@@ -1,0 +1,28 @@
+server:
+    port: 15800
+    tomcat:
+        max-threads: 200
+db:
+    driverClassName: org.postgresql.Driver
+    url: jdbc:postgresql://192.168.5.209:5432/asdb
+    username: as_user
+    password: as_user
+spring:
+    datasource:
+        test-while-idle: true
+        validation-query: SELECT 1;
+        time-between-eviction-runs-millis: 300000
+    jpa:
+        properties:
+            hibernate:
+                jdbc:
+                    lob:
+                        non_contextual_creation: true
+                format_sql: true
+                ddl-auto: update
+        databasePlatform: org.hibernate.dialect.PostgreSQL9Dialect
+
+---
+
+spring:
+    profiles: dev_asavin
