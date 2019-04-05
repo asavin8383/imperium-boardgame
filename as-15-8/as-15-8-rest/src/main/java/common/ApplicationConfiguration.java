@@ -15,9 +15,9 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
 @Import({DataSourceConfiguration.class})
-@ComponentScan(basePackages= {"common", "services", "repositories"})
-@EntityScan("model")
+@ComponentScan(basePackages= {"common", "services", "repositories", "controllers"})
 @EnableJpaRepositories("repositories")
+@EntityScan("model")
 public class ApplicationConfiguration {
 
 	public static void main(String[] args) {

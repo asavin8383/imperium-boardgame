@@ -1,0 +1,41 @@
+dn: ou=groups,dc=ecleasing,dc=ru
+objectclass: top
+objectclass: organizationalUnit
+ou: groups
+
+dn: ou=people,dc=ecleasing,dc=ru
+objectclass: top
+objectclass: organizationalUnit
+ou: people
+
+dn: uid=user,ou=people,dc=ecleasing,dc=ru
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: Operator
+sn: Operator
+uid: user
+userPassword: password
+
+dn: cn=USER,ou=groups,dc=ecleasing,dc=ru
+objectclass: top
+objectclass: groupOfNames
+cn: USER
+member: uid=user,ou=people,dc=ecleasing,dc=ru
+
+dn: uid=admin,ou=people,dc=ecleasing,dc=ru
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: Admin
+sn: Admin
+uid: admin
+userPassword: password
+
+dn: cn=ADMIN,ou=groups,dc=ecleasing,dc=ru
+objectclass: top
+objectclass: groupOfNames
+cn: ADMIN
+member: uid=admin,ou=people,dc=ecleasing,dc=ru

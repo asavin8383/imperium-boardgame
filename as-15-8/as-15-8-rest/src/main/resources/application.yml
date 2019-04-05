@@ -1,7 +1,5 @@
 server:
     port: 15800
-    tomcat:
-        max-threads: 200
 db:
     driverClassName: org.postgresql.Driver
     url: jdbc:postgresql://192.168.5.209:5432/asdb
@@ -19,10 +17,12 @@ spring:
                     lob:
                         non_contextual_creation: true
                 format_sql: true
-                ddl-auto: update
         databasePlatform: org.hibernate.dialect.PostgreSQL9Dialect
 
 ---
 
 spring:
     profiles: dev_asavin
+    jpa:
+        hibernate:
+            ddl-auto: update

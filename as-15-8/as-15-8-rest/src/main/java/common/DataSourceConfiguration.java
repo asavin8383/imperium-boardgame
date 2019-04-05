@@ -35,5 +35,5 @@ public class DataSourceConfiguration {
         source.setPassword(password);
         return source;
     }
-
+    
 }
