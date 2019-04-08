@@ -1,36 +1,95 @@
 package common;
 
+import java.util.Collections;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.authentication.configuration.EnableGlobalAuthentication;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.ldap.authentication.ad.ActiveDirectoryLdapAuthenticationProvider;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
 
 @Configuration
-@EnableWebSecurity
-@EnableGlobalMethodSecurity(securedEnabled = true)
-@EnableGlobalAuthentication
 public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
-
-   @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-	   auth
-	   	.ldapAuthentication()
-	   	.userDnPatterns("cn={0}")
-		//.groupSearchBase("ou=roles")
-		.contextSource()
-		.url("ldap://192.168.1.52:389/OU=users,OU=AS_15_8,DC=designdiv,DC=ecleasing,DC=ru");
+	
+	@Value("${ldap.urls}")
+	private String ldapUrls;
+	
+	@Value("${ldap.domain}")
+	private String adDomain;
+	
+	@Value("${ldap.base.dn}")
+	private String ldapBaseDn;
+	
+	@Value("${ldap.user.dn.pattern}")
+	private String ldapUserDnPattern;
+	
+	@Value("${ldap.login.filter}")
+	private String ldapFilter;
+	
+	@Value("${spring.app.cors.origin}")
+    public String corsOrigin;
+ 
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true);
+        config.addAllowedOrigin(corsOrigin);
+        config.addAllowedHeader("*");
+        config.addAllowedMethod("*");
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
     }
-   
-   @Override
-    protected void configure(HttpSecurity http) throws Exception {
-	   http
-	   	.authorizeRequests()
-	   	.antMatchers("/css/**").permitAll()
-	   	.anyRequest()
-		.fullyAuthenticated().and().formLogin();
+	
+	@Override
+	protected void configure(HttpSecurity http) throws Exception {
+        http
+	        .cors()
+	        .and()
+	         .csrf()
+	         	.disable()
+	        .authorizeRequests()
+	        	.anyRequest()
+	        	.fullyAuthenticated()
+	    	.and()
+            .formLogin()
+            .and()
+            .logout()
+            	.logoutUrl("/perform_logout")
+        		.invalidateHttpSession(true)
+        		.deleteCookies("JSESSIONID")
+        		.permitAll();
+	}
+	
+	
+	@Override
+    protected void configure(AuthenticationManagerBuilder authManagerBuilder) throws Exception {
+        authManagerBuilder.authenticationProvider(activeDirectoryLdapAuthenticationProvider()).userDetailsService(userDetailsService());
+    }
+ 
+    @Bean
+    public AuthenticationManager authenticationManager() {
+        return new ProviderManager(Collections.singletonList(activeDirectoryLdapAuthenticationProvider()));
+    }
+ 
+    @Bean
+    public AuthenticationProvider activeDirectoryLdapAuthenticationProvider() {
+        ActiveDirectoryLdapAuthenticationProvider provider =
+                new ActiveDirectoryLdapAuthenticationProvider(adDomain, ldapUrls, ldapBaseDn);
+        provider.setConvertSubErrorCodesToExceptions(true);
+        provider.setUseAuthenticationRequestCredentials(true);
+        provider.setSearchFilter(ldapFilter);
+        //provider.setUserDetailsContextMapper(new CustomUserDetailsMapper());
+        return provider;
     }
 	   
 }
