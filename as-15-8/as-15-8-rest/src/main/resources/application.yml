@@ -4,7 +4,7 @@ server:
         max-threads: 200
 db:
     driverClassName: org.postgresql.Driver
-    url: jdbc:postgresql://192.168.5.209:5432/asdb
+    url: jdbc:postgresql://192.168.5.195:5432/asdb
     username: as_user
     password: as_user
 spring:
