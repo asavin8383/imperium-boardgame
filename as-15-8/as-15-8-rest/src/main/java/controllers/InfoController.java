@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,7 +22,7 @@ public class InfoController {
 	@Autowired
 	private SearchSystemRepository searchSystemRepo;
 
-	@GetMapping("/search_systems")
+	@GetMapping(path="/search_systems", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<SearchSystem> searchSystems(){
 		return searchSystemRepo.findAll();
 	}

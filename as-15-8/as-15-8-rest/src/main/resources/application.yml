@@ -21,6 +21,9 @@ spring:
                 format_sql: true
         databasePlatform: org.hibernate.dialect.PostgreSQL9Dialect
     app:
+        jwt:
+            secret: Gk-Xun_Yrkd0zigpysWS
+            ttl: 86400
         cors:
             origin: "*"
 ldap:

@@ -5,19 +5,28 @@ import java.util.Collections;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.ldap.authentication.ad.ActiveDirectoryLdapAuthenticationProvider;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import lombok.extern.slf4j.Slf4j;
+import security.JWTAuthenticationFilter;
+import security.JWTLoginFilter;
+
 
 @Configuration
+@Slf4j
+//@EnableWebSecurity
 public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	
 	@Value("${ldap.urls}")
@@ -37,6 +46,12 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	
 	@Value("${spring.app.cors.origin}")
     public String corsOrigin;
+	
+	@Value("${spring.app.jwt.secret}")
+	public String jwtSecret;
+	
+	@Value("${spring.app.jwt.ttl}")
+    public long jwtTTLSec;
  
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
@@ -57,17 +72,21 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	        .and()
 	         .csrf()
 	         	.disable()
-	        .authorizeRequests()
-	        	.anyRequest()
-	        	.fullyAuthenticated()
-	    	.and()
-            .formLogin()
+	         .authorizeRequests()
+                .antMatchers(HttpMethod.POST, "/gettoken").permitAll()
+                .anyRequest().authenticated()
             .and()
-            .logout()
-            	.logoutUrl("/perform_logout")
-        		.invalidateHttpSession(true)
-        		.deleteCookies("JSESSIONID")
-        		.permitAll();
+                .logout()
+                .logoutUrl("/api/logout")
+                .deleteCookies("COOKIE_BEARER")
+                .logoutSuccessHandler(
+                        (httpServletRequest, httpServletResponse, authentication) -> log.info("Logout Successful"))
+            .and()
+                .addFilterBefore(new JWTLoginFilter("/gettoken", authenticationManager(), jwtSecret, jwtTTLSec * 1000),
+                        UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JWTAuthenticationFilter(jwtSecret), UsernamePasswordAuthenticationFilter.class)
+            .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 	}
 	
 	
