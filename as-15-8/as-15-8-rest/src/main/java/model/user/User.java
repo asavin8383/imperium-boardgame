@@ -37,18 +37,17 @@ public class User implements Serializable {
 	@Column(name = "id", updatable = false, nullable = false)
 	private Long id;
 	
+	@Column(unique = true)
 	@NotNull
-	private String fullName;
-	private String name;
-	private String surname;
-	private String patronymic;
+	private String userName;
+	private String firstName;
+	private String secondName;
 	
 	@ManyToMany(mappedBy="users")
 	@JsonIgnore
 	private List<UserRole> roles;
 	
-	@ManyToOne(optional=false)
-	@NotNull
+	@ManyToOne(optional=true)
 	@JsonIgnore
 	private Department department;
 

@@ -65,7 +65,7 @@ public class FormalTask implements Serializable {
 	/**Дата последнего изменения*/
 	private Date modificationDate;
 	
-	@ManyToOne(optional=false)
+	@ManyToOne(optional=true)
 	@JsonIgnore
 	/**Ссылка на неформализованное задание*/
 	private InformalTask informalTask;

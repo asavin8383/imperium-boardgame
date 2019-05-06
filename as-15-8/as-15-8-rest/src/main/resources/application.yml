@@ -44,4 +44,4 @@ spring:
     profiles: dev_asavin
     jpa:
         hibernate:
-            ddl-auto: update
+            ddl-auto: create

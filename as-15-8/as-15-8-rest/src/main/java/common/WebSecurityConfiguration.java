@@ -11,22 +11,24 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.ldap.authentication.ad.ActiveDirectoryLdapAuthenticationProvider;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import advices.AuthenticationEntryPointImpl;
 import lombok.extern.slf4j.Slf4j;
 import security.JWTAuthenticationFilter;
 import security.JWTLoginFilter;
+import user.CustomUserDetailsMapper;
 
 
 @Configuration
 @Slf4j
-//@EnableWebSecurity
+@EnableWebSecurity
 public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	
 	@Value("${ldap.urls}")
@@ -78,15 +80,14 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
             .and()
                 .logout()
                 .logoutUrl("/api/logout")
-                .deleteCookies("COOKIE_BEARER")
                 .logoutSuccessHandler(
                         (httpServletRequest, httpServletResponse, authentication) -> log.info("Logout Successful"))
             .and()
                 .addFilterBefore(new JWTLoginFilter("/gettoken", authenticationManager(), jwtSecret, jwtTTLSec * 1000),
                         UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new JWTAuthenticationFilter(jwtSecret), UsernamePasswordAuthenticationFilter.class)
-            .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+            .exceptionHandling()
+                .authenticationEntryPoint(new AuthenticationEntryPointImpl());
 	}
 	
 	
@@ -107,7 +108,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
         provider.setConvertSubErrorCodesToExceptions(true);
         provider.setUseAuthenticationRequestCredentials(true);
         provider.setSearchFilter(ldapFilter);
-        //provider.setUserDetailsContextMapper(new CustomUserDetailsMapper());
+        provider.setUserDetailsContextMapper(new CustomUserDetailsMapper());
         return provider;
     }
 	   

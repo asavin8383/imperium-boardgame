@@ -27,24 +27,11 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(final HttpServletRequest req, final HttpServletResponse resp, final FilterChain filterChain)
             throws ServletException, IOException {
         try {
- 
-            String uri = req.getRequestURI();
-            boolean skip = false;
-            skip |= uri.startsWith("/info/");
- 
-            if (!skip) {
-                long init = 1556641831;
-                long ttl = 60 * 60 * 24 * 30;
-                long deadline = init + ttl;
-                long now = Long.parseLong(req.getHeader("x-msg-timestamp"));
-                if (now > deadline) throw new RuntimeException("Synchronization fault");
-            }
- 
             Authentication authentication = new TokenAuthenticationHelper(jwtSecret).getAuthentication(req);
             SecurityContextHolder.getContext().setAuthentication(authentication);
             filterChain.doFilter(req, resp);
-        } catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException | IllegalArgumentException e) {
-            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token expired");
+        } catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException | IllegalArgumentException ex) {
+            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token expired or corrupted : " + ex.getMessage()); 
         }
     }
 }
