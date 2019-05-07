@@ -1,6 +1,7 @@
 package controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -36,13 +37,13 @@ public class FormalTaskController {
 	}
 	
 	@GetMapping
-	public Iterable<FormalTask> findList(@RequestParam(required = false) Long userId){
+	public Page<FormalTask> findList(
+			@RequestParam(required = false) Long taskId,
+			@RequestParam(required = false) Long userId,
+			@RequestParam(defaultValue = "0") int pageNumber,
+			@RequestParam(defaultValue = "10") int pageSize){
 		PageRequest page = PageRequest.of(
-				0, 12, Sort.by("creationDate").descending());
-		if(userId == null) {
-			return formalTaskRepo.findAll(page).getContent();
-		} else {
-			return formalTaskRepo.findByAuthor_Id(userId, page).getContent();
-		}
+				pageNumber, pageSize, Sort.by("creationDate").descending());
+		return formalTaskRepo.findPage(taskId, userId, page);
 	}
 }
