@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 
 import lombok.Data;
 
+//TODO Перенести в единый пакет
+
 @Data
 public class ExceptionResponseBody {
 
