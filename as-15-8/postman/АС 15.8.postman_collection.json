@@ -1,0 +1,269 @@
+{
+	"info": {
+		"_postman_id": "bda04c34-885e-4a76-bc7f-de2506015ff4",
+		"name": "АС 15.8",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Формализованные задания",
+			"item": [
+				{
+					"name": "Добавление формализованного задания",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"value": "{{oper_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"title\": \"Тестовое задание\"\n}"
+						},
+						"url": {
+							"raw": "{{url}}/formal_tasks",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"formal_tasks"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Получение списка заданий",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"value": "{{oper_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/formal_tasks",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"formal_tasks"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Пользователи",
+			"item": [
+				{
+					"name": "Получение текущего пользователя",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"value": "{{oper_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/users/current",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users",
+								"current"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Список поисковых систем",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{url}}/info/search_systems",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"info",
+						"search_systems"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Добавление поисковой системы",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"Yandex\"\n}\n"
+				},
+				"url": {
+					"raw": "{{url}}/info/search_systems",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"info",
+						"search_systems"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Вход",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "username",
+							"value": "user",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "password",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{url}}/login",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Получение токена",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"username\": \"jack\",\n\t\"password\": \"12345\"\n}"
+				},
+				"url": {
+					"raw": "{{url}}/gettoken?",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"gettoken"
+					],
+					"query": [
+						{
+							"key": "username",
+							"value": "jack",
+							"disabled": true
+						},
+						{
+							"key": "password",
+							"value": "12345",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "24db4130-c17e-42d2-b51c-795542744ceb",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "9eae378f-9a10-4c44-948a-b5ba6715fa14",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "425e99f6-fffa-452f-8478-a99528015ccd",
+			"key": "url",
+			"value": "http://localhost:15800",
+			"type": "string"
+		},
+		{
+			"id": "27a150dc-df82-4a8b-83e3-dd9e57c811c2",
+			"key": "oper_token",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
