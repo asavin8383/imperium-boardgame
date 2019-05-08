@@ -39,7 +39,83 @@
 							]
 						}
 					},
-					"response": []
+					"response": [
+						{
+							"name": "Добавление формализованного задания",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"value": "{{oper_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"title\": \"Тестовое задание\"\n}"
+								},
+								"url": {
+									"raw": "{{url}}/formal_tasks",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"formal_tasks"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								},
+								{
+									"key": "X-Content-Type-Options",
+									"value": "nosniff"
+								},
+								{
+									"key": "X-XSS-Protection",
+									"value": "1; mode=block"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, no-store, max-age=0, must-revalidate"
+								},
+								{
+									"key": "Pragma",
+									"value": "no-cache"
+								},
+								{
+									"key": "Expires",
+									"value": "0"
+								},
+								{
+									"key": "X-Frame-Options",
+									"value": "DENY"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json;charset=UTF-8"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 08 May 2019 11:34:31 GMT"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": 5,\n    \"title\": \"Тестовое задание\",\n    \"status\": \"PLANNED\",\n    \"creationDate\": \"2019-05-08T11:34:31.301+0000\",\n    \"startDate\": null,\n    \"endDate\": null,\n    \"modificationDate\": null\n}"
+						}
+					]
 				},
 				{
 					"name": "Получение списка заданий",
@@ -57,16 +133,126 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{url}}/formal_tasks",
+							"raw": "{{url}}/formal_tasks?taskId=3&userId=1",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"formal_tasks"
+							],
+							"query": [
+								{
+									"key": "pageSize",
+									"value": "4",
+									"disabled": true
+								},
+								{
+									"key": "pageNumber",
+									"value": "0",
+									"disabled": true
+								},
+								{
+									"key": "taskId",
+									"value": "3"
+								},
+								{
+									"key": "userId",
+									"value": "1"
+								}
 							]
 						}
 					},
-					"response": []
+					"response": [
+						{
+							"name": "Получение списка заданий",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"value": "{{oper_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{url}}/formal_tasks?taskId=3&userId=1",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"formal_tasks"
+									],
+									"query": [
+										{
+											"key": "pageSize",
+											"value": "4",
+											"disabled": true
+										},
+										{
+											"key": "pageNumber",
+											"value": "0",
+											"disabled": true
+										},
+										{
+											"key": "taskId",
+											"value": "3"
+										},
+										{
+											"key": "userId",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								},
+								{
+									"key": "X-Content-Type-Options",
+									"value": "nosniff"
+								},
+								{
+									"key": "X-XSS-Protection",
+									"value": "1; mode=block"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, no-store, max-age=0, must-revalidate"
+								},
+								{
+									"key": "Pragma",
+									"value": "no-cache"
+								},
+								{
+									"key": "Expires",
+									"value": "0"
+								},
+								{
+									"key": "X-Frame-Options",
+									"value": "DENY"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json;charset=UTF-8"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 08 May 2019 11:34:35 GMT"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"content\": [\n        {\n            \"id\": 3,\n            \"title\": \"Тестовое задание\",\n            \"status\": \"PLANNED\",\n            \"creationDate\": \"2019-05-08T11:34:29.464+0000\",\n            \"startDate\": null,\n            \"endDate\": null,\n            \"modificationDate\": null\n        }\n    ],\n    \"pageable\": {\n        \"sort\": {\n            \"unsorted\": false,\n            \"sorted\": true,\n            \"empty\": false\n        },\n        \"pageSize\": 10,\n        \"pageNumber\": 0,\n        \"offset\": 0,\n        \"unpaged\": false,\n        \"paged\": true\n    },\n    \"last\": true,\n    \"totalPages\": 1,\n    \"totalElements\": 1,\n    \"sort\": {\n        \"unsorted\": false,\n        \"sorted\": true,\n        \"empty\": false\n    },\n    \"numberOfElements\": 1,\n    \"first\": true,\n    \"size\": 10,\n    \"number\": 0,\n    \"empty\": false\n}"
+						}
+					]
 				}
 			]
 		},
@@ -99,7 +285,78 @@
 							]
 						}
 					},
-					"response": []
+					"response": [
+						{
+							"name": "Получение текущего пользователя",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"value": "{{oper_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{url}}/users/current",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"users",
+										"current"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								},
+								{
+									"key": "X-Content-Type-Options",
+									"value": "nosniff"
+								},
+								{
+									"key": "X-XSS-Protection",
+									"value": "1; mode=block"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, no-store, max-age=0, must-revalidate"
+								},
+								{
+									"key": "Pragma",
+									"value": "no-cache"
+								},
+								{
+									"key": "Expires",
+									"value": "0"
+								},
+								{
+									"key": "X-Frame-Options",
+									"value": "DENY"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json;charset=UTF-8"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 08 May 2019 11:42:11 GMT"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": 1,\n    \"userName\": \"jack\",\n    \"firstName\": null,\n    \"secondName\": null\n}"
+						}
+					]
 				}
 			]
 		},
@@ -227,7 +484,82 @@
 					]
 				}
 			},
-			"response": []
+			"response": [
+				{
+					"name": "Получение токена",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"username\": \"jack\",\n\t\"password\": \"12345\"\n}"
+						},
+						"url": {
+							"raw": "{{url}}/gettoken?",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"gettoken"
+							],
+							"query": [
+								{
+									"key": "username",
+									"value": "jack",
+									"disabled": true
+								},
+								{
+									"key": "password",
+									"value": "12345",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Cache-Control",
+							"value": "no-cache"
+						},
+						{
+							"key": "X-Content-Type-Options",
+							"value": "nosniff"
+						},
+						{
+							"key": "X-XSS-Protection",
+							"value": "1; mode=block"
+						},
+						{
+							"key": "X-Frame-Options",
+							"value": "DENY"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json;charset=UTF-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "250"
+						},
+						{
+							"key": "Date",
+							"value": "Wed, 08 May 2019 11:33:43 GMT"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"access_token\": \"eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJqYWNrIiwiZXhwIjoxNTU3NDAxNjIzLCJyb2xlcyI6IlJPTEVfT1BFUkFUT1IiLCJnaXZlbl9uYW1lIjpudWxsLCJmYW1pbHlfbmFtZSI6bnVsbH0.cxDGcASUfHg_5GbAyCd_pKhS7KroNQ-_ozoHiZL-gO7gPkNcMcw266JFtymw6EE3XAQOsGx4TUZ2XMpWzpt_IA\"\n}"
+				}
+			]
 		}
 	],
 	"event": [
@@ -254,15 +586,21 @@
 	],
 	"variable": [
 		{
-			"id": "425e99f6-fffa-452f-8478-a99528015ccd",
+			"id": "ac603d18-c38e-4c8a-9ab1-36ced22212cc",
 			"key": "url",
 			"value": "http://localhost:15800",
 			"type": "string"
 		},
 		{
-			"id": "27a150dc-df82-4a8b-83e3-dd9e57c811c2",
+			"id": "ea70b250-353e-4520-be02-4d1875bc8c4b",
 			"key": "oper_token",
 			"value": "",
+			"type": "string"
+		},
+		{
+			"id": "deaa4513-988e-4398-9acb-7ad8f3fbd8e6",
+			"key": "test_url",
+			"value": "http://192.168.5.253:15800",
 			"type": "string"
 		}
 	]
