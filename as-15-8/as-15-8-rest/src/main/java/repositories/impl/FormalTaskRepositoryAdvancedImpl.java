@@ -27,24 +27,26 @@ public class FormalTaskRepositoryAdvancedImpl implements FormalTaskRepositoryAdv
 
 	@Override
 	public Page<FormalTask> findPage(Long taskId, Long userId, Pageable pageable) {
-		CriteriaBuilder cb = em.getCriteriaBuilder();
-	    CriteriaQuery<FormalTask> cq = cb.createQuery(FormalTask.class);
+		CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+		CriteriaQuery<FormalTask> select = criteriaBuilder.createQuery(FormalTask.class);
+		Root<FormalTask> fromFormalTask = select.from(FormalTask.class);
 	 
-	    Root<FormalTask> formalTask = cq.from(FormalTask.class);
 	    List<Predicate> predicates = new ArrayList<>();
 	     
 	    if (taskId != null) {
-	        predicates.add(cb.equal(formalTask.get("id"), taskId));
+	        predicates.add(criteriaBuilder.equal(fromFormalTask.get("id"), taskId));
 	    }
 	    if (userId != null) {
-	        predicates.add(cb.equal(formalTask.get("user.id"), userId));
+	    	predicates.add(criteriaBuilder.equal(fromFormalTask.get("author").get("id"), userId));
 	    }
-	    cq.where(predicates.toArray(new Predicate[0]));
+	    select.where(predicates.toArray(new Predicate[0]));
 	    
 	    //TODO получать сортировку из Pageable
-	    cq.orderBy(cb.desc(formalTask.get("creationDate")));
+	    select.orderBy(criteriaBuilder.desc(fromFormalTask.get("creationDate")));
+	    /*Order[] orders = pageable.getSort().get().toArray(size -> new Order[size]);
+	    cq.orderBy(orders);*/
 	    
-	    TypedQuery<FormalTask> query = em.createQuery(cq);
+	    TypedQuery<FormalTask> query = em.createQuery(select);
 	    int totalRows = query.getResultList().size();
 	    query.setFirstResult(pageable.getPageNumber() * pageable.getPageSize());
 	    query.setMaxResults(pageable.getPageSize());
