@@ -52,7 +52,7 @@ spring:
     profiles: test
     jpa:
         hibernate:
-            ddl-auto: create
+            ddl-auto: none
 db:
     driverClassName: org.postgresql.Driver
     url: jdbc:postgresql://192.168.5.195:5432/asdb_test
