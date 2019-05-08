@@ -9,7 +9,7 @@
 	</parent>
 	<artifactId>as-15-8-rest</artifactId>
 	<name>AS 15-8 rest endpoint</name>
-	
+
 	<properties>
 		<spring.boot.version>2.1.4.RELEASE</spring.boot.version>
 	</properties>
@@ -62,20 +62,25 @@
 			<artifactId>spring-security-ldap</artifactId>
 		</dependency>
 		<dependency>
-            <groupId>com.unboundid</groupId>
-            <artifactId>unboundid-ldapsdk</artifactId>
-        </dependency>
-        
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt</artifactId>
-            <version>0.9.1</version>
-        </dependency>
-        
-        <!-- PostgreSql -->
+			<groupId>com.unboundid</groupId>
+			<artifactId>unboundid-ldapsdk</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt</artifactId>
+			<version>0.9.1</version>
+		</dependency>
+
+		<!-- PostgreSql -->
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-jpamodelgen</artifactId>
 		</dependency>
 
 		<!-- Jackson Json -->
