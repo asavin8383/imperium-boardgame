@@ -1,10 +1,6 @@
 package security;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.stream.Collectors;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -41,13 +37,7 @@ public class JWTLoginFilter extends AbstractAuthenticationProcessingFilter {
  
     @Override
     public Authentication attemptAuthentication(HttpServletRequest req, HttpServletResponse res) throws AuthenticationException, IOException {
-        InputStream stream = req.getInputStream();
-        String data = "";
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(stream, "UTF-8"))) {
-        	data = br.lines().collect(Collectors.joining(System.lineSeparator()));
-        	log.info(data);
-    	}
-    	AccountCredentials creds = new ObjectMapper().readValue(data, AccountCredentials.class);
+    	AccountCredentials creds = new ObjectMapper().readValue(req.getInputStream(), AccountCredentials.class);
         AuthenticationManager authenticationManager = getAuthenticationManager();
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(creds.getUsername(), creds.getPassword());
         return authenticationManager.authenticate(authentication);
