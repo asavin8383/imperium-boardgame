@@ -2,12 +2,12 @@ package robot;
 
 import org.openqa.selenium.WebDriver;
 
-import enums.AccessTool;
+import enums.AccessToolUnit;
 import scripts.RobotScript;
 
 public interface Robot {
 
-	AccessTool getAccessTool();
+	AccessToolUnit getAccessTool();
 	
 	Class<? extends RobotScript> getRobotScriptClass();
 	

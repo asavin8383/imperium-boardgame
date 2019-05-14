@@ -1,9 +1,9 @@
 package service;
 
-import enums.AccessTool;
+import enums.AccessToolUnit;
 
 public interface RobotsService {
 
-	boolean run(AccessTool accessTool);
+	boolean run(AccessToolUnit accessToolUnit);
 	
 }

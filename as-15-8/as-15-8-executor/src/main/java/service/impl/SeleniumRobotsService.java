@@ -5,7 +5,7 @@ import org.testng.TestNG;
 import org.testng.xml.XmlSuite;
 import org.testng.xml.XmlTest;
 
-import enums.AccessTool;
+import enums.AccessToolUnit;
 import robot.Robot;
 import robot.RobotsFactory;
 import service.RobotsService;
@@ -13,8 +13,8 @@ import service.RobotsService;
 @Service
 public class SeleniumRobotsService implements RobotsService {
 	
-	public boolean run(AccessTool accessTool) {
-		Robot robot = RobotsFactory.getRobot(accessTool);
+	public boolean run(AccessToolUnit accessToolUnit) {
+		Robot robot = RobotsFactory.getRobot(accessToolUnit);
 		/*return CompletableFuture.supplyAsync(() -> robot.run()).join();*/
 		
 		TestNG testNG = new TestNG();

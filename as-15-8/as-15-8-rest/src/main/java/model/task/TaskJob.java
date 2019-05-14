@@ -10,8 +10,7 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Data;
-import model.catalog.SearchSystem;
-import model.catalog.Vpn;
+import model.catalog.AccessTool;
 
 /**Мероприятие в рамках формализованного задания*/
 
@@ -45,20 +44,17 @@ public class TaskJob implements Serializable {
 	private Date endDate;
 	
 	@ManyToOne(optional=false)
+	@JoinColumn(name="formal_task_id", foreignKey = @ForeignKey(name = "FK_task_jobs_formal_task_id"))
 	@JsonIgnore
 	/**Формализованное задание на проведение мероприятий*/
 	private FormalTask formalTask;
 	
-	@ManyToMany(mappedBy="taskJobs")
+	@ManyToOne(optional = false)
+	@JoinColumn(name="access_tool_id", foreignKey = @ForeignKey(name = "FK_task_jobs_access_tool_id"))
 	@JsonIgnore
 	/**Список поисковых систем для проверки*/
-	private List<SearchSystem> searchSystems;
+	private AccessTool accessTool;
 	
-	@ManyToMany(mappedBy="taskJobs")
-	@JsonIgnore
-	/**Список ПАСД для проверки*/
-	private List<Vpn> vpnList;
-
 	@OneToMany(cascade=CascadeType.ALL, mappedBy = "taskJob")
 	private List<JobItem> jobItems;
 	

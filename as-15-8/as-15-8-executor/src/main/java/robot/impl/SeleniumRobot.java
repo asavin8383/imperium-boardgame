@@ -7,7 +7,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
-import enums.AccessTool;
+import enums.AccessToolUnit;
 import lombok.Getter;
 import robot.Robot;
 import scripts.RobotScript;
@@ -15,7 +15,7 @@ import scripts.RobotScript;
 public class SeleniumRobot implements Robot{
 
 	@Getter
-	private AccessTool accessTool;
+	private AccessToolUnit accessToolUnit;
 
 	@Getter
 	private Class<? extends RobotScript> robotScriptClass;
@@ -24,8 +24,8 @@ public class SeleniumRobot implements Robot{
 	
 	private URL hubURL;
 	
-	public SeleniumRobot(AccessTool accessTool, Class<? extends RobotScript> robotScriptClass, URL hubUrl, Platform platform, String appName, String browserName) {
-		this.accessTool = accessTool;
+	public SeleniumRobot(AccessToolUnit accessToolUnit, Class<? extends RobotScript> robotScriptClass, URL hubUrl, Platform platform, String appName, String browserName) {
+		this.accessToolUnit = accessToolUnit;
 		this.robotScriptClass = robotScriptClass;
 		this.hubURL = hubUrl;
 		this.capability = createCapability(platform, appName, browserName);

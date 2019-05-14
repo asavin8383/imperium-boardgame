@@ -72,6 +72,14 @@
 			<version>0.9.1</version>
 		</dependency>
 
+		<!-- MQ Messages -->
+		<dependency>
+			<groupId>com.ecls.as-15-8</groupId>
+			<artifactId>as-15-8-messages</artifactId>
+			<version>1.0</version>
+			<type>jar</type>
+		</dependency>
+
 		<!-- PostgreSql -->
 		<dependency>
 			<groupId>org.postgresql</groupId>
