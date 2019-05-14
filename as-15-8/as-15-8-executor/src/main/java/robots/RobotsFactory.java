@@ -14,17 +14,17 @@ import java.util.Map;
 public class RobotsFactory {
 
 	@Autowired
-	private List<Robot<?>> robots;
+	private List<Robot> robots;
 	
-	private static final Map<AccessToolUnit, Robot<?>> robotsCache = new HashMap<>();
+	private static final Map<AccessToolUnit, Robot> robotsCache = new HashMap<>();
 	
 	@PostConstruct
 	public void initRobotsCache() {
 		robots.forEach(robot -> robotsCache.put(robot.getAccessToolUnit(), robot));
 	}
 	
-	public static Robot<?> getRobot(AccessToolUnit accessToolUnit) {
-		Robot<?> robot = robotsCache.get(accessToolUnit);
+	public static Robot getRobot(AccessToolUnit accessToolUnit) {
+		Robot robot = robotsCache.get(accessToolUnit);
 		if(robot == null) {
 			throw new IllegalArgumentException("Error creating robot! Robot for " + accessToolUnit + " is not supported");
 		}
