@@ -9,7 +9,7 @@ import org.springframework.context.annotation.PropertySource;
 import robots.RobotsConfiguration;
 
 /**
- * Конфигурация модуля поиска в социальных сетях
+ * Конфигурация модуля запуска проверок мероприятий
  * @author shabalinAI
  *
  */

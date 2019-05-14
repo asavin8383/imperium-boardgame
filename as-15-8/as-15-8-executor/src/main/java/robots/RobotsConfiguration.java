@@ -12,8 +12,13 @@ import org.springframework.core.env.Environment;
 
 import enums.AccessToolUnit;
 import robots.impl.SeleniumRobot;
-import scripts.GoogleScript;
+import scripts.impl.GoogleScript;
 
+/**
+ * Конфигурация роботов для проверки ПС/ПАСД
+ * @author shabalinAI
+ *
+ */
 @Configuration
 public class RobotsConfiguration {
 
@@ -21,9 +26,15 @@ public class RobotsConfiguration {
 	@Autowired
 	Environment env;
 	
+	/** URL selenium хаба */
 	@Value("${selenium-hub-url}")
 	private String seleniumHubUrl;
 	
+	/**
+	 * Робот проверки ПС Google
+	 * @return
+	 * @throws MalformedURLException
+	 */
 	@Bean
 	public Robot googleRobot() throws MalformedURLException {
 		return new SeleniumRobot<GoogleScript>(

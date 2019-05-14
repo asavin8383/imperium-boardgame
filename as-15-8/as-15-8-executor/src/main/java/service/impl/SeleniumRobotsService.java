@@ -15,6 +15,11 @@ import robots.Robot;
 import robots.RobotsFactory;
 import service.RobotsService;
 
+/**
+ * Сервис управления роботами Selenium
+ * @author shabalinAI
+ *
+ */
 @Service
 public class SeleniumRobotsService implements RobotsService {
 	
