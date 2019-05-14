@@ -9,7 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import common.ApplicationConfiguration;
-import enums.AccessTool;
+import enums.AccessToolUnit;
 import service.impl.SeleniumRobotsService;
 
 @RunWith(SpringRunner.class)
@@ -21,7 +21,7 @@ public class TestMain {
 	
 	@Test
 	public void test() {
-		assertTrue(service.run(AccessTool.GOOGLE));
+		assertTrue(service.run(AccessToolUnit.GOOGLE));
 	}
 	
 }

@@ -14,7 +14,7 @@ import java.util.List;
 @Data
 public class Content {
     @Id
-    private String id;
+    private Long id;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "content")
     @JsonIgnore

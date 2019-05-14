@@ -6,6 +6,10 @@ import model.erdi.Content;
 import javax.persistence.*;
 import java.io.Serializable;
 
+/**
+ * Проверка одной единицы ЕРДИ в рамках мероприятия
+ */
+
 @Entity
 @Table(schema = "portal", name = "job_items")
 @Data
