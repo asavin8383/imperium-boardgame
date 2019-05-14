@@ -25,6 +25,8 @@ public class SeleniumRobotsService implements RobotsService {
 		Robot<?> robot = RobotsFactory.getRobot(accessTool);
 		
 		TestNG testNG = new TestNG();
+		testNG.setUseDefaultListeners(false);
+		
 		XmlSuite suite = new XmlSuite(); 
 		suite.setParallel(XmlSuite.ParallelMode.TESTS);
 		
