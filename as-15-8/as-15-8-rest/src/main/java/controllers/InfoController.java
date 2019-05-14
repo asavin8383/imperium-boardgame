@@ -17,7 +17,7 @@ import model.catalog.SearchSystem;
 import repositories.SearchSystemRepository;
 
 @RestController
-@RequestMapping(path="/info", produces=MediaType.APPLICATION_JSON_VALUE, consumes=MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(path="/info", produces=MediaType.APPLICATION_JSON_VALUE)
 public class InfoController {
 	
 	@Autowired
@@ -28,7 +28,7 @@ public class InfoController {
 		return searchSystemRepo.findAll();
 	}
 	
-	@PostMapping(path="/search_systems")
+	@PostMapping(path="/search_systems", consumes=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseStatus(HttpStatus.CREATED)
 	public SearchSystem postTaco(@RequestBody SearchSystem searchSystem) {
 		return searchSystemRepo.save(searchSystem);

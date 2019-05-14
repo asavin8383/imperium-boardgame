@@ -1,0 +1,607 @@
+{
+	"info": {
+		"_postman_id": "bda04c34-885e-4a76-bc7f-de2506015ff4",
+		"name": "АС 15.8",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Формализованные задания",
+			"item": [
+				{
+					"name": "Добавление формализованного задания",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"value": "{{oper_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"title\": \"Тестовое задание\"\n}"
+						},
+						"url": {
+							"raw": "{{url}}/formal_tasks",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"formal_tasks"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Добавление формализованного задания",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"value": "{{oper_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"title\": \"Тестовое задание\"\n}"
+								},
+								"url": {
+									"raw": "{{url}}/formal_tasks",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"formal_tasks"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								},
+								{
+									"key": "X-Content-Type-Options",
+									"value": "nosniff"
+								},
+								{
+									"key": "X-XSS-Protection",
+									"value": "1; mode=block"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, no-store, max-age=0, must-revalidate"
+								},
+								{
+									"key": "Pragma",
+									"value": "no-cache"
+								},
+								{
+									"key": "Expires",
+									"value": "0"
+								},
+								{
+									"key": "X-Frame-Options",
+									"value": "DENY"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json;charset=UTF-8"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 08 May 2019 11:34:31 GMT"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": 5,\n    \"title\": \"Тестовое задание\",\n    \"status\": \"PLANNED\",\n    \"creationDate\": \"2019-05-08T11:34:31.301+0000\",\n    \"startDate\": null,\n    \"endDate\": null,\n    \"modificationDate\": null\n}"
+						}
+					]
+				},
+				{
+					"name": "Получение списка заданий",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"value": "{{oper_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/formal_tasks?taskId=3&userId=1",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"formal_tasks"
+							],
+							"query": [
+								{
+									"key": "pageSize",
+									"value": "4",
+									"disabled": true
+								},
+								{
+									"key": "pageNumber",
+									"value": "0",
+									"disabled": true
+								},
+								{
+									"key": "taskId",
+									"value": "3"
+								},
+								{
+									"key": "userId",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Получение списка заданий",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"value": "{{oper_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{url}}/formal_tasks?taskId=3&userId=1",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"formal_tasks"
+									],
+									"query": [
+										{
+											"key": "pageSize",
+											"value": "4",
+											"disabled": true
+										},
+										{
+											"key": "pageNumber",
+											"value": "0",
+											"disabled": true
+										},
+										{
+											"key": "taskId",
+											"value": "3"
+										},
+										{
+											"key": "userId",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								},
+								{
+									"key": "X-Content-Type-Options",
+									"value": "nosniff"
+								},
+								{
+									"key": "X-XSS-Protection",
+									"value": "1; mode=block"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, no-store, max-age=0, must-revalidate"
+								},
+								{
+									"key": "Pragma",
+									"value": "no-cache"
+								},
+								{
+									"key": "Expires",
+									"value": "0"
+								},
+								{
+									"key": "X-Frame-Options",
+									"value": "DENY"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json;charset=UTF-8"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 08 May 2019 11:34:35 GMT"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"content\": [\n        {\n            \"id\": 3,\n            \"title\": \"Тестовое задание\",\n            \"status\": \"PLANNED\",\n            \"creationDate\": \"2019-05-08T11:34:29.464+0000\",\n            \"startDate\": null,\n            \"endDate\": null,\n            \"modificationDate\": null\n        }\n    ],\n    \"pageable\": {\n        \"sort\": {\n            \"unsorted\": false,\n            \"sorted\": true,\n            \"empty\": false\n        },\n        \"pageSize\": 10,\n        \"pageNumber\": 0,\n        \"offset\": 0,\n        \"unpaged\": false,\n        \"paged\": true\n    },\n    \"last\": true,\n    \"totalPages\": 1,\n    \"totalElements\": 1,\n    \"sort\": {\n        \"unsorted\": false,\n        \"sorted\": true,\n        \"empty\": false\n    },\n    \"numberOfElements\": 1,\n    \"first\": true,\n    \"size\": 10,\n    \"number\": 0,\n    \"empty\": false\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Пользователи",
+			"item": [
+				{
+					"name": "Получение текущего пользователя",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"value": "{{oper_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/users/current",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users",
+								"current"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Получение текущего пользователя",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"value": "{{oper_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{url}}/users/current",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"users",
+										"current"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								},
+								{
+									"key": "X-Content-Type-Options",
+									"value": "nosniff"
+								},
+								{
+									"key": "X-XSS-Protection",
+									"value": "1; mode=block"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, no-store, max-age=0, must-revalidate"
+								},
+								{
+									"key": "Pragma",
+									"value": "no-cache"
+								},
+								{
+									"key": "Expires",
+									"value": "0"
+								},
+								{
+									"key": "X-Frame-Options",
+									"value": "DENY"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json;charset=UTF-8"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 08 May 2019 11:42:11 GMT"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": 1,\n    \"userName\": \"jack\",\n    \"firstName\": null,\n    \"secondName\": null\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Список поисковых систем",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{url}}/info/search_systems",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"info",
+						"search_systems"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Добавление поисковой системы",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"Yandex\"\n}\n"
+				},
+				"url": {
+					"raw": "{{url}}/info/search_systems",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"info",
+						"search_systems"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Вход",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "username",
+							"value": "user",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "password",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{url}}/login",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Получение токена",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"username\": \"jack\",\n\t\"password\": \"12345\"\n}"
+				},
+				"url": {
+					"raw": "{{url}}/gettoken?",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"gettoken"
+					],
+					"query": [
+						{
+							"key": "username",
+							"value": "jack",
+							"disabled": true
+						},
+						{
+							"key": "password",
+							"value": "12345",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Получение токена",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"username\": \"jack\",\n\t\"password\": \"12345\"\n}"
+						},
+						"url": {
+							"raw": "{{url}}/gettoken?",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"gettoken"
+							],
+							"query": [
+								{
+									"key": "username",
+									"value": "jack",
+									"disabled": true
+								},
+								{
+									"key": "password",
+									"value": "12345",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Cache-Control",
+							"value": "no-cache"
+						},
+						{
+							"key": "X-Content-Type-Options",
+							"value": "nosniff"
+						},
+						{
+							"key": "X-XSS-Protection",
+							"value": "1; mode=block"
+						},
+						{
+							"key": "X-Frame-Options",
+							"value": "DENY"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json;charset=UTF-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "250"
+						},
+						{
+							"key": "Date",
+							"value": "Wed, 08 May 2019 11:33:43 GMT"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"access_token\": \"eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJqYWNrIiwiZXhwIjoxNTU3NDAxNjIzLCJyb2xlcyI6IlJPTEVfT1BFUkFUT1IiLCJnaXZlbl9uYW1lIjpudWxsLCJmYW1pbHlfbmFtZSI6bnVsbH0.cxDGcASUfHg_5GbAyCd_pKhS7KroNQ-_ozoHiZL-gO7gPkNcMcw266JFtymw6EE3XAQOsGx4TUZ2XMpWzpt_IA\"\n}"
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "24db4130-c17e-42d2-b51c-795542744ceb",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "9eae378f-9a10-4c44-948a-b5ba6715fa14",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "ac603d18-c38e-4c8a-9ab1-36ced22212cc",
+			"key": "url",
+			"value": "http://localhost:15800",
+			"type": "string"
+		},
+		{
+			"id": "ea70b250-353e-4520-be02-4d1875bc8c4b",
+			"key": "oper_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"id": "deaa4513-988e-4398-9acb-7ad8f3fbd8e6",
+			"key": "test_url",
+			"value": "http://192.168.5.253:15800",
+			"type": "string"
+		}
+	]
+}

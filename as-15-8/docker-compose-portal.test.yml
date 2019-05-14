@@ -1,0 +1,12 @@
+version: '3'
+services:
+    as-15-8-rest:
+        container_name: as-15-8_REST
+        image: as-15-8-rest
+        restart: always
+        volumes:
+            - ~/as-15-8-rest/logs:/log
+        environment:
+            - PROFILE=test
+        ports:
+            - "15800:15800"

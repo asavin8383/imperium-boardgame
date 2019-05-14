@@ -2,11 +2,6 @@ server:
     port: 15800
     tomcat:
         max-threads: 200
-db:
-    driverClassName: org.postgresql.Driver
-    url: jdbc:postgresql://192.168.5.195:5432/asdb
-    username: as_user
-    password: as_user
 spring:
     datasource:
         test-while-idle: true
@@ -38,10 +33,37 @@ ldap:
     login:
         role: CN=ROLE_OPERATOR,OU=roles,OU=AS_15_8,DC=designdiv,DC=ecleasing,DC=ru
         filter: "(&(objectClass=user)(userPrincipalName={0})(memberof=${ldap.login.role}))"
+
 ---
 
 spring:
     profiles: dev_asavin
     jpa:
         hibernate:
-            ddl-auto: create
+            ddl-auto: none
+        properties:
+            javax:
+                persistence:
+                    schema-generation:
+                         create-source: metadata
+                         scripts:
+                              action: create
+                              create-target: create.sql
+db:
+    driverClassName: org.postgresql.Driver
+    url: jdbc:postgresql://192.168.5.195:5432/asdb
+    username: as_user
+    password: as_user
+---
+
+spring:
+    profiles: test
+    jpa:
+        hibernate:
+            ddl-auto: none
+db:
+    driverClassName: org.postgresql.Driver
+    url: jdbc:postgresql://192.168.5.195:5432/asdb_test
+    username: as_user
+    password: as_user
+    

@@ -4,17 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -68,6 +58,9 @@ public class TaskJob implements Serializable {
 	@JsonIgnore
 	/**Список ПАСД для проверки*/
 	private List<Vpn> vpnList;
+
+	@OneToMany(cascade=CascadeType.ALL, mappedBy = "taskJob")
+	private List<JobItem> jobItems;
 	
 	/**Результат проведения мероприятия*/
     private String result;
