@@ -1,4 +1,4 @@
-package robot;
+package robots;
 
 import java.util.HashMap;
 import java.util.List;
