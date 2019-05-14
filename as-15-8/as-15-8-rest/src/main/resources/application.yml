@@ -41,6 +41,14 @@ spring:
     jpa:
         hibernate:
             ddl-auto: none
+        properties:
+            javax:
+                persistence:
+                    schema-generation:
+                         create-source: metadata
+                         scripts:
+                              action: create
+                              create-target: create.sql
 db:
     driverClassName: org.postgresql.Driver
     url: jdbc:postgresql://192.168.5.195:5432/asdb
