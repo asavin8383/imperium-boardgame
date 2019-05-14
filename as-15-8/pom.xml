@@ -17,6 +17,8 @@
 
 	<modules>
 		<module>as-15-8-rest</module>
+		<module>as-15-8-messages</module>
+		<module>as-15-8-executor</module>
 	</modules>
 
 	<distributionManagement>
