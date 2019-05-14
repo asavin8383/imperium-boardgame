@@ -6,7 +6,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 
-import robot.RobotsConfiguration;
+import robots.RobotsConfiguration;
 
 /**
  * Конфигурация модуля поиска в социальных сетях
@@ -16,7 +16,7 @@ import robot.RobotsConfiguration;
 @SpringBootApplication
 @Import(RobotsConfiguration.class)
 @PropertySource("classpath:application.yml")
-@ComponentScan(basePackages={"common", "robot", "service"})
+@ComponentScan(basePackages={"common", "robots", "service"})
 public class ApplicationConfiguration{
 	
 	public static void main(String[] args) {

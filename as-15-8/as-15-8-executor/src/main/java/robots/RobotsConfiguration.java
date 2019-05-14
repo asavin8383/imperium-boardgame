@@ -1,18 +1,15 @@
-package robot;
+package robots;
 
 import java.net.MalformedURLException;
-import java.net.URL;
 
 import org.openqa.selenium.Platform;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
-import enums.AccessToolUnit;
-import robot.impl.SeleniumRobot;
-import scripts.impl.GoogleScript;
+import enums.AccessTool;
+import scripts.GoogleScript;
 
 @Configuration
 public class RobotsConfiguration {
@@ -21,18 +18,14 @@ public class RobotsConfiguration {
 	@Autowired
 	Environment env;
 	
-	@Value("${selenium-hub-url}")
-	private String seleniumHubUrl;
-	
 	@Bean
-	public Robot googleRobot() throws MalformedURLException {
-		return new SeleniumRobot(
-			AccessToolUnit.GOOGLE,
+	public Robot<?> googleRobot() throws MalformedURLException {
+		return new Robot<GoogleScript>(
+			AccessTool.GOOGLE,
 			GoogleScript.class,
-			new URL(seleniumHubUrl),
+			env.getProperty("robots.google.browser"),
 			Platform.valueOf(env.getProperty("robots.google.platform")),
-			env.getProperty("robots.google.app"),
-			env.getProperty("robots.google.browser"));
+			env.getProperty("robots.google.app"));
 	}
 	
 }
