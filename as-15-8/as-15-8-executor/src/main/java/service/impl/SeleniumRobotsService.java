@@ -10,7 +10,7 @@ import org.testng.xml.XmlClass;
 import org.testng.xml.XmlSuite;
 import org.testng.xml.XmlTest;
 
-import enums.AccessTool;
+import enums.AccessToolUnit;
 import robots.Robot;
 import robots.RobotsFactory;
 import service.RobotsService;
@@ -21,8 +21,8 @@ public class SeleniumRobotsService implements RobotsService {
 	@Value("${selenium-hub-url}")
 	private String seleniumHubUrl;
 	
-	public boolean run(AccessTool accessTool) {
-		Robot<?> robot = RobotsFactory.getRobot(accessTool);
+	public boolean run(AccessToolUnit accessToolUnit) {
+		Robot<?> robot = RobotsFactory.getRobot(accessToolUnit);
 		
 		TestNG testNG = new TestNG();
 		testNG.setUseDefaultListeners(false);

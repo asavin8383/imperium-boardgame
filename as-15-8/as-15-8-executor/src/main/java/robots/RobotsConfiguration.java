@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
-import enums.AccessTool;
+import enums.AccessToolUnit;
 import scripts.GoogleScript;
 
 @Configuration
@@ -21,7 +21,7 @@ public class RobotsConfiguration {
 	@Bean
 	public Robot<?> googleRobot() throws MalformedURLException {
 		return new Robot<GoogleScript>(
-			AccessTool.GOOGLE,
+			AccessToolUnit.GOOGLE,
 			GoogleScript.class,
 			env.getProperty("robots.google.browser"),
 			Platform.valueOf(env.getProperty("robots.google.platform")),

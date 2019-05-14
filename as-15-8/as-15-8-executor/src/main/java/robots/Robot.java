@@ -2,13 +2,13 @@ package robots;
 
 import org.openqa.selenium.Platform;
 
-import enums.AccessTool;
+import enums.AccessToolUnit;
 import lombok.Getter;
 
 public class Robot<T> {
 
 	@Getter
-	private AccessTool accessTool;
+	private AccessToolUnit accessToolUnit;
 	
 	@Getter
 	private Class<T> scriptClass;
@@ -22,8 +22,8 @@ public class Robot<T> {
 	@Getter
 	private String applicationName;
 	
-	public Robot(AccessTool accessTool, Class<T> scriptClass, String browserName, Platform platform, String applicationName) {
-		this.accessTool = accessTool;
+	public Robot(AccessToolUnit accessToolUnit, Class<T> scriptClass, String browserName, Platform platform, String applicationName) {
+		this.accessToolUnit = accessToolUnit;
 		this.scriptClass = scriptClass;
 		this.browserName = browserName;
 		this.platformName = platform.name();
