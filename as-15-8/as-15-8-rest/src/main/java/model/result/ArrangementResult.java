@@ -2,8 +2,8 @@ package model.result;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
-import model.erdi.Content;
-import model.task.TaskJob;
+import model.erdi.ERDI;
+import model.task.Arrangement;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -13,9 +13,9 @@ import java.io.Serializable;
  */
 
 @Entity
-@Table(schema = "portal", name = "job_results")
+@Table(schema = "portal", name = "arrangement_results")
 @Data
-public class JobResult implements Serializable {
+public class ArrangementResult implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -28,12 +28,12 @@ public class JobResult implements Serializable {
     @ManyToOne(optional = false)
     @JoinColumn(name="task_job_id", foreignKey = @ForeignKey(name = "FK_job_results_job_id"))
     @JsonIgnore
-    private TaskJob taskJob;
+    private Arrangement arrangement;
 
     @ManyToOne(optional = false)
     @JoinColumn(name="content_id", foreignKey = @ForeignKey(name = "FK_job_results_content_id"))
     @JsonIgnore
-    private Content content;
+    private ERDI ERDI;
 
     /**URL проверенного ресурса*/
     private String url;
@@ -42,7 +42,7 @@ public class JobResult implements Serializable {
     private String result;
 
     @Lob
-    @Column(name="screenshot", columnDefinition="mediumblob")
+    @Column(name="screenshot", columnDefinition="bytea")
     private byte[] screenshot;
 
 

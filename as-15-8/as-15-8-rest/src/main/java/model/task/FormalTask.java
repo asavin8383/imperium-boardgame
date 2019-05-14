@@ -54,7 +54,7 @@ public class FormalTask implements Serializable {
 	@Enumerated(EnumType.STRING)
 	@NotNull
 	/**Статус задания*/
-	private TaskOrJobStatus status;
+	private ExecutionStatus status;
 	
 	/**Дата создания*/
 	private Date creationDate;
@@ -73,10 +73,10 @@ public class FormalTask implements Serializable {
 	@OneToMany(cascade=CascadeType.ALL,mappedBy="formalTask")
 	@JsonIgnore
 	/**Список мероприятий по заданию*/
-	private List<TaskJob> taskJobs;
+	private List<Arrangement> arrangements;
 	
 	public FormalTask() {
 		this.creationDate = new Date();
-		this.status = TaskOrJobStatus.PLANNED;
+		this.status = ExecutionStatus.PLANNED;
 	}
 }

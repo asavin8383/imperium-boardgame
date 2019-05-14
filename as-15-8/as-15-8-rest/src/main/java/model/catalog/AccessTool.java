@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import enums.AccessToolUnit;
 import lombok.Data;
-import model.task.TaskJob;
+import model.task.Arrangement;
 
 /**
  * Средство доступа к запрещенным ресурсам (Поисковая система, VPN, анонимайзер и т.д.)
@@ -44,5 +44,5 @@ public class AccessTool implements Serializable{
 	@OneToMany(cascade=CascadeType.ALL, mappedBy = "accessTool")
 	@JsonIgnore
 	/**Список мероприятий, в которых проверяется данное средство доступа*/
-	private List<TaskJob> taskJobs;
+	private List<Arrangement> arrangements;
 }

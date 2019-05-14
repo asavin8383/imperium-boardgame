@@ -1,15 +1,14 @@
 package robots;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
-import javax.annotation.PostConstruct;
-
+import enums.AccessToolUnit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import enums.AccessToolUnit;
+import javax.annotation.PostConstruct;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Фабрика роботов проверки ПС/ПАСД
