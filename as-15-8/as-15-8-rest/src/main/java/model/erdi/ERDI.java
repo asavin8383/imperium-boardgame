@@ -2,7 +2,7 @@ package model.erdi;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
-import model.task.JobItem;
+import model.task.ArrangementItem;
 import org.hibernate.annotations.Immutable;
 
 import javax.persistence.*;
@@ -12,11 +12,11 @@ import java.util.List;
 @Table(schema = "sa", name = "content")
 @Immutable
 @Data
-public class Content {
+public class ERDI {
     @Id
     private Long id;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "content")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "erdi")
     @JsonIgnore
-    private List<JobItem> jobItems;
+    private List<ArrangementItem> arrangementItems;
 }

@@ -29,4 +29,5 @@ public class Robot<T> {
 		this.platformName = platform.name();
 		this.applicationName = applicationName;
 	}
+
 }
