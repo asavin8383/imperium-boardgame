@@ -3,17 +3,7 @@ package model.user;
 import java.io.Serializable;
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -32,11 +22,10 @@ import lombok.Data;
 public class Department implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	@Id
-	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="departments_generator")
-	@SequenceGenerator(name="departments_generator", schema="portal", sequenceName="departments_id_seq", allocationSize=1)
-	@Column(name = "id", updatable = false, nullable = false)
+	@GeneratedValue(strategy=GenerationType.TABLE)
+	@Column(name="id", nullable=false, updatable=false, columnDefinition="bigserial")
 	private Long id;
 	
 	@OneToMany(mappedBy="parent", cascade=CascadeType.ALL)
@@ -44,7 +33,7 @@ public class Department implements Serializable {
 	private List<Department> children;
 	
 	@ManyToOne
-	@JoinColumn(name="parent_id", referencedColumnName="id")
+	@JoinColumn(name="parent_id", referencedColumnName="id", foreignKey = @ForeignKey(name = "FK_departments_parent_id"))
 	private Department parent;
 	
 	@Column(nullable=false)

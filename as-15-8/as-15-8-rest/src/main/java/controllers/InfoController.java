@@ -14,23 +14,23 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import repositories.SearchSystemRepository;
+import repositories.AccessToolRepository;
 
 @RestController
 @RequestMapping(path="/info", produces=MediaType.APPLICATION_JSON_VALUE)
 public class InfoController {
 	
 	@Autowired
-	private SearchSystemRepository searchSystemRepo;
+	private AccessToolRepository searchSystemRepo;
 
-	@GetMapping(path="/search_systems")
-	public List<AccessTool> searchSystems(Authentication authentication){
+	@GetMapping(path="/access_tools")
+	public List<AccessTool> accessToolsList(Authentication authentication){
 		return searchSystemRepo.findAll();
 	}
 	
-	@PostMapping(path="/search_systems", consumes=MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path="/access_tools", consumes=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseStatus(HttpStatus.CREATED)
-	public AccessTool postTaco(@RequestBody AccessTool accessTool) {
+	public AccessTool postAccessTool(@RequestBody AccessTool accessTool) {
 		return searchSystemRepo.save(accessTool);
 	}
 }

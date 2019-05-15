@@ -24,11 +24,10 @@ import model.task.Arrangement;
 public class AccessTool implements Serializable{
 
 	private static final long serialVersionUID = 1L;
-	
+
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "access_tools_generator")
-	@SequenceGenerator(name="access_tools_generator", schema = "portal", sequenceName = "access_tools_id_seq", allocationSize=1)
-	@Column(name = "id", updatable = false, nullable = false)
+	@GeneratedValue(strategy=GenerationType.TABLE)
+	@Column(name="id", nullable=false, updatable=false, columnDefinition="bigserial")
 	private Long id;
 	
 	@NotNull

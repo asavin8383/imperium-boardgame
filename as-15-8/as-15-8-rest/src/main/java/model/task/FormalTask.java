@@ -4,18 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -35,11 +24,10 @@ import model.user.User;
 public class FormalTask implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "formal_tasks_generator")
-	@SequenceGenerator(name="formal_tasks_generator", schema = "portal", sequenceName = "formal_tasks_id_seq", allocationSize=1)
-	@Column(name = "id", updatable = false, nullable = false)
+	@GeneratedValue(strategy=GenerationType.TABLE)
+	@Column(name="id", nullable=false, updatable=false, columnDefinition="bigserial")
 	private Long id;
 	
 	@NotNull
@@ -47,6 +35,7 @@ public class FormalTask implements Serializable {
 	private String title;
 	
 	@ManyToOne(optional=false)
+	@JoinColumn(name="user_id", foreignKey = @ForeignKey(name = "FK_formal_tasks_user_id"))
 	@JsonIgnore
 	/**Автор задания (оператор)*/
 	private User author;
@@ -66,6 +55,7 @@ public class FormalTask implements Serializable {
 	private Date modificationDate;
 	
 	@ManyToOne(optional=true)
+	@JoinColumn(name="informal_task_id", foreignKey = @ForeignKey(name = "FK_formal_tasks_informal_task_id"))
 	@JsonIgnore
 	/**Ссылка на неформализованное задание*/
 	private InformalTask informalTask;

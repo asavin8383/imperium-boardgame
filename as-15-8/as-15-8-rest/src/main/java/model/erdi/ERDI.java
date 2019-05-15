@@ -4,12 +4,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import model.task.ArrangementItem;
 import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Subselect;
 
 import javax.persistence.*;
 import java.util.List;
 
 @Entity
-@Table(schema = "sa", name = "content")
+@Subselect("select id from sa.content")
 @Immutable
 @Data
 public class ERDI {

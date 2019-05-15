@@ -20,11 +20,10 @@ import model.catalog.AccessTool;
 public class Arrangement implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	@Id
-	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="arrangements_generator")
-	@SequenceGenerator(name="arrangements_generator", schema="portal", sequenceName="arrangements_id_seq", allocationSize=1)
-	@Column(name="id", nullable=false, updatable=false)
+	@GeneratedValue(strategy=GenerationType.TABLE)
+	@Column(name="id", nullable=false, updatable=false, columnDefinition="bigserial")
 	private Long id;
 
 	@NotNull

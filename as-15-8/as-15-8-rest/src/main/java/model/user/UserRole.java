@@ -3,19 +3,7 @@ package model.user;
 import java.io.Serializable;
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -34,11 +22,10 @@ import lombok.Data;
 public class UserRole implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_roles_generator")
-	@SequenceGenerator(name="user_roles_generator", schema = "portal", sequenceName = "user_roles_id_seq", allocationSize=1)
-	@Column(name = "id", updatable = false, nullable = false)
+	@GeneratedValue(strategy=GenerationType.TABLE)
+	@Column(name="id", nullable=false, updatable=false, columnDefinition="bigserial")
 	private Long id;
 
 	@Enumerated(EnumType.STRING)
@@ -47,8 +34,8 @@ public class UserRole implements Serializable {
 	
 	@ManyToMany(cascade=CascadeType.ALL)
 	@JoinTable(schema="portal", name="user_roles_users"
-				,joinColumns=@JoinColumn(name="user_role_id")
-				,inverseJoinColumns=@JoinColumn(name="user_id"))
+				,joinColumns=@JoinColumn(name="user_role_id", foreignKey = @ForeignKey(name = "FK_user_roles_users_user_role_id"))
+				,inverseJoinColumns=@JoinColumn(name="user_id", foreignKey = @ForeignKey(name = "FK_user_roles_users_user_id")))
 	@JsonIgnore
 	private List<User> users;
 	
