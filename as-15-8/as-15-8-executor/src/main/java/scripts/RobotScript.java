@@ -8,15 +8,30 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
 
-import robots.DriverFactory;
-
+/**
+ * Скрипт робота проверки ПС/ПАСД
+ * @author shabalinAI
+ *
+ */
 public abstract class RobotScript {
 
+	/** Драйвер selenium */
 	protected WebDriver driver;
 	
+	/**
+	 * Метод создания драйвера
+	 * @param hubURL URL хаба selenium
+	 * @param browserName Имя браузера
+	 * @param platformName Имя платформы
+	 * @param applicationName Имя приложения (ПС/ПАСД)
+	 * @param arrangenmentID Идентификатор мероприятия
+	 * @param erdiID Идентификатор ЕРДИ
+	 * @param url URL для проверки
+	 * @throws MalformedURLException
+	 */
 	@BeforeClass
 	@Parameters({"hubURL", "browserName", "platformName", "applicationName", "arrangenmentID", "erdiID", "url"})
-	public void setUp(
+	public void createDriver(
 			String hubURL,
 			String browserName,
 			String platformName,
@@ -29,8 +44,11 @@ public abstract class RobotScript {
 		driver = DriverFactory.createDriver(new URL(hubURL), platformName, applicationName, browserName);
 	}
 	
+	/**
+	 * Метод закрытия драйвера
+	 */
 	@AfterClass
-	public void tearDown() {
+	public void closeDriver() {
 		if(driver!=null) {
 			driver.quit();
 		}

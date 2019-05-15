@@ -12,21 +12,42 @@ import enums.AccessToolUnit;
 import lombok.Getter;
 import robots.Robot;
 
+/**
+ * Робот на технологии Selenium
+ * @author shabalinAI
+ *
+ * @param <T>
+ */
 public class SeleniumRobot<T> implements Robot{
 
+	/** Проверяемая ПС/ПАСД */
 	@Getter
 	private AccessToolUnit accessToolUnit;
 	
+	/** Класс скрипта робота */
 	private Class<T> scriptClass;
 	
+	/** URL хаба selenium Grid */
 	private URL hubURL;
 	
+	/** Имя браузера */
 	private String browserName;
 	
+	/** Имя платформы */
 	private String platformName;
 	
+	/** Имя приложения (ПС/ПАСД) */
 	private String applicationName;
 	
+	/**
+	 * Робот на технологии Selenium
+	 * @param accessToolUnit Проверяемая ПС/ПАСД
+	 * @param hubURL Класс скрипта робота
+	 * @param scriptClass URL хаба selenium Grid
+	 * @param browserName Имя браузера
+	 * @param platform Имя платформы
+	 * @param applicationName Имя приложения (ПС/ПАСД)
+	 */
 	public SeleniumRobot(AccessToolUnit accessToolUnit,
 			URL hubURL,
 			Class<T> scriptClass,
