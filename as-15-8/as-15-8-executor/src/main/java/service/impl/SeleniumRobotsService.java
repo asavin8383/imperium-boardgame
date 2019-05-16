@@ -10,6 +10,7 @@ import org.testng.xml.XmlSuite.ParallelMode;
 import org.testng.xml.XmlTest;
 
 import jobs.ArrangementJob;
+import jobs.CheckUnit;
 import jobs.ERDIJob;
 import robots.Robot;
 import robots.RobotsFactory;
@@ -34,8 +35,13 @@ public class SeleniumRobotsService implements RobotsService {
 			XmlSuite suite = new XmlSuite(); 
 			suite.setName("Arrangement: "+arrangementJob.getId()+", ERDI: "+erdiJob.getId());
 			List<XmlTest> tests = new ArrayList<XmlTest>();
-			for(String url : erdiJob.getUrls()) {
-				XmlTest test = robot.createTest(String.valueOf(tests.size()), arrangementJob.getId(), erdiJob.getId(), url);
+			for(CheckUnit checkUnit : erdiJob.getCheckUnits()) {
+				XmlTest test = robot.createTest(
+						String.valueOf(tests.size()),
+						arrangementJob.getId(),
+						erdiJob.getId(),
+						checkUnit
+				);
 				test.setSuite(suite);
 				tests.add(test);
 			}

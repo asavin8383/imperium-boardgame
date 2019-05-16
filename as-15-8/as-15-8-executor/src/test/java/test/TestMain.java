@@ -11,6 +11,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import common.ApplicationConfiguration;
 import enums.AccessToolUnit;
 import jobs.ArrangementJob;
+import jobs.CheckUnit;
+import jobs.CheckUnitType;
 import jobs.ERDIJob;
 import service.impl.SeleniumRobotsService;
 
@@ -32,7 +34,7 @@ public class TestMain {
 			ERDIJob erdiJob = new ERDIJob();
 			erdiJob.setId(i);
 			for(int j = 0; j < 10; j++)
-				erdiJob.addUrl("https://www.google.ru");
+				erdiJob.addCheckUnit(new CheckUnit(CheckUnitType.URL, "https://www.google.ru"));
 			arrangementJob.addERDIJob(erdiJob);
 		}
 		

@@ -21,13 +21,13 @@ public class ERDIJob {
 	
 	/** Список URL ЕРДИ для проверки */
 	@Getter
-	private List<String> urls = new ArrayList<>();
+	private List<CheckUnit> checkUnits = new ArrayList<>();
 	
 	/**
 	 * Метод добавления URL ЕРДИ в список для проверки
-	 * @param url
+	 * @param checkUnit
 	 */
-	public void addUrl(String url) {
-		urls.add(url);
+	public void addCheckUnit(CheckUnit checkUnit) {
+		checkUnits.add(checkUnit);
 	}
 }

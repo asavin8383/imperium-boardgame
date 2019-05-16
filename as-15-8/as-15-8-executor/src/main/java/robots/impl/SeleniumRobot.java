@@ -9,6 +9,7 @@ import org.testng.xml.XmlClass;
 import org.testng.xml.XmlTest;
 
 import enums.AccessToolUnit;
+import jobs.CheckUnit;
 import lombok.Getter;
 import robots.Robot;
 
@@ -63,7 +64,7 @@ public class SeleniumRobot<T> implements Robot{
 	}
 	
 	@Override
-	public XmlTest createTest(String name, Long arrangenmentID, Long erdiID, String url) {
+	public XmlTest createTest(String name, Long arrangenmentID, Long erdiID, CheckUnit checkUnit) {
 		XmlTest test = new XmlTest();
 		
 		test.setName(name);
@@ -75,7 +76,8 @@ public class SeleniumRobot<T> implements Robot{
 		
 		test.addParameter("arrangenmentID", arrangenmentID.toString());
 		test.addParameter("erdiID", erdiID.toString());
-		test.addParameter("url", url);
+		test.addParameter("checkUnitType", checkUnit.getType().toString());
+		test.addParameter("checkUnitValue", checkUnit.getValue());
 		
 		List<XmlClass> classes = new ArrayList<XmlClass>();
 		classes.add(new XmlClass(this.scriptClass));

@@ -3,6 +3,7 @@ package robots;
 import org.testng.xml.XmlTest;
 
 import enums.AccessToolUnit;
+import jobs.CheckUnit;
 
 /**
  * Интерфейс робота проверки ПС/ПАСД
@@ -25,6 +26,6 @@ public interface Robot {
 	 * @param url Проверяемый URL
 	 * @return
 	 */
-	XmlTest createTest(String name, Long arrangenmentID, Long erdiID, String url);
+	XmlTest createTest(String name, Long arrangenmentID, Long erdiID, CheckUnit checkUnit);
 	
 }

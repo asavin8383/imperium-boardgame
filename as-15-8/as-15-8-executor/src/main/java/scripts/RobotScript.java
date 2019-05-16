@@ -8,6 +8,8 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
 
+import jobs.CheckUnit;
+import jobs.CheckUnitType;
 import lombok.Getter;
 
 /**
@@ -27,7 +29,7 @@ public abstract class RobotScript {
 	private String erdiID;
 	
 	@Getter
-	private String url;
+	private CheckUnit checkUnit;
 	
 	/**
 	 * Метод создания драйвера
@@ -41,7 +43,7 @@ public abstract class RobotScript {
 	 * @throws MalformedURLException
 	 */
 	@BeforeClass
-	@Parameters({"hubURL", "browserName", "platformName", "applicationName", "arrangenmentID", "erdiID", "url"})
+	@Parameters({"hubURL", "browserName", "platformName", "applicationName", "arrangenmentID", "erdiID", "checkUnitType", "checkUnitValue"})
 	public void createDriver(
 			String hubURL,
 			String browserName,
@@ -49,13 +51,14 @@ public abstract class RobotScript {
 			String applicationName,
 			String arrangenmentID,
 			String erdiID,
-			String url
-			) throws MalformedURLException {
+			String checkUnitType,
+			String checkUnitValue
+		) throws MalformedURLException {
 		
-		this.driver = DriverFactory.createDriver(new URL(hubURL), platformName, applicationName, browserName);
-		this.arrangenmentID = arrangenmentID;
-		this.erdiID = erdiID;
-		this.url = url;
+			this.driver = DriverFactory.createDriver(new URL(hubURL), platformName, applicationName, browserName);
+			this.arrangenmentID = arrangenmentID;
+			this.erdiID = erdiID;
+			this.checkUnit = new CheckUnit(CheckUnitType.valueOf(checkUnitType), checkUnitValue);
 	}
 	
 	/**
