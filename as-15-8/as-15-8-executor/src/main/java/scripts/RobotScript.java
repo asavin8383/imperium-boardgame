@@ -8,6 +8,8 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
 
+import lombok.Getter;
+
 /**
  * Скрипт робота проверки ПС/ПАСД
  * @author shabalinAI
@@ -17,6 +19,15 @@ public abstract class RobotScript {
 
 	/** Драйвер selenium */
 	protected WebDriver driver;
+	
+	@Getter
+	private String arrangenmentID;
+	
+	@Getter
+	private String erdiID;
+	
+	@Getter
+	private String url;
 	
 	/**
 	 * Метод создания драйвера
@@ -41,7 +52,10 @@ public abstract class RobotScript {
 			String url
 			) throws MalformedURLException {
 		
-		driver = DriverFactory.createDriver(new URL(hubURL), platformName, applicationName, browserName);
+		this.driver = DriverFactory.createDriver(new URL(hubURL), platformName, applicationName, browserName);
+		this.arrangenmentID = arrangenmentID;
+		this.erdiID = erdiID;
+		this.url = url;
 	}
 	
 	/**
