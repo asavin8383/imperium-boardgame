@@ -3,15 +3,7 @@ package model.user;
 import java.io.Serializable;
 import java.util.List;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -30,11 +22,10 @@ import lombok.Data;
 public class User implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "users_generator")
-	@SequenceGenerator(name="users_generator", schema = "portal", sequenceName = "users_id_seq", allocationSize=1)
-	@Column(name = "id", updatable = false, nullable = false)
+	@GeneratedValue(strategy=GenerationType.TABLE)
+	@Column(name="id", nullable=false, updatable=false, columnDefinition="bigserial")
 	private Long id;
 	
 	@Column(unique = true)
@@ -48,6 +39,7 @@ public class User implements Serializable {
 	private List<UserRole> roles;
 	
 	@ManyToOne(optional=true)
+	@JoinColumn(name="department_id", foreignKey = @ForeignKey(name = "FK_users_department_id"))
 	@JsonIgnore
 	private Department department;
 
