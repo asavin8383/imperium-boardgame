@@ -8,5 +8,5 @@ import model.task.FormalTask;
 
 public interface FormalTaskRepository extends JpaRepository<FormalTask, Long>, FormalTaskRepositoryAdvanced {
 
-	Page<FormalTask> findByAuthor_Id(Long userId, Pageable pageable);
+	Page<FormalTask> findByUser_Id(Long userId, Pageable pageable);
 }

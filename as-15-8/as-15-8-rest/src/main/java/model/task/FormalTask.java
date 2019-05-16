@@ -1,6 +1,8 @@
 package model.task;
 
 import java.io.Serializable;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -10,6 +12,8 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Data;
+import model.enums.ExecutionStatus;
+import model.enums.Priority;
 import model.user.User;
 
 /**
@@ -37,8 +41,8 @@ public class FormalTask implements Serializable {
 	@ManyToOne(optional=false)
 	@JoinColumn(name="user_id", foreignKey = @ForeignKey(name = "FK_formal_tasks_user_id"))
 	@JsonIgnore
-	/**Автор задания (оператор)*/
-	private User author;
+	/**Оператор, ответственный за задание*/
+	private User user;
 	
 	@Enumerated(EnumType.STRING)
 	@NotNull
@@ -46,13 +50,24 @@ public class FormalTask implements Serializable {
 	private ExecutionStatus status;
 	
 	/**Дата создания*/
-	private Date creationDate;
+	private LocalDateTime creationDate;
 	/**Дата начала*/
 	private Date startDate;
 	/**Дата окончания*/
 	private Date endDate;
 	/**Дата последнего изменения*/
 	private Date modificationDate;
+	/**Срок дедлайна*/
+	private Date deadlineDate;
+	/**Автор задания из ФГИС*/
+	private String author;
+	/**Признак согласования*/
+	private boolean agreed;
+	/**Идентификатор ФГИС*/
+	private String fgisId;
+	/**Приоритет*/
+	@Enumerated(EnumType.STRING)
+	private Priority priority;
 	
 	@ManyToOne(optional=true)
 	@JoinColumn(name="informal_task_id", foreignKey = @ForeignKey(name = "FK_formal_tasks_informal_task_id"))
@@ -66,7 +81,7 @@ public class FormalTask implements Serializable {
 	private List<Arrangement> arrangements;
 	
 	public FormalTask() {
-		this.creationDate = new Date();
+		this.creationDate = LocalDateTime.now();
 		this.status = ExecutionStatus.PLANNED;
 	}
 }

@@ -31,8 +31,14 @@ ldap:
         dn:
             pattern: sAMAccountName={0}
     login:
-        role: CN=ROLE_OPERATOR,OU=roles,OU=AS_15_8,DC=designdiv,DC=ecleasing,DC=ru
-        filter: "(&(objectClass=user)(userPrincipalName={0})(memberof=${ldap.login.role}))"
+        role_oper: CN=ROLE_OPERATOR,OU=roles,OU=AS_15_8,DC=designdiv,DC=ecleasing,DC=ru
+        role_admin: CN=ROLE_ADMIN,OU=roles,OU=AS_15_8,DC=designdiv,DC=ecleasing,DC=ru
+        filter_oper: "(&(objectClass=user)(memberof=${ldap.login.role_oper}))"
+        filter_admin: "(&(objectClass=user)(memberof=${ldap.login.role_admin}))"
+        #filter: "(&(objectClass=user)(userPrincipalName={0})(memberof=${ldap.login.role}))"
+    admin: sa
+    password: 12345
+
 
 ---
 

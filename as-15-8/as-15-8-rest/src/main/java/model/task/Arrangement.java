@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Data;
 import model.catalog.AccessTool;
+import model.enums.ExecutionStatus;
 
 /**Мероприятие в рамках формализованного задания*/
 

@@ -10,6 +10,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -29,6 +30,7 @@ import user.CustomUserDetailsMapper;
 @Configuration
 @Slf4j
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	
 	@Value("${ldap.urls}")
@@ -43,8 +45,8 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	@Value("${ldap.user.dn.pattern}")
 	private String ldapUserDnPattern;
 	
-	@Value("${ldap.login.filter}")
-	private String ldapFilter;
+	/*@Value("${ldap.login.filter}")
+	private String ldapFilter;*/
 	
 	@Value("${spring.app.cors.origin}")
     public String corsOrigin;
@@ -107,7 +109,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 new ActiveDirectoryLdapAuthenticationProvider(adDomain, ldapUrls, ldapBaseDn);
         provider.setConvertSubErrorCodesToExceptions(true);
         provider.setUseAuthenticationRequestCredentials(true);
-        provider.setSearchFilter(ldapFilter);
+        //provider.setSearchFilter(ldapFilter);
         provider.setUserDetailsContextMapper(new CustomUserDetailsMapper());
         return provider;
     }

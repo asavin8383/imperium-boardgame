@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import enums.AccessToolUnit;
 import lombok.Data;
+import model.enums.AccessToolType;
 import model.task.Arrangement;
 
 /**
