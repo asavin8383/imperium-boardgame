@@ -361,86 +361,28 @@
 			]
 		},
 		{
-			"name": "Список поисковых систем",
+			"name": "Список средств доступа к запрещённым ресурсам",
 			"request": {
 				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"url": {
-					"raw": "{{url}}/info/search_systems",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"info",
-						"search_systems"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Добавление поисковой системы",
-			"request": {
-				"method": "POST",
 				"header": [
 					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"value": "application/json",
+						"key": "X-AUTH-TOKEN",
+						"value": "{{oper_token}}",
 						"type": "text"
 					}
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"name\": \"Yandex\"\n}\n"
+					"raw": ""
 				},
 				"url": {
-					"raw": "{{url}}/info/search_systems",
+					"raw": "{{url}}/info/access_tools",
 					"host": [
 						"{{url}}"
 					],
 					"path": [
 						"info",
-						"search_systems"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Вход",
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "formdata",
-					"formdata": [
-						{
-							"key": "username",
-							"value": "user",
-							"type": "text"
-						},
-						{
-							"key": "password",
-							"value": "password",
-							"type": "text"
-						}
-					]
-				},
-				"url": {
-					"raw": "{{url}}/login",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"login"
+						"access_tools"
 					]
 				}
 			},
@@ -586,19 +528,19 @@
 	],
 	"variable": [
 		{
-			"id": "ac603d18-c38e-4c8a-9ab1-36ced22212cc",
+			"id": "96da79bd-5bf6-4578-b0ec-b6152b1e8e2f",
 			"key": "url",
 			"value": "http://localhost:15800",
 			"type": "string"
 		},
 		{
-			"id": "ea70b250-353e-4520-be02-4d1875bc8c4b",
+			"id": "908347b6-cce9-4cad-83e7-439c4cc88f57",
 			"key": "oper_token",
 			"value": "",
 			"type": "string"
 		},
 		{
-			"id": "deaa4513-988e-4398-9acb-7ad8f3fbd8e6",
+			"id": "c05d5015-65c7-4ad9-8550-9eeb8bf8518f",
 			"key": "test_url",
 			"value": "http://192.168.5.253:15800",
 			"type": "string"
