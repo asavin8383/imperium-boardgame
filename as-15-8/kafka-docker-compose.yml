@@ -1,0 +1,60 @@
+version: '3.2'
+networks:
+  kafka-net:
+services:
+    zookeeper:
+        image: wurstmeister/zookeeper
+        ports:
+            - "2181:2181"
+        networks:
+            - kafka-net
+
+    kafka:
+        image: wurstmeister/kafka:latest
+        depends_on:
+            - zookeeper
+        deploy:
+            mode: global
+        ports:
+            - target: 9094
+              published: 9094
+              protocol: tcp
+              mode: host
+        networks:
+            - kafka-net
+        environment:
+            HOSTNAME_COMMAND: "docker info | grep 'Node Address' | cut -d' ' -f 4"
+            KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+            KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+            KAFKA_ADVERTISED_LISTENERS: INSIDE://:9092,OUTSIDE://_{HOSTNAME_COMMAND}:9094
+            KAFKA_LISTENERS: INSIDE://:9092,OUTSIDE://:9094
+            KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+        volumes:
+            - /opt/kafka/logs:/opt/kafka/logs
+            - /var/run/docker.sock:/var/run/docker.sock
+
+    kafdrop:
+        image: thomsch98/kafdrop
+        depends_on:
+            - zookeeper
+            - kafka
+        ports:
+            - "9010:9010"
+        environment:
+            ZK_HOSTS: zookeeper:2181
+            LISTEN: 9010
+        networks:
+            - kafka-net
+
+    kafka-manager:
+        image: sheepkiller/kafka-manager:latest
+        depends_on:
+            - zookeeper
+            - kafka
+        ports:
+            - "9000:9000"
+        environment:
+            ZK_HOSTS: zookeeper:2181
+            APPLICATION_SECRET: 1q0p2w9o
+        networks:
+            - kafka-net

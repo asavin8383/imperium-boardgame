@@ -18,7 +18,7 @@ import service.impl.SeleniumRobotsService;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes={ApplicationConfiguration.class})
-public class TestMain {
+public class TestJobExecution {
 
 	@Autowired
 	private SeleniumRobotsService service;
