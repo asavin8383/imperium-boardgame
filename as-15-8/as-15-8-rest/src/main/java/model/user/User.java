@@ -9,6 +9,8 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Data;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.ldap.userdetails.LdapUserDetails;
 
 /**
  * Пользователи, работающие в системе
@@ -42,5 +44,13 @@ public class User implements Serializable {
 	@JoinColumn(name="department_id", foreignKey = @ForeignKey(name = "FK_users_department_id"))
 	@JsonIgnore
 	private Department department;
+
+	private String email;
+
+	public User(){}
+
+	public User(String userName){
+		this.userName = userName;
+	}
 
 }

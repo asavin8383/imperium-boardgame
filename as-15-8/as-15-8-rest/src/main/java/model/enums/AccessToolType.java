@@ -1,4 +1,4 @@
-package model.catalog;
+package model.enums;
 
 public enum AccessToolType {
     SEARCH_SYSTEM,

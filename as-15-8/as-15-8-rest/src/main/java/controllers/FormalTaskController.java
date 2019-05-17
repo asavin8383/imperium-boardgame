@@ -6,6 +6,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,6 +22,7 @@ import repositories.FormalTaskRepository;
 
 @RestController
 @RequestMapping(path="/formal_tasks", produces=MediaType.APPLICATION_JSON_VALUE)
+@PreAuthorize("hasRole('ROLE_OPERATOR')")
 public class FormalTaskController {
 
 	@Autowired
@@ -32,7 +34,7 @@ public class FormalTaskController {
 	@PostMapping(consumes=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseStatus(HttpStatus.CREATED)
 	public FormalTask postFormalTask(@RequestBody FormalTask formalTask, Authentication authentication) {
-		formalTask.setAuthor(userHelper.getOrCreateUser(authentication));
+		//formalTask.setUser(userHelper.getOrCreateUser(authentication));
 		return formalTaskRepo.save(formalTask);
 	}
 	

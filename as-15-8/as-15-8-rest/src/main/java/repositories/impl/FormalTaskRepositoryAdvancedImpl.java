@@ -37,7 +37,7 @@ public class FormalTaskRepositoryAdvancedImpl implements FormalTaskRepositoryAdv
 	        predicates.add(criteriaBuilder.equal(fromFormalTask.get("id"), taskId));
 	    }
 	    if (userId != null) {
-	    	predicates.add(criteriaBuilder.equal(fromFormalTask.get("author").get("id"), userId));
+	    	predicates.add(criteriaBuilder.equal(fromFormalTask.get("user").get("id"), userId));
 	    }
 	    select.where(predicates.toArray(new Predicate[0]));
 	    
@@ -53,7 +53,7 @@ public class FormalTaskRepositoryAdvancedImpl implements FormalTaskRepositoryAdv
 	    
 	    List<FormalTask> taskList = query.getResultList();
 	    
-	    return new PageImpl<FormalTask>(taskList, pageable, totalRows);
+	    return new PageImpl<>(taskList, pageable, totalRows);
 	    
 	}
 

@@ -2,6 +2,7 @@ package common;
 
 import java.util.Collections;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,6 +11,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -23,12 +25,13 @@ import advices.AuthenticationEntryPointImpl;
 import lombok.extern.slf4j.Slf4j;
 import security.JWTAuthenticationFilter;
 import security.JWTLoginFilter;
-import user.CustomUserDetailsMapper;
+import services.CustomUserDetailsMapper;
 
 
 @Configuration
 @Slf4j
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	
 	@Value("${ldap.urls}")
@@ -43,8 +46,8 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	@Value("${ldap.user.dn.pattern}")
 	private String ldapUserDnPattern;
 	
-	@Value("${ldap.login.filter}")
-	private String ldapFilter;
+	/*@Value("${ldap.login.filter}")
+	private String ldapFilter;*/
 	
 	@Value("${spring.app.cors.origin}")
     public String corsOrigin;
@@ -54,6 +57,9 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	
 	@Value("${spring.app.jwt.ttl}")
     public long jwtTTLSec;
+
+	@Autowired
+    CustomUserDetailsMapper userDetailsMapper;
  
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
@@ -107,8 +113,8 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 new ActiveDirectoryLdapAuthenticationProvider(adDomain, ldapUrls, ldapBaseDn);
         provider.setConvertSubErrorCodesToExceptions(true);
         provider.setUseAuthenticationRequestCredentials(true);
-        provider.setSearchFilter(ldapFilter);
-        provider.setUserDetailsContextMapper(new CustomUserDetailsMapper());
+        //provider.setSearchFilter(ldapFilter);
+        provider.setUserDetailsContextMapper(userDetailsMapper);
         return provider;
     }
 	   

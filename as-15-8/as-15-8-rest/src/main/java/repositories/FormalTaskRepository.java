@@ -5,8 +5,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import model.task.FormalTask;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public interface FormalTaskRepository extends JpaRepository<FormalTask, Long>, FormalTaskRepositoryAdvanced {
 
-	Page<FormalTask> findByAuthor_Id(Long userId, Pageable pageable);
+	Page<FormalTask> findByUser_Id(Long userId, Pageable pageable);
 }
