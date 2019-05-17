@@ -1,12 +1,8 @@
 package security;
 
-import java.io.IOException;
-
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
+import model.user.User;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -15,11 +11,11 @@ import org.springframework.security.ldap.userdetails.LdapUserDetails;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import lombok.extern.slf4j.Slf4j;
-import user.UserComposition;
-import user.UserInfo;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 @Slf4j
 public class JWTLoginFilter extends AbstractAuthenticationProcessingFilter {
@@ -46,11 +42,12 @@ public class JWTLoginFilter extends AbstractAuthenticationProcessingFilter {
     @Override
     protected void successfulAuthentication(HttpServletRequest req, HttpServletResponse res, FilterChain chain,
                                             Authentication auth) throws IOException, ServletException {
-    	LdapUserDetails principal = (LdapUserDetails) auth.getPrincipal();
-        UserComposition userComposition = new UserComposition(new UserInfo(principal.getUsername()), principal);
+        User user = new User(((LdapUserDetails)auth.getPrincipal()).getUsername());
+        /*LdapUserDetails principal = (LdapUserDetails) auth.getPrincipal();
+        UserComposition userComposition = new UserComposition(new User(principal.getUsername()), principal);*/
         new TokenAuthenticationHelper(jwtSecret).addAuthentication(
-                res, userComposition.getUserInfo(), auth.getAuthorities(), ttl_msec);
-        log.info("Login Successful (username={})", userComposition.getUsername());
+                res, user, auth.getAuthorities(), ttl_msec);
+        log.info("Login Successful (username={})", user.getUserName());
     }
  
     @Override

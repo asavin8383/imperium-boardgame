@@ -1,6 +1,8 @@
 package controllers;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 import model.catalog.AccessTool;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +26,8 @@ public class InfoController {
 	private AccessToolRepository searchSystemRepo;
 
 	@GetMapping(path="/access_tools")
-	public List<AccessTool> accessToolsList(Authentication authentication){
-		return searchSystemRepo.findAll();
+	public CompletionStage<List<AccessTool>> accessToolsList(Authentication authentication){
+		return CompletableFuture.supplyAsync(searchSystemRepo::findAll);
 	}
 	
 	@PostMapping(path="/access_tools", consumes=MediaType.APPLICATION_JSON_VALUE)

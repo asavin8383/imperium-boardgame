@@ -1,38 +1,30 @@
 package security;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import model.user.User;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.stream.Collectors;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import user.UserInfo;
-
-public class TokenAuthenticationHelper {
+class TokenAuthenticationHelper {
 	
     private static final String AUTHORITIES_KEY = "roles";
     private static final String GIVEN_NAME = "given_name";
     private static final String FAMILY_NAME = "family_name";
     
-    static final String HEADER_STRING = "X-AUTH-TOKEN";
+    private static final String HEADER_STRING = "X-AUTH-TOKEN";
  
     private final String jwtSecret;
  
@@ -40,14 +32,14 @@ public class TokenAuthenticationHelper {
         this.jwtSecret = jwtSecret;
     }
  
-    void addAuthentication(HttpServletResponse res, UserInfo userInfo, Collection<? extends GrantedAuthority> authorities, long ttl_msec) throws UnsupportedEncodingException, IOException {
+    void addAuthentication(HttpServletResponse res, User user, Collection<? extends GrantedAuthority> authorities, long ttl_msec) throws IOException {
         final String auths = authorities.stream().map(GrantedAuthority::getAuthority).filter(s->s.startsWith("ROLE_")).collect(Collectors.joining(","));
         String JWT = Jwts.builder()
-                .setSubject(userInfo.getUsername())
+                .setSubject(user.getUserName())
                 .setExpiration(new Date(System.currentTimeMillis() + ttl_msec))
                 .signWith(SignatureAlgorithm.HS512, jwtSecret.getBytes(StandardCharsets.UTF_8))
                 .claim(AUTHORITIES_KEY, auths)
-                .addClaims(convertInfoToMap(userInfo))
+                .addClaims(convertInfoToMap(user))
                 .compact();
 		if (JWT != null) {
 			res.setContentType("application/json;charset=UTF-8");
@@ -60,36 +52,37 @@ public class TokenAuthenticationHelper {
 		}
     }
  
-    Authentication getAuthentication(HttpServletRequest request) throws UnsupportedEncodingException {
+    Authentication getAuthentication(HttpServletRequest request) {
     	String token = request.getHeader(HEADER_STRING);
         if (token != null) {
             // parse the token.
         	Claims body = Jwts.parser().setSigningKey(jwtSecret.getBytes(StandardCharsets.UTF_8)).parseClaimsJws(token).getBody();
  
-        	final UserInfo info = convertClaimsToInfo(body);
+        	final User user = convertClaimsToInfo(body);
             final String auths = body.get(AUTHORITIES_KEY).toString();
  
             final Collection<? extends GrantedAuthority> authorities = (auths == null || auths.isEmpty()) ?
                     null : Arrays.stream(auths.split(",")).map(SimpleGrantedAuthority::new).collect(Collectors.toList());
  
-            return info.getUsername() != null ? new UsernamePasswordAuthenticationToken(info, null, authorities) : null;
+            return user.getUserName() != null ? new UsernamePasswordAuthenticationToken(user, null, authorities) : null;
         }
         return null;
         
     }
  
-    private static Map<String, Object> convertInfoToMap(UserInfo info) {
+    private static Map<String, Object> convertInfoToMap(User user) {
         Map<String, Object> result = new HashMap<>();
-        result.put(GIVEN_NAME, info.getFirstName());
-        result.put(FAMILY_NAME, info.getSecondName());
+        result.put(GIVEN_NAME, user.getFirstName());
+        result.put(FAMILY_NAME, user.getSecondName());
         return result;
     }
  
-    private static UserInfo convertClaimsToInfo(Claims claims) {
-        UserInfo info = new UserInfo(claims.getSubject());
-        info.setFirstName(claims.get(GIVEN_NAME, String.class));
-        info.setSecondName(claims.get(FAMILY_NAME, String.class));
-        return info;
+    private static User convertClaimsToInfo(Claims claims) {
+        User user = new User();
+        user.setUserName(claims.getSubject());
+        user.setFirstName(claims.get(GIVEN_NAME, String.class));
+        user.setSecondName(claims.get(FAMILY_NAME, String.class));
+        return user;
     }
     
     private static ObjectNode createJson(String token) {

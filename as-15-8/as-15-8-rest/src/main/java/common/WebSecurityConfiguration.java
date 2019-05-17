@@ -2,6 +2,7 @@ package common;
 
 import java.util.Collections;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,7 +25,7 @@ import advices.AuthenticationEntryPointImpl;
 import lombok.extern.slf4j.Slf4j;
 import security.JWTAuthenticationFilter;
 import security.JWTLoginFilter;
-import user.CustomUserDetailsMapper;
+import services.CustomUserDetailsMapper;
 
 
 @Configuration
@@ -56,6 +57,9 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	
 	@Value("${spring.app.jwt.ttl}")
     public long jwtTTLSec;
+
+	@Autowired
+    CustomUserDetailsMapper userDetailsMapper;
  
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
@@ -110,7 +114,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
         provider.setConvertSubErrorCodesToExceptions(true);
         provider.setUseAuthenticationRequestCredentials(true);
         //provider.setSearchFilter(ldapFilter);
-        provider.setUserDetailsContextMapper(new CustomUserDetailsMapper());
+        provider.setUserDetailsContextMapper(userDetailsMapper);
         return provider;
     }
 	   
