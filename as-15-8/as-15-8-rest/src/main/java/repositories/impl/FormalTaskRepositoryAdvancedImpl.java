@@ -53,7 +53,7 @@ public class FormalTaskRepositoryAdvancedImpl implements FormalTaskRepositoryAdv
 	    
 	    List<FormalTask> taskList = query.getResultList();
 	    
-	    return new PageImpl<FormalTask>(taskList, pageable, totalRows);
+	    return new PageImpl<>(taskList, pageable, totalRows);
 	    
 	}
 
