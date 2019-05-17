@@ -40,7 +40,6 @@ public class FormalTask implements Serializable {
 	
 	@ManyToOne(optional=false)
 	@JoinColumn(name="user_id", foreignKey = @ForeignKey(name = "FK_formal_tasks_user_id"))
-	@JsonIgnore
 	/**Оператор, ответственный за задание*/
 	private User user;
 	
@@ -52,13 +51,13 @@ public class FormalTask implements Serializable {
 	/**Дата создания*/
 	private LocalDateTime creationDate;
 	/**Дата начала*/
-	private Date startDate;
+	private LocalDateTime startDate;
 	/**Дата окончания*/
-	private Date endDate;
+	private LocalDateTime endDate;
 	/**Дата последнего изменения*/
-	private Date modificationDate;
+	private LocalDateTime modificationDate;
 	/**Срок дедлайна*/
-	private Date deadlineDate;
+	private LocalDateTime deadlineDate;
 	/**Автор задания из ФГИС*/
 	private String author;
 	/**Признак согласования*/
