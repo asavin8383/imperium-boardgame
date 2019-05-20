@@ -17,7 +17,7 @@ public class KafkaConsumer {
 	@Autowired
 	private RobotsService robotsService;
 	
-	@KafkaListener(topics = "${spring.kafka.topic}")
+	@KafkaListener(topics = "${spring.kafka.consume-topic}")
     public void consumeJson(ArrangementJob arrangementJob/*, Acknowledgment ack*/) {
 		log.info("Принято задание на проведение мероприятия: " + arrangementJob.getId());
         CompletableFuture.runAsync(() -> {

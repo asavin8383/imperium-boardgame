@@ -32,6 +32,27 @@
         <appender-ref ref="rootRollingFile" />
     </root>
     
+    <appender name="MESSAGES_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOGS}/messages.log</file>
+        <encoder>
+            <pattern>%date [%level] from %logger - %message%n%xException</pattern>
+        </encoder>
+        
+        <rollingPolicy
+            class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOGS}/archived/messages-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy
+                class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>100MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+    </appender>
+    
+    <logger name="kafka" level="INFO">
+    	<appender-ref ref="MESSAGES_LOG" />
+    	<appender-ref ref="Console" />
+    </logger>
+    
     <appender name="SERVICES_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOGS}/services.log</file>
         <encoder>
@@ -50,6 +71,32 @@
     
     <logger name="service" level="INFO">
     	<appender-ref ref="SERVICES_LOG" />
+    	<appender-ref ref="Console" />
+    </logger>
+    
+    <appender name="ROBOTS_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOGS}/robots.log</file>
+        <encoder>
+            <pattern>%date [%level] from %logger - %message%n%xException</pattern>
+        </encoder>
+        
+        <rollingPolicy
+            class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOGS}/archived/robots-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy
+                class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>100MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+    </appender>
+    
+    <logger name="scripts.RobotScript" level="INFO">
+    	<appender-ref ref="ROBOTS_LOG" />
+    	<appender-ref ref="Console" />
+    </logger>
+    
+    <logger name="listener" level="INFO">
+    	<appender-ref ref="ROBOTS_LOG" />
     	<appender-ref ref="Console" />
     </logger>
  

@@ -4,23 +4,46 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.openqa.selenium.WebDriver;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.KafkaHeaders;
+import org.springframework.kafka.support.SendResult;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
 
+import execution.ExecutionJobResult;
 import jobs.CheckUnit;
 import jobs.CheckUnitType;
+import kafka.KafkaConfiguration;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Скрипт робота проверки ПС/ПАСД
  * @author shabalinAI
  *
  */
-public abstract class RobotScript {
+@Slf4j
+@SpringBootTest
+@ContextConfiguration(classes = {KafkaConfiguration.class})
+public abstract class RobotScript extends AbstractTestNGSpringContextTests{
 
 	/** Драйвер selenium */
 	protected WebDriver driver;
+	
+	@Autowired
+	private KafkaTemplate<String, ExecutionJobResult> executionResultTemplate;
+	
+	@Autowired
+	private String executionResultTopicName;
 	
 	@Getter
 	private String arrangenmentID;
@@ -69,6 +92,35 @@ public abstract class RobotScript {
 		if(driver!=null) {
 			driver.quit();
 		}
+	}
+	
+	/**
+	 * Метод отправки результата выполнения робота в тему Kafka
+	 * @param jobResult Результат выполнения робота
+	 */
+	protected void sendExecutionResult(ExecutionJobResult jobResult) {
+		
+		Message<ExecutionJobResult> message = MessageBuilder
+                .withPayload(jobResult)
+                .setHeader(KafkaHeaders.TOPIC, executionResultTopicName)
+                .build();
+		
+		ListenableFuture<SendResult<String, ExecutionJobResult>> future = executionResultTemplate.send(message);
+	     
+	    future.addCallback(new ListenableFutureCallback<SendResult<String, ExecutionJobResult>>() {
+	 
+	        @Override
+	        public void onSuccess(SendResult<String, ExecutionJobResult> result) {
+	            log.info("Сообщение успешно отправлено: " +
+	            		"arrangenmentID: " + result.getProducerRecord().value().getArrangenmentID() +
+	            		"ERDI_ID: " + result.getProducerRecord().value().getErdiID() +
+	            		"CheckUnit: " + result.getProducerRecord().value().getCheckUnit().getValue());
+	        }
+	        @Override
+	        public void onFailure(Throwable ex) {
+	        	log.error("Ошибка при отправке сообщения", ex);
+	        }
+	    });
 	}
 	
 }

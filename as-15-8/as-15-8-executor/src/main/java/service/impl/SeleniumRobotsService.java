@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.testng.ITestNGListener;
 import org.testng.TestNG;
 import org.testng.xml.XmlSuite;
 import org.testng.xml.XmlSuite.ParallelMode;
@@ -12,6 +13,7 @@ import org.testng.xml.XmlTest;
 import jobs.ArrangementJob;
 import jobs.CheckUnit;
 import jobs.ERDIJob;
+import listener.RobotListener;
 import robots.Robot;
 import robots.RobotsFactory;
 import service.RobotsService;
@@ -37,7 +39,7 @@ public class SeleniumRobotsService implements RobotsService {
 			List<XmlTest> tests = new ArrayList<XmlTest>();
 			for(CheckUnit checkUnit : erdiJob.getCheckUnits()) {
 				XmlTest test = robot.createTest(
-						String.valueOf(tests.size()),
+						"Check: "+checkUnit.getValue(),
 						arrangementJob.getId(),
 						erdiJob.getId(),
 						checkUnit
@@ -50,7 +52,12 @@ public class SeleniumRobotsService implements RobotsService {
 		}
 	    
 	    testNG.setXmlSuites(suites);
-	    testNG.setParallel(ParallelMode.TESTS);
+	    testNG.setParallel(ParallelMode.INSTANCES);
+	    
+	    List<Class<? extends ITestNGListener>> listeners = new ArrayList<>();
+	    listeners.add(RobotListener.class);
+	    testNG.setListenerClasses(listeners);
+	    
 	    testNG.run();
 		
 		return true;

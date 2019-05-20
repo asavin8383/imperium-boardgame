@@ -7,6 +7,7 @@ robots:
 spring:
     kafka:
         bootstrap-servers: 192.168.5.12:9094,192.168.5.184:9094,192.168.5.211:9094
-        topic: arrangement_jobs
         group: executors
         auto-offset-reset: earliest
+        consume-topic: jobs
+        produce-topic: exec_results

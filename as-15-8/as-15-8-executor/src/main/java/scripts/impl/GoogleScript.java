@@ -1,9 +1,8 @@
 package scripts.impl;
 
-import static org.junit.Assert.assertEquals;
-
 import org.testng.annotations.Test;
 
+import execution.ExecutionPSJobResult;
 import scripts.RobotScript;
 
 /**
@@ -19,6 +18,13 @@ public class GoogleScript extends RobotScript{
 	public void execute() {
 		driver.get(GOOGLE_URL);
 		driver.manage().window().fullscreen();
-		assertEquals("Google", driver.getTitle());
+		boolean result = driver.getTitle().equals("Google");
+		
+		ExecutionPSJobResult message = new ExecutionPSJobResult();
+		message.setArrangenmentID(getArrangenmentID());
+		message.setErdiID(getErdiID());
+		message.setCheckUnit(getCheckUnit());
+		message.setCheckResult(result);
+		sendExecutionResult(message);
 	}
 }

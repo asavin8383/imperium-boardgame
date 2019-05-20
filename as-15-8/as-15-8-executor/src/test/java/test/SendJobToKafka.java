@@ -5,6 +5,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.kafka.support.SendResult;
@@ -14,7 +15,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
-import common.ApplicationConfiguration;
 import enums.AccessToolUnit;
 import jobs.ArrangementJob;
 import jobs.CheckUnit;
@@ -22,13 +22,14 @@ import jobs.CheckUnitType;
 import jobs.ERDIJob;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes={ApplicationConfiguration.class, TestKafkaSenderConfig.class})
+@SpringBootTest(classes={TestKafkaSenderConfig.class})
+@PropertySource("classpath:application.yml")
 public class SendJobToKafka {
 
 	@Autowired
     private KafkaTemplate<String, ArrangementJob> kafkaTemplate;
 	
-	@Value("${spring.kafka.topic}")
+	@Value("${spring.kafka.consume-topic}")
     private String topic;
 	
 	@Test
@@ -38,10 +39,10 @@ public class SendJobToKafka {
 		arrangementJob.setId(1L);
 		arrangementJob.setAccessToolUnit(AccessToolUnit.GOOGLE);
 		
-		for(long i = 0; i < 10; i++) {
+		for(long i = 0; i < 1; i++) {
 			ERDIJob erdiJob = new ERDIJob();
 			erdiJob.setId(i);
-			for(int j = 0; j < 10; j++)
+			for(int j = 0; j < 1; j++)
 				erdiJob.addCheckUnit(new CheckUnit(CheckUnitType.URL, "https://www.google.ru"));
 			arrangementJob.addERDIJob(erdiJob);
 		}
