@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 @ControllerAdvice
 public class AuthenticationEntryPointImpl implements AuthenticationEntryPoint {
 
+	//TODO Разобраться с остальными ошибками при авторизации (сейчас всегда приезжает 401, что неправильно)
+
 	@Override
 	public void commence(HttpServletRequest request, HttpServletResponse response,
 			AuthenticationException authException) throws IOException {

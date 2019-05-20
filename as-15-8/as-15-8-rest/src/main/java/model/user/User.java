@@ -1,16 +1,14 @@
 package model.user;
 
-import java.io.Serializable;
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import lombok.Data;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.ldap.userdetails.LdapUserDetails;
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Пользователи, работающие в системе
@@ -21,6 +19,7 @@ import org.springframework.security.ldap.userdetails.LdapUserDetails;
 @Entity
 @Table(schema="portal", name="users")
 @Data
+@EqualsAndHashCode(exclude = "roles")
 public class User implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -36,11 +35,14 @@ public class User implements Serializable {
 	private String firstName;
 	private String secondName;
 	
-	@ManyToMany(mappedBy="users")
+	@ManyToMany
+	@JoinTable(schema="portal", name="user_roles_users"
+			,joinColumns=@JoinColumn(name="user_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "FK_user_roles_users_user_id"))
+			,inverseJoinColumns=@JoinColumn(name="user_role_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "FK_user_roles_users_user_role_id")))
 	@JsonIgnore
-	private List<UserRole> roles;
+	private Set<UserRole> roles = new HashSet<>();
 	
-	@ManyToOne(optional=true)
+	@ManyToOne
 	@JoinColumn(name="department_id", foreignKey = @ForeignKey(name = "FK_users_department_id"))
 	@JsonIgnore
 	private Department department;

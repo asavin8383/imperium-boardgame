@@ -45,8 +45,8 @@ class TokenAuthenticationHelper {
 			res.setContentType("application/json;charset=UTF-8");
 			res.setHeader("Cache-Control", "no-cache");
 			try {
-				res.getWriter().write(createJson(JWT).toString());
-			} catch (IOException e) {
+				res.getWriter().write(createJson(JWT, auths).toString());
+			} catch (Exception e) {
 				res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Error! Can't write token to the response body");
 			}
 		}
@@ -85,10 +85,11 @@ class TokenAuthenticationHelper {
         return user;
     }
     
-    private static ObjectNode createJson(String token) {
+    private static ObjectNode createJson(String token, String role) {
     	ObjectMapper mapper = new ObjectMapper();
     	ObjectNode node = mapper.createObjectNode();
     	node.put("access_token", token);
+    	node.put("role", role);
     	return node;
     }
 }
