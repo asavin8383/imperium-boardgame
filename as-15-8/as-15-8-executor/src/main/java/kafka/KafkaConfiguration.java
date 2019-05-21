@@ -17,6 +17,7 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
+import org.springframework.kafka.listener.ContainerProperties.AckMode;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
@@ -48,7 +49,7 @@ public class KafkaConfiguration {
         config.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, offset);
         config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
-        //config.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
+        config.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
         
         return new DefaultKafkaConsumerFactory<>(
         	config,
@@ -61,6 +62,7 @@ public class KafkaConfiguration {
     public ProducerFactory<String, ExecutionJobResult> executionResultProducerFactory() {
     	Map<String, Object> configProps = new HashMap<>();
     	configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+    	configProps.put(ProducerConfig.ACKS_CONFIG, "all");
     	configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
     	configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
     	return new DefaultKafkaProducerFactory<>(configProps);
@@ -70,7 +72,7 @@ public class KafkaConfiguration {
     public ConcurrentKafkaListenerContainerFactory<String, ArrangementJob> kafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, ArrangementJob> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(jobsConsumerFactory());
-       // factory.getContainerProperties().setAckMode(AckMode.MANUAL_IMMEDIATE);
+        factory.getContainerProperties().setAckMode(AckMode.MANUAL_IMMEDIATE);
         return factory;
     }
  
