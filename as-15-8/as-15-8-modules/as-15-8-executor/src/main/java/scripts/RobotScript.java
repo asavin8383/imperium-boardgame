@@ -112,8 +112,8 @@ public abstract class RobotScript extends AbstractTestNGSpringContextTests{
 	        @Override
 	        public void onSuccess(SendResult<String, ExecutionJobResult> result) {
 	            log.info("Сообщение успешно отправлено: " +
-	            		"arrangenmentID: " + result.getProducerRecord().value().getArrangenmentID() +
-	            		"ERDI_ID: " + result.getProducerRecord().value().getErdiID() +
+	            		"arrangenmentID: " + result.getProducerRecord().value().getArrangenmentID() + ", " +
+	            		"ERDI_ID: " + result.getProducerRecord().value().getErdiID() + ", " +
 	            		"CheckUnit: " + result.getProducerRecord().value().getCheckUnit().getValue());
 	        }
 	        @Override
