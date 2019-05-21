@@ -10,6 +10,8 @@ spring:
         test-while-idle: true
         validation-query: SELECT 1;
         time-between-eviction-runs-millis: 300000
+        username: as_user
+        password: as_user
     jpa:
         properties:
             hibernate:
@@ -20,10 +22,46 @@ spring:
         databasePlatform: org.hibernate.dialect.PostgreSQL9Dialect
 
 ---
+
+spring:
+    profiles: test
+    datasource:
+        url: jdbc:postgresql://192.168.5.195:5432/asdb
+    kafka:
+        consume-topic: exec_results
+
+---
+
 spring:
     profiles: dev_ashabalin
     datasource:
-#        driverClassName: org.postgresql.Driver
         url: jdbc:postgresql://192.168.5.195:5432/asdb_test
-        username: as_user
-        password: as_user
+    kafka:
+        consume-topic: exec_results_ashabalin
+
+---
+
+spring:
+    profiles: dev_asavin
+    datasource:
+        url: jdbc:postgresql://192.168.5.195:5432/asdb_test
+    kafka:
+        consume-topic: exec_results_asavin
+
+---
+
+spring:
+    profiles: dev_pvorobiev
+    datasource:
+        url: jdbc:postgresql://192.168.5.195:5432/asdb_test
+    kafka:
+        consume-topic: exec_results_pvorobiev
+
+---
+
+spring:
+    profiles: dev_jspirina
+    datasource:
+        url: jdbc:postgresql://192.168.5.195:5432/asdb_test
+    kafka:
+        consume-topic: exec_results_jspirina

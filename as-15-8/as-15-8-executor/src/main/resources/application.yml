@@ -11,5 +11,43 @@ spring:
         bootstrap-servers: 192.168.5.12:9094,192.168.5.184:9094,192.168.5.211:9094
         group: executors
         auto-offset-reset: earliest
+
+---
+
+spring:
+    profiles: test
+    kafka:
         consume-topic: jobs
         produce-topic: exec_results
+
+---
+
+spring:
+    profiles: dev_ashabalin
+    kafka:
+        consume-topic: jobs_ashabalin
+        produce-topic: exec_results_ashabalin
+
+---
+
+spring:
+    profiles: dev_asavin
+    kafka:
+        consume-topic: jobs_asavin
+        produce-topic: exec_results_asavin
+
+---
+
+spring:
+    profiles: dev_pvorobiev
+    kafka:
+        consume-topic: jobs_pvorobiev
+        produce-topic: exec_results_pvorobiev
+
+---
+
+spring:
+    profiles: dev_jspirina
+    kafka:
+        consume-topic: jobs_jspirina
+        produce-topic: exec_results_jspirina
