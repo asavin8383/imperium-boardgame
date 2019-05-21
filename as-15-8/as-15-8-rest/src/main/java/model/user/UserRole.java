@@ -7,7 +7,9 @@ import model.enums.Role;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -35,6 +37,6 @@ public class UserRole implements Serializable {
 	
 	@ManyToMany(mappedBy="roles", fetch = FetchType.EAGER)
 	@JsonIgnore
-	private Set<User> users = new HashSet<>();
+	private List<User> users = new ArrayList<>();
 	
 }

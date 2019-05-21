@@ -1,20 +1,18 @@
 package model.task;
 
-import java.io.Serializable;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.List;
-
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import lombok.Data;
 import model.enums.ExecutionStatus;
 import model.enums.Priority;
 import model.user.User;
+
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Формализованное задание на проведение мероприятий по контролю
@@ -33,19 +31,19 @@ public class FormalTask implements Serializable {
 	@GeneratedValue(strategy=GenerationType.TABLE)
 	@Column(name="id", nullable=false, updatable=false, columnDefinition="bigserial")
 	private Long id;
-	
-	@NotNull
+
 	/**Название*/
+	@NotNull
 	private String title;
-	
+
+	/**Оператор, ответственный за задание*/
 	@ManyToOne(optional=false)
 	@JoinColumn(name="user_id", foreignKey = @ForeignKey(name = "FK_formal_tasks_user_id"))
-	/**Оператор, ответственный за задание*/
 	private User user;
-	
+
+	/**Статус задания*/
 	@Enumerated(EnumType.STRING)
 	@NotNull
-	/**Статус задания*/
 	private ExecutionStatus status;
 	
 	/**Дата создания*/
@@ -67,20 +65,26 @@ public class FormalTask implements Serializable {
 	/**Приоритет*/
 	@Enumerated(EnumType.STRING)
 	private Priority priority;
-	
-	@ManyToOne(optional=true)
+
+	/**Ссылка на неформализованное задание*/
+	@ManyToOne
 	@JoinColumn(name="informal_task_id", foreignKey = @ForeignKey(name = "FK_formal_tasks_informal_task_id"))
 	@JsonIgnore
-	/**Ссылка на неформализованное задание*/
 	private InformalTask informalTask;
-	
+
+	/**Список мероприятий по заданию*/
 	@OneToMany(cascade=CascadeType.ALL,mappedBy="formalTask")
 	@JsonIgnore
-	/**Список мероприятий по заданию*/
 	private List<Arrangement> arrangements;
 	
 	public FormalTask() {
 		this.creationDate = LocalDateTime.now();
 		this.status = ExecutionStatus.PLANNED;
+	}
+
+	public List<Map<String, Object>> getArrangementInfo(){
+		return arrangements.stream()
+			.map(Arrangement::getArrangementInfo)
+			.collect(Collectors.toList());
 	}
 }

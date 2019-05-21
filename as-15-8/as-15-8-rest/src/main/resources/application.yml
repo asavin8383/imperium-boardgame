@@ -7,6 +7,8 @@ spring:
         test-while-idle: true
         validation-query: SELECT 1;
         time-between-eviction-runs-millis: 300000
+        username: as_user
+        password: as_user
     jpa:
         properties:
             hibernate:
@@ -21,6 +23,8 @@ spring:
             ttl: 86400
         cors:
             origin: "*"
+    kafka:
+        bootstrap-servers: 192.168.5.12:9094,192.168.5.184:9094,192.168.5.211:9094
 ldap:
     enabled: true
     domain: designdiv.ecleasing.ru
@@ -39,6 +43,17 @@ ldap:
     admin: sa
     password: 12345
 
+---
+
+spring:
+    profiles: test
+    jpa:
+        hibernate:
+            ddl-auto: none
+    datasource:
+        url: jdbc:postgresql://192.168.5.195:5432/asdb
+    kafka:
+        produce-topic: jobs
 
 ---
 
@@ -51,29 +66,51 @@ spring:
             javax:
                 persistence:
                     schema-generation:
-                         create-source: metadata
-                         scripts:
-                              action: drop-and-create
-                              create-target: scripts/create.sql
-                              drop-target: scripts/drop.sql
+                        create-source: metadata
+                        scripts:
+                            action: drop-and-create
+                            create-target: scripts/create.sql
+                            drop-target: scripts/drop.sql
             hibernate:
                 hbm2ddl:
                     delimiter: ";"
-db:
-    driverClassName: org.postgresql.Driver
-    url: jdbc:postgresql://192.168.5.195:5432/asdb_test
-    username: as_user
-    password: as_user
+    datasource:
+        url: jdbc:postgresql://192.168.5.195:5432/asdb_test
+    kafka:
+        produce-topic: jobs_asavin
+
 ---
 
 spring:
-    profiles: test
+    profiles: dev_ashabalin
     jpa:
         hibernate:
             ddl-auto: none
-db:
-    driverClassName: org.postgresql.Driver
-    url: jdbc:postgresql://192.168.5.195:5432/asdb
-    username: as_user
-    password: as_user
-    
+    datasource:
+        url: jdbc:postgresql://192.168.5.195:5432/asdb_test
+    kafka:
+        produce-topic: jobs_ashabalin
+
+---
+
+spring:
+    profiles: dev_pvorobiev
+    jpa:
+        hibernate:
+            ddl-auto: none
+    datasource:
+        url: jdbc:postgresql://192.168.5.195:5432/asdb_test
+    kafka:
+        produce-topic: jobs_pvorobiev
+
+---
+
+spring:
+    profiles: dev_jspirina
+    jpa:
+        hibernate:
+            ddl-auto: none
+    datasource:
+        url: jdbc:postgresql://192.168.5.195:5432/asdb_test
+    kafka:
+        produce-topic: jobs_jspirina

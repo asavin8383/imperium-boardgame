@@ -1,0 +1,21 @@
+package repositories;
+
+import model.task.Arrangement;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+
+/**
+ * Creation date: 21.05.2019
+ * Author: asavin
+ */
+
+@Repository
+public interface ArrangementRepository extends JpaRepository<Arrangement, Long> {
+
+    @Query("SELECT a FROM Arrangement a WHERE a.formalTask.id=:formalTaskId AND a.id = :id")
+    Optional<Arrangement> findByFormalTaskAndId(@Param("formalTaskId") Long formalTaskId, @Param("id") Long id);
+}

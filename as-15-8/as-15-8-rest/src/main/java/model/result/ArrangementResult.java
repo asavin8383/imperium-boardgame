@@ -6,6 +6,7 @@ import jobs.CheckUnitType;
 import lombok.Data;
 import model.erdi.ERDI;
 import model.task.Arrangement;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -32,7 +33,7 @@ public class ArrangementResult implements Serializable {
     private Arrangement arrangement;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name="content_id", foreignKey = @ForeignKey(name = "FK_arrangement_results_content_id"))
+    @JoinColumn(name="content_id", foreignKey = @ForeignKey(name = "arrangement_results_content_id_fk"))
     @JsonIgnore
     private ERDI ERDI;
 
@@ -48,6 +49,7 @@ public class ArrangementResult implements Serializable {
     private ArrangementUnitCheckResult result;
 
     @Lob
+    @Type(type="org.hibernate.type.BinaryType")
     @Column(name="screenshot", columnDefinition="bytea")
     private byte[] screenshot;
 
