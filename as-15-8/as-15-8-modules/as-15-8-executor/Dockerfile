@@ -16,4 +16,4 @@ ENTRYPOINT ["java", \
          "-Dspring.profiles.active=${PROFILE}", \
          "-Xms512M", \
          "-Xmx1024M", \
-         "${APP_PATH}"]
+         "/lib/as-15-8-executor.jar"]

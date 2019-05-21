@@ -1,21 +1,17 @@
 version: '3.2'
 services:
     executor:
-        container_name: executor
         image: as-15-8-executor
         deploy:
             mode: global
-        restart: always
         environment:
             PROFILE: test
         volumes:
             - ~/as_15_8_modules/executor-module/logs:/log
     analyzer:
-        container_name: analyzer
         image: as-15-8-analyzer
         deploy:
             mode: global
-        restart: always
         environment:
             PROFILE: test
         volumes:
