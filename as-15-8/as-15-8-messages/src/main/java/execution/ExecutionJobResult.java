@@ -12,10 +12,10 @@ import lombok.Data;
 public abstract class ExecutionJobResult {
 
 	/** Идентификатор мероприятия */
-	private String arrangenmentID;
+	private Long arrangenmentID;
 	
 	/** Идентификатор ЕРДИ */
-	private String erdiID;
+	private Long erdiID;
 	
 	/** Единица ЕРДИ для проверки */
 	private CheckUnit checkUnit;

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import execution.ExecutionPSJobResult;
 import lombok.extern.slf4j.Slf4j;
+import model.ArrangementResult;
 import service.AnalyzerService;
 import service.AnalyzerServiceFactory;
 
@@ -20,7 +21,7 @@ public class KafkaConsumer {
         CompletableFuture.runAsync(() -> {
         	try {
         		AnalyzerService service = AnalyzerServiceFactory.getService(job.getClass());
-        		boolean check = service.analyzeResult(job);
+        		ArrangementResult check = service.analyzeResult(job);
         		service.writeCheckResult(check);
         		log.info("Анализ результата проверки ПС/ПАСД выполнен успешно : " + job.getCheckUnit().getValue());
         		//ack.acknowledge();

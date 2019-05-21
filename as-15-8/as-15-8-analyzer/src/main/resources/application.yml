@@ -6,3 +6,24 @@ spring:
         group: analyzers
         auto-offset-reset: earliest
         consume-topic: exec_results
+    datasource:
+        test-while-idle: true
+        validation-query: SELECT 1;
+        time-between-eviction-runs-millis: 300000
+    jpa:
+        properties:
+            hibernate:
+                jdbc:
+                    lob:
+                        non_contextual_creation: true
+                format_sql: true
+        databasePlatform: org.hibernate.dialect.PostgreSQL9Dialect
+
+---
+spring:
+    profiles: dev_ashabalin
+    datasource:
+#        driverClassName: org.postgresql.Driver
+        url: jdbc:postgresql://192.168.5.195:5432/asdb_test
+        username: as_user
+        password: as_user

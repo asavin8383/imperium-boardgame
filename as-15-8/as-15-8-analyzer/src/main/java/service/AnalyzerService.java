@@ -1,6 +1,7 @@
 package service;
 
 import execution.ExecutionJobResult;
+import model.ArrangementResult;
 
 /**
  * Интерфейс сервиса анализа резуьтатов проверки мероприятия
@@ -20,12 +21,12 @@ public interface AnalyzerService {
 	 * @param result Результат работы робота
 	 * @return
 	 */
-	boolean analyzeResult(ExecutionJobResult result);
+	ArrangementResult analyzeResult(ExecutionJobResult result);
 	
 	/**
 	 * Метод записи результата проверки в хранилище
 	 * @param result Результат проверки
 	 */
-	void writeCheckResult(boolean result);
+	void writeCheckResult(ArrangementResult result);
 	
 }

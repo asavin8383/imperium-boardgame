@@ -21,8 +21,8 @@ public class GoogleScript extends RobotScript{
 		boolean result = driver.getTitle().equals("Google");
 		
 		ExecutionPSJobResult message = new ExecutionPSJobResult();
-		message.setArrangenmentID(getArrangenmentID());
-		message.setErdiID(getErdiID());
+		message.setArrangenmentID(Long.parseLong(getArrangenmentID()));
+		message.setErdiID(Long.parseLong(getErdiID()));
 		message.setCheckUnit(getCheckUnit());
 		message.setCheckResult(result);
 		sendExecutionResult(message);
