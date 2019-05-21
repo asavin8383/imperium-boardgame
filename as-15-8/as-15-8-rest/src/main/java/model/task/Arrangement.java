@@ -1,7 +1,9 @@
 package model.task;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import lombok.Getter;
 import model.catalog.AccessTool;
 import model.enums.ExecutionStatus;
 
@@ -14,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 
 /**Мероприятие в рамках формализованного задания*/
+
+//TODO Проверять уникальность ПС/ПАСД в рамках одного задания - исправить в БД
 
 @Entity
 @Table(schema="portal", name="arrangements")
@@ -47,12 +51,14 @@ public class Arrangement implements Serializable {
 	@ManyToOne(optional=false)
 	@JoinColumn(name="formal_task_id", foreignKey = @ForeignKey(name = "FK_arrangements_formal_task_id"))
 	@JsonIgnore
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private FormalTask formalTask;
 
 	/**Список поисковых систем для проверки*/
 	@ManyToOne(optional = false)
 	@JoinColumn(name="access_tool_id", foreignKey = @ForeignKey(name = "FK_arrangements_access_tool_id"))
 	@JsonIgnore
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private AccessTool accessTool;
 	
 	@OneToMany(cascade=CascadeType.ALL, mappedBy = "arrangement", fetch = FetchType.EAGER)
@@ -72,11 +78,12 @@ public class Arrangement implements Serializable {
 	}
 
 	@JsonIgnore
+	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
 	public Map<String, Object> getArrangementInfo(){
 		Map<String, Object> result = new HashMap<>();
 		result.put("id", this.id);
 		result.put("title", this.title);
-		result.put("status", this.status.toString());
+		result.put("status", this.status);
 		result.put("creationDate", this.creationDate);
 		result.put("endDate", this.endDate);
 		result.put("accessTool", this.accessTool.getName());

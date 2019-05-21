@@ -1,6 +1,7 @@
 package model.task;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import model.enums.ExecutionStatus;
 import model.enums.Priority;
@@ -10,6 +11,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -75,7 +77,7 @@ public class FormalTask implements Serializable {
 	/**Список мероприятий по заданию*/
 	@OneToMany(cascade=CascadeType.ALL,mappedBy="formalTask")
 	@JsonIgnore
-	private List<Arrangement> arrangements;
+	private List<Arrangement> arrangements = new ArrayList<>();
 	
 	public FormalTask() {
 		this.creationDate = LocalDateTime.now();
