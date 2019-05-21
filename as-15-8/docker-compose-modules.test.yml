@@ -1,18 +1,18 @@
 version: '3.2'
 services:
     executor:
-        image: as-15-8-executor
+        image: harbor.ec-leasing.ru/as_15_8/as-15-8-executor:latest
         deploy:
             mode: global
         environment:
             PROFILE: test
         volumes:
-            - ~/as_15_8_modules/executor-module/logs:/log
+            - ~/as-15-8-modules/executor-module/logs:/log
     analyzer:
-        image: as-15-8-analyzer
+        image: harbor.ec-leasing.ru/as_15_8/as-15-8-analyzer:latest
         deploy:
             mode: global
         environment:
             PROFILE: test
         volumes:
-            - ~/as_15_8_modules/analyzer-module/logs:/log
+            - ~/as-15-8-modules/analyzer-module/logs:/log
