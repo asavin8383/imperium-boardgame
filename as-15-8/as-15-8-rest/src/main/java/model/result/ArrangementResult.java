@@ -1,6 +1,8 @@
 package model.result;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import enums.ArrangementUnitCheckResult;
+import jobs.CheckUnitType;
 import lombok.Data;
 import model.erdi.ERDI;
 import model.task.Arrangement;
@@ -34,11 +36,16 @@ public class ArrangementResult implements Serializable {
     @JsonIgnore
     private ERDI ERDI;
 
-    /**URL проверенного ресурса*/
-    private String url;
+    @Enumerated(EnumType.STRING)
+    @Column(name="check_unit_type", nullable=false)
+    private CheckUnitType checkUnitType;
 
-    /**Результат проверки*/
-    private String result;
+    @Column(name="check_unit_value", nullable=false)
+    private String checkUnitValue;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name="result", nullable=false)
+    private ArrangementUnitCheckResult result;
 
     @Lob
     @Column(name="screenshot", columnDefinition="bytea")

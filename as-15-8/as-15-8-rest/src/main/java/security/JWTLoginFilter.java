@@ -41,10 +41,8 @@ public class JWTLoginFilter extends AbstractAuthenticationProcessingFilter {
  
     @Override
     protected void successfulAuthentication(HttpServletRequest req, HttpServletResponse res, FilterChain chain,
-                                            Authentication auth) throws IOException, ServletException {
+                                            Authentication auth) throws IOException {
         User user = new User(((LdapUserDetails)auth.getPrincipal()).getUsername());
-        /*LdapUserDetails principal = (LdapUserDetails) auth.getPrincipal();
-        UserComposition userComposition = new UserComposition(new User(principal.getUsername()), principal);*/
         new TokenAuthenticationHelper(jwtSecret).addAuthentication(
                 res, user, auth.getAuthorities(), ttl_msec);
         log.info("Login Successful (username={})", user.getUserName());

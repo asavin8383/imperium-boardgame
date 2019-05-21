@@ -22,8 +22,12 @@ import repositories.FormalTaskRepositoryAdvanced;
 @Repository
 public class FormalTaskRepositoryAdvancedImpl implements FormalTaskRepositoryAdvanced {
 	
+	private EntityManager em;
+
 	@Autowired
-	EntityManager em;
+	public FormalTaskRepositoryAdvancedImpl(EntityManager em) {
+		this.em = em;
+	}
 
 	@Override
 	public Page<FormalTask> findPage(Long taskId, Long userId, Pageable pageable) {

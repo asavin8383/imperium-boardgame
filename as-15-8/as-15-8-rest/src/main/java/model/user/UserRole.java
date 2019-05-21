@@ -1,15 +1,14 @@
 package model.user;
 
-import java.io.Serializable;
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Data;
+import model.enums.Role;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import lombok.Data;
-import model.enums.Role;
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Роль пользователя в системе
@@ -31,13 +30,11 @@ public class UserRole implements Serializable {
 
 	@Enumerated(EnumType.STRING)
 	@NotNull
+    @Column(unique = true)
 	private Role role;
 	
-	@ManyToMany(cascade=CascadeType.ALL)
-	@JoinTable(schema="portal", name="user_roles_users"
-				,joinColumns=@JoinColumn(name="user_role_id", foreignKey = @ForeignKey(name = "FK_user_roles_users_user_role_id"))
-				,inverseJoinColumns=@JoinColumn(name="user_id", foreignKey = @ForeignKey(name = "FK_user_roles_users_user_id")))
+	@ManyToMany(mappedBy="roles", fetch = FetchType.EAGER)
 	@JsonIgnore
-	private List<User> users;
+	private Set<User> users = new HashSet<>();
 	
 }
