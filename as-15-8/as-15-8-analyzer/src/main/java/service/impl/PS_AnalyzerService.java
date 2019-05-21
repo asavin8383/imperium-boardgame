@@ -1,13 +1,11 @@
 package service.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import enums.ArrangementUnitCheckResult;
 import execution.ExecutionJobResult;
 import execution.ExecutionPSJobResult;
 import model.ArrangementResult;
-import repositories.ArrangementResultRepository;
 import service.AnalyzerService;
 
 /**
@@ -17,9 +15,6 @@ import service.AnalyzerService;
  */
 @Service
 public class PS_AnalyzerService implements AnalyzerService {
-
-	@Autowired
-	private ArrangementResultRepository repository;
 	
 	@Override
 	public Class<? extends ExecutionJobResult> getExecutionResultType() {
@@ -38,10 +33,5 @@ public class PS_AnalyzerService implements AnalyzerService {
 						ArrangementUnitCheckResult.COMPLETED : 
 						ArrangementUnitCheckResult.INTERNAL_ERROR);
 		return arrRes;
-	}
-
-	@Override
-	public void writeCheckResult(ArrangementResult result) {
-		repository.save(result);
 	}
 }

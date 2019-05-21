@@ -17,16 +17,9 @@ public interface AnalyzerService {
 	Class<? extends ExecutionJobResult> getExecutionResultType();
 	
 	/**
-	 * Метод проверки результата работы робота
+	 * Метод анализа результата работы робота
 	 * @param result Результат работы робота
 	 * @return
 	 */
-	ArrangementResult analyzeResult(ExecutionJobResult result);
-	
-	/**
-	 * Метод записи результата проверки в хранилище
-	 * @param result Результат проверки
-	 */
-	void writeCheckResult(ArrangementResult result);
-	
+	ArrangementResult analyzeResult(ExecutionJobResult execResult);
 }
