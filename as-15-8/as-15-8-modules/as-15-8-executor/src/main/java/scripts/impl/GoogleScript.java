@@ -1,9 +1,8 @@
 package scripts.impl;
 
-import org.testng.annotations.Test;
-
 import execution.ExecutionPSJobResult;
 import scripts.RobotScript;
+import scripts.RobotScriptExecutionException;
 
 /**
  * Скрипт проверки ПС Google
@@ -14,8 +13,8 @@ public class GoogleScript extends RobotScript{
 
 	private static final String GOOGLE_URL = "https://www.google.ru";
 	
-	@Test
-	public void execute() {
+	@Override
+	public void execute() throws RobotScriptExecutionException{
 		driver.get(GOOGLE_URL);
 		driver.manage().window().fullscreen();
 		boolean result = driver.getTitle().equals("Google");

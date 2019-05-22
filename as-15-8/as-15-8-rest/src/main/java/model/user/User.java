@@ -3,14 +3,11 @@ package model.user;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import model.task.FormalTask;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -44,16 +41,12 @@ public class User implements Serializable {
 			,joinColumns=@JoinColumn(name="user_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "FK_user_roles_users_user_id"))
 			,inverseJoinColumns=@JoinColumn(name="user_role_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "FK_user_roles_users_user_role_id")))
 	@JsonIgnore
-	private List<UserRole> roles = new ArrayList<>();
+	private Set<UserRole> roles = new HashSet<>();
 	
 	@ManyToOne
 	@JoinColumn(name="department_id", foreignKey = @ForeignKey(name = "FK_users_department_id"))
 	@JsonIgnore
 	private Department department;
-
-	@OneToMany(mappedBy = "user")
-	@JsonIgnore
-	private List<FormalTask> formalTasks;
 
 	private String email;
 

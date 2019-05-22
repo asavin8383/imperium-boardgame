@@ -80,6 +80,47 @@
     	<appender-ref ref="JDBC_TEMPLATE_LOG" />
     </logger>
     
+    <appender name="RABBIT_MQ_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOGS}/rabbit-mq.log</file>
+        <encoder>
+            <pattern>%date [%level] from %logger - %message%n%xException</pattern>
+        </encoder>
+        
+        <rollingPolicy
+            class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOGS}/archived/rabbit-mq-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy
+                class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>100MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+    </appender>
+    
+    <logger name="org.springframework.amqp" level="DEBUG">
+    	<appender-ref ref="RABBIT_MQ_LOG" />
+    </logger>
+    
+    <appender name="MESSAGES_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOGS}/messages.log</file>
+        <encoder>
+            <pattern>%date [%level] from %logger - %message%n%xException</pattern>
+        </encoder>
+        
+        <rollingPolicy
+            class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOGS}/archived/messages-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy
+                class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>100MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+    </appender>
+    
+    <logger name="mq" level="INFO">
+    	<appender-ref ref="MESSAGES_LOG" />
+    	<appender-ref ref="Console" />
+    </logger>
+    
     <appender name="REPOSITORIES_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOGS}/repositories.log</file>
         <encoder>
@@ -130,7 +171,7 @@
         
         <rollingPolicy
             class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOGS}/archived/security-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>${LOGS}/archived/securitys-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <timeBasedFileNamingAndTriggeringPolicy
                 class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                 <maxFileSize>100MB</maxFileSize>
@@ -141,27 +182,6 @@
     <logger name="org.springframework.security" level="INFO">
         <appender-ref ref="SECURITY_LOG" />
     	<appender-ref ref="Console" />
-    </logger>
-
-    <appender name="WEB_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOGS}/web.log</file>
-        <encoder>
-            <pattern>%date [%level] from %logger - %message%n%xException</pattern>
-        </encoder>
-
-        <rollingPolicy
-                class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOGS}/archived/web-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
-            <timeBasedFileNamingAndTriggeringPolicy
-                    class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-                <maxFileSize>100MB</maxFileSize>
-            </timeBasedFileNamingAndTriggeringPolicy>
-        </rollingPolicy>
-    </appender>
-
-    <logger name="org.springframework.web" level="INFO">
-        <appender-ref ref="WEB_LOG" />
-        <appender-ref ref="Console" />
     </logger>
  
 </configuration>

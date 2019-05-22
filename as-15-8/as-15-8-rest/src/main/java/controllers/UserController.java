@@ -3,7 +3,6 @@ package controllers;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
 import model.enums.Role;
@@ -23,16 +22,12 @@ import services.LdapService;
 @RequestMapping(path="/users", produces=MediaType.APPLICATION_JSON_VALUE)
 public class UserController {
 
+	@Autowired
 	private UserRepository userRepo;
 
-	private LdapService ldapService;
-
 	@Autowired
-	public UserController(UserRepository userRepo, LdapService ldapService) {
-		this.userRepo = userRepo;
-		this.ldapService = ldapService;
-	}
-
+	private LdapService ldapService;
+	
 	@GetMapping(path="/current")
 	public Optional<User> getSingleUser(Authentication authentication){
 		return userRepo.findByUserName(UserHelper.getUserName(authentication));
@@ -42,12 +37,6 @@ public class UserController {
 	@GetMapping(path="/operators/ldap")
 	public List<User> operatorList(){
 		return ldapService.usersList(Role.ROLE_OPERATOR);
-	}
-
-	@PreAuthorize("hasRole('ROLE_ADMIN')")
-	@GetMapping
-	public List<User> usersList(){
-		return userRepo.findAll();
 	}
 
 }

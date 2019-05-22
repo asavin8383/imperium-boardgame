@@ -31,7 +31,6 @@ public class AccessTool implements Serializable{
 	private Long id;
 	
 	@NotNull
-	@Column(unique = true)
 	@Enumerated(EnumType.STRING)
 	/**Наименование*/
 	private AccessToolUnit name;

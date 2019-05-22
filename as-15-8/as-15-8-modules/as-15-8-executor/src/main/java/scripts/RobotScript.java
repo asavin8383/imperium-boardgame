@@ -2,6 +2,7 @@ package scripts;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.concurrent.ExecutionException;
 
 import org.openqa.selenium.WebDriver;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
 
 import execution.ExecutionJobResult;
 import jobs.CheckUnit;
@@ -85,6 +87,12 @@ public abstract class RobotScript extends AbstractTestNGSpringContextTests{
 	}
 	
 	/**
+	 * Метод, запускаюший выполнение скрипта робота
+	 */
+	@Test
+	public abstract void execute() throws RobotScriptExecutionException;
+	
+	/**
 	 * Метод закрытия драйвера
 	 */
 	@AfterClass
@@ -97,30 +105,37 @@ public abstract class RobotScript extends AbstractTestNGSpringContextTests{
 	/**
 	 * Метод отправки результата выполнения робота в тему Kafka
 	 * @param jobResult Результат выполнения робота
+	 * @throws ExecutionException 
+	 * @throws InterruptedException 
+	 * @throws RobotScriptExecutionException 
 	 */
-	protected void sendExecutionResult(ExecutionJobResult jobResult) {
-		
-		Message<ExecutionJobResult> message = MessageBuilder
-                .withPayload(jobResult)
-                .setHeader(KafkaHeaders.TOPIC, executionResultTopicName)
-                .build();
-		
-		ListenableFuture<SendResult<String, ExecutionJobResult>> future = executionResultTemplate.send(message);
-	     
-	    future.addCallback(new ListenableFutureCallback<SendResult<String, ExecutionJobResult>>() {
-	 
-	        @Override
-	        public void onSuccess(SendResult<String, ExecutionJobResult> result) {
-	            log.info("Сообщение успешно отправлено: " +
-	            		"arrangenmentID: " + result.getProducerRecord().value().getArrangenmentID() + ", " +
-	            		"ERDI_ID: " + result.getProducerRecord().value().getErdiID() + ", " +
-	            		"CheckUnit: " + result.getProducerRecord().value().getCheckUnit().getValue());
-	        }
-	        @Override
-	        public void onFailure(Throwable ex) {
-	        	log.error("Ошибка при отправке сообщения", ex);
-	        }
-	    });
+	protected void sendExecutionResult(ExecutionJobResult jobResult) throws RobotScriptExecutionException {
+		try {
+			Message<ExecutionJobResult> message = MessageBuilder
+	                .withPayload(jobResult)
+	                .setHeader(KafkaHeaders.TOPIC, executionResultTopicName)
+	                .build();
+			
+			ListenableFuture<SendResult<String, ExecutionJobResult>> future = executionResultTemplate.send(message);
+		     
+		    future.addCallback(new ListenableFutureCallback<SendResult<String, ExecutionJobResult>>() {
+		 
+		        @Override
+		        public void onSuccess(SendResult<String, ExecutionJobResult> result) {
+		            log.info("Сообщение успешно отправлено: " +
+		            		"arrangenmentID: " + result.getProducerRecord().value().getArrangenmentID() + ", " +
+		            		"ERDI_ID: " + result.getProducerRecord().value().getErdiID() + ", " +
+		            		"CheckUnit: " + result.getProducerRecord().value().getCheckUnit().getValue());
+		        }
+		        @Override
+		        public void onFailure(Throwable ex) {
+		        	throw new RuntimeException(ex);
+		        }
+		    });
+		    future.get();
+		} catch (Exception ex) {
+			throw new RobotScriptExecutionException("Ошибка при отправке сообщения с результатами работы робота", ex);
+		}
 	}
 	
 }

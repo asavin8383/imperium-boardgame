@@ -20,7 +20,7 @@ import java.util.concurrent.CompletionStage;
 
 @RestController
 @RequestMapping(path="/formal_tasks", produces=MediaType.APPLICATION_JSON_VALUE)
-@PreAuthorize("hasAnyRole('ROLE_OPERATOR','ROLE_ADMIN')")
+@PreAuthorize("hasRole('ROLE_OPERATOR')")
 public class FormalTaskController {
 
 	private FormalTaskRepository formalTaskRepo;
@@ -34,14 +34,17 @@ public class FormalTaskController {
 
 	@PostMapping(consumes=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseStatus(HttpStatus.CREATED)
-	public FormalTask postFormalTask(@RequestBody FormalTask formalTask, Authentication auth) {
+	public CompletionStage<FormalTask> postFormalTask(@RequestBody FormalTask formalTask, Authentication auth) {
 		String userName = ((User)auth.getPrincipal()).getUserName();
-		return userRepo.findByUserName(userName)
+		return CompletableFuture.supplyAsync(() -> userRepo.findByUserName(userName))
+			.thenApply(curUser -> curUser
 				.map(user -> {
 					formalTask.setUser(user);
 					return formalTaskRepo.save(formalTask);
 				})
-				.orElseThrow(() -> new AS_15_8_Exception("User was not found by username: " + userName));
+				.orElseThrow(() -> {return new AS_15_8_Exception("User was not found by username: " + userName);
+				})
+			);
 	}
 	
 	@GetMapping
@@ -56,14 +59,15 @@ public class FormalTaskController {
 	}
 
 	@PutMapping
-	public FormalTask replaceFormalTask(@RequestBody FormalTask newFormalTask, @RequestParam Long id){
-		return formalTaskRepo.findById(id)
+	public CompletionStage<FormalTask> replaceFormalTask(@RequestBody FormalTask newFormalTask, @RequestParam Long id){
+		return CompletableFuture.supplyAsync(() -> formalTaskRepo.findById(id))
+			.thenApply(curFormalTask -> curFormalTask
 				.map(formalTask -> replaceFields(newFormalTask, formalTask))
 				.orElseGet(() -> {
 					newFormalTask.setId(id);
 					return formalTaskRepo.save(newFormalTask);
-			});
-
+				})
+			);
 	}
 
 	private FormalTask replaceFields(FormalTask newTask, FormalTask storedTask){
