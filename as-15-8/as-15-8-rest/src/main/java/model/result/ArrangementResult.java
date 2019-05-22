@@ -16,7 +16,8 @@ import java.io.Serializable;
  */
 
 @Entity
-@Table(schema = "portal", name = "arrangement_results")
+@Table(schema = "portal", name = "arrangement_results",
+    uniqueConstraints = @UniqueConstraint(name = "uq_result", columnNames = {"arrangement_id", "content_id", "check_unit_type", "check_unit_value"}))
 @Data
 public class ArrangementResult implements Serializable {
 
