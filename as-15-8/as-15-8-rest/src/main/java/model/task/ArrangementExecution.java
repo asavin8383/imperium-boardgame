@@ -24,8 +24,9 @@ public class ArrangementExecution implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy= GenerationType.TABLE)
-    @Column(name="id", nullable=false, updatable=false, columnDefinition="bigserial")
+    @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="arrangement_execution_generator")
+    @SequenceGenerator(name="arrangement_execution_generator", schema="portal", sequenceName="arrangement_execution_id_seq", allocationSize=1)
+    @Column(name="id", nullable=false, updatable=false)
     private Long id;
 
 

@@ -28,8 +28,9 @@ public class User implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@GeneratedValue(strategy=GenerationType.TABLE)
-	@Column(name="id", nullable=false, updatable=false, columnDefinition="bigserial")
+	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="users_generator")
+	@SequenceGenerator(name="users_generator", schema="portal", sequenceName="users_id_seq", allocationSize=1)
+	@Column(name="id", nullable=false, updatable=false)
 	private Long id;
 	
 	@Column(unique = true)

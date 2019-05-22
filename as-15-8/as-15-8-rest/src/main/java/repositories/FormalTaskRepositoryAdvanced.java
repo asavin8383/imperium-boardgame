@@ -7,5 +7,5 @@ import model.task.FormalTask;
 
 public interface FormalTaskRepositoryAdvanced {
 
-	Page<FormalTask> findPage(Long taskId, Long userId, Pageable pageable);
+	Page<FormalTask> findPage(Long id, Long userId, Pageable pageable);
 }

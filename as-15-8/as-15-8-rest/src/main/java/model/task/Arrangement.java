@@ -3,7 +3,6 @@ package model.task;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
-import lombok.Getter;
 import model.catalog.AccessTool;
 import model.enums.ExecutionStatus;
 
@@ -26,8 +25,9 @@ public class Arrangement implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@GeneratedValue(strategy=GenerationType.TABLE)
-	@Column(name="id", nullable=false, updatable=false, columnDefinition="bigserial")
+	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="arrangements_generator")
+	@SequenceGenerator(name="arrangements_generator", schema="portal", sequenceName="arrangements_id_seq", allocationSize=1)
+	@Column(name="id", nullable=false, updatable=false)
 	private Long id;
 
 	/**Название мероприятия*/
@@ -50,17 +50,15 @@ public class Arrangement implements Serializable {
 	@ManyToOne(optional=false)
 	@JoinColumn(name="formal_task_id", foreignKey = @ForeignKey(name = "FK_arrangements_formal_task_id"))
 	@JsonIgnore
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private FormalTask formalTask;
 
 	/**Список поисковых систем для проверки*/
 	@ManyToOne(optional = false)
 	@JoinColumn(name="access_tool_id", foreignKey = @ForeignKey(name = "FK_arrangements_access_tool_id"))
-	@JsonIgnore
-	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private AccessTool accessTool;
 	
 	@OneToMany(cascade=CascadeType.ALL, mappedBy = "arrangement", fetch = FetchType.EAGER)
+	@JsonIgnore
 	private List<ArrangementItem> arrangementItems;
 
 	/**Записи об исполнении мероприятия*/
@@ -74,20 +72,5 @@ public class Arrangement implements Serializable {
 	public Arrangement() {
 		this.creationDate = LocalDateTime.now();
 		this.status = ExecutionStatus.PLANNED;
-	}
-
-	@JsonIgnore
-	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
-	public Map<String, Object> getArrangementInfo(){
-		Map<String, Object> result = new HashMap<>();
-		result.put("id", this.id);
-		result.put("title", this.title);
-		result.put("status", this.status);
-		result.put("creationDate", this.creationDate);
-		result.put("endDate", this.endDate);
-		result.put("accessTool", this.accessTool.getName());
-		result.put("result", this.result);
-
-		return result;
 	}
 }

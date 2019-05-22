@@ -24,8 +24,9 @@ public class Department implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@GeneratedValue(strategy=GenerationType.TABLE)
-	@Column(name="id", nullable=false, updatable=false, columnDefinition="bigserial")
+	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="departments_generator")
+	@SequenceGenerator(name="departments_generator", schema="portal", sequenceName="departments_id_seq", allocationSize=1)
+	@Column(name="id", nullable=false, updatable=false)
 	private Long id;
 	
 	@OneToMany(mappedBy="parent", cascade=CascadeType.ALL)
