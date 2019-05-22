@@ -1,9 +1,14 @@
 version: '3.2'
+networks:
+    as-15-8-net:
+        external: true
 services:
     executor:
         image: harbor.ec-leasing.ru/as_15_8/as-15-8-executor:latest
         deploy:
             mode: global
+        networks:
+            - as-15-8-net
         environment:
             PROFILE: test
         volumes:
@@ -12,6 +17,8 @@ services:
         image: harbor.ec-leasing.ru/as_15_8/as-15-8-analyzer:latest
         deploy:
             mode: global
+        networks:
+            - as-15-8-net
         environment:
             PROFILE: test
         volumes:
