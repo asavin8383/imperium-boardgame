@@ -2,3 +2,5 @@
 /.classpath
 /.project
 /logs/
+/scripts/create.sql
+/scripts/drop.sql
