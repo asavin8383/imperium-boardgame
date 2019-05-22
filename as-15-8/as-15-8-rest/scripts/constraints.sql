@@ -6,3 +6,5 @@ alter table portal.formal_tasks drop constraint if exists ck_status;
 alter table portal.formal_tasks add constraint ck_status check ( status in ('PLANNED', 'EXECUTED', 'FAILED', 'EXPIRED'));
 alter table portal.arrangements drop constraint if exists ck_status;
 alter table portal.arrangements add constraint ck_status check ( status in ('PLANNED', 'EXECUTED', 'FAILED', 'EXPIRED'));
+alter table portal.arrangement_execution drop constraint if exists ck_status;
+alter table portal.arrangement_execution add constraint ck_status check ( status in ('RUNNING', 'COMPLETED', 'FAILED', 'EXPIRED'));
