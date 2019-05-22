@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import repositories.FormalTaskRepository;
 import repositories.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -71,6 +72,7 @@ public class FormalTaskController {
 	}
 
 	private FormalTask replaceFields(FormalTask newTask, FormalTask storedTask){
+		storedTask.setModificationDate(LocalDateTime.now());
 		storedTask.setAgreed(newTask.isAgreed());
 		storedTask.setAuthor(newTask.getAuthor());
 		storedTask.setDeadlineDate(newTask.getDeadlineDate());

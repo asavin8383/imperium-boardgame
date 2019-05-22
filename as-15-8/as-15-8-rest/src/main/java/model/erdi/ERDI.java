@@ -10,7 +10,7 @@ import javax.persistence.*;
 import java.util.List;
 
 @Entity
-@Subselect("select id from sa.content")
+@Table(schema = "sa", name = "content")
 @Immutable
 @Data
 public class ERDI {
