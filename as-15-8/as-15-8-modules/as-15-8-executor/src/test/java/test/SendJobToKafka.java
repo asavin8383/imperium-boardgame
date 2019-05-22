@@ -36,10 +36,10 @@ public class SendJobToKafka {
 	public void test() {
 		
 		ArrangementJob arrangementJob = new ArrangementJob();
-		arrangementJob.setId(3L);
+		arrangementJob.setId(1L);
 		arrangementJob.setAccessToolUnit(AccessToolUnit.GOOGLE);
 		
-		for(long i = 0; i < 1; i++) {
+		for(long i = 1; i < 2; i++) {
 			ERDIJob erdiJob = new ERDIJob();
 			erdiJob.setId(i);
 			for(int j = 0; j < 1; j++)
