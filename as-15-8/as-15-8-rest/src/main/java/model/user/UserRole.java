@@ -26,8 +26,9 @@ public class UserRole implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@GeneratedValue(strategy=GenerationType.TABLE)
-	@Column(name="id", nullable=false, updatable=false, columnDefinition="bigserial")
+	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="user_roles_generator")
+	@SequenceGenerator(name="user_roles_generator", schema="portal", sequenceName="user_roles_id_seq", allocationSize=1)
+	@Column(name="id", nullable=false, updatable=false)
 	private Long id;
 
 	@Enumerated(EnumType.STRING)

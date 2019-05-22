@@ -30,8 +30,9 @@ public class FormalTask implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@GeneratedValue(strategy=GenerationType.TABLE)
-	@Column(name="id", nullable=false, updatable=false, columnDefinition="bigserial")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "formal_tasks_generator")
+	@SequenceGenerator(name="formal_tasks_generator", schema = "portal", sequenceName = "formal_tasks_id_seq", allocationSize=1)
+	@Column(name="id", nullable=false, updatable=false)
 	private Long id;
 
 	/**Название*/
@@ -71,7 +72,6 @@ public class FormalTask implements Serializable {
 	/**Ссылка на неформализованное задание*/
 	@ManyToOne
 	@JoinColumn(name="informal_task_id", foreignKey = @ForeignKey(name = "FK_formal_tasks_informal_task_id"))
-	@JsonIgnore
 	private InformalTask informalTask;
 
 	/**Список мероприятий по заданию*/
@@ -84,9 +84,4 @@ public class FormalTask implements Serializable {
 		this.status = ExecutionStatus.PLANNED;
 	}
 
-	public List<Map<String, Object>> getArrangementInfo(){
-		return arrangements.stream()
-			.map(Arrangement::getArrangementInfo)
-			.collect(Collectors.toList());
-	}
 }

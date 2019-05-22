@@ -9,6 +9,250 @@
 			"name": "Формализованные задания",
 			"item": [
 				{
+					"name": "Мероприятия",
+					"item": [
+						{
+							"name": "Получение информации о мероприятии",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"value": "{{oper_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{url}}/arrangements?formalTaskId=3&id=6",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"arrangements"
+									],
+									"query": [
+										{
+											"key": "formalTaskId",
+											"value": "3"
+										},
+										{
+											"key": "id",
+											"value": "6"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Получение информации о мероприятии",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "X-AUTH-TOKEN",
+												"value": "{{oper_token}}",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": ""
+										},
+										"url": {
+											"raw": "{{url}}/arrangements?formalTaskId=3&id=6",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"arrangements"
+											],
+											"query": [
+												{
+													"key": "formalTaskId",
+													"value": "3"
+												},
+												{
+													"key": "id",
+													"value": "6"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "X-Content-Type-Options",
+											"value": "nosniff"
+										},
+										{
+											"key": "X-XSS-Protection",
+											"value": "1; mode=block"
+										},
+										{
+											"key": "Cache-Control",
+											"value": "no-cache, no-store, max-age=0, must-revalidate"
+										},
+										{
+											"key": "Pragma",
+											"value": "no-cache"
+										},
+										{
+											"key": "Expires",
+											"value": "0"
+										},
+										{
+											"key": "X-Frame-Options",
+											"value": "DENY"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json;charset=UTF-8"
+										},
+										{
+											"key": "Transfer-Encoding",
+											"value": "chunked"
+										},
+										{
+											"key": "Date",
+											"value": "Wed, 22 May 2019 08:41:51 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"content\": [\n        {\n            \"id\": 6,\n            \"title\": \"Тест\",\n            \"status\": \"PLANNED\",\n            \"creationDate\": \"2019-05-22T11:40:06.845\",\n            \"startDate\": null,\n            \"endDate\": null,\n            \"accessTool\": {\n                \"id\": 18,\n                \"name\": \"CAMELEO_XYZ\",\n                \"type\": \"ANONYMIZER\"\n            },\n            \"result\": null\n        }\n    ],\n    \"pageable\": {\n        \"sort\": {\n            \"sorted\": true,\n            \"unsorted\": false,\n            \"empty\": false\n        },\n        \"offset\": 0,\n        \"pageNumber\": 0,\n        \"pageSize\": 10,\n        \"paged\": true,\n        \"unpaged\": false\n    },\n    \"totalPages\": 1,\n    \"totalElements\": 1,\n    \"last\": true,\n    \"size\": 10,\n    \"number\": 0,\n    \"sort\": {\n        \"sorted\": true,\n        \"unsorted\": false,\n        \"empty\": false\n    },\n    \"first\": true,\n    \"numberOfElements\": 1,\n    \"empty\": false\n}"
+								}
+							]
+						},
+						{
+							"name": "Добавление мероприятия заданию",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"value": "{{oper_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"accessTool\": {\"id\": 16},\n    \"title\": \"Тест\",\n    \"startDate\": null,\n    \"endDate\": null,\n    \"result\": null\n}"
+								},
+								"url": {
+									"raw": "{{url}}/arrangements?formalTaskId=3",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"arrangements"
+									],
+									"query": [
+										{
+											"key": "formalTaskId",
+											"value": "3"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Добавление мероприятия заданию",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "X-AUTH-TOKEN",
+												"value": "{{oper_token}}",
+												"type": "text"
+											},
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"accessTool\": {\"id\": 16},\n    \"title\": \"Тест\",\n    \"startDate\": null,\n    \"endDate\": null,\n    \"result\": null\n}"
+										},
+										"url": {
+											"raw": "{{url}}/arrangements?formalTaskId=3",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"arrangements"
+											],
+											"query": [
+												{
+													"key": "formalTaskId",
+													"value": "3"
+												}
+											]
+										}
+									},
+									"status": "Created",
+									"code": 201,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "X-Content-Type-Options",
+											"value": "nosniff"
+										},
+										{
+											"key": "X-XSS-Protection",
+											"value": "1; mode=block"
+										},
+										{
+											"key": "Cache-Control",
+											"value": "no-cache, no-store, max-age=0, must-revalidate"
+										},
+										{
+											"key": "Pragma",
+											"value": "no-cache"
+										},
+										{
+											"key": "Expires",
+											"value": "0"
+										},
+										{
+											"key": "X-Frame-Options",
+											"value": "DENY"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json;charset=UTF-8"
+										},
+										{
+											"key": "Transfer-Encoding",
+											"value": "chunked"
+										},
+										{
+											"key": "Date",
+											"value": "Wed, 22 May 2019 08:40:21 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"id\": 8,\n    \"title\": \"Тест\",\n    \"status\": \"PLANNED\",\n    \"creationDate\": \"2019-05-22T11:40:21.223\",\n    \"startDate\": null,\n    \"endDate\": null,\n    \"accessTool\": {\n        \"id\": 16,\n        \"name\": null,\n        \"type\": null\n    },\n    \"result\": null\n}"
+								}
+							]
+						}
+					],
+					"_postman_isSubFolder": true
+				},
+				{
 					"name": "Добавление формализованного задания",
 					"request": {
 						"method": "POST",
@@ -27,7 +271,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"title\": \"Тестовое задание\"\n}"
+							"raw": "{\n\t\"title\": \"Задание на проверку\"\n}"
 						},
 						"url": {
 							"raw": "{{url}}/formal_tasks",
@@ -59,7 +303,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"title\": \"Тестовое задание\"\n}"
+									"raw": "{\n\t\"title\": \"Задание на проверку\"\n}"
 								},
 								"url": {
 									"raw": "{{url}}/formal_tasks",
@@ -75,10 +319,6 @@
 							"code": 201,
 							"_postman_previewlanguage": "json",
 							"header": [
-								{
-									"key": "Transfer-Encoding",
-									"value": "chunked"
-								},
 								{
 									"key": "X-Content-Type-Options",
 									"value": "nosniff"
@@ -108,12 +348,16 @@
 									"value": "application/json;charset=UTF-8"
 								},
 								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								},
+								{
 									"key": "Date",
-									"value": "Wed, 08 May 2019 11:34:31 GMT"
+									"value": "Wed, 22 May 2019 08:41:01 GMT"
 								}
 							],
 							"cookie": [],
-							"body": "{\n    \"id\": 5,\n    \"title\": \"Тестовое задание\",\n    \"status\": \"PLANNED\",\n    \"creationDate\": \"2019-05-08T11:34:31.301+0000\",\n    \"startDate\": null,\n    \"endDate\": null,\n    \"modificationDate\": null\n}"
+							"body": "{\n    \"id\": 4,\n    \"title\": \"Задание на проверку\",\n    \"user\": {\n        \"id\": 2,\n        \"userName\": \"jack\",\n        \"firstName\": \"jack\",\n        \"secondName\": \"jackson\",\n        \"email\": \"jack@jackson.ru\"\n    },\n    \"status\": \"PLANNED\",\n    \"creationDate\": \"2019-05-22T11:41:00.918\",\n    \"startDate\": null,\n    \"endDate\": null,\n    \"modificationDate\": null,\n    \"deadlineDate\": null,\n    \"author\": null,\n    \"agreed\": false,\n    \"fgisId\": null,\n    \"priority\": null,\n    \"informalTask\": null\n}"
 						}
 					]
 				},
@@ -179,7 +423,7 @@
 									"raw": ""
 								},
 								"url": {
-									"raw": "{{url}}/formal_tasks?taskId=3&userId=1",
+									"raw": "{{url}}/formal_tasks?taskId=55",
 									"host": [
 										"{{url}}"
 									],
@@ -199,11 +443,12 @@
 										},
 										{
 											"key": "taskId",
-											"value": "3"
+											"value": "55"
 										},
 										{
 											"key": "userId",
-											"value": "1"
+											"value": "1",
+											"disabled": true
 										}
 									]
 								}
@@ -213,8 +458,8 @@
 							"_postman_previewlanguage": "json",
 							"header": [
 								{
-									"key": "Transfer-Encoding",
-									"value": "chunked"
+									"key": "Set-Cookie",
+									"value": "JSESSIONID=D5BB63193BE10CC18577262347503C1F; Path=/; HttpOnly"
 								},
 								{
 									"key": "X-Content-Type-Options",
@@ -245,12 +490,137 @@
 									"value": "application/json;charset=UTF-8"
 								},
 								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								},
+								{
 									"key": "Date",
-									"value": "Wed, 08 May 2019 11:34:35 GMT"
+									"value": "Tue, 21 May 2019 14:16:56 GMT"
 								}
 							],
 							"cookie": [],
-							"body": "{\n    \"content\": [\n        {\n            \"id\": 3,\n            \"title\": \"Тестовое задание\",\n            \"status\": \"PLANNED\",\n            \"creationDate\": \"2019-05-08T11:34:29.464+0000\",\n            \"startDate\": null,\n            \"endDate\": null,\n            \"modificationDate\": null\n        }\n    ],\n    \"pageable\": {\n        \"sort\": {\n            \"unsorted\": false,\n            \"sorted\": true,\n            \"empty\": false\n        },\n        \"pageSize\": 10,\n        \"pageNumber\": 0,\n        \"offset\": 0,\n        \"unpaged\": false,\n        \"paged\": true\n    },\n    \"last\": true,\n    \"totalPages\": 1,\n    \"totalElements\": 1,\n    \"sort\": {\n        \"unsorted\": false,\n        \"sorted\": true,\n        \"empty\": false\n    },\n    \"numberOfElements\": 1,\n    \"first\": true,\n    \"size\": 10,\n    \"number\": 0,\n    \"empty\": false\n}"
+							"body": "{\n    \"content\": [\n        {\n            \"id\": 55,\n            \"title\": \"Тестовое задание\",\n            \"user\": {\n                \"id\": 48,\n                \"userName\": \"oper\",\n                \"firstName\": \"AS_15_8_oper\",\n                \"secondName\": null,\n                \"email\": null\n            },\n            \"status\": \"PLANNED\",\n            \"creationDate\": \"2019-05-20T17:06:49.097\",\n            \"startDate\": null,\n            \"endDate\": null,\n            \"modificationDate\": null,\n            \"deadlineDate\": null,\n            \"author\": null,\n            \"agreed\": false,\n            \"fgisId\": null,\n            \"priority\": null,\n            \"arrangementInfo\": [\n                {\n                    \"result\": null,\n                    \"accessTool\": \"GOOGLE\",\n                    \"endDate\": null,\n                    \"id\": 3,\n                    \"title\": \"Тест\",\n                    \"creationDate\": \"2019-05-21T09:06:42.745\",\n                    \"status\": \"PLANNED\"\n                }\n            ]\n        }\n    ],\n    \"pageable\": {\n        \"sort\": {\n            \"unsorted\": false,\n            \"sorted\": true,\n            \"empty\": false\n        },\n        \"offset\": 0,\n        \"pageNumber\": 0,\n        \"pageSize\": 10,\n        \"paged\": true,\n        \"unpaged\": false\n    },\n    \"totalElements\": 1,\n    \"totalPages\": 1,\n    \"last\": true,\n    \"size\": 10,\n    \"number\": 0,\n    \"sort\": {\n        \"unsorted\": false,\n        \"sorted\": true,\n        \"empty\": false\n    },\n    \"numberOfElements\": 1,\n    \"first\": true,\n    \"empty\": false\n}"
+						}
+					]
+				},
+				{
+					"name": "Изменение формализованного задания",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"value": "{{oper_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Тестовое задание\",\n    \"user\": {\"userName\": \"jack\"},\n    \"status\": \"PLANNED\",\n    \"creationDate\": \"2019-05-20T16:25:43.301\",\n    \"startDate\": null,\n    \"endDate\": null,\n    \"modificationDate\": null,\n    \"deadlineDate\": null,\n    \"author\": null,\n    \"agreed\": false,\n    \"fgisId\": null,\n    \"priority\": null\n}"
+						},
+						"url": {
+							"raw": "{{url}}/formal_tasks?id=4",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"formal_tasks"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "4"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Изменение формализованного задания",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"value": "{{oper_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"title\": \"Тестовое задание\",\n    \"user\": {\"userName\": \"jack\"},\n    \"status\": \"PLANNED\",\n    \"creationDate\": \"2019-05-20T16:25:43.301\",\n    \"startDate\": null,\n    \"endDate\": null,\n    \"modificationDate\": null,\n    \"deadlineDate\": null,\n    \"author\": null,\n    \"agreed\": false,\n    \"fgisId\": null,\n    \"priority\": null\n}"
+								},
+								"url": {
+									"raw": "{{url}}/formal_tasks?id=4",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"formal_tasks"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "4"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Content-Type-Options",
+									"value": "nosniff"
+								},
+								{
+									"key": "X-XSS-Protection",
+									"value": "1; mode=block"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, no-store, max-age=0, must-revalidate"
+								},
+								{
+									"key": "Pragma",
+									"value": "no-cache"
+								},
+								{
+									"key": "Expires",
+									"value": "0"
+								},
+								{
+									"key": "X-Frame-Options",
+									"value": "DENY"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json;charset=UTF-8"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 22 May 2019 08:42:28 GMT"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": 4,\n    \"title\": \"Задание на проверку\",\n    \"user\": {\n        \"id\": null,\n        \"userName\": \"jack\",\n        \"firstName\": null,\n        \"secondName\": null,\n        \"email\": null\n    },\n    \"status\": \"PLANNED\",\n    \"creationDate\": \"2019-05-22T11:41:00.918\",\n    \"startDate\": null,\n    \"endDate\": null,\n    \"modificationDate\": null,\n    \"deadlineDate\": null,\n    \"author\": null,\n    \"agreed\": false,\n    \"fgisId\": null,\n    \"priority\": null,\n    \"informalTask\": null\n}"
 						}
 					]
 				}
@@ -357,6 +727,35 @@
 							"body": "{\n    \"id\": 1,\n    \"userName\": \"jack\",\n    \"firstName\": null,\n    \"secondName\": null\n}"
 						}
 					]
+				},
+				{
+					"name": "Получение списка пользователей с LDAP",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"value": "{{admin_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/users/operators/ldap",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users",
+								"operators",
+								"ldap"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -491,15 +890,15 @@
 						},
 						{
 							"key": "Content-Length",
-							"value": "250"
+							"value": "273"
 						},
 						{
 							"key": "Date",
-							"value": "Wed, 08 May 2019 11:33:43 GMT"
+							"value": "Wed, 22 May 2019 08:39:12 GMT"
 						}
 					],
 					"cookie": [],
-					"body": "{\n    \"access_token\": \"eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJqYWNrIiwiZXhwIjoxNTU3NDAxNjIzLCJyb2xlcyI6IlJPTEVfT1BFUkFUT1IiLCJnaXZlbl9uYW1lIjpudWxsLCJmYW1pbHlfbmFtZSI6bnVsbH0.cxDGcASUfHg_5GbAyCd_pKhS7KroNQ-_ozoHiZL-gO7gPkNcMcw266JFtymw6EE3XAQOsGx4TUZ2XMpWzpt_IA\"\n}"
+					"body": "{\n    \"access_token\": \"eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJqYWNrIiwiZXhwIjoxNTU4NjAwNzUyLCJyb2xlcyI6IlJPTEVfT1BFUkFUT1IiLCJnaXZlbl9uYW1lIjpudWxsLCJmYW1pbHlfbmFtZSI6bnVsbH0.BOwI2ywHks_f-VOIFj1WpQWCf6b9id4iX4vZpiz2LXn5Db5KW-LrTmHHkn_GJryJ7CsPP5o4KE9wO0lRWr5TkA\",\n    \"role\": \"ROLE_OPERATOR\"\n}"
 				}
 			]
 		}
@@ -528,21 +927,27 @@
 	],
 	"variable": [
 		{
-			"id": "96da79bd-5bf6-4578-b0ec-b6152b1e8e2f",
+			"id": "c251289d-be7d-4be0-b7da-2d9086c532d6",
 			"key": "url",
 			"value": "http://localhost:15800",
 			"type": "string"
 		},
 		{
-			"id": "908347b6-cce9-4cad-83e7-439c4cc88f57",
+			"id": "953165bb-452b-4ef6-8846-6af6be6d0246",
 			"key": "oper_token",
 			"value": "",
 			"type": "string"
 		},
 		{
-			"id": "c05d5015-65c7-4ad9-8550-9eeb8bf8518f",
+			"id": "c9c4f3ed-b5ec-4b5b-a646-055e8e6744d6",
 			"key": "test_url",
 			"value": "http://192.168.5.253:15800",
+			"type": "string"
+		},
+		{
+			"id": "211bb406-f342-4cbe-9893-bbfa3ad4aed1",
+			"key": "admin_token",
+			"value": "",
 			"type": "string"
 		}
 	]
