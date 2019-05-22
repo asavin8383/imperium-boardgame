@@ -17,10 +17,9 @@ import java.util.Map;
 
 /**Мероприятие в рамках формализованного задания*/
 
-//TODO Проверять уникальность ПС/ПАСД в рамках одного задания - исправить в БД
-
 @Entity
-@Table(schema="portal", name="arrangements")
+@Table(schema="portal", name="arrangements",
+	uniqueConstraints = @UniqueConstraint(name = "uq_arrangements_formal_task_id_access_tool_id", columnNames = {"formal_task_id", "access_tool_id"}))
 @Data
 public class Arrangement implements Serializable {
 
