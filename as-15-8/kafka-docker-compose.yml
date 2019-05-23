@@ -48,7 +48,7 @@ services:
             - kafka-net
 
     kafka-manager:
-        image: sheepkiller/kafka-manager:latest
+        image: harbor.ec-leasing.ru/as_15_8/kafka-manager
         depends_on:
             - zookeeper
             - kafka
