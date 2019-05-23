@@ -63,7 +63,7 @@ public class FormalTaskController {
 	public CompletionStage<FormalTask> replaceFormalTask(@RequestBody FormalTask newFormalTask, @RequestParam Long id){
 		return CompletableFuture.supplyAsync(() -> formalTaskRepo.findById(id))
 			.thenApply(curFormalTask -> curFormalTask
-				.map(formalTask -> replaceFields(newFormalTask, formalTask))
+				.map(formalTask -> formalTaskRepo.save(replaceFields(newFormalTask, formalTask)))
 				.orElseGet(() -> {
 					newFormalTask.setId(id);
 					return formalTaskRepo.save(newFormalTask);
