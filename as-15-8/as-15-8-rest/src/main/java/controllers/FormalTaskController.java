@@ -72,6 +72,7 @@ public class FormalTaskController {
 	}
 
 	private FormalTask replaceFields(FormalTask newTask, FormalTask storedTask){
+		storedTask.setTitle(newTask.getTitle());
 		storedTask.setModificationDate(LocalDateTime.now());
 		storedTask.setAgreed(newTask.isAgreed());
 		storedTask.setAuthor(newTask.getAuthor());
