@@ -2,7 +2,6 @@ package controllers;
 
 import exceptions.AS_15_8_Exception;
 import model.task.Arrangement;
-import model.task.FormalTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -14,8 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import repositories.ArrangementRepository;
 import repositories.ArrangementRepositoryAdvanced;
 import repositories.FormalTaskRepository;
-
-import java.util.Optional;
 
 /**
  * Creation date: 21.05.2019

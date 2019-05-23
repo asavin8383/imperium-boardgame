@@ -2,15 +2,7 @@ package model;
 
 import java.io.Serializable;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Lob;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import org.hibernate.annotations.Type;
 
@@ -30,8 +22,9 @@ public class ArrangementResult implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy=GenerationType.TABLE)
-    @Column(name="id", nullable=false, updatable=false, columnDefinition="bigserial")
+    @GeneratedValue(strategy= GenerationType.SEQUENCE, generator="arrangement__results_generator")
+    @SequenceGenerator(name="arrangement__results_generator", schema="portal", sequenceName="arrangement__results_id_seq", allocationSize=1)
+    @Column(name="id", nullable=false, updatable=false)
     private Long id;
 
     @Column(name="arrangement_id", nullable=false)

@@ -21,7 +21,7 @@ import java.util.concurrent.CompletionStage;
 
 @RestController
 @RequestMapping(path="/formal_tasks", produces=MediaType.APPLICATION_JSON_VALUE)
-@PreAuthorize("hasRole('ROLE_OPERATOR')")
+@PreAuthorize("hasAnyRole('ROLE_OPERATOR','ROLE_ADMIN')")
 public class FormalTaskController {
 
 	private FormalTaskRepository formalTaskRepo;

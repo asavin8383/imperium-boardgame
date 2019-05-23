@@ -1,30 +1,29 @@
 package model.erdi;
 
-import checkUnits.CheckUnitType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jobs.CheckUnitType;
 import lombok.Getter;
 import org.hibernate.annotations.Immutable;
-import org.hibernate.annotations.Subselect;
 
 import javax.persistence.*;
 
 /**
- * Creation date: 22.05.2019
+ * Creation date: 23.05.2019
  * Author: asavin
  */
 
 @Entity
-@Subselect("select domain.id, domain from sa.domain join sa.content on domain.content_id=content.id and upper(content.blocktype) = 'DOMAIN-MASK'")
+@Table(schema = "sa", name = "ip")
 @Immutable
 @Getter
-public class DomainMask {
+public class IP {
 
     @Id
     private Long id;
 
-    private CheckUnitType checkUnitType = CheckUnitType.DOMAIN_MASK;
+    private CheckUnitType checkUnitType = CheckUnitType.URL;
 
-    @Column(name = "domain")
+    @Column(name = "ip")
     private String checkUnitValue;
 
     @ManyToOne(optional = false)
