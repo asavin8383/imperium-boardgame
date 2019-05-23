@@ -1,14 +1,12 @@
 package model.erdi;
 
-import lombok.Data;
+import checkUnits.CheckUnitType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Getter;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Subselect;
 
-import checkUnits.CheckUnitType;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 /**
  * Creation date: 22.05.2019
@@ -18,7 +16,7 @@ import javax.persistence.Id;
 @Entity
 @Subselect("select domain.id, domain from sa.domain join sa.content on domain.content_id=content.id and upper(content.blocktype) = 'DOMAIN'")
 @Immutable
-@Data
+@Getter
 public class Domain {
 
     @Id
@@ -28,5 +26,10 @@ public class Domain {
 
     @Column(name = "domain")
     private String checkUnitValue;
+
+    @ManyToOne(optional = false)
+    @JsonIgnore
+    @JoinColumn(name = "content_id", referencedColumnName = "id")
+    private ERDI erdi;
 
 }
