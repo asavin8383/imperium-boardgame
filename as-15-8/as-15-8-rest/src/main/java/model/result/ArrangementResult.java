@@ -1,8 +1,9 @@
 package model.result;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import checkUnits.CheckUnitType;
 import enums.ArrangementUnitCheckResult;
-import jobs.CheckUnitType;
 import lombok.Data;
 import model.erdi.ERDI;
 import model.task.Arrangement;

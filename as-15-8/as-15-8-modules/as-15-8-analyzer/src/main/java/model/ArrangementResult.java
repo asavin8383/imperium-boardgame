@@ -14,8 +14,8 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.Type;
 
+import checkUnits.CheckUnitType;
 import enums.ArrangementUnitCheckResult;
-import jobs.CheckUnitType;
 import lombok.Data;
 
 /**

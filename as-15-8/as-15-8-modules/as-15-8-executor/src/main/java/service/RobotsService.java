@@ -1,6 +1,6 @@
 package service;
 
-import jobs.ArrangementJob;
+import checkUnits.CheckUnitJob;
 
 /**
  * Интерфейс сервиса управления роботами
@@ -10,10 +10,10 @@ import jobs.ArrangementJob;
 public interface RobotsService {
 
 	/**
-	 * Метод запуска роботов по заданию на проверку мероприятия
-	 * @param arrangementJob Идентификатор мероприятия
+	 * Метод запуска роботов по заданию на проверку ресурса
+	 * @param checkUnitJob Задание на ресурса 
 	 * @return
 	 */
-	boolean run(ArrangementJob arrangementJob);
+	boolean run(CheckUnitJob checkUnitJob);
 	
 }

@@ -22,7 +22,7 @@ import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
 import checkUnits.CheckUnitJob;
-import execution.ExecutionJobResult;
+import jobs.ArrangementJob;
 
 @EnableKafka
 @Configuration
@@ -38,10 +38,10 @@ public class KafkaConfiguration {
     private String offset;
     
     @Value("${spring.kafka.produce-topic}")
-    private String executionResultTopicName;
+    private String checkUnitJobTopicName;
 	
     @Bean
-    public ConsumerFactory<String, CheckUnitJob> jobsConsumerFactory() {
+    public ConsumerFactory<String, ArrangementJob> jobsConsumerFactory() {
         Map<String, Object> config = new HashMap<>();
 
         config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
@@ -54,12 +54,12 @@ public class KafkaConfiguration {
         return new DefaultKafkaConsumerFactory<>(
         	config,
         	new StringDeserializer(),
-            new JsonDeserializer<>(CheckUnitJob.class)
+            new JsonDeserializer<>(ArrangementJob.class)
         );
     }
     
     @Bean
-    public ProducerFactory<String, ExecutionJobResult> executionResultProducerFactory() {
+    public ProducerFactory<String, CheckUnitJob> checkUnitJobProducerFactory() {
     	Map<String, Object> configProps = new HashMap<>();
     	configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
     	configProps.put(ProducerConfig.ACKS_CONFIG, "all");
@@ -69,20 +69,20 @@ public class KafkaConfiguration {
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, CheckUnitJob> kafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, CheckUnitJob> factory = new ConcurrentKafkaListenerContainerFactory<>();
+    public ConcurrentKafkaListenerContainerFactory<String, ArrangementJob> kafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, ArrangementJob> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(jobsConsumerFactory());
         factory.getContainerProperties().setAckMode(AckMode.MANUAL_IMMEDIATE);
         return factory;
     }
  
     @Bean
-    public KafkaTemplate<String, ExecutionJobResult> executionResultTemplate() {
-        return new KafkaTemplate<>(executionResultProducerFactory());
+    public KafkaTemplate<String, CheckUnitJob> executionResultTemplate() {
+        return new KafkaTemplate<>(checkUnitJobProducerFactory());
     }
     
     @Bean
-    public String executionResultTopicName() {
-    	return this.executionResultTopicName;
+    public String checkUnitJobTopicName() {
+    	return this.checkUnitJobTopicName;
     }
 }

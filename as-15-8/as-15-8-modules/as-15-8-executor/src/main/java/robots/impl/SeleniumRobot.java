@@ -8,8 +8,8 @@ import org.openqa.selenium.Platform;
 import org.testng.xml.XmlClass;
 import org.testng.xml.XmlTest;
 
+import checkUnits.CheckUnit;
 import enums.AccessToolUnit;
-import jobs.CheckUnit;
 import lombok.Getter;
 import robots.Robot;
 

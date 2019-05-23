@@ -10,9 +10,7 @@ import org.testng.xml.XmlSuite;
 import org.testng.xml.XmlSuite.ParallelMode;
 import org.testng.xml.XmlTest;
 
-import jobs.ArrangementJob;
-import jobs.CheckUnit;
-import jobs.ERDIJob;
+import checkUnits.CheckUnitJob;
 import listener.RobotListener;
 import robots.Robot;
 import robots.RobotsFactory;
@@ -26,30 +24,29 @@ import service.RobotsService;
 @Service
 public class SeleniumRobotsService implements RobotsService {
 	
-	public boolean run(ArrangementJob arrangementJob) {
-		Robot robot = RobotsFactory.getRobot(arrangementJob.getAccessToolUnit());
+	public boolean run(CheckUnitJob checkUnitJob) {
+		Robot robot = RobotsFactory.getRobot(checkUnitJob.getAccessToolUnit());
 		
 		TestNG testNG = new TestNG();
 		testNG.setUseDefaultListeners(false);
 		
 		List<XmlSuite> suites = new ArrayList<XmlSuite>(); 
-		for(ERDIJob erdiJob : arrangementJob.getErdiJobList()) {
-			XmlSuite suite = new XmlSuite(); 
-			suite.setName("Arrangement: "+arrangementJob.getId()+", ERDI: "+erdiJob.getId());
-			List<XmlTest> tests = new ArrayList<XmlTest>();
-			for(CheckUnit checkUnit : erdiJob.getCheckUnits()) {
-				XmlTest test = robot.createTest(
-						"Check: "+checkUnit.getValue(),
-						arrangementJob.getId(),
-						erdiJob.getId(),
-						checkUnit
-				);
-				test.setSuite(suite);
-				tests.add(test);
-			}
-			suite.setTests(tests);
-			suites.add(suite);
-		}
+		XmlSuite suite = new XmlSuite(); 
+		suite.setName("Arrangement: "+checkUnitJob.getArrangementID()+", ERDI: "+checkUnitJob.getErdiID());
+		
+		List<XmlTest> tests = new ArrayList<XmlTest>();
+		XmlTest test = robot.createTest(
+				"Check: "+checkUnitJob.getCheckUnit().getValue(),
+				checkUnitJob.getArrangementID(),
+				checkUnitJob.getErdiID(),
+				checkUnitJob.getCheckUnit()
+		);
+		
+		test.setSuite(suite);
+		tests.add(test);
+		
+		suite.setTests(tests);
+		suites.add(suite);
 	    
 	    testNG.setXmlSuites(suites);
 	    testNG.setParallel(ParallelMode.INSTANCES);

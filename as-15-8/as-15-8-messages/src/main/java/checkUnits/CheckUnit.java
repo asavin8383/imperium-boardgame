@@ -1,4 +1,4 @@
-package jobs;
+package checkUnits;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

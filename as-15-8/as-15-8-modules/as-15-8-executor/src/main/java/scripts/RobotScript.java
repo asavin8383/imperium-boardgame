@@ -21,9 +21,9 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
+import checkUnits.CheckUnit;
+import checkUnits.CheckUnitType;
 import execution.ExecutionJobResult;
-import jobs.CheckUnit;
-import jobs.CheckUnitType;
 import kafka.KafkaConfiguration;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;

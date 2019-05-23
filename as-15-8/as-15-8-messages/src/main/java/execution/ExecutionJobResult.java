@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
-import jobs.CheckUnit;
+import checkUnits.CheckUnit;
 import lombok.Data;
 
 @Data

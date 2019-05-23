@@ -15,11 +15,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
+import checkUnits.CheckUnit;
+import checkUnits.CheckUnitJob;
+import checkUnits.CheckUnitType;
 import enums.AccessToolUnit;
-import jobs.ArrangementJob;
-import jobs.CheckUnit;
-import jobs.CheckUnitType;
-import jobs.ERDIJob;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes={TestKafkaSenderConfig.class})
@@ -27,7 +26,7 @@ import jobs.ERDIJob;
 public class SendJobToKafka {
 
 	@Autowired
-    private KafkaTemplate<String, ArrangementJob> kafkaTemplate;
+    private KafkaTemplate<String, CheckUnitJob> kafkaTemplate;
 	
 	@Value("${spring.kafka.consume-topic}")
     private String topic;
@@ -35,30 +34,25 @@ public class SendJobToKafka {
 	@Test
 	public void test() {
 		
-		ArrangementJob arrangementJob = new ArrangementJob();
-		arrangementJob.setId(1L);
-		arrangementJob.setAccessToolUnit(AccessToolUnit.GOOGLE);
+		CheckUnitJob checkUnitJob = new CheckUnitJob();
+		checkUnitJob.setArrangementID(1L);
+		checkUnitJob.setAccessToolUnit(AccessToolUnit.GOOGLE);
 		
-		for(long i = 1; i < 2; i++) {
-			ERDIJob erdiJob = new ERDIJob();
-			erdiJob.setId(i);
-			for(int j = 0; j < 1; j++)
-				erdiJob.addCheckUnit(new CheckUnit(CheckUnitType.URL, "https://www.google.ru"));
-			arrangementJob.addERDIJob(erdiJob);
-		}
+		checkUnitJob.setErdiID(1L);
+		checkUnitJob.setCheckUnit(new CheckUnit(CheckUnitType.URL, "https://www.google.ru"));
 		
-		Message<ArrangementJob> message = MessageBuilder
-                .withPayload(arrangementJob)
+		Message<CheckUnitJob> message = MessageBuilder
+                .withPayload(checkUnitJob)
                 .setHeader(KafkaHeaders.TOPIC, topic)
                 .build();
 		
-		ListenableFuture<SendResult<String, ArrangementJob>> future = kafkaTemplate.send(message);
+		ListenableFuture<SendResult<String, CheckUnitJob>> future = kafkaTemplate.send(message);
 	     
-	    future.addCallback(new ListenableFutureCallback<SendResult<String, ArrangementJob>>() {
+	    future.addCallback(new ListenableFutureCallback<SendResult<String, CheckUnitJob>>() {
 	 
 	        @Override
-	        public void onSuccess(SendResult<String, ArrangementJob> result) {
-	            System.out.println("Сообщение успешно отправлено: arrangenmentID "+ result.getProducerRecord().value().getId());
+	        public void onSuccess(SendResult<String, CheckUnitJob> result) {
+	            System.out.println("Сообщение успешно отправлено: arrangenmentID "+ result.getProducerRecord().value().toString());
 	        }
 	        @Override
 	        public void onFailure(Throwable ex) {

@@ -7,7 +7,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
 
-import jobs.ArrangementJob;
+import checkUnits.CheckUnitJob;
 import lombok.extern.slf4j.Slf4j;
 import service.RobotsService;
 
@@ -19,13 +19,13 @@ public class KafkaConsumer {
 	private RobotsService robotsService;
 	
 	@KafkaListener(topics = "${spring.kafka.consume-topic}")
-    public void consumeJson(ArrangementJob arrangementJob, Acknowledgment ack) {
-		log.info("Принято задание на проведение мероприятия: " + arrangementJob.getId());
+    public void consumeJson(CheckUnitJob checkUnitJob, Acknowledgment ack) {
+		log.info("Принято задание на проведение мероприятия: " + checkUnitJob.toString());
         CompletableFuture.runAsync(() -> {
         	try {
-        		robotsService.run(arrangementJob);
+        		robotsService.run(checkUnitJob);
         	} catch (Exception ex) {
-        		log.error("Ошибка при обработке задания на проведение мероприятия: " + arrangementJob.getId(), ex);
+        		log.error("Ошибка при обработке задания на проведение мероприятия: " + checkUnitJob.toString(), ex);
         	}
         	ack.acknowledge();
         });

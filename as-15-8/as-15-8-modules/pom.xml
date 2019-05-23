@@ -15,6 +15,7 @@
 	</properties>
 
 	<modules>
+		<module>as-15-8-dispatcher</module>
 		<module>as-15-8-executor</module>
 		<module>as-15-8-analyzer</module>
 	</modules>

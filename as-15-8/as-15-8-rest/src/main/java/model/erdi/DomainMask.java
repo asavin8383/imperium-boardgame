@@ -1,9 +1,10 @@
 package model.erdi;
 
-import jobs.CheckUnitType;
 import lombok.Data;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Subselect;
+
+import checkUnits.CheckUnitType;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

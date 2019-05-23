@@ -2,8 +2,8 @@ package robots;
 
 import org.testng.xml.XmlTest;
 
+import checkUnits.CheckUnit;
 import enums.AccessToolUnit;
-import jobs.CheckUnit;
 
 /**
  * Интерфейс робота проверки ПС/ПАСД

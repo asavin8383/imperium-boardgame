@@ -8,12 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import checkUnits.CheckUnit;
+import checkUnits.CheckUnitJob;
+import checkUnits.CheckUnitType;
 import common.ApplicationConfiguration;
 import enums.AccessToolUnit;
-import jobs.ArrangementJob;
-import jobs.CheckUnit;
-import jobs.CheckUnitType;
-import jobs.ERDIJob;
 import service.impl.SeleniumRobotsService;
 
 @RunWith(SpringRunner.class)
@@ -26,19 +25,14 @@ public class TestJobExecution {
 	@Test
 	public void test() {
 		
-		ArrangementJob arrangementJob = new ArrangementJob();
-		arrangementJob.setId(1L);
-		arrangementJob.setAccessToolUnit(AccessToolUnit.GOOGLE);
+		CheckUnitJob checkUnitJob = new CheckUnitJob();
+		checkUnitJob.setArrangementID(1L);
+		checkUnitJob.setAccessToolUnit(AccessToolUnit.GOOGLE);
 		
-		for(long i = 0; i < 10; i++) {
-			ERDIJob erdiJob = new ERDIJob();
-			erdiJob.setId(i);
-			for(int j = 0; j < 10; j++)
-				erdiJob.addCheckUnit(new CheckUnit(CheckUnitType.URL, "https://www.google.ru"));
-			arrangementJob.addERDIJob(erdiJob);
-		}
+		checkUnitJob.setErdiID(1L);
+		checkUnitJob.setCheckUnit(new CheckUnit(CheckUnitType.URL, "https://www.google.ru"));
 		
-		assertTrue(service.run(arrangementJob));
+		assertTrue(service.run(checkUnitJob));
 	}
 	
 }

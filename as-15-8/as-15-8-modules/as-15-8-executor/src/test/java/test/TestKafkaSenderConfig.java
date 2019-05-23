@@ -13,7 +13,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
-import jobs.ArrangementJob;
+import checkUnits.CheckUnitJob;
 
 @Configuration
 public class TestKafkaSenderConfig {
@@ -22,7 +22,7 @@ public class TestKafkaSenderConfig {
 	private String bootstrapServers;
 	
     @Bean
-    public ProducerFactory<String, ArrangementJob> producerFactory() {
+    public ProducerFactory<String, CheckUnitJob> producerFactory() {
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(
           ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, 
@@ -37,7 +37,7 @@ public class TestKafkaSenderConfig {
     }
  
     @Bean
-    public KafkaTemplate<String, ArrangementJob> kafkaTemplate() {
+    public KafkaTemplate<String, CheckUnitJob> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
     }
 }
