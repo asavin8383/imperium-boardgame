@@ -4,9 +4,9 @@ LABEL Alexander Savin <asavin@ec-leasing.ru>
 
 EXPOSE 15800
 
-ENV APP_PATH "/lib/as-15-8-rest.jar" \
-    LOG_PATH "/log" \
-    PROFILE "test"
+ENV APP_PATH="/lib/as-15-8-rest.jar" \
+    LOG_PATH="/log" \
+    PROFILE="test"
 
 VOLUME $LOG_PATH
 
