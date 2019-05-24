@@ -1,5 +1,5 @@
 package model.enums;
 
 public enum ExecutionStatus {
-	PLANNED, EXECUTED, FAILED, EXPIRED;
+	NEW, PLANNED, RUNNING, PAUSED, EXECUTED, FAILED, EXPIRED
 }

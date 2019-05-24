@@ -1,6 +1,8 @@
 package controllers;
 
+import controllers.helpers.ArrangementExecutionHelper;
 import exceptions.AS_15_8_Exception;
+import model.enums.ExecutionStatus;
 import model.task.Arrangement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -8,11 +10,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import repositories.ArrangementRepository;
 import repositories.ArrangementRepositoryAdvanced;
 import repositories.FormalTaskRepository;
+
+import java.time.LocalDateTime;
 
 /**
  * Creation date: 21.05.2019
@@ -27,12 +32,18 @@ public class ArrangementController {
     private ArrangementRepository arrangementRepo;
     private FormalTaskRepository formalTaskRepo;
     private ArrangementRepositoryAdvanced arrangementRepoAdvanced;
+    private ArrangementExecutionHelper arrangementExecutionHelper;
 
     @Autowired
-    public ArrangementController(ArrangementRepository arrangementRepo, FormalTaskRepository formalTaskRepo, ArrangementRepositoryAdvanced arrangementRepoAdvanced) {
+    public ArrangementController(ArrangementRepository arrangementRepo,
+                                 FormalTaskRepository formalTaskRepo,
+                                 ArrangementRepositoryAdvanced arrangementRepoAdvanced,
+                                 ArrangementExecutionHelper arrangementExecutionHelper
+                                 ) {
         this.arrangementRepo = arrangementRepo;
         this.formalTaskRepo = formalTaskRepo;
         this.arrangementRepoAdvanced = arrangementRepoAdvanced;
+        this.arrangementExecutionHelper = arrangementExecutionHelper;
     }
 
     @GetMapping
@@ -57,5 +68,24 @@ public class ArrangementController {
             .orElseThrow(() -> new AS_15_8_Exception("Error creating arrangement! Formal task was not found by id: " + formalTaskId));
 
     }
+
+    @GetMapping(path = "/run")
+    public ResponseEntity<Arrangement> runArrangement(@RequestParam Long id){
+        return arrangementRepo.findById(id)
+            .map(arrangement -> {
+                if(arrangement.getStatus().equals(ExecutionStatus.PLANNED)) {
+                    arrangementExecutionHelper.sendJobToDispatcher(arrangement);
+                    arrangement.setStartDate(LocalDateTime.now());
+                    arrangement.setStatus(ExecutionStatus.RUNNING);
+                    arrangementRepo.save(arrangement);
+                    return new ResponseEntity<>(arrangement, HttpStatus.OK);
+                }
+                return new ResponseEntity<>(arrangement, HttpStatus.NOT_ACCEPTABLE);
+            })
+            .orElseThrow(() -> new AS_15_8_Exception("Error running arrangement! Arrangement was not found by id: " + id));
+    }
+
+
+
 
 }

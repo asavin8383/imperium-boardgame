@@ -1,7 +1,6 @@
 package model.task;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import model.catalog.AccessTool;
 import model.enums.ExecutionStatus;
@@ -10,9 +9,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**Мероприятие в рамках формализованного задания*/
 

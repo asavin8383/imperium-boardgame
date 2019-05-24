@@ -3,8 +3,8 @@ alter table portal.access_tools add constraint ck_name check ( name in ('GOOGLE'
 alter table portal.access_tools drop constraint if exists ck_type;
 alter table portal.access_tools add constraint ck_type check ( type in ('SEARCH_SYSTEM','VPN','ANONYMIZER'));
 alter table portal.formal_tasks drop constraint if exists ck_status;
-alter table portal.formal_tasks add constraint ck_status check ( status in ('PLANNED', 'EXECUTED', 'FAILED', 'EXPIRED'));
+alter table portal.formal_tasks add constraint ck_status check ( status in ('NEW', 'PLANNED', 'RUNNING', 'PAUSED', 'EXECUTED', 'FAILED', 'EXPIRED'));
 alter table portal.arrangements drop constraint if exists ck_status;
-alter table portal.arrangements add constraint ck_status check ( status in ('PLANNED', 'EXECUTED', 'FAILED', 'EXPIRED'));
+alter table portal.arrangements add constraint ck_status check ( status in ('NEW', 'PLANNED', 'RUNNING', 'PAUSED', 'EXECUTED', 'FAILED', 'EXPIRED'));
 alter table portal.arrangement_execution drop constraint if exists ck_status;
 alter table portal.arrangement_execution add constraint ck_status check ( status in ('RUNNING', 'COMPLETED', 'FAILED', 'EXPIRED'));
