@@ -4,14 +4,14 @@ networks:
         external: true
 services:
     zookeeper:
-        image: wurstmeister/zookeeper
+        image: harbor.ec-leasing.ru/kafka/zookeeper:3.4.13
         ports:
             - "2181:2181"
         networks:
             - kafka-net
 
     kafka:
-        image: wurstmeister/kafka:latest
+        image: harbor.ec-leasing.ru/kafka/kafka:2.12-2.2.0
         depends_on:
             - zookeeper
         deploy:
@@ -30,12 +30,15 @@ services:
             KAFKA_ADVERTISED_LISTENERS: INSIDE://:9092,OUTSIDE://_{HOSTNAME_COMMAND}:9094
             KAFKA_LISTENERS: INSIDE://:9092,OUTSIDE://:9094
             KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+            KAFKA_JMX_OPTS: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=192.168.5.12 -Dcom.sun.management.jmxremote.rmi.port=1099"
+            JMX_PORT: 1099
+            KAFKA_CREATE_TOPICS: "arrangements:3:2:delete,jobs:3:2:delete,exec_results:3:2:delete"
         volumes:
             - /opt/kafka/logs:/opt/kafka/logs
             - /var/run/docker.sock:/var/run/docker.sock
 
     kafdrop:
-        image: thomsch98/kafdrop
+        image: harbor.ec-leasing.ru/kafka/kafdrop:2.0.0
         depends_on:
             - zookeeper
             - kafka
@@ -48,7 +51,7 @@ services:
             - kafka-net
 
     kafka-manager:
-        image: harbor.ec-leasing.ru/as_15_8/kafka-manager
+        image: harbor.ec-leasing.ru/kafka/kafka-manager:2.0.0.2
         depends_on:
             - zookeeper
             - kafka
