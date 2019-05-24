@@ -1,7 +1,6 @@
 package model.task;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import model.enums.ExecutionStatus;
 import model.enums.Priority;
@@ -13,8 +12,6 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Формализованное задание на проведение мероприятий по контролю

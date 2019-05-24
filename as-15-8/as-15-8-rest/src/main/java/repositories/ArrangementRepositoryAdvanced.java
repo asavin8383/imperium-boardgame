@@ -1,7 +1,6 @@
 package repositories;
 
 import model.task.Arrangement;
-import model.task.FormalTask;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

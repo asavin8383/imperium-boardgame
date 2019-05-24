@@ -1,6 +1,5 @@
 package repositories.impl;
 
-import model.task.Arrangement;
 import model.task.ArrangementItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;

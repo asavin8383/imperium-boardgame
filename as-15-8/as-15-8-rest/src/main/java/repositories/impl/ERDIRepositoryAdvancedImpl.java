@@ -4,7 +4,6 @@ import model.erdi.Decision;
 import model.erdi.Decision_;
 import model.erdi.ERDI;
 import model.erdi.ERDI_;
-import model.task.Arrangement;
 import model.task.ArrangementItem;
 import model.task.ArrangementItem_;
 import model.task.Arrangement_;
@@ -17,7 +16,6 @@ import repositories.helpers.CriteriaHelper;
 
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,7 +37,7 @@ public class ERDIRepositoryAdvancedImpl implements ERDIRepositoryAdvanced {
     }
 
     @Override
-    public Page<ERDI> findPage(Long id, Long arrangementId, String organization, String decisionNumber, LocalDateTime decisionDate, String checkUnitValue, Pageable pageable) {
+    public Page<ERDI> findPage(Long id, Long arrangementId, String organization, String decisionNumber, Pageable pageable) {
         CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
         CriteriaQuery<ERDI> select = criteriaBuilder.createQuery(ERDI.class);
         Root<ERDI> erdi = select.from(ERDI.class);
@@ -53,7 +51,7 @@ public class ERDIRepositoryAdvancedImpl implements ERDIRepositoryAdvanced {
             Join<ERDI, ArrangementItem> arrangementItem = erdi.join(ERDI_.ARRANGEMENT_ITEMS);
             predicates.add(criteriaBuilder.equal(arrangementItem.get(ArrangementItem_.ARRANGEMENT).get(Arrangement_.ID), arrangementId));
         }
-        if(organization != null || decisionNumber != null) {
+        if(organization != null) {
             Join<ERDI, Decision> decision = erdi.join(ERDI_.DECISION_LIST);
             predicates.add(criteriaBuilder.like(criteriaBuilder.lower(decision.get(Decision_.ORGANIZATION)), "%" + organization.toLowerCase() + "%"));
         }
