@@ -3,6 +3,14 @@ networks:
     as-15-8-net:
         external: true
 services:
+    dispatcher:
+        image: harbor.ec-leasing.ru/as_15_8/as-15-8-dispatcher:latest
+        networks:
+            - as-15-8-net
+        environment:
+            PROFILE: test
+        volumes:
+            - ~/as-15-8-modules/dispatcher-module/logs:/log
     executor:
         image: harbor.ec-leasing.ru/as_15_8/as-15-8-executor:latest
         deploy:
