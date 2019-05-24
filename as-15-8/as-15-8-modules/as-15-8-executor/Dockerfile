@@ -2,9 +2,9 @@ FROM openjdk:8-jdk-alpine
 
 LABEL Alex Shabalin <ashabalin@ec-leasing.ru>
 
-ENV APP_PATH = "/lib/as-15-8-executor.jar" \
-    LOG_PATH = "/log" \
-    PROFILE = "test"
+ENV APP_PATH="/lib/as-15-8-executor.jar" \
+    LOG_PATH="/log" \
+    PROFILE="test"
 
 VOLUME $LOG_PATH
 
