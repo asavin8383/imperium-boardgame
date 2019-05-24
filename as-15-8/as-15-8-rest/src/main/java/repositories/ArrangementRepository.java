@@ -1,11 +1,14 @@
 package repositories;
 
+import model.enums.ExecutionStatus;
 import model.task.Arrangement;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -18,4 +21,6 @@ public interface ArrangementRepository extends JpaRepository<Arrangement, Long> 
 
     @Query("SELECT a FROM Arrangement a WHERE a.formalTask.id=:formalTaskId AND a.id = :id")
     Optional<Arrangement> findByFormalTaskAndId(@Param("formalTaskId") Long formalTaskId, @Param("id") Long id);
+
+    List<Arrangement> findAllByExecutionStatusAndStartDateIsGreaterThan(ExecutionStatus executionStatus, LocalDateTime startDate);
 }
