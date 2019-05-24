@@ -1,7 +1,6 @@
 package model.erdi;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jobs.CheckUnitType;
 import lombok.Getter;
 import org.hibernate.annotations.Immutable;
 
