@@ -1,7 +1,6 @@
 package controllers;
 
 import model.erdi.ERDI;
-import model.task.Arrangement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -45,6 +44,6 @@ public class ERDIController {
             @RequestParam(defaultValue = "10") int pageSize){
         PageRequest page = PageRequest.of(
                 pageNumber, pageSize, Sort.by("id").ascending());
-        return erdiRepoAdvanced.findPage(id, arrangementId, organization, decisionNumber, decisionDate, checkUnitValue, page);
+        return erdiRepoAdvanced.findPage(id, arrangementId, organization, decisionNumber, page);
     }
 }

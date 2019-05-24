@@ -1,6 +1,5 @@
 package kafka;
 
-import execution.ExecutionJobResult;
 import jobs.ArrangementJob;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;

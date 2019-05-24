@@ -7,9 +7,9 @@ import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.Attributes;
 
-public class UserAttributesMapper implements AttributesMapper {
+public class UserAttributesMapper implements AttributesMapper<User> {
     @Override
-    public Object mapFromAttributes(Attributes attributes) throws NamingException {
+    public User mapFromAttributes(Attributes attributes) throws NamingException {
         User user = new User();
 
         Attribute samaccountname = attributes.get("samaccountname");

@@ -3,8 +3,6 @@ package repositories;
 import model.erdi.ERDI;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
-
 /**
  * Creation date: 23.05.2019
  * Author: asavin
