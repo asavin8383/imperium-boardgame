@@ -1,22 +1,22 @@
 package services.checkUnitJob.impl;
 
-import checkUnits.CheckUnit;
-import checkUnits.CheckUnitJob;
-import checkUnits.CheckUnitType;
-import jobs.ArrangementJob;
-import jobs.ERDIJob;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.stereotype.Service;
-import services.checkUnitJob.CheckUnitJobService;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.stereotype.Service;
+
+import checkUnits.CheckUnit;
+import checkUnits.CheckUnitJob;
+import checkUnits.CheckUnitType;
+import jobs.ArrangementJob;
+import jobs.ERDIJob;
+import services.checkUnitJob.CheckUnitJobService;
 
 /**
  * Creation date: 24.05.2019

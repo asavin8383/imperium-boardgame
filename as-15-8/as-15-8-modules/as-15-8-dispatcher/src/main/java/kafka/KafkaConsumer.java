@@ -1,13 +1,9 @@
 package kafka;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import checkUnits.CheckUnitJob;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.Acknowledgment;
@@ -16,18 +12,22 @@ import org.springframework.kafka.support.SendResult;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
-
-import jobs.ArrangementJob;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
+
+import checkUnits.CheckUnitJob;
+import jobs.ArrangementJob;
+import lombok.extern.slf4j.Slf4j;
 import services.checkUnitJob.CheckUnitJobService;
 
 @Service
 @Slf4j
 public class KafkaConsumer {
 
+	@Autowired
 	private CheckUnitJobService checkUnitJobService;
+	
+	@Autowired
 	private KafkaTemplate<String, CheckUnitJob> kafkaTemplate;
 
 	@Value("${spring.kafka.produce-topic}")
