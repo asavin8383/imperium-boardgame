@@ -14,5 +14,8 @@ public class ERDIJob {
 
 	/** Идентификатор ЕРДИ */
 	private Long id;
-	
+
+	public ERDIJob(Long id) {
+		this.id = id;
+	}
 }

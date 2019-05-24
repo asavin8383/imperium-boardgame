@@ -16,7 +16,7 @@ import kafka.KafkaConfiguration;
 @SpringBootApplication
 @Import({KafkaConfiguration.class})
 @PropertySource("classpath:application.yml")
-@ComponentScan(basePackages={"common", "kafka", "service"})
+@ComponentScan(basePackages={"common", "kafka", "services"})
 public class ApplicationConfiguration{
 	
 	public static void main(String[] args) {
