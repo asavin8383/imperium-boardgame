@@ -10,3 +10,12 @@ services:
             - PROFILE=test
         ports:
             - "15800:15800"
+            
+    as-15-8-front:
+        container_name: as-15-8_Front
+        image: harbor.ec-leasing.ru/as_15_8/as-15-8-front
+        restart: always
+        environment:
+            - VUE_APP_BACKEND_URL=localhost:15800
+        ports:
+            - "80:80"
