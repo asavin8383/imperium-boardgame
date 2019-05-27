@@ -32,7 +32,11 @@ services:
             KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
             KAFKA_JMX_OPTS: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=192.168.5.12 -Dcom.sun.management.jmxremote.rmi.port=1099"
             JMX_PORT: 1099
-            KAFKA_CREATE_TOPICS: "arrangements:3:2:delete,jobs:3:2:delete,exec_results:3:2:delete"
+            KAFKA_CREATE_TOPICS: >-
+                arrangements:3:2:delete,
+                jobs:3:2:delete,
+                exec_results:3:2:delete,
+                analysis_results:3:2:delete
         volumes:
             - /opt/kafka/logs:/opt/kafka/logs
             - /var/run/docker.sock:/var/run/docker.sock
