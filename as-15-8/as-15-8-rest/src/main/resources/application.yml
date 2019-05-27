@@ -54,6 +54,9 @@ spring:
         url: jdbc:postgresql://192.168.5.195:5432/asdb
     kafka:
         produce-topic: arrangements
+cron:
+    expression:
+        arrangement: "0 * * ? * *"
 
 ---
 
@@ -68,7 +71,7 @@ spring:
         produce-topic: arrangements_asavin
 cron:
     expression:
-        arrangement: "* * * ? * *"
+        arrangement: "0 * * ? * *"
 
 ---
 
@@ -81,7 +84,9 @@ spring:
         url: jdbc:postgresql://192.168.5.195:5432/asdb_test
     kafka:
         produce-topic: arrangements_ashabalin
-
+cron:
+    expression:
+        arrangement: "0 * * ? * *"
 ---
 
 spring:
@@ -93,6 +98,9 @@ spring:
         url: jdbc:postgresql://192.168.5.195:5432/asdb_test
     kafka:
         produce-topic: arrangements_pvorobiev
+cron:
+    expression:
+        arrangement: "0 * * ? * *"
 
 ---
 
@@ -105,3 +113,6 @@ spring:
         url: jdbc:postgresql://192.168.5.195:5432/asdb_test
     kafka:
         produce-topic: arrangements_jspirina
+cron:
+    expression:
+        arrangement: "0 * * ? * *"

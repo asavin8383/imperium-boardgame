@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import exceptions.AS_15_8_DispatcherException;
+import model.ArrangementResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -16,6 +18,7 @@ import checkUnits.CheckUnitJob;
 import checkUnits.CheckUnitType;
 import jobs.ArrangementJob;
 import jobs.ERDIJob;
+import repositories.ArrangementResultRepository;
 import services.checkUnitJob.CheckUnitJobService;
 
 /**
@@ -26,10 +29,13 @@ import services.checkUnitJob.CheckUnitJobService;
 public class CheckUnitJobServiceImpl implements CheckUnitJobService {
 
     private NamedParameterJdbcTemplate jdbcTemplate;
+    private ArrangementResultRepository arrangementResultRepo;
 
     @Autowired
-    public CheckUnitJobServiceImpl(NamedParameterJdbcTemplate jdbcTemplate) {
+    public CheckUnitJobServiceImpl(NamedParameterJdbcTemplate jdbcTemplate,
+                                   ArrangementResultRepository arrangementResultRepo) {
         this.jdbcTemplate = jdbcTemplate;
+        this.arrangementResultRepo = arrangementResultRepo;
     }
 
     @Override
@@ -81,6 +87,20 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
 
         }
         return checkUnitJobs;
+    }
+
+    @Override
+    public void saveCheckUnitJobAsResult(CheckUnitJob checkUnitJob) {
+        try{
+            ArrangementResult arrangementResult = new ArrangementResult();
+            arrangementResult.setArrangementId(checkUnitJob.getArrangementID());
+            arrangementResult.setErdiId(checkUnitJob.getErdiID());
+            arrangementResult.setCheckUnitType(checkUnitJob.getCheckUnit().getType());
+            arrangementResult.setCheckUnitValue(checkUnitJob.getCheckUnit().getValue());
+            arrangementResultRepo.save(arrangementResult);
+        }catch (Exception ex){
+            throw new AS_15_8_DispatcherException("Error saving arrangement result by check unit job!", ex);
+        }
     }
 
     private CheckUnitJob mapRowToCheckUnitJob(ResultSet rs, int rowNum) throws SQLException {

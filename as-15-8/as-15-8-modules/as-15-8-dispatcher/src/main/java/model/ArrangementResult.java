@@ -3,6 +3,7 @@ package model;
 import checkUnits.CheckUnitType;
 import enums.ArrangementUnitCheckResult;
 import lombok.Data;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -14,7 +15,7 @@ import java.io.Serializable;
  */
 @Entity
 @Table(schema = "portal", name = "arrangement_results",
-    uniqueConstraints = @UniqueConstraint(columnNames = {"arrangement_id", "erdi_id", "check_unit_type", "check_unit_value"}))
+    uniqueConstraints = @UniqueConstraint(columnNames = {"arrangement_id", "content_id", "check_unit_type", "check_unit_value"}))
 @Data
 public class ArrangementResult implements Serializable {
 
@@ -26,9 +27,11 @@ public class ArrangementResult implements Serializable {
     @Column(name="id", nullable=false, updatable=false)
     private Long id;
 
-    private Long arrangement_id;
+    @Column(name = "arrangement_id", nullable = false)
+    private Long arrangementId;
 
-    private Long erdi_id;
+    @Column(name = "content_id", nullable = false)
+    private Long erdiId;
 
     @Enumerated(EnumType.STRING)
     @Column(name="check_unit_type", nullable=false)
@@ -43,5 +46,6 @@ public class ArrangementResult implements Serializable {
 
     @Lob
     @Column(name="screenshot", columnDefinition="bytea")
+    @Type(type="org.hibernate.type.BinaryType")
     private byte[] screenshot;
 }

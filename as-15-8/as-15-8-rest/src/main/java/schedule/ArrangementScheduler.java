@@ -1,6 +1,9 @@
 package schedule;
 
+import controllers.helpers.ArrangementExecutionHelper;
+import lombok.extern.slf4j.Slf4j;
 import model.enums.ExecutionStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import repositories.ArrangementRepository;
@@ -13,17 +16,27 @@ import java.time.LocalDateTime;
  */
 
 @Service
+@Slf4j
 public class ArrangementScheduler {
 
-    private ArrangementRepository arrangementRepository;
+    private ArrangementRepository arrangementRepo;
+    private ArrangementExecutionHelper arrangementExecutionHelper;
 
-    public ArrangementScheduler(ArrangementRepository arrangementRepository) {
-        this.arrangementRepository = arrangementRepository;
+    @Autowired
+    public ArrangementScheduler(ArrangementRepository arrangementRepo, ArrangementExecutionHelper arrangementExecutionHelper) {
+        this.arrangementRepo = arrangementRepo;
+        this.arrangementExecutionHelper = arrangementExecutionHelper;
     }
 
     @Scheduled(cron = "${cron.expression.arrangement}")
     public void checkAndStartArrangementJobs(){
-        arrangementRepository.findAllByStatusAndStartDateIsGreaterThan(ExecutionStatus.PLANNED, LocalDateTime.now())
-            .forEach(arrangement ->  System.out.println(arrangement.getId()));
+        arrangementRepo.findAllByStatusAndStartDateIsLessThan(ExecutionStatus.PLANNED, LocalDateTime.now())
+            .forEach(arrangement ->  {
+                arrangementExecutionHelper.sendJobToDispatcher(arrangement);
+                arrangement.setStartDate(LocalDateTime.now());
+                arrangement.setStatus(ExecutionStatus.RUNNING);
+                arrangementRepo.save(arrangement);
+                log.info(String.format("Arrangement with id: %d was started", arrangement.getId()));
+            });
     }
 }

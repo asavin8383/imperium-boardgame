@@ -63,7 +63,7 @@ public class ArrangementController {
         return formalTaskRepo.findById(formalTaskId)
             .map(formalTask -> {
                 arrangement.setFormalTask(formalTask);
-                if (arrangement.getStartDate() != null && arrangement.getStartDate().isAfter(LocalDateTime.now())){
+                if (arrangement.getStartDate() != null){
                     arrangement.setStatus(ExecutionStatus.PLANNED);
                 }
                 return arrangementRepo.save(arrangement);
@@ -128,7 +128,7 @@ public class ArrangementController {
         arrangement.setTitle(newArrangement.getTitle());
         //Если новому мероприятию запланировали дату запуска в будущем, оно становится PLANNED
         if(arrangement.getStatus().equals(ExecutionStatus.NEW) &&
-                arrangement.getStartDate() != null && arrangement.getStartDate().isAfter(LocalDateTime.now())){
+                arrangement.getStartDate() != null){
             arrangement.setStatus(ExecutionStatus.PLANNED);
         }
         return arrangement;

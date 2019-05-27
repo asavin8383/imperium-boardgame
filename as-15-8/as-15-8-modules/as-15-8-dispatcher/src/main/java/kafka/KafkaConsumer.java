@@ -44,7 +44,11 @@ public class KafkaConsumer {
         CompletableFuture.runAsync(() -> {
         	try {
 				checkUnitJobService.prepareJobs(arrangementJob)
-					.forEach(this::send);
+					.forEach(checkUnitJob -> {
+						//TODO обеспечить гарантию сохранения результата и отправки сообщения
+						checkUnitJobService.saveCheckUnitJobAsResult(checkUnitJob);
+						send(checkUnitJob);
+					});
         	} catch (Exception ex) {
         		log.error("Ошибка при обработке задания на проведение мероприятия: " + arrangementJob.toString(), ex);
         	}
