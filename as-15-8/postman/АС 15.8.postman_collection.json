@@ -147,10 +147,10 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"accessTool\": {\"id\": 16},\n    \"title\": \"Тест\",\n    \"startDate\": null,\n    \"endDate\": null,\n    \"result\": null\n}"
+									"raw": "{\n    \"accessTool\": {\"id\": 1},\n    \"title\": \"Тест\",\n    \"startDate\": \"2019-05-27T12:00:00\",\n    \"endDate\": \"2019-05-27T15:00:00\"\n}"
 								},
 								"url": {
-									"raw": "{{url}}/arrangements?formalTaskId=3",
+									"raw": "{{url}}/arrangements?formalTaskId=13",
 									"host": [
 										"{{url}}"
 									],
@@ -160,7 +160,7 @@
 									"query": [
 										{
 											"key": "formalTaskId",
-											"value": "3"
+											"value": "13"
 										}
 									]
 								}
@@ -248,6 +248,264 @@
 									"body": "{\n    \"id\": 8,\n    \"title\": \"Тест\",\n    \"status\": \"PLANNED\",\n    \"creationDate\": \"2019-05-22T11:40:21.223\",\n    \"startDate\": null,\n    \"endDate\": null,\n    \"accessTool\": {\n        \"id\": 16,\n        \"name\": null,\n        \"type\": null\n    },\n    \"result\": null\n}"
 								}
 							]
+						},
+						{
+							"name": "Изменение мероприятия",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "X-AUTH-TOKEN",
+										"value": "{{oper_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"accessTool\": {\"id\": 16},\n    \"title\": \"Подготовка к запуску\",\n    \"startDate\": \"2019-05-27T12:00:00\",\n    \"endDate\": \"2019-05-27T15:00:00\"\n}"
+								},
+								"url": {
+									"raw": "{{url}}/arrangements?id=8",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"arrangements"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "8"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Изменение мероприятия",
+									"originalRequest": {
+										"method": "PUT",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											},
+											{
+												"key": "X-AUTH-TOKEN",
+												"value": "{{oper_token}}",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"accessTool\": {\"id\": 16},\n    \"title\": \"Подготовка к запуску\",\n    \"startDate\": \"2019-05-27T12:00:00\",\n    \"endDate\": \"2019-05-27T15:00:00\"\n}"
+										},
+										"url": {
+											"raw": "{{url}}/arrangements?id=8",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"arrangements"
+											],
+											"query": [
+												{
+													"key": "id",
+													"value": "8"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "X-Content-Type-Options",
+											"value": "nosniff"
+										},
+										{
+											"key": "X-XSS-Protection",
+											"value": "1; mode=block"
+										},
+										{
+											"key": "Cache-Control",
+											"value": "no-cache, no-store, max-age=0, must-revalidate"
+										},
+										{
+											"key": "Pragma",
+											"value": "no-cache"
+										},
+										{
+											"key": "Expires",
+											"value": "0"
+										},
+										{
+											"key": "X-Frame-Options",
+											"value": "DENY"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json;charset=UTF-8"
+										},
+										{
+											"key": "Transfer-Encoding",
+											"value": "chunked"
+										},
+										{
+											"key": "Date",
+											"value": "Mon, 27 May 2019 06:25:58 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"id\": 8,\n    \"title\": \"Подготовка к запуску\",\n    \"status\": \"PLANNED\",\n    \"creationDate\": \"2019-05-22T11:40:21.223\",\n    \"startDate\": \"2019-05-27T12:00:00\",\n    \"endDate\": \"2019-05-27T15:00:00\",\n    \"accessTool\": {\n        \"id\": 16,\n        \"name\": null,\n        \"type\": null\n    },\n    \"result\": null\n}"
+								}
+							]
+						},
+						{
+							"name": "Удаление мероприятия",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"value": "{{admin_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{url}}/arrangements?id=6",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"arrangements"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "6"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Получение списка ЕРДИ по фильтру",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"value": "{{oper_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{url}}/erdi?organization=потребнадзор",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"erdi"
+									],
+									"query": [
+										{
+											"key": "organization",
+											"value": "потребнадзор"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Добавление ЕРДИ мероприятию",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"value": "{{oper_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{url}}/arrangement_items?arrangementId=5&erdiId=1",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"arrangement_items"
+									],
+									"query": [
+										{
+											"key": "arrangementId",
+											"value": "5"
+										},
+										{
+											"key": "erdiId",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Запуск мероприятия",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"value": "{{oper_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{url}}/arrangements/run?id=5",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"arrangements",
+										"run"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "5"
+										}
+									]
+								}
+							},
+							"response": []
 						}
 					],
 					"_postman_isSubFolder": true
@@ -927,25 +1185,25 @@
 	],
 	"variable": [
 		{
-			"id": "c251289d-be7d-4be0-b7da-2d9086c532d6",
+			"id": "eeee95d5-9119-4aad-a2c9-18c28a1e34af",
 			"key": "url",
 			"value": "http://localhost:15800",
 			"type": "string"
 		},
 		{
-			"id": "953165bb-452b-4ef6-8846-6af6be6d0246",
+			"id": "04fc88ee-5bb9-4637-84e6-b11d41e5f2bf",
 			"key": "oper_token",
 			"value": "",
 			"type": "string"
 		},
 		{
-			"id": "c9c4f3ed-b5ec-4b5b-a646-055e8e6744d6",
+			"id": "6711e9f3-65a8-4023-bce2-52c6397e5158",
 			"key": "test_url",
 			"value": "http://192.168.5.253:15800",
 			"type": "string"
 		},
 		{
-			"id": "211bb406-f342-4cbe-9893-bbfa3ad4aed1",
+			"id": "587e4e61-fa0e-4e2f-8450-9cfe36d2c235",
 			"key": "admin_token",
 			"value": "",
 			"type": "string"

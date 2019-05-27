@@ -63,12 +63,42 @@ public class ArrangementController {
         return formalTaskRepo.findById(formalTaskId)
             .map(formalTask -> {
                 arrangement.setFormalTask(formalTask);
+                if (arrangement.getStartDate() != null && arrangement.getStartDate().isAfter(LocalDateTime.now())){
+                    arrangement.setStatus(ExecutionStatus.PLANNED);
+                }
                 return arrangementRepo.save(arrangement);
             })
             .orElseThrow(() -> new AS_15_8_Exception("Error creating arrangement! Formal task was not found by id: " + formalTaskId));
 
     }
 
+    @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    public Arrangement replaceFormalTask(@RequestBody Arrangement newArrangement, @RequestParam Long id) {
+        return arrangementRepo.findById(id)
+                .map(arrangement -> arrangementRepo.save(replaceFields(newArrangement, arrangement)))
+                .orElseGet(() -> {
+                    newArrangement.setId(id);
+                    return arrangementRepo.save(newArrangement);
+                });
+    }
+
+    @DeleteMapping
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public Long deleteArrangement(@RequestParam Long id) {
+        return arrangementRepo.findById(id)
+                .map(arrangement -> {
+                    arrangementRepo.delete(arrangement);
+                    return arrangement.getId();
+                })
+                .orElseThrow(() -> new AS_15_8_Exception("Error deleting arrangement! Arrangement was not found by id: " + id));
+    }
+
+    /**
+     * Запуск мероприятия на выполнение
+     * Необходимым условием запуска является статус "PLANNED"
+     * @param id идентификатор мероприятия
+     * @return запущенное мероприятие
+     */
     @GetMapping(path = "/run")
     public ResponseEntity<Arrangement> runArrangement(@RequestParam Long id){
         return arrangementRepo.findById(id)
@@ -83,6 +113,25 @@ public class ArrangementController {
                 return new ResponseEntity<>(arrangement, HttpStatus.NOT_ACCEPTABLE);
             })
             .orElseThrow(() -> new AS_15_8_Exception("Error running arrangement! Arrangement was not found by id: " + id));
+    }
+
+    /**
+     * Заменяет доступные поля мероприятия из БД полученными с фронта
+     * @param newArrangement полученное с фронта мероприятие
+     * @param arrangement мероприятие, сохраненное в БД
+     * @return изменнённое мероприятие
+     */
+    private Arrangement replaceFields(Arrangement newArrangement, Arrangement arrangement) {
+        arrangement.setAccessTool(newArrangement.getAccessTool());
+        arrangement.setStartDate(newArrangement.getStartDate());
+        arrangement.setEndDate(newArrangement.getEndDate());
+        arrangement.setTitle(newArrangement.getTitle());
+        //Если новому мероприятию запланировали дату запуска в будущем, оно становится PLANNED
+        if(arrangement.getStatus().equals(ExecutionStatus.NEW) &&
+                arrangement.getStartDate() != null && arrangement.getStartDate().isAfter(LocalDateTime.now())){
+            arrangement.setStatus(ExecutionStatus.PLANNED);
+        }
+        return arrangement;
     }
 
 
