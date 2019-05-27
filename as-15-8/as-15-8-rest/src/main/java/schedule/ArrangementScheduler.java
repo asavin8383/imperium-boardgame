@@ -23,7 +23,7 @@ public class ArrangementScheduler {
 
     @Scheduled(cron = "${cron.expression.arrangement}")
     public void checkAndStartArrangementJobs(){
-        arrangementRepository.findAllByExecutionStatusAndStartDateIsGreaterThan(ExecutionStatus.PLANNED, LocalDateTime.now())
+        arrangementRepository.findAllByStatusAndStartDateIsGreaterThan(ExecutionStatus.PLANNED, LocalDateTime.now())
             .forEach(arrangement ->  System.out.println(arrangement.getId()));
     }
 }

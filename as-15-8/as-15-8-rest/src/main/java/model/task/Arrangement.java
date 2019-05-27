@@ -68,6 +68,6 @@ public class Arrangement implements Serializable {
 	
 	public Arrangement() {
 		this.creationDate = LocalDateTime.now();
-		this.status = ExecutionStatus.PLANNED;
+		this.status = ExecutionStatus.NEW;
 	}
 }
