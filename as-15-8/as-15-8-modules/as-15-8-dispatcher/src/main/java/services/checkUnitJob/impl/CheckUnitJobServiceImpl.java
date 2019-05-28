@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import exceptions.AS_15_8_DispatcherException;
-import model.ArrangementResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -16,8 +14,11 @@ import org.springframework.stereotype.Service;
 import checkUnits.CheckUnit;
 import checkUnits.CheckUnitJob;
 import checkUnits.CheckUnitType;
+import enums.AccessToolUnit;
+import exceptions.AS_15_8_DispatcherException;
 import jobs.ArrangementJob;
 import jobs.ERDIJob;
+import model.ArrangementResult;
 import repositories.ArrangementResultRepository;
 import services.checkUnitJob.CheckUnitJobService;
 
@@ -48,6 +49,7 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
                 .collect(Collectors.toList())
         );
 
+        CheckUnitJobMapper mapper = new CheckUnitJobMapper(arrangementJob.getAccessToolUnit());
         List<CheckUnitJob> checkUnitJobs = new ArrayList<>();
         try {
             checkUnitJobs = jdbcTemplate.query(
@@ -75,13 +77,8 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
                         "  from sa.content\n" +
                         "  join sa.url on content.id = url.content_id and content.id IN (:ids)",
                     parameters,
-                    this::mapRowToCheckUnitJob
+                    (result, rowNum) -> mapper.map(result, rowNum)
             );
-            //TODO Некрасиво! Что-нибудь придумать
-            for (CheckUnitJob checkUnitJob : checkUnitJobs){
-                checkUnitJob.setArrangementID(arrangementJob.getId());
-                checkUnitJob.setAccessToolUnit(arrangementJob.getAccessToolUnit());
-            }
 
         } catch (Exception ex){
 
@@ -90,24 +87,31 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
     }
 
     @Override
-    public void saveCheckUnitJobAsResult(CheckUnitJob checkUnitJob) {
+    public Long saveCheckUnitJobAsResult(CheckUnitJob checkUnitJob) {
         try{
             ArrangementResult arrangementResult = new ArrangementResult();
-            arrangementResult.setArrangementId(checkUnitJob.getArrangementID());
-            arrangementResult.setErdiId(checkUnitJob.getErdiID());
             arrangementResult.setCheckUnitType(checkUnitJob.getCheckUnit().getType());
             arrangementResult.setCheckUnitValue(checkUnitJob.getCheckUnit().getValue());
-            arrangementResultRepo.save(arrangementResult);
+            return arrangementResultRepo.save(arrangementResult).getId();
         }catch (Exception ex){
             throw new AS_15_8_DispatcherException("Error saving arrangement result by check unit job!", ex);
         }
     }
-
-    private CheckUnitJob mapRowToCheckUnitJob(ResultSet rs, int rowNum) throws SQLException {
-        CheckUnitJob checkUnitJob = new CheckUnitJob();
-        checkUnitJob.setErdiID(rs.getLong("id"));
-        CheckUnitType type = CheckUnitType.valueOf(rs.getString("check_unit_type"));
-        checkUnitJob.setCheckUnit(new CheckUnit(type, rs.getString("check_unit_value")));
-        return checkUnitJob;
+    
+    class CheckUnitJobMapper{
+    	
+    	private AccessToolUnit accessToolUnit;
+    	
+    	public CheckUnitJobMapper(AccessToolUnit accessToolUnit) {
+			this.accessToolUnit = accessToolUnit;
+		}
+    	
+        public CheckUnitJob map(ResultSet rs, int rowNum) throws SQLException {
+            CheckUnitJob checkUnitJob = new CheckUnitJob();
+            checkUnitJob.setAccessToolUnit(accessToolUnit);
+            CheckUnitType type = CheckUnitType.valueOf(rs.getString("check_unit_type"));
+            checkUnitJob.setCheckUnit(new CheckUnit(type, rs.getString("check_unit_value")));
+            return checkUnitJob;
+        }
     }
 }

@@ -18,5 +18,5 @@ public interface CheckUnitJobService {
      * чтобы потом можно было приложить к нему результат и скриншот
      * @param checkUnitJob
      */
-    void saveCheckUnitJobAsResult(CheckUnitJob checkUnitJob);
+    Long saveCheckUnitJobAsResult(CheckUnitJob checkUnitJob);
 }

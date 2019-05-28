@@ -5,63 +5,43 @@ spring:
         bootstrap-servers: 192.168.5.12:9094,192.168.5.184:9094,192.168.5.211:9094
         group: analyzers
         auto-offset-reset: earliest
-        consume-topic: exec_results
-    datasource:
-        test-while-idle: true
-        validation-query: SELECT 1;
-        time-between-eviction-runs-millis: 300000
-        username: as_user
-        password: as_user
-    jpa:
-        properties:
-            hibernate:
-                jdbc:
-                    lob:
-                        non_contextual_creation: true
-                format_sql: true
-        databasePlatform: org.hibernate.dialect.PostgreSQL9Dialect
 
 ---
 
 spring:
     profiles: test
-    datasource:
-        url: jdbc:postgresql://192.168.5.195:5432/asdb
     kafka:
         consume-topic: exec_results
+        produce-topic: analysis_results
 
 ---
 
 spring:
     profiles: dev_ashabalin
-    datasource:
-        url: jdbc:postgresql://192.168.5.195:5432/asdb_test
     kafka:
         consume-topic: exec_results_ashabalin
+        produce-topic: analysis_results_ashabalin
 
 ---
 
 spring:
     profiles: dev_asavin
-    datasource:
-        url: jdbc:postgresql://192.168.5.195:5432/asdb_test
     kafka:
         consume-topic: exec_results_asavin
+        produce-topic: analysis_results_asavin
 
 ---
 
 spring:
     profiles: dev_pvorobiev
-    datasource:
-        url: jdbc:postgresql://192.168.5.195:5432/asdb_test
     kafka:
         consume-topic: exec_results_pvorobiev
+        produce-topic: analysis_results_pvorobiev
 
 ---
 
 spring:
     profiles: dev_jspirina
-    datasource:
-        url: jdbc:postgresql://192.168.5.195:5432/asdb_test
     kafka:
         consume-topic: exec_results_jspirina
+        produce-topic: analysis_results_jspirina

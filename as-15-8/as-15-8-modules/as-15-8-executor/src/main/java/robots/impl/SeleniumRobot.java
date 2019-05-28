@@ -64,7 +64,7 @@ public class SeleniumRobot<T> implements Robot{
 	}
 	
 	@Override
-	public XmlTest createTest(String name, Long arrangenmentID, Long erdiID, CheckUnit checkUnit) {
+	public XmlTest createTest(String name, Long jobID, CheckUnit checkUnit) {
 		XmlTest test = new XmlTest();
 		
 		test.setName(name);
@@ -74,8 +74,7 @@ public class SeleniumRobot<T> implements Robot{
 		test.addParameter("platformName", this.platformName);
 		test.addParameter("applicationName", this.applicationName);
 		
-		test.addParameter("arrangenmentID", arrangenmentID.toString());
-		test.addParameter("erdiID", erdiID.toString());
+		test.addParameter("jobID", jobID.toString());
 		test.addParameter("checkUnitType", checkUnit.getType().toString());
 		test.addParameter("checkUnitValue", checkUnit.getValue());
 		

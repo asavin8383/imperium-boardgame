@@ -1,7 +1,7 @@
 package service;
 
+import analysis.AnalysisResult;
 import execution.ExecutionJobResult;
-import model.ArrangementResult;
 
 /**
  * Интерфейс сервиса анализа резуьтатов проверки мероприятия
@@ -21,5 +21,5 @@ public interface AnalyzerService {
 	 * @param result Результат работы робота
 	 * @return
 	 */
-	ArrangementResult analyzeResult(ExecutionJobResult execResult);
+	AnalysisResult analyzeResult(ExecutionJobResult execResult);
 }

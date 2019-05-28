@@ -2,10 +2,10 @@ package service.impl;
 
 import org.springframework.stereotype.Service;
 
-import enums.ArrangementUnitCheckResult;
+import analysis.AnalysisResult;
+import analysis.PS_AnalysisJobResult;
 import execution.ExecutionJobResult;
 import execution.ExecutionPSJobResult;
-import model.ArrangementResult;
 import service.AnalyzerService;
 
 /**
@@ -22,16 +22,11 @@ public class PS_AnalyzerService implements AnalyzerService {
 	}
 
 	@Override
-	public ArrangementResult analyzeResult(ExecutionJobResult result) {
-		ArrangementResult arrRes = new ArrangementResult();
-		arrRes.setArrangementId(result.getArrangenmentID());
-		arrRes.setErdiId(result.getErdiID());
-		arrRes.setCheckUnitType(result.getCheckUnit().getType());
-		arrRes.setCheckUnitValue(result.getCheckUnit().getValue());
-		arrRes.setResult(
-				((ExecutionPSJobResult)result).isCheckResult() ? 
-						ArrangementUnitCheckResult.COMPLETED : 
-						ArrangementUnitCheckResult.INTERNAL_ERROR);
-		return arrRes;
+	public AnalysisResult analyzeResult(ExecutionJobResult result) {
+		PS_AnalysisJobResult analysisResult = new PS_AnalysisJobResult();
+		analysisResult.setJobID(result.getJobID());
+		analysisResult.setCheckUnit(result.getCheckUnit());
+		analysisResult.setCheckResult(((ExecutionPSJobResult)result).isCheckResult());
+		return analysisResult;
 	}
 }

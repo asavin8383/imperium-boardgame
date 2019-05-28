@@ -26,6 +26,6 @@ public interface Robot {
 	 * @param url Проверяемый URL
 	 * @return
 	 */
-	XmlTest createTest(String name, Long arrangenmentID, Long erdiID, CheckUnit checkUnit);
+	XmlTest createTest(String name, Long jobID, CheckUnit checkUnit);
 	
 }

@@ -48,10 +48,7 @@ public abstract class RobotScript extends AbstractTestNGSpringContextTests{
 	private String executionResultTopicName;
 	
 	@Getter
-	private String arrangenmentID;
-	
-	@Getter
-	private String erdiID;
+	private String jobID;
 	
 	@Getter
 	private CheckUnit checkUnit;
@@ -74,15 +71,13 @@ public abstract class RobotScript extends AbstractTestNGSpringContextTests{
 			String browserName,
 			String platformName,
 			String applicationName,
-			String arrangenmentID,
-			String erdiID,
+			String jobID,
 			String checkUnitType,
 			String checkUnitValue
 		) throws MalformedURLException {
 		
 			this.driver = DriverFactory.createDriver(new URL(hubURL), platformName, applicationName, browserName);
-			this.arrangenmentID = arrangenmentID;
-			this.erdiID = erdiID;
+			this.jobID = jobID;
 			this.checkUnit = new CheckUnit(CheckUnitType.valueOf(checkUnitType), checkUnitValue);
 	}
 	
@@ -123,8 +118,7 @@ public abstract class RobotScript extends AbstractTestNGSpringContextTests{
 		        @Override
 		        public void onSuccess(SendResult<String, ExecutionJobResult> result) {
 		            log.info("Сообщение успешно отправлено: " +
-		            		"arrangenmentID: " + result.getProducerRecord().value().getArrangenmentID() + ", " +
-		            		"ERDI_ID: " + result.getProducerRecord().value().getErdiID() + ", " +
+		            		"jobID: " + result.getProducerRecord().value().getJobID() + ", " +
 		            		"CheckUnit: " + result.getProducerRecord().value().getCheckUnit().getValue());
 		        }
 		        @Override

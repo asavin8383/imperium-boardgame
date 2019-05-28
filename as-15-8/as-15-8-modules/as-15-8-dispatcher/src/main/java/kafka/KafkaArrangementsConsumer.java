@@ -16,6 +16,7 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
 import checkUnits.CheckUnitJob;
+import exceptions.AS_15_8_DispatcherException;
 import jobs.ArrangementJob;
 import lombok.extern.slf4j.Slf4j;
 import services.checkUnitJob.CheckUnitJobService;
@@ -46,7 +47,8 @@ public class KafkaArrangementsConsumer {
 				checkUnitJobService.prepareJobs(arrangementJob)
 					.forEach(checkUnitJob -> {
 						//TODO обеспечить гарантию сохранения результата и отправки сообщения
-						checkUnitJobService.saveCheckUnitJobAsResult(checkUnitJob);
+						Long jobID = checkUnitJobService.saveCheckUnitJobAsResult(checkUnitJob);
+						checkUnitJob.setJobID(jobID);
 						send(checkUnitJob);
 					});
         	} catch (Exception ex) {
@@ -68,20 +70,16 @@ public class KafkaArrangementsConsumer {
 
 				@Override
 				public void onSuccess(SendResult<String, CheckUnitJob> result) {
-					log.info("Check unit job message was sent: " +
-							"arrangement ID: " + result.getProducerRecord().value().getArrangementID() + ", " +
-							"access tool: " + result.getProducerRecord().value().getAccessToolUnit() + ", " +
-							"check unit value: " + result.getProducerRecord().value().getCheckUnit().getValue()
-							);
+					log.info("Отправлено задание на проверку запрещенного ресурса: " + result.getProducerRecord().value().toString());
 				}
 
 				@Override
 				public void onFailure(Throwable ex) {
-					throw new RuntimeException(ex);
+					throw new AS_15_8_DispatcherException("Ошибка при отправке задания на проверку", ex);
 				}
 			});
 		} catch (Exception ex) {
-			throw new RuntimeException("Error sending arrangement job message: ", ex);
+			throw new AS_15_8_DispatcherException("Ошибка при отправке задания на проверку", ex);
 		}
 	}
 	

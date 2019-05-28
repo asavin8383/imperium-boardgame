@@ -8,7 +8,9 @@ package exceptions;
 
 public class AS_15_8_DispatcherException extends RuntimeException {
 
-    public AS_15_8_DispatcherException(String message) {
+	private static final long serialVersionUID = 1L;
+
+	public AS_15_8_DispatcherException(String message) {
         super(message);
     }
 

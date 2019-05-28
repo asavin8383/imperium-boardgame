@@ -5,18 +5,16 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.Data;
 
 /**
- * Creation date: 27.05.2019
+ * Результат анализа результатов выполнения задания на проверку запрещенного ресурса
  * Author: asavin
  */
 
 @Data
 @JsonTypeInfo(include= JsonTypeInfo.As.WRAPPER_OBJECT, use= JsonTypeInfo.Id.CLASS)
 public abstract class AnalysisResult {
-    /** Идентификатор мероприятия */
-    private Long arrangenmentID;
-
-    /** Идентификатор ЕРДИ */
-    private Long erdiID;
+	
+    /** Идентификатор задания */
+    private Long jobID;
 
     /** Единица ЕРДИ для проверки */
     private CheckUnit checkUnit;

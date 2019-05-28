@@ -35,10 +35,9 @@ public class SendJobToKafka {
 	public void test() {
 		
 		CheckUnitJob checkUnitJob = new CheckUnitJob();
-		checkUnitJob.setArrangementID(1L);
+		checkUnitJob.setJobID(1L);
 		checkUnitJob.setAccessToolUnit(AccessToolUnit.GOOGLE);
 		
-		checkUnitJob.setErdiID(1L);
 		checkUnitJob.setCheckUnit(new CheckUnit(CheckUnitType.URL, "https://www.google.ru"));
 		
 		Message<CheckUnitJob> message = MessageBuilder

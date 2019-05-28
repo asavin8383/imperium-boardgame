@@ -32,13 +32,12 @@ public class SeleniumRobotsService implements RobotsService {
 		
 		List<XmlSuite> suites = new ArrayList<XmlSuite>(); 
 		XmlSuite suite = new XmlSuite(); 
-		suite.setName("Arrangement: "+checkUnitJob.getArrangementID()+", ERDI: "+checkUnitJob.getErdiID());
+		suite.setName("JobID: "+checkUnitJob.getJobID());
 		
 		List<XmlTest> tests = new ArrayList<XmlTest>();
 		XmlTest test = robot.createTest(
 				"Check: "+checkUnitJob.getCheckUnit().getValue(),
-				checkUnitJob.getArrangementID(),
-				checkUnitJob.getErdiID(),
+				checkUnitJob.getJobID(),
 				checkUnitJob.getCheckUnit()
 		);
 		
