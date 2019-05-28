@@ -30,7 +30,7 @@ public class SendJobToKafka {
 	@Autowired
     private KafkaTemplate<String, ArrangementJob> kafkaTemplate;
 	
-	@Value("${spring.kafka.consume-topic}")
+	@Value("${spring.kafka.arrangements-topic}")
     private String topic;
 	
 	@Test

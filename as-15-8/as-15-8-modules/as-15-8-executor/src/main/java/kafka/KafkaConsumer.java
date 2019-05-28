@@ -20,12 +20,12 @@ public class KafkaConsumer {
 	
 	@KafkaListener(topics = "${spring.kafka.consume-topic}")
     public void consumeJson(CheckUnitJob checkUnitJob, Acknowledgment ack) {
-		log.info("Принято задание на проведение мероприятия: " + checkUnitJob.toString());
+		log.info("Принято задание: " + checkUnitJob.toString());
         CompletableFuture.runAsync(() -> {
         	try {
         		robotsService.run(checkUnitJob);
         	} catch (Exception ex) {
-        		log.error("Ошибка при обработке задания на проведение мероприятия: " + checkUnitJob.toString(), ex);
+        		log.error("Ошибка при обработке задания проверки запрещенного ресурса: " + checkUnitJob.toString(), ex);
         	}
         	ack.acknowledge();
         });

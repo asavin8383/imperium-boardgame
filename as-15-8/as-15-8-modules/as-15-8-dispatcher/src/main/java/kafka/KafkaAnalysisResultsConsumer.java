@@ -19,7 +19,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class KafkaAnalysisResultsConsumer {
 
-    @KafkaListener(topics = "${spring.kafka.analysis-results-topic}")
+    @KafkaListener(
+    	topics = "${spring.kafka.analysis-results-topic}",
+    	containerFactory = "kafkaAnalysisResultListenerContainerFactory"
+    )
     public void consumeAnalysisResults(AnalysisResult analysisResult, Acknowledgment ack) {
 		log.info("Принято сообщение с анализом результатов проверки: " + analysisResult.toString());
         CompletableFuture.runAsync(() -> {

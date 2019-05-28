@@ -65,7 +65,7 @@ public abstract class RobotScript extends AbstractTestNGSpringContextTests{
 	 * @throws MalformedURLException
 	 */
 	@BeforeClass
-	@Parameters({"hubURL", "browserName", "platformName", "applicationName", "arrangenmentID", "erdiID", "checkUnitType", "checkUnitValue"})
+	@Parameters({"hubURL", "browserName", "platformName", "applicationName", "jobID", "checkUnitType", "checkUnitValue"})
 	public void createDriver(
 			String hubURL,
 			String browserName,
@@ -117,9 +117,7 @@ public abstract class RobotScript extends AbstractTestNGSpringContextTests{
 		 
 		        @Override
 		        public void onSuccess(SendResult<String, ExecutionJobResult> result) {
-		            log.info("Сообщение успешно отправлено: " +
-		            		"jobID: " + result.getProducerRecord().value().getJobID() + ", " +
-		            		"CheckUnit: " + result.getProducerRecord().value().getCheckUnit().getValue());
+		            log.info("Сообщение успешно отправлено: " + result.getProducerRecord().value().toString());
 		        }
 		        @Override
 		        public void onFailure(Throwable ex) {

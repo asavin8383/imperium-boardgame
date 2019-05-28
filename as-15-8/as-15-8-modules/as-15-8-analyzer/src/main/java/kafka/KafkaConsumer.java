@@ -33,7 +33,7 @@ public class KafkaConsumer {
 	
 	@KafkaListener(topics = "${spring.kafka.consume-topic}")
     public void consumeExecutionPSJobMessage(ExecutionPSJobResult job, Acknowledgment ack) {
-		log.info("Принято задание на анализ результата проверки ПС/ПАСД: " + job.getCheckUnit().getValue());
+		log.info("Принято задание на анализ: " + job.toString());
         CompletableFuture.runAsync(() -> {
         	try {
         		AnalyzerService service = AnalyzerServiceFactory.getService(job.getClass());
@@ -65,9 +65,7 @@ public class KafkaConsumer {
 		 
 		        @Override
 		        public void onSuccess(SendResult<String, AnalysisResult> result) {
-		            log.info("Сообщение успешно отправлено: " +
-		            		"jobID: " + result.getProducerRecord().value().getJobID() + ", " +
-		            		"CheckUnit: " + result.getProducerRecord().value().getCheckUnit().getValue());
+		            log.info("Сообщение успешно отправлено: " + result.getProducerRecord().value().toString());
 		        }
 		        @Override
 		        public void onFailure(Throwable ex) {

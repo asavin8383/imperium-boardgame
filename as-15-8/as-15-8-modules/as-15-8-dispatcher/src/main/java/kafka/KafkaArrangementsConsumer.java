@@ -39,18 +39,17 @@ public class KafkaArrangementsConsumer {
 		this.checkUnitJobKafkaTemplate = checkUnitJobKafkaTemplate;
 	}
 
-	@KafkaListener(topics = "${spring.kafka.arrangements-topic}")
+	@KafkaListener(
+		topics = "${spring.kafka.arrangements-topic}",
+		containerFactory = "kafkaListenerContainerFactory"
+	)
     public void consumeArrangementJob(ArrangementJob arrangementJob, Acknowledgment ack) {
 		log.info("Принято задание на проведение мероприятия: " + arrangementJob.toString());
         CompletableFuture.runAsync(() -> {
         	try {
-				checkUnitJobService.prepareJobs(arrangementJob)
-					.forEach(checkUnitJob -> {
-						//TODO обеспечить гарантию сохранения результата и отправки сообщения
-						Long jobID = checkUnitJobService.saveCheckUnitJobAsResult(checkUnitJob);
-						checkUnitJob.setJobID(jobID);
-						send(checkUnitJob);
-					});
+				checkUnitJobService
+					.prepareJobs(arrangementJob)
+					.forEach(this::send);
         	} catch (Exception ex) {
         		log.error("Ошибка при обработке задания на проведение мероприятия: " + arrangementJob.toString(), ex);
         	}

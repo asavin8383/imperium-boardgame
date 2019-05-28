@@ -23,7 +23,7 @@ import enums.AccessToolUnit;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes={TestKafkaSenderConfig.class})
 @PropertySource("classpath:application.yml")
-public class SendJobToKafka {
+public class SendCheckUnitToKafka {
 
 	@Autowired
     private KafkaTemplate<String, CheckUnitJob> kafkaTemplate;

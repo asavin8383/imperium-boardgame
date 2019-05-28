@@ -77,24 +77,30 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
                         "  from sa.content\n" +
                         "  join sa.url on content.id = url.content_id and content.id IN (:ids)",
                     parameters,
-                    (result, rowNum) -> mapper.map(result, rowNum)
+                    (rs, rowNum) -> {
+                    	CheckUnitJob job = mapper.map(rs, rowNum);
+                    	Long jobID = saveCheckUnitJobAsResult(arrangementJob.getId(), rs.getLong("id"), job);
+                    	job.setJobID(jobID);
+                    	return job;
+                    }
             );
 
         } catch (Exception ex){
-
+        	throw new AS_15_8_DispatcherException("Ошибка при создании заданий на проверку запрещенных ресурсов!", ex);
         }
         return checkUnitJobs;
     }
 
-    @Override
-    public Long saveCheckUnitJobAsResult(CheckUnitJob checkUnitJob) {
+    private Long saveCheckUnitJobAsResult(Long arrangementID, Long erdiID, CheckUnitJob checkUnitJob) {
         try{
             ArrangementResult arrangementResult = new ArrangementResult();
+            arrangementResult.setArrangementId(arrangementID);
+            arrangementResult.setErdiId(erdiID);
             arrangementResult.setCheckUnitType(checkUnitJob.getCheckUnit().getType());
             arrangementResult.setCheckUnitValue(checkUnitJob.getCheckUnit().getValue());
             return arrangementResultRepo.save(arrangementResult).getId();
         }catch (Exception ex){
-            throw new AS_15_8_DispatcherException("Error saving arrangement result by check unit job!", ex);
+            throw new AS_15_8_DispatcherException("Ошибка сохранения задания на проверку запрещенного ресурса!", ex);
         }
     }
     

@@ -2,9 +2,7 @@ package kafka;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-import analysis.AnalysisResult;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -23,6 +21,7 @@ import org.springframework.kafka.listener.ContainerProperties.AckMode;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
+import analysis.AnalysisResult;
 import checkUnits.CheckUnitJob;
 import jobs.ArrangementJob;
 
@@ -51,6 +50,7 @@ public class KafkaConfiguration {
 
         config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         config.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, offset);
+        config.put(ConsumerConfig.GROUP_ID_CONFIG, group);
         config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         config.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
@@ -69,11 +69,8 @@ public class KafkaConfiguration {
     //************************Запуск мероприятия************************
     @Bean
     public ConsumerFactory<String, ArrangementJob> arrangementJobConsumerFactory() {
-        Map<String, Object> config = copyMap(consumerFactoryConfig());
-        config.put(ConsumerConfig.GROUP_ID_CONFIG, group);
-
         return new DefaultKafkaConsumerFactory<>(
-        	config,
+        	consumerFactoryConfig(),
         	new StringDeserializer(),
             new JsonDeserializer<>(ArrangementJob.class)
         );
@@ -85,7 +82,7 @@ public class KafkaConfiguration {
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, ArrangementJob> kafkaArrangementJobListenerContainerFactory() {
+    public ConcurrentKafkaListenerContainerFactory<String, ArrangementJob> kafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, ArrangementJob> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(arrangementJobConsumerFactory());
         factory.getContainerProperties().setAckMode(AckMode.MANUAL_IMMEDIATE);
@@ -108,13 +105,10 @@ public class KafkaConfiguration {
     //************************Анализ результатов************************
     @Bean
     public ConsumerFactory<String, AnalysisResult> analysisResultsConsumerFactory() {
-        Map<String, Object> config = copyMap(consumerFactoryConfig());
-        config.put(ConsumerConfig.GROUP_ID_CONFIG, group);
-
         return new DefaultKafkaConsumerFactory<>(
-                config,
-                new StringDeserializer(),
-                new JsonDeserializer<>(AnalysisResult.class)
+    		consumerFactoryConfig(),
+            new StringDeserializer(),
+            new JsonDeserializer<>(AnalysisResult.class)
         );
     }
 
@@ -139,12 +133,5 @@ public class KafkaConfiguration {
     @Bean
     public String analysisResultsTopicName() {
         return this.analysisResultTopicName;
-    }
-
-    //******************************************************************
-
-    private Map<String, Object> copyMap(Map<String, Object> source){
-        return source.entrySet().stream()
-                .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
     }
 }

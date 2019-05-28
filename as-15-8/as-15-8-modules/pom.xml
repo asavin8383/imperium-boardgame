@@ -70,6 +70,10 @@
 
 	<build>
 		<finalName>${project.artifactId}</finalName>
+		<sourceDirectory>src/main/java</sourceDirectory>
+		<testSourceDirectory>src/test/java</testSourceDirectory>
+		<outputDirectory>target/classes</outputDirectory>
+		<testOutputDirectory>target/classes</testOutputDirectory>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

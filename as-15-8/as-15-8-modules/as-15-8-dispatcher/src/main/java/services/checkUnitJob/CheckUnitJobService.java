@@ -12,11 +12,5 @@ import java.util.List;
 public interface CheckUnitJobService {
 
     List<CheckUnitJob> prepareJobs(ArrangementJob arrangementJob);
-
-    /**
-     * Сохранение задания на проверку в базу,
-     * чтобы потом можно было приложить к нему результат и скриншот
-     * @param checkUnitJob
-     */
-    Long saveCheckUnitJobAsResult(CheckUnitJob checkUnitJob);
+    
 }
