@@ -2,7 +2,9 @@ package kafka;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import analysis.AnalysisResult;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -37,20 +39,39 @@ public class KafkaConfiguration {
     @Value("${spring.kafka.auto-offset-reset}")
     private String offset;
     
-    @Value("${spring.kafka.produce-topic}")
+    @Value("${spring.kafka.jobs-topic}")
     private String checkUnitJobTopicName;
-	
+
+    @Value("${spring.kafka.analysis-results-topic}")
+    private String analysisResultTopicName;
+
     @Bean
-    public ConsumerFactory<String, ArrangementJob> jobsConsumerFactory() {
+    public Map<String, Object> consumerFactoryConfig(){
         Map<String, Object> config = new HashMap<>();
 
         config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        config.put(ConsumerConfig.GROUP_ID_CONFIG, group);
         config.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, offset);
         config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         config.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
-        
+        return config;
+    }
+
+    @Bean Map<String, Object> producerFactoryConfig(){
+        Map<String, Object> configProps = new HashMap<>();
+        configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        configProps.put(ProducerConfig.ACKS_CONFIG, "all");
+        configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+        return configProps;
+    }
+
+    //************************Запуск мероприятия************************
+    @Bean
+    public ConsumerFactory<String, ArrangementJob> arrangementJobConsumerFactory() {
+        Map<String, Object> config = copyMap(consumerFactoryConfig());
+        config.put(ConsumerConfig.GROUP_ID_CONFIG, group);
+
         return new DefaultKafkaConsumerFactory<>(
         	config,
         	new StringDeserializer(),
@@ -60,29 +81,70 @@ public class KafkaConfiguration {
     
     @Bean
     public ProducerFactory<String, CheckUnitJob> checkUnitJobProducerFactory() {
-    	Map<String, Object> configProps = new HashMap<>();
-    	configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-    	configProps.put(ProducerConfig.ACKS_CONFIG, "all");
-    	configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-    	configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
-    	return new DefaultKafkaProducerFactory<>(configProps);
+    	return new DefaultKafkaProducerFactory<>(producerFactoryConfig());
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, ArrangementJob> kafkaListenerContainerFactory() {
+    public ConcurrentKafkaListenerContainerFactory<String, ArrangementJob> kafkaArrangementJobListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, ArrangementJob> factory = new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(jobsConsumerFactory());
+        factory.setConsumerFactory(arrangementJobConsumerFactory());
         factory.getContainerProperties().setAckMode(AckMode.MANUAL_IMMEDIATE);
         return factory;
     }
  
     @Bean
-    public KafkaTemplate<String, CheckUnitJob> executionResultTemplate() {
+    public KafkaTemplate<String, CheckUnitJob> checkUnitJobTemplate() {
         return new KafkaTemplate<>(checkUnitJobProducerFactory());
     }
     
     @Bean
     public String checkUnitJobTopicName() {
     	return this.checkUnitJobTopicName;
+    }
+
+    //******************************************************************
+
+
+    //************************Анализ результатов************************
+    @Bean
+    public ConsumerFactory<String, AnalysisResult> analysisResultsConsumerFactory() {
+        Map<String, Object> config = copyMap(consumerFactoryConfig());
+        config.put(ConsumerConfig.GROUP_ID_CONFIG, group);
+
+        return new DefaultKafkaConsumerFactory<>(
+                config,
+                new StringDeserializer(),
+                new JsonDeserializer<>(AnalysisResult.class)
+        );
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, AnalysisResult> kafkaAnalysisResultListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, AnalysisResult> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(analysisResultsConsumerFactory());
+        factory.getContainerProperties().setAckMode(AckMode.MANUAL_IMMEDIATE);
+        return factory;
+    }
+
+    @Bean
+    public ProducerFactory<String, AnalysisResult> analysisResultProducerFactory() {
+        return new DefaultKafkaProducerFactory<>(producerFactoryConfig());
+    }
+
+    @Bean
+    public KafkaTemplate<String, AnalysisResult> analysisResultKafkaTemplate() {
+        return new KafkaTemplate<>(analysisResultProducerFactory());
+    }
+
+    @Bean
+    public String analysisResultsTopicName() {
+        return this.analysisResultTopicName;
+    }
+
+    //******************************************************************
+
+    private Map<String, Object> copyMap(Map<String, Object> source){
+        return source.entrySet().stream()
+                .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
     }
 }

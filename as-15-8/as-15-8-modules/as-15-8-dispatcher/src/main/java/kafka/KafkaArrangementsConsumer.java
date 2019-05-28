@@ -24,21 +24,21 @@ import services.checkUnitJob.CheckUnitJobService;
 @Slf4j
 public class KafkaArrangementsConsumer {
 
-	@Autowired
 	private CheckUnitJobService checkUnitJobService;
 	
-	@Autowired
-	private KafkaTemplate<String, CheckUnitJob> kafkaTemplate;
+	private KafkaTemplate<String, CheckUnitJob> checkUnitJobKafkaTemplate;
 
-	@Value("${spring.kafka.produce-topic}")
+	@Value("${spring.kafka.jobs-topic}")
 	private String checkUnitJobTopicName;
 
 	@Autowired
-	public KafkaArrangementsConsumer(CheckUnitJobService checkUnitJobService) {
+	public KafkaArrangementsConsumer(CheckUnitJobService checkUnitJobService,
+									 KafkaTemplate<String, CheckUnitJob> checkUnitJobKafkaTemplate) {
 		this.checkUnitJobService = checkUnitJobService;
+		this.checkUnitJobKafkaTemplate = checkUnitJobKafkaTemplate;
 	}
 
-	@KafkaListener(topics = "${spring.kafka.consume-topic}")
+	@KafkaListener(topics = "${spring.kafka.arrangements-topic}")
     public void consumeArrangementJob(ArrangementJob arrangementJob, Acknowledgment ack) {
 		log.info("Принято задание на проведение мероприятия: " + arrangementJob.toString());
         CompletableFuture.runAsync(() -> {
@@ -56,13 +56,13 @@ public class KafkaArrangementsConsumer {
         });
     }
 
-	public void send(CheckUnitJob checkUnitJob) {
+	private void send(CheckUnitJob checkUnitJob) {
 		try {
 			Message<CheckUnitJob> message = MessageBuilder
 					.withPayload(checkUnitJob)
 					.setHeader(KafkaHeaders.TOPIC, checkUnitJobTopicName)
 					.build();
-			ListenableFuture<SendResult<String, CheckUnitJob>> future = kafkaTemplate.send(message);
+			ListenableFuture<SendResult<String, CheckUnitJob>> future = checkUnitJobKafkaTemplate.send(message);
 
 			future.addCallback(new ListenableFutureCallback<SendResult<String, CheckUnitJob>>() {
 

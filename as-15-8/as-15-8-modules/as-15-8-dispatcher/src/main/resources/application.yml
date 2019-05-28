@@ -27,8 +27,9 @@ spring:
     datasource:
         url: jdbc:postgresql://192.168.5.195:5432/asdb
     kafka:
-        consume-topic: arrangements
-        produce-topic: jobs
+        arrangements-topic: arrangements
+        jobs-topic: jobs
+        analysis-results-topic: analysis_results
 
 ---
 
@@ -37,8 +38,9 @@ spring:
     datasource:
         url: jdbc:postgresql://192.168.5.195:5432/asdb_test
     kafka:
-        consume-topic: arrangements_ashabalin
-        produce-topic: jobs_ashabalin
+        arrangements-topic: arrangements_ashabalin
+        jobs-topic: jobs_ashabalin
+        analysis-results-topic: analysis_results_ashabalin
 
 ---
 
@@ -47,8 +49,9 @@ spring:
     datasource:
         url: jdbc:postgresql://192.168.5.195:5432/asdb_test
     kafka:
-        consume-topic: arrangements_asavin
-        produce-topic: jobs_asavin
+        arrangements-topic: arrangements_asavin
+        jobs-topic: jobs_asavin
+        analysis-results-topic: analysis_asavin
 
 ---
 
@@ -57,8 +60,9 @@ spring:
     datasource:
         url: jdbc:postgresql://192.168.5.195:5432/asdb_test
     kafka:
-        consume-topic: arrangements_pvorobiev
-        produce-topic: jobs_pvorobiev
+        arrangements-topic: arrangements_pvorobiev
+        jobs-topic: jobs_pvorobiev
+        analysis-results-topic: analysis_results_pvorobiev
 
 ---
 
@@ -67,5 +71,6 @@ spring:
     datasource:
         url: jdbc:postgresql://192.168.5.195:5432/asdb_test
     kafka:
-        consume-topic: arrangements_jspirina
-        produce-topic: jobs_jspirina
+        arrangements-topic: arrangements_jspirina
+        jobs-topic: jobs_jspirina
+        analysis-results-topic: analysis_results_jspirina
