@@ -1,12 +1,14 @@
 package service.impl;
 
-import org.springframework.stereotype.Service;
-
 import analysis.AnalysisResult;
 import analysis.PS_AnalysisJobResult;
+import enums.ArrangementUnitCheckResult;
 import execution.ExecutionJobResult;
 import execution.ExecutionPSJobResult;
+import org.springframework.stereotype.Service;
 import service.AnalyzerService;
+
+import static enums.ArrangementUnitCheckResult.*;
 
 /**
  * Сервис проверки результата работы робота, проверяющего ПС
@@ -26,7 +28,13 @@ public class PS_AnalyzerService implements AnalyzerService {
 		PS_AnalysisJobResult analysisResult = new PS_AnalysisJobResult();
 		analysisResult.setJobID(result.getJobID());
 		analysisResult.setCheckUnit(result.getCheckUnit());
-		analysisResult.setCheckResult(((ExecutionPSJobResult)result).isCheckResult());
+		analysisResult.setCheckResult(obtainResult(result));
 		return analysisResult;
+	}
+
+	private ArrangementUnitCheckResult obtainResult(ExecutionJobResult result) {
+		ExecutionPSJobResult psResult = (ExecutionPSJobResult) result;
+		return psResult.isCaptchaDetected() ? CAPTCHA_DETECTED :
+				(psResult.isLinkFound() ? FORBIDDEN_CONTENT_DETECTED : COMPLETED);
 	}
 }

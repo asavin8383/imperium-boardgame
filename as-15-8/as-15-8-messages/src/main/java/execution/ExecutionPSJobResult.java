@@ -11,6 +11,9 @@ import lombok.ToString;
 @NoArgsConstructor
 public class ExecutionPSJobResult extends ExecutionJobResult {
 
-	private boolean checkResult;
-	
+	private boolean linkFound;
+
+	private boolean captchaDetected;
+
+	private byte[] screenshot;
 }
