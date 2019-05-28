@@ -506,6 +506,80 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "Получение списка ЕРДИ мероприятия для сохранения в файл",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"value": "{{oper_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{url}}/arrangement_items/download?arrangementId=12",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"arrangement_items",
+										"download"
+									],
+									"query": [
+										{
+											"key": "arrangementId",
+											"value": "12"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Загрузка списка ЕРДИ в мероприятие",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "X-AUTH-TOKEN",
+										"value": "{{oper_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "[\n    {\n        \"id\": 1\n    },\n    {\n        \"id\": 2\n    }\n]"
+								},
+								"url": {
+									"raw": "{{url}}/arrangement_items/upload?arrangementId=12",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"arrangement_items",
+										"upload"
+									],
+									"query": [
+										{
+											"key": "arrangementId",
+											"value": "12"
+										}
+									]
+								}
+							},
+							"response": []
 						}
 					],
 					"_postman_isSubFolder": true
@@ -1185,25 +1259,25 @@
 	],
 	"variable": [
 		{
-			"id": "eeee95d5-9119-4aad-a2c9-18c28a1e34af",
+			"id": "b5333dce-b7b1-41a3-981b-97f6850d9cea",
 			"key": "url",
 			"value": "http://localhost:15800",
 			"type": "string"
 		},
 		{
-			"id": "04fc88ee-5bb9-4637-84e6-b11d41e5f2bf",
+			"id": "06d9c4f0-d402-4233-a561-2dab00663391",
 			"key": "oper_token",
 			"value": "",
 			"type": "string"
 		},
 		{
-			"id": "6711e9f3-65a8-4023-bce2-52c6397e5158",
+			"id": "f70e9a70-9084-483f-9e08-1e4ee746f720",
 			"key": "test_url",
 			"value": "http://192.168.5.253:15800",
 			"type": "string"
 		},
 		{
-			"id": "587e4e61-fa0e-4e2f-8450-9cfe36d2c235",
+			"id": "00dcebae-8ebf-4bfd-8030-300c16f53991",
 			"key": "admin_token",
 			"value": "",
 			"type": "string"

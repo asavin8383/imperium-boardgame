@@ -63,9 +63,8 @@ public class ArrangementController {
         return formalTaskRepo.findById(formalTaskId)
             .map(formalTask -> {
                 arrangement.setFormalTask(formalTask);
-                if (arrangement.getStartDate() != null){
-                    arrangement.setStatus(ExecutionStatus.PLANNED);
-                }
+                //Проверим, не нужно ли сменить статус
+                arrangementExecutionHelper.checkArrangementStatus(arrangement);
                 return arrangementRepo.save(arrangement);
             })
             .orElseThrow(() -> new AS_15_8_Exception("Error creating arrangement! Formal task was not found by id: " + formalTaskId));
@@ -126,11 +125,8 @@ public class ArrangementController {
         arrangement.setStartDate(newArrangement.getStartDate());
         arrangement.setEndDate(newArrangement.getEndDate());
         arrangement.setTitle(newArrangement.getTitle());
-        //Если новому мероприятию запланировали дату запуска в будущем, оно становится PLANNED
-        if(arrangement.getStatus().equals(ExecutionStatus.NEW) &&
-                arrangement.getStartDate() != null){
-            arrangement.setStatus(ExecutionStatus.PLANNED);
-        }
+        //Проверим, не нужно ли сменить статус
+        arrangementExecutionHelper.checkArrangementStatus(arrangement);
         return arrangement;
     }
 

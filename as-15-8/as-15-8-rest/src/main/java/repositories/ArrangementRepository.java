@@ -23,4 +23,7 @@ public interface ArrangementRepository extends JpaRepository<Arrangement, Long> 
     Optional<Arrangement> findByFormalTaskAndId(@Param("formalTaskId") Long formalTaskId, @Param("id") Long id);
 
     List<Arrangement> findAllByStatusAndStartDateIsLessThan(ExecutionStatus status, LocalDateTime startDate);
+
+    @Query("SELECT a FROM Arrangement a WHERE a.id = :id and a.status in ('NEW', 'PLANNED')")
+    Optional<Arrangement> findEditableArrangement(@Param("id") Long id);
 }
