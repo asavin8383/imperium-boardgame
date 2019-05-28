@@ -1,6 +1,7 @@
 package model.erdi;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import model.task.ArrangementItem;
 import org.hibernate.annotations.Immutable;
@@ -12,8 +13,10 @@ import java.util.List;
 @Table(schema = "sa", name = "content")
 @Immutable
 @Getter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class ERDI {
     @Id
+    @EqualsAndHashCode.Include
     private Long id;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "erdi")
