@@ -13,7 +13,5 @@ import lombok.ToString;
 public class PS_AnalysisJobResult extends AnalysisResult {
 
 	private ArrangementUnitCheckResult checkResult;
-
-	private byte[] screenshot;
 	
 }

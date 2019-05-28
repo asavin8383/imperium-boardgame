@@ -14,6 +14,4 @@ public class ExecutionPSJobResult extends ExecutionJobResult {
 	private boolean linkFound;
 
 	private boolean captchaDetected;
-
-	private byte[] screenshot;
 }

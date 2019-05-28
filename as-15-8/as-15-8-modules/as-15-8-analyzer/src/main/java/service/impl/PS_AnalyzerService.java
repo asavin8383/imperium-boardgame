@@ -29,6 +29,7 @@ public class PS_AnalyzerService implements AnalyzerService {
 		analysisResult.setJobID(result.getJobID());
 		analysisResult.setCheckUnit(result.getCheckUnit());
 		analysisResult.setCheckResult(obtainResult(result));
+		analysisResult.setScreenshot(result.getScreenshot());
 		return analysisResult;
 	}
 
