@@ -25,17 +25,25 @@ public class YandexScript extends SearchScript {
         WebElement input = driver.findElement(By.name("text"));
         input.sendKeys(getCheckUnit().getValue() + " ");
 
-        if (Objects.nonNull(getSuggestedLink(driver))) {
-            sendExecutionResult(createLinkFoundResult());
+        if (checkSuggestedLink(driver)) {
+            sendExecutionResult(createExecutionResult(true));
         } else {
             input.sendKeys(Keys.ENTER);
             sendExecutionResult(checkSearchResult());
         }
     }
 
+    private boolean checkSuggestedLink(WebDriver driver) {
+        WebElement element = getSuggestedLink(driver);
+        if (Objects.nonNull(element)) {
+            String href = element.getAttribute("href");
+            return getEqualityTest().equalTo(href);
+        }
+        return false;
+    }
+
     @Nullable
     private WebElement getSuggestedLink(WebDriver driver) {
-        // todo actually check link ?
         try {
             WebDriverWait wait = new WebDriverWait(driver, 1);
             return wait.until(presenceOfElementLocated(
@@ -59,16 +67,15 @@ public class YandexScript extends SearchScript {
 
     @Override
     protected List<WebElement> collectLinkElements() {
-        String xpathListLinks = ".//div[contains(@class, \"organic__path\")]/a[2]";
+        String xpathListLinks = "//li[@class=\"serp-item\"]//div[contains(@class, \"organic__path\")]";
         String xpathMainLinks = "//div[@class=\"serp-item\"]//div[contains(@class, \"organic__path\")]/a";
 
         List<WebElement> links = driver.findElements(By.xpath(xpathMainLinks));
-        driver.findElements(By.xpath("//li[@class=\"serp-item\"]"))
+        driver.findElements(By.xpath(xpathListLinks))
                 .forEach(element -> {
-                    List<WebElement> listLinks =
-                            element.findElements(By.xpath(xpathListLinks));
+                    List<WebElement> listLinks = element.findElements(By.xpath("./a[2]"));
                     if (listLinks.isEmpty()) {
-                        listLinks = element.findElements(By.xpath(".//h2/a"));
+                        listLinks = element.findElements(By.xpath("./a[1]"));
                     }
                     links.addAll(listLinks);
                 });
