@@ -6,6 +6,7 @@ import enums.ArrangementUnitCheckResult;
 import lombok.Data;
 import model.erdi.ERDI;
 import model.task.Arrangement;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -50,6 +51,7 @@ public class ArrangementResult implements Serializable {
 
     @Lob
     @Column(name="screenshot", columnDefinition="bytea")
+    @Type(type="org.hibernate.type.BinaryType")
     @JsonIgnore
     private byte[] screenshot;
 
