@@ -585,6 +585,61 @@
 					"_postman_isSubFolder": true
 				},
 				{
+					"name": "Результаты",
+					"item": [
+						{
+							"name": "Получение результатов мероприятия",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"value": "{{oper_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{url}}/results",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"results"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "11",
+											"disabled": true
+										},
+										{
+											"key": "arrangementId",
+											"value": "12",
+											"disabled": true
+										},
+										{
+											"key": "checkUnitValue",
+											"value": "anna",
+											"disabled": true
+										},
+										{
+											"key": "checkUnitType",
+											"value": "DOMAIN",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"_postman_isSubFolder": true
+				},
+				{
 					"name": "Добавление формализованного задания",
 					"request": {
 						"method": "POST",
@@ -1259,25 +1314,25 @@
 	],
 	"variable": [
 		{
-			"id": "b5333dce-b7b1-41a3-981b-97f6850d9cea",
+			"id": "65135fe1-bcf8-49f1-a938-05570550bc2e",
 			"key": "url",
 			"value": "http://localhost:15800",
 			"type": "string"
 		},
 		{
-			"id": "06d9c4f0-d402-4233-a561-2dab00663391",
+			"id": "47b7dc76-8c25-401f-8b2f-7564c405e742",
 			"key": "oper_token",
 			"value": "",
 			"type": "string"
 		},
 		{
-			"id": "f70e9a70-9084-483f-9e08-1e4ee746f720",
+			"id": "6e7923db-0e06-41ea-891f-8da73ffd0ce2",
 			"key": "test_url",
 			"value": "http://192.168.5.253:15800",
 			"type": "string"
 		},
 		{
-			"id": "00dcebae-8ebf-4bfd-8030-300c16f53991",
+			"id": "776e7b2c-4ea3-488c-b9bc-a1386f145131",
 			"key": "admin_token",
 			"value": "",
 			"type": "string"

@@ -1,8 +1,7 @@
 package model.result;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import checkUnits.CheckUnitType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import enums.ArrangementUnitCheckResult;
 import lombok.Data;
 import model.erdi.ERDI;
@@ -36,7 +35,7 @@ public class ArrangementResult implements Serializable {
     @ManyToOne(optional = false)
     @JoinColumn(name="content_id", foreignKey = @ForeignKey(name = "FK_arrangement_results_content_id"))
     @JsonIgnore
-    private ERDI ERDI;
+    private ERDI erdi;
 
     @Enumerated(EnumType.STRING)
     @Column(name="check_unit_type", nullable=false)
@@ -51,6 +50,7 @@ public class ArrangementResult implements Serializable {
 
     @Lob
     @Column(name="screenshot", columnDefinition="bytea")
+    @JsonIgnore
     private byte[] screenshot;
 
 
