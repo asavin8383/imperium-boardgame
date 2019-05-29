@@ -1,16 +1,16 @@
-package services.checkUnitJob;
+package services;
+
+import java.util.List;
 
 import checkUnits.CheckUnitJob;
 import jobs.ArrangementJob;
 
-import java.util.List;
-
 /**
- * Creation date: 24.05.2019
+ * Сервис работы с заданиями на проверку запрещенных ресурсов
  * Author: asavin
  */
 public interface CheckUnitJobService {
 
     List<CheckUnitJob> prepareJobs(ArrangementJob arrangementJob);
-    
+
 }

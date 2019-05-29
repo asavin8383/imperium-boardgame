@@ -3,8 +3,7 @@ package service.impl;
 import org.springframework.stereotype.Service;
 
 import analysis.AnalysisResult;
-import analysis.PS_AnalysisJobResult;
-import execution.ExecutionJobResult;
+import analysis.PS_AnalysisResult;
 import execution.ExecutionPSJobResult;
 import service.AnalyzerService;
 
@@ -14,19 +13,14 @@ import service.AnalyzerService;
  *
  */
 @Service
-public class PS_AnalyzerService implements AnalyzerService {
-	
-	@Override
-	public Class<? extends ExecutionJobResult> getExecutionResultType() {
-		return ExecutionPSJobResult.class;
-	}
+public class PS_AnalyzerService implements AnalyzerService<ExecutionPSJobResult> {
 
 	@Override
-	public AnalysisResult analyzeResult(ExecutionJobResult result) {
-		PS_AnalysisJobResult analysisResult = new PS_AnalysisJobResult();
+	public AnalysisResult analyzeResult(ExecutionPSJobResult result) {
+		PS_AnalysisResult analysisResult = new PS_AnalysisResult();
 		analysisResult.setJobID(result.getJobID());
 		analysisResult.setCheckUnit(result.getCheckUnit());
-		analysisResult.setCheckResult(((ExecutionPSJobResult)result).isCheckResult());
+		analysisResult.setCheckResult(result.isCheckResult());
 		return analysisResult;
 	}
 }

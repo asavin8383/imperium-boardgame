@@ -9,7 +9,7 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper=true)
 @ToString(callSuper=true)
 @NoArgsConstructor
-public class PS_AnalysisJobResult extends AnalysisResult {
+public class PS_AnalysisResult extends AnalysisResult {
 
 	private boolean checkResult;
 	

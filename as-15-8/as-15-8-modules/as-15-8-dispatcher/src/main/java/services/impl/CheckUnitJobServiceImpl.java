@@ -1,4 +1,4 @@
-package services.checkUnitJob.impl;
+package services.impl;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -20,7 +20,7 @@ import jobs.ArrangementJob;
 import jobs.ERDIJob;
 import model.ArrangementResult;
 import repositories.ArrangementResultRepository;
-import services.checkUnitJob.CheckUnitJobService;
+import services.CheckUnitJobService;
 
 /**
  * Creation date: 24.05.2019
@@ -90,7 +90,7 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
         }
         return checkUnitJobs;
     }
-
+    
     private Long saveCheckUnitJobAsResult(Long arrangementID, Long erdiID, CheckUnitJob checkUnitJob) {
         try{
             ArrangementResult arrangementResult = new ArrangementResult();

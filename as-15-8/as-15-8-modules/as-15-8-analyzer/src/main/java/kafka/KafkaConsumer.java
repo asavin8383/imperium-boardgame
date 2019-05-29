@@ -16,7 +16,7 @@ import org.springframework.util.concurrent.ListenableFutureCallback;
 
 import analysis.AnalysisResult;
 import common.AnalysisException;
-import execution.ExecutionPSJobResult;
+import execution.ExecutionJobResult;
 import lombok.extern.slf4j.Slf4j;
 import service.AnalyzerService;
 import service.AnalyzerServiceFactory;
@@ -32,11 +32,11 @@ public class KafkaConsumer {
 	private String analysisResultTopicName;
 	
 	@KafkaListener(topics = "${spring.kafka.consume-topic}")
-    public void consumeExecutionPSJobMessage(ExecutionPSJobResult job, Acknowledgment ack) {
+    public void consumeExecutionJobMessage(ExecutionJobResult job, Acknowledgment ack) {
 		log.info("Принято задание на анализ: " + job.toString());
         CompletableFuture.runAsync(() -> {
         	try {
-        		AnalyzerService service = AnalyzerServiceFactory.getService(job.getClass());
+        		AnalyzerService<? super ExecutionJobResult> service = AnalyzerServiceFactory.getService(job.getClass());
         		AnalysisResult analysisResult = service.analyzeResult(job);
         		sendAnalysisResult(analysisResult);
         		log.info("Анализ результата проверки ПС/ПАСД выполнен успешно : " + job.getCheckUnit().getValue());
