@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import controllers.helpers.UserHelper;
 import model.user.User;
 import repositories.UserRepository;
-import services.LdapService;
+import services.ldap.LdapService;
 
 @RestController
 @RequestMapping(path="/users", produces=MediaType.APPLICATION_JSON_VALUE)

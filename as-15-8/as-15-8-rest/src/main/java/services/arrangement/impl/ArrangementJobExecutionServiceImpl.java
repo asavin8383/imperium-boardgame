@@ -1,4 +1,4 @@
-package services.impl;
+package services.arrangement.impl;
 
 import exceptions.AS_15_8_Exception;
 import jobs.ArrangementJob;
@@ -13,7 +13,7 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
-import services.ArrangementJobExecutionService;
+import services.arrangement.ArrangementJobExecutionService;
 
 /**
  * Creation date: 23.05.2019
@@ -25,7 +25,7 @@ public class ArrangementJobExecutionServiceImpl implements ArrangementJobExecuti
 
     private KafkaTemplate<String, ArrangementJob> kafkaTemplate;
 
-    @Value("${spring.kafka.produce-topic}")
+    @Value("${spring.kafka.arrangements-topic}")
     private String arrangementJobTopicName;
 
     @Autowired

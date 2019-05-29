@@ -1,4 +1,4 @@
-package services;
+package services.ldap;
 
 import model.enums.Role;
 import model.user.User;

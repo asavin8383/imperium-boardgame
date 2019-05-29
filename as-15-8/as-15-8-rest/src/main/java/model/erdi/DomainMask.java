@@ -14,7 +14,7 @@ import javax.persistence.*;
  */
 
 @Entity
-@Subselect("select domain.id, domain from sa.domain join sa.content on domain.content_id=content.id and upper(content.blocktype) = 'DOMAIN-MASK'")
+@Subselect("select * from sa.domain where domain like '%*%'")
 @Immutable
 @Getter
 public class DomainMask {
@@ -22,6 +22,7 @@ public class DomainMask {
     @Id
     private Long id;
 
+    @Transient
     private CheckUnitType checkUnitType = CheckUnitType.DOMAIN_MASK;
 
     @Column(name = "domain")

@@ -25,6 +25,8 @@ spring:
             origin: "*"
     kafka:
         bootstrap-servers: 192.168.5.12:9094,192.168.5.184:9094,192.168.5.211:9094
+        group: portal
+        auto-offset-reset: earliest
 ldap:
     enabled: true
     domain: designdiv.ecleasing.ru
@@ -53,7 +55,8 @@ spring:
     datasource:
         url: jdbc:postgresql://192.168.5.195:5432/asdb
     kafka:
-        produce-topic: arrangements
+        arrangements-topic: arrangements
+        arrangement-notification-topic: arrangement_notifications
 cron:
     expression:
         arrangement: "0 * * ? * *"
@@ -68,7 +71,8 @@ spring:
     datasource:
         url: jdbc:postgresql://192.168.5.195:5432/asdb_test
     kafka:
-        produce-topic: arrangements_asavin
+        arrangements-topic: arrangements_asavin
+        arrangement-notification-topic: arrangement_notifications_asavin
 cron:
     expression:
         arrangement: "0 * * ? * *"
@@ -83,7 +87,8 @@ spring:
     datasource:
         url: jdbc:postgresql://192.168.5.195:5432/asdb_test
     kafka:
-        produce-topic: arrangements_ashabalin
+        arrangements-topic: arrangements_ashabalin
+        arrangement-notification-topic: arrangement_notifications_ashabalin
 cron:
     expression:
         arrangement: "0 * * ? * *"
@@ -97,7 +102,8 @@ spring:
     datasource:
         url: jdbc:postgresql://192.168.5.195:5432/asdb_test
     kafka:
-        produce-topic: arrangements_pvorobiev
+        arrangements-topic: arrangements_pvorobiev
+        arrangement-notification-topic: arrangement_notifications_pvorobiev
 cron:
     expression:
         arrangement: "0 * * ? * *"
@@ -112,7 +118,8 @@ spring:
     datasource:
         url: jdbc:postgresql://192.168.5.195:5432/asdb_test
     kafka:
-        produce-topic: arrangements_jspirina
+        arrangements-topic: arrangements_jspirina
+        arrangement-notification-topic: arrangement_notifications_jspirina
 cron:
     expression:
         arrangement: "0 * * ? * *"

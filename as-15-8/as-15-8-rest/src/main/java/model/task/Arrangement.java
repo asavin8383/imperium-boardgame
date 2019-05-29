@@ -58,11 +58,6 @@ public class Arrangement implements Serializable {
 	@JsonIgnore
 	private List<ArrangementItem> arrangementItems;
 
-	/**Записи об исполнении мероприятия*/
-	@OneToMany(mappedBy = "arrangement", cascade = CascadeType.ALL)
-	@JsonIgnore
-	private List<ArrangementExecution> arrangementExecutionList;
-	
 	/**Результат проведения мероприятия*/
     private String result;
 	

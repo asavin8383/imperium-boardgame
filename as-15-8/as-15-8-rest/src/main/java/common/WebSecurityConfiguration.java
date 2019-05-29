@@ -25,7 +25,7 @@ import advices.AuthenticationEntryPointImpl;
 import lombok.extern.slf4j.Slf4j;
 import security.JWTAuthenticationFilter;
 import security.JWTLoginFilter;
-import services.CustomUserDetailsMapper;
+import services.userDetails.CustomUserDetailsMapper;
 
 
 @Configuration

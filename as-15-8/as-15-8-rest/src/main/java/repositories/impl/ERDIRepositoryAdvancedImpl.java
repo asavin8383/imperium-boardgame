@@ -45,7 +45,7 @@ public class ERDIRepositoryAdvancedImpl implements ERDIRepositoryAdvanced {
         List<Predicate> predicates = new ArrayList<>();
 
         if (id != null) {
-            predicates.add(criteriaBuilder.equal(erdi.get("id"), id));
+            predicates.add(criteriaBuilder.equal(erdi.get(ERDI_.ID), id));
         }
         if (arrangementId != null) {
             Join<ERDI, ArrangementItem> arrangementItem = erdi.join(ERDI_.ARRANGEMENT_ITEMS);
