@@ -12,6 +12,16 @@ robots:
         browser: chrome
         app: google
         limit: 15
+    vpn:
+        platform: WIN8
+        browser: chrome
+        app: vpn
+        vpnProxy: 192.168.5.194:3128
+        etalonProxy:
+        useEtalonProxy: true
+        timeoutRequest: 30
+        tryCountRequest: 3
+
 spring:
     kafka:
         bootstrap-servers: 192.168.5.12:9094,192.168.5.184:9094,192.168.5.211:9094
