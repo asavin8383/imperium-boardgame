@@ -40,10 +40,11 @@ public class ERDIController {
             @RequestParam(required = false) String decisionNumber,
             @RequestParam(required = false) LocalDateTime decisionDate,
             @RequestParam(required = false) String checkUnitValue,
+            @RequestParam(required = false) String blocktype,
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize){
         PageRequest page = PageRequest.of(
                 pageNumber, pageSize, Sort.by("id").ascending());
-        return erdiRepoAdvanced.findPage(id, arrangementId, organization, page);
+        return erdiRepoAdvanced.findPage(id, arrangementId, organization, blocktype, page);
     }
 }
