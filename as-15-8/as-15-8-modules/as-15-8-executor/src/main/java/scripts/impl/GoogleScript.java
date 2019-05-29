@@ -5,6 +5,8 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import scripts.RobotScriptExecutionException;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,8 +38,13 @@ public class GoogleScript extends SearchScript {
 
 	@Override
 	protected boolean captcha() {
-		// todo google captcha
-		return driver.getCurrentUrl().contains("sorry");
+		try {
+			URI uri = new URI(driver.getCurrentUrl());
+			return uri.getPath().equals("/sorry/index");
+		} catch (URISyntaxException e) {
+			// ignore
+		}
+		return false;
 	}
 
 	@Override
