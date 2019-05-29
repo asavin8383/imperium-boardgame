@@ -21,6 +21,7 @@ public class URL {
     @Id
     private Long id;
 
+    @Transient
     private CheckUnitType checkUnitType = CheckUnitType.URL;
 
     @Column(name = "url")

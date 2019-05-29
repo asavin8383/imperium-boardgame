@@ -1,4 +1,4 @@
-package services;
+package services.arrangement;
 
 import jobs.ArrangementJob;
 

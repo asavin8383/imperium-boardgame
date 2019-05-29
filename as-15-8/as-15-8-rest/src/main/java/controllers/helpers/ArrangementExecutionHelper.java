@@ -4,8 +4,8 @@ import model.enums.ExecutionStatus;
 import model.task.Arrangement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import services.ArrangementJobCreationService;
-import services.ArrangementJobExecutionService;
+import services.arrangement.ArrangementJobCreationService;
+import services.arrangement.ArrangementJobExecutionService;
 
 /**
  * Creation date: 24.05.2019

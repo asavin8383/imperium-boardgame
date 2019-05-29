@@ -27,18 +27,14 @@ public class ERDI {
     private List<Decision> decisionList;
 
     @OneToMany(mappedBy = "erdi")
-    @JsonIgnore
     private List<Domain> domains;
 
     @OneToMany(mappedBy = "erdi")
-    @JsonIgnore
     private List<DomainMask> domainMasks;
 
     @OneToMany(mappedBy = "erdi")
-    @JsonIgnore
     private List<URL> urls;
 
     @OneToMany(mappedBy = "erdi")
-    @JsonIgnore
     private List<IP> ipList;
 }

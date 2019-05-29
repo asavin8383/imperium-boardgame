@@ -1,4 +1,4 @@
-package services.impl;
+package services.arrangement.impl;
 
 import jobs.ArrangementJob;
 import jobs.ERDIJob;
@@ -6,7 +6,7 @@ import model.task.Arrangement;
 import model.task.ArrangementItem;
 import org.springframework.stereotype.Service;
 import repositories.ArrangementItemRepository;
-import services.ArrangementJobCreationService;
+import services.arrangement.ArrangementJobCreationService;
 
 import java.util.ArrayList;
 import java.util.List;

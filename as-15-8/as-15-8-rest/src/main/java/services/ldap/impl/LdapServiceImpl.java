@@ -1,4 +1,4 @@
-package services.impl;
+package services.ldap.impl;
 
 import exceptions.AS_15_8_Exception;
 import lombok.extern.slf4j.Slf4j;
@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.stereotype.Service;
-import services.LdapService;
+import services.ldap.LdapService;
 import utils.UserAttributesMapper;
 
 import java.util.ArrayList;
