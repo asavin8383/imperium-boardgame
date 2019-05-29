@@ -19,7 +19,7 @@ import checkUnits.CheckUnitJob;
 import exceptions.AS_15_8_DispatcherException;
 import jobs.ArrangementJob;
 import lombok.extern.slf4j.Slf4j;
-import services.checkUnitJob.CheckUnitJobService;
+import services.CheckUnitJobService;
 
 @Service
 @Slf4j
