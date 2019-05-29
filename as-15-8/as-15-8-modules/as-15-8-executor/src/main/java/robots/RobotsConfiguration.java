@@ -7,8 +7,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import robots.impl.SeleniumRobot;
 import robots.impl.SeleniumSearchRobot;
+import robots.impl.SeleniumVpnRobot;
 import scripts.impl.GoogleScript;
+import scripts.impl.VPNScript;
 import scripts.impl.YandexScript;
 
 import java.net.MalformedURLException;
@@ -62,6 +65,29 @@ public class RobotsConfiguration {
 				Platform.valueOf(env.getProperty("robots.yandex.platform")),
 				env.getProperty("robots.yandex.app"),
 				env.getProperty("robots.yandex.limit"));
+	}
+
+	/**
+	 * Робот проверки ПАСД (VPN и прокси)
+	 * @return
+	 * @throws MalformedURLException
+	 */
+	@Bean
+	public Robot vpnRobot() throws MalformedURLException {
+
+		return new SeleniumVpnRobot<>(
+				AccessToolUnit.VPN,
+				new URL(this.seleniumHubUrl),
+				VPNScript.class,
+				env.getProperty("robots.vpn.browser"),
+				Platform.valueOf(env.getProperty("robots.vpn.platform")),
+				env.getProperty("robots.vpn.app"),
+				env.getProperty("robots.vpn.vpnProxy"),
+				env.getProperty("robots.vpn.etalonProxy"),
+				env.getProperty("robots.vpn.useEtalonProxy"),
+				env.getProperty("robots.vpn.timeoutRequest"),
+				env.getProperty("robots.vpn.tryCountRequest")
+		);
 	}
 	
 }
