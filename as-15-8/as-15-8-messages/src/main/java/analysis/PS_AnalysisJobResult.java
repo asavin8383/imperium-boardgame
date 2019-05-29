@@ -1,5 +1,6 @@
-package execution;
+package analysis;
 
+import enums.ArrangementUnitCheckResult;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -9,9 +10,8 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper=true)
 @ToString(callSuper=true)
 @NoArgsConstructor
-public class ExecutionPSJobResult extends ExecutionJobResult {
+public class PS_AnalysisJobResult extends AnalysisResult {
 
-	private boolean linkFound;
-
-	private boolean captchaDetected;
+	private ArrangementUnitCheckResult checkResult;
+	
 }

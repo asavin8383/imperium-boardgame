@@ -1,11 +1,14 @@
 package service.impl;
 
-import org.springframework.stereotype.Service;
-
 import analysis.AnalysisResult;
-import analysis.PS_AnalysisResult;
+import analysis.PS_AnalysisJobResult;
+import enums.ArrangementUnitCheckResult;
+import execution.ExecutionJobResult;
 import execution.ExecutionPSJobResult;
+import org.springframework.stereotype.Service;
 import service.AnalyzerService;
+
+import static enums.ArrangementUnitCheckResult.*;
 
 /**
  * Сервис проверки результата работы робота, проверяющего ПС
@@ -13,14 +16,26 @@ import service.AnalyzerService;
  *
  */
 @Service
-public class PS_AnalyzerService implements AnalyzerService<ExecutionPSJobResult> {
+public class PS_AnalyzerService implements AnalyzerService {
+	
+	@Override
+	public Class<? extends ExecutionJobResult> getExecutionResultType() {
+		return ExecutionPSJobResult.class;
+	}
 
 	@Override
-	public AnalysisResult analyzeResult(ExecutionPSJobResult result) {
-		PS_AnalysisResult analysisResult = new PS_AnalysisResult();
+	public AnalysisResult analyzeResult(ExecutionJobResult result) {
+		PS_AnalysisJobResult analysisResult = new PS_AnalysisJobResult();
 		analysisResult.setJobID(result.getJobID());
 		analysisResult.setCheckUnit(result.getCheckUnit());
-		analysisResult.setCheckResult(result.isCheckResult());
+		analysisResult.setCheckResult(obtainResult(result));
+		analysisResult.setScreenshot(result.getScreenshot());
 		return analysisResult;
+	}
+
+	private ArrangementUnitCheckResult obtainResult(ExecutionJobResult result) {
+		ExecutionPSJobResult psResult = (ExecutionPSJobResult) result;
+		return psResult.isCaptchaDetected() ? CAPTCHA_DETECTED :
+				(psResult.isLinkFound() ? FORBIDDEN_CONTENT_DETECTED : COMPLETED);
 	}
 }
