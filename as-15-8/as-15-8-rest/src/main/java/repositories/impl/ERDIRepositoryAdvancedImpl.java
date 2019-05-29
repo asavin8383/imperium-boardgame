@@ -37,7 +37,7 @@ public class ERDIRepositoryAdvancedImpl implements ERDIRepositoryAdvanced {
     }
 
     @Override
-    public Page<ERDI> findPage(Long id, Long arrangementId, String organization, String decisionNumber, Pageable pageable) {
+    public Page<ERDI> findPage(Long id, Long arrangementId, String organization, Pageable pageable) {
         CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
         CriteriaQuery<ERDI> select = criteriaBuilder.createQuery(ERDI.class);
         Root<ERDI> erdi = select.from(ERDI.class);

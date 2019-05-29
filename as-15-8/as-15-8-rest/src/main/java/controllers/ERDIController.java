@@ -44,6 +44,6 @@ public class ERDIController {
             @RequestParam(defaultValue = "10") int pageSize){
         PageRequest page = PageRequest.of(
                 pageNumber, pageSize, Sort.by("id").ascending());
-        return erdiRepoAdvanced.findPage(id, arrangementId, organization, decisionNumber, page);
+        return erdiRepoAdvanced.findPage(id, arrangementId, organization, page);
     }
 }
