@@ -10,5 +10,5 @@ import org.springframework.data.domain.Pageable;
  */
 public interface ERDIRepositoryAdvanced {
 
-    Page<ERDI> findPage(Long id, Long arrangementId, String organization, String decisionNumber, Pageable pageable);
+    Page<ERDI> findPage(Long id, Long arrangementId, String organization, String blocktype, Pageable pageable);
 }

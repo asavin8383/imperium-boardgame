@@ -39,6 +39,9 @@ public class SeleniumRobot<T> implements Robot{
 	
 	/** Имя приложения (ПС/ПАСД) */
 	private String applicationName;
+
+	/** Прокси по уполчанию (ПАСД) */
+	private String vpnProxy;
 	
 	/**
 	 * Робот на технологии Selenium
@@ -55,12 +58,33 @@ public class SeleniumRobot<T> implements Robot{
 			String browserName, 
 			Platform platform,
 			String applicationName) {
+		this(accessToolUnit, hubURL, scriptClass, browserName, platform, applicationName, null);
+	}
+
+	/**
+	 * Робот на технологии Selenium
+	 * @param accessToolUnit Проверяемая ПС/ПАСД
+	 * @param hubURL Класс скрипта робота
+	 * @param scriptClass URL хаба selenium Grid
+	 * @param browserName Имя браузера
+	 * @param platform Имя платформы
+	 * @param applicationName Имя приложения (ПС/ПАСД)
+	 * @param vpnProxy Прокси по умолчанию (ПАСД)
+	 */
+	public SeleniumRobot(AccessToolUnit accessToolUnit,
+						 URL hubURL,
+						 Class<T> scriptClass,
+						 String browserName,
+						 Platform platform,
+						 String applicationName,
+						 String vpnProxy) {
 		this.accessToolUnit = accessToolUnit;
 		this.hubURL = hubURL;
 		this.scriptClass = scriptClass;
 		this.browserName = browserName;
 		this.platformName = platform.name();
 		this.applicationName = applicationName;
+		this.vpnProxy = vpnProxy;
 	}
 	
 	@Override
@@ -77,6 +101,7 @@ public class SeleniumRobot<T> implements Robot{
 		test.addParameter("jobID", jobID.toString());
 		test.addParameter("checkUnitType", checkUnit.getType().toString());
 		test.addParameter("checkUnitValue", checkUnit.getValue());
+		test.addParameter("vpnProxy", vpnProxy);
 		
 		List<XmlClass> classes = new ArrayList<XmlClass>();
 		classes.add(new XmlClass(this.scriptClass));

@@ -1,7 +1,7 @@
 package controllers;
 
-import model.erdi.ERDI;
-import org.springframework.beans.factory.annotation.Autowired;
+import checkUnits.CheckUnitType;
+import model.result.ArrangementResult;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -11,40 +11,35 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import repositories.ERDIRepositoryAdvanced;
-
-import java.time.LocalDateTime;
+import repositories.ArrangementResultRepositoryAdvanced;
 
 /**
- * Creation date: 23.05.2019
+ * Creation date: 29.05.2019
  * Author: asavin
+ * Выдача результатов проведения мероприятия на фронт
  */
 
 @RestController
-@RequestMapping(path = "/erdi", produces = MediaType.APPLICATION_JSON_VALUE)
-@PreAuthorize("hasAnyRole('ROLE_OPERATOR','ROLE_ADMIN')")
-public class ERDIController {
+@RequestMapping(path = "/results", produces = MediaType.APPLICATION_JSON_VALUE)
+@PreAuthorize("hasAnyRole('ROLE_OPERATOR', 'ROLE_ADMIN')")
+public class ArrangementResultsController {
 
-    private ERDIRepositoryAdvanced erdiRepoAdvanced;
+    private ArrangementResultRepositoryAdvanced arrangementResultRepoAdvanced;
 
-    @Autowired
-    public ERDIController(ERDIRepositoryAdvanced erdiRepoAdvanced) {
-        this.erdiRepoAdvanced = erdiRepoAdvanced;
+    public ArrangementResultsController(ArrangementResultRepositoryAdvanced arrangementResultRepoAdvanced) {
+        this.arrangementResultRepoAdvanced = arrangementResultRepoAdvanced;
     }
 
     @GetMapping
-    public Page<ERDI> findList(
+    public Page<ArrangementResult> findList(
             @RequestParam(required = false) Long id,
             @RequestParam(required = false) Long arrangementId,
-            @RequestParam(required = false) String organization,
-            @RequestParam(required = false) String decisionNumber,
-            @RequestParam(required = false) LocalDateTime decisionDate,
             @RequestParam(required = false) String checkUnitValue,
-            @RequestParam(required = false) String blocktype,
+            @RequestParam(required = false)CheckUnitType checkUnitType,
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize){
         PageRequest page = PageRequest.of(
                 pageNumber, pageSize, Sort.by("id").ascending());
-        return erdiRepoAdvanced.findPage(id, arrangementId, organization, blocktype, page);
+        return arrangementResultRepoAdvanced.findPage(id, arrangementId, checkUnitValue, page, checkUnitType);
     }
 }

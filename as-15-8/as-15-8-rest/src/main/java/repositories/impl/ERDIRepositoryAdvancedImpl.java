@@ -37,7 +37,7 @@ public class ERDIRepositoryAdvancedImpl implements ERDIRepositoryAdvanced {
     }
 
     @Override
-    public Page<ERDI> findPage(Long id, Long arrangementId, String organization, String decisionNumber, Pageable pageable) {
+    public Page<ERDI> findPage(Long id, Long arrangementId, String organization, String blocktype, Pageable pageable) {
         CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
         CriteriaQuery<ERDI> select = criteriaBuilder.createQuery(ERDI.class);
         Root<ERDI> erdi = select.from(ERDI.class);
@@ -54,6 +54,9 @@ public class ERDIRepositoryAdvancedImpl implements ERDIRepositoryAdvanced {
         if(organization != null) {
             Join<ERDI, Decision> decision = erdi.join(ERDI_.DECISION_LIST);
             predicates.add(criteriaBuilder.like(criteriaBuilder.lower(decision.get(Decision_.ORGANIZATION)), "%" + organization.toLowerCase() + "%"));
+        }
+        if(blocktype != null){
+            predicates.add(criteriaBuilder.like(criteriaBuilder.lower(erdi.get(ERDI_.BLOCKTYPE)), "%" + blocktype.toLowerCase() + "%" ));
         }
         select.where(predicates.toArray(new Predicate[0]));
 

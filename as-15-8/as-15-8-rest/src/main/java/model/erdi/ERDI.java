@@ -1,5 +1,6 @@
 package model.erdi;
 
+import checkUnits.CheckUnitType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -15,9 +16,19 @@ import java.util.List;
 @Getter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class ERDI {
+
+    private static final String defaultType = "URL";
+
     @Id
     @EqualsAndHashCode.Include
     private Long id;
+
+    @Basic
+    @JsonIgnore
+    private String blocktype;
+
+    @Transient
+    private String checkUnitType;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "erdi")
     @JsonIgnore
@@ -37,4 +48,13 @@ public class ERDI {
 
     @OneToMany(mappedBy = "erdi")
     private List<IP> ipList;
+
+    @PostLoad
+    void fillCheckUnitType(){
+        if(blocktype==null){
+            checkUnitType = defaultType;
+        } else {
+            checkUnitType = blocktype.toUpperCase();
+        }
+    }
 }

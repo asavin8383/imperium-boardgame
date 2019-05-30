@@ -52,20 +52,32 @@ public abstract class RobotScript extends AbstractTestNGSpringContextTests{
 	
 	@Getter
 	private CheckUnit checkUnit;
-	
+
+	@Getter
+	private String hubURL;
+
+	@Getter
+	private String platformName;
+
+	@Getter
+	private String applicationName;
+
+	@Getter
+	private String browserName;
+
+	@Getter
+	protected String vpnProxy;
+
 	/**
 	 * Метод создания драйвера
 	 * @param hubURL URL хаба selenium
 	 * @param browserName Имя браузера
 	 * @param platformName Имя платформы
 	 * @param applicationName Имя приложения (ПС/ПАСД)
-	 * @param arrangenmentID Идентификатор мероприятия
-	 * @param erdiID Идентификатор ЕРДИ
-	 * @param url URL для проверки
 	 * @throws MalformedURLException
 	 */
 	@BeforeClass
-	@Parameters({"hubURL", "browserName", "platformName", "applicationName", "jobID", "checkUnitType", "checkUnitValue"})
+	@Parameters({"hubURL", "browserName", "platformName", "applicationName", "jobID", "checkUnitType", "checkUnitValue", "vpnProxy"})
 	public void createDriver(
 			String hubURL,
 			String browserName,
@@ -73,12 +85,19 @@ public abstract class RobotScript extends AbstractTestNGSpringContextTests{
 			String applicationName,
 			String jobID,
 			String checkUnitType,
-			String checkUnitValue
+			String checkUnitValue,
+			String vpnProxy
 		) throws MalformedURLException {
 		
-			this.driver = DriverFactory.createDriver(new URL(hubURL), platformName, applicationName, browserName);
+			this.driver = DriverFactory.createDriver(new URL(hubURL), platformName, applicationName, browserName, vpnProxy);
 			this.jobID = jobID;
 			this.checkUnit = new CheckUnit(CheckUnitType.valueOf(checkUnitType), checkUnitValue);
+
+			this.hubURL = hubURL;
+			this.platformName = platformName;
+			this.applicationName = applicationName;
+			this.browserName = browserName;
+			this.vpnProxy = vpnProxy;
 	}
 	
 	/**
