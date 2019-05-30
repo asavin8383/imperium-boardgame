@@ -2,6 +2,7 @@ package scripts;
 
 import java.net.URL;
 
+import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.Proxy;
@@ -15,6 +16,7 @@ import org.openqa.selenium.remote.RemoteWebDriver;
  * @author shabalinAI
  *
  */
+@Slf4j
 public class DriverFactory {
 	
 	/**
@@ -35,11 +37,11 @@ public class DriverFactory {
 			oProxy.setHttpProxy(proxy);
 			oProxy.setSslProxy(proxy);
 			// oProxy.setSocksProxy(proxy); // так делать не нужно
-			System.out.println("WebDriver set proxy: " + proxy);
+			log.info("WebDriver set proxy: " + proxy);
 			((DesiredCapabilities)cpb).setCapability(CapabilityType.PROXY, oProxy);
 		}
 		else {
-			System.out.println("WebDriver set proxy: NONE");
+			log.info("WebDriver set proxy: NONE");
 			//oProxy.setNoProxy("");
 			//((DesiredCapabilities)cpb).setCapability(CapabilityType.PROXY, oProxy);
 		}

@@ -8,6 +8,7 @@ import common.AnalysisException;
 import enums.CheckUnitJobResult;
 import execution.ExecutionVpnJobResult;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import model.KeyWord;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,7 @@ import static enums.CheckUnitJobResult.*;
  * Сервис проверки результата работы робота, проверяющего ПС
  *
  */
+@Slf4j
 @Service
 public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResult> {
 
@@ -97,19 +99,21 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 		if (aRes.getResponseError()){
 			String errorCode = aRes.getResponseErrorCode();
 
+			CheckUnitJobResult errorResult = HTTP_SERVER_SEND_NO_RESPONSE;
+
 			if (errorCode == null || errorCode.isEmpty())
-				return TIMEOUT_ERROR;
+				errorResult = TIMEOUT_ERROR;
 
-			if (errorCode.contains("TIME"))
-				return TIMEOUT_ERROR;
+			else if (errorCode.contains("TIMEOUT") || errorCode.contains("TIME_OUT"))
+				errorResult = TIMEOUT_ERROR;
 
-			if (errorCode.contains("DNS"))
-				return DNS_ERROR;
+			else if (errorCode.contains("DNS"))
+				errorResult = DNS_ERROR;
 
-			if (errorCode.contains("SOCKET"))
-				return SOCKET_ERROR;
+			else if (errorCode.contains("SOCKET"))
+				errorResult = SOCKET_ERROR;
 
-			return HTTP_SERVER_SEND_NO_RESPONSE;
+			return errorResult;
 		}
 
 		// todo - взять адрес VPN заглушки
@@ -145,7 +149,7 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 		int maxStubWeight = getMaxWeight();
 		double kWeight = (double)sumStubWeight / (double)getMaxWeight();
 
-		System.out.println("sumStubWeight = " + sumStubWeight + ", maxWeight = " + maxStubWeight + ", k = " + kWeight);
+		log.info("sumStubWeight = " + sumStubWeight + ", maxWeight = " + maxStubWeight + ", k = " + kWeight);
 
 		aRes.setStubScoreInfo(String.format("%d/%d (%.2f)", sumStubWeight, maxStubWeight, kWeight));
 
