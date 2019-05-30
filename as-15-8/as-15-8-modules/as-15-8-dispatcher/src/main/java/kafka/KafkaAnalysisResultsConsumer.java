@@ -47,18 +47,20 @@ public class KafkaAnalysisResultsConsumer {
     	containerFactory = "kafkaAnalysisResultListenerContainerFactory"
     )
     public void consumeAnalysisResults(AnalysisResult analysisResult, Acknowledgment ack) {
-		log.info("Принято сообщение с анализом результатов проверки: " + analysisResult.toString());
+		log.info("Принято сообщение с анализом результатов проверки: " + analysisResult.getJobID() + ", " + analysisResult.getCheckUnit().getValue());
         CompletableFuture.runAsync(() -> {
         	try {       		
         		ArrangementResult jobResult = checkUnitService.processJobResult(analysisResult);
-        		log.info("Результаты выполнения проверки успешно обработаны: " + analysisResult.getJobID());
+        		log.info("Результаты выполнения проверки успешно обработаны: " + analysisResult.getJobID() + ", " + analysisResult.getCheckUnit().getValue());
         		
         		ArrangementStatus arrStatus = checkUnitService.checkArrangementStatus(jobResult.getArrangementId());
-        		if(arrStatus == ArrangementStatus.FINISHED)
+        		if(arrStatus == ArrangementStatus.FINISHED) {
+        			log.info("Мероприятие успешно завешено: " + jobResult.getArrangementId());
         			sendArrangementStatusMessage(new ArrangementStatusNotification(jobResult.getArrangementId(), arrStatus));
+        		}
         		
         	} catch (Exception ex) {
-        		log.error("Ошибка при обработке задания на проведение мероприятия: " + analysisResult.toString(), ex);
+        		log.error("Ошибка при обработке задания на проведение мероприятия: " + analysisResult.getJobID() + ", " + analysisResult.getCheckUnit().getValue(), ex);
         	}
         	ack.acknowledge();
         });

@@ -18,6 +18,7 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
@@ -86,7 +87,7 @@ public abstract class RobotScript extends AbstractTestNGSpringContextTests{
 			String jobID,
 			String checkUnitType,
 			String checkUnitValue,
-			String vpnProxy
+			@Optional String vpnProxy
 		) throws MalformedURLException {
 		
 			this.driver = DriverFactory.createDriver(new URL(hubURL), platformName, applicationName, browserName, vpnProxy);
@@ -136,7 +137,8 @@ public abstract class RobotScript extends AbstractTestNGSpringContextTests{
 		 
 		        @Override
 		        public void onSuccess(SendResult<String, ExecutionJobResult> result) {
-		            log.info("Сообщение успешно отправлено: " + result.getProducerRecord().value().toString());
+		        	ExecutionJobResult mess = result.getProducerRecord().value();
+		            log.info("Сообщение успешно отправлено: " + mess.getJobID() + ", " + mess.getCheckUnit().getValue());
 		        }
 		        @Override
 		        public void onFailure(Throwable ex) {

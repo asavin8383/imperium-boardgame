@@ -33,15 +33,15 @@ public class KafkaConsumer {
 	
 	@KafkaListener(topics = "${spring.kafka.consume-topic}")
     public void consumeExecutionJobMessage(ExecutionJobResult job, Acknowledgment ack) {
-		log.info("Принято задание на анализ: " + job.toString());
+		log.info("Принято задание на анализ: " + job.getJobID() + ", "+job.getCheckUnit().getValue());
         CompletableFuture.runAsync(() -> {
         	try {
         		AnalyzerService<? super ExecutionJobResult> service = AnalyzerServiceFactory.getService(job.getClass());
         		AnalysisResult analysisResult = service.analyzeResult(job);
         		sendAnalysisResult(analysisResult);
-        		log.info("Анализ результата проверки ПС/ПАСД выполнен успешно : " + job.getCheckUnit().getValue());
+        		log.info("Анализ результата проверки ПС/ПАСД выполнен успешно : " + job.getJobID() + ", " + job.getCheckUnit().getValue());
         	} catch (Exception ex) {
-        		log.error("Ошибка при обработке задания на анализ результатов проверки ПС/ПАСД : " + job.getCheckUnit().getValue(), ex);
+        		log.error("Ошибка при обработке задания на анализ результатов проверки ПС/ПАСД : " + job.getJobID() + ", " + job.getCheckUnit().getValue(), ex);
         	}
         	ack.acknowledge();
         });
@@ -65,7 +65,8 @@ public class KafkaConsumer {
 		 
 		        @Override
 		        public void onSuccess(SendResult<String, AnalysisResult> result) {
-		            log.info("Сообщение успешно отправлено: " + result.getProducerRecord().value().toString());
+		        	AnalysisResult mess = result.getProducerRecord().value();
+		            log.info("Сообщение успешно отправлено: " + mess.getJobID() + ", " + mess.getCheckUnit().getValue());
 		        }
 		        @Override
 		        public void onFailure(Throwable ex) {

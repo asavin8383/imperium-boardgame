@@ -31,7 +31,7 @@ public class RobotListener implements ITestListener{
 
 	@Override
 	public void onTestSkipped(ITestResult result) {
-		log.info("Робот был остановлен: "+getTestName(result));
+		log.error("Робот был остановлен: "+getTestName(result), result.getThrowable());
 	}
 
 	@Override

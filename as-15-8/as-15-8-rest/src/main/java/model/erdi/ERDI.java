@@ -1,14 +1,23 @@
 package model.erdi;
 
-import checkUnits.CheckUnitType;
+import java.util.List;
+
+import javax.persistence.Basic;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.PostLoad;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+
+import org.hibernate.annotations.Immutable;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import model.task.ArrangementItem;
-import org.hibernate.annotations.Immutable;
-
-import javax.persistence.*;
-import java.util.List;
 
 @Entity
 @Table(schema = "sa", name = "content")
