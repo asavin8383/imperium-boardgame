@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import repositories.ArrangementResultRepository;
@@ -47,9 +49,17 @@ public class ArrangementResultsController {
     }
 
     @GetMapping(value = "/screenshot", produces = MediaType.IMAGE_PNG_VALUE)
-    public @ResponseBody byte[] getScreenshot(@RequestParam Long id){
+    public @ResponseBody
+    ResponseEntity<byte[]> getScreenshot(@RequestParam Long id){
         return arrangementResultRepo.findById(id)
-                .map(ArrangementResult::getScreenshot)
-                .orElseGet(null);
+                .map(arrangementResult -> {
+                    byte[] screenshot = arrangementResult.getScreenshot();
+                    if (screenshot != null){
+                        return new ResponseEntity<>(screenshot, HttpStatus.OK);
+                    } else {
+                        return new ResponseEntity<>(new byte[0], HttpStatus.NO_CONTENT);
+                    }
+                })
+                .orElseGet(() -> new ResponseEntity<>(null, HttpStatus.NO_CONTENT));
     }
 }
