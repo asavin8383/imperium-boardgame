@@ -36,7 +36,7 @@ public class DetailResultsVpn implements Serializable  {
     @Column(name="page_size_etalon")
     private Integer pageSizeEtalon;
 
-    @Column(name="key_words")
+    @Column(name="key_words_count")
     private Integer keyWordsCount;
 
     @Column(name="link_count")

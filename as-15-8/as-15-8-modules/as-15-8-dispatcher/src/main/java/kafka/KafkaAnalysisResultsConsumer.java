@@ -3,22 +3,14 @@ package kafka;
 import java.util.concurrent.CompletableFuture;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.Acknowledgment;
-import org.springframework.kafka.support.KafkaHeaders;
-import org.springframework.kafka.support.SendResult;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.ListenableFutureCallback;
 
 import analysis.AnalysisResult;
 import arrangement.ArrangementStatusNotification;
 import enums.ArrangementStatus;
-import exceptions.AS_15_8_DispatcherException;
+import enums.CheckUnitJobResult;
 import lombok.extern.slf4j.Slf4j;
 import model.ArrangementResult;
 import services.CheckUnitJobService;
@@ -37,10 +29,7 @@ public class KafkaAnalysisResultsConsumer {
 	private CheckUnitJobService checkUnitService;
 	
 	@Autowired
-	private KafkaTemplate<String, ArrangementStatusNotification> arrangementStatusKafkaTemplate;
-	
-	@Value("${spring.kafka.arrangement-notifications-topic}")
-	private String arrangementNotificationsTopicName;
+	private ArrangementStatusProducer arrangementStatusProducer;
 	
     @KafkaListener(
     	topics = "${spring.kafka.analysis-results-topic}",
@@ -56,40 +45,23 @@ public class KafkaAnalysisResultsConsumer {
         		ArrangementStatus arrStatus = checkUnitService.checkArrangementStatus(jobResult.getArrangementId());
         		if(arrStatus == ArrangementStatus.FINISHED) {
         			log.info("Мероприятие успешно завешено: " + jobResult.getArrangementId());
-        			sendArrangementStatusMessage(new ArrangementStatusNotification(jobResult.getArrangementId(), arrStatus));
+        			arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(jobResult.getArrangementId(), arrStatus));
         		}
-        		
+            	ack.acknowledge();
         	} catch (Exception ex) {
-        		log.error("Ошибка при обработке задания на проведение мероприятия: " + analysisResult.getJobID() + ", " + analysisResult.getCheckUnit().getValue(), ex);
+        		try {
+	        		log.error("Ошибка при обработке сообщения с анализом результатов проверки: " + analysisResult.getJobID() + ", " + analysisResult.getCheckUnit().getValue(), ex);
+	        		ArrangementResult jobResult = checkUnitService.updateJobStatus(analysisResult.getJobID(), CheckUnitJobResult.INTERNAL_ERROR);
+	        		ArrangementStatus arrStatus = checkUnitService.checkArrangementStatus(jobResult.getArrangementId());
+	        		if(arrStatus == ArrangementStatus.FINISHED) {
+	        			log.info("Мероприятие успешно завешено: " + jobResult.getArrangementId());
+	        			arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(jobResult.getArrangementId(), arrStatus));
+	        		}
+	            	ack.acknowledge();
+        		} catch(ExceptionInInitializerError newEx) {
+        			log.error("Ошибка при обработке сообщения с анализом результатов проверки: " + analysisResult.getJobID() + ", " + analysisResult.getCheckUnit().getValue(), newEx);
+        		}
         	}
-        	ack.acknowledge();
         });
-    }
-    
-    private void sendArrangementStatusMessage(ArrangementStatusNotification arrangementStatusNotification) {
-    	try {
-			Message<ArrangementStatusNotification> message = MessageBuilder
-	                .withPayload(arrangementStatusNotification)
-	                .setHeader(KafkaHeaders.TOPIC, arrangementNotificationsTopicName)
-	                .build();
-			
-			ListenableFuture<SendResult<String, ArrangementStatusNotification>> future =
-					arrangementStatusKafkaTemplate.send(message);
-		     
-		    future.addCallback(new ListenableFutureCallback<SendResult<String, ArrangementStatusNotification>>() {
-		 
-		        @Override
-		        public void onSuccess(SendResult<String, ArrangementStatusNotification> result) {
-		            log.info("Сообщение успешно отправлено: " + result.getProducerRecord().value().toString());
-		        }
-		        @Override
-		        public void onFailure(Throwable ex) {
-		        	throw new AS_15_8_DispatcherException("Ошибка при отправке сообщения со статусом мероприятия", ex);
-		        }
-		    });
-		    future.get();
-		} catch (Exception ex) {
-			throw new AS_15_8_DispatcherException("Ошибка при отправке сообщения со статусом мероприятия", ex);
-		}
     }
 }

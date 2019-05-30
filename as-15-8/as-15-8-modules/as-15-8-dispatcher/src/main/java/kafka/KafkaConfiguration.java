@@ -24,6 +24,7 @@ import org.springframework.kafka.support.serializer.JsonSerializer;
 import analysis.AnalysisResult;
 import arrangement.ArrangementStatusNotification;
 import checkUnits.CheckUnitJob;
+import checkUnits.CheckUnitStatusNotification;
 import jobs.ArrangementJob;
 
 @EnableKafka
@@ -111,16 +112,28 @@ public class KafkaConfiguration {
         return factory;
     }
 
+    //******************************************************************
+
+
+    //************************Статус проверки************************
+
     @Bean
-    public ProducerFactory<String, AnalysisResult> analysisResultProducerFactory() {
-        return new DefaultKafkaProducerFactory<>(producerFactoryConfig());
+    public ConsumerFactory<String, CheckUnitStatusNotification> jobNotificationsConsumerFactory() {
+        return new DefaultKafkaConsumerFactory<>(
+    		consumerFactoryConfig(),
+            new StringDeserializer(),
+            new JsonDeserializer<>(CheckUnitStatusNotification.class)
+        );
     }
 
     @Bean
-    public KafkaTemplate<String, AnalysisResult> analysisResultKafkaTemplate() {
-        return new KafkaTemplate<>(analysisResultProducerFactory());
+    public ConcurrentKafkaListenerContainerFactory<String, CheckUnitStatusNotification> jobNotificationsListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, CheckUnitStatusNotification> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(jobNotificationsConsumerFactory());
+        factory.getContainerProperties().setAckMode(AckMode.MANUAL_IMMEDIATE);
+        return factory;
     }
-
+    
     //******************************************************************
 
 

@@ -101,11 +101,7 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
     
 	@Override
 	public ArrangementResult processJobResult(AnalysisResult result) {
-		ArrangementResult job = arrangementResultRepo.findById(result.getJobID())
-			.orElseThrow(() -> 
-				new AS_15_8_DispatcherException("Ошибка! Задание не найдено! ID: " + result.getJobID())
-			);
-		
+		ArrangementResult job = findJobByID(result.getJobID());
 		AnalysisResultService<? super AnalysisResult> service = AnalysisResultServiceFactory.getService(result.getClass());
 		job.setResult(service.processResult(result));  		
 		job.setScreenshot(result.getScreenshot());
@@ -155,4 +151,18 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
             return checkUnitJob;
         }
     }
+
+	@Override
+	public ArrangementResult updateJobStatus(Long jobID, CheckUnitJobResult status) {
+		ArrangementResult job = findJobByID(jobID);
+		job.setResult(status);
+		return arrangementResultRepo.save(job);
+	}
+	
+	private ArrangementResult findJobByID(Long jobID) {
+		return arrangementResultRepo.findById(jobID)
+			.orElseThrow(() -> 
+				new AS_15_8_DispatcherException("Ошибка! Задание не найдено! ID: " + jobID)
+			);
+	}
 }
