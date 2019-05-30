@@ -11,8 +11,7 @@ import lombok.NoArgsConstructor;
 public class ExecutionVpnJobResult extends ExecutionJobResult{
     private Integer httpStatus;
     private String chromeErrorCode;
-    private Boolean timeoutError;
-    private byte[] screenShot;
+    private Boolean responseError;
     private String finalUrlPage;
     private String pageContent;
     private String pageContentEtalon;

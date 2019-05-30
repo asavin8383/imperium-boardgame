@@ -32,6 +32,7 @@ public class ERDI {
     @EqualsAndHashCode.Include
     private Long id;
 
+    //TODO Плохо!!! Нужно по-человечески разобраться
     @Basic
     @JsonIgnore
     private String blocktype;

@@ -1,6 +1,7 @@
 package scripts.impl;
 
 import execution.ExecutionVpnJobResult;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -81,20 +82,45 @@ public class VPNScript extends RobotScript {
         if (!checkBrowserChrome())
             throw new RobotScriptExecutionException("Ошибка, неправильный браузер! Для данного робота поддерживатся только браузер CHROME!");
 
-        boolean timeoutError = false;
+        String url = getCheckUnit().getValue();
 
         // получение страницы от VPN (драйвер уже настроен)
-        driver.get(getCheckUnit().getValue());
-        driver.manage().window().fullscreen();
-        ScriptUtils.waitDriver(driver, 3);
-        ScriptUtils.waitPageLoading(driver);
+        PageResult pageSourceResult = null;
+        int tryCount = 3;
 
-        PageResult pageSourceResult = ScriptUtils.getPageSource(driver);
+        while (tryCount > 0 && (pageSourceResult == null || pageSourceResult.errorCodeChrome != null)){
+            if (pageSourceResult != null){
+                ScriptUtils.waitDriver(driver, 2);
+            }
+            tryCount--;
+
+            driver.get(url);
+            driver.manage().window().fullscreen();
+            ScriptUtils.waitDriver(driver, 3);
+            try {
+                ScriptUtils.waitPageLoading(driver);
+                pageSourceResult = ScriptUtils.getPageSource(driver);
+            }
+            catch (TimeoutException te){
+                pageSourceResult = new PageResult(null, "TIME_OUT");
+            }
+        }
 
         // если нет ошибок, то получаем странцы эталоны
         String pageSourceEtalon = null;
         if (pageSourceResult.errorCodeChrome == null && useEtalonProxy){
             WebDriver etalonDriver = createProxyDriver(etalonProxy);
+            etalonDriver.get(url);
+            etalonDriver.manage().window().fullscreen();
+            ScriptUtils.waitDriver(etalonDriver, 3);
+
+            try {
+                ScriptUtils.waitPageLoading(etalonDriver);
+            }
+            catch (TimeoutException te){
+                System.out.println("Timeout exception while access from URL via VPN/Proxy");
+                te.printStackTrace();
+            }
             PageResult source = ScriptUtils.getPageSource(etalonDriver);
             pageSourceEtalon = source.pageSource;
         }
@@ -103,12 +129,14 @@ public class VPNScript extends RobotScript {
         message.setJobID(Long.valueOf(getJobID()));
         message.setCheckUnit(getCheckUnit());
 
-        message.setTimeoutError(timeoutError);
+        boolean errorLoadingPage = pageSourceResult.errorCodeChrome != null;
+
+        message.setResponseError(errorLoadingPage);
         message.setChromeErrorCode(pageSourceResult.errorCodeChrome);
 
-        if(pageSourceResult.errorCodeChrome == null && !timeoutError){
+        if(pageSourceResult.errorCodeChrome == null && !errorLoadingPage){
             message.setPageContent(pageSourceResult.pageSource);
-            message.setScreenShot(ScriptUtils.getScreenshot(driver));
+            message.setScreenshot(ScriptUtils.getScreenshot(driver));
             message.setFinalUrlPage(driver.getCurrentUrl());
             message.setPageContentEtalon(pageSourceEtalon);
         }
