@@ -50,4 +50,7 @@ public class DetailResultsVpn implements Serializable  {
 
     @Column(name="similarity_origin_percent")
     private Integer similarityOriginPercent;
+
+    @Column(name="stub_score_info")
+    private String stubScoreInfo;
 }

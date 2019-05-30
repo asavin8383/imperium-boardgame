@@ -1,26 +1,25 @@
 package service.impl;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.PostConstruct;
-
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.stereotype.Service;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import analysis.AnalysisResult;
 import analysis.AnalysisUtils;
 import analysis.VpnAnalysisResult;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import common.AnalysisException;
 import enums.CheckUnitJobResult;
 import execution.ExecutionVpnJobResult;
 import lombok.Getter;
 import model.KeyWord;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.stereotype.Service;
 import service.AnalyzerService;
+
+import javax.annotation.PostConstruct;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import static enums.CheckUnitJobResult.*;
 
 
 /**
@@ -99,18 +98,18 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 			String errorCode = aRes.getResponseErrorCode();
 
 			if (errorCode == null || errorCode.isEmpty())
-				return CheckUnitJobResult.TIMEOUT_ERROR;
+				return TIMEOUT_ERROR;
 
 			if (errorCode.contains("TIME"))
-				return CheckUnitJobResult.TIMEOUT_ERROR;
+				return TIMEOUT_ERROR;
 
 			if (errorCode.contains("DNS"))
-				return CheckUnitJobResult.DNS_ERROR;
+				return DNS_ERROR;
 
 			if (errorCode.contains("SOCKET"))
-				return CheckUnitJobResult.SOCKET_ERROR;
+				return SOCKET_ERROR;
 
-			return CheckUnitJobResult.HTTP_SERVER_SEND_NO_RESPONSE;
+			return HTTP_SERVER_SEND_NO_RESPONSE;
 		}
 
 		// todo - взять адрес VPN заглушки
@@ -118,7 +117,7 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 
 		// конечный URL совпадает с vpn - заглушкой
 		if (AnalysisUtils.simpleCompareUrls(aRes.getPageUrlFinal(), vpnStub)){
-			return CheckUnitJobResult.COMPLETED;
+			return COMPLETED;
 		}
 
 		// сравнение конечного и начального URL
@@ -126,10 +125,10 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 
 		// сравнение контента иходника с эталоном
 		if (!wasRedirect && aRes.getSimilarityOriginPercent() > 80){
-			return CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED;
+			return FORBIDDEN_CONTENT_DETECTED;
 		}
 		if (wasRedirect && aRes.getSimilarityOriginPercent() > 90){
-			return CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED;
+			return FORBIDDEN_CONTENT_DETECTED;
 		}
 
 		// веса критериев для заглушки
@@ -148,12 +147,14 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 
 		System.out.println("sumStubWeight = " + sumStubWeight + ", maxWeight = " + maxStubWeight + ", k = " + kWeight);
 
+		aRes.setStubScoreInfo(String.format("%d/%d (%.2f)", sumStubWeight, maxStubWeight, kWeight));
+
 		// процентный вес заглушки оносительно максимума
 		if (kWeight >= 0.8){
-			return CheckUnitJobResult.COMPLETED;
+			return COMPLETED;
 		}
 
-		return CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED;
+		return FORBIDDEN_CONTENT_DETECTED;
 	}
 
 	private int getPageSizeWeight(Integer size){

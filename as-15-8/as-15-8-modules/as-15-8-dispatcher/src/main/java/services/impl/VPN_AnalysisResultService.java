@@ -1,11 +1,10 @@
 package services.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import analysis.VpnAnalysisResult;
 import enums.CheckUnitJobResult;
 import model.DetailResultsVpn;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import repositories.DetailResultsVpnRepository;
 import services.AnalysisResultService;
 
@@ -31,6 +30,7 @@ public class VPN_AnalysisResultService implements AnalysisResultService<VpnAnaly
 		detailResultsVpn.setDomainNameCount(aRes.getDomainNameCount());
 		detailResultsVpn.setPageUrlFinal(aRes.getPageUrlFinal());
 		detailResultsVpn.setSimilarityOriginPercent(aRes.getSimilarityOriginPercent());
+		detailResultsVpn.setStubScoreInfo(aRes.getStubScoreInfo());
 
 		detailVpnRepo.save(detailResultsVpn);
 
