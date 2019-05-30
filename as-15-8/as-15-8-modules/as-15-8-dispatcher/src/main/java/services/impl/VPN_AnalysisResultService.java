@@ -30,6 +30,7 @@ public class VPN_AnalysisResultService implements AnalysisResultService<VpnAnaly
 		detailResultsVpn.setDomainNameCount(aRes.getDomainNameCount());
 		detailResultsVpn.setPageUrlFinal(aRes.getPageUrlFinal());
 		detailResultsVpn.setSimilarityOriginPercent(aRes.getSimilarityOriginPercent());
+		detailResultsVpn.setStubScoreInfo(aRes.getStubScoreInfo());
 
 		detailVpnRepo.save(detailResultsVpn);
 

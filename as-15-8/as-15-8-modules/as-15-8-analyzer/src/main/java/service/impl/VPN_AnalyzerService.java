@@ -147,6 +147,8 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 
 		System.out.println("sumStubWeight = " + sumStubWeight + ", maxWeight = " + maxStubWeight + ", k = " + kWeight);
 
+		aRes.setStubScoreInfo(String.format("%d/%d (%.2f)", sumStubWeight, maxStubWeight, kWeight));
+
 		// процентный вес заглушки оносительно максимума
 		if (kWeight >= 0.8){
 			return COMPLETED;

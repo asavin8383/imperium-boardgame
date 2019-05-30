@@ -25,4 +25,5 @@ public class VpnAnalysisResult extends AnalysisResult {
 	private Integer domainNameCount;
 	private String pageUrlFinal;
 	private Integer similarityOriginPercent;
+	private String stubScoreInfo;
 }
