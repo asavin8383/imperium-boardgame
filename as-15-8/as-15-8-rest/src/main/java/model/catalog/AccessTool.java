@@ -18,7 +18,8 @@ import java.util.List;
  */
 
 @Entity
-@Table(schema="portal",name="access_tools")
+@Table(schema="portal",name="access_tools",
+	uniqueConstraints = @UniqueConstraint(name = "uq_access_tools_id_type", columnNames = {"id", "type"}))
 @Data
 public class AccessTool implements Serializable{
 
@@ -44,4 +45,32 @@ public class AccessTool implements Serializable{
 	@JsonIgnore
 	/**Список мероприятий, в которых проверяется данное средство доступа*/
 	private List<Arrangement> arrangements;
+
+	@OneToOne(mappedBy = "accessTool")
+	@JoinColumns({
+			@JoinColumn(name = "id", referencedColumnName = "access_tool_id"),
+			@JoinColumn(name = "type", referencedColumnName = "access_tool_type")
+	})
+	private SearchSystemParameters searchSystemParameters;
+
+	@OneToOne(mappedBy = "accessTool")
+	@JoinColumns({
+			@JoinColumn(name = "id", referencedColumnName = "access_tool_id"),
+			@JoinColumn(name = "type", referencedColumnName = "access_tool_type")
+	})
+	private VPN_Parameters vpnParameters;
+
+	@OneToOne(mappedBy = "accessTool")
+	@JoinColumns({
+			@JoinColumn(name = "id", referencedColumnName = "access_tool_id"),
+			@JoinColumn(name = "type", referencedColumnName = "access_tool_type")
+	})
+	private ProxyParameters proxyParameters;
+
+	@OneToOne(mappedBy = "accessTool")
+	@JoinColumns({
+			@JoinColumn(name = "id", referencedColumnName = "access_tool_id"),
+			@JoinColumn(name = "type", referencedColumnName = "access_tool_type")
+	})
+	private AnonymizerParameters anonymizerParameters;
 }
