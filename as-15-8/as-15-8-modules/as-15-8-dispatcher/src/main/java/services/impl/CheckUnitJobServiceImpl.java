@@ -3,6 +3,7 @@ package services.impl;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -11,15 +12,20 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import analysis.AnalysisResult;
 import checkUnits.CheckUnit;
 import checkUnits.CheckUnitJob;
 import checkUnits.CheckUnitType;
 import enums.AccessToolUnit;
+import enums.ArrangementStatus;
+import enums.ArrangementUnitCheckResult;
 import exceptions.AS_15_8_DispatcherException;
 import jobs.ArrangementJob;
 import jobs.ERDIJob;
 import model.ArrangementResult;
 import repositories.ArrangementResultRepository;
+import services.AnalysisResultService;
+import services.AnalysisResultServiceFactory;
 import services.CheckUnitJobService;
 
 /**
@@ -91,9 +97,33 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
         return checkUnitJobs;
     }
     
+	@Override
+	public ArrangementResult processJobResult(AnalysisResult result) {
+		ArrangementResult job = arrangementResultRepo.findById(result.getJobID())
+			.orElseThrow(() -> 
+				new AS_15_8_DispatcherException("Ошибка! Задание не найдено! ID: " + result.getJobID())
+			);
+		
+		AnalysisResultService<? super AnalysisResult> service = AnalysisResultServiceFactory.getService(result.getClass());
+		job.setResult(service.processResult(result));  		
+		job.setScreenshot(result.getScreenshot());
+		return arrangementResultRepo.save(job);
+	}
+
+	@Override
+	public ArrangementStatus checkArrangementStatus(Long arramgementID) {
+		Long notFinishedJobsCount = arrangementResultRepo.countByResultNullOrResultIn(
+			Arrays.asList(
+				ArrangementUnitCheckResult.RUNNING,
+				ArrangementUnitCheckResult.CAPTCHA_DETECTED)
+			);
+		return notFinishedJobsCount > 0 ? ArrangementStatus.RUNNING : ArrangementStatus.FINISHED;
+	}
+    
     private Long saveCheckUnitJobAsResult(Long arrangementID, Long erdiID, CheckUnitJob checkUnitJob) {
         try{
             ArrangementResult arrangementResult = new ArrangementResult();
+            arrangementResult.setResult(ArrangementUnitCheckResult.RUNNING);
             arrangementResult.setArrangementId(arrangementID);
             arrangementResult.setErdiId(erdiID);
             arrangementResult.setCheckUnitType(checkUnitJob.getCheckUnit().getType());

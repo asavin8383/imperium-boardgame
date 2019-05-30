@@ -40,7 +40,7 @@ public class KafkaArrangementsConsumer {
 	}
 
 	@KafkaListener(
-		topics = "${spring.kafka.arrangements-topic}",
+		topics = "${spring.kafka.arrangement-tasks-topic}",
 		containerFactory = "kafkaListenerContainerFactory"
 	)
     public void consumeArrangementJob(ArrangementJob arrangementJob, Acknowledgment ack) {

@@ -6,5 +6,5 @@ package enums;
  * Текущий статус мероприятия для возврата на Rest-сервис
  */
 public enum ArrangementStatus {
-    ACTION_REQUIRED, FINISHED
+    RUNNING, ACTION_REQUIRED, FINISHED
 }

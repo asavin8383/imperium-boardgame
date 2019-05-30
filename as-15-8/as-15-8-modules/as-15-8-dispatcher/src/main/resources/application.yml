@@ -27,9 +27,10 @@ spring:
     datasource:
         url: jdbc:postgresql://192.168.5.195:5432/asdb
     kafka:
-        arrangements-topic: arrangements
+        arrangement-tasks-topic: arrangements
         jobs-topic: jobs
         analysis-results-topic: analysis_results
+        arrangement-notifications-topic: arrangement_notifications
 
 ---
 
@@ -38,9 +39,10 @@ spring:
     datasource:
         url: jdbc:postgresql://192.168.5.195:5432/asdb_test
     kafka:
-        arrangements-topic: arrangements_ashabalin
+        arrangement-tasks-topic: arrangements_ashabalin
         jobs-topic: jobs_ashabalin
         analysis-results-topic: analysis_results_ashabalin
+        arrangement-notifications-topic: arrangement_notifications_ashabalin
 
 ---
 
@@ -49,9 +51,10 @@ spring:
     datasource:
         url: jdbc:postgresql://192.168.5.195:5432/asdb_test
     kafka:
-        arrangements-topic: arrangements_asavin
+        arrangement-tasks-topic: arrangements_asavin
         jobs-topic: jobs_asavin
         analysis-results-topic: analysis_asavin
+        arrangement-notifications-topic: arrangement_notifications_asavin
 
 ---
 
@@ -60,9 +63,10 @@ spring:
     datasource:
         url: jdbc:postgresql://192.168.5.195:5432/asdb_test
     kafka:
-        arrangements-topic: arrangements_pvorobiev
+        arrangement-tasks-topic: arrangements_pvorobiev
         jobs-topic: jobs_pvorobiev
         analysis-results-topic: analysis_results_pvorobiev
+        arrangement-notifications-topic: arrangement_notifications_pvorobiev
 
 ---
 
@@ -71,6 +75,7 @@ spring:
     datasource:
         url: jdbc:postgresql://192.168.5.195:5432/asdb_test
     kafka:
-        arrangements-topic: arrangements_jspirina
+        arrangement-tasks-topic: arrangements_jspirina
         jobs-topic: jobs_jspirina
         analysis-results-topic: analysis_results_jspirina
+        arrangement-notifications-topic: arrangement_notifications_jspirina

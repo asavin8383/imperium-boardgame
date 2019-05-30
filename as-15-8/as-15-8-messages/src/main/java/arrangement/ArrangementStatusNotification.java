@@ -1,7 +1,9 @@
 package arrangement;
 
 import enums.ArrangementStatus;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Creation date: 28.05.2019
@@ -10,6 +12,8 @@ import lombok.Data;
  */
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ArrangementStatusNotification {
 
     /**Идентификатор мероприятия*/

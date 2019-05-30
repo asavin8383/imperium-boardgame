@@ -30,14 +30,14 @@ public class SendJobToKafka {
 	@Autowired
     private KafkaTemplate<String, ArrangementJob> kafkaTemplate;
 	
-	@Value("${spring.kafka.arrangements-topic}")
+	@Value("${spring.kafka.arrangement-tasks-topic}")
     private String topic;
 	
 	@Test
 	public void test() {
 		
 		ArrangementJob job = new ArrangementJob();
-		job.setId(1L);
+		job.setId(100500L);
 		job.setAccessToolUnit(AccessToolUnit.GOOGLE);
 		List<ERDIJob> erdi = new ArrayList<>();
 		erdi.add(new ERDIJob(1L));

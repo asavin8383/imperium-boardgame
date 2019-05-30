@@ -22,6 +22,7 @@ import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
 import analysis.AnalysisResult;
+import arrangement.ArrangementStatusNotification;
 import checkUnits.CheckUnitJob;
 import jobs.ArrangementJob;
 
@@ -37,12 +38,6 @@ public class KafkaConfiguration {
 
     @Value("${spring.kafka.auto-offset-reset}")
     private String offset;
-    
-    @Value("${spring.kafka.jobs-topic}")
-    private String checkUnitJobTopicName;
-
-    @Value("${spring.kafka.analysis-results-topic}")
-    private String analysisResultTopicName;
 
     @Bean
     public Map<String, Object> consumerFactoryConfig(){
@@ -93,11 +88,6 @@ public class KafkaConfiguration {
     public KafkaTemplate<String, CheckUnitJob> checkUnitJobTemplate() {
         return new KafkaTemplate<>(checkUnitJobProducerFactory());
     }
-    
-    @Bean
-    public String checkUnitJobTopicName() {
-    	return this.checkUnitJobTopicName;
-    }
 
     //******************************************************************
 
@@ -130,8 +120,18 @@ public class KafkaConfiguration {
         return new KafkaTemplate<>(analysisResultProducerFactory());
     }
 
+    //******************************************************************
+
+
+    //************************Статус мероприятия************************
+    
     @Bean
-    public String analysisResultsTopicName() {
-        return this.analysisResultTopicName;
+    public ProducerFactory<String, ArrangementStatusNotification> arrangementStatusProducerFactory() {
+        return new DefaultKafkaProducerFactory<>(producerFactoryConfig());
+    }
+
+    @Bean
+    public KafkaTemplate<String, ArrangementStatusNotification> arrangementStatusKafkaTemplate() {
+        return new KafkaTemplate<>(arrangementStatusProducerFactory());
     }
 }

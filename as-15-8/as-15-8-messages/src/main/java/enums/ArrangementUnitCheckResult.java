@@ -7,6 +7,7 @@ package enums;
  */
 public enum ArrangementUnitCheckResult {
 
+	RUNNING,
 	COMPLETED,
 	FORBIDDEN_CONTENT_DETECTED,
 	CAPTCHA_DETECTED,
