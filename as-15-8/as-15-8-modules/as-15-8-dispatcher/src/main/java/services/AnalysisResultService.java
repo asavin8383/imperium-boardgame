@@ -1,6 +1,6 @@
 package services;
 
-import enums.ArrangementUnitCheckResult;
+import enums.CheckUnitJobResult;
 
 /**
  * Сервис для работы с результатами анализа проверок запрещенных ресурсов
@@ -16,6 +16,6 @@ public interface AnalysisResultService<T> {
 	 * @param result Результат анализа проверок запрещенных ресурсов
 	 * @return
 	 */
-	ArrangementUnitCheckResult processResult(T result);
+	CheckUnitJobResult processResult(T result);
 	
 }

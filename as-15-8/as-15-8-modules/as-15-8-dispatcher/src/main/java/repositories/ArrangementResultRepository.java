@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import enums.ArrangementUnitCheckResult;
+import enums.CheckUnitJobResult;
 import model.ArrangementResult;
 
 /**
@@ -19,6 +19,6 @@ import model.ArrangementResult;
 public interface ArrangementResultRepository extends JpaRepository<ArrangementResult, Long> {
 	
 	@Query("SELECT count(res) FROM ArrangementResult res WHERE res.result IS NULL OR res.result IN :results")
-	Long countByResultNullOrResultIn(@Param("results") List<ArrangementUnitCheckResult> results);
+	Long countByResultNullOrResultIn(@Param("results") List<CheckUnitJobResult> results);
 	
 }

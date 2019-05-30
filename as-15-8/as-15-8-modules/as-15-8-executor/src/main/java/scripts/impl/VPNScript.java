@@ -8,8 +8,9 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import scripts.DriverFactory;
 import scripts.RobotScript;
-import scripts.RobotScriptExecutionException;
 import scripts.ScriptUtils;
+import scripts.exceptions.RobotScriptExecutionException;
+
 import static scripts.ScriptUtils.PageResult;
 
 import java.net.MalformedURLException;

@@ -1,6 +1,6 @@
 package analysis;
 
-import enums.ArrangementUnitCheckResult;
+import enums.CheckUnitJobResult;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -12,6 +12,6 @@ import lombok.ToString;
 @NoArgsConstructor
 public class PS_AnalysisJobResult extends AnalysisResult {
 
-	private ArrangementUnitCheckResult checkResult;
+	private CheckUnitJobResult checkResult;
 	
 }

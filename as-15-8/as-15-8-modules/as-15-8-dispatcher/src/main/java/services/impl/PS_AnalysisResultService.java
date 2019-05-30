@@ -3,7 +3,7 @@ package services.impl;
 import org.springframework.stereotype.Service;
 
 import analysis.PS_AnalysisJobResult;
-import enums.ArrangementUnitCheckResult;
+import enums.CheckUnitJobResult;
 import services.AnalysisResultService;
 
 /**
@@ -16,7 +16,7 @@ import services.AnalysisResultService;
 public class PS_AnalysisResultService implements AnalysisResultService<PS_AnalysisJobResult> {
 	
 	@Override
-	public ArrangementUnitCheckResult processResult(PS_AnalysisJobResult result) {
+	public CheckUnitJobResult processResult(PS_AnalysisJobResult result) {
 		return result.getCheckResult();
 	}
 }

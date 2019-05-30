@@ -1,7 +1,7 @@
 package model;
 
 import checkUnits.CheckUnitType;
-import enums.ArrangementUnitCheckResult;
+import enums.CheckUnitJobResult;
 import lombok.Data;
 import org.hibernate.annotations.Type;
 
@@ -42,7 +42,7 @@ public class ArrangementResult implements Serializable {
 
     @Enumerated(EnumType.STRING)
     @Column(name="result", nullable=false)
-    private ArrangementUnitCheckResult result;
+    private CheckUnitJobResult result;
 
     @Lob
     @Column(name="screenshot", columnDefinition="bytea")

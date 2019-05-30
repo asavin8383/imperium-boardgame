@@ -35,6 +35,7 @@ spring:
     kafka:
         consume-topic: jobs
         produce-topic: exec_results
+        notification-topic: job_notifications
 
 ---
 
@@ -43,6 +44,7 @@ spring:
     kafka:
         consume-topic: jobs_ashabalin
         produce-topic: exec_results_ashabalin
+        notification-topic: job_notifications_ashabalin
 
 ---
 
@@ -51,6 +53,7 @@ spring:
     kafka:
         consume-topic: jobs_asavin
         produce-topic: exec_results_asavin
+        notification-topic: job_notifications_asavin
 
 ---
 
@@ -59,6 +62,7 @@ spring:
     kafka:
         consume-topic: jobs_pvorobiev
         produce-topic: exec_results_pvorobiev
+        notification-topic: job_notifications_pvorobiev
 
 ---
 
@@ -67,3 +71,4 @@ spring:
     kafka:
         consume-topic: jobs_jspirina
         produce-topic: exec_results_jspirina
+        notification-topic: job_notifications_jspirina

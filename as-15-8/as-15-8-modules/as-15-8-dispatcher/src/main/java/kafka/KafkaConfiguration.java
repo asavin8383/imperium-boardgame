@@ -52,7 +52,8 @@ public class KafkaConfiguration {
         return config;
     }
 
-    @Bean Map<String, Object> producerFactoryConfig(){
+    @Bean 
+    Map<String, Object> producerFactoryConfig(){
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         configProps.put(ProducerConfig.ACKS_CONFIG, "all");

@@ -28,6 +28,7 @@ import execution.ExecutionJobResult;
 import kafka.KafkaConfiguration;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import scripts.exceptions.RobotScriptExecutionException;
 
 /**
  * Скрипт робота проверки ПС/ПАСД

@@ -26,6 +26,7 @@ public class KafkaConsumer {
         		robotsService.run(checkUnitJob);
         	} catch (Exception ex) {
         		log.error("Ошибка при обработке задания проверки запрещенного ресурса: " + checkUnitJob.toString(), ex);
+        		JobNotificationsProducer.getInstance().sendCheckJobErrorNotification(checkUnitJob.getJobID(), ex);
         	}
         	ack.acknowledge();
         });

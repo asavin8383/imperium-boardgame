@@ -9,8 +9,8 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
 import scripts.RobotScript;
-import scripts.RobotScriptExecutionException;
 import scripts.exceptions.Captcha_RobotScriptExecutionException;
+import scripts.exceptions.RobotScriptExecutionException;
 
 import javax.annotation.Nullable;
 import java.io.UnsupportedEncodingException;

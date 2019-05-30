@@ -3,7 +3,8 @@ package scripts.impl;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
-import scripts.RobotScriptExecutionException;
+
+import scripts.exceptions.RobotScriptExecutionException;
 
 import java.net.URI;
 import java.net.URISyntaxException;

@@ -2,7 +2,7 @@ package model.result;
 
 import checkUnits.CheckUnitType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import enums.ArrangementUnitCheckResult;
+import enums.CheckUnitJobResult;
 import lombok.Data;
 import model.erdi.ERDI;
 import model.task.Arrangement;
@@ -47,7 +47,7 @@ public class ArrangementResult implements Serializable {
 
     @Enumerated(EnumType.STRING)
     @Column(name="result", nullable=false)
-    private ArrangementUnitCheckResult result;
+    private CheckUnitJobResult result;
 
     @Lob
     @Column(name="screenshot", columnDefinition="bytea")
