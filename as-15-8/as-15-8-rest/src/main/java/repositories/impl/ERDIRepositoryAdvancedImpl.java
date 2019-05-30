@@ -29,6 +29,8 @@ import java.util.List;
 @Repository
 public class ERDIRepositoryAdvancedImpl implements ERDIRepositoryAdvanced {
 
+    private static final String URL = "URL";
+
     private EntityManager em;
 
     @Autowired
@@ -55,9 +57,14 @@ public class ERDIRepositoryAdvancedImpl implements ERDIRepositoryAdvanced {
             Join<ERDI, Decision> decision = erdi.join(ERDI_.DECISION_LIST);
             predicates.add(criteriaBuilder.like(criteriaBuilder.lower(decision.get(Decision_.ORGANIZATION)), "%" + organization.toLowerCase() + "%"));
         }
-        if(blocktype != null){
+        //TODO Безжалостный хардкод в таблице URL - это NULL
+        if(blocktype != null && !blocktype.toUpperCase().equals(URL)){
             predicates.add(criteriaBuilder.like(criteriaBuilder.lower(erdi.get(ERDI_.BLOCKTYPE)), "%" + blocktype.toLowerCase() + "%" ));
         }
+        if(blocktype != null && blocktype.toUpperCase().equals(URL)){
+            predicates.add(criteriaBuilder.isNull(criteriaBuilder.lower(erdi.get(ERDI_.BLOCKTYPE))));
+        }
+
         select.where(predicates.toArray(new Predicate[0]));
 
         //TODO получать сортировку из Pageable

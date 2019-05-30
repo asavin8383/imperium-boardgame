@@ -6,6 +6,9 @@ public enum AccessToolUnit {
 	YANDEX,
 	VPN,
 	CAMELEO_XYZ,
-	HIDEMYASS;
+	HIDEMYASS,
+	HOLA,
+	EXPRESS,
+	KASPERSKY;
 
 }

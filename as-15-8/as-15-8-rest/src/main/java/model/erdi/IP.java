@@ -22,7 +22,7 @@ public class IP {
     private Long id;
 
     @Transient
-    private CheckUnitType checkUnitType = CheckUnitType.URL;
+    private CheckUnitType checkUnitType = CheckUnitType.IP_V4;
 
     @Column(name = "ip")
     private String checkUnitValue;
