@@ -5,7 +5,7 @@ import analysis.AnalysisUtils;
 import analysis.VpnAnalysisResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import common.AnalysisException;
-import enums.ArrangementUnitCheckResult;
+import enums.CheckUnitJobResult;
 import execution.ExecutionVpnJobResult;
 import lombok.Getter;
 import model.KeyWord;
@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static enums.ArrangementUnitCheckResult.*;
+import static enums.CheckUnitJobResult.*;
 
 
 /**
@@ -92,7 +92,7 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 	}
 
 
-	protected ArrangementUnitCheckResult obtainResult(VpnAnalysisResult aRes, ExecutionVpnJobResult jobRes) {
+	protected CheckUnitJobResult obtainResult(VpnAnalysisResult aRes, ExecutionVpnJobResult jobRes) {
 
 		if (aRes.getResponseError()){
 			String errorCode = aRes.getResponseErrorCode();
