@@ -61,12 +61,12 @@ public class JobNotificationsProducer {
 		        }
 		        @Override
 		        public void onFailure(Throwable ex) {
-		        	throw new RuntimeException(ex);
+		        	throw new RuntimeException("Ошибка при отправке сообщения с уведомлением об ошибке", ex);
 		        }
 		    });
 		    future.get();
 		} catch (Exception ex) {
-			throw new RuntimeException("Ошибка при отправке сообщения с результатами работы робота", ex);
+			throw new RuntimeException("Ошибка при отправке сообщения с уведомлением об ошибке", ex);
 		}
 	}
 	

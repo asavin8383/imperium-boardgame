@@ -22,6 +22,7 @@ import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
 import analysis.AnalysisResult;
+import checkUnits.CheckUnitStatusNotification;
 import execution.ExecutionJobResult;
 
 @EnableKafka
@@ -36,10 +37,17 @@ public class KafkaConfiguration {
 
     @Value("${spring.kafka.auto-offset-reset}")
     private String autoOffsetReset;
-    
-    @Value("${spring.kafka.produce-topic}")
-    private String analysisResultTopicName;
 	
+    @Bean 
+    Map<String, Object> producerFactoryConfig(){
+    	Map<String, Object> configProps = new HashMap<>();
+    	configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+    	configProps.put(ProducerConfig.ACKS_CONFIG, "all");
+    	configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+    	configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+        return configProps;
+    }
+    
     @Bean
     public ConsumerFactory<String, ExecutionJobResult> executionResultsConsumerFactory() {
         Map<String, Object> config = new HashMap<>();
@@ -59,13 +67,13 @@ public class KafkaConfiguration {
     }
 
     @Bean
-    public ProducerFactory<String, AnalysisResult> analysisResultProducerFactory() {
-    	Map<String, Object> configProps = new HashMap<>();
-    	configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-    	configProps.put(ProducerConfig.ACKS_CONFIG, "all");
-    	configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-    	configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
-    	return new DefaultKafkaProducerFactory<>(configProps);
+    public ProducerFactory<String, AnalysisResult> analysisResultProducerFactory() {	
+    	return new DefaultKafkaProducerFactory<>(producerFactoryConfig());
+    }
+    
+    @Bean
+    public ProducerFactory<String, CheckUnitStatusNotification> notificationsProducerFactory() {
+    	return new DefaultKafkaProducerFactory<>(producerFactoryConfig());
     }
     
     @Bean
@@ -82,7 +90,7 @@ public class KafkaConfiguration {
     }
     
     @Bean
-    public String analysisResultTopicName() {
-    	return this.analysisResultTopicName;
+    public KafkaTemplate<String, CheckUnitStatusNotification> notificationsTemplate() {
+        return new KafkaTemplate<>(notificationsProducerFactory());
     }
 }
