@@ -1,21 +1,21 @@
 package robots;
 
-import enums.AccessToolUnit;
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import org.openqa.selenium.Platform;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
-import robots.impl.SeleniumRobot;
+
+import enums.AccessToolUnit;
 import robots.impl.SeleniumSearchRobot;
 import robots.impl.SeleniumVpnRobot;
 import scripts.impl.GoogleScript;
 import scripts.impl.VPNScript;
 import scripts.impl.YandexScript;
-
-import java.net.MalformedURLException;
-import java.net.URL;
 
 /**
  * Конфигурация роботов для проверки ПС/ПАСД

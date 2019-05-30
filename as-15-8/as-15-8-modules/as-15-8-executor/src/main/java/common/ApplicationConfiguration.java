@@ -17,7 +17,7 @@ import robots.RobotsConfiguration;
 @SpringBootApplication
 @Import({RobotsConfiguration.class, KafkaConfiguration.class})
 @PropertySource("classpath:application.yml")
-@ComponentScan(basePackages={"common", "kafka", "robots", "service"})
+@ComponentScan(basePackages={"common", "kafka", "robots", "service", "listener"})
 public class ApplicationConfiguration{
 	
 	public static void main(String[] args) {

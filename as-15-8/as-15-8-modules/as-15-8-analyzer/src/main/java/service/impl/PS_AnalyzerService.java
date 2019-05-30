@@ -2,13 +2,13 @@ package service.impl;
 
 import analysis.AnalysisResult;
 import analysis.PS_AnalysisJobResult;
-import enums.ArrangementUnitCheckResult;
+import enums.CheckUnitJobResult;
 import execution.ExecutionPSJobResult;
 import org.springframework.stereotype.Service;
 import service.AnalyzerService;
 
-import static enums.ArrangementUnitCheckResult.COMPLETED;
-import static enums.ArrangementUnitCheckResult.FORBIDDEN_CONTENT_DETECTED;
+import static enums.CheckUnitJobResult.COMPLETED;
+import static enums.CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED;
 
 /**
  * Сервис проверки результата работы робота, проверяющего ПС
@@ -28,7 +28,7 @@ public class PS_AnalyzerService implements AnalyzerService<ExecutionPSJobResult>
 		return analysisResult;
 	}
 
-	private ArrangementUnitCheckResult obtainResult(ExecutionPSJobResult result) {
+	private CheckUnitJobResult obtainResult(ExecutionPSJobResult result) {
 		return result.isLinkFound() ? FORBIDDEN_CONTENT_DETECTED : COMPLETED;
 	}
 }

@@ -5,7 +5,8 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import scripts.RobotScriptExecutionException;
+
+import scripts.exceptions.RobotScriptExecutionException;
 
 import javax.annotation.Nullable;
 import java.util.List;

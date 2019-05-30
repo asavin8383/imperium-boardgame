@@ -5,7 +5,7 @@ package enums;
  * @author shabalinAI
  *
  */
-public enum ArrangementUnitCheckResult {
+public enum CheckUnitJobResult {
 
 	RUNNING,
 	COMPLETED,

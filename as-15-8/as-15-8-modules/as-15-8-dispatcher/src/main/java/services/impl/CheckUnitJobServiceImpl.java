@@ -18,7 +18,7 @@ import checkUnits.CheckUnitJob;
 import checkUnits.CheckUnitType;
 import enums.AccessToolUnit;
 import enums.ArrangementStatus;
-import enums.ArrangementUnitCheckResult;
+import enums.CheckUnitJobResult;
 import exceptions.AS_15_8_DispatcherException;
 import jobs.ArrangementJob;
 import jobs.ERDIJob;
@@ -114,8 +114,8 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
 	public ArrangementStatus checkArrangementStatus(Long arramgementID) {
 		Long notFinishedJobsCount = arrangementResultRepo.countByResultNullOrResultIn(
 			Arrays.asList(
-				ArrangementUnitCheckResult.RUNNING,
-				ArrangementUnitCheckResult.CAPTCHA_DETECTED)
+				CheckUnitJobResult.RUNNING,
+				CheckUnitJobResult.CAPTCHA_DETECTED)
 			);
 		return notFinishedJobsCount > 0 ? ArrangementStatus.RUNNING : ArrangementStatus.FINISHED;
 	}
@@ -123,7 +123,7 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
     private Long saveCheckUnitJobAsResult(Long arrangementID, Long erdiID, CheckUnitJob checkUnitJob) {
         try{
             ArrangementResult arrangementResult = new ArrangementResult();
-            arrangementResult.setResult(ArrangementUnitCheckResult.RUNNING);
+            arrangementResult.setResult(CheckUnitJobResult.RUNNING);
             arrangementResult.setArrangementId(arrangementID);
             arrangementResult.setErdiId(erdiID);
             arrangementResult.setCheckUnitType(checkUnitJob.getCheckUnit().getType());

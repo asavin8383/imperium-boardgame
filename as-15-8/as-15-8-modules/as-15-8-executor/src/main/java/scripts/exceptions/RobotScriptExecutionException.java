@@ -1,4 +1,4 @@
-package scripts;
+package scripts.exceptions;
 
 /**
  * Ошибка выполнения скрипта робота

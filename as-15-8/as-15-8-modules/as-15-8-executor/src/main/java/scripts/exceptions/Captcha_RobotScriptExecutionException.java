@@ -1,7 +1,5 @@
 package scripts.exceptions;
 
-import scripts.RobotScriptExecutionException;
-
 public class Captcha_RobotScriptExecutionException extends RobotScriptExecutionException {
 
 	private static final long serialVersionUID = 1L;
