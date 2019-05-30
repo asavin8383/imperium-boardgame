@@ -5,8 +5,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
+import enums.AccessToolParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -55,7 +57,7 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
                 .collect(Collectors.toList())
         );
 
-        CheckUnitJobMapper mapper = new CheckUnitJobMapper(arrangementJob.getAccessToolUnit());
+        CheckUnitJobMapper mapper = new CheckUnitJobMapper(arrangementJob.getAccessToolUnit(), arrangementJob.getAccessToolParameters());
         List<CheckUnitJob> checkUnitJobs = new ArrayList<>();
         try {
             checkUnitJobs = jdbcTemplate.query(
@@ -137,9 +139,11 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
     class CheckUnitJobMapper{
     	
     	private AccessToolUnit accessToolUnit;
+    	private Map<AccessToolParameters, String> parameters;
     	
-    	public CheckUnitJobMapper(AccessToolUnit accessToolUnit) {
+    	public CheckUnitJobMapper(AccessToolUnit accessToolUnit, Map<AccessToolParameters, String> parameters) {
 			this.accessToolUnit = accessToolUnit;
+			this.parameters = parameters;
 		}
     	
         public CheckUnitJob map(ResultSet rs, int rowNum) throws SQLException {
@@ -147,6 +151,7 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
             checkUnitJob.setAccessToolUnit(accessToolUnit);
             CheckUnitType type = CheckUnitType.valueOf(rs.getString("check_unit_type"));
             checkUnitJob.setCheckUnit(new CheckUnit(type, rs.getString("check_unit_value")));
+            checkUnitJob.getAccessToolParameters().putAll(parameters);
             return checkUnitJob;
         }
     }

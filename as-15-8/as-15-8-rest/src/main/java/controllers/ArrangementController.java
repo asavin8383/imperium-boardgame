@@ -63,8 +63,6 @@ public class ArrangementController {
         return formalTaskRepo.findById(formalTaskId)
             .map(formalTask -> {
                 arrangement.setFormalTask(formalTask);
-                //Проверим, не нужно ли сменить статус
-                arrangementExecutionHelper.checkArrangementStatus(arrangement);
                 return arrangementRepo.save(arrangement);
             })
             .orElseThrow(() -> new AS_15_8_Exception("Error creating arrangement! Formal task was not found by id: " + formalTaskId));
@@ -79,6 +77,17 @@ public class ArrangementController {
                     newArrangement.setId(id);
                     return arrangementRepo.save(newArrangement);
                 });
+    }
+
+    @PostMapping(path = "/plan")
+    public ResponseEntity<Arrangement> planArrangement(@RequestParam Long id){
+        return arrangementRepo.findById(id)
+                .map(arrangement -> {
+                    //Проверим, не нужно ли сменить статус
+                    arrangementExecutionHelper.checkArrangementStatus(arrangement);
+                    arrangementRepo.save(arrangement);
+                    return new ResponseEntity<>(arrangement, HttpStatus.OK);
+                }).orElseGet(()-> new ResponseEntity<>(null, HttpStatus.NO_CONTENT));
     }
 
     @DeleteMapping
@@ -125,8 +134,6 @@ public class ArrangementController {
         arrangement.setStartDate(newArrangement.getStartDate());
         arrangement.setEndDate(newArrangement.getEndDate());
         arrangement.setTitle(newArrangement.getTitle());
-        //Проверим, не нужно ли сменить статус
-        arrangementExecutionHelper.checkArrangementStatus(arrangement);
         return arrangement;
     }
 

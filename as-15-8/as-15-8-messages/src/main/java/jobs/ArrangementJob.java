@@ -1,8 +1,11 @@
 package jobs;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import enums.AccessToolParameters;
 import enums.AccessToolUnit;
 import lombok.Data;
 import lombok.Getter;
@@ -22,6 +25,8 @@ public class ArrangementJob {
 	
 	/** ПС/ПАСД */
 	private AccessToolUnit accessToolUnit;
+
+
 	
 	/** Список заданий на проверку ЕРДИ */
 	@Getter
@@ -34,5 +39,9 @@ public class ArrangementJob {
 	public void addERDIJob(ERDIJob erdiJob) {
 		this.erdiJobList.add(erdiJob);
 	}
+
+	/** Набор параметров ПС/ПАСД*/
+	@Getter
+	private final Map<AccessToolParameters, String> accessToolParameters = new HashMap<>();
 	
 }
