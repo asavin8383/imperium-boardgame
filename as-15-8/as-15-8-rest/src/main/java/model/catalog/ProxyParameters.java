@@ -1,9 +1,9 @@
 package model.catalog;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import java.io.Serializable;
 
 /**
@@ -13,19 +13,9 @@ import java.io.Serializable;
 @Entity
 @Table(schema = "portal", name = "proxy_parameters")
 @Data
-public class ProxyParameters implements Serializable {
+public class ProxyParameters extends AccessToolParameters implements Serializable {
 
     private static final long serialVersionUID = 1L;
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "proxy_parameters_generator")
-    @SequenceGenerator(name="proxy_parameters_generator", schema = "portal", sequenceName = "proxy_parameters_id_seq", allocationSize=1)
-    @Column(name="id", nullable=false, updatable=false)
-    private Long id;
-
-    @OneToOne(optional = false, cascade=CascadeType.ALL)
-    @JsonIgnore
-    private AccessTool accessTool;
 
     private String stubUrl;
     private String proxyDnsName;

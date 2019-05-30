@@ -2,15 +2,14 @@ package controllers;
 
 import checkUnits.CheckUnitType;
 import model.result.ArrangementResult;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import repositories.ArrangementResultRepository;
 import repositories.ArrangementResultRepositoryAdvanced;
 
 /**
@@ -25,9 +24,13 @@ import repositories.ArrangementResultRepositoryAdvanced;
 public class ArrangementResultsController {
 
     private ArrangementResultRepositoryAdvanced arrangementResultRepoAdvanced;
+    private ArrangementResultRepository arrangementResultRepo;
 
-    public ArrangementResultsController(ArrangementResultRepositoryAdvanced arrangementResultRepoAdvanced) {
+    @Autowired
+    public ArrangementResultsController(ArrangementResultRepositoryAdvanced arrangementResultRepoAdvanced,
+                                        ArrangementResultRepository arrangementResultRepo) {
         this.arrangementResultRepoAdvanced = arrangementResultRepoAdvanced;
+        this.arrangementResultRepo = arrangementResultRepo;
     }
 
     @GetMapping
@@ -41,5 +44,12 @@ public class ArrangementResultsController {
         PageRequest page = PageRequest.of(
                 pageNumber, pageSize, Sort.by("id").ascending());
         return arrangementResultRepoAdvanced.findPage(id, arrangementId, checkUnitValue, page, checkUnitType);
+    }
+
+    @GetMapping(value = "/screenshot")
+    public @ResponseBody byte[] getScreenshot(@RequestParam Long id){
+        return arrangementResultRepo.findById(id)
+                .map(ArrangementResult::getScreenshot)
+                .orElseGet(null);
     }
 }
