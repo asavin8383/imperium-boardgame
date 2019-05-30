@@ -46,7 +46,7 @@ public class ArrangementResultsController {
         return arrangementResultRepoAdvanced.findPage(id, arrangementId, checkUnitValue, page, checkUnitType);
     }
 
-    @GetMapping(value = "/screenshot")
+    @GetMapping(value = "/screenshot", produces = MediaType.IMAGE_PNG_VALUE)
     public @ResponseBody byte[] getScreenshot(@RequestParam Long id){
         return arrangementResultRepo.findById(id)
                 .map(ArrangementResult::getScreenshot)
