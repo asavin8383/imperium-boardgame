@@ -12,6 +12,9 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 public class KeyWord implements Serializable {
-    private String word;
+
+	private static final long serialVersionUID = 1L;
+	
+	private String word;
     private String type;
 }

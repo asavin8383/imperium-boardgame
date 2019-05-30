@@ -22,8 +22,8 @@ public class CosineDocumentSimilarity {
     private final RealVector v1;
     private final RealVector v2;
 
-    private boolean is100 = false;
-    private boolean is0 = false;
+    //private boolean is100 = false;
+   // private boolean is0 = false;
 
     public CosineDocumentSimilarity(String s1, String s2) throws IOException {
 
@@ -39,7 +39,8 @@ public class CosineDocumentSimilarity {
         v2 = toRealVector(f2);
     }
 
-    Directory createIndex(String s1, String s2) throws IOException {
+    @SuppressWarnings("deprecation")
+	Directory createIndex(String s1, String s2) throws IOException {
         Directory directory = new RAMDirectory();
         Analyzer analyzer = new SimpleAnalyzer();
         IndexWriterConfig iwc = new IndexWriterConfig(analyzer);

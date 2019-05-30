@@ -1,25 +1,26 @@
 package service.impl;
 
-import analysis.AnalysisResult;
-import analysis.AnalysisUtils;
-import analysis.VpnAnalysisResult;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import common.AnalysisException;
-import enums.ArrangementUnitCheckResult;
-import execution.ExecutionVpnJobResult;
-import lombok.Getter;
-import model.KeyWord;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.stereotype.Service;
-import service.AnalyzerService;
-
-import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static enums.ArrangementUnitCheckResult.*;
+import javax.annotation.PostConstruct;
+
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import analysis.AnalysisResult;
+import analysis.AnalysisUtils;
+import analysis.VpnAnalysisResult;
+import common.AnalysisException;
+import enums.CheckUnitJobResult;
+import execution.ExecutionVpnJobResult;
+import lombok.Getter;
+import model.KeyWord;
+import service.AnalyzerService;
 
 
 /**
@@ -92,24 +93,24 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 	}
 
 
-	protected ArrangementUnitCheckResult obtainResult(VpnAnalysisResult aRes, ExecutionVpnJobResult jobRes) {
+	protected CheckUnitJobResult obtainResult(VpnAnalysisResult aRes, ExecutionVpnJobResult jobRes) {
 
 		if (aRes.getResponseError()){
 			String errorCode = aRes.getResponseErrorCode();
 
 			if (errorCode == null || errorCode.isEmpty())
-				return TIMEOUT_ERROR;
+				return CheckUnitJobResult.TIMEOUT_ERROR;
 
 			if (errorCode.contains("TIME"))
-				return TIMEOUT_ERROR;
+				return CheckUnitJobResult.TIMEOUT_ERROR;
 
 			if (errorCode.contains("DNS"))
-				return DNS_ERROR;
+				return CheckUnitJobResult.DNS_ERROR;
 
 			if (errorCode.contains("SOCKET"))
-				return SOCKET_ERROR;
+				return CheckUnitJobResult.SOCKET_ERROR;
 
-			return HTTP_SERVER_SEND_NO_RESPONSE;
+			return CheckUnitJobResult.HTTP_SERVER_SEND_NO_RESPONSE;
 		}
 
 		// todo - взять адрес VPN заглушки
@@ -117,7 +118,7 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 
 		// конечный URL совпадает с vpn - заглушкой
 		if (AnalysisUtils.simpleCompareUrls(aRes.getPageUrlFinal(), vpnStub)){
-			return COMPLETED;
+			return CheckUnitJobResult.COMPLETED;
 		}
 
 		// сравнение конечного и начального URL
@@ -125,10 +126,10 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 
 		// сравнение контента иходника с эталоном
 		if (!wasRedirect && aRes.getSimilarityOriginPercent() > 80){
-			return FORBIDDEN_CONTENT_DETECTED;
+			return CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED;
 		}
 		if (wasRedirect && aRes.getSimilarityOriginPercent() > 90){
-			return FORBIDDEN_CONTENT_DETECTED;
+			return CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED;
 		}
 
 		// веса критериев для заглушки
@@ -149,10 +150,10 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 
 		// процентный вес заглушки оносительно максимума
 		if (kWeight >= 0.8){
-			return COMPLETED;
+			return CheckUnitJobResult.COMPLETED;
 		}
 
-		return FORBIDDEN_CONTENT_DETECTED;
+		return CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED;
 	}
 
 	private int getPageSizeWeight(Integer size){

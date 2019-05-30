@@ -1,10 +1,11 @@
 package services.impl;
 
-import analysis.VpnAnalysisResult;
-import enums.ArrangementUnitCheckResult;
-import model.DetailResultsVpn;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import analysis.VpnAnalysisResult;
+import enums.CheckUnitJobResult;
+import model.DetailResultsVpn;
 import repositories.DetailResultsVpnRepository;
 import services.AnalysisResultService;
 
@@ -16,7 +17,7 @@ public class VPN_AnalysisResultService implements AnalysisResultService<VpnAnaly
 	DetailResultsVpnRepository detailVpnRepo;
 
 	@Override
-	public ArrangementUnitCheckResult processResult(VpnAnalysisResult aRes) {
+	public CheckUnitJobResult processResult(VpnAnalysisResult aRes) {
 
 		DetailResultsVpn detailResultsVpn = new DetailResultsVpn();
 
