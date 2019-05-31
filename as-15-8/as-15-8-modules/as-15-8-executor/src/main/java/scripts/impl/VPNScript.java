@@ -5,6 +5,7 @@ import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import scripts.DriverFactory;
@@ -30,6 +31,8 @@ public class VPNScript extends RobotScript {
     protected int timeoutRequest;
     protected int tryCountRequest;
 
+    protected String stubUrl;
+    
     protected List<WebDriver> proxyDrivers = new ArrayList<>();
 
     String[] successChromeErrors = {"ERR_EMPTY_RESPONSE"};
@@ -48,6 +51,18 @@ public class VPNScript extends RobotScript {
         for (String str : successChromeErrors){
             mapSuccessChromeErrors.put(str, "");
         }
+    }
+    
+    @BeforeClass
+    @Parameters({"PROXY_DNS_NAME", "PROXY_PORT", "PROXY_USER", "PROXY_PASSWORD", "STUB_URL"})
+    public void setParameters(
+    	@Optional String proxyDnsName,
+    	@Optional String proxyPort,
+    	@Optional String proxyUser,
+    	@Optional String proxyPassword,
+    	@Optional String stubUrl) {
+    		
+    	this.stubUrl = stubUrl;
     }
 
     @AfterClass
@@ -128,6 +143,7 @@ public class VPNScript extends RobotScript {
         ExecutionVpnJobResult message = new ExecutionVpnJobResult();
         message.setJobID(Long.valueOf(getJobID()));
         message.setCheckUnit(getCheckUnit());
+        message.setStubUrl(stubUrl);
 
         boolean errorLoadingPage = pageSourceResult.errorCodeChrome != null;
 

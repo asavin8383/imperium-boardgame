@@ -1,11 +1,13 @@
 package robots.impl;
 
 import checkUnits.CheckUnit;
+import enums.AccessToolParameters;
 import enums.AccessToolUnit;
 import org.openqa.selenium.Platform;
 import org.testng.xml.XmlTest;
 
 import java.net.URL;
+import java.util.Map;
 
 public class SeleniumSearchRobot<T> extends SeleniumRobot<T> {
 
@@ -29,8 +31,8 @@ public class SeleniumSearchRobot<T> extends SeleniumRobot<T> {
     }
 
     @Override
-    public XmlTest createTest(String name, Long jobID, CheckUnit checkUnit) {
-        XmlTest test = super.createTest(name, jobID, checkUnit);
+    public XmlTest createTest(String name, Long jobID, CheckUnit checkUnit, Map<AccessToolParameters, String> accessToolParameters) {
+        XmlTest test = super.createTest(name, jobID, checkUnit, accessToolParameters);
         test.addParameter("searchResultLimit", searchResultLimit);
         return test;
     }

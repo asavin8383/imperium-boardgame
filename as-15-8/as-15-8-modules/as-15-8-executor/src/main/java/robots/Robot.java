@@ -1,8 +1,11 @@
 package robots;
 
+import java.util.Map;
+
 import org.testng.xml.XmlTest;
 
 import checkUnits.CheckUnit;
+import enums.AccessToolParameters;
 import enums.AccessToolUnit;
 
 /**
@@ -26,6 +29,6 @@ public interface Robot {
 	 * @param url Проверяемый URL
 	 * @return
 	 */
-	XmlTest createTest(String name, Long jobID, CheckUnit checkUnit);
+	XmlTest createTest(String name, Long jobID, CheckUnit checkUnit, Map<AccessToolParameters, String> accessToolParameters);
 	
 }

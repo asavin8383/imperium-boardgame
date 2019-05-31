@@ -1,12 +1,14 @@
 package robots.impl;
 
 import checkUnits.CheckUnit;
+import enums.AccessToolParameters;
 import enums.AccessToolUnit;
 import lombok.Getter;
 import org.openqa.selenium.Platform;
 import org.testng.xml.XmlTest;
 
 import java.net.URL;
+import java.util.Map;
 
 public class SeleniumVpnRobot<T> extends SeleniumRobot<T> {
 
@@ -55,12 +57,19 @@ public class SeleniumVpnRobot<T> extends SeleniumRobot<T> {
     }
 
     @Override
-    public XmlTest createTest(String name, Long jobID, CheckUnit checkUnit) {
-        XmlTest test = super.createTest(name, jobID, checkUnit);
+    public XmlTest createTest(String name, Long jobID, CheckUnit checkUnit, Map<AccessToolParameters, String> accessToolParameters) {
+        XmlTest test = super.createTest(name, jobID, checkUnit, accessToolParameters);
         test.addParameter("etalonProxy", etalonProxy);
         test.addParameter("useEtalonProxy", useEtalonProxy.toString());
         test.addParameter("timeoutRequest", timeoutRequest.toString());
         test.addParameter("tryCountRequest", tryCountRequest.toString());
+        
+        test.addParameter(AccessToolParameters.STUB_URL.toString(), accessToolParameters.get(AccessToolParameters.STUB_URL));
+        test.addParameter(AccessToolParameters.PROXY_DNS_NAME.toString(), accessToolParameters.get(AccessToolParameters.PROXY_DNS_NAME));
+        test.addParameter(AccessToolParameters.PROXY_PORT.toString(), accessToolParameters.get(AccessToolParameters.PROXY_PORT));
+        test.addParameter(AccessToolParameters.PROXY_USER.toString(), accessToolParameters.get(AccessToolParameters.PROXY_USER));
+        test.addParameter(AccessToolParameters.PROXY_PASSWORD.toString(), accessToolParameters.get(AccessToolParameters.PROXY_PASSWORD));
+        
         return test;
     }
 }

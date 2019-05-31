@@ -76,7 +76,7 @@ public class RobotsConfiguration {
 	public Robot vpnRobot() throws MalformedURLException {
 
 		return new SeleniumVpnRobot<>(
-				AccessToolUnit.VPN,
+				AccessToolUnit.KASPERSKY,
 				new URL(this.seleniumHubUrl),
 				VPNScript.class,
 				env.getProperty("robots.vpn.browser"),

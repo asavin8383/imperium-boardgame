@@ -15,4 +15,5 @@ public class ExecutionVpnJobResult extends ExecutionJobResult{
     private String finalUrlPage;
     private String pageContent;
     private String pageContentEtalon;
+    private String stubUrl;
 }

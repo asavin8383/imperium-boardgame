@@ -3,12 +3,14 @@ package robots.impl;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.openqa.selenium.Platform;
 import org.testng.xml.XmlClass;
 import org.testng.xml.XmlTest;
 
 import checkUnits.CheckUnit;
+import enums.AccessToolParameters;
 import enums.AccessToolUnit;
 import lombok.Getter;
 import robots.Robot;
@@ -88,7 +90,7 @@ public class SeleniumRobot<T> implements Robot{
 	}
 	
 	@Override
-	public XmlTest createTest(String name, Long jobID, CheckUnit checkUnit) {
+	public XmlTest createTest(String name, Long jobID, CheckUnit checkUnit, Map<AccessToolParameters, String> accessToolParameters) {
 		XmlTest test = new XmlTest();
 		
 		test.setName(name);
