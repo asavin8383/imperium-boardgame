@@ -1,6 +1,10 @@
 package model.erdi;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -26,7 +30,11 @@ import model.task.ArrangementItem;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class ERDI {
 
-    private static final String defaultType = "URL";
+    private static final String URL = "URL";
+    private static final String IP = "IP";
+    private static final String DOMAIN = "DOMAIN";
+    private static final String DOMAIN_MASK = "DOMAIN-MASK";
+    private static final Integer LIMIT = 10;
 
     @Id
     @EqualsAndHashCode.Include
@@ -48,21 +56,46 @@ public class ERDI {
     private List<Decision> decisionList;
 
     @OneToMany(mappedBy = "erdi")
+    @JsonIgnore
     private List<Domain> domains;
 
     @OneToMany(mappedBy = "erdi")
+    @JsonIgnore
     private List<DomainMask> domainMasks;
 
     @OneToMany(mappedBy = "erdi")
+    @JsonIgnore
     private List<URL> urls;
 
     @OneToMany(mappedBy = "erdi")
+    @JsonIgnore
     private List<IP> ipList;
+
+    public List<Map<String, String>> getCheckUnits(){
+        if (this.checkUnitType.equals(URL)){
+            return getExplicitCheckUnits(urls);
+        } else if (this.checkUnitType.equals(IP)){
+            return getExplicitCheckUnits(ipList);
+        } else if (this.checkUnitType.equals(DOMAIN)){
+            return getExplicitCheckUnits(domains);
+        } else if (this.checkUnitType.equals(DOMAIN_MASK)){
+            return getExplicitCheckUnits(domainMasks);
+        } else return new ArrayList<>();
+    }
+
+    private List<Map<String, String>> getExplicitCheckUnits(List<? extends CheckUnit> units){
+        return units.stream().limit(LIMIT)
+                .map(unit -> {
+                    Map<String, String> elem = new HashMap<>();
+                    elem.put(unit.getCheckUnitType().toString(), unit.getCheckUnitValue());
+                    return elem;
+                }).collect(Collectors.toList());
+    }
 
     @PostLoad
     void fillCheckUnitType(){
         if(blocktype==null){
-            checkUnitType = defaultType;
+            checkUnitType = URL;
         } else {
             checkUnitType = blocktype.toUpperCase();
         }

@@ -16,7 +16,7 @@ import javax.persistence.*;
 @Table(schema = "sa", name = "ip")
 @Immutable
 @Getter
-public class IP {
+public class IP implements CheckUnit {
 
     @Id
     private Long id;
