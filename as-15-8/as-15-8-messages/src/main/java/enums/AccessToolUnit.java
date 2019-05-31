@@ -9,6 +9,7 @@ public enum AccessToolUnit {
 	HIDEMYASS,
 	HOLA,
 	EXPRESS,
-	KASPERSKY;
+	KASPERSKY,
+	TORGUARD;
 
 }

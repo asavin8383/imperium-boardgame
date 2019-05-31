@@ -22,7 +22,6 @@ import repositories.ArrangementResultRepositoryAdvanced;
 
 @RestController
 @RequestMapping(path = "/results", produces = MediaType.APPLICATION_JSON_VALUE)
-@PreAuthorize("hasAnyRole('ROLE_OPERATOR', 'ROLE_ADMIN')")
 public class ArrangementResultsController {
 
     private ArrangementResultRepositoryAdvanced arrangementResultRepoAdvanced;
@@ -35,6 +34,7 @@ public class ArrangementResultsController {
         this.arrangementResultRepo = arrangementResultRepo;
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_OPERATOR', 'ROLE_ADMIN')")
     @GetMapping
     public Page<ArrangementResult> findList(
             @RequestParam(required = false) Long id,

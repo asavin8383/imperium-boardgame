@@ -17,8 +17,7 @@ public class DetailResultsVpn implements Serializable  {
     private static final long serialVersionUID = 666L;
 
     @Id
-    @GeneratedValue(strategy=GenerationType.TABLE)
-    @Column(name="id", nullable=false, updatable=false, columnDefinition="bigserial")
+    @Column(name="id", nullable=false, updatable=false, columnDefinition="bigint")
     private Long id;
 
     @Column(name="response_error_code")

@@ -82,6 +82,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	         	.disable()
 	         .authorizeRequests()
                 .antMatchers(HttpMethod.POST, "/gettoken").permitAll()
+                .antMatchers(HttpMethod.GET, "/results/screenshot").permitAll()
                 .anyRequest().authenticated()
             .and()
                 .logout()
