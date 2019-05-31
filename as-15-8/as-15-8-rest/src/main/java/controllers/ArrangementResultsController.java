@@ -2,6 +2,7 @@ package controllers;
 
 import checkUnits.CheckUnitType;
 import model.result.ArrangementResult;
+import model.result.DetailedArrangementResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -13,6 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import repositories.ArrangementResultRepository;
 import repositories.ArrangementResultRepositoryAdvanced;
+import repositories.DetailedArrangementResultRepository;
 
 /**
  * Creation date: 29.05.2019
@@ -26,12 +28,15 @@ public class ArrangementResultsController {
 
     private ArrangementResultRepositoryAdvanced arrangementResultRepoAdvanced;
     private ArrangementResultRepository arrangementResultRepo;
+    private DetailedArrangementResultRepository detailedArrangementResultRepo;
 
     @Autowired
     public ArrangementResultsController(ArrangementResultRepositoryAdvanced arrangementResultRepoAdvanced,
-                                        ArrangementResultRepository arrangementResultRepo) {
+                                        ArrangementResultRepository arrangementResultRepo,
+                                        DetailedArrangementResultRepository detailedArrangementResultRepo) {
         this.arrangementResultRepoAdvanced = arrangementResultRepoAdvanced;
         this.arrangementResultRepo = arrangementResultRepo;
+        this.detailedArrangementResultRepo = detailedArrangementResultRepo;
     }
 
     @PreAuthorize("hasAnyRole('ROLE_OPERATOR', 'ROLE_ADMIN')")
@@ -48,7 +53,7 @@ public class ArrangementResultsController {
         return arrangementResultRepoAdvanced.findPage(id, arrangementId, checkUnitValue, page, checkUnitType);
     }
 
-    @GetMapping(value = "/screenshot", produces = MediaType.IMAGE_PNG_VALUE)
+    @GetMapping(path = "/screenshot", produces = MediaType.IMAGE_PNG_VALUE)
     public @ResponseBody
     ResponseEntity<byte[]> getScreenshot(@RequestParam Long id){
         return arrangementResultRepo.findById(id)
@@ -60,6 +65,14 @@ public class ArrangementResultsController {
                         return new ResponseEntity<>(new byte[0], HttpStatus.NO_CONTENT);
                     }
                 })
+                .orElseGet(() -> new ResponseEntity<>(null, HttpStatus.NO_CONTENT));
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_OPERATOR', 'ROLE_ADMIN')")
+    @GetMapping(path = "/details")
+    public ResponseEntity<DetailedArrangementResult> getDetails(@RequestParam Long id){
+        return detailedArrangementResultRepo.findById(id)
+                .map(detailedArrangementResult -> new ResponseEntity<>(detailedArrangementResult, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(null, HttpStatus.NO_CONTENT));
     }
 }
