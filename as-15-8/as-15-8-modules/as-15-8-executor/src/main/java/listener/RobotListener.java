@@ -7,6 +7,7 @@ import org.testng.ITestResult;
 import kafka.JobNotificationsProducer;
 import lombok.extern.slf4j.Slf4j;
 import scripts.RobotScript;
+import scripts.exceptions.Captcha_RobotScriptExecutionException;
 
 /**
  * Обраьотчик результата выполнения роботов
@@ -29,19 +30,19 @@ public class RobotListener implements ITestListener{
 	@Override
 	public void onTestFailure(ITestResult result) {
 		sendErrorNotification(result);
-		log.error("Робот завершил работу с ошибкой: "+getTestName(result), result.getThrowable());
+		logError(result, false);
 	}
 
 	@Override
 	public void onTestSkipped(ITestResult result) {
 		sendErrorNotification(result);
-		log.error("Робот был остановлен: "+getTestName(result), result.getThrowable());
+		logError(result, true);
 	}
 
 	@Override
 	public void onTestFailedButWithinSuccessPercentage(ITestResult result) {
 		sendErrorNotification(result);
-		log.error("Робот завершил работу с ошибкой: "+getTestName(result), result.getThrowable());
+		logError(result, false);
 	}
 
 	@Override
@@ -59,5 +60,14 @@ public class RobotListener implements ITestListener{
 	private void sendErrorNotification(ITestResult result) {
 		Long jobID = Long.parseLong(((RobotScript)result.getInstance()).getJobID());
 		JobNotificationsProducer.getInstance().sendCheckJobErrorNotification(jobID, result.getThrowable());
+	}
+	
+	private void logError(ITestResult result, boolean isSkipped) {
+		Throwable ex = result.getThrowable();
+		if(ex instanceof Captcha_RobotScriptExecutionException) {
+			log.warn("Робот остановлен, обнаружена капча: " + getTestName(result) + ", checkUnit: " +((RobotScript)result.getInstance()).getCheckUnit().getValue());
+		} else {
+			log.error("Робот "+(isSkipped ? "остановлен" : "завершил работу с ошибкой") + ": "+getTestName(result), ex);
+		}
 	}
 }
