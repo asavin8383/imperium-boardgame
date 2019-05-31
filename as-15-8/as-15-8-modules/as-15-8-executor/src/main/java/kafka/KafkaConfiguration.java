@@ -23,6 +23,7 @@ import org.springframework.kafka.support.serializer.JsonSerializer;
 
 import checkUnits.CheckUnitJob;
 import checkUnits.CheckUnitStatusNotification;
+import control.ExecutorControlMessage;
 import execution.ExecutionJobResult;
 
 @EnableKafka
@@ -40,9 +41,6 @@ public class KafkaConfiguration {
     
     @Value("${spring.kafka.produce-topic}")
     private String executionResultTopicName;
-    
-    @Value("${spring.kafka.notification-topic}")
-    private String notificationsTopicName;
 	
     @Bean 
     Map<String, Object> producerFactoryConfig(){
@@ -54,22 +52,16 @@ public class KafkaConfiguration {
         return configProps;
     }
     
-    @Bean
-    public ConsumerFactory<String, CheckUnitJob> jobsConsumerFactory() {
-        Map<String, Object> config = new HashMap<>();
-
+    @Bean 
+    Map<String, Object> cousumerFactoryConfig(){
+    	Map<String, Object> config = new HashMap<>();
         config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         config.put(ConsumerConfig.GROUP_ID_CONFIG, group);
         config.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, offset);
         config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         config.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
-        
-        return new DefaultKafkaConsumerFactory<>(
-        	config,
-        	new StringDeserializer(),
-            new JsonDeserializer<>(CheckUnitJob.class)
-        );
+        return config;
     }
     
     @Bean
@@ -81,13 +73,42 @@ public class KafkaConfiguration {
     public ProducerFactory<String, CheckUnitStatusNotification> notificationsProducerFactory() {
     	return new DefaultKafkaProducerFactory<>(producerFactoryConfig());
     }
+    
+    @Bean
+    public ProducerFactory<String, ExecutorControlMessage> controlMessagesProducerFactory() {
+    	return new DefaultKafkaProducerFactory<>(producerFactoryConfig());
+    }
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, CheckUnitJob> kafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, CheckUnitJob> factory = new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(jobsConsumerFactory());
-        factory.getContainerProperties().setAckMode(AckMode.MANUAL_IMMEDIATE);
-        return factory;
+    	
+        ConsumerFactory<String, CheckUnitJob> factory = new DefaultKafkaConsumerFactory<>(
+        	cousumerFactoryConfig(),
+        	new StringDeserializer(),
+            new JsonDeserializer<>(CheckUnitJob.class)
+        );
+        factory.getConfigurationProperties().put(ConsumerConfig.GROUP_ID_CONFIG, group);
+    	
+        ConcurrentKafkaListenerContainerFactory<String, CheckUnitJob> listenerFactory = new ConcurrentKafkaListenerContainerFactory<>();
+        listenerFactory.setConsumerFactory(factory);
+        listenerFactory.getContainerProperties().setAckMode(AckMode.MANUAL_IMMEDIATE);
+        return listenerFactory;
+    }
+    
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, ExecutorControlMessage> controlListenerContainerFactory() {
+    	
+        ConsumerFactory<String, ExecutorControlMessage> factory = new DefaultKafkaConsumerFactory<>(
+        	cousumerFactoryConfig(),
+        	new StringDeserializer(),
+            new JsonDeserializer<>(ExecutorControlMessage.class)
+        );
+        factory.getConfigurationProperties().put(ConsumerConfig.GROUP_ID_CONFIG, group);
+
+        ConcurrentKafkaListenerContainerFactory<String, ExecutorControlMessage> listenerFactory = new ConcurrentKafkaListenerContainerFactory<>();
+        listenerFactory.setConsumerFactory(factory);
+        listenerFactory.getContainerProperties().setAckMode(AckMode.MANUAL_IMMEDIATE);
+        return listenerFactory;
     }
  
     @Bean
@@ -101,12 +122,12 @@ public class KafkaConfiguration {
     }
     
     @Bean
-    public String executionResultTopicName() {
-    	return this.executionResultTopicName;
+    public KafkaTemplate<String, ExecutorControlMessage> controlMessagesTemplate() {
+        return new KafkaTemplate<>(controlMessagesProducerFactory());
     }
     
     @Bean
-    public String notificationsTopicName() {
-    	return this.notificationsTopicName;
+    public String executionResultTopicName() {
+    	return this.executionResultTopicName;
     }
 }

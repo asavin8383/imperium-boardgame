@@ -60,6 +60,8 @@ public class RobotListener implements ITestListener{
 	private void sendErrorNotification(ITestResult result) {
 		Long jobID = Long.parseLong(((RobotScript)result.getInstance()).getJobID());
 		JobNotificationsProducer.getInstance().sendCheckJobErrorNotification(jobID, result.getThrowable());
+		if(result.getThrowable() instanceof Captcha_RobotScriptExecutionException)
+			JobNotificationsProducer.getInstance().sendStopExecutorsMessage();
 	}
 	
 	private void logError(ITestResult result, boolean isSkipped) {

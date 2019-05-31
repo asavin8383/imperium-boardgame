@@ -1,6 +1,7 @@
 package kafka;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.kafka.support.SendResult;
@@ -11,6 +12,8 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
 import checkUnits.CheckUnitStatusNotification;
+import control.ExecutorControlMessage;
+import control.ExecutorControlMessage.ControlCommand;
 import enums.CheckUnitJobResult;
 import lombok.extern.slf4j.Slf4j;
 import scripts.exceptions.Captcha_RobotScriptExecutionException;
@@ -23,12 +26,25 @@ public class JobNotificationsProducer {
 	
 	private KafkaTemplate<String, CheckUnitStatusNotification> notificationTemplate;
 	
-	private String notificationsTopicName;
+	private KafkaTemplate<String, ExecutorControlMessage> controlMessagesTemplate;
+	
+    @Value("${spring.kafka.notification-topic}")
+    private String notificationsTopicName;
+    
+    @Value("${spring.kafka.control-topic}")
+    private String controlTopicName;
 
 	@Autowired
-	public JobNotificationsProducer(KafkaTemplate<String, CheckUnitStatusNotification> notificationTemplate, String notificationsTopicName) {
+	public JobNotificationsProducer(
+		KafkaTemplate<String, CheckUnitStatusNotification> notificationTemplate,
+		KafkaTemplate<String, ExecutorControlMessage> controlMessagesTemplate,
+		String notificationsTopicName,
+		String controlTopicName) {
+		
 		this.notificationTemplate = notificationTemplate;
+		this.controlMessagesTemplate = controlMessagesTemplate;
 		this.notificationsTopicName = notificationsTopicName;
+		this.controlTopicName = controlTopicName;
 		instance = this;
 	}
 	
@@ -67,6 +83,34 @@ public class JobNotificationsProducer {
 		    future.get();
 		} catch (Exception ex) {
 			throw new RuntimeException("Ошибка при отправке сообщения с уведомлением об ошибке", ex);
+		}
+	}
+	
+	public void sendStopExecutorsMessage() {
+		try {
+			ExecutorControlMessage controlMessage = new ExecutorControlMessage(ControlCommand.STOP);
+			
+			Message<ExecutorControlMessage> message = MessageBuilder
+	                .withPayload(controlMessage)
+	                .setHeader(KafkaHeaders.TOPIC, controlTopicName)
+	                .build();
+			
+			ListenableFuture<SendResult<String, ExecutorControlMessage>> future = controlMessagesTemplate.send(message);
+		     
+		    future.addCallback(new ListenableFutureCallback<SendResult<String, ExecutorControlMessage>>() {
+		 
+		        @Override
+		        public void onSuccess(SendResult<String, ExecutorControlMessage> result) {
+		            log.info("Сообщение для остановки модулей выполнения проверок успешно отправлено");
+		        }
+		        @Override
+		        public void onFailure(Throwable ex) {
+		        	throw new RuntimeException("Ошибка при отправке сообщения для остановки модулей выполнения проверок", ex);
+		        }
+		    });
+		    future.get();
+		} catch (Exception ex) {
+			throw new RuntimeException("Ошибка при отправке сообщения для остановки модулей выполнения проверок", ex);
 		}
 	}
 	

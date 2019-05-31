@@ -36,6 +36,7 @@ spring:
         consume-topic: jobs
         produce-topic: exec_results
         notification-topic: job_notifications
+        control-topic: exec_control
 
 ---
 
@@ -45,6 +46,7 @@ spring:
         consume-topic: jobs_ashabalin
         produce-topic: exec_results_ashabalin
         notification-topic: job_notifications_ashabalin
+        control-topic: exec_control_ashabalin
 
 ---
 
@@ -54,6 +56,7 @@ spring:
         consume-topic: jobs_asavin
         produce-topic: exec_results_asavin
         notification-topic: job_notifications_asavin
+        control-topic: exec_control_asavin
 
 ---
 
@@ -63,6 +66,7 @@ spring:
         consume-topic: jobs_pvorobiev
         produce-topic: exec_results_pvorobiev
         notification-topic: job_notifications_pvorobiev
+        control-topic: exec_control_pvorobiev
 
 ---
 
@@ -72,3 +76,4 @@ spring:
         consume-topic: jobs_jspirina
         produce-topic: exec_results_jspirina
         notification-topic: job_notifications_jspirina
+        control-topic: exec_control_jspirina
