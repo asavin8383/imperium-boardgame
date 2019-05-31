@@ -58,7 +58,7 @@ public abstract class SearchScript extends RobotScript {
 
             for (WebElement element : elements) {
                 String href = element.getAttribute("href");
-                log.info(checkedResultCount + ". " + href);
+                //log.info(checkedResultCount + ". " + href);
 
                 if (test.equalTo(href)) {
                     scrollTo(element);
@@ -133,7 +133,7 @@ public abstract class SearchScript extends RobotScript {
         boolean equalTo(String found);
 
         @Nullable
-        static URI toUri(String url) {
+        static URI toUri(String url) { // throws URISyntaxException {
             try {
                 if (Objects.nonNull(url)) {
                     url = URLDecoder.decode(url,
@@ -160,6 +160,8 @@ public abstract class SearchScript extends RobotScript {
 
                 case URL:
                     return new UriEquality(unit.getValue());
+                case IP_V6:
+                    return new IPv6HostEquality(unit.getValue());
 
                 default:
                     return new HostEquality(unit.getValue());
@@ -171,7 +173,7 @@ public abstract class SearchScript extends RobotScript {
 
         private String forbiddenHost;
 
-        public HostEquality(String forbiddenHost) {
+        HostEquality(String forbiddenHost) {
             this.forbiddenHost = forbiddenHost;
         }
 
@@ -187,14 +189,53 @@ public abstract class SearchScript extends RobotScript {
 
         private URI forbiddenUri;
 
-        public UriEquality(String forbidden) throws URISyntaxException {
-            this.forbiddenUri = new URI(forbidden);
+        UriEquality(String forbidden) throws URISyntaxException {
+            if (Objects.nonNull(forbidden)) {
+                try {
+                    String decoded = URLDecoder.decode(forbidden,
+                            StandardCharsets.UTF_8.name());
+                    this.forbiddenUri = new URI(decoded);
+                } catch (UnsupportedEncodingException e) {
+                    // ignore
+                }
+            }
+        }
+
+        @Override
+        public boolean equalTo(String found) {
+            URI foundUri = EqualityTest.toUri(removeSlash(found));
+            return forbiddenUri.equals(foundUri);
+        }
+
+        private String removeSlash(String url) {
+            if (url != null && url.length() > 0 &&
+                    url.endsWith("/")) {
+                url = url.substring(0, url.length() - 1);
+            }
+            return url;
+        }
+    }
+
+    private static class IPv6HostEquality implements EqualityTest {
+
+        private String forbiddenHost;
+
+        IPv6HostEquality(String forbiddenHost) {
+            this.forbiddenHost = removeBrackets(forbiddenHost);
         }
 
         @Override
         public boolean equalTo(String found) {
             URI foundUri = EqualityTest.toUri(found);
-            return forbiddenUri.equals(foundUri);
+            if (foundUri != null) {
+                String foundHost = removeBrackets(foundUri.getHost());
+                return forbiddenHost.equals(foundHost);
+            }
+            return false;
+        }
+
+        private String removeBrackets(String host) {
+            return host.replaceAll("[\\[\\]]", "");
         }
     }
 

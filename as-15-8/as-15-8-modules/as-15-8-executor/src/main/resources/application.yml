@@ -10,7 +10,7 @@ robots:
     yandex:
         platform: WIN8
         browser: chrome
-        app: google
+        app: yandex
         limit: 15
     vpn:
         platform: WIN8
