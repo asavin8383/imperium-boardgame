@@ -9,6 +9,7 @@ spring:
         test-while-idle: true
         validation-query: SELECT 1;
         time-between-eviction-runs-millis: 300000
+        max-active: 5
         username: as_user
         password: as_user
     jpa:
