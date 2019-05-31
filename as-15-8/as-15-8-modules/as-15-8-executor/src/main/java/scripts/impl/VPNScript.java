@@ -104,6 +104,7 @@ public class VPNScript extends RobotScript {
             catch (TimeoutException te){
                 pageSourceResult = new PageResult(null, "TIME_OUT");
             }
+            System.out.println("----> try count " + tryCount + ", error = " + pageSourceResult.errorCodeChrome);
         }
 
         // если нет ошибок, то получаем странцы эталоны

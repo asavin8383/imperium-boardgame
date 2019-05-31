@@ -32,6 +32,9 @@ public class VPN_AnalysisResultService implements AnalysisResultService<VpnAnaly
 		detailResultsVpn.setSimilarityOriginPercent(aRes.getSimilarityOriginPercent());
 		detailResultsVpn.setStubScoreInfo(aRes.getStubScoreInfo());
 
+		System.out.println("***************");
+		System.out.println(detailResultsVpn.toString());
+
 		detailVpnRepo.save(detailResultsVpn);
 
 		System.out.println("Детализация анализа сохранена | jobID = " + aRes.getJobID());
