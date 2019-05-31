@@ -63,27 +63,27 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
             checkUnitJobs = jdbcTemplate.query(
                 "select content.id as id, 'DOMAIN' as check_unit_type, domain.domain as check_unit_value\n" +
                         "  from sa.content\n" +
-                        "  join sa.domain on content.id = domain.content_id and content.id IN (:ids)\n" +
+                        "  join sa.domain on content.id = domain.content_id and content.id IN (:ids) and blocktype in ('domain', 'domain-mask')\n" +
                         "UNION\n" +
                         "select content.id, 'IP_V4' as check_unit_type, ip.ip as check_unit_value\n" +
                         "  from sa.content\n" +
-                        "  join sa.ip on content.id = ip.content_id and content.id IN (:ids)\n" +
+                        "  join sa.ip on content.id = ip.content_id and content.id IN (:ids) and blocktype = 'ip'\n" +
                         "UNION\n" +
                         "select content.id, 'IP_V4_SUBNET' as check_unit_type, ipsubnet.ipsubnet as check_unit_value\n" +
                         "  from sa.content\n" +
-                        "  join sa.ipsubnet on content.id = ipsubnet.content_id and content.id IN (:ids)\n" +
+                        "  join sa.ipsubnet on content.id = ipsubnet.content_id and content.id IN (:ids) and blocktype = 'ip'\n" +
                         "UNION\n" +
                         "select content.id, 'IP_V6' as check_unit_type, ipv6.ipv6 as check_unit_value\n" +
                         "  from sa.content\n" +
-                        "  join sa.ipv6 on content.id = ipv6.content_id and content.id IN (:ids)\n" +
+                        "  join sa.ipv6 on content.id = ipv6.content_id and content.id IN (:ids) and blocktype = 'ip'\n" +
                         "UNION\n" +
                         "select content.id, 'IP_V6_SUBNET' as check_unit_type, ipv6subnet.\"ipv6Subnet\" as check_unit_value\n" +
                         "  from sa.content\n" +
-                        "  join sa.ipv6subnet on content.id = ipv6subnet.content_id and content.id IN (:ids)\n" +
+                        "  join sa.ipv6subnet on content.id = ipv6subnet.content_id and content.id IN (:ids) and blocktype = 'ip'\n" +
                         "UNION\n" +
                         "select content.id, 'URL' as check_unit_type, url.url as check_unit_value\n" +
                         "  from sa.content\n" +
-                        "  join sa.url on content.id = url.content_id and content.id IN (:ids)",
+                        "  join sa.url on content.id = url.content_id and content.id IN (:ids) and blocktype is null",
                     parameters,
                     (rs, rowNum) -> {
                     	CheckUnitJob job = mapper.map(rs, rowNum);
