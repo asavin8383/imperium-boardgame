@@ -4,16 +4,19 @@ import enums.AccessToolParameters;
 import jobs.ArrangementJob;
 import jobs.ERDIJob;
 import model.catalog.*;
+import model.parameters.GlobalParameter;
 import model.task.Arrangement;
 import model.task.ArrangementItem;
 import org.springframework.stereotype.Service;
 import repositories.ArrangementItemRepository;
+import repositories.GlobalParametersRepository;
 import services.arrangement.ArrangementJobCreationService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Creation date: 23.05.2019
@@ -25,9 +28,12 @@ import java.util.Map;
 public class ArrangementJobCreationServiceImpl implements ArrangementJobCreationService {
 
     private ArrangementItemRepository arrangementItemRepo;
+    private GlobalParametersRepository globalParametersRepo;
 
-    public ArrangementJobCreationServiceImpl(ArrangementItemRepository arrangementItemRepo) {
+    public ArrangementJobCreationServiceImpl(ArrangementItemRepository arrangementItemRepo,
+                                             GlobalParametersRepository globalParametersRepo) {
         this.arrangementItemRepo = arrangementItemRepo;
+        this.globalParametersRepo = globalParametersRepo;
     }
 
     @Override
@@ -38,7 +44,10 @@ public class ArrangementJobCreationServiceImpl implements ArrangementJobCreation
             arrangementJob.setId(arrangement.getId());
             arrangementJob.setAccessToolUnit(arrangement.getAccessTool().getName());
             arrangementJob.getErdiJobList().add(new ERDIJob(arrangementItem.getErdi().getId()));
+            //Добавляем параметры конкретного ПС/ПАСД
             arrangementJob.getAccessToolParameters().putAll(prepareParameters(arrangement.getAccessTool()));
+            //Добавляем глобальные параметры
+            arrangementJob.getAccessToolParameters().putAll(prepareGlobalParameters());
             jobList.add(arrangementJob);
         }
         return jobList;
@@ -72,5 +81,10 @@ public class ArrangementJobCreationServiceImpl implements ArrangementJobCreation
             result.put(AccessToolParameters.STUB_URL, parameters.getStubUrl());
         }
         return result;
+    }
+
+    private Map<AccessToolParameters, String> prepareGlobalParameters(){
+        return globalParametersRepo.findAll().stream()
+            .collect(Collectors.toMap(GlobalParameter::getKey, GlobalParameter::getValue));
     }
 }
