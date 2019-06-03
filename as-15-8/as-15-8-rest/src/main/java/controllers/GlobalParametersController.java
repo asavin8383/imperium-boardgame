@@ -41,9 +41,13 @@ public class GlobalParametersController {
         return globalParametersRepo.findAll(page);
     }
 
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public GlobalParameter postGlobalParameter(GlobalParameter globalParameter){
+    public GlobalParameter postGlobalParameter(@RequestParam String key,
+                                               @RequestParam String value){
+        GlobalParameter globalParameter = new GlobalParameter();
+        globalParameter.setKey(AccessToolParameters.valueOf(key));
+        globalParameter.setValue(value);
         return globalParametersRepo.save(globalParameter);
     }
 
