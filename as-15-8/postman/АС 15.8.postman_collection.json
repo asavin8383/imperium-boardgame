@@ -1310,6 +1310,118 @@
 			]
 		},
 		{
+			"name": "Параметры",
+			"item": [
+				{
+					"name": "Список параметров",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"value": "{{admin_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/parameters",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"parameters"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Изменение параметра",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"value": "{{admin_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/parameters?key=ETALON_PROXY_HOST&value=test_host",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"parameters"
+							],
+							"query": [
+								{
+									"key": "key",
+									"value": "ETALON_PROXY_HOST"
+								},
+								{
+									"key": "value",
+									"value": "test_host"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Добавление параметра",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"value": "{{admin_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/parameters?key=ETALON_PROXY_HOST&value=test_host",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"parameters"
+							],
+							"query": [
+								{
+									"key": "key",
+									"value": "ETALON_PROXY_HOST"
+								},
+								{
+									"key": "value",
+									"value": "test_host"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "Список средств доступа к запрещённым ресурсам",
 			"request": {
 				"method": "GET",
@@ -1477,25 +1589,25 @@
 	],
 	"variable": [
 		{
-			"id": "b338ec74-a25a-4ebe-a2a4-88b0d06357f3",
+			"id": "55d64e1c-85c7-4a96-9827-ea0ba78a51bd",
 			"key": "url",
 			"value": "http://localhost:15800",
 			"type": "string"
 		},
 		{
-			"id": "64cd6247-5622-4342-9b65-06b6179ee171",
+			"id": "01eadbf2-fe91-47af-a41d-db48a21a02c7",
 			"key": "oper_token",
 			"value": "",
 			"type": "string"
 		},
 		{
-			"id": "7b494c33-b74d-45e1-bc28-3278c7c1e47a",
+			"id": "0b5df86f-59cb-4ba6-ac63-ea9086469437",
 			"key": "test_url",
 			"value": "http://192.168.5.253:15800",
 			"type": "string"
 		},
 		{
-			"id": "a2dbccc9-38c0-4d4d-bb2b-fe05efe0eceb",
+			"id": "7b1ef8d1-9118-4595-9791-81b9698ab8a9",
 			"key": "admin_token",
 			"value": "",
 			"type": "string"
