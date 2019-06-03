@@ -1,5 +1,6 @@
 package model.task;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import model.erdi.ERDI;
 
@@ -25,6 +26,7 @@ public class ArrangementItem implements Serializable {
 
     @ManyToOne(optional = false)
     @JoinColumn(name="arrangement_id", foreignKey = @ForeignKey(name = "FK_arrangement_items_arrangement_id"))
+    @JsonIgnore
     private Arrangement arrangement;
 
     @ManyToOne(optional = false)

@@ -4,6 +4,7 @@ import model.task.FormalTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.query.QueryUtils;
 import org.springframework.stereotype.Repository;
 import repositories.FormalTaskRepositoryAdvanced;
 import repositories.helpers.CriteriaHelper;
@@ -42,10 +43,7 @@ public class FormalTaskRepositoryAdvancedImpl implements FormalTaskRepositoryAdv
 	    }
 	    select.where(predicates.toArray(new Predicate[0]));
 	    
-	    //TODO получать сортировку из Pageable
-	    select.orderBy(criteriaBuilder.desc(fromFormalTask.get("creationDate")));
-	    /*Order[] orders = pageable.getSort().get().toArray(size -> new Order[size]);
-	    cq.orderBy(orders);*/
+	    select.orderBy(QueryUtils.toOrders(pageable.getSort(), fromFormalTask, criteriaBuilder));
 
 		return CriteriaHelper.createPage(em, select, pageable);
 	    

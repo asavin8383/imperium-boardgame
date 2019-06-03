@@ -7,6 +7,7 @@ import model.task.Arrangement_;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.query.QueryUtils;
 import org.springframework.stereotype.Repository;
 import repositories.ArrangementResultRepositoryAdvanced;
 import repositories.helpers.CriteriaHelper;
@@ -56,8 +57,7 @@ public class ArrangementResultRepositoryAdvancedImpl implements ArrangementResul
 
         select.where(predicates.toArray(new Predicate[0]));
 
-        //TODO получать сортировку из Pageable
-        select.orderBy(criteriaBuilder.asc(arrangementResult.get(ArrangementResult_.ID)));
+        select.orderBy(QueryUtils.toOrders(pageable.getSort(), arrangementResult, criteriaBuilder));
 
         return CriteriaHelper.createPage(em, select, pageable);
     }

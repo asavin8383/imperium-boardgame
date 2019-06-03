@@ -1,13 +1,14 @@
 package controllers;
 
 import controllers.helpers.ArrangementExecutionHelper;
+import controllers.helpers.SortingHelper;
+import enums.SortingDirection;
 import exceptions.AS_15_8_Exception;
 import model.enums.ExecutionStatus;
 import model.task.Arrangement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -50,10 +51,12 @@ public class ArrangementController {
     public Page<Arrangement> findList(
             @RequestParam(required = false) Long formalTaskId,
             @RequestParam(required = false) Long id,
+            @RequestParam(required = false) SortingDirection sortingDirection,
+            @RequestParam(required = false) String sortingColumn,
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize){
         PageRequest page = PageRequest.of(
-                pageNumber, pageSize, Sort.by("id").ascending());
+                pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
         return arrangementRepoAdvanced.findPage(formalTaskId, id, page);
     }
 

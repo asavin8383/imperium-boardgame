@@ -1,6 +1,8 @@
 package controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import controllers.helpers.SortingHelper;
+import enums.SortingDirection;
 import exceptions.AS_15_8_Exception;
 import model.erdi.ERDI;
 import model.task.Arrangement;
@@ -8,7 +10,6 @@ import model.task.ArrangementItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -51,10 +52,12 @@ public class ArrangementItemController {
     public Page<ArrangementItem> findList(
             @RequestParam(required = false) Long arrangementId,
             @RequestParam(required = false) Long id,
+            @RequestParam(required = false) SortingDirection sortingDirection,
+            @RequestParam(required = false) String sortingColumn,
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize){
         PageRequest page = PageRequest.of(
-                pageNumber, pageSize, Sort.by("id").ascending());
+                pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
         return arrangementItemRepoAdvanced.findPage(arrangementId, id, page);
     }
 
@@ -74,7 +77,7 @@ public class ArrangementItemController {
 
     @PostMapping(path = "/upload")
     public ResponseEntity<Arrangement> postArrangementItems(@RequestParam Long arrangementId, @RequestBody List<ERDI> erdiList){
-        return arrangementRepo.findEditableArrangement(arrangementId)
+        return arrangementRepo.findById(arrangementId)
                 .map(arrangement -> {
                     List<ERDI> dbErdiList = arrangement.getArrangementItems().stream()
                         .map(ArrangementItem::getErdi)

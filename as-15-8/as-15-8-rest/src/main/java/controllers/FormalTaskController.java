@@ -1,12 +1,13 @@
 package controllers;
 
+import controllers.helpers.SortingHelper;
+import enums.SortingDirection;
 import exceptions.AS_15_8_Exception;
 import model.task.FormalTask;
 import model.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -52,10 +53,12 @@ public class FormalTaskController {
 	public Page<FormalTask> findList(
 			@RequestParam(required = false) Long taskId,
 			@RequestParam(required = false) Long userId,
+			@RequestParam(required = false) SortingDirection sortingDirection,
+			@RequestParam(required = false) String sortingColumn,
 			@RequestParam(defaultValue = "0") int pageNumber,
 			@RequestParam(defaultValue = "10") int pageSize){
 		PageRequest page = PageRequest.of(
-				pageNumber, pageSize, Sort.by("creationDate").descending());
+				pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
 		return formalTaskRepo.findPage(taskId, userId, page);
 	}
 
