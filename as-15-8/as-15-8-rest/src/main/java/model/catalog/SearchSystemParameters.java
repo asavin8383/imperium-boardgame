@@ -1,6 +1,7 @@
 package model.catalog;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -12,6 +13,7 @@ import java.io.Serializable;
 @Entity
 @Table(schema = "portal", name = "search_system_parameters")
 @Data
+@EqualsAndHashCode(callSuper=true)
 public class SearchSystemParameters extends AccessToolParameters implements Serializable {
 
     private static final long serialVersionUID = 1L;

@@ -1,21 +1,22 @@
 package controllers;
 
 import controllers.helpers.ArrangementExecutionHelper;
+import controllers.helpers.SortingHelper;
+import enums.SortingDirection;
 import exceptions.AS_15_8_Exception;
 import model.enums.ExecutionStatus;
 import model.task.Arrangement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import repositories.ArrangementRepository;
-import repositories.ArrangementRepositoryAdvanced;
 import repositories.FormalTaskRepository;
+import services.arrangement.ArrangementStatusService;
 
 import java.time.LocalDateTime;
 
@@ -31,30 +32,32 @@ public class ArrangementController {
 
     private ArrangementRepository arrangementRepo;
     private FormalTaskRepository formalTaskRepo;
-    private ArrangementRepositoryAdvanced arrangementRepoAdvanced;
     private ArrangementExecutionHelper arrangementExecutionHelper;
+    private ArrangementStatusService arrangementStatusService;
 
     @Autowired
     public ArrangementController(ArrangementRepository arrangementRepo,
                                  FormalTaskRepository formalTaskRepo,
-                                 ArrangementRepositoryAdvanced arrangementRepoAdvanced,
-                                 ArrangementExecutionHelper arrangementExecutionHelper
+                                 ArrangementExecutionHelper arrangementExecutionHelper,
+                                 ArrangementStatusService arrangementStatusService
                                  ) {
         this.arrangementRepo = arrangementRepo;
         this.formalTaskRepo = formalTaskRepo;
-        this.arrangementRepoAdvanced = arrangementRepoAdvanced;
         this.arrangementExecutionHelper = arrangementExecutionHelper;
+        this.arrangementStatusService = arrangementStatusService;
     }
 
     @GetMapping
     public Page<Arrangement> findList(
             @RequestParam(required = false) Long formalTaskId,
             @RequestParam(required = false) Long id,
+            @RequestParam(required = false) SortingDirection sortingDirection,
+            @RequestParam(required = false) String sortingColumn,
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize){
         PageRequest page = PageRequest.of(
-                pageNumber, pageSize, Sort.by("id").ascending());
-        return arrangementRepoAdvanced.findPage(formalTaskId, id, page);
+                pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
+        return arrangementRepo.findPage(formalTaskId, id, page);
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -83,15 +86,15 @@ public class ArrangementController {
     public ResponseEntity<Arrangement> planArrangement(@RequestParam Long id){
         return arrangementRepo.findById(id)
                 .map(arrangement -> {
-                    //Проверим, не нужно ли сменить статус
-                    arrangementExecutionHelper.checkArrangementStatus(arrangement);
-                    arrangementRepo.save(arrangement);
+                    //Проверим, не нужно ли сменить статус(сначала у мероприятия, а потом и у задания)
+                    if(isStatusChanged(arrangement)){
+                        arrangementStatusService.processArrangementStatusChange(arrangement);
+                    }
                     return new ResponseEntity<>(arrangement, HttpStatus.OK);
                 }).orElseGet(()-> new ResponseEntity<>(null, HttpStatus.NO_CONTENT));
     }
 
     @DeleteMapping
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public Long deleteArrangement(@RequestParam Long id) {
         return arrangementRepo.findById(id)
                 .map(arrangement -> {
@@ -131,10 +134,27 @@ public class ArrangementController {
      */
     private Arrangement replaceFields(Arrangement newArrangement, Arrangement arrangement) {
         arrangement.setAccessTool(newArrangement.getAccessTool());
-        arrangement.setStartDate(newArrangement.getStartDate());
-        arrangement.setEndDate(newArrangement.getEndDate());
         arrangement.setTitle(newArrangement.getTitle());
         return arrangement;
+    }
+
+    /**
+     * Проверяет состояние мероприятия и меняет ему статус при выполнении условий смены
+     * @param arrangement мероприятие
+     * @return Изменился ли статус
+     */
+    private boolean isStatusChanged(Arrangement arrangement){
+        //Если новому мероприятию запланировали дату запуска в будущем,
+        // при этом не пустой список ЕРДИ,
+        // оно становится PLANNED
+        if(arrangement.getStatus().equals(ExecutionStatus.NEW) &&
+                arrangement.getStartDate() != null &&
+                arrangement.getArrangementItems()!=null &&
+                arrangement.getArrangementItems().size() > 0){
+            arrangement.setStatus(ExecutionStatus.PLANNED);
+            return true;
+        }
+        return false;
     }
 
 

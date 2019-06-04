@@ -9,20 +9,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import repositories.ArrangementRepository;
 import services.arrangement.ArrangementNotificationService;
+import services.arrangement.ArrangementStatusService;
+
+import java.time.LocalDateTime;
 
 /**
  * Creation date: 29.05.2019
  * Author: asavin
+ * Обработчик оповещения об изменении состояния выполнения мероприятие (приостановлен, закончен)
  */
 @Service
 @Slf4j
 public class ArrangementNotificationServiceImpl implements ArrangementNotificationService {
 
     private ArrangementRepository arrangementRepo;
+    private ArrangementStatusService arrangementStatusService;
 
     @Autowired
-    public ArrangementNotificationServiceImpl(ArrangementRepository arrangementRepo) {
+    public ArrangementNotificationServiceImpl(ArrangementRepository arrangementRepo,
+            ArrangementStatusService arrangementStatusService) {
         this.arrangementRepo = arrangementRepo;
+        this.arrangementStatusService = arrangementStatusService;
     }
 
     @Override
@@ -33,10 +40,12 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
                     arrangement.setStatus(ExecutionStatus.ACTION_REQUIRED);
                 } else if (arrangementStatusNotification.getArrangementStatus().equals(ArrangementStatus.FINISHED)){
                     arrangement.setStatus(ExecutionStatus.FINISHED);
+                    arrangement.setEndDate(LocalDateTime.now());
                 } else {
                     throw new AS_15_8_Exception("Error changing arrangement status. Status not supported: " + arrangementStatusNotification.getArrangementStatus());
                 }
-                arrangementRepo.save(arrangement);
+                //Меняем статус мероприятия и задания в случае необходимости
+                arrangementStatusService.processArrangementStatusChange(arrangement);
                 return true;
 
             })

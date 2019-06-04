@@ -18,10 +18,14 @@ robots:
         browser: chrome
         app: vpn
         vpnProxy: 192.168.5.194:3128
-        etalonProxy:
-        useEtalonProxy: true
-        timeoutRequest: 30
-        tryCountRequest: 3
+    hidemyass:
+        platform: WIN8
+        browser: chrome
+        app: hidemyass
+    cameleoxyz:
+        platform: WIN8
+        browser: chrome
+        app: cameleoxyz
 
 spring:
     kafka:

@@ -42,9 +42,7 @@ public class SeleniumRobot<T> implements Robot{
 	/** Имя приложения (ПС/ПАСД) */
 	private String applicationName;
 
-	/** Прокси по уполчанию (ПАСД) */
-	private String vpnProxy;
-	
+
 	/**
 	 * Робот на технологии Selenium
 	 * @param accessToolUnit Проверяемая ПС/ПАСД
@@ -86,7 +84,6 @@ public class SeleniumRobot<T> implements Robot{
 		this.browserName = browserName;
 		this.platformName = platform.name();
 		this.applicationName = applicationName;
-		this.vpnProxy = vpnProxy;
 	}
 	
 	@Override
@@ -102,10 +99,10 @@ public class SeleniumRobot<T> implements Robot{
 		test.addParameter("applicationName", this.applicationName);
 		
 		test.addParameter("jobID", jobID.toString());
+		test.addParameter("accessToolUnit", this.accessToolUnit.name());
 		test.addParameter("checkUnitType", checkUnit.getType().toString());
 		test.addParameter("checkUnitValue", checkUnit.getValue());
-		test.addParameter("vpnProxy", vpnProxy);
-		
+
 		List<XmlClass> classes = new ArrayList<XmlClass>();
 		classes.add(new XmlClass(this.scriptClass));
 		test.setXmlClasses(classes);

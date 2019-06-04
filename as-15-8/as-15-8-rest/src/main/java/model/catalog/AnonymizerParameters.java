@@ -1,6 +1,7 @@
 package model.catalog;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -13,6 +14,7 @@ import java.io.Serializable;
 @Entity
 @Table(schema = "portal", name = "anonymizer_parameters")
 @Data
+@EqualsAndHashCode(callSuper=true)
 public class AnonymizerParameters extends AccessToolParameters implements Serializable {
     private static final long serialVersionUID = 1L;
 

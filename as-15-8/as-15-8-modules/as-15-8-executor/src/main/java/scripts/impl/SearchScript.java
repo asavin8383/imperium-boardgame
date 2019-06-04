@@ -1,31 +1,26 @@
 package scripts.impl;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
+import checkUnits.CheckUnit;
+import execution.ExecutionPSJobResult;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
+import org.springframework.util.StringUtils;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Parameters;
+import scripts.RobotScript;
+import scripts.ScriptUtils;
+import scripts.exceptions.Captcha_RobotScriptExecutionException;
+import scripts.exceptions.RobotScriptExecutionException;
+
+import javax.annotation.Nullable;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Objects;
-
-import javax.annotation.Nullable;
-
-import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.support.ui.WebDriverWait;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Parameters;
-
-import checkUnits.CheckUnit;
-import execution.ExecutionPSJobResult;
-import lombok.extern.slf4j.Slf4j;
-import scripts.RobotScript;
-import scripts.exceptions.Captcha_RobotScriptExecutionException;
-import scripts.exceptions.RobotScriptExecutionException;
 
 @Slf4j
 public abstract class SearchScript extends RobotScript {
@@ -43,7 +38,7 @@ public abstract class SearchScript extends RobotScript {
 
     @BeforeClass
     @Parameters({"searchResultLimit"})
-    public void setOptions(String searchLimit) throws URISyntaxException {
+    public void setOptions(String searchLimit) {
         this.test = EqualityTest.forCheckUnit(getCheckUnit());
         this.checkedResultCount = 0;
 
@@ -80,10 +75,11 @@ public abstract class SearchScript extends RobotScript {
     }
 
     ExecutionPSJobResult createExecutionResult(boolean linkFound) {
-    	ExecutionPSJobResult message = new ExecutionPSJobResult();
-    	fillExecutionJobResult(message);
+        ExecutionPSJobResult message = new ExecutionPSJobResult();
+        fillExecutionResultMessage(message);
         message.setLinkFound(linkFound);
-        message.setScreenshot(linkFound ? takeScreenshot() : null);
+        message.setScreenshot(linkFound ?
+                ScriptUtils.getScreenshot(driver) : null);
         return message;
     }
 
@@ -91,10 +87,7 @@ public abstract class SearchScript extends RobotScript {
         WebElement next = findElementIfExists(by);
         if (next != null) {
             next.click();
-            new WebDriverWait(driver, 20)
-                    .until(waitDriver -> ((JavascriptExecutor) waitDriver)
-                            .executeScript("return document.readyState")
-                            .equals("complete"));
+            ScriptUtils.waitPageLoading(driver);
             return true;
         }
         return false;
@@ -118,11 +111,6 @@ public abstract class SearchScript extends RobotScript {
         actions.moveToElement(webElement, 0, 0).perform();
     }
 
-    private byte[] takeScreenshot() {
-        TakesScreenshot takesScreenshot = (TakesScreenshot) driver;
-        return takesScreenshot.getScreenshotAs(OutputType.BYTES);
-    }
-
 
 
     protected abstract boolean nextPage();
@@ -137,23 +125,28 @@ public abstract class SearchScript extends RobotScript {
 
         boolean equalTo(String found);
 
+        @SneakyThrows
+        static String decode(String url) {
+            if (!StringUtils.isEmpty(url)) {
+                return URLDecoder.decode(url,
+                        StandardCharsets.UTF_8.name());
+            }
+            return url;
+        }
+
         @Nullable
-        static URI toUri(String url) { // throws URISyntaxException {
+        static URL toUrl(String url) {
             try {
-                if (Objects.nonNull(url)) {
-                    url = URLDecoder.decode(url,
-                            StandardCharsets.UTF_8.name());
-                    return new URI(url);
+                if (!StringUtils.isEmpty(url)) {
+                    return new URL(decode(url));
                 }
-            } catch (URISyntaxException e) {
+            } catch (MalformedURLException e) {
                 log.warn(e.getMessage() + ": " + url);
-            } catch (UnsupportedEncodingException e) {
-                // ignore
             }
             return null;
         }
 
-        static EqualityTest forCheckUnit(CheckUnit unit) throws URISyntaxException {
+        static EqualityTest forCheckUnit(CheckUnit unit) {
             switch (unit.getType()) {
 
                 case DOMAIN_MASK:
@@ -164,7 +157,7 @@ public abstract class SearchScript extends RobotScript {
                                     unit.getType().toString());
 
                 case URL:
-                    return new UriEquality(unit.getValue());
+                    return new UrlEquality(unit.getValue());
                 case IP_V6:
                     return new IPv6HostEquality(unit.getValue());
 
@@ -184,32 +177,36 @@ public abstract class SearchScript extends RobotScript {
 
         @Override
         public boolean equalTo(String found) {
-            URI foundUri = EqualityTest.toUri(found);
-            return foundUri != null &&
-                    forbiddenHost.equals(foundUri.getHost());
+            URL foundUrl = EqualityTest.toUrl(found);
+            return foundUrl != null &&
+                    forbiddenHost.equals(foundUrl.getHost());
         }
     }
 
-    private static class UriEquality implements EqualityTest {
+    private static class UrlEquality implements EqualityTest {
 
-        private URI forbiddenUri;
+        private String originalUrl;
+        private String decodedUrl;
+        private boolean isEncoded;
 
-        UriEquality(String forbidden) throws URISyntaxException {
-            if (Objects.nonNull(forbidden)) {
-                try {
-                    String decoded = URLDecoder.decode(forbidden,
-                            StandardCharsets.UTF_8.name());
-                    this.forbiddenUri = new URI(decoded);
-                } catch (UnsupportedEncodingException e) {
-                    // ignore
-                }
-            }
+        UrlEquality(String forbiddenUrl) {
+            this.originalUrl = removeSlash(forbiddenUrl);
+            this.decodedUrl = EqualityTest.decode(originalUrl);
+            this.isEncoded = originalUrl.compareTo(decodedUrl) != 0;
         }
 
         @Override
-        public boolean equalTo(String found) {
-            URI foundUri = EqualityTest.toUri(removeSlash(found));
-            return forbiddenUri.equals(foundUri);
+        public boolean equalTo(String foundUrl) {
+            if (StringUtils.isEmpty(foundUrl))
+                return false;
+
+            foundUrl = removeSlash(foundUrl);
+
+            if (isEncoded)
+                return originalUrl.equals(foundUrl);
+
+            foundUrl = EqualityTest.decode(foundUrl);
+            return decodedUrl.equals(foundUrl);
         }
 
         private String removeSlash(String url) {
@@ -231,9 +228,9 @@ public abstract class SearchScript extends RobotScript {
 
         @Override
         public boolean equalTo(String found) {
-            URI foundUri = EqualityTest.toUri(found);
-            if (foundUri != null) {
-                String foundHost = removeBrackets(foundUri.getHost());
+            URL foundUrl = EqualityTest.toUrl(found);
+            if (foundUrl != null) {
+                String foundHost = removeBrackets(foundUrl.getHost());
                 return forbiddenHost.equals(foundHost);
             }
             return false;

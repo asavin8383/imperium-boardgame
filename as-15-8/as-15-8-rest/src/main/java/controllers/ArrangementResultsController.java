@@ -1,19 +1,19 @@
 package controllers;
 
 import checkUnits.CheckUnitType;
+import controllers.helpers.SortingHelper;
+import enums.SortingDirection;
 import model.result.ArrangementResult;
 import model.result.DetailedArrangementResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import repositories.ArrangementResultRepository;
-import repositories.ArrangementResultRepositoryAdvanced;
 import repositories.DetailedArrangementResultRepository;
 
 /**
@@ -26,15 +26,12 @@ import repositories.DetailedArrangementResultRepository;
 @RequestMapping(path = "/results", produces = MediaType.APPLICATION_JSON_VALUE)
 public class ArrangementResultsController {
 
-    private ArrangementResultRepositoryAdvanced arrangementResultRepoAdvanced;
     private ArrangementResultRepository arrangementResultRepo;
     private DetailedArrangementResultRepository detailedArrangementResultRepo;
 
     @Autowired
-    public ArrangementResultsController(ArrangementResultRepositoryAdvanced arrangementResultRepoAdvanced,
-                                        ArrangementResultRepository arrangementResultRepo,
+    public ArrangementResultsController(ArrangementResultRepository arrangementResultRepo,
                                         DetailedArrangementResultRepository detailedArrangementResultRepo) {
-        this.arrangementResultRepoAdvanced = arrangementResultRepoAdvanced;
         this.arrangementResultRepo = arrangementResultRepo;
         this.detailedArrangementResultRepo = detailedArrangementResultRepo;
     }
@@ -42,15 +39,17 @@ public class ArrangementResultsController {
     @PreAuthorize("hasAnyRole('ROLE_OPERATOR', 'ROLE_ADMIN')")
     @GetMapping
     public Page<ArrangementResult> findList(
+            @RequestParam Long arrangementId,
             @RequestParam(required = false) Long id,
-            @RequestParam(required = false) Long arrangementId,
             @RequestParam(required = false) String checkUnitValue,
             @RequestParam(required = false)CheckUnitType checkUnitType,
+            @RequestParam(required = false) SortingDirection sortingDirection,
+            @RequestParam(required = false) String sortingColumn,
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize){
         PageRequest page = PageRequest.of(
-                pageNumber, pageSize, Sort.by("id").ascending());
-        return arrangementResultRepoAdvanced.findPage(id, arrangementId, checkUnitValue, page, checkUnitType);
+                pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
+        return arrangementResultRepo.findPage(id, arrangementId, checkUnitValue, page, checkUnitType);
     }
 
     @GetMapping(path = "/screenshot", produces = MediaType.IMAGE_PNG_VALUE)

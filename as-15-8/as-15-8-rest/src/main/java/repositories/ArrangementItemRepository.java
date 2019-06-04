@@ -11,7 +11,7 @@ import java.util.List;
  * Creation date: 23.05.2019
  * Author: asavin
  */
-public interface ArrangementItemRepository extends JpaRepository<ArrangementItem, Long> {
+public interface ArrangementItemRepository extends JpaRepository<ArrangementItem, Long>, ArrangementItemRepositoryAdvanced {
 
     @Query("SELECT item FROM ArrangementItem item WHERE item.arrangement.id=:arrangementId")
     List<ArrangementItem> findAllByArrangementId(@Param("arrangementId") Long arrangementId);

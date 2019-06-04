@@ -47,6 +47,9 @@ public class DetailResultsVpn implements Serializable  {
     @Column(name="page_url_final")
     private String pageUrlFinal;
 
+    @Column(name="stub_url")
+    private String stubUrl;
+
     @Column(name="similarity_origin_percent")
     private Integer similarityOriginPercent;
 

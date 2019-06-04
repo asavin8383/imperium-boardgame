@@ -17,7 +17,7 @@ import javax.persistence.*;
 @Subselect("select * from sa.domain where domain like '%*%'")
 @Immutable
 @Getter
-public class DomainMask {
+public class DomainMask implements CheckUnit{
 
     @Id
     private Long id;

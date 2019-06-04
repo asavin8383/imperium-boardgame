@@ -1,21 +1,18 @@
 package robots;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
+import enums.AccessToolUnit;
 import org.openqa.selenium.Platform;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
-
-import enums.AccessToolUnit;
 import robots.impl.SeleniumSearchRobot;
 import robots.impl.SeleniumVpnRobot;
-import scripts.impl.GoogleScript;
-import scripts.impl.VPNScript;
-import scripts.impl.YandexScript;
+import scripts.impl.*;
+
+import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  * Конфигурация роботов для проверки ПС/ПАСД
@@ -81,12 +78,43 @@ public class RobotsConfiguration {
 				VPNScript.class,
 				env.getProperty("robots.vpn.browser"),
 				Platform.valueOf(env.getProperty("robots.vpn.platform")),
-				env.getProperty("robots.vpn.app"),
-				env.getProperty("robots.vpn.vpnProxy"),
-				env.getProperty("robots.vpn.etalonProxy"),
-				env.getProperty("robots.vpn.useEtalonProxy"),
-				env.getProperty("robots.vpn.timeoutRequest"),
-				env.getProperty("robots.vpn.tryCountRequest")
+				env.getProperty("robots.vpn.app")
+		);
+	}
+
+	/**
+	 * Робот проверки анонимайзера HideMyAss
+	 * @return
+	 * @throws MalformedURLException
+	 */
+	@Bean
+	public Robot hideMyAssRobot() throws MalformedURLException {
+
+		return new SeleniumVpnRobot<>(
+				AccessToolUnit.HIDEMYASS,
+				new URL(this.seleniumHubUrl),
+				HideMyAssScript.class,
+				env.getProperty("robots.hidemyass.browser"),
+				Platform.valueOf(env.getProperty("robots.hidemyass.platform")),
+				env.getProperty("robots.hidemyass.app")
+		);
+	}
+
+	/**
+	 * Робот проверки анонимайзера CameleoXYZ
+	 * @return
+	 * @throws MalformedURLException
+	 */
+	@Bean
+	public Robot cameleoXyzRobot() throws MalformedURLException {
+
+		return new SeleniumVpnRobot<>(
+				AccessToolUnit.CAMELEO_XYZ,
+				new URL(this.seleniumHubUrl),
+				CameleoScript.class,
+				env.getProperty("robots.cameleoxyz.browser"),
+				Platform.valueOf(env.getProperty("robots.cameleoxyz.platform")),
+				env.getProperty("robots.cameleoxyz.app")
 		);
 	}
 	

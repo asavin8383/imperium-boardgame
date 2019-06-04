@@ -1,17 +1,18 @@
 package controllers;
 
+import controllers.helpers.SortingHelper;
+import enums.SortingDirection;
 import model.erdi.ERDI;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import repositories.ERDIRepositoryAdvanced;
+import repositories.ERDIRepository;
 
 import java.time.LocalDateTime;
 
@@ -25,11 +26,11 @@ import java.time.LocalDateTime;
 @PreAuthorize("hasAnyRole('ROLE_OPERATOR','ROLE_ADMIN')")
 public class ERDIController {
 
-    private ERDIRepositoryAdvanced erdiRepoAdvanced;
+    private ERDIRepository erdiRepo;
 
     @Autowired
-    public ERDIController(ERDIRepositoryAdvanced erdiRepoAdvanced) {
-        this.erdiRepoAdvanced = erdiRepoAdvanced;
+    public ERDIController(ERDIRepository erdiRepo) {
+        this.erdiRepo = erdiRepo;
     }
 
     @GetMapping
@@ -41,10 +42,12 @@ public class ERDIController {
             @RequestParam(required = false) LocalDateTime decisionDate,
             @RequestParam(required = false) String checkUnitValue,
             @RequestParam(required = false) String blocktype,
+            @RequestParam(required = false) SortingDirection sortingDirection,
+            @RequestParam(required = false) String sortingColumn,
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize){
         PageRequest page = PageRequest.of(
-                pageNumber, pageSize, Sort.by("id").ascending());
-        return erdiRepoAdvanced.findPage(id, arrangementId, organization, blocktype, page);
+                pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
+        return erdiRepo.findPage(id, arrangementId, organization, blocktype, page);
     }
 }

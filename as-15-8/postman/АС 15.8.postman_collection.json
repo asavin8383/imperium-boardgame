@@ -27,7 +27,7 @@
 									"raw": ""
 								},
 								"url": {
-									"raw": "{{url}}/arrangements?formalTaskId=3&id=6",
+									"raw": "{{url}}/arrangements?formalTaskId=3&sortingColumn=title&sortingDirection=DESC",
 									"host": [
 										"{{url}}"
 									],
@@ -41,7 +41,16 @@
 										},
 										{
 											"key": "id",
-											"value": "6"
+											"value": "6",
+											"disabled": true
+										},
+										{
+											"key": "sortingColumn",
+											"value": "title"
+										},
+										{
+											"key": "sortingDirection",
+											"value": "DESC"
 										}
 									]
 								}
@@ -419,7 +428,7 @@
 									"raw": ""
 								},
 								"url": {
-									"raw": "{{url}}/erdi?organization=потребнадзор",
+									"raw": "{{url}}/erdi?blocktype=DOMAIN&sortingColumn=id&sortingDirection=DESC",
 									"host": [
 										"{{url}}"
 									],
@@ -429,7 +438,20 @@
 									"query": [
 										{
 											"key": "organization",
-											"value": "потребнадзор"
+											"value": "потребнадзор",
+											"disabled": true
+										},
+										{
+											"key": "blocktype",
+											"value": "DOMAIN"
+										},
+										{
+											"key": "sortingColumn",
+											"value": "id"
+										},
+										{
+											"key": "sortingDirection",
+											"value": "DESC"
 										}
 									]
 								}
@@ -542,6 +564,47 @@
 							"response": []
 						},
 						{
+							"name": "Получение списка ЕРДИ мероприятия",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"type": "text",
+										"value": "{{oper_token}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{url}}/arrangement_items?arrangementId=1&sortingColumn=erdi.id&sortingDirection=DESC",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"arrangement_items"
+									],
+									"query": [
+										{
+											"key": "arrangementId",
+											"value": "1"
+										},
+										{
+											"key": "sortingColumn",
+											"value": "erdi.id"
+										},
+										{
+											"key": "sortingDirection",
+											"value": "DESC"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "Загрузка списка ЕРДИ в мероприятие",
 							"request": {
 								"method": "POST",
@@ -580,6 +643,40 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "Запланировать мероприятие",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"value": "{{oper_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{url}}/arrangements/plan?id=28",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"arrangements",
+										"plan"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "28"
+										}
+									]
+								}
+							},
+							"response": []
 						}
 					],
 					"_postman_isSubFolder": true
@@ -603,7 +700,7 @@
 									"raw": ""
 								},
 								"url": {
-									"raw": "{{url}}/results",
+									"raw": "{{url}}/results?arrangementId=1&sortingColumn=result&sortingDirection=DESC",
 									"host": [
 										"{{url}}"
 									],
@@ -618,8 +715,7 @@
 										},
 										{
 											"key": "arrangementId",
-											"value": "12",
-											"disabled": true
+											"value": "1"
 										},
 										{
 											"key": "checkUnitValue",
@@ -630,8 +726,65 @@
 											"key": "checkUnitType",
 											"value": "DOMAIN",
 											"disabled": true
+										},
+										{
+											"key": "sortingColumn",
+											"value": "result"
+										},
+										{
+											"key": "sortingDirection",
+											"value": "DESC"
 										}
 									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Получение скриншота",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"value": "{{oper_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{url}}/results/screenshot?id=258",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"results",
+										"screenshot"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "258"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Получение дополнительной информации",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": ""
 								}
 							},
 							"response": []
@@ -764,7 +917,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{url}}/formal_tasks?taskId=3&userId=1",
+							"raw": "{{url}}/formal_tasks?sortingColumn=creationDate&sortingDirection=ASC",
 							"host": [
 								"{{url}}"
 							],
@@ -784,11 +937,21 @@
 								},
 								{
 									"key": "taskId",
-									"value": "3"
+									"value": "3",
+									"disabled": true
 								},
 								{
 									"key": "userId",
-									"value": "1"
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "sortingColumn",
+									"value": "creationDate"
+								},
+								{
+									"key": "sortingDirection",
+									"value": "ASC"
 								}
 							]
 						}
@@ -1010,6 +1173,68 @@
 							"body": "{\n    \"id\": 4,\n    \"title\": \"Задание на проверку\",\n    \"user\": {\n        \"id\": null,\n        \"userName\": \"jack\",\n        \"firstName\": null,\n        \"secondName\": null,\n        \"email\": null\n    },\n    \"status\": \"PLANNED\",\n    \"creationDate\": \"2019-05-22T11:41:00.918\",\n    \"startDate\": null,\n    \"endDate\": null,\n    \"modificationDate\": null,\n    \"deadlineDate\": null,\n    \"author\": null,\n    \"agreed\": false,\n    \"fgisId\": null,\n    \"priority\": null,\n    \"informalTask\": null\n}"
 						}
 					]
+				},
+				{
+					"name": "Группировка заданий по статусам",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"value": "{{oper_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/formal_tasks/group",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"formal_tasks",
+								"group"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Список заданий по статусу",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"value": "{{oper_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/formal_tasks/status?status=PLANNED",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"formal_tasks",
+								"status"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "PLANNED"
+								}
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -1139,6 +1364,118 @@
 								"users",
 								"operators",
 								"ldap"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Параметры",
+			"item": [
+				{
+					"name": "Список параметров",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"value": "{{admin_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/parameters",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"parameters"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Изменение параметра",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"value": "{{admin_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/parameters?key=ETALON_PROXY_HOST&value=test_host",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"parameters"
+							],
+							"query": [
+								{
+									"key": "key",
+									"value": "ETALON_PROXY_HOST"
+								},
+								{
+									"key": "value",
+									"value": "test_host"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Добавление параметра",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"value": "{{admin_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/parameters?key=ETALON_PROXY_HOST&value=test_host",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"parameters"
+							],
+							"query": [
+								{
+									"key": "key",
+									"value": "ETALON_PROXY_HOST"
+								},
+								{
+									"key": "value",
+									"value": "test_host"
+								}
 							]
 						}
 					},
@@ -1314,25 +1651,25 @@
 	],
 	"variable": [
 		{
-			"id": "65135fe1-bcf8-49f1-a938-05570550bc2e",
+			"id": "fe473ba4-a692-4d7f-8fc9-cfe0ca7891ee",
 			"key": "url",
 			"value": "http://localhost:15800",
 			"type": "string"
 		},
 		{
-			"id": "47b7dc76-8c25-401f-8b2f-7564c405e742",
+			"id": "f79fe7ba-d493-49c1-826f-ddb8d6d6223b",
 			"key": "oper_token",
 			"value": "",
 			"type": "string"
 		},
 		{
-			"id": "6e7923db-0e06-41ea-891f-8da73ffd0ce2",
+			"id": "f59d6e87-1dca-43c0-8c76-7e6bd6381daf",
 			"key": "test_url",
 			"value": "http://192.168.5.253:15800",
 			"type": "string"
 		},
 		{
-			"id": "776e7b2c-4ea3-488c-b9bc-a1386f145131",
+			"id": "25c83a60-c5fc-401c-8676-581b3b0bae41",
 			"key": "admin_token",
 			"value": "",
 			"type": "string"

@@ -82,6 +82,7 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 			analysisResult.setPageSize(pageContent.length());
 			analysisResult.setPageSizeEtalon(pageContentEtalon.length());
 			analysisResult.setPageUrlFinal(result.getFinalUrlPage());
+			analysisResult.setStubUrl(result.getStubUrl());
 
 			analysisResult.setKeyWordsCount(AnalysisUtils.getCountKeyWords(pageContent, keyWords));
 
@@ -116,11 +117,8 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 			return errorResult;
 		}
 
-		// todo - взять адрес VPN заглушки
-		String vpnStub = "";
-
 		// конечный URL совпадает с vpn - заглушкой
-		if (AnalysisUtils.simpleCompareUrls(aRes.getPageUrlFinal(), vpnStub)){
+		if (checkStubUrl(aRes.getPageUrlFinal(), aRes.getStubUrl())){
 			return COMPLETED;
 		}
 
@@ -128,119 +126,110 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 		boolean wasRedirect = !AnalysisUtils.simpleCompareUrls(aRes.getPageUrlFinal(), jobRes.getCheckUnit().getValue());
 
 		// сравнение контента иходника с эталоном
-		if (!wasRedirect && aRes.getSimilarityOriginPercent() > 80){
+		if (aRes.getSimilarityOriginPercent() >= 90){
 			return FORBIDDEN_CONTENT_DETECTED;
 		}
-		if (wasRedirect && aRes.getSimilarityOriginPercent() > 90){
-			return FORBIDDEN_CONTENT_DETECTED;
-		}
+
+		double pageSize_percent = 0.25;
+		double keyWords_percent = 0.4;
+		double domainCount_percent = 0.25;
+		double linkCount_percent = 0.1;
+		double sun_percent = pageSize_percent + keyWords_percent + domainCount_percent + linkCount_percent;
 
 		// веса критериев для заглушки
-		int pageSizeWeight = getPageSizeWeight(aRes.getPageSize());
-		int keyWordsCountWeight = getKeyWordsCountWeight(aRes.getKeyWordsCount());
-		int domainCountWeight = getDomainCountWeight(aRes.getDomainNameCount());
-		int linkCountWeight = getLinkCountWeight(aRes.getLinkCount());
-		int diffWeight = getDiffWeight(aRes.getSimilarityOriginPercent(), aRes.getPageSize());
+		double pageSizeWeight = pageSize_percent * getPageSizeWeight(aRes.getPageSize());
+		double keyWordsCountWeight = keyWords_percent * getKeyWordsCountWeight(aRes.getKeyWordsCount());
+		double domainCountWeight = domainCount_percent * getDomainCountWeight(aRes.getDomainNameCount());
+		double linkCountWeight = linkCount_percent * getLinkCountWeight(aRes.getLinkCount());
+
+		final double maxWeight = 100*sun_percent;
+		final double kStub = 0.8;
 
 		// суммируем веса криетериев для определения заглушки
-		int sumStubWeight =
-				pageSizeWeight + keyWordsCountWeight + domainCountWeight + linkCountWeight + diffWeight;
+		double sumWeight = pageSizeWeight + keyWordsCountWeight + domainCountWeight + linkCountWeight;
+		sumWeight = sumWeight > maxWeight ? maxWeight : sumWeight;
 
-		int maxStubWeight = getMaxWeight();
-		double kWeight = (double)sumStubWeight / (double)getMaxWeight();
+		double kWeight = sumWeight / maxWeight;
 
-		log.info("sumStubWeight = " + sumStubWeight + ", maxWeight = " + maxStubWeight + ", k = " + kWeight);
+		log.info("kWeight = " + kWeight + " | kStub = " + kStub);
 
-		aRes.setStubScoreInfo(String.format("%d/%d (%.2f)", sumStubWeight, maxStubWeight, kWeight));
+		aRes.setStubScoreInfo(String.format("k = %.2f (stub >= %.2f)", kWeight, kStub));
 
 		// процентный вес заглушки оносительно максимума
-		if (kWeight >= 0.8){
+		if (kWeight >= kStub){
 			return COMPLETED;
+		}
+
+		// todo - проверить конечную ссылку на запрещенную (завести статус??? для того чтобы в дальнейшем проверять пачкой)
+		if (wasRedirect){
 		}
 
 		return FORBIDDEN_CONTENT_DETECTED;
 	}
 
+	private boolean checkStubUrl(String url, String stubUrl){
+		url = url != null ? url : "";
+		stubUrl = stubUrl != null ? stubUrl : "";
+
+		boolean res1 = AnalysisUtils.simpleCompareUrls(url, stubUrl);
+		boolean res2 = url.toLowerCase().contains(stubUrl.toLowerCase());
+		return res1 || res2;
+	}
+
+	// вес от 0 о 100 (0 - большой размер, 100 - маленький)
 	private int getPageSizeWeight(Integer size){
 		size = size == null ? 0 : size;
 
-		int maxSize = 1024;
-		int minWeight = 20;
-		int maxPercentWeight = 10;
+		int maxSize = 2048;
 
 		if (size > maxSize)
 			return 0;
 
-		return ((maxSize-size)/maxSize)*maxPercentWeight + minWeight;
+		return ((maxSize-size)/maxSize)*50 + 50;
 	}
 
+	// вес от 0 до 100 (0 - мало слов, 100 - много)
 	private int getKeyWordsCountWeight(Integer count){
 		count = count == null ? 0 : count;
 
 		int minCount1 = 3;
 		int minCount2 = 10;
-
-		int minWeight1 = 15;
-		int minWeight2 = 30;
+		int minCount3 = 30;
 
 		if (count < minCount1)
 			return 0;
 
 		if (count < minCount2)
-			return minWeight1;
+			return 50;
 
-		return minWeight2;
+		count = count < minCount3 ? count : minCount3;
+
+		return (count/minCount3) * 50 + 50;
 	}
 
+	// вес от 0 до 100 (0 - встретилось много доментов, 100 - ниодного домена)
 	private int getDomainCountWeight(Integer count){
 		count = count == null ? 0 : count;
 
-		int weight1 = 20;
-		int weight2 = 10;
-		int weight3 = 0;
-
 		if (count == 0)
-			return weight1;
+			return 100;
 
 		if (count <= 2)
-			return weight2;
+			return 50;
 
-		return weight3;
+		return 0;
 	}
 
+	// вес от 0 до 100 (0 - встретилось много ссылок, 100 - мало ссылок)
 	private int getLinkCountWeight(Integer count){
 		count = count == null ? 0 : count;
 
 		int maxCount = 10;
-		int minWeight = 10;
-		int maxPercentWeight = 10;
 
 		if (count > maxCount)
 			return 0;
 
-		return ((maxCount-count)/maxCount)*maxPercentWeight + minWeight;
-	}
-
-	private int getDiffWeight(Integer similarPercent, Integer size){
-		similarPercent = similarPercent == null ? 0 : similarPercent;
-		size = size == null ? 0 : size;
-
-		int weight1 = 15;
-		int weight2 = 10;
-
-		if (size < 1024 && similarPercent < 20){
-			return weight1;
-		}
-		else if (similarPercent < 20){
-			return weight2;
-		}
-		return 0;
-	}
-
-	private int getMaxWeight(){
-		return getPageSizeWeight(0) + getKeyWordsCountWeight(100) +
-				getDomainCountWeight(0) + getLinkCountWeight(0) +
-				getDiffWeight(0, 0);
+		return ((maxCount-count)/maxCount)*50 + 50;
 	}
 
 }
