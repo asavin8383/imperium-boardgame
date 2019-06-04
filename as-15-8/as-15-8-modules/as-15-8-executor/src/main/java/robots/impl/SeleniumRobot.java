@@ -95,6 +95,7 @@ public class SeleniumRobot<T> implements Robot{
 		
 		test.setName(name);
 		
+		test.addParameter("accessToolUnit", this.accessToolUnit.name());
 		test.addParameter("hubURL", this.hubURL.toString());
 		test.addParameter("browserName", this.browserName);
 		test.addParameter("platformName", this.platformName);

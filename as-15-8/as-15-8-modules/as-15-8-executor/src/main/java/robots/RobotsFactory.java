@@ -3,6 +3,7 @@ package robots;
 
 import enums.AccessToolUnit;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -16,6 +17,7 @@ import java.util.Map;
  *
  */
 @Service
+@Qualifier("robotsFactory")
 public class RobotsFactory {
 
 	/** Список роботов */

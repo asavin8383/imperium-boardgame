@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
 import checkUnits.CheckUnit;
+import enums.AccessToolUnit;
 import lombok.Data;
 
 /**
@@ -18,6 +19,9 @@ public abstract class ExecutionJobResult {
 
 	/** Идентификатор задания */
 	private Long jobID;
+	
+	/** ПС/ПАСД */
+	private AccessToolUnit accessToolUnit;
 	
 	/** Единица ЕРДИ для проверки */
 	private CheckUnit checkUnit;

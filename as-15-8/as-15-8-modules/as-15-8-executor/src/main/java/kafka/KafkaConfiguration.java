@@ -41,7 +41,7 @@ public class KafkaConfiguration {
     
     @Value("${spring.kafka.produce-topic}")
     private String executionResultTopicName;
-	
+    
     @Bean 
     Map<String, Object> producerFactoryConfig(){
     	Map<String, Object> configProps = new HashMap<>();
@@ -56,7 +56,6 @@ public class KafkaConfiguration {
     Map<String, Object> cousumerFactoryConfig(){
     	Map<String, Object> config = new HashMap<>();
         config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        config.put(ConsumerConfig.GROUP_ID_CONFIG, group);
         config.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, offset);
         config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
@@ -80,30 +79,29 @@ public class KafkaConfiguration {
     }
 
     @Bean
+    public ConsumerFactory<String, CheckUnitJob> checkUnitJobsConsumerFactory(){
+        return new DefaultKafkaConsumerFactory<>(
+            	cousumerFactoryConfig(),
+            	new StringDeserializer(),
+                new JsonDeserializer<>(CheckUnitJob.class)
+            );
+    }
+    
+    @Bean
     public ConcurrentKafkaListenerContainerFactory<String, CheckUnitJob> kafkaListenerContainerFactory() {
-    	
-        ConsumerFactory<String, CheckUnitJob> factory = new DefaultKafkaConsumerFactory<>(
-        	cousumerFactoryConfig(),
-        	new StringDeserializer(),
-            new JsonDeserializer<>(CheckUnitJob.class)
-        );
-        factory.getConfigurationProperties().put(ConsumerConfig.GROUP_ID_CONFIG, group);
-    	
         ConcurrentKafkaListenerContainerFactory<String, CheckUnitJob> listenerFactory = new ConcurrentKafkaListenerContainerFactory<>();
-        listenerFactory.setConsumerFactory(factory);
-        listenerFactory.getContainerProperties().setAckMode(AckMode.MANUAL_IMMEDIATE);
+        listenerFactory.setConsumerFactory(checkUnitJobsConsumerFactory());
         return listenerFactory;
     }
     
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, ExecutorControlMessage> controlListenerContainerFactory() {
+    public ConcurrentKafkaListenerContainerFactory<String, ExecutorControlMessage> controlMessagesListenerContainerFactory() {
     	
         ConsumerFactory<String, ExecutorControlMessage> factory = new DefaultKafkaConsumerFactory<>(
         	cousumerFactoryConfig(),
         	new StringDeserializer(),
             new JsonDeserializer<>(ExecutorControlMessage.class)
         );
-        factory.getConfigurationProperties().put(ConsumerConfig.GROUP_ID_CONFIG, group);
 
         ConcurrentKafkaListenerContainerFactory<String, ExecutorControlMessage> listenerFactory = new ConcurrentKafkaListenerContainerFactory<>();
         listenerFactory.setConsumerFactory(factory);

@@ -14,6 +14,7 @@ import org.springframework.util.concurrent.ListenableFutureCallback;
 import checkUnits.CheckUnitStatusNotification;
 import control.ExecutorControlMessage;
 import control.ExecutorControlMessage.ControlCommand;
+import enums.AccessToolUnit;
 import enums.CheckUnitJobResult;
 import lombok.extern.slf4j.Slf4j;
 import scripts.exceptions.Captcha_RobotScriptExecutionException;
@@ -86,9 +87,9 @@ public class JobNotificationsProducer {
 		}
 	}
 	
-	public void sendStopExecutorsMessage() {
+	public void sendStopExecutorsMessage(AccessToolUnit accessToolUnit) {
 		try {
-			ExecutorControlMessage controlMessage = new ExecutorControlMessage(ControlCommand.STOP);
+			ExecutorControlMessage controlMessage = new ExecutorControlMessage(accessToolUnit, ControlCommand.STOP);
 			
 			Message<ExecutorControlMessage> message = MessageBuilder
 	                .withPayload(controlMessage)

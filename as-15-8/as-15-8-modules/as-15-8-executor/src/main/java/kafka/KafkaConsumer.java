@@ -1,68 +1,93 @@
 package kafka;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
+import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
+import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
+import org.springframework.kafka.listener.ContainerProperties.AckMode;
 import org.springframework.kafka.listener.MessageListenerContainer;
+import org.springframework.kafka.listener.adapter.FilteringMessageListenerAdapter;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
 
 import checkUnits.CheckUnitJob;
 import control.ExecutorControlMessage;
 import control.ExecutorControlMessage.ControlCommand;
+import enums.AccessToolUnit;
+import kafka.listeners.CheckUnitJobsListener;
 import lombok.extern.slf4j.Slf4j;
 import service.RobotsService;
 
 @Service
 @Slf4j
+@DependsOn({"robotsFactory"})
 public class KafkaConsumer {
 
-	private static final String jobListenerID = "job_listener";
+	private Map<AccessToolUnit, MessageListenerContainer> listenerContainers = new HashMap<>();
 	
 	@Autowired
 	private RobotsService robotsService;
 	
-	@Autowired 
-    private KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry;
+	@Autowired
+	private ConcurrentKafkaListenerContainerFactory<String, CheckUnitJob> kafkaListenerContainerFactory;
 	
-	@KafkaListener(
-		topics = "${spring.kafka.consume-topic}",
-		id = jobListenerID,
-		containerFactory = "kafkaListenerContainerFactory"
-	)
-    public void consumeCheckUnitJob(CheckUnitJob checkUnitJob, Acknowledgment ack) {
-		log.info("Принято задание: " + checkUnitJob.toString());
-       // CompletableFuture.runAsync(() -> {   // новый поток не нужен, чтобы работала пауза
-    	try {
-    		robotsService.run(checkUnitJob);
-    	} catch (Exception ex) {
-    		log.error("Ошибка при обработке задания проверки запрещенного ресурса: " + checkUnitJob.toString(), ex);
-    		JobNotificationsProducer.getInstance().sendCheckJobErrorNotification(checkUnitJob.getJobID(), ex);
+	@Value("${spring.kafka.consume-topic}")
+	private String checkUnitJobsTopicName;
+	
+	@Value("${robots.max-parallel-running}")
+	private int maxRobotsParallelRunning;
+	
+	@PostConstruct
+    void createCheckUnitJobsListeners() {
+    	
+    	for(AccessToolUnit accessTool : AccessToolUnit.values()) {
+    		    
+    		ConcurrentMessageListenerContainer<String, CheckUnitJob> container =
+    				kafkaListenerContainerFactory.createContainer(checkUnitJobsTopicName);
+	    	
+    		container.getContainerProperties().setGroupId("exec_"+accessTool.name().toLowerCase());
+    		container.getContainerProperties().setAckMode(AckMode.MANUAL);
+	    	
+	    	container.setupMessageListener(
+	    		new FilteringMessageListenerAdapter<String, CheckUnitJob>(
+	    			new CheckUnitJobsListener(robotsService, maxRobotsParallelRunning), 
+	    			record -> !record.value().getAccessToolUnit().equals(accessTool)
+	    		)
+	    	);
+	    	
+	    	container.start();
+	    	listenerContainers.put(accessTool, container);
     	}
-    	ack.acknowledge();
-       // });
     }
 	
 	@KafkaListener(
 		topics = "${spring.kafka.control-topic}",
-		containerFactory = "controlListenerContainerFactory"
+		containerFactory = "controlMessagesListenerContainerFactory",
+		groupId = "${spring.kafka.group}"
 	)
     public void consumeControlMessage(ExecutorControlMessage controlMessage, Acknowledgment ack) {
 		log.info("Принято управляющее сообщение: " + controlMessage.toString());
         CompletableFuture.runAsync(() -> {
         	try {
-        		MessageListenerContainer jobsListener = kafkaListenerEndpointRegistry.getListenerContainer(jobListenerID);
+        		MessageListenerContainer jobsListenerContainer = listenerContainers.get(controlMessage.getAccessToolUnit());
         		if(controlMessage.getCommand() == ControlCommand.STOP)
-        			jobsListener.pause();
+        			jobsListenerContainer.pause();
         		else if(controlMessage.getCommand() == ControlCommand.START)
-        			jobsListener.resume();
+        			jobsListenerContainer.resume();
+        		CheckUnitJobsListener listener = (CheckUnitJobsListener)jobsListenerContainer.getContainerProperties().getMessageListener();
+        		listener.stopRunningJobs();
         	} catch (Exception ex) {
         		log.error("Ошибка при обработке управляющего сообщения: " + controlMessage.toString(), ex);
         	}
         	ack.acknowledge();
         });
     }
-	
 }

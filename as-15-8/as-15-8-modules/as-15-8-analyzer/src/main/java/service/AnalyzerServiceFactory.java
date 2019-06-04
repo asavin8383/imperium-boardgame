@@ -9,6 +9,7 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import execution.ExecutionJobResult;
@@ -19,6 +20,7 @@ import execution.ExecutionJobResult;
  *
  */
 @Service
+@Qualifier("analyzerServiceFactory")
 public class AnalyzerServiceFactory {
 
 	/** Список сервисов */

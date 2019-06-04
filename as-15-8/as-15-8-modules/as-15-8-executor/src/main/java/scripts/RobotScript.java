@@ -24,6 +24,7 @@ import org.testng.annotations.Test;
 
 import checkUnits.CheckUnit;
 import checkUnits.CheckUnitType;
+import enums.AccessToolUnit;
 import execution.ExecutionJobResult;
 import kafka.KafkaConfiguration;
 import lombok.Getter;
@@ -56,6 +57,9 @@ public abstract class RobotScript extends AbstractTestNGSpringContextTests{
 	private CheckUnit checkUnit;
 
 	@Getter
+	private AccessToolUnit accessToolUnit;
+	
+	@Getter
 	private String hubURL;
 
 	@Getter
@@ -79,13 +83,14 @@ public abstract class RobotScript extends AbstractTestNGSpringContextTests{
 	 * @throws MalformedURLException
 	 */
 	@BeforeClass
-	@Parameters({"hubURL", "browserName", "platformName", "applicationName", "jobID", "checkUnitType", "checkUnitValue", "vpnProxy"})
+	@Parameters({"hubURL", "browserName", "platformName", "applicationName", "jobID", "accessToolUnit", "checkUnitType", "checkUnitValue", "vpnProxy"})
 	public void createDriver(
 			String hubURL,
 			String browserName,
 			String platformName,
 			String applicationName,
 			String jobID,
+			String accessToolUnit,
 			String checkUnitType,
 			String checkUnitValue,
 			@Optional String vpnProxy
@@ -93,6 +98,7 @@ public abstract class RobotScript extends AbstractTestNGSpringContextTests{
 		
 			this.driver = DriverFactory.createDriver(new URL(hubURL), platformName, applicationName, browserName, vpnProxy);
 			this.jobID = jobID;
+			this.accessToolUnit = AccessToolUnit.valueOf(accessToolUnit);
 			this.checkUnit = new CheckUnit(CheckUnitType.valueOf(checkUnitType), checkUnitValue);
 
 			this.hubURL = hubURL;
@@ -116,6 +122,12 @@ public abstract class RobotScript extends AbstractTestNGSpringContextTests{
 		if(driver!=null) {
 			driver.quit();
 		}
+	}
+	
+	protected void fillExecutionJobResult(ExecutionJobResult message) {
+        message.setJobID(Long.parseLong(this.jobID));
+        message.setCheckUnit(this.checkUnit);
+        message.setAccessToolUnit(this.accessToolUnit);
 	}
 	
 	/**

@@ -1,18 +1,5 @@
 package scripts.impl;
 
-import checkUnits.CheckUnit;
-import execution.ExecutionPSJobResult;
-import lombok.extern.slf4j.Slf4j;
-import org.openqa.selenium.*;
-import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.support.ui.WebDriverWait;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Parameters;
-import scripts.RobotScript;
-import scripts.exceptions.Captcha_RobotScriptExecutionException;
-import scripts.exceptions.RobotScriptExecutionException;
-
-import javax.annotation.Nullable;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -20,6 +7,25 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
+
+import javax.annotation.Nullable;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Parameters;
+
+import checkUnits.CheckUnit;
+import execution.ExecutionPSJobResult;
+import lombok.extern.slf4j.Slf4j;
+import scripts.RobotScript;
+import scripts.exceptions.Captcha_RobotScriptExecutionException;
+import scripts.exceptions.RobotScriptExecutionException;
 
 @Slf4j
 public abstract class SearchScript extends RobotScript {
@@ -74,9 +80,8 @@ public abstract class SearchScript extends RobotScript {
     }
 
     ExecutionPSJobResult createExecutionResult(boolean linkFound) {
-        ExecutionPSJobResult message = new ExecutionPSJobResult();
-        message.setJobID(Long.parseLong(getJobID()));
-        message.setCheckUnit(getCheckUnit());
+    	ExecutionPSJobResult message = new ExecutionPSJobResult();
+    	fillExecutionJobResult(message);
         message.setLinkFound(linkFound);
         message.setScreenshot(linkFound ? takeScreenshot() : null);
         return message;

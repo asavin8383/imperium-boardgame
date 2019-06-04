@@ -1,6 +1,12 @@
 package scripts.impl;
 
-import execution.ExecutionVpnJobResult;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.testng.annotations.AfterClass;
@@ -8,19 +14,13 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
+
+import execution.ExecutionVpnJobResult;
 import scripts.DriverFactory;
 import scripts.RobotScript;
 import scripts.ScriptUtils;
+import scripts.ScriptUtils.PageResult;
 import scripts.exceptions.RobotScriptExecutionException;
-
-import static scripts.ScriptUtils.PageResult;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 
 public class VPNScript extends RobotScript {
@@ -141,9 +141,7 @@ public class VPNScript extends RobotScript {
             pageSourceEtalon = source.pageSource;
         }
 
-        ExecutionVpnJobResult message = new ExecutionVpnJobResult();
-        message.setJobID(Long.valueOf(getJobID()));
-        message.setCheckUnit(getCheckUnit());
+        ExecutionVpnJobResult message = createExecutionJobResult();
         message.setStubUrl(stubUrl);
 
         boolean errorLoadingPage = pageSourceResult.errorCodeChrome != null;
@@ -165,4 +163,10 @@ public class VPNScript extends RobotScript {
         return "chrome".equalsIgnoreCase(getBrowserName());
     }
 
+    protected ExecutionVpnJobResult createExecutionJobResult() {
+    	ExecutionVpnJobResult message = new ExecutionVpnJobResult();
+    	fillExecutionJobResult(message);
+    	return message;
+    }
+    
 }

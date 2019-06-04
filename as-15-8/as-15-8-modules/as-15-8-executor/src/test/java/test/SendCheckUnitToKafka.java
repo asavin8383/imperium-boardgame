@@ -34,30 +34,32 @@ public class SendCheckUnitToKafka {
 	@Test
 	public void test() {
 		
-		CheckUnitJob checkUnitJob = new CheckUnitJob();
-		checkUnitJob.setJobID(1L);
-		checkUnitJob.setAccessToolUnit(AccessToolUnit.GOOGLE);
-		
-		checkUnitJob.setCheckUnit(new CheckUnit(CheckUnitType.URL, "https://www.google.ru"));
-		
-		Message<CheckUnitJob> message = MessageBuilder
-                .withPayload(checkUnitJob)
-                .setHeader(KafkaHeaders.TOPIC, topic)
-                .build();
-		
-		ListenableFuture<SendResult<String, CheckUnitJob>> future = kafkaTemplate.send(message);
-	     
-	    future.addCallback(new ListenableFutureCallback<SendResult<String, CheckUnitJob>>() {
-	 
-	        @Override
-	        public void onSuccess(SendResult<String, CheckUnitJob> result) {
-	            System.out.println("Сообщение успешно отправлено: arrangenmentID "+ result.getProducerRecord().value().toString());
-	        }
-	        @Override
-	        public void onFailure(Throwable ex) {
-	            System.out.println("Ошибка при отправке сообщения: " + ex.getMessage());
-	        }
-	    });
+		for(long i = 10000; i<10010; i++) {
+			CheckUnitJob checkUnitJob = new CheckUnitJob();
+			checkUnitJob.setJobID(i);
+			checkUnitJob.setAccessToolUnit(AccessToolUnit.YANDEX);
+			
+			checkUnitJob.setCheckUnit(new CheckUnit(CheckUnitType.URL, "https://www.google.ru"));
+			
+			Message<CheckUnitJob> message = MessageBuilder
+	                .withPayload(checkUnitJob)
+	                .setHeader(KafkaHeaders.TOPIC, topic)
+	                .build();
+			
+			ListenableFuture<SendResult<String, CheckUnitJob>> future = kafkaTemplate.send(message);
+		     
+		    future.addCallback(new ListenableFutureCallback<SendResult<String, CheckUnitJob>>() {
+		 
+		        @Override
+		        public void onSuccess(SendResult<String, CheckUnitJob> result) {
+		            System.out.println("Сообщение успешно отправлено: arrangenmentID "+ result.getProducerRecord().value().toString());
+		        }
+		        @Override
+		        public void onFailure(Throwable ex) {
+		            System.out.println("Ошибка при отправке сообщения: " + ex.getMessage());
+		        }
+		    });
+		}
 	}
 	
 }

@@ -17,7 +17,6 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
-import org.springframework.kafka.listener.ContainerProperties.AckMode;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
@@ -32,9 +31,6 @@ public class KafkaConfiguration {
 	@Value("${spring.kafka.bootstrap-servers}")
 	private String bootstrapServers;
 
-	@Value("${spring.kafka.group}")
-    private String group;
-
     @Value("${spring.kafka.auto-offset-reset}")
     private String autoOffsetReset;
 	
@@ -48,24 +44,33 @@ public class KafkaConfiguration {
         return configProps;
     }
     
+    @Bean 
+    Map<String, Object> consumerFactoryConfig(){
+    	 Map<String, Object> config = new HashMap<>();
+         config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+         config.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, autoOffsetReset);
+         config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+         config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+         config.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
+         return config;
+    }
+    
     @Bean
-    public ConsumerFactory<String, ExecutionJobResult> executionResultsConsumerFactory() {
-        Map<String, Object> config = new HashMap<>();
-
-        config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        config.put(ConsumerConfig.GROUP_ID_CONFIG, group);
-        config.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, autoOffsetReset);
-        config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
-        config.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
-        
+    public ConsumerFactory<String, ExecutionJobResult> executionResultsConsumerFactory() {      
         return new DefaultKafkaConsumerFactory<>(
-        	config,
+        	consumerFactoryConfig(),
         	new StringDeserializer(),
             new JsonDeserializer<>(ExecutionJobResult.class)
         );
     }
 
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, ExecutionJobResult> kafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, ExecutionJobResult> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(executionResultsConsumerFactory());
+        return factory;
+    }
+    
     @Bean
     public ProducerFactory<String, AnalysisResult> analysisResultProducerFactory() {	
     	return new DefaultKafkaProducerFactory<>(producerFactoryConfig());
@@ -74,14 +79,6 @@ public class KafkaConfiguration {
     @Bean
     public ProducerFactory<String, CheckUnitStatusNotification> notificationsProducerFactory() {
     	return new DefaultKafkaProducerFactory<>(producerFactoryConfig());
-    }
-    
-    @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, ExecutionJobResult> kafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, ExecutionJobResult> factory = new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(executionResultsConsumerFactory());
-        factory.getContainerProperties().setAckMode(AckMode.MANUAL_IMMEDIATE);
-        return factory;
     }
     
     @Bean

@@ -1,125 +1,59 @@
 package kafka;
 
-import java.util.concurrent.CompletableFuture;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.Acknowledgment;
-import org.springframework.kafka.support.KafkaHeaders;
-import org.springframework.kafka.support.SendResult;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.context.annotation.DependsOn;
+import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
+import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
+import org.springframework.kafka.listener.MessageListenerContainer;
+import org.springframework.kafka.listener.ContainerProperties.AckMode;
+import org.springframework.kafka.listener.adapter.FilteringMessageListenerAdapter;
 import org.springframework.stereotype.Service;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.ListenableFutureCallback;
 
-import analysis.AnalysisResult;
-import checkUnits.CheckUnitStatusNotification;
-import common.AnalysisException;
-import enums.CheckUnitJobResult;
+import enums.AccessToolUnit;
 import execution.ExecutionJobResult;
-import lombok.extern.slf4j.Slf4j;
-import service.AnalyzerService;
-import service.AnalyzerServiceFactory;
+import kafka.listeners.ExecutionJobResultsListener;
 
 @Service
-@Slf4j
+@DependsOn({"analyzerServiceFactory"})
 public class KafkaConsumer {
-	
-	@Autowired
-	private KafkaTemplate<String, AnalysisResult> analysisResultTemplate;
-	
-	@Autowired
-	private KafkaTemplate<String, CheckUnitStatusNotification> notificationTemplate;
-	
-    @Value("${spring.kafka.produce-topic}")
-    private String analysisResultTopicName;
     
-    @Value("${spring.kafka.notification-topic}")
-    private String notificationsTopicName;
+	private Map<AccessToolUnit, MessageListenerContainer> listenerContainers = new HashMap<>();
 	
-	@KafkaListener(topics = "${spring.kafka.consume-topic}")
-    public void consumeExecutionJobMessage(ExecutionJobResult job, Acknowledgment ack) {
-		log.info("Принято задание на анализ: " + job.getJobID() + ", "+job.getCheckUnit().getValue());
-        CompletableFuture.runAsync(() -> {
-        	try {
-        		AnalyzerService<? super ExecutionJobResult> service = AnalyzerServiceFactory.getService(job.getClass());
-        		AnalysisResult analysisResult = service.analyzeResult(job);
-        		sendAnalysisResult(analysisResult);
-        		log.info("Анализ результата проверки ПС/ПАСД выполнен успешно : " + job.getJobID() + ", " + job.getCheckUnit().getValue());
-        	} catch (Exception ex) {
-        		log.error("Ошибка при обработке задания на анализ результатов проверки ПС/ПАСД : " + job.getJobID() + ", " + job.getCheckUnit().getValue(), ex);
-        		sendErrorNotification(job.getJobID());
-        	}
-        	ack.acknowledge();
-        });
+	@Value("${spring.kafka.consume-topic}")
+	private String executionResultsTopicName;
+	
+	@Autowired
+	private KafkaProducer kafkaProducer;
+	
+	@Autowired
+	private ConcurrentKafkaListenerContainerFactory<String, ExecutionJobResult> kafkaListenerContainerFactory;
+	
+	@PostConstruct
+    void createExecutionJobResultsListeners() {
+    	
+    	for(AccessToolUnit accessTool : AccessToolUnit.values()) {
+    		    	
+    		ConcurrentMessageListenerContainer<String, ExecutionJobResult> container = 
+    				kafkaListenerContainerFactory.createContainer(executionResultsTopicName);
+	    	
+	    	container.getContainerProperties().setGroupId("analyzer_"+accessTool.name().toLowerCase());
+	    	container.getContainerProperties().setAckMode(AckMode.MANUAL);
+	    	
+	    	container.setupMessageListener(
+	    		new FilteringMessageListenerAdapter<String, ExecutionJobResult>(
+	    			new ExecutionJobResultsListener(kafkaProducer), 
+	    			record -> !record.value().getAccessToolUnit().equals(accessTool)
+	    		)
+	    	);
+	    	
+	    	container.start();
+	    	listenerContainers.put(accessTool, container);
+    	}
     }
-	
-	/**
-	 * Метод отправки результата анализа в тему Kafka
-	 * @param analysisResult Результат анализа
-	 * @throws AnalysisException 
-	 */
-	private void sendAnalysisResult(AnalysisResult analysisResult) {
-		try {
-			Message<AnalysisResult> message = MessageBuilder
-	                .withPayload(analysisResult)
-	                .setHeader(KafkaHeaders.TOPIC, analysisResultTopicName)
-	                .build();
-			
-			ListenableFuture<SendResult<String, AnalysisResult>> future = analysisResultTemplate.send(message);
-		     
-		    future.addCallback(new ListenableFutureCallback<SendResult<String, AnalysisResult>>() {
-		 
-		        @Override
-		        public void onSuccess(SendResult<String, AnalysisResult> result) {
-		        	AnalysisResult mess = result.getProducerRecord().value();
-		            log.info("Сообщение успешно отправлено: " + mess.getJobID() + ", " + mess.getCheckUnit().getValue());
-		        }
-		        @Override
-		        public void onFailure(Throwable ex) {
-		        	throw new AnalysisException("Ошибка при отправке сообщения с результатами анализа", ex);
-		        }
-		    });
-		    future.get();
-		} catch (Exception ex) {
-			throw new AnalysisException("Ошибка при отправке сообщения с результатами анализа", ex);
-		}
-	}
-	
-	/**
-	 * Метод отправки результата анализа в тему Kafka
-	 * @param analysisResult Результат анализа
-	 * @throws AnalysisException 
-	 */
-	private void sendErrorNotification(Long jobID) {
-		try {
-			CheckUnitStatusNotification notification = new CheckUnitStatusNotification(jobID, CheckUnitJobResult.INTERNAL_ERROR);
-			
-			Message<CheckUnitStatusNotification> message = MessageBuilder
-	                .withPayload(notification)
-	                .setHeader(KafkaHeaders.TOPIC, notificationsTopicName)
-	                .build();
-			
-			ListenableFuture<SendResult<String, CheckUnitStatusNotification>> future = notificationTemplate.send(message);
-		     
-		    future.addCallback(new ListenableFutureCallback<SendResult<String, CheckUnitStatusNotification>>() {
-		 
-		        @Override
-		        public void onSuccess(SendResult<String, CheckUnitStatusNotification> result) {
-		        	CheckUnitStatusNotification mess = result.getProducerRecord().value();
-		            log.info("Сообщение успешно отправлено: " + mess.getJobID() + ", " + mess.getCheckUnitStatus());
-		        }
-		        @Override
-		        public void onFailure(Throwable ex) {
-		        	throw new AnalysisException("Ошибка при отправке сообщения с уведомлением об ошибке", ex);
-		        }
-		    });
-		    future.get();
-		} catch (Exception ex) {
-			throw new AnalysisException("Ошибка при отправке сообщения с уведомлением об ошибке", ex);
-		}
-	}
 }
