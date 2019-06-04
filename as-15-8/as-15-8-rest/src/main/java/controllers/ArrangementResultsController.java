@@ -14,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import repositories.ArrangementResultRepository;
-import repositories.ArrangementResultRepositoryAdvanced;
 import repositories.DetailedArrangementResultRepository;
 
 /**
@@ -27,15 +26,12 @@ import repositories.DetailedArrangementResultRepository;
 @RequestMapping(path = "/results", produces = MediaType.APPLICATION_JSON_VALUE)
 public class ArrangementResultsController {
 
-    private ArrangementResultRepositoryAdvanced arrangementResultRepoAdvanced;
     private ArrangementResultRepository arrangementResultRepo;
     private DetailedArrangementResultRepository detailedArrangementResultRepo;
 
     @Autowired
-    public ArrangementResultsController(ArrangementResultRepositoryAdvanced arrangementResultRepoAdvanced,
-                                        ArrangementResultRepository arrangementResultRepo,
+    public ArrangementResultsController(ArrangementResultRepository arrangementResultRepo,
                                         DetailedArrangementResultRepository detailedArrangementResultRepo) {
-        this.arrangementResultRepoAdvanced = arrangementResultRepoAdvanced;
         this.arrangementResultRepo = arrangementResultRepo;
         this.detailedArrangementResultRepo = detailedArrangementResultRepo;
     }
@@ -53,7 +49,7 @@ public class ArrangementResultsController {
             @RequestParam(defaultValue = "10") int pageSize){
         PageRequest page = PageRequest.of(
                 pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
-        return arrangementResultRepoAdvanced.findPage(id, arrangementId, checkUnitValue, page, checkUnitType);
+        return arrangementResultRepo.findPage(id, arrangementId, checkUnitValue, page, checkUnitType);
     }
 
     @GetMapping(path = "/screenshot", produces = MediaType.IMAGE_PNG_VALUE)

@@ -1173,6 +1173,68 @@
 							"body": "{\n    \"id\": 4,\n    \"title\": \"Задание на проверку\",\n    \"user\": {\n        \"id\": null,\n        \"userName\": \"jack\",\n        \"firstName\": null,\n        \"secondName\": null,\n        \"email\": null\n    },\n    \"status\": \"PLANNED\",\n    \"creationDate\": \"2019-05-22T11:41:00.918\",\n    \"startDate\": null,\n    \"endDate\": null,\n    \"modificationDate\": null,\n    \"deadlineDate\": null,\n    \"author\": null,\n    \"agreed\": false,\n    \"fgisId\": null,\n    \"priority\": null,\n    \"informalTask\": null\n}"
 						}
 					]
+				},
+				{
+					"name": "Группировка заданий по статусам",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"value": "{{oper_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/formal_tasks/group",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"formal_tasks",
+								"group"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Список заданий по статусу",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"value": "{{oper_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/formal_tasks/status?status=PLANNED",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"formal_tasks",
+								"status"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "PLANNED"
+								}
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -1589,25 +1651,25 @@
 	],
 	"variable": [
 		{
-			"id": "55d64e1c-85c7-4a96-9827-ea0ba78a51bd",
+			"id": "fe473ba4-a692-4d7f-8fc9-cfe0ca7891ee",
 			"key": "url",
 			"value": "http://localhost:15800",
 			"type": "string"
 		},
 		{
-			"id": "01eadbf2-fe91-47af-a41d-db48a21a02c7",
+			"id": "f79fe7ba-d493-49c1-826f-ddb8d6d6223b",
 			"key": "oper_token",
 			"value": "",
 			"type": "string"
 		},
 		{
-			"id": "0b5df86f-59cb-4ba6-ac63-ea9086469437",
+			"id": "f59d6e87-1dca-43c0-8c76-7e6bd6381daf",
 			"key": "test_url",
 			"value": "http://192.168.5.253:15800",
 			"type": "string"
 		},
 		{
-			"id": "7b1ef8d1-9118-4595-9791-81b9698ab8a9",
+			"id": "25c83a60-c5fc-401c-8676-581b3b0bae41",
 			"key": "admin_token",
 			"value": "",
 			"type": "string"

@@ -8,6 +8,7 @@ import model.enums.ExecutionStatus;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -64,5 +65,13 @@ public class Arrangement implements Serializable {
 	public Arrangement() {
 		this.creationDate = LocalDateTime.now();
 		this.status = ExecutionStatus.NEW;
+	}
+
+	public Long getDurationInMinutes(){
+		if (this.startDate != null && this.endDate != null){
+			return Duration.between(startDate, endDate).toMinutes();
+		}else {
+			return null;
+		}
 	}
 }

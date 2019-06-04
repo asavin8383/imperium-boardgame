@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import repositories.ERDIRepositoryAdvanced;
+import repositories.ERDIRepository;
 
 import java.time.LocalDateTime;
 
@@ -26,11 +26,11 @@ import java.time.LocalDateTime;
 @PreAuthorize("hasAnyRole('ROLE_OPERATOR','ROLE_ADMIN')")
 public class ERDIController {
 
-    private ERDIRepositoryAdvanced erdiRepoAdvanced;
+    private ERDIRepository erdiRepo;
 
     @Autowired
-    public ERDIController(ERDIRepositoryAdvanced erdiRepoAdvanced) {
-        this.erdiRepoAdvanced = erdiRepoAdvanced;
+    public ERDIController(ERDIRepository erdiRepo) {
+        this.erdiRepo = erdiRepo;
     }
 
     @GetMapping
@@ -48,6 +48,6 @@ public class ERDIController {
             @RequestParam(defaultValue = "10") int pageSize){
         PageRequest page = PageRequest.of(
                 pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
-        return erdiRepoAdvanced.findPage(id, arrangementId, organization, blocktype, page);
+        return erdiRepo.findPage(id, arrangementId, organization, blocktype, page);
     }
 }

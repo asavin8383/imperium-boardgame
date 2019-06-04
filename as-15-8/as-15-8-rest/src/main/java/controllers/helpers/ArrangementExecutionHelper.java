@@ -20,9 +20,11 @@ public class ArrangementExecutionHelper {
     private ArrangementJobExecutionService arrangementJobExecutionService;
 
     @Autowired
-    public ArrangementExecutionHelper(ArrangementJobCreationService arrangementJobCreationService, ArrangementJobExecutionService arrangementJobExecutionService) {
+    public ArrangementExecutionHelper(ArrangementJobCreationService arrangementJobCreationService,
+                                      ArrangementJobExecutionService arrangementJobExecutionService) {
         this.arrangementJobCreationService = arrangementJobCreationService;
         this.arrangementJobExecutionService = arrangementJobExecutionService;
+
     }
 
     public void sendJobToDispatcher(Arrangement arrangement){
@@ -30,20 +32,4 @@ public class ArrangementExecutionHelper {
                 .forEach(arrangementJobExecutionService::run);
     }
 
-    /**
-     * Устанавливает статус мероприятия в зависимости от текущего состояния его параметров
-      * @param arrangement мероприятие
-     */
-    public void checkArrangementStatus(Arrangement arrangement){
-        //Если новому мероприятию запланировали дату запуска в будущем,
-        // при этом не пустой список ЕРДИ,
-        // оно становится PLANNED
-        if(arrangement.getStatus().equals(ExecutionStatus.NEW) &&
-                arrangement.getStartDate() != null &&
-                arrangement.getArrangementItems()!=null &&
-                arrangement.getArrangementItems().size() > 0){
-            arrangement.setStatus(ExecutionStatus.PLANNED);
-            return;
-        }
-    }
 }

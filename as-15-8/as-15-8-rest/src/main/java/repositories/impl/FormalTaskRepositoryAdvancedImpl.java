@@ -1,6 +1,8 @@
 package repositories.impl;
 
+import model.enums.ExecutionStatus;
 import model.task.FormalTask;
+import model.task.FormalTask_;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,12 +12,14 @@ import repositories.FormalTaskRepositoryAdvanced;
 import repositories.helpers.CriteriaHelper;
 
 import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Repository
 public class FormalTaskRepositoryAdvancedImpl implements FormalTaskRepositoryAdvanced {
@@ -47,6 +51,18 @@ public class FormalTaskRepositoryAdvancedImpl implements FormalTaskRepositoryAdv
 
 		return CriteriaHelper.createPage(em, select, pageable);
 	    
+	}
+
+	@Override
+	public List<?> getFormalTasksGroupingByStatus(){
+		CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+		CriteriaQuery<Object[]> select = criteriaBuilder.createQuery(Object[].class);
+		Root<FormalTask> fromFormalTask = select.from(FormalTask.class);
+
+		select.multiselect(fromFormalTask.get(FormalTask_.STATUS), criteriaBuilder.count(fromFormalTask));
+		select.groupBy(fromFormalTask.get(FormalTask_.STATUS));
+
+		return em.createQuery(select).getResultList();
 	}
 
 }

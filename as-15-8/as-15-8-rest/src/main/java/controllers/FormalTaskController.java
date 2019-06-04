@@ -3,6 +3,7 @@ package controllers;
 import controllers.helpers.SortingHelper;
 import enums.SortingDirection;
 import exceptions.AS_15_8_Exception;
+import model.enums.ExecutionStatus;
 import model.task.FormalTask;
 import model.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import repositories.FormalTaskRepository;
 import repositories.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -42,6 +44,7 @@ public class FormalTaskController {
 			.thenApply(curUser -> curUser
 				.map(user -> {
 					formalTask.setUser(user);
+					formalTask.setStatus(ExecutionStatus.NEW);
 					return formalTaskRepo.save(formalTask);
 				})
 				.orElseThrow(() -> {return new AS_15_8_Exception("User was not found by username: " + userName);
@@ -74,6 +77,23 @@ public class FormalTaskController {
 			);
 	}
 
+	@GetMapping(path = "/group")
+	public List<?> groupByStatusList(){
+		return formalTaskRepo.getFormalTasksGroupingByStatus();
+	}
+
+	@GetMapping(path = "/status")
+	public Page<FormalTask> findListByStatus(
+			@RequestParam ExecutionStatus status,
+			@RequestParam(required = false) SortingDirection sortingDirection,
+			@RequestParam(required = false) String sortingColumn,
+			@RequestParam(defaultValue = "0") int pageNumber,
+			@RequestParam(defaultValue = "10") int pageSize){
+		PageRequest page = PageRequest.of(
+				pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
+		return formalTaskRepo.findAllByStatus(status, page);
+	}
+
 	private FormalTask replaceFields(FormalTask newTask, FormalTask storedTask){
 		storedTask.setTitle(newTask.getTitle());
 		storedTask.setModificationDate(LocalDateTime.now());
@@ -82,8 +102,8 @@ public class FormalTaskController {
 		storedTask.setDeadlineDate(newTask.getDeadlineDate());
 		storedTask.setFgisId(newTask.getFgisId());
 		storedTask.setPriority(newTask.getPriority());
-		storedTask.setStatus(newTask.getStatus());
 		storedTask.setUser(newTask.getUser());
 		return storedTask;
 	}
+
 }

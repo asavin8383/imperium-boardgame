@@ -14,7 +14,6 @@ import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import repositories.ArrangementItemRepository;
-import repositories.ArrangementItemRepositoryAdvanced;
 import repositories.ArrangementRepository;
 import repositories.ERDIRepository;
 
@@ -33,17 +32,14 @@ import java.util.stream.Collectors;
 public class ArrangementItemController {
 
     private ArrangementItemRepository arrangementItemRepo;
-    private ArrangementItemRepositoryAdvanced arrangementItemRepoAdvanced;
     private ArrangementRepository arrangementRepo;
     private ERDIRepository erdiRepo;
 
     @Autowired
     public ArrangementItemController(ArrangementItemRepository arrangementItemRepo,
-                                     ArrangementItemRepositoryAdvanced arrangementItemRepoAdvanced,
                                      ArrangementRepository arrangementRepo,
                                      ERDIRepository erdiRepo) {
         this.arrangementItemRepo = arrangementItemRepo;
-        this.arrangementItemRepoAdvanced = arrangementItemRepoAdvanced;
         this.arrangementRepo = arrangementRepo;
         this.erdiRepo = erdiRepo;
     }
@@ -58,7 +54,7 @@ public class ArrangementItemController {
             @RequestParam(defaultValue = "10") int pageSize){
         PageRequest page = PageRequest.of(
                 pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
-        return arrangementItemRepoAdvanced.findPage(arrangementId, id, page);
+        return arrangementItemRepo.findPage(arrangementId, id, page);
     }
 
     @PostMapping
