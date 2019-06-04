@@ -1,6 +1,7 @@
 package scripts.impl;
 
 import execution.ExecutionVpnJobResult;
+import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.testng.annotations.AfterClass;
@@ -18,51 +19,65 @@ import static scripts.ScriptUtils.PageResult;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-
+@Slf4j
 public class VPNScript extends RobotScript {
 
     protected String vpnProxy;
     protected String etalonProxy;
-    protected boolean useEtalonProxy;
-    protected int timeoutRequest;
-    protected int tryCountRequest;
-
     protected String stubUrl;
     
     protected List<WebDriver> proxyDrivers = new ArrayList<>();
 
-    String[] successChromeErrors = {"ERR_EMPTY_RESPONSE"};
-    Map<String, String> mapSuccessChromeErrors = new HashMap<>();
 
-
-    @BeforeClass
-    @Parameters({"vpnProxy", "etalonProxy", "useEtalonProxy", "timeoutRequest", "tryCountRequest"})
-    public void setOptions(String vpnProxy, String etalonProxy, String useEtalonProxy, String timeoutRequest, String tryCountRequest) {
-        this.vpnProxy = vpnProxy;
-        this.etalonProxy = etalonProxy;
-        this.useEtalonProxy = Boolean.parseBoolean(useEtalonProxy);
-        this.timeoutRequest = Integer.parseInt(timeoutRequest);
-        this.tryCountRequest = Integer.parseInt(tryCountRequest);
-
-        for (String str : successChromeErrors){
-            mapSuccessChromeErrors.put(str, "");
-        }
+    protected boolean needAutoCreateDriver(){
+        return false;
     }
-    
+
     @BeforeClass
-    @Parameters({"PROXY_DNS_NAME", "PROXY_PORT", "PROXY_USER", "PROXY_PASSWORD", "STUB_URL"})
+    @Parameters({"PROXY_DNS_NAME", "PROXY_PORT", "PROXY_USER", "PROXY_PASSWORD",
+            "ETALON_PROXY_HOST", "ETALON_PROXY_PORT", "ETALON_PROXY_USERNAME", "ETALON_PROXY_PASSWORD",
+            "STUB_URL"})
     public void setParameters(
-    	@Optional String proxyDnsName,
+    	@Optional String proxyHost,
     	@Optional String proxyPort,
     	@Optional String proxyUser,
     	@Optional String proxyPassword,
-    	@Optional String stubUrl) {
-    		
+        @Optional String etalonProxyHost,
+        @Optional String etalonProxyPort,
+        @Optional String etalonProxyUser,
+        @Optional String etalonProxyPassword,
+    	@Optional String stubUrl) throws MalformedURLException {
+
+        vpnProxy = fullProxy(proxyHost, proxyPort, proxyUser, proxyPassword);
+        etalonProxy = fullProxy(etalonProxyHost, etalonProxyPort, etalonProxyUser, etalonProxyPassword);
     	this.stubUrl = stubUrl;
+
+        log.info("---------- PROXY -----------");
+        log.info("proxyHost = " + proxyHost);
+        log.info("etalonProxyHost = " + etalonProxyHost);
+        log.info("vpnProxy = " + vpnProxy);
+        log.info("etalonProxy = " + etalonProxy);
+        log.info("stubUrl = " + stubUrl);
+
+        createDriver(vpnProxy);
+    }
+
+    String fullProxy(String host, String port, String user, String pass){
+        String proxy = null;
+        port = port != null && !port.isEmpty() ? port : "80";
+        pass = pass != null ? pass : "";
+
+        if (host != null && !host.isEmpty()){
+            if (user != null && !user.isEmpty()){
+                proxy = String.format("%s:%s@%s:%s", user, pass, host, port);
+            }
+            else {
+                proxy = String.format("%s:%s", host, port);
+            }
+        }
+        return proxy;
     }
 
     @AfterClass
@@ -74,11 +89,11 @@ public class VPNScript extends RobotScript {
         });
     }
 
-    public WebDriver createProxyDriver(String proxy) {
+    public WebDriver createEtalonDriver() {
         WebDriver driver = null;
         try {
             driver = DriverFactory.createDriver(
-                    new URL(getHubURL()), getPlatformName(), getApplicationName(), getBrowserName(), proxy);
+                    new URL(getHubURL()), getPlatformName(), getApplicationName(), getBrowserName(), etalonProxy);
 
 
         } catch (MalformedURLException e) {
@@ -105,7 +120,7 @@ public class VPNScript extends RobotScript {
 
         while (tryCount > 0 && (pageSourceResult == null || pageSourceResult.errorCodeChrome != null)){
             if (pageSourceResult != null){
-                ScriptUtils.waitDriver(driver, 2);
+                ScriptUtils.waitDriver(driver, 3);
             }
             tryCount--;
 
@@ -119,13 +134,13 @@ public class VPNScript extends RobotScript {
             catch (TimeoutException te){
                 pageSourceResult = new PageResult(null, "TIME_OUT");
             }
-            System.out.println("----> try count " + tryCount + ", error = " + pageSourceResult.errorCodeChrome);
+            log.info("----> try count " + tryCount + ", error = " + pageSourceResult.errorCodeChrome);
         }
 
         // если нет ошибок, то получаем странцы эталоны
         String pageSourceEtalon = null;
-        if (pageSourceResult.errorCodeChrome == null && useEtalonProxy){
-            WebDriver etalonDriver = createProxyDriver(etalonProxy);
+        if (pageSourceResult.errorCodeChrome == null){
+            WebDriver etalonDriver = createEtalonDriver();
             etalonDriver.get(url);
             etalonDriver.manage().window().fullscreen();
             ScriptUtils.waitDriver(etalonDriver, 3);

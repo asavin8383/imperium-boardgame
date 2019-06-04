@@ -13,63 +13,35 @@ import java.util.Map;
 public class SeleniumVpnRobot<T> extends SeleniumRobot<T> {
 
 
-    @Getter
-    private String etalonProxy;
-    @Getter
-    private Boolean useEtalonProxy = true;
-    @Getter
-    private Integer timeoutRequest = 30;
-    @Getter
-    private Integer tryCountRequest = 3;
-
-
     public SeleniumVpnRobot(AccessToolUnit accessToolUnit,
                             URL hubURL,
                             Class<T> scriptClass,
                             String browserName,
                             Platform platform,
-                            String applicationName,
-                            String vpnProxy,
-                            String etalonProxy,
-                            String useEtalonProxy,
-                            String timeoutRequest,
-                            String tryCountRequest) {
+                            String applicationName) {
         super(accessToolUnit,
                 hubURL,
                 scriptClass,
                 browserName,
                 platform,
-                applicationName,
-                vpnProxy);
-
-        this.etalonProxy = etalonProxy;
-
-        this.useEtalonProxy = useEtalonProxy == null || useEtalonProxy.trim().isEmpty() ? this.useEtalonProxy : Boolean.valueOf(useEtalonProxy);
-        try {
-            this.timeoutRequest = Integer.valueOf(timeoutRequest);
-        }
-        catch (NumberFormatException e){}
-
-        try {
-            this.tryCountRequest = Integer.valueOf(tryCountRequest);
-        }
-        catch (NumberFormatException e){}
+                applicationName);
     }
 
     @Override
     public XmlTest createTest(String name, Long jobID, CheckUnit checkUnit, Map<AccessToolParameters, String> accessToolParameters) {
         XmlTest test = super.createTest(name, jobID, checkUnit, accessToolParameters);
-        test.addParameter("etalonProxy", etalonProxy);
-        test.addParameter("useEtalonProxy", useEtalonProxy.toString());
-        test.addParameter("timeoutRequest", timeoutRequest.toString());
-        test.addParameter("tryCountRequest", tryCountRequest.toString());
-        
+
         test.addParameter(AccessToolParameters.STUB_URL.toString(), accessToolParameters.get(AccessToolParameters.STUB_URL));
         test.addParameter(AccessToolParameters.PROXY_DNS_NAME.toString(), accessToolParameters.get(AccessToolParameters.PROXY_DNS_NAME));
         test.addParameter(AccessToolParameters.PROXY_PORT.toString(), accessToolParameters.get(AccessToolParameters.PROXY_PORT));
         test.addParameter(AccessToolParameters.PROXY_USER.toString(), accessToolParameters.get(AccessToolParameters.PROXY_USER));
         test.addParameter(AccessToolParameters.PROXY_PASSWORD.toString(), accessToolParameters.get(AccessToolParameters.PROXY_PASSWORD));
-        
+
+        test.addParameter(AccessToolParameters.ETALON_PROXY_HOST.toString(), accessToolParameters.get(AccessToolParameters.ETALON_PROXY_HOST));
+        test.addParameter(AccessToolParameters.ETALON_PROXY_PORT.toString(), accessToolParameters.get(AccessToolParameters.ETALON_PROXY_PORT));
+        test.addParameter(AccessToolParameters.ETALON_PROXY_USERNAME.toString(), accessToolParameters.get(AccessToolParameters.ETALON_PROXY_USERNAME));
+        test.addParameter(AccessToolParameters.ETALON_PROXY_PASSWORD.toString(), accessToolParameters.get(AccessToolParameters.ETALON_PROXY_PASSWORD));
+
         return test;
     }
 }

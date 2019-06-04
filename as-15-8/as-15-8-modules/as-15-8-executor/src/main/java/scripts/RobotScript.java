@@ -16,11 +16,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Optional;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
 import checkUnits.CheckUnit;
 import checkUnits.CheckUnitType;
@@ -50,25 +46,22 @@ public abstract class RobotScript extends AbstractTestNGSpringContextTests{
 	private String executionResultTopicName;
 	
 	@Getter
-	private String jobID;
+	protected String jobID;
 	
 	@Getter
-	private CheckUnit checkUnit;
+	protected CheckUnit checkUnit;
 
 	@Getter
-	private String hubURL;
+	protected String hubURL;
 
 	@Getter
-	private String platformName;
+	protected String platformName;
 
 	@Getter
-	private String applicationName;
+	protected String applicationName;
 
 	@Getter
-	private String browserName;
-
-	@Getter
-	protected String vpnProxy;
+	protected String browserName;
 
 	/**
 	 * Метод создания драйвера
@@ -79,7 +72,7 @@ public abstract class RobotScript extends AbstractTestNGSpringContextTests{
 	 * @throws MalformedURLException
 	 */
 	@BeforeClass
-	@Parameters({"hubURL", "browserName", "platformName", "applicationName", "jobID", "checkUnitType", "checkUnitValue", "vpnProxy"})
+	@Parameters({"hubURL", "browserName", "platformName", "applicationName", "jobID", "checkUnitType", "checkUnitValue"})
 	public void createDriver(
 			String hubURL,
 			String browserName,
@@ -87,11 +80,9 @@ public abstract class RobotScript extends AbstractTestNGSpringContextTests{
 			String applicationName,
 			String jobID,
 			String checkUnitType,
-			String checkUnitValue,
-			@Optional String vpnProxy
+			String checkUnitValue
 		) throws MalformedURLException {
-		
-			this.driver = DriverFactory.createDriver(new URL(hubURL), platformName, applicationName, browserName, vpnProxy);
+
 			this.jobID = jobID;
 			this.checkUnit = new CheckUnit(CheckUnitType.valueOf(checkUnitType), checkUnitValue);
 
@@ -99,9 +90,20 @@ public abstract class RobotScript extends AbstractTestNGSpringContextTests{
 			this.platformName = platformName;
 			this.applicationName = applicationName;
 			this.browserName = browserName;
-			this.vpnProxy = vpnProxy;
+
+			if (needAutoCreateDriver()){
+				createDriver(null);
+			}
 	}
-	
+
+	protected void createDriver(String proxy) throws MalformedURLException {
+		this.driver = DriverFactory.createDriver(new URL(hubURL), platformName, applicationName, browserName, proxy);
+	}
+
+	protected boolean needAutoCreateDriver(){
+		return true;
+	}
+
 	/**
 	 * Метод, запускаюший выполнение скрипта робота
 	 */

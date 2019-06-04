@@ -29,15 +29,11 @@ public class VPN_AnalysisResultService implements AnalysisResultService<VpnAnaly
 		detailResultsVpn.setLinkCount(aRes.getLinkCount());
 		detailResultsVpn.setDomainNameCount(aRes.getDomainNameCount());
 		detailResultsVpn.setPageUrlFinal(aRes.getPageUrlFinal());
+		detailResultsVpn.setStubUrl(aRes.getStubUrl());
 		detailResultsVpn.setSimilarityOriginPercent(aRes.getSimilarityOriginPercent());
 		detailResultsVpn.setStubScoreInfo(aRes.getStubScoreInfo());
 
-		System.out.println("***************");
-		System.out.println(detailResultsVpn.toString());
-
 		detailVpnRepo.save(detailResultsVpn);
-
-		System.out.println("Детализация анализа сохранена | jobID = " + aRes.getJobID());
 
 		return aRes.getCheckResult();
 	}

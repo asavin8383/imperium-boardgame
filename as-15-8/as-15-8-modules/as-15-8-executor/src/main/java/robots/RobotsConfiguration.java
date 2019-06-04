@@ -81,12 +81,7 @@ public class RobotsConfiguration {
 				VPNScript.class,
 				env.getProperty("robots.vpn.browser"),
 				Platform.valueOf(env.getProperty("robots.vpn.platform")),
-				env.getProperty("robots.vpn.app"),
-				env.getProperty("robots.vpn.vpnProxy"),
-				env.getProperty("robots.vpn.etalonProxy"),
-				env.getProperty("robots.vpn.useEtalonProxy"),
-				env.getProperty("robots.vpn.timeoutRequest"),
-				env.getProperty("robots.vpn.tryCountRequest")
+				env.getProperty("robots.vpn.app")
 		);
 	}
 	
