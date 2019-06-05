@@ -101,7 +101,7 @@ public class VPNScript extends RobotScript {
         if (!checkBrowserChrome())
             throw new RobotScriptExecutionException("Ошибка, неправильный браузер! Для данного робота поддерживатся только браузер CHROME!");
 
-        String url = getCheckUnit().getValue();
+        String url = ScriptUtils.getCheckUnitValue(getCheckUnit());
 
         // получение страницы от VPN (драйвер уже настроен)
         PageResult pageSourceResult = null;
