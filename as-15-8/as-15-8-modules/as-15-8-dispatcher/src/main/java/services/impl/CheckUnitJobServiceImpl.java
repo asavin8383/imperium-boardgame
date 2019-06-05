@@ -115,7 +115,7 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
     }
 
     private List<CheckUnitJob> prepareJobsForRestart(ArrangementJob arrangementJob){
-        final String CAPTCHA = "'CAPTCHA_DETECTED'";
+        final String CAPTCHA = "CAPTCHA_DETECTED";
         CheckUnitJobMapper mapper = new CheckUnitJobMapper(arrangementJob.getAccessToolUnit(), arrangementJob.getAccessToolParameters());
         List<CheckUnitJob> checkUnitJobs;
         try {
