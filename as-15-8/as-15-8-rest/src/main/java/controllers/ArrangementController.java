@@ -135,6 +135,7 @@ public class ArrangementController {
     private Arrangement replaceFields(Arrangement newArrangement, Arrangement arrangement) {
         arrangement.setAccessTool(newArrangement.getAccessTool());
         arrangement.setTitle(newArrangement.getTitle());
+        arrangement.setPlannedDate(newArrangement.getPlannedDate());
         return arrangement;
     }
 
