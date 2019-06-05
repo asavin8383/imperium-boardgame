@@ -13,6 +13,7 @@ import jobs.ArrangementJob;
 import jobs.ERDIJob;
 import model.ArrangementResult;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,7 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 /**
@@ -35,18 +37,30 @@ import java.util.stream.Collectors;
 @Service
 public class CheckUnitJobServiceImpl implements CheckUnitJobService {
 
-    private NamedParameterJdbcTemplate jdbcTemplate;
+    private NamedParameterJdbcTemplate jdbcNamedTemplate;
+    private JdbcTemplate jdbcTemplate;
     private ArrangementResultRepository arrangementResultRepo;
 
     @Autowired
-    public CheckUnitJobServiceImpl(NamedParameterJdbcTemplate jdbcTemplate,
+    public CheckUnitJobServiceImpl(NamedParameterJdbcTemplate jdbcNamedTemplate,
                                    ArrangementResultRepository arrangementResultRepo) {
-        this.jdbcTemplate = jdbcTemplate;
+        this.jdbcNamedTemplate = jdbcNamedTemplate;
         this.arrangementResultRepo = arrangementResultRepo;
     }
 
     @Override
     public List<CheckUnitJob> prepareJobs(ArrangementJob arrangementJob) {
+        switch (arrangementJob.getRunType()){
+            case START:
+                return prepareJobsForStart(arrangementJob);
+            case RESTART:
+                return prepareJobsForRestart(arrangementJob);
+            default:
+                throw new AS_15_8_DispatcherException("Error preparing check unit jobs! Arrangement run type is not supported: " + arrangementJob.getRunType());
+        }
+    }
+
+    private List<CheckUnitJob> prepareJobsForStart(ArrangementJob arrangementJob) {
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("ids",
                 arrangementJob.getErdiJobList().stream()
@@ -59,7 +73,7 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
         List<CheckUnitJob> checkUnitJobs;
         try {
             //noinspection SqlDialectInspection
-            checkUnitJobs = jdbcTemplate.query(
+            checkUnitJobs = jdbcNamedTemplate.query(
                 "select content.id as id, 'DOMAIN' as check_unit_type, domain.domain as check_unit_value\n" +
                         "  from sa.content\n" +
                         "  join sa.domain on content.id = domain.content_id and content.id IN (:ids) and blocktype in ('domain', 'domain-mask')\n" +
@@ -97,7 +111,28 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
         }
         return checkUnitJobs;
     }
-    
+
+    private List<CheckUnitJob> prepareJobsForRestart(ArrangementJob arrangementJob){
+        final String CAPTCHA = "'CAPTCHA_DETECTED'";
+        CheckUnitJobMapper mapper = new CheckUnitJobMapper(arrangementJob.getAccessToolUnit(), arrangementJob.getAccessToolParameters());
+        List<CheckUnitJob> checkUnitJobs;
+        try {
+            //noinspection SqlDialectInspection
+            checkUnitJobs = jdbcTemplate.query("select id, check_unit_type, check_unit_value from portal.arrangement_results where arrangement_id = ? AND result = ?"
+            , (rs, rowNum) -> {
+                        CheckUnitJob job = mapper.map(rs, rowNum);
+                        Long jobID = updateCheckUnitJob(rs.getLong("id"));
+                        job.setJobID(jobID);
+                        return job;
+                    }
+            ,arrangementJob.getId(), CAPTCHA);
+        } catch (Exception ex){
+            throw new AS_15_8_DispatcherException("Ошибка при создании заданий на проверку запрещенных ресурсов!", ex);
+        }
+        return checkUnitJobs;
+    }
+
+
 	@Override
 	public ArrangementResult processJobResult(AnalysisResult result) {
 		ArrangementResult job = findJobByID(result.getJobID());
@@ -130,6 +165,16 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
             return arrangementResultRepo.save(arrangementResult).getId();
         }catch (Exception ex){
             throw new AS_15_8_DispatcherException("Ошибка сохранения задания на проверку запрещенного ресурса!", ex);
+        }
+    }
+
+    private Long updateCheckUnitJob(Long id){
+        try {
+            ArrangementResult arrangementResult = findJobByID(id);
+            arrangementResult.setResult(CheckUnitJobResult.RUNNING);
+            return arrangementResultRepo.save(arrangementResult).getId();
+        }catch (Exception ex){
+            throw new AS_15_8_DispatcherException("Ошибка обновления задания на проверку запрещенного ресурса!", ex);
         }
     }
     

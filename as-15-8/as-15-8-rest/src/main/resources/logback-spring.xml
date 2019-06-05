@@ -61,14 +61,14 @@
     
    
     <appender name="JDBC_TEMPLATE_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOGS}/jdbcTemplate.log</file>
+        <file>${LOGS}/jdbcNamedTemplate.log</file>
         <encoder>
             <pattern>%date [%level] from %logger - %message%n%xException</pattern>
         </encoder>
         
         <rollingPolicy
             class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOGS}/archived/jdbcTemplate-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>${LOGS}/archived/jdbcNamedTemplate-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <timeBasedFileNamingAndTriggeringPolicy
                 class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                 <maxFileSize>100MB</maxFileSize>
