@@ -1,5 +1,6 @@
 package scripts.impl;
 
+import enums.AccessToolUnit;
 import execution.ExecutionVpnJobResult;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.TimeoutException;
@@ -56,9 +57,8 @@ public class VPNScript extends RobotScript {
         etalonProxy = ProxyUtils.getFullProxy(proxyType, etalonProxyHost, etalonProxyPort, etalonProxyUser, etalonProxyPassword);
     	this.stubUrl = stubUrl;
 
-    	// todo - хардкодинг
-        //vpnProxy = "http://:@192.168.5.10:3128";
-        //etalonProxy = null;
+        // todo - хардккод, удалить!
+        proxyHard();
 
         log.info("---------- PROXY -----------");
         log.info("vpnProxy = " + vpnProxy);
@@ -68,6 +68,23 @@ public class VPNScript extends RobotScript {
         createDriver(vpnProxy);
     }
 
+    // todo - хардккод, удалить!
+    protected void proxyHard(){
+        if (getAccessToolUnit() == AccessToolUnit.TORGUARD){
+            vpnProxy = "http://:@192.168.5.10:3128";
+            etalonProxy = null;
+        }
+        else if (getAccessToolUnit() == AccessToolUnit.KASPERSKY){
+            vpnProxy = "http://:@192.168.5.194:3128";
+            etalonProxy = null;
+            stubUrl = "kaspersky.ru";
+        }
+        else if (getAccessToolUnit() == AccessToolUnit.EXPRESS){
+            vpnProxy = "http://:@192.168.5.194:3128";
+            etalonProxy = null;
+            stubUrl = "expressvpn.com";
+        }
+    }
 
     @AfterClass
     public void closeProxyDrivers() {
