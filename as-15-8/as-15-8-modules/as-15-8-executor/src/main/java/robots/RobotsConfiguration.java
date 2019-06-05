@@ -44,7 +44,8 @@ public class RobotsConfiguration {
 				env.getProperty("robots.google.browser"),
 				Platform.valueOf(env.getProperty("robots.google.platform")),
 				env.getProperty("robots.google.app"),
-				env.getProperty("robots.google.limit"));
+				env.getProperty("robots.google.limit"),
+				env.getProperty("robots.yandex.input-delay"));
 	}
 
 	/**
@@ -61,7 +62,8 @@ public class RobotsConfiguration {
 				env.getProperty("robots.yandex.browser"),
 				Platform.valueOf(env.getProperty("robots.yandex.platform")),
 				env.getProperty("robots.yandex.app"),
-				env.getProperty("robots.yandex.limit"));
+				env.getProperty("robots.yandex.limit"),
+				env.getProperty("robots.yandex.input-delay"));
 	}
 
 	/**

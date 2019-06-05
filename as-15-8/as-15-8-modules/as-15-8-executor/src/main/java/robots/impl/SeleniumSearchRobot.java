@@ -12,6 +12,7 @@ import java.util.Map;
 public class SeleniumSearchRobot<T> extends SeleniumRobot<T> {
 
     private String searchResultLimit;
+    private String inputDelay;
 
     public SeleniumSearchRobot(AccessToolUnit accessToolUnit,
                                URL hubURL,
@@ -19,7 +20,8 @@ public class SeleniumSearchRobot<T> extends SeleniumRobot<T> {
                                String browserName,
                                Platform platform,
                                String applicationName,
-                               String searchResultLimit) {
+                               String searchResultLimit,
+                               String inputDelay) {
         super(accessToolUnit,
                 hubURL,
                 scriptClass,
@@ -28,12 +30,16 @@ public class SeleniumSearchRobot<T> extends SeleniumRobot<T> {
                 applicationName);
 
         this.searchResultLimit = searchResultLimit;
+        this.inputDelay = inputDelay;
     }
 
     @Override
-    public XmlTest createTest(String name, Long jobID, CheckUnit checkUnit, Map<AccessToolParameters, String> accessToolParameters) {
+    public XmlTest createTest(String name, Long jobID, CheckUnit checkUnit,
+                              Map<AccessToolParameters, String> accessToolParameters) {
         XmlTest test = super.createTest(name, jobID, checkUnit, accessToolParameters);
         test.addParameter("searchResultLimit", searchResultLimit);
+        test.addParameter("inputDelay", accessToolParameters.getOrDefault(
+                AccessToolParameters.SEARCH_SYSTEM_INPUT_DELAY, inputDelay));
         return test;
     }
 }

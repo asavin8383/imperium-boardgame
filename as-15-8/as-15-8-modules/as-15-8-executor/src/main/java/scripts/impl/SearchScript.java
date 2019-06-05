@@ -28,22 +28,33 @@ public abstract class SearchScript extends RobotScript {
     /** Максимальное кол-во проверяемых результатов по умолчанию */
     private static final int DEFAULT_SEARCH_LIMIT = 20;
 
+    private static final long DEFAULT_INPUT_DELAY = 300;
+
     /** Максимальное кол-во проверяемых результатов */
     private int searchResultLimit;
 
     /** Текущее кол-во проверенных результатов */
     private int checkedResultCount;
 
+    private long inputDelay;
+
     private EqualityTest test;
 
     @BeforeClass
-    @Parameters({"searchResultLimit"})
-    public void setOptions(String searchLimit) {
+    @Parameters({"searchResultLimit", "inputDelay"})
+    public void setOptions(String searchLimit, String inputDelay) {
         this.test = EqualityTest.forCheckUnit(getCheckUnit());
         this.checkedResultCount = 0;
 
         int limit = Integer.parseInt(searchLimit);
         this.searchResultLimit = limit > 0 ? limit : DEFAULT_SEARCH_LIMIT;
+
+        this.inputDelay = StringUtils.isEmpty(inputDelay) ?
+                DEFAULT_INPUT_DELAY : Long.parseLong(inputDelay);
+    }
+
+    protected long getInputDelay() {
+        return inputDelay;
     }
 
     EqualityTest getEqualityTest() {
@@ -109,6 +120,17 @@ public abstract class SearchScript extends RobotScript {
     private void scrollTo(WebElement webElement) {
         Actions actions = new Actions(driver);
         actions.moveToElement(webElement, 0, 0).perform();
+    }
+
+    protected void type(WebElement input, long sleep, String query) {
+        query.codePoints().forEach(cp -> {
+            input.sendKeys(new String(Character.toChars(cp)));
+            try {
+                Thread.sleep(sleep);
+            } catch (InterruptedException e) {
+                // ignore
+            }
+        });
     }
 
 

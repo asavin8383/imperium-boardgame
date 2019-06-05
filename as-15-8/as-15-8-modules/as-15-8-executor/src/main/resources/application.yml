@@ -8,11 +8,13 @@ robots:
         browser: chrome
         app: google
         limit: 15
+        input-delay: 500
     yandex:
         platform: WIN8
         browser: chrome
         app: yandex
         limit: 15
+        input-delay: 500
     vpn:
         platform: WIN8
         browser: chrome
