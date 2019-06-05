@@ -3,6 +3,7 @@ package kafka;
 import java.util.HashMap;
 import java.util.Map;
 
+import control.ExecutorControlMessage;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -148,5 +149,17 @@ public class KafkaConfiguration {
     @Bean
     public KafkaTemplate<String, ArrangementStatusNotification> arrangementStatusKafkaTemplate() {
         return new KafkaTemplate<>(arrangementStatusProducerFactory());
+    }
+
+    //************************Контрольное сообщение на запуск************************
+
+    @Bean
+    public ProducerFactory<String, ExecutorControlMessage> controlMessagesProducerFactory() {
+        return new DefaultKafkaProducerFactory<>(producerFactoryConfig());
+    }
+
+    @Bean
+    public KafkaTemplate<String, ExecutorControlMessage> controlMessagesTemplate() {
+        return new KafkaTemplate<>(controlMessagesProducerFactory());
     }
 }

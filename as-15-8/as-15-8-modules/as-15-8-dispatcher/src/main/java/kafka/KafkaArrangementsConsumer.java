@@ -1,7 +1,11 @@
 package kafka;
 
-import java.util.concurrent.CompletableFuture;
-
+import checkUnits.CheckUnitJob;
+import control.ExecutorControlMessage;
+import enums.AccessToolUnit;
+import exceptions.AS_15_8_DispatcherException;
+import jobs.ArrangementJob;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -14,12 +18,9 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
-
-import checkUnits.CheckUnitJob;
-import exceptions.AS_15_8_DispatcherException;
-import jobs.ArrangementJob;
-import lombok.extern.slf4j.Slf4j;
 import services.CheckUnitJobService;
+
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @Slf4j
@@ -28,15 +29,22 @@ public class KafkaArrangementsConsumer {
 	private CheckUnitJobService checkUnitJobService;
 	
 	private KafkaTemplate<String, CheckUnitJob> checkUnitJobKafkaTemplate;
+	private KafkaTemplate<String, ExecutorControlMessage> controlMessagesTemplate;
+
 
 	@Value("${spring.kafka.jobs-topic}")
 	private String checkUnitJobTopicName;
 
+	@Value("${spring.kafka.control-topic}")
+	private String controlTopicName;
+
 	@Autowired
 	public KafkaArrangementsConsumer(CheckUnitJobService checkUnitJobService,
-									 KafkaTemplate<String, CheckUnitJob> checkUnitJobKafkaTemplate) {
+									 KafkaTemplate<String, CheckUnitJob> checkUnitJobKafkaTemplate,
+									 KafkaTemplate<String, ExecutorControlMessage> controlMessagesTemplate) {
 		this.checkUnitJobService = checkUnitJobService;
 		this.checkUnitJobKafkaTemplate = checkUnitJobKafkaTemplate;
+		this.controlMessagesTemplate = controlMessagesTemplate;
 	}
 
 	@KafkaListener(
@@ -50,6 +58,10 @@ public class KafkaArrangementsConsumer {
 				checkUnitJobService
 					.prepareJobs(arrangementJob)
 					.forEach(this::send);
+				//Если получили сообщение на перезапуск, нужно поднять сервис
+				if(arrangementJob.getRunType().equals(ArrangementJob.JobRunType.RESTART)){
+					sendStartExecutorsMessage(arrangementJob.getAccessToolUnit());
+				}
         	} catch (Exception ex) {
         		log.error("Ошибка при обработке задания на проведение мероприятия: " + arrangementJob.toString(), ex);
         	}
@@ -79,6 +91,34 @@ public class KafkaArrangementsConsumer {
 			});
 		} catch (Exception ex) {
 			throw new AS_15_8_DispatcherException("Ошибка при отправке задания на проверку", ex);
+		}
+	}
+
+	private void sendStartExecutorsMessage(AccessToolUnit accessToolUnit) {
+		try {
+			ExecutorControlMessage controlMessage = new ExecutorControlMessage(accessToolUnit, ExecutorControlMessage.ControlCommand.START);
+
+			Message<ExecutorControlMessage> message = MessageBuilder
+					.withPayload(controlMessage)
+					.setHeader(KafkaHeaders.TOPIC, controlTopicName)
+					.build();
+
+			ListenableFuture<SendResult<String, ExecutorControlMessage>> future = controlMessagesTemplate.send(message);
+
+			future.addCallback(new ListenableFutureCallback<SendResult<String, ExecutorControlMessage>>() {
+
+				@Override
+				public void onSuccess(SendResult<String, ExecutorControlMessage> result) {
+					log.info("Сообщение для запуска модулей выполнения проверок успешно отправлено");
+				}
+				@Override
+				public void onFailure(Throwable ex) {
+					throw new RuntimeException("Ошибка при отправке сообщения для запсука модулей выполнения проверок", ex);
+				}
+			});
+			future.get();
+		} catch (Exception ex) {
+			throw new RuntimeException("Ошибка при отправке сообщения для запуска модулей выполнения проверок", ex);
 		}
 	}
 	
