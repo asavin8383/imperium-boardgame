@@ -56,6 +56,10 @@ public class VPNScript extends RobotScript {
         etalonProxy = ProxyUtils.getFullProxy(proxyType, etalonProxyHost, etalonProxyPort, etalonProxyUser, etalonProxyPassword);
     	this.stubUrl = stubUrl;
 
+    	// todo - хардкодинг
+        vpnProxy = "http://:@192.168.5.10:3128";
+        etalonProxy = null;
+
         log.info("---------- PROXY -----------");
         log.info("vpnProxy = " + vpnProxy);
         log.info("etalonProxy = " + etalonProxy);
