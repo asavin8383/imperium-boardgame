@@ -41,6 +41,7 @@ public class ArrangementJobExecutionServiceImpl implements ArrangementJobExecuti
                 .setHeader(KafkaHeaders.TOPIC, arrangementJobTopicName)
                 .build();
             ListenableFuture<SendResult<String, ArrangementJob>> future = kafkaTemplate.send(message);
+            log.info("Arrangement job message was sent to dispatcher: " + message);
 
             future.addCallback(new ListenableFutureCallback<SendResult<String, ArrangementJob>>() {
 

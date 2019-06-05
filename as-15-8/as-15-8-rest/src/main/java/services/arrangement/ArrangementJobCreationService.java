@@ -12,4 +12,6 @@ import java.util.List;
 public interface ArrangementJobCreationService {
 
     List<ArrangementJob> createArrangementJobs(Arrangement arrangement);
+
+    ArrangementJob createSingleArrangementJob(Arrangement arrangement);
 }

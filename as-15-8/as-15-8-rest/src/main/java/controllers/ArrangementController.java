@@ -117,7 +117,10 @@ public class ArrangementController {
             .map(arrangement -> {
                 if(arrangement.getStatus().equals(ExecutionStatus.PLANNED)||arrangement.getStatus().equals(ExecutionStatus.ACTION_REQUIRED)) {
                     arrangementExecutionHelper.sendJobToDispatcher(arrangement);
-                    arrangement.setStartDate(LocalDateTime.now());
+                    //Устанавливаем дату запуска(актуально только для впервые запущенных мероприятий)
+                    if(arrangement.getStatus().equals(ExecutionStatus.PLANNED)){
+                        arrangement.setStartDate(LocalDateTime.now());
+                    }
                     arrangement.setStatus(ExecutionStatus.RUNNING);
                     arrangementRepo.save(arrangement);
                     return new ResponseEntity<>(arrangement, HttpStatus.OK);
