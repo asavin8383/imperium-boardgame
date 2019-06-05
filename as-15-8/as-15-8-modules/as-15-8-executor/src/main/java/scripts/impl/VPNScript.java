@@ -127,15 +127,16 @@ public class VPNScript extends RobotScript {
         etalonDriver.get(url);
         etalonDriver.manage().window().fullscreen();
         ScriptUtils.waitDriver(etalonDriver, 3);
-
+        PageResult resultEtalon = new PageResult();
         try {
             ScriptUtils.waitPageLoading(etalonDriver);
+            resultEtalon = ScriptUtils.getPageSource(etalonDriver);
         }
         catch (TimeoutException te){
             System.out.println("Timeout exception while access from URL via VPN/Proxy");
             te.printStackTrace();
+            resultEtalon.errorCodeChrome = "TIME_OUT";
         }
-        PageResult resultEtalon = ScriptUtils.getPageSource(etalonDriver);
 
         ExecutionVpnJobResult message = new ExecutionVpnJobResult();
         fillExecutionResultMessage(message);
@@ -151,8 +152,8 @@ public class VPNScript extends RobotScript {
         }
 
         message.setChromeErrorCodeEtalon(resultEtalon.errorCodeChrome);
+        message.setPageContentEtalon(resultEtalon.pageSource);
         if (resultEtalon.errorCodeChrome == null){
-            message.setPageContentEtalon(resultEtalon.pageSource);
             message.setEtalonScreenshot(ScriptUtils.getScreenshot(etalonDriver));
         }
 

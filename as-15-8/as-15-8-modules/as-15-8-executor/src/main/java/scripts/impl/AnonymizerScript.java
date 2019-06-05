@@ -24,21 +24,25 @@ public abstract class AnonymizerScript extends VPNScript {
             message.setPageContent(result.pageSource);
             message.setScreenshot(ScriptUtils.getScreenshot(driver));
             message.setFinalUrlPage(driver.getCurrentUrl());
-
-            WebDriver etalonDriver = createEtalonDriver();
-            etalonDriver.get(getCheckUnit().getValue());
-            etalonDriver.manage().window().fullscreen();
-            try {
-                ScriptUtils.waitPageLoading(etalonDriver);
-                ScriptUtils.PageResult etalon =
-                        ScriptUtils.getPageSource(etalonDriver);
-                message.setPageContentEtalon(etalon.pageSource);
-            }
-            catch (TimeoutException e) {
-                log.error("Ошибка при получении эталона", e);
-            }
         }
 
+        WebDriver etalonDriver = createEtalonDriver();
+        etalonDriver.get(getCheckUnit().getValue());
+        etalonDriver.manage().window().fullscreen();
+        ScriptUtils.PageResult etalon = new ScriptUtils.PageResult();
+        try {
+            ScriptUtils.waitPageLoading(etalonDriver);
+            etalon = ScriptUtils.getPageSource(etalonDriver);
+            message.setChromeErrorCodeEtalon(etalon.errorCodeChrome);
+            message.setPageContentEtalon(etalon.pageSource);
+        }
+        catch (TimeoutException e) {
+            log.error("Ошибка при получении эталона", e);
+            etalon.errorCodeChrome = "TIME_OUT";
+        }
+        if (etalon.errorCodeChrome == null){
+            message.setEtalonScreenshot(ScriptUtils.getScreenshot(etalonDriver));
+        }
         sendExecutionResult(message);
     }
 
