@@ -7,8 +7,8 @@ import lombok.EqualsAndHashCode;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Пользователи, работающие в системе
@@ -41,7 +41,7 @@ public class User implements Serializable {
 			,joinColumns=@JoinColumn(name="user_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "FK_user_roles_users_user_id"))
 			,inverseJoinColumns=@JoinColumn(name="user_role_id", referencedColumnName = "id", foreignKey = @ForeignKey(name = "FK_user_roles_users_user_role_id")))
 	@JsonIgnore
-	private Set<UserRole> roles = new HashSet<>();
+	private List<UserRole> roles = new ArrayList<>();
 	
 	@ManyToOne
 	@JoinColumn(name="department_id", foreignKey = @ForeignKey(name = "FK_users_department_id"))
