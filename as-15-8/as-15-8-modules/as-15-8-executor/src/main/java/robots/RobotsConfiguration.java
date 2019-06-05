@@ -67,7 +67,7 @@ public class RobotsConfiguration {
 	}
 
 	/**
-	 * Робот проверки ПАСД (VPN и прокси)
+	 * Робот проверки ПАСД (VPN)
 	 * @return
 	 * @throws MalformedURLException
 	 */
@@ -76,6 +76,24 @@ public class RobotsConfiguration {
 
 		return new SeleniumVpnRobot<>(
 				AccessToolUnit.KASPERSKY,
+				new URL(this.seleniumHubUrl),
+				VPNScript.class,
+				env.getProperty("robots.vpn.browser"),
+				Platform.valueOf(env.getProperty("robots.vpn.platform")),
+				env.getProperty("robots.vpn.app")
+		);
+	}
+
+	/**
+	 * Робот проверки ПАСД (Прокси)
+	 * @return
+	 * @throws MalformedURLException
+	 */
+	@Bean
+	public Robot proxyTopGuardRobot() throws MalformedURLException {
+
+		return new SeleniumVpnRobot<>(
+				AccessToolUnit.TORGUARD,
 				new URL(this.seleniumHubUrl),
 				VPNScript.class,
 				env.getProperty("robots.vpn.browser"),
