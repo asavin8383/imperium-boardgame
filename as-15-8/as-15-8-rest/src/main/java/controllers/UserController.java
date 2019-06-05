@@ -1,9 +1,12 @@
 package controllers;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import model.enums.Role;
+import model.user.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -31,6 +34,12 @@ public class UserController {
 	@GetMapping(path="/current")
 	public Optional<User> getSingleUser(Authentication authentication){
 		return userRepo.findByUserName(UserHelper.getUserName(authentication));
+	}
+
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_OPERATOR')")
+	@GetMapping(path="/operators")
+	public List<User> findAllOperators(){
+		return userRepo.findByRoles_Role(Role.ROLE_OPERATOR);
 	}
 
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
