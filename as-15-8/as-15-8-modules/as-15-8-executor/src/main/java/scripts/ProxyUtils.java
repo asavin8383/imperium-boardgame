@@ -55,12 +55,15 @@ public class ProxyUtils {
             oProxy.setSslProxy(simpleProxyUrl);
         }
         else if (proxyType == ProxyType.SOCKS){
+            throw new IllegalArgumentException("Socks проскси не должен использоваться!");
+
             // todo - код не работает
+            /*
             oProxy.setSocksProxy(simpleProxyUrl);
             if (user != null && !user.isEmpty()){
                 oProxy.setSocksUsername(user);
                 oProxy.setSocksPassword(pass);
-            }
+            }*/
         }
         else {
             throw new IllegalArgumentException("Не определен тип прокси: " + proxyType);
