@@ -43,8 +43,10 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
 
     @Autowired
     public CheckUnitJobServiceImpl(NamedParameterJdbcTemplate jdbcNamedTemplate,
+                                   JdbcTemplate jdbcTemplate,
                                    ArrangementResultRepository arrangementResultRepo) {
         this.jdbcNamedTemplate = jdbcNamedTemplate;
+        this.jdbcTemplate = jdbcTemplate;
         this.arrangementResultRepo = arrangementResultRepo;
     }
 
