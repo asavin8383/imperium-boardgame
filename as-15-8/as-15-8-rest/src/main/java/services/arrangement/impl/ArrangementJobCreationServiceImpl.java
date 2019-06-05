@@ -56,6 +56,21 @@ public class ArrangementJobCreationServiceImpl implements ArrangementJobCreation
         return jobList;
     }
 
+    @Override
+    public ArrangementJob createSingleArrangementJob(Arrangement arrangement) {
+        ArrangementJob arrangementJob = new ArrangementJob();
+        arrangementJob.setId(arrangement.getId());
+        //Установим тип запуска для диспетчеризации старта/перезапуска
+        arrangementJob.setRunType(getRunType(arrangement));
+        arrangementJob.setAccessToolUnit(arrangement.getAccessTool().getName());
+        //Добавляем параметры конкретного ПС/ПАСД
+        arrangementJob.getAccessToolParameters().putAll(prepareParameters(arrangement.getAccessTool()));
+        //Добавляем глобальные параметры
+        arrangementJob.getAccessToolParameters().putAll(prepareGlobalParameters());
+        return arrangementJob;
+    }
+
+
     private ArrangementJob.JobRunType getRunType(Arrangement arrangement){
         switch (arrangement.getStatus()){
             case PLANNED:
