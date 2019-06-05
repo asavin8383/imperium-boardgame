@@ -10,6 +10,7 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import scripts.DriverFactory;
+import scripts.ProxyUtils;
 import scripts.RobotScript;
 import scripts.ScriptUtils;
 import scripts.exceptions.RobotScriptExecutionException;
@@ -36,10 +37,11 @@ public class VPNScript extends RobotScript {
     }
 
     @BeforeClass
-    @Parameters({"PROXY_DNS_NAME", "PROXY_PORT", "PROXY_USER", "PROXY_PASSWORD",
+    @Parameters({"PROXY_TYPE", "PROXY_DNS_NAME", "PROXY_PORT", "PROXY_USER", "PROXY_PASSWORD",
             "ETALON_PROXY_HOST", "ETALON_PROXY_PORT", "ETALON_PROXY_USERNAME", "ETALON_PROXY_PASSWORD",
             "STUB_URL"})
     public void setParameters(
+    	@Optional String proxyType,
     	@Optional String proxyHost,
     	@Optional String proxyPort,
     	@Optional String proxyUser,
@@ -50,13 +52,11 @@ public class VPNScript extends RobotScript {
         @Optional String etalonProxyPassword,
     	@Optional String stubUrl) throws MalformedURLException {
 
-        vpnProxy = fullProxy(proxyHost, proxyPort, proxyUser, proxyPassword);
-        etalonProxy = fullProxy(etalonProxyHost, etalonProxyPort, etalonProxyUser, etalonProxyPassword);
+        vpnProxy = ProxyUtils.getFullProxy(proxyType, proxyHost, proxyPort, proxyUser, proxyPassword);
+        etalonProxy = ProxyUtils.getFullProxy(proxyType, etalonProxyHost, etalonProxyPort, etalonProxyUser, etalonProxyPassword);
     	this.stubUrl = stubUrl;
 
         log.info("---------- PROXY -----------");
-        log.info("proxyHost = " + proxyHost);
-        log.info("etalonProxyHost = " + etalonProxyHost);
         log.info("vpnProxy = " + vpnProxy);
         log.info("etalonProxy = " + etalonProxy);
         log.info("stubUrl = " + stubUrl);
@@ -64,21 +64,6 @@ public class VPNScript extends RobotScript {
         createDriver(vpnProxy);
     }
 
-    String fullProxy(String host, String port, String user, String pass){
-        String proxy = null;
-        port = port != null && !port.isEmpty() ? port : "80";
-        pass = pass != null ? pass : "";
-
-        if (host != null && !host.isEmpty()){
-            if (user != null && !user.isEmpty()){
-                proxy = String.format("%s:%s@%s:%s", user, pass, host, port);
-            }
-            else {
-                proxy = String.format("%s:%s", host, port);
-            }
-        }
-        return proxy;
-    }
 
     @AfterClass
     public void closeProxyDrivers() {
@@ -171,6 +156,9 @@ public class VPNScript extends RobotScript {
             message.setFinalUrlPage(driver.getCurrentUrl());
             message.setPageContentEtalon(pageSourceEtalon);
         }
+
+        //log.info("--------- TEXT ---------");
+        //log.info(pageSourceResult.pageSource);
 
         sendExecutionResult(message);
     }

@@ -16,7 +16,7 @@ robots:
     vpn:
         platform: WIN8
         browser: chrome
-        app: vpn
+        app: kas
         vpnProxy: 192.168.5.194:3128
     hidemyass:
         platform: WIN8

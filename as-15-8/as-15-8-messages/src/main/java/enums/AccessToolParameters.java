@@ -13,6 +13,7 @@ public enum  AccessToolParameters {
     BUTTON_SEARCH_FIELD_XPATH_ID,
     BUTTON_SEARCH_FIELD_CSS_SELECTOR,
     STUB_URL,
+    PROXY_TYPE,
     PROXY_DNS_NAME,
     PROXY_PORT,
     PROXY_USER,

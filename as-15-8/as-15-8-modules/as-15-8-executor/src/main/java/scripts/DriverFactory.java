@@ -31,19 +31,13 @@ public class DriverFactory {
 	public static WebDriver createDriver(URL hubURL, String platformName, String appName, String browserName, String proxy) {
 		Capabilities cpb = buildCapability(Platform.valueOf(platformName), appName, browserName);
 
-		Proxy oProxy = new Proxy();
-		if (proxy != null && !proxy.trim().isEmpty()) {
-			oProxy.setProxyType(Proxy.ProxyType.MANUAL);
-			oProxy.setHttpProxy(proxy);
-			oProxy.setSslProxy(proxy);
-			// oProxy.setSocksProxy(proxy); // так делать не нужно
+		Proxy oProxy = ProxyUtils.getSeleniumProxy(proxy);
+		if (oProxy != null) {
 			log.info("WebDriver set proxy: " + proxy);
 			((DesiredCapabilities)cpb).setCapability(CapabilityType.PROXY, oProxy);
 		}
 		else {
 			log.info("WebDriver set proxy: NONE");
-			//oProxy.setNoProxy("");
-			//((DesiredCapabilities)cpb).setCapability(CapabilityType.PROXY, oProxy);
 		}
 
 		return new RemoteWebDriver(hubURL, cpb);

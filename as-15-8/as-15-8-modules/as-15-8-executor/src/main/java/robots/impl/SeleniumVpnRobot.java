@@ -32,6 +32,7 @@ public class SeleniumVpnRobot<T> extends SeleniumRobot<T> {
         XmlTest test = super.createTest(name, jobID, checkUnit, accessToolParameters);
 
         test.addParameter(AccessToolParameters.STUB_URL.toString(), accessToolParameters.get(AccessToolParameters.STUB_URL));
+        test.addParameter(AccessToolParameters.PROXY_TYPE.toString(), accessToolParameters.get(AccessToolParameters.PROXY_TYPE));
         test.addParameter(AccessToolParameters.PROXY_DNS_NAME.toString(), accessToolParameters.get(AccessToolParameters.PROXY_DNS_NAME));
         test.addParameter(AccessToolParameters.PROXY_PORT.toString(), accessToolParameters.get(AccessToolParameters.PROXY_PORT));
         test.addParameter(AccessToolParameters.PROXY_USER.toString(), accessToolParameters.get(AccessToolParameters.PROXY_USER));
