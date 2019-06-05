@@ -39,6 +39,8 @@ public class Arrangement implements Serializable {
 	
 	/**Дата создания*/
 	private LocalDateTime creationDate;
+	/**Запланированная дата запуска*/
+	private LocalDateTime plannedDate;
 	/**Дата начала*/
 	private LocalDateTime startDate;
 	/**Дата окончания*/

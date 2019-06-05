@@ -54,4 +54,10 @@ public class ArrangementResult implements Serializable {
     @Type(type="org.hibernate.type.BinaryType")
     @JsonIgnore
     private byte[] screenshot;
+
+    @Lob
+    @Column(name="etalon_screenshot", columnDefinition="bytea")
+    @Type(type="org.hibernate.type.BinaryType")
+    @JsonIgnore
+    private byte[] etalonScreenshot;
 }

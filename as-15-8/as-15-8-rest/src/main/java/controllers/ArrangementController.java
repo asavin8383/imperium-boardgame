@@ -148,7 +148,7 @@ public class ArrangementController {
         // при этом не пустой список ЕРДИ,
         // оно становится PLANNED
         if(arrangement.getStatus().equals(ExecutionStatus.NEW) &&
-                arrangement.getStartDate() != null &&
+                arrangement.getPlannedDate() != null &&
                 arrangement.getArrangementItems()!=null &&
                 arrangement.getArrangementItems().size() > 0){
             arrangement.setStatus(ExecutionStatus.PLANNED);

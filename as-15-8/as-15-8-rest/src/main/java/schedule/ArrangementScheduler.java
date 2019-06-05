@@ -30,7 +30,7 @@ public class ArrangementScheduler {
 
     @Scheduled(cron = "${cron.expression.arrangement}")
     public void checkAndStartArrangementJobs(){
-        arrangementRepo.findAllByStatusAndStartDateIsLessThan(ExecutionStatus.PLANNED, LocalDateTime.now())
+        arrangementRepo.findAllByStatusAndPlannedDateIsLessThan(ExecutionStatus.PLANNED, LocalDateTime.now())
             .forEach(arrangement ->  {
                 arrangementExecutionHelper.sendJobToDispatcher(arrangement);
                 arrangement.setStartDate(LocalDateTime.now());

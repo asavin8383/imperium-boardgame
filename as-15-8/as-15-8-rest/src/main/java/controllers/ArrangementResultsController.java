@@ -55,16 +55,13 @@ public class ArrangementResultsController {
     @GetMapping(path = "/screenshot", produces = MediaType.IMAGE_PNG_VALUE)
     public @ResponseBody
     ResponseEntity<byte[]> getScreenshot(@RequestParam Long id){
-        return arrangementResultRepo.findById(id)
-                .map(arrangementResult -> {
-                    byte[] screenshot = arrangementResult.getScreenshot();
-                    if (screenshot != null){
-                        return new ResponseEntity<>(screenshot, HttpStatus.OK);
-                    } else {
-                        return new ResponseEntity<>(new byte[0], HttpStatus.NO_CONTENT);
-                    }
-                })
-                .orElseGet(() -> new ResponseEntity<>(null, HttpStatus.NO_CONTENT));
+        return receiveScreenshotFromDB(id, false);
+    }
+
+    @GetMapping(path = "/etalon_screenshot", produces = MediaType.IMAGE_PNG_VALUE)
+    public @ResponseBody
+    ResponseEntity<byte[]> getEtalonScreenshot(@RequestParam Long id){
+        return receiveScreenshotFromDB(id, true);
     }
 
     @PreAuthorize("hasAnyRole('ROLE_OPERATOR', 'ROLE_ADMIN')")
@@ -72,6 +69,24 @@ public class ArrangementResultsController {
     public ResponseEntity<DetailedArrangementResult> getDetails(@RequestParam Long id){
         return detailedArrangementResultRepo.findById(id)
                 .map(detailedArrangementResult -> new ResponseEntity<>(detailedArrangementResult, HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(null, HttpStatus.NO_CONTENT));
+    }
+
+    private ResponseEntity<byte[]> receiveScreenshotFromDB(Long id, boolean isEtalon){
+        return arrangementResultRepo.findById(id)
+                .map(arrangementResult -> {
+                    byte[] screenshot;
+                    if (isEtalon){
+                        screenshot = arrangementResult.getEtalonScreenshot();
+                    } else {
+                        screenshot = arrangementResult.getScreenshot();
+                    }
+                    if (screenshot != null){
+                        return new ResponseEntity<>(screenshot, HttpStatus.OK);
+                    } else {
+                        return new ResponseEntity<>(new byte[0], HttpStatus.NO_CONTENT);
+                    }
+                })
                 .orElseGet(() -> new ResponseEntity<>(null, HttpStatus.NO_CONTENT));
     }
 }
