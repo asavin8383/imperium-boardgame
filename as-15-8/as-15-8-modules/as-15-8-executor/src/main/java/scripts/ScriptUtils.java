@@ -1,7 +1,10 @@
 package scripts;
 
+import checkUnits.CheckUnit;
+import checkUnits.CheckUnitType;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -110,5 +113,20 @@ public class ScriptUtils {
         return ((TakesScreenshot) webDriver).getScreenshotAs(OutputType.BYTES);
     }
 
+    public static String getCheckUnitValue(@NonNull CheckUnit checkUnit){
+        String value = checkUnit.getValue();
+
+        switch (checkUnit.getType()){
+            case URL:
+            case DOMAIN:
+            case IP_V4:
+            case IP_V6:
+                value = (value != null && !value.isEmpty() && !value.startsWith("http") ? "http://" + value : value);
+                break;
+            default:
+                break;
+        }
+        return value;
+    }
 
 }

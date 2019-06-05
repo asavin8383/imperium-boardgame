@@ -56,6 +56,10 @@ public class VPNScript extends RobotScript {
         etalonProxy = ProxyUtils.getFullProxy(proxyType, etalonProxyHost, etalonProxyPort, etalonProxyUser, etalonProxyPassword);
     	this.stubUrl = stubUrl;
 
+    	// todo - хардкодинг
+        vpnProxy = "http://:@192.168.5.10:3128";
+        etalonProxy = null;
+
         log.info("---------- PROXY -----------");
         log.info("vpnProxy = " + vpnProxy);
         log.info("etalonProxy = " + etalonProxy);
@@ -97,7 +101,7 @@ public class VPNScript extends RobotScript {
         if (!checkBrowserChrome())
             throw new RobotScriptExecutionException("Ошибка, неправильный браузер! Для данного робота поддерживатся только браузер CHROME!");
 
-        String url = getCheckUnit().getValue();
+        String url = ScriptUtils.getCheckUnitValue(getCheckUnit());
 
         // получение страницы от VPN (драйвер уже настроен)
         PageResult pageSourceResult = null;
