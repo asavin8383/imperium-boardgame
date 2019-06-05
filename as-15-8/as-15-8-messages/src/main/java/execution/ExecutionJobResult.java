@@ -28,4 +28,7 @@ public abstract class ExecutionJobResult {
 	
     /**Скриншот полученной при проверке страницы*/
     private byte[] screenshot;
+
+	/**Эталонноый скриншот, полученной при проверке страницы с выделенного прокси*/
+	private byte[] etalonScreenshot;
 }

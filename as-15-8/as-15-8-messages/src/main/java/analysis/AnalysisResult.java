@@ -21,4 +21,7 @@ public abstract class AnalysisResult {
 
     /**Скриншот полученной при проверке страницы*/
     private byte[] screenshot;
+
+    /**Скриншот полученной при проверке страницы с выделенного прокси (эталона) */
+    private byte[] etalonScreenshot;
 }

@@ -22,6 +22,7 @@ public class VPN_AnalysisResultService implements AnalysisResultService<VpnAnaly
 
 		detailResultsVpn.setId(aRes.getJobID());
 		detailResultsVpn.setResponseErrorCode(aRes.getResponseErrorCode());
+		detailResultsVpn.setResponseErrorCodeEtalon(aRes.getResponseErrorCodeEtalon());
 		detailResultsVpn.setResponseError(aRes.getResponseError());
 		detailResultsVpn.setPageSize(aRes.getPageSize());
 		detailResultsVpn.setPageSizeEtalon(aRes.getPageSizeEtalon());

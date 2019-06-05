@@ -105,6 +105,7 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
 		AnalysisResultService<? super AnalysisResult> service = AnalysisResultServiceFactory.getService(result.getClass());
 		job.setResult(service.processResult(result));  		
 		job.setScreenshot(result.getScreenshot());
+		job.setEtalonScreenshot(result.getEtalonScreenshot());
 		return arrangementResultRepo.save(job);
 	}
 

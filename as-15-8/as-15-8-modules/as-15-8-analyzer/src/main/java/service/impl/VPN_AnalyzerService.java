@@ -54,6 +54,7 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 		analysisResult.setJobID(result.getJobID());
 		analysisResult.setCheckUnit(result.getCheckUnit());
 		analysisResult.setScreenshot(result.getScreenshot());
+		analysisResult.setEtalonScreenshot(result.getEtalonScreenshot());
 
 		try {
 			prepareResult(analysisResult, result);
@@ -67,6 +68,7 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 
 	protected void prepareResult(VpnAnalysisResult analysisResult, ExecutionVpnJobResult result) throws IOException {
 		String chromeErrorCode = result.getChromeErrorCode();
+		String chromeErrorCodeEtalon = result.getChromeErrorCodeEtalon();
 		Boolean responseError = result.getResponseError();
 		String  pageContent = result.getPageContent();
 		if (pageContent == null)
@@ -77,6 +79,7 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 
 		analysisResult.setResponseError(responseError);
 		analysisResult.setResponseErrorCode(chromeErrorCode);
+		analysisResult.setResponseErrorCodeEtalon(chromeErrorCodeEtalon);
 
 		if (!responseError) {
 			analysisResult.setPageSize(pageContent.length());
@@ -88,7 +91,7 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 
 			analysisResult.setDomainNameCount(AnalysisUtils.getDomainCount(result.getCheckUnit().getValue(), pageContent));
 
-			analysisResult.setSimilarityOriginPercent(AnalysisUtils.getTextSimilarityPercent(pageContent, result.getPageContentEtalon()));
+			analysisResult.setSimilarityOriginPercent(AnalysisUtils.getTextSimilarityPercent(pageContent, pageContentEtalon));
 
 			analysisResult.setLinkCount(AnalysisUtils.getLinkCounts(pageContent));
 		}

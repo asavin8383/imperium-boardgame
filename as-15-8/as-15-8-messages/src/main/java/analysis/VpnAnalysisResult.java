@@ -16,6 +16,7 @@ public class VpnAnalysisResult extends AnalysisResult {
 	private CheckUnitJobResult checkResult;
 
 	private String responseErrorCode;
+	private String responseErrorCodeEtalon;
 	private Boolean responseError;
 	private Integer httpStatus;
 	private Integer pageSize;

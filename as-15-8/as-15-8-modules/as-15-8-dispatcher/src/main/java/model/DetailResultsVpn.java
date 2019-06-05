@@ -23,6 +23,9 @@ public class DetailResultsVpn implements Serializable  {
     @Column(name="response_error_code")
     private String responseErrorCode;
 
+    @Column(name="response_error_code_etalon")
+    private String responseErrorCodeEtalon;
+
     @Column(name="response_error")
     private Boolean responseError;
 
