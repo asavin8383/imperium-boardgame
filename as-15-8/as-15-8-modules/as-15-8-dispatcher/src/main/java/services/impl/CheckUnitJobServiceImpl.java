@@ -1,23 +1,10 @@
 package services.impl;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import enums.AccessToolParameters;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.stereotype.Service;
-
 import analysis.AnalysisResult;
 import checkUnits.CheckUnit;
 import checkUnits.CheckUnitJob;
 import checkUnits.CheckUnitType;
+import enums.AccessToolParameters;
 import enums.AccessToolUnit;
 import enums.ArrangementStatus;
 import enums.CheckUnitJobResult;
@@ -25,10 +12,21 @@ import exceptions.AS_15_8_DispatcherException;
 import jobs.ArrangementJob;
 import jobs.ERDIJob;
 import model.ArrangementResult;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.stereotype.Service;
 import repositories.ArrangementResultRepository;
 import services.AnalysisResultService;
 import services.AnalysisResultServiceFactory;
 import services.CheckUnitJobService;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Creation date: 24.05.2019
@@ -58,8 +56,9 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
         );
 
         CheckUnitJobMapper mapper = new CheckUnitJobMapper(arrangementJob.getAccessToolUnit(), arrangementJob.getAccessToolParameters());
-        List<CheckUnitJob> checkUnitJobs = new ArrayList<>();
+        List<CheckUnitJob> checkUnitJobs;
         try {
+            //noinspection SqlDialectInspection
             checkUnitJobs = jdbcTemplate.query(
                 "select content.id as id, 'DOMAIN' as check_unit_type, domain.domain as check_unit_value\n" +
                         "  from sa.content\n" +
@@ -110,15 +109,16 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
 	}
 
 	@Override
-	public ArrangementStatus checkArrangementStatus(Long arramgementID) {
-		Long notFinishedJobsCount = arrangementResultRepo.countByResultNullOrResultIn(
+	public ArrangementStatus checkArrangementStatus(Long arrangementID) {
+		Long notFinishedJobsCount = arrangementResultRepo.countByResultNullOrResultIn(arrangementID,
 			Arrays.asList(
 				CheckUnitJobResult.RUNNING,
 				CheckUnitJobResult.CAPTCHA_DETECTED)
 			);
 		return notFinishedJobsCount > 0 ? ArrangementStatus.RUNNING : ArrangementStatus.FINISHED;
 	}
-    
+
+
     private Long saveCheckUnitJobAsResult(Long arrangementID, Long erdiID, CheckUnitJob checkUnitJob) {
         try{
             ArrangementResult arrangementResult = new ArrangementResult();
@@ -138,12 +138,12 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
     	private AccessToolUnit accessToolUnit;
     	private Map<AccessToolParameters, String> parameters;
     	
-    	public CheckUnitJobMapper(AccessToolUnit accessToolUnit, Map<AccessToolParameters, String> parameters) {
+    	CheckUnitJobMapper(AccessToolUnit accessToolUnit, Map<AccessToolParameters, String> parameters) {
 			this.accessToolUnit = accessToolUnit;
 			this.parameters = parameters;
 		}
     	
-        public CheckUnitJob map(ResultSet rs, int rowNum) throws SQLException {
+        CheckUnitJob map(ResultSet rs, int rowNum) throws SQLException {
             CheckUnitJob checkUnitJob = new CheckUnitJob();
             checkUnitJob.setAccessToolUnit(accessToolUnit);
             CheckUnitType type = CheckUnitType.valueOf(rs.getString("check_unit_type"));

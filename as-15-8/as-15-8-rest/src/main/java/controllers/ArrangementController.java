@@ -4,6 +4,7 @@ import controllers.helpers.ArrangementExecutionHelper;
 import controllers.helpers.SortingHelper;
 import enums.SortingDirection;
 import exceptions.AS_15_8_Exception;
+import jobs.ArrangementJob;
 import model.enums.ExecutionStatus;
 import model.task.Arrangement;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -114,7 +115,7 @@ public class ArrangementController {
     public ResponseEntity<Arrangement> runArrangement(@RequestParam Long id){
         return arrangementRepo.findById(id)
             .map(arrangement -> {
-                if(arrangement.getStatus().equals(ExecutionStatus.PLANNED)) {
+                if(arrangement.getStatus().equals(ExecutionStatus.PLANNED)||arrangement.getStatus().equals(ExecutionStatus.ACTION_REQUIRED)) {
                     arrangementExecutionHelper.sendJobToDispatcher(arrangement);
                     arrangement.setStartDate(LocalDateTime.now());
                     arrangement.setStatus(ExecutionStatus.RUNNING);

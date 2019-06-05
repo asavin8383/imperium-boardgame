@@ -21,6 +21,6 @@ public interface CheckUnitJobService {
     
     ArrangementResult updateJobStatus(Long jobID, CheckUnitJobResult status);
     
-    ArrangementStatus checkArrangementStatus(Long arramgementID);
-    
+    ArrangementStatus checkArrangementStatus(Long arrangementID);
+
 }

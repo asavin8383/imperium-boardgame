@@ -20,14 +20,18 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ArrangementJob {
 
+	/**Тип запуска мероприятия*/
+	public enum JobRunType{START, RESTART}
+
 	/** Идентификатор мероприятия */
 	private Long id;
+
+	/**Тип запуска мероприятия, по умолчанию - START*/
+	private JobRunType runType = JobRunType.START;
 	
 	/** ПС/ПАСД */
 	private AccessToolUnit accessToolUnit;
 
-
-	
 	/** Список заданий на проверку ЕРДИ */
 	@Getter
 	private List<ERDIJob> erdiJobList = new ArrayList<>();

@@ -36,18 +36,20 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
     public void processNotification(ArrangementStatusNotification arrangementStatusNotification) {
         arrangementRepo.findById(arrangementStatusNotification.getArrangementId())
             .map(arrangement -> {
-                if (arrangementStatusNotification.getArrangementStatus().equals(ArrangementStatus.ACTION_REQUIRED)){
-                    arrangement.setStatus(ExecutionStatus.ACTION_REQUIRED);
-                } else if (arrangementStatusNotification.getArrangementStatus().equals(ArrangementStatus.FINISHED)){
-                    arrangement.setStatus(ExecutionStatus.FINISHED);
-                    arrangement.setEndDate(LocalDateTime.now());
-                } else {
-                    throw new AS_15_8_Exception("Error changing arrangement status. Status not supported: " + arrangementStatusNotification.getArrangementStatus());
+                if (arrangement.getStatus().equals(ExecutionStatus.RUNNING)){
+                    log.info("Arrangement status need to be changed to: " + arrangementStatusNotification.getArrangementStatus() + " for arrangement: " +arrangement.getId());
+                    if (arrangementStatusNotification.getArrangementStatus().equals(ArrangementStatus.ACTION_REQUIRED)){
+                        arrangement.setStatus(ExecutionStatus.ACTION_REQUIRED);
+                    } else if (arrangementStatusNotification.getArrangementStatus().equals(ArrangementStatus.FINISHED)){
+                        arrangement.setStatus(ExecutionStatus.FINISHED);
+                        arrangement.setEndDate(LocalDateTime.now());
+                    } else {
+                        throw new AS_15_8_Exception("Error changing arrangement status. Status not supported: " + arrangementStatusNotification.getArrangementStatus());
+                    }
+                    //Меняем статус мероприятия и задания в случае необходимости
+                    arrangementStatusService.processArrangementStatusChange(arrangement);
                 }
-                //Меняем статус мероприятия и задания в случае необходимости
-                arrangementStatusService.processArrangementStatusChange(arrangement);
                 return true;
-
             })
             .orElseGet(() -> {
                 log.error("Error changing arrangement status. Arrangement was not found by id: " + arrangementStatusNotification.getArrangementId());

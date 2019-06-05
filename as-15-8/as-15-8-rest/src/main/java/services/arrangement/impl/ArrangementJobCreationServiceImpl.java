@@ -1,6 +1,7 @@
 package services.arrangement.impl;
 
 import enums.AccessToolParameters;
+import exceptions.AS_15_8_Exception;
 import jobs.ArrangementJob;
 import jobs.ERDIJob;
 import model.catalog.*;
@@ -42,6 +43,8 @@ public class ArrangementJobCreationServiceImpl implements ArrangementJobCreation
         for(ArrangementItem arrangementItem : arrangementItemRepo.findAllByArrangementId(arrangement.getId())){
             ArrangementJob arrangementJob = new ArrangementJob();
             arrangementJob.setId(arrangement.getId());
+            //Установим тип запуска для диспетчеризации старта/перезапуска
+            arrangementJob.setRunType(getRunType(arrangement));
             arrangementJob.setAccessToolUnit(arrangement.getAccessTool().getName());
             arrangementJob.getErdiJobList().add(new ERDIJob(arrangementItem.getErdi().getId()));
             //Добавляем параметры конкретного ПС/ПАСД
@@ -51,6 +54,17 @@ public class ArrangementJobCreationServiceImpl implements ArrangementJobCreation
             jobList.add(arrangementJob);
         }
         return jobList;
+    }
+
+    private ArrangementJob.JobRunType getRunType(Arrangement arrangement){
+        switch (arrangement.getStatus()){
+            case PLANNED:
+                return ArrangementJob.JobRunType.START;
+            case ACTION_REQUIRED:
+                return ArrangementJob.JobRunType.RESTART;
+            default:
+                throw new AS_15_8_Exception("Error creating arrangement job! Status is not supported: " + arrangement.getStatus());
+        }
     }
 
     private Map<AccessToolParameters, String> prepareParameters(AccessTool accessTool){
