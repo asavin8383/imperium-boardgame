@@ -33,6 +33,7 @@ spring:
         analysis-results-topic: analysis_results
         arrangement-notifications-topic: arrangement_notifications
         notification-topic: job_notifications
+        control-topic: exec_control
 
 ---
 
@@ -46,6 +47,7 @@ spring:
         analysis-results-topic: analysis_results_ashabalin
         arrangement-notifications-topic: arrangement_notifications_ashabalin
         notification-topic: job_notifications_ashabalin
+        control-topic: exec_control_ashabalin
 
 ---
 
@@ -59,6 +61,7 @@ spring:
         analysis-results-topic: analysis_asavin
         arrangement-notifications-topic: arrangement_notifications_asavin
         notification-topic: job_notifications_asavin
+        control-topic: exec_control_asavin
 
 ---
 
@@ -72,6 +75,7 @@ spring:
         analysis-results-topic: analysis_results_pvorobiev
         arrangement-notifications-topic: arrangement_notifications_pvorobiev
         notification-topic: job_notifications_pvorobiev
+        control-topic: exec_control_pvorobiev
 
 ---
 
@@ -85,3 +89,4 @@ spring:
         analysis-results-topic: analysis_results_jspirina
         arrangement-notifications-topic: arrangement_notifications_jspirina
         notification-topic: job_notifications_jspirina
+        control-topic: exec_control_jspirina
