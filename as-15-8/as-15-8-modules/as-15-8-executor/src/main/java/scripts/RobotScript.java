@@ -73,7 +73,7 @@ public abstract class RobotScript extends AbstractTestNGSpringContextTests{
 	 * @param browserName Имя браузера
 	 * @param platformName Имя платформы
 	 * @param applicationName Имя приложения (ПС/ПАСД)
-	 * @throws MalformedURLException
+	 * @throws RobotScriptExecutionException
 	 */
 	@BeforeClass
 	@Parameters({"hubURL", "browserName", "platformName", "applicationName", "jobID", "accessToolUnit", "checkUnitType", "checkUnitValue"})
@@ -86,7 +86,7 @@ public abstract class RobotScript extends AbstractTestNGSpringContextTests{
 			String accessToolUnit,
 			String checkUnitType,
 			String checkUnitValue
-		) throws MalformedURLException {
+		) throws RobotScriptExecutionException {
 
 			this.jobID = jobID;
 			this.checkUnit = new CheckUnit(CheckUnitType.valueOf(checkUnitType), checkUnitValue);
@@ -102,8 +102,15 @@ public abstract class RobotScript extends AbstractTestNGSpringContextTests{
 			}
 	}
 
-	protected void createDriver(String proxy) throws MalformedURLException {
-		this.driver = DriverFactory.createDriver(new URL(hubURL), platformName, applicationName, browserName, proxy);
+	protected void createDriver(String proxy) throws RobotScriptExecutionException {
+		if (this.driver != null)
+			return;
+		try {
+			this.driver = DriverFactory.createDriver(new URL(hubURL), platformName, applicationName, browserName, proxy);
+		}
+		catch (Exception e){
+			throw new RobotScriptExecutionException("Ошибка, создания драйвера! JobID = " + jobID, e);
+		}
 	}
 
 	protected boolean needAutoCreateDriver(){

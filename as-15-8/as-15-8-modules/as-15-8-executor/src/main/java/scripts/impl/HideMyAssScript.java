@@ -17,6 +17,8 @@ public class HideMyAssScript extends AnonymizerScript {
 
     @Override
     public void execute() throws RobotScriptExecutionException {
+        createDriver(vpnProxy);
+
         driver.get(URL);
         driver.manage().window().fullscreen();
         driver.switchTo().frame(driver.findElement(By.id("proxyIframe")));
@@ -24,8 +26,7 @@ public class HideMyAssScript extends AnonymizerScript {
         // to do no such element
         WebElement input = driver.findElement(By.id("form_url"));
         //input.sendKeys(getCheckUnit().getValue());
-        ScriptUtils.type(input, getInputDelay(),
-                getCheckUnit().getValue());
+        ScriptUtils.type(input, getInputDelay(), getCheckUnit().getValue());
 
         try {
             new WebDriverWait(driver, 10)

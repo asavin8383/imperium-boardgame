@@ -65,8 +65,6 @@ public class VPNScript extends RobotScript {
         log.info("vpnProxy = " + vpnProxy);
         log.info("etalonProxy = " + etalonProxy);
         log.info("stubUrl = " + stubUrl);
-
-        createDriver(vpnProxy);
     }
 
     // todo - хардккод, удалить!
@@ -87,33 +85,29 @@ public class VPNScript extends RobotScript {
         }
     }
 
-    @AfterClass
-    public void closeProxyDrivers() {
-        proxyDrivers.forEach(driver -> {
-            if (driver != null) {
-                driver.quit();
-            }
-        });
+    /**
+     * Метод закрытия драйвера
+     */
+    public void closeDriver(WebDriver webDriver) {
+        if (webDriver != null) {
+            webDriver.quit();
+        }
     }
 
-    public WebDriver createEtalonDriver() {
+    public WebDriver createEtalonDriver() throws RobotScriptExecutionException {
         WebDriver driver = null;
         try {
             driver = DriverFactory.createDriver(
                     new URL(getHubURL()), getPlatformName(), getApplicationName(), getBrowserName(), etalonProxy);
 
-
         } catch (MalformedURLException e) {
-            System.out.println("Exception on create WebDriver");
+            log.info("Exception on create WebDriver");
             e.printStackTrace();
+            throw new RobotScriptExecutionException("Ошибка, создания эталонного драйвера!");
         }
-
-        if (driver != null)
-            proxyDrivers.add(driver);
         return driver;
     }
 
-    @Test
     public void execute() throws RobotScriptExecutionException {
         // работате только с хромом!
         if (!checkBrowserChrome())
@@ -121,68 +115,84 @@ public class VPNScript extends RobotScript {
 
         String url = ScriptUtils.getCheckUnitValue(getCheckUnit());
 
-        // получение страницы от VPN (драйвер уже настроен)
-        PageResult pageSourceResult = null;
-        int tryCount = 3, cnt = 0;
-
-        while (tryCount > 0 && (pageSourceResult == null || pageSourceResult.errorCodeChrome != null)){
-            if (pageSourceResult != null){
-                ScriptUtils.waitDriver(driver, 3);
-            }
-            tryCount--; cnt++;
-
-            driver.get(url);
-            driver.manage().window().fullscreen();
-            ScriptUtils.waitDriver(driver, 3);
-            try {
-                ScriptUtils.waitPageLoading(driver);
-                pageSourceResult = ScriptUtils.getPageSource(driver);
-            }
-            catch (TimeoutException te){
-                pageSourceResult = new PageResult(null, TIME_OUT_ERROR);
-            }
-            log.info("----> try count " + cnt + ", error = " + pageSourceResult.errorCodeChrome);
-        }
-
-        // получаем странцу эталона в любом случае (даже если ошибка получения vpn/proxy страницы)
-        WebDriver etalonDriver = createEtalonDriver();
-        etalonDriver.get(url);
-        etalonDriver.manage().window().fullscreen();
-        ScriptUtils.waitDriver(etalonDriver, 3);
-        PageResult resultEtalon = new PageResult();
+        // получение страницы и доп. данных от основного драйвера
+        PageResult pageResult;
+        byte[] screenShot;
+        String finalUrl;
         try {
-            ScriptUtils.waitPageLoading(etalonDriver);
-            resultEtalon = ScriptUtils.getPageSource(etalonDriver);
+            createDriver(vpnProxy);
+            pageResult = loadPage(url, driver, 3);
+            screenShot = ScriptUtils.getScreenshot(driver);
+            finalUrl = driver.getCurrentUrl();
         }
-        catch (TimeoutException te){
-            System.out.println("Timeout exception while access from URL via VPN/Proxy");
-            te.printStackTrace();
-            resultEtalon.errorCodeChrome = TIME_OUT_ERROR;
+        finally {
+            closeDriver(driver);
+        }
+
+        // получение странцы и доп. данных от эталонного драйвера
+        PageResult pageResultEtalon;
+        byte[] screenShotEtalon;
+        WebDriver driverEtalon = null;
+        try {
+            // получение страницы и доп. данных от основного драйвера
+            driverEtalon = createEtalonDriver();
+            pageResultEtalon = loadPage(url, driverEtalon, 1);
+            screenShotEtalon = ScriptUtils.getScreenshot(driverEtalon);
+        }
+        finally {
+            closeDriver(driverEtalon);
         }
 
         ExecutionVpnJobResult message = new ExecutionVpnJobResult();
         fillExecutionResultMessage(message);
+
         message.setStubUrl(stubUrl);
-
-        message.setResponseError(pageSourceResult.errorCodeChrome != null);
-
-        message.setChromeErrorCode(pageSourceResult.errorCodeChrome);
-        message.setScreenshot(ScriptUtils.getScreenshot(driver));
-        if(pageSourceResult.errorCodeChrome == null){
-            message.setPageContent(pageSourceResult.pageSource);
-            message.setFinalUrlPage(driver.getCurrentUrl());
+        message.setResponseError(pageResult.errorCodeChrome != null);
+        message.setChromeErrorCode(pageResult.errorCodeChrome);
+        message.setPageContent(pageResult.pageSource);
+        message.setScreenshot(screenShot);
+        if(pageResult.errorCodeChrome == null){
+            message.setFinalUrlPage(finalUrl);
         }
 
-        message.setChromeErrorCodeEtalon(resultEtalon.errorCodeChrome);
-        message.setPageContentEtalon(resultEtalon.pageSource);
-        message.setEtalonScreenshot(ScriptUtils.getScreenshot(etalonDriver));
+        message.setChromeErrorCodeEtalon(pageResultEtalon.errorCodeChrome);
+        message.setPageContentEtalon(pageResultEtalon.pageSource);
+        message.setEtalonScreenshot(screenShotEtalon);
 
-        log.info("--------- message ---------");
-        log.info(message.toString());
+        //log.info("--------- message ---------");
+        //log.info(message.toString());
         //log.info("--------- TEXT ---------");
         //log.info(pageSourceResult.pageSource);
 
         sendExecutionResult(message);
+    }
+
+    public PageResult loadPage(String url, WebDriver webDriver, int countRetry){
+        PageResult pageSourceResult = null;
+        int cnt = 0;
+
+        while (cnt < countRetry && (pageSourceResult == null || pageSourceResult.errorCodeChrome != null)){
+            if (pageSourceResult != null){
+                ScriptUtils.waitDriver(webDriver, 3);
+            }
+            cnt++;
+
+            webDriver.get(url);
+            webDriver.manage().window().fullscreen();
+            ScriptUtils.waitDriver(webDriver, 3);
+            try {
+                ScriptUtils.waitPageLoading(webDriver);
+                pageSourceResult = ScriptUtils.getPageSource(webDriver);
+            }
+            catch (TimeoutException te){
+                pageSourceResult = new PageResult(null, TIME_OUT_ERROR);
+                log.info("Timeout exception при получении страницы");
+            }
+
+            if (countRetry > 1)
+                log.info("----> Попытка загрузить страницу: {}, error: {}, jobId: %d", cnt, pageSourceResult.errorCodeChrome, jobID);
+        }
+        return pageSourceResult;
     }
 
     public boolean checkBrowserChrome(){
