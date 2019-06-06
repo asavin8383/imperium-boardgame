@@ -94,6 +94,16 @@ public class FormalTaskController {
 		return formalTaskRepo.findAllByStatus(status, page);
 	}
 
+	@DeleteMapping
+	public Long deleteFormalTask(@RequestParam Long id) {
+		return formalTaskRepo.findById(id)
+				.map(formalTask -> {
+					formalTaskRepo.delete(formalTask);
+					return formalTask.getId();
+				})
+				.orElseThrow(() -> new AS_15_8_Exception("Error deleting formal task! Formal task was not found by id: " + id));
+	}
+
 	private FormalTask replaceFields(FormalTask newTask, FormalTask storedTask){
 		storedTask.setTitle(newTask.getTitle());
 		storedTask.setModificationDate(LocalDateTime.now());
