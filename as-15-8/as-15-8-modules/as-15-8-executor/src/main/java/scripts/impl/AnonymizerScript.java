@@ -44,7 +44,8 @@ public abstract class AnonymizerScript extends VPNScript {
         }
 
         WebDriver etalonDriver = createEtalonDriver();
-        etalonDriver.get(getCheckUnit().getValue());
+        String url = ScriptUtils.getCheckUnitValue(getCheckUnit());
+        etalonDriver.get(url);
         etalonDriver.manage().window().fullscreen();
         ScriptUtils.PageResult etalon = new ScriptUtils.PageResult();
         try {
