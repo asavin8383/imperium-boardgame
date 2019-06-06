@@ -122,17 +122,6 @@ public abstract class SearchScript extends RobotScript {
         actions.moveToElement(webElement, 0, 0).perform();
     }
 
-    protected void type(WebElement input, long sleep, String query) {
-        query.codePoints().forEach(cp -> {
-            input.sendKeys(new String(Character.toChars(cp)));
-            try {
-                Thread.sleep(sleep);
-            } catch (InterruptedException e) {
-                // ignore
-            }
-        });
-    }
-
 
 
     protected abstract boolean nextPage();

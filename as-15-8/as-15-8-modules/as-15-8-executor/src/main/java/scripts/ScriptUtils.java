@@ -1,7 +1,6 @@
 package scripts;
 
 import checkUnits.CheckUnit;
-import checkUnits.CheckUnitType;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -127,6 +126,18 @@ public class ScriptUtils {
                 break;
         }
         return value;
+    }
+
+    public static void type(WebElement input, long sleep, String query) {
+        query.codePoints().forEach(cp -> {
+            input.sendKeys(new String(
+                    Character.toChars(cp)));
+            try {
+                Thread.sleep(sleep);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
 }

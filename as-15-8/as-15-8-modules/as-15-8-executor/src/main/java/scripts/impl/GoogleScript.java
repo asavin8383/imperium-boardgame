@@ -3,6 +3,7 @@ package scripts.impl;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
+import scripts.ScriptUtils;
 import scripts.exceptions.RobotScriptExecutionException;
 
 import java.net.URI;
@@ -26,7 +27,8 @@ public class GoogleScript extends SearchScript {
 
 		WebElement input = driver.findElement(By.name("q"));
 		//input.sendKeys(getCheckUnit().getValue());
-		type(input, getInputDelay(), getCheckUnit().getValue() + " ");
+		ScriptUtils.type(input, getInputDelay(),
+				getCheckUnit().getValue() + " ");
 		input.sendKeys(Keys.ENTER);
 
 		sendExecutionResult(checkSearchResult());

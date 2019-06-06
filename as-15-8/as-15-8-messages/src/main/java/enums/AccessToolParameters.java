@@ -7,8 +7,8 @@ package enums;
  */
 
 public enum  AccessToolParameters {
+    INPUT_DELAY,
     SEARCH_SYSTEM_URL,
-    SEARCH_SYSTEM_INPUT_DELAY,
     INPUT_SEARCH_FIELD_XPATH_ID,
     INPUT_SEARCH_FIELD_CSS_SELECTOR,
     BUTTON_SEARCH_FIELD_XPATH_ID,

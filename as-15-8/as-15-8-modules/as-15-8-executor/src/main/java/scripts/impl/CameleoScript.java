@@ -4,6 +4,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import scripts.ScriptUtils;
 import scripts.exceptions.RobotScriptExecutionException;
 import scripts.exceptions.TimeoutScriptException;
 
@@ -19,7 +20,9 @@ public class CameleoScript extends AnonymizerScript {
         driver.manage().window().fullscreen();
 
         WebElement input = driver.findElement(By.id("url"));
-        input.sendKeys(getCheckUnit().getValue());
+        //input.sendKeys(getCheckUnit().getValue());
+        ScriptUtils.type(input, getInputDelay(),
+                getCheckUnit().getValue());
 
         try {
             new WebDriverWait(driver, 10)

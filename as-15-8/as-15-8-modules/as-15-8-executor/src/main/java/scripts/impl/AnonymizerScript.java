@@ -4,11 +4,25 @@ import execution.ExecutionVpnJobResult;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
+import org.springframework.util.StringUtils;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Parameters;
 import scripts.ScriptUtils;
 import scripts.exceptions.RobotScriptExecutionException;
 
 @Slf4j
 public abstract class AnonymizerScript extends VPNScript {
+
+    private static final long DEFAULT_INPUT_DELAY = 300;
+
+    private long inputDelay;
+
+    @BeforeClass
+    @Parameters({"inputDelay"})
+    public void setOptions(String inputDelay) {
+        this.inputDelay = StringUtils.isEmpty(inputDelay) ?
+                DEFAULT_INPUT_DELAY : Long.parseLong(inputDelay);
+    }
 
     @Override
     public void execute() throws RobotScriptExecutionException {
@@ -55,5 +69,9 @@ public abstract class AnonymizerScript extends VPNScript {
                     null,
                     "TIME_OUT");
         }
+    }
+
+    public long getInputDelay() {
+        return inputDelay;
     }
 }

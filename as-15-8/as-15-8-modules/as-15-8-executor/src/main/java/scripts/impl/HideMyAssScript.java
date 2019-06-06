@@ -4,6 +4,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import scripts.ScriptUtils;
 import scripts.exceptions.RobotScriptExecutionException;
 import scripts.exceptions.TimeoutScriptException;
 
@@ -21,7 +22,9 @@ public class HideMyAssScript extends AnonymizerScript {
 
         // to do no such element
         WebElement input = driver.findElement(By.id("form_url"));
-        input.sendKeys(getCheckUnit().getValue());
+        //input.sendKeys(getCheckUnit().getValue());
+        ScriptUtils.type(input, getInputDelay(),
+                getCheckUnit().getValue());
 
         try {
             new WebDriverWait(driver, 10)

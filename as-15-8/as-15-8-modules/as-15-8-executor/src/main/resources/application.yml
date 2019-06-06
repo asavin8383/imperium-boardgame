@@ -24,10 +24,12 @@ robots:
         platform: WIN8
         browser: chrome
         app: hidemyass
+        input-delay: 500
     cameleoxyz:
         platform: WIN8
         browser: chrome
         app: cameleoxyz
+        input-delay: 500
 
 spring:
     kafka:

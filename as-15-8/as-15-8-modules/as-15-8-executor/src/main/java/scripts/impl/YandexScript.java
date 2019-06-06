@@ -5,6 +5,7 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import scripts.ScriptUtils;
 import scripts.exceptions.RobotScriptExecutionException;
 
 import javax.annotation.Nullable;
@@ -23,7 +24,8 @@ public class YandexScript extends SearchScript {
         driver.manage().window().fullscreen();
 
         WebElement input = driver.findElement(By.name("text"));
-        type(input, getInputDelay(), getCheckUnit().getValue() + " ");
+        ScriptUtils.type(input, getInputDelay(),
+                getCheckUnit().getValue() + " ");
         //input.sendKeys(getCheckUnit().getValue() + " ");
 
         if (checkSuggestedLink(driver)) {

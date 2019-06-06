@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import robots.impl.SeleniumAnonymizerRobot;
 import robots.impl.SeleniumSearchRobot;
 import robots.impl.SeleniumVpnRobot;
 import scripts.impl.*;
@@ -45,7 +46,7 @@ public class RobotsConfiguration {
 				Platform.valueOf(env.getProperty("robots.google.platform")),
 				env.getProperty("robots.google.app"),
 				env.getProperty("robots.google.limit"),
-				env.getProperty("robots.yandex.input-delay"));
+				env.getProperty("robots.google.input-delay"));
 	}
 
 	/**
@@ -110,13 +111,14 @@ public class RobotsConfiguration {
 	@Bean
 	public Robot hideMyAssRobot() throws MalformedURLException {
 
-		return new SeleniumVpnRobot<>(
+		return new SeleniumAnonymizerRobot<>(
 				AccessToolUnit.HIDEMYASS,
 				new URL(this.seleniumHubUrl),
 				HideMyAssScript.class,
 				env.getProperty("robots.hidemyass.browser"),
 				Platform.valueOf(env.getProperty("robots.hidemyass.platform")),
-				env.getProperty("robots.hidemyass.app")
+				env.getProperty("robots.hidemyass.app"),
+				env.getProperty("robots.hidemyass.input-delay")
 		);
 	}
 
@@ -128,13 +130,14 @@ public class RobotsConfiguration {
 	@Bean
 	public Robot cameleoXyzRobot() throws MalformedURLException {
 
-		return new SeleniumVpnRobot<>(
+		return new SeleniumAnonymizerRobot<>(
 				AccessToolUnit.CAMELEO_XYZ,
 				new URL(this.seleniumHubUrl),
 				CameleoScript.class,
 				env.getProperty("robots.cameleoxyz.browser"),
 				Platform.valueOf(env.getProperty("robots.cameleoxyz.platform")),
-				env.getProperty("robots.cameleoxyz.app")
+				env.getProperty("robots.cameleoxyz.app"),
+				env.getProperty("robots.cameleoxyz.input-delay")
 		);
 	}
 	

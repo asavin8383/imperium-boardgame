@@ -9,19 +9,17 @@ import org.testng.xml.XmlTest;
 import java.net.URL;
 import java.util.Map;
 
-public class SeleniumSearchRobot<T> extends SeleniumRobot<T> {
+public class SeleniumAnonymizerRobot<T> extends SeleniumVpnRobot<T> {
 
-    private String searchResultLimit;
     private String inputDelay;
 
-    public SeleniumSearchRobot(AccessToolUnit accessToolUnit,
-                               URL hubURL,
-                               Class<T> scriptClass,
-                               String browserName,
-                               Platform platform,
-                               String applicationName,
-                               String searchResultLimit,
-                               String inputDelay) {
+    public SeleniumAnonymizerRobot(AccessToolUnit accessToolUnit,
+                                   URL hubURL,
+                                   Class<T> scriptClass,
+                                   String browserName,
+                                   Platform platform,
+                                   String applicationName,
+                                   String inputDelay) {
         super(accessToolUnit,
                 hubURL,
                 scriptClass,
@@ -29,7 +27,6 @@ public class SeleniumSearchRobot<T> extends SeleniumRobot<T> {
                 platform,
                 applicationName);
 
-        this.searchResultLimit = searchResultLimit;
         this.inputDelay = inputDelay;
     }
 
@@ -37,9 +34,9 @@ public class SeleniumSearchRobot<T> extends SeleniumRobot<T> {
     public XmlTest createTest(String name, Long jobID, CheckUnit checkUnit,
                               Map<AccessToolParameters, String> accessToolParameters) {
         XmlTest test = super.createTest(name, jobID, checkUnit, accessToolParameters);
-        test.addParameter("searchResultLimit", searchResultLimit);
         test.addParameter("inputDelay", accessToolParameters.getOrDefault(
                 AccessToolParameters.INPUT_DELAY, inputDelay));
         return test;
     }
+
 }
