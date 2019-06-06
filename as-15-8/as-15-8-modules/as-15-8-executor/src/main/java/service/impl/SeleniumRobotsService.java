@@ -37,7 +37,7 @@ public class SeleniumRobotsService implements RobotsService {
 		
 		List<XmlTest> tests = new ArrayList<XmlTest>();
 		XmlTest test = robot.createTest(
-			"Job: "+checkUnitJob.getJobID()+", Check: "+checkUnitJob.getCheckUnit().getValue(),
+			"Job: "+checkUnitJob.getJobID()+", AccessTool: "+checkUnitJob.getAccessToolUnit()+", Check: "+checkUnitJob.getCheckUnit().getValue(),
 			checkUnitJob.getJobID(),
 			checkUnitJob.getCheckUnit(),
 			checkUnitJob.getAccessToolParameters()
