@@ -60,4 +60,8 @@ public class ArrangementResult implements Serializable {
     @Type(type="org.hibernate.type.BinaryType")
     @JsonIgnore
     private byte[] etalonScreenshot;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JsonIgnore
+    DetailedArrangementResult detailedArrangementResult;
 }
