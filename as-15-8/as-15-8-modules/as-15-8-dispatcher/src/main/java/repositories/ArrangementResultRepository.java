@@ -18,7 +18,7 @@ import model.ArrangementResult;
 @Repository
 public interface ArrangementResultRepository extends JpaRepository<ArrangementResult, Long> {
 	
-	@Query("SELECT count(res) FROM ArrangementResult res WHERE res.id = :id and res.result IS NULL OR res.result IN :results")
+	@Query("SELECT count(res) FROM ArrangementResult res WHERE res.arrangementId = :id AND (res.result IS NULL OR res.result IN :results)")
 	Long countByResultNullOrResultIn(@Param("id") Long id, @Param("results") List<CheckUnitJobResult> results);
 	
 }

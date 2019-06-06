@@ -32,6 +32,49 @@
         <appender-ref ref="rootRollingFile" />
     </root>
     
+    <appender name="HIBERNATE_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOGS}/hibernate.log</file>
+        <encoder>
+            <pattern>%date [%level] from %logger - %message%n%xException</pattern>
+        </encoder>
+        
+        <rollingPolicy
+            class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOGS}/archived/hibernate-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy
+                class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>100MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+    </appender>
+    
+    <logger name="org.hibernate" level="INFO">
+    	<appender-ref ref="HIBERNATE_LOG" />
+    </logger>
+    <logger name="org.hibernate.SQL" level="DEBUG" additivity="false">
+    	<appender-ref ref="HIBERNATE_LOG" />
+    </logger>
+    
+    <appender name="JDBC_TEMPLATE_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOGS}/jdbcNamedTemplate.log</file>
+        <encoder>
+            <pattern>%date [%level] from %logger - %message%n%xException</pattern>
+        </encoder>
+        
+        <rollingPolicy
+            class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOGS}/archived/jdbcNamedTemplate-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy
+                class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>100MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+    </appender>
+    
+    <logger name="org.springframework.jdbc.core.JdbcTemplate" level="DEBUG">
+    	<appender-ref ref="JDBC_TEMPLATE_LOG" />
+    </logger>
+    
     <appender name="MESSAGES_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOGS}/messages.log</file>
         <encoder>

@@ -40,7 +40,7 @@ public class SendJobToKafka {
 		job.setId(100500L);
 		job.setAccessToolUnit(AccessToolUnit.YANDEX);
 		List<ERDIJob> erdi = new ArrayList<>();
-		erdi.add(new ERDIJob(1L));
+		erdi.add(new ERDIJob(169111L));
 		job.setErdiJobList(erdi);
 		
 		Message<ArrangementJob> message = MessageBuilder
