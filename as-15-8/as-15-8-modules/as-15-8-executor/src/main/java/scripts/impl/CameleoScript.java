@@ -35,4 +35,9 @@ public class CameleoScript extends AnonymizerScript {
 
         super.execute();
     }
+
+    @Override
+    protected boolean captcha() {
+        return false;
+    }
 }

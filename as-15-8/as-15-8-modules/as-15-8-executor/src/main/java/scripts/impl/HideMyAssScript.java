@@ -1,6 +1,7 @@
 package scripts.impl;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -36,5 +37,17 @@ public class HideMyAssScript extends AnonymizerScript {
         }
 
         super.execute();
+    }
+
+    @Override
+    protected boolean captcha() {
+        try {
+            WebElement captchaForm = driver.findElement(
+                    By.xpath("//*[@id=\"captcha-form\"]"));
+            return captchaForm != null;
+        } catch (NoSuchElementException e) {
+            // ignore
+        }
+        return false;
     }
 }

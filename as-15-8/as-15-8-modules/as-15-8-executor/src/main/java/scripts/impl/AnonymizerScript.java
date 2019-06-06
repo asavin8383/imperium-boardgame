@@ -8,6 +8,7 @@ import org.springframework.util.StringUtils;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
 import scripts.ScriptUtils;
+import scripts.exceptions.Captcha_RobotScriptExecutionException;
 import scripts.exceptions.RobotScriptExecutionException;
 
 @Slf4j
@@ -27,6 +28,8 @@ public abstract class AnonymizerScript extends VPNScript {
     @Override
     public void execute() throws RobotScriptExecutionException {
         ScriptUtils.PageResult result = load();
+        if (captcha())
+            throw new Captcha_RobotScriptExecutionException("Обнаружена captcha");
 
         ExecutionVpnJobResult message = new ExecutionVpnJobResult();
         fillExecutionResultMessage(message);
@@ -74,4 +77,6 @@ public abstract class AnonymizerScript extends VPNScript {
     public long getInputDelay() {
         return inputDelay;
     }
+
+    protected abstract boolean captcha();
 }
