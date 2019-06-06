@@ -46,7 +46,10 @@ services:
                 arrangements:3:2:delete,
                 jobs:3:2:delete,
                 exec_results:3:2:delete,
-                analysis_results:3:2:delete
+                analysis_results:3:2:delete,
+                job_notifications:3:2:delete,
+                arrangement_notifications:3:2:delete,
+                exec_control:3:2:delete
         volumes:
             - /opt/kafka/logs:/opt/kafka/logs
             - /var/run/docker.sock:/var/run/docker.sock
