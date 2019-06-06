@@ -62,6 +62,7 @@ public class ArrangementResult implements Serializable {
     private byte[] etalonScreenshot;
 
     @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "id", referencedColumnName = "id")
     @JsonIgnore
     DetailedArrangementResult detailedArrangementResult;
 }
