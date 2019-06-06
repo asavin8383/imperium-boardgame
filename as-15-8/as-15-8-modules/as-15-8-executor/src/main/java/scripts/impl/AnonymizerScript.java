@@ -37,9 +37,9 @@ public abstract class AnonymizerScript extends VPNScript {
         message.setResponseError(result.errorCodeChrome != null);
         message.setChromeErrorCode(result.errorCodeChrome);
 
+        message.setScreenshot(ScriptUtils.getScreenshot(driver));
         if (result.errorCodeChrome == null) {
             message.setPageContent(result.pageSource);
-            message.setScreenshot(ScriptUtils.getScreenshot(driver));
             message.setFinalUrlPage(driver.getCurrentUrl());
         }
 
@@ -56,11 +56,9 @@ public abstract class AnonymizerScript extends VPNScript {
         }
         catch (TimeoutException e) {
             log.error("Ошибка при получении эталона", e);
-            etalon.errorCodeChrome = "TIME_OUT";
+            etalon.errorCodeChrome = TIME_OUT_ERROR;
         }
-        if (etalon.errorCodeChrome == null){
-            message.setEtalonScreenshot(ScriptUtils.getScreenshot(etalonDriver));
-        }
+        message.setEtalonScreenshot(ScriptUtils.getScreenshot(etalonDriver));
         sendExecutionResult(message);
     }
 
@@ -71,7 +69,7 @@ public abstract class AnonymizerScript extends VPNScript {
         } catch (TimeoutException te){
             return new ScriptUtils.PageResult(
                     null,
-                    "TIME_OUT");
+                    TIME_OUT_ERROR);
         }
     }
 

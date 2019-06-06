@@ -32,6 +32,7 @@ public class VPNScript extends RobotScript {
     
     protected List<WebDriver> proxyDrivers = new ArrayList<>();
 
+    public static final String TIME_OUT_ERROR = "TIME_OUT";
 
     protected boolean needAutoCreateDriver(){
         return false;
@@ -138,7 +139,7 @@ public class VPNScript extends RobotScript {
                 pageSourceResult = ScriptUtils.getPageSource(driver);
             }
             catch (TimeoutException te){
-                pageSourceResult = new PageResult(null, "TIME_OUT");
+                pageSourceResult = new PageResult(null, TIME_OUT_ERROR);
             }
             log.info("----> try count " + cnt + ", error = " + pageSourceResult.errorCodeChrome);
         }
@@ -156,7 +157,7 @@ public class VPNScript extends RobotScript {
         catch (TimeoutException te){
             System.out.println("Timeout exception while access from URL via VPN/Proxy");
             te.printStackTrace();
-            resultEtalon.errorCodeChrome = "TIME_OUT";
+            resultEtalon.errorCodeChrome = TIME_OUT_ERROR;
         }
 
         ExecutionVpnJobResult message = new ExecutionVpnJobResult();
@@ -166,17 +167,15 @@ public class VPNScript extends RobotScript {
         message.setResponseError(pageSourceResult.errorCodeChrome != null);
 
         message.setChromeErrorCode(pageSourceResult.errorCodeChrome);
+        message.setScreenshot(ScriptUtils.getScreenshot(driver));
         if(pageSourceResult.errorCodeChrome == null){
             message.setPageContent(pageSourceResult.pageSource);
-            message.setScreenshot(ScriptUtils.getScreenshot(driver));
             message.setFinalUrlPage(driver.getCurrentUrl());
         }
 
         message.setChromeErrorCodeEtalon(resultEtalon.errorCodeChrome);
         message.setPageContentEtalon(resultEtalon.pageSource);
-        if (resultEtalon.errorCodeChrome == null){
-            message.setEtalonScreenshot(ScriptUtils.getScreenshot(etalonDriver));
-        }
+        message.setEtalonScreenshot(ScriptUtils.getScreenshot(etalonDriver));
 
         log.info("--------- message ---------");
         log.info(message.toString());
