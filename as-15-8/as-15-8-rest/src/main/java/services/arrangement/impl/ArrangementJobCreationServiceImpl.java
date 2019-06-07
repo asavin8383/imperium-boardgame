@@ -86,6 +86,7 @@ public class ArrangementJobCreationServiceImpl implements ArrangementJobCreation
         Map<AccessToolParameters, String> result = new HashMap<>();
         if (accessTool.getSearchSystemParameters() != null){
             SearchSystemParameters parameters = accessTool.getSearchSystemParameters();
+            result.put(AccessToolParameters.INPUT_DELAY, String.valueOf(parameters.getInputDelay()));
             result.put(AccessToolParameters.SEARCH_SYSTEM_URL, parameters.getSearchSystemUrl());
             result.put(AccessToolParameters.INPUT_SEARCH_FIELD_XPATH_ID, parameters.getInputSearchFieldXpathId());
             result.put(AccessToolParameters.INPUT_SEARCH_FIELD_CSS_SELECTOR, parameters.getInputSearchFieldCssSelector());

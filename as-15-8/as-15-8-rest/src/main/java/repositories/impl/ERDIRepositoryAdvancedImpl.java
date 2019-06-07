@@ -60,7 +60,7 @@ public class ERDIRepositoryAdvancedImpl implements ERDIRepositoryAdvanced {
         }
         //TODO Безжалостный хардкод в таблице URL - это NULL
         if(blocktype != null && !blocktype.toUpperCase().equals(URL)){
-            predicates.add(criteriaBuilder.like(criteriaBuilder.lower(erdi.get(ERDI_.BLOCKTYPE)), "%" + blocktype.toLowerCase() + "%" ));
+            predicates.add(criteriaBuilder.equal(criteriaBuilder.lower(erdi.get(ERDI_.BLOCKTYPE)), blocktype.toLowerCase()));
         }
         if(blocktype != null && blocktype.toUpperCase().equals(URL)){
             predicates.add(criteriaBuilder.isNull(criteriaBuilder.lower(erdi.get(ERDI_.BLOCKTYPE))));
@@ -69,6 +69,8 @@ public class ERDIRepositoryAdvancedImpl implements ERDIRepositoryAdvanced {
         select.where(predicates.toArray(new Predicate[0]));
 
         select.orderBy(QueryUtils.toOrders(pageable.getSort(), erdi, criteriaBuilder));
+
+
 
         return CriteriaHelper.createPage(em, select, pageable);
     }
