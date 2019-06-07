@@ -8,13 +8,13 @@ robots:
         browser: chrome
         app: google
         limit: 15
-        input-delay: 500
+        input-delay: 0
     yandex:
         platform: WIN8
         browser: chrome
         app: yandex
         limit: 15
-        input-delay: 500
+        input-delay: 0
     vpn:
         platform: WIN8
         browser: chrome
@@ -24,12 +24,12 @@ robots:
         platform: WIN8
         browser: chrome
         app: hidemyass
-        input-delay: 500
+        input-delay: 0
     cameleoxyz:
         platform: WIN8
         browser: chrome
         app: cameleoxyz
-        input-delay: 500
+        input-delay: 0
 
 spring:
     kafka:

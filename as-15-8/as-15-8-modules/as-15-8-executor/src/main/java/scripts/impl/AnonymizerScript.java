@@ -14,7 +14,7 @@ import scripts.exceptions.RobotScriptExecutionException;
 @Slf4j
 public abstract class AnonymizerScript extends VPNScript {
 
-    private static final long DEFAULT_INPUT_DELAY = 300;
+    private static final long DEFAULT_INPUT_DELAY = 0;
 
     private long inputDelay;
 
