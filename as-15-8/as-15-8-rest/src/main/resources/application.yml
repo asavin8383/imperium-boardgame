@@ -75,7 +75,7 @@ spring:
         arrangement-notification-topic: arrangement_notifications_asavin
 cron:
     expression:
-        arrangement: "0 * * ? * *"
+        arrangement: "0 0 * ? * *"
 
 ---
 

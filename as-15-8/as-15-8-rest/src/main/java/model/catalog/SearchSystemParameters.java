@@ -23,4 +23,5 @@ public class SearchSystemParameters extends AccessToolParameters implements Seri
     private String inputSearchFieldCssSelector;
     private String buttonSearchFieldXpathId;
     private String buttonSearchFieldCssSelector;
+    private int inputDelay;
 }

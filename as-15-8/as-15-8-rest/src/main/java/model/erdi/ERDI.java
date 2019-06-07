@@ -1,9 +1,6 @@
 package model.erdi;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.persistence.Basic;
@@ -34,7 +31,6 @@ public class ERDI {
     private static final String IP = "IP";
     private static final String DOMAIN = "DOMAIN";
     private static final String DOMAIN_MASK = "DOMAIN-MASK";
-    private static final Integer LIMIT = 10;
 
     @Id
     @EqualsAndHashCode.Include
@@ -71,7 +67,8 @@ public class ERDI {
     @JsonIgnore
     private List<IP> ipList;
 
-    public List<Map<String, String>> getCheckUnits(){
+
+    public Optional<Map<String, String>> getFirstCheckUnit(){
         if (this.checkUnitType.equals(URL)){
             return getExplicitCheckUnits(urls);
         } else if (this.checkUnitType.equals(IP)){
@@ -80,16 +77,16 @@ public class ERDI {
             return getExplicitCheckUnits(domains);
         } else if (this.checkUnitType.equals(DOMAIN_MASK)){
             return getExplicitCheckUnits(domainMasks);
-        } else return new ArrayList<>();
+        } else return Optional.empty();
     }
 
-    private List<Map<String, String>> getExplicitCheckUnits(List<? extends CheckUnit> units){
-        return units.stream().limit(LIMIT)
+    private Optional<Map<String, String>> getExplicitCheckUnits(List<? extends CheckUnit> units){
+        return units.stream()
                 .map(unit -> {
                     Map<String, String> elem = new HashMap<>();
                     elem.put(unit.getCheckUnitType().toString(), unit.getCheckUnitValue());
                     return elem;
-                }).collect(Collectors.toList());
+                }).findFirst();
     }
 
     @PostLoad
