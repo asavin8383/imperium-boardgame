@@ -10,16 +10,14 @@ import checkUnits.CheckUnit;
 import enums.AccessToolParameters;
 import execution.ExecutionJobResult;
 import execution.ExecutionVpnJobResult;
-import lombok.extern.slf4j.Slf4j;
 import scripts.ScriptDriverParameters;
 import scripts.ScriptUtils;
 import scripts.exceptions.Captcha_RobotScriptExecutionException;
 import scripts.exceptions.RobotScriptExecutionException;
 
-@Slf4j
 public abstract class AnonymizerScript extends VPNScript {
 
-    private static final long DEFAULT_INPUT_DELAY = 300;
+    private static final long DEFAULT_INPUT_DELAY = 0;
 
     private long inputDelay;
 
@@ -32,38 +30,54 @@ public abstract class AnonymizerScript extends VPNScript {
 
     @Override
     public ExecutionJobResult execute(CheckUnit checkUnit) throws RobotScriptExecutionException {
-        ScriptUtils.PageResult result = load();
-        if (captcha())
-            throw new Captcha_RobotScriptExecutionException("Обнаружена captcha");
 
-        ExecutionVpnJobResult message = new ExecutionVpnJobResult();
-        message.setStubUrl(stubUrl);
-        message.setResponseError(result.errorCodeChrome != null);
-        message.setChromeErrorCode(result.errorCodeChrome);
-
-        message.setScreenshot(ScriptUtils.getScreenshot(driver));
-        if (result.errorCodeChrome == null) {
-            message.setPageContent(result.pageSource);
-            message.setFinalUrlPage(driver.getCurrentUrl());
-        }
-
-        WebDriver etalonDriver = createEtalonDriver();
-        String url = ScriptUtils.getCheckUnitValue(checkUnit);
-        etalonDriver.get(url);
-        etalonDriver.manage().window().fullscreen();
-        ScriptUtils.PageResult etalon = new ScriptUtils.PageResult();
-        try {
-            ScriptUtils.waitPageLoading(etalonDriver);
-            etalon = ScriptUtils.getPageSource(etalonDriver);
-            message.setChromeErrorCodeEtalon(etalon.errorCodeChrome);
-            message.setPageContentEtalon(etalon.pageSource);
-        }
-        catch (TimeoutException e) {
-            log.error("Ошибка при получении эталона", e);
-            etalon.errorCodeChrome = TIME_OUT_ERROR;
-        }
-        message.setEtalonScreenshot(ScriptUtils.getScreenshot(etalonDriver));
-        return message;
+		ScriptUtils.PageResult result;
+	    byte[] screenShot;
+	    String finalUrl;
+	    try {
+	        result = load();
+	        if (captcha()) {
+	            closeDriver(driver);
+	            throw new Captcha_RobotScriptExecutionException("Обнаружена captcha");
+	        }
+	
+	        screenShot = ScriptUtils.getScreenshot(driver);
+	        finalUrl = driver.getCurrentUrl();
+	    }
+	    finally {
+	        closeDriver(driver);
+	    }
+	
+	    String url = ScriptUtils.getCheckUnitValue(checkUnit);
+	
+	    WebDriver driverEtalon = null;
+	    ScriptUtils.PageResult pageResultEtalon;
+	    byte[] screenShotEtalon;
+	    try {
+	        driverEtalon = createEtalonDriver();
+	        pageResultEtalon = loadPage(url, driverEtalon, 1);
+	        screenShotEtalon = ScriptUtils.getScreenshot(driverEtalon);
+	    }
+	    finally {
+	        closeDriver(driverEtalon);
+	    }
+	
+	    ExecutionVpnJobResult message = new ExecutionVpnJobResult();
+	
+	    message.setStubUrl(stubUrl);
+	    message.setResponseError(result.errorCodeChrome != null);
+	    message.setChromeErrorCode(result.errorCodeChrome);
+	    message.setPageContent(result.pageSource);
+	    message.setScreenshot(screenShot);
+	    if (result.errorCodeChrome == null) {
+	        message.setFinalUrlPage(finalUrl);
+	    }
+	
+	    message.setChromeErrorCodeEtalon(pageResultEtalon.errorCodeChrome);
+	    message.setPageContentEtalon(pageResultEtalon.pageSource);
+	    message.setEtalonScreenshot(screenShotEtalon);
+	
+	    return message;
     }
 
     private ScriptUtils.PageResult load() {

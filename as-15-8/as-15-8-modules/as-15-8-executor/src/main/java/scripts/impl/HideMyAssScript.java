@@ -28,17 +28,16 @@ public class HideMyAssScript extends AnonymizerScript {
 	}
 
     @Override
-    public ExecutionJobResult execute(CheckUnit checkUnit) throws RobotScriptExecutionException {
+    public ExecutionJobResult execute(CheckUnit checkUnit) throws RobotScriptExecutionException { 	 
         driver.get(URL);
         driver.manage().window().fullscreen();
         driver.switchTo().frame(driver.findElement(By.id("proxyIframe")));
-
+ 
         // to do no such element
         WebElement input = driver.findElement(By.id("form_url"));
         //input.sendKeys(getCheckUnit().getValue());
-        ScriptUtils.type(input, getInputDelay(),
-                checkUnit.getValue());
-
+        ScriptUtils.type(input, getInputDelay(), checkUnit.getValue());
+ 
         try {
             new WebDriverWait(driver, 10)
                     .until(presenceOfElementLocated(
@@ -47,7 +46,7 @@ public class HideMyAssScript extends AnonymizerScript {
         } catch (TimeoutException e) {
             throw new TimeoutScriptException(e);
         }
-
+ 
         return super.execute(checkUnit);
     }
 

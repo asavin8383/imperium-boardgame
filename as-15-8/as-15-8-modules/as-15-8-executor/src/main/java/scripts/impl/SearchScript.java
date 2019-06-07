@@ -31,7 +31,7 @@ public abstract class SearchScript extends RobotScript {
 	/** Максимальное кол-во проверяемых результатов по умолчанию */
     private static final int DEFAULT_SEARCH_LIMIT = 20;
 
-    private static final long DEFAULT_INPUT_DELAY = 300;
+    private static final long DEFAULT_INPUT_DELAY = 0;
 
     /** Максимальное кол-во проверяемых результатов */
     private int searchResultLimit;

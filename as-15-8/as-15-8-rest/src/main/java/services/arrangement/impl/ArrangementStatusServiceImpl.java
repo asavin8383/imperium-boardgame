@@ -35,14 +35,20 @@ public class ArrangementStatusServiceImpl implements ArrangementStatusService {
     @Override
     @Transactional
     public void processArrangementStatusChange(Arrangement arrangement) {
+        log.info("Changing arrangement status. Arrangement id: " + arrangement.getId() + ", arrangement status: " + arrangement.getStatus());
         arrangementRepo.save(arrangement);
         formalTaskRepo.findById(arrangement.getFormalTask().getId())
                 .map(formalTask -> {
-                    //Статус сменился, будем сохранять
-                    if(!formalTask.getStatus().equals(determineFormalTaskStatus(formalTask))){
-                        formalTaskRepo.save(formalTask);
-                        log.info("Formal task status changed. Formal task id: " + formalTask.getId() + ", new status: " + formalTask.getStatus());
-                    }
+                    //Если статус сменился, будем сохранять
+                    determineFormalTaskStatus(formalTask)
+                        .ifPresent(status -> {
+                            if(!formalTask.getStatus().equals(status)){
+                                formalTask.setStatus(status);
+                                formalTaskRepo.save(formalTask);
+                                log.info("Formal task status changed. Formal task id: " + formalTask.getId() + ", new status: " + formalTask.getStatus());
+                            }
+                        });
+
                     return true;
                 })
                 .orElseThrow(() -> new AS_15_8_Exception("Error updating arrangement status! Formal task was not found by id: " + arrangement.getFormalTask().getId()));

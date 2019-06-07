@@ -47,13 +47,13 @@ public class DriverFactory {
 
 		if(Strings.isNotEmpty(proxy)) {
 			Proxy oProxy = ProxyUtils.getSeleniumProxy(proxy);
-			if (oProxy != null) {
-				log.info("WebDriver set proxy: " + proxy);
-				((DesiredCapabilities)cpb).setCapability(CapabilityType.PROXY, oProxy);
-			}
-			else {
-				log.info("WebDriver set proxy: NONE");
-			}
+	        if (oProxy != null) {
+	            log.info("Create WebDriver, proxy: " + proxy);
+	            ((DesiredCapabilities)cpb).setCapability(CapabilityType.PROXY, oProxy);
+	        }
+	        else {
+	            log.info("Create WebDriver, proxy: NONE");
+	        }
 		}
 
 		return new RemoteWebDriver(hubURL, cpb);
