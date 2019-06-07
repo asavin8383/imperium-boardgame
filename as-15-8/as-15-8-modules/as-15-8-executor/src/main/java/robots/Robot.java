@@ -2,11 +2,11 @@ package robots;
 
 import java.util.Map;
 
-import org.testng.xml.XmlTest;
-
 import checkUnits.CheckUnit;
 import enums.AccessToolParameters;
 import enums.AccessToolUnit;
+import execution.ExecutionJobResult;
+import scripts.exceptions.RobotScriptExecutionException;
 
 /**
  * Интерфейс робота проверки ПС/ПАСД
@@ -21,14 +21,6 @@ public interface Robot {
 	 */
 	AccessToolUnit getAccessToolUnit();
 	
-	/**
-	 * Метод создания теста для проверки
-	 * @param name Имя теста
-	 * @param arrangenmentID Идентификатор мероприятия
-	 * @param erdiID Идентификатор ЕРДИ
-	 * @param url Проверяемый URL
-	 * @return
-	 */
-	XmlTest createTest(String name, Long jobID, CheckUnit checkUnit, Map<AccessToolParameters, String> accessToolParameters);
+	ExecutionJobResult run(CheckUnit checkUnit, Map<AccessToolParameters, String> accessToolParameters) throws RobotScriptExecutionException;
 	
 }

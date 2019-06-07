@@ -1,42 +1,32 @@
 package robots.impl;
 
-import checkUnits.CheckUnit;
-import enums.AccessToolParameters;
-import enums.AccessToolUnit;
-import org.openqa.selenium.Platform;
-import org.testng.xml.XmlTest;
-
-import java.net.URL;
 import java.util.Map;
 
-public class SeleniumAnonymizerRobot<T> extends SeleniumVpnRobot<T> {
+import enums.AccessToolParameters;
+import enums.AccessToolUnit;
+import scripts.RobotScript;
+import scripts.ScriptDriverParameters;
 
-    private String inputDelay;
+public class SeleniumAnonymizerRobot extends SeleniumVpnRobot {
+
+    private long inputDelay;
 
     public SeleniumAnonymizerRobot(AccessToolUnit accessToolUnit,
-                                   URL hubURL,
-                                   Class<T> scriptClass,
-                                   String browserName,
-                                   Platform platform,
-                                   String applicationName,
-                                   String inputDelay) {
-        super(accessToolUnit,
-                hubURL,
-                scriptClass,
-                browserName,
-                platform,
-                applicationName);
+    							   Class<? extends RobotScript> scriptClass,
+                                   ScriptDriverParameters driverParams,
+                                   long inputDelay) {
+        super(accessToolUnit, scriptClass, driverParams);
 
         this.inputDelay = inputDelay;
     }
 
     @Override
-    public XmlTest createTest(String name, Long jobID, CheckUnit checkUnit,
-                              Map<AccessToolParameters, String> accessToolParameters) {
-        XmlTest test = super.createTest(name, jobID, checkUnit, accessToolParameters);
-        test.addParameter("inputDelay", accessToolParameters.getOrDefault(
-                AccessToolParameters.INPUT_DELAY, inputDelay));
-        return test;
-    }
-
+	protected Object[] getScriptArgs(Map<AccessToolParameters, String> params) {
+		return new Object[] {
+			this.driverParams,
+			params,
+			inputDelay
+		};
+	}
+    
 }

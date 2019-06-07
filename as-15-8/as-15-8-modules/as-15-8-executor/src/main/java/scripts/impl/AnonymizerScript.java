@@ -1,12 +1,17 @@
 package scripts.impl;
 
-import execution.ExecutionVpnJobResult;
-import lombok.extern.slf4j.Slf4j;
+import java.net.MalformedURLException;
+import java.util.Map;
+
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
-import org.springframework.util.StringUtils;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Parameters;
+
+import checkUnits.CheckUnit;
+import enums.AccessToolParameters;
+import execution.ExecutionJobResult;
+import execution.ExecutionVpnJobResult;
+import lombok.extern.slf4j.Slf4j;
+import scripts.ScriptDriverParameters;
 import scripts.ScriptUtils;
 import scripts.exceptions.Captcha_RobotScriptExecutionException;
 import scripts.exceptions.RobotScriptExecutionException;
@@ -18,21 +23,20 @@ public abstract class AnonymizerScript extends VPNScript {
 
     private long inputDelay;
 
-    @BeforeClass
-    @Parameters({"inputDelay"})
-    public void setOptions(String inputDelay) {
-        this.inputDelay = StringUtils.isEmpty(inputDelay) ?
-                DEFAULT_INPUT_DELAY : Long.parseLong(inputDelay);
+    public AnonymizerScript(ScriptDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams, long inputDelay)
+    		throws MalformedURLException {
+    	super(driverParams, scriptParams);
+        this.inputDelay = inputDelay <= 0 ?
+                DEFAULT_INPUT_DELAY : inputDelay;
     }
 
     @Override
-    public void execute() throws RobotScriptExecutionException {
+    public ExecutionJobResult execute(CheckUnit checkUnit) throws RobotScriptExecutionException {
         ScriptUtils.PageResult result = load();
         if (captcha())
             throw new Captcha_RobotScriptExecutionException("Обнаружена captcha");
 
         ExecutionVpnJobResult message = new ExecutionVpnJobResult();
-        fillExecutionResultMessage(message);
         message.setStubUrl(stubUrl);
         message.setResponseError(result.errorCodeChrome != null);
         message.setChromeErrorCode(result.errorCodeChrome);
@@ -44,7 +48,7 @@ public abstract class AnonymizerScript extends VPNScript {
         }
 
         WebDriver etalonDriver = createEtalonDriver();
-        String url = ScriptUtils.getCheckUnitValue(getCheckUnit());
+        String url = ScriptUtils.getCheckUnitValue(checkUnit);
         etalonDriver.get(url);
         etalonDriver.manage().window().fullscreen();
         ScriptUtils.PageResult etalon = new ScriptUtils.PageResult();
@@ -59,7 +63,7 @@ public abstract class AnonymizerScript extends VPNScript {
             etalon.errorCodeChrome = TIME_OUT_ERROR;
         }
         message.setEtalonScreenshot(ScriptUtils.getScreenshot(etalonDriver));
-        sendExecutionResult(message);
+        return message;
     }
 
     private ScriptUtils.PageResult load() {

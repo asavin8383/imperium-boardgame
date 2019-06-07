@@ -37,7 +37,7 @@ public class SendCheckUnitToKafka {
 		for(long i = 10000; i<10001; i++) {
 			CheckUnitJob checkUnitJob = new CheckUnitJob();
 			checkUnitJob.setJobID(i);
-			checkUnitJob.setAccessToolUnit(AccessToolUnit.YANDEX);
+			checkUnitJob.setAccessToolUnit(AccessToolUnit.TORGUARD);
 			
 			checkUnitJob.setCheckUnit(new CheckUnit(CheckUnitType.URL, "https://www.google.ru"));
 			

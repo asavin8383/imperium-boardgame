@@ -1,45 +1,35 @@
 package robots.impl;
 
-import checkUnits.CheckUnit;
-import enums.AccessToolParameters;
-import enums.AccessToolUnit;
-import org.openqa.selenium.Platform;
-import org.testng.xml.XmlTest;
-
-import java.net.URL;
 import java.util.Map;
 
-public class SeleniumSearchRobot<T> extends SeleniumRobot<T> {
+import enums.AccessToolParameters;
+import enums.AccessToolUnit;
+import scripts.RobotScript;
+import scripts.ScriptDriverParameters;
 
-    private String searchResultLimit;
-    private String inputDelay;
+public class SeleniumSearchRobot extends SeleniumRobot {
+
+    private int searchResultLimit;
+    private long inputDelay;
 
     public SeleniumSearchRobot(AccessToolUnit accessToolUnit,
-                               URL hubURL,
-                               Class<T> scriptClass,
-                               String browserName,
-                               Platform platform,
-                               String applicationName,
-                               String searchResultLimit,
-                               String inputDelay) {
-        super(accessToolUnit,
-                hubURL,
-                scriptClass,
-                browserName,
-                platform,
-                applicationName);
+    						   Class<? extends RobotScript> scriptClass,
+                               ScriptDriverParameters driverParams,
+                               int searchResultLimit,
+                               long inputDelay) {
+        super(accessToolUnit, scriptClass, driverParams);
 
         this.searchResultLimit = searchResultLimit;
         this.inputDelay = inputDelay;
     }
 
-    @Override
-    public XmlTest createTest(String name, Long jobID, CheckUnit checkUnit,
-                              Map<AccessToolParameters, String> accessToolParameters) {
-        XmlTest test = super.createTest(name, jobID, checkUnit, accessToolParameters);
-        test.addParameter("searchResultLimit", searchResultLimit);
-        test.addParameter("inputDelay", accessToolParameters.getOrDefault(
-                AccessToolParameters.INPUT_DELAY, inputDelay));
-        return test;
-    }
+	@Override
+	protected Object[] getScriptArgs(Map<AccessToolParameters, String> params) {
+		return new Object[] {
+			this.driverParams,
+			params,
+			this.searchResultLimit,
+			this.inputDelay	
+		};
+	}
 }

@@ -11,7 +11,6 @@ import org.springframework.kafka.listener.AcknowledgingConsumerAwareMessageListe
 import org.springframework.kafka.support.Acknowledgment;
 
 import checkUnits.CheckUnitJob;
-import kafka.JobNotificationsProducer;
 import lombok.extern.slf4j.Slf4j;
 import service.RobotsService;
 
@@ -37,12 +36,7 @@ public class CheckUnitJobsListener implements AcknowledgingConsumerAwareMessageL
 		clearDoneJobs();
 		
 		jobsFutures.add(CompletableFuture.runAsync(() -> {
-    		try {
-    			robotsService.run(data.value());
-    		} catch (Exception ex) {
-    			log.error("Ошибка при обработке задания проверки запрещенного ресурса: " + data.value().toString(), ex);
-    			JobNotificationsProducer.getInstance().sendCheckJobErrorNotification(data.value().getJobID(), ex);
-    		}
+    		robotsService.run(data.value());
     		acknowledgment.acknowledge();
 		}));
 		

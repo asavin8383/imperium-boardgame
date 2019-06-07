@@ -90,14 +90,29 @@
         </rollingPolicy>
     </appender>
     
-    <logger name="scripts.RobotScript" level="INFO">
+    <logger name="robots" level="INFO">
     	<appender-ref ref="ROBOTS_LOG" />
     	<appender-ref ref="Console" />
     </logger>
     
-    <logger name="listener" level="INFO">
-    	<appender-ref ref="ROBOTS_LOG" />
-    	<appender-ref ref="Console" />
+    <appender name="SCRIPTS_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOGS}/scripts.log</file>
+        <encoder>
+            <pattern>%date [%level] from %logger - %message%n%xException</pattern>
+        </encoder>
+        
+        <rollingPolicy
+            class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOGS}/archived/scripts-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy
+                class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>100MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+    </appender>
+    
+    <logger name="scripts" level="INFO">
+    	<appender-ref ref="SCRIPTS_LOG" />
     </logger>
  
 </configuration>

@@ -1,32 +1,32 @@
 package scripts.impl;
 
-import enums.AccessToolUnit;
-import execution.ExecutionVpnJobResult;
-import lombok.extern.slf4j.Slf4j;
+import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Optional;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
+
+import checkUnits.CheckUnit;
+import enums.AccessToolParameters;
+import execution.ExecutionJobResult;
+import execution.ExecutionVpnJobResult;
+import lombok.extern.slf4j.Slf4j;
 import scripts.DriverFactory;
 import scripts.ProxyUtils;
 import scripts.RobotScript;
+import scripts.ScriptDriverParameters;
 import scripts.ScriptUtils;
+import scripts.ScriptUtils.PageResult;
 import scripts.exceptions.RobotScriptExecutionException;
-
-import static scripts.ScriptUtils.PageResult;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 
 @Slf4j
 public class VPNScript extends RobotScript {
 
-    protected String vpnProxy;
+
+	protected String vpnProxy;
     protected String etalonProxy;
     protected String stubUrl;
     
@@ -34,57 +34,32 @@ public class VPNScript extends RobotScript {
 
     public static final String TIME_OUT_ERROR = "TIME_OUT";
 
-    protected boolean needAutoCreateDriver(){
-        return false;
-    }
-
-    @BeforeClass
-    @Parameters({"PROXY_TYPE", "PROXY_DNS_NAME", "PROXY_PORT", "PROXY_USER", "PROXY_PASSWORD",
-            "ETALON_PROXY_HOST", "ETALON_PROXY_PORT", "ETALON_PROXY_USERNAME", "ETALON_PROXY_PASSWORD",
-            "STUB_URL"})
-    public void setParameters(
-    	@Optional String proxyType,
-    	@Optional String proxyHost,
-    	@Optional String proxyPort,
-    	@Optional String proxyUser,
-    	@Optional String proxyPassword,
-        @Optional String etalonProxyHost,
-        @Optional String etalonProxyPort,
-        @Optional String etalonProxyUser,
-        @Optional String etalonProxyPassword,
-    	@Optional String stubUrl) throws MalformedURLException {
-
-        vpnProxy = ProxyUtils.getFullProxy(proxyType, proxyHost, proxyPort, proxyUser, proxyPassword);
-        etalonProxy = ProxyUtils.getFullProxy(proxyType, etalonProxyHost, etalonProxyPort, etalonProxyUser, etalonProxyPassword);
-    	this.stubUrl = stubUrl;
-
-        // todo - хардккод, удалить!
-        proxyHard();
-
-        log.info("---------- PROXY -----------");
+    public VPNScript(ScriptDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams)
+    		throws MalformedURLException {
+    	
+    	super(driverParams, scriptParams,
+    			ProxyUtils.getFullProxy(
+					scriptParams.get(AccessToolParameters.PROXY_TYPE),
+					scriptParams.get(AccessToolParameters.PROXY_DNS_NAME),
+					scriptParams.get(AccessToolParameters.PROXY_PORT),
+					scriptParams.get(AccessToolParameters.PROXY_USER),
+					scriptParams.get(AccessToolParameters.PROXY_PASSWORD)
+    			)
+    		);
+    	 
+    	etalonProxy = ProxyUtils.getFullProxy(
+    			scriptParams.get(AccessToolParameters.PROXY_TYPE),
+    			scriptParams.get(AccessToolParameters.ETALON_PROXY_HOST),
+    			scriptParams.get(AccessToolParameters.ETALON_PROXY_PORT),
+    			scriptParams.get(AccessToolParameters.ETALON_PROXY_USERNAME),
+    			scriptParams.get(AccessToolParameters.ETALON_PROXY_PASSWORD)
+			);
+     	this.stubUrl = scriptParams.get(AccessToolParameters.STUB_URL);
+     	
+     	log.info("---------- PROXY -----------");
         log.info("vpnProxy = " + vpnProxy);
         log.info("etalonProxy = " + etalonProxy);
         log.info("stubUrl = " + stubUrl);
-
-        createDriver(vpnProxy);
-    }
-
-    // todo - хардккод, удалить!
-    protected void proxyHard(){
-        if (getAccessToolUnit() == AccessToolUnit.TORGUARD){
-            vpnProxy = "http://:@192.168.5.10:3128";
-            etalonProxy = null;
-        }
-        else if (getAccessToolUnit() == AccessToolUnit.KASPERSKY){
-            vpnProxy = "http://:@192.168.5.194:3128";
-            etalonProxy = null;
-            stubUrl = "kaspersky.ru";
-        }
-        else if (getAccessToolUnit() == AccessToolUnit.EXPRESS){
-            vpnProxy = "http://:@192.168.5.194:3128";
-            etalonProxy = null;
-            stubUrl = "expressvpn.com";
-        }
     }
 
     @AfterClass
@@ -98,28 +73,26 @@ public class VPNScript extends RobotScript {
 
     public WebDriver createEtalonDriver() {
         WebDriver driver = null;
-        try {
-            driver = DriverFactory.createDriver(
-                    new URL(getHubURL()), getPlatformName(), getApplicationName(), getBrowserName(), etalonProxy);
-
-
-        } catch (MalformedURLException e) {
-            System.out.println("Exception on create WebDriver");
-            e.printStackTrace();
-        }
+        driver = DriverFactory.createDriver(
+                getDriverParams().getHubURL(),
+                getDriverParams().getPlatformName(),
+                getDriverParams().getApplicationName(),
+                getDriverParams().getBrowserName(),
+                etalonProxy
+         );
 
         if (driver != null)
             proxyDrivers.add(driver);
         return driver;
     }
 
-    @Test
-    public void execute() throws RobotScriptExecutionException {
+    @Override
+	public ExecutionJobResult execute(CheckUnit checkUnit) throws RobotScriptExecutionException {
         // работате только с хромом!
         if (!checkBrowserChrome())
             throw new RobotScriptExecutionException("Ошибка, неправильный браузер! Для данного робота поддерживатся только браузер CHROME!");
 
-        String url = ScriptUtils.getCheckUnitValue(getCheckUnit());
+        String url = ScriptUtils.getCheckUnitValue(checkUnit);
 
         // получение страницы от VPN (драйвер уже настроен)
         PageResult pageSourceResult = null;
@@ -161,7 +134,6 @@ public class VPNScript extends RobotScript {
         }
 
         ExecutionVpnJobResult message = new ExecutionVpnJobResult();
-        fillExecutionResultMessage(message);
         message.setStubUrl(stubUrl);
 
         message.setResponseError(pageSourceResult.errorCodeChrome != null);
@@ -182,11 +154,11 @@ public class VPNScript extends RobotScript {
         //log.info("--------- TEXT ---------");
         //log.info(pageSourceResult.pageSource);
 
-        sendExecutionResult(message);
+        return message;
     }
 
     public boolean checkBrowserChrome(){
-        return "chrome".equalsIgnoreCase(getBrowserName());
+        return "chrome".equalsIgnoreCase(getDriverParams().getBrowserName());
     }
 
 }

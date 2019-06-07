@@ -14,6 +14,6 @@ public interface RobotsService {
 	 * @param checkUnitJob Задание на ресурса 
 	 * @return
 	 */
-	boolean run(CheckUnitJob checkUnitJob);
+	void run(CheckUnitJob checkUnitJob);
 	
 }

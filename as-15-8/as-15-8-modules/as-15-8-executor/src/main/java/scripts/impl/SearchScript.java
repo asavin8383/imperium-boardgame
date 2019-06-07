@@ -1,31 +1,34 @@
 package scripts.impl;
 
-import checkUnits.CheckUnit;
-import execution.ExecutionPSJobResult;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
-import org.springframework.util.StringUtils;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Parameters;
-import scripts.RobotScript;
-import scripts.ScriptUtils;
-import scripts.exceptions.Captcha_RobotScriptExecutionException;
-import scripts.exceptions.RobotScriptExecutionException;
-
-import javax.annotation.Nullable;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Nullable;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
+import org.springframework.util.StringUtils;
+
+import checkUnits.CheckUnit;
+import enums.AccessToolParameters;
+import execution.ExecutionPSJobResult;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import scripts.RobotScript;
+import scripts.ScriptDriverParameters;
+import scripts.ScriptUtils;
+import scripts.exceptions.Captcha_RobotScriptExecutionException;
+import scripts.exceptions.RobotScriptExecutionException;
 
 @Slf4j
 public abstract class SearchScript extends RobotScript {
 
-    /** Максимальное кол-во проверяемых результатов по умолчанию */
+	/** Максимальное кол-во проверяемых результатов по умолчанию */
     private static final int DEFAULT_SEARCH_LIMIT = 20;
 
     private static final long DEFAULT_INPUT_DELAY = 300;
@@ -37,31 +40,23 @@ public abstract class SearchScript extends RobotScript {
     private int checkedResultCount;
 
     private long inputDelay;
+    
+	public SearchScript(ScriptDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams, int searchLimit, long inputDelay)
+			throws MalformedURLException {
+		
+		super(driverParams, scriptParams);
+		this.checkedResultCount = 0;
 
-    private EqualityTest test;
+		this.searchResultLimit = searchLimit > 0 ? searchLimit : DEFAULT_SEARCH_LIMIT;
 
-    @BeforeClass
-    @Parameters({"searchResultLimit", "inputDelay"})
-    public void setOptions(String searchLimit, String inputDelay) {
-        this.test = EqualityTest.forCheckUnit(getCheckUnit());
-        this.checkedResultCount = 0;
-
-        int limit = Integer.parseInt(searchLimit);
-        this.searchResultLimit = limit > 0 ? limit : DEFAULT_SEARCH_LIMIT;
-
-        this.inputDelay = StringUtils.isEmpty(inputDelay) ?
-                DEFAULT_INPUT_DELAY : Long.parseLong(inputDelay);
-    }
+		this.inputDelay = inputDelay > 0 ? inputDelay : DEFAULT_INPUT_DELAY;
+	}
 
     protected long getInputDelay() {
         return inputDelay;
     }
 
-    EqualityTest getEqualityTest() {
-        return test;
-    }
-
-    ExecutionPSJobResult checkSearchResult() throws RobotScriptExecutionException {
+    ExecutionPSJobResult checkSearchResult(EqualityTest test) throws RobotScriptExecutionException {
         do {
             if (captcha())
                 throw new Captcha_RobotScriptExecutionException("Обнаружена captcha");
@@ -87,7 +82,6 @@ public abstract class SearchScript extends RobotScript {
 
     ExecutionPSJobResult createExecutionResult(boolean linkFound) {
         ExecutionPSJobResult message = new ExecutionPSJobResult();
-        fillExecutionResultMessage(message);
         message.setLinkFound(linkFound);
         message.setScreenshot(linkFound ?
                 ScriptUtils.getScreenshot(driver) : null);

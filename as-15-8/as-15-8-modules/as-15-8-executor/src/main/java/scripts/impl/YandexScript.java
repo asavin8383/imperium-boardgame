@@ -1,46 +1,62 @@
 package scripts.impl;
 
+import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
+
+import java.net.MalformedURLException;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+import javax.annotation.Nullable;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
+
+import checkUnits.CheckUnit;
+import enums.AccessToolParameters;
+import execution.ExecutionJobResult;
+import scripts.ScriptDriverParameters;
 import scripts.ScriptUtils;
 import scripts.exceptions.RobotScriptExecutionException;
 
-import javax.annotation.Nullable;
-import java.util.List;
-import java.util.Objects;
-
-import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
-
 public class YandexScript extends SearchScript {
 
-    private static final String YANDEX_URL = "https://yandex.ru";
+	private static final String YANDEX_URL = "https://yandex.ru";
 
-    @Override
-    public void execute() throws RobotScriptExecutionException {
-        driver.get(YANDEX_URL);
+	
+	public YandexScript(ScriptDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams, int searchLimit, long inputDelay) throws MalformedURLException {	
+		super(driverParams, scriptParams, searchLimit, inputDelay);
+	}
+
+
+	@Override
+	public ExecutionJobResult execute(CheckUnit checkUnit) throws RobotScriptExecutionException {
+		EqualityTest test = EqualityTest.forCheckUnit(checkUnit);
+		
+		driver.get(YANDEX_URL);
         driver.manage().window().fullscreen();
 
         WebElement input = driver.findElement(By.name("text"));
         ScriptUtils.type(input, getInputDelay(),
-                getCheckUnit().getValue() + " ");
+        		checkUnit.getValue() + " ");
         //input.sendKeys(getCheckUnit().getValue() + " ");
 
-        if (checkSuggestedLink(driver)) {
-            sendExecutionResult(createExecutionResult(true));
+        if (checkSuggestedLink(test)) {
+            return createExecutionResult(true);
         } else {
             input.sendKeys(Keys.ENTER);
-            sendExecutionResult(checkSearchResult());
+            return checkSearchResult(test);
         }
-    }
+	}
 
-    private boolean checkSuggestedLink(WebDriver driver) {
+    private boolean checkSuggestedLink(EqualityTest test) {
         WebElement element = getSuggestedLink(driver);
         if (Objects.nonNull(element)) {
             String href = element.getAttribute("href");
-            return getEqualityTest().equalTo(href);
+            return test.equalTo(href);
         }
         return false;
     }
@@ -85,5 +101,4 @@ public class YandexScript extends SearchScript {
 
         return links;
     }
-
 }

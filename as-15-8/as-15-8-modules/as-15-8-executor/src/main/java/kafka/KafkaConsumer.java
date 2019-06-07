@@ -82,8 +82,17 @@ public class KafkaConsumer {
         			jobsListenerContainer.pause();
         		else if(controlMessage.getCommand() == ControlCommand.START)
         			jobsListenerContainer.resume();
-        		CheckUnitJobsListener listener = (CheckUnitJobsListener)jobsListenerContainer.getContainerProperties().getMessageListener();
+        		
+        		@SuppressWarnings("unchecked")
+				CheckUnitJobsListener listener = (CheckUnitJobsListener)(
+        				(FilteringMessageListenerAdapter<String, CheckUnitJob>)
+	        				jobsListenerContainer
+	        				.getContainerProperties()
+	        				.getMessageListener()
+        				).getDelegate();
+        		
         		listener.stopRunningJobs();
+        		log.info("Слушатель заданий на проверку "+controlMessage.getAccessToolUnit()+" успешно остановлен");
         	} catch (Exception ex) {
         		log.error("Ошибка при обработке управляющего сообщения: " + controlMessage.toString(), ex);
         	}

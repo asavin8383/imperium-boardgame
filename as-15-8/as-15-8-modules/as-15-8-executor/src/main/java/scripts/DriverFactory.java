@@ -3,6 +3,8 @@ package scripts;
 import java.net.URL;
 
 import lombok.extern.slf4j.Slf4j;
+
+import org.apache.logging.log4j.util.Strings;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.Proxy;
@@ -18,6 +20,18 @@ import org.openqa.selenium.remote.RemoteWebDriver;
  */
 @Slf4j
 public class DriverFactory {
+
+	/**
+	 * Метод создания selenium драйвера
+	 * @param hubURL URL selenium хаба
+	 * @param platformName Имя платформы
+	 * @param appName Имя приложения (ПС/ПАСД)
+	 * @param browserName Имя браузера
+	 * @return
+	 */
+	public static WebDriver createDriver(URL hubURL, Platform platformName, String appName, String browserName) {
+		return createDriver(hubURL, platformName, appName, browserName, null);
+	}
 	
 	/**
 	 * Метод создания selenium драйвера
@@ -28,16 +42,18 @@ public class DriverFactory {
 	 * @param proxy прокси
 	 * @return
 	 */
-	public static WebDriver createDriver(URL hubURL, String platformName, String appName, String browserName, String proxy) {
-		Capabilities cpb = buildCapability(Platform.valueOf(platformName), appName, browserName);
+	public static WebDriver createDriver(URL hubURL, Platform platformName, String appName, String browserName, String proxy) {
+		Capabilities cpb = buildCapability(platformName, appName, browserName);
 
-		Proxy oProxy = ProxyUtils.getSeleniumProxy(proxy);
-		if (oProxy != null) {
-			log.info("WebDriver set proxy: " + proxy);
-			((DesiredCapabilities)cpb).setCapability(CapabilityType.PROXY, oProxy);
-		}
-		else {
-			log.info("WebDriver set proxy: NONE");
+		if(Strings.isNotEmpty(proxy)) {
+			Proxy oProxy = ProxyUtils.getSeleniumProxy(proxy);
+			if (oProxy != null) {
+				log.info("WebDriver set proxy: " + proxy);
+				((DesiredCapabilities)cpb).setCapability(CapabilityType.PROXY, oProxy);
+			}
+			else {
+				log.info("WebDriver set proxy: NONE");
+			}
 		}
 
 		return new RemoteWebDriver(hubURL, cpb);

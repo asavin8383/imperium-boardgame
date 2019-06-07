@@ -1,7 +1,5 @@
 package test;
 
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +11,7 @@ import checkUnits.CheckUnitJob;
 import checkUnits.CheckUnitType;
 import common.ApplicationConfiguration;
 import enums.AccessToolUnit;
+import scripts.exceptions.RobotScriptExecutionException;
 import service.impl.SeleniumRobotsService;
 
 @RunWith(SpringRunner.class)
@@ -23,7 +22,7 @@ public class TestJobExecution {
 	private SeleniumRobotsService service;
 	
 	@Test
-	public void test() {
+	public void test() throws RobotScriptExecutionException {
 		
 		CheckUnitJob checkUnitJob = new CheckUnitJob();
 		checkUnitJob.setJobID(1L);
@@ -31,7 +30,7 @@ public class TestJobExecution {
 		
 		checkUnitJob.setCheckUnit(new CheckUnit(CheckUnitType.URL, "https://www.google.ru"));
 		
-		assertTrue(service.run(checkUnitJob));
+		service.run(checkUnitJob);
 	}
 	
 }

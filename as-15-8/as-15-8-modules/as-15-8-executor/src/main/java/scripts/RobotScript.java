@@ -1,30 +1,16 @@
 package scripts;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.concurrent.ExecutionException;
+import java.util.Map;
 
 import org.openqa.selenium.WebDriver;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.KafkaHeaders;
-import org.springframework.kafka.support.SendResult;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.ListenableFutureCallback;
-import org.testng.annotations.*;
 
 import checkUnits.CheckUnit;
-import checkUnits.CheckUnitType;
-import enums.AccessToolUnit;
+import enums.AccessToolParameters;
 import execution.ExecutionJobResult;
-import kafka.KafkaConfiguration;
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import scripts.exceptions.RobotScriptExecutionException;
 
 /**
@@ -32,138 +18,54 @@ import scripts.exceptions.RobotScriptExecutionException;
  * @author shabalinAI
  *
  */
-@Slf4j
-@SpringBootTest
-@ContextConfiguration(classes = {KafkaConfiguration.class})
-public abstract class RobotScript extends AbstractTestNGSpringContextTests{
+public abstract class RobotScript implements Closeable{
 
-	/** Драйвер selenium */
 	protected WebDriver driver;
 	
-	@Autowired
-	private KafkaTemplate<String, ExecutionJobResult> executionResultTemplate;
-	
-	@Autowired
-	private String executionResultTopicName;
+	@Getter
+	private ScriptDriverParameters driverParams;
 	
 	@Getter
-	protected String jobID;
-	
-	@Getter
-	private AccessToolUnit accessToolUnit;
-	
-	@Getter
-	protected CheckUnit checkUnit;
+	private Map<AccessToolParameters, String> scriptParams;
 
-	@Getter
-	protected String hubURL;
-
-	@Getter
-	protected String platformName;
-
-	@Getter
-	protected String applicationName;
-
-	@Getter
-	protected String browserName;
-
-	/**
-	 * Метод создания драйвера
-	 * @param hubURL URL хаба selenium
-	 * @param browserName Имя браузера
-	 * @param platformName Имя платформы
-	 * @param applicationName Имя приложения (ПС/ПАСД)
-	 * @throws MalformedURLException
-	 */
-	@BeforeClass
-	@Parameters({"hubURL", "browserName", "platformName", "applicationName", "jobID", "accessToolUnit", "checkUnitType", "checkUnitValue"})
-	public void createDriver(
-			String hubURL,
-			String browserName,
-			String platformName,
-			String applicationName,
-			String jobID,
-			String accessToolUnit,
-			String checkUnitType,
-			String checkUnitValue
-		) throws MalformedURLException {
-
-			this.jobID = jobID;
-			this.checkUnit = new CheckUnit(CheckUnitType.valueOf(checkUnitType), checkUnitValue);
-			this.accessToolUnit = AccessToolUnit.valueOf(accessToolUnit);
-
-			this.hubURL = hubURL;
-			this.platformName = platformName;
-			this.applicationName = applicationName;
-			this.browserName = browserName;
-
-			if (needAutoCreateDriver()){
-				createDriver(null);
-			}
+	public RobotScript(ScriptDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams) throws MalformedURLException {
+		setParams(driverParams, scriptParams);
+		this.driver = DriverFactory.createDriver(
+			driverParams.getHubURL(),
+			driverParams.getPlatformName(),
+			driverParams.getApplicationName(),
+			driverParams.getBrowserName()
+		);
 	}
 
-	protected void createDriver(String proxy) throws MalformedURLException {
-		this.driver = DriverFactory.createDriver(new URL(hubURL), platformName, applicationName, browserName, proxy);
+	public RobotScript(ScriptDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams, String proxy) throws MalformedURLException {
+		setParams(driverParams, scriptParams);
+		this.driver = DriverFactory.createDriver(
+			driverParams.getHubURL(),
+			driverParams.getPlatformName(),
+			driverParams.getApplicationName(),
+			driverParams.getBrowserName(),
+			proxy
+		);
 	}
-
-	protected boolean needAutoCreateDriver(){
-		return true;
+	
+	private void setParams(ScriptDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams) {
+		this.driverParams = driverParams;
+		this.scriptParams = scriptParams;
 	}
-
+	
 	/**
 	 * Метод, запускаюший выполнение скрипта робота
+	 * @param driver Драйвер
+	 * @param checkUnit Ресурс для проверки
+	 * @return
+	 * @throws RobotScriptExecutionException
 	 */
-	@Test
-	public abstract void execute() throws RobotScriptExecutionException;
+	public abstract ExecutionJobResult execute(CheckUnit checkUnit) throws RobotScriptExecutionException;
 	
-	/**
-	 * Метод закрытия драйвера
-	 */
-	@AfterClass
-	public void closeDriver() {
-		if(driver!=null) {
+	@Override
+	public void close() throws IOException {
+		if(this.driver != null)
 			driver.quit();
-		}
 	}
-	
-	protected void fillExecutionResultMessage(ExecutionJobResult message) {
-		message.setJobID(Long.parseLong(this.jobID));
-        message.setCheckUnit(this.checkUnit);
-        message.setAccessToolUnit(this.accessToolUnit);
-	}
-	
-	/**
-	 * Метод отправки результата выполнения робота в тему Kafka
-	 * @param jobResult Результат выполнения робота
-	 * @throws ExecutionException 
-	 * @throws InterruptedException 
-	 * @throws RobotScriptExecutionException 
-	 */
-	protected void sendExecutionResult(ExecutionJobResult jobResult) throws RobotScriptExecutionException {
-		try {
-			Message<ExecutionJobResult> message = MessageBuilder
-	                .withPayload(jobResult)
-	                .setHeader(KafkaHeaders.TOPIC, executionResultTopicName)
-	                .build();
-			
-			ListenableFuture<SendResult<String, ExecutionJobResult>> future = executionResultTemplate.send(message);
-		     
-		    future.addCallback(new ListenableFutureCallback<SendResult<String, ExecutionJobResult>>() {
-		 
-		        @Override
-		        public void onSuccess(SendResult<String, ExecutionJobResult> result) {
-		        	ExecutionJobResult mess = result.getProducerRecord().value();
-		            log.info("Сообщение успешно отправлено: " + mess.getJobID() + ", " + mess.getCheckUnit().getValue());
-		        }
-		        @Override
-		        public void onFailure(Throwable ex) {
-		        	throw new RuntimeException(ex);
-		        }
-		    });
-		    future.get();
-		} catch (Exception ex) {
-			throw new RobotScriptExecutionException("Ошибка при отправке сообщения с результатами работы робота", ex);
-		}
-	}
-	
 }

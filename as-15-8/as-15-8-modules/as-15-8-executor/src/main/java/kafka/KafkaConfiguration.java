@@ -39,9 +39,6 @@ public class KafkaConfiguration {
     @Value("${spring.kafka.auto-offset-reset}")
     private String offset;
     
-    @Value("${spring.kafka.produce-topic}")
-    private String executionResultTopicName;
-    
     @Bean 
     Map<String, Object> producerFactoryConfig(){
     	Map<String, Object> configProps = new HashMap<>();
@@ -123,10 +120,5 @@ public class KafkaConfiguration {
     @Bean
     public KafkaTemplate<String, ExecutorControlMessage> controlMessagesTemplate() {
         return new KafkaTemplate<>(controlMessagesProducerFactory());
-    }
-    
-    @Bean
-    public String executionResultTopicName() {
-    	return this.executionResultTopicName;
     }
 }

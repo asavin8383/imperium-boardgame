@@ -1,15 +1,22 @@
 package scripts.impl;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebElement;
-import scripts.ScriptUtils;
-import scripts.exceptions.RobotScriptExecutionException;
-
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebElement;
+
+import checkUnits.CheckUnit;
+import enums.AccessToolParameters;
+import execution.ExecutionJobResult;
+import scripts.ScriptDriverParameters;
+import scripts.ScriptUtils;
+import scripts.exceptions.RobotScriptExecutionException;
 
 /**
  * Скрипт проверки ПС Google
@@ -20,18 +27,24 @@ public class GoogleScript extends SearchScript {
 
 	private static final String GOOGLE_URL = "https://www.google.ru";
 
+	public GoogleScript(ScriptDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams, int searchLimit, long inputDelay) throws MalformedURLException {
+		super(driverParams, scriptParams, searchLimit, inputDelay);
+	}
+	
 	@Override
-	public void execute() throws RobotScriptExecutionException{
+	public ExecutionJobResult execute(CheckUnit checkUnit) throws RobotScriptExecutionException{
+		EqualityTest test = EqualityTest.forCheckUnit(checkUnit);
+		
 		driver.get(GOOGLE_URL);
 		driver.manage().window().fullscreen();
 
 		WebElement input = driver.findElement(By.name("q"));
 		//input.sendKeys(getCheckUnit().getValue());
 		ScriptUtils.type(input, getInputDelay(),
-				getCheckUnit().getValue() + " ");
+				checkUnit.getValue() + " ");
 		input.sendKeys(Keys.ENTER);
 
-		sendExecutionResult(checkSearchResult());
+		return checkSearchResult(test);
 	}
 
 	@Override
