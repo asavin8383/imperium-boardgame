@@ -47,7 +47,7 @@ public class KafkaAnalysisResultsConsumer {
         			log.info("Мероприятие успешно завешено: " + jobResult.getArrangementId());
         			arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(jobResult.getArrangementId(), arrStatus));
         		}
-            	ack.acknowledge();
+
         	} catch (Exception ex) {
         		try {
 	        		log.error("Ошибка при обработке сообщения с анализом результатов проверки: " + analysisResult.getJobID() + ", " + analysisResult.getCheckUnit().getValue(), ex);
@@ -57,11 +57,11 @@ public class KafkaAnalysisResultsConsumer {
 	        			log.info("Мероприятие успешно завешено: " + jobResult.getArrangementId());
 	        			arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(jobResult.getArrangementId(), arrStatus));
 	        		}
-	            	ack.acknowledge();
-        		} catch(ExceptionInInitializerError newEx) {
-        			log.error("Ошибка при обработке сообщения с анализом результатов проверки: " + analysisResult.getJobID() + ", " + analysisResult.getCheckUnit().getValue(), newEx);
+        		} catch(Exception newEx) {
+        			log.error("Ошибка при сохранении ошибочной обработки сообщения с анализом результатов проверки: " + analysisResult.getJobID() + ", " + analysisResult.getCheckUnit().getValue(), newEx);
         		}
         	}
+        	ack.acknowledge();
         });
     }
 }

@@ -71,10 +71,6 @@ public abstract class SeleniumRobot implements Robot{
 				}
 			}
 		}
-		
-        message.setCheckUnit(checkUnit);
-        message.setAccessToolUnit(accessToolUnit);
-        
         return message;
 	}
 	

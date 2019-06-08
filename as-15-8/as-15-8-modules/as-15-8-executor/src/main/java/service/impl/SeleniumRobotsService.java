@@ -66,6 +66,9 @@ public class SeleniumRobotsService implements RobotsService {
 			log.info("Запуск робота: " + robotName);
 			try {
 				message = robot.run(checkUnitJob.getCheckUnit(), checkUnitJob.getAccessToolParameters());
+				message.setJobID(checkUnitJob.getJobID());
+				message.setCheckUnit(checkUnitJob.getCheckUnit());
+		        message.setAccessToolUnit(checkUnitJob.getAccessToolUnit());
 			} catch (Exception ex) {
 				if(ex instanceof Captcha_RobotScriptExecutionException) {
 					log.warn("Робот остановлен, обнаружена капча: " + robotName);
