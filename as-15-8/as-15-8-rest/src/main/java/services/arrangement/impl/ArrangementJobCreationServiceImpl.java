@@ -48,9 +48,9 @@ public class ArrangementJobCreationServiceImpl implements ArrangementJobCreation
             arrangementJob.setAccessToolUnit(arrangement.getAccessTool().getName());
             arrangementJob.getErdiJobList().add(new ERDIJob(arrangementItem.getErdi().getId()));
             //Добавляем параметры конкретного ПС/ПАСД
-            putAll(arrangementJob.getAccessToolParameters(), prepareParameters(arrangement.getAccessTool()));
+            arrangementJob.getAccessToolParameters().putAll(prepareParameters(arrangement.getAccessTool()));
             //Добавляем глобальные параметры
-            putAll(arrangementJob.getAccessToolParameters(), prepareGlobalParameters());
+            arrangementJob.getAccessToolParameters().putAll(prepareGlobalParameters());
             jobList.add(arrangementJob);
         }
         return jobList;
@@ -115,14 +115,6 @@ public class ArrangementJobCreationServiceImpl implements ArrangementJobCreation
 
     private Map<AccessToolParameters, String> prepareGlobalParameters(){
         return globalParametersRepo.findAll().stream()
-            .collect(Collectors.toMap(GlobalParameter::getKey, GlobalParameter::getValue));
-    }
-
-    private <K, V> void putAll(Map<K, V> destination, Map<K, V> source){
-        source.forEach((k, v) -> {
-            if (!destination.containsKey(k)){
-                destination.put(k,v);
-            }
-        });
+            .collect(HashMap::new, (m,v)->m.put(v.getKey(), v.getValue()), HashMap::putAll);
     }
 }
