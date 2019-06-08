@@ -103,7 +103,7 @@ public class KafkaConfiguration {
 
         ConcurrentKafkaListenerContainerFactory<String, ExecutorControlMessage> listenerFactory = new ConcurrentKafkaListenerContainerFactory<>();
         listenerFactory.setConsumerFactory(factory);
-        listenerFactory.getContainerProperties().setAckMode(AckMode.MANUAL_IMMEDIATE);
+        listenerFactory.getContainerProperties().setAckMode(AckMode.MANUAL);
         return listenerFactory;
     }
  
