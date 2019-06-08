@@ -13,12 +13,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.lob.DefaultLobHandler;
+import org.springframework.jdbc.support.lob.LobHandler;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import repositories.ArrangementResultRepository;
 import repositories.DetailedArrangementResultRepository;
 
 import java.sql.Blob;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
@@ -90,14 +93,15 @@ public class ArrangementResultsController {
 
         String sql = "select " + fieldName + " from portal.arrangement_results where id = ?";
 
-        Blob blob = jdbcTemplate.queryForObject(sql, new Object[]{id}, Blob.class);
-        if (blob != null) {
-            try {
-                return new ResponseEntity<>(blob.getBytes(1, (int) blob.length()), HttpStatus.OK);
-            } catch (SQLException ex) {
-                log.error("Error getting image from DB", ex);
-            }
+        byte[] result = jdbcTemplate.queryForObject(sql, new Object[]{id}, this::mapScreenShot);
+        if (result != null) {
+            return new ResponseEntity<>(result, HttpStatus.OK);
         }
         return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
+    }
+
+    private byte[] mapScreenShot(ResultSet rs, int rowNum) throws SQLException {
+        LobHandler lobHandler = new DefaultLobHandler();
+        return lobHandler.getBlobAsBytes(rs,0);
     }
 }
