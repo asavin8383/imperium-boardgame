@@ -5,7 +5,6 @@ import exceptions.AS_15_8_Exception;
 import jobs.ArrangementJob;
 import jobs.ERDIJob;
 import model.catalog.*;
-import model.parameters.GlobalParameter;
 import model.task.Arrangement;
 import model.task.ArrangementItem;
 import org.springframework.stereotype.Service;
@@ -17,7 +16,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Creation date: 23.05.2019
