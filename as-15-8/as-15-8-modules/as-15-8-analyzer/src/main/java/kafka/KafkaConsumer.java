@@ -43,12 +43,13 @@ public class KafkaConsumer {
     				kafkaListenerContainerFactory.createContainer(executionResultsTopicName);
 	    	
 	    	container.getContainerProperties().setGroupId("analyzer_"+accessTool.name().toLowerCase());
-	    	container.getContainerProperties().setAckMode(AckMode.MANUAL);
+	    	container.getContainerProperties().setAckMode(AckMode.MANUAL_IMMEDIATE);
 	    	
 	    	container.setupMessageListener(
 	    		new FilteringMessageListenerAdapter<String, ExecutionJobResult>(
 	    			new ExecutionJobResultsListener(kafkaProducer), 
-	    			record -> !record.value().getAccessToolUnit().equals(accessTool)
+	    			record -> !record.value().getAccessToolUnit().equals(accessTool),
+	    			true
 	    		)
 	    	);
 	    	
