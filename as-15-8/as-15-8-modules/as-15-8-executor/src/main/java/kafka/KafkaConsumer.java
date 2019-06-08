@@ -54,7 +54,8 @@ public class KafkaConsumer {
     				kafkaListenerContainerFactory.createContainer(checkUnitJobsTopicName);
 	    	
     		container.getContainerProperties().setGroupId("exec_"+accessTool.name().toLowerCase());
-    		container.getContainerProperties().setAckMode(AckMode.MANUAL_IMMEDIATE);
+    		container.getContainerProperties().setAckMode(AckMode.COUNT);
+    		container.getContainerProperties().setAckCount(maxRobotsParallelRunning);
 	    	
 	    	container.setupMessageListener(
 	    		new FilteringMessageListenerAdapter<String, CheckUnitJob>(
