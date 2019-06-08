@@ -102,6 +102,6 @@ public class ArrangementResultsController {
 
     private byte[] mapScreenShot(ResultSet rs, int rowNum) throws SQLException {
         LobHandler lobHandler = new DefaultLobHandler();
-        return lobHandler.getBlobAsBytes(rs,0);
+        return lobHandler.getBlobAsBytes(rs,1);
     }
 }
