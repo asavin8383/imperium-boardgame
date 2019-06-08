@@ -46,7 +46,7 @@ spring:
         notification-topic: job_notifications
         control-topic: exec_control
 robots:
-    max-parallel-running: 10
+    max-parallel-running: 3
 
 ---
 
