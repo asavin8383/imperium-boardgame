@@ -7,6 +7,7 @@ import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  * Creation date: 23.05.2019
@@ -53,4 +54,11 @@ public class ArrangementResult implements Serializable {
     @Column(name="etalon_screenshot", columnDefinition="bytea")
     @Type(type="org.hibernate.type.BinaryType")
     private byte[] etalonScreenshot;
+
+    private LocalDateTime startDate;
+    private LocalDateTime endDate;
+
+    public ArrangementResult() {
+        this.startDate = LocalDateTime.now();
+    }
 }

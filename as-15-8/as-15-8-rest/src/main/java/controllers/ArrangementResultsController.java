@@ -3,6 +3,7 @@ package controllers;
 import checkUnits.CheckUnitType;
 import controllers.helpers.SortingHelper;
 import enums.SortingDirection;
+import lombok.extern.slf4j.Slf4j;
 import model.result.ArrangementResult;
 import model.result.DetailedArrangementResult;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,10 +12,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import repositories.ArrangementResultRepository;
 import repositories.DetailedArrangementResultRepository;
+
+import java.sql.Blob;
+import java.sql.SQLException;
 
 /**
  * Creation date: 29.05.2019
@@ -24,16 +29,20 @@ import repositories.DetailedArrangementResultRepository;
 
 @RestController
 @RequestMapping(path = "/results", produces = MediaType.APPLICATION_JSON_VALUE)
+@Slf4j
 public class ArrangementResultsController {
 
     private ArrangementResultRepository arrangementResultRepo;
     private DetailedArrangementResultRepository detailedArrangementResultRepo;
+    private JdbcTemplate jdbcTemplate;
 
     @Autowired
     public ArrangementResultsController(ArrangementResultRepository arrangementResultRepo,
-                                        DetailedArrangementResultRepository detailedArrangementResultRepo) {
+                                        DetailedArrangementResultRepository detailedArrangementResultRepo,
+                                        JdbcTemplate jdbcTemplate) {
         this.arrangementResultRepo = arrangementResultRepo;
         this.detailedArrangementResultRepo = detailedArrangementResultRepo;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @PreAuthorize("hasAnyRole('ROLE_OPERATOR', 'ROLE_ADMIN')")
@@ -73,20 +82,22 @@ public class ArrangementResultsController {
     }
 
     private ResponseEntity<byte[]> receiveScreenshotFromDB(Long id, boolean isEtalon){
-        return arrangementResultRepo.findById(id)
-                .map(arrangementResult -> {
-                    byte[] screenshot;
-                    if (isEtalon){
-                        screenshot = arrangementResult.getEtalonScreenshot();
-                    } else {
-                        screenshot = arrangementResult.getScreenshot();
-                    }
-                    if (screenshot != null){
-                        return new ResponseEntity<>(screenshot, HttpStatus.OK);
-                    } else {
-                        return new ResponseEntity<>(new byte[0], HttpStatus.NO_CONTENT);
-                    }
-                })
-                .orElseGet(() -> new ResponseEntity<>(null, HttpStatus.NO_CONTENT));
+
+        String fieldName = "screenshot";
+        if (isEtalon) {
+            fieldName = "etalon_screenshot";
+        }
+
+        String sql = "select " + fieldName + " from portal.arrangement_results where id = ?";
+
+        Blob blob = jdbcTemplate.queryForObject(sql, new Object[]{id}, Blob.class);
+        if (blob != null) {
+            try {
+                return new ResponseEntity<>(blob.getBytes(1, (int) blob.length()), HttpStatus.OK);
+            } catch (SQLException ex) {
+                log.error("Error getting image from DB", ex);
+            }
+        }
+        return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
     }
 }
