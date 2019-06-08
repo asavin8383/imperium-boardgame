@@ -54,7 +54,7 @@ public class KafkaConsumer {
     				kafkaListenerContainerFactory.createContainer(checkUnitJobsTopicName);
 	    	
     		container.getContainerProperties().setGroupId("exec_"+accessTool.name().toLowerCase());
-    		container.getContainerProperties().setAckMode(AckMode.MANUAL);
+    		container.getContainerProperties().setAckMode(AckMode.MANUAL_IMMEDIATE);
     		//container.getContainerProperties().setAckCount(maxRobotsParallelRunning);
 	    	
 	    	container.setupMessageListener(
@@ -86,12 +86,12 @@ public class KafkaConsumer {
         			jobsListenerContainer.resume();
         		
         		@SuppressWarnings("unchecked")
-				CheckUnitJobsListener listener = (CheckUnitJobsListener)(
-        				(FilteringMessageListenerAdapter<String, CheckUnitJob>)
+				CheckUnitJobsListener listener = (CheckUnitJobsListener)
+						((FilteringMessageListenerAdapter<String, CheckUnitJob>)
 	        				jobsListenerContainer
 	        				.getContainerProperties()
-	        				.getMessageListener()
-        				).getDelegate();
+	        				.getMessageListener())
+						.getDelegate();
         		
         		listener.stopRunningJobs();
         		log.info("Слушатель заданий на проверку "+controlMessage.getAccessToolUnit()+" успешно остановлен");
