@@ -2,6 +2,7 @@ package services.impl;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -142,6 +143,7 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
 		job.setResult(service.processResult(result));  		
 		job.setScreenshot(result.getScreenshot());
 		job.setEtalonScreenshot(result.getEtalonScreenshot());
+		job.setEndDate(LocalDateTime.now());
 		return arrangementResultRepo.save(job);
 	}
 

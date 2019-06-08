@@ -10,6 +10,7 @@ import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  * Результаты выполнения мероприятия
@@ -49,7 +50,7 @@ public class ArrangementResult implements Serializable {
     @Column(name="result", nullable=false)
     private CheckUnitJobResult result;
 
-    @Lob
+    /*Lob
     @Column(name="screenshot", columnDefinition="bytea")
     @Type(type="org.hibernate.type.BinaryType")
     @JsonIgnore
@@ -59,10 +60,14 @@ public class ArrangementResult implements Serializable {
     @Column(name="etalon_screenshot", columnDefinition="bytea")
     @Type(type="org.hibernate.type.BinaryType")
     @JsonIgnore
-    private byte[] etalonScreenshot;
+    private byte[] etalonScreenshot;*/
+
+    private LocalDateTime startDate;
+    private LocalDateTime endDate;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "id", referencedColumnName = "id")
     @JsonIgnore
     DetailedArrangementResult detailedArrangementResult;
+
 }
