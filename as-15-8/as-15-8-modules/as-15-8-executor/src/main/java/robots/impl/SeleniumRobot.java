@@ -1,5 +1,6 @@
 package robots.impl;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
@@ -11,6 +12,7 @@ import lombok.Getter;
 import robots.Robot;
 import scripts.RobotScript;
 import scripts.ScriptDriverParameters;
+import scripts.exceptions.Captcha_RobotScriptExecutionException;
 import scripts.exceptions.RobotScriptExecutionException;
 
 /**
@@ -48,13 +50,26 @@ public abstract class SeleniumRobot implements Robot{
 	public ExecutionJobResult run(CheckUnit checkUnit, Map<AccessToolParameters, String> accessToolParameters) throws RobotScriptExecutionException {
 	
 		ExecutionJobResult message = null;
-		try(RobotScript script = createScript(accessToolParameters)){
+		RobotScript script = null;
+		boolean isCaptcha = false;
+		try{
+			script = createScript(accessToolParameters);
 			message = script.execute(checkUnit);
 		} catch (Exception ex) {
-			if(ex instanceof RobotScriptExecutionException)
+			if(ex instanceof RobotScriptExecutionException) {
+				if(ex instanceof Captcha_RobotScriptExecutionException)
+					isCaptcha = true;
 				throw (RobotScriptExecutionException)ex;
-			else
+			} else
 				throw new RobotScriptExecutionException("Ошибка при выполнении скрипта робота", ex);
+		} finally {
+			if(!isCaptcha && script != null) {
+				try {
+					script.close();
+				} catch (IOException ex) {
+					throw new RobotScriptExecutionException("Ошибка при закрытии скрипта", ex);
+				}
+			}
 		}
 		
         message.setCheckUnit(checkUnit);

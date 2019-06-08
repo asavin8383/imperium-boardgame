@@ -41,8 +41,8 @@ public class ProxyUtils {
         ProxyType proxyType = getProxyType(proxy);
         String host = getProxyHost(proxy);
         String port = getProxyPort(proxy);
-        String user = getProxyUser(proxy);
-        String pass = getProxyPass(proxy);
+        //String user = getProxyUser(proxy);
+        //String pass = getProxyPass(proxy);
 
         String simpleProxyUrl = host + ":" + port;
 
@@ -72,7 +72,8 @@ public class ProxyUtils {
         return oProxy;
     }
 
-    public static String getFullProxy(String type, String host, String port, String user, String pass){
+    @SuppressWarnings("deprecation")
+	public static String getFullProxy(String type, String host, String port, String user, String pass){
         if (host == null || host.isEmpty())
             return null;
 
@@ -117,12 +118,14 @@ public class ProxyUtils {
         return matcher == null ? null : matcher.group(5);
     }
 
-    public static String getProxyUser(String fullProxy){
+    @SuppressWarnings("deprecation")
+	public static String getProxyUser(String fullProxy){
         Matcher matcher = getProxyMatcher(fullProxy);
         return matcher == null ? null : URLDecoder.decode(matcher.group(2));
     }
 
-    public static String getProxyPass(String fullProxy){
+    @SuppressWarnings("deprecation")
+	public static String getProxyPass(String fullProxy){
         Matcher matcher = getProxyMatcher(fullProxy);
         return matcher == null ? null : URLDecoder.decode(matcher.group(3));
     }
