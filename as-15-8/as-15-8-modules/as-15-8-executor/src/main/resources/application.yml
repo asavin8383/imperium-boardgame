@@ -2,7 +2,6 @@ server:
     port: 11100
 selenium-hub-url: http://192.168.5.46:4444/wd/hub
 robots:
-    max-parallel-running: 3
     google:
         platform: WIN8
         browser: chrome
@@ -46,6 +45,8 @@ spring:
         produce-topic: exec_results
         notification-topic: job_notifications
         control-topic: exec_control
+robots:
+    max-parallel-running: 10
 
 ---
 
@@ -56,6 +57,8 @@ spring:
         produce-topic: exec_results_ashabalin
         notification-topic: job_notifications_ashabalin
         control-topic: exec_control_ashabalin
+robots:
+    max-parallel-running: 3
 
 ---
 
@@ -66,6 +69,8 @@ spring:
         produce-topic: exec_results_asavin
         notification-topic: job_notifications_asavin
         control-topic: exec_control_asavin
+robots:
+    max-parallel-running: 3
 
 ---
 
@@ -76,6 +81,8 @@ spring:
         produce-topic: exec_results_pvorobiev
         notification-topic: job_notifications_pvorobiev
         control-topic: exec_control_pvorobiev
+robots:
+    max-parallel-running: 3
 
 ---
 
@@ -86,3 +93,5 @@ spring:
         produce-topic: exec_results_jspirina
         notification-topic: job_notifications_jspirina
         control-topic: exec_control_jspirina
+robots:
+    max-parallel-running: 3
