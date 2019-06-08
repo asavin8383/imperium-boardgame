@@ -53,9 +53,8 @@ public abstract class SeleniumRobot implements Robot{
 		RobotScript script = null;
 		boolean isCaptcha = false;
 		try{
-			throw new Captcha_RobotScriptExecutionException("Test");
-			//script = createScript(accessToolParameters);
-			//message = script.execute(checkUnit);
+			script = createScript(accessToolParameters);
+			message = script.execute(checkUnit);
 		} catch (Exception ex) {
 			if(ex instanceof RobotScriptExecutionException) {
 				if(ex instanceof Captcha_RobotScriptExecutionException)
@@ -72,7 +71,7 @@ public abstract class SeleniumRobot implements Robot{
 				}
 			}
 		}
-        //return message;
+        return message;
 	}
 	
 	protected abstract Object[] getScriptArgs(Map<AccessToolParameters, String> params);
