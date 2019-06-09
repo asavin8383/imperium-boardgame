@@ -11,7 +11,7 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper=true)
 @ToString(callSuper=true)
 @NoArgsConstructor
-public class VpnAnalysisResult extends AnalysisResult {
+public class VpnAnalysisResult extends AnalysisResult implements StubAnalysisResult {
 
 	private CheckUnitJobResult checkResult;
 
@@ -28,4 +28,9 @@ public class VpnAnalysisResult extends AnalysisResult {
 	private String stubUrl;
 	private Integer similarityOriginPercent;
 	private String stubScoreInfo;
+
+	@Override
+	public String getFinalUrl() {
+		return pageUrlFinal;
+	}
 }

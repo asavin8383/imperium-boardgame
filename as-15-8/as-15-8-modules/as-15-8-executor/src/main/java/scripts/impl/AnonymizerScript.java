@@ -2,8 +2,8 @@ package scripts.impl;
 
 import checkUnits.CheckUnit;
 import enums.AccessToolParameters;
+import execution.ExecutionAnonymizerResult;
 import execution.ExecutionJobResult;
-import execution.ExecutionVpnJobResult;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.TimeoutException;
 import scripts.*;
@@ -17,7 +17,7 @@ public abstract class AnonymizerScript extends RobotScript {
 
     private String etalonProxy;
 
-    private ExecutionVpnJobResult message;
+    private ExecutionAnonymizerResult message;
 
     public AnonymizerScript(ScriptDriverParameters driverParams,
                             Map<AccessToolParameters, String> scriptParams) {
@@ -31,47 +31,44 @@ public abstract class AnonymizerScript extends RobotScript {
                 scriptParams.get(AccessToolParameters.ETALON_PROXY_PASSWORD)
         );
 
-        this.message = new ExecutionVpnJobResult();
+        this.message = new ExecutionAnonymizerResult();
         this.message.setStubUrl(scriptParams.get(AccessToolParameters.STUB_URL));
     }
 
     ExecutionJobResult process(CheckUnit checkUnit) {
         ScriptUtils.PageResult page = ScriptUtils.getPageSource(driver);
 
-        message.setResponseError(page.errorCodeChrome != null);
-        message.setChromeErrorCode(page.errorCodeChrome);
+        message.setErrorCode(page.errorCodeChrome);
         message.setPageContent(page.pageSource);
         message.setScreenshot(ScriptUtils.getScreenshot(driver));
-        if (page.errorCodeChrome == null) {
-            message.setFinalUrlPage(driver.getCurrentUrl());
-        }
+
+        if (message.hasError())
+            return message;
+
+        message.setFinalUrl(driver.getCurrentUrl());
 
         close(driver);
 
-        try {
-            driver = DriverFactory.createDriver(
-                    getDriverParams().getHubURL(),
-                    getDriverParams().getPlatformName(),
-                    getDriverParams().getApplicationName(),
-                    getDriverParams().getBrowserName(),
-                    etalonProxy);
+        driver = DriverFactory.createDriver(
+                getDriverParams().getHubURL(),
+                getDriverParams().getPlatformName(),
+                getDriverParams().getApplicationName(),
+                getDriverParams().getBrowserName(),
+                etalonProxy);
 
-            driver.get(ScriptUtils.getCheckUnitValue(checkUnit));
-            ScriptUtils.PageResult etalon = loadEtalon();
+        driver.get(ScriptUtils.getCheckUnitValue(checkUnit));
+        ScriptUtils.PageResult etalon = loadEtalon();
 
-            message.setChromeErrorCodeEtalon(etalon.errorCodeChrome);
-            message.setPageContentEtalon(etalon.pageSource);
-            message.setEtalonScreenshot(ScriptUtils.getScreenshot(driver));
-        } finally {
-            close(driver);
-        }
+        message.setEtalonErrorCode(etalon.errorCodeChrome);
+        message.setEtalonPageContent(etalon.pageSource);
+        message.setEtalonScreenshot(ScriptUtils.getScreenshot(driver));
 
+        close(driver);
 	    return message;
     }
 
     ExecutionJobResult getTimeoutMessage() {
-        message.setResponseError(true);
-        message.setChromeErrorCode(TIME_OUT_ERROR);
+        message.setErrorCode(TIME_OUT_ERROR);
         message.setScreenshot(ScriptUtils.getScreenshot(driver));
         return message;
     }
