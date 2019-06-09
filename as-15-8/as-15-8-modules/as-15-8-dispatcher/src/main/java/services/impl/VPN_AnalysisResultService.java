@@ -5,8 +5,12 @@ import enums.CheckUnitJobResult;
 import model.DetailResultsVpn;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import repositories.DetailResultsVpnRepository;
 import services.AnalysisResultService;
+
+import java.net.URI;
+import java.net.URISyntaxException;
 
 
 @Service
@@ -49,6 +53,23 @@ public class VPN_AnalysisResultService implements AnalysisResultService<VpnAnaly
 	}
 
 	private Boolean searchUrlInErdi(String url){
+		if (StringUtils.isEmpty(url)){
+			return false;
+		}
+
+		URI u = null;
+		try {
+			u = new URI(url);
+		}
+		catch (URISyntaxException e) {
+			e.printStackTrace();
+			return false;
+		}
+
+		String host = u.getHost();
+		String h1 = java.net.IDN.toUnicode(host);
+		String h2 = java.net.IDN.toASCII(host);
+
 		return false;
 	}
 }

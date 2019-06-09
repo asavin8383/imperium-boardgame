@@ -2,6 +2,8 @@ package analysis;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
 
@@ -28,17 +30,22 @@ public class AnalysisUtils {
         return StringUtils.countMatches(source, substr);
     }
 
-    public static int getDomainCount(String url, String text) throws MalformedURLException {
-        String domain = getDomain(url);
-        return countMatches(text, domain);
+    public static int getDomainCount(String url, String text) {
+        try {
+            String domain = getDomain(url);
+            return countMatches(text, domain);
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
-    public static String getDomain(String url) throws MalformedURLException {
+    public static String getDomain(String url) throws URISyntaxException {
         if (url == null || url.trim().isEmpty()){
             return null;
         }
-        URL aURL = new URL(url);
-        return aURL.getHost();
+        URI u = new URI(url);
+        return u.getHost();
     }
 
     public static int getLinkCounts(String text){

@@ -135,17 +135,20 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 			return FORBIDDEN_CONTENT_DETECTED;
 		}
 
+		// проверка на заглушку
 		boolean isStub = StubAnalysis.isStub(aRes);
 
 		if (isStub){
 			return COMPLETED;
 		}
 
-		// todo - проверить конечную ссылку на запрещенную (завести статус??? для того чтобы в дальнейшем проверять пачкой)
+		// флаг необходимости проверить конечный юрл в картотеке ЕРДИ
 		if (wasRedirect){
+			aRes.setNeedTestFinalUrl(true);
+			return COMPLETED;	// todo - в случае если юрл разрешен (подумать)
 		}
 
-		return FORBIDDEN_CONTENT_DETECTED;
+		return FORBIDDEN_CONTENT_DETECTED;	// todo - юрл тот же, но не заглушка (подумать)
 	}
 
 }
