@@ -1,26 +1,24 @@
 package robots.impl;
 
-import java.util.Map;
-
 import enums.AccessToolParameters;
 import enums.AccessToolUnit;
 import scripts.RobotScript;
 import scripts.ScriptDriverParameters;
 
+import java.util.Map;
+
 public class SeleniumSearchRobot extends SeleniumRobot {
 
+	// todo as db parameter
     private int searchResultLimit;
-    private long inputDelay;
 
     public SeleniumSearchRobot(AccessToolUnit accessToolUnit,
     						   Class<? extends RobotScript> scriptClass,
                                ScriptDriverParameters driverParams,
-                               int searchResultLimit,
-                               long inputDelay) {
+                               int searchResultLimit) {
         super(accessToolUnit, scriptClass, driverParams);
 
         this.searchResultLimit = searchResultLimit;
-        this.inputDelay = inputDelay;
     }
 
 	@Override
@@ -29,7 +27,6 @@ public class SeleniumSearchRobot extends SeleniumRobot {
 			this.driverParams,
 			params,
 			this.searchResultLimit,
-			this.inputDelay	
 		};
 	}
 }

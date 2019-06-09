@@ -1,22 +1,19 @@
 package scripts.impl;
 
-import java.net.MalformedURLException;
+import checkUnits.CheckUnit;
+import enums.AccessToolParameters;
+import execution.ExecutionJobResult;
+import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebElement;
+import scripts.ScriptDriverParameters;
+import scripts.exceptions.RobotScriptExecutionException;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebElement;
-
-import checkUnits.CheckUnit;
-import enums.AccessToolParameters;
-import execution.ExecutionJobResult;
-import scripts.ScriptDriverParameters;
-import scripts.ScriptUtils;
-import scripts.exceptions.RobotScriptExecutionException;
 
 /**
  * Скрипт проверки ПС Google
@@ -27,8 +24,10 @@ public class GoogleScript extends SearchScript {
 
 	private static final String GOOGLE_URL = "https://www.google.ru";
 
-	public GoogleScript(ScriptDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams, int searchLimit, long inputDelay) throws MalformedURLException {
-		super(driverParams, scriptParams, searchLimit, inputDelay);
+	public GoogleScript(ScriptDriverParameters driverParams,
+						Map<AccessToolParameters, String> scriptParams,
+						int searchLimit) {
+		super(driverParams, scriptParams, searchLimit);
 	}
 	
 	@Override
@@ -39,17 +38,15 @@ public class GoogleScript extends SearchScript {
 		driver.manage().window().fullscreen();
 
 		WebElement input = driver.findElement(By.name("q"));
-		//input.sendKeys(getCheckUnit().getValue());
-		ScriptUtils.type(input, getInputDelay(),
-				checkUnit.getValue() + " ");
+		input(input, checkUnit.getValue() + " ");
 		input.sendKeys(Keys.ENTER);
 
 		return checkSearchResult(test);
 	}
 
 	@Override
-	protected boolean nextPage() {
-		return nextPage(By.id("pnnext"));
+	protected By nextPageBy() {
+		return By.id("pnnext");
 	}
 
 	@Override

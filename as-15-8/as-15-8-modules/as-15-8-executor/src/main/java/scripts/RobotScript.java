@@ -1,24 +1,22 @@
 package scripts;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.util.Map;
-
-import org.openqa.selenium.WebDriver;
-
 import checkUnits.CheckUnit;
 import enums.AccessToolParameters;
 import execution.ExecutionJobResult;
 import lombok.Getter;
+import org.openqa.selenium.WebDriver;
 import scripts.exceptions.RobotScriptExecutionException;
+
+import java.io.Closeable;
+import java.io.IOException;
+import java.util.Map;
 
 /**
  * Скрипт робота проверки ПС/ПАСД
  * @author shabalinAI
  *
  */
-public abstract class RobotScript implements Closeable{
+public abstract class RobotScript implements Closeable {
 
 	protected WebDriver driver;
 	
@@ -28,7 +26,7 @@ public abstract class RobotScript implements Closeable{
 	@Getter
 	private Map<AccessToolParameters, String> scriptParams;
 
-	public RobotScript(ScriptDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams) throws MalformedURLException {
+	public RobotScript(ScriptDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams) {
 		setParams(driverParams, scriptParams);
 		this.driver = DriverFactory.createDriver(
 			driverParams.getHubURL(),
@@ -38,7 +36,7 @@ public abstract class RobotScript implements Closeable{
 		);
 	}
 
-	public RobotScript(ScriptDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams, String proxy) throws MalformedURLException {
+	public RobotScript(ScriptDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams, String proxy) {
 		setParams(driverParams, scriptParams);
 		this.driver = DriverFactory.createDriver(
 			driverParams.getHubURL(),
@@ -56,7 +54,6 @@ public abstract class RobotScript implements Closeable{
 	
 	/**
 	 * Метод, запускаюший выполнение скрипта робота
-	 * @param driver Драйвер
 	 * @param checkUnit Ресурс для проверки
 	 * @return
 	 * @throws RobotScriptExecutionException
@@ -65,7 +62,12 @@ public abstract class RobotScript implements Closeable{
 	
 	@Override
 	public void close() throws IOException {
-		if(this.driver != null)
+		close(driver);
+	}
+
+	public void close(WebDriver driver) {
+		if (driver != null)
 			driver.quit();
 	}
+
 }

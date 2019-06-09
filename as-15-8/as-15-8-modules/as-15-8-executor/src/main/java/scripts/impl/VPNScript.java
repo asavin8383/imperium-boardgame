@@ -1,25 +1,20 @@
 package scripts.impl;
 
-import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import org.openqa.selenium.TimeoutException;
-import org.openqa.selenium.WebDriver;
-
 import checkUnits.CheckUnit;
 import enums.AccessToolParameters;
 import execution.ExecutionJobResult;
 import execution.ExecutionVpnJobResult;
 import lombok.extern.slf4j.Slf4j;
-import scripts.DriverFactory;
-import scripts.ProxyUtils;
-import scripts.RobotScript;
-import scripts.ScriptDriverParameters;
-import scripts.ScriptUtils;
+import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebDriver;
+import scripts.*;
 import scripts.ScriptUtils.PageResult;
 import scripts.exceptions.RobotScriptExecutionException;
+
+import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 public class VPNScript extends RobotScript {
@@ -61,15 +56,6 @@ public class VPNScript extends RobotScript {
         log.info("stubUrl = " + stubUrl);
     }
 
-    /**
-     * Метод закрытия драйвера
-     */
-    public void closeDriver(WebDriver webDriver) {
-        if (webDriver != null) {
-            webDriver.quit();
-        }
-    }
-
     public WebDriver createEtalonDriver() throws RobotScriptExecutionException {
         WebDriver driver = null;
         try {
@@ -107,7 +93,7 @@ public class VPNScript extends RobotScript {
             finalUrl = driver.getCurrentUrl();
         }
         finally {
-            closeDriver(driver);
+            close(driver);
         }
 
         // получение странцы и доп. данных от эталонного драйвера
@@ -121,7 +107,7 @@ public class VPNScript extends RobotScript {
             screenShotEtalon = ScriptUtils.getScreenshot(driverEtalon);
         }
         finally {
-            closeDriver(driverEtalon);
+            close(driverEtalon);
         }
 
         ExecutionVpnJobResult message = new ExecutionVpnJobResult();

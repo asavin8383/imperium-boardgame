@@ -1,34 +1,32 @@
 package scripts.impl;
 
-import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
-
-import java.net.MalformedURLException;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
-import javax.annotation.Nullable;
-
+import checkUnits.CheckUnit;
+import enums.AccessToolParameters;
+import execution.ExecutionJobResult;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
-
-import checkUnits.CheckUnit;
-import enums.AccessToolParameters;
-import execution.ExecutionJobResult;
 import scripts.ScriptDriverParameters;
-import scripts.ScriptUtils;
 import scripts.exceptions.RobotScriptExecutionException;
+
+import javax.annotation.Nullable;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
 
 public class YandexScript extends SearchScript {
 
 	private static final String YANDEX_URL = "https://yandex.ru";
 
 	
-	public YandexScript(ScriptDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams, int searchLimit, long inputDelay) throws MalformedURLException {	
-		super(driverParams, scriptParams, searchLimit, inputDelay);
+	public YandexScript(ScriptDriverParameters driverParams,
+                        Map<AccessToolParameters, String> scriptParams,
+                        int searchLimit) {
+		super(driverParams, scriptParams, searchLimit);
 	}
 
 
@@ -40,9 +38,7 @@ public class YandexScript extends SearchScript {
         driver.manage().window().fullscreen();
 
         WebElement input = driver.findElement(By.name("text"));
-        ScriptUtils.type(input, getInputDelay(),
-        		checkUnit.getValue() + " ");
-        //input.sendKeys(getCheckUnit().getValue() + " ");
+       input(input, checkUnit.getValue() + " ");
 
         if (checkSuggestedLink(test)) {
             return createExecutionResult(true);
@@ -74,8 +70,8 @@ public class YandexScript extends SearchScript {
     }
 
     @Override
-    protected boolean nextPage() {
-        return nextPage(By.xpath("//div[contains(@class, \"pager \")]/a[last()]"));
+    protected By nextPageBy() {
+        return By.xpath("//div[contains(@class, \"pager \")]/a[last()]");
     }
 
     @Override
