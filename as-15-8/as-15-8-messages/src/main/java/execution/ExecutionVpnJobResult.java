@@ -13,6 +13,7 @@ public class ExecutionVpnJobResult extends ExecutionJobResult{
     private String chromeErrorCode;
     private Boolean responseError;
     private String finalUrlPage;
+    private String finalUrlPageEtalon;
     private String pageContent;
     private String pageContentEtalon;
     private String chromeErrorCodeEtalon;

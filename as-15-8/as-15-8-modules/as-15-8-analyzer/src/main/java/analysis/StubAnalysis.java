@@ -37,6 +37,15 @@ public class StubAnalysis {
         return kWeight >= kStub;
     }
 
+    public boolean checkStubUrl(String url, String stubUrl){
+        url = url != null ? url : "";
+        stubUrl = stubUrl != null ? stubUrl : "";
+
+        boolean res1 = AnalysisUtils.simpleCompareUrls(url, stubUrl);
+        boolean res2 = url.toLowerCase().contains(stubUrl.toLowerCase());
+        return res1 || res2;
+    }
+
     // вес от 0 о 100 (0 - большой размер, 100 - маленький)
     private static int getPageSizeWeight(Integer size){
         size = size == null ? 0 : size;

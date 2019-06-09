@@ -50,6 +50,12 @@ public class DetailResultsVpn implements Serializable  {
     @Column(name="page_url_final")
     private String pageUrlFinal;
 
+    @Column(name="page_url_final_etalon")
+    private String pageUrlFinalEtalon;
+
+    @Column(name="forbidden_final_url")
+    private Boolean forbiddenFinalUrl;
+
     @Column(name="stub_url")
     private String stubUrl;
 

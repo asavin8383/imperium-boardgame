@@ -25,8 +25,10 @@ public class VpnAnalysisResult extends AnalysisResult implements StubAnalysisRes
 	private Integer linkCount;
 	private Integer domainNameCount;
 	private String pageUrlFinal;
+	private String pageUrlFinalEtalon;
 	private String stubUrl;
 	private Integer similarityOriginPercent;
+	private Boolean needTestFinalUrl;
 	private String stubScoreInfo;
 
 	@Override

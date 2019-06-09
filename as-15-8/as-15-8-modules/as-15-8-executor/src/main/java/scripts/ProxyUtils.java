@@ -30,6 +30,11 @@ public class ProxyUtils {
         }
     }
 
+    /**
+     * @param proxy  Строка проикси в виде {протокол}://{user}.{pass}@{domain}:{port}. Допустима нулевая строка.
+     * @return Selenium Proxy, если удалось разобрать строку
+     * @throws IllegalArgumentException  В случае недопустимого протокола
+     */
     public static Proxy getSeleniumProxy(String proxy) throws IllegalArgumentException {
         if (!checkProxy(proxy)) {
             return null;

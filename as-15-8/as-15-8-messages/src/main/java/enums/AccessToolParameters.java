@@ -19,6 +19,7 @@ public enum  AccessToolParameters {
     PROXY_PORT,
     PROXY_USER,
     PROXY_PASSWORD,
+    ETALON_PROXY_TYPE,
     ETALON_PROXY_HOST,
     ETALON_PROXY_PORT,
     ETALON_PROXY_USERNAME,

@@ -19,7 +19,8 @@ import java.util.Map;
 public abstract class RobotScript implements Closeable {
 
 	protected WebDriver driver;
-	
+	protected String proxy;
+
 	@Getter
 	private ScriptDriverParameters driverParams;
 	
@@ -27,24 +28,13 @@ public abstract class RobotScript implements Closeable {
 	private Map<AccessToolParameters, String> scriptParams;
 
 	public RobotScript(ScriptDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams) {
-		setParams(driverParams, scriptParams);
-		this.driver = DriverFactory.createDriver(
-			driverParams.getHubURL(),
-			driverParams.getPlatformName(),
-			driverParams.getApplicationName(),
-			driverParams.getBrowserName()
-		);
+		this(driverParams, scriptParams, null);
 	}
 
 	public RobotScript(ScriptDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams, String proxy) {
 		setParams(driverParams, scriptParams);
-		this.driver = DriverFactory.createDriver(
-			driverParams.getHubURL(),
-			driverParams.getPlatformName(),
-			driverParams.getApplicationName(),
-			driverParams.getBrowserName(),
-			proxy
-		);
+		this.proxy = proxy;
+		this.driver = createDriver(proxy);
 	}
 	
 	private void setParams(ScriptDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams) {
@@ -59,7 +49,18 @@ public abstract class RobotScript implements Closeable {
 	 * @throws RobotScriptExecutionException
 	 */
 	public abstract ExecutionJobResult execute(CheckUnit checkUnit) throws RobotScriptExecutionException;
-	
+
+	protected WebDriver createDriver(String proxy) {
+		WebDriver driver = DriverFactory.createDriver(
+				getDriverParams().getHubURL(),
+				getDriverParams().getPlatformName(),
+				getDriverParams().getApplicationName(),
+				getDriverParams().getBrowserName(),
+				proxy
+		);
+		return driver;
+	}
+
 	@Override
 	public void close() throws IOException {
 		close(driver);

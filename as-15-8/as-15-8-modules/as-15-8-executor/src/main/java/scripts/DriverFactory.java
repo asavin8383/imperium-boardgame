@@ -45,15 +45,13 @@ public class DriverFactory {
 	public static WebDriver createDriver(URL hubURL, Platform platformName, String appName, String browserName, String proxy) {
 		Capabilities cpb = buildCapability(platformName, appName, browserName);
 
-		if(Strings.isNotEmpty(proxy)) {
-			Proxy oProxy = ProxyUtils.getSeleniumProxy(proxy);
-	        if (oProxy != null) {
-	            log.info("Create WebDriver, proxy: " + proxy);
-	            ((DesiredCapabilities)cpb).setCapability(CapabilityType.PROXY, oProxy);
-	        }
-	        else {
-	            log.info("Create WebDriver, proxy: NONE");
-	        }
+		Proxy oProxy = ProxyUtils.getSeleniumProxy(proxy);
+		if (oProxy != null) {
+			log.info("Create WebDriver, proxy: " + proxy);
+			((DesiredCapabilities)cpb).setCapability(CapabilityType.PROXY, oProxy);
+		}
+		else {
+			log.info("Create WebDriver, proxy: NONE");
 		}
 
 		return new RemoteWebDriver(hubURL, cpb);
