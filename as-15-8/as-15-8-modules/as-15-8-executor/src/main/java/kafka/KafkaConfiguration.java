@@ -68,7 +68,7 @@ public class KafkaConfiguration {
         //config.put(ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, robotsWaitTime);
         //config.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, robotsWaitTime);
         //config.put(ConsumerConfig.REQUEST_TIMEOUT_MS_CONFIG, robotsWaitTime);
-        config.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, robotsWaitTime);
+        //config.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, robotsWaitTime);
         
         return config;
     }
@@ -102,7 +102,7 @@ public class KafkaConfiguration {
         ConcurrentKafkaListenerContainerFactory<String, CheckUnitJob> listenerFactory = new ConcurrentKafkaListenerContainerFactory<>();
         listenerFactory.setConsumerFactory(checkUnitJobsConsumerFactory());
         listenerFactory.setConcurrency(listenersConcurrency);
-       // listenerFactory.getContainerProperties().setPollTimeout(robotsWaitTime.longValue());
+        listenerFactory.getContainerProperties().setPollTimeout(robotsWaitTime.longValue());
         return listenerFactory;
     }
     
