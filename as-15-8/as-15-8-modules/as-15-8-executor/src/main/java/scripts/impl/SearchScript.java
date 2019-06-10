@@ -1,5 +1,23 @@
 package scripts.impl;
 
+import checkUnits.CheckUnit;
+import enums.AccessToolParameters;
+import execution.ExecutionPSJobResult;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
+import org.springframework.util.StringUtils;
+import scripts.RobotScript;
+import scripts.ScriptDriverParameters;
+import scripts.ScriptUtils;
+import scripts.exceptions.Captcha_RobotScriptExecutionException;
+import scripts.exceptions.RobotScriptExecutionException;
+import scripts.exceptions.TimeoutScriptException;
+
+import javax.annotation.Nullable;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -7,23 +25,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Nullable;
-
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
-import org.springframework.util.StringUtils;
-
-import checkUnits.CheckUnit;
-import enums.AccessToolParameters;
-import execution.ExecutionPSJobResult;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
-import scripts.RobotScript;
-import scripts.ScriptDriverParameters;
-import scripts.ScriptUtils;
-import scripts.exceptions.Captcha_RobotScriptExecutionException;
-import scripts.exceptions.RobotScriptExecutionException;
+import static enums.AccessToolParameters.INPUT_DELAY;
 
 @Slf4j
 public abstract class SearchScript extends RobotScript {
@@ -31,6 +33,7 @@ public abstract class SearchScript extends RobotScript {
 	/** Максимальное кол-во проверяемых результатов по умолчанию */
     private static final int DEFAULT_SEARCH_LIMIT = 20;
 
+    /** Задержка при вводе по умолчанию (мс) */
     private static final long DEFAULT_INPUT_DELAY = 0;
 
     /** Максимальное кол-во проверяемых результатов */
@@ -39,22 +42,23 @@ public abstract class SearchScript extends RobotScript {
     /** Текущее кол-во проверенных результатов */
     private int checkedResultCount;
 
+    /** Задержка при вводе (мс) */
     private long inputDelay;
     
-	public SearchScript(ScriptDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams, int searchLimit, long inputDelay)
-			throws MalformedURLException {
+	public SearchScript(ScriptDriverParameters driverParams,
+                        Map<AccessToolParameters, String> scriptParams,
+                        int searchLimit) {
 		
 		super(driverParams, scriptParams);
 		this.checkedResultCount = 0;
 
 		this.searchResultLimit = searchLimit > 0 ? searchLimit : DEFAULT_SEARCH_LIMIT;
 
-		this.inputDelay = inputDelay > 0 ? inputDelay : DEFAULT_INPUT_DELAY;
+		long delayParameterValue = scriptParams.containsKey(INPUT_DELAY) ?
+                Long.parseLong(scriptParams.get(INPUT_DELAY)) : DEFAULT_INPUT_DELAY;
+		this.inputDelay = delayParameterValue < 0 ?
+                DEFAULT_INPUT_DELAY : delayParameterValue;
 	}
-
-    protected long getInputDelay() {
-        return inputDelay;
-    }
 
     ExecutionPSJobResult checkSearchResult(EqualityTest test) throws RobotScriptExecutionException {
         do {
@@ -88,15 +92,8 @@ public abstract class SearchScript extends RobotScript {
         return message;
     }
 
-    boolean nextPage(By by) {
-        WebElement next = findElementIfExists(by);
-        if (next != null) {
-            next.click();
-            ScriptUtils.waitPageLoading(driver);
-            return true;
-        }
-        return false;
-
+    void input(WebElement element, String query) {
+        SearchScript.input(element, inputDelay, query);
     }
 
     @Nullable
@@ -111,14 +108,48 @@ public abstract class SearchScript extends RobotScript {
         return list != null && list.size() > 0 ? list.get(0) : null;
     }
 
+    private boolean nextPage() throws TimeoutScriptException {
+        WebElement next = findElementIfExists(nextPageBy());
+        try {
+            if (next != null) {
+                next.click();
+                ScriptUtils.waitPageLoading(driver);
+                return true;
+            }
+        } catch (TimeoutException e) {
+            throw new TimeoutScriptException(e);
+        }
+        return false;
+
+    }
+
     private void scrollTo(WebElement webElement) {
         Actions actions = new Actions(driver);
         actions.moveToElement(webElement, 0, 0).perform();
     }
 
+    private static void type(WebElement element, long sleep, String query) {
+        query.codePoints().forEach(cp -> {
+            element.sendKeys(new String(
+                    Character.toChars(cp)));
+            try {
+                Thread.sleep(sleep);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    private static void input(WebElement element, long sleep, String query) {
+        if (sleep == 0L)
+            element.sendKeys(query);
+        else
+            type(element, sleep, query);
+    }
 
 
-    protected abstract boolean nextPage();
+
+    protected abstract By nextPageBy();
 
     protected abstract boolean captcha();
 

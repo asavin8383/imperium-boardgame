@@ -1,16 +1,12 @@
 package robots;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
+import enums.AccessToolUnit;
 import org.openqa.selenium.Platform;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
-
-import enums.AccessToolUnit;
 import robots.impl.SeleniumAnonymizerRobot;
 import robots.impl.SeleniumSearchRobot;
 import robots.impl.SeleniumVpnRobot;
@@ -19,6 +15,9 @@ import scripts.impl.GoogleScript;
 import scripts.impl.HideMyAssScript;
 import scripts.impl.VPNScript;
 import scripts.impl.YandexScript;
+
+import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  * Конфигурация роботов для проверки ПС/ПАСД
@@ -51,8 +50,7 @@ public class RobotsConfiguration {
 				Platform.valueOf(env.getProperty("robots.google.platform")),
 				env.getProperty("robots.google.app"),
 				env.getProperty("robots.google.browser")),
-			Integer.parseInt(env.getProperty("robots.google.limit")),
-			Long.parseLong(env.getProperty("robots.google.input-delay"))
+			Integer.parseInt(env.getProperty("robots.google.limit"))
 		);
 	}
 
@@ -71,8 +69,7 @@ public class RobotsConfiguration {
 				Platform.valueOf(env.getProperty("robots.yandex.platform")),
 				env.getProperty("robots.yandex.app"),
 				env.getProperty("robots.yandex.browser")),
-			Integer.parseInt(env.getProperty("robots.yandex.limit")),
-			Long.parseLong(env.getProperty("robots.yandex.input-delay"))
+			Integer.parseInt(env.getProperty("robots.yandex.limit"))
 		);
 	}
 
@@ -132,8 +129,7 @@ public class RobotsConfiguration {
 				Platform.valueOf(env.getProperty("robots.hidemyass.platform")),
 				env.getProperty("robots.hidemyass.app"),
 				env.getProperty("robots.hidemyass.browser")
-			),
-			Long.parseLong(env.getProperty("robots.hidemyass.input-delay"))
+			)
 		);
 	}
 
@@ -153,8 +149,7 @@ public class RobotsConfiguration {
 				Platform.valueOf(env.getProperty("robots.cameleoxyz.platform")),
 				env.getProperty("robots.cameleoxyz.app"),
 				env.getProperty("robots.cameleoxyz.browser")
-			),
-			Long.parseLong(env.getProperty("robots.cameleoxyz.input-delay"))
+			)
 		);
 	}
 	
