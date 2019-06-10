@@ -40,7 +40,7 @@ public class VPN_AnalysisResultService implements AnalysisResultService<VpnAnaly
 		detailResultsVpn.setSimilarityOriginPercent(aRes.getSimilarityOriginPercent());
 		detailResultsVpn.setStubScoreInfo(aRes.getStubScoreInfo());
 
-		if (aRes.getNeedTestFinalUrl()){
+		if (aRes.getNeedTestFinalUrl() != null && aRes.getNeedTestFinalUrl()){
 			if (searchUrlInErdi(aRes.getPageUrlFinal())){
 				result = CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED;
 				detailResultsVpn.setForbiddenFinalUrl(true);
@@ -70,6 +70,9 @@ public class VPN_AnalysisResultService implements AnalysisResultService<VpnAnaly
 		String host = u.getHost();
 		String h1 = java.net.IDN.toUnicode(host);
 		String h2 = java.net.IDN.toASCII(host);
+
+
+
 
 		return false;
 	}
