@@ -52,6 +52,7 @@ public class VPN_AnalysisResultService implements AnalysisResultService<VpnAnaly
 		return result;
 	}
 
+	@SuppressWarnings("unused")
 	private Boolean searchUrlInErdi(String url){
 		if (StringUtils.isEmpty(url)){
 			return false;

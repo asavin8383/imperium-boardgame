@@ -30,7 +30,7 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 
 	private static final String keyWordsSource = "key_words.json";
 
-	private static final int similarityThreshold = 70;
+	//private static final int similarityThreshold = 70;
 
 	@Getter
 	private List<KeyWord> keyWords = new ArrayList<>();
