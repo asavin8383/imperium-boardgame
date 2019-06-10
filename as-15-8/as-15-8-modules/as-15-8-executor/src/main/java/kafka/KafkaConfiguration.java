@@ -102,7 +102,7 @@ public class KafkaConfiguration {
         ConcurrentKafkaListenerContainerFactory<String, CheckUnitJob> listenerFactory = new ConcurrentKafkaListenerContainerFactory<>();
         listenerFactory.setConsumerFactory(checkUnitJobsConsumerFactory());
         listenerFactory.setConcurrency(listenersConcurrency);
-        listenerFactory.getContainerProperties().setPollTimeout(robotsWaitTime);
+        listenerFactory.getContainerProperties().setPollTimeout(robotsWaitTime.intValue());
         return listenerFactory;
     }
     
