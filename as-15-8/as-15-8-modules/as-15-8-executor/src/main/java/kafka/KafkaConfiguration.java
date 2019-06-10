@@ -66,7 +66,7 @@ public class KafkaConfiguration {
         config.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
         
         //config.put(ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, robotsWaitTime);
-        config.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, 30000);
+        //config.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, 30000);
         //config.put(ConsumerConfig.REQUEST_TIMEOUT_MS_CONFIG, robotsWaitTime);
         //config.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, robotsWaitTime);
         
