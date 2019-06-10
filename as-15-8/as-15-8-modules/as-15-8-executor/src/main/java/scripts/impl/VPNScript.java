@@ -28,7 +28,6 @@ public class VPNScript extends RobotScript {
     protected String etalonProxy;
     protected String stubUrl;
     
-    protected List<WebDriver> proxyDrivers = new ArrayList<>();
 
     public static final String TIME_OUT_ERROR = "TIME_OUT";
 
