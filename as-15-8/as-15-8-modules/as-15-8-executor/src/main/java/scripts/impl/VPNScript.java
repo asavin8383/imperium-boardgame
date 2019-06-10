@@ -22,7 +22,6 @@ import scripts.exceptions.RobotScriptExecutionException;
 @Slf4j
 public class VPNScript extends RobotScript {
 
-	protected String vpnProxy;
     protected String etalonProxy;
     protected String stubUrl;
     
@@ -49,11 +48,6 @@ public class VPNScript extends RobotScript {
     			scriptParams.get(AccessToolParameters.ETALON_PROXY_PASSWORD)
 			);
      	this.stubUrl = scriptParams.get(AccessToolParameters.STUB_URL);
-
-     	log.info("---------- PROXY -----------");
-        log.info("vpnProxy = " + vpnProxy);
-        log.info("etalonProxy = " + etalonProxy);
-        log.info("stubUrl = " + stubUrl);
     }
 
     @Override
