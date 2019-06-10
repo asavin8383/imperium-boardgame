@@ -34,15 +34,21 @@ public class HideMyAssScript extends AnonymizerScript {
             input.sendKeys(checkUnit.getValue());
             driver.findElement(By.xpath("/html/body/form/div[3]/a")).click();
             ScriptUtils.waitPageLoading(driver);
-            if (captcha()) {
+            ScriptUtils.waitCloudflareRedirect(driver);
+            ScriptUtils.waitPageLoading(driver);
+
+            if (captcha())
                 throw new Captcha_RobotScriptExecutionException(
                         "Обнаружена captcha-form на HideMyAss");
-            }
+
         } catch (TimeoutException e) {
             return getTimeoutMessage();
         } catch (NoSuchElementException e) {
             throw new RobotScriptExecutionException(
                     "Не удалось найти элементы навигации HideMyAss", e);
+        } catch (InterruptedException e) {
+            throw new RobotScriptExecutionException(
+                    "Выполнение потока прервано", e);
         }
 
         return process(checkUnit);

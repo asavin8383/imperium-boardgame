@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static scripts.ScriptUtils.findElementIfExists;
+
 /**
  * Скрипт проверки ПС Google
  * @author shabalinAI

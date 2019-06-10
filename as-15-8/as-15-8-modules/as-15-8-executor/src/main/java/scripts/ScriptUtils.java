@@ -6,7 +6,9 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import scripts.exceptions.TimeoutScriptException;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -126,6 +128,56 @@ public class ScriptUtils {
                 break;
         }
         return value;
+    }
+
+    @Nullable
+    public static WebElement findElementIfExists(By by, WebElement where) {
+        List<WebElement> list = where.findElements(by);
+        return list != null && list.size() > 0 ? list.get(0) : null;
+    }
+
+    @Nullable
+    public static WebElement findElementIfExists(By by, WebDriver driver) {
+        List<WebElement> list = driver.findElements(by);
+        return list != null && list.size() > 0 ? list.get(0) : null;
+    }
+
+    public static boolean isCloudflareDdosProtection(WebDriver driver) {
+        /*WebElement redirectText = findElementIfExists(
+                By.xpath("//*[@id=\"cf-content\"]/p[1]"), driver);
+        if (redirectText != null)
+            return redirectText.getText()
+                    .toLowerCase().contains("redirect");*/
+
+        WebElement cloudflareLink = findElementIfExists(
+                By.xpath("//div[contains(@class, \"attribution\")]//a"), driver);
+        if (cloudflareLink != null)
+            return cloudflareLink.getText()
+                    .equals("DDoS protection by Cloudflare");
+
+        return false;
+    }
+
+    public static void waitCloudflareRedirect(WebDriver driver)
+            throws InterruptedException, TimeoutScriptException {
+
+        waitCloudflareRedirect(driver, 5 * 1000, 30 * 1000);
+    }
+
+    public static void waitCloudflareRedirect(WebDriver driver, long timeStep, long timeMax)
+            throws InterruptedException, TimeoutScriptException {
+
+        long total = 0;
+
+        while (isCloudflareDdosProtection(driver) && total < timeMax) {
+            total += timeStep;
+            Thread.sleep(timeStep);
+        }
+
+        if (isCloudflareDdosProtection(driver))
+            throw new TimeoutScriptException(
+                    "DDoS protection by Cloudflare. Wait time " +
+                            "(seconds) = " + timeMax / 1000);
     }
 
 }

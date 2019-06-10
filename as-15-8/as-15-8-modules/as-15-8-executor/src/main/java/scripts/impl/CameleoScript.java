@@ -3,6 +3,7 @@ package scripts.impl;
 import checkUnits.CheckUnit;
 import enums.AccessToolParameters;
 import execution.ExecutionJobResult;
+import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.TimeoutException;
@@ -13,6 +14,7 @@ import scripts.exceptions.RobotScriptExecutionException;
 
 import java.util.Map;
 
+@Slf4j
 public class CameleoScript extends AnonymizerScript {
 
 	private static final String CAMELEO_URL = "http://www.cameleo.xyz";
@@ -32,11 +34,17 @@ public class CameleoScript extends AnonymizerScript {
             input.sendKeys(checkUnit.getValue());
             driver.findElement(By.xpath("//*[@id=\"proxy\"]/div/div[2]/input")).click();
             ScriptUtils.waitPageLoading(driver);
+            ScriptUtils.waitCloudflareRedirect(driver);
+            ScriptUtils.waitPageLoading(driver);
+
         } catch (TimeoutException e) {
             return getTimeoutMessage();
         }catch (NoSuchElementException e) {
             throw new RobotScriptExecutionException(
                     "Не удалось найти элементы навигации CameleoXYZ", e);
+        } catch (InterruptedException e) {
+            throw new RobotScriptExecutionException(
+                    "Выполнение потока прервано", e);
         }
 
         return process(checkUnit);

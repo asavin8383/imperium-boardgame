@@ -7,6 +7,7 @@ import execution.ExecutionJobResult;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.TimeoutException;
 import scripts.*;
+import scripts.exceptions.RobotScriptExecutionException;
 
 import java.util.Map;
 
@@ -35,7 +36,8 @@ public abstract class AnonymizerScript extends RobotScript {
         this.message.setStubUrl(scriptParams.get(AccessToolParameters.STUB_URL));
     }
 
-    ExecutionJobResult process(CheckUnit checkUnit) {
+    ExecutionJobResult process(CheckUnit checkUnit) throws RobotScriptExecutionException {
+
         ScriptUtils.PageResult page = ScriptUtils.getPageSource(driver);
 
         message.setErrorCode(page.errorCodeChrome);
@@ -56,6 +58,7 @@ public abstract class AnonymizerScript extends RobotScript {
                 getDriverParams().getBrowserName(),
                 etalonProxy);
 
+        driver.manage().window().fullscreen();
         driver.get(ScriptUtils.getCheckUnitValue(checkUnit));
         ScriptUtils.PageResult etalon = loadEtalon();
 
@@ -73,13 +76,17 @@ public abstract class AnonymizerScript extends RobotScript {
         return message;
     }
 
-    private ScriptUtils.PageResult loadEtalon() {
+    private ScriptUtils.PageResult loadEtalon() throws RobotScriptExecutionException {
         try {
             ScriptUtils.waitPageLoading(driver);
+            ScriptUtils.waitCloudflareRedirect(driver);
             return ScriptUtils.getPageSource(driver);
         } catch (TimeoutException e) {
             log.info("TimeoutException при получении эталона", e);
             return new ScriptUtils.PageResult(null, TIME_OUT_ERROR);
+        } catch (InterruptedException e) {
+            throw new RobotScriptExecutionException(
+                    "Выполнение потока прервано", e);
         }
     }
 

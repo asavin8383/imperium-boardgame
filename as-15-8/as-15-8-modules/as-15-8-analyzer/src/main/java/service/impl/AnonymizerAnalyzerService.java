@@ -30,7 +30,7 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 
 	private static final String keyWordsSource = "key_words.json";
 
-	//private static final int similarityThreshold = 70;
+	private static final int similarityThreshold = 60;
 
 	@Getter
 	private List<KeyWord> keyWords = new ArrayList<>();
@@ -65,21 +65,7 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 			return analysisResult;
 		}
 
-		/* STUB */
-
-		analysisResult.setStubUrl(executionResult.getStubUrl());
-		analysisResult.setFinalUrl(executionResult.getFinalUrl());
-
-		try {
-			if (isStub(analysisResult, executionResult)) {
-				analysisResult.setCheckResult(COMPLETED);
-				return analysisResult;
-			}
-		} catch (IOException e) {
-			String msg = "Ошибка при проверке заглушки";
-			log.error(msg, e);
-			throw new AnalysisException(msg, e);
-		}
+		// todo check that hidemyass final url equals to initial or contains in erdi
 
 		/* ETALON */
 
@@ -94,13 +80,32 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 								executionResult.getPageContent(),
 								executionResult.getEtalonPageContent()));
 
-				// if (analysisResult.getSimilarityPercent() > similarityThreshold)
+				if (analysisResult.getSimilarityPercent() > similarityThreshold) {
+					analysisResult.setCheckResult(FORBIDDEN_CONTENT_DETECTED);
+					return analysisResult;
+				}
 
 			} catch (IOException e) {
 				String msg = "Ошибка при сверке с эталоном";
 				log.error(msg, e);
 				throw new AnalysisException(msg, e);
 			}
+		}
+
+		/* STUB */
+
+		analysisResult.setStubUrl(executionResult.getStubUrl());
+		analysisResult.setFinalUrl(executionResult.getFinalUrl());
+
+		try {
+			if (isStub(analysisResult, executionResult)) {
+				analysisResult.setCheckResult(COMPLETED);
+				return analysisResult;
+			}
+		} catch (IOException e) {
+			String msg = "Ошибка при проверке заглушки";
+			log.error(msg, e);
+			throw new AnalysisException(msg, e);
 		}
 
 		analysisResult.setCheckResult(FORBIDDEN_CONTENT_DETECTED);

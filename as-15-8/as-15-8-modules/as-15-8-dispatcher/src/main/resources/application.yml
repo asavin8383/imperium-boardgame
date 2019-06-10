@@ -48,7 +48,7 @@ spring:
         jobs-topic: jobs_ashabalin
         analysis-results-topic: analysis_results_ashabalin
         arrangement-notifications-topic: arrangement_notifications_ashabalin
-        notification-topic: job_notifications_ashabalin
+        notifications-topic: job_notifications_ashabalin
         control-topic: exec_control_ashabalin
         analysis-results-concurrency: 12
         notifications-concurrency: 12
@@ -64,7 +64,7 @@ spring:
         jobs-topic: jobs_asavin
         analysis-results-topic: analysis_asavin
         arrangement-notifications-topic: arrangement_notifications_asavin
-        notification-topic: job_notifications_asavin
+        notifications-topic: job_notifications_asavin
         control-topic: exec_control_asavin
         analysis-results-concurrency: 12
         notifications-concurrency: 12
@@ -80,7 +80,7 @@ spring:
         jobs-topic: jobs_pvorobiev
         analysis-results-topic: analysis_results_pvorobiev
         arrangement-notifications-topic: arrangement_notifications_pvorobiev
-        notification-topic: job_notifications_pvorobiev
+        notifications-topic: job_notifications_pvorobiev
         control-topic: exec_control_pvorobiev
         analysis-results-concurrency: 12
         notifications-concurrency: 12
@@ -96,7 +96,7 @@ spring:
         jobs-topic: jobs_jspirina
         analysis-results-topic: analysis_results_jspirina
         arrangement-notifications-topic: arrangement_notifications_jspirina
-        notification-topic: job_notifications_jspirina
+        notifications-topic: job_notifications_jspirina
         control-topic: exec_control_jspirina
         analysis-results-concurrency: 12
         notifications-concurrency: 12

@@ -11,10 +11,7 @@ import robots.impl.SeleniumAnonymizerRobot;
 import robots.impl.SeleniumSearchRobot;
 import robots.impl.SeleniumVpnRobot;
 import scripts.ScriptDriverParameters;
-import scripts.impl.GoogleScript;
-import scripts.impl.HideMyAssScript;
-import scripts.impl.VPNScript;
-import scripts.impl.YandexScript;
+import scripts.impl.*;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -143,7 +140,7 @@ public class RobotsConfiguration {
 
 		return new SeleniumAnonymizerRobot(
 			AccessToolUnit.CAMELEO_XYZ,
-			HideMyAssScript.class,
+			CameleoScript.class,
 			new ScriptDriverParameters(
 				new URL(this.seleniumHubUrl),
 				Platform.valueOf(env.getProperty("robots.cameleoxyz.platform")),

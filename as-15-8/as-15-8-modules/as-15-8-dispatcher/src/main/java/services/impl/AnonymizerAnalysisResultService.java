@@ -33,6 +33,7 @@ public class AnonymizerAnalysisResultService implements AnalysisResultService<An
 		detailResultsVpn.setStubScoreInfo(aRes.getStubScoreInfo());
 		detailResultsVpn.setSimilarityOriginPercent(aRes.getSimilarityPercent());
 
+		detailResultsVpn.setResponseError(aRes.getErrorCode() != null);
 		detailVpnRepo.save(detailResultsVpn);
 
 		return aRes.getCheckResult();

@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import static enums.AccessToolParameters.INPUT_DELAY;
+import static scripts.ScriptUtils.findElementIfExists;
 
 @Slf4j
 public abstract class SearchScript extends RobotScript {
@@ -96,20 +97,8 @@ public abstract class SearchScript extends RobotScript {
         SearchScript.input(element, inputDelay, query);
     }
 
-    @Nullable
-    WebElement findElementIfExists(By by, WebElement where) {
-        List<WebElement> list = where.findElements(by);
-        return list != null && list.size() > 0 ? list.get(0) : null;
-    }
-
-    @Nullable
-    private WebElement findElementIfExists(By by) {
-        List<WebElement> list = driver.findElements(by);
-        return list != null && list.size() > 0 ? list.get(0) : null;
-    }
-
     private boolean nextPage() throws TimeoutScriptException {
-        WebElement next = findElementIfExists(nextPageBy());
+        WebElement next = findElementIfExists(nextPageBy(), driver);
         try {
             if (next != null) {
                 next.click();
