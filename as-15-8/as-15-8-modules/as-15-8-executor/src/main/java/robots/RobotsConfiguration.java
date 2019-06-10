@@ -99,16 +99,16 @@ public class RobotsConfiguration {
 	 * @throws MalformedURLException
 	 */
 	@Bean
-	public Robot proxyTopGuardRobot() throws MalformedURLException {
+	public Robot proxyTorGuardRobot() throws MalformedURLException {
 
 		return new SeleniumVpnRobot(
 			AccessToolUnit.TORGUARD,
 			VPNScript.class,
 			new ScriptDriverParameters(
 				new URL(this.seleniumHubUrl),
-				Platform.valueOf(env.getProperty("robots.vpn.platform")),
-				env.getProperty("robots.vpn.app"),
-				env.getProperty("robots.vpn.browser")
+				Platform.valueOf(env.getProperty("robots.torguard.platform")),
+				env.getProperty("robots.torguard.app"),
+				env.getProperty("robots.torguard.browser")
 			)
 		);
 	}

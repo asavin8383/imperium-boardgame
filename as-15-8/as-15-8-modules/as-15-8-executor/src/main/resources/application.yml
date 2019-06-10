@@ -16,7 +16,10 @@ robots:
         platform: WIN8
         browser: chrome
         app: kas
-        vpnProxy: 192.168.5.194:3128
+    torguard:
+        platform: WIN8
+        browser: chrome
+        app: torguard
     hidemyass:
         platform: WIN8
         browser: chrome

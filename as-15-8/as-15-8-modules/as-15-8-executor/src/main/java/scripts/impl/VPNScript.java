@@ -11,10 +11,11 @@ import scripts.*;
 import scripts.ScriptUtils.PageResult;
 import scripts.exceptions.RobotScriptExecutionException;
 
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 @Slf4j
 public class VPNScript extends RobotScript {
@@ -62,49 +63,66 @@ public class VPNScript extends RobotScript {
 
         String url = ScriptUtils.getCheckUnitValue(checkUnit);
 
-        // получение страницы и доп. данных от основного драйвера
-        PageResult pageResult;
-        byte[] screenShot;
-        String finalUrl;
-        try {
-            pageResult = loadPage(url, driver, 3);
-            screenShot = ScriptUtils.getScreenshot(driver);
-            finalUrl = driver.getCurrentUrl();
-        }
-        finally {
-            close(driver);
-        }
-
-        // получение странцы и доп. данных от эталонного драйвера
-        PageResult pageResultEtalon;
-        byte[] screenShotEtalon;
-        String finalUrlEtalon;
-        try {
-            // получение страницы и доп. данных от основного драйвера
-            driver = createDriver(etalonProxy);
-            pageResultEtalon = loadPage(url, driver, 1);
-            screenShotEtalon = ScriptUtils.getScreenshot(driver);
-            finalUrlEtalon = driver.getCurrentUrl();
-        }
-        finally {
-            close(driver);
-        }
-
         ExecutionVpnJobResult message = new ExecutionVpnJobResult();
         message.setStubUrl(stubUrl);
-        message.setResponseError(pageResult.errorCodeChrome != null);
-        message.setChromeErrorCode(pageResult.errorCodeChrome);
-        message.setPageContent(pageResult.pageSource);
-        message.setScreenshot(screenShot);
-        if(pageResult.errorCodeChrome == null){
-            message.setFinalUrlPage(finalUrl);
-        }
 
-        message.setChromeErrorCodeEtalon(pageResultEtalon.errorCodeChrome);
-        message.setPageContentEtalon(pageResultEtalon.pageSource);
-        message.setEtalonScreenshot(screenShotEtalon);
-        if(pageResultEtalon.errorCodeChrome == null){
-            message.setFinalUrlPageEtalon(finalUrlEtalon);
+        CompletableFuture<Void> pageGetter = CompletableFuture
+                .runAsync(() -> {
+                    WebDriver driver = this.driver;
+                    try {
+                        PageResult pageResult = loadPage(url, driver, 3);
+                        byte[] screenShot = ScriptUtils.getScreenshot(driver);
+                        String finalUrl = driver.getCurrentUrl();
+
+                        message.setResponseError(pageResult.errorCodeChrome != null);
+                        message.setChromeErrorCode(pageResult.errorCodeChrome);
+                        message.setPageContent(pageResult.pageSource);
+                        message.setScreenshot(screenShot);
+                        if(pageResult.errorCodeChrome == null){
+                            message.setFinalUrlPage(finalUrl);
+                        }
+                    }
+                    finally {
+                        close(driver);
+                    }
+                });
+
+        CompletableFuture<Void> pageGetterEtalon = CompletableFuture
+                .runAsync(() -> {
+                    WebDriver driver = null;
+                    try {
+                        driver = createDriver(etalonProxy);
+                        PageResult pageResult = loadPage(url, driver, 1);
+                        byte[] screenShot = ScriptUtils.getScreenshot(driver);
+                        String finalUrl = driver.getCurrentUrl();
+
+                        message.setChromeErrorCodeEtalon(pageResult.errorCodeChrome);
+                        message.setPageContentEtalon(pageResult.pageSource);
+                        message.setEtalonScreenshot(screenShot);
+                        if(pageResult.errorCodeChrome == null){
+                            message.setFinalUrlPageEtalon(finalUrl);
+                        }
+                    }
+                    finally {
+                        close(driver);
+                    }
+                });
+
+        CompletableFuture<Void> allPageGetters = CompletableFuture.allOf(pageGetter, pageGetterEtalon);
+
+        try {
+            allPageGetters.join();
+        }
+        catch(CompletionException ex) {
+            try {
+                throw ex.getCause();
+            }
+            catch(Error|RuntimeException possible) {
+                throw possible;
+            }
+            catch(Throwable impossible) {
+                throw new RobotScriptExecutionException(impossible);
+            }
         }
 
         //log.info("--------- message ---------");
