@@ -91,7 +91,7 @@ public class KafkaConfiguration {
         ConcurrentKafkaListenerContainerFactory<String, ArrangementJob> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(arrangementJobConsumerFactory());
         factory.setConcurrency(1);
-        factory.getContainerProperties().setAckMode(AckMode.MANUAL);
+        factory.getContainerProperties().setAckMode(AckMode.MANUAL_IMMEDIATE);
         return factory;
     }
  
@@ -117,7 +117,7 @@ public class KafkaConfiguration {
     public ConcurrentKafkaListenerContainerFactory<String, AnalysisResult> kafkaAnalysisResultListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, AnalysisResult> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(analysisResultsConsumerFactory());
-        factory.getContainerProperties().setAckMode(AckMode.MANUAL);
+        factory.getContainerProperties().setAckMode(AckMode.MANUAL_IMMEDIATE);
         factory.setConcurrency(analysisResultsConcurrency);
         return factory;
     }
@@ -141,7 +141,7 @@ public class KafkaConfiguration {
         ConcurrentKafkaListenerContainerFactory<String, CheckUnitStatusNotification> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(jobNotificationsConsumerFactory());
         factory.setConcurrency(notificationsConcurrency);
-        factory.getContainerProperties().setAckMode(AckMode.MANUAL);
+        factory.getContainerProperties().setAckMode(AckMode.MANUAL_IMMEDIATE);
         return factory;
     }
     
