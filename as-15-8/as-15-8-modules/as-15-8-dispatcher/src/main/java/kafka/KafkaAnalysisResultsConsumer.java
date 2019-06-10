@@ -1,7 +1,5 @@
 package kafka;
 
-import java.util.concurrent.CompletableFuture;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
@@ -37,31 +35,29 @@ public class KafkaAnalysisResultsConsumer {
     )
     public void consumeAnalysisResults(AnalysisResult analysisResult, Acknowledgment ack) {
 		log.info("Принято сообщение с анализом результатов проверки: " + analysisResult.getJobID() + ", " + analysisResult.getCheckUnit().getValue());
-        CompletableFuture.runAsync(() -> {
-        	try {       		
-        		ArrangementResult jobResult = checkUnitService.processJobResult(analysisResult);
-        		log.info("Результаты выполнения проверки успешно обработаны: " + analysisResult.getJobID() + ", " + analysisResult.getCheckUnit().getValue());
-        		
+    	try {       		
+    		ArrangementResult jobResult = checkUnitService.processJobResult(analysisResult);
+    		log.info("Результаты выполнения проверки успешно обработаны: " + analysisResult.getJobID() + ", " + analysisResult.getCheckUnit().getValue());
+    		
+    		ArrangementStatus arrStatus = checkUnitService.checkArrangementStatus(jobResult.getArrangementId());
+    		if(arrStatus == ArrangementStatus.FINISHED) {
+    			log.info("Мероприятие успешно завешено: " + jobResult.getArrangementId());
+    			arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(jobResult.getArrangementId(), arrStatus));
+    		}
+
+    	} catch (Exception ex) {
+    		try {
+        		log.error("Ошибка при обработке сообщения с анализом результатов проверки: " + analysisResult.getJobID() + ", " + analysisResult.getCheckUnit().getValue(), ex);
+        		ArrangementResult jobResult = checkUnitService.updateJobStatus(analysisResult.getJobID(), CheckUnitJobResult.INTERNAL_ERROR);
         		ArrangementStatus arrStatus = checkUnitService.checkArrangementStatus(jobResult.getArrangementId());
         		if(arrStatus == ArrangementStatus.FINISHED) {
         			log.info("Мероприятие успешно завешено: " + jobResult.getArrangementId());
         			arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(jobResult.getArrangementId(), arrStatus));
         		}
-
-        	} catch (Exception ex) {
-        		try {
-	        		log.error("Ошибка при обработке сообщения с анализом результатов проверки: " + analysisResult.getJobID() + ", " + analysisResult.getCheckUnit().getValue(), ex);
-	        		ArrangementResult jobResult = checkUnitService.updateJobStatus(analysisResult.getJobID(), CheckUnitJobResult.INTERNAL_ERROR);
-	        		ArrangementStatus arrStatus = checkUnitService.checkArrangementStatus(jobResult.getArrangementId());
-	        		if(arrStatus == ArrangementStatus.FINISHED) {
-	        			log.info("Мероприятие успешно завешено: " + jobResult.getArrangementId());
-	        			arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(jobResult.getArrangementId(), arrStatus));
-	        		}
-        		} catch(Exception newEx) {
-        			log.error("Ошибка при сохранении ошибочной обработки сообщения с анализом результатов проверки: " + analysisResult.getJobID() + ", " + analysisResult.getCheckUnit().getValue(), newEx);
-        		}
-        	}
-        	ack.acknowledge();
-        });
+    		} catch(Exception newEx) {
+    			log.error("Ошибка при сохранении ошибочной обработки сообщения с анализом результатов проверки: " + analysisResult.getJobID() + ", " + analysisResult.getCheckUnit().getValue(), newEx);
+    		}
+    	}
+    	ack.acknowledge();
     }
 }

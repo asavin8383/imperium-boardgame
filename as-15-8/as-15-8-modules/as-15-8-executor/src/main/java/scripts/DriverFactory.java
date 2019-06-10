@@ -2,9 +2,6 @@ package scripts;
 
 import java.net.URL;
 
-import lombok.extern.slf4j.Slf4j;
-
-import org.apache.logging.log4j.util.Strings;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.Proxy;
@@ -12,6 +9,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Фабрика создания selenium драйвера

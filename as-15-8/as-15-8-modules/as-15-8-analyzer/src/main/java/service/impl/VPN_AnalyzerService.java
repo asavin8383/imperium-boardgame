@@ -1,34 +1,40 @@
 package service.impl;
 
-import analysis.AnalysisResult;
-import analysis.AnalysisUtils;
-import analysis.StubAnalysis;
-import analysis.VpnAnalysisResult;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import common.AnalysisException;
-import enums.CheckUnitJobResult;
-import execution.ExecutionVpnJobResult;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
-import model.KeyWord;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.stereotype.Service;
-import service.AnalyzerService;
+import static enums.CheckUnitJobResult.COMPLETED;
+import static enums.CheckUnitJobResult.DNS_ERROR;
+import static enums.CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED;
+import static enums.CheckUnitJobResult.HTTP_SERVER_SEND_NO_RESPONSE;
+import static enums.CheckUnitJobResult.SOCKET_ERROR;
+import static enums.CheckUnitJobResult.TIMEOUT_ERROR;
 
-import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static enums.CheckUnitJobResult.*;
+import javax.annotation.PostConstruct;
+
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import analysis.AnalysisResult;
+import analysis.AnalysisUtils;
+import analysis.StubAnalysis;
+import analysis.VpnAnalysisResult;
+import common.AnalysisException;
+import enums.CheckUnitJobResult;
+import execution.ExecutionVpnJobResult;
+import lombok.Getter;
+import model.KeyWord;
+import service.AnalyzerService;
 
 
 /**
  * Сервис проверки результата работы робота, проверяющего ПС
  *
  */
-@Slf4j
 @Service
 public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResult> {
 

@@ -1,7 +1,5 @@
 package kafka;
 
-import java.util.concurrent.CompletableFuture;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
@@ -37,24 +35,22 @@ public class KafkaJobNotificationsConsumer {
     )
     public void consumeJobNotifications(CheckUnitStatusNotification notification, Acknowledgment ack) {
 		log.info("Принято сообщение с уведомлением от проверки: " + notification.getJobID() + ", " + notification.getCheckUnitStatus());
-        CompletableFuture.runAsync(() -> {
-        	try {       		
-        		ArrangementResult job = checkUnitService.updateJobStatus(notification.getJobID(), notification.getCheckUnitStatus());
-        		if(notification.getCheckUnitStatus() == CheckUnitJobResult.CAPTCHA_DETECTED) {
-        			ArrangementStatusNotification arrNotification = new ArrangementStatusNotification(job.getArrangementId(), ArrangementStatus.ACTION_REQUIRED);
-        			arrangementStatusProducer.sendArrangementStatusMessage(arrNotification);
-        		} else {
-        			ArrangementStatus arrStatus = checkUnitService.checkArrangementStatus(job.getArrangementId());
-            		if(arrStatus == ArrangementStatus.FINISHED) {
-            			log.info("Мероприятие успешно завешено: " + job.getArrangementId());
-            			arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(job.getArrangementId(), arrStatus));
-            		}
+    	try {       		
+    		ArrangementResult job = checkUnitService.updateJobStatus(notification.getJobID(), notification.getCheckUnitStatus());
+    		if(notification.getCheckUnitStatus() == CheckUnitJobResult.CAPTCHA_DETECTED) {
+    			ArrangementStatusNotification arrNotification = new ArrangementStatusNotification(job.getArrangementId(), ArrangementStatus.ACTION_REQUIRED);
+    			arrangementStatusProducer.sendArrangementStatusMessage(arrNotification);
+    		} else {
+    			ArrangementStatus arrStatus = checkUnitService.checkArrangementStatus(job.getArrangementId());
+        		if(arrStatus == ArrangementStatus.FINISHED) {
+        			log.info("Мероприятие успешно завешено: " + job.getArrangementId());
+        			arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(job.getArrangementId(), arrStatus));
         		}
-        	} catch (Exception ex) {
-        		log.error("Ошибка при обработке уведомления от проверки: " + notification.getJobID() + ", " + notification.getCheckUnitStatus(), ex);
-        	}
-        	ack.acknowledge();
-        });
+    		}
+    	} catch (Exception ex) {
+    		log.error("Ошибка при обработке уведомления от проверки: " + notification.getJobID() + ", " + notification.getCheckUnitStatus(), ex);
+    	}
+    	ack.acknowledge();
     }
     
 

@@ -43,7 +43,7 @@ public class KafkaConsumer {
     				kafkaListenerContainerFactory.createContainer(executionResultsTopicName);
 	    	
 	    	container.getContainerProperties().setGroupId("analyzer_"+accessTool.name().toLowerCase());
-	    	container.getContainerProperties().setAckMode(AckMode.MANUAL_IMMEDIATE);
+	    	container.getContainerProperties().setAckMode(AckMode.MANUAL);
 	    	
 	    	container.setupMessageListener(
 	    		new FilteringMessageListenerAdapter<String, ExecutionJobResult>(

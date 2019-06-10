@@ -1,11 +1,5 @@
 package kafka;
 
-import checkUnits.CheckUnitJob;
-import control.ExecutorControlMessage;
-import enums.AccessToolUnit;
-import exceptions.AS_15_8_DispatcherException;
-import jobs.ArrangementJob;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -18,9 +12,14 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
-import services.CheckUnitJobService;
 
-import java.util.concurrent.CompletableFuture;
+import checkUnits.CheckUnitJob;
+import control.ExecutorControlMessage;
+import enums.AccessToolUnit;
+import exceptions.AS_15_8_DispatcherException;
+import jobs.ArrangementJob;
+import lombok.extern.slf4j.Slf4j;
+import services.CheckUnitJobService;
 
 @Service
 @Slf4j
@@ -53,20 +52,18 @@ public class KafkaArrangementsConsumer {
 	)
     public void consumeArrangementJob(ArrangementJob arrangementJob, Acknowledgment ack) {
 		log.info("Принято задание на проведение мероприятия: " + arrangementJob.toString());
-        CompletableFuture.runAsync(() -> {
-        	try {
-				checkUnitJobService
-					.prepareJobs(arrangementJob)
-					.forEach(this::send);
-				//Если получили сообщение на перезапуск, нужно поднять сервис
-				if(arrangementJob.getRunType().equals(ArrangementJob.JobRunType.RESTART)){
-					sendStartExecutorsMessage(arrangementJob.getAccessToolUnit());
-				}
-        	} catch (Exception ex) {
-        		log.error("Ошибка при обработке задания на проведение мероприятия: " + arrangementJob.toString(), ex);
-        	}
-        	ack.acknowledge();
-        });
+    	try {
+			checkUnitJobService
+				.prepareJobs(arrangementJob)
+				.forEach(this::send);
+			//Если получили сообщение на перезапуск, нужно поднять сервис
+			if(arrangementJob.getRunType().equals(ArrangementJob.JobRunType.RESTART)){
+				sendStartExecutorsMessage(arrangementJob.getAccessToolUnit());
+			}
+    	} catch (Exception ex) {
+    		log.error("Ошибка при обработке задания на проведение мероприятия: " + arrangementJob.toString(), ex);
+    	}
+    	ack.acknowledge();
     }
 
 	private void send(CheckUnitJob checkUnitJob) {
