@@ -13,6 +13,7 @@ spring:
         consume-topic: exec_results
         produce-topic: analysis_results
         notification-topic: job_notifications
+        analysis-concurrency: 4
 
 ---
 
@@ -22,7 +23,7 @@ spring:
         consume-topic: exec_results_ashabalin
         produce-topic: analysis_results_ashabalin
         notification-topic: job_notifications_ashabalin
-
+        analysis-concurrency: 4
 ---
 
 spring:
@@ -31,6 +32,7 @@ spring:
         consume-topic: exec_results_asavin
         produce-topic: analysis_results_asavin
         notification-topic: job_notifications_asavin
+        analysis-concurrency: 4
 
 ---
 
@@ -40,6 +42,7 @@ spring:
         consume-topic: exec_results_pvorobiev
         produce-topic: analysis_results_pvorobiev
         notification-topic: job_notifications_pvorobiev
+        analysis-concurrency: 4
 
 ---
 
@@ -49,3 +52,4 @@ spring:
         consume-topic: exec_results_jspirina
         produce-topic: analysis_results_jspirina
         notification-topic: job_notifications_jspirina
+        analysis-concurrency: 4

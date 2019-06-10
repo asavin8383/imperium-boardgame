@@ -33,6 +33,9 @@ public class KafkaConfiguration {
 
     @Value("${spring.kafka.auto-offset-reset}")
     private String autoOffsetReset;
+    
+    @Value("${spring.kafka.analysis-concurrency}")
+    private Integer analysisConcurrency;
 	
     @Bean 
     Map<String, Object> producerFactoryConfig(){
@@ -69,6 +72,7 @@ public class KafkaConfiguration {
     public ConcurrentKafkaListenerContainerFactory<String, ExecutionJobResult> kafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, ExecutionJobResult> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(executionResultsConsumerFactory());
+        factory.setConcurrency(analysisConcurrency);
         return factory;
     }
     

@@ -32,7 +32,7 @@ public class KafkaJobNotificationsConsumer {
 	private ArrangementStatusProducer arrangementStatusProducer;
 	
     @KafkaListener(
-    	topics = "${spring.kafka.notification-topic}",
+    	topics = "${spring.kafka.notifications-topic}",
     	containerFactory = "jobNotificationsListenerContainerFactory"
     )
     public void consumeJobNotifications(CheckUnitStatusNotification notification, Acknowledgment ack) {

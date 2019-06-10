@@ -1,7 +1,5 @@
 package kafka.listeners;
 
-import java.util.concurrent.CompletableFuture;
-
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.listener.AcknowledgingConsumerAwareMessageListener;
@@ -32,18 +30,16 @@ public class ExecutionJobResultsListener implements AcknowledgingConsumerAwareMe
 				", partition: "+data.partition() +
 				", offset: "+data.offset());
 		
-		CompletableFuture.runAsync(() -> {
-			ExecutionJobResult job = data.value();
-			try {
-        		AnalyzerService<? super ExecutionJobResult> service = AnalyzerServiceFactory.getService(job.getClass());
-        		AnalysisResult analysisResult = service.analyzeResult(job);
-        		kafkaProducer.sendAnalysisResult(analysisResult);
-        		log.info("Анализ результата проверки ПС/ПАСД выполнен успешно : " + job.getJobID() + ", " + job.getCheckUnit().getValue());
-        	} catch (Exception ex) {
-        		log.error("Ошибка при обработке задания на анализ результатов проверки ПС/ПАСД : " + job.getJobID() + ", " + job.getCheckUnit().getValue(), ex);
-        		kafkaProducer.sendErrorNotification(job.getJobID());
-        	}
-			acknowledgment.acknowledge();
-		});
+		ExecutionJobResult job = data.value();
+		try {
+    		AnalyzerService<? super ExecutionJobResult> service = AnalyzerServiceFactory.getService(job.getClass());
+    		AnalysisResult analysisResult = service.analyzeResult(job);
+    		kafkaProducer.sendAnalysisResult(analysisResult);
+    		log.info("Анализ результата проверки ПС/ПАСД выполнен успешно : " + job.getJobID() + ", " + job.getCheckUnit().getValue());
+    	} catch (Exception ex) {
+    		log.error("Ошибка при обработке задания на анализ результатов проверки ПС/ПАСД : " + job.getJobID() + ", " + job.getCheckUnit().getValue(), ex);
+    		kafkaProducer.sendErrorNotification(job.getJobID());
+    	}
+		acknowledgment.acknowledge();
 	}
 }

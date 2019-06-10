@@ -37,7 +37,10 @@ public class KafkaConfiguration {
     private String group;
 
     @Value("${spring.kafka.auto-offset-reset}")
-    private String offset;
+    private String autoOffsetReset;
+    
+    @Value("${spring.kafka.executor-concurrency}")
+    private Integer listenersConcurrency;
     
     @Bean 
     Map<String, Object> producerFactoryConfig(){
@@ -54,7 +57,7 @@ public class KafkaConfiguration {
     Map<String, Object> cousumerFactoryConfig(){
     	Map<String, Object> config = new HashMap<>();
         config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        config.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, offset);
+        config.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, autoOffsetReset);
         config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         config.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
@@ -89,6 +92,7 @@ public class KafkaConfiguration {
     public ConcurrentKafkaListenerContainerFactory<String, CheckUnitJob> kafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, CheckUnitJob> listenerFactory = new ConcurrentKafkaListenerContainerFactory<>();
         listenerFactory.setConsumerFactory(checkUnitJobsConsumerFactory());
+        listenerFactory.setConcurrency(listenersConcurrency);
         return listenerFactory;
     }
     
@@ -103,7 +107,8 @@ public class KafkaConfiguration {
 
         ConcurrentKafkaListenerContainerFactory<String, ExecutorControlMessage> listenerFactory = new ConcurrentKafkaListenerContainerFactory<>();
         listenerFactory.setConsumerFactory(factory);
-        listenerFactory.getContainerProperties().setAckMode(AckMode.MANUAL);
+        listenerFactory.getContainerProperties().setAckMode(AckMode.MANUAL_IMMEDIATE);
+        listenerFactory.setConcurrency(1);
         return listenerFactory;
     }
  

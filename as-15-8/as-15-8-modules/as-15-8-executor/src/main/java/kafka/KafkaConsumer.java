@@ -42,9 +42,6 @@ public class KafkaConsumer {
 	@Value("${spring.kafka.consume-topic}")
 	private String checkUnitJobsTopicName;
 	
-	@Value("${robots.max-parallel-running}")
-	private int maxRobotsParallelRunning;
-	
 	@PostConstruct
     void createCheckUnitJobsListeners() {
     	
@@ -55,11 +52,10 @@ public class KafkaConsumer {
 	    	
     		container.getContainerProperties().setGroupId("exec_"+accessTool.name().toLowerCase());
     		container.getContainerProperties().setAckMode(AckMode.MANUAL_IMMEDIATE);
-    		//container.getContainerProperties().setAckCount(maxRobotsParallelRunning);
 	    	
 	    	container.setupMessageListener(
 	    		new FilteringMessageListenerAdapter<String, CheckUnitJob>(
-	    			new CheckUnitJobsListener(robotsService, maxRobotsParallelRunning), 
+	    			new CheckUnitJobsListener(robotsService), 
 	    			record -> !record.value().getAccessToolUnit().equals(accessTool),
 	    			true
 	    		)
@@ -85,15 +81,6 @@ public class KafkaConsumer {
         		else if(controlMessage.getCommand() == ControlCommand.START)
         			jobsListenerContainer.resume();
         		
-        		@SuppressWarnings("unchecked")
-				CheckUnitJobsListener listener = (CheckUnitJobsListener)
-						((FilteringMessageListenerAdapter<String, CheckUnitJob>)
-	        				jobsListenerContainer
-	        				.getContainerProperties()
-	        				.getMessageListener())
-						.getDelegate();
-        		
-        		listener.stopRunningJobs();
         		log.info("Слушатель заданий на проверку "+controlMessage.getAccessToolUnit()+" успешно остановлен");
         	} catch (Exception ex) {
         		log.error("Ошибка при обработке управляющего сообщения: " + controlMessage.toString(), ex);
