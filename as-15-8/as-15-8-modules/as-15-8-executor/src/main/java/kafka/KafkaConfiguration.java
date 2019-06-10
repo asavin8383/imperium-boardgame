@@ -43,7 +43,7 @@ public class KafkaConfiguration {
     private Integer listenersConcurrency;
     
     @Value("${spring.kafka.robots-wait-time}")
-    private Long robotsWaitTime;
+    private Integer robotsWaitTime;
     
     @Bean 
     Map<String, Object> producerFactoryConfig(){
@@ -102,7 +102,7 @@ public class KafkaConfiguration {
         ConcurrentKafkaListenerContainerFactory<String, CheckUnitJob> listenerFactory = new ConcurrentKafkaListenerContainerFactory<>();
         listenerFactory.setConsumerFactory(checkUnitJobsConsumerFactory());
         listenerFactory.setConcurrency(listenersConcurrency);
-        listenerFactory.getContainerProperties().setPollTimeout(robotsWaitTime.intValue());
+        listenerFactory.getContainerProperties().setPollTimeout(robotsWaitTime.longValue());
         return listenerFactory;
     }
     
