@@ -34,6 +34,7 @@ spring:
         bootstrap-servers: 192.168.5.12:9094,192.168.5.184:9094,192.168.5.211:9094
         group: executors
         auto-offset-reset: earliest
+        robots-wait-time: 900000
 
 ---
 

@@ -1,8 +1,8 @@
 package scripts.impl;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
@@ -18,8 +18,6 @@ import scripts.ScriptDriverParameters;
 import scripts.ScriptUtils;
 import scripts.ScriptUtils.PageResult;
 import scripts.exceptions.RobotScriptExecutionException;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 
 @Slf4j
 public class VPNScript extends RobotScript {

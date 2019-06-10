@@ -42,6 +42,9 @@ public class KafkaConfiguration {
     @Value("${spring.kafka.executor-concurrency}")
     private Integer listenersConcurrency;
     
+    @Value("${spring.kafka.robots-wait-time}")
+    private Long robotsWaitTime;
+    
     @Bean 
     Map<String, Object> producerFactoryConfig(){
     	Map<String, Object> configProps = new HashMap<>();
@@ -61,6 +64,12 @@ public class KafkaConfiguration {
         config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         config.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
+        
+        config.put(ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, robotsWaitTime);
+        config.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, robotsWaitTime);
+        config.put(ConsumerConfig.REQUEST_TIMEOUT_MS_CONFIG, robotsWaitTime);
+        config.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, robotsWaitTime);
+        
         return config;
     }
     
@@ -93,6 +102,7 @@ public class KafkaConfiguration {
         ConcurrentKafkaListenerContainerFactory<String, CheckUnitJob> listenerFactory = new ConcurrentKafkaListenerContainerFactory<>();
         listenerFactory.setConsumerFactory(checkUnitJobsConsumerFactory());
         listenerFactory.setConcurrency(listenersConcurrency);
+        listenerFactory.getContainerProperties().setPollTimeout(robotsWaitTime);
         return listenerFactory;
     }
     
