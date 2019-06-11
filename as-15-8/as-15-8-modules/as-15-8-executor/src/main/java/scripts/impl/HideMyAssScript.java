@@ -53,13 +53,14 @@ public class HideMyAssScript extends AnonymizerScript {
             if (isHideMyAssErrorPage())
                 return getErrorMessage(getHideMyAssErrorDetails());
 
+            // todo get final url before remove
+            ScriptUtils.tryRemoveElementById(driver, "hma-top");
+
             String plainError = ScriptUtils
                     .getPlainErrorDescriptionIfOccurred(driver);
             if (plainError != null)
                 return getErrorMessage(plainError);
 
-            // todo get final url before remove
-            ScriptUtils.tryRemoveElementById(driver, "hma-top");
             return process(checkUnit);
 
         } catch (TimeoutException | TimeoutScriptException e) {
