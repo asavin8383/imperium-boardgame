@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.TimeoutException;
 import scripts.*;
 import scripts.exceptions.RobotScriptExecutionException;
+import scripts.exceptions.TimeoutScriptException;
 
 import java.util.Map;
 
@@ -81,7 +82,7 @@ public abstract class AnonymizerScript extends RobotScript {
             ScriptUtils.waitPageLoading(driver);
             ScriptUtils.waitCloudflareRedirect(driver);
             return ScriptUtils.getPageSource(driver);
-        } catch (TimeoutException e) {
+        } catch (TimeoutException | TimeoutScriptException e) {
             log.info("TimeoutException при получении эталона", e);
             return new ScriptUtils.PageResult(null, TIME_OUT_ERROR);
         } catch (InterruptedException e) {

@@ -3,6 +3,7 @@ package scripts.impl;
 import checkUnits.CheckUnit;
 import enums.AccessToolParameters;
 import execution.ExecutionJobResult;
+import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.TimeoutException;
@@ -11,9 +12,11 @@ import scripts.ScriptDriverParameters;
 import scripts.ScriptUtils;
 import scripts.exceptions.Captcha_RobotScriptExecutionException;
 import scripts.exceptions.RobotScriptExecutionException;
+import scripts.exceptions.TimeoutScriptException;
 
 import java.util.Map;
 
+@Slf4j
 public class HideMyAssScript extends AnonymizerScript {
 	
 	private static final String URL = "https://www.hidemyass.com/proxy";
@@ -41,7 +44,8 @@ public class HideMyAssScript extends AnonymizerScript {
                 throw new Captcha_RobotScriptExecutionException(
                         "Обнаружена captcha-form на HideMyAss");
 
-        } catch (TimeoutException e) {
+        } catch (TimeoutException | TimeoutScriptException e) {
+            log.info("TimeoutException при получении страницы", e);
             return getTimeoutMessage();
         } catch (NoSuchElementException e) {
             throw new RobotScriptExecutionException(

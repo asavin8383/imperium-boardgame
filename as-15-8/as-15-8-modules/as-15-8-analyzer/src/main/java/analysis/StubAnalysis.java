@@ -7,11 +7,22 @@ import lombok.extern.slf4j.Slf4j;
 @UtilityClass
 public class StubAnalysis {
 
+    public static final double pageSize_percent = 0.25;
+    public static final double keyWords_percent = 0.4;
+    public static final double domainCount_percent = 0.25;
+    public static final double linkCount_percent = 0.1;
+
     public static boolean isStub(StubAnalysisResult result) {
-        double pageSize_percent = 0.25;
-        double keyWords_percent = 0.4;
-        double domainCount_percent = 0.25;
-        double linkCount_percent = 0.1;
+        return isStub(result,
+                pageSize_percent, keyWords_percent,
+                domainCount_percent, linkCount_percent);
+    }
+
+    public static boolean isStub(StubAnalysisResult result,
+                                 double pageSize_percent,
+                                 double keyWords_percent,
+                                 double domainCount_percent,
+                                 double linkCount_percent) {
         double sun_percent = pageSize_percent + keyWords_percent + domainCount_percent + linkCount_percent;
 
         // веса критериев для заглушки
