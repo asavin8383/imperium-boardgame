@@ -169,15 +169,15 @@ public class ScriptUtils {
 
     @Nullable
     public static String getPlainErrorDescriptionIfOccurred(WebDriver driver) {
-        if (driver.getPageSource().getBytes().length <= ERROR_PAGE_SIZE_THRESHOLD) {
-            WebElement element = findElementIfExists(By.xpath("//h1"), driver);
-            String text = getTextOrDefault(element, null);
-            if (text != null) {
-                Pattern pattern = Pattern.compile("[1-5][0-9]{2}");
-                Matcher matcher = pattern.matcher(text);
-                return matcher.find() ? text : null;
-            }
+//        if (driver.getPageSource().length() <= ERROR_PAGE_SIZE_THRESHOLD) {
+        WebElement element = findElementIfExists(By.xpath("//h1"), driver);
+        String text = getTextOrDefault(element, null);
+        if (text != null) {
+            Pattern pattern = Pattern.compile("[1-5][0-9]{2}");
+            Matcher matcher = pattern.matcher(text);
+            return matcher.find() ? text : null;
         }
+//        }
         return null;
     }
 

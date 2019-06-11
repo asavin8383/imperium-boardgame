@@ -32,6 +32,8 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 
 	private static final int similarityThreshold = 30;
 
+	private static final int EMPTY_PAGE_SIZE = 1024;
+
 	@Getter
 	private List<KeyWord> keyWords = new ArrayList<>();
 
@@ -59,19 +61,27 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 		analysisResult.setScreenshot(executionResult.getScreenshot());
 		analysisResult.setPageSize(sizeOf(executionResult.getPageContent()));
 
+        analysisResult.setEtalonErrorCode(executionResult.getEtalonErrorCode());
+        analysisResult.setEtalonScreenshot(executionResult.getEtalonScreenshot());
+        analysisResult.setEtalonPageSize(sizeOf(executionResult.getEtalonPageContent()));
+
+        analysisResult.setStubUrl(executionResult.getStubUrl());
+        analysisResult.setFinalUrl(executionResult.getFinalUrl());
+
 		if (analysisResult.hasError()) {
 			analysisResult.setCheckResult(
 					obtainErrorResult(analysisResult.getErrorCode()));
 			return analysisResult;
 		}
 
+		if (analysisResult.getPageSize() < EMPTY_PAGE_SIZE) {
+			analysisResult.setCheckResult(COMPLETED);
+			return analysisResult;
+		}
+
 		// todo check that hidemyass final url equals to initial or contains in erdi
 
 		/* ETALON */
-
-		analysisResult.setEtalonErrorCode(executionResult.getEtalonErrorCode());
-		analysisResult.setEtalonScreenshot(executionResult.getEtalonScreenshot());
-		analysisResult.setEtalonPageSize(sizeOf(executionResult.getEtalonPageContent()));
 
 		if ( !analysisResult.hasEtalonError() ) {
 			try {
@@ -93,9 +103,6 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 		}
 
 		/* STUB */
-
-		analysisResult.setStubUrl(executionResult.getStubUrl());
-		analysisResult.setFinalUrl(executionResult.getFinalUrl());
 
 		try {
 			if (isStub(analysisResult, executionResult)) {
