@@ -6,17 +6,20 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import scripts.exceptions.TimeoutScriptException;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 
 public class ScriptUtils {
+
+    private static final int ERROR_PAGE_SIZE_THRESHOLD = 2048;
 
     @AllArgsConstructor
     @NoArgsConstructor
@@ -142,46 +145,40 @@ public class ScriptUtils {
         return list != null && list.size() > 0 ? list.get(0) : null;
     }
 
-    public static boolean isCloudflareDdosProtection(WebDriver driver) {
-        /*WebElement redirectText = findElementIfExists(
-                By.xpath("//*[@id=\"cf-content\"]/p[1]"), driver);
-        if (redirectText != null)
-            return redirectText.getText()
-                    .toLowerCase().contains("redirect");*/
-
+    public static String getTextOrDefault(WebElement element, String defaultValue) {
         try {
-            WebElement cloudflareLink = findElementIfExists(
-                    By.xpath("//div[contains(@class, \"attribution\")]//a"), driver);
-            if (cloudflareLink != null)
-                return cloudflareLink.getText()
-                        .equals("DDoS protection by Cloudflare");
+            return element == null ?
+                    defaultValue : element.getText();
         } catch (StaleElementReferenceException e) {
             // ignore
         }
-
-        return false;
+        return defaultValue;
     }
 
-    public static void waitCloudflareRedirect(WebDriver driver)
-            throws InterruptedException, TimeoutScriptException {
-
-        waitCloudflareRedirect(driver, 5 * 1000, 30 * 1000);
-    }
-
-    public static void waitCloudflareRedirect(WebDriver driver, long timeStep, long timeMax)
-            throws InterruptedException, TimeoutScriptException {
-
-        long total = 0;
-
-        while (isCloudflareDdosProtection(driver) && total < timeMax) {
-            total += timeStep;
-            Thread.sleep(timeStep);
+    public static void tryRemoveElementById(WebDriver driver, String id) {
+        try {
+            if (driver instanceof JavascriptExecutor) {
+                ((JavascriptExecutor) driver).executeScript(
+                        "return document.getElementById('" +
+                                id + "').remove();");
+            }
+        } catch (Exception e) {
+            // ignore
         }
+    }
 
-        if (isCloudflareDdosProtection(driver))
-            throw new TimeoutScriptException(
-                    "DDoS protection by Cloudflare. Wait time " +
-                            "(seconds) = " + timeMax / 1000);
+    @Nullable
+    public static String getPlainErrorDescriptionIfOccurred(WebDriver driver) {
+        if (driver.getPageSource().getBytes().length <= ERROR_PAGE_SIZE_THRESHOLD) {
+            WebElement element = findElementIfExists(By.xpath("//h1"), driver);
+            String text = getTextOrDefault(element, null);
+            if (text != null) {
+                Pattern pattern = Pattern.compile("[1-5][0-9]{2}");
+                Matcher matcher = pattern.matcher(text);
+                return matcher.find() ? text : null;
+            }
+        }
+        return null;
     }
 
 }

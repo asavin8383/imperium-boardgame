@@ -8,6 +8,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
+import scripts.CloudflareUtils;
 import scripts.ScriptDriverParameters;
 import scripts.ScriptUtils;
 import scripts.exceptions.Captcha_RobotScriptExecutionException;
@@ -37,12 +38,29 @@ public class HideMyAssScript extends AnonymizerScript {
             input.sendKeys(checkUnit.getValue());
             driver.findElement(By.xpath("/html/body/form/div[3]/a")).click();
             ScriptUtils.waitPageLoading(driver);
-            ScriptUtils.waitCloudflareRedirect(driver);
+
+            CloudflareUtils.waitCloudflareRedirect(driver);
             ScriptUtils.waitPageLoading(driver);
+            if (CloudflareUtils.isCloudflareError(driver)) {
+                return getErrorMessage(CloudflareUtils
+                        .getCloudflareErrorDetails(driver));
+            }
 
             if (captcha())
                 throw new Captcha_RobotScriptExecutionException(
                         "Обнаружена captcha-form на HideMyAss");
+
+            if (isHideMyAssErrorPage())
+                return getErrorMessage(getHideMyAssErrorDetails());
+
+            String plainError = ScriptUtils
+                    .getPlainErrorDescriptionIfOccurred(driver);
+            if (plainError != null)
+                return getErrorMessage(plainError);
+
+            // todo get final url before remove
+            ScriptUtils.tryRemoveElementById(driver, "hma-top");
+            return process(checkUnit);
 
         } catch (TimeoutException | TimeoutScriptException e) {
             log.info("TimeoutException при получении страницы", e);
@@ -54,8 +72,6 @@ public class HideMyAssScript extends AnonymizerScript {
             throw new RobotScriptExecutionException(
                     "Выполнение потока прервано", e);
         }
-
-        return process(checkUnit);
     }
 
     private boolean captcha() {
@@ -67,5 +83,21 @@ public class HideMyAssScript extends AnonymizerScript {
             // ignore
         }
         return false;
+    }
+
+    private boolean isHideMyAssErrorPage() {
+        WebElement headerElement = ScriptUtils.findElementIfExists(
+                By.xpath("//*[@id=\"top\"]/div/h1"), driver);
+        String text = ScriptUtils.getTextOrDefault(
+                headerElement, null);
+        return text != null && text.equalsIgnoreCase(
+                "Oops! Something’s gone wrong...");
+    }
+
+    private String getHideMyAssErrorDetails() {
+        WebElement element = ScriptUtils.findElementIfExists(
+                By.xpath("//*[@id=\"top\"]/div/p"), driver);
+        return ScriptUtils.getTextOrDefault(element,
+                "Описание ошибки не найдено");
     }
 }

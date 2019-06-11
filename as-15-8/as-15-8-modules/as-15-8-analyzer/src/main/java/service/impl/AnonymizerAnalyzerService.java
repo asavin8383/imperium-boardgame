@@ -30,7 +30,7 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 
 	private static final String keyWordsSource = "key_words.json";
 
-	private static final int similarityThreshold = 50;
+	private static final int similarityThreshold = 30;
 
 	@Getter
 	private List<KeyWord> keyWords = new ArrayList<>();
@@ -116,14 +116,8 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 
 		if (errorCode.contains("TIMEOUT") || errorCode.contains("TIME_OUT"))
 			return TIMEOUT_ERROR;
-
-		else if (errorCode.contains("DNS"))
-			return DNS_ERROR;
-
-		else if (errorCode.contains("SOCKET"))
-			return SOCKET_ERROR;
-
-		return HTTP_SERVER_SEND_NO_RESPONSE;
+		else
+			return COMPLETED;
 	}
 
 	private boolean isStub(AnonymizerAnalysisResult analysisResult,
