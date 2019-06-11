@@ -4,7 +4,7 @@ import controllers.helpers.ArrangementExecutionHelper;
 import controllers.helpers.SortingHelper;
 import enums.SortingDirection;
 import exceptions.AS_15_8_Exception;
-import jobs.ArrangementJob;
+import lombok.extern.slf4j.Slf4j;
 import model.enums.ExecutionStatus;
 import model.task.Arrangement;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +20,7 @@ import repositories.FormalTaskRepository;
 import services.arrangement.ArrangementStatusService;
 
 import java.time.LocalDateTime;
+import java.util.stream.Collectors;
 
 /**
  * Creation date: 21.05.2019
@@ -29,6 +30,7 @@ import java.time.LocalDateTime;
 @RestController
 @RequestMapping(path = "/arrangements", produces = MediaType.APPLICATION_JSON_VALUE)
 @PreAuthorize("hasAnyRole('ROLE_OPERATOR','ROLE_ADMIN')")
+@Slf4j
 public class ArrangementController {
 
     private ArrangementRepository arrangementRepo;
@@ -157,8 +159,12 @@ public class ArrangementController {
                 arrangement.getArrangementItems()!=null &&
                 arrangement.getArrangementItems().size() > 0){
             arrangement.setStatus(ExecutionStatus.PLANNED);
+            log.info("Arrangement status changed to " + arrangement.getStatus());
             return true;
         }
+        log.warn("Arrangement status was not changed. Planned date: " + arrangement.getPlannedDate() +
+                ", arrangement items: " + arrangement.getArrangementItems().stream()
+                .map(arrangementItem -> arrangementItem.getId().toString()).collect(Collectors.joining("'")));
         return false;
     }
 
