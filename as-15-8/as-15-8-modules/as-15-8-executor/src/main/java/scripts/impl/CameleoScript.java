@@ -1,20 +1,19 @@
 package scripts.impl;
 
-import checkUnits.CheckUnit;
-import enums.AccessToolParameters;
-import execution.ExecutionJobResult;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Map;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
+
+import checkUnits.CheckUnit;
+import enums.AccessToolParameters;
+import execution.ExecutionJobResult;
 import scripts.ScriptDriverParameters;
 import scripts.ScriptUtils;
 import scripts.exceptions.RobotScriptExecutionException;
 
-import java.util.Map;
-
-@Slf4j
 public class CameleoScript extends AnonymizerScript {
 
 	private static final String CAMELEO_URL = "http://www.cameleo.xyz";

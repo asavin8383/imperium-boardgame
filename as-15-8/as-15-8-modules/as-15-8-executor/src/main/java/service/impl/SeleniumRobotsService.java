@@ -15,9 +15,6 @@ import org.springframework.util.concurrent.ListenableFutureCallback;
 
 import checkUnits.CheckUnitJob;
 import checkUnits.CheckUnitStatusNotification;
-import control.ExecutorControlMessage;
-import control.ExecutorControlMessage.ControlCommand;
-import enums.AccessToolUnit;
 import enums.CheckUnitJobResult;
 import execution.ExecutionJobResult;
 import lombok.extern.slf4j.Slf4j;
@@ -42,51 +39,47 @@ public class SeleniumRobotsService implements RobotsService {
 	@Autowired
 	private KafkaTemplate<String, CheckUnitStatusNotification> notificationTemplate;
 	
-	@Autowired
-	private KafkaTemplate<String, ExecutorControlMessage> controlMessagesTemplate;
-	
     @Value("${spring.kafka.produce-topic}")
     private String executionResultTopicName;
 	
     @Value("${spring.kafka.notification-topic}")
     private String notificationsTopicName;
-    
-    @Value("${spring.kafka.control-topic}")
-    private String controlTopicName;
 	
 	@Override
-	public void run(CheckUnitJob checkUnitJob) {
+	public void run(CheckUnitJob checkUnitJob) throws Captcha_RobotScriptExecutionException{
+		String robotName = "";
 		try {
-			String robotName = "jobID = " + checkUnitJob.getJobID() +
+			robotName = "jobID = " + checkUnitJob.getJobID() +
 					" accessTool = " + checkUnitJob.getAccessToolUnit() +
 					" checkUnit = " + checkUnitJob.getCheckUnit().getValue();
 			
 			Robot robot = RobotsFactory.getRobot(checkUnitJob.getAccessToolUnit());
 			ExecutionJobResult message = null;
 			log.info("Запуск робота: " + robotName);
-			try {
-				message = robot.run(checkUnitJob.getCheckUnit(), checkUnitJob.getAccessToolParameters());
-				message.setJobID(checkUnitJob.getJobID());
-				message.setCheckUnit(checkUnitJob.getCheckUnit());
-		        message.setAccessToolUnit(checkUnitJob.getAccessToolUnit());
-			} catch (Exception ex) {
-				if(ex instanceof Captcha_RobotScriptExecutionException) {
-					log.warn("Робот остановлен, обнаружена капча: " + robotName);
-					sendStopExecutorsMessage(checkUnitJob.getAccessToolUnit());
-				} else
-					log.error("Робот завершил работу с ошибкой: "+robotName, ex);
-				sendCheckJobErrorNotification(checkUnitJob.getJobID(), ex);
-			}
+			
+			message = robot.run(checkUnitJob.getCheckUnit(), checkUnitJob.getAccessToolParameters());
+			message.setJobID(checkUnitJob.getJobID());
+			message.setCheckUnit(checkUnitJob.getCheckUnit());
+	        message.setAccessToolUnit(checkUnitJob.getAccessToolUnit());
+	        
 			if(message != null) {
 				log.info("Робот успешно завершил работу: "+robotName);
-				try {
-					sendExecutionResult(message);
-				} catch(Exception ex) {
-					log.error("Ошибка при отправке сообщения с результатами работы робота: "+robotName, ex);
-				}
+				sendExecutionResult(message);
 			}
 		} catch(Exception ex) {
-			log.error("Ошибка при выполнении задания на проверку запрещенного ресурса: "+checkUnitJob.getJobID(), ex);
+			if(ex instanceof Captcha_RobotScriptExecutionException) {
+				log.warn("Робот остановлен, обнаружена капча: " + robotName);
+				throw (Captcha_RobotScriptExecutionException)ex;
+			} else if(ex instanceof RobotScriptExecutionException) {
+				log.error("Робот завершил работу с ошибкой: "+robotName, ex);
+			} else {
+				log.error("Ошибка при выполнении задания на проверку запрещенного ресурса: "+checkUnitJob.getJobID(), ex);
+			}
+			try {
+				sendCheckJobErrorNotification(checkUnitJob.getJobID(), ex);
+			} catch (Exception sendEx) {
+				log.error("Ошибка при отправке сообщения с ошибкой при выполнении задания на проверку запрещенного ресурса: "+robotName, ex);
+			}
 		}
 	}
 	
@@ -97,7 +90,7 @@ public class SeleniumRobotsService implements RobotsService {
 	 * @throws InterruptedException 
 	 * @throws RobotScriptExecutionException 
 	 */
-	protected void sendExecutionResult(ExecutionJobResult jobResult) throws RobotScriptExecutionException {
+	protected void sendExecutionResult(ExecutionJobResult jobResult) throws RuntimeException {
 		try {
 			Message<ExecutionJobResult> message = MessageBuilder
 	                .withPayload(jobResult)
@@ -155,34 +148,6 @@ public class SeleniumRobotsService implements RobotsService {
 		    future.get();
 		} catch (Exception ex) {
 			throw new RuntimeException("Ошибка при отправке сообщения с уведомлением об ошибке", ex);
-		}
-	}
-	
-	protected void sendStopExecutorsMessage(AccessToolUnit accessToolUnit) {
-		try {
-			ExecutorControlMessage controlMessage = new ExecutorControlMessage(accessToolUnit, ControlCommand.STOP);
-			
-			Message<ExecutorControlMessage> message = MessageBuilder
-	                .withPayload(controlMessage)
-	                .setHeader(KafkaHeaders.TOPIC, controlTopicName)
-	                .build();
-			
-			ListenableFuture<SendResult<String, ExecutorControlMessage>> future = controlMessagesTemplate.send(message);
-		     
-		    future.addCallback(new ListenableFutureCallback<SendResult<String, ExecutorControlMessage>>() {
-		 
-		        @Override
-		        public void onSuccess(SendResult<String, ExecutorControlMessage> result) {
-		            log.info("Сообщение для остановки модулей выполнения проверок успешно отправлено");
-		        }
-		        @Override
-		        public void onFailure(Throwable ex) {
-		        	throw new RuntimeException("Ошибка при отправке сообщения для остановки модулей выполнения проверок", ex);
-		        }
-		    });
-		    future.get();
-		} catch (Exception ex) {
-			throw new RuntimeException("Ошибка при отправке сообщения для остановки модулей выполнения проверок", ex);
 		}
 	}
 }

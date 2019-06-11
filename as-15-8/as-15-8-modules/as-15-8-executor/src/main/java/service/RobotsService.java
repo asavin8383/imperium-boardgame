@@ -1,6 +1,7 @@
 package service;
 
 import checkUnits.CheckUnitJob;
+import scripts.exceptions.Captcha_RobotScriptExecutionException;
 
 /**
  * Интерфейс сервиса управления роботами
@@ -14,6 +15,6 @@ public interface RobotsService {
 	 * @param checkUnitJob Задание на ресурса 
 	 * @return
 	 */
-	void run(CheckUnitJob checkUnitJob);
+	void run(CheckUnitJob checkUnitJob) throws Captcha_RobotScriptExecutionException;
 	
 }
