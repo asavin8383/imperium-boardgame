@@ -30,7 +30,7 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 
 	private static final String keyWordsSource = "key_words.json";
 
-	private static final int similarityThreshold = 60;
+	private static final int similarityThreshold = 50;
 
 	@Getter
 	private List<KeyWord> keyWords = new ArrayList<>();
@@ -108,7 +108,7 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 			throw new AnalysisException(msg, e);
 		}
 
-		analysisResult.setCheckResult(FORBIDDEN_CONTENT_DETECTED);
+		analysisResult.setCheckResult(DOUBTFUL);
 		return analysisResult;
 	}
 
@@ -140,7 +140,9 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 		analysisResult.setKeyWordsCount(AnalysisUtils.getCountKeyWords(content, keyWords));
 		analysisResult.setDomainNameCount(AnalysisUtils.getDomainCount(checkValue, content));
 
-		return StubAnalysis.isStub(analysisResult);
+		return StubAnalysis.isStub(analysisResult,
+				0.35, 0.15,
+				0.15, 0.35);
 	}
 
 	private boolean checkStubUrl(String finalUrl, String stubUrl) {

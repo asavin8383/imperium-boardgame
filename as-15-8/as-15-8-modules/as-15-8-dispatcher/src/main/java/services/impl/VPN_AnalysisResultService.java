@@ -23,7 +23,6 @@ public class VPN_AnalysisResultService implements AnalysisResultService<VpnAnaly
 	public CheckUnitJobResult processResult(VpnAnalysisResult aRes) {
 
 		DetailResultsVpn detailResultsVpn = new DetailResultsVpn();
-		CheckUnitJobResult result = aRes.getCheckResult();
 
 		detailResultsVpn.setId(aRes.getJobID());
 		detailResultsVpn.setResponseErrorCode(aRes.getResponseErrorCode());
@@ -40,15 +39,22 @@ public class VPN_AnalysisResultService implements AnalysisResultService<VpnAnaly
 		detailResultsVpn.setSimilarityOriginPercent(aRes.getSimilarityOriginPercent());
 		detailResultsVpn.setStubScoreInfo(aRes.getStubScoreInfo());
 
-		if (aRes.getNeedTestFinalUrl() != null && aRes.getNeedTestFinalUrl()){
-			if (searchUrlInErdi(aRes.getPageUrlFinal())){
-				result = CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED;
-				detailResultsVpn.setForbiddenFinalUrl(true);
-			}
-		}
+		CheckUnitJobResult result = postAnalysis(detailResultsVpn, aRes);
 
 		detailVpnRepo.save(detailResultsVpn);
 
+		return result;
+	}
+
+	private CheckUnitJobResult postAnalysis(DetailResultsVpn detailResults, VpnAnalysisResult aRes){
+		CheckUnitJobResult result = aRes.getCheckResult();
+
+		if (aRes.getNeedTestFinalUrl() != null && aRes.getNeedTestFinalUrl()){
+			if (searchUrlInErdi(aRes.getPageUrlFinal())){
+				result = CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED;
+				detailResults.setForbiddenFinalUrl(true);
+			}
+		}
 		return result;
 	}
 

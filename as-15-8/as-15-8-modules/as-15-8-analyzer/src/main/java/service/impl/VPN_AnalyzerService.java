@@ -1,12 +1,5 @@
 package service.impl;
 
-import static enums.CheckUnitJobResult.COMPLETED;
-import static enums.CheckUnitJobResult.DNS_ERROR;
-import static enums.CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED;
-import static enums.CheckUnitJobResult.HTTP_SERVER_SEND_NO_RESPONSE;
-import static enums.CheckUnitJobResult.SOCKET_ERROR;
-import static enums.CheckUnitJobResult.TIMEOUT_ERROR;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,6 +7,7 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +23,8 @@ import execution.ExecutionVpnJobResult;
 import lombok.Getter;
 import model.KeyWord;
 import service.AnalyzerService;
+
+import static enums.CheckUnitJobResult.*;
 
 
 /**
@@ -107,13 +103,12 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 
 
 	protected CheckUnitJobResult obtainResult(VpnAnalysisResult aRes, ExecutionVpnJobResult jobRes) {
+		String errorCode = aRes.getResponseErrorCode();
 
-		if (aRes.getResponseError()){
-			String errorCode = aRes.getResponseErrorCode();
-
+		if (!StringUtils.isEmpty(errorCode)){
 			CheckUnitJobResult errorResult = HTTP_SERVER_SEND_NO_RESPONSE;
 
-			if (errorCode == null || errorCode.isEmpty())
+			if (errorCode.isEmpty())
 				errorResult = TIMEOUT_ERROR;
 
 			else if (errorCode.contains("TIMEOUT") || errorCode.contains("TIME_OUT"))
@@ -122,10 +117,18 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 			else if (errorCode.contains("DNS"))
 				errorResult = DNS_ERROR;
 
-			else if (errorCode.contains("SOCKET"))
+			else if (errorCode.contains("SOCKET")){
 				errorResult = SOCKET_ERROR;
+			}
 
-			return errorResult;
+			if (errorResult == SOCKET_ERROR){
+				aRes.setStubScoreInfo("При доступе к интернет ресурсу возникла следующая ошибка: " + errorCode + ". Вероятно проблемы с сетью.");
+				return DOUBTFUL;
+			}
+
+			aRes.setStubScoreInfo("При доступе к интернет ресурсу возникла следующая ошибка: " + errorCode);
+
+			return COMPLETED;
 		}
 
 		// конечный URL совпадает с vpn - заглушкой

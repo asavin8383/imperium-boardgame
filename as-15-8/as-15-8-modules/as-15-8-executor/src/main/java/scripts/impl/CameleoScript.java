@@ -13,6 +13,7 @@ import execution.ExecutionJobResult;
 import scripts.ScriptDriverParameters;
 import scripts.ScriptUtils;
 import scripts.exceptions.RobotScriptExecutionException;
+import scripts.exceptions.TimeoutScriptException;
 
 public class CameleoScript extends AnonymizerScript {
 
@@ -36,7 +37,8 @@ public class CameleoScript extends AnonymizerScript {
             ScriptUtils.waitCloudflareRedirect(driver);
             ScriptUtils.waitPageLoading(driver);
 
-        } catch (TimeoutException e) {
+        } catch (TimeoutException | TimeoutScriptException e) {
+            log.info("TimeoutException при получении страницы", e);
             return getTimeoutMessage();
         }catch (NoSuchElementException e) {
             throw new RobotScriptExecutionException(

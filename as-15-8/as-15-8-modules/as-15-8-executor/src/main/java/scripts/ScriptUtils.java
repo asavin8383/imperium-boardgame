@@ -149,11 +149,15 @@ public class ScriptUtils {
             return redirectText.getText()
                     .toLowerCase().contains("redirect");*/
 
-        WebElement cloudflareLink = findElementIfExists(
-                By.xpath("//div[contains(@class, \"attribution\")]//a"), driver);
-        if (cloudflareLink != null)
-            return cloudflareLink.getText()
-                    .equals("DDoS protection by Cloudflare");
+        try {
+            WebElement cloudflareLink = findElementIfExists(
+                    By.xpath("//div[contains(@class, \"attribution\")]//a"), driver);
+            if (cloudflareLink != null)
+                return cloudflareLink.getText()
+                        .equals("DDoS protection by Cloudflare");
+        } catch (StaleElementReferenceException e) {
+            // ignore
+        }
 
         return false;
     }
