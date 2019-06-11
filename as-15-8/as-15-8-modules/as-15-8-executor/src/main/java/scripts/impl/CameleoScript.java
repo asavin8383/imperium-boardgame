@@ -10,11 +10,13 @@ import org.openqa.selenium.WebElement;
 import checkUnits.CheckUnit;
 import enums.AccessToolParameters;
 import execution.ExecutionJobResult;
+import lombok.extern.slf4j.Slf4j;
 import scripts.ScriptDriverParameters;
 import scripts.ScriptUtils;
 import scripts.exceptions.RobotScriptExecutionException;
 import scripts.exceptions.TimeoutScriptException;
 
+@Slf4j
 public class CameleoScript extends AnonymizerScript {
 
 	private static final String CAMELEO_URL = "http://www.cameleo.xyz";
