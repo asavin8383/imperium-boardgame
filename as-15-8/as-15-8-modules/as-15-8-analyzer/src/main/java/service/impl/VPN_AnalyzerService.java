@@ -98,12 +98,20 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 			analysisResult.setSimilarityOriginPercent(AnalysisUtils.getTextSimilarityPercent(pageContent, pageContentEtalon));
 
 			analysisResult.setLinkCount(AnalysisUtils.getLinkCounts(pageContent));
+
+			// сравнение конечного и начального URL
+			boolean wasRedirect = false;
+			if (!StringUtils.isEmpty(analysisResult.getPageUrlFinal())){
+				wasRedirect = !AnalysisUtils.simpleCompareUrls(analysisResult.getPageUrlFinal(), result.getCheckUnit().getValue());
+			}
+			analysisResult.setRedirectionDetected(wasRedirect);
 		}
 	}
 
 
 	protected CheckUnitJobResult obtainResult(VpnAnalysisResult aRes, ExecutionVpnJobResult jobRes) {
 		String errorCode = aRes.getResponseErrorCode();
+		boolean wasRedirect = aRes.getRedirectionDetected();
 
 		if (!StringUtils.isEmpty(errorCode)){
 			CheckUnitJobResult errorResult = HTTP_SERVER_SEND_NO_RESPONSE;
@@ -136,9 +144,6 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 			return COMPLETED;
 		}
 
-		// сравнение конечного и начального URL
-		boolean wasRedirect = !AnalysisUtils.simpleCompareUrls(aRes.getPageUrlFinal(), jobRes.getCheckUnit().getValue());
-
 		// сравнение контента иходника с эталоном
 		if (aRes.getSimilarityOriginPercent() >= 90){
 			return FORBIDDEN_CONTENT_DETECTED;
@@ -154,10 +159,10 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 		// флаг необходимости проверить конечный юрл в картотеке ЕРДИ
 		if (wasRedirect){
 			aRes.setNeedTestFinalUrl(true);
-			return COMPLETED;	// todo - в случае если юрл разрешен (подумать)
+			return COMPLETED;
 		}
 
-		return FORBIDDEN_CONTENT_DETECTED;	// todo - юрл тот же, но не заглушка (подумать)
+		return FORBIDDEN_CONTENT_DETECTED;
 	}
 
 }
