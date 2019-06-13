@@ -41,19 +41,9 @@ public class GlobalParametersController {
         return globalParametersRepo.findAll(page);
     }
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public GlobalParameter postGlobalParameter(@RequestParam String key,
-                                               @RequestParam String value){
-        GlobalParameter globalParameter = new GlobalParameter();
-        globalParameter.setKey(AccessToolParameters.valueOf(key));
-        globalParameter.setValue(value);
-        return globalParametersRepo.save(globalParameter);
-    }
-
     @PutMapping
     public GlobalParameter putGlobalParameter(
-            @RequestParam String key,
+            @RequestParam AccessToolParameters key,
             @RequestParam String value) {
         return globalParametersRepo.findById(key)
             .map(globalParameter -> {
@@ -61,7 +51,7 @@ public class GlobalParametersController {
                 return globalParametersRepo.save(globalParameter);
             }).orElseGet(() -> {
                 GlobalParameter globalParameter = new GlobalParameter();
-                globalParameter.setKey(AccessToolParameters.valueOf(key));
+                globalParameter.setKey(key);
                 globalParameter.setValue(value);
                 return globalParametersRepo.save(globalParameter);
         });
