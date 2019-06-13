@@ -5,6 +5,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -13,8 +14,14 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
 import model.KeyWord;
+import org.springframework.web.util.UriUtils;
+
+import static java.net.IDN.toASCII;
+import static java.net.IDN.toUnicode;
 
 public class AnalysisUtils {
+
+    public static final String UTF8 =  StandardCharsets.UTF_8.name();
 
     public static int getTextSimilarityPercent(String t1, String t2) throws IOException {
         CosineDocumentSimilarity cos = new CosineDocumentSimilarity(t1, t2);
@@ -72,13 +79,23 @@ public class AnalysisUtils {
             URL u1 = new URL(url1);
             URL u2 = new URL(url2);
 
+            String host1 = u1.getHost() == null ? "" : u1.getHost();
+            String host2 = u2.getHost() == null ? "" : u2.getHost();
+            boolean hostsEquals = host1.equals(host2) || host1.equals(toUnicode(host2)) ||  host1.equals(toASCII(host2));
+
             String path1 = u1.getPath();
-            path1 = path1.endsWith("/") ? "" : path1;
+            path1 = path1 == null ? "" : path1;
+            path1 += path1.endsWith("/") ? "" : "/";
 
             String path2 = u2.getPath();
-            path2 = path2.endsWith("/") ? "" : path2;
+            path2 = path2 == null ? "" : path2;
+            path2 += path2.endsWith("/") ? "" : "/";
 
-            return u1.getHost().equals(u2.getHost()) && path1.equals(path2);
+            boolean pathsEquals = path1.equals(path2) ||
+                    path1.equals(UriUtils.decode(path2, UTF8)) ||
+                    path1.equals(UriUtils.encodeFragment(UriUtils.decode(path2, UTF8), UTF8));
+
+            return hostsEquals && pathsEquals;
         }
         catch (MalformedURLException e) {
             e.printStackTrace();

@@ -1,7 +1,9 @@
 package model.task;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Data;
+import model.Views;
 import model.catalog.AccessTool;
 import model.enums.ExecutionStatus;
 
@@ -26,6 +28,7 @@ public class Arrangement implements Serializable {
 	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="arrangements_generator")
 	@SequenceGenerator(name="arrangements_generator", schema="portal", sequenceName="arrangements_id_seq", allocationSize=1)
 	@Column(name="id", nullable=false, updatable=false)
+	@JsonView(Views.Id.class)
 	private Long id;
 
 	/**Название мероприятия*/

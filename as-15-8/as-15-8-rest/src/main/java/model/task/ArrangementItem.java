@@ -1,7 +1,8 @@
 package model.task;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Data;
+import model.Views;
 import model.erdi.ERDI;
 
 import javax.persistence.*;
@@ -22,11 +23,11 @@ public class ArrangementItem implements Serializable {
     @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="arrangement_items_generator")
     @SequenceGenerator(name="arrangement_items_generator", schema="portal", sequenceName="arrangement_items_id_seq", allocationSize=1)
     @Column(name="id", nullable=false, updatable=false)
+    @JsonView(Views.Id.class)
     private Long id;
 
     @ManyToOne(optional = false)
     @JoinColumn(name="arrangement_id", foreignKey = @ForeignKey(name = "FK_arrangement_items_arrangement_id"))
-    @JsonIgnore
     private Arrangement arrangement;
 
     @ManyToOne(optional = false)

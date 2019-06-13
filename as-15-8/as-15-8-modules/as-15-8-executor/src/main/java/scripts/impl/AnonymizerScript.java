@@ -77,10 +77,26 @@ public abstract class AnonymizerScript extends RobotScript {
         return message;
     }
 
+    ExecutionJobResult getErrorMessage(String details) {
+        message.setErrorCode(details);
+        message.setScreenshot(ScriptUtils.getScreenshot(driver));
+        return message;
+    }
+
     private ScriptUtils.PageResult loadEtalon() throws RobotScriptExecutionException {
         try {
             ScriptUtils.waitPageLoading(driver);
-            ScriptUtils.waitCloudflareRedirect(driver);
+            CloudflareUtils.waitCloudflareRedirect(driver);
+            ScriptUtils.waitPageLoading(driver);
+            if (CloudflareUtils.isCloudflareError(driver)) {
+                new ScriptUtils.PageResult(null,
+                        CloudflareUtils.getCloudflareErrorDetails(driver));
+            }
+            String plainError = ScriptUtils
+                    .getPlainErrorDescriptionIfOccurred(driver);
+            if (plainError != null)
+                return new ScriptUtils.PageResult(null, plainError);
+
             return ScriptUtils.getPageSource(driver);
         } catch (TimeoutException | TimeoutScriptException e) {
             log.info("TimeoutException при получении эталона", e);

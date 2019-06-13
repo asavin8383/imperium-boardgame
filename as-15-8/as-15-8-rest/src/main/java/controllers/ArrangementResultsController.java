@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 import repositories.ArrangementResultRepository;
 import repositories.DetailedArrangementResultRepository;
 
-import java.sql.Blob;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 

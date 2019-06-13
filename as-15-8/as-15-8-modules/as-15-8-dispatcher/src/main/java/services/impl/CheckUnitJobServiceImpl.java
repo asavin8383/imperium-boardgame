@@ -1,19 +1,5 @@
 package services.impl;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.stereotype.Service;
-
 import analysis.AnalysisResult;
 import checkUnits.CheckUnit;
 import checkUnits.CheckUnitJob;
@@ -25,11 +11,24 @@ import enums.CheckUnitJobResult;
 import exceptions.AS_15_8_DispatcherException;
 import jobs.ArrangementJob;
 import jobs.ERDIJob;
+import lombok.Data;
 import model.ArrangementResult;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.stereotype.Service;
 import repositories.ArrangementResultRepository;
 import services.AnalysisResultService;
 import services.AnalysisResultServiceFactory;
 import services.CheckUnitJobService;
+
+import javax.annotation.PostConstruct;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Creation date: 24.05.2019
@@ -41,6 +40,8 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
     private NamedParameterJdbcTemplate jdbcNamedTemplate;
     private JdbcTemplate jdbcTemplate;
     private ArrangementResultRepository arrangementResultRepo;
+    private final List<String> protocols = new ArrayList<>();
+    private final List<String> ports = new ArrayList<>();
 
     @Autowired
     public CheckUnitJobServiceImpl(NamedParameterJdbcTemplate jdbcNamedTemplate,
@@ -49,6 +50,18 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
         this.jdbcNamedTemplate = jdbcNamedTemplate;
         this.jdbcTemplate = jdbcTemplate;
         this.arrangementResultRepo = arrangementResultRepo;
+    }
+
+    @PostConstruct
+    private void fillProtocolsAndPorts(){
+        String sqlForProtocols = "select id, protocol from dictionaries.protocols";
+        protocols.addAll(jdbcTemplate.queryForList(sqlForProtocols).stream()
+                .map(stringObjectMap -> stringObjectMap.get("protocol").toString())
+                .collect(Collectors.toList()));
+        String sqlForPorts = "select id, port_number from dictionaries.ports";
+        ports.addAll(jdbcTemplate.queryForList(sqlForPorts).stream()
+                .map(stringObjectMap -> stringObjectMap.get("port_number").toString())
+                .collect(Collectors.toList()));
     }
 
     @Override
@@ -73,13 +86,21 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
         );
 
         CheckUnitJobMapper mapper = new CheckUnitJobMapper(arrangementJob.getAccessToolUnit(), arrangementJob.getAccessToolParameters());
-        List<CheckUnitJob> checkUnitJobs;
+        List<CheckUnitJobTemplate> checkUnitJobcheckUnitJobTemplates;
         try {
             //noinspection SqlDialectInspection
-            checkUnitJobs = jdbcNamedTemplate.query(
+            /*CheckUnitJob job = mapper.map(rs, rowNum);
+            Long jobID = saveCheckUnitJobAsResult(arrangementJob.getId(), rs.getLong("id"), job);
+            job.setJobID(jobID);
+            return job;*/
+            checkUnitJobcheckUnitJobTemplates = jdbcNamedTemplate.query(
                 "select content.id as id, 'DOMAIN' as check_unit_type, domain.domain as check_unit_value\n" +
                         "  from sa.content\n" +
-                        "  join sa.domain on content.id = domain.content_id and content.id IN (:ids) and blocktype in ('domain', 'domain-mask')\n" +
+                        "  join sa.domain on content.id = domain.content_id and content.id IN (:ids) and blocktype = 'domain'\n" +
+                        "UNION\n" +
+                        "select content.id as id, 'DOMAIN_MASK' as check_unit_type, domain.domain as check_unit_value\n" +
+                        "  from sa.content\n" +
+                        "  join sa.domain on content.id = domain.content_id and content.id IN (:ids) and blocktype = 'domain-mask'\n" +
                         "UNION\n" +
                         "select content.id, 'IP_V4' as check_unit_type, ip.ip as check_unit_value\n" +
                         "  from sa.content\n" +
@@ -101,38 +122,103 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
                         "  from sa.content\n" +
                         "  join sa.url on content.id = url.content_id and content.id IN (:ids) and blocktype is null",
                     parameters,
-                    (rs, rowNum) -> {
-                    	CheckUnitJob job = mapper.map(rs, rowNum);
-                    	Long jobID = saveCheckUnitJobAsResult(arrangementJob.getId(), rs.getLong("id"), job);
-                    	job.setJobID(jobID);
-                    	return job;
-                    }
+                    mapper::map
             );
 
         } catch (Exception ex){
         	throw new AS_15_8_DispatcherException("Ошибка при создании заданий на проверку запрещенных ресурсов!", ex);
         }
+        return buildCheckUnitJobsFromTemplates(checkUnitJobcheckUnitJobTemplates, arrangementJob.getId());
+    }
+
+    /**
+     * Построение проверок по шаблонам
+     * @param checkUnitJobTemplates
+     * @return
+     */
+    private List<CheckUnitJob> buildCheckUnitJobsFromTemplates(List<CheckUnitJobTemplate> checkUnitJobTemplates, Long arrangementId){
+        List<CheckUnitJob> checkUnitJobs = new ArrayList<>();
+        for(CheckUnitJobTemplate template : checkUnitJobTemplates){
+            switch (template.checkUnitType) {
+                case URL:
+                    CheckUnitJob urlCheckUnitJob = new CheckUnitJob();
+                    fillCommonFields(urlCheckUnitJob, template);
+                    urlCheckUnitJob.setCheckUnit(new CheckUnit(template.checkUnitType, template.checkUnitValueTemplate));
+                    Long urlJobID = saveCheckUnitJobAsResult(arrangementId, template.erdiId, urlCheckUnitJob);
+                    urlCheckUnitJob.setJobID(urlJobID);
+                    checkUnitJobs.add(urlCheckUnitJob);
+                    break;
+                case DOMAIN:
+                    for (String protocol : protocols){
+                        CheckUnitJob domainCheckUnitJob = new CheckUnitJob();
+                        fillCommonFields(domainCheckUnitJob, template);
+                        domainCheckUnitJob.setCheckUnit(new CheckUnit(template.checkUnitType, protocol + template.checkUnitValueTemplate));
+                        Long domainJobID = saveCheckUnitJobAsResult(arrangementId, template.erdiId, domainCheckUnitJob);
+                        domainCheckUnitJob.setJobID(domainJobID);
+                        checkUnitJobs.add(domainCheckUnitJob);
+                    }
+                    break;
+                case DOMAIN_MASK:
+                    String sql = "SELECT domain_name FROM dictionaries.domain_mask_items dmi\n" +
+                            "JOIN sa.domain domain on domain.id = dmi.domain_mask_id and domain.domain=?";
+                    jdbcTemplate.queryForList(sql, template.checkUnitValueTemplate).stream()
+                        .map(stringObjectMap -> stringObjectMap.get("domain_name").toString())
+                        .forEach(domainName -> {
+                            for (String protocol : protocols) {
+                                CheckUnitJob domainMaskCheckUnitJob = new CheckUnitJob();
+                                fillCommonFields(domainMaskCheckUnitJob, template);
+                                domainMaskCheckUnitJob.setCheckUnit(new CheckUnit(template.checkUnitType, protocol + domainName));
+                                Long domainMaskJobID = saveCheckUnitJobAsResult(arrangementId, template.erdiId, domainMaskCheckUnitJob);
+                                domainMaskCheckUnitJob.setJobID(domainMaskJobID);
+                                checkUnitJobs.add(domainMaskCheckUnitJob);
+                            }
+                        });
+                    break;
+                case IP_V4:
+                case IP_V6:
+                    for (String protocol : protocols){
+                        for (String port : ports){
+                            CheckUnitJob ipCheckUnitJob = new CheckUnitJob();
+                            fillCommonFields(ipCheckUnitJob, template);
+                            ipCheckUnitJob.setCheckUnit(new CheckUnit(template.checkUnitType, protocol + template.checkUnitValueTemplate + port));
+                            Long ipJobID = saveCheckUnitJobAsResult(arrangementId, template.erdiId, ipCheckUnitJob);
+                            ipCheckUnitJob.setJobID(ipJobID);
+                            checkUnitJobs.add(ipCheckUnitJob);
+                        }
+                    }
+                    break;
+                default:
+                    break;
+
+            }
+        }
         return checkUnitJobs;
     }
 
+
+
+    private void fillCommonFields(CheckUnitJob checkUnitJob, CheckUnitJobTemplate checkUnitJobTemplate){
+        checkUnitJob.setAccessToolUnit(checkUnitJobTemplate.getAccessToolUnit());
+        checkUnitJob.getAccessToolParameters().putAll(checkUnitJobTemplate.getParameters());
+    }
+
     private List<CheckUnitJob> prepareJobsForRestart(ArrangementJob arrangementJob){
+        //TODO Отложить до решения вопроса с капчей
+        /*
         final String CAPTCHA = "CAPTCHA_DETECTED";
         CheckUnitJobMapper mapper = new CheckUnitJobMapper(arrangementJob.getAccessToolUnit(), arrangementJob.getAccessToolParameters());
         List<CheckUnitJob> checkUnitJobs;
         try {
             //noinspection SqlDialectInspection
-            checkUnitJobs = jdbcTemplate.query("select id, check_unit_type, check_unit_value from portal.arrangement_results where arrangement_id = ? AND result = ?"
-            , (rs, rowNum) -> {
-                        CheckUnitJob job = mapper.map(rs, rowNum);
-                        Long jobID = updateCheckUnitJob(rs.getLong("id"));
-                        job.setJobID(jobID);
-                        return job;
-                    }
-            ,arrangementJob.getId(), CAPTCHA);
+            jdbcTemplate.queryForList("select id from portal.arrangement_results where arrangement_id = ? AND result = ?",arrangementJob.getId(), CAPTCHA)
+            .stream()
+            .map(stringObjectMap -> Long.valueOf(stringObjectMap.get("id").toString()))
+            .forEach(this::updateCheckUnitJob);
         } catch (Exception ex){
             throw new AS_15_8_DispatcherException("Ошибка при создании заданий на проверку запрещенных ресурсов!", ex);
         }
-        return checkUnitJobs;
+        return checkUnitJobs;*/
+        return null;
     }
 
 
@@ -172,7 +258,7 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
         }
     }
 
-    private Long updateCheckUnitJob(Long id){
+    /*private Long updateCheckUnitJob(Long id){
         try {
             ArrangementResult arrangementResult = findJobByID(id);
             arrangementResult.setResult(CheckUnitJobResult.RUNNING);
@@ -180,9 +266,9 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
         }catch (Exception ex){
             throw new AS_15_8_DispatcherException("Ошибка обновления задания на проверку запрещенного ресурса!", ex);
         }
-    }
+    }*/
     
-    class CheckUnitJobMapper{
+    static class CheckUnitJobMapper{
     	
     	private AccessToolUnit accessToolUnit;
     	private Map<AccessToolParameters, String> parameters;
@@ -191,15 +277,25 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
 			this.accessToolUnit = accessToolUnit;
 			this.parameters = parameters;
 		}
-    	
-        CheckUnitJob map(ResultSet rs, int rowNum) throws SQLException {
-            CheckUnitJob checkUnitJob = new CheckUnitJob();
-            checkUnitJob.setAccessToolUnit(accessToolUnit);
-            CheckUnitType type = CheckUnitType.valueOf(rs.getString("check_unit_type"));
-            checkUnitJob.setCheckUnit(new CheckUnit(type, rs.getString("check_unit_value")));
-            checkUnitJob.getAccessToolParameters().putAll(parameters);
-            return checkUnitJob;
+
+        CheckUnitJobTemplate map(ResultSet rs, int rowNum) throws SQLException {
+            CheckUnitJobTemplate checkUnitJobTemplate = new CheckUnitJobTemplate();
+            checkUnitJobTemplate.setErdiId(rs.getLong("id"));
+            checkUnitJobTemplate.setAccessToolUnit(accessToolUnit);
+            checkUnitJobTemplate.setCheckUnitType(CheckUnitType.valueOf(rs.getString("check_unit_type")));
+            checkUnitJobTemplate.setCheckUnitValueTemplate(rs.getString("check_unit_value"));
+            checkUnitJobTemplate.getParameters().putAll(parameters);
+            return checkUnitJobTemplate;
         }
+    }
+
+    @Data
+    private static class CheckUnitJobTemplate {
+        private Long erdiId;
+        private AccessToolUnit accessToolUnit;
+        private final Map<AccessToolParameters, String> parameters = new HashMap<>();
+        private CheckUnitType checkUnitType;
+        private String checkUnitValueTemplate;
     }
 
 	@Override

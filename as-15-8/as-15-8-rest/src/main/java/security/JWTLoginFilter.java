@@ -1,6 +1,7 @@
 package security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import model.user.User;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -21,7 +22,8 @@ import java.io.IOException;
 public class JWTLoginFilter extends AbstractAuthenticationProcessingFilter {
 
 	private final String jwtSecret;
-    private final long ttl_msec;
+	@Setter
+    private long ttl_msec;
  
     public JWTLoginFilter(String url, AuthenticationManager authManager, String jwtSecret, long ttl_msec) {
         super(new AntPathRequestMatcher(url));

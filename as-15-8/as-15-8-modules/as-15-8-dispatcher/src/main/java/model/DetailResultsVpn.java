@@ -53,6 +53,9 @@ public class DetailResultsVpn implements Serializable  {
     @Column(name="page_url_final_etalon")
     private String pageUrlFinalEtalon;
 
+    @Column(name="redirection_detected")
+    private Boolean redirectionDetected;
+
     @Column(name="forbidden_final_url")
     private Boolean forbiddenFinalUrl;
 

@@ -1,12 +1,14 @@
 package common;
 
-import java.util.Collections;
-
+import advices.AuthenticationEntryPointImpl;
+import exceptions.AS_15_8_Exception;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
@@ -20,12 +22,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import advices.AuthenticationEntryPointImpl;
-import lombok.extern.slf4j.Slf4j;
 import security.JWTAuthenticationFilter;
 import security.JWTLoginFilter;
 import services.userDetails.CustomUserDetailsMapper;
+
+import javax.sql.DataSource;
+import java.util.Collections;
 
 
 @Configuration
@@ -55,12 +57,15 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	@Value("${spring.app.jwt.secret}")
 	public String jwtSecret;
 	
-	@Value("${spring.app.jwt.ttl}")
-    public long jwtTTLSec;
+	/*@Value("${spring.app.jwt.ttl}")
+    public long jwtTTLSec;*/
 
 	@Autowired
-    CustomUserDetailsMapper userDetailsMapper;
- 
+	private CustomUserDetailsMapper userDetailsMapper;
+
+    @Autowired
+    JdbcTemplate jdbcTemplate;
+
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
@@ -71,6 +76,11 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
+    }
+
+    @Bean
+    public JWTLoginFilter jwtLoginFilter(){
+        return new JWTLoginFilter("/gettoken", authenticationManager(), jwtSecret, getJwtTTLSec() * 1000);
     }
 	
 	@Override
@@ -91,7 +101,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .logoutSuccessHandler(
                         (httpServletRequest, httpServletResponse, authentication) -> log.info("Logout Successful"))
             .and()
-                .addFilterBefore(new JWTLoginFilter("/gettoken", authenticationManager(), jwtSecret, jwtTTLSec * 1000),
+                .addFilterBefore(jwtLoginFilter(),
                         UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new JWTAuthenticationFilter(jwtSecret), UsernamePasswordAuthenticationFilter.class)
             .exceptionHandling()
@@ -119,5 +129,17 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
         provider.setUserDetailsContextMapper(userDetailsMapper);
         return provider;
     }
-	   
+
+    private long getJwtTTLSec(){
+        String sql = "select value from system.system_parameters where key='jwt_ttl_sec'";
+        String value = jdbcTemplate.queryForObject(sql, String.class);
+        if (value==null){
+            log.error("Error getting ttl for token from DB. Query result is null: " + sql);
+            throw new AS_15_8_Exception("Error getting ttl for token from DB. Query result is null: " + sql);
+        }
+        return Long.valueOf(value);
+    }
+
+
+
 }

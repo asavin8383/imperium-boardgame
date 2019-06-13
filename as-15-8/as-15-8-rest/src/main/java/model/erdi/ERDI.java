@@ -12,6 +12,8 @@ import javax.persistence.PostLoad;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import model.Views;
 import org.hibernate.annotations.Immutable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -24,16 +26,25 @@ import model.task.ArrangementItem;
 @Table(schema = "sa", name = "content")
 @Immutable
 @Getter
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(of = {"id"})
 public class ERDI {
 
-    private static final String URL = "URL";
-    private static final String IP = "IP";
-    private static final String DOMAIN = "DOMAIN";
-    private static final String DOMAIN_MASK = "DOMAIN-MASK";
+    public enum CheckUnitType{
+        URL("URL"),
+        IP("IP"),
+        DOMAIN("DOMAIN"),
+        DOMAIN_MASK("DOMAIN-MASK")
+        ;
+        @Getter
+        private String name;
+
+        CheckUnitType(String name) {
+            this.name = name;
+        }
+    }
 
     @Id
-    @EqualsAndHashCode.Include
+    @JsonView(Views.Id.class)
     private Long id;
 
     //TODO Плохо!!! Нужно по-человечески разобраться
@@ -69,13 +80,13 @@ public class ERDI {
 
 
     public Optional<Map<String, String>> getFirstCheckUnit(){
-        if (this.checkUnitType.equals(URL)){
+        if (this.checkUnitType.equals(CheckUnitType.URL.getName())){
             return getExplicitCheckUnits(urls);
-        } else if (this.checkUnitType.equals(IP)){
+        } else if (this.checkUnitType.equals(CheckUnitType.IP.getName())){
             return getExplicitCheckUnits(ipList);
-        } else if (this.checkUnitType.equals(DOMAIN)){
+        } else if (this.checkUnitType.equals(CheckUnitType.DOMAIN.getName())){
             return getExplicitCheckUnits(domains);
-        } else if (this.checkUnitType.equals(DOMAIN_MASK)){
+        } else if (this.checkUnitType.equals(CheckUnitType.DOMAIN_MASK.getName())){
             return getExplicitCheckUnits(domainMasks);
         } else return Optional.empty();
     }
@@ -92,7 +103,7 @@ public class ERDI {
     @PostLoad
     void fillCheckUnitType(){
         if(blocktype==null){
-            checkUnitType = URL;
+            checkUnitType = CheckUnitType.URL.getName();
         } else {
             checkUnitType = blocktype.toUpperCase();
         }

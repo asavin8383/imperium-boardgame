@@ -163,5 +163,26 @@
         <appender-ref ref="SECURITY_LOG" />
     	<appender-ref ref="Console" />
     </logger>
+
+    <appender name="REST_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOGS}/rest.log</file>
+        <encoder>
+            <pattern>%date [%level] from %logger - %message%n%xException</pattern>
+        </encoder>
+
+        <rollingPolicy
+                class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOGS}/archived/rests-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy
+                    class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>100MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+    </appender>
+
+    <logger name="org.springframework.controllers" level="INFO">
+        <appender-ref ref="REST_LOG" />
+        <appender-ref ref="Console" />
+    </logger>
  
 </configuration>
