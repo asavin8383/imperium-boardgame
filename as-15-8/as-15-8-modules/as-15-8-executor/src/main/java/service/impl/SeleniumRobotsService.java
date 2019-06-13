@@ -67,6 +67,11 @@ public class SeleniumRobotsService implements RobotsService {
 				sendExecutionResult(message);
 			}
 		} catch(Exception ex) {
+			try {
+				sendCheckJobErrorNotification(checkUnitJob.getJobID(), ex);
+			} catch (Exception sendEx) {
+				log.error("Ошибка при отправке сообщения с ошибкой при выполнении задания на проверку запрещенного ресурса: "+robotName, ex);
+			}
 			if(ex instanceof Captcha_RobotScriptExecutionException) {
 				log.warn("Робот остановлен, обнаружена капча: " + robotName);
 				throw (Captcha_RobotScriptExecutionException)ex;
@@ -74,11 +79,6 @@ public class SeleniumRobotsService implements RobotsService {
 				log.error("Робот завершил работу с ошибкой: "+robotName, ex);
 			} else {
 				log.error("Ошибка при выполнении задания на проверку запрещенного ресурса: "+checkUnitJob.getJobID(), ex);
-			}
-			try {
-				sendCheckJobErrorNotification(checkUnitJob.getJobID(), ex);
-			} catch (Exception sendEx) {
-				log.error("Ошибка при отправке сообщения с ошибкой при выполнении задания на проверку запрещенного ресурса: "+robotName, ex);
 			}
 		}
 	}

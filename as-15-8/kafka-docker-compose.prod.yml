@@ -35,7 +35,6 @@ services:
             KAFKA_NUM_PARTITIONS: 3
             KAFKA_MESSAGE_MAX_BYTES: 10000000
             KAFKA_MAX_REQUEST_SIZE: 10000000
-            KAFKA_GROUP_MAX_SESSION_TIMEOUT_MS: 1000000
             KAFKA_JMX_OPTS: >
                 -Dcom.sun.management.jmxremote
                 -Dcom.sun.management.jmxremote.authenticate=false

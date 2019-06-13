@@ -1,7 +1,7 @@
 package kafka;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
 
@@ -31,7 +31,7 @@ import service.RobotsService;
 @DependsOn({"robotsFactory"})
 public class KafkaConsumer {
 
-	private Map<AccessToolUnit, MessageListenerContainer> listenerContainers = new HashMap<>();
+	private Map<AccessToolUnit, MessageListenerContainer> listenerContainers = new ConcurrentHashMap<>();
 	
 	@Autowired
 	private RobotsService robotsService;
@@ -52,10 +52,10 @@ public class KafkaConsumer {
     void createCheckUnitJobsListeners() {
     	
     	for(AccessToolUnit accessTool : AccessToolUnit.values()) {
-    		    
+    		
     		ConcurrentMessageListenerContainer<String, CheckUnitJob> container =
     				kafkaListenerContainerFactory.createContainer(checkUnitJobsTopicName);
-	    	
+    		
     		container.getContainerProperties().setGroupId("exec_"+accessTool.name().toLowerCase());
     		container.getContainerProperties().setAckMode(AckMode.MANUAL_IMMEDIATE);
     		
@@ -68,7 +68,6 @@ public class KafkaConsumer {
 	    			true
 	    		)
 	    	);
-	    	
 	    	container.start();
 	    	listenerContainers.put(accessTool, container);
     	}
@@ -112,8 +111,8 @@ public class KafkaConsumer {
 	private void stopListeners(AccessToolUnit accessToolUnit) {
 		try {
 			MessageListenerContainer jobsListenerContainer = listenerContainers.get(accessToolUnit);
-			if(jobsListenerContainer.isRunning()) {
-				jobsListenerContainer.stop();
+			if(!jobsListenerContainer.isPauseRequested()) {
+				jobsListenerContainer.pause();
 				log.info("\n\n-------------------------------------------\n"+
 						"Слушатель заданий на проверку "+accessToolUnit+" успешно остановлен"+
 						"\n-------------------------------------------\n");
@@ -126,8 +125,8 @@ public class KafkaConsumer {
 	private void startListeners(AccessToolUnit accessToolUnit) {
 		try {
 			MessageListenerContainer jobsListenerContainer = listenerContainers.get(accessToolUnit);
-			if(!jobsListenerContainer.isRunning()) {
-				jobsListenerContainer.start();
+			if(jobsListenerContainer.isContainerPaused()) {
+				jobsListenerContainer.resume();
 				log.info("\n\n-------------------------------------------\n"+
 						"Слушатель заданий на проверку "+accessToolUnit+" успешно запущен"+
 						"\n-------------------------------------------\n");
