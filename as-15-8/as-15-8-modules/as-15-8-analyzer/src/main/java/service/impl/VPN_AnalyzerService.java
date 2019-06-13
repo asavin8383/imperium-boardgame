@@ -145,9 +145,11 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 		}
 
 		// сравнение контента иходника с эталоном
-		if (aRes.getSimilarityOriginPercent() >= 90){
-			return FORBIDDEN_CONTENT_DETECTED;
-		}
+        if (useEtalon(jobRes)){
+            if (aRes.getSimilarityOriginPercent() >= 90){
+                return FORBIDDEN_CONTENT_DETECTED;
+            }
+        }
 
 		// проверка на заглушку
 		boolean isStub = StubAnalysis.isStub(aRes);
@@ -164,5 +166,9 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 
 		return FORBIDDEN_CONTENT_DETECTED;
 	}
+
+	protected boolean useEtalon(ExecutionVpnJobResult jobRes){
+        return !StringUtils.isEmpty(jobRes.getPageContentEtalon()) || !StringUtils.isEmpty(jobRes.getChromeErrorCodeEtalon());
+    }
 
 }

@@ -6,6 +6,7 @@ import execution.ExecutionAnonymizerResult;
 import execution.ExecutionJobResult;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.TimeoutException;
+import org.springframework.util.StringUtils;
 import scripts.*;
 import scripts.exceptions.RobotScriptExecutionException;
 import scripts.exceptions.TimeoutScriptException;
@@ -17,6 +18,7 @@ public abstract class AnonymizerScript extends RobotScript {
 
     private static final String TIME_OUT_ERROR = "TIME_OUT";
 
+    protected boolean useEtalon;
     private String etalonProxy;
 
     private ExecutionAnonymizerResult message;
@@ -24,6 +26,11 @@ public abstract class AnonymizerScript extends RobotScript {
     public AnonymizerScript(ScriptDriverParameters driverParams,
                             Map<AccessToolParameters, String> scriptParams) {
     	super(driverParams, scriptParams);
+
+        String useEtalon = scriptParams.get(AccessToolParameters.USE_ETALON);
+        this.useEtalon = StringUtils.isEmpty(useEtalon) ||
+                useEtalon.equalsIgnoreCase("true") ||
+                useEtalon.equalsIgnoreCase("on");
 
         this.etalonProxy = ProxyUtils.getFullProxy(
                 scriptParams.get(AccessToolParameters.PROXY_TYPE),
@@ -52,22 +59,25 @@ public abstract class AnonymizerScript extends RobotScript {
 
         close(driver);
 
-        driver = DriverFactory.createDriver(
-                getDriverParams().getHubURL(),
-                getDriverParams().getPlatformName(),
-                getDriverParams().getApplicationName(),
-                getDriverParams().getBrowserName(),
-                etalonProxy);
+        if (useEtalon){
+            driver = DriverFactory.createDriver(
+                    getDriverParams().getHubURL(),
+                    getDriverParams().getPlatformName(),
+                    getDriverParams().getApplicationName(),
+                    getDriverParams().getBrowserName(),
+                    etalonProxy);
 
-        driver.manage().window().fullscreen();
-        driver.get(ScriptUtils.getCheckUnitValue(checkUnit));
-        ScriptUtils.PageResult etalon = loadEtalon();
+            driver.manage().window().fullscreen();
+            driver.get(ScriptUtils.getCheckUnitValue(checkUnit));
+            ScriptUtils.PageResult etalon = loadEtalon();
 
-        message.setEtalonErrorCode(etalon.errorCodeChrome);
-        message.setEtalonPageContent(etalon.pageSource);
-        message.setEtalonScreenshot(ScriptUtils.getScreenshot(driver));
+            message.setEtalonErrorCode(etalon.errorCodeChrome);
+            message.setEtalonPageContent(etalon.pageSource);
+            message.setEtalonScreenshot(ScriptUtils.getScreenshot(driver));
 
-        close(driver);
+            close(driver);
+        }
+
 	    return message;
     }
 

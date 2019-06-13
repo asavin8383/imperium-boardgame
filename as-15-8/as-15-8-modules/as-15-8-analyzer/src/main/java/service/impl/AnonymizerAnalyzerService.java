@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import common.AnalysisException;
 import enums.CheckUnitJobResult;
 import execution.ExecutionAnonymizerResult;
+import execution.ExecutionVpnJobResult;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import model.KeyWord;
@@ -83,7 +84,7 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 
 		/* ETALON */
 
-		if ( !analysisResult.hasEtalonError() ) {
+		if ( useEtalon(executionResult) && !analysisResult.hasEtalonError() ) {
 			try {
 				analysisResult.setSimilarityPercent(
 						AnalysisUtils.getTextSimilarityPercent(
@@ -159,6 +160,10 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 
 	private Integer sizeOf(String pageContent) {
 		return StringUtils.isEmpty(pageContent) ? 0 : pageContent.length();
+	}
+
+	private boolean useEtalon(ExecutionAnonymizerResult jobRes){
+		return !StringUtils.isEmpty(jobRes.getEtalonPageContent()) || !StringUtils.isEmpty(jobRes.getEtalonErrorCode());
 	}
 
 }
