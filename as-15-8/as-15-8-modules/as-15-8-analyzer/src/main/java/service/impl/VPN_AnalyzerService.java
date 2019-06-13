@@ -7,7 +7,6 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +24,7 @@ import model.KeyWord;
 import service.AnalyzerService;
 
 import static enums.CheckUnitJobResult.*;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 
 /**
@@ -69,42 +69,43 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 		return analysisResult;
 	}
 
-	protected void prepareResult(VpnAnalysisResult analysisResult, ExecutionVpnJobResult result) throws IOException {
-		String chromeErrorCode = result.getChromeErrorCode();
-		String chromeErrorCodeEtalon = result.getChromeErrorCodeEtalon();
-		Boolean responseError = result.getResponseError();
-		String  pageContent = result.getPageContent();
+	protected void prepareResult(VpnAnalysisResult aRes, ExecutionVpnJobResult jobRes) throws IOException {
+		String chromeErrorCode = jobRes.getChromeErrorCode();
+		String chromeErrorCodeEtalon = jobRes.getChromeErrorCodeEtalon();
+		Boolean responseError = jobRes.getResponseError();
+		String  pageContent = jobRes.getPageContent();
 		if (pageContent == null)
 			pageContent = "";
-		String pageContentEtalon = result.getPageContentEtalon();
+		String pageContentEtalon = jobRes.getPageContentEtalon();
 		if (pageContentEtalon == null)
 			pageContentEtalon = "";
 
-		analysisResult.setResponseError(responseError);
-		analysisResult.setResponseErrorCode(chromeErrorCode);
-		analysisResult.setResponseErrorCodeEtalon(chromeErrorCodeEtalon);
+		aRes.setResponseError(responseError);
+		aRes.setResponseErrorCode(chromeErrorCode);
+		aRes.setResponseErrorCodeEtalon(chromeErrorCodeEtalon);
+		aRes.setUseEtalon(jobRes.getUseEtalon() == null || jobRes.getUseEtalon());
 
 		if (!responseError) {
-			analysisResult.setPageSize(pageContent.length());
-			analysisResult.setPageSizeEtalon(pageContentEtalon.length());
-			analysisResult.setPageUrlFinal(result.getFinalUrlPage());
-			analysisResult.setPageUrlFinalEtalon(result.getFinalUrlPageEtalon());
-			analysisResult.setStubUrl(result.getStubUrl());
+			aRes.setPageSize(pageContent.length());
+			aRes.setPageSizeEtalon(pageContentEtalon.length());
+			aRes.setPageUrlFinal(jobRes.getFinalUrlPage());
+			aRes.setPageUrlFinalEtalon(jobRes.getFinalUrlPageEtalon());
+			aRes.setStubUrl(jobRes.getStubUrl());
 
-			analysisResult.setKeyWordsCount(AnalysisUtils.getCountKeyWords(pageContent, keyWords));
+			aRes.setKeyWordsCount(AnalysisUtils.getCountKeyWords(pageContent, keyWords));
 
-			analysisResult.setDomainNameCount(AnalysisUtils.getDomainCount(result.getCheckUnit().getValue(), pageContent));
+			aRes.setDomainNameCount(AnalysisUtils.getDomainCount(jobRes.getCheckUnit().getValue(), pageContent));
 
-			analysisResult.setSimilarityOriginPercent(AnalysisUtils.getTextSimilarityPercent(pageContent, pageContentEtalon));
+			aRes.setSimilarityOriginPercent(AnalysisUtils.getTextSimilarityPercent(pageContent, pageContentEtalon));
 
-			analysisResult.setLinkCount(AnalysisUtils.getLinkCounts(pageContent));
+			aRes.setLinkCount(AnalysisUtils.getLinkCounts(pageContent));
 
 			// сравнение конечного и начального URL
 			boolean wasRedirect = false;
-			if (!StringUtils.isEmpty(analysisResult.getPageUrlFinal())){
-				wasRedirect = !AnalysisUtils.simpleCompareUrls(analysisResult.getPageUrlFinal(), result.getCheckUnit().getValue());
+			if (!isEmpty(aRes.getPageUrlFinal())){
+				wasRedirect = !AnalysisUtils.simpleCompareUrls(aRes.getPageUrlFinal(), jobRes.getCheckUnit().getValue());
 			}
-			analysisResult.setRedirectionDetected(wasRedirect);
+			aRes.setRedirectionDetected(wasRedirect);
 		}
 	}
 
@@ -113,7 +114,7 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 		String errorCode = aRes.getResponseErrorCode();
 		boolean wasRedirect = aRes.getRedirectionDetected();
 
-		if (!StringUtils.isEmpty(errorCode)){
+		if (!isEmpty(errorCode)){
 			CheckUnitJobResult errorResult = HTTP_SERVER_SEND_NO_RESPONSE;
 
 			if (errorCode.isEmpty())
@@ -145,10 +146,15 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 		}
 
 		// сравнение контента иходника с эталоном
-        if (useEtalon(jobRes)){
-            if (aRes.getSimilarityOriginPercent() >= 90){
-                return FORBIDDEN_CONTENT_DETECTED;
-            }
+        if (aRes.getUseEtalon()){
+        	if (!aRes.hasEtalonError()){
+				if (aRes.getSimilarityOriginPercent() >= 90){
+					return FORBIDDEN_CONTENT_DETECTED;
+				}
+			}
+            else {
+				appendInfo(aRes, "Не удалось загрузить эталон: " + aRes.getResponseErrorCodeEtalon());
+			}
         }
 
 		// проверка на заглушку
@@ -167,8 +173,12 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 		return FORBIDDEN_CONTENT_DETECTED;
 	}
 
-	protected boolean useEtalon(ExecutionVpnJobResult jobRes){
-        return !StringUtils.isEmpty(jobRes.getPageContentEtalon()) || !StringUtils.isEmpty(jobRes.getChromeErrorCodeEtalon());
-    }
+	private void appendInfo(VpnAnalysisResult vpnAnalysisResult, String append){
+		String info = vpnAnalysisResult.getStubScoreInfo();
+		info = info == null ? "" : info;
+		info += info.isEmpty() ? "" : ". ";
+		info += append;
+		vpnAnalysisResult.setStubScoreInfo(info);
+	}
 
 }

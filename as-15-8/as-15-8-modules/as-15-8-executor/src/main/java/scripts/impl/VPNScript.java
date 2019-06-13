@@ -129,6 +129,8 @@ public class VPNScript extends RobotScript {
             }
         }
 
+        message.setUseEtalon(this.useEtalon);
+
         //log.info("--------- message ---------");
         //log.info(message.toString());
         //log.info("--------- TEXT ---------");

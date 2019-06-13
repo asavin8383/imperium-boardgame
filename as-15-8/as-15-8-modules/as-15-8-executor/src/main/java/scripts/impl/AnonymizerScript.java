@@ -78,6 +78,8 @@ public abstract class AnonymizerScript extends RobotScript {
             close(driver);
         }
 
+        message.setUseEtalon(this.useEtalon);
+
 	    return message;
     }
 
