@@ -8,6 +8,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import enums.CheckUnitJobResult;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -16,8 +17,11 @@ import org.jsoup.select.Elements;
 import model.KeyWord;
 import org.springframework.web.util.UriUtils;
 
+import static enums.CheckUnitJobResult.*;
+import static enums.CheckUnitJobResult.COMPLETED;
 import static java.net.IDN.toASCII;
 import static java.net.IDN.toUnicode;
+import static org.springframework.util.StringUtils.isEmpty;
 
 public class AnalysisUtils {
 
@@ -103,5 +107,40 @@ public class AnalysisUtils {
         return false;
     }
 
+    public static CheckUnitJobResult obtainErrorResult(String errorCode, StringBuffer returnDetail){
+        returnDetail = returnDetail == null ? new StringBuffer() : returnDetail;
+        CheckUnitJobResult result = null;
+        String message = null;
+
+        if (!isEmpty(errorCode)){
+            if (errorCode.contains("NO_INTERNET")) {
+                message = "Ошибка! Нет интернета! " + errorCode;
+                result = INTERNAL_ERROR;
+            }
+            else if (errorCode.contains("ERR_PROXY")) {
+                message = "Ошибка доступа к прокси! " + errorCode;
+                result = INTERNAL_ERROR;
+            }
+            else if (errorCode.contains("SOCKET")){
+                message = "Ошибка доступа к интернет ресурсу: " + errorCode + ". Есть вероятность проблемы с сетью.";
+                result = DOUBTFUL;
+            }
+            else if (errorCode.contains("TIMEOUT") || errorCode.contains("TIME_OUT")) {
+                message = "Ошибка таймаута: " + errorCode + ". Ресурс вероятно недоступен.";
+                result = COMPLETED;
+            }
+            else if (errorCode.contains("DNS")){
+            }
+
+            if (result == null){
+                message = "Ошибка доступа к интернет ресурсу: " + errorCode;
+                result = COMPLETED;
+            }
+
+            returnDetail.append(message);
+            return result;
+        }
+        return null;
+    }
 
 }
