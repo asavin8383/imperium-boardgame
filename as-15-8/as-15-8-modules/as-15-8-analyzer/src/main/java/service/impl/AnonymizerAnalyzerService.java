@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import common.AnalysisException;
 import enums.CheckUnitJobResult;
 import execution.ExecutionAnonymizerResult;
+import execution.ExecutionVpnJobResult;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import model.KeyWord;
@@ -61,6 +62,7 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 		analysisResult.setScreenshot(executionResult.getScreenshot());
 		analysisResult.setPageSize(sizeOf(executionResult.getPageContent()));
 
+        analysisResult.setUseEtalon(executionResult.getUseEtalon() == null || executionResult.getUseEtalon());
         analysisResult.setEtalonErrorCode(executionResult.getEtalonErrorCode());
         analysisResult.setEtalonScreenshot(executionResult.getEtalonScreenshot());
         analysisResult.setEtalonPageSize(sizeOf(executionResult.getEtalonPageContent()));
@@ -83,23 +85,25 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 
 		/* ETALON */
 
-		if ( !analysisResult.hasEtalonError() ) {
-			try {
-				analysisResult.setSimilarityPercent(
-						AnalysisUtils.getTextSimilarityPercent(
-								executionResult.getPageContent(),
-								executionResult.getEtalonPageContent()));
+		if ( analysisResult.getUseEtalon() ) {
+		    if (!analysisResult.hasEtalonError()){
+                try {
+                    analysisResult.setSimilarityPercent(
+                            AnalysisUtils.getTextSimilarityPercent(
+                                    executionResult.getPageContent(),
+                                    executionResult.getEtalonPageContent()));
 
-				if (analysisResult.getSimilarityPercent() > similarityThreshold) {
-					analysisResult.setCheckResult(FORBIDDEN_CONTENT_DETECTED);
-					return analysisResult;
-				}
+                    if (analysisResult.getSimilarityPercent() > similarityThreshold) {
+                        analysisResult.setCheckResult(FORBIDDEN_CONTENT_DETECTED);
+                        return analysisResult;
+                    }
 
-			} catch (IOException e) {
-				String msg = "Ошибка при сверке с эталоном";
-				log.error(msg, e);
-				throw new AnalysisException(msg, e);
-			}
+                } catch (IOException e) {
+                    String msg = "Ошибка при сверке с эталоном";
+                    log.error(msg, e);
+                    throw new AnalysisException(msg, e);
+                }
+            }
 		}
 
 		/* STUB */

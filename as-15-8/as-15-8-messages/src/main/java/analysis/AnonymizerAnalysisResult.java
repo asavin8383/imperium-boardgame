@@ -17,6 +17,7 @@ public class AnonymizerAnalysisResult extends AnalysisResult implements StubAnal
     private String errorCode;
     private Integer pageSize;
 
+    private Boolean useEtalon;
     private String etalonErrorCode;
     private Integer etalonPageSize;
 

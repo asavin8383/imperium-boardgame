@@ -12,6 +12,7 @@ import enums.AccessToolParameters;
 import execution.ExecutionJobResult;
 import execution.ExecutionVpnJobResult;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.StringUtils;
 import scripts.ProxyUtils;
 import scripts.RobotScript;
 import scripts.ScriptDriverParameters;
@@ -22,9 +23,10 @@ import scripts.exceptions.RobotScriptExecutionException;
 @Slf4j
 public class VPNScript extends RobotScript {
 
+    protected boolean useEtalon;
     protected String etalonProxy;
     protected String stubUrl;
-    
+
 
     public static final String TIME_OUT_ERROR = "TIME_OUT";
 
@@ -39,6 +41,11 @@ public class VPNScript extends RobotScript {
 					scriptParams.get(AccessToolParameters.PROXY_PASSWORD)
     			)
     		);
+
+    	String useEtalon = scriptParams.get(AccessToolParameters.USE_ETALON);
+    	this.useEtalon = StringUtils.isEmpty(useEtalon) ||
+                useEtalon.equalsIgnoreCase("true") ||
+                useEtalon.equalsIgnoreCase("on");
 
     	etalonProxy = ProxyUtils.getFullProxy(
     			scriptParams.get(AccessToolParameters.ETALON_PROXY_TYPE),
@@ -84,22 +91,24 @@ public class VPNScript extends RobotScript {
 
         CompletableFuture<Void> pageGetterEtalon = CompletableFuture
                 .runAsync(() -> {
-                    WebDriver driver = null;
-                    try {
-                        driver = createDriver(etalonProxy);
-                        PageResult pageResult = loadPage(url, driver, 1);
-                        byte[] screenShot = ScriptUtils.getScreenshot(driver);
-                        String finalUrl = driver.getCurrentUrl();
+                    if (useEtalon){
+                        WebDriver driver = null;
+                        try {
+                            driver = createDriver(etalonProxy);
+                            PageResult pageResult = loadPage(url, driver, 1);
+                            byte[] screenShot = ScriptUtils.getScreenshot(driver);
+                            String finalUrl = driver.getCurrentUrl();
 
-                        message.setChromeErrorCodeEtalon(pageResult.errorCodeChrome);
-                        message.setPageContentEtalon(pageResult.pageSource);
-                        message.setEtalonScreenshot(screenShot);
-                        if(pageResult.errorCodeChrome == null){
-                            message.setFinalUrlPageEtalon(finalUrl);
+                            message.setChromeErrorCodeEtalon(pageResult.errorCodeChrome);
+                            message.setPageContentEtalon(pageResult.pageSource);
+                            message.setEtalonScreenshot(screenShot);
+                            if(pageResult.errorCodeChrome == null){
+                                message.setFinalUrlPageEtalon(finalUrl);
+                            }
                         }
-                    }
-                    finally {
-                        close(driver);
+                        finally {
+                            close(driver);
+                        }
                     }
                 });
 
@@ -119,6 +128,8 @@ public class VPNScript extends RobotScript {
                 throw new RobotScriptExecutionException(impossible);
             }
         }
+
+        message.setUseEtalon(this.useEtalon);
 
         //log.info("--------- message ---------");
         //log.info(message.toString());

@@ -28,4 +28,4 @@ alter table portal.anonymizer_parameters drop constraint if exists ck_type;
 alter table portal.anonymizer_parameters add constraint ck_type check ( access_tool_type in ('ANONYMIZER'));
 
 alter table portal.global_parameters drop constraint if exists ck_key;
-alter table portal.global_parameters add constraint ck_key check ( key in ('ETALON_PROXY_HOST', 'ETALON_PROXY_PORT', 'ETALON_PROXY_USERNAME', 'ETALON_PROXY_PASSWORD'));
+alter table portal.global_parameters add constraint ck_key check ( key in ('ETALON_PROXY_HOST', 'ETALON_PROXY_PORT', 'ETALON_PROXY_USERNAME', 'ETALON_PROXY_PASSWORD', 'USE_ETALON'));
