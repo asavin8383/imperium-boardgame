@@ -34,8 +34,7 @@ spring:
         bootstrap-servers: 192.168.5.12:9094,192.168.5.184:9094,192.168.5.211:9094
         group: executors
         auto-offset-reset: earliest
-        jobs-execution-timeout: 890000
-        session-timeout: 30000
+        jobs-execution-timeout: 3600000
 
 ---
 

@@ -45,9 +45,6 @@ public class KafkaConfiguration {
     @Value("${spring.kafka.jobs-execution-timeout}")
     private Integer jobsExecutionTimeout;
     
-    @Value("${spring.kafka.session-timeout}")
-    private Integer sessionTimeout;
-    
     @Bean 
     Map<String, Object> producerFactoryConfig(){
     	Map<String, Object> configProps = new HashMap<>();
@@ -68,9 +65,6 @@ public class KafkaConfiguration {
         config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         config.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
         
-        //config.put(ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, robotsWaitTime);
-        config.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, sessionTimeout);
-       // config.put(ConsumerConfig.REQUEST_TIMEOUT_MS_CONFIG, robotsWaitTime);
         config.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, jobsExecutionTimeout);
         
         return config;

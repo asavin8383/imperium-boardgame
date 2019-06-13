@@ -21,7 +21,6 @@ import org.springframework.stereotype.Service;
 
 import checkUnits.CheckUnitJob;
 import control.ExecutorControlMessage;
-import control.ExecutorControlMessage.ControlCommand;
 import enums.AccessToolUnit;
 import lombok.extern.slf4j.Slf4j;
 import scripts.exceptions.Captcha_RobotScriptExecutionException;
@@ -93,13 +92,17 @@ public class KafkaConsumer {
     public void consumeControlMessage(ExecutorControlMessage controlMessage, Acknowledgment ack) {
 		log.info("Принято управляющее сообщение: " + controlMessage.toString());
     	try {
-    		MessageListenerContainer jobsListenerContainer = listenerContainers.get(controlMessage.getAccessToolUnit());
-    		if(controlMessage.getCommand() == ControlCommand.STOP)
-    			jobsListenerContainer.stop();
-    		else if(controlMessage.getCommand() == ControlCommand.START)
-    			jobsListenerContainer.start();
-    		
-    		log.info("Слушатель заданий на проверку "+controlMessage.getAccessToolUnit()+" успешно остановлен");
+    		switch(controlMessage.getCommand()) {
+				case STOP:
+					stopListeners(controlMessage.getAccessToolUnit());
+					break;
+				case START:
+					startListeners(controlMessage.getAccessToolUnit());
+					break;
+				default:
+					log.warn("Команда управляющего сообщения " + controlMessage.getCommand() + " не поддерживается");
+					break;
+    		}
     	} catch (Exception ex) {
     		log.error("Ошибка при обработке управляющего сообщения: " + controlMessage.toString(), ex);
     	}
@@ -109,11 +112,28 @@ public class KafkaConsumer {
 	private void stopListeners(AccessToolUnit accessToolUnit) {
 		try {
 			MessageListenerContainer jobsListenerContainer = listenerContainers.get(accessToolUnit);
-			jobsListenerContainer. stop(() -> {				
-				log.info("Слушатель заданий на проверку "+accessToolUnit+" успешно остановлен");
-			});
+			if(jobsListenerContainer.isRunning()) {
+				jobsListenerContainer.stop();
+				log.info("\n\n-------------------------------------------\n"+
+						"Слушатель заданий на проверку "+accessToolUnit+" успешно остановлен"+
+						"\n-------------------------------------------\n");
+			}
 		} catch(Exception ex) {
 			log.error("Ошибка при остановке слушателей для " + accessToolUnit, ex);
+		}
+	}
+	
+	private void startListeners(AccessToolUnit accessToolUnit) {
+		try {
+			MessageListenerContainer jobsListenerContainer = listenerContainers.get(accessToolUnit);
+			if(!jobsListenerContainer.isRunning()) {
+				jobsListenerContainer.start();
+				log.info("\n\n-------------------------------------------\n"+
+						"Слушатель заданий на проверку "+accessToolUnit+" успешно запущен"+
+						"\n-------------------------------------------\n");
+			}
+		} catch(Exception ex) {
+			log.error("Ошибка при запуске слушателей для " + accessToolUnit, ex);
 		}
 	}
 	
