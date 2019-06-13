@@ -7,10 +7,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import security.JWTLoginFilter;
 
 @RestController
@@ -41,6 +38,18 @@ public class SystemParametersController {
         } else {
             log.error("Error updating ttl. Number of affected rows was not expected: " + rowsAffected);
             return new ResponseEntity<>(null, HttpStatus.NOT_ACCEPTABLE);
+        }
+    }
+
+    @GetMapping(path = "/ttl")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_OPERATOR')")
+    public ResponseEntity<Long> getTTL(){
+        String sql = "select value from system.system_parameters where key = 'jwt_ttl_sec'";
+        try {
+             return new ResponseEntity<>(Long.valueOf(jdbcTemplate.queryForObject(sql, String.class)), HttpStatus.OK);
+        }catch (Exception ex){
+            log.error("Error getting ttl from db", ex);
+            return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
         }
     }
 }
