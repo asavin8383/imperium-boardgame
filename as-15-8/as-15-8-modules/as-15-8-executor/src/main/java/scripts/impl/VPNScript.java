@@ -3,6 +3,7 @@ package scripts.impl;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
@@ -13,12 +14,10 @@ import execution.ExecutionJobResult;
 import execution.ExecutionVpnJobResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
-import scripts.ProxyUtils;
-import scripts.RobotScript;
-import scripts.ScriptDriverParameters;
-import scripts.ScriptUtils;
+import scripts.*;
 import scripts.ScriptUtils.PageResult;
 import scripts.exceptions.RobotScriptExecutionException;
+import scripts.exceptions.TimeoutScriptException;
 
 @Slf4j
 public class VPNScript extends RobotScript {
@@ -26,6 +25,9 @@ public class VPNScript extends RobotScript {
     protected boolean useEtalon;
     protected String etalonProxy;
     protected String stubUrl;
+
+    public static final int PAGE_LOAD_TIMEOUT_SEC = 30;
+    private static final int PAGE_LOAD_TIMEOUT_MS = PAGE_LOAD_TIMEOUT_SEC * 1000;
 
 
     public static final String TIME_OUT_ERROR = "TIME_OUT";
@@ -72,7 +74,7 @@ public class VPNScript extends RobotScript {
                 .runAsync(() -> {
                     WebDriver driver = this.driver;
                     try {
-                        PageResult pageResult = loadPage(url, driver, 3);
+                        PageResult pageResult = loadPage(url, driver, 1);
                         byte[] screenShot = ScriptUtils.getScreenshot(driver);
                         String finalUrl = driver.getCurrentUrl();
 
@@ -83,6 +85,9 @@ public class VPNScript extends RobotScript {
                         if(pageResult.errorCodeChrome == null){
                             message.setFinalUrlPage(finalUrl);
                         }
+                    }
+                    catch (RobotScriptExecutionException e) {
+                        throw new CompletionException(e);
                     }
                     finally {
                         close(driver);
@@ -105,8 +110,9 @@ public class VPNScript extends RobotScript {
                             if(pageResult.errorCodeChrome == null){
                                 message.setFinalUrlPageEtalon(finalUrl);
                             }
-                        }
-                        finally {
+                        } catch (RobotScriptExecutionException e) {
+                            throw new CompletionException(e);
+                        } finally {
                             close(driver);
                         }
                     }
@@ -131,15 +137,12 @@ public class VPNScript extends RobotScript {
 
         message.setUseEtalon(this.useEtalon);
 
-        //log.info("--------- message ---------");
-        //log.info(message.toString());
-        //log.info("--------- TEXT ---------");
-        //log.info(pageSourceResult.pageSource);
-
         return message;
     }
 
-    public PageResult loadPage(String url, WebDriver webDriver, int countRetry){
+    public PageResult loadPage(String url, WebDriver webDriver, int countRetry) throws RobotScriptExecutionException {
+        webDriver.manage().timeouts().pageLoadTimeout(PAGE_LOAD_TIMEOUT_SEC, TimeUnit.SECONDS);
+
         PageResult pageSourceResult = null;
         int cnt = 0;
 
@@ -149,25 +152,38 @@ public class VPNScript extends RobotScript {
             }
             cnt++;
 
-            webDriver.get(url);
-            webDriver.manage().window().fullscreen();
-            ScriptUtils.waitDriver(webDriver, 3);
             try {
+                webDriver.get(url);
+                webDriver.manage().window().fullscreen();
+
                 ScriptUtils.waitPageLoading(webDriver);
-                pageSourceResult = ScriptUtils.getPageSource(webDriver);
+                CloudflareUtils.waitCloudflareRedirect(webDriver, PAGE_LOAD_TIMEOUT_MS);
+                ScriptUtils.waitPageLoading(webDriver);
+
+                if (CloudflareUtils.isCloudflareError(webDriver)) {
+                    pageSourceResult = new PageResult(null,
+                            CloudflareUtils.getCloudflareErrorDetailsOpt(webDriver, null));
+                }
+                else {
+                    pageSourceResult = ScriptUtils.getPageSource(webDriver);
+                }
             }
-            catch (TimeoutException te){
+            catch (TimeoutException | TimeoutScriptException e) {
+                log.info("TimeoutException при получении эталона", e);
                 pageSourceResult = new PageResult(null, TIME_OUT_ERROR);
-                log.info("Timeout exception при получении страницы");
+            }
+            catch (InterruptedException e) {
+                throw new RobotScriptExecutionException("Выполнение потока прервано", e);
             }
 
-            if (countRetry > 1)
+            if (countRetry > 1) {
                 log.info("----> Попытка загрузить страницу: {}, error: {}", cnt, pageSourceResult.errorCodeChrome);
+            }
         }
         return pageSourceResult;
     }
 
-    public boolean checkBrowserChrome(){
+    private boolean checkBrowserChrome(){
         return "chrome".equalsIgnoreCase(getDriverParams().getBrowserName());
     }
 
