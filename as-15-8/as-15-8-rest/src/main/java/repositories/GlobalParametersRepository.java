@@ -1,5 +1,6 @@
 package repositories;
 
+import enums.AccessToolParameters;
 import model.parameters.GlobalParameter;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -9,5 +10,5 @@ import org.springframework.stereotype.Repository;
  * Author: asavin
  */
 @Repository
-public interface GlobalParametersRepository extends JpaRepository<GlobalParameter, String> {
+public interface GlobalParametersRepository extends JpaRepository<GlobalParameter, AccessToolParameters> {
 }

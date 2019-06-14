@@ -38,6 +38,10 @@ public class VpnAnalysisResult extends AnalysisResult implements StubAnalysisRes
 		return pageUrlFinal;
 	}
 
+    public boolean hasError() {
+        return responseErrorCode != null;
+    }
+
     public boolean hasEtalonError() {
         return responseErrorCodeEtalon != null;
     }

@@ -1,14 +1,10 @@
 package service.impl;
 
-import analysis.AnalysisResult;
-import analysis.AnalysisUtils;
-import analysis.AnonymizerAnalysisResult;
-import analysis.StubAnalysis;
+import analysis.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import common.AnalysisException;
 import enums.CheckUnitJobResult;
 import execution.ExecutionAnonymizerResult;
-import execution.ExecutionVpnJobResult;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import model.KeyWord;
@@ -24,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static enums.CheckUnitJobResult.*;
+
 
 @Slf4j
 @Service
@@ -72,7 +69,7 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 
 		if (analysisResult.hasError()) {
 			analysisResult.setCheckResult(
-					obtainErrorResult(analysisResult.getErrorCode()));
+					obtainErrorResult(analysisResult));
 			return analysisResult;
 		}
 
@@ -123,12 +120,14 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 		return analysisResult;
 	}
 
-	private CheckUnitJobResult obtainErrorResult(String errorCode) {
+	private CheckUnitJobResult obtainErrorResult(AnonymizerAnalysisResult aRes) {
+		String errorCode = aRes.getErrorCode();
+		StringBuffer details = new StringBuffer();
 
-		if (errorCode.contains("TIMEOUT") || errorCode.contains("TIME_OUT"))
-			return TIMEOUT_ERROR;
-		else
-			return COMPLETED;
+		CheckUnitJobResult result = AnalysisUtils.obtainErrorResult(errorCode, details);
+		appendInfo(aRes, details.toString());
+
+		return result == null ? COMPLETED : result;
 	}
 
 	private boolean isStub(AnonymizerAnalysisResult analysisResult,
@@ -163,6 +162,14 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 
 	private Integer sizeOf(String pageContent) {
 		return StringUtils.isEmpty(pageContent) ? 0 : pageContent.length();
+	}
+
+	private void appendInfo(AnonymizerAnalysisResult aRes, String append){
+		String info = aRes.getStubScoreInfo();
+		info = info == null ? "" : info;
+		append = append == null ? "" : append;
+		info += (StringUtils.isEmpty(info) || StringUtils.isEmpty(append) ? "" : ". ") + append;
+		aRes.setStubScoreInfo(info);
 	}
 
 }

@@ -21,6 +21,7 @@ import enums.CheckUnitJobResult;
 import execution.ExecutionVpnJobResult;
 import lombok.Getter;
 import model.KeyWord;
+import org.springframework.util.StringUtils;
 import service.AnalyzerService;
 
 import static enums.CheckUnitJobResult.*;
@@ -111,34 +112,16 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 
 
 	protected CheckUnitJobResult obtainResult(VpnAnalysisResult aRes, ExecutionVpnJobResult jobRes) {
-		String errorCode = aRes.getResponseErrorCode();
 		boolean wasRedirect = aRes.getRedirectionDetected();
 
-		if (!isEmpty(errorCode)){
-			CheckUnitJobResult errorResult = HTTP_SERVER_SEND_NO_RESPONSE;
+        if (aRes.hasError()) {
+            aRes.setCheckResult(obtainErrorResult(aRes));
+            return aRes.getCheckResult();
+        }
 
-			if (errorCode.isEmpty())
-				errorResult = TIMEOUT_ERROR;
-
-			else if (errorCode.contains("TIMEOUT") || errorCode.contains("TIME_OUT"))
-				errorResult = TIMEOUT_ERROR;
-
-			else if (errorCode.contains("DNS"))
-				errorResult = DNS_ERROR;
-
-			else if (errorCode.contains("SOCKET")){
-				errorResult = SOCKET_ERROR;
-			}
-
-			if (errorResult == SOCKET_ERROR){
-				aRes.setStubScoreInfo("При доступе к интернет ресурсу возникла следующая ошибка: " + errorCode + ". Вероятно проблемы с сетью.");
-				return DOUBTFUL;
-			}
-
-			aRes.setStubScoreInfo("При доступе к интернет ресурсу возникла следующая ошибка: " + errorCode);
-
-			return COMPLETED;
-		}
+		if (aRes.hasEtalonError()){
+            obtainErrorEtalon(aRes);
+        }
 
 		// конечный URL совпадает с vpn - заглушкой
 		if (StubAnalysis.checkStubUrl(aRes.getPageUrlFinal(), aRes.getStubUrl())){
@@ -173,12 +156,35 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 		return FORBIDDEN_CONTENT_DETECTED;
 	}
 
-	private void appendInfo(VpnAnalysisResult vpnAnalysisResult, String append){
-		String info = vpnAnalysisResult.getStubScoreInfo();
+	private CheckUnitJobResult obtainErrorResult(VpnAnalysisResult aRes){
+        String errorCode = aRes.getResponseErrorCode();
+        StringBuffer details = new StringBuffer();
+
+		CheckUnitJobResult result = AnalysisUtils.obtainErrorResult(errorCode, details);
+		appendInfo(aRes, details.toString());
+
+        return result == null ? COMPLETED : result;
+    }
+
+    private void obtainErrorEtalon(VpnAnalysisResult aRes){
+        String errorCodeEtalon = aRes.getResponseErrorCodeEtalon();
+
+        if (!isEmpty(errorCodeEtalon)){
+            if (errorCodeEtalon.contains("NO_INTERNET")) {
+                aRes.setStubScoreInfo("Ошибка получения эталона! Нет интернета! " + errorCodeEtalon);
+            }
+            else {
+                aRes.setStubScoreInfo("Ошибка получения эталона! " + errorCodeEtalon);
+            }
+        }
+    }
+
+	private void appendInfo(VpnAnalysisResult aRes, String append){
+		String info = aRes.getStubScoreInfo();
 		info = info == null ? "" : info;
-		info += info.isEmpty() ? "" : ". ";
-		info += append;
-		vpnAnalysisResult.setStubScoreInfo(info);
+		append = append == null ? "" : append;
+		info += (StringUtils.isEmpty(info) || StringUtils.isEmpty(append) ? "" : ". ") + append;
+		aRes.setStubScoreInfo(info);
 	}
 
 }

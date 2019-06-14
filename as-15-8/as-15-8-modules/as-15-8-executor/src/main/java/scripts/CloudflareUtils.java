@@ -12,11 +12,17 @@ import static scripts.ScriptUtils.getTextOrDefault;
 @UtilityClass
 public class CloudflareUtils {
 
+    public static final String CHECK_BROWSE_ERROR = "CHECK_BROWSE_ERROR";
+
     public static boolean isCloudflareError(WebDriver driver) {
         return findElementIfExists(By.xpath("//*[@id=\"cf-error-details\"]"), driver) != null;
     }
 
     public static String getCloudflareErrorDetails(WebDriver driver) {
+        return getCloudflareErrorDetailsOpt(driver, "Элемент cf-error-details не найден");
+    }
+
+    public static String getCloudflareErrorDetailsOpt(WebDriver driver, String opt) {
         WebElement errorElement = findElementIfExists(
                 By.xpath("//*[@id=\"cf-error-details\"]"), driver);
         if (errorElement != null) {
@@ -24,14 +30,16 @@ public class CloudflareUtils {
                     By.xpath("//span[contains(@class, \"cf-error-code\")]"), errorElement);
             WebElement descriptionElement = findElementIfExists(
                     By.xpath("//h2[contains(@class, \"cf-subheadline\")]"), errorElement);
-            return String.format("Error %s: %s",
+            return String.format("%s %s: %s",
+                    CHECK_BROWSE_ERROR,
                     getTextOrDefault(codeElement, "<no code>"),
                     getTextOrDefault(descriptionElement, "<no description>"));
         }
-        return "Элемент cf-error-details не найден";
+        return opt;
     }
 
-    public static boolean isCloudflareDdosProtection(WebDriver driver) {
+    @Deprecated
+    public static boolean isCloudflareDdosProtection_old(WebDriver driver) {
 
         WebElement cloudflareLink = findElementIfExists(
                 By.xpath("//div[contains(@class, \"attribution\")]//a"), driver);
@@ -39,8 +47,26 @@ public class CloudflareUtils {
             return ScriptUtils.getTextOrDefault(cloudflareLink, "")
                     .equals("DDoS protection by Cloudflare");
 
-
         return false;
+    }
+
+    public static boolean isCloudflareDdosProtection(WebDriver driver) {
+
+        WebElement cloudflareLink = findElementIfExists(
+                By.cssSelector(".cf-browser-verification #cf-content1, .attribution"), driver);
+
+        if (cloudflareLink != null){
+            String text = ScriptUtils.getTextOrDefault(cloudflareLink, "").toLowerCase();
+            return (text.contains("check") && text.contains("browser")) ||
+                    (text.contains("ddos") && text.contains("cloudflare"));
+        }
+        return false;
+    }
+
+    public static void waitCloudflareRedirect(WebDriver driver, int timeoutMs)
+            throws InterruptedException, TimeoutScriptException {
+
+        waitCloudflareRedirect(driver, (timeoutMs > 10000 ? 5000 : timeoutMs / 2), timeoutMs);
     }
 
     public static void waitCloudflareRedirect(WebDriver driver)
