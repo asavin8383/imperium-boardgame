@@ -1,8 +1,5 @@
 package kafka;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import javax.annotation.PostConstruct;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -11,11 +8,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
-import org.springframework.kafka.listener.AcknowledgingConsumerAwareMessageListener;
-import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
-import org.springframework.kafka.listener.ContainerProperties.AckMode;
+import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.kafka.listener.MessageListenerContainer;
-import org.springframework.kafka.listener.adapter.FilteringMessageListenerAdapter;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
 
@@ -31,13 +25,16 @@ import service.RobotsService;
 @DependsOn({"robotsFactory"})
 public class KafkaConsumer {
 
-	private Map<AccessToolUnit, MessageListenerContainer> listenerContainers = new ConcurrentHashMap<>();
+	//private Map<AccessToolUnit, MessageListenerContainer> listenerContainers = new ConcurrentHashMap<>();
 	
 	@Autowired
 	private RobotsService robotsService;
 	
 	@Autowired
 	private ConcurrentKafkaListenerContainerFactory<String, CheckUnitJob> kafkaListenerContainerFactory;
+	
+	@Autowired
+	private KafkaListenerEndpointRegistry endpointRegistry;
 	
 	/*@Autowired
 	private KafkaTemplate<String, ExecutorControlMessage> controlMessagesTemplate;*/
@@ -50,14 +47,23 @@ public class KafkaConsumer {
 	
 	@PostConstruct
     void createCheckUnitJobsListeners() {
-    	
+		
     	for(AccessToolUnit accessTool : AccessToolUnit.values()) {
     		
-    		ConcurrentMessageListenerContainer<String, CheckUnitJob> container =
+    		CheckUnitJobsListenerEndpoint endpoint = new CheckUnitJobsListenerEndpoint(
+				checkUnitJobsTopicName,
+				accessTool,
+				(data, ack) -> {
+					consumeCheckUnitJobMessage(data, ack);
+				}
+    		);
+    		
+    		endpointRegistry.registerListenerContainer(endpoint, kafkaListenerContainerFactory);
+    		
+    		/*ConcurrentMessageListenerContainer<String, CheckUnitJob> container =
     				kafkaListenerContainerFactory.createContainer(checkUnitJobsTopicName);
     		
     		container.getContainerProperties().setGroupId("exec_"+accessTool.name().toLowerCase());
-    		container.getContainerProperties().setAckMode(AckMode.MANUAL_IMMEDIATE);
     		
 	    	container.setupMessageListener(
 	    		new FilteringMessageListenerAdapter<String, CheckUnitJob>(
@@ -68,8 +74,10 @@ public class KafkaConsumer {
 	    			true
 	    		)
 	    	);
+	    	
 	    	container.start();
-	    	listenerContainers.put(accessTool, container);
+	    	
+	    	listenerContainers.put(accessTool, container);*/
     	}
     }
 	
@@ -84,6 +92,7 @@ public class KafkaConsumer {
 	}
 	
 	@KafkaListener(
+		id = "control",
 		topics = "${spring.kafka.control-topic}",
 		containerFactory = "controlMessagesListenerContainerFactory",
 		groupId = "${spring.kafka.group}"
@@ -110,12 +119,14 @@ public class KafkaConsumer {
 	
 	private void stopListeners(AccessToolUnit accessToolUnit) {
 		try {
-			MessageListenerContainer jobsListenerContainer = listenerContainers.get(accessToolUnit);
-			if(!jobsListenerContainer.isPauseRequested()) {
+			MessageListenerContainer jobsListenerContainer = endpointRegistry.getListenerContainer(accessToolUnit.name());//listenerContainers.get(accessToolUnit);
+			if(!jobsListenerContainer.isContainerPaused() && !jobsListenerContainer.isPauseRequested()) {
 				jobsListenerContainer.pause();
 				log.info("\n\n-------------------------------------------\n"+
 						"Слушатель заданий на проверку "+accessToolUnit+" успешно остановлен"+
 						"\n-------------------------------------------\n");
+			} else {
+				log.info("Слушатель заданий на проверку "+accessToolUnit+" уже остановлен");
 			}
 		} catch(Exception ex) {
 			log.error("Ошибка при остановке слушателей для " + accessToolUnit, ex);
@@ -124,12 +135,14 @@ public class KafkaConsumer {
 	
 	private void startListeners(AccessToolUnit accessToolUnit) {
 		try {
-			MessageListenerContainer jobsListenerContainer = listenerContainers.get(accessToolUnit);
-			if(jobsListenerContainer.isContainerPaused()) {
+			MessageListenerContainer jobsListenerContainer = endpointRegistry.getListenerContainer(accessToolUnit.name());//listenerContainers.get(accessToolUnit);
+			if(jobsListenerContainer.isContainerPaused() || jobsListenerContainer.isPauseRequested()) {
 				jobsListenerContainer.resume();
 				log.info("\n\n-------------------------------------------\n"+
 						"Слушатель заданий на проверку "+accessToolUnit+" успешно запущен"+
 						"\n-------------------------------------------\n");
+			} else {
+				log.info("Слушатель заданий на проверку "+accessToolUnit+" уже запущен");
 			}
 		} catch(Exception ex) {
 			log.error("Ошибка при запуске слушателей для " + accessToolUnit, ex);
