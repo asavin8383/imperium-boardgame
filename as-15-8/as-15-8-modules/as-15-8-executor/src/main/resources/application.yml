@@ -46,9 +46,6 @@ spring:
     profiles: prod
     kafka:
         bootstrap-servers: 10.97.220.141:9094,10.97.220.142:9094,10.97.220.143:9094
-        group: executors
-        auto-offset-reset: earliest
-        jobs-execution-timeout: 3600000
         consume-topic: jobs
         produce-topic: exec_results
         notification-topic: job_notifications
