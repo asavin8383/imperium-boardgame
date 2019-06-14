@@ -2,11 +2,13 @@ package analysis;
 
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 @Slf4j
 @UtilityClass
 public class StubAnalysis {
 
+    public static final double THRESHOLD = 0.8;
     public static final double pageSize_percent = 0.25;
     public static final double keyWords_percent = 0.4;
     public static final double domainCount_percent = 0.25;
@@ -18,7 +20,7 @@ public class StubAnalysis {
                 domainCount_percent, linkCount_percent);
     }
 
-    public static boolean isStub(StubAnalysisResult result,
+    public static boolean isStub(StubAnalysisResult res,
                                  double pageSize_percent,
                                  double keyWords_percent,
                                  double domainCount_percent,
@@ -26,26 +28,30 @@ public class StubAnalysis {
         double sun_percent = pageSize_percent + keyWords_percent + domainCount_percent + linkCount_percent;
 
         // веса критериев для заглушки
-        double pageSizeWeight = pageSize_percent * getPageSizeWeight(result.getPageSize());
-        double keyWordsCountWeight = keyWords_percent * getKeyWordsCountWeight(result.getKeyWordsCount());
-        double domainCountWeight = domainCount_percent * getDomainCountWeight(result.getDomainNameCount());
-        double linkCountWeight = linkCount_percent * getLinkCountWeight(result.getLinkCount());
+        double pageSizeWeight = pageSize_percent * getPageSizeWeight(res.getPageSize());
+        double keyWordsCountWeight = keyWords_percent * getKeyWordsCountWeight(res.getKeyWordsCount());
+        double domainCountWeight = domainCount_percent * getDomainCountWeight(res.getDomainNameCount());
+        double linkCountWeight = linkCount_percent * getLinkCountWeight(res.getLinkCount());
 
         final double maxWeight = 100*sun_percent;
-        final double kStub = 0.8;
 
         // суммируем веса криетериев для определения заглушки
         double sumWeight = pageSizeWeight + keyWordsCountWeight + domainCountWeight + linkCountWeight;
         sumWeight = sumWeight > maxWeight ? maxWeight : sumWeight;
 
         double kWeight = sumWeight / maxWeight;
+        boolean result = kWeight >= THRESHOLD;
 
-        log.info("kWeight = " + kWeight + " | kStub = " + kStub);
+        String info = String.format("Заглушка: %s (коэф = %.2f, порог = %.2f)", (result ? "да" : "нет"), kWeight, THRESHOLD);
+        log.info(info);
 
-        result.setStubScoreInfo(String.format("k = %.2f (stub >= %.2f)", kWeight, kStub));
+        String score = res.getStubScoreInfo();
+        score = StringUtils.isEmpty(score) ? "" : score;
+        score += (StringUtils.isEmpty(score) ? "" : " ") + info;
+        res.setStubScoreInfo(score);
 
-        // процентный вес заглушки оносительно максимума
-        return kWeight >= kStub;
+        // процентный вес
+        return result;
     }
 
     public boolean checkStubUrl(String url, String stubUrl){
