@@ -1,9 +1,6 @@
 package service.impl;
 
-import analysis.AnalysisResult;
-import analysis.AnalysisUtils;
-import analysis.AnonymizerAnalysisResult;
-import analysis.StubAnalysis;
+import analysis.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import common.AnalysisException;
 import enums.CheckUnitJobResult;
@@ -23,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static enums.CheckUnitJobResult.*;
+
 
 @Slf4j
 @Service
@@ -61,6 +59,7 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 		analysisResult.setScreenshot(executionResult.getScreenshot());
 		analysisResult.setPageSize(sizeOf(executionResult.getPageContent()));
 
+        analysisResult.setUseEtalon(executionResult.getUseEtalon() == null || executionResult.getUseEtalon());
         analysisResult.setEtalonErrorCode(executionResult.getEtalonErrorCode());
         analysisResult.setEtalonScreenshot(executionResult.getEtalonScreenshot());
         analysisResult.setEtalonPageSize(sizeOf(executionResult.getEtalonPageContent()));
@@ -70,7 +69,7 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 
 		if (analysisResult.hasError()) {
 			analysisResult.setCheckResult(
-					obtainErrorResult(analysisResult.getErrorCode()));
+					obtainErrorResult(analysisResult));
 			return analysisResult;
 		}
 
@@ -83,23 +82,25 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 
 		/* ETALON */
 
-		if ( !analysisResult.hasEtalonError() ) {
-			try {
-				analysisResult.setSimilarityPercent(
-						AnalysisUtils.getTextSimilarityPercent(
-								executionResult.getPageContent(),
-								executionResult.getEtalonPageContent()));
+		if ( analysisResult.getUseEtalon() ) {
+		    if (!analysisResult.hasEtalonError()){
+                try {
+                    analysisResult.setSimilarityPercent(
+                            AnalysisUtils.getTextSimilarityPercent(
+                                    executionResult.getPageContent(),
+                                    executionResult.getEtalonPageContent()));
 
-				if (analysisResult.getSimilarityPercent() > similarityThreshold) {
-					analysisResult.setCheckResult(FORBIDDEN_CONTENT_DETECTED);
-					return analysisResult;
-				}
+                    if (analysisResult.getSimilarityPercent() > similarityThreshold) {
+                        analysisResult.setCheckResult(FORBIDDEN_CONTENT_DETECTED);
+                        return analysisResult;
+                    }
 
-			} catch (IOException e) {
-				String msg = "Ошибка при сверке с эталоном";
-				log.error(msg, e);
-				throw new AnalysisException(msg, e);
-			}
+                } catch (IOException e) {
+                    String msg = "Ошибка при сверке с эталоном";
+                    log.error(msg, e);
+                    throw new AnalysisException(msg, e);
+                }
+            }
 		}
 
 		/* STUB */
@@ -119,12 +120,14 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 		return analysisResult;
 	}
 
-	private CheckUnitJobResult obtainErrorResult(String errorCode) {
+	private CheckUnitJobResult obtainErrorResult(AnonymizerAnalysisResult aRes) {
+		String errorCode = aRes.getErrorCode();
+		StringBuffer details = new StringBuffer();
 
-		if (errorCode.contains("TIMEOUT") || errorCode.contains("TIME_OUT"))
-			return TIMEOUT_ERROR;
-		else
-			return COMPLETED;
+		CheckUnitJobResult result = AnalysisUtils.obtainErrorResult(errorCode, details);
+		appendInfo(aRes, details.toString());
+
+		return result == null ? COMPLETED : result;
 	}
 
 	private boolean isStub(AnonymizerAnalysisResult analysisResult,
@@ -159,6 +162,14 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 
 	private Integer sizeOf(String pageContent) {
 		return StringUtils.isEmpty(pageContent) ? 0 : pageContent.length();
+	}
+
+	private void appendInfo(AnonymizerAnalysisResult aRes, String append){
+		String info = aRes.getStubScoreInfo();
+		info = info == null ? "" : info;
+		append = append == null ? "" : append;
+		info += (StringUtils.isEmpty(info) || StringUtils.isEmpty(append) ? "" : ". ") + append;
+		aRes.setStubScoreInfo(info);
 	}
 
 }

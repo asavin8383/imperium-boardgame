@@ -38,7 +38,7 @@ public class ScriptUtils {
 
     public static void waitDriver(WebDriver driver, Integer seconds){
         try{
-            WebDriverWait wait = new WebDriverWait(driver, 3);
+            WebDriverWait wait = new WebDriverWait(driver, seconds);
             wait.until(webDriver -> false);
         }
         catch (TimeoutException te){}
@@ -100,18 +100,6 @@ public class ScriptUtils {
         return pageResults;
     }
 
-    public static List<String> getEtalonProxies(Map<String, String> proxies){
-        List<String> etalonProxies = new ArrayList<>();
-
-        for (Map.Entry<String, String> entry : proxies.entrySet()) {
-            String key = entry.getKey();
-            String proxy = entry.getValue();
-            if(key.toLowerCase().startsWith("etalon")){
-                etalonProxies.add(proxy);
-            }
-        }
-        return etalonProxies;
-    }
 
     public static byte[] getScreenshot(WebDriver webDriver) {
         return ((TakesScreenshot) webDriver).getScreenshotAs(OutputType.BYTES);

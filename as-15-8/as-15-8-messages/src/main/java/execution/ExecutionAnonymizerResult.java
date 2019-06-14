@@ -12,6 +12,8 @@ public class ExecutionAnonymizerResult extends ExecutionJobResult {
     private String errorCode;
     private String pageContent;
 
+    private Boolean useEtalon;
+
     private String etalonErrorCode;
     private String etalonPageContent;
 

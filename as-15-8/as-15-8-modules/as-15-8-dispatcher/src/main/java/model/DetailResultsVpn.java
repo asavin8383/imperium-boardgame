@@ -29,6 +29,9 @@ public class DetailResultsVpn implements Serializable  {
     @Column(name="response_error")
     private Boolean responseError;
 
+    @Column(name="use_etalon")
+    private Boolean useEtalon;
+
     @Column(name="http_status")
     private Integer httpStatus;
 
@@ -52,6 +55,9 @@ public class DetailResultsVpn implements Serializable  {
 
     @Column(name="page_url_final_etalon")
     private String pageUrlFinalEtalon;
+
+    @Column(name="redirection_detected")
+    private Boolean redirectionDetected;
 
     @Column(name="forbidden_final_url")
     private Boolean forbiddenFinalUrl;

@@ -24,6 +24,25 @@ spring:
 ---
 
 spring:
+    profiles: prod
+    datasource:
+        url: jdbc:postgresql://10.97.220.144:5432/asdb
+    kafka:
+        bootstrap-servers: 10.97.220.141:9094,10.97.220.142:9094,10.97.220.143:9094
+        group: dispatchers
+        auto-offset-reset: earliest
+        arrangement-tasks-topic: arrangements
+        jobs-topic: jobs
+        analysis-results-topic: analysis_results
+        arrangement-notifications-topic: arrangement_notifications
+        notifications-topic: job_notifications
+        control-topic: exec_control
+        analysis-results-concurrency: 12
+        notifications-concurrency: 12
+
+---
+
+spring:
     profiles: test
     datasource:
         url: jdbc:postgresql://192.168.5.195:5432/asdb

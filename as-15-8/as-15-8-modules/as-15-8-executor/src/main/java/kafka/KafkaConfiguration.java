@@ -45,9 +45,6 @@ public class KafkaConfiguration {
     @Value("${spring.kafka.jobs-execution-timeout}")
     private Integer jobsExecutionTimeout;
     
-    @Value("${spring.kafka.session-timeout}")
-    private Integer sessionTimeout;
-    
     @Bean 
     Map<String, Object> producerFactoryConfig(){
     	Map<String, Object> configProps = new HashMap<>();
@@ -66,13 +63,16 @@ public class KafkaConfiguration {
         config.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, autoOffsetReset);
         config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
-        config.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
-        
-        //config.put(ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, robotsWaitTime);
-        config.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, sessionTimeout);
-       // config.put(ConsumerConfig.REQUEST_TIMEOUT_MS_CONFIG, robotsWaitTime);
+        config.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);        
+        return config;
+    }
+    
+    @Bean 
+    Map<String, Object> checkUnitJobsFactoryConfig(){
+    	Map<String, Object> config = new HashMap<>();
+        config.putAll(cousumerFactoryConfig());
         config.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, jobsExecutionTimeout);
-        
+        config.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 1);        
         return config;
     }
     
@@ -94,7 +94,7 @@ public class KafkaConfiguration {
     @Bean
     public ConsumerFactory<String, CheckUnitJob> checkUnitJobsConsumerFactory(){
         return new DefaultKafkaConsumerFactory<>(
-            	cousumerFactoryConfig(),
+        		checkUnitJobsFactoryConfig(),
             	new StringDeserializer(),
                 new JsonDeserializer<>(CheckUnitJob.class)
             );
@@ -105,6 +105,7 @@ public class KafkaConfiguration {
         ConcurrentKafkaListenerContainerFactory<String, CheckUnitJob> listenerFactory = new ConcurrentKafkaListenerContainerFactory<>();
         listenerFactory.setConsumerFactory(checkUnitJobsConsumerFactory());
         listenerFactory.setConcurrency(listenersConcurrency);
+        listenerFactory.getContainerProperties().setAckMode(AckMode.MANUAL_IMMEDIATE);
         return listenerFactory;
     }
     
@@ -121,6 +122,7 @@ public class KafkaConfiguration {
         listenerFactory.setConsumerFactory(factory);
         listenerFactory.getContainerProperties().setAckMode(AckMode.MANUAL_IMMEDIATE);
         listenerFactory.setConcurrency(1);
+        listenerFactory.setAutoStartup(true);
         return listenerFactory;
     }
  

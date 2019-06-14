@@ -7,7 +7,6 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
@@ -22,9 +21,11 @@ import enums.CheckUnitJobResult;
 import execution.ExecutionVpnJobResult;
 import lombok.Getter;
 import model.KeyWord;
+import org.springframework.util.StringUtils;
 import service.AnalyzerService;
 
 import static enums.CheckUnitJobResult.*;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 
 /**
@@ -69,80 +70,75 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 		return analysisResult;
 	}
 
-	protected void prepareResult(VpnAnalysisResult analysisResult, ExecutionVpnJobResult result) throws IOException {
-		String chromeErrorCode = result.getChromeErrorCode();
-		String chromeErrorCodeEtalon = result.getChromeErrorCodeEtalon();
-		Boolean responseError = result.getResponseError();
-		String  pageContent = result.getPageContent();
+	protected void prepareResult(VpnAnalysisResult aRes, ExecutionVpnJobResult jobRes) throws IOException {
+		String chromeErrorCode = jobRes.getChromeErrorCode();
+		String chromeErrorCodeEtalon = jobRes.getChromeErrorCodeEtalon();
+		Boolean responseError = jobRes.getResponseError();
+		String  pageContent = jobRes.getPageContent();
 		if (pageContent == null)
 			pageContent = "";
-		String pageContentEtalon = result.getPageContentEtalon();
+		String pageContentEtalon = jobRes.getPageContentEtalon();
 		if (pageContentEtalon == null)
 			pageContentEtalon = "";
 
-		analysisResult.setResponseError(responseError);
-		analysisResult.setResponseErrorCode(chromeErrorCode);
-		analysisResult.setResponseErrorCodeEtalon(chromeErrorCodeEtalon);
+		aRes.setResponseError(responseError);
+		aRes.setResponseErrorCode(chromeErrorCode);
+		aRes.setResponseErrorCodeEtalon(chromeErrorCodeEtalon);
+		aRes.setUseEtalon(jobRes.getUseEtalon() == null || jobRes.getUseEtalon());
 
 		if (!responseError) {
-			analysisResult.setPageSize(pageContent.length());
-			analysisResult.setPageSizeEtalon(pageContentEtalon.length());
-			analysisResult.setPageUrlFinal(result.getFinalUrlPage());
-			analysisResult.setPageUrlFinalEtalon(result.getFinalUrlPageEtalon());
-			analysisResult.setStubUrl(result.getStubUrl());
+			aRes.setPageSize(pageContent.length());
+			aRes.setPageSizeEtalon(pageContentEtalon.length());
+			aRes.setPageUrlFinal(jobRes.getFinalUrlPage());
+			aRes.setPageUrlFinalEtalon(jobRes.getFinalUrlPageEtalon());
+			aRes.setStubUrl(jobRes.getStubUrl());
 
-			analysisResult.setKeyWordsCount(AnalysisUtils.getCountKeyWords(pageContent, keyWords));
+			aRes.setKeyWordsCount(AnalysisUtils.getCountKeyWords(pageContent, keyWords));
 
-			analysisResult.setDomainNameCount(AnalysisUtils.getDomainCount(result.getCheckUnit().getValue(), pageContent));
+			aRes.setDomainNameCount(AnalysisUtils.getDomainCount(jobRes.getCheckUnit().getValue(), pageContent));
 
-			analysisResult.setSimilarityOriginPercent(AnalysisUtils.getTextSimilarityPercent(pageContent, pageContentEtalon));
+			aRes.setSimilarityOriginPercent(AnalysisUtils.getTextSimilarityPercent(pageContent, pageContentEtalon));
 
-			analysisResult.setLinkCount(AnalysisUtils.getLinkCounts(pageContent));
+			aRes.setLinkCount(AnalysisUtils.getLinkCounts(pageContent));
+
+			// сравнение конечного и начального URL
+			boolean wasRedirect = false;
+			if (!isEmpty(aRes.getPageUrlFinal())){
+				wasRedirect = !AnalysisUtils.simpleCompareUrls(aRes.getPageUrlFinal(), jobRes.getCheckUnit().getValue());
+			}
+			aRes.setRedirectionDetected(wasRedirect);
 		}
 	}
 
 
 	protected CheckUnitJobResult obtainResult(VpnAnalysisResult aRes, ExecutionVpnJobResult jobRes) {
-		String errorCode = aRes.getResponseErrorCode();
+		boolean wasRedirect = aRes.getRedirectionDetected() != null && aRes.getRedirectionDetected();
 
-		if (!StringUtils.isEmpty(errorCode)){
-			CheckUnitJobResult errorResult = HTTP_SERVER_SEND_NO_RESPONSE;
+        if (aRes.hasError()) {
+            aRes.setCheckResult(obtainErrorResult(aRes));
+            return aRes.getCheckResult();
+        }
 
-			if (errorCode.isEmpty())
-				errorResult = TIMEOUT_ERROR;
-
-			else if (errorCode.contains("TIMEOUT") || errorCode.contains("TIME_OUT"))
-				errorResult = TIMEOUT_ERROR;
-
-			else if (errorCode.contains("DNS"))
-				errorResult = DNS_ERROR;
-
-			else if (errorCode.contains("SOCKET")){
-				errorResult = SOCKET_ERROR;
-			}
-
-			if (errorResult == SOCKET_ERROR){
-				aRes.setStubScoreInfo("При доступе к интернет ресурсу возникла следующая ошибка: " + errorCode + ". Вероятно проблемы с сетью.");
-				return DOUBTFUL;
-			}
-
-			aRes.setStubScoreInfo("При доступе к интернет ресурсу возникла следующая ошибка: " + errorCode);
-
-			return COMPLETED;
-		}
+		if (aRes.hasEtalonError()){
+            obtainErrorEtalon(aRes);
+        }
 
 		// конечный URL совпадает с vpn - заглушкой
 		if (StubAnalysis.checkStubUrl(aRes.getPageUrlFinal(), aRes.getStubUrl())){
 			return COMPLETED;
 		}
 
-		// сравнение конечного и начального URL
-		boolean wasRedirect = !AnalysisUtils.simpleCompareUrls(aRes.getPageUrlFinal(), jobRes.getCheckUnit().getValue());
-
 		// сравнение контента иходника с эталоном
-		if (aRes.getSimilarityOriginPercent() >= 90){
-			return FORBIDDEN_CONTENT_DETECTED;
-		}
+        if (aRes.getUseEtalon()){
+        	if (!aRes.hasEtalonError()){
+				if (aRes.getSimilarityOriginPercent() >= 90){
+					return FORBIDDEN_CONTENT_DETECTED;
+				}
+			}
+            else {
+				appendInfo(aRes, "Не удалось загрузить эталон: " + aRes.getResponseErrorCodeEtalon());
+			}
+        }
 
 		// проверка на заглушку
 		boolean isStub = StubAnalysis.isStub(aRes);
@@ -154,10 +150,41 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 		// флаг необходимости проверить конечный юрл в картотеке ЕРДИ
 		if (wasRedirect){
 			aRes.setNeedTestFinalUrl(true);
-			return COMPLETED;	// todo - в случае если юрл разрешен (подумать)
+			return COMPLETED;
 		}
 
-		return FORBIDDEN_CONTENT_DETECTED;	// todo - юрл тот же, но не заглушка (подумать)
+		return FORBIDDEN_CONTENT_DETECTED;
+	}
+
+	private CheckUnitJobResult obtainErrorResult(VpnAnalysisResult aRes){
+        String errorCode = aRes.getResponseErrorCode();
+        StringBuffer details = new StringBuffer();
+
+		CheckUnitJobResult result = AnalysisUtils.obtainErrorResult(errorCode, details);
+		appendInfo(aRes, details.toString());
+
+        return result == null ? COMPLETED : result;
+    }
+
+    private void obtainErrorEtalon(VpnAnalysisResult aRes){
+        String errorCodeEtalon = aRes.getResponseErrorCodeEtalon();
+
+        if (!isEmpty(errorCodeEtalon)){
+            if (errorCodeEtalon.contains("NO_INTERNET")) {
+                aRes.setStubScoreInfo("Ошибка получения эталона! Нет интернета! " + errorCodeEtalon);
+            }
+            else {
+                aRes.setStubScoreInfo("Ошибка получения эталона! " + errorCodeEtalon);
+            }
+        }
+    }
+
+	private void appendInfo(VpnAnalysisResult aRes, String append){
+		String info = aRes.getStubScoreInfo();
+		info = info == null ? "" : info;
+		append = append == null ? "" : append;
+		info += (StringUtils.isEmpty(info) || StringUtils.isEmpty(append) ? "" : ". ") + append;
+		aRes.setStubScoreInfo(info);
 	}
 
 }

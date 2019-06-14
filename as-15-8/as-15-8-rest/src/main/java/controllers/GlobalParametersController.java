@@ -7,7 +7,6 @@ import model.parameters.GlobalParameter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -41,19 +40,9 @@ public class GlobalParametersController {
         return globalParametersRepo.findAll(page);
     }
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public GlobalParameter postGlobalParameter(@RequestParam String key,
-                                               @RequestParam String value){
-        GlobalParameter globalParameter = new GlobalParameter();
-        globalParameter.setKey(AccessToolParameters.valueOf(key));
-        globalParameter.setValue(value);
-        return globalParametersRepo.save(globalParameter);
-    }
-
     @PutMapping
     public GlobalParameter putGlobalParameter(
-            @RequestParam String key,
+            @RequestParam AccessToolParameters key,
             @RequestParam String value) {
         return globalParametersRepo.findById(key)
             .map(globalParameter -> {
@@ -61,7 +50,7 @@ public class GlobalParametersController {
                 return globalParametersRepo.save(globalParameter);
             }).orElseGet(() -> {
                 GlobalParameter globalParameter = new GlobalParameter();
-                globalParameter.setKey(AccessToolParameters.valueOf(key));
+                globalParameter.setKey(key);
                 globalParameter.setValue(value);
                 return globalParametersRepo.save(globalParameter);
         });

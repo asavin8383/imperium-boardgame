@@ -18,6 +18,7 @@ public class VpnAnalysisResult extends AnalysisResult implements StubAnalysisRes
 	private String responseErrorCode;
 	private String responseErrorCodeEtalon;
 	private Boolean responseError;
+	private Boolean useEtalon;
 	private Integer httpStatus;
 	private Integer pageSize;
 	private Integer pageSizeEtalon;
@@ -26,6 +27,7 @@ public class VpnAnalysisResult extends AnalysisResult implements StubAnalysisRes
 	private Integer domainNameCount;
 	private String pageUrlFinal;
 	private String pageUrlFinalEtalon;
+	private Boolean redirectionDetected;
 	private String stubUrl;
 	private Integer similarityOriginPercent;
 	private Boolean needTestFinalUrl;
@@ -35,4 +37,12 @@ public class VpnAnalysisResult extends AnalysisResult implements StubAnalysisRes
 	public String getFinalUrl() {
 		return pageUrlFinal;
 	}
+
+    public boolean hasError() {
+        return responseErrorCode != null;
+    }
+
+    public boolean hasEtalonError() {
+        return responseErrorCodeEtalon != null;
+    }
 }

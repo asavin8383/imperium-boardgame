@@ -1,0 +1,81 @@
+version: '3.2'
+networks:
+    kafka-network:
+        external: true
+services:
+    zookeeper:
+        image: dcr.ec-leasing.ru/as-15-8/kafka/zookeeper:3.4.13
+        ports:
+            - "2181:2181"
+        networks:
+            - kafka-network
+
+    kafka:
+        image: dcr.ec-leasing.ru/as-15-8/kafka/kafka:2.12-2.2.0
+        depends_on:
+            - zookeeper
+        deploy:
+            mode: global
+        ports:
+            - target: 9094
+              published: 9094
+              protocol: tcp
+              mode: host
+        networks:
+            - kafka-network
+        environment:
+            HOSTNAME_COMMAND: "docker info | grep 'Node Address' | cut -d' ' -f 4" #IP address
+            BROKER_ID_COMMAND: "docker info | grep 'Node Address' | cut -d' ' -f 4 | cut -d'.' -f 4" #last IP triade
+            KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+            KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+            KAFKA_ADVERTISED_LISTENERS: INSIDE://:9092,OUTSIDE://_{HOSTNAME_COMMAND}:9094
+            KAFKA_LISTENERS: INSIDE://:9092,OUTSIDE://:9094
+            KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+            KAFKA_DEFAULT_REPLICATION_FACTOR: 2
+            KAFKA_NUM_PARTITIONS: 3
+            KAFKA_MESSAGE_MAX_BYTES: 10000000
+            KAFKA_MAX_REQUEST_SIZE: 10000000
+            KAFKA_JMX_OPTS: >
+                -Dcom.sun.management.jmxremote
+                -Dcom.sun.management.jmxremote.authenticate=false
+                -Dcom.sun.management.jmxremote.ssl=false
+                -Djava.rmi.server.hostname=192.168.5.12
+                -Dcom.sun.management.jmxremote.rmi.port=1099
+            JMX_PORT: 1099
+            KAFKA_CREATE_TOPICS: >-
+                arrangements:3:2:delete,
+                jobs:12:2:delete,
+                exec_results:12:2:delete,
+                analysis_results:12:2:delete,
+                job_notifications:12:2:delete,
+                arrangement_notifications:3:2:delete,
+                exec_control:3:2:delete
+        volumes:
+            - /opt/kafka/logs:/opt/kafka/logs
+            - /var/run/docker.sock:/var/run/docker.sock
+
+    kafdrop:
+        image: dcr.ec-leasing.ru/as-15-8/kafka/kafdrop:2.0.0
+        depends_on:
+            - zookeeper
+            - kafka
+        ports:
+            - "9010:9010"
+        environment:
+            ZK_HOSTS: zookeeper:2181
+            LISTEN: 9010
+        networks:
+            - kafka-network
+
+    kafka-manager:
+        image: dcr.ec-leasing.ru/as-15-8/kafka/kafka-manager:2.0.0.2
+        depends_on:
+            - zookeeper
+            - kafka
+        ports:
+            - "9000:9000"
+        environment:
+            ZK_HOSTS: zookeeper:2181
+            APPLICATION_SECRET: 1q0p2w9o
+        networks:
+            - kafka-network

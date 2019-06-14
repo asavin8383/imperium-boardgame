@@ -48,6 +48,37 @@ ldap:
 ---
 
 spring:
+    profiles: prod
+    jpa:
+        hibernate:
+            ddl-auto: none
+    datasource:
+        url: jdbc:postgresql://10.97.220.144:5432/asdb
+    kafka:
+        bootstrap-servers: 10.97.220.141:9094,10.97.220.142:9094,10.97.220.143:9094
+        group: portal
+        auto-offset-reset: earliest
+        arrangements-topic: arrangements
+        arrangement-notification-topic: arrangement_notifications
+cron:
+    expression:
+        arrangement: "0 * * ? * *"
+ldap:
+    enabled: true
+    domain: as158.ru
+    urls: ldap://10.97.220.140:389/
+    base:
+        dn: OU=AS_15_8,DC=as158,DC=ru
+    user:
+        dn:
+            pattern: sAMAccountName={0}
+    login:
+        role_oper: CN=ROLE_OPERATOR,OU=roles,OU=AS_15_8,DC=as158,DC=ru
+        role_admin: CN=ROLE_ADMIN,OU=roles,OU=AS_15_8,DC=as158,DC=ru
+
+---
+
+spring:
     profiles: test
     jpa:
         hibernate:
