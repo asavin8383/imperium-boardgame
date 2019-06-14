@@ -38,9 +38,10 @@ public class VPNScript extends RobotScript {
     		);
 
     	String useEtalon = scriptParams.get(AccessToolParameters.USE_ETALON);
-    	this.useEtalon = StringUtils.isEmpty(useEtalon) ||
+        this.useEtalon = StringUtils.isEmpty(useEtalon) ||
                 useEtalon.equalsIgnoreCase("true") ||
-                useEtalon.equalsIgnoreCase("on");
+                useEtalon.equalsIgnoreCase("on") ||
+                useEtalon.equalsIgnoreCase("1");
 
     	etalonProxy = ProxyUtils.getFullProxy(
     			scriptParams.get(AccessToolParameters.ETALON_PROXY_TYPE),

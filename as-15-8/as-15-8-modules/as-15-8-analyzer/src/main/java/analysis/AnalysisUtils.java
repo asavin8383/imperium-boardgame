@@ -107,8 +107,8 @@ public class AnalysisUtils {
         return false;
     }
 
-    public static CheckUnitJobResult obtainErrorResult(String errorCode, StringBuffer returnDetail){
-        returnDetail = returnDetail == null ? new StringBuffer() : returnDetail;
+    public static CheckUnitJobResult obtainErrorResult(String errorCode, StringBuffer details){
+        details = details == null ? new StringBuffer() : details;
         CheckUnitJobResult result = null;
         String message = null;
 
@@ -137,7 +137,31 @@ public class AnalysisUtils {
                 result = COMPLETED;
             }
 
-            returnDetail.append(message);
+            details.append(message);
+            return result;
+        }
+        return null;
+    }
+
+    public static CheckUnitJobResult obtainErrorResultEtalon(String errorCode, StringBuffer details){
+        details = details == null ? new StringBuffer() : details;
+        CheckUnitJobResult result = null;
+        String message = null;
+
+        if (!isEmpty(errorCode)){
+            if (errorCode.contains("NO_INTERNET")) {
+                message = "Ошибка ЭТАЛОНА - нет интернета! " + errorCode;
+                result = INTERNAL_ERROR;
+            }
+            else if (errorCode.contains("ERR_PROXY")) {
+                message = "Ошибка ЭТАЛОНА - доступ к прокси! " + errorCode;
+                result = INTERNAL_ERROR;
+            }
+            else {
+                message = "Ошибка ЭТАЛОНА: " + errorCode + ". Не критическая";
+            }
+
+            details.append(message);
             return result;
         }
         return null;

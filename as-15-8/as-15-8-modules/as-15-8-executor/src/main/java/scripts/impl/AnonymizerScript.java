@@ -30,10 +30,11 @@ public abstract class AnonymizerScript extends RobotScript {
         String useEtalon = scriptParams.get(AccessToolParameters.USE_ETALON);
         this.useEtalon = StringUtils.isEmpty(useEtalon) ||
                 useEtalon.equalsIgnoreCase("true") ||
-                useEtalon.equalsIgnoreCase("on");
+                useEtalon.equalsIgnoreCase("on") ||
+                useEtalon.equalsIgnoreCase("1");
 
         this.etalonProxy = ProxyUtils.getFullProxy(
-                scriptParams.get(AccessToolParameters.PROXY_TYPE),
+                scriptParams.get(AccessToolParameters.ETALON_PROXY_TYPE),
                 scriptParams.get(AccessToolParameters.ETALON_PROXY_HOST),
                 scriptParams.get(AccessToolParameters.ETALON_PROXY_PORT),
                 scriptParams.get(AccessToolParameters.ETALON_PROXY_USERNAME),

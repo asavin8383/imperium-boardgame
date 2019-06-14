@@ -15,4 +15,5 @@ public interface StubAnalysisResult {
     Integer getDomainNameCount();
 
     void setStubScoreInfo(String info);
+    String getStubScoreInfo();
 }

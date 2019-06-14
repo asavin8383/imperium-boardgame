@@ -7,15 +7,12 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import analysis.*;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import analysis.AnalysisResult;
-import analysis.AnalysisUtils;
-import analysis.StubAnalysis;
-import analysis.VpnAnalysisResult;
 import common.AnalysisException;
 import enums.CheckUnitJobResult;
 import execution.ExecutionVpnJobResult;
@@ -35,7 +32,8 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 @Service
 public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResult> {
 
-	public static String keyWordsSource = "key_words.json";
+	public static final String keyWordsSource = "key_words.json";
+	public static final int similarityThreshold = 85;
 
 	@Getter
 	private List<KeyWord> keyWords = new ArrayList<>();
@@ -66,7 +64,7 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 			throw new AnalysisException(String.format("Ошибка во время анализа ПАСД (jobID=%d)", result.getJobID()), e);
 		}
 
-		analysisResult.setCheckResult(obtainResult(analysisResult, result));
+		analysisResult.setCheckResult(obtainResult(analysisResult));
 		return analysisResult;
 	}
 
@@ -111,16 +109,11 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 	}
 
 
-	protected CheckUnitJobResult obtainResult(VpnAnalysisResult aRes, ExecutionVpnJobResult jobRes) {
+	protected CheckUnitJobResult obtainResult(VpnAnalysisResult aRes) {
 		boolean wasRedirect = aRes.getRedirectionDetected() != null && aRes.getRedirectionDetected();
 
         if (aRes.hasError()) {
-            aRes.setCheckResult(obtainErrorResult(aRes));
-            return aRes.getCheckResult();
-        }
-
-		if (aRes.hasEtalonError()){
-            obtainErrorEtalon(aRes);
+            return obtainErrorResult(aRes);
         }
 
 		// конечный URL совпадает с vpn - заглушкой
@@ -128,62 +121,76 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 			return COMPLETED;
 		}
 
-		// сравнение контента иходника с эталоном
-        if (aRes.getUseEtalon()){
-        	if (!aRes.hasEtalonError()){
-				if (aRes.getSimilarityOriginPercent() >= 90){
-					return FORBIDDEN_CONTENT_DETECTED;
-				}
+		boolean useEtalon = aRes.getUseEtalon() == null || aRes.getUseEtalon();
+
+		// проверка на критическую ошибку эталона
+		if (useEtalon && aRes.hasEtalonError()){
+			CheckUnitJobResult errorResult = obtainErrorEtalon(aRes);
+			if (errorResult != null){
+				return errorResult;
 			}
-            else {
-				appendInfo(aRes, "Не удалось загрузить эталон: " + aRes.getResponseErrorCodeEtalon());
+		}
+
+		// если эталон есть, проверяем на схожесть
+		if (useEtalon && !aRes.hasEtalonError()){
+			if (!wasRedirect && aRes.getSimilarityOriginPercent() >= similarityThreshold){
+				appendInfo(aRes, "Порог схожести текста >= " + similarityThreshold + "%.");
+				return FORBIDDEN_CONTENT_DETECTED;
 			}
-        }
+			else if (wasRedirect && aRes.getSimilarityOriginPercent() >= similarityThreshold){
+				appendInfo(aRes, "Произошел редирект, но порог схожести текста >= " + similarityThreshold + "%.");
+				return FORBIDDEN_CONTENT_DETECTED;
+			}
+		}
 
 		// проверка на заглушку
 		boolean isStub = StubAnalysis.isStub(aRes);
-
 		if (isStub){
 			return COMPLETED;
 		}
 
-		// флаг необходимости проверить конечный юрл в картотеке ЕРДИ
-		if (wasRedirect){
-			aRes.setNeedTestFinalUrl(true);
-			return COMPLETED;
+		// проверка без эталона
+		if (!wasRedirect){
+			boolean isForbidden = ContentAnalysis.forbiddenContent(aRes);
+			if (isForbidden){
+				return FORBIDDEN_CONTENT_DETECTED;
+			}
 		}
 
-		return FORBIDDEN_CONTENT_DETECTED;
+		if (wasRedirect){
+			aRes.setNeedTestFinalUrl(true);
+		}
+
+		// не прошли проверку - сомнительно
+		return DOUBTFUL;
 	}
 
 	private CheckUnitJobResult obtainErrorResult(VpnAnalysisResult aRes){
-        String errorCode = aRes.getResponseErrorCode();
-        StringBuffer details = new StringBuffer();
+		String errorCode = aRes.getResponseErrorCode();
+		StringBuffer details = new StringBuffer();
 
 		CheckUnitJobResult result = AnalysisUtils.obtainErrorResult(errorCode, details);
-		appendInfo(aRes, details.toString());
+		result = result == null ? COMPLETED : result;
 
-        return result == null ? COMPLETED : result;
+		appendInfo(aRes, details.toString());
+		return result;
     }
 
-    private void obtainErrorEtalon(VpnAnalysisResult aRes){
+    private CheckUnitJobResult obtainErrorEtalon(VpnAnalysisResult aRes){
         String errorCodeEtalon = aRes.getResponseErrorCodeEtalon();
+		StringBuffer details = new StringBuffer();
 
-        if (!isEmpty(errorCodeEtalon)){
-            if (errorCodeEtalon.contains("NO_INTERNET")) {
-                aRes.setStubScoreInfo("Ошибка получения эталона! Нет интернета! " + errorCodeEtalon);
-            }
-            else {
-                aRes.setStubScoreInfo("Ошибка получения эталона! " + errorCodeEtalon);
-            }
-        }
+		CheckUnitJobResult result = AnalysisUtils.obtainErrorResultEtalon(errorCodeEtalon, details);
+		appendInfo(aRes, details.toString());
+
+		return result;
     }
 
 	private void appendInfo(VpnAnalysisResult aRes, String append){
 		String info = aRes.getStubScoreInfo();
 		info = info == null ? "" : info;
 		append = append == null ? "" : append;
-		info += (StringUtils.isEmpty(info) || StringUtils.isEmpty(append) ? "" : ". ") + append;
+		info += (StringUtils.isEmpty(info) || StringUtils.isEmpty(append) ? "" : " ") + append;
 		aRes.setStubScoreInfo(info);
 	}
 
