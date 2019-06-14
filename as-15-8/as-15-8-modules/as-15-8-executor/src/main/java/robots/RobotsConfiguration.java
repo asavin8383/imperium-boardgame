@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import robots.impl.SeleniumAnonymizerRobot;
+import robots.impl.SeleniumHolaRobot;
 import robots.impl.SeleniumSearchRobot;
 import robots.impl.SeleniumVpnRobot;
 import scripts.ScriptDriverParameters;
@@ -27,11 +28,11 @@ public class RobotsConfiguration {
 	/** Среда выполнения модуля */
 	@Autowired
 	Environment env;
-	
+
 	/** URL selenium хаба */
 	@Value("${selenium-hub-url}")
 	private String seleniumHubUrl;
-	
+
 	/**
 	 * Робот проверки ПС Google
 	 * @return
@@ -86,6 +87,26 @@ public class RobotsConfiguration {
 				Platform.valueOf(env.getProperty("robots.vpn.platform")),
 				env.getProperty("robots.vpn.app"),
 				env.getProperty("robots.vpn.browser")
+			)
+		);
+	}
+
+	/**
+	 * Робот проверки ПАСД (VPN)
+	 * @return
+	 * @throws MalformedURLException
+	 */
+	@Bean
+	public Robot holaRobot() throws MalformedURLException {
+
+		return new SeleniumHolaRobot(
+			AccessToolUnit.HOLA,
+			HolaScript.class,
+			new ScriptDriverParameters(
+				new URL(this.seleniumHubUrl),
+				Platform.valueOf(env.getProperty("robots.hola.platform")),
+				env.getProperty("robots.hola.app"),
+				env.getProperty("robots.hola.browser")
 			)
 		);
 	}
@@ -149,5 +170,5 @@ public class RobotsConfiguration {
 			)
 		);
 	}
-	
+
 }

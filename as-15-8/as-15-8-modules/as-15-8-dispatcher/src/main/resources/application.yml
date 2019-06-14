@@ -56,6 +56,22 @@ spring:
 ---
 
 spring:
+    profiles: dev_asinyavin
+    datasource:
+        url: jdbc:postgresql://192.168.5.195:5432/asdb_test
+    kafka:
+        arrangement-tasks-topic: arrangements_asinyavin
+        jobs-topic: jobs_asinyavin
+        analysis-results-topic: analysis_results_asinyavin
+        arrangement-notifications-topic: arrangement_notifications_asinyavin
+        notifications-topic: job_notifications_asinyavin
+        control-topic: exec_control_asinyavin
+        analysis-results-concurrency: 12
+        notifications-concurrency: 12
+
+---
+
+spring:
     profiles: dev_asavin
     datasource:
         url: jdbc:postgresql://192.168.5.195:5432/asdb_test

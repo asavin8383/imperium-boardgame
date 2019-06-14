@@ -6,6 +6,7 @@ import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.Proxy;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -31,7 +32,7 @@ public class DriverFactory {
 	public static WebDriver createDriver(URL hubURL, Platform platformName, String appName, String browserName) {
 		return createDriver(hubURL, platformName, appName, browserName, null);
 	}
-	
+
 	/**
 	 * Метод создания selenium драйвера
 	 * @param hubURL URL selenium хаба
@@ -57,6 +58,24 @@ public class DriverFactory {
 	}
 
 	/**
+	 * Метод создания selenium драйвера Chrome с кастомным профилем
+	 * @param hubURL URL selenium хаба
+	 * @param platformName Имя платформы
+	 * @param appName Имя приложения (ПС/ПАСД)
+	 * @param profile пусть к папке профиля
+	 * @return
+	 */
+	public static WebDriver createChromeDriver(URL hubURL, Platform platformName, String appName, String profile) {
+        ChromeOptions options = new ChromeOptions();
+
+        options.setCapability("platform", platformName);
+        options.setCapability("applicationName", appName);
+        options.addArguments("user-data-dir=" + profile);
+
+        return new RemoteWebDriver(hubURL, options);
+    }
+
+	/**
 	 * Метод создания параметров драйвера
 	 * @param platform Имя платформы
 	 * @param appName Имя приложения (ПС/ПАСД)
@@ -70,7 +89,7 @@ public class DriverFactory {
 		capability.setCapability("applicationName", appName);
 		return capability;
 	}
-	
+
 	/**
 	 * Метод создания параметров драйвера
 	 * @param browserName Имя браузера
