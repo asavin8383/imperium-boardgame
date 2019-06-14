@@ -144,7 +144,7 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 		}
 
 		// проверка на заглушку
-		boolean isStub = StubAnalysis.isStub(aRes);
+		boolean isStub = StubAnalysis.isStub(aRes, 0.35, 0.20, 0.15, 0.30);
 		if (isStub){
 			return COMPLETED;
 		}
