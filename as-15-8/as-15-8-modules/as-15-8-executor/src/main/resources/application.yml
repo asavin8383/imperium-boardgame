@@ -16,6 +16,10 @@ robots:
         platform: WIN8
         browser: chrome
         app: kas
+    hola:
+        platform: WIN10
+        browser: chrome
+        app: hola
     torguard:
         platform: WIN8
         browser: chrome
@@ -69,6 +73,17 @@ spring:
         produce-topic: exec_results_ashabalin
         notification-topic: job_notifications_ashabalin
         control-topic: exec_control_ashabalin
+        executor-concurrency: 4
+
+---
+
+spring:
+    profiles: dev_asinyavin
+    kafka:
+        consume-topic: jobs_asinyavin
+        produce-topic: exec_results_asinyavin
+        notification-topic: job_notifications_asinyavin
+        control-topic: exec_control_asinyavin
         executor-concurrency: 4
 
 ---

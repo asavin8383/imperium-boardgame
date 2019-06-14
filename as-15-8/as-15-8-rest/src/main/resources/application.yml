@@ -126,6 +126,21 @@ cron:
 ---
 
 spring:
+    profiles: dev_asinyavin
+    jpa:
+        hibernate:
+            ddl-auto: none
+    datasource:
+        url: jdbc:postgresql://192.168.5.195:5432/asdb_test
+    kafka:
+        arrangements-topic: arrangements_asinyavin
+        arrangement-notification-topic: arrangement_notifications_asinyavin
+cron:
+    expression:
+        arrangement: "0 * * ? * *"
+---
+
+spring:
     profiles: dev_pvorobiev
     jpa:
         hibernate:

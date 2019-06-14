@@ -38,6 +38,16 @@ spring:
         analysis-concurrency: 4
 ---
 
+
+spring:
+    profiles: dev_asinyavin
+    kafka:
+        consume-topic: exec_results_asinyavin
+        produce-topic: analysis_results_asinyavin
+        notification-topic: job_notifications_asinyavin
+        analysis-concurrency: 4
+---
+
 spring:
     profiles: dev_asavin
     kafka:
