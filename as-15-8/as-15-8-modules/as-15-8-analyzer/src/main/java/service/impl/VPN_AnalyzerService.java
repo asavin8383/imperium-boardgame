@@ -112,7 +112,7 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 
 
 	protected CheckUnitJobResult obtainResult(VpnAnalysisResult aRes, ExecutionVpnJobResult jobRes) {
-		boolean wasRedirect = aRes.getRedirectionDetected();
+		boolean wasRedirect = aRes.getRedirectionDetected() != null && aRes.getRedirectionDetected();
 
         if (aRes.hasError()) {
             aRes.setCheckResult(obtainErrorResult(aRes));
