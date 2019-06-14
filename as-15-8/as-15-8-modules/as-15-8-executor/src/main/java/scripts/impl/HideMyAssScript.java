@@ -37,6 +37,7 @@ public class HideMyAssScript extends AnonymizerScript {
             WebElement input = driver.findElement(By.id("form_url_fake"));
             input.sendKeys(checkUnit.getValue());
             driver.findElement(By.xpath("/html/body/form/div[3]/a")).click();
+            ScriptUtils.waitDriver(driver, 1);
             ScriptUtils.waitPageLoading(driver);
 
             CloudflareUtils.waitCloudflareRedirect(driver);

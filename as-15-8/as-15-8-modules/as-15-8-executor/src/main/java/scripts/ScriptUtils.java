@@ -38,7 +38,7 @@ public class ScriptUtils {
 
     public static void waitDriver(WebDriver driver, Integer seconds){
         try{
-            WebDriverWait wait = new WebDriverWait(driver, 3);
+            WebDriverWait wait = new WebDriverWait(driver, seconds);
             wait.until(webDriver -> false);
         }
         catch (TimeoutException te){}
