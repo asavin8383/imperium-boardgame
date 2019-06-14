@@ -59,30 +59,11 @@ public class KafkaConsumer {
     		);
     		
     		endpointRegistry.registerListenerContainer(endpoint, kafkaListenerContainerFactory);
-    		
-    		/*ConcurrentMessageListenerContainer<String, CheckUnitJob> container =
-    				kafkaListenerContainerFactory.createContainer(checkUnitJobsTopicName);
-    		
-    		container.getContainerProperties().setGroupId("exec_"+accessTool.name().toLowerCase());
-    		
-	    	container.setupMessageListener(
-	    		new FilteringMessageListenerAdapter<String, CheckUnitJob>(
-	    			(AcknowledgingConsumerAwareMessageListener<String, CheckUnitJob>)(data, ack, consumer) -> {
-	    				consumeCheckUnitJobMessage(data, ack);
-	    			}, 
-	    			record -> !record.value().getAccessToolUnit().equals(accessTool),
-	    			true
-	    		)
-	    	);
-	    	
-	    	container.start();
-	    	
-	    	listenerContainers.put(accessTool, container);*/
     	}
     }
 	
 	private void consumeCheckUnitJobMessage(ConsumerRecord<String, CheckUnitJob> message, Acknowledgment ack) {
-		log.info("Принято задание: " + message.value().toString()+", partition: "+message.partition()+", offset: "+message.offset());    				
+		log.info("\n   ---->>> Принято задание: " + message.value().toString()+", partition: "+message.partition()+", offset: "+message.offset());
 		try {
 			robotsService.run(message.value());
 			ack.acknowledge();

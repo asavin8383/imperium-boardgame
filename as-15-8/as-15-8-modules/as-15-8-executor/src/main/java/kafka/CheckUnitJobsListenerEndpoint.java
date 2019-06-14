@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.config.KafkaListenerEndpoint;
-import org.springframework.kafka.listener.AcknowledgingConsumerAwareMessageListener;
+import org.springframework.kafka.listener.AcknowledgingMessageListener;
 import org.springframework.kafka.listener.MessageListenerContainer;
 import org.springframework.kafka.listener.adapter.FilteringMessageListenerAdapter;
 import org.springframework.kafka.support.Acknowledgment;
@@ -61,7 +61,7 @@ public class CheckUnitJobsListenerEndpoint implements KafkaListenerEndpoint {
 	@Override
 	public void setupListenerContainer(MessageListenerContainer listenerContainer, MessageConverter messageConverter) {
 		listenerContainer.setupMessageListener(new FilteringMessageListenerAdapter<String, CheckUnitJob>(
-    			(AcknowledgingConsumerAwareMessageListener<String, CheckUnitJob>)(data, ack, consumer) -> {
+    			(AcknowledgingMessageListener<String, CheckUnitJob>)(data, ack) -> {
     				consumeMethod.accept(data, ack);
     			}, 
     			record -> !record.value().getAccessToolUnit().equals(this.accessToolUnit),

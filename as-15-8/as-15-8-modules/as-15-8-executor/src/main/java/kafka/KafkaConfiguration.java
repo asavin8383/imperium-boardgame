@@ -18,6 +18,7 @@ import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.listener.ContainerProperties.AckMode;
+import org.springframework.kafka.listener.DefaultAfterRollbackProcessor;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
@@ -71,7 +72,7 @@ public class KafkaConfiguration {
     Map<String, Object> checkUnitJobsFactoryConfig(){
     	Map<String, Object> config = new HashMap<>();
         config.putAll(cousumerFactoryConfig());
-        config.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, jobsExecutionTimeout);
+        //config.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, jobsExecutionTimeout);
         config.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 1);        
         return config;
     }
@@ -106,6 +107,7 @@ public class KafkaConfiguration {
         listenerFactory.setConsumerFactory(checkUnitJobsConsumerFactory());
         listenerFactory.setConcurrency(listenersConcurrency);
         listenerFactory.getContainerProperties().setAckMode(AckMode.MANUAL_IMMEDIATE);
+        listenerFactory.setAfterRollbackProcessor(new DefaultAfterRollbackProcessor<>(0));
         return listenerFactory;
     }
     
