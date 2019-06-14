@@ -6,11 +6,14 @@ EXPOSE 15800
 
 ENV APP_PATH="/lib/as-15-8-rest.jar" \
     LOG_PATH="/log" \
+    CONFIG_PATH="/config" \
     PROFILE="test"
 
-VOLUME $LOG_PATH
+VOLUME $LOG_PATH \
+    $CONFIG_PATH
 
-COPY /target/as-15-8-rest.jar $APP_PATH
+COPY /target/as-15-8-rest.jar $APP_PATH \
+    /src/main/resources/application.yml $CONFIG_PATH
 
 ENTRYPOINT ["java", \
          "-jar", \

@@ -6,6 +6,7 @@ services:
         restart: always
         volumes:
             - ~/as-15-8-rest/logs:/log
+            - ~/as-15-8-rest/config:/config
         environment:
             - PROFILE=test
         ports:
