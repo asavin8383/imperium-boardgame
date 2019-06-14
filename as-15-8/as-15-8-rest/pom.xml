@@ -131,6 +131,15 @@
 		</dependency>
 	</dependencies>
 	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+				<excludes>
+					<exclude>**/application.yml</exclude>
+				</excludes>
+			</resource>
+		</resources>
 		<finalName>${project.artifactId}</finalName>
 		<plugins>
 			<plugin>

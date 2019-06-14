@@ -1,4 +1,4 @@
-version: '3'
+version: '3.3'
 services:
     as-15-8-rest:
         container_name: as-15-8_REST
@@ -10,3 +10,8 @@ services:
             - PROFILE=test
         ports:
             - "15800:15800"
+        configs:
+            - rest
+configs:
+    rest:
+        file: ./application.yml
