@@ -115,31 +115,6 @@ public class HolaScript extends RobotScript {
     }
 
 
-    public PageResult loadPage(String url, WebDriver webDriver, int countRetry) {
-        PageResult pageSourceResult = null;
-        int cnt = 0;
-
-        while (cnt < countRetry && (pageSourceResult == null || pageSourceResult.errorCodeChrome != null)) {
-            if (pageSourceResult != null) {
-                ScriptUtils.waitDriver(webDriver, 3);
-            }
-            cnt++;
-
-            webDriver.get(url);
-            webDriver.manage().window().fullscreen();
-            ScriptUtils.waitDriver(webDriver, 3);
-            try {
-                ScriptUtils.waitPageLoading(webDriver);
-                pageSourceResult = ScriptUtils.getPageSource(webDriver);
-            } catch (TimeoutException te) {
-                pageSourceResult = new PageResult(null, TIME_OUT_ERROR);
-                log.info("Timeout exception при получении страницы");
-            }
-
-            if (countRetry > 1) log.info("----> Попытка загрузить страницу: {}, error: {}", cnt, pageSourceResult.errorCodeChrome);
-        }
-        return pageSourceResult;
-    }
 
     public boolean checkBrowserChrome(){
         return "chrome".equalsIgnoreCase(getDriverParams().getBrowserName());
