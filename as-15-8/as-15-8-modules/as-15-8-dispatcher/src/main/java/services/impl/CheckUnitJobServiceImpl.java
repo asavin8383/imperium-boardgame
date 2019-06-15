@@ -179,7 +179,7 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
                         for (String port : ports){
                             CheckUnitJob ipCheckUnitJob = new CheckUnitJob();
                             fillCommonFields(ipCheckUnitJob, template);
-                            ipCheckUnitJob.setCheckUnit(new CheckUnit(template.checkUnitType, protocol + template.checkUnitValueTemplate + port));
+                            ipCheckUnitJob.setCheckUnit(new CheckUnit(template.checkUnitType, protocol + template.checkUnitValueTemplate + ":" + port));
                             Long ipJobID = saveCheckUnitJobAsResult(arrangementId, template.erdiId, ipCheckUnitJob);
                             ipCheckUnitJob.setJobID(ipJobID);
                             checkUnitJobs.add(ipCheckUnitJob);
@@ -194,7 +194,7 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
                             for(String address : utils.getInfo().getAllAddresses()){
                                 CheckUnitJob ipCheckUnitJob = new CheckUnitJob();
                                 fillCommonFields(ipCheckUnitJob, template);
-                                ipCheckUnitJob.setCheckUnit(new CheckUnit(template.checkUnitType, protocol + address + port));
+                                ipCheckUnitJob.setCheckUnit(new CheckUnit(template.checkUnitType, protocol + address + ":" + port));
                                 Long ipJobID = saveCheckUnitJobAsResult(arrangementId, template.erdiId, ipCheckUnitJob);
                                 ipCheckUnitJob.setJobID(ipJobID);
                                 checkUnitJobs.add(ipCheckUnitJob);
