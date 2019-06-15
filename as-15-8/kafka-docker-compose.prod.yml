@@ -9,6 +9,10 @@ services:
             - "2181:2181"
         networks:
             - kafka-network
+        environment:
+            TZ: "Europe/Moscow"          
+        volumes:
+            - /etc/timezone:/etc/timezone:ro
 
     kafka:
         image: dcr.ec-leasing.ru/as-15-8/kafka/kafka:2.12-2.2.0
@@ -24,6 +28,7 @@ services:
         networks:
             - kafka-network
         environment:
+            TZ: "Europe/Moscow"
             HOSTNAME_COMMAND: "docker info | grep 'Node Address' | cut -d' ' -f 4" #IP address
             BROKER_ID_COMMAND: "docker info | grep 'Node Address' | cut -d' ' -f 4 | cut -d'.' -f 4" #last IP triade
             KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -53,6 +58,7 @@ services:
         volumes:
             - /opt/kafka/logs:/opt/kafka/logs
             - /var/run/docker.sock:/var/run/docker.sock
+            - /etc/timezone:/etc/timezone:ro
 
     kafdrop:
         image: dcr.ec-leasing.ru/as-15-8/kafka/kafdrop:2.0.0
@@ -62,10 +68,13 @@ services:
         ports:
             - "9010:9010"
         environment:
+            TZ: "Europe/Moscow"
             ZK_HOSTS: zookeeper:2181
             LISTEN: 9010
         networks:
-            - kafka-network
+            - kafka-network          
+        volumes:
+            - /etc/timezone:/etc/timezone:ro
 
     kafka-manager:
         image: dcr.ec-leasing.ru/as-15-8/kafka/kafka-manager:2.0.0.2
@@ -75,7 +84,10 @@ services:
         ports:
             - "9000:9000"
         environment:
+            TZ: "Europe/Moscow"
             ZK_HOSTS: zookeeper:2181
             APPLICATION_SECRET: 1q0p2w9o
         networks:
-            - kafka-network
+            - kafka-network          
+        volumes:
+            - /etc/timezone:/etc/timezone:ro

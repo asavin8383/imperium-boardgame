@@ -102,7 +102,7 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 
                     if (analysisResult.getSimilarityPercent() > similarityThreshold) {
                         analysisResult.setCheckResult(FORBIDDEN_CONTENT_DETECTED);
-                        appendInfo(analysisResult, "Порог схожести текста >= " + similarityThreshold + "%.");
+                        appendInfo(analysisResult, "Порог сходства текста >= " + similarityThreshold + "%.");
                         return analysisResult;
                     }
 

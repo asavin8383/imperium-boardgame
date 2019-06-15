@@ -1,23 +1,28 @@
 package scripts.impl;
 
+import java.util.Map;
+import java.util.function.Function;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
 import checkUnits.CheckUnit;
 import enums.AccessToolParameters;
 import execution.ExecutionJobResult;
 import execution.ExecutionVpnJobResult;
-import lombok.extern.slf4j.Slf4j;
-import org.openqa.selenium.*;
-import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.remote.RemoteWebDriver;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
-import scripts.*;
+import scripts.DriverFactory;
+import scripts.ProxyUtils;
+import scripts.RobotScript;
+import scripts.ScriptDriverParameters;
+import scripts.ScriptUtils;
 import scripts.ScriptUtils.PageResult;
 import scripts.exceptions.RobotScriptExecutionException;
 
-import java.util.Map;
-import java.util.function.Function;
-
-@Slf4j
 public class HolaScript extends RobotScript {
 
     private static final String CHROME_PROFILE = "C:\\Selenium\\Chrome";

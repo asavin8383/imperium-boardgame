@@ -9,6 +9,7 @@ services:
       - as-15-8-net
     environment:
       PROFILE: prod
+      TZ: "Europe/Moscow"
     volumes:
       - ~/as-15-8-modules/dispatcher-module/logs:/log
   executor:
@@ -19,6 +20,7 @@ services:
       - as-15-8-net
     environment:
       PROFILE: prod
+      TZ: "Europe/Moscow"
     volumes:
       - ~/as-15-8-modules/executor-module/logs:/log
   analyzer:
@@ -29,5 +31,6 @@ services:
       - as-15-8-net
     environment:
       PROFILE: prod
+      TZ: "Europe/Moscow"
     volumes:
       - ~/as-15-8-modules/analyzer-module/logs:/log
