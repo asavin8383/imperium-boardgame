@@ -4,7 +4,7 @@ networks:
     external: true
 services:
   dispatcher:
-    image: dcr.ec-leasing.ru/as_15_8/as-15-8-dispatcher:latest
+    image: dcr.ec-leasing.ru/as-15-8/as-15-8-dispatcher:latest
     networks:
       - as-15-8-net
     environment:
@@ -12,7 +12,7 @@ services:
     volumes:
       - ~/as-15-8-modules/dispatcher-module/logs:/log
   executor:
-    image: dcr.ec-leasing.ru/as_15_8/as-15-8-executor:latest
+    image: dcr.ec-leasing.ru/as-15-8/as-15-8-executor:latest
     deploy:
       mode: global
     networks:
@@ -22,7 +22,7 @@ services:
     volumes:
       - ~/as-15-8-modules/executor-module/logs:/log
   analyzer:
-    image: dcr.ec-leasing.ru/as_15_8/as-15-8-analyzer:latest
+    image: dcr.ec-leasing.ru/as-15-8/as-15-8-analyzer:latest
     deploy:
       mode: global
     networks:

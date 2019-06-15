@@ -53,11 +53,13 @@ public class KafkaArrangementsConsumer {
     public void consumeArrangementJob(ArrangementJob arrangementJob, Acknowledgment ack) {
 		log.info("Принято задание на проведение мероприятия: " + arrangementJob.toString());
     	try {
-			checkUnitJobService
-				.prepareJobs(arrangementJob)
-				.forEach(this::send);
+    		if(arrangementJob.getRunType().equals(ArrangementJob.JobRunType.START)){
+				checkUnitJobService
+					.prepareJobs(arrangementJob)
+					.forEach(this::send);
+			}
 			//Если получили сообщение на перезапуск, нужно поднять сервис
-			if(arrangementJob.getRunType().equals(ArrangementJob.JobRunType.RESTART)){
+			else if(arrangementJob.getRunType().equals(ArrangementJob.JobRunType.RESTART)){
 				sendStartExecutorsMessage(arrangementJob.getAccessToolUnit());
 			}
     	} catch (Exception ex) {

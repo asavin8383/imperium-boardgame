@@ -69,8 +69,6 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
         switch (arrangementJob.getRunType()){
             case START:
                 return prepareJobsForStart(arrangementJob);
-            case RESTART:
-                return prepareJobsForRestart(arrangementJob);
             default:
                 throw new AS_15_8_DispatcherException("Error preparing check unit jobs! Arrangement run type is not supported: " + arrangementJob.getRunType());
         }
@@ -133,8 +131,8 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
 
     /**
      * Построение проверок по шаблонам
-     * @param checkUnitJobTemplates
-     * @return
+     * @param checkUnitJobTemplates список шаблонов
+     * @return список заданий на проверки
      */
     private List<CheckUnitJob> buildCheckUnitJobsFromTemplates(List<CheckUnitJobTemplate> checkUnitJobTemplates, Long arrangementId){
         List<CheckUnitJob> checkUnitJobs = new ArrayList<>();
@@ -202,24 +200,7 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
         checkUnitJob.getAccessToolParameters().putAll(checkUnitJobTemplate.getParameters());
     }
 
-    private List<CheckUnitJob> prepareJobsForRestart(ArrangementJob arrangementJob){
-        //TODO Отложить до решения вопроса с капчей
-        /*
-        final String CAPTCHA = "CAPTCHA_DETECTED";
-        CheckUnitJobMapper mapper = new CheckUnitJobMapper(arrangementJob.getAccessToolUnit(), arrangementJob.getAccessToolParameters());
-        List<CheckUnitJob> checkUnitJobs;
-        try {
-            //noinspection SqlDialectInspection
-            jdbcTemplate.queryForList("select id from portal.arrangement_results where arrangement_id = ? AND result = ?",arrangementJob.getId(), CAPTCHA)
-            .stream()
-            .map(stringObjectMap -> Long.valueOf(stringObjectMap.get("id").toString()))
-            .forEach(this::updateCheckUnitJob);
-        } catch (Exception ex){
-            throw new AS_15_8_DispatcherException("Ошибка при создании заданий на проверку запрещенных ресурсов!", ex);
-        }
-        return checkUnitJobs;*/
-        return null;
-    }
+
 
 
 	@Override
