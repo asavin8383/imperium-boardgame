@@ -2,12 +2,10 @@ package controllers;
 
 import model.task.ArrangementView;
 import model.user.User;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import repositories.ArrangementViewRepo;
 
 import java.util.List;
@@ -29,7 +27,20 @@ public class ArrangementViewController {
 
     @GetMapping
     public List<ArrangementView> findList(@RequestParam(value = "user_id") User user,
-                                          @RequestParam boolean status){
-        return arrangementViewRepo.findAllByUserAndViewed(user, status);
+                                          @RequestParam boolean viewed){
+        return arrangementViewRepo.findAllByUserAndViewed(user, viewed);
     }
+
+    @PutMapping
+    public ArrangementView updateView(@RequestParam("id") ArrangementView arrangementView){
+        arrangementView.setViewed(true);
+        return arrangementViewRepo.save(arrangementView);
+    }
+
+    @DeleteMapping
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteView(@RequestParam("id") ArrangementView arrangementView){
+        arrangementViewRepo.delete(arrangementView);
+    }
+
 }
