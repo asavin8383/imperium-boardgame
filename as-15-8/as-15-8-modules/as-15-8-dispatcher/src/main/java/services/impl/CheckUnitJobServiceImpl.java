@@ -194,7 +194,7 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
                             for(String address : utils.getInfo().getAllAddresses()){
                                 CheckUnitJob ipCheckUnitJob = new CheckUnitJob();
                                 fillCommonFields(ipCheckUnitJob, template);
-                                ipCheckUnitJob.setCheckUnit(new CheckUnit(template.checkUnitType, protocol + address + ":" + port));
+                                ipCheckUnitJob.setCheckUnit(new CheckUnit(CheckUnitType.IP_V4, protocol + address + ":" + port));
                                 Long ipJobID = saveCheckUnitJobAsResult(arrangementId, template.erdiId, ipCheckUnitJob);
                                 ipCheckUnitJob.setJobID(ipJobID);
                                 checkUnitJobs.add(ipCheckUnitJob);
