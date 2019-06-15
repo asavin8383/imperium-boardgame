@@ -72,7 +72,7 @@ public class KafkaConfiguration {
     Map<String, Object> checkUnitJobsFactoryConfig(){
     	Map<String, Object> config = new HashMap<>();
         config.putAll(cousumerFactoryConfig());
-        //config.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, jobsExecutionTimeout);
+        config.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, jobsExecutionTimeout);
         config.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 1);        
         return config;
     }

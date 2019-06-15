@@ -74,6 +74,7 @@ spring:
         notification-topic: job_notifications_ashabalin
         control-topic: exec_control_ashabalin
         executor-concurrency: 4
+        jobs-execution-timeout: 300000
 
 ---
 
@@ -85,6 +86,7 @@ spring:
         notification-topic: job_notifications_asinyavin
         control-topic: exec_control_asinyavin
         executor-concurrency: 4
+        jobs-execution-timeout: 300000
 
 ---
 
@@ -96,6 +98,7 @@ spring:
         notification-topic: job_notifications_asavin
         control-topic: exec_control_asavin
         executor-concurrency: 4
+        jobs-execution-timeout: 300000
 
 ---
 
@@ -107,6 +110,7 @@ spring:
         notification-topic: job_notifications_pvorobiev
         control-topic: exec_control_pvorobiev
         executor-concurrency: 4
+        jobs-execution-timeout: 300000
 
 ---
 
@@ -118,3 +122,4 @@ spring:
         notification-topic: job_notifications_jspirina
         control-topic: exec_control_jspirina
         executor-concurrency: 4
+        jobs-execution-timeout: 300000
