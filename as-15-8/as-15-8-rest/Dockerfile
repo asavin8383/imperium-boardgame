@@ -13,6 +13,7 @@ VOLUME $LOG_PATH
 VOLUME $CONF_PATH
 
 COPY /target/as-15-8-rest.jar $APP_PATH
+COPY /config/* $CONF_PATH
 
 ENTRYPOINT ["java", \
          "-jar", \
