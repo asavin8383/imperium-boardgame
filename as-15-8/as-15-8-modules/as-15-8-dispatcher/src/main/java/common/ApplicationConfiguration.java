@@ -5,10 +5,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.PropertySource;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import kafka.KafkaConfiguration;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 /**
  * Конфигурация модуля запуска проверок мероприятий
@@ -17,7 +16,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
  */
 @SpringBootApplication
 @Import({KafkaConfiguration.class})
-@PropertySource("classpath:application.yml")
 @ComponentScan(basePackages={"common", "kafka", "services", "repositories"})
 @EnableJpaRepositories("repositories")
 @EntityScan("model")

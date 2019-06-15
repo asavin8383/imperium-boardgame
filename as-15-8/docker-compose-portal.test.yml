@@ -6,7 +6,9 @@ services:
         restart: always
         volumes:
             - ~/as-15-8-rest/logs:/log
+            - ~/as-15-8-rest/conf:/conf
         environment:
-            - PROFILE=test
+            PROFILE: test
+            TZ: "Europe/Moscow"
         ports:
             - "15800:15800"

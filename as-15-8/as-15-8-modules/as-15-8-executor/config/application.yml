@@ -1,5 +1,7 @@
 server:
     port: 11100
+logging:
+    config: config/logback-spring.xml
 selenium-hub-url: http://192.168.5.46:4444/wd/hub
 robots:
     google:
