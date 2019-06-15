@@ -1,11 +1,10 @@
 package services.impl;
 
-import analysis.VpnAnalysisResult;
-import checkUnits.CheckUnitType;
-import enums.CheckUnitJobResult;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-import model.DetailResultsVpn;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+
 import org.apache.commons.validator.routines.InetAddressValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -13,16 +12,16 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import org.springframework.web.context.ContextLoader;
-import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.util.UriUtils;
+
+import analysis.VpnAnalysisResult;
+import checkUnits.CheckUnitType;
+import enums.CheckUnitJobResult;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import model.DetailResultsVpn;
 import repositories.DetailResultsVpnRepository;
 import services.AnalysisResultService;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
 
 
 @Slf4j
