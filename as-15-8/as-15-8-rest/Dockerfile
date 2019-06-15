@@ -6,11 +6,10 @@ EXPOSE 15800
 
 ENV APP_PATH="/as-15-8-rest.jar" \
     LOG_PATH="/log" \
-    CONF_PATH="/conf" \
+    CONF_PATH="/config" \
     PROFILE="test"
 
 COPY target/as-15-8-rest.jar $APP_PATH
-COPY config/ $CONF_PATH/
 
 VOLUME $LOG_PATH
 VOLUME $CONF_PATH
