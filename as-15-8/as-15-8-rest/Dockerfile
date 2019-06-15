@@ -10,7 +10,6 @@ ENV APP_PATH="/as-15-8-rest.jar" \
     PROFILE="test"
 
 VOLUME $LOG_PATH
-VOLUME $CONF_PATH
 
 COPY /target/as-15-8-rest.jar $APP_PATH
 COPY /config/ $CONF_PATH
