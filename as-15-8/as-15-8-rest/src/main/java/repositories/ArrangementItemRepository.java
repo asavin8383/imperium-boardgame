@@ -4,6 +4,7 @@ import model.task.ArrangementItem;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
@@ -11,6 +12,7 @@ import java.util.List;
  * Creation date: 23.05.2019
  * Author: asavin
  */
+@Repository
 public interface ArrangementItemRepository extends JpaRepository<ArrangementItem, Long>, ArrangementItemRepositoryAdvanced {
 
     @Query("SELECT item FROM ArrangementItem item WHERE item.arrangement.id=:arrangementId")

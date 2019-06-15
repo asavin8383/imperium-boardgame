@@ -1,14 +1,17 @@
 package services.arrangement.impl;
 
+import enums.ArrangementStatus;
 import exceptions.AS_15_8_Exception;
 import lombok.extern.slf4j.Slf4j;
 import model.enums.ExecutionStatus;
 import model.task.Arrangement;
+import model.task.ArrangementView;
 import model.task.FormalTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import repositories.ArrangementRepository;
+import repositories.ArrangementViewRepo;
 import repositories.FormalTaskRepository;
 import services.arrangement.ArrangementStatusService;
 
@@ -25,11 +28,15 @@ public class ArrangementStatusServiceImpl implements ArrangementStatusService {
 
     private ArrangementRepository arrangementRepo;
     private FormalTaskRepository formalTaskRepo;
+    private ArrangementViewRepo arrangementViewRepo;
 
     @Autowired
-    public ArrangementStatusServiceImpl(ArrangementRepository arrangementRepo, FormalTaskRepository formalTaskRepo) {
+    public ArrangementStatusServiceImpl(ArrangementRepository arrangementRepo,
+                                        FormalTaskRepository formalTaskRepo,
+                                        ArrangementViewRepo arrangementViewRepo) {
         this.arrangementRepo = arrangementRepo;
         this.formalTaskRepo = formalTaskRepo;
+        this.arrangementViewRepo = arrangementViewRepo;
     }
 
     @Override
@@ -37,6 +44,8 @@ public class ArrangementStatusServiceImpl implements ArrangementStatusService {
     public void processArrangementStatusChange(Arrangement arrangement) {
         log.info("Changing arrangement status. Arrangement id: " + arrangement.getId() + ", arrangement status: " + arrangement.getStatus());
         arrangementRepo.save(arrangement);
+        //Если нужно, сохраним мероприятие в таблицу для просмотра
+        saveArrangementView(arrangement);
         formalTaskRepo.findById(arrangement.getFormalTask().getId())
                 .map(formalTask -> {
                     //Если статус сменился, будем сохранять
@@ -58,5 +67,16 @@ public class ArrangementStatusServiceImpl implements ArrangementStatusService {
         return formalTask.getArrangements().stream()
                 .map(Arrangement::getStatus)
                 .min(Comparator.comparing(ExecutionStatus::getPriority));
+    }
+
+    private void saveArrangementView(Arrangement arrangement){
+        if (arrangement.getStatus().equals(ExecutionStatus.ACTION_REQUIRED) || arrangement.getStatus().equals(ExecutionStatus.FINISHED)){
+            ArrangementView arrangementView = new ArrangementView();
+            arrangementView.setUser(arrangement.getFormalTask().getUser());
+            arrangementView.setArrangement(arrangement);
+            arrangementView.setStatus(arrangement.getStatus());
+            arrangementView.setViewed(false);
+            arrangementViewRepo.save(arrangementView);
+        }
     }
 }

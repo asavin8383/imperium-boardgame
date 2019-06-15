@@ -40,7 +40,9 @@ public class ArrangementRepositoryAdvancedImpl implements ArrangementRepositoryA
 
         List<Predicate> predicates = new ArrayList<>();
 
-        predicates.add(criteriaBuilder.equal(fromArrangement.get("formalTask").get("id"), formalTaskId));
+        if (formalTaskId != null) {
+            predicates.add(criteriaBuilder.equal(fromArrangement.get("formalTask").get("id"), formalTaskId));
+        }
 
         if (id != null) {
             predicates.add(criteriaBuilder.equal(fromArrangement.get("id"), id));
