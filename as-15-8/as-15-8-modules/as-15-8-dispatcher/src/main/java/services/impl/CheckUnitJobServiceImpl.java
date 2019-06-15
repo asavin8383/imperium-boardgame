@@ -166,7 +166,7 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
                             for (String protocol : protocols) {
                                 CheckUnitJob domainMaskCheckUnitJob = new CheckUnitJob();
                                 fillCommonFields(domainMaskCheckUnitJob, template);
-                                domainMaskCheckUnitJob.setCheckUnit(new CheckUnit(template.checkUnitType, protocol + domainName));
+                                domainMaskCheckUnitJob.setCheckUnit(new CheckUnit(CheckUnitType.DOMAIN, protocol + domainName));
                                 Long domainMaskJobID = saveCheckUnitJobAsResult(arrangementId, template.erdiId, domainMaskCheckUnitJob);
                                 domainMaskCheckUnitJob.setJobID(domainMaskJobID);
                                 checkUnitJobs.add(domainMaskCheckUnitJob);
