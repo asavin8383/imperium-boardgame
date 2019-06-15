@@ -428,7 +428,7 @@
 									"raw": ""
 								},
 								"url": {
-									"raw": "{{url}}/erdi?blocktype=DOMAIN&sortingColumn=id&sortingDirection=DESC",
+									"raw": "{{url}}/erdi?blocktype=IP&sortingColumn=id&sortingDirection=DESC",
 									"host": [
 										"{{url}}"
 									],
@@ -443,7 +443,7 @@
 										},
 										{
 											"key": "blocktype",
-											"value": "DOMAIN"
+											"value": "IP"
 										},
 										{
 											"key": "sortingColumn",
@@ -452,6 +452,11 @@
 										{
 											"key": "sortingDirection",
 											"value": "DESC"
+										},
+										{
+											"key": "id",
+											"value": "322865",
+											"disabled": true
 										}
 									]
 								}
@@ -467,14 +472,20 @@
 										"key": "X-AUTH-TOKEN",
 										"value": "{{oper_token}}",
 										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
 									}
 								],
 								"body": {
 									"mode": "raw",
-									"raw": ""
+									"raw": "{\n\t\"arrangement\": {\"id\": 33},\n\t\"erdi\": {\"id\": 170670}\n}"
 								},
 								"url": {
-									"raw": "{{url}}/arrangement_items?arrangementId=5&erdiId=1",
+									"raw": "{{url}}/arrangement_items?",
 									"host": [
 										"{{url}}"
 									],
@@ -483,12 +494,14 @@
 									],
 									"query": [
 										{
-											"key": "arrangementId",
-											"value": "5"
+											"key": "",
+											"value": "5",
+											"disabled": true
 										},
 										{
-											"key": "erdiId",
-											"value": "1"
+											"key": "",
+											"value": "1",
+											"disabled": true
 										}
 									]
 								}
@@ -700,7 +713,7 @@
 									"raw": ""
 								},
 								"url": {
-									"raw": "{{url}}/results?arrangementId=1&sortingColumn=result&sortingDirection=DESC",
+									"raw": "{{url}}/results?arrangementId=43&sortingColumn=result&sortingDirection=DESC&checkUnitJobResults=TIMEOUT_ERROR",
 									"host": [
 										"{{url}}"
 									],
@@ -715,7 +728,7 @@
 										},
 										{
 											"key": "arrangementId",
-											"value": "1"
+											"value": "43"
 										},
 										{
 											"key": "checkUnitValue",
@@ -734,6 +747,10 @@
 										{
 											"key": "sortingDirection",
 											"value": "DESC"
+										},
+										{
+											"key": "checkUnitJobResults",
+											"value": "TIMEOUT_ERROR"
 										}
 									]
 								}
@@ -785,6 +802,82 @@
 								},
 								"url": {
 									"raw": ""
+								}
+							},
+							"response": []
+						}
+					],
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Просмотры",
+					"item": [
+						{
+							"name": "Список",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"value": "{{oper_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{url}}/arrangement_views?user_id=1&viewed=false",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"arrangement_views"
+									],
+									"query": [
+										{
+											"key": "user_id",
+											"value": "1"
+										},
+										{
+											"key": "viewed",
+											"value": "false"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Удаление",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"value": "{{oper_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{url}}/arrangement_views?id=3",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"arrangement_views"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "3"
+										}
+									]
 								}
 							},
 							"response": []
@@ -1235,6 +1328,39 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Удаление формализованных заданий",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"value": "{{oper_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/formal_tasks?id=6",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"formal_tasks"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "6"
+								}
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -1341,14 +1467,14 @@
 					]
 				},
 				{
-					"name": "Получение списка пользователей с LDAP",
+					"name": "Получение списка операторов",
 					"request": {
 						"method": "GET",
 						"header": [
 							{
 								"key": "X-AUTH-TOKEN",
-								"value": "{{admin_token}}",
-								"type": "text"
+								"type": "text",
+								"value": "{{oper_token}}"
 							}
 						],
 						"body": {
@@ -1356,14 +1482,13 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{url}}/users/operators/ldap",
+							"raw": "{{url}}/users/operators",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"users",
-								"operators",
-								"ldap"
+								"operators"
 							]
 						}
 					},
@@ -1477,6 +1602,55 @@
 									"value": "test_host"
 								}
 							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Изменение времени жизни токена",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"value": "{{admin_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/system_parameters/ttl?ttl=20",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"system_parameters",
+								"ttl"
+							],
+							"query": [
+								{
+									"key": "ttl",
+									"value": "20"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Получение времени жизни токена",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": ""
 						}
 					},
 					"response": []
@@ -1651,25 +1825,25 @@
 	],
 	"variable": [
 		{
-			"id": "fe473ba4-a692-4d7f-8fc9-cfe0ca7891ee",
+			"id": "c9d13ff4-fe4b-45c6-82db-bb7424709f95",
 			"key": "url",
 			"value": "http://localhost:15800",
 			"type": "string"
 		},
 		{
-			"id": "f79fe7ba-d493-49c1-826f-ddb8d6d6223b",
+			"id": "4b79061b-34bf-4423-bc46-e592b717a5e7",
 			"key": "oper_token",
 			"value": "",
 			"type": "string"
 		},
 		{
-			"id": "f59d6e87-1dca-43c0-8c76-7e6bd6381daf",
+			"id": "0ed2e5cc-0499-4e1b-acbe-834467bfb2b4",
 			"key": "test_url",
 			"value": "http://192.168.5.253:15800",
 			"type": "string"
 		},
 		{
-			"id": "25c83a60-c5fc-401c-8676-581b3b0bae41",
+			"id": "530606ba-9f08-4a86-b1ce-1d37ca228f16",
 			"key": "admin_token",
 			"value": "",
 			"type": "string"
