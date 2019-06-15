@@ -9,9 +9,9 @@ import org.apache.commons.lang3.StringUtils;
 public class ContentAnalysis {
 
     public static final double THRESHOLD = 0.6;
-    public static final double pageSize_weight = 0.2;
+    public static final double pageSize_weight = 0.15;
     public static final double domainCount_weight = 0.65;
-    public static final double linkCount_weight = 0.15;
+    public static final double linkCount_weight = 0.20;
 
     public static boolean forbiddenContent(StubAnalysisResult res) {
 
@@ -46,15 +46,15 @@ public class ContentAnalysis {
     private static int getPageSizeHit(Integer size){
         size = size == null ? 0 : size;
 
-        int minSize = 1024;
-        int maxSize = 1024*5;
+        int minSize = 1024*2;
+        int maxSize = 1024*20;
 
         if (size < minSize)
             return 0;
 
         size = (size > maxSize ? maxSize : size);
 
-        return (size/maxSize)*50 + 50;
+        return (size/maxSize)*40 + 60;
     }
 
     // вес от 0 до 100 (0 - ниодного домена, 100 - много доменов)

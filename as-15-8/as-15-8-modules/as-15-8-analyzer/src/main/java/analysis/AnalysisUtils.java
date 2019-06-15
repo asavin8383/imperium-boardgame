@@ -113,7 +113,11 @@ public class AnalysisUtils {
         String message = null;
 
         if (!isEmpty(errorCode)){
-            if (errorCode.contains("NO_INTERNET")) {
+            if (errorCode.contains(INTERNAL_ERROR.name())) {
+                message = "Ошибка! " + errorCode;
+                result = INTERNAL_ERROR;
+            }
+            else if (errorCode.contains("NO_INTERNET")) {
                 message = "Ошибка! Нет интернета! " + errorCode;
                 result = INTERNAL_ERROR;
             }
@@ -122,7 +126,11 @@ public class AnalysisUtils {
                 result = INTERNAL_ERROR;
             }
             else if (errorCode.contains("SOCKET")){
-                message = "Ошибка доступа к интернет ресурсу: " + errorCode + ". Есть вероятность проблемы с сетью.";
+                message = "Ошибка доступа к ресурсу: " + errorCode + ". Есть вероятность проблемы с сетью.";
+                result = DOUBTFUL;
+            }
+            else if (errorCode.contains("TIME_OUT_CHECKING")) {
+                message = "Ошибка таймаута при проверке браузера: " + errorCode + ". Возможно ресурс доступен.";
                 result = DOUBTFUL;
             }
             else if (errorCode.contains("TIMEOUT") || errorCode.contains("TIME_OUT")) {
@@ -133,7 +141,7 @@ public class AnalysisUtils {
             }
 
             if (result == null){
-                message = "Ошибка доступа к интернет ресурсу: " + errorCode;
+                message = "Ошибка доступа к ресурсу: " + errorCode;
                 result = COMPLETED;
             }
 
@@ -149,7 +157,11 @@ public class AnalysisUtils {
         String message = null;
 
         if (!isEmpty(errorCode)){
-            if (errorCode.contains("NO_INTERNET")) {
+            if (errorCode.contains(INTERNAL_ERROR.name())) {
+                message = "Ошибка! " + errorCode;
+                result = INTERNAL_ERROR;
+            }
+            else if (errorCode.contains("NO_INTERNET")) {
                 message = "Ошибка ЭТАЛОНА - нет интернета! " + errorCode;
                 result = INTERNAL_ERROR;
             }

@@ -4,6 +4,7 @@ import lombok.experimental.UtilityClass;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import scripts.exceptions.TimeoutCheckingBrowserException;
 import scripts.exceptions.TimeoutScriptException;
 
 import static scripts.utils.ScriptUtils.findElementIfExists;
@@ -86,7 +87,7 @@ public class CloudflareUtils {
         }
 
         if (isCloudflareDdosProtection(driver))
-            throw new TimeoutScriptException(
+            throw new TimeoutCheckingBrowserException(
                     "DDoS protection by Cloudflare. " +
                             "Время ожидания редиректа (" +
                             timeMax / 1000 +

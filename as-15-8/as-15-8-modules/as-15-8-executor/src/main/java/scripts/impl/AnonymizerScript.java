@@ -15,15 +15,16 @@ import scripts.utils.ScriptUtils;
 
 import java.util.Map;
 
+import static scripts.utils.ScriptUtils.TIME_OUT_ERROR;
+
 @Slf4j
 public abstract class AnonymizerScript extends RobotScript {
 
-    private static final String TIME_OUT_ERROR = "TIME_OUT";
 
     protected boolean useEtalon;
     private String etalonProxy;
 
-    private ExecutionAnonymizerResult message;
+    protected ExecutionAnonymizerResult message;
 
     public AnonymizerScript(ScriptDriverParameters driverParams,
                             Map<AccessToolParameters, String> scriptParams) {
@@ -58,7 +59,9 @@ public abstract class AnonymizerScript extends RobotScript {
         if (message.hasError())
             return message;
 
-        message.setFinalUrl(driver.getCurrentUrl());
+        if (StringUtils.isEmpty(message.getFinalUrl())){
+            message.setFinalUrl(driver.getCurrentUrl());
+        }
 
         close(driver);
 

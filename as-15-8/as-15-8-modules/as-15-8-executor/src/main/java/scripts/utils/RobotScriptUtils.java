@@ -3,7 +3,9 @@ package scripts.utils;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import scripts.exceptions.RobotScriptExecutionException;
+import scripts.exceptions.TimeoutCheckingBrowserException;
 import scripts.exceptions.TimeoutScriptException;
 
 import java.util.List;
@@ -11,15 +13,13 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static scripts.utils.ScriptUtils.PageResult;
+import static scripts.utils.ScriptUtils.*;
 
 
 @Slf4j
 public class RobotScriptUtils {
 
     public static final int PAGE_LOAD_TIMEOUT_SEC = 30;
-    public static final String TIME_OUT_ERROR = "TIME_OUT";
-
 
     public static PageResult loadPage(String url, WebDriver webDriver) throws RobotScriptExecutionException {
         return loadPage(url, webDriver, 1, PAGE_LOAD_TIMEOUT_SEC);
@@ -58,8 +58,11 @@ public class RobotScriptUtils {
                 } else {
                     pageSourceResult = ScriptUtils.getPageSource(webDriver);
                 }
+            } catch (TimeoutCheckingBrowserException e) {
+                log.info("TimeoutException на проверке браузера", e);
+                return new ScriptUtils.PageResult(null, TIME_OUT_CHECKING_ERROR);
             } catch (TimeoutException | TimeoutScriptException e) {
-                log.info("TimeoutException при получении эталона", e);
+                log.info("TimeoutException при получении страницы", e);
                 pageSourceResult = new ScriptUtils.PageResult(null, TIME_OUT_ERROR);
             } catch (InterruptedException e) {
                 throw new RobotScriptExecutionException("Выполнение потока прервано", e);

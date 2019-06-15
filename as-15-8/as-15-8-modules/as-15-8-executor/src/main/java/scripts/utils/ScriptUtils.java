@@ -25,6 +25,9 @@ import lombok.NonNull;
 
 public class ScriptUtils {
 
+    public static final String TIME_OUT_ERROR = "TIME_OUT";
+    public static final String TIME_OUT_CHECKING_ERROR = "TIME_OUT_CHECKING";
+
     private static final int ERROR_PAGE_SIZE_THRESHOLD = 2048;
 
     @AllArgsConstructor

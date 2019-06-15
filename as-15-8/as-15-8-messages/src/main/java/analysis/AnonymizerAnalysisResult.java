@@ -24,6 +24,8 @@ public class AnonymizerAnalysisResult extends AnalysisResult implements StubAnal
     private String finalUrl;
     private String stubUrl;
 
+    private Boolean redirectionDetected;
+
     private Integer keyWordsCount;
     private Integer linkCount;
     private String stubScoreInfo;

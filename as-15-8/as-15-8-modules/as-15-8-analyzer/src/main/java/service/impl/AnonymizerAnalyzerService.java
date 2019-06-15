@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static enums.CheckUnitJobResult.*;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 
 @Slf4j
@@ -73,6 +74,12 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 			return analysisResult;
 		}
 
+		boolean wasRedirect = false;
+		if (!isEmpty(analysisResult.getFinalUrl())){
+			wasRedirect = !AnalysisUtils.simpleCompareUrls(analysisResult.getFinalUrl(), executionResult.getCheckUnit().getValue());
+		}
+		analysisResult.setRedirectionDetected(wasRedirect);
+
 		if (analysisResult.getPageSize() < EMPTY_PAGE_SIZE) {
 			analysisResult.setCheckResult(COMPLETED);
 			return analysisResult;
@@ -125,6 +132,15 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 			String msg = "Ошибка при проверке заглушки";
 			log.error(msg, e);
 			throw new AnalysisException(msg, e);
+		}
+
+		// проверка без эталона
+		if (!wasRedirect){
+			boolean isForbidden = ContentAnalysis.forbiddenContent(analysisResult);
+			if (isForbidden){
+				analysisResult.setCheckResult(FORBIDDEN_CONTENT_DETECTED);
+				return analysisResult;
+			}
 		}
 
 		analysisResult.setCheckResult(DOUBTFUL);

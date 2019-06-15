@@ -30,8 +30,6 @@ public class HolaScript extends RobotScript {
     protected String stubUrl;
 
 
-    public static final String TIME_OUT_ERROR = "TIME_OUT";
-
     public HolaScript(ScriptDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams) {
 
     	super(driverParams, scriptParams,
