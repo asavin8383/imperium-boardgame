@@ -134,11 +134,11 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 		// если эталон есть, проверяем на схожесть
 		if (useEtalon && !aRes.hasEtalonError()){
 			if (!wasRedirect && aRes.getSimilarityOriginPercent() >= similarityThreshold){
-				appendInfo(aRes, "Порог схожести текста >= " + similarityThreshold + "%.");
+				appendInfo(aRes, "Порог сходства текста >= " + similarityThreshold + "%.");
 				return FORBIDDEN_CONTENT_DETECTED;
 			}
 			else if (wasRedirect && aRes.getSimilarityOriginPercent() >= similarityThreshold){
-				appendInfo(aRes, "Произошел редирект, но порог схожести текста >= " + similarityThreshold + "%.");
+				appendInfo(aRes, "Произошел редирект, но порог сходства текста >= " + similarityThreshold + "%.");
 				return FORBIDDEN_CONTENT_DETECTED;
 			}
 		}

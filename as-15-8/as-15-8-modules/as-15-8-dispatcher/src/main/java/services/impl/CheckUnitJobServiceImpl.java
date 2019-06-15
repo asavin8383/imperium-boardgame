@@ -166,7 +166,7 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
                             for (String protocol : protocols) {
                                 CheckUnitJob domainMaskCheckUnitJob = new CheckUnitJob();
                                 fillCommonFields(domainMaskCheckUnitJob, template);
-                                domainMaskCheckUnitJob.setCheckUnit(new CheckUnit(template.checkUnitType, protocol + domainName));
+                                domainMaskCheckUnitJob.setCheckUnit(new CheckUnit(CheckUnitType.DOMAIN, protocol + domainName));
                                 Long domainMaskJobID = saveCheckUnitJobAsResult(arrangementId, template.erdiId, domainMaskCheckUnitJob);
                                 domainMaskCheckUnitJob.setJobID(domainMaskJobID);
                                 checkUnitJobs.add(domainMaskCheckUnitJob);
@@ -194,7 +194,7 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
                             for(String address : utils.getInfo().getAllAddresses()){
                                 CheckUnitJob ipCheckUnitJob = new CheckUnitJob();
                                 fillCommonFields(ipCheckUnitJob, template);
-                                ipCheckUnitJob.setCheckUnit(new CheckUnit(template.checkUnitType, protocol + address + ":" + port));
+                                ipCheckUnitJob.setCheckUnit(new CheckUnit(CheckUnitType.IP_V4, protocol + address + ":" + port));
                                 Long ipJobID = saveCheckUnitJobAsResult(arrangementId, template.erdiId, ipCheckUnitJob);
                                 ipCheckUnitJob.setJobID(ipJobID);
                                 checkUnitJobs.add(ipCheckUnitJob);
