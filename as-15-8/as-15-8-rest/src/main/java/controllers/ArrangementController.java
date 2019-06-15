@@ -124,6 +124,7 @@ public class ArrangementController {
                         arrangement.setStartDate(LocalDateTime.now());
                     }
                     arrangement.setStatus(ExecutionStatus.RUNNING);
+                    arrangementStatusService.processArrangementStatusChange(arrangement);
                     arrangementRepo.save(arrangement);
                     return new ResponseEntity<>(arrangement, HttpStatus.OK);
                 }
