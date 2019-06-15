@@ -7,6 +7,7 @@ services:
         volumes:
             - ~/as-15-8-rest/logs:/log
         environment:
-            - PROFILE=test
+            PROFILE: test
+            TZ: "Europe/Moscow"
         ports:
             - "15800:15800"
