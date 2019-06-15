@@ -1,10 +1,8 @@
-package scripts;
+package scripts.utils;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -71,41 +69,6 @@ public class ScriptUtils {
         String errorCode = getErrorCode(driver);
         String pageContent = errorCode == null ? driver.getPageSource() : null;
         return new PageResult(pageContent, errorCode);
-    }
-
-    /**
-     * Параллельная загрузка исходника страниц.
-     **/
-    public static List<PageResult> getPageSources(List<WebDriver> drivers, String url){
-        List<CompletableFuture<PageResult>> pageContentFutures = drivers.stream()
-                .map(webDriver -> {
-                    return CompletableFuture.supplyAsync(() -> {
-                        PageResult pResult = new PageResult();
-                        try{
-                            webDriver.get(url);
-                            webDriver.manage().window().fullscreen();
-                            waitDriver(webDriver, 3);
-                            pResult = getPageSource(webDriver);
-                        }
-                        catch(Exception e){
-                            e.printStackTrace();
-                        }
-                        return pResult;
-                    });
-                })
-                .collect(Collectors.toList());
-
-        CompletableFuture<Void> allFutures = CompletableFuture.allOf(
-                pageContentFutures.toArray(new CompletableFuture[0]));
-
-        CompletableFuture<List<PageResult>> allPageContentsFuture = allFutures.thenApply(v -> {
-            return pageContentFutures.stream()
-                    .map(pageContentFuture -> pageContentFuture.join())
-                    .collect(Collectors.toList());
-        });
-
-        List<PageResult> pageResults = allPageContentsFuture.join();
-        return pageResults;
     }
 
 

@@ -1,4 +1,4 @@
-package scripts;
+package scripts.utils;
 
 import lombok.experimental.UtilityClass;
 import org.openqa.selenium.By;
@@ -6,8 +6,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import scripts.exceptions.TimeoutScriptException;
 
-import static scripts.ScriptUtils.findElementIfExists;
-import static scripts.ScriptUtils.getTextOrDefault;
+import static scripts.utils.ScriptUtils.findElementIfExists;
+import static scripts.utils.ScriptUtils.getTextOrDefault;
 
 @UtilityClass
 public class CloudflareUtils {

@@ -19,8 +19,8 @@ import scripts.DriverFactory;
 import scripts.ProxyUtils;
 import scripts.RobotScript;
 import scripts.ScriptDriverParameters;
-import scripts.ScriptUtils;
-import scripts.ScriptUtils.PageResult;
+import scripts.utils.*;
+import scripts.utils.ScriptUtils.PageResult;
 import scripts.exceptions.RobotScriptExecutionException;
 
 public class HolaScript extends RobotScript {
@@ -62,7 +62,7 @@ public class HolaScript extends RobotScript {
         // Эталонная страница с дефолтного драйвера с дефолтным прокси
         WebDriver driver = this.driver;
         try {
-            PageResult pageResult = loadPage(url, driver, 3);
+            PageResult pageResult = RobotScriptUtils.loadPage(url, driver);
             byte[] screenShot = ScriptUtils.getScreenshot(driver);
             String finalUrl = driver.getCurrentUrl();
 
@@ -101,7 +101,7 @@ public class HolaScript extends RobotScript {
             wait.until(pageLoaded);
             wait.until(pageLoaded);
 
-            PageResult pageResult = loadPage(url, driver, 3);
+            PageResult pageResult = RobotScriptUtils.loadPage(url, driver);
             byte[] screenShot = ScriptUtils.getScreenshot(driver);
             String finalUrl = driver.getCurrentUrl();
 

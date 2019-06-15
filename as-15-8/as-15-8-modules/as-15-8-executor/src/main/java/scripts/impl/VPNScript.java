@@ -9,8 +9,9 @@ import org.springframework.util.StringUtils;
 import scripts.ProxyUtils;
 import scripts.RobotScript;
 import scripts.ScriptDriverParameters;
-import scripts.ScriptUtils;
-import scripts.ScriptUtils.PageResult;
+import scripts.utils.RobotScriptUtils;
+import scripts.utils.ScriptUtils;
+import scripts.utils.ScriptUtils.PageResult;
 import scripts.exceptions.RobotScriptExecutionException;
 
 import java.util.Map;
@@ -22,7 +23,6 @@ public class VPNScript extends RobotScript {
     protected boolean useEtalon;
     protected String etalonProxy;
     protected String stubUrl;
-
 
 
     public VPNScript(ScriptDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams) {
@@ -68,7 +68,7 @@ public class VPNScript extends RobotScript {
                 .runAsync(() -> {
                     WebDriver driver = this.driver;
                     try {
-                        PageResult pageResult = loadPage(url, driver, 1);
+                        PageResult pageResult = RobotScriptUtils.loadPage(url, driver);
                         byte[] screenShot = ScriptUtils.getScreenshot(driver);
                         String finalUrl = driver.getCurrentUrl();
 
@@ -94,7 +94,7 @@ public class VPNScript extends RobotScript {
                         WebDriver driver = null;
                         try {
                             driver = createDriver(etalonProxy);
-                            PageResult pageResult = loadPage(url, driver, 1);
+                            PageResult pageResult = RobotScriptUtils.loadPage(url, driver);
                             byte[] screenShot = ScriptUtils.getScreenshot(driver);
                             String finalUrl = driver.getCurrentUrl();
 

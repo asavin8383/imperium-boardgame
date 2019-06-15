@@ -12,7 +12,7 @@ import org.openqa.selenium.interactions.Actions;
 import org.springframework.util.StringUtils;
 import scripts.RobotScript;
 import scripts.ScriptDriverParameters;
-import scripts.ScriptUtils;
+import scripts.utils.ScriptUtils;
 import scripts.exceptions.Captcha_RobotScriptExecutionException;
 import scripts.exceptions.RobotScriptExecutionException;
 import scripts.exceptions.TimeoutScriptException;
@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import static enums.AccessToolParameters.INPUT_DELAY;
-import static scripts.ScriptUtils.findElementIfExists;
+import static scripts.utils.ScriptUtils.findElementIfExists;
 
 @Slf4j
 public abstract class SearchScript extends RobotScript {
