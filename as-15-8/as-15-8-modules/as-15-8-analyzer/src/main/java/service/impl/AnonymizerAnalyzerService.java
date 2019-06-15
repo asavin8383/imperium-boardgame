@@ -82,7 +82,17 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 
 		/* ETALON */
 
-		if ( analysisResult.getUseEtalon() ) {
+        if ( analysisResult.getUseEtalon() ) {
+
+            // проверка на критическую ошибку эталона
+            if (analysisResult.hasEtalonError()){
+                CheckUnitJobResult errorResult = obtainErrorEtalon(analysisResult);
+                if (errorResult != null){
+                    analysisResult.setCheckResult(errorResult);
+                    return analysisResult;
+                }
+            }
+
 		    if (!analysisResult.hasEtalonError()){
                 try {
                     analysisResult.setSimilarityPercent(
@@ -92,6 +102,7 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 
                     if (analysisResult.getSimilarityPercent() > similarityThreshold) {
                         analysisResult.setCheckResult(FORBIDDEN_CONTENT_DETECTED);
+                        appendInfo(analysisResult, "Порог схожести текста >= " + similarityThreshold + "%.");
                         return analysisResult;
                     }
 
@@ -129,6 +140,16 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 
 		return result == null ? COMPLETED : result;
 	}
+
+    private CheckUnitJobResult obtainErrorEtalon(AnonymizerAnalysisResult aRes){
+        String errorCodeEtalon = aRes.getEtalonErrorCode();
+        StringBuffer details = new StringBuffer();
+
+        CheckUnitJobResult result = AnalysisUtils.obtainErrorResultEtalon(errorCodeEtalon, details);
+        appendInfo(aRes, details.toString());
+
+        return result;
+    }
 
 	private boolean isStub(AnonymizerAnalysisResult analysisResult,
 						   ExecutionAnonymizerResult executionResult)
@@ -168,7 +189,7 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 		String info = aRes.getStubScoreInfo();
 		info = info == null ? "" : info;
 		append = append == null ? "" : append;
-		info += (StringUtils.isEmpty(info) || StringUtils.isEmpty(append) ? "" : ". ") + append;
+		info += (StringUtils.isEmpty(info) || StringUtils.isEmpty(append) ? "" : " ") + append;
 		aRes.setStubScoreInfo(info);
 	}
 
