@@ -1,6 +1,7 @@
 package repositories.impl;
 
 import checkUnits.CheckUnitType;
+import enums.CheckUnitJobResult;
 import model.result.ArrangementResult;
 import model.result.ArrangementResult_;
 import model.task.Arrangement_;
@@ -35,7 +36,7 @@ public class ArrangementResultRepositoryAdvancedImpl implements ArrangementResul
     }
 
     @Override
-    public Page<ArrangementResult> findPage(Long id, Long arrangementId, String checkUnitValue, Pageable pageable, CheckUnitType checkUnitType) {
+    public Page<ArrangementResult> findPage(Long id, Long arrangementId, String checkUnitValue, Pageable pageable, CheckUnitType checkUnitType, List<CheckUnitJobResult> checkUnitJobResults) {
         CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
         CriteriaQuery<ArrangementResult> select = criteriaBuilder.createQuery(ArrangementResult.class);
         Root<ArrangementResult> arrangementResult = select.from(ArrangementResult.class);
@@ -53,6 +54,9 @@ public class ArrangementResultRepositoryAdvancedImpl implements ArrangementResul
         }
         if(checkUnitType != null) {
             predicates.add(criteriaBuilder.equal(arrangementResult.get(ArrangementResult_.CHECK_UNIT_TYPE), checkUnitType));
+        }
+        if(checkUnitJobResults != null && checkUnitJobResults.size()>0) {
+            predicates.add(arrangementResult.get(ArrangementResult_.RESULT).in(checkUnitJobResults));
         }
 
         select.where(predicates.toArray(new Predicate[0]));

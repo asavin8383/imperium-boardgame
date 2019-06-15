@@ -13,6 +13,7 @@ import jobs.ArrangementJob;
 import jobs.ERDIJob;
 import lombok.Data;
 import model.ArrangementResult;
+import org.apache.commons.net.util.SubnetUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -69,8 +70,6 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
         switch (arrangementJob.getRunType()){
             case START:
                 return prepareJobsForStart(arrangementJob);
-            case RESTART:
-                return prepareJobsForRestart(arrangementJob);
             default:
                 throw new AS_15_8_DispatcherException("Error preparing check unit jobs! Arrangement run type is not supported: " + arrangementJob.getRunType());
         }
@@ -133,8 +132,8 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
 
     /**
      * Построение проверок по шаблонам
-     * @param checkUnitJobTemplates
-     * @return
+     * @param checkUnitJobTemplates список шаблонов
+     * @return список заданий на проверки
      */
     private List<CheckUnitJob> buildCheckUnitJobsFromTemplates(List<CheckUnitJobTemplate> checkUnitJobTemplates, Long arrangementId){
         List<CheckUnitJob> checkUnitJobs = new ArrayList<>();
@@ -180,13 +179,28 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
                         for (String port : ports){
                             CheckUnitJob ipCheckUnitJob = new CheckUnitJob();
                             fillCommonFields(ipCheckUnitJob, template);
-                            ipCheckUnitJob.setCheckUnit(new CheckUnit(template.checkUnitType, protocol + template.checkUnitValueTemplate + port));
+                            ipCheckUnitJob.setCheckUnit(new CheckUnit(template.checkUnitType, protocol + template.checkUnitValueTemplate + ":" + port));
                             Long ipJobID = saveCheckUnitJobAsResult(arrangementId, template.erdiId, ipCheckUnitJob);
                             ipCheckUnitJob.setJobID(ipJobID);
                             checkUnitJobs.add(ipCheckUnitJob);
                         }
                     }
                     break;
+                case IP_V4_SUBNET:
+                    for (String protocol : protocols){
+                        for (String port : ports){
+                            //Раскладываем маску в IP-адреса
+                            SubnetUtils utils = new SubnetUtils(template.checkUnitValueTemplate);
+                            for(String address : utils.getInfo().getAllAddresses()){
+                                CheckUnitJob ipCheckUnitJob = new CheckUnitJob();
+                                fillCommonFields(ipCheckUnitJob, template);
+                                ipCheckUnitJob.setCheckUnit(new CheckUnit(template.checkUnitType, protocol + address + ":" + port));
+                                Long ipJobID = saveCheckUnitJobAsResult(arrangementId, template.erdiId, ipCheckUnitJob);
+                                ipCheckUnitJob.setJobID(ipJobID);
+                                checkUnitJobs.add(ipCheckUnitJob);
+                            }
+                        }
+                    }
                 default:
                     break;
 
@@ -194,33 +208,6 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
         }
         return checkUnitJobs;
     }
-
-
-
-    private void fillCommonFields(CheckUnitJob checkUnitJob, CheckUnitJobTemplate checkUnitJobTemplate){
-        checkUnitJob.setAccessToolUnit(checkUnitJobTemplate.getAccessToolUnit());
-        checkUnitJob.getAccessToolParameters().putAll(checkUnitJobTemplate.getParameters());
-    }
-
-    private List<CheckUnitJob> prepareJobsForRestart(ArrangementJob arrangementJob){
-        //TODO Отложить до решения вопроса с капчей
-        /*
-        final String CAPTCHA = "CAPTCHA_DETECTED";
-        CheckUnitJobMapper mapper = new CheckUnitJobMapper(arrangementJob.getAccessToolUnit(), arrangementJob.getAccessToolParameters());
-        List<CheckUnitJob> checkUnitJobs;
-        try {
-            //noinspection SqlDialectInspection
-            jdbcTemplate.queryForList("select id from portal.arrangement_results where arrangement_id = ? AND result = ?",arrangementJob.getId(), CAPTCHA)
-            .stream()
-            .map(stringObjectMap -> Long.valueOf(stringObjectMap.get("id").toString()))
-            .forEach(this::updateCheckUnitJob);
-        } catch (Exception ex){
-            throw new AS_15_8_DispatcherException("Ошибка при создании заданий на проверку запрещенных ресурсов!", ex);
-        }
-        return checkUnitJobs;*/
-        return null;
-    }
-
 
 	@Override
 	public ArrangementResult processJobResult(AnalysisResult result) {
@@ -258,15 +245,10 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
         }
     }
 
-    /*private Long updateCheckUnitJob(Long id){
-        try {
-            ArrangementResult arrangementResult = findJobByID(id);
-            arrangementResult.setResult(CheckUnitJobResult.RUNNING);
-            return arrangementResultRepo.save(arrangementResult).getId();
-        }catch (Exception ex){
-            throw new AS_15_8_DispatcherException("Ошибка обновления задания на проверку запрещенного ресурса!", ex);
-        }
-    }*/
+    private void fillCommonFields(CheckUnitJob checkUnitJob, CheckUnitJobTemplate checkUnitJobTemplate){
+        checkUnitJob.setAccessToolUnit(checkUnitJobTemplate.getAccessToolUnit());
+        checkUnitJob.getAccessToolParameters().putAll(checkUnitJobTemplate.getParameters());
+    }
     
     static class CheckUnitJobMapper{
     	

@@ -2,6 +2,7 @@ package controllers;
 
 import checkUnits.CheckUnitType;
 import controllers.helpers.SortingHelper;
+import enums.CheckUnitJobResult;
 import enums.SortingDirection;
 import lombok.extern.slf4j.Slf4j;
 import model.result.ArrangementResult;
@@ -22,6 +23,7 @@ import repositories.DetailedArrangementResultRepository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 /**
  * Creation date: 29.05.2019
@@ -53,14 +55,15 @@ public class ArrangementResultsController {
             @RequestParam Long arrangementId,
             @RequestParam(required = false) Long id,
             @RequestParam(required = false) String checkUnitValue,
-            @RequestParam(required = false)CheckUnitType checkUnitType,
+            @RequestParam(required = false) CheckUnitType checkUnitType,
+            @RequestParam(required = false) List<CheckUnitJobResult> checkUnitJobResults,
             @RequestParam(required = false) SortingDirection sortingDirection,
             @RequestParam(required = false) String sortingColumn,
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize){
         PageRequest page = PageRequest.of(
                 pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
-        return arrangementResultRepo.findPage(id, arrangementId, checkUnitValue, page, checkUnitType);
+        return arrangementResultRepo.findPage(id, arrangementId, checkUnitValue, page, checkUnitType, checkUnitJobResults);
     }
 
     @GetMapping(path = "/screenshot", produces = MediaType.IMAGE_PNG_VALUE)
