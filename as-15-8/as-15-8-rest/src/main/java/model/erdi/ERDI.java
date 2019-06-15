@@ -33,7 +33,8 @@ public class ERDI {
         URL("URL"),
         IP("IP"),
         DOMAIN("DOMAIN"),
-        DOMAIN_MASK("DOMAIN-MASK")
+        DOMAIN_MASK("DOMAIN-MASK"),
+        IPSUBNET("IPSUBNET")
         ;
         @Getter
         private String name;
@@ -78,6 +79,10 @@ public class ERDI {
     @JsonIgnore
     private List<IP> ipList;
 
+    @OneToMany(mappedBy = "erdi")
+    @JsonIgnore
+    private List<IP_Subnet> ip_subnetList;
+
 
     public Optional<Map<String, String>> getFirstCheckUnit(){
         if (this.checkUnitType.equals(CheckUnitType.URL.getName())){
@@ -88,7 +93,10 @@ public class ERDI {
             return getExplicitCheckUnits(domains);
         } else if (this.checkUnitType.equals(CheckUnitType.DOMAIN_MASK.getName())){
             return getExplicitCheckUnits(domainMasks);
-        } else return Optional.empty();
+        } else if (this.checkUnitType.equals(CheckUnitType.IPSUBNET.getName())){
+            return getExplicitCheckUnits(ip_subnetList);
+        }
+        else return Optional.empty();
     }
 
     private Optional<Map<String, String>> getExplicitCheckUnits(List<? extends CheckUnit> units){
@@ -102,9 +110,17 @@ public class ERDI {
 
     @PostLoad
     void fillCheckUnitType(){
+        //TODO Всё это - костыли. После испытаний разобраться. В content нужно заводить поле, чётко определяющее тип
         if(blocktype==null){
             checkUnitType = CheckUnitType.URL.getName();
-        } else {
+        } else if (blocktype.toUpperCase().equals(CheckUnitType.IP.getName())){
+            if (this.ip_subnetList!=null && this.ip_subnetList.size()>0){
+                checkUnitType = CheckUnitType.IPSUBNET.getName();
+            } else {
+                checkUnitType = CheckUnitType.IP.getName();
+            }
+        }
+        else {
             checkUnitType = blocktype.toUpperCase();
         }
     }
