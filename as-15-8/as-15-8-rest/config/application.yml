@@ -2,6 +2,8 @@ server:
     port: 15800
     tomcat:
         max-threads: 200
+logging:
+    config: config/logback-spring.xml
 spring:
     datasource:
         test-while-idle: true
