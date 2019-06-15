@@ -13,6 +13,7 @@ import jobs.ArrangementJob;
 import jobs.ERDIJob;
 import lombok.Data;
 import model.ArrangementResult;
+import org.apache.commons.net.util.SubnetUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -185,6 +186,21 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
                         }
                     }
                     break;
+                case IP_V4_SUBNET:
+                    for (String protocol : protocols){
+                        for (String port : ports){
+                            //Раскладываем маску в IP-адреса
+                            SubnetUtils utils = new SubnetUtils(template.checkUnitValueTemplate);
+                            for(String address : utils.getInfo().getAllAddresses()){
+                                CheckUnitJob ipCheckUnitJob = new CheckUnitJob();
+                                fillCommonFields(ipCheckUnitJob, template);
+                                ipCheckUnitJob.setCheckUnit(new CheckUnit(template.checkUnitType, protocol + address + port));
+                                Long ipJobID = saveCheckUnitJobAsResult(arrangementId, template.erdiId, ipCheckUnitJob);
+                                ipCheckUnitJob.setJobID(ipJobID);
+                                checkUnitJobs.add(ipCheckUnitJob);
+                            }
+                        }
+                    }
                 default:
                     break;
 
@@ -192,16 +208,6 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
         }
         return checkUnitJobs;
     }
-
-
-
-    private void fillCommonFields(CheckUnitJob checkUnitJob, CheckUnitJobTemplate checkUnitJobTemplate){
-        checkUnitJob.setAccessToolUnit(checkUnitJobTemplate.getAccessToolUnit());
-        checkUnitJob.getAccessToolParameters().putAll(checkUnitJobTemplate.getParameters());
-    }
-
-
-
 
 	@Override
 	public ArrangementResult processJobResult(AnalysisResult result) {
@@ -239,15 +245,10 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
         }
     }
 
-    /*private Long updateCheckUnitJob(Long id){
-        try {
-            ArrangementResult arrangementResult = findJobByID(id);
-            arrangementResult.setResult(CheckUnitJobResult.RUNNING);
-            return arrangementResultRepo.save(arrangementResult).getId();
-        }catch (Exception ex){
-            throw new AS_15_8_DispatcherException("Ошибка обновления задания на проверку запрещенного ресурса!", ex);
-        }
-    }*/
+    private void fillCommonFields(CheckUnitJob checkUnitJob, CheckUnitJobTemplate checkUnitJobTemplate){
+        checkUnitJob.setAccessToolUnit(checkUnitJobTemplate.getAccessToolUnit());
+        checkUnitJob.getAccessToolParameters().putAll(checkUnitJobTemplate.getParameters());
+    }
     
     static class CheckUnitJobMapper{
     	
