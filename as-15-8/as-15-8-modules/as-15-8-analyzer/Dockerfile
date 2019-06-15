@@ -2,7 +2,7 @@ FROM openjdk:8-jdk-alpine
 
 LABEL Alex Shabalin <ashabalin@ec-leasing.ru>
 
-ENV APP_PATH="/lib/as-15-8-analyzer.jar" \
+ENV APP_PATH="/as-15-8-analyzer.jar" \
     LOG_PATH="/log" \
     PROFILE="test"
 
@@ -16,4 +16,4 @@ ENTRYPOINT ["java", \
          "-Dspring.profiles.active=${PROFILE}", \
          "-Xms512M", \
          "-Xmx1024M", \
-         "/lib/as-15-8-analyzer.jar"]
+         "/as-15-8-analyzer.jar"]
