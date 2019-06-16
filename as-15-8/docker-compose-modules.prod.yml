@@ -1,36 +1,64 @@
-version: '3.2'
+version: '3.7'
 networks:
-  as-15-8-net:
-    external: true
+    as-15-8-net:
+        external: true
 services:
-  dispatcher:
-    image: dcr.ec-leasing.ru/as-15-8/as-15-8-dispatcher:latest
-    networks:
-      - as-15-8-net
-    environment:
-      PROFILE: prod
-      TZ: "Europe/Moscow"
-    volumes:
-      - ~/as-15-8-modules/dispatcher-module/logs:/log
-  executor:
-    image: dcr.ec-leasing.ru/as-15-8/as-15-8-executor:latest
-    deploy:
-      mode: global
-    networks:
-      - as-15-8-net
-    environment:
-      PROFILE: prod
-      TZ: "Europe/Moscow"
-    volumes:
-      - ~/as-15-8-modules/executor-module/logs:/log
-  analyzer:
-    image: dcr.ec-leasing.ru/as-15-8/as-15-8-analyzer:latest
-    deploy:
-      mode: global
-    networks:
-      - as-15-8-net
-    environment:
-      PROFILE: prod
-      TZ: "Europe/Moscow"
-    volumes:
-      - ~/as-15-8-modules/analyzer-module/logs:/log
+    dispatcher:
+        image: dcr.ec-leasing.ru/as-15-8/as-15-8-dispatcher:latest
+        networks:
+            - as-15-8-net
+        environment:
+            PROFILE: prod
+            TZ: Europe/Moscow
+        volumes:
+            - ~/as-15-8-modules/dispatcher-module/logs:/log
+        configs:
+            - source: dispatcher-config
+              target: /config/application.yml
+            - source: dispatcher-logback
+              target: /config/logback-spring.xml
+    executor:
+        image: dcr.ec-leasing.ru/as-15-8/as-15-8-executor:latest
+        deploy:
+            mode: global
+        networks:
+            - as-15-8-net
+        environment:
+            PROFILE: prod
+            TZ: Europe/Moscow
+        volumes:
+            - ~/as-15-8-modules/executor-module/logs:/log
+        configs:
+            - source: executor-config
+              target: /config/application.yml
+            - source: executor-logback
+              target: /config/logback-spring.xml
+    analyzer:
+        image: dcr.ec-leasing.ru/as-15-8/as-15-8-analyzer:latest
+        deploy:
+            mode: global
+        networks:
+            - as-15-8-net
+        environment:
+            PROFILE: prod
+            TZ: Europe/Moscow
+        volumes:
+            - ~/as-15-8-modules/analyzer-module/logs:/log
+        configs:
+            - source: analyzer-config
+              target: /config/application.yml
+            - source: analyzer-logback
+              target: /config/logback-spring.xml
+configs:
+    dispatcher-config:
+       file: dispatcher-module/config/application.yml
+    dispatcher-logback:
+       file: dispatcher-module/config/logback-spring.xml
+    executor-config:
+       file: executor-module/config/application.yml
+    executor-logback:
+       file: executor-module/config/logback-spring.xml
+    analyzer-config:
+       file: analyzer-module/config/application.yml
+    analyzer-logback:
+       file: analyzer-module/config/logback-spring.xml
