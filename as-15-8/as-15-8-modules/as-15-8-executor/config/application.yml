@@ -14,10 +14,14 @@ robots:
         browser: chrome
         app: yandex
         limit: 15
-    vpn:
+    kaspersky:
         platform: WIN8
         browser: chrome
         app: kas
+    express:
+        platform: WIN8
+        browser: chrome
+        app: express
     hola:
         platform: WIN10
         browser: chrome

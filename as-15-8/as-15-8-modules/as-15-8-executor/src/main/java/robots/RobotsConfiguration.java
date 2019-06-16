@@ -84,15 +84,15 @@ public class RobotsConfiguration {
 			VPNScript.class,
 			new ScriptDriverParameters(
 				new URL(this.seleniumHubUrl),
-				Platform.valueOf(env.getProperty("robots.vpn.platform")),
-				env.getProperty("robots.vpn.app"),
-				env.getProperty("robots.vpn.browser")
+				Platform.valueOf(env.getProperty("robots.kaspersky.platform")),
+				env.getProperty("robots.kaspersky.app"),
+				env.getProperty("robots.kaspersky.browser")
 			)
 		);
 	}
 	
 	/**
-	 * Робот проверки ПАСД (VPN)
+	 * Робот проверки ПАСД (VPN-Express)
 	 * @return
 	 * @throws MalformedURLException
 	 */
@@ -104,9 +104,9 @@ public class RobotsConfiguration {
 			VPNScript.class,
 			new ScriptDriverParameters(
 				new URL(this.seleniumHubUrl),
-				Platform.valueOf(env.getProperty("robots.vpn.platform")),
-				env.getProperty("robots.vpn.app"),
-				env.getProperty("robots.vpn.browser")
+				Platform.valueOf(env.getProperty("robots.express.platform")),
+				env.getProperty("robots.express.app"),
+				env.getProperty("robots.express.browser")
 			)
 		);
 	}
