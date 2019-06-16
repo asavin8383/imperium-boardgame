@@ -1,28 +1,35 @@
 package service.impl;
 
-import java.io.File;
+import static enums.CheckUnitJobResult.COMPLETED;
+import static enums.CheckUnitJobResult.DOUBTFUL;
+import static enums.CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
 
-import analysis.*;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import analysis.AnalysisResult;
+import analysis.AnalysisUtils;
+import analysis.ContentAnalysis;
+import analysis.StubAnalysis;
+import analysis.VpnAnalysisResult;
 import common.AnalysisException;
 import enums.CheckUnitJobResult;
 import execution.ExecutionVpnJobResult;
 import lombok.Getter;
 import model.KeyWord;
-import org.springframework.util.StringUtils;
 import service.AnalyzerService;
-
-import static enums.CheckUnitJobResult.*;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 
 /**
@@ -32,18 +39,21 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 @Service
 public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResult> {
 
-	public static final String keyWordsSource = "key_words.json";
+	public static final String keyWordsSource = "classpath:key_words.json";
 	public static final int similarityThreshold = 85;
 
 	@Getter
 	private List<KeyWord> keyWords = new ArrayList<>();
 
+	@Autowired
+	private ResourceLoader resourceLoader;
+	
 	@PostConstruct
 	public void initAnalyzer() {
 		try {
-			File file = new ClassPathResource(keyWordsSource).getFile();
+			InputStream input = resourceLoader.getResource(keyWordsSource).getInputStream();
 			ObjectMapper mapper = new ObjectMapper();
-			keyWords = mapper.readValue(file, mapper.getTypeFactory().constructCollectionType(List.class, KeyWord.class));
+			keyWords = mapper.readValue(input, mapper.getTypeFactory().constructCollectionType(List.class, KeyWord.class));
 		}
 		catch (IOException e) {
 			e.printStackTrace();

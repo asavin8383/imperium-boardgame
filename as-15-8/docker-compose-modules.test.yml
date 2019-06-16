@@ -1,4 +1,4 @@
-version: '3.2'
+version: '3.7'
 networks:
     as-15-8-net:
         external: true
@@ -14,9 +14,9 @@ services:
             - ~/as-15-8-modules/dispatcher-module/logs:/log
         configs:
             - source: dispatcher-config
-              target: /config
+              target: /config/application.yml
             - source: dispatcher-logback
-              target: /config
+              target: /config/logback-spring.xml
     executor:
         image: harbor.ec-leasing.ru/as_15_8/as-15-8-executor:latest
         deploy:
@@ -30,9 +30,9 @@ services:
             - ~/as-15-8-modules/executor-module/logs:/log
         configs:
             - source: executor-config
-              target: /config
+              target: /config/application.yml
             - source: executor-logback
-              target: /config
+              target: /config/logback-spring.xml
     analyzer:
         image: harbor.ec-leasing.ru/as_15_8/as-15-8-analyzer:latest
         deploy:
@@ -46,9 +46,9 @@ services:
             - ~/as-15-8-modules/analyzer-module/logs:/log
         configs:
             - source: analyzer-config
-              target: /config
+              target: /config/application.yml
             - source: analyzer-logback
-              target: /config
+              target: /config/logback-spring.xml
 configs:
     dispatcher-config:
         file: dispatcher-module/config/application.yml

@@ -17,6 +17,8 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
+import org.springframework.kafka.listener.DefaultAfterRollbackProcessor;
+import org.springframework.kafka.listener.ContainerProperties.AckMode;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
@@ -36,6 +38,9 @@ public class KafkaConfiguration {
     
     @Value("${spring.kafka.analysis-concurrency}")
     private Integer analysisConcurrency;
+    
+    @Value("${spring.kafka.analysis-execution-timeout}")
+    private Integer analysisExecutionTimeout;
 	
     @Bean 
     Map<String, Object> producerFactoryConfig(){
@@ -59,6 +64,15 @@ public class KafkaConfiguration {
          return config;
     }
     
+    @Bean 
+    Map<String, Object> executionResultsFactoryConfig(){
+    	Map<String, Object> config = new HashMap<>();
+        config.putAll(consumerFactoryConfig());
+        config.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, analysisExecutionTimeout);
+        config.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 1);        
+        return config;
+    }
+    
     @Bean
     public ConsumerFactory<String, ExecutionJobResult> executionResultsConsumerFactory() {      
         return new DefaultKafkaConsumerFactory<>(
@@ -72,7 +86,9 @@ public class KafkaConfiguration {
     public ConcurrentKafkaListenerContainerFactory<String, ExecutionJobResult> kafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, ExecutionJobResult> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(executionResultsConsumerFactory());
+        factory.getContainerProperties().setAckMode(AckMode.MANUAL_IMMEDIATE);
         factory.setConcurrency(analysisConcurrency);
+        factory.setAfterRollbackProcessor(new DefaultAfterRollbackProcessor<>(0));
         return factory;
     }
     

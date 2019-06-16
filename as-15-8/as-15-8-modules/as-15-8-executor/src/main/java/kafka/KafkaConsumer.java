@@ -24,8 +24,6 @@ import service.RobotsService;
 @Slf4j
 @DependsOn({"robotsFactory"})
 public class KafkaConsumer {
-
-	//private Map<AccessToolUnit, MessageListenerContainer> listenerContainers = new ConcurrentHashMap<>();
 	
 	@Autowired
 	private RobotsService robotsService;
@@ -35,9 +33,6 @@ public class KafkaConsumer {
 	
 	@Autowired
 	private KafkaListenerEndpointRegistry endpointRegistry;
-	
-	/*@Autowired
-	private KafkaTemplate<String, ExecutorControlMessage> controlMessagesTemplate;*/
 	
 	@Value("${spring.kafka.consume-topic}")
 	private String checkUnitJobsTopicName;
@@ -129,32 +124,4 @@ public class KafkaConsumer {
 			log.error("Ошибка при запуске слушателей для " + accessToolUnit, ex);
 		}
 	}
-	
-	/*private void sendStopExecutorsMessage(AccessToolUnit accessToolUnit) {
-		try {
-			ExecutorControlMessage controlMessage = new ExecutorControlMessage(accessToolUnit, ControlCommand.STOP);
-			
-			Message<ExecutorControlMessage> message = MessageBuilder
-	                .withPayload(controlMessage)
-	                .setHeader(KafkaHeaders.TOPIC, controlTopicName)
-	                .build();
-			
-			ListenableFuture<SendResult<String, ExecutorControlMessage>> future = controlMessagesTemplate.send(message);
-		     
-		    future.addCallback(new ListenableFutureCallback<SendResult<String, ExecutorControlMessage>>() {
-		 
-		        @Override
-		        public void onSuccess(SendResult<String, ExecutorControlMessage> result) {
-		            log.info("Сообщение для остановки модулей выполнения проверок успешно отправлено");
-		        }
-		        @Override
-		        public void onFailure(Throwable ex) {
-		        	throw new RuntimeException("Ошибка при отправке сообщения для остановки модулей выполнения проверок", ex);
-		        }
-		    });
-		    future.get();
-		} catch (Exception ex) {
-			throw new RuntimeException("Ошибка при отправке сообщения для остановки модулей выполнения проверок", ex);
-		}
-	}*/
 }

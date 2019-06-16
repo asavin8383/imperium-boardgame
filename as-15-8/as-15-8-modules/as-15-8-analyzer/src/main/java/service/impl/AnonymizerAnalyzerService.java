@@ -1,33 +1,43 @@
 package service.impl;
 
-import analysis.*;
+import static enums.CheckUnitJobResult.COMPLETED;
+import static enums.CheckUnitJobResult.DOUBTFUL;
+import static enums.CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.PostConstruct;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import analysis.AnalysisResult;
+import analysis.AnalysisUtils;
+import analysis.AnonymizerAnalysisResult;
+import analysis.ContentAnalysis;
+import analysis.StubAnalysis;
 import common.AnalysisException;
 import enums.CheckUnitJobResult;
 import execution.ExecutionAnonymizerResult;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import model.KeyWord;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import service.AnalyzerService;
-
-import javax.annotation.PostConstruct;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import static enums.CheckUnitJobResult.*;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 
 @Slf4j
 @Service
 public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnonymizerResult> {
 
-	private static final String keyWordsSource = "key_words.json";
+	private static final String keyWordsSource = "classpath:key_words.json";
 
 	private static final int similarityThreshold = 30;
 
@@ -36,12 +46,15 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 	@Getter
 	private List<KeyWord> keyWords = new ArrayList<>();
 
+	@Autowired
+	private ResourceLoader resourceLoader;
+	
 	@PostConstruct
 	public void initAnalyzer() {
 		try {
-			File file = new ClassPathResource(keyWordsSource).getFile();
+			InputStream input = resourceLoader.getResource(keyWordsSource).getInputStream();
 			ObjectMapper mapper = new ObjectMapper();
-			keyWords = mapper.readValue(file, mapper.getTypeFactory().constructCollectionType(List.class, KeyWord.class));
+			keyWords = mapper.readValue(input, mapper.getTypeFactory().constructCollectionType(List.class, KeyWord.class));
 		}
 		catch (IOException e) {
 			e.printStackTrace();

@@ -58,7 +58,7 @@ public class KafkaConfiguration {
     }
     
     @Bean 
-    Map<String, Object> cousumerFactoryConfig(){
+    Map<String, Object> consumerFactoryConfig(){
     	Map<String, Object> config = new HashMap<>();
         config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         config.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, autoOffsetReset);
@@ -71,7 +71,7 @@ public class KafkaConfiguration {
     @Bean 
     Map<String, Object> checkUnitJobsFactoryConfig(){
     	Map<String, Object> config = new HashMap<>();
-        config.putAll(cousumerFactoryConfig());
+        config.putAll(consumerFactoryConfig());
         config.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, jobsExecutionTimeout);
         config.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 1);        
         return config;
@@ -84,11 +84,6 @@ public class KafkaConfiguration {
     
     @Bean
     public ProducerFactory<String, CheckUnitStatusNotification> notificationsProducerFactory() {
-    	return new DefaultKafkaProducerFactory<>(producerFactoryConfig());
-    }
-    
-    @Bean
-    public ProducerFactory<String, ExecutorControlMessage> controlMessagesProducerFactory() {
     	return new DefaultKafkaProducerFactory<>(producerFactoryConfig());
     }
 
@@ -115,7 +110,7 @@ public class KafkaConfiguration {
     public ConcurrentKafkaListenerContainerFactory<String, ExecutorControlMessage> controlMessagesListenerContainerFactory() {
     	
         ConsumerFactory<String, ExecutorControlMessage> factory = new DefaultKafkaConsumerFactory<>(
-        	cousumerFactoryConfig(),
+        	consumerFactoryConfig(),
         	new StringDeserializer(),
             new JsonDeserializer<>(ExecutorControlMessage.class)
         );
@@ -124,7 +119,7 @@ public class KafkaConfiguration {
         listenerFactory.setConsumerFactory(factory);
         listenerFactory.getContainerProperties().setAckMode(AckMode.MANUAL_IMMEDIATE);
         listenerFactory.setConcurrency(1);
-        listenerFactory.setAutoStartup(true);
+        listenerFactory.setAfterRollbackProcessor(new DefaultAfterRollbackProcessor<>(0));
         return listenerFactory;
     }
  
@@ -136,10 +131,5 @@ public class KafkaConfiguration {
     @Bean
     public KafkaTemplate<String, CheckUnitStatusNotification> notificationsTemplate() {
         return new KafkaTemplate<>(notificationsProducerFactory());
-    }
-    
-    @Bean
-    public KafkaTemplate<String, ExecutorControlMessage> controlMessagesTemplate() {
-        return new KafkaTemplate<>(controlMessagesProducerFactory());
     }
 }
