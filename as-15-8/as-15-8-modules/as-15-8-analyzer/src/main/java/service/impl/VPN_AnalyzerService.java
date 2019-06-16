@@ -15,7 +15,6 @@ import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -127,7 +126,7 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
         }
 
 		// конечный URL совпадает с vpn - заглушкой
-		if (StubAnalysis.checkStubUrl(aRes.getPageUrlFinal(), aRes.getStubUrl())){
+		if (AnalysisUtils.compareDomainsInUrls(aRes.getPageUrlFinal(), aRes.getStubUrl())){
 			return COMPLETED;
 		}
 
@@ -154,14 +153,25 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 		}
 
 		// проверка на заглушку
-		boolean isStub = StubAnalysis.isStub(aRes, 0.35, 0.20, 0.15, 0.30);
+		StringBuffer stubDetails = new StringBuffer();
+		boolean isStub = StubAnalysis.isStub(aRes, StubAnalysis.getDefaultStubWeights(), stubDetails);
+		appendInfo(aRes, stubDetails.toString());
 		if (isStub){
+			return COMPLETED;
+		}
+
+		// проверка на маленькую заглушку
+		boolean isLittleStub = StubAnalysis.isStub(aRes, StubAnalysis.getLittleStubWeights(), null);
+		if (isLittleStub){
+			appendInfo(aRes, "Обнаружена маленькая заглушка.");
 			return COMPLETED;
 		}
 
 		// проверка без эталона
 		if (!wasRedirect){
-			boolean isForbidden = ContentAnalysis.forbiddenContent(aRes);
+			StringBuffer contentDetails = new StringBuffer();
+			boolean isForbidden = ContentAnalysis.forbiddenContent(aRes, contentDetails);
+			appendInfo(aRes, contentDetails.toString());
 			if (isForbidden){
 				return FORBIDDEN_CONTENT_DETECTED;
 			}
@@ -197,11 +207,7 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
     }
 
 	private void appendInfo(VpnAnalysisResult aRes, String append){
-		String info = aRes.getStubScoreInfo();
-		info = info == null ? "" : info;
-		append = append == null ? "" : append;
-		info += (StringUtils.isEmpty(info) || StringUtils.isEmpty(append) ? "" : " ") + append;
-		aRes.setStubScoreInfo(info);
+		aRes.setStubScoreInfo(AnalysisUtils.appendString(aRes.getStubScoreInfo(), append));
 	}
 
 }

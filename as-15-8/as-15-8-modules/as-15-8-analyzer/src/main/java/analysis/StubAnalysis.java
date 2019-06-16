@@ -1,5 +1,8 @@
 package analysis;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -8,63 +11,69 @@ import org.apache.commons.lang3.StringUtils;
 @UtilityClass
 public class StubAnalysis {
 
-    public static final double THRESHOLD = 0.8;
-    public static final double pageSize_percent = 0.25;
-    public static final double keyWords_percent = 0.4;
-    public static final double domainCount_percent = 0.25;
-    public static final double linkCount_percent = 0.1;
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder(toBuilder = true)
+    public static class StubWeights {
+        public double threshold;
+        public double pageSize;
+        public double keyWords;
+        public double domainCount;
+        public double linkCount;
 
-    public static boolean isStub(StubAnalysisResult result) {
-        return isStub(result,
-                pageSize_percent, keyWords_percent,
-                domainCount_percent, linkCount_percent);
+        public double allWeights(){
+            return pageSize + keyWords + domainCount + linkCount;
+        }
     }
 
-    public static boolean isStub(StubAnalysisResult res,
-                                 double pageSize_percent,
-                                 double keyWords_percent,
-                                 double domainCount_percent,
-                                 double linkCount_percent) {
-        double sun_percent = pageSize_percent + keyWords_percent + domainCount_percent + linkCount_percent;
+    public static boolean isStub(StubAnalysisResult res, StubWeights weights, StringBuffer details) {
 
         // веса критериев для заглушки
-        double pageSizeWeight = pageSize_percent * getPageSizeWeight(res.getPageSize());
-        double keyWordsCountWeight = keyWords_percent * getKeyWordsCountWeight(res.getKeyWordsCount());
-        double domainCountWeight = domainCount_percent * getDomainCountWeight(res.getDomainNameCount());
-        double linkCountWeight = linkCount_percent * getLinkCountWeight(res.getLinkCount());
+        double pageSizePoints = weights.pageSize * getPageSizeHit(res.getPageSize());
+        double keyWordsCountPoints = weights.keyWords * getKeyWordsCountHit(res.getKeyWordsCount());
+        double domainCountPoints = weights.domainCount * getDomainCountHit(res.getDomainNameCount());
+        double linkCountPoints = weights.linkCount * getLinkCountHit(res.getLinkCount());
 
-        final double maxWeight = 100*sun_percent;
+        final double maxPoints = 100 * weights.allWeights();
 
         // суммируем веса криетериев для определения заглушки
-        double sumWeight = pageSizeWeight + keyWordsCountWeight + domainCountWeight + linkCountWeight;
-        sumWeight = sumWeight > maxWeight ? maxWeight : sumWeight;
+        double sumPoints = pageSizePoints + keyWordsCountPoints + domainCountPoints + linkCountPoints;
+        sumPoints = sumPoints > maxPoints ? maxPoints : sumPoints;
 
-        double kWeight = sumWeight / maxWeight;
-        boolean result = kWeight >= THRESHOLD;
+        double k = sumPoints / maxPoints;
+        boolean result = k >= weights.threshold;
 
-        String info = String.format("Заглушка: %s (коэф = %.2f, порог = %.2f)", (result ? "да" : "нет"), kWeight, THRESHOLD);
+        String info = String.format("Заглушка: %s (коэф = %.2f, порог = %.2f)", (result ? "да" : "нет"), k, weights.threshold);
         log.info(info);
 
-        String score = res.getStubScoreInfo();
-        score = StringUtils.isEmpty(score) ? "" : score;
-        score += (StringUtils.isEmpty(score) ? "" : " ") + info;
-        res.setStubScoreInfo(score);
+        AnalysisUtils.appendString(details, info);
 
         // процентный вес
         return result;
     }
 
-    public boolean checkStubUrl(String url, String stubUrl){
-        url = url != null ? url : "";
-        stubUrl = stubUrl != null ? stubUrl : "";
 
-        boolean res1 = AnalysisUtils.simpleCompareUrls(url, stubUrl);
-        boolean res2 = url.toLowerCase().contains(stubUrl.toLowerCase());
-        return res1 || res2;
+    public static StubWeights getDefaultStubWeights(){
+        return  new StubWeights(0.8, 0.25, 0.4, 0.25, 0.1);
+    }
+
+    public static StubWeights getLittleStubWeights(){
+        return new StubWeights(0.7, 0.5, 0.2, 0.2, 0.1);
+    }
+
+    public static StubWeights getAnonymousStubWeights(){
+        return new StubWeights(0.8, 0.35, 0.15, 0.15, 0.35);
+    }
+
+
+    private static String appendToString(String str, String append){
+        return  (StringUtils.isEmpty(str) ? "" : str) +
+                (StringUtils.isEmpty(str) || StringUtils.isEmpty(append) ? "" : " ") +
+                (StringUtils.isEmpty(append) ? "" : append);
     }
 
     // вес от 0 о 100 (0 - большой размер, 100 - маленький)
-    private static int getPageSizeWeight(Integer size){
+    private static int getPageSizeHit(Integer size){
         size = size == null ? 0 : size;
 
         int maxSize = 2048;
@@ -76,12 +85,12 @@ public class StubAnalysis {
     }
 
     // вес от 0 до 100 (0 - мало слов, 100 - много)
-    private static int getKeyWordsCountWeight(Integer count){
+    private static int getKeyWordsCountHit(Integer count){
         count = count == null ? 0 : count;
 
-        int minCount1 = 3;
-        int minCount2 = 10;
-        int minCount3 = 30;
+        int minCount1 = 2;
+        int minCount2 = 8;
+        int minCount3 = 15;
 
         if (count < minCount1)
             return 0;
@@ -95,7 +104,7 @@ public class StubAnalysis {
     }
 
     // вес от 0 до 100 (0 - встретилось много доментов, 100 - ниодного домена)
-    private static int getDomainCountWeight(Integer count){
+    private static int getDomainCountHit(Integer count){
         count = count == null ? 0 : count;
 
         if (count == 0)
@@ -108,7 +117,7 @@ public class StubAnalysis {
     }
 
     // вес от 0 до 100 (0 - встретилось много ссылок, 100 - мало ссылок)
-    private static int getLinkCountWeight(Integer count){
+    private static int getLinkCountHit(Integer count){
         count = count == null ? 0 : count;
 
         int maxCount = 10;

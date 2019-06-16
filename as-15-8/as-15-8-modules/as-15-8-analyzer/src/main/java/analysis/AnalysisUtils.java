@@ -71,7 +71,7 @@ public class AnalysisUtils {
         url1 = url1 == null ? "" : url1.trim();
         url2 = url2 == null ? "" : url2.trim();
 
-        if (url1.isEmpty() && url2.isEmpty())
+        if (url1.isEmpty() || url2.isEmpty())
             return false;
 
         if (!url1.startsWith("http"))
@@ -106,6 +106,59 @@ public class AnalysisUtils {
         }
         return false;
     }
+
+    public static boolean compareDomainsInUrls(String url1, String url2){
+        url2 = url2 != null ? url2 : "";
+        url1 = url1 != null ? url1 : "";
+
+        if (url2.isEmpty() || url1.isEmpty())
+            return false;
+
+        if (!url1.startsWith("http"))
+            url1 = "http://" + url1;
+        if (!url2.startsWith("http"))
+            url2 = "http://" + url2;
+
+        try {
+            URL u1 = new URL(url1);
+            URL u2 = new URL(url2);
+            String host1 = u1.getHost() == null ? "" : u1.getHost();
+            String host2 = u2.getHost() == null ? "" : u2.getHost();
+
+            boolean res1 = host2.endsWith(host1) ||
+                    host2.endsWith(toUnicode(host1)) ||
+                    host2.endsWith(toASCII(host1));
+
+            boolean res2 = host1.endsWith(host2) ||
+                    host1.endsWith(toUnicode(host2)) ||
+                    host1.endsWith(toASCII(host2));
+
+            return res1 || res2;
+        }
+        catch (MalformedURLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static String appendString(String str, String append){
+        return appendString(str, append, " ");
+    }
+    public static String appendString(String str, String append, String delim){
+        return  (StringUtils.isEmpty(str) ? "" : str) +
+                (StringUtils.isEmpty(str) || StringUtils.isEmpty(append) ? "" : (delim == null ? "" : delim)) +
+                (StringUtils.isEmpty(append) ? "" : append);
+    }
+    public static void appendString(StringBuffer strBuffer, String append){
+        appendString(strBuffer, append, " ");
+    }
+    public static void appendString(StringBuffer strBuffer, String append, String delim){
+        if (strBuffer != null && !StringUtils.isEmpty(append)){
+            strBuffer.append(delim == null ? "" : delim);
+            strBuffer.append(append);
+        }
+    }
+
 
     public static CheckUnitJobResult obtainErrorResult(String errorCode, StringBuffer details){
         details = details == null ? new StringBuffer() : details;

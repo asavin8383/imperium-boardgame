@@ -13,7 +13,7 @@ public class ContentAnalysis {
     public static final double domainCount_weight = 0.65;
     public static final double linkCount_weight = 0.20;
 
-    public static boolean forbiddenContent(StubAnalysisResult res) {
+    public static boolean forbiddenContent(StubAnalysisResult res, StringBuffer details) {
 
         // суммп попадиний
         double pageSize_points = pageSize_weight * getPageSizeHit(res.getPageSize());
@@ -32,6 +32,8 @@ public class ContentAnalysis {
 
         String info = String.format("Запрещенный сайт: %s (коэф = %.2f, порог = %.2f)", (result ? "да" : "нет"), k, THRESHOLD);
         log.info(info);
+
+        AnalysisUtils.appendString(details, info);
 
         String score = res.getStubScoreInfo();
         score = StringUtils.isEmpty(score) ? "" : score;

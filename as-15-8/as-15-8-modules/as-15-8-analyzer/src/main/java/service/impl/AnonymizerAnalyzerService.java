@@ -149,7 +149,9 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 
 		// проверка без эталона
 		if (!wasRedirect){
-			boolean isForbidden = ContentAnalysis.forbiddenContent(analysisResult);
+			StringBuffer contentDetails = new StringBuffer();
+			boolean isForbidden = ContentAnalysis.forbiddenContent(analysisResult, contentDetails);
+			appendInfo(analysisResult, contentDetails.toString());
 			if (isForbidden){
 				analysisResult.setCheckResult(FORBIDDEN_CONTENT_DETECTED);
 				return analysisResult;
@@ -194,9 +196,12 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 		analysisResult.setKeyWordsCount(AnalysisUtils.getCountKeyWords(content, keyWords));
 		analysisResult.setDomainNameCount(AnalysisUtils.getDomainCount(checkValue, content));
 
-		return StubAnalysis.isStub(analysisResult,
-				0.35, 0.15,
-				0.15, 0.35);
+		StringBuffer stubDetails = new StringBuffer();
+
+		boolean res = StubAnalysis.isStub(analysisResult, StubAnalysis.getAnonymousStubWeights(), stubDetails);
+		appendInfo(analysisResult, stubDetails.toString());
+
+		return res;
 	}
 
 	private boolean checkStubUrl(String finalUrl, String stubUrl) {
@@ -215,11 +220,7 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 	}
 
 	private void appendInfo(AnonymizerAnalysisResult aRes, String append){
-		String info = aRes.getStubScoreInfo();
-		info = info == null ? "" : info;
-		append = append == null ? "" : append;
-		info += (StringUtils.isEmpty(info) || StringUtils.isEmpty(append) ? "" : " ") + append;
-		aRes.setStubScoreInfo(info);
+		aRes.setStubScoreInfo(AnalysisUtils.appendString(aRes.getStubScoreInfo(), append));
 	}
 
 }
