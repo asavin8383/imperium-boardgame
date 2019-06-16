@@ -77,10 +77,30 @@ public class RobotsConfiguration {
 	 * @throws MalformedURLException
 	 */
 	@Bean
-	public Robot vpnRobot() throws MalformedURLException {
+	public Robot kasperskyRobot() throws MalformedURLException {
 
 		return new SeleniumVpnRobot(
 			AccessToolUnit.KASPERSKY,
+			VPNScript.class,
+			new ScriptDriverParameters(
+				new URL(this.seleniumHubUrl),
+				Platform.valueOf(env.getProperty("robots.vpn.platform")),
+				env.getProperty("robots.vpn.app"),
+				env.getProperty("robots.vpn.browser")
+			)
+		);
+	}
+	
+	/**
+	 * Робот проверки ПАСД (VPN)
+	 * @return
+	 * @throws MalformedURLException
+	 */
+	@Bean
+	public Robot expressRobot() throws MalformedURLException {
+
+		return new SeleniumVpnRobot(
+			AccessToolUnit.EXPRESS,
 			VPNScript.class,
 			new ScriptDriverParameters(
 				new URL(this.seleniumHubUrl),
