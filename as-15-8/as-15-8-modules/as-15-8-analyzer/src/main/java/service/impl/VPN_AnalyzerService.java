@@ -127,6 +127,7 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 
 		// конечный URL совпадает с vpn - заглушкой
 		if (AnalysisUtils.compareDomainsInUrls(aRes.getPageUrlFinal(), aRes.getStubUrl())){
+			appendInfo(aRes, "Определена заглушка по URL заглушки");
 			return COMPLETED;
 		}
 
@@ -148,7 +149,8 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 			}
 			else if (wasRedirect && aRes.getSimilarityOriginPercent() >= similarityThreshold){
 				appendInfo(aRes, "Произошел редирект, но порог сходства текста >= " + similarityThreshold + "%.");
-				return FORBIDDEN_CONTENT_DETECTED;
+				aRes.setNeedTestFinalUrl(true);
+				return DOUBTFUL;
 			}
 		}
 
