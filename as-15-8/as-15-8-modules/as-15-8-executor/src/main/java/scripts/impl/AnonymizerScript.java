@@ -28,7 +28,15 @@ public abstract class AnonymizerScript extends RobotScript {
 
     public AnonymizerScript(ScriptDriverParameters driverParams,
                             Map<AccessToolParameters, String> scriptParams) {
-    	super(driverParams, scriptParams);
+
+    	super(driverParams, scriptParams,
+                ProxyUtils.getFullProxy(
+                        scriptParams.get(AccessToolParameters.PROXY_TYPE),
+                        scriptParams.get(AccessToolParameters.PROXY_DNS_NAME),
+                        scriptParams.get(AccessToolParameters.PROXY_PORT),
+                        scriptParams.get(AccessToolParameters.PROXY_USER),
+                        scriptParams.get(AccessToolParameters.PROXY_PASSWORD)
+                ));
 
         String useEtalon = scriptParams.get(AccessToolParameters.USE_ETALON);
         this.useEtalon = StringUtils.isEmpty(useEtalon) ||
