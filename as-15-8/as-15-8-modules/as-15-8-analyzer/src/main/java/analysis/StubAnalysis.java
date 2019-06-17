@@ -52,6 +52,17 @@ public class StubAnalysis {
         return result;
     }
 
+    public static boolean isLittleStub(StubAnalysisResult aRes, String content, StringBuffer details) {
+        content = content == null ? "" : content;
+
+        boolean res = (aRes.getPageSize() < 2048 && aRes.getDomainNameCount() <= 1 && aRes.getLinkCount() <= 2);
+        if (res){
+            String title = AnalysisUtils.getTitle(content);
+            AnalysisUtils.appendString(details, "Найдена заглушка: " + (StringUtils.isEmpty(title) ? "<no title>" : title) + ".");
+        }
+        return res;
+    }
+
 
     public static StubWeights getDefaultStubWeights(){
         return  new StubWeights(0.8, 0.25, 0.4, 0.25, 0.1);
@@ -74,14 +85,18 @@ public class StubAnalysis {
 
     // вес от 0 о 100 (0 - большой размер, 100 - маленький)
     private static int getPageSizeHit(Integer size){
+        return getPageSizeHit(size, null, null);
+    }
+    private static int getPageSizeHit(Integer size, Integer maxSize, Integer minPercent){
         size = size == null ? 0 : size;
 
-        int maxSize = 2048;
+        maxSize = maxSize == null ? 2048 : maxSize;
+        minPercent = minPercent == null ? 70 : (minPercent < 0 ? 0 : (minPercent > 100 ? 100 : minPercent));
 
         if (size > maxSize)
             return 0;
 
-        return ((maxSize-size)/maxSize)*50 + 50;
+        return ((maxSize-size)/maxSize)*(100-minPercent) + minPercent;
     }
 
     // вес от 0 до 100 (0 - мало слов, 100 - много)

@@ -73,7 +73,7 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 			throw new AnalysisException(String.format("Ошибка во время анализа ПАСД (jobID=%d)", result.getJobID()), e);
 		}
 
-		analysisResult.setCheckResult(obtainResult(analysisResult));
+		analysisResult.setCheckResult(obtainResult(analysisResult, result));
 		return analysisResult;
 	}
 
@@ -118,7 +118,7 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 	}
 
 
-	protected CheckUnitJobResult obtainResult(VpnAnalysisResult aRes) {
+	protected CheckUnitJobResult obtainResult(VpnAnalysisResult aRes, ExecutionVpnJobResult jobRes) {
 		boolean wasRedirect = aRes.getRedirectionDetected() != null && aRes.getRedirectionDetected();
 
         if (aRes.hasError()) {
@@ -163,9 +163,10 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 		}
 
 		// проверка на маленькую заглушку
-		boolean isLittleStub = StubAnalysis.isStub(aRes, StubAnalysis.getLittleStubWeights(), null);
+        StringBuffer stubLittleDetails = new StringBuffer();
+		boolean isLittleStub = StubAnalysis.isLittleStub(aRes, jobRes.getPageContent(), stubLittleDetails);
 		if (isLittleStub){
-			appendInfo(aRes, "Обнаружена маленькая заглушка.");
+			appendInfo(aRes, stubLittleDetails.toString());
 			return COMPLETED;
 		}
 

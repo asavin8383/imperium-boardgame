@@ -67,6 +67,14 @@ public class AnalysisUtils {
         return links.size();
     }
 
+    public static String getTitle(String text){
+        if (text == null)
+            return null;
+        Document doc = Jsoup.parse(text);
+        Elements title = doc.select("title");
+        return title.text();
+    }
+
     public static boolean simpleCompareUrls(String url1, String url2) {
         url1 = url1 == null ? "" : url1.trim();
         url2 = url2 == null ? "" : url2.trim();
