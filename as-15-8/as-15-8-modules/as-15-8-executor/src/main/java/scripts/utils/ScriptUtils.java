@@ -1,11 +1,13 @@
 package scripts.utils;
 
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 
+import enums.AccessToolParameters;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
@@ -21,6 +23,7 @@ import checkUnits.CheckUnit;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import org.springframework.util.StringUtils;
 
 
 public class ScriptUtils {
@@ -141,6 +144,17 @@ public class ScriptUtils {
             }
         }
         return null;
+    }
+
+    public static boolean useEtalon(Map<AccessToolParameters, String> scriptParams){
+        if (scriptParams == null)
+            return true;
+
+        String useEtalon = scriptParams.get(AccessToolParameters.USE_ETALON);
+        return StringUtils.isEmpty(useEtalon) ||
+                useEtalon.equalsIgnoreCase("true") ||
+                useEtalon.equalsIgnoreCase("on") ||
+                useEtalon.equalsIgnoreCase("1");
     }
 
 }

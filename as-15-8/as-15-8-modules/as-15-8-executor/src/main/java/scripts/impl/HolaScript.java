@@ -28,6 +28,7 @@ public class HolaScript extends RobotScript {
     private static final String CHROME_PROFILE = "C:\\Selenium\\Chrome";
     private static final String HOLA_POPUP = "chrome-extension://gkojfkhlekighikafcpjkiklfbnlmeio/js/popup.html";
     protected String stubUrl;
+    protected boolean useEtalon;
 
 
     public HolaScript(ScriptDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams) {
@@ -41,6 +42,8 @@ public class HolaScript extends RobotScript {
     			scriptParams.get(AccessToolParameters.ETALON_PROXY_PASSWORD)
     			)
     		);
+
+        this.useEtalon = ScriptUtils.useEtalon(scriptParams);
 
      	this.stubUrl = scriptParams.get(AccessToolParameters.STUB_URL);
     }
@@ -59,19 +62,21 @@ public class HolaScript extends RobotScript {
 
         // Эталонная страница с дефолтного драйвера с дефолтным прокси
         WebDriver driver = this.driver;
-        try {
-            PageResult pageResult = RobotScriptUtils.loadPage(url, driver);
-            byte[] screenShot = ScriptUtils.getScreenshot(driver);
-            String finalUrl = driver.getCurrentUrl();
+        if (useEtalon) {
+            try {
+                PageResult pageResult = RobotScriptUtils.loadPage(url, driver);
+                byte[] screenShot = ScriptUtils.getScreenshot(driver);
+                String finalUrl = driver.getCurrentUrl();
 
-            message.setChromeErrorCodeEtalon(pageResult.errorCodeChrome);
-            message.setPageContentEtalon(pageResult.pageSource);
-            message.setEtalonScreenshot(screenShot);
-            if (pageResult.errorCodeChrome == null) {
-                message.setFinalUrlPageEtalon(finalUrl);
+                message.setChromeErrorCodeEtalon(pageResult.errorCodeChrome);
+                message.setPageContentEtalon(pageResult.pageSource);
+                message.setEtalonScreenshot(screenShot);
+                if (pageResult.errorCodeChrome == null) {
+                    message.setFinalUrlPageEtalon(finalUrl);
+                }
+            } finally {
+                close(driver);
             }
-        } finally {
-            close(driver);
         }
 
 
