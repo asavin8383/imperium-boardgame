@@ -78,8 +78,6 @@ public class VPN_AnalysisResultService implements AnalysisResultService<VpnAnaly
 
 		if (aRes.getNeedTestFinalUrl() != null && aRes.getNeedTestFinalUrl()){
 			if (searchCheckUnits(aRes.getPageUrlFinal())){
-
-				// todo - подумать! Если редирект находится в запрещенке, то - найден запрещенный контент
                 result = CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED;
 				detailResults.setForbiddenFinalUrl(true);
 				String info = aRes.getStubScoreInfo();

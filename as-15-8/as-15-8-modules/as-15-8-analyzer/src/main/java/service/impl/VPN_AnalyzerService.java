@@ -142,16 +142,27 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 		}
 
 		// если эталон есть, проверяем на схожесть
+		boolean isSimilarityEtalon = false;
 		if (useEtalon && !aRes.hasEtalonError()){
-			if (!wasRedirect && aRes.getSimilarityOriginPercent() >= similarityThreshold){
-				appendInfo(aRes, "Порог сходства текста >= " + similarityThreshold + "%.");
-				return FORBIDDEN_CONTENT_DETECTED;
+			if (aRes.getSimilarityOriginPercent() >= similarityThreshold){
+				isSimilarityEtalon = true;
+
+				if (wasRedirect){
+					appendInfo(aRes, "Порог сходства текста >= " + similarityThreshold + "%, но прошел редирект.");
+					aRes.setNeedTestFinalUrl(true);
+				}
+				else {
+					appendInfo(aRes, "Порог сходства текста >= " + similarityThreshold + "%.");
+				}
 			}
-			else if (wasRedirect && aRes.getSimilarityOriginPercent() >= similarityThreshold){
-				appendInfo(aRes, "Произошел редирект, но порог сходства текста >= " + similarityThreshold + "%.");
-				aRes.setNeedTestFinalUrl(true);
-				return DOUBTFUL;
-			}
+		}
+
+		// проверка на маленькую заглушку
+		StringBuffer stubLittleDetails = new StringBuffer();
+		boolean isLittleStub = StubAnalysis.isLittleStub(aRes, jobRes.getPageContent(), stubLittleDetails);
+		if (isLittleStub){
+			appendInfo(aRes, stubLittleDetails.toString());
+			return COMPLETED;
 		}
 
 		// проверка на заглушку
@@ -162,12 +173,14 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 			return COMPLETED;
 		}
 
-		// проверка на маленькую заглушку
-        StringBuffer stubLittleDetails = new StringBuffer();
-		boolean isLittleStub = StubAnalysis.isLittleStub(aRes, jobRes.getPageContent(), stubLittleDetails);
-		if (isLittleStub){
-			appendInfo(aRes, stubLittleDetails.toString());
-			return COMPLETED;
+		// результат по сходству
+		if (isSimilarityEtalon){
+			if (wasRedirect){
+				return FORBIDDEN_CONTENT_DETECTED;
+			}
+			else {
+				return DOUBTFUL;
+			}
 		}
 
 		// проверка без эталона
