@@ -146,14 +146,6 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 		if (useEtalon && !aRes.hasEtalonError()){
 			if (aRes.getSimilarityOriginPercent() >= similarityThreshold){
 				isSimilarityEtalon = true;
-
-				if (wasRedirect){
-					appendInfo(aRes, "Порог сходства текста >= " + similarityThreshold + "%, но прошел редирект.");
-					aRes.setNeedTestFinalUrl(true);
-				}
-				else {
-					appendInfo(aRes, "Порог сходства текста >= " + similarityThreshold + "%.");
-				}
 			}
 		}
 
@@ -176,9 +168,12 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 		// результат по сходству
 		if (isSimilarityEtalon){
 			if (wasRedirect){
+                appendInfo(aRes, "Порог сходства текста >= " + similarityThreshold + "%, но прошел редирект.");
+                aRes.setNeedTestFinalUrl(true);
 				return FORBIDDEN_CONTENT_DETECTED;
 			}
 			else {
+                appendInfo(aRes, "Порог сходства текста >= " + similarityThreshold + "%.");
 				return DOUBTFUL;
 			}
 		}
