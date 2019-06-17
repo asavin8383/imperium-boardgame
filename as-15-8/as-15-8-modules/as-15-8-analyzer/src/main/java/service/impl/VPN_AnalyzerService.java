@@ -170,11 +170,11 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 			if (wasRedirect){
                 appendInfo(aRes, "Порог сходства текста >= " + similarityThreshold + "%, но прошел редирект.");
                 aRes.setNeedTestFinalUrl(true);
-				return FORBIDDEN_CONTENT_DETECTED;
+				return DOUBTFUL;
 			}
 			else {
                 appendInfo(aRes, "Порог сходства текста >= " + similarityThreshold + "%.");
-				return DOUBTFUL;
+				return FORBIDDEN_CONTENT_DETECTED;
 			}
 		}
 
