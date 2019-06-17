@@ -107,6 +107,8 @@ public class ArrangementJobCreationServiceImpl implements ArrangementJobCreation
         } else if (accessTool.getAnonymizerParameters() != null) {
             AnonymizerParameters parameters = accessTool.getAnonymizerParameters();
             result.put(AccessToolParameters.STUB_URL, parameters.getStubUrl());
+            result.put(AccessToolParameters.PROXY_DNS_NAME, parameters.getProxyDnsName());
+            result.put(AccessToolParameters.PROXY_PORT, parameters.getProxyPort());
         }
         return result;
     }

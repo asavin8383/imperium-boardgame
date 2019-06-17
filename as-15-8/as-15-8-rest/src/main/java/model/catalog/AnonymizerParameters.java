@@ -19,4 +19,6 @@ public class AnonymizerParameters extends AccessToolParameters implements Serial
     private static final long serialVersionUID = 1L;
 
     private String stubUrl;
+    private String proxyDnsName;
+    private String proxyPort;
 }
