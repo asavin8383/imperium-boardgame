@@ -1,22 +1,22 @@
 package services.arrangement.impl;
 
-import enums.ArrangementStatus;
+import java.util.Comparator;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import exceptions.AS_15_8_Exception;
 import lombok.extern.slf4j.Slf4j;
 import model.enums.ExecutionStatus;
 import model.task.Arrangement;
 import model.task.ArrangementView;
 import model.task.FormalTask;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import repositories.ArrangementRepository;
 import repositories.ArrangementViewRepo;
 import repositories.FormalTaskRepository;
 import services.arrangement.ArrangementStatusService;
-
-import java.util.Comparator;
-import java.util.Optional;
 
 /**
  * Creation date: 04.06.2019

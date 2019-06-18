@@ -1,8 +1,7 @@
 package common;
 
-import advices.AuthenticationEntryPointImpl;
-import exceptions.AS_15_8_Exception;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Collections;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -22,12 +21,13 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import advices.AuthenticationEntryPointImpl;
+import exceptions.AS_15_8_Exception;
+import lombok.extern.slf4j.Slf4j;
 import security.JWTAuthenticationFilter;
 import security.JWTLoginFilter;
 import services.userDetails.CustomUserDetailsMapper;
-
-import javax.sql.DataSource;
-import java.util.Collections;
 
 
 @Configuration
