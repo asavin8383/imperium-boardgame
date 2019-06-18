@@ -17,13 +17,12 @@ import execution.ExecutionJobResult;
 import execution.ExecutionVpnJobResult;
 import scripts.DriverFactory;
 import scripts.ProxyUtils;
-import scripts.RobotScript;
 import scripts.ScriptDriverParameters;
 import scripts.utils.*;
 import scripts.utils.ScriptUtils.PageResult;
 import scripts.exceptions.RobotScriptExecutionException;
 
-public class HolaScript extends RobotScript {
+public class HolaScript extends SeleniumRobotScript {
 
     private static final String CHROME_PROFILE = "C:\\Selenium\\Chrome";
     private static final String HOLA_POPUP = "chrome-extension://gkojfkhlekighikafcpjkiklfbnlmeio/js/popup.html";

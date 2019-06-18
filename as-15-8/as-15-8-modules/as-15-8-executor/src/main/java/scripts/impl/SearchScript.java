@@ -10,7 +10,7 @@ import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.springframework.util.StringUtils;
-import scripts.RobotScript;
+
 import scripts.ScriptDriverParameters;
 import scripts.utils.ScriptUtils;
 import scripts.exceptions.Captcha_RobotScriptExecutionException;
@@ -29,7 +29,7 @@ import static enums.AccessToolParameters.INPUT_DELAY;
 import static scripts.utils.ScriptUtils.findElementIfExists;
 
 @Slf4j
-public abstract class SearchScript extends RobotScript {
+public abstract class SearchScript extends SeleniumRobotScript {
 
 	/** Максимальное кол-во проверяемых результатов по умолчанию */
     private static final int DEFAULT_SEARCH_LIMIT = 20;

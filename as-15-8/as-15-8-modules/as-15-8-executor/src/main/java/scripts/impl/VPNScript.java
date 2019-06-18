@@ -11,14 +11,13 @@ import enums.AccessToolParameters;
 import execution.ExecutionJobResult;
 import execution.ExecutionVpnJobResult;
 import scripts.ProxyUtils;
-import scripts.RobotScript;
 import scripts.ScriptDriverParameters;
 import scripts.exceptions.RobotScriptExecutionException;
 import scripts.utils.RobotScriptUtils;
 import scripts.utils.ScriptUtils;
 import scripts.utils.ScriptUtils.PageResult;
 
-public class VPNScript extends RobotScript {
+public class VPNScript extends SeleniumRobotScript {
 
     protected boolean useEtalon;
     protected String etalonProxy;

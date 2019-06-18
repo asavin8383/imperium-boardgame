@@ -18,7 +18,7 @@ import java.util.Map;
 import static scripts.utils.ScriptUtils.TIME_OUT_ERROR;
 
 @Slf4j
-public abstract class AnonymizerScript extends RobotScript {
+public abstract class AnonymizerScript extends SeleniumRobotScript {
 
 
     protected boolean useEtalon;

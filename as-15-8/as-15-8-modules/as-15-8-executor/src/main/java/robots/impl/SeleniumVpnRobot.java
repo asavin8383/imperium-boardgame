@@ -4,14 +4,14 @@ import java.util.Map;
 
 import enums.AccessToolParameters;
 import enums.AccessToolUnit;
-import scripts.RobotScript;
 import scripts.ScriptDriverParameters;
+import scripts.impl.SeleniumRobotScript;
 
 public class SeleniumVpnRobot extends SeleniumRobot {
 
 
     public SeleniumVpnRobot(AccessToolUnit accessToolUnit,
-    						Class<? extends RobotScript> scriptClass,
+    						Class<? extends SeleniumRobotScript> scriptClass,
                             ScriptDriverParameters driverParams) {
         super(accessToolUnit, scriptClass, driverParams);
     }
