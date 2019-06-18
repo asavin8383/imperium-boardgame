@@ -11,6 +11,7 @@ import enums.CheckUnitJobResult;
 import exceptions.AS_15_8_DispatcherException;
 import jobs.ArrangementJob;
 import jobs.ERDIJob;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import model.ArrangementResult;
 import org.apache.commons.net.util.SubnetUtils;
@@ -41,8 +42,7 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
     private NamedParameterJdbcTemplate jdbcNamedTemplate;
     private JdbcTemplate jdbcTemplate;
     private ArrangementResultRepository arrangementResultRepo;
-    private final List<String> protocols = new ArrayList<>();
-    private final List<String> ports = new ArrayList<>();
+    private final List<Protocol> protocols = new ArrayList<>();
 
     @Autowired
     public CheckUnitJobServiceImpl(NamedParameterJdbcTemplate jdbcNamedTemplate,
@@ -55,14 +55,19 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
 
     @PostConstruct
     private void fillProtocolsAndPorts(){
-        String sqlForProtocols = "select id, protocol from dictionaries.protocols";
+        String sqlForProtocols = "select id, protocol, port from dictionaries.protocols";
         protocols.addAll(jdbcTemplate.queryForList(sqlForProtocols).stream()
-                .map(stringObjectMap -> stringObjectMap.get("protocol").toString())
+                .map(stringObjectMap -> 
+                	new Protocol(
+            			stringObjectMap.get("protocol").toString(),
+            			Integer.parseInt(stringObjectMap.get("port").toString())
+                	)
+                )
                 .collect(Collectors.toList()));
-        String sqlForPorts = "select id, port_number from dictionaries.ports";
+        /*String sqlForPorts = "select id, port_number from dictionaries.ports";
         ports.addAll(jdbcTemplate.queryForList(sqlForPorts).stream()
                 .map(stringObjectMap -> stringObjectMap.get("port_number").toString())
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList()));*/
     }
 
     @Override
@@ -140,21 +145,19 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
         for(CheckUnitJobTemplate template : checkUnitJobTemplates){
             switch (template.checkUnitType) {
                 case URL:
-                    CheckUnitJob urlCheckUnitJob = new CheckUnitJob();
-                    fillCommonFields(urlCheckUnitJob, template);
-                    urlCheckUnitJob.setCheckUnit(new CheckUnit(template.checkUnitType, template.checkUnitValueTemplate));
-                    Long urlJobID = saveCheckUnitJobAsResult(arrangementId, template.erdiId, urlCheckUnitJob);
-                    urlCheckUnitJob.setJobID(urlJobID);
-                    checkUnitJobs.add(urlCheckUnitJob);
+                	checkUnitJobs.add(createAndSaveCheckUnitJob(
+                			arrangementId,
+                			template, 
+                			new CheckUnit(template.checkUnitType,
+                                template.checkUnitValueTemplate)));
                     break;
                 case DOMAIN:
-                    for (String protocol : protocols){
-                        CheckUnitJob domainCheckUnitJob = new CheckUnitJob();
-                        fillCommonFields(domainCheckUnitJob, template);
-                        domainCheckUnitJob.setCheckUnit(new CheckUnit(template.checkUnitType, protocol + template.checkUnitValueTemplate));
-                        Long domainJobID = saveCheckUnitJobAsResult(arrangementId, template.erdiId, domainCheckUnitJob);
-                        domainCheckUnitJob.setJobID(domainJobID);
-                        checkUnitJobs.add(domainCheckUnitJob);
+                    for (Protocol protocol : protocols){    
+                    	checkUnitJobs.add(createAndSaveCheckUnitJob(
+                        			arrangementId,
+                        			template, 
+                        			new CheckUnit(template.checkUnitType,
+                                		protocol.getProtocol() + template.checkUnitValueTemplate)));
                     }
                     break;
                 case DOMAIN_MASK:
@@ -163,42 +166,43 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
                     jdbcTemplate.queryForList(sql, template.checkUnitValueTemplate).stream()
                         .map(stringObjectMap -> stringObjectMap.get("domain_name").toString())
                         .forEach(domainName -> {
-                            for (String protocol : protocols) {
-                                CheckUnitJob domainMaskCheckUnitJob = new CheckUnitJob();
-                                fillCommonFields(domainMaskCheckUnitJob, template);
-                                domainMaskCheckUnitJob.setCheckUnit(new CheckUnit(CheckUnitType.DOMAIN, protocol + domainName));
-                                Long domainMaskJobID = saveCheckUnitJobAsResult(arrangementId, template.erdiId, domainMaskCheckUnitJob);
-                                domainMaskCheckUnitJob.setJobID(domainMaskJobID);
-                                checkUnitJobs.add(domainMaskCheckUnitJob);
+                            for (Protocol protocol : protocols) {  
+                            	checkUnitJobs.add(createAndSaveCheckUnitJob(
+                            			arrangementId,
+                            			template, 
+                            			new CheckUnit(CheckUnitType.DOMAIN,
+                                        		protocol.getProtocol() + domainName)));
                             }
                         });
                     break;
                 case IP_V4:
+                    for (Protocol protocol : protocols){   
+                    	checkUnitJobs.add(createAndSaveCheckUnitJob(
+                    			arrangementId,
+                    			template, 
+                    			new CheckUnit(template.checkUnitType,
+                                		protocol.getProtocol() + template.checkUnitValueTemplate + ":" + protocol.getPort())));
+                    }
+                    break;
                 case IP_V6:
-                    for (String protocol : protocols){
-                        for (String port : ports){
-                            CheckUnitJob ipCheckUnitJob = new CheckUnitJob();
-                            fillCommonFields(ipCheckUnitJob, template);
-                            ipCheckUnitJob.setCheckUnit(new CheckUnit(template.checkUnitType, protocol + template.checkUnitValueTemplate + ":" + port));
-                            Long ipJobID = saveCheckUnitJobAsResult(arrangementId, template.erdiId, ipCheckUnitJob);
-                            ipCheckUnitJob.setJobID(ipJobID);
-                            checkUnitJobs.add(ipCheckUnitJob);
-                        }
+                	for (Protocol protocol : protocols){   
+                    	checkUnitJobs.add(createAndSaveCheckUnitJob(
+                    			arrangementId,
+                    			template, 
+                    			new CheckUnit(template.checkUnitType,
+                                		protocol.getProtocol() + "[" + template.checkUnitValueTemplate + "::" + protocol.getPort() + "]")));
                     }
                     break;
                 case IP_V4_SUBNET:
-                    for (String protocol : protocols){
-                        for (String port : ports){
-                            //Раскладываем маску в IP-адреса
-                            SubnetUtils utils = new SubnetUtils(template.checkUnitValueTemplate);
-                            for(String address : utils.getInfo().getAllAddresses()){
-                                CheckUnitJob ipCheckUnitJob = new CheckUnitJob();
-                                fillCommonFields(ipCheckUnitJob, template);
-                                ipCheckUnitJob.setCheckUnit(new CheckUnit(CheckUnitType.IP_V4, protocol + address + ":" + port));
-                                Long ipJobID = saveCheckUnitJobAsResult(arrangementId, template.erdiId, ipCheckUnitJob);
-                                ipCheckUnitJob.setJobID(ipJobID);
-                                checkUnitJobs.add(ipCheckUnitJob);
-                            }
+                    for (Protocol protocol : protocols){
+                        //Раскладываем маску в IP-адреса
+                        SubnetUtils utils = new SubnetUtils(template.checkUnitValueTemplate);
+                        for(String address : utils.getInfo().getAllAddresses()){ 
+                        	checkUnitJobs.add(createAndSaveCheckUnitJob(
+                        			arrangementId,
+                        			template, 
+                        			new CheckUnit(CheckUnitType.IP_V4,
+                                    		protocol.getProtocol() + address + ":" + protocol.getPort())));
                         }
                     }
                 default:
@@ -208,7 +212,7 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
         }
         return checkUnitJobs;
     }
-
+    
 	@Override
 	public ArrangementResult processJobResult(AnalysisResult result) {
 		ArrangementResult job = findJobByID(result.getJobID());
@@ -245,41 +249,6 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
         }
     }
 
-    private void fillCommonFields(CheckUnitJob checkUnitJob, CheckUnitJobTemplate checkUnitJobTemplate){
-        checkUnitJob.setAccessToolUnit(checkUnitJobTemplate.getAccessToolUnit());
-        checkUnitJob.getAccessToolParameters().putAll(checkUnitJobTemplate.getParameters());
-    }
-    
-    static class CheckUnitJobMapper{
-    	
-    	private AccessToolUnit accessToolUnit;
-    	private Map<AccessToolParameters, String> parameters;
-    	
-    	CheckUnitJobMapper(AccessToolUnit accessToolUnit, Map<AccessToolParameters, String> parameters) {
-			this.accessToolUnit = accessToolUnit;
-			this.parameters = parameters;
-		}
-
-        CheckUnitJobTemplate map(ResultSet rs, int rowNum) throws SQLException {
-            CheckUnitJobTemplate checkUnitJobTemplate = new CheckUnitJobTemplate();
-            checkUnitJobTemplate.setErdiId(rs.getLong("id"));
-            checkUnitJobTemplate.setAccessToolUnit(accessToolUnit);
-            checkUnitJobTemplate.setCheckUnitType(CheckUnitType.valueOf(rs.getString("check_unit_type")));
-            checkUnitJobTemplate.setCheckUnitValueTemplate(rs.getString("check_unit_value"));
-            checkUnitJobTemplate.getParameters().putAll(parameters);
-            return checkUnitJobTemplate;
-        }
-    }
-
-    @Data
-    private static class CheckUnitJobTemplate {
-        private Long erdiId;
-        private AccessToolUnit accessToolUnit;
-        private final Map<AccessToolParameters, String> parameters = new HashMap<>();
-        private CheckUnitType checkUnitType;
-        private String checkUnitValueTemplate;
-    }
-
 	@Override
 	public ArrangementResult updateJobStatus(Long jobID, CheckUnitJobResult status) {
 		ArrangementResult job = findJobByID(jobID);
@@ -292,5 +261,52 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
 			.orElseThrow(() -> 
 				new AS_15_8_DispatcherException("Ошибка! Задание не найдено! ID: " + jobID)
 			);
+	}
+	
+	private CheckUnitJob createAndSaveCheckUnitJob(Long arrangementID, CheckUnitJobTemplate template, CheckUnit checkUnit) {
+		CheckUnitJob checkUnitJob = new CheckUnitJob();
+		checkUnitJob.setAccessToolUnit(template.getAccessToolUnit());
+        checkUnitJob.getAccessToolParameters().putAll(template.getParameters());
+        checkUnitJob.setCheckUnit(checkUnit);
+        Long ipJobID = saveCheckUnitJobAsResult(arrangementID, template.erdiId, checkUnitJob);
+        checkUnitJob.setJobID(ipJobID);
+        return checkUnitJob;
+	}
+	
+	@Data
+	@AllArgsConstructor
+	private static class Protocol {
+		private String protocol;
+		private int port;
+	}
+	
+	@Data
+	private static class CheckUnitJobTemplate {
+		private Long erdiId;
+		private AccessToolUnit accessToolUnit;
+		private final Map<AccessToolParameters, String> parameters = new HashMap<>();
+		private CheckUnitType checkUnitType;
+		private String checkUnitValueTemplate;
+	}
+	
+	static class CheckUnitJobMapper{
+		
+		private AccessToolUnit accessToolUnit;
+		private Map<AccessToolParameters, String> parameters;
+		
+		CheckUnitJobMapper(AccessToolUnit accessToolUnit, Map<AccessToolParameters, String> parameters) {
+			this.accessToolUnit = accessToolUnit;
+			this.parameters = parameters;
+		}
+		
+		CheckUnitJobTemplate map(ResultSet rs, int rowNum) throws SQLException {
+			CheckUnitJobTemplate checkUnitJobTemplate = new CheckUnitJobTemplate();
+			checkUnitJobTemplate.setErdiId(rs.getLong("id"));
+			checkUnitJobTemplate.setAccessToolUnit(accessToolUnit);
+			checkUnitJobTemplate.setCheckUnitType(CheckUnitType.valueOf(rs.getString("check_unit_type")));
+			checkUnitJobTemplate.setCheckUnitValueTemplate(rs.getString("check_unit_value"));
+			checkUnitJobTemplate.getParameters().putAll(parameters);
+			return checkUnitJobTemplate;
+		}
 	}
 }
