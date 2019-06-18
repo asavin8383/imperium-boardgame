@@ -77,11 +77,11 @@ public class StubAnalysis {
     }
 
 
-    private static String appendToString(String str, String append){
+   /* private static String appendToString(String str, String append){
         return  (StringUtils.isEmpty(str) ? "" : str) +
                 (StringUtils.isEmpty(str) || StringUtils.isEmpty(append) ? "" : " ") +
                 (StringUtils.isEmpty(append) ? "" : append);
-    }
+    }*/
 
     // вес от 0 о 100 (0 - большой размер, 100 - маленький)
     private static int getPageSizeHit(Integer size){

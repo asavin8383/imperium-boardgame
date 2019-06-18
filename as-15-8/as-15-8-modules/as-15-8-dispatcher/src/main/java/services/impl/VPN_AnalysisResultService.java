@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.apache.commons.validator.routines.InetAddressValidator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -30,17 +29,14 @@ public class VPN_AnalysisResultService implements AnalysisResultService<VpnAnaly
 
 	private DetailResultsVpnRepository detailVpnRepo;
     private NamedParameterJdbcTemplate jdbcNamedTemplate;
-    private JdbcTemplate jdbcTemplate;
 
 	public static final String UTF8 =  StandardCharsets.UTF_8.name();
 
     @Autowired
     public VPN_AnalysisResultService(NamedParameterJdbcTemplate jdbcNamedTemplate,
-									 JdbcTemplate jdbcTemplate,
 									 DetailResultsVpnRepository detailVpnRepo) {
         this.detailVpnRepo = detailVpnRepo;
         this.jdbcNamedTemplate = jdbcNamedTemplate;
-        this.jdbcTemplate = jdbcTemplate;
     }
 
 
