@@ -70,9 +70,12 @@ public class HideMyAssScript extends AnonymizerScript {
                         .getCloudflareErrorDetails(driver));
             }
 
-            if (captcha())
-                throw new Captcha_RobotScriptExecutionException(
-                        "Обнаружена captcha-form на HideMyAss");
+            if (captcha()) {
+                log.info("Обнаружена captcha-form на HideMyAss");
+                if (false && !this.ignoreCaptcha) {
+                    throw new Captcha_RobotScriptExecutionException("Обнаружена captcha-form на HideMyAss");
+                }
+            }
 
             if (isHideMyAssErrorPage())
                 return getErrorMessage(getHideMyAssErrorDetails());

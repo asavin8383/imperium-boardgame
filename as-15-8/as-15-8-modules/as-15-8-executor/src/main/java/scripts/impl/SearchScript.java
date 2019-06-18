@@ -88,8 +88,7 @@ public abstract class SearchScript extends SeleniumRobotScript {
     ExecutionPSJobResult createExecutionResult(boolean linkFound) {
         ExecutionPSJobResult message = new ExecutionPSJobResult();
         message.setLinkFound(linkFound);
-        message.setScreenshot(linkFound ?
-                ScriptUtils.getScreenshot(driver) : null);
+        message.setScreenshot(ScriptUtils.getScreenshot(driver));   // в любом случае делаем скриншот
         return message;
     }
 
