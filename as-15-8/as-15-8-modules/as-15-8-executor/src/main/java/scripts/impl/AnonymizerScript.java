@@ -23,6 +23,7 @@ public abstract class AnonymizerScript extends RobotScript {
 
     protected boolean useEtalon;
     private String etalonProxy;
+    protected boolean ignoreCaptcha = false;
 
     protected ExecutionAnonymizerResult message;
 
@@ -47,6 +48,13 @@ public abstract class AnonymizerScript extends RobotScript {
                 scriptParams.get(AccessToolParameters.ETALON_PROXY_USERNAME),
                 scriptParams.get(AccessToolParameters.ETALON_PROXY_PASSWORD)
         );
+
+        String ignoreCaptchaApps = scriptParams.get(AccessToolParameters.IGNORE_CAPTCHA_APPS);
+        ignoreCaptchaApps = ignoreCaptchaApps == null ? "" : ignoreCaptchaApps;
+
+        String appName = getDriverParams().getApplicationName();
+        appName = appName == null ? "" : appName.toLowerCase();
+        ignoreCaptcha = ignoreCaptchaApps.toLowerCase().contains(appName);
 
         this.message = new ExecutionAnonymizerResult();
         this.message.setStubUrl(scriptParams.get(AccessToolParameters.STUB_URL));

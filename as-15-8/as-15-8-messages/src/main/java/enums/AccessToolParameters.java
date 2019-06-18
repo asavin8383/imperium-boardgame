@@ -24,5 +24,6 @@ public enum  AccessToolParameters {
     ETALON_PROXY_PORT,
     ETALON_PROXY_USERNAME,
     ETALON_PROXY_PASSWORD,
-    USE_ETALON
+    USE_ETALON,
+    IGNORE_CAPTCHA_APPS
 }
