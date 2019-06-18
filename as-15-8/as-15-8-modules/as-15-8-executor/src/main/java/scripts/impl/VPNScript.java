@@ -1,22 +1,22 @@
 package scripts.impl;
 
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+
+import org.openqa.selenium.WebDriver;
+
 import checkUnits.CheckUnit;
 import enums.AccessToolParameters;
 import execution.ExecutionJobResult;
 import execution.ExecutionVpnJobResult;
-import org.openqa.selenium.WebDriver;
-import org.springframework.util.StringUtils;
 import scripts.ProxyUtils;
 import scripts.RobotScript;
 import scripts.ScriptDriverParameters;
+import scripts.exceptions.RobotScriptExecutionException;
 import scripts.utils.RobotScriptUtils;
 import scripts.utils.ScriptUtils;
 import scripts.utils.ScriptUtils.PageResult;
-import scripts.exceptions.RobotScriptExecutionException;
-
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 
 public class VPNScript extends RobotScript {
 

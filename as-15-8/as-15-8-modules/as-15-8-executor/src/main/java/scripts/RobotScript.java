@@ -1,23 +1,22 @@
 package scripts;
 
+import java.io.Closeable;
+import java.io.IOException;
+import java.util.Map;
+
+import org.openqa.selenium.WebDriver;
+
 import checkUnits.CheckUnit;
 import enums.AccessToolParameters;
 import execution.ExecutionJobResult;
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
-import org.openqa.selenium.WebDriver;
 import scripts.exceptions.RobotScriptExecutionException;
-
-import java.io.Closeable;
-import java.io.IOException;
-import java.util.Map;
 
 /**
  * Скрипт робота проверки ПС/ПАСД
  * @author shabalinAI
  *
  */
-@Slf4j
 public abstract class RobotScript implements Closeable {
 
     protected WebDriver driver;
