@@ -1,16 +1,30 @@
 package model.result;
 
-import checkUnits.CheckUnitType;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.ForeignKey;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import checkUnits.CheckUnitType;
 import enums.CheckUnitJobResult;
 import lombok.Data;
 import model.erdi.ERDI;
 import model.task.Arrangement;
-import org.hibernate.annotations.Type;
-
-import javax.persistence.*;
-import java.io.Serializable;
-import java.time.LocalDateTime;
 
 /**
  * Результаты выполнения мероприятия

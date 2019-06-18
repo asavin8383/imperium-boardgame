@@ -1,19 +1,21 @@
 package scripts.utils;
 
-import lombok.extern.slf4j.Slf4j;
-import org.openqa.selenium.TimeoutException;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import scripts.exceptions.RobotScriptExecutionException;
-import scripts.exceptions.TimeoutCheckingBrowserException;
-import scripts.exceptions.TimeoutScriptException;
+import static scripts.utils.ScriptUtils.TIME_OUT_CHECKING_ERROR;
+import static scripts.utils.ScriptUtils.TIME_OUT_ERROR;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static scripts.utils.ScriptUtils.*;
+import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebDriver;
+
+import lombok.extern.slf4j.Slf4j;
+import scripts.exceptions.RobotScriptExecutionException;
+import scripts.exceptions.TimeoutCheckingBrowserException;
+import scripts.exceptions.TimeoutScriptException;
+import scripts.utils.ScriptUtils.PageResult;
 
 
 @Slf4j
