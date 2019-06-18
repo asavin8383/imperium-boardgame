@@ -190,7 +190,7 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
                     			arrangementId,
                     			template, 
                     			new CheckUnit(template.checkUnitType,
-                                		protocol.getProtocol() + "[" + template.checkUnitValueTemplate + "::" + protocol.getPort() + "]")));
+                                		protocol.getProtocol() + "[" + template.checkUnitValueTemplate + "]"+ ":" + protocol.getPort() )));
                     }
                     break;
                 case IP_V4_SUBNET:
