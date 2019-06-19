@@ -17,6 +17,7 @@ import org.apache.logging.log4j.util.Strings;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.openqa.selenium.json.JsonException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
@@ -88,16 +89,18 @@ public class GoogleApiScript implements RobotScript{
 			String curURL = url.toString()+"&start="+startIndex;
 			ResponseEntity<String> response = restTemplate.getForEntity(curURL, String.class);
 			if(response.getStatusCode() == HttpStatus.OK && response.hasBody()) {
-				JSONObject searchResult = new JSONObject(response.getBody());		
-				JSONArray urlsJson = searchResult.getJSONArray("items"); //TODO JsonException
+				JSONObject searchResult = new JSONObject(response.getBody());
+				try {
+					JSONArray urlsJson = searchResult.getJSONArray("items");
+					List<String> urls = new ArrayList<>();
+					int limit = Math.min(urlsJson.length(), this.searchLimit - startIndex + 1);
+					for(int i = 0; i < limit; i++) {
+						urls.add(urlsJson.getJSONObject(i).getString("link"));
+					}
+					
+					resp.put(formatResponse(response), urls);
+				} catch(JsonException ex) {}
 				
-				List<String> urls = new ArrayList<>();
-				int limit = Math.min(urlsJson.length(), this.searchLimit - startIndex + 1);
-				for(int i = 0; i < limit; i++) {
-					urls.add(urlsJson.getJSONObject(i).getString("link"));
-				}
-				
-				resp.put(formatResponse(response), urls);
 				try {
 					startIndex = searchResult.getJSONObject("queries").getJSONArray("nextPage").getJSONObject(0).getInt("startIndex");
 				} catch (Exception ex) {

@@ -15,7 +15,7 @@ import robots.RobotsConfiguration;
  */
 @SpringBootApplication
 @Import({RobotsConfiguration.class, KafkaConfiguration.class})
-@ComponentScan(basePackages={"common", "kafka", "robots", "service", "listener", "scripts"})
+@ComponentScan(basePackages={"common", "kafka", "robots", "service", "listener"})
 public class ApplicationConfiguration{
 	
 	public static void main(String[] args) {
