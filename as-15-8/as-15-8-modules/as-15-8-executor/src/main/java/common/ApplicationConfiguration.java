@@ -15,11 +15,10 @@ import robots.RobotsConfiguration;
  */
 @SpringBootApplication
 @Import({RobotsConfiguration.class, KafkaConfiguration.class})
-@ComponentScan(basePackages={"common", "kafka", "robots", "service", "listener"})
+@ComponentScan(basePackages={"common", "kafka", "robots", "service", "listener", "scripts"})
 public class ApplicationConfiguration{
 	
 	public static void main(String[] args) {
 		SpringApplication.run(ApplicationConfiguration.class, args);
 	}
-
 }

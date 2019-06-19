@@ -89,7 +89,7 @@ public class GoogleApiScript implements RobotScript{
 			ResponseEntity<String> response = restTemplate.getForEntity(curURL, String.class);
 			if(response.getStatusCode() == HttpStatus.OK && response.hasBody()) {
 				JSONObject searchResult = new JSONObject(response.getBody());		
-				JSONArray urlsJson = searchResult.getJSONArray("items");
+				JSONArray urlsJson = searchResult.getJSONArray("items"); //TODO JsonException
 				
 				List<String> urls = new ArrayList<>();
 				int limit = Math.min(urlsJson.length(), this.searchLimit - startIndex + 1);

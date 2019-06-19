@@ -13,21 +13,29 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
+import javax.annotation.PostConstruct;
 import javax.imageio.ImageIO;
 
-import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@Service
 public class ScreenshotFromTextMaker {
+	
+	@Autowired
+	private ResourceLoader resourceLoader;
 	
 	private static Font font;
 	
-	static {
+	@PostConstruct
+	public void setFont() {
 		try {
-			InputStream fontStream = new DefaultResourceLoader().getResource("classpath:ARIAL.TTF").getInputStream();
+			InputStream fontStream = resourceLoader.getResource("classpath:ARIAL.TTF").getInputStream();
 			font = Font.createFont(Font.TRUETYPE_FONT, fontStream);
 		} catch (FontFormatException | IOException ex) {
 			log.error("Ошибка! Шрифты не были загружены", ex);
