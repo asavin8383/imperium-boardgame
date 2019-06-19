@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+
+import robots.impl.GoogleApiRobot;
 import robots.impl.SeleniumAnonymizerRobot;
 import robots.impl.SeleniumHolaRobot;
 import robots.impl.SeleniumSearchRobot;
@@ -38,7 +40,7 @@ public class RobotsConfiguration {
 	 * @return
 	 * @throws MalformedURLException
 	 */
-	@Bean
+	/*@Bean
 	public Robot googleRobot() throws MalformedURLException {
 		return new SeleniumSearchRobot(
 			AccessToolUnit.GOOGLE,
@@ -49,6 +51,16 @@ public class RobotsConfiguration {
 				env.getProperty("robots.google.app"),
 				env.getProperty("robots.google.browser")),
 			Integer.parseInt(env.getProperty("robots.google.limit"))
+		);
+	}*/
+	public Robot googleRobot() throws MalformedURLException {
+		return new GoogleApiRobot(
+			AccessToolUnit.GOOGLE,
+			GoogleApiScript.class,
+			env.getProperty("robots.google-api.search-system-id"),
+			env.getProperty("robots.google-api.key"),
+			env.getProperty("robots.google-api.region"),
+			Integer.parseInt(env.getProperty("robots.google-api.search-limit"))
 		);
 	}
 

@@ -1,22 +1,25 @@
 package scripts.impl;
 
-import checkUnits.CheckUnit;
-import enums.AccessToolParameters;
-import execution.ExecutionJobResult;
+import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+import javax.annotation.Nullable;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
+
+import checkUnits.CheckUnit;
+import enums.AccessToolParameters;
+import execution.ExecutionJobResult;
 import scripts.ScriptDriverParameters;
 import scripts.exceptions.RobotScriptExecutionException;
-
-import javax.annotation.Nullable;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
-import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
+import scripts.utils.EqualityTest;
 
 public class YandexScript extends SearchScript {
 
@@ -48,13 +51,17 @@ public class YandexScript extends SearchScript {
         }
 	}
 
-    private boolean checkSuggestedLink(EqualityTest test) {
-        WebElement element = getSuggestedLink(driver);
-        if (Objects.nonNull(element)) {
-            String href = element.getAttribute("href");
-            return test.equalTo(href);
-        }
-        return false;
+    private boolean checkSuggestedLink(EqualityTest test) throws RobotScriptExecutionException {
+    	try {
+	        WebElement element = getSuggestedLink(driver);
+	        if (Objects.nonNull(element)) {
+	            String href = element.getAttribute("href");
+	            return test.equalTo(href);
+	        }
+	        return false;
+    	} catch (Exception ex) {
+    		throw new RobotScriptExecutionException(ex);
+    	}
     }
 
     @Nullable

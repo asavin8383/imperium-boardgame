@@ -1,24 +1,25 @@
 package scripts.impl;
 
-import checkUnits.CheckUnit;
-import enums.AccessToolParameters;
-import execution.ExecutionJobResult;
-import lombok.extern.slf4j.Slf4j;
+import static enums.CheckUnitJobResult.INTERNAL_ERROR;
+import static scripts.utils.ScriptUtils.TIME_OUT_CHECKING_ERROR;
+
+import java.util.Map;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
+
+import checkUnits.CheckUnit;
+import enums.AccessToolParameters;
+import execution.ExecutionJobResult;
+import lombok.extern.slf4j.Slf4j;
 import scripts.ScriptDriverParameters;
-import scripts.exceptions.TimeoutCheckingBrowserException;
-import scripts.utils.*;
-import scripts.exceptions.Captcha_RobotScriptExecutionException;
 import scripts.exceptions.RobotScriptExecutionException;
+import scripts.exceptions.TimeoutCheckingBrowserException;
 import scripts.exceptions.TimeoutScriptException;
-
-import java.util.Map;
-
-import static enums.CheckUnitJobResult.INTERNAL_ERROR;
-import static scripts.utils.ScriptUtils.TIME_OUT_CHECKING_ERROR;
+import scripts.utils.CloudflareUtils;
+import scripts.utils.ScriptUtils;
 
 @Slf4j
 public class HideMyAssScript extends AnonymizerScript {
@@ -72,9 +73,9 @@ public class HideMyAssScript extends AnonymizerScript {
 
             if (captcha()) {
                 log.info("Обнаружена captcha-form на HideMyAss");
-                if (false && !this.ignoreCaptcha) {
+               /* if (false && !this.ignoreCaptcha) {
                     throw new Captcha_RobotScriptExecutionException("Обнаружена captcha-form на HideMyAss");
-                }
+                }*/
             }
 
             if (isHideMyAssErrorPage())

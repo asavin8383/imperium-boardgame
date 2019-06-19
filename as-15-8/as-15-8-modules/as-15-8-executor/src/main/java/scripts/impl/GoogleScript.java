@@ -8,6 +8,7 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import scripts.ScriptDriverParameters;
 import scripts.exceptions.RobotScriptExecutionException;
+import scripts.utils.EqualityTest;
 
 import java.net.URI;
 import java.net.URISyntaxException;
