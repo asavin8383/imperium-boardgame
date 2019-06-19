@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 
+import org.apache.logging.log4j.util.Strings;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -134,12 +135,14 @@ public class GoogleApiScript implements RobotScript{
     }
     
     private String createSearchUrl(String searchQuery) {
-    	return new StringBuilder(GOOGLE_API_URL+"?")
+    	StringBuilder builder = new StringBuilder(GOOGLE_API_URL+"?")
     			.append("cx="+this.searchSystemID+"&")
     			.append("key="+this.key+"&")
     			.append("fields="+SEARCH_FIELDS+"&")
-    			.append("cr="+this.region)
-    			.append("q="+searchQuery).toString();
+    			.append("q="+searchQuery);
+    	if(Strings.isNotEmpty(this.region))
+    		builder.append("cr="+this.region);
+    	return builder.toString();
     }
     
 	public static void main(String[] args) throws RobotScriptExecutionException, IOException {
