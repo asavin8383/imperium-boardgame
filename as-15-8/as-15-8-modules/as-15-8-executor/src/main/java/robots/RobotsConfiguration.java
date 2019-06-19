@@ -53,6 +53,7 @@ public class RobotsConfiguration {
 			Integer.parseInt(env.getProperty("robots.google.limit"))
 		);
 	}*/
+	@Bean
 	public Robot googleRobot() throws MalformedURLException {
 		return new GoogleApiRobot(
 			AccessToolUnit.GOOGLE,
