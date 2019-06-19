@@ -15,18 +15,19 @@ import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.util.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class ScreenshotFromTextMaker {
-
+	
 	private static Font font;
 	
 	static {
-		InputStream fontStream = ScreenshotFromTextMaker.class.getClassLoader().getResourceAsStream("ARIAL.TTF");
 		try {
+			InputStream fontStream = new DefaultResourceLoader().getResource("classpath:ARIAL.TTF").getInputStream();
 			font = Font.createFont(Font.TRUETYPE_FONT, fontStream);
 		} catch (FontFormatException | IOException ex) {
 			log.error("Ошибка! Шрифты не были загружены", ex);
