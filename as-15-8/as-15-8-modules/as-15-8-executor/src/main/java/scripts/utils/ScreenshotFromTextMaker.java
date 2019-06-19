@@ -1,28 +1,45 @@
 package scripts.utils;
 
-import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.FontFormatException;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 
 import org.springframework.util.StringUtils;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class ScreenshotFromTextMaker {
 
+	private static Font font;
+	
+	static {
+		InputStream fontStream = ScreenshotFromTextMaker.class.getClassLoader().getResourceAsStream("ARIAL.TTF");
+		try {
+			font = Font.createFont(Font.TRUETYPE_FONT, fontStream);
+		} catch (FontFormatException | IOException ex) {
+			log.error("Ошибка! Шрифты не были загружены", ex);
+		}
+		font = font.deriveFont(Font.TRUETYPE_FONT, 12);
+	}
+	
 	public static byte[] makeScreenshot(String content) {
 		BufferedImage img = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = img.createGraphics();
-        Font font = new Font("Arial", Font.PLAIN, 12);
+        
         g2d.setFont(font);
-        Canvas canvas = new Canvas();
-        FontMetrics fm = canvas.getFontMetrics(font);
+        FontMetrics fm = g2d.getFontMetrics(font);
         int height = fm.getHeight() * StringUtils.countOccurrencesOf(content, "\n");
         g2d.dispose();
 
@@ -54,5 +71,12 @@ public class ScreenshotFromTextMaker {
             ex.printStackTrace();
         }
         return outputStream.toByteArray();
+	}
+	
+	public static void main(String[] args) throws IOException {
+		byte[] imgBytes = makeScreenshot("hello\r\nworld");
+		ByteArrayInputStream bis = new ByteArrayInputStream(imgBytes);
+		BufferedImage bImage2 = ImageIO.read(bis);
+		ImageIO.write(bImage2, "png", new File("D:\\output.png") );
 	}
 }

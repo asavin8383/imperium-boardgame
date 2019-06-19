@@ -146,7 +146,7 @@ public class GoogleApiScript implements RobotScript{
     }
     
 	public static void main(String[] args) throws RobotScriptExecutionException, IOException {
-		GoogleApiScript script = new GoogleApiScript("008760942635674233646:iomr_wlnhoi", "AIzaSyChrOZnfJyx_Jmz6dDqBmOkp0zGfE9htgU", "countryRU", 15);
+		GoogleApiScript script = new GoogleApiScript("008760942635674233646:iomr_wlnhoi", "AIzaSyDD-B6NrOjC_Vyjhezdo8EruwH-xrqdT-8", "countryRU", 15);
 		ExecutionPSJobResult result = (ExecutionPSJobResult)script.execute(new CheckUnit(CheckUnitType.URL, "https://cannabay.org"));
 		System.out.println(result.isLinkFound());
 		
