@@ -15,7 +15,7 @@ import scripts.ScriptDriverParameters;
 import scripts.exceptions.RobotScriptExecutionException;
 
 /**
- * Скрипт робота проверки ПС/ПАСД
+ * РЎРєСЂРёРїС‚ СЂРѕР±РѕС‚Р° РїСЂРѕРІРµСЂРєРё РџРЎ/РџРђРЎР”
  * @author shabalinAI
  *
  */
@@ -46,8 +46,8 @@ public abstract class SeleniumRobotScript implements RobotScript {
 	}
 
 	/**
-	 * Метод, запускаюший выполнение скрипта робота
-	 * @param checkUnit Ресурс для проверки
+	 * РњРµС‚РѕРґ, Р·Р°РїСѓСЃРєР°СЋС€РёР№ РІС‹РїРѕР»РЅРµРЅРёРµ СЃРєСЂРёРїС‚Р° СЂРѕР±РѕС‚Р°
+	 * @param checkUnit Р РµСЃСѓСЂСЃ РґР»СЏ РїСЂРѕРІРµСЂРєРё
 	 * @return
 	 * @throws RobotScriptExecutionException
 	 */
@@ -71,7 +71,7 @@ public abstract class SeleniumRobotScript implements RobotScript {
 
 	public void close(WebDriver driver) {
 		if (driver != null) {
-			driver.close();
+			//driver.close();
 			driver.quit();
 		}
 	}
