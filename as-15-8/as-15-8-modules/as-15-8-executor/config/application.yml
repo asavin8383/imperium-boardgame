@@ -11,8 +11,8 @@ robots:
         limit: 15
     google-api:
         search-system-id: 008760942635674233646:iomr_wlnhoi
-        key: AIzaSyChrOZnfJyx_Jmz6dDqBmOkp0zGfE9htgU
-        region: countryRU
+        key: AIzaSyDD-B6NrOjC_Vyjhezdo8EruwH-xrqdT-8
+        region:
         search-limit: 15
     yandex:
         platform: WIN8

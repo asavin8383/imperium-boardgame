@@ -1,5 +1,6 @@
 package scripts.utils;
 
+import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -20,7 +21,8 @@ public class ScreenshotFromTextMaker {
         Graphics2D g2d = img.createGraphics();
         Font font = new Font("Arial", Font.PLAIN, 12);
         g2d.setFont(font);
-        FontMetrics fm = g2d.getFontMetrics();
+        Canvas canvas = new Canvas();
+        FontMetrics fm = canvas.getFontMetrics(font);
         int height = fm.getHeight() * StringUtils.countOccurrencesOf(content, "\n");
         g2d.dispose();
 
