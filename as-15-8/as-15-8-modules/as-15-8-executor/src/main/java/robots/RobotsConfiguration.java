@@ -40,7 +40,7 @@ public class RobotsConfiguration {
 	 * @return
 	 * @throws MalformedURLException
 	 */
-	/*@Bean
+	@Bean
 	public Robot googleRobot() throws MalformedURLException {
 		return new SeleniumSearchRobot(
 			AccessToolUnit.GOOGLE,
@@ -52,8 +52,8 @@ public class RobotsConfiguration {
 				env.getProperty("robots.google.browser")),
 			Integer.parseInt(env.getProperty("robots.google.limit"))
 		);
-	}*/
-	@Bean
+	}
+	/*@Bean
 	public Robot googleRobot() throws MalformedURLException {
 		return new GoogleApiRobot(
 			AccessToolUnit.GOOGLE,
@@ -63,7 +63,7 @@ public class RobotsConfiguration {
 			env.getProperty("robots.google-api.region"),
 			Integer.parseInt(env.getProperty("robots.google-api.search-limit"))
 		);
-	}
+	}/*
 
 	/**
 	 * Робот проверки ПС Yandex
