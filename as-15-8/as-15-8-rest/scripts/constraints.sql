@@ -1,5 +1,5 @@
 alter table portal.access_tools drop constraint if exists ck_name;
-alter table portal.access_tools add constraint ck_name check ( name in ('GOOGLE','YANDEX','VPN', 'CAMELEO_XYZ', 'HIDEMYASS', 'HOLA', 'EXPRESS', 'KASPERSKY'));
+alter table portal.access_tools add constraint ck_name check ( name in ('GOOGLE','YANDEX', 'GOOGLE_API', 'VPN', 'CAMELEO_XYZ', 'HIDEMYASS', 'HOLA', 'EXPRESS', 'KASPERSKY'));
 alter table portal.access_tools drop constraint if exists ck_type;
 alter table portal.access_tools add constraint ck_type check ( type in ('SEARCH_SYSTEM','VPN','ANONYMIZER', 'PROXY'));
 alter table portal.arrangements drop constraint if exists ck_status;
