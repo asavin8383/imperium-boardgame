@@ -82,8 +82,10 @@ public abstract class AbstractRobot implements Robot {
 	
 	@Override
 	public void close() throws IOException {
-		for(RobotScript script : runningScripts)
+		for(RobotScript script : runningScripts) {
 			script.close();
+		}
+		log.info(getAccessToolUnit()+": Скрипты успешно остановлены!");
 		runningScripts.clear();
 	}
 }
