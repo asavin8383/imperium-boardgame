@@ -2,6 +2,8 @@ package robots;
 
 
 import enums.AccessToolUnit;
+
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -18,7 +20,7 @@ import java.util.Map;
  */
 @Service
 @Qualifier("robotsFactory")
-public class RobotsFactory {
+public class RobotsFactory implements DisposableBean {
 
 	/** Список роботов */
 	@Autowired
@@ -46,6 +48,12 @@ public class RobotsFactory {
 			throw new IllegalArgumentException("Error creating robot! Robot for " + accessToolUnit + " is not supported");
 		}
 		return robot;
+	}
+
+	@Override
+	public void destroy() throws Exception {
+		for(Robot robot : robots)
+			robot.destroy();
 	}
 	
 }

@@ -1,8 +1,7 @@
 package robots;
 
+import java.io.IOException;
 import java.util.Map;
-
-import org.springframework.beans.factory.DisposableBean;
 
 import checkUnits.CheckUnit;
 import enums.AccessToolParameters;
@@ -15,7 +14,7 @@ import scripts.exceptions.RobotScriptExecutionException;
  * @author shabalinAI
  *
  */
-public interface Robot extends DisposableBean{
+public interface Robot {
 	
 	/**
 	 * Проверяемая ПС/ПАСД
@@ -25,4 +24,5 @@ public interface Robot extends DisposableBean{
 	
 	ExecutionJobResult run(CheckUnit checkUnit, Map<AccessToolParameters, String> accessToolParameters) throws RobotScriptExecutionException;
 	
+	void destroy() throws IOException;
 }
