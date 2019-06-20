@@ -11,12 +11,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
 import enums.AccessToolUnit;
+import robots.impl.GoogleApiRobot;
 import robots.impl.SeleniumAnonymizerRobot;
 import robots.impl.SeleniumHolaRobot;
 import robots.impl.SeleniumSearchRobot;
 import robots.impl.SeleniumVpnRobot;
 import scripts.ScriptDriverParameters;
 import scripts.impl.CameleoScript;
+import scripts.impl.GoogleApiScript;
 import scripts.impl.GoogleScript;
 import scripts.impl.HideMyAssScript;
 import scripts.impl.HolaScript;
@@ -57,17 +59,18 @@ public class RobotsConfiguration {
 			Integer.parseInt(env.getProperty("robots.google.limit"))
 		);
 	}
-	/*@Bean
-	public Robot googleRobot() throws MalformedURLException {
+	
+	@Bean
+	public Robot googleApiRobot() throws MalformedURLException {
 		return new GoogleApiRobot(
-			AccessToolUnit.GOOGLE,
+			AccessToolUnit.GOOGLE_API,
 			GoogleApiScript.class,
 			env.getProperty("robots.google-api.search-system-id"),
 			env.getProperty("robots.google-api.key"),
 			env.getProperty("robots.google-api.region"),
 			Integer.parseInt(env.getProperty("robots.google-api.search-limit"))
 		);
-	}/*
+	}
 
 	/**
 	 * Робот проверки ПС Yandex
