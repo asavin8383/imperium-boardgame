@@ -71,7 +71,6 @@ public abstract class SeleniumRobotScript implements RobotScript {
 
 	public void close(WebDriver driver) {
 		if (driver != null) {
-			//driver.close();
 			driver.quit();
 		}
 	}

@@ -82,6 +82,7 @@ public abstract class AbstractRobot implements Robot {
 	
 	@Override
 	public void destroy() throws IOException {
+		log.info("\n------->>> " + getAccessToolUnit() + ": Остановка скриптов");
 		for(RobotScript script : runningScripts) {
 			try {
 				script.close();
@@ -90,7 +91,7 @@ public abstract class AbstractRobot implements Robot {
 				throw ex;
 			}
 		}
-		log.info("\n------->>> " + getAccessToolUnit() + ": Скрипты успешно остановлены!");
 		runningScripts.clear();
+		log.info("\n------->>> " + getAccessToolUnit() + ": Скрипты успешно остановлены");
 	}
 }
