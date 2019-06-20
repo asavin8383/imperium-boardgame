@@ -1,7 +1,8 @@
 package robots;
 
-import java.io.Closeable;
 import java.util.Map;
+
+import org.springframework.beans.factory.DisposableBean;
 
 import checkUnits.CheckUnit;
 import enums.AccessToolParameters;
@@ -14,7 +15,7 @@ import scripts.exceptions.RobotScriptExecutionException;
  * @author shabalinAI
  *
  */
-public interface Robot extends Closeable{
+public interface Robot extends DisposableBean{
 	
 	/**
 	 * Проверяемая ПС/ПАСД
