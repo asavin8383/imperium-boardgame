@@ -36,7 +36,7 @@ public class KafkaJobNotificationsConsumer {
     public void consumeJobNotifications(CheckUnitStatusNotification notification, Acknowledgment ack) {
 		log.info("Принято сообщение с уведомлением от проверки: " + notification.getJobID() + ", " + notification.getCheckUnitStatus());
     	try {       		
-    		ArrangementResult job = checkUnitService.updateJobStatus(notification.getJobID(), notification.getCheckUnitStatus());
+    		ArrangementResult job = checkUnitService.updateJobStatus(notification.getJobID(), notification.getCheckUnitStatus(), notification.getDescription());
     		if(notification.getCheckUnitStatus() == CheckUnitJobResult.CAPTCHA_DETECTED) {
     			ArrangementStatusNotification arrNotification = new ArrangementStatusNotification(job.getArrangementId(), ArrangementStatus.ACTION_REQUIRED);
     			arrangementStatusProducer.sendArrangementStatusMessage(arrNotification);

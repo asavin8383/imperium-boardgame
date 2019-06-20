@@ -1,6 +1,8 @@
 package robots;
 
-import enums.AccessToolUnit;
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import org.openqa.selenium.Platform;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -8,16 +10,18 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
-import robots.impl.GoogleApiRobot;
+import enums.AccessToolUnit;
 import robots.impl.SeleniumAnonymizerRobot;
 import robots.impl.SeleniumHolaRobot;
 import robots.impl.SeleniumSearchRobot;
 import robots.impl.SeleniumVpnRobot;
 import scripts.ScriptDriverParameters;
-import scripts.impl.*;
-
-import java.net.MalformedURLException;
-import java.net.URL;
+import scripts.impl.CameleoScript;
+import scripts.impl.GoogleScript;
+import scripts.impl.HideMyAssScript;
+import scripts.impl.HolaScript;
+import scripts.impl.VPNScript;
+import scripts.impl.YandexScript;
 
 /**
  * Конфигурация роботов для проверки ПС/ПАСД

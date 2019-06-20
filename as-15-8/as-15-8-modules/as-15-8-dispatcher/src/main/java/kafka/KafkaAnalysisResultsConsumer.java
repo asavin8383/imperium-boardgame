@@ -1,5 +1,8 @@
 package kafka;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
@@ -48,7 +51,11 @@ public class KafkaAnalysisResultsConsumer {
     	} catch (Exception ex) {
     		try {
         		log.error("Ошибка при обработке сообщения с анализом результатов проверки: " + analysisResult.getJobID() + ", " + analysisResult.getCheckUnit().getValue(), ex);
-        		ArrangementResult jobResult = checkUnitService.updateJobStatus(analysisResult.getJobID(), CheckUnitJobResult.INTERNAL_ERROR);
+        		
+        		StringWriter sw = new StringWriter();
+        		ex.printStackTrace(new PrintWriter(sw));
+        		
+        		ArrangementResult jobResult = checkUnitService.updateJobStatus(analysisResult.getJobID(), CheckUnitJobResult.INTERNAL_ERROR, sw.toString());
         		ArrangementStatus arrStatus = checkUnitService.checkArrangementStatus(jobResult.getArrangementId());
         		if(arrStatus == ArrangementStatus.FINISHED) {
         			log.info("Мероприятие успешно завешено: " + jobResult.getArrangementId());

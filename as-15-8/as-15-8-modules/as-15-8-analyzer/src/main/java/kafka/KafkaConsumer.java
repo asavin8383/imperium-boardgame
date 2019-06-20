@@ -67,7 +67,7 @@ public class KafkaConsumer {
     		log.info("Анализ результата проверки ПС/ПАСД выполнен успешно : " + job.getJobID() + ", " + job.getCheckUnit().getValue());
     	} catch (Exception ex) {
     		log.error("Ошибка при обработке задания на анализ результатов проверки ПС/ПАСД : " + job.getJobID() + ", " + job.getCheckUnit().getValue(), ex);
-    		kafkaProducer.sendErrorNotification(job.getJobID());
+    		kafkaProducer.sendErrorNotification(job.getJobID(), ex);
     	}
 		ack.acknowledge();
 	}

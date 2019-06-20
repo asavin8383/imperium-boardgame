@@ -21,4 +21,5 @@ public class CheckUnitStatusNotification {
 	/** Статус задания */
 	private CheckUnitJobResult checkUnitStatus;
 	
+	private String description;
 }

@@ -14,6 +14,8 @@ import jobs.ERDIJob;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import model.ArrangementResult;
+import model.DetailResultsVpn;
+
 import org.apache.commons.net.util.SubnetUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -21,6 +23,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 import repositories.ArrangementResultRepository;
+import repositories.DetailResultsVpnRepository;
 import services.AnalysisResultService;
 import services.AnalysisResultServiceFactory;
 import services.CheckUnitJobService;
@@ -42,15 +45,18 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
     private NamedParameterJdbcTemplate jdbcNamedTemplate;
     private JdbcTemplate jdbcTemplate;
     private ArrangementResultRepository arrangementResultRepo;
+    private DetailResultsVpnRepository detailResultsRepo;
     private final List<Protocol> protocols = new ArrayList<>();
 
     @Autowired
     public CheckUnitJobServiceImpl(NamedParameterJdbcTemplate jdbcNamedTemplate,
                                    JdbcTemplate jdbcTemplate,
-                                   ArrangementResultRepository arrangementResultRepo) {
+                                   ArrangementResultRepository arrangementResultRepo,
+                                   DetailResultsVpnRepository detailResultsRepo) {
         this.jdbcNamedTemplate = jdbcNamedTemplate;
         this.jdbcTemplate = jdbcTemplate;
         this.arrangementResultRepo = arrangementResultRepo;
+        this.detailResultsRepo = detailResultsRepo;
     }
 
     @PostConstruct
@@ -250,9 +256,11 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
     }
 
 	@Override
-	public ArrangementResult updateJobStatus(Long jobID, CheckUnitJobResult status) {
+	public ArrangementResult updateJobStatus(Long jobID, CheckUnitJobResult status, String description) {
 		ArrangementResult job = findJobByID(jobID);
 		job.setResult(status);
+		if(status == CheckUnitJobResult.INTERNAL_ERROR)
+			saveErrorToDetailResults(jobID, description);
 		return arrangementResultRepo.save(job);
 	}
 	
@@ -271,6 +279,13 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
         Long ipJobID = saveCheckUnitJobAsResult(arrangementID, template.erdiId, checkUnitJob);
         checkUnitJob.setJobID(ipJobID);
         return checkUnitJob;
+	}
+	
+	private void saveErrorToDetailResults(Long jobID, String exText) {
+		DetailResultsVpn detailResults = new DetailResultsVpn();
+		detailResults.setId(jobID);
+		detailResults.setStubScoreInfo(exText);
+		detailResultsRepo.save(detailResults);
 	}
 	
 	@Data

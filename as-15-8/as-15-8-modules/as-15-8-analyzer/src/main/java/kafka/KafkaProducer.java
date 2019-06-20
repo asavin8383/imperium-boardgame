@@ -1,5 +1,8 @@
 package kafka;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -77,9 +80,11 @@ public class KafkaProducer {
 	 * @param analysisResult Результат анализа
 	 * @throws AnalysisException 
 	 */
-	public void sendErrorNotification(Long jobID) {
+	public void sendErrorNotification(Long jobID, Throwable cause) {
 		try {
-			CheckUnitStatusNotification notification = new CheckUnitStatusNotification(jobID, CheckUnitJobResult.INTERNAL_ERROR);
+			StringWriter sw = new StringWriter();
+			cause.printStackTrace(new PrintWriter(sw));
+			CheckUnitStatusNotification notification = new CheckUnitStatusNotification(jobID, CheckUnitJobResult.INTERNAL_ERROR, sw.toString());
 			
 			Message<CheckUnitStatusNotification> message = MessageBuilder
 	                .withPayload(notification)

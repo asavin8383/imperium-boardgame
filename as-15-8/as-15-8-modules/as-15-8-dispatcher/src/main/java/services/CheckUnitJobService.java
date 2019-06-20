@@ -19,7 +19,7 @@ public interface CheckUnitJobService {
 
     ArrangementResult processJobResult(AnalysisResult result);
     
-    ArrangementResult updateJobStatus(Long jobID, CheckUnitJobResult status);
+    ArrangementResult updateJobStatus(Long jobID, CheckUnitJobResult status, String description);
     
     ArrangementStatus checkArrangementStatus(Long arrangementID);
 

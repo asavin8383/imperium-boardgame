@@ -1,5 +1,7 @@
 package service.impl;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.concurrent.ExecutionException;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -121,10 +123,14 @@ public class SeleniumRobotsService implements RobotsService {
 		try {
 			CheckUnitStatusNotification notification = new CheckUnitStatusNotification();
 			notification.setJobID(jobID);
-			if(cause instanceof Captcha_RobotScriptExecutionException)
+			if(cause instanceof Captcha_RobotScriptExecutionException) {
 				notification.setCheckUnitStatus(CheckUnitJobResult.CAPTCHA_DETECTED);
-			else
+			} else {
 				notification.setCheckUnitStatus(CheckUnitJobResult.INTERNAL_ERROR);
+				StringWriter sw = new StringWriter();
+				cause.printStackTrace(new PrintWriter(sw));
+				notification.setDescription(sw.toString());
+			}
 			
 			Message<CheckUnitStatusNotification> message = MessageBuilder
 	                .withPayload(notification)
