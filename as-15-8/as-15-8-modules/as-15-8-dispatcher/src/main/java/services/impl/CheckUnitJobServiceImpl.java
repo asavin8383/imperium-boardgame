@@ -284,6 +284,7 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
 	private void saveErrorToDetailResults(Long jobID, String exText) {
 		DetailResultsVpn detailResults = new DetailResultsVpn();
 		detailResults.setId(jobID);
+		detailResults.setResponseError(false);
 		detailResults.setStubScoreInfo(exText);
 		detailResultsRepo.save(detailResults);
 	}
