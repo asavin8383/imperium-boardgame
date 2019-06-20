@@ -46,7 +46,7 @@ public class RobotsConfiguration {
 	 * @return
 	 * @throws MalformedURLException
 	 */
-	@Bean(destroyMethod = "destroy")
+	@Bean
 	public Robot googleRobot() throws MalformedURLException {
 		return new SeleniumSearchRobot(
 			AccessToolUnit.GOOGLE,
@@ -77,7 +77,7 @@ public class RobotsConfiguration {
 	 * @return
 	 * @throws MalformedURLException
 	 */
-	@Bean(destroyMethod = "destroy")
+	@Bean
 	public Robot yandexRobot() throws MalformedURLException {
 		return new SeleniumSearchRobot(
 			AccessToolUnit.YANDEX,
@@ -96,7 +96,7 @@ public class RobotsConfiguration {
 	 * @return
 	 * @throws MalformedURLException
 	 */
-	@Bean(destroyMethod = "destroy")
+	@Bean
 	public Robot kasperskyRobot() throws MalformedURLException {
 
 		return new SeleniumVpnRobot(
@@ -116,7 +116,7 @@ public class RobotsConfiguration {
 	 * @return
 	 * @throws MalformedURLException
 	 */
-	@Bean(destroyMethod = "destroy")
+	@Bean
 	public Robot expressRobot() throws MalformedURLException {
 
 		return new SeleniumVpnRobot(
@@ -136,7 +136,7 @@ public class RobotsConfiguration {
 	 * @return
 	 * @throws MalformedURLException
 	 */
-	@Bean(destroyMethod = "destroy")
+	@Bean
 	public Robot holaRobot() throws MalformedURLException {
 
 		return new SeleniumHolaRobot(
@@ -156,7 +156,7 @@ public class RobotsConfiguration {
 	 * @return
 	 * @throws MalformedURLException
 	 */
-	@Bean(destroyMethod = "destroy")
+	@Bean
 	public Robot proxyTorGuardRobot() throws MalformedURLException {
 
 		return new SeleniumVpnRobot(
@@ -176,7 +176,7 @@ public class RobotsConfiguration {
 	 * @return
 	 * @throws MalformedURLException
 	 */
-	@Bean(destroyMethod = "destroy")
+	@Bean
 	public Robot hideMyAssRobot() throws MalformedURLException {
 
 		return new SeleniumAnonymizerRobot(
@@ -196,7 +196,7 @@ public class RobotsConfiguration {
 	 * @return
 	 * @throws MalformedURLException
 	 */
-	@Bean(destroyMethod = "destroy")
+	@Bean
 	public Robot cameleoXyzRobot() throws MalformedURLException {
 
 		return new SeleniumAnonymizerRobot(
