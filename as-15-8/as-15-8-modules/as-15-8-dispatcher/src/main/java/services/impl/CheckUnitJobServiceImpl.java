@@ -149,6 +149,11 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
     private List<CheckUnitJob> buildCheckUnitJobsFromTemplates(List<CheckUnitJobTemplate> checkUnitJobTemplates, Long arrangementId){
         List<CheckUnitJob> checkUnitJobs = new ArrayList<>();
         for(CheckUnitJobTemplate template : checkUnitJobTemplates){
+        	
+        	boolean isPS = template.getAccessToolUnit() == AccessToolUnit.GOOGLE ||
+        			template.getAccessToolUnit() == AccessToolUnit.GOOGLE_API ||
+        			template.getAccessToolUnit() == AccessToolUnit.YANDEX;
+        	
             switch (template.checkUnitType) {
                 case URL:
                 	checkUnitJobs.add(createAndSaveCheckUnitJob(
@@ -158,13 +163,21 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
                                 template.checkUnitValueTemplate)));
                     break;
                 case DOMAIN:
-                    for (Protocol protocol : protocols){    
-                    	checkUnitJobs.add(createAndSaveCheckUnitJob(
-                        			arrangementId,
-                        			template, 
-                        			new CheckUnit(template.checkUnitType,
-                                		protocol.getProtocol() + template.checkUnitValueTemplate)));
-                    }
+                	if(isPS) {
+                		checkUnitJobs.add(createAndSaveCheckUnitJob(
+                    			arrangementId,
+                    			template, 
+                    			new CheckUnit(template.checkUnitType,
+                            		template.checkUnitValueTemplate)));
+                	} else {
+	                    for (Protocol protocol : protocols){    
+	                    	checkUnitJobs.add(createAndSaveCheckUnitJob(
+	                        			arrangementId,
+	                        			template, 
+	                        			new CheckUnit(template.checkUnitType,
+	                                		protocol.getProtocol() + template.checkUnitValueTemplate)));
+	                    }
+                	}
                     break;
                 case DOMAIN_MASK:
                     String sql = "SELECT domain_name FROM dictionaries.domain_mask_items dmi\n" +
@@ -172,13 +185,21 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
                     jdbcTemplate.queryForList(sql, template.checkUnitValueTemplate).stream()
                         .map(stringObjectMap -> stringObjectMap.get("domain_name").toString())
                         .forEach(domainName -> {
-                            for (Protocol protocol : protocols) {  
-                            	checkUnitJobs.add(createAndSaveCheckUnitJob(
+                        	if(isPS) {
+                        		checkUnitJobs.add(createAndSaveCheckUnitJob(
                             			arrangementId,
                             			template, 
                             			new CheckUnit(CheckUnitType.DOMAIN,
-                                        		protocol.getProtocol() + domainName)));
-                            }
+                                        		domainName)));
+                        	} else {
+	                            for (Protocol protocol : protocols) {  
+	                            	checkUnitJobs.add(createAndSaveCheckUnitJob(
+	                            			arrangementId,
+	                            			template, 
+	                            			new CheckUnit(CheckUnitType.DOMAIN,
+	                                        		protocol.getProtocol() + domainName)));
+	                            }
+                        	}
                         });
                     break;
                 case IP_V4:
