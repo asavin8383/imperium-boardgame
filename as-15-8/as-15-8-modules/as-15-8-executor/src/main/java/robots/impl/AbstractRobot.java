@@ -2,18 +2,22 @@ package robots.impl;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import checkUnits.CheckUnit;
 import enums.AccessToolParameters;
 import enums.AccessToolUnit;
 import execution.ExecutionJobResult;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import robots.Robot;
 import scripts.RobotScript;
 import scripts.exceptions.Captcha_RobotScriptExecutionException;
 import scripts.exceptions.RobotScriptExecutionException;
 
+@Slf4j
 public abstract class AbstractRobot implements Robot {
 
 	/** Проверяемая ПС/ПАСД */
@@ -21,6 +25,8 @@ public abstract class AbstractRobot implements Robot {
 	protected AccessToolUnit accessToolUnit;
 	
 	private Class<? extends RobotScript> scriptClass;
+	
+	private Set<RobotScript> runningScripts = new HashSet<>();
 	
 	/**
 	 * Робот
@@ -40,6 +46,7 @@ public abstract class AbstractRobot implements Robot {
 		boolean isCaptcha = false;
 		try{
 			script = createScript(accessToolParameters);
+			runningScripts.add(script);
 			message = script.execute(checkUnit);
 		} catch (Exception ex) {
 			if(ex instanceof RobotScriptExecutionException) {
@@ -52,8 +59,9 @@ public abstract class AbstractRobot implements Robot {
 			if(!isCaptcha && script != null) {
 				try {
 					script.close();
+					runningScripts.remove(script);
 				} catch (IOException ex) {
-					throw new RobotScriptExecutionException("Ошибка при закрытии скрипта", ex);
+					log.error("Ошибка при закрытии скрипта", ex);
 				}
 			}
 		}
@@ -70,5 +78,12 @@ public abstract class AbstractRobot implements Robot {
 		} catch (SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
 			throw new RuntimeException("Ошибка при создании скрипта робота", ex);
 		}
+	}
+	
+	@Override
+	public void close() throws IOException {
+		for(RobotScript script : runningScripts)
+			script.close();
+		runningScripts.clear();
 	}
 }

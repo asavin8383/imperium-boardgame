@@ -1,5 +1,6 @@
 package robots;
 
+import java.io.Closeable;
 import java.util.Map;
 
 import checkUnits.CheckUnit;
@@ -13,7 +14,7 @@ import scripts.exceptions.RobotScriptExecutionException;
  * @author shabalinAI
  *
  */
-public interface Robot {
+public interface Robot extends Closeable{
 	
 	/**
 	 * Проверяемая ПС/ПАСД
