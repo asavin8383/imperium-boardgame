@@ -2,6 +2,7 @@ package scripts.utils;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -79,7 +80,12 @@ public class ScriptUtils {
 
 
     public static byte[] getScreenshot(WebDriver webDriver) {
-        return ((TakesScreenshot) webDriver).getScreenshotAs(OutputType.BYTES);
+        try {
+            return ((TakesScreenshot) webDriver).getScreenshotAs(OutputType.BYTES);
+        }
+        catch (TimeoutException te){
+            return ((TakesScreenshot) webDriver).getScreenshotAs(OutputType.BYTES);     // в случае таймаута пробуем еще один раз
+        }
     }
 
     public static String getCheckUnitValue(@NonNull CheckUnit checkUnit){
