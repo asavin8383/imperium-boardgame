@@ -21,8 +21,6 @@ import checkUnits.CheckUnitStatusNotification;
 import enums.CheckUnitJobResult;
 import execution.ExecutionJobResult;
 import lombok.extern.slf4j.Slf4j;
-import robots.Robot;
-import robots.RobotsFactory;
 import scripts.RobotScript;
 import scripts.exceptions.Captcha_RobotScriptExecutionException;
 import scripts.exceptions.RobotScriptExecutionException;

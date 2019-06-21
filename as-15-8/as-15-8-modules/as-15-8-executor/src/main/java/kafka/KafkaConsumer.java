@@ -139,7 +139,6 @@ public class KafkaConsumer {
 			if(messageListener instanceof FilteringMessageListenerAdapter) {
 				Object listenerDelegate = ((FilteringMessageListenerAdapter<?, ?>)messageListener).getDelegate();
 				if(listenerDelegate instanceof CheckUnitJobMessageListener) {
-					log.info(listenerDelegate.getClass().getName());
 					((CheckUnitJobMessageListener)listenerDelegate).destroy();
 				}
 			}

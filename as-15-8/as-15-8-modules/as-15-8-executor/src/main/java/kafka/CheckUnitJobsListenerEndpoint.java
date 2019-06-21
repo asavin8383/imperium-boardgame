@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.springframework.beans.factory.DisposableBean;
 import org.springframework.kafka.config.KafkaListenerEndpoint;
 import org.springframework.kafka.listener.AcknowledgingMessageListener;
 import org.springframework.kafka.listener.MessageListenerContainer;
@@ -99,7 +98,7 @@ public class CheckUnitJobsListenerEndpoint implements KafkaListenerEndpoint {
 		return null;
 	}
 	
-	class CheckUnitJobMessageListener implements AcknowledgingMessageListener<String, CheckUnitJob>, DisposableBean {
+	class CheckUnitJobMessageListener implements AcknowledgingMessageListener<String, CheckUnitJob> {
 
 		private CheckUnitJobMessageConsumer consumer;
 		
@@ -116,7 +115,6 @@ public class CheckUnitJobsListenerEndpoint implements KafkaListenerEndpoint {
 			this.consumer.onMessage(script, data, acknowledgment);
 		}
 
-		@Override
 		public void destroy() throws Exception {
 			if(this.script != null) {
 				script.close();
