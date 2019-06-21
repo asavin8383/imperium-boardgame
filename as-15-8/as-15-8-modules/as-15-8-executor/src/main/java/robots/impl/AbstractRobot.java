@@ -6,8 +6,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.PreDestroy;
-
 import checkUnits.CheckUnit;
 import enums.AccessToolParameters;
 import enums.AccessToolUnit;
@@ -28,7 +26,7 @@ public abstract class AbstractRobot implements Robot {
 	
 	private Class<? extends RobotScript> scriptClass;
 	
-	private Set<RobotScript> runningScripts = new HashSet<>();
+	private volatile Set<RobotScript> runningScripts = new HashSet<>();
 	
 	/**
 	 * Робот
@@ -83,9 +81,12 @@ public abstract class AbstractRobot implements Robot {
 	}
 	
 	@Override
-	@PreDestroy
-	public void destroy() throws IOException {
-		log.info("\n------->>> " + getAccessToolUnit() + ": Остановка скриптов");
+	public boolean isRunning() {
+		return runningScripts.size() > 0;
+	}
+	
+	@Override
+	public void stop() throws IOException {
 		for(RobotScript script : runningScripts) {
 			try {
 				script.close();

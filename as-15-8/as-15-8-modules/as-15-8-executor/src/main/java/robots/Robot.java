@@ -24,5 +24,7 @@ public interface Robot {
 	
 	ExecutionJobResult run(CheckUnit checkUnit, Map<AccessToolParameters, String> accessToolParameters) throws RobotScriptExecutionException;
 	
-	void destroy() throws IOException;
+	boolean isRunning();
+	
+	void stop() throws IOException;
 }

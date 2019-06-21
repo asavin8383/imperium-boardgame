@@ -1,6 +1,7 @@
 package robots;
 
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,4 +50,12 @@ public class RobotsFactory {
 		}
 		return robot;
 	}	
+	
+	public static void destroyRobot(AccessToolUnit accessToolUnit) throws IOException {
+		synchronized (robotsCache) {
+			Robot robot = robotsCache.get(accessToolUnit);
+			if(robot != null && robot.isRunning())
+				robot.stop();
+		}
+	}
 }

@@ -1,14 +1,19 @@
 package kafka;
 
+import java.io.IOException;
+
 import javax.annotation.PostConstruct;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.context.event.EventListener;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
+import org.springframework.kafka.event.ContainerStoppedEvent;
+import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.listener.MessageListenerContainer;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
@@ -17,6 +22,7 @@ import checkUnits.CheckUnitJob;
 import control.ExecutorControlMessage;
 import enums.AccessToolUnit;
 import lombok.extern.slf4j.Slf4j;
+import robots.RobotsFactory;
 import scripts.exceptions.Captcha_RobotScriptExecutionException;
 import service.RobotsService;
 
@@ -122,6 +128,16 @@ public class KafkaConsumer {
 			}
 		} catch(Exception ex) {
 			log.error("Ошибка при запуске слушателей для " + accessToolUnit, ex);
+		}
+	}
+	
+	@SuppressWarnings({"rawtypes"})
+	@EventListener
+	public synchronized <K, V> void listenStopContanier(ContainerStoppedEvent event) throws IOException {
+		ConcurrentMessageListenerContainer container = event.getContainer(ConcurrentMessageListenerContainer.class);
+		AccessToolUnit accessToolUnit = AccessToolUnit.valueOf(container.getListenerId());
+		if(accessToolUnit != null && !container.isRunning()) {
+			RobotsFactory.destroyRobot(accessToolUnit);
 		}
 	}
 }
