@@ -134,11 +134,14 @@ public class KafkaConsumer {
 	@EventListener
 	public void listenStopContanier(ConsumerStoppedEvent event) throws Exception {
 		Object container = event.getSource();
+		log.info(container.getClass().getName());
 		if(container instanceof ConcurrentMessageListenerContainer) {
 			Object messageListener = ((ConcurrentMessageListenerContainer<?, ?>)container).getContainerProperties().getMessageListener();
 			if(messageListener instanceof DelegatingMessageListener) {
+				log.info(messageListener.getClass().getName());
 				Object listenerDelegate = ((DelegatingMessageListener<?>)messageListener).getDelegate();
 				if(listenerDelegate instanceof CheckUnitJobMessageListener) {
+					log.info(listenerDelegate.getClass().getName());
 					((CheckUnitJobMessageListener)listenerDelegate).destroy();
 				}
 			}
