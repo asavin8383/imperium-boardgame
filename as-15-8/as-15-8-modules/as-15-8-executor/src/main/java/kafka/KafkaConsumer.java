@@ -1,7 +1,5 @@
 package kafka;
 
-import java.io.IOException;
-
 import javax.annotation.PostConstruct;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -13,11 +11,9 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.kafka.event.ContainerStoppedEvent;
-import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.listener.DelegatingMessageListener;
 import org.springframework.kafka.listener.KafkaMessageListenerContainer;
 import org.springframework.kafka.listener.MessageListenerContainer;
-import org.springframework.kafka.listener.adapter.FilteringMessageListenerAdapter;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
 

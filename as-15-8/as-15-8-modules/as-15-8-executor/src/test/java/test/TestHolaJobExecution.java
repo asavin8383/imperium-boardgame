@@ -1,16 +1,20 @@
 package test;
 
-import checkUnits.CheckUnit;
-import checkUnits.CheckUnitJob;
-import checkUnits.CheckUnitType;
-import common.ApplicationConfiguration;
-import enums.AccessToolUnit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import checkUnits.CheckUnit;
+import checkUnits.CheckUnitJob;
+import checkUnits.CheckUnitType;
+import common.ApplicationConfiguration;
+import enums.AccessToolUnit;
+import robots.Robot;
+import robots.RobotsFactory;
+import scripts.RobotScript;
 import scripts.exceptions.RobotScriptExecutionException;
 import service.impl.SeleniumRobotsService;
 
@@ -32,7 +36,10 @@ public class TestHolaJobExecution
 
 		checkUnitJob.setCheckUnit(new CheckUnit(CheckUnitType.URL, "myip.ru"));
 
-		service.run(checkUnitJob);
+		
+		Robot robot = RobotsFactory.getRobot(checkUnitJob.getAccessToolUnit());
+		RobotScript script = robot.createScript(checkUnitJob.getAccessToolParameters());
+		service.run(checkUnitJob, script);
 	}
 
 }

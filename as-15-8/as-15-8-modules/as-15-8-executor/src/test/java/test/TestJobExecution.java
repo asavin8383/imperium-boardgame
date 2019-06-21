@@ -11,6 +11,9 @@ import checkUnits.CheckUnitJob;
 import checkUnits.CheckUnitType;
 import common.ApplicationConfiguration;
 import enums.AccessToolUnit;
+import robots.Robot;
+import robots.RobotsFactory;
+import scripts.RobotScript;
 import scripts.exceptions.RobotScriptExecutionException;
 import service.impl.SeleniumRobotsService;
 
@@ -30,7 +33,9 @@ public class TestJobExecution {
 		
 		checkUnitJob.setCheckUnit(new CheckUnit(CheckUnitType.URL, "https://www.google.ru"));
 		
-		service.run(checkUnitJob);
+		Robot robot = RobotsFactory.getRobot(checkUnitJob.getAccessToolUnit());
+		RobotScript script = robot.createScript(checkUnitJob.getAccessToolParameters());
+		service.run(checkUnitJob, script);
 	}
 	
 }
