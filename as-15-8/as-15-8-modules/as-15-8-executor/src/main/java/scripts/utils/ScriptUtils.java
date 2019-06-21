@@ -79,6 +79,9 @@ public class ScriptUtils {
 
 
     public static byte[] getScreenshot(WebDriver webDriver) {
+
+        waitDriver(webDriver, 1);   // задержка скриншота, чтоб избежать белого экрана, т.к. некоторые сайты показывают контент не сразу.
+
         try {
             return ((TakesScreenshot) webDriver).getScreenshotAs(OutputType.BYTES);
         }
