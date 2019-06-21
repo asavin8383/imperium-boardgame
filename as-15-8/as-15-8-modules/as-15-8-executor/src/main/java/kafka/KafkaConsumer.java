@@ -10,7 +10,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
-import org.springframework.kafka.event.ContainerStoppedEvent;
+import org.springframework.kafka.event.ConsumerStoppedEvent;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.listener.DelegatingMessageListener;
 import org.springframework.kafka.listener.MessageListenerContainer;
@@ -132,13 +132,15 @@ public class KafkaConsumer {
 	}
 	
 	@EventListener
-	public synchronized <K, V> void listenStopContanier(ContainerStoppedEvent event) throws Exception {
-		ConcurrentMessageListenerContainer<?, ?> container = event.getSource(ConcurrentMessageListenerContainer.class);
-		Object messageListener = container.getContainerProperties().getMessageListener();
-		if(messageListener instanceof DelegatingMessageListener) {
-			Object listenerDelegate = ((DelegatingMessageListener<?>)messageListener).getDelegate();
-			if(listenerDelegate instanceof CheckUnitJobMessageListener) {
-				((CheckUnitJobMessageListener)listenerDelegate).destroy();
+	public void listenStopContanier(ConsumerStoppedEvent event) throws Exception {
+		Object container = event.getSource();
+		if(container instanceof ConcurrentMessageListenerContainer) {
+			Object messageListener = ((ConcurrentMessageListenerContainer<?, ?>)container).getContainerProperties().getMessageListener();
+			if(messageListener instanceof DelegatingMessageListener) {
+				Object listenerDelegate = ((DelegatingMessageListener<?>)messageListener).getDelegate();
+				if(listenerDelegate instanceof CheckUnitJobMessageListener) {
+					((CheckUnitJobMessageListener)listenerDelegate).destroy();
+				}
 			}
 		}
 	}
