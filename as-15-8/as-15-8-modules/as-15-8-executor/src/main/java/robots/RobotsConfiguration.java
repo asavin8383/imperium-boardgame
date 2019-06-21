@@ -60,7 +60,7 @@ public class RobotsConfiguration {
 		);
 	}
 	
-	@Bean(destroyMethod = "destroy")
+	@Bean
 	public Robot googleApiRobot() throws MalformedURLException {
 		return new GoogleApiRobot(
 			AccessToolUnit.GOOGLE_API,
@@ -210,5 +210,4 @@ public class RobotsConfiguration {
 			)
 		);
 	}
-
 }
