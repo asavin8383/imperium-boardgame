@@ -57,13 +57,11 @@ public class SeleniumRobotsService implements RobotsService {
 					" accessTool = " + checkUnitJob.getAccessToolUnit() +
 					" checkUnit = " + checkUnitJob.getCheckUnit().getValue();
 			
-			Robot robot = RobotsFactory.getRobot(checkUnitJob.getAccessToolUnit());
 			ExecutionJobResult message = null;
 			log.info("Запуск робота: " + robotName);
 			
 			boolean isCaptcha = false;
 			try{
-				script = robot.createScript(checkUnitJob.getAccessToolParameters());
 				message = script.execute(checkUnitJob.getCheckUnit());
 			} catch (Exception ex) {
 				if(ex instanceof RobotScriptExecutionException) {
