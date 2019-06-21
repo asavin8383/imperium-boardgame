@@ -11,8 +11,8 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.kafka.event.ContainerStoppedEvent;
+import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.listener.DelegatingMessageListener;
-import org.springframework.kafka.listener.KafkaMessageListenerContainer;
 import org.springframework.kafka.listener.MessageListenerContainer;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
@@ -133,7 +133,7 @@ public class KafkaConsumer {
 	
 	@EventListener
 	public synchronized <K, V> void listenStopContanier(ContainerStoppedEvent event) throws Exception {
-		KafkaMessageListenerContainer<?, ?> container = event.getSource(KafkaMessageListenerContainer.class);
+		ConcurrentMessageListenerContainer<?, ?> container = event.getSource(ConcurrentMessageListenerContainer.class);
 		Object messageListener = container.getContainerProperties().getMessageListener();
 		if(messageListener instanceof DelegatingMessageListener) {
 			Object listenerDelegate = ((DelegatingMessageListener<?>)messageListener).getDelegate();
