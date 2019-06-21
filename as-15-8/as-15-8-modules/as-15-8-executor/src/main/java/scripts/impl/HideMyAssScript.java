@@ -29,6 +29,7 @@ public class HideMyAssScript extends AnonymizerScript {
 	public static final String HIDEMYASS_RETRY_AGREE_DETECTED   = "HIDEMYASS_RETRY_AGREE_DETECTED";
 	public static final String HIDEMYASS_NOT_FOUND_BUTTON       = INTERNAL_ERROR.name() + "__NOT_FOUND_BUTTON";
 	public static final String HIDEMYASS_NOT_OPENED_URL         = INTERNAL_ERROR.name() + "__NOT_OPENED_URL";
+	public static final String HIDEMYASS_NOT_FOUND_INPUT        = INTERNAL_ERROR.name() + "__NOT_FOUND_INPUT";
 
 
     public HideMyAssScript(ScriptDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams) {
@@ -111,11 +112,9 @@ public class HideMyAssScript extends AnonymizerScript {
                 return getErrorMessage(TIME_OUT_CHECKING_ERROR);
             return getTimeoutMessage();
         } catch (NoSuchElementException e) {
-            throw new RobotScriptExecutionException(
-                    "Не удалось найти элементы навигации HideMyAss", e);
+            return getErrorMessage(HIDEMYASS_NOT_FOUND_INPUT);  // "Не удалось найти элементы навигации HideMyAss"
         } catch (InterruptedException e) {
-            throw new RobotScriptExecutionException(
-                    "Выполнение потока прервано", e);
+            throw new RobotScriptExecutionException("Выполнение потока прервано", e);
         }
     }
 
