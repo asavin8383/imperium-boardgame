@@ -14,15 +14,19 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.kafka.event.ContainerStoppedEvent;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
+import org.springframework.kafka.listener.DelegatingMessageListener;
+import org.springframework.kafka.listener.KafkaMessageListenerContainer;
 import org.springframework.kafka.listener.MessageListenerContainer;
+import org.springframework.kafka.listener.adapter.FilteringMessageListenerAdapter;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
 
 import checkUnits.CheckUnitJob;
 import control.ExecutorControlMessage;
 import enums.AccessToolUnit;
+import kafka.CheckUnitJobsListenerEndpoint.CheckUnitJobMessageListener;
 import lombok.extern.slf4j.Slf4j;
-import robots.RobotsFactory;
+import scripts.RobotScript;
 import scripts.exceptions.Captcha_RobotScriptExecutionException;
 import service.RobotsService;
 
@@ -54,8 +58,8 @@ public class KafkaConsumer {
     		CheckUnitJobsListenerEndpoint endpoint = new CheckUnitJobsListenerEndpoint(
 				checkUnitJobsTopicName,
 				accessTool,
-				(data, ack) -> {
-					consumeCheckUnitJobMessage(data, ack);
+				(script, data, ack) -> {
+					consumeCheckUnitJobMessage(script, data, ack);
 				}
     		);
     		
@@ -63,10 +67,10 @@ public class KafkaConsumer {
     	}
     }
 	
-	private void consumeCheckUnitJobMessage(ConsumerRecord<String, CheckUnitJob> message, Acknowledgment ack) {
+	private void consumeCheckUnitJobMessage(RobotScript script, ConsumerRecord<String, CheckUnitJob> message, Acknowledgment ack) {
 		log.info("\n   ---->>> Принято задание: " + message.value().toString()+", partition: "+message.partition()+", offset: "+message.offset());
 		try {
-			robotsService.run(message.value());
+			robotsService.run(message.value(), script);
 			ack.acknowledge();
 		} catch (Captcha_RobotScriptExecutionException ex) {
 			stopListeners(message.value().getAccessToolUnit());
@@ -131,13 +135,15 @@ public class KafkaConsumer {
 		}
 	}
 	
-	@SuppressWarnings({"rawtypes"})
 	@EventListener
-	public synchronized <K, V> void listenStopContanier(ContainerStoppedEvent event) throws IOException {
-		ConcurrentMessageListenerContainer container = event.getContainer(ConcurrentMessageListenerContainer.class);
-		AccessToolUnit accessToolUnit = AccessToolUnit.valueOf(container.getListenerId());
-		if(accessToolUnit != null && !container.isRunning()) {
-			RobotsFactory.destroyRobot(accessToolUnit);
+	public synchronized <K, V> void listenStopContanier(ContainerStoppedEvent event) throws Exception {
+		KafkaMessageListenerContainer<?, ?> container = event.getSource(KafkaMessageListenerContainer.class);
+		Object messageListener = container.getContainerProperties().getMessageListener();
+		if(messageListener instanceof DelegatingMessageListener) {
+			Object listenerDelegate = ((DelegatingMessageListener<?>)messageListener).getDelegate();
+			if(listenerDelegate instanceof CheckUnitJobMessageListener) {
+				((CheckUnitJobMessageListener)listenerDelegate).destroy();
+			}
 		}
 	}
 }

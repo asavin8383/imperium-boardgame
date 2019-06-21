@@ -1,13 +1,10 @@
 package robots;
 
-import java.io.IOException;
 import java.util.Map;
 
-import checkUnits.CheckUnit;
 import enums.AccessToolParameters;
 import enums.AccessToolUnit;
-import execution.ExecutionJobResult;
-import scripts.exceptions.RobotScriptExecutionException;
+import scripts.RobotScript;
 
 /**
  * Интерфейс робота проверки ПС/ПАСД
@@ -22,9 +19,5 @@ public interface Robot {
 	 */
 	AccessToolUnit getAccessToolUnit();
 	
-	ExecutionJobResult run(CheckUnit checkUnit, Map<AccessToolParameters, String> accessToolParameters) throws RobotScriptExecutionException;
-	
-	boolean isRunning();
-	
-	void stop() throws IOException;
+	RobotScript createScript(Map<AccessToolParameters, String> params);
 }

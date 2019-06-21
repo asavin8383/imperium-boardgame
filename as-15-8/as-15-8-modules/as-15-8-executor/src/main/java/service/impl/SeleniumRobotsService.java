@@ -1,5 +1,6 @@
 package service.impl;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.concurrent.ExecutionException;
@@ -22,6 +23,7 @@ import execution.ExecutionJobResult;
 import lombok.extern.slf4j.Slf4j;
 import robots.Robot;
 import robots.RobotsFactory;
+import scripts.RobotScript;
 import scripts.exceptions.Captcha_RobotScriptExecutionException;
 import scripts.exceptions.RobotScriptExecutionException;
 import service.RobotsService;
@@ -48,7 +50,7 @@ public class SeleniumRobotsService implements RobotsService {
     private String notificationsTopicName;
 	
 	@Override
-	public void run(CheckUnitJob checkUnitJob) throws Captcha_RobotScriptExecutionException{
+	public void run(CheckUnitJob checkUnitJob, RobotScript script) throws Captcha_RobotScriptExecutionException{
 		String robotName = "";
 		try {
 			robotName = "jobID = " + checkUnitJob.getJobID() +
@@ -59,7 +61,26 @@ public class SeleniumRobotsService implements RobotsService {
 			ExecutionJobResult message = null;
 			log.info("Запуск робота: " + robotName);
 			
-			message = robot.run(checkUnitJob.getCheckUnit(), checkUnitJob.getAccessToolParameters());
+			boolean isCaptcha = false;
+			try{
+				script = robot.createScript(checkUnitJob.getAccessToolParameters());
+				message = script.execute(checkUnitJob.getCheckUnit());
+			} catch (Exception ex) {
+				if(ex instanceof RobotScriptExecutionException) {
+					if(ex instanceof Captcha_RobotScriptExecutionException)
+						isCaptcha = true;
+					throw (RobotScriptExecutionException)ex;
+				} else
+					throw new RobotScriptExecutionException("Ошибка при выполнении скрипта робота", ex);
+			} finally {
+				if(!isCaptcha && script != null) {
+					try {
+						script.close();
+					} catch (IOException ex) {
+						log.error("Ошибка при закрытии скрипта", ex);
+					}
+				}
+			}
 			message.setJobID(checkUnitJob.getJobID());
 			message.setCheckUnit(checkUnitJob.getCheckUnit());
 	        message.setAccessToolUnit(checkUnitJob.getAccessToolUnit());
