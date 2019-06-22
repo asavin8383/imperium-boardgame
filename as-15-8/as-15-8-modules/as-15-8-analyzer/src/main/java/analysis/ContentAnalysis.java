@@ -30,15 +30,10 @@ public class ContentAnalysis {
         double k = sumPoints / maxPoints;
         boolean result = k >= THRESHOLD;
 
-        String info = String.format("Запрещенный сайт: %s (коэф = %.2f, порог = %.2f)", (result ? "да" : "нет"), k, THRESHOLD);
+        String info = String.format("Запрещенный сайт: %s (коэф = %.2f, порог = %.2f).", (result ? "да" : "нет"), k, THRESHOLD);
         log.info(info);
 
         AnalysisUtils.appendString(details, info);
-
-        String score = res.getStubScoreInfo();
-        score = StringUtils.isEmpty(score) ? "" : score;
-        score += (StringUtils.isEmpty(score) ? "" : " ") + info;
-        res.setStubScoreInfo(score);
 
         // процентный вес
         return result;

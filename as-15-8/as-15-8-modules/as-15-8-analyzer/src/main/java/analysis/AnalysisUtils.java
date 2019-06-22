@@ -231,7 +231,7 @@ public class AnalysisUtils {
                 result = INTERNAL_ERROR;
             }
             else {
-                message = "Ошибка ЭТАЛОНА: " + errorCode + ". Не критическая";
+                message = "Не критическая ошибка ЭТАЛОНА: " + errorCode;
             }
 
             details.append(message);
