@@ -85,7 +85,6 @@ public abstract class AnonymizerScript extends SeleniumRobotScript {
                     getDriverParams().getBrowserName(),
                     etalonProxy);
 
-            driver.manage().window().fullscreen();
             driver.get(ScriptUtils.getCheckUnitValue(checkUnit));
             ScriptUtils.PageResult etalon = loadEtalon();
 

@@ -103,6 +103,7 @@ public class HolaScript extends SeleniumRobotScript {
             wait.until(pageLoaded);
             wait.until(pageLoaded);
 
+            driver.manage().window().maximize();
             PageResult pageResult = RobotScriptUtils.loadPage(url, driver);
             byte[] screenShot = ScriptUtils.getScreenshot(driver);
             String finalUrl = ScriptUtils.getCurrentUrl(driver);

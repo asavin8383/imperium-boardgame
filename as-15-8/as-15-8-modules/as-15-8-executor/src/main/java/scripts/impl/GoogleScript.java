@@ -39,7 +39,6 @@ public class GoogleScript extends SearchScript {
 		EqualityTest test = EqualityTest.forCheckUnit(checkUnit);
 		
 		driver.get(GOOGLE_URL);
-		driver.manage().window().fullscreen();
 
 		WebElement input = driver.findElement(By.name("q"));
 		input(input, checkUnit.getValue() + " ");

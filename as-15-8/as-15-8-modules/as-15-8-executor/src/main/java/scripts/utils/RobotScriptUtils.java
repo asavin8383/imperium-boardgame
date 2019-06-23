@@ -49,7 +49,6 @@ public class RobotScriptUtils {
 
             try {
                 webDriver.get(url);
-                webDriver.manage().window().fullscreen();
 
                 ScriptUtils.waitPageLoading(webDriver);
                 CloudflareUtils.waitCloudflareRedirect(webDriver, timeoutSec*1000);
@@ -115,7 +114,6 @@ public class RobotScriptUtils {
                         PageResult pResult = new PageResult();
                         try{
                             webDriver.get(url);
-                            webDriver.manage().window().fullscreen();
                             ScriptUtils.waitDriver(webDriver, 3);
                             pResult = ScriptUtils.getPageSource(webDriver);
                         }

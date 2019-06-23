@@ -27,7 +27,6 @@ public class CameleoScript extends AnonymizerScript {
     @Override
     public ExecutionJobResult execute(CheckUnit checkUnit) throws RobotScriptExecutionException {
         driver.get(CAMELEO_URL);
-        driver.manage().window().fullscreen();
 
         try {
             ScriptUtils.waitPageLoading(driver);
