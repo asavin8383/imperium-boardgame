@@ -45,7 +45,7 @@ public class HideMyAssScript extends AnonymizerScript {
         driver.manage().timeouts().pageLoadTimeout(WAIT_TIMEOUT, TimeUnit.SECONDS);
 
         try {
-            try{
+            try {
                 RobotScriptUtils.simpleLoadPage(driver, URL, WAIT_TIMEOUT, 2);
             }
             catch (TimeoutException e){
@@ -112,7 +112,7 @@ public class HideMyAssScript extends AnonymizerScript {
             log.info("TimeoutException при получении страницы", e);
             return getTimeoutMessage();
         } catch (NoSuchElementException e) {
-            return getErrorMessageDetails(HIDEMYASS_NOT_FOUND_ELEMENT, "Не удалось найти элементы навигации");
+            return getErrorMessageDetails(HIDEMYASS_NOT_FOUND_ELEMENT, "Не удалось найти элементы навигации.");
         } catch (InterruptedException e) {
             throw new RobotScriptExecutionException("Выполнение потока прервано", e);
         }
