@@ -31,6 +31,7 @@ public class HideMyAssScript extends AnonymizerScript {
     public static Integer WAIT_TIMEOUT = 60;
 
 	public static final String HIDEMYASS_RETRY_AGREE_DETECTED   = "HIDEMYASS_RETRY_AGREE_DETECTED";
+    public static final String HIDEMYASS_CAPTCHA                = "HIDEMYASS_CAPTCHA";
 	public static final String HIDEMYASS_ERROR                  = INTERNAL_ERROR.name() + "__HIDEMYASS_ERROR";
 
 
@@ -76,6 +77,7 @@ public class HideMyAssScript extends AnonymizerScript {
 
             if (captcha()) {
                 log.info("Обнаружена captcha-form на HideMyAss");
+                return getErrorMessage(HIDEMYASS_CAPTCHA);
                /* if (false && !this.ignoreCaptcha) {
                     throw new Captcha_RobotScriptExecutionException("Обнаружена captcha-form на HideMyAss");
                 }*/

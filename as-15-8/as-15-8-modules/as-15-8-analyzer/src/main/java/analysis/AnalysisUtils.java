@@ -190,6 +190,10 @@ public class AnalysisUtils {
                 message = "Ошибка доступа к ресурсу: " + errorCode + ". Есть вероятность проблемы с сетью.";
                 result = DOUBTFUL;
             }
+            else if (errorCode.contains("CAPTCHA")){
+                message = "Обнаружена капча: " + errorCode + ".";
+                result = DOUBTFUL;
+            }
             else if (errorCode.contains("TIME_OUT_CHECKING")) {
                 message = "Ошибка таймаута при проверке браузера: " + errorCode + ". Возможно ресурс доступен.";
                 result = DOUBTFUL;
