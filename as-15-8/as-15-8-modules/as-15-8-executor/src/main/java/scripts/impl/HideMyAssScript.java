@@ -31,8 +31,7 @@ public class HideMyAssScript extends AnonymizerScript {
     public static Integer WAIT_TIMEOUT = 60;
 
 	public static final String HIDEMYASS_RETRY_AGREE_DETECTED   = "HIDEMYASS_RETRY_AGREE_DETECTED";
-	public static final String HIDEMYASS_TIMEOUT                = INTERNAL_ERROR.name() + "__TIMEOUT";
-	public static final String HIDEMYASS_NOT_FOUND_ELEMENT      = INTERNAL_ERROR.name() + "__NOT_FOUND_ELEMENT";
+	public static final String HIDEMYASS_ERROR                  = INTERNAL_ERROR.name() + "__HIDEMYASS_ERROR";
 
 
     public HideMyAssScript(ScriptDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams) {
@@ -45,11 +44,15 @@ public class HideMyAssScript extends AnonymizerScript {
         driver.manage().timeouts().pageLoadTimeout(WAIT_TIMEOUT, TimeUnit.SECONDS);
 
         try {
+            ScriptUtils.PageResult pageResult = null;
             try {
-                RobotScriptUtils.simpleLoadPage(driver, URL, WAIT_TIMEOUT, 2);
+                pageResult = RobotScriptUtils.simpleLoadPage(driver, URL, WAIT_TIMEOUT, 2);
             }
             catch (TimeoutException e){
-                return getErrorMessageDetails(HIDEMYASS_TIMEOUT, "Таймаут. Hidemyass недоступен!");
+                return getErrorMessageDetails(HIDEMYASS_ERROR, "Таймаут. Hidemyass недоступен!");
+            }
+            if (pageResult.errorCodeChrome != null){
+                return getErrorMessageDetails(HIDEMYASS_ERROR, "Hidemyass недоступен! " + pageResult.errorCodeChrome + ".");
             }
 
             WebElement input = driver.findElement(By.id("form_url_fake"));
@@ -57,7 +60,7 @@ public class HideMyAssScript extends AnonymizerScript {
 
             WebElement submitButton = getSubmitButton();
             if (submitButton == null) {
-                return getErrorMessageDetails(HIDEMYASS_NOT_FOUND_ELEMENT, "Не удалось найти кнопку перехода.");
+                return getErrorMessageDetails(HIDEMYASS_ERROR, "Не удалось найти кнопку перехода.");
             }
 
             submitButton.click();
@@ -112,7 +115,7 @@ public class HideMyAssScript extends AnonymizerScript {
             log.info("TimeoutException при получении страницы", e);
             return getTimeoutMessage();
         } catch (NoSuchElementException e) {
-            return getErrorMessageDetails(HIDEMYASS_NOT_FOUND_ELEMENT, "Не удалось найти элементы навигации.");
+            return getErrorMessageDetails(HIDEMYASS_ERROR, "Не удалось найти элементы навигации.");
         } catch (InterruptedException e) {
             throw new RobotScriptExecutionException("Выполнение потока прервано", e);
         }

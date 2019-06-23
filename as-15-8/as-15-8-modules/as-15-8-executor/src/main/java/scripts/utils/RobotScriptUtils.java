@@ -78,7 +78,7 @@ public class RobotScriptUtils {
     }
 
 
-    public static void simpleLoadPage(WebDriver driver, String url, int timeoutSec, int tryCount) {
+    public static PageResult simpleLoadPage(WebDriver driver, String url, int timeoutSec, int tryCount) {
         int cnt = 0;
         TimeoutException exception = null;
         PageResult pageSourceResult = new PageResult("", "FIRST");
@@ -101,6 +101,8 @@ public class RobotScriptUtils {
         if (exception != null){
             throw exception;
         }
+
+        return pageSourceResult;
     }
 
     /**
