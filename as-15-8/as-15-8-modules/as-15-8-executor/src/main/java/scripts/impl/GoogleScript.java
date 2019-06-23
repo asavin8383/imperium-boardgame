@@ -9,6 +9,7 @@ import org.openqa.selenium.WebElement;
 import scripts.ScriptDriverParameters;
 import scripts.exceptions.RobotScriptExecutionException;
 import scripts.utils.EqualityTest;
+import scripts.utils.ScriptUtils;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -55,7 +56,7 @@ public class GoogleScript extends SearchScript {
 	@Override
 	protected boolean captcha() {
 		try {
-			URI uri = new URI(driver.getCurrentUrl());
+			URI uri = new URI(ScriptUtils.getCurrentUrl(driver));
 			return uri.getPath().equals("/sorry/index");
 		} catch (URISyntaxException e) {
 			// ignore

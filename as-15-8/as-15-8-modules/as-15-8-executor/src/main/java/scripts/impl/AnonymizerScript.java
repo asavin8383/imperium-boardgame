@@ -72,7 +72,7 @@ public abstract class AnonymizerScript extends SeleniumRobotScript {
             return message;
 
         if (StringUtils.isEmpty(message.getFinalUrl())){
-            message.setFinalUrl(driver.getCurrentUrl());
+            message.setFinalUrl(ScriptUtils.getCurrentUrl(driver));
         }
 
         close(driver);

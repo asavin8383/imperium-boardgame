@@ -65,7 +65,7 @@ public class HolaScript extends SeleniumRobotScript {
             if (useEtalon) {
                 PageResult pageResult = RobotScriptUtils.loadPage(url, driver);
                 byte[] screenShot = ScriptUtils.getScreenshot(driver);
-                String finalUrl = driver.getCurrentUrl();
+                String finalUrl = ScriptUtils.getCurrentUrl(driver);
 
                 message.setChromeErrorCodeEtalon(pageResult.errorCodeChrome);
                 message.setPageContentEtalon(pageResult.pageSource);
@@ -105,7 +105,7 @@ public class HolaScript extends SeleniumRobotScript {
 
             PageResult pageResult = RobotScriptUtils.loadPage(url, driver);
             byte[] screenShot = ScriptUtils.getScreenshot(driver);
-            String finalUrl = driver.getCurrentUrl();
+            String finalUrl = ScriptUtils.getCurrentUrl(driver);
 
             message.setResponseError(pageResult.errorCodeChrome != null);
             message.setChromeErrorCode(pageResult.errorCodeChrome);

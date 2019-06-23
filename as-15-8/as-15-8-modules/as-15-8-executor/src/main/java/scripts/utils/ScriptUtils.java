@@ -96,6 +96,12 @@ public class ScriptUtils {
         }
     }
 
+    public static String getCurrentUrl(WebDriver webDriver) {
+        String url = webDriver.getCurrentUrl();
+        url = url == null ? "" : (url.startsWith("data:") ? "" : url);
+        return url;
+    }
+
     public static String getCheckUnitValue(@NonNull CheckUnit checkUnit){
         String value = checkUnit.getValue();
 
