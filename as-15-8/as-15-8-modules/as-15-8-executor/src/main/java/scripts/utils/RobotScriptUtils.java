@@ -78,6 +78,26 @@ public class RobotScriptUtils {
     }
 
 
+    public static void simpleLoadPage(WebDriver driver, String url, int timeoutSec, int tryCount) {
+        int cnt = 0;
+        TimeoutException exception = null;
+
+        while (++cnt <= tryCount)
+            try{
+                exception = null;
+                driver.get(url);
+                ScriptUtils.waitPageLoading(driver, timeoutSec);
+                break;
+            }
+            catch (TimeoutException te){
+                exception = te;
+            }
+
+        if (exception != null){
+            throw exception;
+        }
+    }
+
     /**
      * Параллельная загрузка исходника страниц.
      **/

@@ -81,6 +81,8 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
         analysisResult.setStubUrl(executionResult.getStubUrl());
         analysisResult.setFinalUrl(executionResult.getFinalUrl());
 
+		appendInfo(analysisResult, executionResult.getDetails());
+
 		if (analysisResult.hasError()) {
 			analysisResult.setCheckResult(
 					obtainErrorResult(analysisResult));

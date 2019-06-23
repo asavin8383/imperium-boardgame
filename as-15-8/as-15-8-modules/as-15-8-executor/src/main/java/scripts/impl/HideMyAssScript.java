@@ -1,35 +1,38 @@
 package scripts.impl;
 
 import static enums.CheckUnitJobResult.INTERNAL_ERROR;
+import static org.openqa.selenium.support.ui.ExpectedConditions.*;
 import static scripts.utils.ScriptUtils.TIME_OUT_CHECKING_ERROR;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.TimeoutException;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 
 import checkUnits.CheckUnit;
 import enums.AccessToolParameters;
 import execution.ExecutionJobResult;
 import lombok.extern.slf4j.Slf4j;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import scripts.RobotScript;
 import scripts.ScriptDriverParameters;
 import scripts.exceptions.RobotScriptExecutionException;
 import scripts.exceptions.TimeoutCheckingBrowserException;
 import scripts.exceptions.TimeoutScriptException;
 import scripts.utils.CloudflareUtils;
+import scripts.utils.RobotScriptUtils;
 import scripts.utils.ScriptUtils;
 
 @Slf4j
 public class HideMyAssScript extends AnonymizerScript {
 	
-	private static final String URL = "https://www.hidemyass.com/proxy";
+	private static final String URL = "https://proxy.hidemyass.com";
+
+    public static Integer WAIT_TIMEOUT = 60;
 
 	public static final String HIDEMYASS_RETRY_AGREE_DETECTED   = "HIDEMYASS_RETRY_AGREE_DETECTED";
-	public static final String HIDEMYASS_NOT_FOUND_BUTTON       = INTERNAL_ERROR.name() + "__NOT_FOUND_BUTTON";
-	public static final String HIDEMYASS_NOT_OPENED_URL         = INTERNAL_ERROR.name() + "__NOT_OPENED_URL";
-	public static final String HIDEMYASS_NOT_FOUND_INPUT        = INTERNAL_ERROR.name() + "__NOT_FOUND_INPUT";
+	public static final String HIDEMYASS_TIMEOUT                = INTERNAL_ERROR.name() + "__TIMEOUT";
+	public static final String HIDEMYASS_NOT_FOUND_ELEMENT      = INTERNAL_ERROR.name() + "__NOT_FOUND_ELEMENT";
 
 
     public HideMyAssScript(ScriptDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams) {
@@ -37,33 +40,29 @@ public class HideMyAssScript extends AnonymizerScript {
 	}
 
     @Override
-    public ExecutionJobResult execute(CheckUnit checkUnit) throws RobotScriptExecutionException { 	 
-        driver.get(URL);
-        driver.manage().window().fullscreen();
+    public ExecutionJobResult execute(CheckUnit checkUnit) throws RobotScriptExecutionException {
+
+        driver.manage().timeouts().pageLoadTimeout(WAIT_TIMEOUT, TimeUnit.SECONDS);
 
         try {
-            ScriptUtils.waitPageLoading(driver);
-            driver.switchTo().frame(driver.findElement(By.id("proxyIframe")));
+            try{
+                RobotScriptUtils.simpleLoadPage(driver, URL, WAIT_TIMEOUT, 2);
+            }
+            catch (TimeoutException e){
+                return getErrorMessageDetails(HIDEMYASS_TIMEOUT, "Таймаут. Hidemyass недоступен!");
+            }
+
             WebElement input = driver.findElement(By.id("form_url_fake"));
             input.sendKeys(checkUnit.getValue());
 
             WebElement submitButton = getSubmitButton();
             if (submitButton == null) {
-                return getErrorMessage(HIDEMYASS_NOT_FOUND_BUTTON);     // Не удалось найти кнопку перехода!
+                return getErrorMessageDetails(HIDEMYASS_NOT_FOUND_ELEMENT, "Не удалось найти кнопку перехода.");
             }
 
-            // повторяем поиск кнопки перехода несколько раз (бывали случае когда не срабатывала с первого раза)
-            int i = 0, cnt = 3;
-            while (submitButton != null && i < cnt) {
-                submitButton.click();
-                ScriptUtils.waitPageLoading(driver);
-                ScriptUtils.waitDriver(driver, 1);
-                submitButton = getSubmitButton();
-                i++;
-            }
-            if (submitButton != null) {
-                return getErrorMessage(HIDEMYASS_NOT_OPENED_URL);   // Не удалось осуществить переход по кнопке!
-            }
+            submitButton.click();
+            ScriptUtils.waitDriver(driver, 1);
+            ScriptUtils.waitPageLoading(driver);
 
             CloudflareUtils.waitCloudflareRedirect(driver);
             ScriptUtils.waitPageLoading(driver);
@@ -92,7 +91,7 @@ public class HideMyAssScript extends AnonymizerScript {
             WebElement agreeButtonSecond = getAgreeButtonPage();
             if (agreeButtonSecond != null){
                 log.info("Повторно обнаружена страница 'Agree & Connect'.");
-                return getErrorMessage(HIDEMYASS_RETRY_AGREE_DETECTED);
+                return getErrorMessageDetails(HIDEMYASS_RETRY_AGREE_DETECTED, "Неудачный повторый переход по кнопке 'Agree & Connect'.");
             }
 
             message.setFinalUrl(getFinalUrl());
@@ -106,13 +105,14 @@ public class HideMyAssScript extends AnonymizerScript {
 
             return process(checkUnit);
 
+        } catch (TimeoutCheckingBrowserException e) {
+            log.info("TimeoutException (checking browser) при получении страницы", e);
+            return getErrorMessage(TIME_OUT_CHECKING_ERROR);
         } catch (TimeoutException | TimeoutScriptException e) {
             log.info("TimeoutException при получении страницы", e);
-            if (e instanceof TimeoutCheckingBrowserException)
-                return getErrorMessage(TIME_OUT_CHECKING_ERROR);
             return getTimeoutMessage();
         } catch (NoSuchElementException e) {
-            return getErrorMessage(HIDEMYASS_NOT_FOUND_INPUT);  // "Не удалось найти элементы навигации HideMyAss"
+            return getErrorMessageDetails(HIDEMYASS_NOT_FOUND_ELEMENT, "Не удалось найти элементы навигации");
         } catch (InterruptedException e) {
             throw new RobotScriptExecutionException("Выполнение потока прервано", e);
         }

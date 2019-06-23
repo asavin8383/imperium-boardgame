@@ -107,8 +107,15 @@ public abstract class AnonymizerScript extends SeleniumRobotScript {
         return message;
     }
 
-    ExecutionJobResult getErrorMessage(String details) {
-        message.setErrorCode(details);
+    ExecutionJobResult getErrorMessage(String errorCode) {
+        message.setErrorCode(errorCode);
+        message.setScreenshot(ScriptUtils.getScreenshot(driver));
+        return message;
+    }
+
+    ExecutionJobResult getErrorMessageDetails(String errorCode, String details) {
+        message.setErrorCode(errorCode);
+        message.setDetails(details);
         message.setScreenshot(ScriptUtils.getScreenshot(driver));
         return message;
     }

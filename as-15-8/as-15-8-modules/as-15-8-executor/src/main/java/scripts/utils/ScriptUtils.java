@@ -1,5 +1,6 @@
 package scripts.utils;
 
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -57,9 +58,14 @@ public class ScriptUtils {
     }
 
     public static void waitPageLoading(WebDriver driver) {
-        new WebDriverWait(driver, WAIT_TIMEOUT).until(
+        waitPageLoading(driver, WAIT_TIMEOUT);
+    }
+
+    public static void waitPageLoading(WebDriver driver, int timeoutSec) {
+        new WebDriverWait(driver, timeoutSec).until(
                 webDriver -> ((JavascriptExecutor) webDriver).executeScript("return document.readyState").equals("complete"));
     }
+
 
     public static String getErrorCode(WebDriver driver){
         try{
