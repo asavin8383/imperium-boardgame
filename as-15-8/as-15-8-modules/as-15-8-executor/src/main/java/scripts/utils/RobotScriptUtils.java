@@ -81,17 +81,22 @@ public class RobotScriptUtils {
     public static void simpleLoadPage(WebDriver driver, String url, int timeoutSec, int tryCount) {
         int cnt = 0;
         TimeoutException exception = null;
+        PageResult pageSourceResult = new PageResult("", "FIRST");
 
-        while (++cnt <= tryCount)
+        while (++cnt <= tryCount && pageSourceResult.errorCodeChrome != null){
+            if (cnt > 1)
+                ScriptUtils.waitDriver(driver, 2);
+
             try{
                 exception = null;
                 driver.get(url);
                 ScriptUtils.waitPageLoading(driver, timeoutSec);
-                break;
+                pageSourceResult = ScriptUtils.getPageSource(driver);
             }
             catch (TimeoutException te){
                 exception = te;
             }
+        }
 
         if (exception != null){
             throw exception;
