@@ -61,8 +61,8 @@ public class HolaScript extends SeleniumRobotScript {
 
         // Эталонная страница с дефолтного драйвера с дефолтным прокси
         WebDriver driver = this.driver;
-        if (useEtalon) {
-            try {
+        try {
+            if (useEtalon) {
                 PageResult pageResult = RobotScriptUtils.loadPage(url, driver);
                 byte[] screenShot = ScriptUtils.getScreenshot(driver);
                 String finalUrl = driver.getCurrentUrl();
@@ -73,9 +73,9 @@ public class HolaScript extends SeleniumRobotScript {
                 if (pageResult.errorCodeChrome == null) {
                     message.setFinalUrlPageEtalon(finalUrl);
                 }
-            } finally {
-                close(driver);
             }
+        } finally {
+            close(driver);
         }
 
 
