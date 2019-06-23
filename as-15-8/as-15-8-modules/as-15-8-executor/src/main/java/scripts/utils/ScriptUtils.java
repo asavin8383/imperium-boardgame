@@ -92,7 +92,7 @@ public class ScriptUtils {
             return ((TakesScreenshot) webDriver).getScreenshotAs(OutputType.BYTES);
         }
         catch (TimeoutException te){
-            return ((TakesScreenshot) webDriver).getScreenshotAs(OutputType.BYTES);     // в случае таймаута пробуем еще один раз
+            return null;        // вероятно, загрузка страницы была прервана по явному таймауту, поэтому DOM не сформировался.
         }
     }
 
