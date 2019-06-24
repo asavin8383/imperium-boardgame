@@ -27,7 +27,8 @@ public class HideMyAssScript extends AnonymizerScript {
 	
 	private static final String URL = "https://proxy.hidemyass.com";
 
-    public static Integer WAIT_TIMEOUT = 60;
+    public static Integer WAIT_TIMEOUT_PAGE = 60;
+    public static Integer WAIT_TIMEOUT = 30;
 
 	public static final String HIDEMYASS_RETRY_AGREE_DETECTED   = "HIDEMYASS_RETRY_AGREE_DETECTED";
     public static final String HIDEMYASS_CAPTCHA                = "HIDEMYASS_CAPTCHA";
@@ -44,7 +45,7 @@ public class HideMyAssScript extends AnonymizerScript {
     @Override
     public ExecutionJobResult execute(CheckUnit checkUnit) throws RobotScriptExecutionException {
 
-        driver.manage().timeouts().pageLoadTimeout(WAIT_TIMEOUT, TimeUnit.SECONDS);
+        driver.manage().timeouts().pageLoadTimeout(WAIT_TIMEOUT_PAGE, TimeUnit.SECONDS);
 
         try {
             ScriptUtils.PageResult pageResult = null;
@@ -52,10 +53,10 @@ public class HideMyAssScript extends AnonymizerScript {
                 pageResult = RobotScriptUtils.simpleLoadPage(driver, URL, WAIT_TIMEOUT, 3);
             }
             catch (TimeoutException e){
-                return getErrorMessageDetails(HIDEMYASS_ERROR, "Таймаут. Hidemyass недоступен!", true);
+                return getErrorMessage(HIDEMYASS_ERROR, "Таймаут. Hidemyass недоступен!");
             }
             if (pageResult.errorCodeChrome != null){
-                return getErrorMessageDetails(HIDEMYASS_ERROR, "Hidemyass недоступен! " + pageResult.errorCodeChrome + ".", true);
+                return getErrorMessage(HIDEMYASS_ERROR, "Hidemyass недоступен! " + pageResult.errorCodeChrome + ".");
             }
 
             WebElement input = driver.findElement(By.id("form_url_fake"));
@@ -64,7 +65,7 @@ public class HideMyAssScript extends AnonymizerScript {
             By submitLocator = By.xpath("/html/body/form/div[3]/a");
             WebElement submitButton = ScriptUtils.getElementBy(submitLocator, driver);
             if (submitButton == null || !isSubmitButton(submitButton)) {
-                return getErrorMessageDetails(HIDEMYASS_ERROR, "Не удалось найти кнопку перехода.", true);
+                return getErrorMessage(HIDEMYASS_ERROR, "Не удалось найти кнопку перехода.");
             }
 
             submitButton.click();
@@ -78,19 +79,19 @@ public class HideMyAssScript extends AnonymizerScript {
 
             if (CloudflareUtils.isCloudflareError(driver)) {
                 return getErrorMessage(CloudflareUtils
-                        .getCloudflareErrorDetails(driver), true);
+                        .getCloudflareErrorDetails(driver));
             }
 
             if (captcha()) {
                 log.info("Обнаружена captcha-form на HideMyAss");
-                return getErrorMessage(HIDEMYASS_CAPTCHA, true);
+                return getErrorMessage(HIDEMYASS_CAPTCHA);
                /* if (false && !this.ignoreCaptcha) {
                     throw new Captcha_RobotScriptExecutionException("Обнаружена captcha-form на HideMyAss");
                 }*/
             }
 
             if (isHideMyAssErrorPage())
-                return getErrorMessage(getHideMyAssErrorDetails(), true);
+                return getErrorMessage(getHideMyAssErrorDetails());
 
             WebElement agreeButton = getAgreeButtonPage();
             if (agreeButton != null){
@@ -102,7 +103,7 @@ public class HideMyAssScript extends AnonymizerScript {
             WebElement agreeButtonSecond = getAgreeButtonPage();
             if (agreeButtonSecond != null){
                 log.info("Повторно обнаружена страница 'Agree & Connect'.");
-                return getErrorMessageDetails(HIDEMYASS_RETRY_AGREE_DETECTED, "Неудачный повторый переход по кнопке 'Agree & Connect'.", true);
+                return getErrorMessage(HIDEMYASS_RETRY_AGREE_DETECTED, "Неудачный повторый переход по кнопке 'Agree & Connect'.");
             }
 
             message.setFinalUrl(getFinalUrl());
@@ -112,18 +113,18 @@ public class HideMyAssScript extends AnonymizerScript {
             String plainError = ScriptUtils
                     .getPlainErrorDescriptionIfOccurred(driver);
             if (plainError != null)
-                return getErrorMessage(plainError, true);
+                return getErrorMessage(plainError);
 
             return process(checkUnit);
 
         } catch (TimeoutCheckingBrowserException e) {
             log.info("TimeoutException (checking browser) при получении страницы", e);
-            return getErrorMessage(TIME_OUT_CHECKING_ERROR, true);
+            return getErrorMessage(TIME_OUT_CHECKING_ERROR);
         } catch (TimeoutException | TimeoutScriptException e) {
             log.info("TimeoutException при получении страницы", e);
             return getTimeoutMessage();
         } catch (NoSuchElementException e) {
-            return getErrorMessageDetails(HIDEMYASS_ERROR, "Не удалось найти элементы навигации.", true);
+            return getErrorMessage(HIDEMYASS_ERROR, "Не удалось найти элементы навигации.");
         }
     }
 

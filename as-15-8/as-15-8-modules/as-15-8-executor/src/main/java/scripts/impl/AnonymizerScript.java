@@ -123,29 +123,19 @@ public abstract class AnonymizerScript extends SeleniumRobotScript {
         return message;
     }
 
-    ExecutionJobResult getErrorMessage(String errorCode, boolean addHttpStatus) {
-        if (addHttpStatus){
-            HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(driver);
-            if (responseMeta != null){
-                message.setHttpStatus(responseMeta.status);
-                message.setHttpHeaders(HttpResponseHelper.headers2Str(responseMeta.jsonHeaders));
-            }
-        }
-        message.setErrorCode(errorCode);
-        message.setScreenshot(ScriptUtils.getScreenshot(driver));
-        return message;
+    ExecutionJobResult getErrorMessage(String errorCode) {
+        return getErrorMessage(errorCode, null);
     }
 
-    ExecutionJobResult getErrorMessageDetails(String errorCode, String details, boolean addHttpStatus) {
-        if (addHttpStatus){
-            HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(driver);
-            if (responseMeta != null){
-                message.setHttpStatus(responseMeta.status);
-                message.setHttpHeaders(HttpResponseHelper.headers2Str(responseMeta.jsonHeaders));
-            }
+    ExecutionJobResult getErrorMessage(String errorCode, String details) {
+        HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(driver);
+        if (responseMeta != null){
+            message.setHttpStatus(responseMeta.status);
+            message.setHttpHeaders(HttpResponseHelper.headers2Str(responseMeta.jsonHeaders));
         }
         message.setErrorCode(errorCode);
-        message.setDetails(details);
+        if (details != null)
+            message.setDetails(details);
         message.setScreenshot(ScriptUtils.getScreenshot(driver));
         return message;
     }

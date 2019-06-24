@@ -40,13 +40,13 @@ public class CameleoScript extends AnonymizerScript {
             ScriptUtils.waitPageLoading(driver);
             if (CloudflareUtils.isCloudflareError(driver)) {
                 return getErrorMessage(CloudflareUtils
-                        .getCloudflareErrorDetails(driver), true);
+                        .getCloudflareErrorDetails(driver));
             }
 
             String plainError = ScriptUtils
                     .getPlainErrorDescriptionIfOccurred(driver);
             if (plainError != null)
-                return getErrorMessage(plainError, true);
+                return getErrorMessage(plainError);
 
             return process(checkUnit);
 
