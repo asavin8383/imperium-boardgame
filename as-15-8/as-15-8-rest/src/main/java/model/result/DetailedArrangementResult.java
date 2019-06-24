@@ -37,4 +37,5 @@ public class DetailedArrangementResult implements Serializable {
     private String pageUrlFinal;
     private Integer similarityOriginPercent;
     private String stubScoreInfo;
+    private Boolean redirectionDetected;
 }
