@@ -73,10 +73,8 @@ public class KafkaConsumer {
 	}
 	
 	@KafkaListener(
-		id = "control",
 		topics = "${spring.kafka.control-topic}",
-		containerFactory = "controlMessagesListenerContainerFactory",
-		groupId = "${spring.kafka.group}"
+		containerFactory = "controlMessagesListenerContainerFactory"
 	)
     public void consumeControlMessage(ExecutorControlMessage controlMessage, Acknowledgment ack) {
 		log.info("Принято управляющее сообщение: " + controlMessage.toString());
