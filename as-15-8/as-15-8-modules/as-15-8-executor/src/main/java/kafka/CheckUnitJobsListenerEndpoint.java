@@ -55,7 +55,7 @@ public class CheckUnitJobsListenerEndpoint implements KafkaListenerEndpoint {
 	@Override
 	public void setupListenerContainer(MessageListenerContainer listenerContainer, MessageConverter messageConverter) {
 		listenerContainer.setupMessageListener(new FilteringMessageListenerAdapter<String, CheckUnitJob>(
-				new CheckUnitJobMessageListener(this.consumer), 
+				new CheckUnitJobMessageListener(listenerContainer.getListenerId(), this.consumer), 
     			record -> !record.value().getAccessToolUnit().equals(this.accessToolUnit),
     			true
     		)

@@ -17,7 +17,10 @@ public class CheckUnitJobMessageListener implements AcknowledgingMessageListener
 	
 	private RobotScript script;
 	
-	public CheckUnitJobMessageListener(CheckUnitJobMessageProcessor consumer) {
+	private final String id;
+	
+	public CheckUnitJobMessageListener(String id, CheckUnitJobMessageProcessor consumer) {
+		this.id = id;
 		this.consumer = consumer;
 	}
 	
@@ -32,9 +35,9 @@ public class CheckUnitJobMessageListener implements AcknowledgingMessageListener
 		if(this.script != null) {
 			script.close();
 			script = null;
-			log.info("!!!!!!! script CLOSED");
+			log.info(id+": script CLOSED");
 		} else {
-			log.info("!!!!!!! script is null");
+			log.info(id+": script is null");
 		}
 	}
 }

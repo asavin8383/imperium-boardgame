@@ -11,7 +11,6 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.kafka.event.ConsumerPausedEvent;
-import org.springframework.kafka.event.ConsumerStoppingEvent;
 import org.springframework.kafka.listener.KafkaMessageListenerContainer;
 import org.springframework.kafka.listener.MessageListenerContainer;
 import org.springframework.kafka.listener.adapter.FilteringMessageListenerAdapter;
@@ -101,7 +100,7 @@ public class KafkaConsumer {
 	
 	private void stopListeners(AccessToolUnit accessToolUnit) {
 		try {
-			MessageListenerContainer jobsListenerContainer = endpointRegistry.getListenerContainer(accessToolUnit.name());//listenerContainers.get(accessToolUnit);
+			MessageListenerContainer jobsListenerContainer = endpointRegistry.getListenerContainer(accessToolUnit.name());
 			if(!jobsListenerContainer.isContainerPaused() && !jobsListenerContainer.isPauseRequested()) {
 				jobsListenerContainer.pause();
 				log.info("\n\n-------------------------------------------\n"+
@@ -117,7 +116,7 @@ public class KafkaConsumer {
 	
 	private void startListeners(AccessToolUnit accessToolUnit) {
 		try {
-			MessageListenerContainer jobsListenerContainer = endpointRegistry.getListenerContainer(accessToolUnit.name());//listenerContainers.get(accessToolUnit);
+			MessageListenerContainer jobsListenerContainer = endpointRegistry.getListenerContainer(accessToolUnit.name());
 			if(jobsListenerContainer.isContainerPaused() || jobsListenerContainer.isPauseRequested()) {
 				jobsListenerContainer.resume();
 				log.info("\n\n-------------------------------------------\n"+
