@@ -98,23 +98,26 @@ public class ArrangementResultsController {
 
     @PreAuthorize("hasAnyRole('ROLE_OPERATOR', 'ROLE_ADMIN')")
     @PostMapping(path = "/user", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ArrangementResult postUserResult(@RequestParam Long id, @RequestBody Map<String, String> userResult) {
+    public ResponseEntity<?> postUserResult(@RequestParam Long id, @RequestBody Map<String, String> userResult) {
     	return arrangementResultRepo.findById(id)
     		.map(arrResult -> {
-    			UserResult result = UserResult.valueOf(userResult.get("userResult"));
+    			UserResult result = null;
+    			try {
+    				result = UserResult.valueOf(userResult.get("userResult"));
+    			} catch (Exception ex) { }
     			if(result == null) {
     				AS_15_8_Exception error = new AS_15_8_Exception("Ошибка! Результат " + userResult.get("userResult")+" не поддерживается!");
     				log.error("Ошибка при сохранении результатов от пользователя", error);
-    				throw error;
+    				return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     			}
     			arrResult.setUserResult(result);
     			arrResult.setUserDescription(userResult.get("userDescription"));
     			arrangementResultRepo.save(arrResult);
-    			return arrResult;
-    		}).orElseThrow(() -> {
+    			return new ResponseEntity<>(arrResult, HttpStatus.OK);
+    		}).orElseGet(() -> {
     			AS_15_8_Exception error = new AS_15_8_Exception("Ошибка! Результат не найден по идентификатору: "+id);
 				log.error("Ошибка при сохранении результатов от пользователя", error);
-				return error;
+				return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     		});
     }
     
