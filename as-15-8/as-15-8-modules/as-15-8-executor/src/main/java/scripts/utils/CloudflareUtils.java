@@ -67,6 +67,7 @@ public class CloudflareUtils {
         waitCloudflareRedirect(driver, 5 * 1000, 30 * 1000);
     }
 
+    @Deprecated
     public static void waitCloudflareRedirect(WebDriver driver, long timeStep, long timeMax)
             throws InterruptedException, TimeoutScriptException {
 
