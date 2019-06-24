@@ -67,11 +67,13 @@ public abstract class AnonymizerScript extends SeleniumRobotScript {
     ExecutionJobResult process(CheckUnit checkUnit) throws RobotScriptExecutionException {
 
         ScriptUtils.PageResult page = ScriptUtils.getPageSource(driver);
-        HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(driver);
 
-        if (responseMeta != null){
-            message.setHttpStatus(responseMeta.status);
-            message.setHttpHeaders(HttpResponseHelper.headers2Str(responseMeta.jsonHeaders));
+        if (message.getHttpStatus() == null){
+            HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(driver);
+            if (responseMeta != null){
+                message.setHttpStatus(responseMeta.status);
+                message.setHttpHeaders(HttpResponseHelper.headers2Str(responseMeta.jsonHeaders));
+            }
         }
         message.setErrorCode(page.errorCodeChrome);
         message.setPageContent(page.pageSource);
@@ -127,7 +129,14 @@ public abstract class AnonymizerScript extends SeleniumRobotScript {
         return message;
     }
 
-    ExecutionJobResult getErrorMessageDetails(String errorCode, String details) {
+    ExecutionJobResult getErrorMessageDetails(String errorCode, String details, boolean addHttpStatus) {
+        if (addHttpStatus){
+            HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(driver);
+            if (responseMeta != null){
+                message.setHttpStatus(responseMeta.status);
+                message.setHttpHeaders(HttpResponseHelper.headers2Str(responseMeta.jsonHeaders));
+            }
+        }
         message.setErrorCode(errorCode);
         message.setDetails(details);
         message.setScreenshot(ScriptUtils.getScreenshot(driver));
