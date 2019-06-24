@@ -106,18 +106,18 @@ public class ArrangementResultsController {
     				result = UserResult.valueOf(userResult.get("userResult"));
     			} catch (Exception ex) { }
     			if(result == null) {
-    				AS_15_8_Exception error = new AS_15_8_Exception("Ошибка! Результат " + userResult.get("userResult")+" не поддерживается!");
-    				log.error("Ошибка при сохранении результатов от пользователя", error);
-    				return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    				String errorMessage = "Ошибка! Результат " + userResult.get("userResult")+" не поддерживается!";
+    				log.error("Ошибка при сохранении результатов от пользователя", new AS_15_8_Exception(errorMessage));
+    				return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
     			}
     			arrResult.setUserResult(result);
     			arrResult.setUserDescription(userResult.get("userDescription"));
     			arrangementResultRepo.save(arrResult);
     			return new ResponseEntity<>(arrResult, HttpStatus.OK);
     		}).orElseGet(() -> {
-    			AS_15_8_Exception error = new AS_15_8_Exception("Ошибка! Результат не найден по идентификатору: "+id);
-				log.error("Ошибка при сохранении результатов от пользователя", error);
-				return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    			String errorMessage = "Ошибка! Результат не найден по идентификатору: "+id;
+				log.error("Ошибка при сохранении результатов от пользователя", new AS_15_8_Exception(errorMessage));
+				return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
     		});
     }
     
