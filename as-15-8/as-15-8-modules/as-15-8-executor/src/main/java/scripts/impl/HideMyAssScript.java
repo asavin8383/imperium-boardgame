@@ -1,15 +1,14 @@
 package scripts.impl;
 
 import static enums.CheckUnitJobResult.INTERNAL_ERROR;
-import static scripts.utils.ScriptUtils.TIME_OUT_CHECKING_ERROR;
+import static scripts.utils.ScriptUtils.*;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.TimeoutException;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 
 import checkUnits.CheckUnit;
 import enums.AccessToolParameters;
@@ -34,6 +33,9 @@ public class HideMyAssScript extends AnonymizerScript {
     public static final String HIDEMYASS_CAPTCHA                = "HIDEMYASS_CAPTCHA";
 	public static final String HIDEMYASS_ERROR                  = INTERNAL_ERROR.name() + "__HIDEMYASS_ERROR";
 
+    private static final int DEFAULT_LOAD_TIMEOUT = 5;      // seconds
+    private static final String AGREE_BUTTON_TEXT = "Agree & Connect".toLowerCase();
+
 
     public HideMyAssScript(ScriptDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams) {
 		super(driverParams, scriptParams);
@@ -47,7 +49,7 @@ public class HideMyAssScript extends AnonymizerScript {
         try {
             ScriptUtils.PageResult pageResult = null;
             try {
-                pageResult = RobotScriptUtils.simpleLoadPage(driver, URL, WAIT_TIMEOUT, 2);
+                pageResult = RobotScriptUtils.simpleLoadPage(driver, URL, WAIT_TIMEOUT, 3);
             }
             catch (TimeoutException e){
                 return getErrorMessageDetails(HIDEMYASS_ERROR, "Таймаут. Hidemyass недоступен!");
@@ -59,17 +61,21 @@ public class HideMyAssScript extends AnonymizerScript {
             WebElement input = driver.findElement(By.id("form_url_fake"));
             input.sendKeys(checkUnit.getValue());
 
-            WebElement submitButton = getSubmitButton();
-            if (submitButton == null) {
+            By submitLocator = By.xpath("/html/body/form/div[3]/a");
+            WebElement submitButton = ScriptUtils.getElementBy(submitLocator, driver);
+            if (submitButton == null || !isSubmitButton(submitButton)) {
                 return getErrorMessageDetails(HIDEMYASS_ERROR, "Не удалось найти кнопку перехода.");
             }
 
             submitButton.click();
-            ScriptUtils.waitDriver(driver, 1);
-            ScriptUtils.waitPageLoading(driver);
 
-            CloudflareUtils.waitCloudflareRedirect(driver);
-            ScriptUtils.waitPageLoading(driver);
+            ScriptUtils.waitDriver(driver, 1);
+            ScriptUtils.waitPageLoading(driver, WAIT_TIMEOUT);
+
+            CloudflareUtils.waitCloudflareRedirect(driver, WAIT_TIMEOUT, true);
+
+            ScriptUtils.waitPageLoading(driver, WAIT_TIMEOUT);
+
             if (CloudflareUtils.isCloudflareError(driver)) {
                 return getErrorMessage(CloudflareUtils
                         .getCloudflareErrorDetails(driver));
@@ -118,8 +124,6 @@ public class HideMyAssScript extends AnonymizerScript {
             return getTimeoutMessage();
         } catch (NoSuchElementException e) {
             return getErrorMessageDetails(HIDEMYASS_ERROR, "Не удалось найти элементы навигации.");
-        } catch (InterruptedException e) {
-            throw new RobotScriptExecutionException("Выполнение потока прервано", e);
         }
     }
 
@@ -150,15 +154,6 @@ public class HideMyAssScript extends AnonymizerScript {
                 "Описание ошибки не найдено");
     }
 
-    private WebElement getSubmitButton() {
-        WebElement button = ScriptUtils.findElementIfExists(
-                By.xpath("/html/body/form/div[3]/a"), driver);
-        String text = ScriptUtils.getTextOrDefault(
-                button, null);
-        return text != null &&
-                text.toLowerCase().contains("Agree & Connect".toLowerCase()) ? button : null;
-    }
-
     private WebElement getAgreeButtonPage() {
         WebElement button = ScriptUtils.findElementIfExists(
                 By.cssSelector(".terms-agree-wrapper > a.button"), driver);
@@ -173,5 +168,42 @@ public class HideMyAssScript extends AnonymizerScript {
                 By.cssSelector("input#hma-top-input-url"), driver);
         String text = button == null ? null : button.getAttribute("value");
         return text == null ? null : text.trim();
+    }
+
+    /**
+     * Метод, который скорее всего пригодится.
+     */
+    private boolean submit(WebDriver driver, By locator, int retryCount) {
+        WebElement button = ScriptUtils.waitClickable(driver, locator, DEFAULT_LOAD_TIMEOUT);
+
+        Consumer<WebElement> tryClick = el -> { if (el != null) el.click(); };
+
+        Supplier<WebElement> refresher = () -> {
+            WebElement el = ScriptUtils.findElementIfExists(locator, driver);
+            return isSubmitButton(el) ? el : null;
+        };
+
+        int counter = 0;
+
+        do {
+            try {
+                // if null or stale on the first try ?
+                button = ScriptUtils.actOnStaleRef(button,
+                        tryClick, refresher);
+            } catch (StaleElementReferenceException e) {
+                return true;
+            }
+            if (button != null) {
+                ScriptUtils.waitDriver(driver, 1);
+                button = refresher.get();
+            }
+        } while (button != null && ++counter < retryCount);
+
+        return button == null && counter < retryCount;
+    }
+
+    private boolean isSubmitButton(WebElement button) {
+        String text = getTextOrDefault(button, null);
+        return text != null && text.toLowerCase().contains(AGREE_BUTTON_TEXT);
     }
 }
