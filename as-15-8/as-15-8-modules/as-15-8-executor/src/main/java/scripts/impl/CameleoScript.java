@@ -9,9 +9,10 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import scripts.ScriptDriverParameters;
-import scripts.utils.*;
 import scripts.exceptions.RobotScriptExecutionException;
 import scripts.exceptions.TimeoutScriptException;
+import scripts.utils.CloudflareUtils;
+import scripts.utils.ScriptUtils;
 
 import java.util.Map;
 
@@ -39,13 +40,13 @@ public class CameleoScript extends AnonymizerScript {
             ScriptUtils.waitPageLoading(driver);
             if (CloudflareUtils.isCloudflareError(driver)) {
                 return getErrorMessage(CloudflareUtils
-                        .getCloudflareErrorDetails(driver));
+                        .getCloudflareErrorDetails(driver), true);
             }
 
             String plainError = ScriptUtils
                     .getPlainErrorDescriptionIfOccurred(driver);
             if (plainError != null)
-                return getErrorMessage(plainError);
+                return getErrorMessage(plainError, true);
 
             return process(checkUnit);
 

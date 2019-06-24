@@ -78,19 +78,19 @@ public class HideMyAssScript extends AnonymizerScript {
 
             if (CloudflareUtils.isCloudflareError(driver)) {
                 return getErrorMessage(CloudflareUtils
-                        .getCloudflareErrorDetails(driver));
+                        .getCloudflareErrorDetails(driver), true);
             }
 
             if (captcha()) {
                 log.info("Обнаружена captcha-form на HideMyAss");
-                return getErrorMessage(HIDEMYASS_CAPTCHA);
+                return getErrorMessage(HIDEMYASS_CAPTCHA, true);
                /* if (false && !this.ignoreCaptcha) {
                     throw new Captcha_RobotScriptExecutionException("Обнаружена captcha-form на HideMyAss");
                 }*/
             }
 
             if (isHideMyAssErrorPage())
-                return getErrorMessage(getHideMyAssErrorDetails());
+                return getErrorMessage(getHideMyAssErrorDetails(), true);
 
             WebElement agreeButton = getAgreeButtonPage();
             if (agreeButton != null){
@@ -112,13 +112,13 @@ public class HideMyAssScript extends AnonymizerScript {
             String plainError = ScriptUtils
                     .getPlainErrorDescriptionIfOccurred(driver);
             if (plainError != null)
-                return getErrorMessage(plainError);
+                return getErrorMessage(plainError, true);
 
             return process(checkUnit);
 
         } catch (TimeoutCheckingBrowserException e) {
             log.info("TimeoutException (checking browser) при получении страницы", e);
-            return getErrorMessage(TIME_OUT_CHECKING_ERROR);
+            return getErrorMessage(TIME_OUT_CHECKING_ERROR, true);
         } catch (TimeoutException | TimeoutScriptException e) {
             log.info("TimeoutException при получении страницы", e);
             return getTimeoutMessage();

@@ -123,7 +123,14 @@ public abstract class AnonymizerScript extends SeleniumRobotScript {
         return message;
     }
 
-    ExecutionJobResult getErrorMessage(String errorCode) {
+    ExecutionJobResult getErrorMessage(String errorCode, boolean addHttpStatus) {
+        if (addHttpStatus){
+            HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(driver);
+            if (responseMeta != null){
+                message.setHttpStatus(responseMeta.status);
+                message.setHttpHeaders(HttpResponseHelper.headers2Str(responseMeta.jsonHeaders));
+            }
+        }
         message.setErrorCode(errorCode);
         message.setScreenshot(ScriptUtils.getScreenshot(driver));
         return message;
