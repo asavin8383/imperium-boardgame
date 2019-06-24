@@ -175,7 +175,7 @@ public class AnalysisUtils {
 
         if (!isEmpty(errorCode)){
             if (errorCode.contains(INTERNAL_ERROR.name())) {
-                message = "Ошибка! " + errorCode;
+                message = "Ошибка " + errorCode + ".";
                 result = INTERNAL_ERROR;
             }
             else if (errorCode.contains("NO_INTERNET")) {
@@ -188,6 +188,10 @@ public class AnalysisUtils {
             }
             else if (errorCode.contains("SOCKET")){
                 message = "Ошибка доступа к ресурсу: " + errorCode + ". Есть вероятность проблемы с сетью.";
+                result = DOUBTFUL;
+            }
+            else if (errorCode.contains("CAPTCHA")){
+                message = "Обнаружена капча: " + errorCode + ".";
                 result = DOUBTFUL;
             }
             else if (errorCode.contains("TIME_OUT_CHECKING")) {
@@ -231,7 +235,7 @@ public class AnalysisUtils {
                 result = INTERNAL_ERROR;
             }
             else {
-                message = "Ошибка ЭТАЛОНА: " + errorCode + ". Не критическая";
+                message = "Не критическая ошибка ЭТАЛОНА: " + errorCode;
             }
 
             details.append(message);

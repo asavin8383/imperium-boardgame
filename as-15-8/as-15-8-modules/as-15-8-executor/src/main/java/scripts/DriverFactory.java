@@ -2,10 +2,7 @@ package scripts;
 
 import java.net.URL;
 
-import org.openqa.selenium.Capabilities;
-import org.openqa.selenium.Platform;
-import org.openqa.selenium.Proxy;
-import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -43,16 +40,20 @@ public class DriverFactory {
 	 * @return
 	 */
 	public static WebDriver createDriver(URL hubURL, Platform platformName, String appName, String browserName, String proxy) {
-		Capabilities cpb = buildCapability(platformName, appName, browserName);
+		DesiredCapabilities cpb = buildCapability(platformName, appName, browserName);
 
 		Proxy oProxy = ProxyUtils.getSeleniumProxy(proxy);
 		if (oProxy != null) {
 			log.info("Create WebDriver, proxy: " + proxy);
-			((DesiredCapabilities)cpb).setCapability(CapabilityType.PROXY, oProxy);
+			cpb.setCapability(CapabilityType.PROXY, oProxy);
 		}
 		else {
 			log.info("Create WebDriver, proxy: NONE");
 		}
+
+		ChromeOptions options = new ChromeOptions();
+		setOptimalChromeOptions(options);
+		cpb.setCapability(ChromeOptions.CAPABILITY, options);
 
 		return new RemoteWebDriver(hubURL, cpb);
 	}
@@ -74,6 +75,19 @@ public class DriverFactory {
 
         return new RemoteWebDriver(hubURL, options);
     }
+
+    private static void setOptimalChromeOptions(ChromeOptions options){
+		options.addArguments("--start-maximized");
+		options.addArguments("--ignore-certificate-errors");
+		options.addArguments("--disable-popup-blocking");
+		//options.addArguments("--headless");
+		//options.addArguments("--window-size=1920,1080");
+		//options.addArguments("--no-sandbox");				// избавляет от некоторых проблем с таймаутом, рендерингом, но не безопасно!
+		options.addArguments("--dns-prefetch-disable");		// отключение предварительной выборки DNS. в теории должно ускорить работу
+		options.addArguments("--disable-gpu");				// говорят частично решает проблему с рендерингом (скриншотом)
+		options.addArguments("--disable-features=VizDisplayCompositor");	// у кого-то в 73 версии устранило проблему: Timed out receiving message from renderer: 10.000
+		//options.setPageLoadStrategy(PageLoadStrategy.NORMAL);
+	}
 
 	/**
 	 * Метод создания параметров драйвера

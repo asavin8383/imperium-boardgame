@@ -38,7 +38,6 @@ public class YandexScript extends SearchScript {
 		EqualityTest test = EqualityTest.forCheckUnit(checkUnit);
 		
 		driver.get(YANDEX_URL);
-        driver.manage().window().fullscreen();
 
         WebElement input = driver.findElement(By.name("text"));
        input(input, checkUnit.getValue() + " ");

@@ -72,7 +72,7 @@ public abstract class AnonymizerScript extends SeleniumRobotScript {
             return message;
 
         if (StringUtils.isEmpty(message.getFinalUrl())){
-            message.setFinalUrl(driver.getCurrentUrl());
+            message.setFinalUrl(ScriptUtils.getCurrentUrl(driver));
         }
 
         close(driver);
@@ -85,7 +85,6 @@ public abstract class AnonymizerScript extends SeleniumRobotScript {
                     getDriverParams().getBrowserName(),
                     etalonProxy);
 
-            driver.manage().window().fullscreen();
             driver.get(ScriptUtils.getCheckUnitValue(checkUnit));
             ScriptUtils.PageResult etalon = loadEtalon();
 
@@ -107,8 +106,15 @@ public abstract class AnonymizerScript extends SeleniumRobotScript {
         return message;
     }
 
-    ExecutionJobResult getErrorMessage(String details) {
-        message.setErrorCode(details);
+    ExecutionJobResult getErrorMessage(String errorCode) {
+        message.setErrorCode(errorCode);
+        message.setScreenshot(ScriptUtils.getScreenshot(driver));
+        return message;
+    }
+
+    ExecutionJobResult getErrorMessageDetails(String errorCode, String details) {
+        message.setErrorCode(errorCode);
+        message.setDetails(details);
         message.setScreenshot(ScriptUtils.getScreenshot(driver));
         return message;
     }

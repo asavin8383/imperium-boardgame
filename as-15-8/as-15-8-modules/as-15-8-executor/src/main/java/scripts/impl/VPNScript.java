@@ -65,7 +65,7 @@ public class VPNScript extends SeleniumRobotScript {
                     try {
                         PageResult pageResult = RobotScriptUtils.loadPage(url, driver);
                         byte[] screenShot = ScriptUtils.getScreenshot(driver);
-                        String finalUrl = driver.getCurrentUrl();
+                        String finalUrl = ScriptUtils.getCurrentUrl(driver);
 
                         message.setResponseError(pageResult.errorCodeChrome != null);
                         message.setChromeErrorCode(pageResult.errorCodeChrome);
@@ -91,7 +91,7 @@ public class VPNScript extends SeleniumRobotScript {
                             driver = createDriver(etalonProxy);
                             PageResult pageResult = RobotScriptUtils.loadPage(url, driver);
                             byte[] screenShot = ScriptUtils.getScreenshot(driver);
-                            String finalUrl = driver.getCurrentUrl();
+                            String finalUrl = ScriptUtils.getCurrentUrl(driver);
 
                             message.setChromeErrorCodeEtalon(pageResult.errorCodeChrome);
                             message.setPageContentEtalon(pageResult.pageSource);

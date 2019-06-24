@@ -43,7 +43,7 @@ public class StubAnalysis {
         double k = sumPoints / maxPoints;
         boolean result = k >= weights.threshold;
 
-        String info = String.format("Заглушка: %s (коэф = %.2f, порог = %.2f)", (result ? "да" : "нет"), k, weights.threshold);
+        String info = String.format("Заглушка: %s (коэф = %.2f, порог = %.2f).", (result ? "да" : "нет"), k, weights.threshold);
         log.info(info);
 
         AnalysisUtils.appendString(details, info);

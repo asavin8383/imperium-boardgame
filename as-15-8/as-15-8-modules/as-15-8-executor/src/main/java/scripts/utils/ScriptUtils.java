@@ -1,5 +1,6 @@
 package scripts.utils;
 
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -57,9 +58,14 @@ public class ScriptUtils {
     }
 
     public static void waitPageLoading(WebDriver driver) {
-        new WebDriverWait(driver, WAIT_TIMEOUT).until(
+        waitPageLoading(driver, WAIT_TIMEOUT);
+    }
+
+    public static void waitPageLoading(WebDriver driver, int timeoutSec) {
+        new WebDriverWait(driver, timeoutSec).until(
                 webDriver -> ((JavascriptExecutor) webDriver).executeScript("return document.readyState").equals("complete"));
     }
+
 
     public static String getErrorCode(WebDriver driver){
         try{
@@ -86,8 +92,14 @@ public class ScriptUtils {
             return ((TakesScreenshot) webDriver).getScreenshotAs(OutputType.BYTES);
         }
         catch (TimeoutException te){
-            return ((TakesScreenshot) webDriver).getScreenshotAs(OutputType.BYTES);     // в случае таймаута пробуем еще один раз
+            return null;        // вероятно, загрузка страницы была прервана по явному таймауту, поэтому DOM не сформировался.
         }
+    }
+
+    public static String getCurrentUrl(WebDriver webDriver) {
+        String url = webDriver.getCurrentUrl();
+        url = url == null ? "" : (url.startsWith("data:") ? "" : url);
+        return url;
     }
 
     public static String getCheckUnitValue(@NonNull CheckUnit checkUnit){

@@ -49,7 +49,6 @@ public class RobotScriptUtils {
 
             try {
                 webDriver.get(url);
-                webDriver.manage().window().fullscreen();
 
                 ScriptUtils.waitPageLoading(webDriver);
                 CloudflareUtils.waitCloudflareRedirect(webDriver, timeoutSec*1000);
@@ -78,6 +77,33 @@ public class RobotScriptUtils {
     }
 
 
+    public static PageResult simpleLoadPage(WebDriver driver, String url, int timeoutSec, int tryCount) {
+        int cnt = 0;
+        TimeoutException exception = null;
+        PageResult pageSourceResult = new PageResult("", "FIRST");
+
+        while (++cnt <= tryCount && pageSourceResult.errorCodeChrome != null){
+            if (cnt > 1)
+                ScriptUtils.waitDriver(driver, 2);
+
+            try{
+                exception = null;
+                driver.get(url);
+                ScriptUtils.waitPageLoading(driver, timeoutSec);
+                pageSourceResult = ScriptUtils.getPageSource(driver);
+            }
+            catch (TimeoutException te){
+                exception = te;
+            }
+        }
+
+        if (exception != null){
+            throw exception;
+        }
+
+        return pageSourceResult;
+    }
+
     /**
      * Параллельная загрузка исходника страниц.
      **/
@@ -88,7 +114,6 @@ public class RobotScriptUtils {
                         PageResult pResult = new PageResult();
                         try{
                             webDriver.get(url);
-                            webDriver.manage().window().fullscreen();
                             ScriptUtils.waitDriver(webDriver, 3);
                             pResult = ScriptUtils.getPageSource(webDriver);
                         }

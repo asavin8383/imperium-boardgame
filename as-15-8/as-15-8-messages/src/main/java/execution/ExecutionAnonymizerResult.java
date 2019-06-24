@@ -20,6 +20,8 @@ public class ExecutionAnonymizerResult extends ExecutionJobResult {
     private String finalUrl;
     private String stubUrl;
 
+    private String details;
+
     public boolean hasError() {
         return errorCode != null;
     }
