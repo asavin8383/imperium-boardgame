@@ -98,7 +98,7 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 
 			aRes.setKeyWordsCount(AnalysisUtils.getCountKeyWords(pageContent, keyWords));
 
-			aRes.setDomainNameCount(AnalysisUtils.getDomainCount(jobRes.getCheckUnit().getValue(), pageContent));
+			aRes.setDomainNameCount(AnalysisUtils.getDomainCount(aRes.getPageUrlFinal(), pageContent));
 
 			aRes.setSimilarityOriginPercent(AnalysisUtils.getTextSimilarityPercent(pageContent, pageContentEtalon));
 

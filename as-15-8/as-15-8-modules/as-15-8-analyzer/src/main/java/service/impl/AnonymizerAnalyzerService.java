@@ -192,7 +192,7 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 
 		analysisResult.setLinkCount(AnalysisUtils.getLinkCounts(content));
 		analysisResult.setKeyWordsCount(AnalysisUtils.getCountKeyWords(content, keyWords));
-		analysisResult.setDomainNameCount(AnalysisUtils.getDomainCount(checkValue, content));
+		analysisResult.setDomainNameCount(AnalysisUtils.getDomainCount(analysisResult.getFinalUrl(), content));
 
 		StringBuffer stubDetails = new StringBuffer();
 

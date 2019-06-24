@@ -1,24 +1,20 @@
 package analysis;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-
 import enums.CheckUnitJobResult;
+import model.KeyWord;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
-
-import model.KeyWord;
 import org.springframework.web.util.UriUtils;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+
 import static enums.CheckUnitJobResult.*;
-import static enums.CheckUnitJobResult.COMPLETED;
 import static java.net.IDN.toASCII;
 import static java.net.IDN.toUnicode;
 import static org.springframework.util.StringUtils.isEmpty;
@@ -42,21 +38,55 @@ public class AnalysisUtils {
     }
 
     public static int getDomainCount(String url, String text) {
-        try {
-            String domain = getDomain(url);
-            return countMatches(text, domain);
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
+        String domain1 = getDomainDecoded(url);
+        String domain2 = getDomainEncoded(url);
+
+        int count1 = 0;
+        int count2 = 0;
+
+        if (!StringUtils.isEmpty(domain1)){
+            count1 = countMatches(text, domain1);
         }
-        return 0;
+        if (!StringUtils.isEmpty(domain2) && !domain2.equals(domain1)){
+            count2 = countMatches(text, domain2);
+        }
+        return count1 + count2;
     }
 
-    public static String getDomain(String url) throws URISyntaxException {
+    public static String getDomainDecoded(String url) {
         if (url == null || url.trim().isEmpty()){
             return null;
         }
-        URI u = new URI(url);
-        return u.getHost();
+        if (!url.startsWith("http"))
+            url = "http://" + url;
+
+        try {
+            URL u = new URL(url);
+            String host = u.getHost() == null ? "" : u.getHost();
+            return toUnicode(host);
+        }
+        catch (MalformedURLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static String getDomainEncoded(String url) {
+        if (url == null || url.trim().isEmpty()){
+            return null;
+        }
+        if (!url.startsWith("http"))
+            url = "http://" + url;
+
+        try {
+            URL u = new URL(url);
+            String host = u.getHost() == null ? "" : u.getHost();
+            return toASCII(host);
+        }
+        catch (MalformedURLException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public static int getLinkCounts(String text){
@@ -93,7 +123,7 @@ public class AnalysisUtils {
 
             String host1 = u1.getHost() == null ? "" : u1.getHost();
             String host2 = u2.getHost() == null ? "" : u2.getHost();
-            boolean hostsEquals = host1.equals(host2) || host1.equals(toUnicode(host2)) ||  host1.equals(toASCII(host2));
+            boolean hostsEquals = host1.equals(host2) || host1.equals(toUnicode(host2)) || host1.equals(toASCII(host2));
 
             String path1 = u1.getPath();
             path1 = path1 == null ? "" : path1;
