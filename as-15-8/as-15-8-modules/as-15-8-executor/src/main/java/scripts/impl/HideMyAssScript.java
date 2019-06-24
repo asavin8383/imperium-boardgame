@@ -1,7 +1,6 @@
 package scripts.impl;
 
 import static enums.CheckUnitJobResult.INTERNAL_ERROR;
-import static org.openqa.selenium.support.ui.ExpectedConditions.*;
 import static scripts.utils.ScriptUtils.*;
 
 import java.util.Map;
@@ -15,8 +14,6 @@ import checkUnits.CheckUnit;
 import enums.AccessToolParameters;
 import execution.ExecutionJobResult;
 import lombok.extern.slf4j.Slf4j;
-import org.openqa.selenium.support.ui.WebDriverWait;
-import scripts.RobotScript;
 import scripts.ScriptDriverParameters;
 import scripts.exceptions.RobotScriptExecutionException;
 import scripts.exceptions.TimeoutCheckingBrowserException;

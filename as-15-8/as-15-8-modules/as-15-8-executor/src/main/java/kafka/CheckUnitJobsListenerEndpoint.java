@@ -6,20 +6,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.config.KafkaListenerEndpoint;
-import org.springframework.kafka.listener.AcknowledgingMessageListener;
 import org.springframework.kafka.listener.MessageListenerContainer;
 import org.springframework.kafka.listener.adapter.FilteringMessageListenerAdapter;
-import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.kafka.support.TopicPartitionInitialOffset;
 import org.springframework.kafka.support.converter.MessageConverter;
 
 import checkUnits.CheckUnitJob;
 import enums.AccessToolUnit;
-import robots.Robot;
-import robots.RobotsFactory;
-import scripts.RobotScript;
 
 public class CheckUnitJobsListenerEndpoint implements KafkaListenerEndpoint {
 
@@ -33,9 +27,9 @@ public class CheckUnitJobsListenerEndpoint implements KafkaListenerEndpoint {
 	
 	private AccessToolUnit accessToolUnit;
 	
-	private CheckUnitJobMessageConsumer consumer;
+	private CheckUnitJobMessageProcessor consumer;
 	
-	CheckUnitJobsListenerEndpoint(String topic, AccessToolUnit accessToolUnit, CheckUnitJobMessageConsumer consumer) {		
+	CheckUnitJobsListenerEndpoint(String topic, AccessToolUnit accessToolUnit, CheckUnitJobMessageProcessor consumer) {		
 		this.accessToolUnit = accessToolUnit;
 		this.id = accessToolUnit.name();
 		this.groupID = GROUP_ID_PREFIX+accessToolUnit.name().toLowerCase();
@@ -96,37 +90,5 @@ public class CheckUnitJobsListenerEndpoint implements KafkaListenerEndpoint {
 	@Override
 	public Integer getConcurrency() {
 		return null;
-	}
-	
-	class CheckUnitJobMessageListener implements AcknowledgingMessageListener<String, CheckUnitJob> {
-
-		private CheckUnitJobMessageConsumer consumer;
-		
-		private RobotScript script;
-		
-		public CheckUnitJobMessageListener(CheckUnitJobMessageConsumer consumer) {
-			this.consumer = consumer;
-		}
-		
-		@Override
-		public void onMessage(ConsumerRecord<String, CheckUnitJob> data, Acknowledgment acknowledgment) {
-			Robot robot = RobotsFactory.getRobot(data.value().getAccessToolUnit());
-			this.script = robot.createScript(data.value().getAccessToolParameters());
-			this.consumer.onMessage(script, data, acknowledgment);
-		}
-
-		public void destroy() throws Exception {
-			if(this.script != null) {
-				script.close();
-				script = null;
-			}
-		}
-	}
-	
-	@FunctionalInterface
-	interface CheckUnitJobMessageConsumer {
-		
-		void onMessage(RobotScript script, ConsumerRecord<String, CheckUnitJob> data, Acknowledgment acknowledgment);
-		
 	}
 }

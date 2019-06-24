@@ -10,7 +10,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
-import org.springframework.kafka.event.ConsumerStoppedEvent;
+import org.springframework.kafka.event.ConsumerStoppingEvent;
 import org.springframework.kafka.listener.KafkaMessageListenerContainer;
 import org.springframework.kafka.listener.MessageListenerContainer;
 import org.springframework.kafka.listener.adapter.FilteringMessageListenerAdapter;
@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import checkUnits.CheckUnitJob;
 import control.ExecutorControlMessage;
 import enums.AccessToolUnit;
-import kafka.CheckUnitJobsListenerEndpoint.CheckUnitJobMessageListener;
 import lombok.extern.slf4j.Slf4j;
 import scripts.RobotScript;
 import scripts.exceptions.Captcha_RobotScriptExecutionException;
@@ -132,7 +131,7 @@ public class KafkaConsumer {
 	}
 	
 	@EventListener
-	public void listenStopContanier(ConsumerStoppedEvent event) throws Exception {
+	public void listenStopContanier(ConsumerStoppingEvent event) throws Exception {
 		Object container = event.getSource();
 		if(container instanceof KafkaMessageListenerContainer) {
 			Object messageListener = ((KafkaMessageListenerContainer<?, ?>)container).getContainerProperties().getMessageListener();
