@@ -3,6 +3,9 @@ package scripts.utils;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,6 +20,7 @@ import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.util.StringUtils;
 
@@ -61,11 +65,12 @@ public class ScriptUtils {
         waitPageLoading(driver, WAIT_TIMEOUT);
     }
 
-    public static void waitPageLoading(WebDriver driver, int timeoutSec) {
-        new WebDriverWait(driver, timeoutSec).until(
-                webDriver -> ((JavascriptExecutor) webDriver).executeScript("return document.readyState").equals("complete"));
+    public static void waitPageLoading(WebDriver driver, int timeoutInSeconds) {
+        new WebDriverWait(driver, timeoutInSeconds)
+                .withMessage("загрузка страницы")
+                .until(webDriver -> ((JavascriptExecutor) webDriver)
+                        .executeScript("return document.readyState").equals("complete"));
     }
-
 
     public static String getErrorCode(WebDriver driver){
         try{
@@ -120,14 +125,30 @@ public class ScriptUtils {
 
     @Nullable
     public static WebElement findElementIfExists(By by, WebElement where) {
+        try {
         List<WebElement> list = where.findElements(by);
         return list != null && list.size() > 0 ? list.get(0) : null;
+        } catch (TimeoutException e) {
+            // element not in the DOM
+            return null;
+        }
     }
 
     @Nullable
     public static WebElement findElementIfExists(By by, WebDriver driver) {
+        try {
         List<WebElement> list = driver.findElements(by);
         return list != null && list.size() > 0 ? list.get(0) : null;
+        } catch (TimeoutException e) {
+            // element not in the DOM
+            return null;
+        }
+    }
+
+    @Nullable
+    public static WebElement getElementBy(By by, WebDriver driver) {
+        WebElement element = ScriptUtils.findElementIfExists(by, driver);
+        return element;
     }
 
     public static String getTextOrDefault(WebElement element, String defaultValue) {
@@ -176,5 +197,92 @@ public class ScriptUtils {
                 useEtalon.equalsIgnoreCase("on") ||
                 useEtalon.equalsIgnoreCase("1");
     }
+
+
+    // дикие эксперименты
+
+
+    public static WebElement waitClickable(WebDriver driver, By locator, int timeoutInSeconds) {
+        return new WebDriverWait(driver, timeoutInSeconds)
+                .withMessage("clickable " + locator)
+                .until(ExpectedConditions.elementToBeClickable(locator));
+    }
+
+    public static WebElement waitPresence(WebDriver driver, By locator, int timeoutInSeconds) {
+        return waitPresenceToAct(driver, locator, timeoutInSeconds, null);
+    }
+
+    public static WebElement waitPresenceToAct(WebDriver driver, By locator, int timeoutInSeconds,
+                                         Consumer<WebElement> action) {
+        WebElement element = new WebDriverWait(driver, timeoutInSeconds)
+                .withMessage("загрузка " + locator)
+                .until(ExpectedConditions.presenceOfElementLocated(locator));
+
+        return action != null ? actOnStaleRef(driver, element, locator, action) : element;
+    }
+
+    @Nullable
+    public static WebElement actOnStaleRef(WebDriver driver, WebElement element, By locator,
+                                     Consumer<WebElement> action) {
+        try {
+            return actOnStaleRef(element, action,
+                    () -> findElementIfExists(locator, driver));
+        } catch (StaleElementReferenceException e) {
+            e.addInfo("locator", locator.toString());
+            throw e;
+        }
+    }
+
+    @Nullable
+    public static WebElement actOnStaleRef(WebElement element,
+                                     Consumer<WebElement> action,
+                                     Supplier<WebElement> refresher) {
+        try {
+            try {
+                action.accept(element);
+            } catch (StaleElementReferenceException e) {
+                element = refresher.get();
+                if (element != null)
+                    // still may throw exception
+                    action.accept(element);
+            }
+        } catch (TimeoutException e) {
+            // ignore
+        }
+        return element;
+    }
+
+    @Nullable
+    public static <T> T actOnStaleRef(WebDriver driver, WebElement element,
+                                      By locator, T defaultValue,
+                                      Function<WebElement, T> action) {
+        try {
+            return actOnStaleRef(element, defaultValue, action,
+                    () -> findElementIfExists(locator, driver));
+        } catch (StaleElementReferenceException e) {
+            e.addInfo("locator", locator.toString());
+            throw e;
+        }
+    }
+
+    @Nullable
+    public static <T> T actOnStaleRef(WebElement element, T defaultValue,
+                                Function<WebElement, T> action,
+                                Supplier<WebElement> refresher) {
+        try {
+            try {
+                return action.apply(element);
+            } catch (StaleElementReferenceException e) {
+                element = refresher.get();
+                if (element != null)
+                    // still may throw exception
+                    return action.apply(element);
+            }
+        } catch (TimeoutException e) {
+            // ignore
+        }
+        return defaultValue;
+    }
+
 
 }

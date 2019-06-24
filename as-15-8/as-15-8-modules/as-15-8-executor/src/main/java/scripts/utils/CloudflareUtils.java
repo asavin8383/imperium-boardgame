@@ -2,8 +2,11 @@ package scripts.utils;
 
 import lombok.experimental.UtilityClass;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import scripts.exceptions.TimeoutCheckingBrowserException;
 import scripts.exceptions.TimeoutScriptException;
 
@@ -37,18 +40,6 @@ public class CloudflareUtils {
                     getTextOrDefault(descriptionElement, "<no description>"));
         }
         return opt;
-    }
-
-    @Deprecated
-    public static boolean isCloudflareDdosProtection_old(WebDriver driver) {
-
-        WebElement cloudflareLink = findElementIfExists(
-                By.xpath("//div[contains(@class, \"attribution\")]//a"), driver);
-        if (cloudflareLink != null)
-            return ScriptUtils.getTextOrDefault(cloudflareLink, "")
-                    .equals("DDoS protection by Cloudflare");
-
-        return false;
     }
 
     public static boolean isCloudflareDdosProtection(WebDriver driver) {
@@ -92,5 +83,20 @@ public class CloudflareUtils {
                             "Время ожидания редиректа (" +
                             timeMax / 1000 +
                             " секунд) истекло");
+    }
+
+    public static void waitCloudflareRedirect(WebDriver driver, int timeoutInSeconds,
+                                              boolean useDriverWait) throws TimeoutCheckingBrowserException {
+        try {
+            new WebDriverWait(driver, timeoutInSeconds)
+                    .withMessage("DDoS protection by Cloudflare пройдена")
+                    .until(ExpectedConditions.not(CloudflareUtils::isCloudflareDdosProtection));
+        } catch (TimeoutException e) {
+            throw new TimeoutCheckingBrowserException(
+                    "DDoS protection by Cloudflare. " +
+                            "Время ожидания редиректа (" +
+                            timeoutInSeconds +
+                            " секунд) истекло");
+        }
     }
 }

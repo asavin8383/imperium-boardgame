@@ -84,7 +84,7 @@ public class RobotScriptUtils {
 
         while (++cnt <= tryCount && pageSourceResult.errorCodeChrome != null){
             if (cnt > 1)
-                ScriptUtils.waitDriver(driver, 2);
+                ScriptUtils.waitDriver(driver, 3 * (cnt-1));
 
             try{
                 exception = null;
