@@ -10,6 +10,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
+import org.springframework.kafka.event.ConsumerPausedEvent;
 import org.springframework.kafka.event.ConsumerStoppingEvent;
 import org.springframework.kafka.listener.KafkaMessageListenerContainer;
 import org.springframework.kafka.listener.MessageListenerContainer;
@@ -131,7 +132,7 @@ public class KafkaConsumer {
 	}
 	
 	@EventListener
-	public void listenStopContanier(ConsumerStoppingEvent event) throws Exception {
+	public void listenStopContanier(ConsumerPausedEvent event) throws Exception {
 		Object container = event.getSource();
 		if(container instanceof KafkaMessageListenerContainer) {
 			Object messageListener = ((KafkaMessageListenerContainer<?, ?>)container).getContainerProperties().getMessageListener();
