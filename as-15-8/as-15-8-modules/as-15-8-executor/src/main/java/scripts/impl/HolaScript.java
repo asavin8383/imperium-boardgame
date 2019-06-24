@@ -1,26 +1,26 @@
 package scripts.impl;
 
-import java.util.Map;
-import java.util.function.Function;
-
-import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
-
 import checkUnits.CheckUnit;
 import enums.AccessToolParameters;
 import execution.ExecutionJobResult;
 import execution.ExecutionVpnJobResult;
+import org.openqa.selenium.*;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import scripts.DriverFactory;
 import scripts.ProxyUtils;
 import scripts.ScriptDriverParameters;
-import scripts.utils.*;
-import scripts.utils.ScriptUtils.PageResult;
 import scripts.exceptions.RobotScriptExecutionException;
+import scripts.utils.HttpResponseHelper;
+import scripts.utils.RobotScriptUtils;
+import scripts.utils.ScriptUtils;
+import scripts.utils.ScriptUtils.PageResult;
+
+import java.util.Map;
+import java.util.function.Function;
+
+import static scripts.utils.HttpResponseHelper.HttpResponseMeta;
+
 
 public class HolaScript extends SeleniumRobotScript {
 
@@ -66,7 +66,12 @@ public class HolaScript extends SeleniumRobotScript {
                 PageResult pageResult = RobotScriptUtils.loadPage(url, driver);
                 byte[] screenShot = ScriptUtils.getScreenshot(driver);
                 String finalUrl = ScriptUtils.getCurrentUrl(driver);
+                HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(driver);
 
+                if (responseMeta != null){
+                    message.setHttpStatus(responseMeta.status);
+                    message.setHttpHeaders(HttpResponseHelper.headers2Str(responseMeta.jsonHeaders));
+                }
                 message.setChromeErrorCodeEtalon(pageResult.errorCodeChrome);
                 message.setPageContentEtalon(pageResult.pageSource);
                 message.setEtalonScreenshot(screenShot);
@@ -107,7 +112,12 @@ public class HolaScript extends SeleniumRobotScript {
             PageResult pageResult = RobotScriptUtils.loadPage(url, driver);
             byte[] screenShot = ScriptUtils.getScreenshot(driver);
             String finalUrl = ScriptUtils.getCurrentUrl(driver);
+            HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(driver);
 
+            if (responseMeta != null){
+                message.setHttpStatus(responseMeta.status);
+                message.setHttpHeaders(HttpResponseHelper.headers2Str(responseMeta.jsonHeaders));
+            }
             message.setResponseError(pageResult.errorCodeChrome != null);
             message.setChromeErrorCode(pageResult.errorCodeChrome);
             message.setPageContent(pageResult.pageSource);

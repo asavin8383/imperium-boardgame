@@ -1,36 +1,27 @@
 package service.impl;
 
-import static enums.CheckUnitJobResult.COMPLETED;
-import static enums.CheckUnitJobResult.DOUBTFUL;
-import static enums.CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.PostConstruct;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ResourceLoader;
-import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
-
+import analysis.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import analysis.AnalysisResult;
-import analysis.AnalysisUtils;
-import analysis.AnonymizerAnalysisResult;
-import analysis.ContentAnalysis;
-import analysis.StubAnalysis;
 import common.AnalysisException;
 import enums.CheckUnitJobResult;
 import execution.ExecutionAnonymizerResult;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import model.KeyWord;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import service.AnalyzerService;
+
+import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+import static enums.CheckUnitJobResult.*;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 
 @Slf4j
@@ -66,6 +57,11 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 		AnonymizerAnalysisResult analysisResult = new AnonymizerAnalysisResult();
 		analysisResult.setJobID(executionResult.getJobID());
 		analysisResult.setCheckUnit(executionResult.getCheckUnit());
+
+		analysisResult.setHttpStatus(executionResult.getHttpStatus());
+		analysisResult.setHttpStatusEtalon(executionResult.getHttpStatusEtalon());
+		analysisResult.setHttpHeaders(executionResult.getHttpHeaders());
+		analysisResult.setHttpHeadersEtalon(executionResult.getHttpHeadersEtalon());
 
 		/* ERROR */
 

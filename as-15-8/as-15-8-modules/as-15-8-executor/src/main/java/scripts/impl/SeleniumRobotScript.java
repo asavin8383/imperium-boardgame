@@ -1,18 +1,17 @@
 package scripts.impl;
 
-import java.io.IOException;
-import java.util.Map;
-
-import org.openqa.selenium.WebDriver;
-
 import checkUnits.CheckUnit;
 import enums.AccessToolParameters;
 import execution.ExecutionJobResult;
 import lombok.Getter;
+import org.openqa.selenium.WebDriver;
 import scripts.DriverFactory;
 import scripts.RobotScript;
 import scripts.ScriptDriverParameters;
 import scripts.exceptions.RobotScriptExecutionException;
+
+import java.io.IOException;
+import java.util.Map;
 
 /**
  * Скрипт робота проверки ПС/ПАСД
@@ -23,6 +22,7 @@ public abstract class SeleniumRobotScript implements RobotScript {
 
     protected WebDriver driver;
 	protected String proxy;
+	protected boolean enableLog;
 
 	@Getter
 	private ScriptDriverParameters driverParams;
@@ -35,9 +35,14 @@ public abstract class SeleniumRobotScript implements RobotScript {
 	}
 
 	public SeleniumRobotScript(ScriptDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams, String proxy) {
+		this(driverParams, scriptParams, proxy, true);
+	}
+
+	public SeleniumRobotScript(ScriptDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams, String proxy, boolean enableLog) {
 		setParams(driverParams, scriptParams);
 		this.proxy = proxy;
-		this.driver = createDriver(proxy);
+		this.enableLog = enableLog;
+		this.driver = createDriver(proxy, enableLog);
 	}
 
 	private void setParams(ScriptDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams) {
@@ -53,13 +58,13 @@ public abstract class SeleniumRobotScript implements RobotScript {
 	 */
 	public abstract ExecutionJobResult execute(CheckUnit checkUnit) throws RobotScriptExecutionException;
 
-	protected WebDriver createDriver(String proxy) {
+	protected WebDriver createDriver(String proxy, boolean enableLog) {
 		WebDriver driver = DriverFactory.createDriver(
 				getDriverParams().getHubURL(),
 				getDriverParams().getPlatformName(),
 				getDriverParams().getApplicationName(),
 				getDriverParams().getBrowserName(),
-				proxy
+				proxy, enableLog
 		);
 		return driver;
 	}

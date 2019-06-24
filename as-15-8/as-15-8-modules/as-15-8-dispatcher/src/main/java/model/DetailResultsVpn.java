@@ -2,7 +2,10 @@ package model;
 
 import lombok.Data;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import java.io.Serializable;
 
 /**
@@ -34,6 +37,15 @@ public class DetailResultsVpn implements Serializable  {
 
     @Column(name="http_status")
     private Integer httpStatus;
+
+    @Column(name="http_status_etalon")
+    private Integer httpStatusEtalon;
+
+    @Column(name="http_headers")
+    private String httpHeaders;
+
+    @Column(name="http_headers_etalon")
+    private String httpHeadersEtalon;
 
     @Column(name="page_size")
     private Integer pageSize;

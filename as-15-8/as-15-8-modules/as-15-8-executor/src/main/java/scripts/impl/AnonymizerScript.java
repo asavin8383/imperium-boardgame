@@ -7,14 +7,18 @@ import execution.ExecutionJobResult;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.TimeoutException;
 import org.springframework.util.StringUtils;
-import scripts.*;
+import scripts.DriverFactory;
+import scripts.ProxyUtils;
+import scripts.ScriptDriverParameters;
 import scripts.exceptions.RobotScriptExecutionException;
 import scripts.exceptions.TimeoutScriptException;
 import scripts.utils.CloudflareUtils;
+import scripts.utils.HttpResponseHelper;
 import scripts.utils.ScriptUtils;
 
 import java.util.Map;
 
+import static scripts.utils.HttpResponseHelper.HttpResponseMeta;
 import static scripts.utils.ScriptUtils.TIME_OUT_ERROR;
 
 @Slf4j
@@ -63,7 +67,12 @@ public abstract class AnonymizerScript extends SeleniumRobotScript {
     ExecutionJobResult process(CheckUnit checkUnit) throws RobotScriptExecutionException {
 
         ScriptUtils.PageResult page = ScriptUtils.getPageSource(driver);
+        HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(driver);
 
+        if (responseMeta != null){
+            message.setHttpStatus(responseMeta.status);
+            message.setHttpHeaders(HttpResponseHelper.headers2Str(responseMeta.jsonHeaders));
+        }
         message.setErrorCode(page.errorCodeChrome);
         message.setPageContent(page.pageSource);
         message.setScreenshot(ScriptUtils.getScreenshot(driver));
@@ -83,11 +92,17 @@ public abstract class AnonymizerScript extends SeleniumRobotScript {
                     getDriverParams().getPlatformName(),
                     getDriverParams().getApplicationName(),
                     getDriverParams().getBrowserName(),
-                    etalonProxy);
+                    etalonProxy,
+                    true);
 
             driver.get(ScriptUtils.getCheckUnitValue(checkUnit));
             ScriptUtils.PageResult etalon = loadEtalon();
+            HttpResponseMeta responseMetaEtalon = HttpResponseHelper.getGetResponseMeta(driver);
 
+            if (responseMetaEtalon != null){
+                message.setHttpStatusEtalon(responseMetaEtalon.status);
+                message.setHttpHeadersEtalon(HttpResponseHelper.headers2Str(responseMetaEtalon.jsonHeaders));
+            }
             message.setEtalonErrorCode(etalon.errorCodeChrome);
             message.setEtalonPageContent(etalon.pageSource);
             message.setEtalonScreenshot(ScriptUtils.getScreenshot(driver));

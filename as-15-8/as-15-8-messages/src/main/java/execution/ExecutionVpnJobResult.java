@@ -10,6 +10,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ExecutionVpnJobResult extends ExecutionJobResult{
     private Integer httpStatus;
+    private Integer httpStatusEtalon;
+    private String httpHeaders;
+    private String httpHeadersEtalon;
     private String chromeErrorCode;
     private Boolean responseError;
     private Boolean useEtalon;
