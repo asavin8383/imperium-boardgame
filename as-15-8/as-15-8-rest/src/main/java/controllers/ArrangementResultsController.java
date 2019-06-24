@@ -97,7 +97,7 @@ public class ArrangementResultsController {
     }
 
     @PreAuthorize("hasAnyRole('ROLE_OPERATOR', 'ROLE_ADMIN')")
-    @PostMapping(path = "/user", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = "/user_result", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> postUserResult(@RequestParam Long id, @RequestBody Map<String, String> userResult) {
     	return arrangementResultRepo.findById(id)
     		.map(arrResult -> {
