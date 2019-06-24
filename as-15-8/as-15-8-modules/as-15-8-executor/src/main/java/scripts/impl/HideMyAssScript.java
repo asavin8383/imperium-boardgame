@@ -1,20 +1,20 @@
 package scripts.impl;
 
 import static enums.CheckUnitJobResult.INTERNAL_ERROR;
-import static org.openqa.selenium.support.ui.ExpectedConditions.*;
 import static scripts.utils.ScriptUtils.TIME_OUT_CHECKING_ERROR;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.openqa.selenium.*;
+import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebElement;
 
 import checkUnits.CheckUnit;
 import enums.AccessToolParameters;
 import execution.ExecutionJobResult;
 import lombok.extern.slf4j.Slf4j;
-import org.openqa.selenium.support.ui.WebDriverWait;
-import scripts.RobotScript;
 import scripts.ScriptDriverParameters;
 import scripts.exceptions.RobotScriptExecutionException;
 import scripts.exceptions.TimeoutCheckingBrowserException;
