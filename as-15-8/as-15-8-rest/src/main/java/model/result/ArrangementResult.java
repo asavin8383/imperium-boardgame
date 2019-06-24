@@ -23,6 +23,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import checkUnits.CheckUnitType;
 import enums.CheckUnitJobResult;
 import lombok.Data;
+import model.enums.UserResult;
 import model.erdi.ERDI;
 import model.task.Arrangement;
 
@@ -83,5 +84,12 @@ public class ArrangementResult implements Serializable {
     @JoinColumn(name = "id", referencedColumnName = "id")
     @JsonIgnore
     DetailedArrangementResult detailedArrangementResult;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name="user_result")
+    private UserResult userResult;
+    
+    @Column(name="user_description")
+    private String userDescription;
 
 }

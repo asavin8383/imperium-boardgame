@@ -3,6 +3,7 @@ package controllers;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -15,6 +16,8 @@ import org.springframework.jdbc.support.lob.DefaultLobHandler;
 import org.springframework.jdbc.support.lob.LobHandler;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -24,6 +27,9 @@ import checkUnits.CheckUnitType;
 import controllers.helpers.SortingHelper;
 import enums.CheckUnitJobResult;
 import enums.SortingDirection;
+import exceptions.AS_15_8_Exception;
+import lombok.extern.slf4j.Slf4j;
+import model.enums.UserResult;
 import model.result.ArrangementResult;
 import model.result.DetailedArrangementResult;
 import repositories.ArrangementResultRepository;
@@ -37,6 +43,7 @@ import repositories.DetailedArrangementResultRepository;
 
 @RestController
 @RequestMapping(path = "/results", produces = MediaType.APPLICATION_JSON_VALUE)
+@Slf4j
 public class ArrangementResultsController {
 
     private ArrangementResultRepository arrangementResultRepo;
@@ -89,6 +96,28 @@ public class ArrangementResultsController {
                 .orElseGet(() -> new ResponseEntity<>(null, HttpStatus.NO_CONTENT));
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_OPERATOR', 'ROLE_ADMIN')")
+    @PostMapping(path = "/user", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ArrangementResult postUserResult(@RequestParam Long id, @RequestBody Map<String, String> userResult) {
+    	return arrangementResultRepo.findById(id)
+    		.map(arrResult -> {
+    			UserResult result = UserResult.valueOf(userResult.get("userResult"));
+    			if(result == null) {
+    				AS_15_8_Exception error = new AS_15_8_Exception("Ошибка! Результат " + userResult.get("userResult")+" не поддерживается!");
+    				log.error("Ошибка при сохранении результатов от пользователя", error);
+    				throw error;
+    			}
+    			arrResult.setUserResult(result);
+    			arrResult.setUserDescription(userResult.get("userDescription"));
+    			arrangementResultRepo.save(arrResult);
+    			return arrResult;
+    		}).orElseThrow(() -> {
+    			AS_15_8_Exception error = new AS_15_8_Exception("Ошибка! Результат не найден по идентификатору: "+id);
+				log.error("Ошибка при сохранении результатов от пользователя", error);
+				return error;
+    		});
+    }
+    
     private ResponseEntity<byte[]> receiveScreenshotFromDB(Long id, boolean isEtalon){
 
         String fieldName = "screenshot";

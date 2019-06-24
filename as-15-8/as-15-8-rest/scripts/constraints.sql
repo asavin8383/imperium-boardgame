@@ -17,6 +17,11 @@ alter table portal.arrangement_results add constraint ck_result check ( result i
 'PAGE_NOT_FOUND', 
 'INTERNAL_ERROR',
 'TIMEOUT_ERROR' ));
+alter table portal.arrangement_results drop constraint if exists ck_user_result;
+alter table portal.arrangement_results add constraint ck_user_result check ( user_result in (
+'COMPLETED',
+'DOUBTFUL',
+'FORBIDDEN_CONTENT_DETECTED'));
 
 alter table portal.search_system_parameters drop constraint if exists ck_type;
 alter table portal.search_system_parameters add constraint ck_type check ( access_tool_type in ('SEARCH_SYSTEM'));
