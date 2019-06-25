@@ -6,7 +6,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 
 import kafka.KafkaConfiguration;
-import robots.RobotsConfiguration;
+import robots.factory.RobotsFactoryConfiguration;
 
 /**
  * Конфигурация модуля запуска проверок мероприятий
@@ -14,8 +14,8 @@ import robots.RobotsConfiguration;
  *
  */
 @SpringBootApplication
-@Import({RobotsConfiguration.class, KafkaConfiguration.class})
-@ComponentScan(basePackages={"common", "kafka", "robots", "service", "listener"})
+@Import({RobotsFactoryConfiguration.class, KafkaConfiguration.class})
+@ComponentScan(basePackages={"common", "kafka", "robots.factory", "service"})
 public class ApplicationConfiguration{
 	
 	public static void main(String[] args) {

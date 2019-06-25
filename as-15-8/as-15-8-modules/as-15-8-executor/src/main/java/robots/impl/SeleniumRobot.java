@@ -1,31 +1,84 @@
 package robots.impl;
 
-import enums.AccessToolUnit;
-import scripts.RobotScript;
-import scripts.ScriptDriverParameters;
+import java.io.IOException;
+import java.util.Map;
+
+import org.openqa.selenium.WebDriver;
+
+import checkUnits.CheckUnit;
+import enums.AccessToolParameters;
+import execution.ExecutionJobResult;
+import lombok.Getter;
+import robots.DriverFactory;
+import robots.Robot;
+import robots.RobotDriverParameters;
+import robots.exceptions.RobotScriptExecutionException;
 
 /**
- * Робот на технологии Selenium
+ * Скрипт робота проверки ПС/ПАСД
  * @author shabalinAI
  *
- * @param <T>
  */
-public abstract class SeleniumRobot extends AbstractRobot {
-	
-	protected ScriptDriverParameters driverParams;
+public abstract class SeleniumRobot implements Robot {
+
+    protected WebDriver driver;
+	protected String proxy;
+	protected boolean enableLog;
+
+	@Getter
+	private RobotDriverParameters driverParams;
+
+	@Getter
+	private Map<AccessToolParameters, String> scriptParams;
+
+	public SeleniumRobot(RobotDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams) {
+		this(driverParams, scriptParams, null);
+	}
+
+	public SeleniumRobot(RobotDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams, String proxy) {
+		this(driverParams, scriptParams, proxy, true);
+	}
+
+	public SeleniumRobot(RobotDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams, String proxy, boolean enableLog) {
+		setParams(driverParams, scriptParams);
+		this.proxy = proxy;
+		this.enableLog = enableLog;
+		this.driver = createDriver(proxy, enableLog);
+	}
+
+	private void setParams(RobotDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams) {
+		this.driverParams = driverParams;
+		this.scriptParams = scriptParams;
+	}
 
 	/**
-	 * Робот на технологии Selenium
-	 * @param accessToolUnit Проверяемая ПС/ПАСД
-	 * @param hubURL Класс скрипта робота
-	 * @param scriptClass URL хаба selenium Grid
-	 * @param browserName Имя браузера
-	 * @param platform Имя платформы
-	 * @param applicationName Имя приложения (ПС/ПАСД)
+	 * Метод, запускаюший выполнение скрипта робота
+	 * @param checkUnit Ресурс для проверки
+	 * @return
+	 * @throws RobotScriptExecutionException
 	 */
-	public SeleniumRobot(AccessToolUnit accessToolUnit, Class<? extends RobotScript> scriptClass, ScriptDriverParameters driverParams) {
-		super(accessToolUnit, scriptClass);
-		this.driverParams = driverParams;
+	public abstract ExecutionJobResult execute(CheckUnit checkUnit) throws RobotScriptExecutionException;
+
+	protected WebDriver createDriver(String proxy, boolean enableLog) {
+		WebDriver driver = DriverFactory.createDriver(
+				getDriverParams().getHubURL(),
+				getDriverParams().getPlatformName(),
+				getDriverParams().getApplicationName(),
+				getDriverParams().getBrowserName(),
+				proxy, enableLog
+		);
+		return driver;
 	}
-	
+
+	@Override
+	public void close() throws IOException {
+		close(driver);
+	}
+
+	public void close(WebDriver driver) {
+		if (driver != null) {
+			driver.quit();
+		}
+	}
+
 }

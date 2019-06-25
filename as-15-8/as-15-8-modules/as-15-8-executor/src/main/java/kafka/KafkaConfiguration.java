@@ -2,6 +2,7 @@ package kafka;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -131,5 +132,10 @@ public class KafkaConfiguration {
     @Bean
     public KafkaTemplate<String, CheckUnitStatusNotification> notificationsTemplate() {
         return new KafkaTemplate<>(notificationsProducerFactory());
+    }
+    
+    @Bean
+    public String execControlGroupID() {
+    	return "exec-control-"+UUID.randomUUID();
     }
 }

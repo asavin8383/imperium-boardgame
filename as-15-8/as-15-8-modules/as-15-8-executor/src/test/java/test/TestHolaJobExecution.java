@@ -12,11 +12,8 @@ import checkUnits.CheckUnitJob;
 import checkUnits.CheckUnitType;
 import common.ApplicationConfiguration;
 import enums.AccessToolUnit;
-import robots.Robot;
-import robots.RobotsFactory;
-import scripts.RobotScript;
-import scripts.exceptions.RobotScriptExecutionException;
-import service.impl.SeleniumRobotsService;
+import robots.exceptions.RobotScriptExecutionException;
+import service.RobotsService;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes={ApplicationConfiguration.class})
@@ -25,7 +22,7 @@ public class TestHolaJobExecution
 {
 
 	@Autowired
-	private SeleniumRobotsService service;
+	private RobotsService service;
 
 	@Test
 	public void test() throws RobotScriptExecutionException {
@@ -36,10 +33,7 @@ public class TestHolaJobExecution
 
 		checkUnitJob.setCheckUnit(new CheckUnit(CheckUnitType.URL, "myip.ru"));
 
-		
-		Robot robot = RobotsFactory.getRobot(checkUnitJob.getAccessToolUnit());
-		RobotScript script = robot.createScript(checkUnitJob.getAccessToolParameters());
-		service.run(checkUnitJob, script);
+		service.run(checkUnitJob);
 	}
 
 }
