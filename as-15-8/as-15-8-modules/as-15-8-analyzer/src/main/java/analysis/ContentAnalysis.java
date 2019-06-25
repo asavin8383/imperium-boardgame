@@ -42,17 +42,21 @@ public class ContentAnalysis {
     private static int getPageSizeHit(Integer size){
         size = size == null ? 0 : size;
 
-        int minSize = 1024*2;
-        int maxSize1 = 1024*20;
-        int maxSize2 = 1024*100;
+        int minSize = 1024;
+        int size1 = 1024*5;
+        int size2 = 1024*10;
+        int size3 = 1024*30;
 
         if (size < minSize)
             return 0;
-        else if (size < maxSize1){
-            return (size/maxSize1)*30 + 40;
+        else if (size < size1){
+            return (size/size1)*20 + 30;
         }
-        else if (size < maxSize2){
-            return (size/maxSize2)*30 + 70;
+        else if (size < size2){
+            return (size/size2)*30 + 50;
+        }
+        else if (size < size3){
+            return (size/size3)*20 + 80;
         }
         return 100;
     }
