@@ -21,9 +21,11 @@ import checkUnits.CheckUnitStatusNotification;
 import enums.CheckUnitJobResult;
 import execution.ExecutionJobResult;
 import lombok.extern.slf4j.Slf4j;
-import scripts.RobotScript;
-import scripts.exceptions.Captcha_RobotScriptExecutionException;
-import scripts.exceptions.RobotScriptExecutionException;
+import robots.Robot;
+import robots.exceptions.Captcha_RobotScriptExecutionException;
+import robots.exceptions.RobotScriptExecutionException;
+import robots.factory.RobotsFactory;
+import robots.factory.RobotsFactoryRegistry;
 import service.RobotsService;
 
 /**
@@ -48,12 +50,15 @@ public class SeleniumRobotsService implements RobotsService {
     private String notificationsTopicName;
 	
 	@Override
-	public void run(CheckUnitJob checkUnitJob, RobotScript script) throws Captcha_RobotScriptExecutionException{
+	public void run(CheckUnitJob checkUnitJob) throws Captcha_RobotScriptExecutionException{
 		String robotName = "";
 		try {
 			robotName = "jobID = " + checkUnitJob.getJobID() +
 					" accessTool = " + checkUnitJob.getAccessToolUnit() +
 					" checkUnit = " + checkUnitJob.getCheckUnit().getValue();
+			
+			RobotsFactory robot = RobotsFactoryRegistry.getRobot(checkUnitJob.getAccessToolUnit());
+			Robot script = robot.createScript(checkUnitJob.getAccessToolParameters());
 			
 			ExecutionJobResult message = null;
 			log.info("Запуск робота: " + robotName);

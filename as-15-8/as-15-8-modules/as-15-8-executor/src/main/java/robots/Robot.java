@@ -1,23 +1,24 @@
 package robots;
 
-import java.util.Map;
+import java.io.Closeable;
 
-import enums.AccessToolParameters;
-import enums.AccessToolUnit;
-import scripts.RobotScript;
+import checkUnits.CheckUnit;
+import execution.ExecutionJobResult;
+import robots.exceptions.RobotScriptExecutionException;
 
 /**
- * Интерфейс робота проверки ПС/ПАСД
+ * Интефейс скрипта робота
  * @author shabalinAI
  *
  */
-public interface Robot {
-	
+public interface Robot extends Closeable {
+
 	/**
-	 * Проверяемая ПС/ПАСД
+	 * Метод выполнения скрипта робота
+	 * @param checkUnit
 	 * @return
+	 * @throws RobotScriptExecutionException
 	 */
-	AccessToolUnit getAccessToolUnit();
+	ExecutionJobResult execute(CheckUnit checkUnit) throws RobotScriptExecutionException;
 	
-	RobotScript createScript(Map<AccessToolParameters, String> params);
 }

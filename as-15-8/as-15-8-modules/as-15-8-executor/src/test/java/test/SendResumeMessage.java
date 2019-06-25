@@ -33,7 +33,7 @@ public class SendResumeMessage {
 	@Test
 	public void test() {
 			
-		ExecutorControlMessage controlMessage = new ExecutorControlMessage(AccessToolUnit.GOOGLE, ControlCommand.START);
+		ExecutorControlMessage controlMessage = new ExecutorControlMessage(AccessToolUnit.YANDEX, ControlCommand.START);
 		
 		Message<ExecutorControlMessage> message = MessageBuilder
                 .withPayload(controlMessage)

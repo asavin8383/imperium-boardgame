@@ -6,14 +6,10 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
-import org.springframework.context.event.EventListener;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
-import org.springframework.kafka.event.ConsumerPausedEvent;
-import org.springframework.kafka.listener.KafkaMessageListenerContainer;
 import org.springframework.kafka.listener.MessageListenerContainer;
-import org.springframework.kafka.listener.adapter.FilteringMessageListenerAdapter;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
 
@@ -21,8 +17,7 @@ import checkUnits.CheckUnitJob;
 import control.ExecutorControlMessage;
 import enums.AccessToolUnit;
 import lombok.extern.slf4j.Slf4j;
-import scripts.RobotScript;
-import scripts.exceptions.Captcha_RobotScriptExecutionException;
+import robots.exceptions.Captcha_RobotScriptExecutionException;
 import service.RobotsService;
 
 @Service
@@ -53,19 +48,17 @@ public class KafkaConsumer {
     		CheckUnitJobsListenerEndpoint endpoint = new CheckUnitJobsListenerEndpoint(
 				checkUnitJobsTopicName,
 				accessTool,
-				(script, data, ack) -> {
-					consumeCheckUnitJobMessage(script, data, ack);
-				}
+				(data, ack) -> consumeCheckUnitJobMessage(data, ack)
     		);
     		
     		endpointRegistry.registerListenerContainer(endpoint, kafkaListenerContainerFactory);
     	}
     }
 	
-	private void consumeCheckUnitJobMessage(RobotScript script, ConsumerRecord<String, CheckUnitJob> message, Acknowledgment ack) {
+	private void consumeCheckUnitJobMessage(ConsumerRecord<String, CheckUnitJob> message, Acknowledgment ack) {
 		log.info("\n   ---->>> Принято задание: " + message.value().toString()+", partition: "+message.partition()+", offset: "+message.offset());
 		try {
-			robotsService.run(message.value(), script);
+			robotsService.run(message.value());
 			ack.acknowledge();
 		} catch (Captcha_RobotScriptExecutionException ex) {
 			stopListeners(message.value().getAccessToolUnit());
@@ -129,7 +122,7 @@ public class KafkaConsumer {
 		}
 	}
 	
-	@EventListener
+	/*@EventListener
 	public void listenStopContanier(ConsumerPausedEvent event) throws Exception {
 		Object container = event.getSource();
 		if(container instanceof KafkaMessageListenerContainer) {
@@ -141,5 +134,5 @@ public class KafkaConsumer {
 				}
 			}
 		}
-	}
+	}*/
 }
