@@ -12,14 +12,14 @@ import checkUnits.CheckUnitType;
 import common.ApplicationConfiguration;
 import enums.AccessToolUnit;
 import robots.exceptions.RobotScriptExecutionException;
-import service.impl.SeleniumRobotsService;
+import service.RobotsService;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes={ApplicationConfiguration.class})
 public class TestJobExecution {
 
 	@Autowired
-	private SeleniumRobotsService service;
+	private RobotsService service;
 	
 	@Test
 	public void test() throws RobotScriptExecutionException {

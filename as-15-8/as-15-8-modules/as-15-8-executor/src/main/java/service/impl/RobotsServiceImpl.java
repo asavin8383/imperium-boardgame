@@ -3,8 +3,11 @@ package service.impl;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -35,7 +38,7 @@ import service.RobotsService;
  */
 @Service
 @Slf4j
-public class SeleniumRobotsService implements RobotsService {
+public class RobotsServiceImpl implements RobotsService, DisposableBean {
 	
 	@Autowired
 	private KafkaTemplate<String, ExecutionJobResult> executionResultTemplate;
@@ -49,6 +52,8 @@ public class SeleniumRobotsService implements RobotsService {
     @Value("${spring.kafka.notification-topic}")
     private String notificationsTopicName;
 	
+    private volatile Set<Robot> robots = new HashSet<>();
+    
 	@Override
 	public void run(CheckUnitJob checkUnitJob) throws Captcha_RobotScriptExecutionException{
 		String robotName = "";
@@ -57,15 +62,17 @@ public class SeleniumRobotsService implements RobotsService {
 					" accessTool = " + checkUnitJob.getAccessToolUnit() +
 					" checkUnit = " + checkUnitJob.getCheckUnit().getValue();
 			
-			RobotsFactory robot = RobotsFactoryRegistry.getRobot(checkUnitJob.getAccessToolUnit());
-			Robot script = robot.createScript(checkUnitJob.getAccessToolParameters());
+			RobotsFactory robotFactory = RobotsFactoryRegistry.getRobot(checkUnitJob.getAccessToolUnit());
+			Robot robot = robotFactory.createScript(checkUnitJob.getAccessToolParameters());
+			
+			robots.add(robot);
 			
 			ExecutionJobResult message = null;
 			log.info("Запуск робота: " + robotName);
 			
 			boolean isCaptcha = false;
 			try{
-				message = script.execute(checkUnitJob.getCheckUnit());
+				message = robot.execute(checkUnitJob.getCheckUnit());
 			} catch (Exception ex) {
 				if(ex instanceof RobotScriptExecutionException) {
 					if(ex instanceof Captcha_RobotScriptExecutionException)
@@ -74,9 +81,10 @@ public class SeleniumRobotsService implements RobotsService {
 				} else
 					throw new RobotScriptExecutionException("Ошибка при выполнении скрипта робота", ex);
 			} finally {
-				if(!isCaptcha && script != null) {
+				if(!isCaptcha && robot != null) {
 					try {
-						script.close();
+						robot.close();
+						robots.remove(robot);
 					} catch (IOException ex) {
 						log.error("Ошибка при закрытии скрипта", ex);
 					}
@@ -177,5 +185,19 @@ public class SeleniumRobotsService implements RobotsService {
 		} catch (Exception ex) {
 			throw new RuntimeException("Ошибка при отправке сообщения с уведомлением об ошибке", ex);
 		}
+	}
+
+	@Override
+	public void destroy() throws Exception {
+		log.info("\n\n----------------\n"
+				+ "Остановка всех активных роботов..."
+				+ "\n-----------------------\n");
+		
+		for(Robot robot : robots)
+			robot.close();
+		
+		log.info("\n\n----------------\n"
+				+ "Роботы успешно остановлены"
+				+ "\n-----------------------\n");
 	}
 }
