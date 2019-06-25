@@ -1,4 +1,4 @@
-package robots.factories.impl;
+package robots.factory.impl;
 
 import enums.AccessToolUnit;
 import robots.Robot;

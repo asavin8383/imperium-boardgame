@@ -1,4 +1,4 @@
-package robots.factories.impl;
+package robots.factory.impl;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;

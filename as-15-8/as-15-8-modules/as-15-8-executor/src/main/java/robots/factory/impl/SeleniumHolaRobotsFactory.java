@@ -1,18 +1,18 @@
-package robots.factories.impl;
-
-import java.util.Map;
+package robots.factory.impl;
 
 import enums.AccessToolParameters;
 import enums.AccessToolUnit;
 import robots.RobotDriverParameters;
 import robots.impl.SeleniumRobot;
 
-public class SeleniumVpnRobotsFactory extends SeleniumRobotsFactory {
+import java.util.Map;
+
+public class SeleniumHolaRobotsFactory extends SeleniumRobotsFactory {
 
 
-    public SeleniumVpnRobotsFactory(AccessToolUnit accessToolUnit,
-    						Class<? extends SeleniumRobot> scriptClass,
-                            RobotDriverParameters driverParams) {
+    public SeleniumHolaRobotsFactory(AccessToolUnit accessToolUnit,
+                             Class<? extends SeleniumRobot> scriptClass,
+                             RobotDriverParameters driverParams) {
         super(accessToolUnit, scriptClass, driverParams);
     }
 
@@ -20,7 +20,7 @@ public class SeleniumVpnRobotsFactory extends SeleniumRobotsFactory {
 	protected Object[] getScriptArgs(Map<AccessToolParameters, String> params) {
 		return new Object[] {
 			this.driverParams,
-			params	
+			params
 		};
 	}
 }

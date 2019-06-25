@@ -12,11 +12,11 @@ import org.springframework.core.env.Environment;
 
 import enums.AccessToolUnit;
 import robots.RobotDriverParameters;
-import robots.factories.impl.GoogleApiRobotsFactory;
-import robots.factories.impl.SeleniumAnonymizerRobotsFactory;
-import robots.factories.impl.SeleniumHolaRobotsFactory;
-import robots.factories.impl.SeleniumSearchRobotsFactory;
-import robots.factories.impl.SeleniumVpnRobotsFactory;
+import robots.factory.impl.GoogleApiRobotsFactory;
+import robots.factory.impl.SeleniumAnonymizerRobotsFactory;
+import robots.factory.impl.SeleniumHolaRobotsFactory;
+import robots.factory.impl.SeleniumSearchRobotsFactory;
+import robots.factory.impl.SeleniumVpnRobotsFactory;
 import robots.impl.CameleoRobot;
 import robots.impl.GoogleApiRobot;
 import robots.impl.GoogleRobot;
