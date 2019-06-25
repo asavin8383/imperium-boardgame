@@ -52,7 +52,7 @@ public class KafkaConsumer {
     		);
     		
     		endpointRegistry.registerListenerContainer(endpoint, kafkaListenerContainerFactory);
-    	}
+    	};
     }
 	
 	private void consumeCheckUnitJobMessage(ConsumerRecord<String, CheckUnitJob> message, Acknowledgment ack) {
@@ -68,9 +68,10 @@ public class KafkaConsumer {
 	@KafkaListener(
 		topics = "${spring.kafka.control-topic}",
 		containerFactory = "controlMessagesListenerContainerFactory",
-		groupId = "exec-control-${random.uuid}"
+		groupId = "#{execControlGroupID}"
 	)
     public void consumeControlMessage(ExecutorControlMessage controlMessage, Acknowledgment ack) {
+		ack.acknowledge();
 		log.info("Принято управляющее сообщение: " + controlMessage.toString());
     	try {
     		switch(controlMessage.getCommand()) {
@@ -87,7 +88,6 @@ public class KafkaConsumer {
     	} catch (Exception ex) {
     		log.error("Ошибка при обработке управляющего сообщения: " + controlMessage.toString(), ex);
     	}
-    	ack.acknowledge();
     }
 	
 	private void stopListeners(AccessToolUnit accessToolUnit) {
