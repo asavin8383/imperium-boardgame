@@ -22,7 +22,7 @@ import service.RobotsService;
 
 @Service
 @Slf4j
-@DependsOn({"robotsFactory"})
+@DependsOn({"robotsFactoryRegistry"})
 public class KafkaConsumer {
 	
 	@Autowired
