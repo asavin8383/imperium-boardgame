@@ -280,6 +280,7 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
 	public ArrangementResult updateJobStatus(Long jobID, CheckUnitJobResult status, String description) {
 		ArrangementResult job = findJobByID(jobID);
 		job.setResult(status);
+		job.setEndDate(LocalDateTime.now());
 		if(status == CheckUnitJobResult.INTERNAL_ERROR)
 			saveErrorToDetailResults(jobID, description);
 		return arrangementResultRepo.save(job);
