@@ -92,7 +92,7 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 		analysisResult.setRedirectionDetected(wasRedirect);
 
 		if (analysisResult.getPageSize() < EMPTY_PAGE_SIZE) {
-			analysisResult.setCheckResult(COMPLETED);
+			analysisResult.setCheckResult(DOUBTFUL);	// todo - так сказали делать
 			appendInfo(analysisResult, "Пустая страница: размер <" + EMPTY_PAGE_SIZE + " байт.");
 			return analysisResult;
 		}
@@ -137,7 +137,7 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 
 		try {
 			if (isStub(analysisResult, executionResult)) {
-				analysisResult.setCheckResult(COMPLETED);
+				analysisResult.setCheckResult(DOUBTFUL);	// todo - так сказали делать
 				return analysisResult;
 			}
 		} catch (IOException e) {
