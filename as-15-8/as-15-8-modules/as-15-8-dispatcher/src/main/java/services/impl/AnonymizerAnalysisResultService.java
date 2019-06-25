@@ -21,6 +21,10 @@ public class AnonymizerAnalysisResultService implements AnalysisResultService<An
 		DetailResultsVpn detailResultsVpn = new DetailResultsVpn();
 
 		detailResultsVpn.setId(aRes.getJobID());
+		detailResultsVpn.setHttpStatus(aRes.getHttpStatus());
+		detailResultsVpn.setHttpStatusEtalon(aRes.getHttpStatusEtalon());
+		detailResultsVpn.setHttpHeaders(aRes.getHttpHeaders());
+		detailResultsVpn.setHttpHeadersEtalon(aRes.getHttpHeadersEtalon());
 		detailResultsVpn.setResponseErrorCode(aRes.getErrorCode());
 		detailResultsVpn.setPageSize(aRes.getPageSize());
 		detailResultsVpn.setUseEtalon(aRes.getUseEtalon());

@@ -1,21 +1,24 @@
 package robots.impl;
 
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
-
-import org.openqa.selenium.WebDriver;
-
 import checkUnits.CheckUnit;
 import enums.AccessToolParameters;
 import execution.ExecutionJobResult;
 import execution.ExecutionVpnJobResult;
+import org.openqa.selenium.WebDriver;
 import robots.ProxyUtils;
 import robots.RobotDriverParameters;
 import robots.exceptions.RobotScriptExecutionException;
+import robots.utils.HttpResponseHelper;
 import robots.utils.RobotScriptUtils;
 import robots.utils.ScriptUtils;
 import robots.utils.ScriptUtils.PageResult;
+
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+
+import static robots.utils.HttpResponseHelper.HttpResponseMeta;
+
 
 public class VPNRobot extends SeleniumRobot {
 
@@ -66,7 +69,12 @@ public class VPNRobot extends SeleniumRobot {
                         PageResult pageResult = RobotScriptUtils.loadPage(url, driver);
                         byte[] screenShot = ScriptUtils.getScreenshot(driver);
                         String finalUrl = ScriptUtils.getCurrentUrl(driver);
+                        HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(driver);
 
+                        if (responseMeta != null){
+                            message.setHttpStatus(responseMeta.status);
+                            message.setHttpHeaders(HttpResponseHelper.headers2Str(responseMeta.jsonHeaders));
+                        }
                         message.setResponseError(pageResult.errorCodeChrome != null);
                         message.setChromeErrorCode(pageResult.errorCodeChrome);
                         message.setPageContent(pageResult.pageSource);
@@ -88,11 +96,16 @@ public class VPNRobot extends SeleniumRobot {
                     if (useEtalon){
                         WebDriver driver = null;
                         try {
-                            driver = createDriver(etalonProxy);
+                            driver = createDriver(etalonProxy, true);
                             PageResult pageResult = RobotScriptUtils.loadPage(url, driver);
                             byte[] screenShot = ScriptUtils.getScreenshot(driver);
                             String finalUrl = ScriptUtils.getCurrentUrl(driver);
+                            HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(driver);
 
+                            if (responseMeta != null){
+                                message.setHttpStatusEtalon(responseMeta.status);
+                                message.setHttpHeadersEtalon(HttpResponseHelper.headers2Str(responseMeta.jsonHeaders));
+                            }
                             message.setChromeErrorCodeEtalon(pageResult.errorCodeChrome);
                             message.setPageContentEtalon(pageResult.pageSource);
                             message.setEtalonScreenshot(screenShot);

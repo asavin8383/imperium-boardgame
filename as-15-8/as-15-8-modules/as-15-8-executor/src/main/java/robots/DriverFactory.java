@@ -1,14 +1,18 @@
 package robots;
 
-import java.net.URL;
-
-import org.openqa.selenium.*;
+import lombok.extern.slf4j.Slf4j;
+import org.openqa.selenium.Platform;
+import org.openqa.selenium.Proxy;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.logging.LogType;
+import org.openqa.selenium.logging.LoggingPreferences;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
-import lombok.extern.slf4j.Slf4j;
+import java.net.URL;
+import java.util.logging.Level;
 
 /**
  * Фабрика создания selenium драйвера
@@ -27,7 +31,7 @@ public class DriverFactory {
 	 * @return
 	 */
 	public static WebDriver createDriver(URL hubURL, Platform platformName, String appName, String browserName) {
-		return createDriver(hubURL, platformName, appName, browserName, null);
+		return createDriver(hubURL, platformName, appName, browserName, null, false);
 	}
 
 	/**
@@ -39,7 +43,7 @@ public class DriverFactory {
 	 * @param proxy прокси
 	 * @return
 	 */
-	public static WebDriver createDriver(URL hubURL, Platform platformName, String appName, String browserName, String proxy) {
+	public static WebDriver createDriver(URL hubURL, Platform platformName, String appName, String browserName, String proxy, boolean enableLog) {
 		DesiredCapabilities cpb = buildCapability(platformName, appName, browserName);
 
 		Proxy oProxy = ProxyUtils.getSeleniumProxy(proxy);
@@ -54,6 +58,12 @@ public class DriverFactory {
 		ChromeOptions options = new ChromeOptions();
 		setOptimalChromeOptions(options);
 		cpb.setCapability(ChromeOptions.CAPABILITY, options);
+
+		if (enableLog){
+			LoggingPreferences logPrefs = new LoggingPreferences();
+			logPrefs.enable(LogType.PERFORMANCE, Level.ALL);
+			cpb.setCapability(CapabilityType.LOGGING_PREFS, logPrefs);
+		}
 
 		return new RemoteWebDriver(hubURL, cpb);
 	}

@@ -1,36 +1,27 @@
 package service.impl;
 
-import static enums.CheckUnitJobResult.COMPLETED;
-import static enums.CheckUnitJobResult.DOUBTFUL;
-import static enums.CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.PostConstruct;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ResourceLoader;
-import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
-
+import analysis.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import analysis.AnalysisResult;
-import analysis.AnalysisUtils;
-import analysis.AnonymizerAnalysisResult;
-import analysis.ContentAnalysis;
-import analysis.StubAnalysis;
 import common.AnalysisException;
 import enums.CheckUnitJobResult;
 import execution.ExecutionAnonymizerResult;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import model.KeyWord;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import service.AnalyzerService;
+
+import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+import static enums.CheckUnitJobResult.*;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 
 @Slf4j
@@ -67,6 +58,11 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 		analysisResult.setJobID(executionResult.getJobID());
 		analysisResult.setCheckUnit(executionResult.getCheckUnit());
 
+		analysisResult.setHttpStatus(executionResult.getHttpStatus());
+		analysisResult.setHttpStatusEtalon(executionResult.getHttpStatusEtalon());
+		analysisResult.setHttpHeaders(executionResult.getHttpHeaders());
+		analysisResult.setHttpHeadersEtalon(executionResult.getHttpHeadersEtalon());
+
 		/* ERROR */
 
 		analysisResult.setErrorCode(executionResult.getErrorCode());
@@ -97,6 +93,7 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 
 		if (analysisResult.getPageSize() < EMPTY_PAGE_SIZE) {
 			analysisResult.setCheckResult(COMPLETED);
+			appendInfo(analysisResult, "Пустая страница: размер <" + EMPTY_PAGE_SIZE + " байт.");
 			return analysisResult;
 		}
 
@@ -196,7 +193,7 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 
 		analysisResult.setLinkCount(AnalysisUtils.getLinkCounts(content));
 		analysisResult.setKeyWordsCount(AnalysisUtils.getCountKeyWords(content, keyWords));
-		analysisResult.setDomainNameCount(AnalysisUtils.getDomainCount(checkValue, content));
+		analysisResult.setDomainNameCount(AnalysisUtils.getDomainCount(analysisResult.getFinalUrl(), content));
 
 		StringBuffer stubDetails = new StringBuffer();
 

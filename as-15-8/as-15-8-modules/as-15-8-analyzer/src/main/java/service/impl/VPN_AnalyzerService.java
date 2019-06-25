@@ -1,34 +1,25 @@
 package service.impl;
 
-import static enums.CheckUnitJobResult.COMPLETED;
-import static enums.CheckUnitJobResult.DOUBTFUL;
-import static enums.CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.PostConstruct;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ResourceLoader;
-import org.springframework.stereotype.Service;
-
+import analysis.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import analysis.AnalysisResult;
-import analysis.AnalysisUtils;
-import analysis.ContentAnalysis;
-import analysis.StubAnalysis;
-import analysis.VpnAnalysisResult;
 import common.AnalysisException;
 import enums.CheckUnitJobResult;
 import execution.ExecutionVpnJobResult;
 import lombok.Getter;
 import model.KeyWord;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.stereotype.Service;
 import service.AnalyzerService;
+
+import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+import static enums.CheckUnitJobResult.*;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 
 /**
@@ -88,6 +79,11 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 		if (pageContentEtalon == null)
 			pageContentEtalon = "";
 
+		aRes.setHttpStatus(jobRes.getHttpStatus());
+		aRes.setHttpStatusEtalon(jobRes.getHttpStatusEtalon());
+		aRes.setHttpHeaders(jobRes.getHttpHeaders());
+		aRes.setHttpHeadersEtalon(jobRes.getHttpHeadersEtalon());
+
 		aRes.setResponseError(responseError);
 		aRes.setResponseErrorCode(chromeErrorCode);
 		aRes.setResponseErrorCodeEtalon(chromeErrorCodeEtalon);
@@ -102,7 +98,7 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 
 			aRes.setKeyWordsCount(AnalysisUtils.getCountKeyWords(pageContent, keyWords));
 
-			aRes.setDomainNameCount(AnalysisUtils.getDomainCount(jobRes.getCheckUnit().getValue(), pageContent));
+			aRes.setDomainNameCount(AnalysisUtils.getDomainCount(aRes.getPageUrlFinal(), pageContent));
 
 			aRes.setSimilarityOriginPercent(AnalysisUtils.getTextSimilarityPercent(pageContent, pageContentEtalon));
 

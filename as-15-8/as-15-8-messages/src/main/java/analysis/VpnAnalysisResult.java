@@ -20,6 +20,9 @@ public class VpnAnalysisResult extends AnalysisResult implements StubAnalysisRes
 	private Boolean responseError;
 	private Boolean useEtalon;
 	private Integer httpStatus;
+	private Integer httpStatusEtalon;
+	private String httpHeaders;
+	private String httpHeadersEtalon;
 	private Integer pageSize;
 	private Integer pageSizeEtalon;
 	private Integer keyWordsCount;

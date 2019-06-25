@@ -1,10 +1,11 @@
 package services.impl;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-
+import analysis.VpnAnalysisResult;
+import checkUnits.CheckUnitType;
+import enums.CheckUnitJobResult;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import model.DetailResultsVpn;
 import org.apache.commons.validator.routines.InetAddressValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -12,15 +13,13 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriUtils;
-
-import analysis.VpnAnalysisResult;
-import checkUnits.CheckUnitType;
-import enums.CheckUnitJobResult;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-import model.DetailResultsVpn;
 import repositories.DetailResultsVpnRepository;
 import services.AnalysisResultService;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 
 @Slf4j
@@ -46,6 +45,10 @@ public class VPN_AnalysisResultService implements AnalysisResultService<VpnAnaly
 		DetailResultsVpn detailResultsVpn = new DetailResultsVpn();
 
 		detailResultsVpn.setId(aRes.getJobID());
+		detailResultsVpn.setHttpStatus(aRes.getHttpStatus());
+		detailResultsVpn.setHttpStatusEtalon(aRes.getHttpStatusEtalon());
+		detailResultsVpn.setHttpHeaders(aRes.getHttpHeaders());
+		detailResultsVpn.setHttpHeadersEtalon(aRes.getHttpHeadersEtalon());
 		detailResultsVpn.setResponseErrorCode(aRes.getResponseErrorCode());
 		detailResultsVpn.setResponseErrorCodeEtalon(aRes.getResponseErrorCodeEtalon());
 		detailResultsVpn.setResponseError(aRes.getResponseError());

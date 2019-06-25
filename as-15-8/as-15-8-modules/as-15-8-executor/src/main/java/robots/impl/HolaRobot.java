@@ -1,26 +1,26 @@
 package robots.impl;
 
-import java.util.Map;
-import java.util.function.Function;
-
-import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
-
 import checkUnits.CheckUnit;
 import enums.AccessToolParameters;
 import execution.ExecutionJobResult;
 import execution.ExecutionVpnJobResult;
+import org.openqa.selenium.*;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import robots.DriverFactory;
 import robots.ProxyUtils;
 import robots.RobotDriverParameters;
 import robots.exceptions.RobotScriptExecutionException;
-import robots.utils.*;
+import robots.utils.HttpResponseHelper;
+import robots.utils.RobotScriptUtils;
+import robots.utils.ScriptUtils;
 import robots.utils.ScriptUtils.PageResult;
+
+import java.util.Map;
+import java.util.function.Function;
+
+import static robots.utils.HttpResponseHelper.HttpResponseMeta;
+
 
 public class HolaRobot extends SeleniumRobot {
 
@@ -66,7 +66,12 @@ public class HolaRobot extends SeleniumRobot {
                 PageResult pageResult = RobotScriptUtils.loadPage(url, driver);
                 byte[] screenShot = ScriptUtils.getScreenshot(driver);
                 String finalUrl = ScriptUtils.getCurrentUrl(driver);
+                HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(driver);
 
+                if (responseMeta != null){
+                    message.setHttpStatus(responseMeta.status);
+                    message.setHttpHeaders(HttpResponseHelper.headers2Str(responseMeta.jsonHeaders));
+                }
                 message.setChromeErrorCodeEtalon(pageResult.errorCodeChrome);
                 message.setPageContentEtalon(pageResult.pageSource);
                 message.setEtalonScreenshot(screenShot);
@@ -107,7 +112,12 @@ public class HolaRobot extends SeleniumRobot {
             PageResult pageResult = RobotScriptUtils.loadPage(url, driver);
             byte[] screenShot = ScriptUtils.getScreenshot(driver);
             String finalUrl = ScriptUtils.getCurrentUrl(driver);
+            HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(driver);
 
+            if (responseMeta != null){
+                message.setHttpStatus(responseMeta.status);
+                message.setHttpHeaders(HttpResponseHelper.headers2Str(responseMeta.jsonHeaders));
+            }
             message.setResponseError(pageResult.errorCodeChrome != null);
             message.setChromeErrorCode(pageResult.errorCodeChrome);
             message.setPageContent(pageResult.pageSource);

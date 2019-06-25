@@ -8,9 +8,9 @@ import lombok.extern.slf4j.Slf4j;
 public class ContentAnalysis {
 
     public static final double THRESHOLD = 0.6;
-    public static final double pageSize_weight = 0.15;
-    public static final double domainCount_weight = 0.65;
-    public static final double linkCount_weight = 0.20;
+    public static final double pageSize_weight = 0.20;
+    public static final double domainCount_weight = 0.50;
+    public static final double linkCount_weight = 0.30;
 
     public static boolean forbiddenContent(StubAnalysisResult res, StringBuffer details) {
 
@@ -42,46 +42,53 @@ public class ContentAnalysis {
     private static int getPageSizeHit(Integer size){
         size = size == null ? 0 : size;
 
-        int minSize = 1024*2;
-        int maxSize = 1024*20;
+        int minSize = 1024;
+        int size1 = 1024*5;
+        int size2 = 1024*10;
+        int size3 = 1024*30;
 
         if (size < minSize)
             return 0;
-
-        size = (size > maxSize ? maxSize : size);
-
-        return (size/maxSize)*40 + 60;
+        else if (size < size1){
+            return (size/size1)*20 + 30;
+        }
+        else if (size < size2){
+            return (size/size2)*30 + 50;
+        }
+        else if (size < size3){
+            return (size/size3)*20 + 80;
+        }
+        return 100;
     }
 
     // вес от 0 до 100 (0 - ниодного домена, 100 - много доменов)
     private static int getDomainCountHit(Integer count){
         count = count == null ? 0 : count;
 
-        int max = 40;
+        int min = 2;
+        int max = 20;
 
-        if (count == 0)
+        if (count < min)
             return 0;
-
-        if (count <= 2)
-            return 50;
-
-        count = (count > max ? max : count);
-
-        return (count/max)*50 + 50;
+        else if (count < max)
+            return (count/max)*50 + 50;
+        return 100;
     }
 
     // вес от 0 до 100 (0 - мало, 100 - много ссылок)
     private static int getLinkCountHit(Integer count){
         count = count == null ? 0 : count;
 
-        int min = 10;
-        int max = 100;
+        int min = 2;
+        int max1 = 5;
+        int max2 = 20;
 
         if (count < min)
             return 0;
-
-        count = (count > max ? max : count);
-
-        return (count/max)*50 + 50;
+        if (count < max1)
+            return (count/max1)*10 + 20;
+        else if (count < max2)
+            return (count/max2)*70 + 30;
+        return 100;
     }
 }

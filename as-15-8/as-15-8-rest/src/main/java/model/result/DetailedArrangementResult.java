@@ -26,6 +26,9 @@ public class DetailedArrangementResult implements Serializable {
     private String responseErrorCode;
     private boolean responseError;
     private Integer httpStatus;
+    private Integer httpStatusEtalon;
+    private String httpHeaders;
+    private String httpHeadersEtalon;
     private Integer pageSize;
     private Integer pageSizeEtalon;
     private Integer keyWordsCount;
@@ -34,4 +37,5 @@ public class DetailedArrangementResult implements Serializable {
     private String pageUrlFinal;
     private Integer similarityOriginPercent;
     private String stubScoreInfo;
+    private Boolean redirectionDetected;
 }

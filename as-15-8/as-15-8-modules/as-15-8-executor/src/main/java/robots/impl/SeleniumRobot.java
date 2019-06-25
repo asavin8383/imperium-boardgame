@@ -23,6 +23,7 @@ public abstract class SeleniumRobot implements Robot {
 
     protected WebDriver driver;
 	protected String proxy;
+	protected boolean enableLog;
 
 	@Getter
 	private RobotDriverParameters driverParams;
@@ -35,9 +36,14 @@ public abstract class SeleniumRobot implements Robot {
 	}
 
 	public SeleniumRobot(RobotDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams, String proxy) {
+		this(driverParams, scriptParams, proxy, true);
+	}
+
+	public SeleniumRobot(RobotDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams, String proxy, boolean enableLog) {
 		setParams(driverParams, scriptParams);
 		this.proxy = proxy;
-		this.driver = createDriver(proxy);
+		this.enableLog = enableLog;
+		this.driver = createDriver(proxy, enableLog);
 	}
 
 	private void setParams(RobotDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams) {
@@ -53,13 +59,13 @@ public abstract class SeleniumRobot implements Robot {
 	 */
 	public abstract ExecutionJobResult execute(CheckUnit checkUnit) throws RobotScriptExecutionException;
 
-	protected WebDriver createDriver(String proxy) {
+	protected WebDriver createDriver(String proxy, boolean enableLog) {
 		WebDriver driver = DriverFactory.createDriver(
 				getDriverParams().getHubURL(),
 				getDriverParams().getPlatformName(),
 				getDriverParams().getApplicationName(),
 				getDriverParams().getBrowserName(),
-				proxy
+				proxy, enableLog
 		);
 		return driver;
 	}

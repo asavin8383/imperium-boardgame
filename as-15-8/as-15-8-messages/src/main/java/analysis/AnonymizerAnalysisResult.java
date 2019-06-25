@@ -14,6 +14,11 @@ public class AnonymizerAnalysisResult extends AnalysisResult implements StubAnal
 
     private CheckUnitJobResult checkResult;
 
+    private Integer httpStatus;
+    private Integer httpStatusEtalon;
+    private String httpHeaders;
+    private String httpHeadersEtalon;
+
     private String errorCode;
     private Integer pageSize;
 

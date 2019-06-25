@@ -1,14 +1,20 @@
 package robots.impl;
 
 import static enums.CheckUnitJobResult.INTERNAL_ERROR;
-import static robots.utils.ScriptUtils.*;
+import static robots.utils.ScriptUtils.TIME_OUT_CHECKING_ERROR;
+import static robots.utils.ScriptUtils.getTextOrDefault;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import org.openqa.selenium.*;
+import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 
 import checkUnits.CheckUnit;
 import enums.AccessToolParameters;
@@ -27,7 +33,8 @@ public class HideMyAssRobot extends AnonymizerRobot {
 	
 	private static final String URL = "https://proxy.hidemyass.com";
 
-    public static Integer WAIT_TIMEOUT = 60;
+    public static Integer WAIT_TIMEOUT_PAGE = 60;
+    public static Integer WAIT_TIMEOUT = 30;
 
 	public static final String HIDEMYASS_RETRY_AGREE_DETECTED   = "HIDEMYASS_RETRY_AGREE_DETECTED";
     public static final String HIDEMYASS_CAPTCHA                = "HIDEMYASS_CAPTCHA";
@@ -44,7 +51,7 @@ public class HideMyAssRobot extends AnonymizerRobot {
     @Override
     public ExecutionJobResult execute(CheckUnit checkUnit) throws RobotScriptExecutionException {
 
-        driver.manage().timeouts().pageLoadTimeout(WAIT_TIMEOUT, TimeUnit.SECONDS);
+        driver.manage().timeouts().pageLoadTimeout(WAIT_TIMEOUT_PAGE, TimeUnit.SECONDS);
 
         try {
             ScriptUtils.PageResult pageResult = null;
@@ -52,10 +59,10 @@ public class HideMyAssRobot extends AnonymizerRobot {
                 pageResult = RobotScriptUtils.simpleLoadPage(driver, URL, WAIT_TIMEOUT, 3);
             }
             catch (TimeoutException e){
-                return getErrorMessageDetails(HIDEMYASS_ERROR, "Таймаут. Hidemyass недоступен!");
+                return getErrorMessage(HIDEMYASS_ERROR, "Таймаут. Hidemyass недоступен!");
             }
             if (pageResult.errorCodeChrome != null){
-                return getErrorMessageDetails(HIDEMYASS_ERROR, "Hidemyass недоступен! " + pageResult.errorCodeChrome + ".");
+                return getErrorMessage(HIDEMYASS_ERROR, "Hidemyass недоступен! " + pageResult.errorCodeChrome + ".");
             }
 
             WebElement input = driver.findElement(By.id("form_url_fake"));
@@ -64,7 +71,7 @@ public class HideMyAssRobot extends AnonymizerRobot {
             By submitLocator = By.xpath("/html/body/form/div[3]/a");
             WebElement submitButton = ScriptUtils.getElementBy(submitLocator, driver);
             if (submitButton == null || !isSubmitButton(submitButton)) {
-                return getErrorMessageDetails(HIDEMYASS_ERROR, "Не удалось найти кнопку перехода.");
+                return getErrorMessage(HIDEMYASS_ERROR, "Не удалось найти кнопку перехода.");
             }
 
             submitButton.click();
@@ -102,7 +109,7 @@ public class HideMyAssRobot extends AnonymizerRobot {
             WebElement agreeButtonSecond = getAgreeButtonPage();
             if (agreeButtonSecond != null){
                 log.info("Повторно обнаружена страница 'Agree & Connect'.");
-                return getErrorMessageDetails(HIDEMYASS_RETRY_AGREE_DETECTED, "Неудачный повторый переход по кнопке 'Agree & Connect'.");
+                return getErrorMessage(HIDEMYASS_RETRY_AGREE_DETECTED, "Неудачный повторый переход по кнопке 'Agree & Connect'.");
             }
 
             message.setFinalUrl(getFinalUrl());
@@ -123,7 +130,7 @@ public class HideMyAssRobot extends AnonymizerRobot {
             log.info("TimeoutException при получении страницы", e);
             return getTimeoutMessage();
         } catch (NoSuchElementException e) {
-            return getErrorMessageDetails(HIDEMYASS_ERROR, "Не удалось найти элементы навигации.");
+            return getErrorMessage(HIDEMYASS_ERROR, "Не удалось найти элементы навигации.");
         }
     }
 

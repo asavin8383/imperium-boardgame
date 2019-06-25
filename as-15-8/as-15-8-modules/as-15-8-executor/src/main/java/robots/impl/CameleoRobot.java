@@ -4,15 +4,15 @@ import checkUnits.CheckUnit;
 import enums.AccessToolParameters;
 import execution.ExecutionJobResult;
 import lombok.extern.slf4j.Slf4j;
-import robots.RobotDriverParameters;
-import robots.exceptions.RobotScriptExecutionException;
-import robots.exceptions.TimeoutScriptException;
-import robots.utils.*;
-
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
+import robots.RobotDriverParameters;
+import robots.exceptions.RobotScriptExecutionException;
+import robots.exceptions.TimeoutScriptException;
+import robots.utils.CloudflareUtils;
+import robots.utils.ScriptUtils;
 
 import java.util.Map;
 

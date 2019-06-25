@@ -1,22 +1,26 @@
 package robots.impl;
 
+import static robots.utils.ScriptUtils.TIME_OUT_ERROR;
+
+import java.util.Map;
+
+import org.openqa.selenium.TimeoutException;
+import org.springframework.util.StringUtils;
+
 import checkUnits.CheckUnit;
 import enums.AccessToolParameters;
 import execution.ExecutionAnonymizerResult;
 import execution.ExecutionJobResult;
 import lombok.extern.slf4j.Slf4j;
-import robots.*;
+import robots.ProxyUtils;
+import robots.RobotDriverParameters;
 import robots.exceptions.RobotScriptExecutionException;
 import robots.exceptions.TimeoutScriptException;
 import robots.utils.CloudflareUtils;
 import robots.utils.ScriptUtils;
-
-import org.openqa.selenium.TimeoutException;
-import org.springframework.util.StringUtils;
-
-import static robots.utils.ScriptUtils.TIME_OUT_ERROR;
-
-import java.util.Map;
+import robots.DriverFactory;
+import robots.utils.HttpResponseHelper;
+import robots.utils.HttpResponseHelper.HttpResponseMeta;
 
 @Slf4j
 public abstract class AnonymizerRobot extends SeleniumRobot {
@@ -65,6 +69,13 @@ public abstract class AnonymizerRobot extends SeleniumRobot {
 
         ScriptUtils.PageResult page = ScriptUtils.getPageSource(driver);
 
+        if (message.getHttpStatus() == null){
+            HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(driver);
+            if (responseMeta != null){
+                message.setHttpStatus(responseMeta.status);
+                message.setHttpHeaders(HttpResponseHelper.headers2Str(responseMeta.jsonHeaders));
+            }
+        }
         message.setErrorCode(page.errorCodeChrome);
         message.setPageContent(page.pageSource);
         message.setScreenshot(ScriptUtils.getScreenshot(driver));
@@ -84,11 +95,17 @@ public abstract class AnonymizerRobot extends SeleniumRobot {
                     getDriverParams().getPlatformName(),
                     getDriverParams().getApplicationName(),
                     getDriverParams().getBrowserName(),
-                    etalonProxy);
+                    etalonProxy,
+                    true);
 
             driver.get(ScriptUtils.getCheckUnitValue(checkUnit));
             ScriptUtils.PageResult etalon = loadEtalon();
+            HttpResponseMeta responseMetaEtalon = HttpResponseHelper.getGetResponseMeta(driver);
 
+            if (responseMetaEtalon != null){
+                message.setHttpStatusEtalon(responseMetaEtalon.status);
+                message.setHttpHeadersEtalon(HttpResponseHelper.headers2Str(responseMetaEtalon.jsonHeaders));
+            }
             message.setEtalonErrorCode(etalon.errorCodeChrome);
             message.setEtalonPageContent(etalon.pageSource);
             message.setEtalonScreenshot(ScriptUtils.getScreenshot(driver));
@@ -108,14 +125,18 @@ public abstract class AnonymizerRobot extends SeleniumRobot {
     }
 
     ExecutionJobResult getErrorMessage(String errorCode) {
-        message.setErrorCode(errorCode);
-        message.setScreenshot(ScriptUtils.getScreenshot(driver));
-        return message;
+        return getErrorMessage(errorCode, null);
     }
 
-    ExecutionJobResult getErrorMessageDetails(String errorCode, String details) {
+    ExecutionJobResult getErrorMessage(String errorCode, String details) {
+        HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(driver);
+        if (responseMeta != null){
+            message.setHttpStatus(responseMeta.status);
+            message.setHttpHeaders(HttpResponseHelper.headers2Str(responseMeta.jsonHeaders));
+        }
         message.setErrorCode(errorCode);
-        message.setDetails(details);
+        if (details != null)
+            message.setDetails(details);
         message.setScreenshot(ScriptUtils.getScreenshot(driver));
         return message;
     }
