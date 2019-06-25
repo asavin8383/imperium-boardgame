@@ -93,6 +93,7 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 
 		if (analysisResult.getPageSize() < EMPTY_PAGE_SIZE) {
 			analysisResult.setCheckResult(COMPLETED);
+			appendInfo(analysisResult, "Пустая страница: размер <" + EMPTY_PAGE_SIZE + " байт.");
 			return analysisResult;
 		}
 
