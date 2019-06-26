@@ -150,7 +150,7 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 		boolean isLittleStub = StubAnalysis.isLittleStub(aRes, jobRes.getPageContent(), stubLittleDetails);
 		if (isLittleStub){
 			appendInfo(aRes, stubLittleDetails.toString());
-			return COMPLETED;
+			return DOUBTFUL;	// todo - так сказали делать
 		}
 
 		// проверка на заглушку
@@ -158,7 +158,7 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 		boolean isStub = StubAnalysis.isStub(aRes, StubAnalysis.getDefaultStubWeights(), stubDetails);
 		appendInfo(aRes, stubDetails.toString());
 		if (isStub){
-			return COMPLETED;
+			return DOUBTFUL;	// todo - так сказали делать
 		}
 
 		// результат по сходству
