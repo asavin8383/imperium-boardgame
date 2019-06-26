@@ -67,13 +67,13 @@ public class RobotsServiceImpl implements RobotsService {
 					" accessTool = " + checkUnitJob.getAccessToolUnit() +
 					" checkUnit = " + checkUnitJob.getCheckUnit().getValue();
 			
+			if(Boolean.TRUE.equals(executionStopped.get(checkUnitJob.getAccessToolUnit())))
+				throw new Cancel_RobotScriptExecutionException("Выполнение остановлено!");
+			
 			RobotsFactory robotFactory = RobotsFactoryRegistry.getRobot(checkUnitJob.getAccessToolUnit());
 			Robot robot = robotFactory.createScript(checkUnitJob.getAccessToolParameters());
 			
 			addRobotToRegistry(checkUnitJob.getAccessToolUnit(), robot);
-			
-			if(Boolean.TRUE.equals(executionStopped.get(checkUnitJob.getAccessToolUnit())))
-				throw new Cancel_RobotScriptExecutionException("Выполнение остановлено!");
 			
 			ExecutionJobResult message = null;
 			log.info("Запуск робота: " + robotName);
@@ -108,7 +108,6 @@ public class RobotsServiceImpl implements RobotsService {
 			}
 		} catch(Exception ex) {
 			if(ex instanceof Cancel_RobotScriptExecutionException) {
-				log.info("Робот остановлен: " + robotName);
 				throw (Cancel_RobotScriptExecutionException)ex;
 			}
 			try {
