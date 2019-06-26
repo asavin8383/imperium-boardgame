@@ -2,6 +2,8 @@ package robots.impl;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 import org.openqa.selenium.WebDriver;
 
@@ -24,6 +26,8 @@ public abstract class SeleniumRobot implements Robot {
     protected WebDriver driver;
 	protected String proxy;
 	protected boolean enableLog;
+	
+	private CompletableFuture<ExecutionJobResult> currentExecutionFuture;
 
 	@Getter
 	private RobotDriverParameters driverParams;
@@ -51,13 +55,24 @@ public abstract class SeleniumRobot implements Robot {
 		this.scriptParams = scriptParams;
 	}
 
+	public ExecutionJobResult run(CheckUnit checkUnit) {
+		currentExecutionFuture = CompletableFuture.supplyAsync(() -> {
+				try {
+					return execute(checkUnit);
+				} catch (RobotScriptExecutionException ex) {
+					throw new CompletionException(ex);
+				}
+			});
+		return currentExecutionFuture.join();
+	}
+	
 	/**
 	 * Метод, запускаюший выполнение скрипта робота
 	 * @param checkUnit Ресурс для проверки
 	 * @return
 	 * @throws RobotScriptExecutionException
 	 */
-	public abstract ExecutionJobResult execute(CheckUnit checkUnit) throws RobotScriptExecutionException;
+	protected abstract ExecutionJobResult execute(CheckUnit checkUnit) throws RobotScriptExecutionException;
 
 	protected WebDriver createDriver(String proxy, boolean enableLog) {
 		WebDriver driver = DriverFactory.createDriver(
@@ -76,6 +91,8 @@ public abstract class SeleniumRobot implements Robot {
 	}
 
 	public void close(WebDriver driver) {
+		if(!currentExecutionFuture.isDone())
+			currentExecutionFuture.cancel(true);
 		if (driver != null) {
 			driver.quit();
 		}

@@ -74,7 +74,7 @@ public class RobotsServiceImpl implements RobotsService {
 			
 			boolean isCaptcha = false;
 			try{
-				message = robot.execute(checkUnitJob.getCheckUnit());
+				message = robot.run(checkUnitJob.getCheckUnit());
 			} catch (Exception ex) {
 				if(ex instanceof RobotScriptExecutionException) {
 					if(ex instanceof Captcha_RobotScriptExecutionException)

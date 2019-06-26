@@ -56,7 +56,7 @@ public class GoogleApiRobot implements Robot{
 	}
 	
 	@Override
-	public ExecutionJobResult execute(CheckUnit checkUnit) throws RobotScriptExecutionException {
+	public ExecutionJobResult run(CheckUnit checkUnit) throws RobotScriptExecutionException {
 		try {
 			EqualityTest test = EqualityTest.forCheckUnit(checkUnit);
 			Map<String, List<String>> urls = searchUrlsInGoogle(checkUnit.getValue());
@@ -150,7 +150,7 @@ public class GoogleApiRobot implements Robot{
     
 	public static void main(String[] args) throws RobotScriptExecutionException, IOException {
 		GoogleApiRobot script = new GoogleApiRobot("008760942635674233646:iomr_wlnhoi", "AIzaSyDD-B6NrOjC_Vyjhezdo8EruwH-xrqdT-8", "countryRU", 15);
-		ExecutionPSJobResult result = (ExecutionPSJobResult)script.execute(new CheckUnit(CheckUnitType.URL, "https://cannabay.org"));
+		ExecutionPSJobResult result = (ExecutionPSJobResult)script.run(new CheckUnit(CheckUnitType.URL, "https://cannabay.org"));
 		System.out.println(result.isLinkFound());
 		
 		ByteArrayInputStream bis = new ByteArrayInputStream(result.getScreenshot());

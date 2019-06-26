@@ -19,6 +19,6 @@ public interface Robot extends Closeable {
 	 * @return
 	 * @throws RobotScriptExecutionException
 	 */
-	ExecutionJobResult execute(CheckUnit checkUnit) throws RobotScriptExecutionException;
+	ExecutionJobResult run(CheckUnit checkUnit) throws RobotScriptExecutionException;
 	
 }
