@@ -3,11 +3,12 @@ package service.impl;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
-import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -21,6 +22,7 @@ import org.springframework.util.concurrent.ListenableFutureCallback;
 
 import checkUnits.CheckUnitJob;
 import checkUnits.CheckUnitStatusNotification;
+import enums.AccessToolUnit;
 import enums.CheckUnitJobResult;
 import execution.ExecutionJobResult;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +40,7 @@ import service.RobotsService;
  */
 @Service
 @Slf4j
-public class RobotsServiceImpl implements RobotsService, DisposableBean {
+public class RobotsServiceImpl implements RobotsService {
 	
 	@Autowired
 	private KafkaTemplate<String, ExecutionJobResult> executionResultTemplate;
@@ -52,7 +54,7 @@ public class RobotsServiceImpl implements RobotsService, DisposableBean {
     @Value("${spring.kafka.notification-topic}")
     private String notificationsTopicName;
 	
-    private volatile Set<Robot> robots = new HashSet<>();
+    private volatile Map<AccessToolUnit, Set<Robot>> robots = new HashMap<>();
     
 	@Override
 	public void run(CheckUnitJob checkUnitJob) throws Captcha_RobotScriptExecutionException{
@@ -65,7 +67,7 @@ public class RobotsServiceImpl implements RobotsService, DisposableBean {
 			RobotsFactory robotFactory = RobotsFactoryRegistry.getRobot(checkUnitJob.getAccessToolUnit());
 			Robot robot = robotFactory.createScript(checkUnitJob.getAccessToolParameters());
 			
-			robots.add(robot);
+			addRobotToRegistry(checkUnitJob.getAccessToolUnit(), robot);
 			
 			ExecutionJobResult message = null;
 			log.info("Запуск робота: " + robotName);
@@ -84,7 +86,7 @@ public class RobotsServiceImpl implements RobotsService, DisposableBean {
 				if(!isCaptcha && robot != null) {
 					try {
 						robot.close();
-						robots.remove(robot);
+						removeRobotFromRegistry(checkUnitJob.getAccessToolUnit(), robot);
 					} catch (IOException ex) {
 						log.error("Ошибка при закрытии скрипта", ex);
 					}
@@ -113,6 +115,22 @@ public class RobotsServiceImpl implements RobotsService, DisposableBean {
 				log.error("Ошибка при выполнении задания на проверку запрещенного ресурса: "+checkUnitJob.getJobID(), ex);
 			}
 		}
+	}
+	
+	private void addRobotToRegistry(AccessToolUnit accessToolUnit, Robot robot) {
+		Set<Robot> robotsSet = robots.get(accessToolUnit);
+		if(robotsSet == null)
+			robotsSet = new HashSet<>();
+		robotsSet.add(robot);
+		robots.put(accessToolUnit, robotsSet);
+	}
+	
+	private void removeRobotFromRegistry(AccessToolUnit accessToolUnit, Robot robot) {
+		Set<Robot> robotsSet = robots.get(accessToolUnit);
+		if(robotsSet == null)
+			return;
+		robotsSet.remove(robot);
+		robots.put(accessToolUnit, robotsSet);
 	}
 	
 	/**
@@ -188,16 +206,20 @@ public class RobotsServiceImpl implements RobotsService, DisposableBean {
 	}
 
 	@Override
-	public void destroy() throws Exception {
+	public void destroyRobot(AccessToolUnit accessToolUnit) throws IOException {
 		log.info("\n\n----------------\n"
-				+ "Остановка всех активных роботов..."
+				+ accessToolUnit + ": oстановка активных роботов..."
 				+ "\n-----------------------\n");
-		
-		for(Robot robot : robots)
-			robot.close();
+		Set<Robot> robotsSet = robots.get(accessToolUnit);
+		if(robotsSet != null) {
+			for(Robot robot : robotsSet) {
+				robot.close();
+			}
+			robots.remove(accessToolUnit);
+		}
 		
 		log.info("\n\n----------------\n"
-				+ "Роботы успешно остановлены"
+				+ accessToolUnit + ": pоботы успешно остановлены"
 				+ "\n-----------------------\n");
 	}
 }

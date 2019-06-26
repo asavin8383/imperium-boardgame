@@ -1,6 +1,9 @@
 package service;
 
+import java.io.IOException;
+
 import checkUnits.CheckUnitJob;
+import enums.AccessToolUnit;
 import robots.exceptions.Captcha_RobotScriptExecutionException;
 
 /**
@@ -16,5 +19,7 @@ public interface RobotsService {
 	 * @return
 	 */
 	void run(CheckUnitJob checkUnitJob) throws Captcha_RobotScriptExecutionException;
+
+	void destroyRobot(AccessToolUnit accessToolUnit) throws IOException;
 	
 }

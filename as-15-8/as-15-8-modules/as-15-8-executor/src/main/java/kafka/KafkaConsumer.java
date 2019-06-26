@@ -6,9 +6,12 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.context.event.EventListener;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
+import org.springframework.kafka.event.ConsumerStoppedEvent;
+import org.springframework.kafka.listener.KafkaMessageListenerContainer;
 import org.springframework.kafka.listener.MessageListenerContainer;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
@@ -122,17 +125,11 @@ public class KafkaConsumer {
 		}
 	}
 	
-	/*@EventListener
-	public void listenStopContanier(ConsumerPausedEvent event) throws Exception {
-		Object container = event.getSource();
-		if(container instanceof KafkaMessageListenerContainer) {
-			Object messageListener = ((KafkaMessageListenerContainer<?, ?>)container).getContainerProperties().getMessageListener();
-			if(messageListener instanceof FilteringMessageListenerAdapter) {
-				Object listenerDelegate = ((FilteringMessageListenerAdapter<?, ?>)messageListener).getDelegate();
-				if(listenerDelegate instanceof CheckUnitJobMessageListener) {
-					((CheckUnitJobMessageListener)listenerDelegate).destroy();
-				}
-			}
+	@EventListener
+	public void listenStopContanier(ConsumerStoppedEvent event) throws Exception {
+		AccessToolUnit accessToolUnit = AccessToolUnit.valueOf(event.getSource(KafkaMessageListenerContainer.class).getListenerId());
+		if(accessToolUnit != null) {
+			robotsService.destroyRobot(accessToolUnit);
 		}
-	}*/
+	}
 }
