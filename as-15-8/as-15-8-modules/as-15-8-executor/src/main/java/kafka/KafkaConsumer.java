@@ -127,9 +127,11 @@ public class KafkaConsumer {
 	
 	@EventListener
 	public void listenStopContanier(ConsumerStoppedEvent event) throws Exception {
-		AccessToolUnit accessToolUnit = AccessToolUnit.valueOf(event.getSource(KafkaMessageListenerContainer.class).getListenerId());
-		if(accessToolUnit != null) {
-			robotsService.destroyRobot(accessToolUnit);
-		}
+		try {
+			AccessToolUnit accessToolUnit = AccessToolUnit.valueOf(event.getContainer(KafkaMessageListenerContainer.class).getListenerId());
+			if(accessToolUnit != null) {
+				robotsService.destroyRobot(accessToolUnit);
+			}
+		} catch (Exception ex){}
 	}
 }
