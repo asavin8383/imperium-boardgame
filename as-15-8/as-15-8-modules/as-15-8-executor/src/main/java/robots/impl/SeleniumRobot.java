@@ -87,12 +87,12 @@ public abstract class SeleniumRobot implements Robot {
 
 	@Override
 	public void close() throws IOException {
+		if(!currentExecutionFuture.isDone())
+			currentExecutionFuture.cancel(true);
 		close(driver);
 	}
 
 	public void close(WebDriver driver) {
-		if(!currentExecutionFuture.isDone())
-			currentExecutionFuture.cancel(true);
 		if (driver != null) {
 			driver.quit();
 		}

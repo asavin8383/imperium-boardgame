@@ -58,7 +58,7 @@ public class RobotsServiceImpl implements RobotsService {
     private volatile Map<AccessToolUnit, Set<Robot>> robots = new HashMap<>();
     
 	@Override
-	public void run(CheckUnitJob checkUnitJob) throws Captcha_RobotScriptExecutionException{
+	public void run(CheckUnitJob checkUnitJob) throws Captcha_RobotScriptExecutionException, Cancel_RobotScriptExecutionException{
 		String robotName = "";
 		try {
 			robotName = "jobID = " + checkUnitJob.getJobID() +
@@ -78,8 +78,6 @@ public class RobotsServiceImpl implements RobotsService {
 				message = robot.run(checkUnitJob.getCheckUnit());
 			} catch (Exception ex) {
 				if(ex instanceof RobotScriptExecutionException) {
-					if(ex instanceof Cancel_RobotScriptExecutionException)
-						return;
 					if(ex instanceof Captcha_RobotScriptExecutionException)
 						isCaptcha = true;
 					throw (RobotScriptExecutionException)ex;
@@ -104,6 +102,10 @@ public class RobotsServiceImpl implements RobotsService {
 				sendExecutionResult(message);
 			}
 		} catch(Exception ex) {
+			if(ex instanceof Cancel_RobotScriptExecutionException) {
+				log.info("Робот остановлен: " + robotName);
+				throw (Cancel_RobotScriptExecutionException)ex;
+			}
 			try {
 				sendCheckJobErrorNotification(checkUnitJob.getJobID(), ex);
 			} catch (Exception sendEx) {

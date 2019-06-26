@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import checkUnits.CheckUnitJob;
 import enums.AccessToolUnit;
+import robots.exceptions.Cancel_RobotScriptExecutionException;
 import robots.exceptions.Captcha_RobotScriptExecutionException;
 
 /**
@@ -18,7 +19,7 @@ public interface RobotsService {
 	 * @param checkUnitJob Задание на ресурса 
 	 * @return
 	 */
-	void run(CheckUnitJob checkUnitJob) throws Captcha_RobotScriptExecutionException;
+	void run(CheckUnitJob checkUnitJob) throws Captcha_RobotScriptExecutionException, Cancel_RobotScriptExecutionException;
 
 	void destroyRobots(AccessToolUnit accessToolUnit) throws IOException;
 	
