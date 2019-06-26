@@ -253,7 +253,7 @@ public class AnalysisUtils {
 
         if (!isEmpty(errorCode)){
             if (errorCode.contains(INTERNAL_ERROR.name())) {
-                message = "Ошибка! " + errorCode;
+                message = "Ошибка ЭТАЛОНА! " + errorCode;
                 result = INTERNAL_ERROR;
             }
             else if (errorCode.contains("NO_INTERNET")) {
