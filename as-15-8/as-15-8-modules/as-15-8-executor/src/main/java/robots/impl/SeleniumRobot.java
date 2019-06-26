@@ -2,6 +2,7 @@ package robots.impl;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
@@ -14,6 +15,7 @@ import lombok.Getter;
 import robots.DriverFactory;
 import robots.Robot;
 import robots.RobotDriverParameters;
+import robots.exceptions.Cancel_RobotScriptExecutionException;
 import robots.exceptions.RobotScriptExecutionException;
 
 /**
@@ -55,15 +57,24 @@ public abstract class SeleniumRobot implements Robot {
 		this.scriptParams = scriptParams;
 	}
 
-	public ExecutionJobResult run(CheckUnit checkUnit) {
-		currentExecutionFuture = CompletableFuture.supplyAsync(() -> {
-				try {
-					return execute(checkUnit);
-				} catch (RobotScriptExecutionException ex) {
-					throw new CompletionException(ex);
-				}
-			});
-		return currentExecutionFuture.join();
+	public ExecutionJobResult run(CheckUnit checkUnit) throws RobotScriptExecutionException {
+		try {
+			currentExecutionFuture = CompletableFuture.supplyAsync(() -> {
+					try {
+						return execute(checkUnit);
+					} catch (RobotScriptExecutionException ex) {
+						throw new CompletionException(ex);
+					}
+				});
+			return currentExecutionFuture.join();
+		} catch (CompletionException ex) {
+			if(ex.getCause() instanceof RobotScriptExecutionException)
+				throw (RobotScriptExecutionException) ex.getCause();
+			else
+				throw new RobotScriptExecutionException(ex.getCause());
+		} catch (CancellationException ex) {
+			throw new Cancel_RobotScriptExecutionException(ex);
+		}
 	}
 	
 	/**
