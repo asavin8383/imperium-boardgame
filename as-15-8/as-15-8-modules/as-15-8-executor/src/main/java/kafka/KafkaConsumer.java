@@ -11,7 +11,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.kafka.event.ConsumerStoppedEvent;
-import org.springframework.kafka.listener.KafkaMessageListenerContainer;
+import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.listener.MessageListenerContainer;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
@@ -128,9 +128,9 @@ public class KafkaConsumer {
 	@EventListener
 	public void listenStopContanier(ConsumerStoppedEvent event) throws Exception {
 		try {
-			AccessToolUnit accessToolUnit = AccessToolUnit.valueOf(event.getContainer(KafkaMessageListenerContainer.class).getListenerId());
+			AccessToolUnit accessToolUnit = AccessToolUnit.valueOf(event.getContainer(ConcurrentMessageListenerContainer.class).getListenerId());
 			if(accessToolUnit != null) {
-				robotsService.destroyRobot(accessToolUnit);
+				robotsService.destroyRobots(accessToolUnit);
 			}
 		} catch (Exception ex){}
 	}

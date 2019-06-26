@@ -206,20 +206,19 @@ public class RobotsServiceImpl implements RobotsService {
 	}
 
 	@Override
-	public void destroyRobot(AccessToolUnit accessToolUnit) throws IOException {
-		log.info("\n\n----------------\n"
-				+ accessToolUnit + ": oстановка активных роботов..."
-				+ "\n-----------------------\n");
+	public void destroyRobots(AccessToolUnit accessToolUnit) throws IOException {
 		Set<Robot> robotsSet = robots.get(accessToolUnit);
-		if(robotsSet != null) {
+		if(robotsSet != null && robotsSet.size() > 0) {
+			log.info("\n\n----------------\n"
+					+ accessToolUnit + ": oстановка активных роботов..."
+					+ "\n-----------------------\n");
 			for(Robot robot : robotsSet) {
 				robot.close();
 			}
 			robots.remove(accessToolUnit);
-		}
-		
-		log.info("\n\n----------------\n"
-				+ accessToolUnit + ": pоботы успешно остановлены"
-				+ "\n-----------------------\n");
+			log.info("\n\n----------------\n"
+					+ accessToolUnit + ": pоботы успешно остановлены"
+					+ "\n-----------------------\n");
+		}		
 	}
 }

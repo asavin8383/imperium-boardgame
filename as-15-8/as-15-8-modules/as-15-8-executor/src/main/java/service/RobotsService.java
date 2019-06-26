@@ -20,6 +20,6 @@ public interface RobotsService {
 	 */
 	void run(CheckUnitJob checkUnitJob) throws Captcha_RobotScriptExecutionException;
 
-	void destroyRobot(AccessToolUnit accessToolUnit) throws IOException;
+	void destroyRobots(AccessToolUnit accessToolUnit) throws IOException;
 	
 }
