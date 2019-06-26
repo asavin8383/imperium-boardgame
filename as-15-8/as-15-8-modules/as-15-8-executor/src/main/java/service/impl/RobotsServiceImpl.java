@@ -57,6 +57,8 @@ public class RobotsServiceImpl implements RobotsService {
 	
     private volatile Map<AccessToolUnit, Set<Robot>> robots = new HashMap<>();
     
+    private volatile Map<AccessToolUnit, Boolean> executionStopped = new HashMap<>();
+    
 	@Override
 	public void run(CheckUnitJob checkUnitJob) throws Captcha_RobotScriptExecutionException, Cancel_RobotScriptExecutionException{
 		String robotName = "";
@@ -69,6 +71,9 @@ public class RobotsServiceImpl implements RobotsService {
 			Robot robot = robotFactory.createScript(checkUnitJob.getAccessToolParameters());
 			
 			addRobotToRegistry(checkUnitJob.getAccessToolUnit(), robot);
+			
+			if(Boolean.TRUE.equals(executionStopped.get(checkUnitJob.getAccessToolUnit())))
+				throw new Cancel_RobotScriptExecutionException("Выполнение остановлено!");
 			
 			ExecutionJobResult message = null;
 			log.info("Запуск робота: " + robotName);
@@ -212,6 +217,7 @@ public class RobotsServiceImpl implements RobotsService {
 
 	@Override
 	public void destroyRobots(AccessToolUnit accessToolUnit) throws IOException {
+		executionStopped.put(accessToolUnit, true);
 		Set<Robot> robotsSet = robots.get(accessToolUnit);
 		if(robotsSet != null && robotsSet.size() > 0) {
 			log.info("\n\n----------------\n"

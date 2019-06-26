@@ -4,6 +4,10 @@ public class Cancel_RobotScriptExecutionException extends RobotScriptExecutionEx
 
 	private static final long serialVersionUID = 1L;
 
+	public Cancel_RobotScriptExecutionException(String message) {
+        super(message);
+    }
+	
     public Cancel_RobotScriptExecutionException(Throwable cause) {
         super(cause);
     }
