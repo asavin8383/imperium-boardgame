@@ -27,6 +27,7 @@ import enums.CheckUnitJobResult;
 import execution.ExecutionJobResult;
 import lombok.extern.slf4j.Slf4j;
 import robots.Robot;
+import robots.exceptions.Cancel_RobotScriptExecutionException;
 import robots.exceptions.Captcha_RobotScriptExecutionException;
 import robots.exceptions.RobotScriptExecutionException;
 import robots.factory.RobotsFactory;
@@ -77,6 +78,8 @@ public class RobotsServiceImpl implements RobotsService {
 				message = robot.run(checkUnitJob.getCheckUnit());
 			} catch (Exception ex) {
 				if(ex instanceof RobotScriptExecutionException) {
+					if(ex instanceof Cancel_RobotScriptExecutionException)
+						return;
 					if(ex instanceof Captcha_RobotScriptExecutionException)
 						isCaptcha = true;
 					throw (RobotScriptExecutionException)ex;
