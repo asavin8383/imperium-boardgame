@@ -29,7 +29,7 @@ public abstract class AbstractRobotsFactory implements RobotsFactory {
 	
 	protected abstract Object[] getScriptArgs(Map<AccessToolParameters, String> params);
 	
-	public Robot createScript(Map<AccessToolParameters, String> params) {
+	public Robot createRobot(Map<AccessToolParameters, String> params) {
 		try {
 			return (Robot)scriptClass
 					.getConstructors()[0]

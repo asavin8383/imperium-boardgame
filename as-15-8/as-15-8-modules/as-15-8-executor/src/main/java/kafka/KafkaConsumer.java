@@ -6,12 +6,9 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
-import org.springframework.context.event.EventListener;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
-import org.springframework.kafka.event.ConsumerStoppingEvent;
-import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.listener.MessageListenerContainer;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
@@ -128,7 +125,7 @@ public class KafkaConsumer {
 		}
 	}
 	
-	@EventListener
+	/*@EventListener
 	public void listenStopContanier(ConsumerStoppingEvent event) throws Exception {
 		try {
 			AccessToolUnit accessToolUnit = AccessToolUnit.valueOf(event.getContainer(ConcurrentMessageListenerContainer.class).getListenerId());
@@ -136,5 +133,5 @@ public class KafkaConsumer {
 				robotsService.destroyRobots(accessToolUnit);
 			}
 		} catch (Exception ex){}
-	}
+	}*/
 }

@@ -1,9 +1,8 @@
 package service;
 
-import java.io.IOException;
+import org.springframework.beans.factory.DisposableBean;
 
 import checkUnits.CheckUnitJob;
-import enums.AccessToolUnit;
 import robots.exceptions.Cancel_RobotScriptExecutionException;
 import robots.exceptions.Captcha_RobotScriptExecutionException;
 
@@ -12,7 +11,7 @@ import robots.exceptions.Captcha_RobotScriptExecutionException;
  * @author shabalinAI
  *
  */
-public interface RobotsService {
+public interface RobotsService extends DisposableBean {
 
 	/**
 	 * Метод запуска роботов по заданию на проверку ресурса
@@ -20,7 +19,5 @@ public interface RobotsService {
 	 * @return
 	 */
 	void run(CheckUnitJob checkUnitJob) throws Captcha_RobotScriptExecutionException, Cancel_RobotScriptExecutionException;
-
-	void destroyRobots(AccessToolUnit accessToolUnit) throws IOException;
 	
 }
