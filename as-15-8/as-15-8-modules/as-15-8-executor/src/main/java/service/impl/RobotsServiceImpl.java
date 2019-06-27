@@ -70,6 +70,9 @@ public class RobotsServiceImpl implements RobotsService {
 					" accessTool = " + checkUnitJob.getAccessToolUnit() +
 					" checkUnit = " + checkUnitJob.getCheckUnit().getValue();
 			
+			if(!this.isRunning)
+				throw new Cancel_RobotScriptExecutionException("Сервис получил сигнал остановки!");
+			
 			RobotsFactory robotFactory = getRobotFactory(checkUnitJob.getAccessToolUnit());
 			Robot robot = robotFactory.createRobot(checkUnitJob.getAccessToolParameters());
 			
@@ -134,6 +137,7 @@ public class RobotsServiceImpl implements RobotsService {
 
 	@Override
 	public void stop() {
+		isRunning = false;
 		log.info("\n\n-----------------------------\n"
 				+ "Oстановка активных роботов..."
 				+ "\n-----------------------------\n");
@@ -147,7 +151,6 @@ public class RobotsServiceImpl implements RobotsService {
 		log.info("\n\n-----------------------------\n"
 				+ "Pоботы успешно остановлены"
 				+ "\n-----------------------------\n");
-		isRunning = false;
 	}
 
 	@Override
