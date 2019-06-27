@@ -134,14 +134,22 @@ public class RobotsServiceImpl implements RobotsService {
 
 	@Override
 	public void stop() {
-		stopRobots();
-		this.isRunning = false;
-	}
-	
-	@Override
-	public void stop(Runnable callback) {
-		stop();
-		callback.run();
+		log.info("\n\n-----------------------------\n"
+				+ "Oстановка активных роботов..."
+				+ "\n-----------------------------\n");
+		for(Robot robot : robots)
+			log.info(robot.getCurrentCheckUnit().getValue()+"\n");
+		for(Robot robot : robots) {
+			try {
+				robot.close();
+			} catch (IOException ex) {
+				log.error("Ошибка при остановке робота", ex);
+			}
+		}
+		log.info("\n\n-----------------------------\n"
+				+ "Pоботы успешно остановлены"
+				+ "\n-----------------------------\n");
+		isRunning = false;
 	}
 
 	@Override
@@ -237,21 +245,5 @@ public class RobotsServiceImpl implements RobotsService {
 		} catch (Exception ex) {
 			throw new RuntimeException("Ошибка при отправке сообщения с уведомлением об ошибке", ex);
 		}
-	}
-	
-	private void stopRobots() {
-		log.info("\n\n-----------------------------\n"
-				+ "Oстановка активных роботов..."
-				+ "\n-----------------------------\n");
-		for(Robot robot : robots) {
-			try {
-				robot.close();
-			} catch (IOException ex) {
-				log.error("Ошибка при остановке робота", ex);
-			}
-		}
-		log.info("\n\n-----------------------------\n"
-				+ "Pоботы успешно остановлены"
-				+ "\n-----------------------------\n");
 	}
 }

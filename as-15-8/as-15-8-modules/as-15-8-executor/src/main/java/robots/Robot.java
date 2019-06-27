@@ -21,4 +21,6 @@ public interface Robot extends Closeable {
 	 */
 	ExecutionJobResult run(CheckUnit checkUnit) throws RobotScriptExecutionException;
 	
+	CheckUnit getCurrentCheckUnit();
+	
 }
