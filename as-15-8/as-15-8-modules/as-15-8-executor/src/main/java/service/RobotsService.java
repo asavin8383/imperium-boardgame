@@ -1,6 +1,6 @@
 package service;
 
-import org.springframework.beans.factory.DisposableBean;
+import org.springframework.context.SmartLifecycle;
 
 import checkUnits.CheckUnitJob;
 import robots.exceptions.Cancel_RobotScriptExecutionException;
@@ -11,7 +11,7 @@ import robots.exceptions.Captcha_RobotScriptExecutionException;
  * @author shabalinAI
  *
  */
-public interface RobotsService extends DisposableBean {
+public interface RobotsService extends SmartLifecycle {
 
 	/**
 	 * Метод запуска роботов по заданию на проверку ресурса

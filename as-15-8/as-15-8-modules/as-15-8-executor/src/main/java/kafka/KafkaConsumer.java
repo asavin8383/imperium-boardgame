@@ -5,7 +5,6 @@ import javax.annotation.PostConstruct;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
@@ -23,7 +22,6 @@ import service.RobotsService;
 
 @Service
 @Slf4j
-@DependsOn({"robotsFactoryRegistry"})
 public class KafkaConsumer {
 	
 	@Autowired

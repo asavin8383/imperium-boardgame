@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
@@ -20,6 +21,7 @@ import org.springframework.util.concurrent.ListenableFutureCallback;
 
 import checkUnits.CheckUnitJob;
 import checkUnits.CheckUnitStatusNotification;
+import enums.AccessToolUnit;
 import enums.CheckUnitJobResult;
 import execution.ExecutionJobResult;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +30,6 @@ import robots.exceptions.Cancel_RobotScriptExecutionException;
 import robots.exceptions.Captcha_RobotScriptExecutionException;
 import robots.exceptions.RobotScriptExecutionException;
 import robots.factory.RobotsFactory;
-import robots.factory.RobotsFactoryRegistry;
 import service.RobotsService;
 
 /**
@@ -39,6 +40,10 @@ import service.RobotsService;
 @Service
 @Slf4j
 public class RobotsServiceImpl implements RobotsService {
+	
+	/** Список роботов */
+	@Autowired
+	private List<RobotsFactory> robotFactories;
 	
 	@Autowired
 	private KafkaTemplate<String, ExecutionJobResult> executionResultTemplate;
@@ -62,7 +67,7 @@ public class RobotsServiceImpl implements RobotsService {
 					" accessTool = " + checkUnitJob.getAccessToolUnit() +
 					" checkUnit = " + checkUnitJob.getCheckUnit().getValue();
 			
-			RobotsFactory robotFactory = RobotsFactoryRegistry.getRobot(checkUnitJob.getAccessToolUnit());
+			RobotsFactory robotFactory = getRobotFactory(checkUnitJob.getAccessToolUnit());
 			Robot robot = robotFactory.createRobot(checkUnitJob.getAccessToolParameters());
 			
 			robots.add(robot);
@@ -117,6 +122,19 @@ public class RobotsServiceImpl implements RobotsService {
 				log.error("Ошибка при выполнении задания на проверку запрещенного ресурса: "+checkUnitJob.getJobID(), ex);
 			}
 		}
+	}
+	
+	/**
+	 * Метод получения робота для ПС/ПАСД
+	 * @param accessToolUnit ПС/ПАСД
+	 * @return
+	 */
+	protected RobotsFactory getRobotFactory(AccessToolUnit accessToolUnit) {
+		for(RobotsFactory robotFactory : robotFactories) {
+			if(robotFactory.getAccessToolUnit().equals(accessToolUnit))
+				return robotFactory;
+		}
+		throw new IllegalArgumentException("Error creating robot! Robot for " + accessToolUnit + " is not supported");
 	}
 	
 	/**
@@ -192,15 +210,27 @@ public class RobotsServiceImpl implements RobotsService {
 	}
 
 	@Override
-	public void destroy() throws IOException {
+	public void start() { }
+
+	@Override
+	public void stop() {
 		log.info("\n\n----------------\n"
 				+ "Oстановка активных роботов..."
 				+ "\n-----------------------\n");
 		for(Robot robot : robots) {
-			robot.close();
+			try {
+				robot.close();
+			} catch (IOException ex) {
+				log.error("Ошибка при остановке робота", ex);
+			}
 		}
 		log.info("\n\n----------------\n"
 				+ "Pоботы успешно остановлены"
-				+ "\n-----------------------\n");	
+				+ "\n-----------------------\n");
+	}
+
+	@Override
+	public boolean isRunning() {
+		return true;
 	}
 }
