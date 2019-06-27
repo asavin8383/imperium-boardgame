@@ -137,8 +137,6 @@ public class RobotsServiceImpl implements RobotsService {
 		log.info("\n\n-----------------------------\n"
 				+ "Oстановка активных роботов..."
 				+ "\n-----------------------------\n");
-		for(Robot robot : robots)
-			log.info(robot.getCurrentCheckUnit().getValue()+"\n");
 		for(Robot robot : robots) {
 			try {
 				robot.close();

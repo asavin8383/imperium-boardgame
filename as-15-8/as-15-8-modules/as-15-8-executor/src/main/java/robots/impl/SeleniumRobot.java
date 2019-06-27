@@ -36,8 +36,6 @@ public abstract class SeleniumRobot implements Robot {
 
 	@Getter
 	private Map<AccessToolParameters, String> scriptParams;
-	
-	private CheckUnit currentCheckUnit;
 
 	public SeleniumRobot(RobotDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams) {
 		this(driverParams, scriptParams, null);
@@ -61,7 +59,6 @@ public abstract class SeleniumRobot implements Robot {
 
 	public ExecutionJobResult run(CheckUnit checkUnit) throws RobotScriptExecutionException {
 		try {
-			this.currentCheckUnit = checkUnit;
 			currentExecutionFuture = CompletableFuture.supplyAsync(() -> {
 					try {
 						return execute(checkUnit);
@@ -79,7 +76,6 @@ public abstract class SeleniumRobot implements Robot {
 		} catch (CancellationException ex) {
 			throw new Cancel_RobotScriptExecutionException(ex);
 		} finally {
-			this.currentCheckUnit = null;
 			currentExecutionFuture = null;
 		}
 	}
@@ -115,11 +111,5 @@ public abstract class SeleniumRobot implements Robot {
 			driver.quit();
 			driver = null;
 		}
-	}
-
-	@Override
-	public CheckUnit getCurrentCheckUnit() {
-		return this.currentCheckUnit;
-	}
-	
+	}	
 }

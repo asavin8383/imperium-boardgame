@@ -159,9 +159,4 @@ public class GoogleApiRobot implements Robot{
 		
 		script.close();
 	}
-
-	@Override
-	public CheckUnit getCurrentCheckUnit() {
-		return null;
-	}
 }
