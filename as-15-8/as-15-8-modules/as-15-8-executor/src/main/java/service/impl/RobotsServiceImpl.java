@@ -70,6 +70,7 @@ public class RobotsServiceImpl implements RobotsService {
 					" accessTool = " + checkUnitJob.getAccessToolUnit() +
 					" checkUnit = " + checkUnitJob.getCheckUnit().getValue();
 			
+			log.info("Запуск робота: " + robotName);
 			if(!this.isRunning)
 				throw new Cancel_RobotScriptExecutionException("Сервис получил сигнал остановки!");
 			
@@ -78,9 +79,7 @@ public class RobotsServiceImpl implements RobotsService {
 			
 			robots.add(robot);
 			
-			ExecutionJobResult message = null;
-			log.info("Запуск робота: " + robotName);
-			
+			ExecutionJobResult message = null;			
 			boolean needToStop = true;
 			try{
 				message = robot.run(checkUnitJob.getCheckUnit());

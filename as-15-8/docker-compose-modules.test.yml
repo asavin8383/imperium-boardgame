@@ -23,7 +23,7 @@ services:
             mode: global
         networks:
             - as-15-8-net
-        stop_grace_period: 3m
+        stop_grace_period: 5m
         environment:
             PROFILE: test
             TZ: "Europe/Moscow"

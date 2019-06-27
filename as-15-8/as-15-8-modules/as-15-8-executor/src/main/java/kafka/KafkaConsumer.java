@@ -58,12 +58,10 @@ public class KafkaConsumer {
 		log.info("\n   ---->>> Принято задание: " + message.value().toString()+", partition: "+message.partition()+", offset: "+message.offset());
 		try {
 			robotsService.run(message.value());
+			ack.acknowledge();
 		} catch (Captcha_RobotScriptExecutionException ex) {
 			stopListeners(message.value().getAccessToolUnit());
-		} catch (Cancel_RobotScriptExecutionException e) {
-			return;
-		}
-		ack.acknowledge();
+		} catch (Cancel_RobotScriptExecutionException e) { }
 	}
 	
 	@KafkaListener(
