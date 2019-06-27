@@ -66,7 +66,9 @@ public abstract class SeleniumRobot implements Robot {
 						throw new CompletionException(ex);
 					}
 				});
-			return currentExecutionFuture.join();
+			ExecutionJobResult jobResult = currentExecutionFuture.join();
+			currentExecutionFuture = null;
+			return jobResult;
 		} catch (CompletionException ex) {
 			if(ex.getCause() instanceof RobotScriptExecutionException)
 				throw (RobotScriptExecutionException) ex.getCause();
@@ -98,7 +100,7 @@ public abstract class SeleniumRobot implements Robot {
 
 	@Override
 	public void close() throws IOException {
-		if(!currentExecutionFuture.isDone())
+		if(currentExecutionFuture != null && !currentExecutionFuture.isDone())
 			currentExecutionFuture.cancel(true);
 		close(driver);
 	}
@@ -106,6 +108,7 @@ public abstract class SeleniumRobot implements Robot {
 	public void close(WebDriver driver) {
 		if (driver != null) {
 			driver.quit();
+			driver = null;
 		}
 	}
 

@@ -19,5 +19,5 @@ public interface RobotsFactory {
 	 */
 	AccessToolUnit getAccessToolUnit();
 	
-	Robot createScript(Map<AccessToolParameters, String> params);
+	Robot createRobot(Map<AccessToolParameters, String> params);
 }

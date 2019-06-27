@@ -3,15 +3,15 @@ package service.impl;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.listener.AbstractMessageListenerContainer;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.messaging.Message;
@@ -31,7 +31,6 @@ import robots.exceptions.Cancel_RobotScriptExecutionException;
 import robots.exceptions.Captcha_RobotScriptExecutionException;
 import robots.exceptions.RobotScriptExecutionException;
 import robots.factory.RobotsFactory;
-import robots.factory.RobotsFactoryRegistry;
 import service.RobotsService;
 
 /**
@@ -42,6 +41,10 @@ import service.RobotsService;
 @Service
 @Slf4j
 public class RobotsServiceImpl implements RobotsService {
+	
+	/** Список роботов */
+	@Autowired
+	private List<RobotsFactory> robotFactories;
 	
 	@Autowired
 	private KafkaTemplate<String, ExecutionJobResult> executionResultTemplate;
@@ -55,9 +58,9 @@ public class RobotsServiceImpl implements RobotsService {
     @Value("${spring.kafka.notification-topic}")
     private String notificationsTopicName;
 	
-    private volatile Map<AccessToolUnit, Set<Robot>> robots = new HashMap<>();
+    private volatile Set<Robot> robots = new HashSet<>();
     
-    private volatile Map<AccessToolUnit, Boolean> executionStopped = new HashMap<>();
+    private boolean isRunning = false;
     
 	@Override
 	public void run(CheckUnitJob checkUnitJob) throws Captcha_RobotScriptExecutionException, Cancel_RobotScriptExecutionException{
@@ -67,37 +70,34 @@ public class RobotsServiceImpl implements RobotsService {
 					" accessTool = " + checkUnitJob.getAccessToolUnit() +
 					" checkUnit = " + checkUnitJob.getCheckUnit().getValue();
 			
-			if(Boolean.TRUE.equals(executionStopped.get(checkUnitJob.getAccessToolUnit())))
-				throw new Cancel_RobotScriptExecutionException("Выполнение остановлено!");
+			RobotsFactory robotFactory = getRobotFactory(checkUnitJob.getAccessToolUnit());
+			Robot robot = robotFactory.createRobot(checkUnitJob.getAccessToolParameters());
 			
-			RobotsFactory robotFactory = RobotsFactoryRegistry.getRobot(checkUnitJob.getAccessToolUnit());
-			Robot robot = robotFactory.createScript(checkUnitJob.getAccessToolParameters());
-			
-			addRobotToRegistry(checkUnitJob.getAccessToolUnit(), robot);
+			robots.add(robot);
 			
 			ExecutionJobResult message = null;
 			log.info("Запуск робота: " + robotName);
 			
-			boolean isCaptcha = false;
+			boolean needToStop = true;
 			try{
 				message = robot.run(checkUnitJob.getCheckUnit());
 			} catch (Exception ex) {
 				if(ex instanceof RobotScriptExecutionException) {
-					if(ex instanceof Captcha_RobotScriptExecutionException)
-						isCaptcha = true;
+					if(ex instanceof Captcha_RobotScriptExecutionException || ex instanceof Cancel_RobotScriptExecutionException)
+						needToStop = false;
 					throw (RobotScriptExecutionException)ex;
 				} else
 					throw new RobotScriptExecutionException("Ошибка при выполнении скрипта робота", ex);
 			} finally {
-				if(!isCaptcha && robot != null) {
+				if(needToStop && robot != null) {
 					try {
 						robot.close();
-						removeRobotFromRegistry(checkUnitJob.getAccessToolUnit(), robot);
 					} catch (IOException ex) {
 						log.error("Ошибка при закрытии скрипта", ex);
 					}
 				}
 			}
+			robots.remove(robot);
 			message.setJobID(checkUnitJob.getJobID());
 			message.setCheckUnit(checkUnitJob.getCheckUnit());
 	        message.setAccessToolUnit(checkUnitJob.getAccessToolUnit());
@@ -108,6 +108,7 @@ public class RobotsServiceImpl implements RobotsService {
 			}
 		} catch(Exception ex) {
 			if(ex instanceof Cancel_RobotScriptExecutionException) {
+				log.info("Робот остановлен: " + robotName);
 				throw (Cancel_RobotScriptExecutionException)ex;
 			}
 			try {
@@ -126,20 +127,44 @@ public class RobotsServiceImpl implements RobotsService {
 		}
 	}
 	
-	private void addRobotToRegistry(AccessToolUnit accessToolUnit, Robot robot) {
-		Set<Robot> robotsSet = robots.get(accessToolUnit);
-		if(robotsSet == null)
-			robotsSet = new HashSet<>();
-		robotsSet.add(robot);
-		robots.put(accessToolUnit, robotsSet);
+	@Override
+	public void start() {
+		this.isRunning = true;
+	}
+
+	@Override
+	public void stop() {
+		stopRobots();
+		this.isRunning = false;
 	}
 	
-	private void removeRobotFromRegistry(AccessToolUnit accessToolUnit, Robot robot) {
-		Set<Robot> robotsSet = robots.get(accessToolUnit);
-		if(robotsSet == null)
-			return;
-		robotsSet.remove(robot);
-		robots.put(accessToolUnit, robotsSet);
+	@Override
+	public void stop(Runnable callback) {
+		stop();
+		callback.run();
+	}
+
+	@Override
+	public boolean isRunning() {
+		return this.isRunning;
+	}
+	
+	@Override
+	public int getPhase() {
+		return AbstractMessageListenerContainer.DEFAULT_PHASE + 10;
+	}
+	
+	/**
+	 * Метод получения робота для ПС/ПАСД
+	 * @param accessToolUnit ПС/ПАСД
+	 * @return
+	 */
+	protected RobotsFactory getRobotFactory(AccessToolUnit accessToolUnit) {
+		for(RobotsFactory robotFactory : robotFactories) {
+			if(robotFactory.getAccessToolUnit().equals(accessToolUnit))
+				return robotFactory;
+		}
+		throw new IllegalArgumentException("Error creating robot! Robot for " + accessToolUnit + " is not supported");
 	}
 	
 	/**
@@ -213,22 +238,20 @@ public class RobotsServiceImpl implements RobotsService {
 			throw new RuntimeException("Ошибка при отправке сообщения с уведомлением об ошибке", ex);
 		}
 	}
-
-	@Override
-	public void destroyRobots(AccessToolUnit accessToolUnit) throws IOException {
-		executionStopped.put(accessToolUnit, true);
-		Set<Robot> robotsSet = robots.get(accessToolUnit);
-		if(robotsSet != null && robotsSet.size() > 0) {
-			log.info("\n\n----------------\n"
-					+ accessToolUnit + ": oстановка активных роботов..."
-					+ "\n-----------------------\n");
-			for(Robot robot : robotsSet) {
+	
+	private void stopRobots() {
+		log.info("\n\n-----------------------------\n"
+				+ "Oстановка активных роботов..."
+				+ "\n-----------------------------\n");
+		for(Robot robot : robots) {
+			try {
 				robot.close();
+			} catch (IOException ex) {
+				log.error("Ошибка при остановке робота", ex);
 			}
-			robots.remove(accessToolUnit);
-			log.info("\n\n----------------\n"
-					+ accessToolUnit + ": pоботы успешно остановлены"
-					+ "\n-----------------------\n");
-		}		
+		}
+		log.info("\n\n-----------------------------\n"
+				+ "Pоботы успешно остановлены"
+				+ "\n-----------------------------\n");
 	}
 }
