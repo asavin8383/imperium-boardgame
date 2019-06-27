@@ -13,4 +13,7 @@ public class ExecutionPSJobResult extends ExecutionJobResult {
 
 	private boolean linkFound;
 
+	private boolean error;
+	private String errorDetails;
+
 }

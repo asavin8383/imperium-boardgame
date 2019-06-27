@@ -124,8 +124,8 @@ public class ScriptUtils {
     @Nullable
     public static WebElement findElementIfExists(By by, WebElement where) {
         try {
-        List<WebElement> list = where.findElements(by);
-        return list != null && list.size() > 0 ? list.get(0) : null;
+            List<WebElement> list = where.findElements(by);
+            return list != null && list.size() > 0 ? list.get(0) : null;
         } catch (TimeoutException e) {
             // element not in the DOM
             return null;
@@ -135,8 +135,8 @@ public class ScriptUtils {
     @Nullable
     public static WebElement findElementIfExists(By by, WebDriver driver) {
         try {
-        List<WebElement> list = driver.findElements(by);
-        return list != null && list.size() > 0 ? list.get(0) : null;
+            List<WebElement> list = driver.findElements(by);
+            return list != null && list.size() > 0 ? list.get(0) : null;
         } catch (TimeoutException e) {
             // element not in the DOM
             return null;
