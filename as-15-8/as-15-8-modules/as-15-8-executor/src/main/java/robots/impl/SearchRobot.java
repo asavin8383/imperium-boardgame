@@ -1,24 +1,22 @@
 package robots.impl;
 
-import static enums.AccessToolParameters.INPUT_DELAY;
-import static robots.utils.ScriptUtils.findElementIfExists;
-
-import java.util.List;
-import java.util.Map;
-
+import enums.AccessToolParameters;
+import execution.ExecutionPSJobResult;
 import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
-
-import enums.AccessToolParameters;
-import execution.ExecutionPSJobResult;
 import robots.RobotDriverParameters;
 import robots.exceptions.Captcha_RobotScriptExecutionException;
 import robots.exceptions.RobotScriptExecutionException;
 import robots.exceptions.TimeoutScriptException;
 import robots.utils.EqualityTest;
 import robots.utils.ScriptUtils;
+
+import java.util.Map;
+
+import static enums.AccessToolParameters.INPUT_DELAY;
+import static robots.utils.ScriptUtils.findElementIfExists;
 
 public abstract class SearchRobot extends SeleniumRobot {
 
@@ -52,50 +50,35 @@ public abstract class SearchRobot extends SeleniumRobot {
                 DEFAULT_INPUT_DELAY : delayParameterValue;
 	}
 
-	ExecutionPSJobResult checkSearchResult(EqualityTest test) throws RobotScriptExecutionException {
-		try {
-			do {
-				if (captcha())
-					throw new Captcha_RobotScriptExecutionException("Обнаружена captcha");
+    protected abstract By nextPageLocator();
 
-				List<WebElement> elements = collectLinkElements();
+    protected abstract boolean captcha();
 
-				for (WebElement element : elements) {
-					String href = element.getAttribute("href");
-					// log.info(checkedResultCount + ". " + href);
+    protected abstract boolean checkPageResult(EqualityTest test);
 
-					if (test.equalTo(href)) {
-						scrollTo(element);
-						return createExecutionResult(true);
-					}
-
-					++checkedResultCount;
-				}
-
-			} while (checkedResultCount < searchResultLimit && nextPage());
-
-			return createExecutionResult(false);
-		} catch (Exception ex) {
-			throw new RobotScriptExecutionException(ex);
-		}
-	}
-
-    ExecutionPSJobResult createExecutionResult(boolean linkFound) {
-        ExecutionPSJobResult message = new ExecutionPSJobResult();
-        message.setLinkFound(linkFound);
-        message.setScreenshot(ScriptUtils.getScreenshot(driver));   // в любом случае делаем скриншот
-        return message;
+	final void incCheckResultCount() {
+        ++checkedResultCount;
     }
 
-    void input(WebElement element, String query) {
+    final boolean withinLimit() {
+	    return checkedResultCount < searchResultLimit;
+    }
+
+    final void input(WebElement element, String query) {
         SearchRobot.input(element, inputDelay, query);
     }
 
-    private boolean nextPage() throws TimeoutScriptException {
-        WebElement next = findElementIfExists(nextPageBy(), driver);
+    final void scrollTo(WebElement webElement) {
+        Actions actions = new Actions(driver);
+        actions.moveToElement(webElement, 0, 0).perform();
+    }
+
+    boolean nextPage() throws TimeoutScriptException {
+        WebElement next = findElementIfExists(
+                nextPageLocator(), driver);
         try {
             if (next != null) {
-                next.click();
+                next.click(); //  not clickable ?
                 ScriptUtils.waitPageLoading(driver);
                 return true;
             }
@@ -106,10 +89,39 @@ public abstract class SearchRobot extends SeleniumRobot {
 
     }
 
-    private void scrollTo(WebElement webElement) {
-        Actions actions = new Actions(driver);
-        actions.moveToElement(webElement, 0, 0).perform();
+    boolean checkSearchResult(EqualityTest test)
+            throws RobotScriptExecutionException {
+        do {
+            if (captcha())
+                throw new Captcha_RobotScriptExecutionException(
+                        "Обнаружена Captcha в Yandex");
+
+            if (checkPageResult(test))
+                return true;
+
+        } while (withinLimit() && nextPage());
+
+        return false;
     }
+
+    final ExecutionPSJobResult createMessage(boolean linkFound) {
+        ExecutionPSJobResult message = new ExecutionPSJobResult();
+        message.setLinkFound(linkFound);
+        message.setError(false);
+        message.setScreenshot(ScriptUtils.getScreenshot(driver));
+        return message;
+    }
+
+    final ExecutionPSJobResult createErrorMessage(String errorDetails) {
+        ExecutionPSJobResult message = new ExecutionPSJobResult();
+        message.setLinkFound(false);
+        message.setError(true);
+        message.setErrorDetails(errorDetails);
+        message.setScreenshot(ScriptUtils.getScreenshot(driver));
+        return message;
+    }
+
+
 
     private static void type(WebElement element, long sleep, String query) {
         query.codePoints().forEach(cp -> {
@@ -129,13 +141,5 @@ public abstract class SearchRobot extends SeleniumRobot {
         else
             type(element, sleep, query);
     }
-
-
-
-    protected abstract By nextPageBy();
-
-    protected abstract boolean captcha();
-
-    protected abstract List<WebElement> collectLinkElements();
 
 }
