@@ -127,6 +127,33 @@ public class RobotsServiceImpl implements RobotsService {
 		}
 	}
 	
+	@Override
+	public void start() {
+		this.isRunning = true;
+	}
+
+	@Override
+	public void stop() {
+		stopRobots();
+		this.isRunning = false;
+	}
+	
+	@Override
+	public void stop(Runnable callback) {
+		stop();
+		callback.run();
+	}
+
+	@Override
+	public boolean isRunning() {
+		return this.isRunning;
+	}
+	
+	@Override
+	public int getPhase() {
+		return AbstractMessageListenerContainer.DEFAULT_PHASE + 10;
+	}
+	
 	/**
 	 * Метод получения робота для ПС/ПАСД
 	 * @param accessToolUnit ПС/ПАСД
@@ -211,14 +238,8 @@ public class RobotsServiceImpl implements RobotsService {
 			throw new RuntimeException("Ошибка при отправке сообщения с уведомлением об ошибке", ex);
 		}
 	}
-
-	@Override
-	public void start() {
-		this.isRunning = true;
-	}
-
-	@Override
-	public void stop() {
+	
+	private void stopRobots() {
 		log.info("\n\n-----------------------------\n"
 				+ "Oстановка активных роботов..."
 				+ "\n-----------------------------\n");
@@ -232,16 +253,5 @@ public class RobotsServiceImpl implements RobotsService {
 		log.info("\n\n-----------------------------\n"
 				+ "Pоботы успешно остановлены"
 				+ "\n-----------------------------\n");
-		this.isRunning = false;
-	}
-
-	@Override
-	public boolean isRunning() {
-		return this.isRunning;
-	}
-	
-	@Override
-	public int getPhase() {
-		return AbstractMessageListenerContainer.DEFAULT_PHASE + 10;
 	}
 }

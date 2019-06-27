@@ -108,6 +108,7 @@ public abstract class SeleniumRobot implements Robot {
 	public void close(WebDriver driver) {
 		if (driver != null) {
 			driver.quit();
+			driver = null;
 		}
 	}
 
