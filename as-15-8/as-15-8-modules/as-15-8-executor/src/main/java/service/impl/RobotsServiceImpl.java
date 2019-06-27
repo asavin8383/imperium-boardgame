@@ -59,6 +59,8 @@ public class RobotsServiceImpl implements RobotsService {
 	
     private volatile Set<Robot> robots = new HashSet<>();
     
+    private boolean isRunning = false;
+    
 	@Override
 	public void run(CheckUnitJob checkUnitJob) throws Captcha_RobotScriptExecutionException, Cancel_RobotScriptExecutionException{
 		String robotName = "";
@@ -75,18 +77,18 @@ public class RobotsServiceImpl implements RobotsService {
 			ExecutionJobResult message = null;
 			log.info("Запуск робота: " + robotName);
 			
-			boolean isCaptcha = false;
+			boolean needToStop = true;
 			try{
 				message = robot.run(checkUnitJob.getCheckUnit());
 			} catch (Exception ex) {
 				if(ex instanceof RobotScriptExecutionException) {
-					if(ex instanceof Captcha_RobotScriptExecutionException)
-						isCaptcha = true;
+					if(ex instanceof Captcha_RobotScriptExecutionException || ex instanceof Cancel_RobotScriptExecutionException)
+						needToStop = false;
 					throw (RobotScriptExecutionException)ex;
 				} else
 					throw new RobotScriptExecutionException("Ошибка при выполнении скрипта робота", ex);
 			} finally {
-				if(!isCaptcha && robot != null) {
+				if(needToStop && robot != null) {
 					try {
 						robot.close();
 					} catch (IOException ex) {
@@ -210,13 +212,15 @@ public class RobotsServiceImpl implements RobotsService {
 	}
 
 	@Override
-	public void start() { }
+	public void start() {
+		this.isRunning = true;
+	}
 
 	@Override
 	public void stop() {
-		log.info("\n\n----------------\n"
+		log.info("\n\n-----------------------------\n"
 				+ "Oстановка активных роботов..."
-				+ "\n-----------------------\n");
+				+ "\n-----------------------------\n");
 		for(Robot robot : robots) {
 			try {
 				robot.close();
@@ -224,13 +228,14 @@ public class RobotsServiceImpl implements RobotsService {
 				log.error("Ошибка при остановке робота", ex);
 			}
 		}
-		log.info("\n\n----------------\n"
+		log.info("\n\n-----------------------------\n"
 				+ "Pоботы успешно остановлены"
-				+ "\n-----------------------\n");
+				+ "\n-----------------------------\n");
+		this.isRunning = false;
 	}
 
 	@Override
 	public boolean isRunning() {
-		return true;
+		return this.isRunning;
 	}
 }
