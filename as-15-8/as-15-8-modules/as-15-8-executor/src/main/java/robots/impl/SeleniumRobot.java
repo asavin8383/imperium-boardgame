@@ -68,13 +68,13 @@ public abstract class SeleniumRobot implements Robot {
 				});
 			ExecutionJobResult jobResult = currentExecutionFuture.join();
 			return jobResult;
+		} catch (CancellationException ex) {
+			throw new Cancel_RobotScriptExecutionException(ex);
 		} catch (CompletionException ex) {
 			if(ex.getCause() instanceof RobotScriptExecutionException)
 				throw (RobotScriptExecutionException) ex.getCause();
 			else
 				throw new RobotScriptExecutionException(ex.getCause());
-		} catch (CancellationException ex) {
-			throw new Cancel_RobotScriptExecutionException(ex);
 		} finally {
 			currentExecutionFuture = null;
 		}

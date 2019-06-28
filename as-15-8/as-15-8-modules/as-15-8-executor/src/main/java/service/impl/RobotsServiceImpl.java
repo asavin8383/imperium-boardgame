@@ -70,9 +70,9 @@ public class RobotsServiceImpl implements RobotsService {
 					" accessTool = " + checkUnitJob.getAccessToolUnit() +
 					" checkUnit = " + checkUnitJob.getCheckUnit().getValue();
 			
-			log.info("Запуск робота: " + robotName);
 			if(!this.isRunning)
-				throw new Cancel_RobotScriptExecutionException("Сервис получил сигнал остановки!");
+				return;
+			log.info("Запуск робота: " + robotName);
 			
 			RobotsFactory robotFactory = getRobotFactory(checkUnitJob.getAccessToolUnit());
 			Robot robot = robotFactory.createRobot(checkUnitJob.getAccessToolParameters());
