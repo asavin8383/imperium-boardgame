@@ -1,6 +1,6 @@
 package robots;
 
-import java.io.Closeable;
+import java.io.IOException;
 
 import checkUnits.CheckUnit;
 import execution.ExecutionJobResult;
@@ -11,7 +11,7 @@ import robots.exceptions.RobotScriptExecutionException;
  * @author shabalinAI
  *
  */
-public interface Robot extends Closeable {
+public interface Robot {
 
 	/**
 	 * Метод выполнения скрипта робота
@@ -21,4 +21,9 @@ public interface Robot extends Closeable {
 	 */
 	ExecutionJobResult run(CheckUnit checkUnit) throws RobotScriptExecutionException;
 	
+	/**
+	 * Метод уничтожения робота
+	 * @throws IOException
+	 */
+	void destroy() throws IOException;
 }

@@ -100,7 +100,7 @@ public abstract class SeleniumRobot implements Robot {
 	}
 
 	@Override
-	public void close() throws IOException {
+	public void destroy() throws IOException {
 		if(currentExecutionFuture != null && !currentExecutionFuture.isDone())
 			currentExecutionFuture.cancel(true);
 		close(driver);

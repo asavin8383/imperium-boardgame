@@ -74,9 +74,7 @@ public class GoogleApiRobot implements Robot{
 	}
 
 	@Override
-	public void close() throws IOException {
-		
-	}
+	public void destroy() throws IOException { }
 	
 	private Map<String, List<String>> searchUrlsInGoogle(String query) throws JSONException, RobotScriptExecutionException {
 		String url = createSearchUrl(query);
@@ -157,6 +155,6 @@ public class GoogleApiRobot implements Robot{
 		BufferedImage bImage2 = ImageIO.read(bis);
 		ImageIO.write(bImage2, "png", new File("D:\\output.png") );
 		
-		script.close();
+		script.destroy();
 	}
 }

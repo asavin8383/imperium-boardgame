@@ -93,7 +93,7 @@ public class RobotsServiceImpl implements RobotsService {
 			} finally {
 				if(needToStop && robot != null) {
 					try {
-						robot.close();
+						robot.destroy();
 					} catch (IOException ex) {
 						log.error("Ошибка при закрытии скрипта", ex);
 					}
@@ -142,7 +142,7 @@ public class RobotsServiceImpl implements RobotsService {
 				+ "\n-----------------------------\n");
 		for(Robot robot : robots) {
 			try {
-				robot.close();
+				robot.destroy();
 			} catch (IOException ex) {
 				log.error("Ошибка при остановке робота", ex);
 			}

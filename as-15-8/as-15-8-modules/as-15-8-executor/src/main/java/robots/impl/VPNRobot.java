@@ -13,7 +13,9 @@ import robots.utils.RobotScriptUtils;
 import robots.utils.ScriptUtils;
 import robots.utils.ScriptUtils.PageResult;
 
+import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
@@ -25,8 +27,13 @@ public class VPNRobot extends SeleniumRobot {
     protected boolean useEtalon;
     protected String etalonProxy;
     protected String stubUrl;
+    
+    protected volatile WebDriver etalonDriver;
 
-
+    CompletableFuture<Void> pageGetterFuture;
+    CompletableFuture<Void> etalonPageGetterFuture;
+    
+    
     public VPNRobot(RobotDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams) {
 
     	super(driverParams, scriptParams,
@@ -62,9 +69,8 @@ public class VPNRobot extends SeleniumRobot {
         ExecutionVpnJobResult message = new ExecutionVpnJobResult();
         message.setStubUrl(stubUrl);
 
-        CompletableFuture<Void> pageGetter = CompletableFuture
+        pageGetterFuture = CompletableFuture
                 .runAsync(() -> {
-                    WebDriver driver = this.driver;
                     try {
                         PageResult pageResult = RobotScriptUtils.loadPage(url, driver);
                         byte[] screenShot = ScriptUtils.getScreenshot(driver);
@@ -91,16 +97,15 @@ public class VPNRobot extends SeleniumRobot {
                     }
                 });
 
-        CompletableFuture<Void> pageGetterEtalon = CompletableFuture
+        etalonPageGetterFuture = CompletableFuture
                 .runAsync(() -> {
                     if (useEtalon){
-                        WebDriver driver = null;
                         try {
-                            driver = createDriver(etalonProxy, true);
-                            PageResult pageResult = RobotScriptUtils.loadPage(url, driver);
-                            byte[] screenShot = ScriptUtils.getScreenshot(driver);
-                            String finalUrl = ScriptUtils.getCurrentUrl(driver);
-                            HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(driver);
+                        	etalonDriver = createDriver(etalonProxy, true);
+                            PageResult pageResult = RobotScriptUtils.loadPage(url, etalonDriver);
+                            byte[] screenShot = ScriptUtils.getScreenshot(etalonDriver);
+                            String finalUrl = ScriptUtils.getCurrentUrl(etalonDriver);
+                            HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(etalonDriver);
 
                             if (responseMeta != null){
                                 message.setHttpStatusEtalon(responseMeta.status);
@@ -115,12 +120,12 @@ public class VPNRobot extends SeleniumRobot {
                         } catch (RobotScriptExecutionException e) {
                             throw new CompletionException(e);
                         } finally {
-                            close(driver);
+                            close(etalonDriver);
                         }
                     }
                 });
 
-        CompletableFuture<Void> allPageGetters = CompletableFuture.allOf(pageGetter, pageGetterEtalon);
+        CompletableFuture<Void> allPageGetters = CompletableFuture.allOf(pageGetterFuture, etalonPageGetterFuture);
 
         try {
             allPageGetters.join();
@@ -135,6 +140,8 @@ public class VPNRobot extends SeleniumRobot {
             catch(Throwable impossible) {
                 throw new RobotScriptExecutionException(impossible);
             }
+        } catch (CancellationException ex) {
+        	throw new RobotScriptExecutionException("Робот был остановлен", ex);
         }
 
         message.setUseEtalon(this.useEtalon);
@@ -146,4 +153,13 @@ public class VPNRobot extends SeleniumRobot {
         return "chrome".equalsIgnoreCase(getDriverParams().getBrowserName());
     }
 
+    @Override
+    public void destroy() throws IOException {
+    	if(pageGetterFuture != null && !pageGetterFuture.isDone())
+    		pageGetterFuture.cancel(true);
+    	if(etalonPageGetterFuture != null && !etalonPageGetterFuture.isDone())
+    		etalonPageGetterFuture.cancel(true);
+    	close(etalonDriver);
+    	super.destroy();
+    }
 }

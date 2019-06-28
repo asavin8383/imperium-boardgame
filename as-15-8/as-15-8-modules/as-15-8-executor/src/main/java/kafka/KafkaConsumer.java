@@ -120,14 +120,4 @@ public class KafkaConsumer {
 			log.error("Ошибка при запуске слушателей для " + accessToolUnit, ex);
 		}
 	}
-	
-	/*@EventListener
-	public void listenStopContanier(ConsumerStoppingEvent event) throws Exception {
-		try {
-			AccessToolUnit accessToolUnit = AccessToolUnit.valueOf(event.getContainer(ConcurrentMessageListenerContainer.class).getListenerId());
-			if(accessToolUnit != null) {
-				robotsService.destroyRobots(accessToolUnit);
-			}
-		} catch (Exception ex){}
-	}*/
 }

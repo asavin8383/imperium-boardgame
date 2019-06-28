@@ -60,7 +60,6 @@ public class HolaRobot extends SeleniumRobot {
 
 
         // Эталонная страница с дефолтного драйвера с дефолтным прокси
-        WebDriver driver = this.driver;
         try {
             if (useEtalon) {
                 PageResult pageResult = RobotScriptUtils.loadPage(url, driver);
