@@ -159,7 +159,7 @@ public class RobotsServiceImpl implements RobotsService {
 	
 	@Override
 	public int getPhase() {
-		return AbstractMessageListenerContainer.DEFAULT_PHASE + 10;
+		return AbstractMessageListenerContainer.DEFAULT_PHASE - 10;
 	}
 	
 	/**
