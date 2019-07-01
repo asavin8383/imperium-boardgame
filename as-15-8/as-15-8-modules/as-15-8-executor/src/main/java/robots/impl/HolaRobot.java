@@ -63,14 +63,14 @@ public class HolaRobot extends SeleniumRobot {
         try {
             if (useEtalon) {
                 PageResult pageResult = RobotScriptUtils.loadPage(url, driver);
-                byte[] screenShot = ScriptUtils.getScreenshot(driver);
-                String finalUrl = ScriptUtils.getCurrentUrl(driver);
                 HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(driver);
-
                 if (responseMeta != null){
                     message.setHttpStatus(responseMeta.status);
                     message.setHttpHeaders(HttpResponseHelper.headers2Str(responseMeta.jsonHeaders));
                 }
+                byte[] screenShot = ScriptUtils.getScreenshot(driver);
+                String finalUrl = ScriptUtils.getCurrentUrl(driver);
+
                 message.setChromeErrorCodeEtalon(pageResult.errorCodeChrome);
                 message.setPageContentEtalon(pageResult.pageSource);
                 message.setEtalonScreenshot(screenShot);
@@ -109,14 +109,14 @@ public class HolaRobot extends SeleniumRobot {
 
             driver.manage().window().maximize();
             PageResult pageResult = RobotScriptUtils.loadPage(url, driver);
-            byte[] screenShot = ScriptUtils.getScreenshot(driver);
-            String finalUrl = ScriptUtils.getCurrentUrl(driver);
             HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(driver);
-
             if (responseMeta != null){
                 message.setHttpStatus(responseMeta.status);
                 message.setHttpHeaders(HttpResponseHelper.headers2Str(responseMeta.jsonHeaders));
             }
+
+            byte[] screenShot = ScriptUtils.getScreenshot(driver);
+            String finalUrl = ScriptUtils.getCurrentUrl(driver);
             message.setResponseError(pageResult.errorCodeChrome != null);
             message.setChromeErrorCode(pageResult.errorCodeChrome);
             message.setPageContent(pageResult.pageSource);
