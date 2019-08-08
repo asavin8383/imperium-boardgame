@@ -19,7 +19,8 @@
 		<module>as-15-8-messages</module>
 		<module>as-15-8-rest</module>
 		<module>as-15-8-modules</module>
-	</modules>
+        <module>scheduler</module>
+    </modules>
 
 	<distributionManagement>
 		<!-- use the following if you're not using a snapshot version. -->
