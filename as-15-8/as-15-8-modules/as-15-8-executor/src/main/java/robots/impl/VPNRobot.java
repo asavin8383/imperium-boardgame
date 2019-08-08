@@ -27,13 +27,13 @@ public class VPNRobot extends SeleniumRobot {
     protected boolean useEtalon;
     protected String etalonProxy;
     protected String stubUrl;
-    
+
     protected volatile WebDriver etalonDriver;
 
     CompletableFuture<Void> pageGetterFuture;
     CompletableFuture<Void> etalonPageGetterFuture;
-    
-    
+
+
     public VPNRobot(RobotDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams) {
 
     	super(driverParams, scriptParams,
@@ -73,14 +73,21 @@ public class VPNRobot extends SeleniumRobot {
                 .runAsync(() -> {
                     try {
                         PageResult pageResult = RobotScriptUtils.loadPage(url, driver);
-                        byte[] screenShot = ScriptUtils.getScreenshot(driver);
-                        String finalUrl = ScriptUtils.getCurrentUrl(driver);
-                        HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(driver);
 
+                        HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(driver,
+                                pageResult.errorCodeChrome != null && pageResult.errorCodeChrome.toLowerCase().contains("err_"),
+                                "CODE: " + pageResult.errorCodeChrome +
+                                ", checkUnit: " + checkUnit.toString() +
+                                ", finalUrl: " + ScriptUtils.getCurrentUrl(driver) +
+                                ", ИСХОДНИК.");
                         if (responseMeta != null){
                             message.setHttpStatus(responseMeta.status);
                             message.setHttpHeaders(HttpResponseHelper.headers2Str(responseMeta.jsonHeaders));
                         }
+
+                        byte[] screenShot = ScriptUtils.getScreenshot(driver);
+                        String finalUrl = ScriptUtils.getCurrentUrl(driver);
+
                         message.setResponseError(pageResult.errorCodeChrome != null);
                         message.setChromeErrorCode(pageResult.errorCodeChrome);
                         message.setPageContent(pageResult.pageSource);
@@ -103,14 +110,21 @@ public class VPNRobot extends SeleniumRobot {
                         try {
                         	etalonDriver = createDriver(etalonProxy, true);
                             PageResult pageResult = RobotScriptUtils.loadPage(url, etalonDriver);
-                            byte[] screenShot = ScriptUtils.getScreenshot(etalonDriver);
-                            String finalUrl = ScriptUtils.getCurrentUrl(etalonDriver);
-                            HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(etalonDriver);
 
+                            HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(etalonDriver,
+                                    pageResult.errorCodeChrome != null && pageResult.errorCodeChrome.toLowerCase().contains("err_"),
+                                    "CODE: " + pageResult.errorCodeChrome +
+                                            ", checkUnit: " + checkUnit.toString() +
+                                            ", finalUrl: " + ScriptUtils.getCurrentUrl(etalonDriver) +
+                                            ", ЭТАЛОН.");
                             if (responseMeta != null){
                                 message.setHttpStatusEtalon(responseMeta.status);
                                 message.setHttpHeadersEtalon(HttpResponseHelper.headers2Str(responseMeta.jsonHeaders));
                             }
+
+                            byte[] screenShot = ScriptUtils.getScreenshot(etalonDriver);
+                            String finalUrl = ScriptUtils.getCurrentUrl(etalonDriver);
+
                             message.setChromeErrorCodeEtalon(pageResult.errorCodeChrome);
                             message.setPageContentEtalon(pageResult.pageSource);
                             message.setEtalonScreenshot(screenShot);
