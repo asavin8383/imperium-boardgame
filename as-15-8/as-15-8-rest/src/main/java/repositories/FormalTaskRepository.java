@@ -1,6 +1,6 @@
 package repositories;
 
-import model.enums.ExecutionStatus;
+import enums.ExecutionStatus;
 import model.task.FormalTask;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

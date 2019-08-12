@@ -1,5 +1,7 @@
 package checkUnits;
 
+import lombok.Getter;
+
 /**
  * Тип проверяемой единицы ЕРДИ
  * @author shabalinAI
@@ -7,12 +9,18 @@ package checkUnits;
  */
 public enum CheckUnitType {
 
-	URL,
-	DOMAIN,
-	DOMAIN_MASK,
-	IP_V4,
-	IP_V6,
-	IP_V4_SUBNET,
-	IP_V6_SUBNET
-	
+	URL(CheckMethod.BROWSER),
+	DOMAIN(CheckMethod.BROWSER),
+	DOMAIN_MASK(CheckMethod.BROWSER),
+	IP_V4(CheckMethod.BROWSER),
+	IP_V6(CheckMethod.BROWSER),
+	IP_V4_SUBNET(CheckMethod.NMAP),
+	IP_V6_SUBNET(CheckMethod.NMAP);
+
+	@Getter
+	private CheckMethod checkMethod;
+
+	CheckUnitType(CheckMethod checkMethod) {
+		this.checkMethod = checkMethod;
+	}
 }

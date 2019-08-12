@@ -7,6 +7,7 @@ package enums;
  */
 public enum CheckUnitJobResult {
 
+	PLANNED,
 	RUNNING,
 	COMPLETED,
 	DOUBTFUL,

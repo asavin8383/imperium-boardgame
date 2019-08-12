@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import controllers.helpers.SortingHelper;
 import enums.SortingDirection;
 import exceptions.AS_15_8_Exception;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Views;
 import model.task.Arrangement;
@@ -30,18 +31,11 @@ import java.util.List;
 @RequestMapping(path = "/arrangement_items", produces = MediaType.APPLICATION_JSON_VALUE)
 @PreAuthorize("hasAnyRole('ROLE_OPERATOR','ROLE_ADMIN')")
 @Slf4j
+@RequiredArgsConstructor(onConstructor_={@Autowired})
 public class ArrangementItemController {
 
-    private ArrangementItemRepository arrangementItemRepo;
-    private ArrangementRepository arrangementRepo;
-
-
-    @Autowired
-    public ArrangementItemController(ArrangementItemRepository arrangementItemRepo,
-                                     ArrangementRepository arrangementRepo) {
-        this.arrangementItemRepo = arrangementItemRepo;
-        this.arrangementRepo = arrangementRepo;
-    }
+    private final ArrangementItemRepository arrangementItemRepo;
+    private final ArrangementRepository arrangementRepo;
 
     @GetMapping
     public Page<ArrangementItem> findList(

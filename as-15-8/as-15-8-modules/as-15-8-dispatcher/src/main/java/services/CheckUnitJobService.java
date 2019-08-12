@@ -1,13 +1,13 @@
 package services;
 
-import java.util.List;
-
 import analysis.AnalysisResult;
 import checkUnits.CheckUnitJob;
-import enums.ArrangementStatus;
 import enums.CheckUnitJobResult;
+import enums.ExecutionStatus;
 import jobs.ArrangementJob;
 import model.ArrangementResult;
+
+import java.util.List;
 
 /**
  * Сервис работы с заданиями на проверку запрещенных ресурсов
@@ -21,6 +21,6 @@ public interface CheckUnitJobService {
     
     ArrangementResult updateJobStatus(Long jobID, CheckUnitJobResult status, String description);
     
-    ArrangementStatus checkArrangementStatus(Long arrangementID);
+    ExecutionStatus checkArrangementStatus(Long arrangementID);
 
 }

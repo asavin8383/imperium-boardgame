@@ -10,7 +10,6 @@ import model.SchedulePeriod;
 import org.junit.Test;
 import service.ScheduleFactory;
 
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;

@@ -12,9 +12,7 @@ import repositories.ArrangementItemRepository;
 import repositories.GlobalParametersRepository;
 import services.arrangement.ArrangementJobCreationService;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -36,28 +34,8 @@ public class ArrangementJobCreationServiceImpl implements ArrangementJobCreation
     }
 
     @Override
-    public List<ArrangementJob> createArrangementJobs(Arrangement arrangement) {
-        List<ArrangementJob> jobList = new ArrayList<>();
-        for(ArrangementItem arrangementItem : arrangementItemRepo.findAllByArrangementId(arrangement.getId())){
-            ArrangementJob arrangementJob = new ArrangementJob();
-            arrangementJob.setId(arrangement.getId());
-            //Установим тип запуска для диспетчеризации старта/перезапуска
-            arrangementJob.setRunType(getRunType(arrangement));
-            arrangementJob.setAccessToolUnit(arrangement.getAccessTool().getName());
-            arrangementJob.getErdiJobList().add(new ERDIJob(arrangementItem.getErdi().getId()));
-            //Добавляем параметры конкретного ПС/ПАСД
-            arrangementJob.getAccessToolParameters().putAll(prepareParameters(arrangement.getAccessTool()));
-            //Добавляем глобальные параметры
-            arrangementJob.getAccessToolParameters().putAll(prepareGlobalParameters());
-            jobList.add(arrangementJob);
-        }
-        return jobList;
-    }
-
-    @Override
-    public ArrangementJob createSingleArrangementJob(Arrangement arrangement) {
-        ArrangementJob arrangementJob = new ArrangementJob();
-        arrangementJob.setId(arrangement.getId());
+    public ArrangementJob createArrangementJob(Arrangement arrangement) {
+        ArrangementJob arrangementJob = createBriefArrangementJob(arrangement);
         //Установим тип запуска для диспетчеризации старта/перезапуска
         arrangementJob.setRunType(getRunType(arrangement));
         arrangementJob.setAccessToolUnit(arrangement.getAccessTool().getName());
@@ -65,13 +43,22 @@ public class ArrangementJobCreationServiceImpl implements ArrangementJobCreation
         arrangementJob.getAccessToolParameters().putAll(prepareParameters(arrangement.getAccessTool()));
         //Добавляем глобальные параметры
         arrangementJob.getAccessToolParameters().putAll(prepareGlobalParameters());
+        for(ArrangementItem arrangementItem : arrangementItemRepo.findAllByArrangementId(arrangement.getId())){
+            arrangementJob.getErdiJobList().add(new ERDIJob(arrangementItem.getErdi().getId()));
+        }
         return arrangementJob;
     }
 
+    @Override
+    public ArrangementJob createBriefArrangementJob(Arrangement arrangement){
+        ArrangementJob arrangementJob = new ArrangementJob();
+        arrangementJob.setId(arrangement.getId());
+        return arrangementJob;
+    }
 
     private ArrangementJob.JobRunType getRunType(Arrangement arrangement){
         switch (arrangement.getStatus()){
-            case PLANNED:
+            case NEW:
                 return ArrangementJob.JobRunType.START;
             case ACTION_REQUIRED:
                 return ArrangementJob.JobRunType.RESTART;

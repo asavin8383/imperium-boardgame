@@ -1,7 +1,7 @@
 package model.task;
 
 import lombok.Data;
-import model.enums.ExecutionStatus;
+import enums.ExecutionStatus;
 import model.user.User;
 
 import javax.persistence.*;

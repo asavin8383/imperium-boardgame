@@ -4,9 +4,11 @@ import controllers.helpers.ArrangementExecutionHelper;
 import controllers.helpers.SortingHelper;
 import enums.SortingDirection;
 import exceptions.AS_15_8_Exception;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import model.enums.ExecutionStatus;
+import enums.ExecutionStatus;
 import model.task.Arrangement;
+import model.task.FormalTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,8 +18,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import repositories.ArrangementRepository;
-import repositories.FormalTaskRepository;
 import services.arrangement.ArrangementStatusService;
+import services.arrangement.impl.ArrangementService;
+import stateMachine.ArrangementEvents;
 
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
@@ -30,25 +33,14 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping(path = "/arrangements", produces = MediaType.APPLICATION_JSON_VALUE)
 @PreAuthorize("hasAnyRole('ROLE_OPERATOR','ROLE_ADMIN')")
+@RequiredArgsConstructor(onConstructor_={@Autowired})
 @Slf4j
 public class ArrangementController {
 
-    private ArrangementRepository arrangementRepo;
-    private FormalTaskRepository formalTaskRepo;
-    private ArrangementExecutionHelper arrangementExecutionHelper;
-    private ArrangementStatusService arrangementStatusService;
-
-    @Autowired
-    public ArrangementController(ArrangementRepository arrangementRepo,
-                                 FormalTaskRepository formalTaskRepo,
-                                 ArrangementExecutionHelper arrangementExecutionHelper,
-                                 ArrangementStatusService arrangementStatusService
-                                 ) {
-        this.arrangementRepo = arrangementRepo;
-        this.formalTaskRepo = formalTaskRepo;
-        this.arrangementExecutionHelper = arrangementExecutionHelper;
-        this.arrangementStatusService = arrangementStatusService;
-    }
+    private final ArrangementRepository arrangementRepo;
+    private final ArrangementExecutionHelper arrangementExecutionHelper;
+    private final ArrangementStatusService arrangementStatusService;
+    private final ArrangementService arrangementService;
 
     @GetMapping
     public Page<Arrangement> findList(
@@ -65,13 +57,8 @@ public class ArrangementController {
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(code = HttpStatus.CREATED)
-    public Arrangement postArrangement(@RequestBody Arrangement arrangement, @RequestParam Long formalTaskId){
-        return formalTaskRepo.findById(formalTaskId)
-            .map(formalTask -> {
-                arrangement.setFormalTask(formalTask);
-                return arrangementRepo.save(arrangement);
-            })
-            .orElseThrow(() -> new AS_15_8_Exception("Error creating arrangement! Formal task was not found by id: " + formalTaskId));
+    public Arrangement postArrangement(@RequestBody Arrangement arrangement, @RequestParam("formalTaskId") FormalTask formalTask){
+        return arrangementService.saveArrangement(arrangement, formalTask);
 
     }
 
@@ -109,7 +96,7 @@ public class ArrangementController {
 
     /**
      * Запуск мероприятия на выполнение
-     * Необходимым условием запуска является статус "PLANNED"
+     * Необходимым условием запуска является статус "FORMED"
      * @param id идентификатор мероприятия
      * @return запущенное мероприятие
      */
@@ -117,13 +104,13 @@ public class ArrangementController {
     public ResponseEntity<Arrangement> runArrangement(@RequestParam Long id){
         return arrangementRepo.findById(id)
             .map(arrangement -> {
-                if(arrangement.getStatus().equals(ExecutionStatus.PLANNED)||arrangement.getStatus().equals(ExecutionStatus.ACTION_REQUIRED)) {
+                if(arrangement.getStatus().equals(ExecutionStatus.FORMED)||arrangement.getStatus().equals(ExecutionStatus.ACTION_REQUIRED)) {
                     arrangementExecutionHelper.sendJobToDispatcher(arrangement);
                     //Устанавливаем дату запуска(актуально только для впервые запущенных мероприятий)
-                    if(arrangement.getStatus().equals(ExecutionStatus.PLANNED)){
+                    if(arrangement.getStatus().equals(ExecutionStatus.FORMED)){
                         arrangement.setStartDate(LocalDateTime.now());
                     }
-                    arrangement.setStatus(ExecutionStatus.RUNNING);
+                    arrangement.sendEvent(ArrangementEvents.RUN);
                     arrangementStatusService.processArrangementStatusChange(arrangement);
                     arrangementRepo.save(arrangement);
                     return new ResponseEntity<>(arrangement, HttpStatus.OK);
@@ -131,6 +118,17 @@ public class ArrangementController {
                 return new ResponseEntity<>(arrangement, HttpStatus.NOT_ACCEPTABLE);
             })
             .orElseThrow(() -> new AS_15_8_Exception("Error running arrangement! Arrangement was not found by id: " + id));
+    }
+
+    /**
+     * Заполнение мероприятия в зависимости по списку ЕРДИ
+     * @param arrangement - мероприятие для заполнение
+     * @return статус запроса
+     */
+    @GetMapping(path = "/fill")
+    public ResponseEntity<Void> fillArrangement(@RequestParam("id") Arrangement arrangement){
+        arrangementService.fillArrangement(arrangement);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**
@@ -154,12 +152,12 @@ public class ArrangementController {
     private boolean isStatusChanged(Arrangement arrangement){
         //Если новому мероприятию запланировали дату запуска в будущем,
         // при этом не пустой список ЕРДИ,
-        // оно становится PLANNED
+        // оно становится FORMED
         if(arrangement.getStatus().equals(ExecutionStatus.NEW) &&
                 arrangement.getPlannedDate() != null &&
                 arrangement.getArrangementItems()!=null &&
                 arrangement.getArrangementItems().size() > 0){
-            arrangement.setStatus(ExecutionStatus.PLANNED);
+            arrangement.sendEvent(ArrangementEvents.FILL);
             log.info("Arrangement status changed to " + arrangement.getStatus());
             return true;
         }

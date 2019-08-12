@@ -3,12 +3,14 @@ alter table portal.access_tools add constraint ck_name check ( name in ('GOOGLE'
 alter table portal.access_tools drop constraint if exists ck_type;
 alter table portal.access_tools add constraint ck_type check ( type in ('SEARCH_SYSTEM','VPN','ANONYMIZER', 'PROXY'));
 alter table portal.arrangements drop constraint if exists ck_status;
-alter table portal.arrangements add constraint ck_status check ( status in ('NEW', 'PLANNED', 'RUNNING', 'ACTION_REQUIRED', 'FINISHED'));
+alter table portal.arrangements add constraint ck_status check ( status in ('NEW', 'FORMED', 'RUNNING', 'ACTION_REQUIRED', 'FINISHED'));
 
 alter table portal.arrangement_results drop constraint if exists ck_result;
 alter table portal.arrangement_results add constraint ck_result check ( result in (
+'FORMED',
 'RUNNING',
 'COMPLETED',
+'DOUBTFUL',
 'FORBIDDEN_CONTENT_DETECTED',
 'CAPTCHA_DETECTED',
 'DNS_ERROR',
@@ -34,3 +36,6 @@ alter table portal.anonymizer_parameters add constraint ck_type check ( access_t
 
 alter table portal.global_parameters drop constraint if exists ck_key;
 alter table portal.global_parameters add constraint ck_key check ( key in ('ETALON_PROXY_HOST', 'ETALON_PROXY_PORT', 'ETALON_PROXY_USERNAME', 'ETALON_PROXY_PASSWORD', 'USE_ETALON'));
+
+alter table portal.planned_processing_times drop constraint if exists ck_type;
+alter table portal.planned_processing_times add constraint ck_type check ( check_method in ('BROWSER', 'NMAP'));

@@ -1,20 +1,19 @@
 package kafka;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-
+import analysis.AnalysisResult;
+import arrangement.ArrangementStatusNotification;
+import enums.CheckUnitJobResult;
+import enums.ExecutionStatus;
+import lombok.extern.slf4j.Slf4j;
+import model.ArrangementResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
-
-import analysis.AnalysisResult;
-import arrangement.ArrangementStatusNotification;
-import enums.ArrangementStatus;
-import enums.CheckUnitJobResult;
-import lombok.extern.slf4j.Slf4j;
-import model.ArrangementResult;
 import services.CheckUnitJobService;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 /**
  * Creation date: 27.05.2019
@@ -42,10 +41,10 @@ public class KafkaAnalysisResultsConsumer {
     		ArrangementResult jobResult = checkUnitService.processJobResult(analysisResult);
     		log.info("Результаты выполнения проверки успешно обработаны: " + analysisResult.getJobID() + ", " + analysisResult.getCheckUnit().getValue());
     		
-    		ArrangementStatus arrStatus = checkUnitService.checkArrangementStatus(jobResult.getArrangementId());
-    		if(arrStatus == ArrangementStatus.FINISHED) {
+    		ExecutionStatus status = checkUnitService.checkArrangementStatus(jobResult.getArrangementId());
+    		if(status == ExecutionStatus.FINISHED) {
     			log.info("Мероприятие успешно завешено: " + jobResult.getArrangementId());
-    			arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(jobResult.getArrangementId(), arrStatus));
+    			arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(jobResult.getArrangementId(), status));
     		}
 
     	} catch (Exception ex) {
@@ -56,10 +55,10 @@ public class KafkaAnalysisResultsConsumer {
         		ex.printStackTrace(new PrintWriter(sw));
         		
         		ArrangementResult jobResult = checkUnitService.updateJobStatus(analysisResult.getJobID(), CheckUnitJobResult.INTERNAL_ERROR, sw.toString());
-        		ArrangementStatus arrStatus = checkUnitService.checkArrangementStatus(jobResult.getArrangementId());
-        		if(arrStatus == ArrangementStatus.FINISHED) {
+				ExecutionStatus status = checkUnitService.checkArrangementStatus(jobResult.getArrangementId());
+        		if(status == ExecutionStatus.FINISHED) {
         			log.info("Мероприятие успешно завешено: " + jobResult.getArrangementId());
-        			arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(jobResult.getArrangementId(), arrStatus));
+        			arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(jobResult.getArrangementId(), status));
         		}
     		} catch(Exception newEx) {
     			log.error("Ошибка при сохранении ошибочной обработки сообщения с анализом результатов проверки: " + analysisResult.getJobID() + ", " + analysisResult.getCheckUnit().getValue(), newEx);

@@ -2,7 +2,7 @@ package model.task;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
-import model.enums.ExecutionStatus;
+import enums.ExecutionStatus;
 import model.enums.Priority;
 import model.user.User;
 
@@ -78,7 +78,7 @@ public class FormalTask implements Serializable {
 	
 	public FormalTask() {
 		this.creationDate = LocalDateTime.now();
-		this.status = ExecutionStatus.PLANNED;
+		this.status = ExecutionStatus.FORMED;
 	}
 
 }

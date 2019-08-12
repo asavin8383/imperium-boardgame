@@ -2,10 +2,13 @@ package model.task;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
+import exceptions.AS_15_8_Exception;
 import lombok.Data;
 import model.Views;
 import model.catalog.AccessTool;
-import model.enums.ExecutionStatus;
+import enums.ExecutionStatus;
+import stateMachine.ArrangementEvents;
+import stateMachine.ArrangementStateMachine;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -66,10 +69,13 @@ public class Arrangement implements Serializable {
 
 	/**Результат проведения мероприятия*/
     private String result;
+
+    private ArrangementStateMachine stateMachine;
 	
 	public Arrangement() {
 		this.creationDate = LocalDateTime.now();
 		this.status = ExecutionStatus.NEW;
+		this.stateMachine = new ArrangementStateMachine(this.status);
 	}
 
 	public Long getDurationInMinutes(){
@@ -78,5 +84,18 @@ public class Arrangement implements Serializable {
 		}else {
 			return null;
 		}
+	}
+
+	public void sendEvent(ArrangementEvents event){
+		if(this.stateMachine.sendEvent(event)){
+			this.status = stateMachine.getCurrentStatus();
+		} else {
+			throw new AS_15_8_Exception("Ошибка смены статуса мероприятия: " + stateMachine.getCurrentStatus() + " событием " + event);
+		}
+	}
+
+	private void setStatus(ExecutionStatus status){
+		this.status = status;
+		this.stateMachine = new ArrangementStateMachine(status);
 	}
 }

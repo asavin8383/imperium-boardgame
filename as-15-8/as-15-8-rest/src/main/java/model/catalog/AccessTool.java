@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import enums.AccessToolUnit;
 import lombok.Data;
 import model.enums.AccessToolType;
+import model.schedule.PlannedProcessingTime;
 import model.task.Arrangement;
 
 import javax.persistence.*;
@@ -73,4 +74,8 @@ public class AccessTool implements Serializable{
 			@JoinColumn(name = "type", referencedColumnName = "access_tool_type")
 	})
 	private AnonymizerParameters anonymizerParameters;
+
+	@OneToMany(mappedBy = "accessTool")
+	@JsonIgnore
+	private List<PlannedProcessingTime> plannedProcessingTimes;
 }

@@ -2,7 +2,6 @@ package kafka;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.kafka.support.KafkaHeaders;
@@ -46,10 +45,10 @@ public class KafkaArrangementsConsumer {
 		this.controlMessagesTemplate = controlMessagesTemplate;
 	}
 
-	@KafkaListener(
+	/*@KafkaListener(
 		topics = "${spring.kafka.arrangement-tasks-topic}",
 		containerFactory = "kafkaListenerContainerFactory"
-	)
+	)*/
     public void consumeArrangementJob(ArrangementJob arrangementJob, Acknowledgment ack) {
 		log.info("Принято задание на проведение мероприятия: " + arrangementJob.toString());
     	try {

@@ -10,6 +10,8 @@ import org.springframework.stereotype.Repository;
 import enums.CheckUnitJobResult;
 import model.ArrangementResult;
 
+import javax.transaction.Transactional;
+
 /**
  * Creation date: 27.05.2019
  * Author: asavin
@@ -20,5 +22,8 @@ public interface ArrangementResultRepository extends JpaRepository<ArrangementRe
 	
 	@Query("SELECT count(res) FROM ArrangementResult res WHERE res.arrangementId = :id AND (res.result IS NULL OR res.result IN :results)")
 	Long countByResultNullOrResultIn(@Param("id") Long id, @Param("results") List<CheckUnitJobResult> results);
+
+	@Transactional
+	Long deleteByArrangementIdAndErdiId(Long arrangementId, Long erdiId);
 	
 }

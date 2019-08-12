@@ -3,7 +3,7 @@ package controllers;
 import controllers.helpers.SortingHelper;
 import enums.SortingDirection;
 import exceptions.AS_15_8_Exception;
-import model.enums.ExecutionStatus;
+import enums.ExecutionStatus;
 import model.task.FormalTask;
 import model.user.User;
 import org.springframework.beans.factory.annotation.Autowired;

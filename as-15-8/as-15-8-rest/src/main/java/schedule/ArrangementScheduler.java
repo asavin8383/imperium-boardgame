@@ -2,11 +2,11 @@ package schedule;
 
 import controllers.helpers.ArrangementExecutionHelper;
 import lombok.extern.slf4j.Slf4j;
-import model.enums.ExecutionStatus;
+import enums.ExecutionStatus;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import repositories.ArrangementRepository;
+import stateMachine.ArrangementEvents;
 
 import java.time.LocalDateTime;
 
@@ -28,13 +28,13 @@ public class ArrangementScheduler {
         this.arrangementExecutionHelper = arrangementExecutionHelper;
     }
 
-    @Scheduled(cron = "${cron.expression.arrangement}")
+    //@Scheduled(cron = "${cron.expression.arrangement}")
     public void checkAndStartArrangementJobs(){
-        arrangementRepo.findAllByStatusAndPlannedDateIsLessThan(ExecutionStatus.PLANNED, LocalDateTime.now())
+        arrangementRepo.findAllByStatusAndPlannedDateIsLessThan(ExecutionStatus.FORMED, LocalDateTime.now())
             .forEach(arrangement ->  {
                 arrangementExecutionHelper.sendJobToDispatcher(arrangement);
                 arrangement.setStartDate(LocalDateTime.now());
-                arrangement.setStatus(ExecutionStatus.RUNNING);
+                arrangement.sendEvent(ArrangementEvents.RUN);
                 arrangementRepo.save(arrangement);
                 log.info(String.format("Arrangement with id: %d was started", arrangement.getId()));
             });

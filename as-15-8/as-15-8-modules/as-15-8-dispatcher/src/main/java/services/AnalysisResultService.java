@@ -12,7 +12,6 @@ public interface AnalysisResultService<T> {
 	
 	/**
 	 * Метод обработки результатов анализа проверок запрещенных ресурсов
-	 * @param <T>
 	 * @param result Результат анализа проверок запрещенных ресурсов
 	 * @return
 	 */

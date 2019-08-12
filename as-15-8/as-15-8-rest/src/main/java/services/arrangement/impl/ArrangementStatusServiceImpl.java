@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import exceptions.AS_15_8_Exception;
 import lombok.extern.slf4j.Slf4j;
-import model.enums.ExecutionStatus;
+import enums.ExecutionStatus;
 import model.task.Arrangement;
 import model.task.ArrangementView;
 import model.task.FormalTask;

@@ -4,18 +4,16 @@ import analysis.AnalysisResult;
 import checkUnits.CheckUnit;
 import checkUnits.CheckUnitJob;
 import checkUnits.CheckUnitType;
-import enums.AccessToolParameters;
-import enums.AccessToolUnit;
-import enums.ArrangementStatus;
-import enums.CheckUnitJobResult;
+import enums.*;
 import exceptions.AS_15_8_DispatcherException;
 import jobs.ArrangementJob;
 import jobs.ERDIJob;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import model.ArrangementResult;
 import model.DetailResultsVpn;
-
 import org.apache.commons.net.util.SubnetUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -40,24 +38,15 @@ import java.util.stream.Collectors;
  * Author: asavin
  */
 @Service
+@RequiredArgsConstructor(onConstructor_={@Autowired})
+@Slf4j
 public class CheckUnitJobServiceImpl implements CheckUnitJobService {
 
-    private NamedParameterJdbcTemplate jdbcNamedTemplate;
-    private JdbcTemplate jdbcTemplate;
-    private ArrangementResultRepository arrangementResultRepo;
-    private DetailResultsVpnRepository detailResultsRepo;
+    private final NamedParameterJdbcTemplate jdbcNamedTemplate;
+    private final JdbcTemplate jdbcTemplate;
+    private final ArrangementResultRepository arrangementResultRepo;
+    private final DetailResultsVpnRepository detailResultsRepo;
     private final List<Protocol> protocols = new ArrayList<>();
-
-    @Autowired
-    public CheckUnitJobServiceImpl(NamedParameterJdbcTemplate jdbcNamedTemplate,
-                                   JdbcTemplate jdbcTemplate,
-                                   ArrangementResultRepository arrangementResultRepo,
-                                   DetailResultsVpnRepository detailResultsRepo) {
-        this.jdbcNamedTemplate = jdbcNamedTemplate;
-        this.jdbcTemplate = jdbcTemplate;
-        this.arrangementResultRepo = arrangementResultRepo;
-        this.detailResultsRepo = detailResultsRepo;
-    }
 
     @PostConstruct
     private void fillProtocolsAndPorts(){
@@ -87,6 +76,12 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
     }
 
     private List<CheckUnitJob> prepareJobsForStart(ArrangementJob arrangementJob) {
+    	//Удаляем результаты, если они есть и это допустимо
+		for(ERDIJob erdiJob: arrangementJob.getErdiJobList())
+		{
+			deleteArrangementResults(arrangementJob.getId(), erdiJob.getId());
+		}
+
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("ids",
                 arrangementJob.getErdiJobList().stream()
@@ -252,20 +247,21 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
 	}
 
 	@Override
-	public ArrangementStatus checkArrangementStatus(Long arrangementID) {
+	public ExecutionStatus checkArrangementStatus(Long arrangementID) {
 		Long notFinishedJobsCount = arrangementResultRepo.countByResultNullOrResultIn(arrangementID,
 			Arrays.asList(
+				CheckUnitJobResult.PLANNED,
 				CheckUnitJobResult.RUNNING,
 				CheckUnitJobResult.CAPTCHA_DETECTED)
 			);
-		return notFinishedJobsCount > 0 ? ArrangementStatus.RUNNING : ArrangementStatus.FINISHED;
+		return notFinishedJobsCount > 0 ? ExecutionStatus.RUNNING : ExecutionStatus.FINISHED;
 	}
 
 
     private Long saveCheckUnitJobAsResult(Long arrangementID, Long erdiID, CheckUnitJob checkUnitJob) {
         try{
             ArrangementResult arrangementResult = new ArrangementResult();
-            arrangementResult.setResult(CheckUnitJobResult.RUNNING);
+            arrangementResult.setResult(CheckUnitJobResult.PLANNED);
             arrangementResult.setArrangementId(arrangementID);
             arrangementResult.setErdiId(erdiID);
             arrangementResult.setCheckUnitType(checkUnitJob.getCheckUnit().getType());
@@ -275,6 +271,33 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
             throw new AS_15_8_DispatcherException("Ошибка сохранения задания на проверку запрещенного ресурса!", ex);
         }
     }
+
+	/**
+	 * Проверка доступности удаления списка ресурсов мероприятия. (Только для статуса NEW)
+	 * @param arrangementId идентификатор мероприятия
+	 * @return можно ли удалить список ресурсов мероприятия
+	 */
+	private boolean checkArrangementStatusForDelete(Long arrangementId){
+    	String sql = "select status from portal.arrangements where id = ?";
+    	String arrangementStatus = jdbcTemplate.queryForObject(sql, new Object[] { arrangementId }, String.class);
+		if(arrangementStatus != null && (arrangementStatus.equals("NEW"))){
+			return true;
+		}
+    	return false;
+	}
+
+	void deleteArrangementResults(Long arrangementId, Long erdiId){
+		try{
+			if(!checkArrangementStatusForDelete(arrangementId)){
+				throw new AS_15_8_DispatcherException("Ошибка удаления списка запрещенных ресурсов мероприятия! Мероприятие " + arrangementId + " имеет недопустимый статус (запущено или завершено)");
+			}
+			arrangementResultRepo.deleteByArrangementIdAndErdiId(arrangementId, erdiId);
+		}catch (Exception ex){
+			log.error("Ошибка удаления списка запрещённых ресурсов мероприятия " + arrangementId + " для ЕРДИ " + erdiId,ex);
+			throw new AS_15_8_DispatcherException("Ошибка удаления списка запрещенных ресурсов мероприятия!", ex);
+		}
+
+	}
 
 	@Override
 	public ArrangementResult updateJobStatus(Long jobID, CheckUnitJobResult status, String description) {

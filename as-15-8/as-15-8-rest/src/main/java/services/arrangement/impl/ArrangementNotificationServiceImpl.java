@@ -1,15 +1,15 @@
 package services.arrangement.impl;
 
 import arrangement.ArrangementStatusNotification;
-import enums.ArrangementStatus;
 import exceptions.AS_15_8_Exception;
 import lombok.extern.slf4j.Slf4j;
-import model.enums.ExecutionStatus;
+import enums.ExecutionStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import repositories.ArrangementRepository;
 import services.arrangement.ArrangementNotificationService;
 import services.arrangement.ArrangementStatusService;
+import stateMachine.ArrangementEvents;
 
 import java.time.LocalDateTime;
 
@@ -37,14 +37,14 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
         arrangementRepo.findById(arrangementStatusNotification.getArrangementId())
             .map(arrangement -> {
                 if (arrangement.getStatus().equals(ExecutionStatus.RUNNING)){
-                    log.info("Arrangement status need to be changed to: " + arrangementStatusNotification.getArrangementStatus() + " for arrangement: " +arrangement.getId());
-                    if (arrangementStatusNotification.getArrangementStatus().equals(ArrangementStatus.ACTION_REQUIRED)){
-                        arrangement.setStatus(ExecutionStatus.ACTION_REQUIRED);
-                    } else if (arrangementStatusNotification.getArrangementStatus().equals(ArrangementStatus.FINISHED)){
-                        arrangement.setStatus(ExecutionStatus.FINISHED);
+                    log.info("Arrangement status need to be changed to: " + arrangementStatusNotification.getExecutionStatus() + " for arrangement: " +arrangement.getId());
+                    if (arrangementStatusNotification.getExecutionStatus().equals(ExecutionStatus.ACTION_REQUIRED)){
+                        arrangement.sendEvent(ArrangementEvents.PAUSE);
+                    } else if (arrangementStatusNotification.getExecutionStatus().equals(ExecutionStatus.FINISHED)){
+                        arrangement.sendEvent(ArrangementEvents.FINISH);
                         arrangement.setEndDate(LocalDateTime.now());
                     } else {
-                        throw new AS_15_8_Exception("Error changing arrangement status. Status not supported: " + arrangementStatusNotification.getArrangementStatus());
+                        throw new AS_15_8_Exception("Error changing arrangement status. Status not supported: " + arrangementStatusNotification.getExecutionStatus());
                     }
                     //Меняем статус мероприятия и задания в случае необходимости
                     arrangementStatusService.processArrangementStatusChange(arrangement);
