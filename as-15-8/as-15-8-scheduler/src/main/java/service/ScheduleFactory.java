@@ -19,7 +19,7 @@ public class ScheduleFactory {
     public static Schedule create(List<Arrangement> arrangements){
         Schedule schedule = createNewSchedule(arrangements);
         calculateWorkers(schedule);
-        checkSchedule(schedule, arrangements);
+        checkSchedule(schedule);
         return schedule;
     }
 
@@ -46,6 +46,7 @@ public class ScheduleFactory {
                 schedule.getSchedulePeriods().add(schedulePeriod);
             }
         }
+        schedule.getSchedulePeriods().sort(Comparator.comparing(SchedulePeriod::getStartTime));
         return schedule;
     }
 
@@ -57,10 +58,12 @@ public class ScheduleFactory {
             }
         }
 
-        for(SchedulePeriod schedulePeriod : schedule.getSchedulePeriods()){
+        for(int i = 0; i<schedule.getSchedulePeriods().size(); i++){
+            SchedulePeriod schedulePeriod = schedule.getSchedulePeriods().get(i);
             Map<Arrangement, Double> arrangementDensities = calculateDensities(schedulePeriod, nextCheckUnits);
             double totalPeriodDensity = arrangementDensities.values().stream().collect(Collectors.summingDouble(Double::doubleValue));
 
+            Map<Arrangement, CheckUnit> notFinishedArrangements = new HashMap<>();
             Iterator<ArrangementProcessingPart> arrProcessingIter = schedulePeriod.getArrangementProcessingParts().iterator();
             while(arrProcessingIter.hasNext()){
                 ArrangementProcessingPart arrangementProcessingPart = arrProcessingIter.next();
@@ -76,36 +79,56 @@ public class ScheduleFactory {
                 int workersCount = Long.valueOf(Math.round(totalWorkersCount * percent)).intValue();
                 arrangementProcessingPart.setWorkersCount(workersCount);
 
-                CheckUnit lastCheckUnit = getLastCompletionCheckUnits(arrangement, firstCheckUnit, workersCount,
-                        schedulePeriod.getStartTime(),schedulePeriod.getEndTime());
-                nextCheckUnits.put(arrangement, arrangement.getCheckUnits().higher(lastCheckUnit));
+                CheckUnit nextCheckUnit = arrangement.getCheckUnits().higher(
+                        getLastCompletionCheckUnits(arrangement, firstCheckUnit, workersCount,schedulePeriod.getStartTime(),schedulePeriod.getEndTime()));
+                nextCheckUnits.put(arrangement, nextCheckUnit);
+
+                if(nextCheckUnit != null){
+                    if(schedule.getSchedulePeriods().indexOf(schedulePeriod) < schedule.getSchedulePeriods().size()-1) {
+                        SchedulePeriod nextPeriod = schedule.getSchedulePeriods().get(schedule.getSchedulePeriods().indexOf(schedulePeriod)+1);
+                        if (!containsArrangement(nextPeriod.getArrangementProcessingParts(), arrangement)) {
+                            nextPeriod.addArrangementProcessingPart(new ArrangementProcessingPart(arrangement));
+                        }
+                    } else {
+                        notFinishedArrangements.put(arrangement, nextCheckUnit);
+                    }
+                }
+            }
+
+            if(notFinishedArrangements.size() > 0) {
+                SchedulePeriod newSchedulePeriod = new SchedulePeriod(schedulePeriod.getEndTime(), schedulePeriod.getEndTime().plusSeconds(1));
+                long processingTime = 0;
+                for (Map.Entry<Arrangement, CheckUnit> entry : notFinishedArrangements.entrySet()) {
+                    processingTime += countArrangementProcessingTime(entry.getKey().getCheckUnits().tailSet(entry.getValue()), entry.getKey().getType());
+                    newSchedulePeriod.addArrangementProcessingPart(new ArrangementProcessingPart(entry.getKey()));
+                }
+
+                newSchedulePeriod.setEndTime(schedulePeriod.getEndTime().plusSeconds(processingTime / totalWorkersCount + 1));
+                schedule.getSchedulePeriods().add(newSchedulePeriod);
             }
         }
     }
 
-    private static boolean checkSchedule(Schedule schedule, List<Arrangement> arrangements){
+    private static boolean checkSchedule(Schedule schedule){
         boolean isScheduleCorrect = true;
 
-        Map<Arrangement, Long> arrangementScheduleTimes = new HashMap<>();
+        Map<Arrangement, Long> arrangementLags = new HashMap<>();
         for(SchedulePeriod schedulePeriod : schedule.getSchedulePeriods()){
             for(ArrangementProcessingPart arrangementProcessingPart : schedulePeriod.getArrangementProcessingParts()){
-                if(!arrangementScheduleTimes.containsKey(arrangementProcessingPart.getArrangement()))
-                    arrangementScheduleTimes.put(arrangementProcessingPart.getArrangement(), 0L);
 
-                long arrangementPeriodTime = arrangementScheduleTimes.get(arrangementProcessingPart.getArrangement()) +
-                        (arrangementProcessingPart.getWorkersCount() *
-                        ChronoUnit.SECONDS.between(schedulePeriod.getStartTime(), schedulePeriod.getEndTime()));
-                arrangementScheduleTimes.put(arrangementProcessingPart.getArrangement(), arrangementPeriodTime);
+                if(arrangementProcessingPart.getArrangement().getPlannedEndDate().compareTo(schedulePeriod.getStartTime()) <= 0){
+                    if(!arrangementLags.containsKey(arrangementProcessingPart.getArrangement()))
+                        arrangementLags.put(arrangementProcessingPart.getArrangement(), 0L);
+                    long arrangementLag = arrangementLags.get(arrangementProcessingPart.getArrangement()) +
+                                    ChronoUnit.MINUTES.between(schedulePeriod.getStartTime(), schedulePeriod.getEndTime());
+                    arrangementLags.put(arrangementProcessingPart.getArrangement(), arrangementLag);
+                    isScheduleCorrect = false;
+                }
             }
         }
 
-        for(Arrangement arrangement : arrangements){
-            long totalTime = countArrangementProcessingTime(arrangement.getCheckUnits(), arrangement.getType());
-            if(totalTime > arrangementScheduleTimes.get(arrangement)){
-                System.out.println("Мероприятие "+arrangement.getName()+ " не вписалось по времени на " +
-                        ((double)(totalTime - arrangementScheduleTimes.get(arrangement)) / 60 / totalWorkersCount) + " минут");
-                isScheduleCorrect = false;
-            }
+        for(Map.Entry<Arrangement, Long> lagEntry : arrangementLags.entrySet()){
+            System.out.println("Мероприятие " + lagEntry.getKey().getName() + " запаздывает на " + lagEntry.getValue() + " минут");
         }
 
         return isScheduleCorrect;
@@ -150,10 +173,19 @@ public class ScheduleFactory {
                 continue;
 
             double density = calculateDensity(arrangement.getCheckUnits().tailSet(firstCheckUnit), arrangement.getType(),
-                    schedulePeriod.getStartTime(), arrangement.getPlannedEndDate());
+                    schedulePeriod.getStartTime(), schedulePeriod.getEndTime());
 
             arrangementDensities.put(arrangement, density);
         }
         return arrangementDensities;
+    }
+
+    private static boolean containsArrangement(List<ArrangementProcessingPart> nextArrangementParts, Arrangement arrangement){
+        for(ArrangementProcessingPart nextArrangementPart : nextArrangementParts){
+            if(nextArrangementPart.getArrangement().equals(arrangement)){
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -15,6 +15,4 @@ public class AS_15_8_Exception extends RuntimeException {
     public AS_15_8_Exception(String s, Throwable t){
         super(s,t);
     }
-
-
 }

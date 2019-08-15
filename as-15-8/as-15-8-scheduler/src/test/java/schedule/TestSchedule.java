@@ -37,7 +37,7 @@ public class TestSchedule {
         Arrangement arr4 = new Arrangement("arr4", AccessToolUnit.TORGUARD,
                 LocalTime.parse("13:10", formatter),
                 LocalTime.parse("16:30", formatter));
-        generateCheckUnits(arr4, 400000);
+        generateCheckUnits(arr4, 800000);
 
         Schedule schedule = ScheduleFactory.create(Arrays.asList(arr1, arr2, arr3, arr4));
 

@@ -2,12 +2,12 @@ package model;
 
 import lombok.Data;
 
-import java.util.Comparator;
-import java.util.TreeSet;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 public class Schedule {
 
-    TreeSet<SchedulePeriod> schedulePeriods = new TreeSet<>(Comparator.comparing(SchedulePeriod::getStartTime));
+    List<SchedulePeriod> schedulePeriods = new ArrayList<>();
 
 }
