@@ -1,5 +1,6 @@
 package arrangement;
 
+import enums.ArrangementEvents;
 import enums.ExecutionStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,6 +20,6 @@ public class ArrangementStatusNotification {
     /**Идентификатор мероприятия*/
     private Long arrangementId;
 
-    /**Текущее состояние мереприятия*/
-    private ExecutionStatus executionStatus;
+    /**Событие смены состояния мероприятия*/
+    private ArrangementEvents event;
 }

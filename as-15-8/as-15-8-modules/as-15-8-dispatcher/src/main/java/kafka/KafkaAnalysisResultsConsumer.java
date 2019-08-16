@@ -2,6 +2,7 @@ package kafka;
 
 import analysis.AnalysisResult;
 import arrangement.ArrangementStatusNotification;
+import enums.ArrangementEvents;
 import enums.CheckUnitJobResult;
 import enums.ExecutionStatus;
 import lombok.extern.slf4j.Slf4j;
@@ -44,7 +45,7 @@ public class KafkaAnalysisResultsConsumer {
     		ExecutionStatus status = checkUnitService.checkArrangementStatus(jobResult.getArrangementId());
     		if(status == ExecutionStatus.FINISHED) {
     			log.info("Мероприятие успешно завешено: " + jobResult.getArrangementId());
-    			arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(jobResult.getArrangementId(), status));
+    			arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(jobResult.getArrangementId(), ArrangementEvents.FINISH));
     		}
 
     	} catch (Exception ex) {
@@ -58,7 +59,7 @@ public class KafkaAnalysisResultsConsumer {
 				ExecutionStatus status = checkUnitService.checkArrangementStatus(jobResult.getArrangementId());
         		if(status == ExecutionStatus.FINISHED) {
         			log.info("Мероприятие успешно завешено: " + jobResult.getArrangementId());
-        			arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(jobResult.getArrangementId(), status));
+        			arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(jobResult.getArrangementId(), ArrangementEvents.FINISH));
         		}
     		} catch(Exception newEx) {
     			log.error("Ошибка при сохранении ошибочной обработки сообщения с анализом результатов проверки: " + analysisResult.getJobID() + ", " + analysisResult.getCheckUnit().getValue(), newEx);

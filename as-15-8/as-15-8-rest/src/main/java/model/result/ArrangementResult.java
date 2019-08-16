@@ -53,18 +53,6 @@ public class ArrangementResult implements Serializable {
     @Column(name="result", nullable=false)
     private CheckUnitJobResult result;
 
-    /*Lob
-    @Column(name="screenshot", columnDefinition="bytea")
-    @Type(type="org.hibernate.type.BinaryType")
-    @JsonIgnore
-    private byte[] screenshot;
-
-    @Lob
-    @Column(name="etalon_screenshot", columnDefinition="bytea")
-    @Type(type="org.hibernate.type.BinaryType")
-    @JsonIgnore
-    private byte[] etalonScreenshot;*/
-
     private LocalDateTime startDate;
     private LocalDateTime endDate;
 

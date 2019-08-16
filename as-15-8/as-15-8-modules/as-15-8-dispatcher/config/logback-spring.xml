@@ -95,6 +95,10 @@
     	<appender-ref ref="MESSAGES_LOG" />
     	<appender-ref ref="Console" />
     </logger>
+    <logger name="events" level="INFO">
+        <appender-ref ref="MESSAGES_LOG" />
+        <appender-ref ref="Console" />
+    </logger>
     
     <appender name="SERVICES_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOGS}/services.log</file>

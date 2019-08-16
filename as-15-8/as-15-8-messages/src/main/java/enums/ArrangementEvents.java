@@ -1,4 +1,4 @@
-package stateMachine;
+package enums;
 
 /**
  * События, вызывающие переход между состояниями мероприятия
@@ -6,5 +6,5 @@ package stateMachine;
  * Author: asavin
  */
 public enum ArrangementEvents {
-    FILL, SCHEDULE, RUN, PAUSE, RESTORE, FINISH
+    FILL, SCHEDULE, RUN, PAUSE, RESTORE, FINISH, FAIL
 }

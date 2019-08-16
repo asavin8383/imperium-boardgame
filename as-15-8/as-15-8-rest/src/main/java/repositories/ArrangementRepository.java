@@ -1,11 +1,13 @@
 package repositories;
 
+import enums.ExecutionStatus;
 import model.task.Arrangement;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -16,7 +18,7 @@ import java.util.Optional;
 @Repository
 public interface ArrangementRepository extends JpaRepository<Arrangement, Long>, ArrangementRepositoryAdvanced {
 
-    //List<Arrangement> findAllByStatusAndPlannedDateIsLessThan(ExecutionStatus status, LocalDateTime startDate);
+    List<Arrangement> findAllByStatus(ExecutionStatus status);
 
     @Query("SELECT a FROM Arrangement a WHERE a.id = :id and a.status in ('NEW', FORMED)")
     Optional<Arrangement> findEditableArrangement(@Param("id") Long id);

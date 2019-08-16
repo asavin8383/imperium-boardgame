@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import repositories.ArrangementRepository;
 import services.arrangement.ArrangementStatusService;
 import services.arrangement.impl.ArrangementService;
-import stateMachine.ArrangementEvents;
+import enums.ArrangementEvents;
 
 import java.time.LocalTime;
 import java.util.stream.Collectors;
@@ -126,7 +126,10 @@ public class ArrangementController {
      * @return статус запроса
      */
     @GetMapping(path = "/fill")
-    public ResponseEntity<Void> fillArrangement(@RequestParam("id") Arrangement arrangement){
+    public @ResponseBody ResponseEntity<String> fillArrangement(@RequestParam("id") Arrangement arrangement){
+        if(arrangement.getPlannedStartTime() == null || arrangement.getPlannedEndTime() == null){
+            return new ResponseEntity<>("Не заполнено плановое время начала или окончания мероприятия", HttpStatus.NOT_ACCEPTABLE);
+        }
         arrangementService.fillArrangement(arrangement);
         return new ResponseEntity<>(HttpStatus.OK);
     }

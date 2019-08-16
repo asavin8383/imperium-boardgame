@@ -1,7 +1,8 @@
 package services.arrangement.impl;
 
+import exceptions.AS_15_8_Exception;
 import jobs.ArrangementJob;
-import kafka.ArrangementSource;
+import events.ArrangementChannels;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.task.Arrangement;
@@ -22,12 +23,12 @@ import services.arrangement.ArrangementJobCreationService;
 @Service
 @Slf4j
 @RequiredArgsConstructor(onConstructor_={@Autowired})
-@EnableBinding(ArrangementSource.class)
+@EnableBinding(ArrangementChannels.class)
 public class ArrangementService {
 
     private final ArrangementRepository arrangementRepo;
     private final ArrangementJobCreationService arrangementJobCreationService;
-    private final ArrangementSource source;
+    private final ArrangementChannels source;
 
     public Arrangement saveArrangement(Arrangement arrangement, FormalTask formalTask){
         arrangement.setFormalTask(formalTask);
@@ -41,7 +42,7 @@ public class ArrangementService {
     public void fillArrangement(Arrangement arrangement){
         ArrangementJob arrangementJob = arrangementJobCreationService.createArrangementJob(arrangement);
         source
-            .output()
+            .outputArrangementJobs()
             .send(
                 MessageBuilder
                     .withPayload(arrangementJob)

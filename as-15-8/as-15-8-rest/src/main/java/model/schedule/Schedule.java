@@ -26,21 +26,25 @@ public class Schedule {
     private Long id;
 
     @NotNull
+    @JsonView(Views.Full.class)
     private LocalDate plannedDate;
 
     @NotNull
+    @JsonView(Views.Full.class)
     private LocalDateTime creationDate;
 
     @ManyToOne(optional=false)
     @JoinColumn(name="user_id")
+    @JsonView(Views.Full.class)
     private User user;
 
     @Enumerated(EnumType.STRING)
     @NotNull
+    @JsonView(Views.Full.class)
     private ScheduleStatus status;
 
     @OneToMany(cascade=CascadeType.ALL, mappedBy = "schedule", fetch = FetchType.EAGER)
-    @JsonIgnore
+    @JsonView(Views.Full.class)
     private List<SchedulePeriod> schedulePeriods = new ArrayList<>();
 
     public Schedule(){

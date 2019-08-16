@@ -19,7 +19,7 @@ import java.io.Serializable;
 @Entity
 @Table(schema = "portal", name = "planned_processing_times",
         uniqueConstraints=
-        @UniqueConstraint(columnNames={"access_tool_id", "checkMethod"}))
+        @UniqueConstraint(columnNames={"access_tool_id", "check_method"}))
 @Data
 public class PlannedProcessingTime implements Serializable {
 
@@ -39,6 +39,7 @@ public class PlannedProcessingTime implements Serializable {
     @Enumerated(EnumType.STRING)
     @NotNull
     @JsonView(Views.Full.class)
+    @Column(name = "check_method")
     private CheckMethod checkMethod;
 
     @JsonView(Views.Full.class)

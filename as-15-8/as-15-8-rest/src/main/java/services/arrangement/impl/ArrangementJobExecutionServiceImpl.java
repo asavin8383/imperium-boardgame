@@ -23,19 +23,11 @@ import services.arrangement.ArrangementJobExecutionService;
 @Service
 public class ArrangementJobExecutionServiceImpl implements ArrangementJobExecutionService {
 
-    private KafkaTemplate<String, ArrangementJob> kafkaTemplate;
-
-    @Value("${spring.kafka.arrangements-topic}")
-    private String arrangementJobTopicName;
-
-    @Autowired
-    public ArrangementJobExecutionServiceImpl(KafkaTemplate<String, ArrangementJob> kafkaTemplate) {
-        this.kafkaTemplate = kafkaTemplate;
-    }
+    
 
     @Override
     public void run(ArrangementJob arrangementJob) {
-        try {
+        /*try {
             Message<ArrangementJob> message = MessageBuilder
                 .withPayload(arrangementJob)
                 .setHeader(KafkaHeaders.TOPIC, arrangementJobTopicName)
@@ -59,6 +51,6 @@ public class ArrangementJobExecutionServiceImpl implements ArrangementJobExecuti
             });
         } catch (Exception ex) {
             throw new AS_15_8_Exception("Error sending arrangement job message: ", ex);
-        }
+        }*/
     }
 }

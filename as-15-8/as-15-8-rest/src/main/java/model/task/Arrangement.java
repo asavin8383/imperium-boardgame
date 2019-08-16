@@ -4,10 +4,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import exceptions.AS_15_8_Exception;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import model.Views;
 import model.catalog.AccessTool;
 import enums.ExecutionStatus;
-import stateMachine.ArrangementEvents;
+import enums.ArrangementEvents;
 import stateMachine.ArrangementStateMachine;
 
 import javax.persistence.*;
@@ -25,6 +27,8 @@ import java.util.List;
 @Table(schema="portal", name="arrangements",
 	uniqueConstraints = @UniqueConstraint(name = "uq_arrangements_formal_task_id_access_tool_id", columnNames = {"formal_task_id", "access_tool_id"}))
 @Data
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Arrangement implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -34,18 +38,23 @@ public class Arrangement implements Serializable {
 	@SequenceGenerator(name="arrangements_generator", schema="portal", sequenceName="arrangements_id_seq", allocationSize=1)
 	@Column(name="id", nullable=false, updatable=false)
 	@JsonView(Views.Id.class)
+	@ToString.Include
+	@EqualsAndHashCode.Include
 	private Long id;
 
 	/**Название мероприятия*/
 	@NotNull
+	@ToString.Include
 	private String title;
 
 	/**Статус мероприятия*/
 	@Enumerated(EnumType.STRING)
 	@NotNull
+	@ToString.Include
 	private ExecutionStatus status;
 	
 	/**Дата создания*/
+	@ToString.Include
 	private LocalDateTime creationDate;
 
 	/** Дата завершения */
@@ -101,7 +110,10 @@ public class Arrangement implements Serializable {
 
 	public void sendEvent(ArrangementEvents event){
 		if(this.stateMachine.sendEvent(event)){
-			this.status = stateMachine.getCurrentStatus();
+			this.status = this.stateMachine.getCurrentStatus();
+			if (this.status.equals(ExecutionStatus.FINISHED)){
+				this.endTime = LocalTime.now();
+			}
 		} else {
 			throw new AS_15_8_Exception("Ошибка смены статуса мероприятия: " + stateMachine.getCurrentStatus() + " событием " + event);
 		}
