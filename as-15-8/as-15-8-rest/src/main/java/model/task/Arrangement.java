@@ -13,8 +13,10 @@ import stateMachine.ArrangementStateMachine;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 /**Мероприятие в рамках формализованного задания*/
@@ -45,12 +47,22 @@ public class Arrangement implements Serializable {
 	
 	/**Дата создания*/
 	private LocalDateTime creationDate;
-	/**Запланированная дата запуска*/
-	private LocalDateTime plannedDate;
+
+	/** Дата завершения */
+	private LocalDate completionDate;
+
+	/**Плановая дата начала*/
+	private LocalTime plannedStartTime;
+	/**Плановая дата окончания*/
+	private LocalTime plannedEndTime;
+
 	/**Дата начала*/
-	private LocalDateTime startDate;
+	private LocalTime startTime;
 	/**Дата окончания*/
-	private LocalDateTime endDate;
+	private LocalTime endTime;
+
+	/** Максимальное количество обработчиков мероприятия */
+	private Integer maxWorkersCount;
 
 	/**Формализованное задание на проведение мероприятий*/
 	@ManyToOne(optional=false)
@@ -63,13 +75,14 @@ public class Arrangement implements Serializable {
 	@JoinColumn(name="access_tool_id", foreignKey = @ForeignKey(name = "FK_arrangements_access_tool_id"))
 	private AccessTool accessTool;
 	
-	@OneToMany(cascade=CascadeType.ALL, mappedBy = "arrangement", fetch = FetchType.EAGER)
+	@OneToMany(cascade=CascadeType.ALL, mappedBy = "arrangement")
 	@JsonIgnore
 	private List<ArrangementItem> arrangementItems;
 
 	/**Результат проведения мероприятия*/
     private String result;
 
+    @Transient
     private ArrangementStateMachine stateMachine;
 	
 	public Arrangement() {
@@ -79,8 +92,8 @@ public class Arrangement implements Serializable {
 	}
 
 	public Long getDurationInMinutes(){
-		if (this.startDate != null && this.endDate != null){
-			return Duration.between(startDate, endDate).toMinutes();
+		if (this.plannedStartTime != null && this.plannedEndTime != null){
+			return ChronoUnit.MINUTES.between(plannedStartTime, plannedEndTime);
 		}else {
 			return null;
 		}

@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 public class ScheduleFactory {
 
-    private static final int totalWorkersCount = 2000;
+    private static final int totalWorkersCount = 200;
 
     public static Schedule create(List<Arrangement> arrangements){
         Schedule schedule = createNewSchedule(arrangements);
@@ -83,7 +83,9 @@ public class ScheduleFactory {
                         getLastCompletionCheckUnits(arrangement, firstCheckUnit, workersCount,schedulePeriod.getStartTime(),schedulePeriod.getEndTime()));
                 nextCheckUnits.put(arrangement, nextCheckUnit);
 
+
                 if(nextCheckUnit != null){
+                    System.out.println(schedulePeriod.getStartTime() + " - "+schedulePeriod.getEndTime()+": "+arrangement.getName()+", осталось "+arrangement.getCheckUnits().tailSet(nextCheckUnit).size());
                     if(schedule.getSchedulePeriods().indexOf(schedulePeriod) < schedule.getSchedulePeriods().size()-1) {
                         SchedulePeriod nextPeriod = schedule.getSchedulePeriods().get(schedule.getSchedulePeriods().indexOf(schedulePeriod)+1);
                         if (!containsArrangement(nextPeriod.getArrangementProcessingParts(), arrangement)) {
@@ -119,9 +121,10 @@ public class ScheduleFactory {
                 if(arrangementProcessingPart.getArrangement().getPlannedEndDate().compareTo(schedulePeriod.getStartTime()) <= 0){
                     if(!arrangementLags.containsKey(arrangementProcessingPart.getArrangement()))
                         arrangementLags.put(arrangementProcessingPart.getArrangement(), 0L);
-                    long arrangementLag = arrangementLags.get(arrangementProcessingPart.getArrangement()) +
-                                    ChronoUnit.MINUTES.between(schedulePeriod.getStartTime(), schedulePeriod.getEndTime());
-                    arrangementLags.put(arrangementProcessingPart.getArrangement(), arrangementLag);
+
+
+                    long arrangementLag = ChronoUnit.MINUTES.between(schedulePeriod.getStartTime(), schedulePeriod.getEndTime());
+                    arrangementLags.put(arrangementProcessingPart.getArrangement(), arrangementLags.get(arrangementProcessingPart.getArrangement()) + arrangementLag);
                     isScheduleCorrect = false;
                 }
             }
@@ -160,7 +163,7 @@ public class ScheduleFactory {
     private static double calculateDensity(Set<CheckUnit> checkUnits, AccessToolUnit arrangementType, LocalTime startTime, LocalTime endTime){
         long processingTime = countArrangementProcessingTime(checkUnits, arrangementType);
         long arrangementPlannedDuration = ChronoUnit.SECONDS.between(startTime, endTime);
-        return processingTime / arrangementPlannedDuration;
+        return (double) processingTime / arrangementPlannedDuration;
     }
 
     private static Map<Arrangement, Double> calculateDensities(SchedulePeriod schedulePeriod, Map<Arrangement, CheckUnit> nextCheckUnits){

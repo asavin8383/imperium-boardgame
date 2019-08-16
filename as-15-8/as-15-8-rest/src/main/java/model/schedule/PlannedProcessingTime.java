@@ -19,7 +19,7 @@ import java.io.Serializable;
 @Entity
 @Table(schema = "portal", name = "planned_processing_times",
         uniqueConstraints=
-        @UniqueConstraint(columnNames={"access_tool_id", "check_method"}))
+        @UniqueConstraint(columnNames={"access_tool_id", "checkMethod"}))
 @Data
 public class PlannedProcessingTime implements Serializable {
 

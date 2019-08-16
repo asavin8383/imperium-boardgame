@@ -3,20 +3,7 @@ package model.result;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.ForeignKey;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -25,6 +12,7 @@ import enums.CheckUnitJobResult;
 import lombok.Data;
 import model.enums.UserResult;
 import model.erdi.ERDI;
+import model.schedule.SchedulePeriodCheckUnit;
 import model.task.Arrangement;
 
 /**
@@ -92,4 +80,7 @@ public class ArrangementResult implements Serializable {
     @Column(name="user_description")
     private String userDescription;
 
+    @OneToOne(mappedBy = "checkUnit")
+    @JoinColumn(name = "id", referencedColumnName = "check_unit_id")
+    private SchedulePeriodCheckUnit schedulePeriodCheckUnit;
 }

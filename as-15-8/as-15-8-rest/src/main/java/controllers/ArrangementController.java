@@ -2,11 +2,11 @@ package controllers;
 
 import controllers.helpers.ArrangementExecutionHelper;
 import controllers.helpers.SortingHelper;
+import enums.ExecutionStatus;
 import enums.SortingDirection;
 import exceptions.AS_15_8_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import enums.ExecutionStatus;
 import model.task.Arrangement;
 import model.task.FormalTask;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +22,7 @@ import services.arrangement.ArrangementStatusService;
 import services.arrangement.impl.ArrangementService;
 import stateMachine.ArrangementEvents;
 
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.stream.Collectors;
 
 /**
@@ -108,7 +108,7 @@ public class ArrangementController {
                     arrangementExecutionHelper.sendJobToDispatcher(arrangement);
                     //Устанавливаем дату запуска(актуально только для впервые запущенных мероприятий)
                     if(arrangement.getStatus().equals(ExecutionStatus.FORMED)){
-                        arrangement.setStartDate(LocalDateTime.now());
+                        arrangement.setStartTime(LocalTime.now());
                     }
                     arrangement.sendEvent(ArrangementEvents.RUN);
                     arrangementStatusService.processArrangementStatusChange(arrangement);
@@ -140,7 +140,6 @@ public class ArrangementController {
     private Arrangement replaceFields(Arrangement newArrangement, Arrangement arrangement) {
         arrangement.setAccessTool(newArrangement.getAccessTool());
         arrangement.setTitle(newArrangement.getTitle());
-        arrangement.setPlannedDate(newArrangement.getPlannedDate());
         return arrangement;
     }
 
@@ -154,16 +153,17 @@ public class ArrangementController {
         // при этом не пустой список ЕРДИ,
         // оно становится FORMED
         if(arrangement.getStatus().equals(ExecutionStatus.NEW) &&
-                arrangement.getPlannedDate() != null &&
                 arrangement.getArrangementItems()!=null &&
                 arrangement.getArrangementItems().size() > 0){
             arrangement.sendEvent(ArrangementEvents.FILL);
             log.info("Arrangement status changed to " + arrangement.getStatus());
             return true;
         }
-        log.warn("Arrangement status was not changed. Planned date: " + arrangement.getPlannedDate() +
-                ", arrangement items: " + arrangement.getArrangementItems().stream()
-                .map(arrangementItem -> arrangementItem.getId().toString()).collect(Collectors.joining("'")));
+        log.warn("Arrangement status was not changed. Arrangement items: " +
+                arrangement.getArrangementItems()
+                        .stream()
+                        .map(arrangementItem -> arrangementItem.getId().toString())
+                        .collect(Collectors.joining("'")));
         return false;
     }
 

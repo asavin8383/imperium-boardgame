@@ -14,7 +14,7 @@ import java.io.Serializable;
 @Entity
 @Table(schema = "portal", name = "vpn_parameters")
 @Data
-@EqualsAndHashCode(callSuper=true)
+@EqualsAndHashCode(callSuper=false)
 public class VPN_Parameters extends AccessToolParameters implements Serializable {
 
     private static final long serialVersionUID = 1L;

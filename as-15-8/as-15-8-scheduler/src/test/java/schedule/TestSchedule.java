@@ -22,22 +22,22 @@ public class TestSchedule {
         Arrangement arr1 = new Arrangement("arr1", AccessToolUnit.GOOGLE,
                 LocalTime.parse("09:00", formatter),
                 LocalTime.parse("12:00", formatter));
-        generateCheckUnits(arr1, 450000);
+        generateCheckUnits(arr1, 45000);
 
         Arrangement arr2 = new Arrangement("arr2", AccessToolUnit.YANDEX,
                 LocalTime.parse("10:30", formatter),
                 LocalTime.parse("11:30", formatter));
-        generateCheckUnits(arr2, 80000);
+        generateCheckUnits(arr2, 15000);
 
         Arrangement arr3 = new Arrangement("arr3", AccessToolUnit.KASPERSKY,
                 LocalTime.parse("11:15", formatter),
                 LocalTime.parse("15:20", formatter));
-        generateCheckUnits(arr3, 800000);
+        generateCheckUnits(arr3, 40000);
 
         Arrangement arr4 = new Arrangement("arr4", AccessToolUnit.TORGUARD,
                 LocalTime.parse("13:10", formatter),
                 LocalTime.parse("16:30", formatter));
-        generateCheckUnits(arr4, 800000);
+        generateCheckUnits(arr4, 25000);
 
         Schedule schedule = ScheduleFactory.create(Arrays.asList(arr1, arr2, arr3, arr4));
 

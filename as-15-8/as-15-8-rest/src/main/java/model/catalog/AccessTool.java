@@ -3,6 +3,7 @@ package model.catalog;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import enums.AccessToolUnit;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import model.enums.AccessToolType;
 import model.schedule.PlannedProcessingTime;
 import model.task.Arrangement;
@@ -22,6 +23,7 @@ import java.util.List;
 @Table(schema="portal",name="access_tools",
 	uniqueConstraints = @UniqueConstraint(name = "uq_access_tools_id_type", columnNames = {"id", "type"}))
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class AccessTool implements Serializable{
 
 	private static final long serialVersionUID = 1L;
@@ -34,6 +36,7 @@ public class AccessTool implements Serializable{
 	
 	@NotNull
 	@Enumerated(EnumType.STRING)
+	@EqualsAndHashCode.Include
 	/**Наименование*/
 	private AccessToolUnit name;
 

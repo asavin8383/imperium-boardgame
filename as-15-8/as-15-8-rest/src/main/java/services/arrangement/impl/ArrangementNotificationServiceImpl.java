@@ -1,9 +1,9 @@
 package services.arrangement.impl;
 
 import arrangement.ArrangementStatusNotification;
+import enums.ExecutionStatus;
 import exceptions.AS_15_8_Exception;
 import lombok.extern.slf4j.Slf4j;
-import enums.ExecutionStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import repositories.ArrangementRepository;
@@ -11,7 +11,7 @@ import services.arrangement.ArrangementNotificationService;
 import services.arrangement.ArrangementStatusService;
 import stateMachine.ArrangementEvents;
 
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 /**
  * Creation date: 29.05.2019
@@ -42,7 +42,7 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
                         arrangement.sendEvent(ArrangementEvents.PAUSE);
                     } else if (arrangementStatusNotification.getExecutionStatus().equals(ExecutionStatus.FINISHED)){
                         arrangement.sendEvent(ArrangementEvents.FINISH);
-                        arrangement.setEndDate(LocalDateTime.now());
+                        arrangement.setEndTime(LocalTime.now());
                     } else {
                         throw new AS_15_8_Exception("Error changing arrangement status. Status not supported: " + arrangementStatusNotification.getExecutionStatus());
                     }

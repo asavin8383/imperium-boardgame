@@ -13,7 +13,7 @@ import java.io.Serializable;
 @Entity
 @Table(schema = "portal", name = "search_system_parameters")
 @Data
-@EqualsAndHashCode(callSuper=true)
+@EqualsAndHashCode(callSuper=false)
 public class SearchSystemParameters extends AccessToolParameters implements Serializable {
 
     private static final long serialVersionUID = 1L;

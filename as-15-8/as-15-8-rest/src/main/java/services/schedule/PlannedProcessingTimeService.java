@@ -4,10 +4,13 @@ import checkUnits.CheckMethod;
 import checkUnits.CheckUnitType;
 import lombok.RequiredArgsConstructor;
 import model.catalog.AccessTool;
-import model.schedule.PlannedProcessingTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import repositories.PlannedProcessingTimeRepo;
+
+import javax.annotation.PostConstruct;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -15,27 +18,29 @@ public class PlannedProcessingTimeService {
 
     private final PlannedProcessingTimeRepo plannedProcessingTimeRepo;
 
-    public long getProcessingTime(AccessTool accessTool, CheckUnitType checkUnitType){
-        CheckMethod checkMethod = getCheckMethod(checkUnitType);
-        return Math.round(plannedProcessingTimeRepo.findAllByAccessTool(accessTool.getId())
-                .stream().filter(plannedProcessingTime -> plannedProcessingTime.getCheckMethod().equals(checkMethod))
-                .mapToLong(PlannedProcessingTime::getPlannedProcessingTimeMs)
-                .findFirst()
-                .orElse(0L) / 1000);
+    private Map<AccessTool, Map<CheckMethod, Long>> processingTimes = new HashMap<>();
+
+    @PostConstruct
+    public void loadTimes(){
+        plannedProcessingTimeRepo.findAll()
+                .forEach(processingTime -> {
+                    if(processingTimes.containsKey(processingTime.getAccessTool())){
+                        Map<CheckMethod, Long> methodTimes = processingTimes.get(processingTime.getAccessTool());
+                        methodTimes.put(processingTime.getCheckMethod(), processingTime.getPlannedProcessingTimeMs());
+                    } else {
+                        Map<CheckMethod, Long> methodTimes = new HashMap<>();
+                        methodTimes.put(processingTime.getCheckMethod(), processingTime.getPlannedProcessingTimeMs());
+                        processingTimes.put(processingTime.getAccessTool(), methodTimes);
+                    }
+                });
+
     }
 
-    private CheckMethod getCheckMethod(CheckUnitType checkUnitType){
-        switch (checkUnitType){
-            case IP_V4_SUBNET:
-            case IP_V6_SUBNET:
-                return CheckMethod.NMAP;
-            case URL:
-            case DOMAIN:
-            case DOMAIN_MASK:
-            case IP_V4:
-            case IP_V6:
-            default:
-                return CheckMethod.BROWSER;
+    public long getProcessingTime(AccessTool accessTool, CheckUnitType checkUnitType){
+        if(processingTimes.containsKey(accessTool)){
+            if(processingTimes.get(accessTool).containsKey(checkUnitType.getCheckMethod()))
+                return processingTimes.get(accessTool).get(checkUnitType.getCheckMethod()) / 1000;
         }
+        return 1;
     }
 }

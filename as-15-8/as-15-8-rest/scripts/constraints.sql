@@ -35,7 +35,10 @@ alter table portal.anonymizer_parameters drop constraint if exists ck_type;
 alter table portal.anonymizer_parameters add constraint ck_type check ( access_tool_type in ('ANONYMIZER'));
 
 alter table portal.global_parameters drop constraint if exists ck_key;
-alter table portal.global_parameters add constraint ck_key check ( key in ('ETALON_PROXY_HOST', 'ETALON_PROXY_PORT', 'ETALON_PROXY_USERNAME', 'ETALON_PROXY_PASSWORD', 'USE_ETALON'));
+alter table portal.global_parameters add constraint ck_key check ( key in ('ETALON_PROXY_HOST', 'ETALON_PROXY_PORT', 'ETALON_PROXY_USERNAME', 'ETALON_PROXY_PASSWORD', 'USE_ETALON', 'TOTAL_WORKERS_COUNT'));
 
 alter table portal.planned_processing_times drop constraint if exists ck_type;
 alter table portal.planned_processing_times add constraint ck_type check ( check_method in ('BROWSER', 'NMAP'));
+
+alter table schedule.schedule_period_check_units drop constraint if exists ck_status;
+alter table schedule.schedule_period_check_units add constraint ck_status check ( status in ('READY', 'EXPIRED'));

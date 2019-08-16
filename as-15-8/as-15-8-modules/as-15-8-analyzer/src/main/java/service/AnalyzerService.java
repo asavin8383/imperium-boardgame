@@ -12,7 +12,7 @@ public interface AnalyzerService<T> {
 	
 	/**
 	 * Метод анализа результата работы робота
-	 * @param result Результат работы робота
+	 * @param execResult Результат работы робота
 	 * @return
 	 */
 	AnalysisResult analyzeResult(T execResult);
