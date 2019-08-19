@@ -38,5 +38,11 @@ public class SchedulePeriodArrangement {
     @JsonIgnore
     private List<SchedulePeriodCheckUnit> schedulePeriodCheckUnits;
 
+    @JsonView(Views.Brief.class)
     private Integer workersCount;
+
+    @JsonView(Views.Brief.class)
+    public Long getArrangementId(){
+        return arrangement.getId();
+    }
 }

@@ -31,12 +31,14 @@ public class SchedulePeriod {
     private Schedule schedule;
 
     @NonNull
+    @JsonView(Views.Brief.class)
     private LocalTime startTime;
 
     @NonNull
+    @JsonView(Views.Brief.class)
     private LocalTime endTime;
 
     @OneToMany(cascade=CascadeType.ALL, mappedBy = "schedulePeriod", fetch = FetchType.EAGER)
-    @JsonIgnore
+    @JsonView(Views.Full.class)
     private List<SchedulePeriodArrangement> schedulePeriodArrangements = new ArrayList<>();
 }
