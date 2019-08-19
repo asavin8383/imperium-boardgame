@@ -13,7 +13,7 @@ import javax.persistence.*;
 import java.util.List;
 
 @Data
-@NoArgsConstructor
+@NoArgsConstructor(force = true)
 @RequiredArgsConstructor
 @Entity
 @Table(name = "schedule_period_arrangements", schema = "schedule")
@@ -27,6 +27,7 @@ public class SchedulePeriodArrangement {
 
     @ManyToOne(optional=false)
     @JoinColumn(name="schedule_period_id")
+    @NonNull
     private SchedulePeriod schedulePeriod;
 
     @ManyToOne(optional=false)

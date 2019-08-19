@@ -27,7 +27,7 @@ import exceptions.AS_15_8_Exception;
 import lombok.extern.slf4j.Slf4j;
 import security.JWTAuthenticationFilter;
 import security.JWTLoginFilter;
-import services.userDetails.CustomUserDetailsMapper;
+import services.user.CustomUserDetailsMapper;
 
 
 @Configuration

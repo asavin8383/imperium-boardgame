@@ -11,6 +11,7 @@ import model.task.Arrangement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import repositories.GlobalParametersRepository;
+import repositories.ScheduleRepo;
 
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
@@ -24,9 +25,12 @@ public class ScheduleService {
 
     private final PlannedProcessingTimeService plannedProcessingTimeService;
 
+    private final ScheduleRepo scheduleRepo;
+
     @Autowired
-    public ScheduleService(PlannedProcessingTimeService plannedProcessingTimeService, GlobalParametersRepository globalParametersRepository){
+    public ScheduleService(PlannedProcessingTimeService plannedProcessingTimeService, GlobalParametersRepository globalParametersRepository, ScheduleRepo scheduleRepo){
         this.plannedProcessingTimeService = plannedProcessingTimeService;
+        this.scheduleRepo = scheduleRepo;
         try {
             this.totalWorkersCount = globalParametersRepository
                     .findById(AccessToolParameters.TOTAL_WORKERS_COUNT)
@@ -35,6 +39,14 @@ public class ScheduleService {
         } catch (Exception ex){
             throw new AS_15_8_Exception("Ошибка при получении количества ресурсов из параметров в БД", ex);
         }
+    }
+
+    public Schedule saveSchedule(Schedule schedule){
+        return scheduleRepo.save(schedule);
+    }
+
+    public void deleteSchedule(Schedule schedule){
+        scheduleRepo.delete(schedule);
     }
 
     public Schedule create(Map<Arrangement, TreeSet<ArrangementResult>> arrangementCheckUnits){
@@ -56,12 +68,11 @@ public class ScheduleService {
         for(LocalTime startOfPeriod : scheduleIntervals){
             LocalTime endOfPeriod = scheduleIntervals.higher(startOfPeriod);
             if(endOfPeriod != null) {
-                SchedulePeriod schedulePeriod = new SchedulePeriod(startOfPeriod, endOfPeriod);
+                SchedulePeriod schedulePeriod = new SchedulePeriod(schedule, startOfPeriod, endOfPeriod);
                 for(Arrangement arrangement : arrangementCheckUnits.keySet()){
                     if(startOfPeriod.compareTo(arrangement.getPlannedStartTime()) >= 0 &&
                             endOfPeriod.compareTo(arrangement.getPlannedEndTime()) <= 0){
-
-                        schedulePeriod.getSchedulePeriodArrangements().add(new SchedulePeriodArrangement(arrangement));
+                        schedulePeriod.getSchedulePeriodArrangements().add(new SchedulePeriodArrangement(schedulePeriod, arrangement));
                     }
                 }
                 schedule.getSchedulePeriods().add(schedulePeriod);
@@ -120,7 +131,7 @@ public class ScheduleService {
                     if(schedule.getSchedulePeriods().indexOf(schedulePeriod) < schedule.getSchedulePeriods().size()-1) {
                         SchedulePeriod nextPeriod = schedule.getSchedulePeriods().get(schedule.getSchedulePeriods().indexOf(schedulePeriod)+1);
                         if (!containsArrangement(nextPeriod.getSchedulePeriodArrangements(), arrangement)) {
-                            nextPeriod.getSchedulePeriodArrangements().add(new SchedulePeriodArrangement(arrangement));
+                            nextPeriod.getSchedulePeriodArrangements().add(new SchedulePeriodArrangement(nextPeriod, arrangement));
                         }
                     } else {
                         notFinishedArrangements.put(arrangement, nextCheckUnit);
@@ -129,11 +140,11 @@ public class ScheduleService {
             }
 
             if(notFinishedArrangements.size() > 0) {
-                SchedulePeriod newSchedulePeriod = new SchedulePeriod(schedulePeriod.getEndTime(), schedulePeriod.getEndTime().plusSeconds(1));
+                SchedulePeriod newSchedulePeriod = new SchedulePeriod(schedule, schedulePeriod.getEndTime(), schedulePeriod.getEndTime().plusSeconds(1));
                 long processingTime = 0;
                 for (Map.Entry<Arrangement, ArrangementResult> entry : notFinishedArrangements.entrySet()) {
                     processingTime += countArrangementProcessingTime(arrangementCheckUnits.get(entry.getKey()).tailSet(entry.getValue()), entry.getKey().getAccessTool());
-                    newSchedulePeriod.getSchedulePeriodArrangements().add(new SchedulePeriodArrangement(entry.getKey()));
+                    newSchedulePeriod.getSchedulePeriodArrangements().add(new SchedulePeriodArrangement(newSchedulePeriod, entry.getKey()));
                 }
 
                 newSchedulePeriod.setEndTime(schedulePeriod.getEndTime().plusSeconds(processingTime / totalWorkersCount + 1));

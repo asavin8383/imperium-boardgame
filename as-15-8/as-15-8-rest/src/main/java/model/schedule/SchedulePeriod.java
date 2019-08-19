@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@NoArgsConstructor
+@NoArgsConstructor(force = true)
 @RequiredArgsConstructor
 @Entity
 @Table(name = "schedule_periods", schema = "schedule")
@@ -28,6 +28,7 @@ public class SchedulePeriod {
 
     @ManyToOne(optional=false)
     @JoinColumn(name="schedule_id")
+    @NonNull
     private Schedule schedule;
 
     @NonNull

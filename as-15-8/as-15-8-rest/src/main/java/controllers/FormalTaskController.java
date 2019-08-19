@@ -1,9 +1,11 @@
 package controllers;
 
 import controllers.helpers.SortingHelper;
+import enums.ExecutionStatus;
 import enums.SortingDirection;
 import exceptions.AS_15_8_Exception;
-import enums.ExecutionStatus;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import model.task.FormalTask;
 import model.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +17,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import repositories.FormalTaskRepository;
-import repositories.UserRepository;
+import services.user.UserService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,31 +27,23 @@ import java.util.concurrent.CompletionStage;
 @RestController
 @RequestMapping(path="/formal_tasks", produces=MediaType.APPLICATION_JSON_VALUE)
 @PreAuthorize("hasAnyRole('ROLE_OPERATOR','ROLE_ADMIN')")
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@Slf4j
 public class FormalTaskController {
 
-	private FormalTaskRepository formalTaskRepo;
-	private UserRepository userRepo;
-
-	@Autowired
-	public FormalTaskController(FormalTaskRepository formalTaskRepo, UserRepository userRepo) {
-		this.formalTaskRepo = formalTaskRepo;
-		this.userRepo = userRepo;
-	}
+	private final FormalTaskRepository formalTaskRepo;
+	private final UserService userService;
 
 	@PostMapping(consumes=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseStatus(HttpStatus.CREATED)
 	public CompletionStage<FormalTask> postFormalTask(@RequestBody FormalTask formalTask, Authentication auth) {
 		String userName = ((User)auth.getPrincipal()).getUserName();
-		return CompletableFuture.supplyAsync(() -> userRepo.findByUserName(userName))
-			.thenApply(curUser -> curUser
-				.map(user -> {
+		return CompletableFuture.supplyAsync(() -> userService.getUserByUserName(userName))
+			.thenApply(user -> {
 					formalTask.setUser(user);
 					formalTask.setStatus(ExecutionStatus.NEW);
 					return formalTaskRepo.save(formalTask);
-				})
-				.orElseThrow(() -> {return new AS_15_8_Exception("User was not found by username: " + userName);
-				})
-			);
+				});
 	}
 	
 	@GetMapping
