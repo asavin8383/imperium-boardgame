@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "6f8e57d1-76fd-4cd9-943d-b702169694cc",
+		"_postman_id": "bda04c34-885e-4a76-bc7f-de2506015ff4",
 		"name": "АС 15.8",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -22,10 +22,6 @@
 										"type": "text"
 									}
 								],
-								"body": {
-									"mode": "raw",
-									"raw": ""
-								},
 								"url": {
 									"raw": "{{url}}/arrangements?formalTaskId=3&sortingColumn=title&sortingDirection=DESC",
 									"host": [
@@ -67,10 +63,6 @@
 												"type": "text"
 											}
 										],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "{{url}}/arrangements?formalTaskId=3&id=6",
 											"host": [
@@ -390,10 +382,6 @@
 										"type": "text"
 									}
 								],
-								"body": {
-									"mode": "raw",
-									"raw": ""
-								},
 								"url": {
 									"raw": "{{url}}/arrangements?id=6",
 									"host": [
@@ -423,10 +411,6 @@
 										"type": "text"
 									}
 								],
-								"body": {
-									"mode": "raw",
-									"raw": ""
-								},
 								"url": {
 									"raw": "{{url}}/erdi?blocktype=IP&sortingColumn=id&sortingDirection=DESC",
 									"host": [
@@ -519,10 +503,6 @@
 										"type": "text"
 									}
 								],
-								"body": {
-									"mode": "raw",
-									"raw": ""
-								},
 								"url": {
 									"raw": "{{url}}/arrangements/run?id=5",
 									"host": [
@@ -553,10 +533,6 @@
 										"type": "text"
 									}
 								],
-								"body": {
-									"mode": "raw",
-									"raw": ""
-								},
 								"url": {
 									"raw": "{{url}}/arrangement_items/download?arrangementId=12",
 									"host": [
@@ -587,10 +563,6 @@
 										"value": "{{oper_token}}"
 									}
 								],
-								"body": {
-									"mode": "raw",
-									"raw": ""
-								},
 								"url": {
 									"raw": "{{url}}/arrangement_items?arrangementId=1&sortingColumn=erdi.id&sortingDirection=DESC",
 									"host": [
@@ -668,10 +640,6 @@
 										"type": "text"
 									}
 								],
-								"body": {
-									"mode": "raw",
-									"raw": ""
-								},
 								"url": {
 									"raw": "{{url}}/arrangements/plan?id=28",
 									"host": [
@@ -685,6 +653,37 @@
 										{
 											"key": "id",
 											"value": "28"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Заполнение мероприятия списком проверяемых ресурсов",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"value": "{{oper_token}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/arrangements/fill/?id=23",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"arrangements",
+										"fill",
+										""
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "23"
 										}
 									]
 								}
@@ -708,10 +707,6 @@
 										"type": "text"
 									}
 								],
-								"body": {
-									"mode": "raw",
-									"raw": ""
-								},
 								"url": {
 									"raw": "{{url}}/results?arrangementId=43&sortingColumn=result&sortingDirection=DESC&checkUnitJobResults=TIMEOUT_ERROR",
 									"host": [
@@ -768,10 +763,6 @@
 										"type": "text"
 									}
 								],
-								"body": {
-									"mode": "raw",
-									"raw": ""
-								},
 								"url": {
 									"raw": "{{url}}/results/screenshot?id=258",
 									"host": [
@@ -796,52 +787,8 @@
 							"request": {
 								"method": "GET",
 								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": ""
-								},
 								"url": {
 									"raw": ""
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Обноление результата установленного пользователем",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"name": "Content-Type",
-										"value": "application/json",
-										"type": "text"
-									},
-									{
-										"key": "X-AUTH-TOKEN",
-										"value": "{{oper_token}}",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n\t\"userResult\": \"ЕУЫЕ\",\n\t\"userDescription\": \"test\"\n}"
-								},
-								"url": {
-									"raw": "{{url}}/results/user_result?id=18503",
-									"host": [
-										"{{url}}"
-									],
-									"path": [
-										"results",
-										"user_result"
-									],
-									"query": [
-										{
-											"key": "id",
-											"value": "18503"
-										}
-									]
 								}
 							},
 							"response": []
@@ -863,10 +810,6 @@
 										"type": "text"
 									}
 								],
-								"body": {
-									"mode": "raw",
-									"raw": ""
-								},
 								"url": {
 									"raw": "{{url}}/arrangement_views?user_id=1&viewed=false",
 									"host": [
@@ -900,10 +843,6 @@
 										"type": "text"
 									}
 								],
-								"body": {
-									"mode": "raw",
-									"raw": ""
-								},
 								"url": {
 									"raw": "{{url}}/arrangement_views?id=3",
 									"host": [
@@ -1045,10 +984,6 @@
 								"type": "text"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{url}}/formal_tasks?sortingColumn=creationDate&sortingDirection=ASC",
 							"host": [
@@ -1101,10 +1036,6 @@
 										"type": "text"
 									}
 								],
-								"body": {
-									"mode": "raw",
-									"raw": ""
-								},
 								"url": {
 									"raw": "{{url}}/formal_tasks?taskId=55",
 									"host": [
@@ -1318,10 +1249,6 @@
 								"type": "text"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{url}}/formal_tasks/group",
 							"host": [
@@ -1346,10 +1273,6 @@
 								"type": "text"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{url}}/formal_tasks/status?status=PLANNED",
 							"host": [
@@ -1380,10 +1303,6 @@
 								"type": "text"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{url}}/formal_tasks?id=6",
 							"host": [
@@ -1418,10 +1337,6 @@
 								"type": "text"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{url}}/users/current",
 							"host": [
@@ -1445,10 +1360,6 @@
 										"type": "text"
 									}
 								],
-								"body": {
-									"mode": "raw",
-									"raw": ""
-								},
 								"url": {
 									"raw": "{{url}}/users/current",
 									"host": [
@@ -1517,10 +1428,6 @@
 								"value": "{{oper_token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{url}}/users/operators",
 							"host": [
@@ -1550,10 +1457,6 @@
 								"type": "text"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{url}}/parameters",
 							"host": [
@@ -1577,10 +1480,6 @@
 								"type": "text"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{url}}/parameters?key=ETALON_PROXY_HOST&value=test_host",
 							"host": [
@@ -1620,10 +1519,6 @@
 								"type": "text"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{url}}/parameters?key=ETALON_PROXY_HOST&value=test_host",
 							"host": [
@@ -1657,10 +1552,6 @@
 								"type": "text"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{url}}/system_parameters/ttl?ttl=20",
 							"host": [
@@ -1685,12 +1576,115 @@
 					"request": {
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": ""
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Расписание",
+			"item": [
+				{
+					"name": "Создание нового расписания",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"value": "{{oper_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[\n\t{\t\n\t\t\"id\": 23\n\t}\n]"
+						},
+						"url": {
+							"raw": "{{url}}/schedule/new",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"schedule",
+								"new"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Сохранение расписания в БД",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"value": "{{oper_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[23, 24, 218]"
+						},
+						"url": {
+							"raw": "{{url}}/schedule?plannedDate=2019-08-19",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"schedule"
+							],
+							"query": [
+								{
+									"key": "plannedDate",
+									"value": "2019-08-19"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Удаление расписания",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"value": "{{oper_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/schedule?id=4",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"schedule"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "4"
+								}
+							]
 						}
 					},
 					"response": []
@@ -1708,10 +1702,6 @@
 						"type": "text"
 					}
 				],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
 				"url": {
 					"raw": "{{url}}/info/access_tools",
 					"host": [
@@ -1865,25 +1855,25 @@
 	],
 	"variable": [
 		{
-			"id": "835a855e-b7fe-4fd6-bffc-ec0a5716a343",
+			"id": "063f7a46-9225-4920-bd16-6f3862534c5a",
 			"key": "url",
 			"value": "http://localhost:15800",
 			"type": "string"
 		},
 		{
-			"id": "8f7e6442-b459-4b8c-9b06-4c93364d5284",
+			"id": "032b56ca-a06c-47af-b2ed-26008f781a93",
 			"key": "oper_token",
 			"value": "",
 			"type": "string"
 		},
 		{
-			"id": "072cc82d-d08b-45f9-aa16-45383140f787",
+			"id": "15b57b43-5a5a-4566-a4f5-2e34135a7af5",
 			"key": "test_url",
 			"value": "http://192.168.5.253:15800",
 			"type": "string"
 		},
 		{
-			"id": "8eb16449-0604-4441-aaed-fc858d9b29e2",
+			"id": "690908f5-2624-4bd6-81a6-cc18a14a0d05",
 			"key": "admin_token",
 			"value": "",
 			"type": "string"
