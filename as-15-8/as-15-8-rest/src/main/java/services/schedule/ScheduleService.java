@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import repositories.GlobalParametersRepository;
 import repositories.ScheduleRepo;
 
+import javax.transaction.Transactional;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -43,6 +44,13 @@ public class ScheduleService {
 
     public Schedule saveSchedule(Schedule schedule){
         return scheduleRepo.save(schedule);
+    }
+
+    @Transactional
+    public Schedule updateSchedule(Schedule oldSchedule, Schedule newSchedule)
+    {
+        scheduleRepo.delete(oldSchedule);
+        return scheduleRepo.save(newSchedule);
     }
 
     public void deleteSchedule(Schedule schedule){

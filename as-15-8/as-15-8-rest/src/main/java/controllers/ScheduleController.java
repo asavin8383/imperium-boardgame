@@ -1,19 +1,26 @@
 package controllers;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import controllers.helpers.SortingHelper;
 import enums.ExecutionStatus;
+import enums.SortingDirection;
 import exceptions.AS_15_8_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Views;
+import model.enums.ScheduleStatus;
 import model.result.ArrangementResult;
 import model.schedule.Schedule;
 import model.task.Arrangement;
 import model.user.User;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -42,38 +49,55 @@ public class ScheduleController {
     private final UserService userService;
 
     @GetMapping(path = "/arrangements")
-    public List<Arrangement> getArrangementsForSchedule(){
-        return arrangementRepo.findAllByStatus(ExecutionStatus.FORMED);
+    public Page<Arrangement> getArrangementsForSchedule(
+            @RequestParam(required = false) SortingDirection sortingDirection,
+            @RequestParam(required = false) String sortingColumn,
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize
+    ){
+        PageRequest page = PageRequest.of(
+                pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
+        return arrangementRepo.findPageByStatus(ExecutionStatus.FORMED, page);
     }
 
-    @PostMapping(path = "/new", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @JsonView(Views.Full.class)
-    public Schedule createNewSchedule(@RequestBody List<Long> arrangementIds){
-        return createSchedule(arrangementIds);
-    }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    @JsonView(Views.Id.class)
+    @JsonView(Views.Full.class)
     @ResponseStatus(code = HttpStatus.CREATED)
-    public Schedule saveSchedule(
+    public Schedule postSchedule(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Optional<LocalDate> plannedDate,
             @RequestBody List<Long> arrangementIds,
             Authentication auth){
-        User user = userService.getUserByUserName(((User)auth.getPrincipal()).getUserName());
-        log.info("Начало расчета расписания");
-        Schedule schedule = createSchedule(arrangementIds);
-        log.info("Расчет расписания завершен");
-        schedule.setUser(user);
-        schedule.setPlannedDate(plannedDate.orElse(LocalDate.now()));
+        Schedule schedule = createSchedule(arrangementIds, ((User)auth.getPrincipal()).getUserName(), plannedDate);
         return scheduleService.saveSchedule(schedule);
     }
+
+    @PutMapping
+    @JsonView(Views.Full.class)
+    public ResponseEntity<Schedule> updateSchedule(
+            @RequestParam("id") Schedule schedule,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Optional<LocalDate> plannedDate,
+            @RequestBody List<Long> arrangementIds,
+    Authentication auth){
+        if(!(schedule.getStatus().equals(ScheduleStatus.NEW))){
+            AS_15_8_Exception.logAndThrow(log, String.format("Некорректный статус расписания с ИД: %d - %s", schedule.getId(), schedule.getStatus()));
+        }
+        Schedule newSchedule = createSchedule(arrangementIds, ((User)auth.getPrincipal()).getUserName(), plannedDate);
+        newSchedule.setId(schedule.getId());
+        return new ResponseEntity<>(scheduleService.updateSchedule(schedule, newSchedule), HttpStatus.OK) ;
+    }
+
+
 
     @DeleteMapping
     public void deleteSchedule(@RequestParam("id") Schedule schedule){
         scheduleService.deleteSchedule(schedule);
     }
 
-    private Schedule createSchedule(List<Long> arrangementIds){
+    private Schedule createSchedule(List<Long> arrangementIds, String userName, Optional<LocalDate> plannedDate){
+        User user = userService.getUserByUserName(userName);
+        LocalDate scheduleDate = plannedDate.orElse(LocalDate.now());
+        log.info("Начало расчета расписания на дату: {}", scheduleDate);
         Map<Arrangement, TreeSet<ArrangementResult>> arrangementCheckUnits = new HashMap<>();
         arrangementIds.forEach(arrangementId -> {
             Arrangement arrangement = arrangementRepo.findById(arrangementId)
@@ -82,7 +106,11 @@ public class ScheduleController {
             arrangementResults.addAll(arrangementResultRepo.findAllByArrangement(arrangement));
             arrangementCheckUnits.put(arrangement, arrangementResults);
         });
-        return scheduleService.create(arrangementCheckUnits);
+        Schedule schedule = scheduleService.create(arrangementCheckUnits);
+        log.info("Расчет расписания на дату {} завершен", scheduleDate);
+        schedule.setUser(user);
+        schedule.setPlannedDate(scheduleDate);
+        return schedule;
     }
 
 }

@@ -1,5 +1,6 @@
 package repositories;
 
+import enums.ExecutionStatus;
 import model.task.Arrangement;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,4 +12,6 @@ import org.springframework.data.domain.Pageable;
 public interface ArrangementRepositoryAdvanced {
 
     Page<Arrangement> findPage(Long formalTaskId, Long id, Pageable pageable);
+
+    Page<Arrangement> findPageByStatus(ExecutionStatus status, Pageable pageable);
 }

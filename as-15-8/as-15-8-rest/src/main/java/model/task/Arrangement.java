@@ -45,32 +45,41 @@ public class Arrangement implements Serializable {
 	/**Название мероприятия*/
 	@NotNull
 	@ToString.Include
+	@JsonView(Views.Brief.class)
 	private String title;
 
 	/**Статус мероприятия*/
 	@Enumerated(EnumType.STRING)
 	@NotNull
 	@ToString.Include
+	@JsonView(Views.Brief.class)
 	private ExecutionStatus status;
 	
 	/**Дата создания*/
 	@ToString.Include
+	@JsonView(Views.Brief.class)
 	private LocalDateTime creationDate;
 
 	/** Дата завершения */
+	@JsonView(Views.Brief.class)
 	private LocalDate completionDate;
 
 	/**Плановая дата начала*/
+	@JsonView(Views.Brief.class)
 	private LocalTime plannedStartTime;
 	/**Плановая дата окончания*/
+	@JsonView(Views.Brief.class)
 	private LocalTime plannedEndTime;
 
 	/**Дата начала*/
+	@JsonView(Views.Brief.class)
 	private LocalTime startTime;
 	/**Дата окончания*/
+	@JsonView(Views.Brief.class)
 	private LocalTime endTime;
 
 	/** Максимальное количество обработчиков мероприятия */
+	@JsonView(Views.Brief.class)
 	private Integer maxWorkersCount;
 
 	/**Формализованное задание на проведение мероприятий*/
@@ -89,6 +98,7 @@ public class Arrangement implements Serializable {
 	private List<ArrangementItem> arrangementItems;
 
 	/**Результат проведения мероприятия*/
+	@JsonView(Views.Brief.class)
     private String result;
 
     @Transient

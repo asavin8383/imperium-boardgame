@@ -128,7 +128,7 @@ public class ArrangementController {
     @GetMapping(path = "/fill")
     public @ResponseBody ResponseEntity<String> fillArrangement(@RequestParam("id") Arrangement arrangement){
         if(arrangement.getPlannedStartTime() == null || arrangement.getPlannedEndTime() == null){
-            return new ResponseEntity<>("Не заполнено плановое время начала или окончания мероприятия", HttpStatus.NOT_ACCEPTABLE);
+            AS_15_8_Exception.logAndThrow(log, String.format("Не заполнено плановое время начала или окончания мероприятия c ID: %d", arrangement.getId()));
         }
         arrangementService.fillArrangement(arrangement);
         return new ResponseEntity<>(HttpStatus.OK);

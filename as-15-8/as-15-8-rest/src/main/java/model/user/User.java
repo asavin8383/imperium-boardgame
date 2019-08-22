@@ -1,8 +1,10 @@
 package model.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import model.Views;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -28,12 +30,16 @@ public class User implements Serializable {
 	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="users_generator")
 	@SequenceGenerator(name="users_generator", schema="portal", sequenceName="users_id_seq", allocationSize=1)
 	@Column(name="id", nullable=false, updatable=false)
+	@JsonView(Views.Id.class)
 	private Long id;
 	
 	@Column(unique = true)
 	@NotNull
+	@JsonView(Views.Brief.class)
 	private String userName;
+	@JsonView(Views.Brief.class)
 	private String firstName;
+	@JsonView(Views.Brief.class)
 	private String secondName;
 	
 	@ManyToMany
@@ -48,6 +54,7 @@ public class User implements Serializable {
 	@JsonIgnore
 	private Department department;
 
+	@JsonView(Views.Brief.class)
 	private String email;
 
 	public User(){}
