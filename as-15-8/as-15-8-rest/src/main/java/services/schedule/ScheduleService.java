@@ -2,24 +2,33 @@ package services.schedule;
 
 import enums.AccessToolParameters;
 import exceptions.AS_15_8_Exception;
+import lombok.extern.slf4j.Slf4j;
 import model.catalog.AccessTool;
+import model.enums.ScheduleStatus;
 import model.result.ArrangementResult;
 import model.schedule.Schedule;
 import model.schedule.SchedulePeriod;
 import model.schedule.SchedulePeriodArrangement;
+import model.schedule.SchedulePeriodCheckUnit;
 import model.task.Arrangement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import repositories.ArrangementRepo;
+import repositories.ArrangementResultRepository;
 import repositories.GlobalParametersRepository;
 import repositories.ScheduleRepo;
+import repositories.schedule.SchedulePeriodArrangementRepo;
+import repositories.schedule.SchedulePeriodCheckUnitRepo;
 
 import javax.transaction.Transactional;
+import java.time.Duration;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class ScheduleService {
 
     private final int totalWorkersCount;
@@ -28,10 +37,22 @@ public class ScheduleService {
 
     private final ScheduleRepo scheduleRepo;
 
+    private final SchedulePeriodArrangementRepo schedulePeriodArrangementRepo;
+
+    private final ArrangementResultRepository arrangementResultRepo;
+
+    private final SchedulePeriodCheckUnitRepo schedulePeriodCheckUnitRepo;
+
+    private final ArrangementRepo arrangementRepo;
+
     @Autowired
-    public ScheduleService(PlannedProcessingTimeService plannedProcessingTimeService, GlobalParametersRepository globalParametersRepository, ScheduleRepo scheduleRepo){
+    public ScheduleService(PlannedProcessingTimeService plannedProcessingTimeService, GlobalParametersRepository globalParametersRepository, ScheduleRepo scheduleRepo, SchedulePeriodArrangementRepo schedulePeriodArrangementRepo, ArrangementResultRepository arrangementResultRepo, SchedulePeriodCheckUnitRepo schedulePeriodCheckUnitRepo, ArrangementRepo arrangementRepo){
         this.plannedProcessingTimeService = plannedProcessingTimeService;
         this.scheduleRepo = scheduleRepo;
+        this.schedulePeriodArrangementRepo = schedulePeriodArrangementRepo;
+        this.arrangementResultRepo = arrangementResultRepo;
+        this.schedulePeriodCheckUnitRepo = schedulePeriodCheckUnitRepo;
+        this.arrangementRepo = arrangementRepo;
         try {
             this.totalWorkersCount = globalParametersRepository
                     .findById(AccessToolParameters.TOTAL_WORKERS_COUNT)
@@ -62,6 +83,20 @@ public class ScheduleService {
         calculateWorkers(schedule, arrangementCheckUnits);
         //checkSchedule(schedule);
         return schedule;
+    }
+
+    /**
+     * Сохранение ресурсов каждого мероприятия по периодам расписания
+     * Установка статуса PLANNED расписанию
+     * @param schedule расписание для планирования
+     * @return Запланированное расписание
+     */
+    @Transactional
+    public Schedule planSchedule(Schedule schedule){
+        arrangementRepo.findAllBySchedule(schedule.getId())
+                .forEach(this::fillCheckUnits);
+        schedule.setStatus(ScheduleStatus.PLANNED);
+        return scheduleRepo.save(schedule);
     }
 
     private Schedule createNewSchedule(Map<Arrangement, TreeSet<ArrangementResult>> arrangementCheckUnits){
@@ -246,4 +281,44 @@ public class ScheduleService {
         return false;
     }
 
+    private void fillCheckUnits(Arrangement arrangement){
+        List<SchedulePeriodArrangement> schedulePeriodArrangements = schedulePeriodArrangementRepo.findAllByArrangement(arrangement);
+        SortedSet<ArrangementResult> arrangementResults = new TreeSet<>(Comparator.comparingLong(ArrangementResult::getId));
+        arrangementResults.addAll(arrangementResultRepo.findAllByArrangement(arrangement));
+        for(SchedulePeriodArrangement schedulePeriodArrangement : schedulePeriodArrangements){
+            if(!arrangementResults.isEmpty()){
+                arrangementResults = fillSchedulePeriodArrangement(schedulePeriodArrangement, arrangementResults);
+            }
+        }
+    }
+
+
+    private SortedSet<ArrangementResult> fillSchedulePeriodArrangement(SchedulePeriodArrangement schedulePeriodArrangement, SortedSet<ArrangementResult> arrangementResults){
+        long totalTime = countSchedulePeriodArrangementTotalTime(schedulePeriodArrangement);
+        long i = 1;
+        for (ArrangementResult arrangementResult : arrangementResults){
+            if (totalTime <= 0){
+                arrangementResults = arrangementResults.tailSet(arrangementResult);
+                return arrangementResults.tailSet(arrangementResult);
+            }
+            SchedulePeriodCheckUnit schedulePeriodCheckUnit = new SchedulePeriodCheckUnit();
+            schedulePeriodCheckUnit.setSchedulePeriodArrangement(schedulePeriodArrangement);
+            schedulePeriodCheckUnit.setCheckUnit(arrangementResult);
+            schedulePeriodCheckUnit.setExecutionNumber(i++);
+            schedulePeriodCheckUnitRepo.save(schedulePeriodCheckUnit);
+            long plannedProcessingTime = plannedProcessingTimeService.getProcessingTime(schedulePeriodArrangement.getArrangement().getAccessTool(), arrangementResult.getCheckUnitType());
+            if (plannedProcessingTime <= 0){
+                AS_15_8_Exception.logAndThrow(log, String
+                        .format("Некорректное время обработки для ПАСД %s типа ресурса %s - значение: %d", schedulePeriodArrangement.getArrangement().getAccessTool().getName(), arrangementResult.getCheckUnitType(), plannedProcessingTime));
+            }
+            totalTime -= plannedProcessingTime;
+        }
+        return new TreeSet<>(Comparator.comparingLong(ArrangementResult::getId));
+    }
+
+    private long countSchedulePeriodArrangementTotalTime(SchedulePeriodArrangement schedulePeriodArrangement){
+        SchedulePeriod schedulePeriod = schedulePeriodArrangement.getSchedulePeriod();
+        long durationMS = Duration.between(schedulePeriod.getStartTime(), schedulePeriod.getEndTime()).toMillis();
+        return durationMS * schedulePeriodArrangement.getWorkersCount();
+    }
 }

@@ -1,6 +1,5 @@
 package repositories;
 
-import enums.ExecutionStatus;
 import model.task.Arrangement;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,10 +15,15 @@ import java.util.Optional;
  */
 
 @Repository
-public interface ArrangementRepository extends JpaRepository<Arrangement, Long>, ArrangementRepositoryAdvanced {
-
-    List<Arrangement> findAllByStatus(ExecutionStatus status);
+public interface ArrangementRepo extends JpaRepository<Arrangement, Long>, ArrangementRepositoryAdvanced {
 
     @Query("SELECT a FROM Arrangement a WHERE a.id = :id and a.status in ('NEW', FORMED)")
     Optional<Arrangement> findEditableArrangement(@Param("id") Long id);
+
+    @Query("select DISTINCT a " +
+            "from Arrangement a " +
+            "join a.schedulePeriodArrangements spa " +
+            "join spa.schedulePeriod sp " +
+            "where sp.schedule.id = :id")
+    List<Arrangement> findAllBySchedule(@Param("id") Long scheduleId);
 }

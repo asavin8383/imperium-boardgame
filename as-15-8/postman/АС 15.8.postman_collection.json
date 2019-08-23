@@ -1609,7 +1609,7 @@
 							"raw": "[23, 24, 218]"
 						},
 						"url": {
-							"raw": "{{url}}/schedule?plannedDate=2019-08-22",
+							"raw": "{{url}}/schedule?",
 							"host": [
 								"{{url}}"
 							],
@@ -1619,7 +1619,8 @@
 							"query": [
 								{
 									"key": "plannedDate",
-									"value": "2019-08-22"
+									"value": "2019-08-22",
+									"disabled": true
 								}
 							]
 						}
@@ -1663,6 +1664,48 @@
 								{
 									"key": "plannedDate",
 									"value": "2019-08-22"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Планирование расписания",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"type": "text",
+								"value": "{{oper_token}}"
+							},
+							{
+								"key": "",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json",
+								"disabled": true
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{url}}/schedule/plan?id=6",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"schedule",
+								"plan"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "6"
 								}
 							]
 						}
@@ -1875,25 +1918,25 @@
 	],
 	"variable": [
 		{
-			"id": "f36c0abc-973f-4cb2-a263-4865b91daa98",
+			"id": "eb42e14d-6ce4-4b52-9fcf-38c9789ae91e",
 			"key": "url",
 			"value": "http://localhost:15800",
 			"type": "string"
 		},
 		{
-			"id": "01111cf1-6c75-4b9d-940c-bf569a55b0b1",
+			"id": "cd1e6237-e067-4815-ac96-1232e3c2f4f8",
 			"key": "oper_token",
 			"value": "",
 			"type": "string"
 		},
 		{
-			"id": "900df6e2-eaf2-47e8-8480-d1a242ca64da",
+			"id": "81a48032-43e9-4f82-89f5-c33dde8a44a6",
 			"key": "test_url",
 			"value": "http://192.168.5.253:15800",
 			"type": "string"
 		},
 		{
-			"id": "1e64883c-c272-4f2d-88f3-a6ece7781b3e",
+			"id": "d0da9680-624b-413a-a179-c49c3e8c5ba0",
 			"key": "admin_token",
 			"value": "",
 			"type": "string"

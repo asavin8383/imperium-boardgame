@@ -1,6 +1,5 @@
 package services.arrangement.impl;
 
-import exceptions.AS_15_8_Exception;
 import jobs.ArrangementJob;
 import events.ArrangementChannels;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
-import repositories.ArrangementRepository;
+import repositories.ArrangementRepo;
 import services.arrangement.ArrangementJobCreationService;
 
 /**
@@ -26,7 +25,7 @@ import services.arrangement.ArrangementJobCreationService;
 @EnableBinding(ArrangementChannels.class)
 public class ArrangementService {
 
-    private final ArrangementRepository arrangementRepo;
+    private final ArrangementRepo arrangementRepo;
     private final ArrangementJobCreationService arrangementJobCreationService;
     private final ArrangementChannels source;
 

@@ -68,7 +68,7 @@ public class ArrangementResult implements Serializable {
     @Column(name="user_description")
     private String userDescription;
 
-    @OneToOne(mappedBy = "checkUnit")
+    @OneToOne(mappedBy = "checkUnit", cascade = CascadeType.ALL)
     @JoinColumn(name = "id", referencedColumnName = "check_unit_id")
     private SchedulePeriodCheckUnit schedulePeriodCheckUnit;
 }

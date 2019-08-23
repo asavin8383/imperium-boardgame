@@ -13,7 +13,7 @@ import enums.ExecutionStatus;
 import model.task.Arrangement;
 import model.task.ArrangementView;
 import model.task.FormalTask;
-import repositories.ArrangementRepository;
+import repositories.ArrangementRepo;
 import repositories.ArrangementViewRepo;
 import repositories.FormalTaskRepository;
 import services.arrangement.ArrangementStatusService;
@@ -26,12 +26,12 @@ import services.arrangement.ArrangementStatusService;
 @Slf4j
 public class ArrangementStatusServiceImpl implements ArrangementStatusService {
 
-    private ArrangementRepository arrangementRepo;
+    private ArrangementRepo arrangementRepo;
     private FormalTaskRepository formalTaskRepo;
     private ArrangementViewRepo arrangementViewRepo;
 
     @Autowired
-    public ArrangementStatusServiceImpl(ArrangementRepository arrangementRepo,
+    public ArrangementStatusServiceImpl(ArrangementRepo arrangementRepo,
                                         FormalTaskRepository formalTaskRepo,
                                         ArrangementViewRepo arrangementViewRepo) {
         this.arrangementRepo = arrangementRepo;

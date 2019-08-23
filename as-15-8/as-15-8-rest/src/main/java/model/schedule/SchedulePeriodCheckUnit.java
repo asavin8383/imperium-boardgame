@@ -24,7 +24,7 @@ public class SchedulePeriodCheckUnit {
     @JoinColumn(name="schedule_period_arrangement_id")
     private SchedulePeriodArrangement schedulePeriodArrangement;
 
-    @OneToOne(optional = false, cascade = CascadeType.ALL)
+    @OneToOne(optional = false)
     private ArrangementResult checkUnit;
 
     @Column(nullable = false)

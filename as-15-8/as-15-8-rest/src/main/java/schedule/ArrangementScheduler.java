@@ -12,11 +12,11 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class ArrangementScheduler {
 
-   // private ArrangementRepository arrangementRepo;
+   // private ArrangementRepo arrangementRepo;
    // private ArrangementExecutionHelper arrangementExecutionHelper;
 
    /* @Autowired
-    public ArrangementScheduler(ArrangementRepository arrangementRepo, ArrangementExecutionHelper arrangementExecutionHelper) {
+    public ArrangementScheduler(ArrangementRepo arrangementRepo, ArrangementExecutionHelper arrangementExecutionHelper) {
         this.arrangementRepo = arrangementRepo;
         this.arrangementExecutionHelper = arrangementExecutionHelper;
     }*/

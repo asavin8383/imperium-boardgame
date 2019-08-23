@@ -13,7 +13,6 @@ import model.result.ArrangementResult;
 import model.schedule.Schedule;
 import model.task.Arrangement;
 import model.user.User;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -24,7 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import repositories.ArrangementRepository;
+import repositories.ArrangementRepo;
 import repositories.ArrangementResultRepository;
 import services.schedule.ScheduleService;
 import services.user.UserService;
@@ -43,7 +42,7 @@ import java.util.*;
 @Slf4j
 public class ScheduleController {
 
-    private final ArrangementRepository arrangementRepo;
+    private final ArrangementRepo arrangementRepo;
     private final ScheduleService scheduleService;
     private final ArrangementResultRepository arrangementResultRepo;
     private final UserService userService;
@@ -74,20 +73,29 @@ public class ScheduleController {
 
     @PutMapping
     @JsonView(Views.Full.class)
-    public ResponseEntity<Schedule> updateSchedule(
+    public Schedule updateSchedule(
             @RequestParam("id") Schedule schedule,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Optional<LocalDate> plannedDate,
             @RequestBody List<Long> arrangementIds,
     Authentication auth){
         if(!(schedule.getStatus().equals(ScheduleStatus.NEW))){
-            AS_15_8_Exception.logAndThrow(log, String.format("Некорректный статус расписания с ИД: %d - %s", schedule.getId(), schedule.getStatus()));
+            AS_15_8_Exception.logAndThrow(log, String.format("Ошибка изменения расписания! Некорректный статус расписания с ИД: %d - %s", schedule.getId(), schedule.getStatus()));
         }
         Schedule newSchedule = createSchedule(arrangementIds, ((User)auth.getPrincipal()).getUserName(), plannedDate);
         newSchedule.setId(schedule.getId());
-        return new ResponseEntity<>(scheduleService.updateSchedule(schedule, newSchedule), HttpStatus.OK) ;
+        return scheduleService.updateSchedule(schedule, newSchedule);
     }
 
-
+    @PutMapping(path = "/plan")
+    @JsonView(Views.Id.class)
+    public Schedule planSchedule(
+            @RequestParam("id") Schedule schedule
+    ) {
+        if(!(schedule.getStatus().equals(ScheduleStatus.NEW))){
+            AS_15_8_Exception.logAndThrow(log, String.format("Ошибка планирования расписания! Некорректный статус расписания с ИД: %d - %s", schedule.getId(), schedule.getStatus()));
+        }
+        return scheduleService.planSchedule(schedule);
+    }
 
     @DeleteMapping
     public void deleteSchedule(@RequestParam("id") Schedule schedule){
@@ -97,6 +105,9 @@ public class ScheduleController {
     private Schedule createSchedule(List<Long> arrangementIds, String userName, Optional<LocalDate> plannedDate){
         User user = userService.getUserByUserName(userName);
         LocalDate scheduleDate = plannedDate.orElse(LocalDate.now());
+        if(scheduleDate.isBefore(LocalDate.now())){
+            AS_15_8_Exception.logAndThrow(log, String.format("Ошибка создания расписания. Плановая дата меньше текушей: %s", scheduleDate));
+        }
         log.info("Начало расчета расписания на дату: {}", scheduleDate);
         Map<Arrangement, TreeSet<ArrangementResult>> arrangementCheckUnits = new HashMap<>();
         arrangementIds.forEach(arrangementId -> {

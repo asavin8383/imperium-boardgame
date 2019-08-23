@@ -4,7 +4,7 @@ import arrangement.ArrangementStatusNotification;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import repositories.ArrangementRepository;
+import repositories.ArrangementRepo;
 import services.arrangement.ArrangementNotificationService;
 import services.arrangement.ArrangementStatusService;
 
@@ -17,12 +17,12 @@ import services.arrangement.ArrangementStatusService;
 @Slf4j
 public class ArrangementNotificationServiceImpl implements ArrangementNotificationService {
 
-    private ArrangementRepository arrangementRepo;
+    private ArrangementRepo arrangementRepo;
     private ArrangementStatusService arrangementStatusService;
 
     @Autowired
-    public ArrangementNotificationServiceImpl(ArrangementRepository arrangementRepo,
-            ArrangementStatusService arrangementStatusService) {
+    public ArrangementNotificationServiceImpl(ArrangementRepo arrangementRepo,
+                                              ArrangementStatusService arrangementStatusService) {
         this.arrangementRepo = arrangementRepo;
         this.arrangementStatusService = arrangementStatusService;
     }

@@ -17,7 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import repositories.ArrangementRepository;
+import repositories.ArrangementRepo;
 import services.arrangement.ArrangementStatusService;
 import services.arrangement.impl.ArrangementService;
 import enums.ArrangementEvents;
@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ArrangementController {
 
-    private final ArrangementRepository arrangementRepo;
+    private final ArrangementRepo arrangementRepo;
     private final ArrangementExecutionHelper arrangementExecutionHelper;
     private final ArrangementStatusService arrangementStatusService;
     private final ArrangementService arrangementService;

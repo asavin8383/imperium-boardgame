@@ -10,6 +10,7 @@ import model.Views;
 import model.catalog.AccessTool;
 import enums.ExecutionStatus;
 import enums.ArrangementEvents;
+import model.schedule.SchedulePeriodArrangement;
 import stateMachine.ArrangementStateMachine;
 
 import javax.persistence.*;
@@ -96,6 +97,10 @@ public class Arrangement implements Serializable {
 	@OneToMany(cascade=CascadeType.ALL, mappedBy = "arrangement")
 	@JsonIgnore
 	private List<ArrangementItem> arrangementItems;
+
+	@OneToMany(cascade=CascadeType.ALL, mappedBy = "arrangement")
+	@JsonIgnore
+	private List<SchedulePeriodArrangement> schedulePeriodArrangements;
 
 	/**Результат проведения мероприятия*/
 	@JsonView(Views.Brief.class)
