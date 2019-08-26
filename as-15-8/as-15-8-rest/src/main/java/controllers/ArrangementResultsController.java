@@ -90,10 +90,8 @@ public class ArrangementResultsController {
 
     @PreAuthorize("hasAnyRole('ROLE_OPERATOR', 'ROLE_ADMIN')")
     @GetMapping(path = "/details")
-    public ResponseEntity<DetailedArrangementResult> getDetails(@RequestParam Long id){
-        return detailedArrangementResultRepo.findById(id)
-                .map(detailedArrangementResult -> new ResponseEntity<>(detailedArrangementResult, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(null, HttpStatus.NO_CONTENT));
+    public DetailedArrangementResult getDetails(@RequestParam("id") DetailedArrangementResult detailedArrangementResult){
+        return detailedArrangementResult;
     }
 
     @PreAuthorize("hasAnyRole('ROLE_OPERATOR', 'ROLE_ADMIN')")

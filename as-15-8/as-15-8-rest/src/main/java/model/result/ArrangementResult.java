@@ -56,11 +56,6 @@ public class ArrangementResult implements Serializable {
     private LocalDateTime startDate;
     private LocalDateTime endDate;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "id", referencedColumnName = "id")
-    @JsonIgnore
-    DetailedArrangementResult detailedArrangementResult;
-    
     @Enumerated(EnumType.STRING)
     @Column(name="user_result")
     private UserResult userResult;
@@ -68,7 +63,4 @@ public class ArrangementResult implements Serializable {
     @Column(name="user_description")
     private String userDescription;
 
-    @OneToOne(mappedBy = "checkUnit", cascade = CascadeType.ALL)
-    @JoinColumn(name = "id", referencedColumnName = "check_unit_id")
-    private SchedulePeriodCheckUnit schedulePeriodCheckUnit;
 }

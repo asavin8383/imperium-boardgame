@@ -10,6 +10,7 @@ import model.Views;
 import model.catalog.AccessTool;
 import enums.ExecutionStatus;
 import enums.ArrangementEvents;
+import model.result.ArrangementResult;
 import model.schedule.SchedulePeriodArrangement;
 import stateMachine.ArrangementStateMachine;
 
@@ -97,6 +98,10 @@ public class Arrangement implements Serializable {
 	@OneToMany(cascade=CascadeType.ALL, mappedBy = "arrangement")
 	@JsonIgnore
 	private List<ArrangementItem> arrangementItems;
+
+	@OneToMany(cascade=CascadeType.ALL, mappedBy = "arrangement")
+	@JsonIgnore
+	private List<ArrangementResult> arrangementResults;
 
 	@OneToMany(cascade=CascadeType.ALL, mappedBy = "arrangement")
 	@JsonIgnore

@@ -284,7 +284,9 @@ public class ScheduleService {
     private void fillCheckUnits(Arrangement arrangement){
         List<SchedulePeriodArrangement> schedulePeriodArrangements = schedulePeriodArrangementRepo.findAllByArrangement(arrangement);
         SortedSet<ArrangementResult> arrangementResults = new TreeSet<>(Comparator.comparingLong(ArrangementResult::getId));
+        log.debug("Поиск arrangementResults по мероприятию: {}", arrangement.getId());
         arrangementResults.addAll(arrangementResultRepo.findAllByArrangement(arrangement));
+        log.debug("Поиск arrangementResults по мероприятию: {} завершен", arrangement.getId());
         for(SchedulePeriodArrangement schedulePeriodArrangement : schedulePeriodArrangements){
             if(!arrangementResults.isEmpty()){
                 arrangementResults = fillSchedulePeriodArrangement(schedulePeriodArrangement, arrangementResults);
@@ -296,6 +298,7 @@ public class ScheduleService {
     private SortedSet<ArrangementResult> fillSchedulePeriodArrangement(SchedulePeriodArrangement schedulePeriodArrangement, SortedSet<ArrangementResult> arrangementResults){
         long totalTime = countSchedulePeriodArrangementTotalTime(schedulePeriodArrangement);
         long i = 1;
+        log.debug("Заполняется SPA {}", schedulePeriodArrangement.getId());
         for (ArrangementResult arrangementResult : arrangementResults){
             if (totalTime <= 0){
                 arrangementResults = arrangementResults.tailSet(arrangementResult);
@@ -305,14 +308,18 @@ public class ScheduleService {
             schedulePeriodCheckUnit.setSchedulePeriodArrangement(schedulePeriodArrangement);
             schedulePeriodCheckUnit.setCheckUnit(arrangementResult);
             schedulePeriodCheckUnit.setExecutionNumber(i++);
-            schedulePeriodCheckUnitRepo.save(schedulePeriodCheckUnit);
+            schedulePeriodArrangement.getSchedulePeriodCheckUnits().add(schedulePeriodCheckUnit);
+            //schedulePeriodCheckUnitRepo.save(schedulePeriodCheckUnit);
             long plannedProcessingTime = plannedProcessingTimeService.getProcessingTime(schedulePeriodArrangement.getArrangement().getAccessTool(), arrangementResult.getCheckUnitType());
             if (plannedProcessingTime <= 0){
                 AS_15_8_Exception.logAndThrow(log, String
                         .format("Некорректное время обработки для ПАСД %s типа ресурса %s - значение: %d", schedulePeriodArrangement.getArrangement().getAccessTool().getName(), arrangementResult.getCheckUnitType(), plannedProcessingTime));
             }
             totalTime -= plannedProcessingTime;
+            log.debug("Добавлен новый CheckUinit: {}", schedulePeriodCheckUnit.getExecutionNumber());
         }
+        schedulePeriodArrangementRepo.save(schedulePeriodArrangement);
+        log.debug("SPA {} заполнено", schedulePeriodArrangement.getId());
         return new TreeSet<>(Comparator.comparingLong(ArrangementResult::getId));
     }
 
