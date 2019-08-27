@@ -1,10 +1,15 @@
 package controllers;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.List;
-import java.util.Map;
-
+import checkUnits.CheckUnitType;
+import controllers.helpers.SortingHelper;
+import enums.CheckUnitJobResult;
+import enums.SortingDirection;
+import exceptions.AS_15_8_Exception;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import model.enums.UserResult;
+import model.result.ArrangementResult;
+import model.result.DetailedArrangementResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,25 +20,13 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.lob.DefaultLobHandler;
 import org.springframework.jdbc.support.lob.LobHandler;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
-
-import checkUnits.CheckUnitType;
-import controllers.helpers.SortingHelper;
-import enums.CheckUnitJobResult;
-import enums.SortingDirection;
-import exceptions.AS_15_8_Exception;
-import lombok.extern.slf4j.Slf4j;
-import model.enums.UserResult;
-import model.result.ArrangementResult;
-import model.result.DetailedArrangementResult;
+import org.springframework.web.bind.annotation.*;
 import repositories.ArrangementResultRepository;
-import repositories.DetailedArrangementResultRepository;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Creation date: 29.05.2019
@@ -43,21 +36,12 @@ import repositories.DetailedArrangementResultRepository;
 
 @RestController
 @RequestMapping(path = "/results", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Slf4j
 public class ArrangementResultsController {
 
-    private ArrangementResultRepository arrangementResultRepo;
-    private DetailedArrangementResultRepository detailedArrangementResultRepo;
-    private JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    public ArrangementResultsController(ArrangementResultRepository arrangementResultRepo,
-                                        DetailedArrangementResultRepository detailedArrangementResultRepo,
-                                        JdbcTemplate jdbcTemplate) {
-        this.arrangementResultRepo = arrangementResultRepo;
-        this.detailedArrangementResultRepo = detailedArrangementResultRepo;
-        this.jdbcTemplate = jdbcTemplate;
-    }
+    private final ArrangementResultRepository arrangementResultRepo;
+    private final JdbcTemplate jdbcTemplate;
 
     @PreAuthorize("hasAnyRole('ROLE_OPERATOR', 'ROLE_ADMIN')")
     @GetMapping
@@ -102,7 +86,7 @@ public class ArrangementResultsController {
     			UserResult result = null;
     			try {
     				result = UserResult.valueOf(userResult.get("userResult"));
-    			} catch (Exception ex) { }
+    			} catch (Exception ex) {AS_15_8_Exception.logAndThrow(log, "Ошибка сохранения результатов от пользователя: " + ex.getMessage()); }
     			if(result == null) {
     				String errorMessage = "Ошибка! Результат " + userResult.get("userResult")+" не поддерживается!";
     				log.error("Ошибка при сохранении результатов от пользователя", new AS_15_8_Exception(errorMessage));
