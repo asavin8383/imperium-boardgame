@@ -1646,10 +1646,10 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "[23, 24]"
+							"raw": "[{\"id\":23, \"plannedStartTime\": \"09:00:30\", \"plannedEndTime\": \"09:01:30\"}, {\"id\":24}]"
 						},
 						"url": {
-							"raw": "{{url}}/schedule?id=5&plannedDate=2019-08-22",
+							"raw": "{{url}}/schedule?id=23",
 							"host": [
 								"{{url}}"
 							],
@@ -1658,12 +1658,13 @@
 							],
 							"query": [
 								{
-									"key": "id",
-									"value": "5"
+									"key": "plannedDate",
+									"value": "2019-08-22",
+									"disabled": true
 								},
 								{
-									"key": "plannedDate",
-									"value": "2019-08-22"
+									"key": "id",
+									"value": "23"
 								}
 							]
 						}
@@ -1918,25 +1919,25 @@
 	],
 	"variable": [
 		{
-			"id": "eb42e14d-6ce4-4b52-9fcf-38c9789ae91e",
+			"id": "300d0164-03d7-49f1-aa0a-54978ca81c33",
 			"key": "url",
 			"value": "http://localhost:15800",
 			"type": "string"
 		},
 		{
-			"id": "cd1e6237-e067-4815-ac96-1232e3c2f4f8",
+			"id": "f8b8ec85-bbee-4c51-b260-3c83fadf249a",
 			"key": "oper_token",
 			"value": "",
 			"type": "string"
 		},
 		{
-			"id": "81a48032-43e9-4f82-89f5-c33dde8a44a6",
+			"id": "40988877-58ef-46d4-b1dd-75cda044fa71",
 			"key": "test_url",
 			"value": "http://192.168.5.253:15800",
 			"type": "string"
 		},
 		{
-			"id": "d0da9680-624b-413a-a179-c49c3e8c5ba0",
+			"id": "f86307d9-1a93-4c0c-949a-c12f2846aeb2",
 			"key": "admin_token",
 			"value": "",
 			"type": "string"

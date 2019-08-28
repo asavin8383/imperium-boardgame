@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Views;
 import model.enums.ScheduleStatus;
-import model.result.ArrangementResult;
 import model.schedule.Schedule;
 import model.task.Arrangement;
 import model.user.User;
@@ -19,17 +18,18 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import repositories.ArrangementRepo;
-import repositories.ArrangementResultRepository;
+import services.arrangement.impl.ArrangementService;
 import services.schedule.ScheduleService;
 import services.user.UserService;
 
+import javax.transaction.Transactional;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Creation date: 16.08.2019
@@ -42,9 +42,8 @@ import java.util.*;
 @Slf4j
 public class ScheduleController {
 
-    private final ArrangementRepo arrangementRepo;
+    private final ArrangementService arrangementService;
     private final ScheduleService scheduleService;
-    private final ArrangementResultRepository arrangementResultRepo;
     private final UserService userService;
 
     @GetMapping(path = "/arrangements")
@@ -56,7 +55,7 @@ public class ScheduleController {
     ){
         PageRequest page = PageRequest.of(
                 pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
-        return arrangementRepo.findPageByStatus(ExecutionStatus.FORMED, page);
+        return arrangementService.findPageByStatus(ExecutionStatus.FORMED, page);
     }
 
 
@@ -73,14 +72,20 @@ public class ScheduleController {
 
     @PutMapping
     @JsonView(Views.Full.class)
+    @Transactional
     public Schedule updateSchedule(
             @RequestParam("id") Schedule schedule,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Optional<LocalDate> plannedDate,
-            @RequestBody List<Long> arrangementIds,
-    Authentication auth){
+            @RequestBody List<Arrangement> arrangements,
+            Authentication auth){
         if(!(schedule.getStatus().equals(ScheduleStatus.NEW))){
             AS_15_8_Exception.logAndThrow(log, String.format("Ошибка изменения расписания! Некорректный статус расписания с ИД: %d - %s", schedule.getId(), schedule.getStatus()));
         }
+        //Если изменились плановые значения времени, сначала нужно изменить само мероприятие
+        arrangements.stream()
+                .filter(arrangement -> arrangement.getPlannedStartTime()!=null && arrangement.getPlannedEndTime()!=null)
+                .forEach(arrangementService::updateArrangementPlanInfo);
+        List<Long> arrangementIds = arrangements.stream().map(Arrangement::getId).collect(Collectors.toList());
         Schedule newSchedule = createSchedule(arrangementIds, ((User)auth.getPrincipal()).getUserName(), plannedDate);
         newSchedule.setId(schedule.getId());
         return scheduleService.updateSchedule(schedule, newSchedule);
@@ -109,15 +114,7 @@ public class ScheduleController {
             AS_15_8_Exception.logAndThrow(log, String.format("Ошибка создания расписания. Плановая дата меньше текушей: %s", scheduleDate));
         }
         log.info("Начало расчета расписания на дату: {}", scheduleDate);
-        Map<Arrangement, TreeSet<ArrangementResult>> arrangementCheckUnits = new HashMap<>();
-        arrangementIds.forEach(arrangementId -> {
-            Arrangement arrangement = arrangementRepo.findById(arrangementId)
-                    .orElseThrow(() -> new AS_15_8_Exception("Ошибка создания расписания! Мероприятие не было найдено по ID: " + arrangementId));
-            TreeSet<ArrangementResult> arrangementResults = new TreeSet<>(Comparator.comparingLong(ArrangementResult::getId));
-            arrangementResults.addAll(arrangementResultRepo.findAllByArrangement(arrangement));
-            arrangementCheckUnits.put(arrangement, arrangementResults);
-        });
-        Schedule schedule = scheduleService.create(arrangementCheckUnits);
+        Schedule schedule = scheduleService.create(arrangementService.getArrangementCheckUnits(arrangementIds));
         log.info("Расчет расписания на дату {} завершен", scheduleDate);
         schedule.setUser(user);
         schedule.setPlannedDate(scheduleDate);

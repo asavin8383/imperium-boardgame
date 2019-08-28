@@ -14,7 +14,7 @@ import model.task.Arrangement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import repositories.ArrangementRepo;
-import repositories.ArrangementResultRepository;
+import repositories.ArrangementResultRepo;
 import repositories.GlobalParametersRepository;
 import repositories.ScheduleRepo;
 import repositories.schedule.SchedulePeriodArrangementRepo;
@@ -39,14 +39,14 @@ public class ScheduleService {
 
     private final SchedulePeriodArrangementRepo schedulePeriodArrangementRepo;
 
-    private final ArrangementResultRepository arrangementResultRepo;
+    private final ArrangementResultRepo arrangementResultRepo;
 
     private final SchedulePeriodCheckUnitRepo schedulePeriodCheckUnitRepo;
 
     private final ArrangementRepo arrangementRepo;
 
     @Autowired
-    public ScheduleService(PlannedProcessingTimeService plannedProcessingTimeService, GlobalParametersRepository globalParametersRepository, ScheduleRepo scheduleRepo, SchedulePeriodArrangementRepo schedulePeriodArrangementRepo, ArrangementResultRepository arrangementResultRepo, SchedulePeriodCheckUnitRepo schedulePeriodCheckUnitRepo, ArrangementRepo arrangementRepo){
+    public ScheduleService(PlannedProcessingTimeService plannedProcessingTimeService, GlobalParametersRepository globalParametersRepository, ScheduleRepo scheduleRepo, SchedulePeriodArrangementRepo schedulePeriodArrangementRepo, ArrangementResultRepo arrangementResultRepo, SchedulePeriodCheckUnitRepo schedulePeriodCheckUnitRepo, ArrangementRepo arrangementRepo){
         this.plannedProcessingTimeService = plannedProcessingTimeService;
         this.scheduleRepo = scheduleRepo;
         this.schedulePeriodArrangementRepo = schedulePeriodArrangementRepo;
@@ -70,6 +70,7 @@ public class ScheduleService {
     @Transactional
     public Schedule updateSchedule(Schedule oldSchedule, Schedule newSchedule)
     {
+        //TODO Обдумать, наиболее ли это оптимальный вариант изменения расписания (при обычном UPDATE не удаляются one-to-many, а только добавляются новые)
         scheduleRepo.delete(oldSchedule);
         return scheduleRepo.save(newSchedule);
     }

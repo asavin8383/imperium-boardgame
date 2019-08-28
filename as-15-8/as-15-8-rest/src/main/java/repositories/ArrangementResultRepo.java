@@ -12,7 +12,7 @@ import java.util.List;
  * Author: asavin
  */
 @Repository
-public interface ArrangementResultRepository extends JpaRepository<ArrangementResult, Long>, ArrangementResultRepositoryAdvanced {
+public interface ArrangementResultRepo extends JpaRepository<ArrangementResult, Long>, ArrangementResultRepositoryAdvanced {
 
     List<ArrangementResult> findAllByArrangement(Arrangement arrangement);
 }

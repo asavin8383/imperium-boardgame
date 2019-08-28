@@ -1,8 +1,9 @@
 package model.schedule;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import model.Views;
 import model.enums.ScheduleStatus;
 import model.user.User;
@@ -15,6 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
 @Table(name = "schedules", schema = "schedule")
 public class Schedule {
@@ -23,10 +26,13 @@ public class Schedule {
     @GeneratedValue(strategy= GenerationType.SEQUENCE, generator="schedules_generator")
     @SequenceGenerator(name="schedules_generator", schema= "schedule", sequenceName="schedules_id_seq", allocationSize=1)
     @JsonView(Views.Id.class)
+    @ToString.Include
+    @EqualsAndHashCode.Include
     private Long id;
 
     @NotNull
     @JsonView(Views.Full.class)
+    @ToString.Include
     private LocalDate plannedDate;
 
     @NotNull
@@ -41,6 +47,7 @@ public class Schedule {
     @Enumerated(EnumType.STRING)
     @NotNull
     @JsonView(Views.Full.class)
+    @ToString.Include
     private ScheduleStatus status;
 
     @OneToMany(cascade=CascadeType.ALL, mappedBy = "schedule", fetch = FetchType.EAGER)

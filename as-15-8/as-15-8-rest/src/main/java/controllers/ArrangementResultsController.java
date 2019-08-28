@@ -21,7 +21,7 @@ import org.springframework.jdbc.support.lob.DefaultLobHandler;
 import org.springframework.jdbc.support.lob.LobHandler;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import repositories.ArrangementResultRepository;
+import repositories.ArrangementResultRepo;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -40,7 +40,7 @@ import java.util.Map;
 @Slf4j
 public class ArrangementResultsController {
 
-    private final ArrangementResultRepository arrangementResultRepo;
+    private final ArrangementResultRepo arrangementResultRepo;
     private final JdbcTemplate jdbcTemplate;
 
     @PreAuthorize("hasAnyRole('ROLE_OPERATOR', 'ROLE_ADMIN')")
