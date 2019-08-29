@@ -12,8 +12,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Data
 @ToString(onlyExplicitlyIncluded = true)
@@ -52,7 +51,8 @@ public class Schedule {
 
     @OneToMany(cascade=CascadeType.ALL, mappedBy = "schedule", fetch = FetchType.EAGER)
     @JsonView(Views.Full.class)
-    private List<SchedulePeriod> schedulePeriods = new ArrayList<>();
+    @OrderBy("startTime")
+    private SortedSet<SchedulePeriod> schedulePeriods = new TreeSet<>(Comparator.comparing(SchedulePeriod::getStartTime));
 
     public Schedule(){
         this.creationDate = LocalDateTime.now();

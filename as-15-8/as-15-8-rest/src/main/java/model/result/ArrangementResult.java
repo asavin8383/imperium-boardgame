@@ -12,7 +12,6 @@ import enums.CheckUnitJobResult;
 import lombok.Data;
 import model.enums.UserResult;
 import model.erdi.ERDI;
-import model.schedule.SchedulePeriodCheckUnit;
 import model.task.Arrangement;
 
 /**

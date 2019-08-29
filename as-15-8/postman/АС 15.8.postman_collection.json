@@ -1752,6 +1752,36 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Получение диаграммы ганта по расписанию",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"value": "{{oper_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/schedule/gant?id=34",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"schedule",
+								"gant"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "34"
+								}
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -1919,25 +1949,25 @@
 	],
 	"variable": [
 		{
-			"id": "300d0164-03d7-49f1-aa0a-54978ca81c33",
+			"id": "ca476973-d57c-4bff-ba93-311eafba7729",
 			"key": "url",
 			"value": "http://localhost:15800",
 			"type": "string"
 		},
 		{
-			"id": "f8b8ec85-bbee-4c51-b260-3c83fadf249a",
+			"id": "bb5540cf-102b-4410-b892-8ec1193e1d6e",
 			"key": "oper_token",
 			"value": "",
 			"type": "string"
 		},
 		{
-			"id": "40988877-58ef-46d4-b1dd-75cda044fa71",
+			"id": "bfce1ba9-de4b-4caa-9d1a-046044a6786b",
 			"key": "test_url",
 			"value": "http://192.168.5.253:15800",
 			"type": "string"
 		},
 		{
-			"id": "f86307d9-1a93-4c0c-949a-c12f2846aeb2",
+			"id": "6d667524-339c-4e1b-8440-49fca72960f6",
 			"key": "admin_token",
 			"value": "",
 			"type": "string"

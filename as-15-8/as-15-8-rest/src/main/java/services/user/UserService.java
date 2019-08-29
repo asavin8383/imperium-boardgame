@@ -8,8 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import repositories.UserRepository;
 
-import java.util.Optional;
-
 /**
  * Creation date: 19.08.2019
  * Author: asavin

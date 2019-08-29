@@ -2,10 +2,7 @@ package model.schedule;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import model.Views;
 import model.task.Arrangement;
 
@@ -17,6 +14,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @Entity
 @Table(name = "schedule_period_arrangements", schema = "schedule")
+@EqualsAndHashCode(exclude = "schedulePeriodCheckUnits")
+@ToString(exclude = "schedulePeriodCheckUnits")
 public class SchedulePeriodArrangement {
 
     @Id

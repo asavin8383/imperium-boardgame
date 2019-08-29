@@ -1,8 +1,6 @@
 package model.schedule;
 
-import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Data;
-import model.Views;
 import model.enums.SchedulePeriodCheckUnitStatus;
 import model.result.ArrangementResult;
 

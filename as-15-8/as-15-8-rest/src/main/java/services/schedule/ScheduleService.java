@@ -18,7 +18,6 @@ import repositories.ArrangementResultRepo;
 import repositories.GlobalParametersRepository;
 import repositories.ScheduleRepo;
 import repositories.schedule.SchedulePeriodArrangementRepo;
-import repositories.schedule.SchedulePeriodCheckUnitRepo;
 
 import javax.transaction.Transactional;
 import java.time.Duration;
@@ -41,17 +40,14 @@ public class ScheduleService {
 
     private final ArrangementResultRepo arrangementResultRepo;
 
-    private final SchedulePeriodCheckUnitRepo schedulePeriodCheckUnitRepo;
-
     private final ArrangementRepo arrangementRepo;
 
     @Autowired
-    public ScheduleService(PlannedProcessingTimeService plannedProcessingTimeService, GlobalParametersRepository globalParametersRepository, ScheduleRepo scheduleRepo, SchedulePeriodArrangementRepo schedulePeriodArrangementRepo, ArrangementResultRepo arrangementResultRepo, SchedulePeriodCheckUnitRepo schedulePeriodCheckUnitRepo, ArrangementRepo arrangementRepo){
+    public ScheduleService(PlannedProcessingTimeService plannedProcessingTimeService, GlobalParametersRepository globalParametersRepository, ScheduleRepo scheduleRepo, SchedulePeriodArrangementRepo schedulePeriodArrangementRepo, ArrangementResultRepo arrangementResultRepo, ArrangementRepo arrangementRepo){
         this.plannedProcessingTimeService = plannedProcessingTimeService;
         this.scheduleRepo = scheduleRepo;
         this.schedulePeriodArrangementRepo = schedulePeriodArrangementRepo;
         this.arrangementResultRepo = arrangementResultRepo;
-        this.schedulePeriodCheckUnitRepo = schedulePeriodCheckUnitRepo;
         this.arrangementRepo = arrangementRepo;
         try {
             this.totalWorkersCount = globalParametersRepository
@@ -61,6 +57,10 @@ public class ScheduleService {
         } catch (Exception ex){
             throw new AS_15_8_Exception("Ошибка при получении количества ресурсов из параметров в БД", ex);
         }
+    }
+
+    public Schedule getScheduleById(Long id){
+        return scheduleRepo.findById(id).orElseThrow(() -> new AS_15_8_Exception(String.format("Ошибка получения расписания по id %d. Расписание не найдено в БД")));
     }
 
     public Schedule saveSchedule(Schedule schedule){
@@ -122,7 +122,7 @@ public class ScheduleService {
                 schedule.getSchedulePeriods().add(schedulePeriod);
             }
         }
-        schedule.getSchedulePeriods().sort(Comparator.comparing(SchedulePeriod::getStartTime));
+        //Collections.sort(schedule.getSchedulePeriods(), Comparator.comparing(SchedulePeriod::getStartTime));
         return schedule;
     }
 
@@ -134,8 +134,8 @@ public class ScheduleService {
             }
         }
 
-        for(int i = 0; i<schedule.getSchedulePeriods().size(); i++){
-            SchedulePeriod schedulePeriod = schedule.getSchedulePeriods().get(i);
+        for(SchedulePeriod schedulePeriod : schedule.getSchedulePeriods()){
+            //SchedulePeriod schedulePeriod = schedule.getSchedulePeriods().get(i);
             Map<Arrangement, Double> arrangementDensities = calculateDensities(schedulePeriod, arrangementCheckUnits, nextCheckUnits);
             double totalPeriodDensity = arrangementDensities.values().stream().collect(Collectors.summingDouble(Double::doubleValue));
 
@@ -172,8 +172,14 @@ public class ScheduleService {
                 nextCheckUnits.put(arrangement, nextCheckUnit);
 
                 if(nextCheckUnit != null){
-                    if(schedule.getSchedulePeriods().indexOf(schedulePeriod) < schedule.getSchedulePeriods().size()-1) {
-                        SchedulePeriod nextPeriod = schedule.getSchedulePeriods().get(schedule.getSchedulePeriods().indexOf(schedulePeriod)+1);
+                    if(schedulePeriod != schedule.getSchedulePeriods().last()) {
+                        //TODO не придумал ничего более умного. Обсудить с Лёхой
+                        SchedulePeriod nextPeriod =
+                                schedule.getSchedulePeriods().tailSet(schedulePeriod)
+                                        .stream()
+                                        .filter(elem -> !elem.equals(schedulePeriod))
+                                        .findFirst()
+                                        .orElseThrow(() -> new AS_15_8_Exception("Ошибка подсчёта workers. Неожиданный конец коллекции периодов"));
                         if (!containsArrangement(nextPeriod.getSchedulePeriodArrangements(), arrangement)) {
                             nextPeriod.getSchedulePeriodArrangements().add(new SchedulePeriodArrangement(nextPeriod, arrangement));
                         }

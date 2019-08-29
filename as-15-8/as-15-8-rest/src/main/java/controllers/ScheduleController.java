@@ -5,11 +5,15 @@ import controllers.helpers.SortingHelper;
 import enums.ExecutionStatus;
 import enums.SortingDirection;
 import exceptions.AS_15_8_Exception;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Views;
 import model.enums.ScheduleStatus;
 import model.schedule.Schedule;
+import model.schedule.SchedulePeriod;
 import model.task.Arrangement;
 import model.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +31,8 @@ import services.user.UserService;
 
 import javax.transaction.Transactional;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
+import java.time.LocalTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -107,6 +111,24 @@ public class ScheduleController {
         scheduleService.deleteSchedule(schedule);
     }
 
+    @GetMapping(path = "/gant")
+    @JsonView(Views.Full.class)
+    public List<BriefArrangement> getScheduleGant(@RequestParam("id") Long id){
+        Schedule schedule = scheduleService.getScheduleById(id);
+        List<BriefArrangement> briefArrangements = new ArrayList<>();
+        SortedSet<SchedulePeriod> schedulePeriods = schedule.getSchedulePeriods();
+        schedulePeriods.forEach(schedulePeriod -> schedulePeriod.getSchedulePeriodArrangements()
+                .forEach(schedulePeriodArrangement -> {
+                    BriefArrangement briefArrangement = new BriefArrangement(schedulePeriodArrangement.getArrangementId(), schedulePeriod.getStartTime(), schedulePeriod.getEndTime());
+                    if(briefArrangements.contains(briefArrangement)){
+                        briefArrangements.get(briefArrangements.indexOf(briefArrangement)).setPlannedEndTime(briefArrangement.getPlannedEndTime());
+                    } else {
+                        briefArrangements.add(briefArrangement);
+                    }
+                }));
+        return briefArrangements;
+    }
+
     private Schedule createSchedule(List<Long> arrangementIds, String userName, Optional<LocalDate> plannedDate){
         User user = userService.getUserByUserName(userName);
         LocalDate scheduleDate = plannedDate.orElse(LocalDate.now());
@@ -119,6 +141,19 @@ public class ScheduleController {
         schedule.setUser(user);
         schedule.setPlannedDate(scheduleDate);
         return schedule;
+    }
+
+    @Data
+    @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+    @AllArgsConstructor
+    class BriefArrangement {
+        @EqualsAndHashCode.Include
+        @JsonView(Views.Id.class)
+        private Long id;
+        @JsonView(Views.Full.class)
+        private LocalTime plannedStartTime;
+        @JsonView(Views.Full.class)
+        private LocalTime plannedEndTime;
     }
 
 }

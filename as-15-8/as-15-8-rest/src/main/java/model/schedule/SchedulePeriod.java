@@ -1,11 +1,7 @@
 package model.schedule;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import model.Views;
 
 import javax.persistence.*;
@@ -18,7 +14,9 @@ import java.util.List;
 @RequiredArgsConstructor
 @Entity
 @Table(name = "schedule_periods", schema = "schedule")
-public class SchedulePeriod {
+@ToString(exclude = "schedulePeriodArrangements")
+@EqualsAndHashCode(exclude = "schedulePeriodArrangements")
+public class SchedulePeriod implements Comparable<SchedulePeriod>{
 
     @Id
     @GeneratedValue(strategy= GenerationType.SEQUENCE, generator="schedule_periods_generator")
@@ -42,4 +40,9 @@ public class SchedulePeriod {
     @OneToMany(cascade=CascadeType.ALL, mappedBy = "schedulePeriod", fetch = FetchType.EAGER)
     @JsonView(Views.Full.class)
     private List<SchedulePeriodArrangement> schedulePeriodArrangements = new ArrayList<>();
+
+    @Override
+    public int compareTo(SchedulePeriod otherPeriod) {
+        return this.getStartTime().compareTo(otherPeriod.getStartTime());
+    }
 }
