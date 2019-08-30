@@ -67,7 +67,7 @@ public class ScheduleController {
     @JsonView(Views.Full.class)
     @ResponseStatus(code = HttpStatus.CREATED)
     public Schedule postSchedule(
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Optional<LocalDate> plannedDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate plannedDate,
             @RequestBody List<Long> arrangementIds,
             Authentication auth){
         Schedule schedule = createSchedule(arrangementIds, ((User)auth.getPrincipal()).getUserName(), plannedDate);
@@ -79,7 +79,7 @@ public class ScheduleController {
     @Transactional
     public Schedule updateSchedule(
             @RequestParam("id") Schedule schedule,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Optional<LocalDate> plannedDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate plannedDate,
             @RequestBody List<Arrangement> arrangements,
             Authentication auth){
         if(!(schedule.getStatus().equals(ScheduleStatus.NEW))){
@@ -113,8 +113,7 @@ public class ScheduleController {
 
     @GetMapping(path = "/gant")
     @JsonView(Views.Full.class)
-    public List<BriefArrangement> getScheduleGant(@RequestParam("id") Long id){
-        Schedule schedule = scheduleService.getScheduleById(id);
+    public List<BriefArrangement> getScheduleGant(@RequestParam("id") Schedule schedule){
         List<BriefArrangement> briefArrangements = new ArrayList<>();
         SortedSet<SchedulePeriod> schedulePeriods = schedule.getSchedulePeriods();
         schedulePeriods.forEach(schedulePeriod -> schedulePeriod.getSchedulePeriodArrangements()
@@ -129,17 +128,16 @@ public class ScheduleController {
         return briefArrangements;
     }
 
-    private Schedule createSchedule(List<Long> arrangementIds, String userName, Optional<LocalDate> plannedDate){
+    private Schedule createSchedule(List<Long> arrangementIds, String userName, LocalDate plannedDate){
         User user = userService.getUserByUserName(userName);
-        LocalDate scheduleDate = plannedDate.orElse(LocalDate.now());
-        if(scheduleDate.isBefore(LocalDate.now())){
-            AS_15_8_Exception.logAndThrow(log, String.format("Ошибка создания расписания. Плановая дата меньше текушей: %s", scheduleDate));
+        if(plannedDate==null || plannedDate.isBefore(LocalDate.now())){
+            plannedDate = LocalDate.now();
         }
-        log.info("Начало расчета расписания на дату: {}", scheduleDate);
+        log.info("Начало расчета расписания на дату: {}", plannedDate);
         Schedule schedule = scheduleService.create(arrangementService.getArrangementCheckUnits(arrangementIds));
-        log.info("Расчет расписания на дату {} завершен", scheduleDate);
+        log.info("Расчет расписания на дату {} завершен", plannedDate);
         schedule.setUser(user);
-        schedule.setPlannedDate(scheduleDate);
+        schedule.setPlannedDate(plannedDate);
         return schedule;
     }
 
