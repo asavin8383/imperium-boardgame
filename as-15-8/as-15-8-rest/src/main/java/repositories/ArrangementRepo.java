@@ -17,7 +17,7 @@ import java.util.Optional;
 @Repository
 public interface ArrangementRepo extends JpaRepository<Arrangement, Long>, ArrangementRepositoryAdvanced {
 
-    @Query("SELECT a FROM Arrangement a WHERE a.id = :id and a.status in ('NEW', FORMED)")
+    @Query("SELECT a FROM Arrangement a WHERE a.id = :id and a.status in ('NEW', 'FORMED')")
     Optional<Arrangement> findEditableArrangement(@Param("id") Long id);
 
     @Query("select DISTINCT a " +
