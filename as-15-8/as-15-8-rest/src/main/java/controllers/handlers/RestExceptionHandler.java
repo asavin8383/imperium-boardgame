@@ -4,10 +4,13 @@ import exceptions.AS_15_8_API_Error;
 import exceptions.AS_15_8_Exception;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 /**
@@ -18,9 +21,15 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @ControllerAdvice
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(AS_15_8_Exception.class)
+    @ExceptionHandler(value = {AS_15_8_Exception.class})
     protected ResponseEntity<Object> handleAS_15_8_Exception(
             AS_15_8_Exception ex) {
+        AS_15_8_API_Error apiError = new AS_15_8_API_Error(HttpStatus.BAD_REQUEST, ex.getMessage());
+        return buildResponseEntity(apiError);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
         AS_15_8_API_Error apiError = new AS_15_8_API_Error(HttpStatus.BAD_REQUEST, ex.getMessage());
         return buildResponseEntity(apiError);
     }
