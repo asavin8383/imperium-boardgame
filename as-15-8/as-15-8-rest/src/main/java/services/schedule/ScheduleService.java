@@ -63,14 +63,6 @@ public class ScheduleService {
         return scheduleRepo.save(schedule);
     }
 
-    @Transactional
-    public Schedule updateSchedule(Schedule oldSchedule, Schedule newSchedule)
-    {
-        //TODO Обдумать, наиболее ли это оптимальный вариант изменения расписания (при обычном UPDATE не удаляются one-to-many, а только добавляются новые)
-        scheduleRepo.delete(oldSchedule);
-        return scheduleRepo.save(newSchedule);
-    }
-
     public void deleteSchedule(Schedule schedule){
         scheduleRepo.delete(schedule);
     }

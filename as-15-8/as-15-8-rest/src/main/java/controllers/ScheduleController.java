@@ -99,7 +99,7 @@ public class ScheduleController {
         List<Long> arrangementIds = arrangements.stream().map(Arrangement::getId).collect(Collectors.toList());
         Schedule newSchedule = createSchedule(arrangementIds, ((User)auth.getPrincipal()).getUserName(), plannedDate);
         newSchedule.setId(schedule.getId());
-        return scheduleService.updateSchedule(schedule, newSchedule);
+        return scheduleService.saveSchedule(newSchedule);
     }
 
     @PutMapping(path = "/plan")

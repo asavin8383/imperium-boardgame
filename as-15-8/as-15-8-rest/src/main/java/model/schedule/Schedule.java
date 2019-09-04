@@ -60,10 +60,6 @@ public class Schedule {
     }
 
     public TreeSet<SchedulePeriod> getSchedulePeriodsAsTreeSet(){
-        if (this.getSchedulePeriods() != null){
-            return (TreeSet)this.getSchedulePeriods();
-        } else {
-            return null;
-        }
+        return (TreeSet)this.getSchedulePeriods();
     }
 }
