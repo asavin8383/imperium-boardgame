@@ -1,5 +1,6 @@
 package controllers;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import controllers.helpers.SortingHelper;
 import enums.ExecutionStatus;
@@ -60,6 +61,12 @@ public class ScheduleController {
         PageRequest page = PageRequest.of(
                 pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
         return arrangementService.findPageByStatus(ExecutionStatus.FORMED, page);
+    }
+
+    @GetMapping
+    @JsonView(Views.Full.class)
+    public Schedule getSchedule(@RequestParam("id") Schedule schedule){
+        return schedule;
     }
 
 

@@ -7,7 +7,9 @@ import model.Views;
 import javax.persistence.*;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor(force = true)
@@ -39,7 +41,7 @@ public class SchedulePeriod implements Comparable<SchedulePeriod>{
 
     @OneToMany(cascade=CascadeType.ALL, mappedBy = "schedulePeriod", fetch = FetchType.EAGER)
     @JsonView(Views.Full.class)
-    private List<SchedulePeriodArrangement> schedulePeriodArrangements = new ArrayList<>();
+    private Set<SchedulePeriodArrangement> schedulePeriodArrangements = new HashSet<>();
 
     @Override
     public int compareTo(SchedulePeriod otherPeriod) {

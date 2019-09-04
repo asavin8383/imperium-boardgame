@@ -883,7 +883,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"title\": \"Задание на проверку\"\n}"
+							"raw": "{\n\t\"agreed\":true,\n\t\"author\":\"jack\",\n\t\"creationDate\":\"\",\n\t\"deadlineDate\":\"\",\n\t\"endDate\":\"\",\n\t\"fgisId\":\"\",\n\t\"id\":\"\",\n\t\"modificationDate\":\"\",\n\t\"priority\":\"URGENT\",\n\t\"startDate\":\"\",\n\t\"title\":\"test p oper\",\n\t\"user\":{\"id\":1,\"userName\":\"jack\",\"firstName\":null,\"secondName\":null,\"email\":null},\n\t\"plannedDate\":\"2019-09-28T17:26:00\"}"
 						},
 						"url": {
 							"raw": "{{url}}/formal_tasks",
@@ -1782,6 +1782,35 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Получение расписания по ИД",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"value": "{{oper_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/schedule?id=18",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"schedule"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "18"
+								}
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -1949,25 +1978,25 @@
 	],
 	"variable": [
 		{
-			"id": "ca476973-d57c-4bff-ba93-311eafba7729",
+			"id": "86e85777-890c-42cc-8bd5-f6e82669068f",
 			"key": "url",
 			"value": "http://localhost:15800",
 			"type": "string"
 		},
 		{
-			"id": "bb5540cf-102b-4410-b892-8ec1193e1d6e",
+			"id": "cb077cca-f27c-4c9e-85d5-71cb92f6a439",
 			"key": "oper_token",
 			"value": "",
 			"type": "string"
 		},
 		{
-			"id": "bfce1ba9-de4b-4caa-9d1a-046044a6786b",
+			"id": "6868c443-76e8-469e-b1ca-f2c67d39b0dd",
 			"key": "test_url",
 			"value": "http://192.168.5.253:15800",
 			"type": "string"
 		},
 		{
-			"id": "6d667524-339c-4e1b-8440-49fca72960f6",
+			"id": "aed0f5bf-fa01-453c-a45c-bbdad85bd2ae",
 			"key": "admin_token",
 			"value": "",
 			"type": "string"

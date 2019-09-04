@@ -58,4 +58,12 @@ public class Schedule {
         this.creationDate = LocalDateTime.now();
         this.status = ScheduleStatus.NEW;
     }
+
+    public TreeSet<SchedulePeriod> getSchedulePeriodsAsTreeSet(){
+        if (this.getSchedulePeriods() != null){
+            return (TreeSet)this.getSchedulePeriods();
+        } else {
+            return null;
+        }
+    }
 }
