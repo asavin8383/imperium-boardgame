@@ -24,7 +24,6 @@ import java.time.Duration;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -125,7 +124,7 @@ public class ScheduleService {
         for(SchedulePeriod schedulePeriod : schedule.getSchedulePeriods()){
             //SchedulePeriod schedulePeriod = schedule.getSchedulePeriods().get(i);
             Map<Arrangement, Double> arrangementDensities = calculateDensities(schedulePeriod, arrangementCheckUnits, nextCheckUnits);
-            double totalPeriodDensity = arrangementDensities.values().stream().collect(Collectors.summingDouble(Double::doubleValue));
+            double totalPeriodDensity = arrangementDensities.values().stream().mapToDouble(Double::doubleValue).sum();
 
             Map<Arrangement, ArrangementResult> notFinishedArrangements = new HashMap<>();
             Iterator<SchedulePeriodArrangement> schedulePeriodArrangementsIterator = schedulePeriod.getSchedulePeriodArrangements().iterator();
@@ -185,7 +184,7 @@ public class ScheduleService {
         }
     }
 
-    private boolean checkSchedule(Schedule schedule){
+    /*private boolean checkSchedule(Schedule schedule){
         boolean isScheduleCorrect = true;
 
         Map<Arrangement, Long> arrangementLags = new HashMap<>();
@@ -208,7 +207,7 @@ public class ScheduleService {
         }
 
         return isScheduleCorrect;
-    }
+    }*/
 
     private long countArrangementProcessingTime(Set<ArrangementResult> checkUnits, AccessTool accessTool){
         long processingTime = 0;
