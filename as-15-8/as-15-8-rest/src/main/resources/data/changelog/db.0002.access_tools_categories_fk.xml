@@ -6,11 +6,9 @@
     http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
     <changeSet id="2" author="asavin">
-        <insert tableName="access_tools_categories" schemaName="portal">
-            <column name="name" value="DEFAULT"></column>
-        </insert>
+        <sql>insert into portal.access_tools_categories (id, name) values (0, 'DEFAULT')</sql>
         <addColumn tableName="access_tools" schemaName="portal">
-            <column name="category_id" type="bigint" defaultValue="1">
+            <column name="category_id" type="bigint" defaultValue="0">
                 <constraints nullable="false"/>
             </column>
         </addColumn>
@@ -21,6 +19,11 @@
             baseColumnNames="category_id"
             constraintName="fk_access_tools_access_tools_categories"
             referencedTableName="access_tools_categories"
-            referencedColumnNames="id"/>
+            referencedColumnNames="id"
+            onUpdate="CASCADE"
+            onDelete="CASCADE"/>
+        <rollback>
+            <sql>delete from portal.access_tools_categories where id = 0</sql>
+        </rollback>
     </changeSet>
 </databaseChangeLog>
