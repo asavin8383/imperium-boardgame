@@ -5,9 +5,9 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd
     http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
-    <include file="data/changelog/db.0001.access_tools_categories.xml"/>
-    <include file="data/changelog/db.0002.access_tools_categories_fk.xml"/>
-    <include file="data/changelog/db.0003.traffic.xml"/>
+    <include file="data/changelog/rest.0001.access_tools_categories.xml"/>
+    <include file="data/changelog/rest.0002.access_tools_categories_fk.xml"/>
+    <include file="data/changelog/rest.0003.traffic.xml"/>
 
 
 </databaseChangeLog>

@@ -5,25 +5,29 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd
     http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
-
-    <changeSet id="1" author="asavin">
-        <createTable tableName="access_tools_categories" schemaName="portal">
+    <changeSet id="rest.0003" author="asavin">
+        <createTable tableName="traffic" schemaName="portal">
             <column name="id" type="bigint" autoIncrement="true" >
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="name" type="varchar(255)">
                 <constraints nullable="false" unique="true"/>
             </column>
-            <column name="parent_id" type="bigint"/>
+            <column name="arrangement_id" type="bigint">
+                <constraints
+                        unique="true"
+                        nullable="false"/>
+            </column>
         </createTable>
         <addForeignKeyConstraint
-                baseTableSchemaName="portal"
-                referencedTableSchemaName="portal"
-                baseTableName="access_tools_categories"
-                baseColumnNames="parent_id"
-                constraintName="fk_access_tools_categories_id"
-                referencedTableName="access_tools_categories"
-                referencedColumnNames="id"/>
+            baseTableSchemaName="portal"
+            baseTableName="traffic"
+            baseColumnNames="arrangement_id"
+            constraintName="fk_traffic_arrangements"
+            referencedTableSchemaName="portal"
+            referencedTableName="arrangements"
+            referencedColumnNames="id"
+            onUpdate="CASCADE"
+            onDelete="CASCADE"/>
     </changeSet>
-
 </databaseChangeLog>
