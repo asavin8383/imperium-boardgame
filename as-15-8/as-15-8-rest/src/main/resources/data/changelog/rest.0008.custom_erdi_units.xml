@@ -1,0 +1,40 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd
+    http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <changeSet id="rest.0008" author="asavin">
+        <createTable tableName="custom_erdi_units" schemaName="portal">
+            <column name="id" type="bigint" autoIncrement="true" >
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="custom_erdi_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="varchar(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="value" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint
+                baseTableSchemaName="portal"
+                baseTableName="custom_erdi_units"
+                baseColumnNames="custom_erdi_id"
+                constraintName="fk_custom_erdi"
+                referencedTableSchemaName="portal"
+                referencedTableName="custom_erdi"
+                referencedColumnNames="id"
+                onUpdate="CASCADE"
+                onDelete="CASCADE"/>
+        <sql>
+            ALTER TABLE portal.custom_erdi_units ADD CONSTRAINT ck_type CHECK ( type in ('URL', 'DOMAIN', 'DOMAIN_MASK', 'IP_V4', 'IP_V6', 'IP_V4_SUBNET', 'IP_V6_SUBNET') );
+        </sql>
+        <rollback>
+            <dropTable schemaName="portal" tableName="custom_erdi_units"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

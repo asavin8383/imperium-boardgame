@@ -12,6 +12,11 @@
     <include file="data/changelog/rest.0005.custom_erdi.xml"/>
     <include file="data/changelog/rest.0006.erdi_traffic_units.xml"/>
     <include file="data/changelog/rest.0007.erdi_traffic_units_custom_erdi.xml"/>
+    <include file="data/changelog/rest.0008.custom_erdi_units.xml"/>
+    <include file="data/changelog/rest.0009.search_phrases.xml"/>
+    <include file="data/changelog/rest.0010.search_query_traffic_units.xml"/>
+    <include file="data/changelog/rest.0011.search_query_traffic_units_custom_erdi.xml"/>
+    <include file="data/changelog/rest.0012.search_query_traffic_units_search_phrases.xml"/>
 
 
 </databaseChangeLog>
