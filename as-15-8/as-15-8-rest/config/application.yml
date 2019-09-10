@@ -7,6 +7,8 @@ logging:
 spring:
     application:
         name: as15-8-rest
+    liquibase:
+      enabled: false
     datasource:
         test-while-idle: true
         validation-query: SELECT 1;
