@@ -24,7 +24,6 @@ import java.time.Duration;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -59,20 +58,8 @@ public class ScheduleService {
         }
     }
 
-    public Schedule getScheduleById(Long id){
-        return scheduleRepo.findById(id).orElseThrow(() -> new AS_15_8_Exception(String.format("Ошибка получения расписания по id %d. Расписание не найдено в БД")));
-    }
-
     public Schedule saveSchedule(Schedule schedule){
         return scheduleRepo.save(schedule);
-    }
-
-    @Transactional
-    public Schedule updateSchedule(Schedule oldSchedule, Schedule newSchedule)
-    {
-        //TODO Обдумать, наиболее ли это оптимальный вариант изменения расписания (при обычном UPDATE не удаляются one-to-many, а только добавляются новые)
-        scheduleRepo.delete(oldSchedule);
-        return scheduleRepo.save(newSchedule);
     }
 
     public void deleteSchedule(Schedule schedule){
@@ -137,7 +124,7 @@ public class ScheduleService {
         for(SchedulePeriod schedulePeriod : schedule.getSchedulePeriods()){
             //SchedulePeriod schedulePeriod = schedule.getSchedulePeriods().get(i);
             Map<Arrangement, Double> arrangementDensities = calculateDensities(schedulePeriod, arrangementCheckUnits, nextCheckUnits);
-            double totalPeriodDensity = arrangementDensities.values().stream().collect(Collectors.summingDouble(Double::doubleValue));
+            double totalPeriodDensity = arrangementDensities.values().stream().mapToDouble(Double::doubleValue).sum();
 
             Map<Arrangement, ArrangementResult> notFinishedArrangements = new HashMap<>();
             Iterator<SchedulePeriodArrangement> schedulePeriodArrangementsIterator = schedulePeriod.getSchedulePeriodArrangements().iterator();
@@ -173,13 +160,7 @@ public class ScheduleService {
 
                 if(nextCheckUnit != null){
                     if(schedulePeriod != schedule.getSchedulePeriods().last()) {
-                        //TODO не придумал ничего более умного. Обсудить с Лёхой
-                        SchedulePeriod nextPeriod =
-                                schedule.getSchedulePeriods().tailSet(schedulePeriod)
-                                        .stream()
-                                        .filter(elem -> !elem.equals(schedulePeriod))
-                                        .findFirst()
-                                        .orElseThrow(() -> new AS_15_8_Exception("Ошибка подсчёта workers. Неожиданный конец коллекции периодов"));
+                        SchedulePeriod nextPeriod = schedule.getSchedulePeriodsAsTreeSet().higher(schedulePeriod);
                         if (!containsArrangement(nextPeriod.getSchedulePeriodArrangements(), arrangement)) {
                             nextPeriod.getSchedulePeriodArrangements().add(new SchedulePeriodArrangement(nextPeriod, arrangement));
                         }
@@ -203,7 +184,7 @@ public class ScheduleService {
         }
     }
 
-    private boolean checkSchedule(Schedule schedule){
+    /*private boolean checkSchedule(Schedule schedule){
         boolean isScheduleCorrect = true;
 
         Map<Arrangement, Long> arrangementLags = new HashMap<>();
@@ -226,7 +207,7 @@ public class ScheduleService {
         }
 
         return isScheduleCorrect;
-    }
+    }*/
 
     private long countArrangementProcessingTime(Set<ArrangementResult> checkUnits, AccessTool accessTool){
         long processingTime = 0;
@@ -279,7 +260,7 @@ public class ScheduleService {
         return arrangementDensities;
     }
 
-    private static boolean containsArrangement(List<SchedulePeriodArrangement> schedulePeriodArrangements, Arrangement arrangement){
+    private static boolean containsArrangement(Set<SchedulePeriodArrangement> schedulePeriodArrangements, Arrangement arrangement){
         for(SchedulePeriodArrangement schedulePeriodArrangement : schedulePeriodArrangements){
             if(schedulePeriodArrangement.getArrangement().equals(arrangement)){
                 return true;

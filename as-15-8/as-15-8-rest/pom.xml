@@ -13,6 +13,7 @@
 	<properties>
 		<spring.boot.version>2.1.4.RELEASE</spring.boot.version>
 		<spring.cloud.version>Greenwich.SR2</spring.cloud.version>
+		<liquibase-maven-plugin.version>3.8.0</liquibase-maven-plugin.version>
 	</properties>
 
 	<dependencyManagement>
@@ -145,6 +146,13 @@
 			<artifactId>lombok</artifactId>
 		</dependency>
 
+		<!-- Liquibase -->
+		<dependency>
+			<groupId>org.liquibase</groupId>
+			<artifactId>liquibase-core</artifactId>
+		</dependency>
+
+
 		<!-- Test -->
 		<dependency>
 			<groupId>junit</groupId>
@@ -171,6 +179,15 @@
 				</executions>
 				<version>${spring.boot.version}</version>
 				<!-- <configuration> <executable>true</executable> </configuration> -->
+			</plugin>
+			<plugin>
+				<groupId>org.liquibase</groupId>
+				<artifactId>liquibase-maven-plugin</artifactId>
+				<version>${liquibase-maven-plugin.version}</version>
+				<configuration>
+					<propertyFile>src/main/resources/liquibase/liquibase.properties</propertyFile>
+					<changeLogFile>data/changelog/db.changelog.master.xml</changeLogFile>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

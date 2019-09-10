@@ -1,5 +1,6 @@
 package controllers;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import controllers.helpers.SortingHelper;
 import enums.ExecutionStatus;
@@ -62,6 +63,12 @@ public class ScheduleController {
         return arrangementService.findPageByStatus(ExecutionStatus.FORMED, page);
     }
 
+    @GetMapping
+    @JsonView(Views.Full.class)
+    public Schedule getSchedule(@RequestParam("id") Schedule schedule){
+        return schedule;
+    }
+
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @JsonView(Views.Full.class)
@@ -92,7 +99,7 @@ public class ScheduleController {
         List<Long> arrangementIds = arrangements.stream().map(Arrangement::getId).collect(Collectors.toList());
         Schedule newSchedule = createSchedule(arrangementIds, ((User)auth.getPrincipal()).getUserName(), plannedDate);
         newSchedule.setId(schedule.getId());
-        return scheduleService.updateSchedule(schedule, newSchedule);
+        return scheduleService.saveSchedule(newSchedule);
     }
 
     @PutMapping(path = "/plan")
