@@ -12,7 +12,6 @@ import enums.CheckUnitJobResult;
 import lombok.Data;
 import model.enums.UserResult;
 import model.erdi.ERDI;
-import model.schedule.SchedulePeriodCheckUnit;
 import model.task.Arrangement;
 
 /**
@@ -53,26 +52,9 @@ public class ArrangementResult implements Serializable {
     @Column(name="result", nullable=false)
     private CheckUnitJobResult result;
 
-    /*Lob
-    @Column(name="screenshot", columnDefinition="bytea")
-    @Type(type="org.hibernate.type.BinaryType")
-    @JsonIgnore
-    private byte[] screenshot;
-
-    @Lob
-    @Column(name="etalon_screenshot", columnDefinition="bytea")
-    @Type(type="org.hibernate.type.BinaryType")
-    @JsonIgnore
-    private byte[] etalonScreenshot;*/
-
     private LocalDateTime startDate;
     private LocalDateTime endDate;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "id", referencedColumnName = "id")
-    @JsonIgnore
-    DetailedArrangementResult detailedArrangementResult;
-    
     @Enumerated(EnumType.STRING)
     @Column(name="user_result")
     private UserResult userResult;
@@ -80,7 +62,4 @@ public class ArrangementResult implements Serializable {
     @Column(name="user_description")
     private String userDescription;
 
-    @OneToOne(mappedBy = "checkUnit")
-    @JoinColumn(name = "id", referencedColumnName = "check_unit_id")
-    private SchedulePeriodCheckUnit schedulePeriodCheckUnit;
 }

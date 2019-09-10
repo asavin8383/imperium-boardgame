@@ -1,4 +1,4 @@
-package services.userDetails;
+package services.user;
 
 import exceptions.AS_15_8_Exception;
 import lombok.extern.slf4j.Slf4j;

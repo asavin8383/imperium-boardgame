@@ -81,4 +81,9 @@ public class AccessTool implements Serializable{
 	@OneToMany(mappedBy = "accessTool")
 	@JsonIgnore
 	private List<PlannedProcessingTime> plannedProcessingTimes;
+
+	@ManyToOne
+	@JoinColumn(name="category_id")
+	@NotNull
+	private AccessToolsCategory accessToolsCategory;
 }

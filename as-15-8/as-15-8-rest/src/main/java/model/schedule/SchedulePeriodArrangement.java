@@ -2,10 +2,7 @@ package model.schedule;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import model.Views;
 import model.task.Arrangement;
 
@@ -13,10 +10,12 @@ import javax.persistence.*;
 import java.util.List;
 
 @Data
-@NoArgsConstructor
+@NoArgsConstructor(force = true)
 @RequiredArgsConstructor
 @Entity
 @Table(name = "schedule_period_arrangements", schema = "schedule")
+@EqualsAndHashCode(exclude = "schedulePeriodCheckUnits")
+@ToString(exclude = "schedulePeriodCheckUnits")
 public class SchedulePeriodArrangement {
 
     @Id
@@ -27,6 +26,7 @@ public class SchedulePeriodArrangement {
 
     @ManyToOne(optional=false)
     @JoinColumn(name="schedule_period_id")
+    @NonNull
     private SchedulePeriod schedulePeriod;
 
     @ManyToOne(optional=false)
@@ -38,5 +38,11 @@ public class SchedulePeriodArrangement {
     @JsonIgnore
     private List<SchedulePeriodCheckUnit> schedulePeriodCheckUnits;
 
+    @JsonView(Views.Brief.class)
     private Integer workersCount;
+
+    @JsonView(Views.Brief.class)
+    public Long getArrangementId(){
+        return arrangement.getId();
+    }
 }

@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.task.Arrangement;
 import model.task.FormalTask;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,10 +18,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import repositories.ArrangementRepository;
+import repositories.ArrangementRepo;
 import services.arrangement.ArrangementStatusService;
 import services.arrangement.impl.ArrangementService;
-import stateMachine.ArrangementEvents;
+import enums.ArrangementEvents;
 
 import java.time.LocalTime;
 import java.util.stream.Collectors;
@@ -37,7 +38,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ArrangementController {
 
-    private final ArrangementRepository arrangementRepo;
+    private final ArrangementRepo arrangementRepo;
     private final ArrangementExecutionHelper arrangementExecutionHelper;
     private final ArrangementStatusService arrangementStatusService;
     private final ArrangementService arrangementService;
@@ -63,13 +64,8 @@ public class ArrangementController {
     }
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Arrangement replaceFormalTask(@RequestBody Arrangement newArrangement, @RequestParam Long id) {
-        return arrangementRepo.findById(id)
-                .map(arrangement -> arrangementRepo.save(replaceFields(newArrangement, arrangement)))
-                .orElseGet(() -> {
-                    newArrangement.setId(id);
-                    return arrangementRepo.save(newArrangement);
-                });
+    public Arrangement replaceFormalTask(@RequestBody Arrangement newArrangement, @RequestParam("id") Arrangement arrangement) {
+        return arrangementRepo.save(replaceFields(newArrangement, arrangement));
     }
 
     @PostMapping(path = "/plan")
@@ -126,7 +122,10 @@ public class ArrangementController {
      * @return статус запроса
      */
     @GetMapping(path = "/fill")
-    public ResponseEntity<Void> fillArrangement(@RequestParam("id") Arrangement arrangement){
+    public @ResponseBody ResponseEntity<String> fillArrangement(@RequestParam("id") Arrangement arrangement){
+        if(arrangement.getPlannedStartTime() == null || arrangement.getPlannedEndTime() == null){
+            AS_15_8_Exception.logAndThrow(log, String.format("Не заполнено плановое время начала или окончания мероприятия c ID: %d", arrangement.getId()));
+        }
         arrangementService.fillArrangement(arrangement);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -140,6 +139,8 @@ public class ArrangementController {
     private Arrangement replaceFields(Arrangement newArrangement, Arrangement arrangement) {
         arrangement.setAccessTool(newArrangement.getAccessTool());
         arrangement.setTitle(newArrangement.getTitle());
+        arrangement.setPlannedStartTime(newArrangement.getPlannedStartTime());
+        arrangement.setPlannedEndTime(newArrangement.getPlannedEndTime());
         return arrangement;
     }
 

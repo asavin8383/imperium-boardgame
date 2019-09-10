@@ -1,18 +1,8 @@
 package services.arrangement.impl;
 
-import exceptions.AS_15_8_Exception;
 import jobs.ArrangementJob;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.KafkaHeaders;
-import org.springframework.kafka.support.SendResult;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.ListenableFutureCallback;
 import services.arrangement.ArrangementJobExecutionService;
 
 /**
@@ -23,19 +13,11 @@ import services.arrangement.ArrangementJobExecutionService;
 @Service
 public class ArrangementJobExecutionServiceImpl implements ArrangementJobExecutionService {
 
-    private KafkaTemplate<String, ArrangementJob> kafkaTemplate;
-
-    @Value("${spring.kafka.arrangements-topic}")
-    private String arrangementJobTopicName;
-
-    @Autowired
-    public ArrangementJobExecutionServiceImpl(KafkaTemplate<String, ArrangementJob> kafkaTemplate) {
-        this.kafkaTemplate = kafkaTemplate;
-    }
+    
 
     @Override
     public void run(ArrangementJob arrangementJob) {
-        try {
+        /*try {
             Message<ArrangementJob> message = MessageBuilder
                 .withPayload(arrangementJob)
                 .setHeader(KafkaHeaders.TOPIC, arrangementJobTopicName)
@@ -59,6 +41,6 @@ public class ArrangementJobExecutionServiceImpl implements ArrangementJobExecuti
             });
         } catch (Exception ex) {
             throw new AS_15_8_Exception("Error sending arrangement job message: ", ex);
-        }
+        }*/
     }
 }

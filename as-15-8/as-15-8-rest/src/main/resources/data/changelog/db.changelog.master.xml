@@ -1,0 +1,24 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd
+    http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <include file="data/changelog/rest.0001.access_tools_categories.xml"/>
+    <include file="data/changelog/rest.0002.access_tools_categories_fk.xml"/>
+    <include file="data/changelog/rest.0003.traffic.xml"/>
+    <include file="data/changelog/rest.0004.traffic_units.xml"/>
+    <include file="data/changelog/rest.0005.custom_erdi.xml"/>
+    <include file="data/changelog/rest.0006.erdi_traffic_units.xml"/>
+    <include file="data/changelog/rest.0007.erdi_traffic_units_custom_erdi.xml"/>
+    <include file="data/changelog/rest.0008.custom_erdi_units.xml"/>
+    <include file="data/changelog/rest.0009.search_phrases.xml"/>
+    <include file="data/changelog/rest.0010.search_query_traffic_units.xml"/>
+    <include file="data/changelog/rest.0011.search_query_traffic_units_custom_erdi.xml"/>
+    <include file="data/changelog/rest.0012.search_query_traffic_units_search_phrases.xml"/>
+    <include file="data/changelog/rest.0013.erdi_traffic_units_content.xml"/>
+    <include file="data/changelog/rest.0014.search_query_traffic_units_content.xml"/>
+
+
+</databaseChangeLog>

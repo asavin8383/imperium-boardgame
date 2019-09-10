@@ -1,6 +1,7 @@
 package events.handlers;
 
 import arrangement.ArrangementStatusNotification;
+import enums.ArrangementEvents;
 import enums.ExecutionStatus;
 import events.DispatcherChannels;
 import exceptions.AS_15_8_DispatcherException;
@@ -32,20 +33,20 @@ public class ArrangementHandler {
      * @param arrangementJob
      */
     @StreamListener(DispatcherChannels.INPUT)
-    @SendTo(DispatcherChannels.INPUT)
+    @SendTo(DispatcherChannels.NOTIFICATIONS_OUTPUT)
     public ArrangementStatusNotification createJobItems(ArrangementJob arrangementJob){
         log.info("Принято задание на проведение мероприятия: " + arrangementJob.toString());
         try {
             if(arrangementJob.getRunType().equals(ArrangementJob.JobRunType.START)) {
                 checkUnitJobService.prepareJobs(arrangementJob);
-                return new ArrangementStatusNotification(arrangementJob.getId(), ExecutionStatus.FORMED);
+                return new ArrangementStatusNotification(arrangementJob.getId(), ArrangementEvents.FILL);
             } else {
                 log.error("Тип запуска мероприятия не поддерживается: " + arrangementJob.getRunType());
                 throw new AS_15_8_DispatcherException("Тип запуска мероприятия не поддерживается: " + arrangementJob.getRunType());
             }
         } catch (Exception ex) {
             log.error("Ошибка при обработке задания на проведение мероприятия: " + arrangementJob.toString(), ex);
-            return new ArrangementStatusNotification(arrangementJob.getId(), ExecutionStatus.ERROR);
+            return new ArrangementStatusNotification(arrangementJob.getId(), ArrangementEvents.FAIL);
         }
     }
 

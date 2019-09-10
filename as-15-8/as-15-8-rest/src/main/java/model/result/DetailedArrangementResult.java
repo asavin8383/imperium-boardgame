@@ -3,9 +3,7 @@ package model.result;
 import lombok.Data;
 import org.hibernate.annotations.Immutable;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.io.Serializable;
 
 /**
@@ -38,4 +36,8 @@ public class DetailedArrangementResult implements Serializable {
     private Integer similarityOriginPercent;
     private String stubScoreInfo;
     private Boolean redirectionDetected;
+
+    @OneToOne(optional = false, fetch = FetchType.LAZY)
+    @MapsId
+    private ArrangementResult checkUnit;
 }

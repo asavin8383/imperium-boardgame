@@ -1,6 +1,7 @@
 package repositories;
 
 import model.result.ArrangementResult;
+import model.task.Arrangement;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -11,7 +12,7 @@ import java.util.List;
  * Author: asavin
  */
 @Repository
-public interface ArrangementResultRepository extends JpaRepository<ArrangementResult, Long>, ArrangementResultRepositoryAdvanced {
+public interface ArrangementResultRepo extends JpaRepository<ArrangementResult, Long>, ArrangementResultRepositoryAdvanced {
 
-    List<ArrangementResult> findAllByArrangement(Long arrangementId);
+    List<ArrangementResult> findAllByArrangement(Arrangement arrangement);
 }

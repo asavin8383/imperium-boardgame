@@ -1,5 +1,6 @@
 package stateMachine;
 
+import enums.ArrangementEvents;
 import exceptions.AS_15_8_Exception;
 import enums.ExecutionStatus;
 import org.springframework.statemachine.StateMachine;
@@ -18,6 +19,7 @@ public class ArrangementStateMachine {
 
     public ArrangementStateMachine(ExecutionStatus initialStatus){
         this.stateMachine = buildMachine(initialStatus);
+        this.stateMachine.start();
     }
 
     public boolean sendEvent(ArrangementEvents event){
@@ -40,6 +42,10 @@ public class ArrangementStateMachine {
                     .withExternal()
                     .source(ExecutionStatus.NEW).target(ExecutionStatus.FORMED)
                     .event(ArrangementEvents.FILL)
+                    .and()
+                    .withExternal()
+                    .source(ExecutionStatus.NEW).target(ExecutionStatus.ERROR)
+                    .event(ArrangementEvents.FAIL)
                     .and()
                     .withExternal()
                     .source(ExecutionStatus.FORMED).target(ExecutionStatus.SCHEDULED)

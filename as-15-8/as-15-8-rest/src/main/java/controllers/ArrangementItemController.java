@@ -18,7 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import repositories.ArrangementItemRepository;
-import repositories.ArrangementRepository;
+import repositories.ArrangementRepo;
 
 import java.util.List;
 
@@ -35,7 +35,7 @@ import java.util.List;
 public class ArrangementItemController {
 
     private final ArrangementItemRepository arrangementItemRepo;
-    private final ArrangementRepository arrangementRepo;
+    private final ArrangementRepo arrangementRepo;
 
     @GetMapping
     public Page<ArrangementItem> findList(

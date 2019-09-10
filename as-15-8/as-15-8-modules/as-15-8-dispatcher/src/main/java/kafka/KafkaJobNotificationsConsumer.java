@@ -2,6 +2,7 @@ package kafka;
 
 import arrangement.ArrangementStatusNotification;
 import checkUnits.CheckUnitStatusNotification;
+import enums.ArrangementEvents;
 import enums.CheckUnitJobResult;
 import enums.ExecutionStatus;
 import lombok.extern.slf4j.Slf4j;
@@ -37,13 +38,13 @@ public class KafkaJobNotificationsConsumer {
     	try {       		
     		ArrangementResult job = checkUnitService.updateJobStatus(notification.getJobID(), notification.getCheckUnitStatus(), notification.getDescription());
     		if(notification.getCheckUnitStatus() == CheckUnitJobResult.CAPTCHA_DETECTED) {
-    			ArrangementStatusNotification arrNotification = new ArrangementStatusNotification(job.getArrangementId(), ExecutionStatus.ACTION_REQUIRED);
+    			ArrangementStatusNotification arrNotification = new ArrangementStatusNotification(job.getArrangementId(), ArrangementEvents.PAUSE);
     			arrangementStatusProducer.sendArrangementStatusMessage(arrNotification);
     		} else {
     			ExecutionStatus status = checkUnitService.checkArrangementStatus(job.getArrangementId());
         		if(status == ExecutionStatus.FINISHED) {
         			log.info("Мероприятие успешно завешено: " + job.getArrangementId());
-        			arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(job.getArrangementId(), status));
+        			arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(job.getArrangementId(), ArrangementEvents.FINISH));
         		}
     		}
     	} catch (Exception ex) {

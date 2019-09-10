@@ -14,6 +14,9 @@ spring:
                     destination: arrangements
                     content-type: application/json
                     group: dispatchers
+                arrangementNotifications:
+                    content-type: application/json
+                    destination: arrangement_notifications
             kafka:
                 binder:
                     brokers: 192.168.5.12:9094,192.168.5.184:9094,192.168.5.211:9094
@@ -55,13 +58,18 @@ spring:
         control-topic: exec_control
         analysis-results-concurrency: 12
         notifications-concurrency: 12
+    cloud:
+        stream:
+            kafka:
+                binder:
+                    brokers: 10.97.220.141:9094,10.97.220.142:9094,10.97.220.143:9094
 
 ---
 
 spring:
     profiles: test
     datasource:
-        url: jdbc:postgresql://192.168.5.195:5432/asdb
+        url: jdbc:postgresql://192.168.5.195:5432/asdb_test
     kafka:
         arrangement-tasks-topic: arrangements
         jobs-topic: jobs
@@ -87,6 +95,13 @@ spring:
         control-topic: exec_control_ashabalin
         analysis-results-concurrency: 12
         notifications-concurrency: 12
+    cloud:
+        stream:
+            bindings:
+                incomingArrangements:
+                    destination: arrangements_ashabalin
+                arrangementNotifications:
+                    destination: arrangement_notifications_ashabalin
 
 ---
 
@@ -103,6 +118,13 @@ spring:
         control-topic: exec_control_asinyavin
         analysis-results-concurrency: 12
         notifications-concurrency: 12
+    cloud:
+        stream:
+            bindings:
+                incomingArrangements:
+                    destination: arrangements_asinyavin
+                arrangementNotifications:
+                    destination: arrangement_notifications_asinyavin
 
 ---
 
@@ -124,6 +146,8 @@ spring:
             bindings:
                 incomingArrangements:
                     destination: arrangements_asavin
+                arrangementNotifications:
+                    destination: arrangement_notifications_asavin
 ---
 
 spring:
@@ -139,6 +163,13 @@ spring:
         control-topic: exec_control_pvorobiev
         analysis-results-concurrency: 12
         notifications-concurrency: 12
+    cloud:
+        stream:
+            bindings:
+                incomingArrangements:
+                    destination: arrangements_pvorobiev
+                arrangementNotifications:
+                    destination: arrangement_notifications_pvorobiev
 
 ---
 
@@ -155,3 +186,10 @@ spring:
         control-topic: exec_control_jspirina
         analysis-results-concurrency: 12
         notifications-concurrency: 12
+    cloud:
+        stream:
+            bindings:
+                incomingArrangements:
+                    destination: arrangements_jspirina
+                arrangementNotifications:
+                    destination: arrangement_notifications_jspirina
