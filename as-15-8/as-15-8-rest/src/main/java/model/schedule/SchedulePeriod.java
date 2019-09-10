@@ -11,7 +11,9 @@ import model.Views;
 import javax.persistence.*;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -38,5 +40,5 @@ public class SchedulePeriod {
 
     @OneToMany(cascade=CascadeType.ALL, mappedBy = "schedulePeriod", fetch = FetchType.EAGER)
     @JsonIgnore
-    private List<SchedulePeriodArrangement> schedulePeriodArrangements = new ArrayList<>();
+    private Set<SchedulePeriodArrangement> schedulePeriodArrangements = new HashSet<>();
 }

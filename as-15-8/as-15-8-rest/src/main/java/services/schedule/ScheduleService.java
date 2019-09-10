@@ -15,7 +15,6 @@ import repositories.GlobalParametersRepository;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class ScheduleService {
@@ -82,7 +81,7 @@ public class ScheduleService {
         for(int i = 0; i<schedule.getSchedulePeriods().size(); i++){
             SchedulePeriod schedulePeriod = schedule.getSchedulePeriods().get(i);
             Map<Arrangement, Double> arrangementDensities = calculateDensities(schedulePeriod, arrangementCheckUnits, nextCheckUnits);
-            double totalPeriodDensity = arrangementDensities.values().stream().collect(Collectors.summingDouble(Double::doubleValue));
+            double totalPeriodDensity = arrangementDensities.values().stream().mapToDouble(Double::doubleValue).sum();
 
             Map<Arrangement, ArrangementResult> notFinishedArrangements = new HashMap<>();
             Iterator<SchedulePeriodArrangement> schedulePeriodArrangementsIterator = schedulePeriod.getSchedulePeriodArrangements().iterator();
@@ -142,7 +141,7 @@ public class ScheduleService {
         }
     }
 
-    private boolean checkSchedule(Schedule schedule){
+    /*private boolean checkSchedule(Schedule schedule){
         boolean isScheduleCorrect = true;
 
         Map<Arrangement, Long> arrangementLags = new HashMap<>();
@@ -165,7 +164,7 @@ public class ScheduleService {
         }
 
         return isScheduleCorrect;
-    }
+    }*/
 
     private long countArrangementProcessingTime(Set<ArrangementResult> checkUnits, AccessTool accessTool){
         long processingTime = 0;
@@ -218,7 +217,7 @@ public class ScheduleService {
         return arrangementDensities;
     }
 
-    private static boolean containsArrangement(List<SchedulePeriodArrangement> schedulePeriodArrangements, Arrangement arrangement){
+    private static boolean containsArrangement(Set<SchedulePeriodArrangement> schedulePeriodArrangements, Arrangement arrangement){
         for(SchedulePeriodArrangement schedulePeriodArrangement : schedulePeriodArrangements){
             if(schedulePeriodArrangement.getArrangement().equals(arrangement)){
                 return true;
