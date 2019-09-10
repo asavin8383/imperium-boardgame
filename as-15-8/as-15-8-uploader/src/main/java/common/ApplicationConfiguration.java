@@ -55,7 +55,7 @@ public class ApplicationConfiguration {
 
 	@PostConstruct
 	public void test() throws IOException, ExceptionErdiParser {
-		System.out.println("---------------------");
+		System.out.println("START ---------------------");
 
 
 		//restApiHelper.test1();
@@ -104,7 +104,7 @@ public class ApplicationConfiguration {
 		*/
 
 
-		System.out.println("---------------------");
+		System.out.println("END ---------------------");
 
 	}
 }
