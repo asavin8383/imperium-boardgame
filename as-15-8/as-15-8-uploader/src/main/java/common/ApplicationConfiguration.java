@@ -91,9 +91,11 @@ public class ApplicationConfiguration {
 		System.out.println( list.toString() );
 		*/
 
+		/*
 		Optional<ContentInfo> opt = contentInfoRepository.findById(2L);
 		System.out.println("ContentInfo --->");
 		System.out.println( opt.toString() );
+		*/
 
 		/*
 		RestTemplate restTemplate = new RestTemplate();

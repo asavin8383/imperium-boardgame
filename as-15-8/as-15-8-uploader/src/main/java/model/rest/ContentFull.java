@@ -7,8 +7,7 @@ import javax.xml.bind.annotation.*;
 import java.util.List;
 
 
-@XmlType(name="content")
-@XmlRootElement
+@XmlRootElement(name="content")
 @ToString
 public class ContentFull {
     @XmlAttribute

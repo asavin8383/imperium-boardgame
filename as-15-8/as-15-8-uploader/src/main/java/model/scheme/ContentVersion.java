@@ -25,4 +25,7 @@ public class ContentVersion implements Serializable {
 
 	@Column(nullable=false, name = "ppn_dt")
 	private Date ppnDate;
+
+	@Column(nullable=false)
+	private Boolean success;
 }
