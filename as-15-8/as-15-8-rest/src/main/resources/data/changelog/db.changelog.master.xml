@@ -18,7 +18,7 @@
     <include file="data/changelog/rest.0011.search_query_traffic_units_custom_erdi.xml" relativeToChangelogFile="true"/>
     <include file="data/changelog/rest.0012.search_query_traffic_units_search_phrases.xml" relativeToChangelogFile="true"/>
     <include file="data/changelog/rest.0013.erdi_traffic_units_content.xml" relativeToChangelogFile="true"/>
-    <include file="data/changelog/rest.0014.search_query_traffic_units_content.xml" relativeToChangelogFile="true"/>
+    <include file="rest.0014.search_query_traffic_units_content.xml" relativeToChangelogFile="true"/>
 
 
 </databaseChangeLog>
