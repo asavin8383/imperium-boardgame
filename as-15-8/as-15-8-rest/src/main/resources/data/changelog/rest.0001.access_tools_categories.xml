@@ -6,7 +6,7 @@
     http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
 
-    <changeSet id="rest.0001" author="asavin" context="asavin,test">
+    <changeSet id="rest.0001" author="asavin">
         <createTable tableName="access_tools_categories" schemaName="portal">
             <column name="id" type="bigint" autoIncrement="true" >
                 <constraints primaryKey="true" nullable="false"/>
