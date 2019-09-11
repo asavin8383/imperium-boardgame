@@ -1,4 +1,4 @@
-FROM openjdk:8-jdk-alpine
+FROM openjdk:8-jdk
 
 LABEL Alexander Savin <asavin@ec-leasing.ru>
 
