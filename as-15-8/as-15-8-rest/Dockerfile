@@ -1,4 +1,4 @@
-FROM openjdk:11-jdk
+FROM openjdk:8-jdk-alpine
 
 LABEL Alexander Savin <asavin@ec-leasing.ru>
 
@@ -14,11 +14,4 @@ COPY target/as-15-8-rest.jar $APP_PATH
 VOLUME $LOG_PATH
 VOLUME $CONF_PATH
 
-ENTRYPOINT ["java", \
-         "-jar", \
-         "-Dapplication.logpath=${LOG_PATH}", \
-         "-Dspring.profiles.active=${PROFILE}", \
-         "-Xms512M", \
-         "-Xmx1024M", \
-         "/as-15-8-rest.jar", \
-         "--trace"]
+ENTRYPOINT java -jar -Dapplication.logpath=${LOG_PATH} -Dspring.profiles.active=${PROFILE} -Xms512M -Xmx1024M /as-15-8-rest.jar
