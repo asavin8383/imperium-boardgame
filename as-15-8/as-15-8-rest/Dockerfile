@@ -20,4 +20,5 @@ ENTRYPOINT ["java", \
          "-Dspring.profiles.active=${PROFILE}", \
          "-Xms512M", \
          "-Xmx1024M", \
-         "/as-15-8-rest.jar"]
+         "/as-15-8-rest.jar", \
+         "--trace"]
