@@ -3,6 +3,7 @@ package common;
 import exceptions.ExceptionErdiParser;
 import model.scheme.ContentHistory;
 import model.scheme.ContentInfo;
+import model.scheme.Parameter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -11,10 +12,8 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import repositories.AddonVersionRepository;
-import repositories.ContentHistoryRepository;
-import repositories.ContentInfoRepository;
-import repositories.ContentVersionRepository;
+import repositories.*;
+import services.ParameterService;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -28,7 +27,7 @@ import java.util.Optional;
  *
  */
 @SpringBootApplication
-@ComponentScan(basePackages= {"common", "repositories", "schedule"})
+@ComponentScan(basePackages= {"common", "repositories", "schedule", "services"})
 @EnableJpaRepositories("repositories")
 @EntityScan("model")
 @EnableScheduling
@@ -48,6 +47,10 @@ public class ApplicationConfiguration {
 
 	@Autowired
 	RestApiHelper restApiHelper;
+
+    @Autowired
+    ParameterService parameterService;
+
 
 	public static void main(String[] args) {
 		SpringApplication.run(ApplicationConfiguration.class, args);
@@ -103,6 +106,11 @@ public class ApplicationConfiguration {
 		log.info(quote.toString());
 		*/
 
+        System.out.println("test1 --->" + parameterService.getParamValue("TEST1"));
+        System.out.println("test2 --->" + parameterService.getParamValue("test2"));
+        System.out.println("test2 --->" + parameterService.getParamValue("test2", null));
+        System.out.println("test2 --->" + parameterService.getParamValue("test2", false));
+        System.out.println("test3 --->" + parameterService.getParamValue("test2", true));
 
 		System.out.println("END ---------------------");
 

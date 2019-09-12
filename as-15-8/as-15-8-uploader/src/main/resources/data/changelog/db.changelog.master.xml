@@ -7,5 +7,6 @@
 
     <include file="data/changelog/uploader.0001.violation.xml"/>
     <include file="data/changelog/uploader.0002.addon_change.xml"/>
+    <include file="data/changelog/uploader.0003.parameters.xml"/>
 
 </databaseChangeLog>
