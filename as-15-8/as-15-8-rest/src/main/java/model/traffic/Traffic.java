@@ -37,15 +37,11 @@ public class Traffic implements Serializable {
     @ToString.Include
     private String name;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name="arrangement_id", nullable = false)
-    @JsonView(Views.Brief.class)
-    @ToString.Include
-    private Arrangement arrangement;
+    @OneToMany(mappedBy = "traffic")
+    @JsonIgnore
+    private List<Arrangement> arrangements;
 
     @OneToMany(mappedBy = "traffic")
-    // cascade nothing, fetch lazy, orphanRemoval = false
-    // @JoinColumn(name = "traffic_id")
     @JsonIgnore
     private List<TrafficUnit> trafficUnits;
 
