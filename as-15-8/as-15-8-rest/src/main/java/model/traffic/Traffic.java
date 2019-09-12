@@ -37,9 +37,8 @@ public class Traffic implements Serializable {
     @ToString.Include
     private String name;
 
-    @ManyToOne(optional = false) // todo or @OneToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name="arrangement_id", nullable = false)
-            //foreignKey = @ForeignKey(name = "fk_traffic_arrangements")
     @JsonView(Views.Brief.class)
     @ToString.Include
     private Arrangement arrangement;
