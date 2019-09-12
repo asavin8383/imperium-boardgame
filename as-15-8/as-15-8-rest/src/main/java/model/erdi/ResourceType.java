@@ -5,10 +5,7 @@ import lombok.*;
 import model.Views;
 import org.hibernate.annotations.Immutable;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.io.Serializable;
 
 @Entity
@@ -22,6 +19,24 @@ public class ResourceType implements Serializable {
 
     public static final Long serialVersionUID = 1L;
 
+    private enum Type {
+        DOMAIN, IP, IPV6, IPSUBNET, IPV6SUBNET, URL
+    }
+
+    @Converter(autoApply = true)
+    private static class TypeConverter implements AttributeConverter<Type, String> {
+
+        @Override
+        public String convertToDatabaseColumn(Type type) {
+            return type.toString().toLowerCase();
+        }
+
+        @Override
+        public Type convertToEntityAttribute(String s) {
+            return Type.valueOf(s.toUpperCase());
+        }
+    }
+
     @Id
     @JsonView(Views.Id.class)
     @ToString.Include
@@ -29,8 +44,9 @@ public class ResourceType implements Serializable {
     private Integer id;
 
     @Column(name = "dsc")
+    @Enumerated(EnumType.STRING)
     @JsonView(Views.Brief.class)
     @ToString.Include
-    private String description;
+    private Type description;
 
 }

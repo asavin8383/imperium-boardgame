@@ -22,24 +22,6 @@ public class ContentResource implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private enum Type {
-        DOMAIN, IP, IPV6, IPSUBNET, IPV6SUBNET, URL
-    }
-
-    @Converter(autoApply = true)
-    private static class TypeConverter implements AttributeConverter<Type, String> {
-
-        @Override
-        public String convertToDatabaseColumn(Type type) {
-            return type.toString().toLowerCase();
-        }
-
-        @Override
-        public Type convertToEntityAttribute(String s) {
-            return Type.valueOf(s.toUpperCase());
-        }
-    }
-
     @Id
     @JsonView(Views.Id.class)
     @ToString.Include
@@ -60,10 +42,9 @@ public class ContentResource implements Serializable {
     @ToString.Include
     private LocalDateTime ts;
 
-    @Enumerated(EnumType.STRING)
     @JsonView(Views.Brief.class)
     @ToString.Include
-    private Type resourceType;
+    private ResourceType resourceType;
 
     @JsonIgnore
     @ToString.Include
