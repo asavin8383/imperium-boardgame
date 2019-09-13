@@ -66,7 +66,8 @@ public class CustomErdiUnitController {
     private CustomErdiUnit merge(CustomErdiUnit newUnit, CustomErdiUnit unit) {
         unit.setValue(newUnit.getValue());
         unit.setType(newUnit.getType());
-        //unit.setCustomErdi(newUnit.getCustomErdi());
+        if (newUnit.getCustomErdi() != null)
+            unit.setCustomErdi(newUnit.getCustomErdi());
         return unit;
     }
 
