@@ -20,6 +20,7 @@
     <include file="data/changelog/rest.0013.erdi_traffic_units_content.xml"/>
     <include file="data/changelog/rest.0014.search_query_traffic_units_content.xml"/>
     <include file="data/changelog/rest.0015.fk_search_phrases_violation.xml"/>
+    <include file="data/changelog/rest.0016.fk_custom_erdi_violation.xml"/>
 
 
 </databaseChangeLog>
