@@ -19,12 +19,12 @@ public class ResourceType implements Serializable {
 
     public static final Long serialVersionUID = 1L;
 
-    private enum Type {
+    public enum Type {
         DOMAIN, IP, IPV6, IPSUBNET, IPV6SUBNET, URL
     }
 
     @Converter(autoApply = true)
-    private static class TypeConverter implements AttributeConverter<Type, String> {
+    public static class TypeConverter implements AttributeConverter<Type, String> {
 
         @Override
         public String convertToDatabaseColumn(Type type) {
