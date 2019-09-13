@@ -2,16 +2,17 @@ package model.task;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
+import enums.ArrangementEvents;
+import enums.ExecutionStatus;
 import exceptions.AS_15_8_Exception;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import model.Views;
 import model.catalog.AccessTool;
-import enums.ExecutionStatus;
-import enums.ArrangementEvents;
 import model.result.ArrangementResult;
 import model.schedule.SchedulePeriodArrangement;
+import model.traffic.Traffic;
 import stateMachine.ArrangementStateMachine;
 
 import javax.persistence.*;
@@ -106,6 +107,11 @@ public class Arrangement implements Serializable {
 	@OneToMany(cascade=CascadeType.ALL, mappedBy = "arrangement")
 	@JsonIgnore
 	private List<SchedulePeriodArrangement> schedulePeriodArrangements;
+
+	@ManyToOne
+	@JoinColumn(name = "traffic_id")
+	@JsonIgnore
+	private Traffic traffic;
 
 	/**Результат проведения мероприятия*/
 	@JsonView(Views.Brief.class)

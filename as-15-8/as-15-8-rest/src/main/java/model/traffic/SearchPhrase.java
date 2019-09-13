@@ -37,10 +37,11 @@ public class SearchPhrase implements Serializable {
     private String phrase;
 
     @NotNull
-    @Column(nullable = false)
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "violation_id")
     @JsonView(Views.Brief.class)
     @ToString.Include
-    private Long violationId;
+    private Violation violation;
 
 
 

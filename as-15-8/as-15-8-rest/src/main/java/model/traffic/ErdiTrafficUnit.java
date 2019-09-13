@@ -7,6 +7,7 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import model.Views;
 import model.catalog.AccessToolsCategory;
+import model.erdi.FormalErdi;
 
 import javax.persistence.*;
 import java.io.Serializable;

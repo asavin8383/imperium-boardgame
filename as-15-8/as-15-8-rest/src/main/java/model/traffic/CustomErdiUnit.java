@@ -1,5 +1,6 @@
 package model.traffic;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -28,7 +29,7 @@ public class CustomErdiUnit {
     @ManyToOne(optional = false)
     // cascade nothing, fetch eager
     @JoinColumn(name = "custom_erdi_id", nullable = false)
-    @JsonView(Views.Brief.class)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @ToString.Include
     private CustomErdi customErdi;
 
