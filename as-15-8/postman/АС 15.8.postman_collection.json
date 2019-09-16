@@ -1814,281 +1814,287 @@
 				}
 			]
 		},
-		{
-			"name": "Профильный трафик",
-			"item": [
-				{
-					"name": "Пользовательские ЕРДИ",
-					"item": [
-						{
-							"name": "Получение списка ЕРДИ",
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "X-AUTH-TOKEN",
-										"type": "text",
-										"value": "{{oper_token}}"
-									}
-								],
-								"url": {
-									"raw": "{{url}}/erdi/custom",
-									"host": [
-										"{{url}}"
-									],
-									"path": [
-										"erdi",
-										"custom"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Добавление ЕРДИ",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "X-AUTH-TOKEN",
-										"type": "text",
-										"value": "{{oper_token}}"
-									},
-									{
-										"key": "Content-Type",
-										"name": "Content-Type",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n\t\"name\": \"Custom ERDI 2\"\n}"
-								},
-								"url": {
-									"raw": "{{url}}/erdi/custom",
-									"host": [
-										"{{url}}"
-									],
-									"path": [
-										"erdi",
-										"custom"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Редактирование ЕРДИ",
-							"request": {
-								"method": "PUT",
-								"header": [
-									{
-										"key": "X-AUTH-TOKEN",
-										"type": "text",
-										"value": "{{oper_token}}"
-									},
-									{
-										"key": "Content-Type",
-										"name": "Content-Type",
-										"type": "text",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n\t\"name\": \"Changed Custom ERDI\"\n}"
-								},
-								"url": {
-									"raw": "{{url}}/erdi/custom/1",
-									"host": [
-										"{{url}}"
-									],
-									"path": [
-										"erdi",
-										"custom",
-										"1"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Удаление ЕРДИ",
-							"request": {
-								"method": "DELETE",
-								"header": [
-									{
-										"key": "X-AUTH-TOKEN",
-										"type": "text",
-										"value": "{{oper_token}}"
-									},
-									{
-										"key": "Content-Type",
-										"name": "Content-Type",
-										"type": "text",
-										"value": "application/json"
-									}
-								],
-								"url": {
-									"raw": "{{url}}/erdi/custom/1",
-									"host": [
-										"{{url}}"
-									],
-									"path": [
-										"erdi",
-										"custom",
-										"1"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Получение списка юнитов",
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "X-AUTH-TOKEN",
-										"type": "text",
-										"value": "{{oper_token}}"
-									}
-								],
-								"url": {
-									"raw": "{{url}}/erdi/custom/units?customErdiId=2",
-									"host": [
-										"{{url}}"
-									],
-									"path": [
-										"erdi",
-										"custom",
-										"units"
-									],
-									"query": [
-										{
-											"key": "customErdiId",
-											"value": "2"
-										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Добавление юнита",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "X-AUTH-TOKEN",
-										"type": "text",
-										"value": "{{oper_token}}"
-									},
-									{
-										"key": "Content-Type",
-										"name": "Content-Type",
-										"type": "text",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n\t\"name\": \"Unit 2\",\n\t\"type\": \"URL\",\n\t\"value\": \"https://doom.ru/cp\"\n}"
-								},
-								"url": {
-									"raw": "{{url}}/erdi/custom/units?customErdiId=3",
-									"host": [
-										"{{url}}"
-									],
-									"path": [
-										"erdi",
-										"custom",
-										"units"
-									],
-									"query": [
-										{
-											"key": "customErdiId",
-											"value": "3"
-										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Редактирование юнита",
-							"request": {
-								"method": "PUT",
-								"header": [
-									{
-										"key": "X-AUTH-TOKEN",
-										"type": "text",
-										"value": "{{oper_token}}"
-									},
-									{
-										"key": "Content-Type",
-										"name": "Content-Type",
-										"type": "text",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n\t\"type\": \"IP_V6\",\n\t\"value\": \"2001:db8::8a2e:370:7334\"\n}"
-								},
-								"url": {
-									"raw": "{{url}}/erdi/custom/units/3",
-									"host": [
-										"{{url}}"
-									],
-									"path": [
-										"erdi",
-										"custom",
-										"units",
-										"3"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Удаление югита",
-							"request": {
-								"method": "DELETE",
-								"header": [
-									{
-										"key": "X-AUTH-TOKEN",
-										"type": "text",
-										"value": "{{oper_token}}"
-									},
-									{
-										"key": "Content-Type",
-										"name": "Content-Type",
-										"type": "text",
-										"value": "application/json"
-									}
-								],
-								"url": {
-									"raw": "{{url}}/erdi/custom/units/4",
-									"host": [
-										"{{url}}"
-									],
-									"path": [
-										"erdi",
-										"custom",
-										"units",
-										"4"
-									]
-								}
-							},
-							"response": []
-						}
-					],
-					"_postman_isSubFolder": true
-				}
-			]
-		},
+        {
+            "name": "Профильный трафик",
+            "item": [
+                {
+                    "name": "Пользовательские ЕРДИ",
+                    "item": [
+                        {
+                            "name": "Получение списка ЕРДИ",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "X-AUTH-TOKEN",
+                                        "type": "text",
+                                        "value": "{{oper_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{url}}/erdi/custom?violationId=1",
+                                    "host": [
+                                        "{{url}}"
+                                    ],
+                                    "path": [
+                                        "erdi",
+                                        "custom"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "violationId",
+                                            "value": "1"
+                                        }
+                                    ]
+                                }
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "Добавление ЕРДИ",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "X-AUTH-TOKEN",
+                                        "type": "text",
+                                        "value": "{{oper_token}}"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "name": "Content-Type",
+                                        "value": "application/json",
+                                        "type": "text"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n\t\"name\": \"Custom ERDI 4\",\n\t\"violation\": { \"id\": 1 }\n}"
+                                },
+                                "url": {
+                                    "raw": "{{url}}/erdi/custom",
+                                    "host": [
+                                        "{{url}}"
+                                    ],
+                                    "path": [
+                                        "erdi",
+                                        "custom"
+                                    ]
+                                }
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "Редактирование ЕРДИ",
+                            "request": {
+                                "method": "PUT",
+                                "header": [
+                                    {
+                                        "key": "X-AUTH-TOKEN",
+                                        "type": "text",
+                                        "value": "{{oper_token}}"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "name": "Content-Type",
+                                        "type": "text",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n\t\"name\": \"Changed Custom ERDI\",\n\t\"violation\": { \"id\": 1 }\n}"
+                                },
+                                "url": {
+                                    "raw": "{{url}}/erdi/custom/2",
+                                    "host": [
+                                        "{{url}}"
+                                    ],
+                                    "path": [
+                                        "erdi",
+                                        "custom",
+                                        "2"
+                                    ]
+                                }
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "Удаление ЕРДИ",
+                            "request": {
+                                "method": "DELETE",
+                                "header": [
+                                    {
+                                        "key": "X-AUTH-TOKEN",
+                                        "type": "text",
+                                        "value": "{{oper_token}}"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "name": "Content-Type",
+                                        "type": "text",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{url}}/erdi/custom/1",
+                                    "host": [
+                                        "{{url}}"
+                                    ],
+                                    "path": [
+                                        "erdi",
+                                        "custom",
+                                        "1"
+                                    ]
+                                }
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "Получение списка юнитов",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "X-AUTH-TOKEN",
+                                        "type": "text",
+                                        "value": "{{oper_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{url}}/erdi/custom/units?customErdiId=2",
+                                    "host": [
+                                        "{{url}}"
+                                    ],
+                                    "path": [
+                                        "erdi",
+                                        "custom",
+                                        "units"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "customErdiId",
+                                            "value": "2"
+                                        }
+                                    ]
+                                }
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "Добавление юнита",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "X-AUTH-TOKEN",
+                                        "type": "text",
+                                        "value": "{{oper_token}}"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "name": "Content-Type",
+                                        "type": "text",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n\t\"name\": \"Unit 2\",\n\t\"type\": \"URL\",\n\t\"value\": \"https://doom.ru/cp\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{url}}/erdi/custom/units?customErdiId=3",
+                                    "host": [
+                                        "{{url}}"
+                                    ],
+                                    "path": [
+                                        "erdi",
+                                        "custom",
+                                        "units"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "customErdiId",
+                                            "value": "3"
+                                        }
+                                    ]
+                                }
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "Редактирование юнита",
+                            "request": {
+                                "method": "PUT",
+                                "header": [
+                                    {
+                                        "key": "X-AUTH-TOKEN",
+                                        "type": "text",
+                                        "value": "{{oper_token}}"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "name": "Content-Type",
+                                        "type": "text",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n\t\"type\": \"IP_V6\",\n\t\"value\": \"2001:db8::8a2e:370:7334\",\n\t\"customErdi\": {\"id\": 3}\n}"
+                                },
+                                "url": {
+                                    "raw": "{{url}}/erdi/custom/units/3",
+                                    "host": [
+                                        "{{url}}"
+                                    ],
+                                    "path": [
+                                        "erdi",
+                                        "custom",
+                                        "units",
+                                        "3"
+                                    ]
+                                }
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "Удаление югита",
+                            "request": {
+                                "method": "DELETE",
+                                "header": [
+                                    {
+                                        "key": "X-AUTH-TOKEN",
+                                        "type": "text",
+                                        "value": "{{oper_token}}"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "name": "Content-Type",
+                                        "type": "text",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{url}}/erdi/custom/units/4",
+                                    "host": [
+                                        "{{url}}"
+                                    ],
+                                    "path": [
+                                        "erdi",
+                                        "custom",
+                                        "units",
+                                        "4"
+                                    ]
+                                }
+                            },
+                            "response": []
+                        }
+                    ],
+                    "_postman_isSubFolder": true
+                }
+            ]
+        },
 		{
 			"name": "Список средств доступа к запрещённым ресурсам",
 			"request": {

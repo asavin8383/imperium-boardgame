@@ -21,9 +21,6 @@ public class Violation implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "violation_generator")
-    @SequenceGenerator(name = "violation_generator",
-            schema = "sor", sequenceName = "violation_id_seq") //, allocationSize = 1
     @JsonView(Views.Id.class)
     @ToString.Include
     @EqualsAndHashCode.Include

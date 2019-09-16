@@ -28,10 +28,12 @@ public class CustomErdiController {
     public Page<CustomErdi> getAllCustomErdi(@RequestParam(required = false) SortingDirection sortingDirection,
                                              @RequestParam(required = false) String sortingColumn,
                                              @RequestParam(defaultValue = "0") int pageNumber,
-                                             @RequestParam(defaultValue = "10") int pageSize) {
+                                             @RequestParam(defaultValue = "10") int pageSize,
+                                             @RequestParam(required = false) Long violationId) {
         PageRequest page = PageRequest.of(pageNumber, pageSize,
                 SortingHelper.createSorting(sortingDirection, sortingColumn));
-        return erdiRepository.findAll(page);
+        return violationId == null ? erdiRepository.findAll(page) :
+                erdiRepository.findByViolationId(page, violationId);
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -50,6 +52,7 @@ public class CustomErdiController {
     public CustomErdi updateCustomErdi(@RequestBody CustomErdi newCustomErdi,
                                        @PathVariable("id") CustomErdi customErdi) {
         customErdi.setName(newCustomErdi.getName());
+        customErdi.setViolation(newCustomErdi.getViolation());
         return erdiRepository.save(customErdi);
     }
 
