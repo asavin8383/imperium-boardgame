@@ -233,6 +233,7 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
 
             }
         }
+        log.info("Для мероприятия " + arrangementId + " был подготовлен список из " + checkUnitJobs.size() + " элементов");
         return checkUnitJobs;
     }
     
