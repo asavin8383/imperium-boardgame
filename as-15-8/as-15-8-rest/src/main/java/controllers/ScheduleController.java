@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Views;
 import model.enums.ScheduleStatus;
+import model.result.ArrangementResult;
 import model.schedule.Schedule;
 import model.schedule.SchedulePeriod;
 import model.task.Arrangement;
@@ -141,7 +142,13 @@ public class ScheduleController {
             plannedDate = LocalDate.now();
         }
         log.info("Начало расчета расписания на дату: {}", plannedDate);
-        Schedule schedule = scheduleService.create(arrangementService.getArrangementCheckUnits(arrangementIds));
+        Map<Arrangement, TreeSet<ArrangementResult>> arrangementCheckUnits = arrangementService.getArrangementCheckUnits(arrangementIds);
+        for(Map.Entry<Arrangement, TreeSet<ArrangementResult>> entry: arrangementCheckUnits.entrySet()){
+            if(entry.getValue().isEmpty()){
+                AS_15_8_Exception.logAndThrow(log, "Ошибка создания расписания. У мероприятия " + entry.getKey().getId() + " пустое множество значений для проверки");
+            }
+        }
+        Schedule schedule = scheduleService.create(arrangementCheckUnits);
         log.info("Расчет расписания на дату {} завершен", plannedDate);
         schedule.setUser(user);
         schedule.setPlannedDate(plannedDate);
