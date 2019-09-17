@@ -120,5 +120,10 @@
     	<appender-ref ref="SERVICES_LOG" />
     	<appender-ref ref="Console" />
     </logger>
+
+    <logger name="service.impl" level="INFO">
+        <appender-ref ref="SERVICES_LOG" />
+        <appender-ref ref="Console" />
+    </logger>
  
 </configuration>
