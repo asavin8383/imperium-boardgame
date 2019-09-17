@@ -135,6 +135,9 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
         } catch (Exception ex){
         	throw new AS_15_8_DispatcherException("Ошибка при создании заданий на проверку запрещенных ресурсов!", ex);
         }
+        if(checkUnitJobcheckUnitJobTemplates.size()==0){
+        	throw new AS_15_8_DispatcherException("Ошибка заполнения мероприятия " + arrangementJob.getId() + " ресурсами. Не было найдено ни одного ресурса для ЕРДИ " + parameters);
+		}
 		log.info("Для мероприятия " + arrangementJob.getId() + " был подготовлен список шаблонов из " + checkUnitJobcheckUnitJobTemplates.size() + " элементов");
         return buildCheckUnitJobsFromTemplates(checkUnitJobcheckUnitJobTemplates, arrangementJob.getId());
     }
