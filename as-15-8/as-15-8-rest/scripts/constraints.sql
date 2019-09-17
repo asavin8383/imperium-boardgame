@@ -3,7 +3,7 @@ alter table portal.access_tools add constraint ck_name check ( name in ('GOOGLE'
 alter table portal.access_tools drop constraint if exists ck_type;
 alter table portal.access_tools add constraint ck_type check ( type in ('SEARCH_SYSTEM','VPN','ANONYMIZER', 'PROXY'));
 alter table portal.arrangements drop constraint if exists ck_status;
-alter table portal.arrangements add constraint ck_status check ( status in ('NEW', 'FORMED', 'RUNNING', 'ACTION_REQUIRED', 'FINISHED'));
+alter table portal.arrangements add constraint ck_status check ( status in ('NEW', 'FORMED', 'SCHEDULED', 'RUNNING', 'ACTION_REQUIRED', 'FINISHED', 'ERROR'));
 
 alter table portal.arrangement_results drop constraint if exists ck_result;
 alter table portal.arrangement_results add constraint ck_result check ( result in (
