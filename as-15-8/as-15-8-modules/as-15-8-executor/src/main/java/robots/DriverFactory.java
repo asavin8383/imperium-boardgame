@@ -1,6 +1,7 @@
 package robots;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.util.Strings;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.Proxy;
 import org.openqa.selenium.WebDriver;
@@ -109,8 +110,12 @@ public class DriverFactory {
 	private static DesiredCapabilities buildCapability(Platform platform, String appName, String browserName) {
 		DesiredCapabilities capability = createCapabilities(browserName);
 		capability.setBrowserName(browserName);
-		capability.setPlatform(platform);
-		capability.setCapability("applicationName", appName);
+		if(platform != null)
+			capability.setPlatform(platform);
+		else
+			capability.setPlatform(Platform.ANY);
+		if(Strings.isNotEmpty(appName))
+			capability.setCapability("applicationName", appName);
 		return capability;
 	}
 

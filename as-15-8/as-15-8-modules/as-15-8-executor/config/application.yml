@@ -2,12 +2,11 @@ server:
     port: 11100
 logging:
     config: config/logback-spring.xml
-selenium-hub-url: http://192.168.5.46:4444/wd/hub
+selenium-hub-url: http://user:1q0p2w9o@192.168.5.12:4442/wd/hub
 robots:
     google:
-        platform: WIN8
+        platform: ANY
         browser: chrome
-        app: google
         limit: 15
     google-api:
         search-system-id: 008760942635674233646:iomr_wlnhoi
@@ -15,34 +14,27 @@ robots:
         region:
         search-limit: 15
     yandex:
-        platform: WIN8
+        platform: ANY
         browser: chrome
-        app: yandex
         limit: 15
     kaspersky:
-        platform: WIN8
+        platform: ANY
         browser: chrome
-        app: kas
     express:
-        platform: WIN8
+        platform: ANY
         browser: chrome
-        app: express
     hola:
-        platform: WIN10
+        platform: ANY
         browser: chrome
-        app: hola
     torguard:
-        platform: WIN8
+        platform: ANY
         browser: chrome
-        app: torguard
     hidemyass:
-        platform: WIN8
+        platform: ANY
         browser: chrome
-        app: hidemyass
     cameleoxyz:
-        platform: WIN8
+        platform: ANY
         browser: chrome
-        app: cameleoxyz
 
 spring:
     kafka:
