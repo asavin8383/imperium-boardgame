@@ -16,6 +16,7 @@ import model.ArrangementResult;
 import model.DetailResultsVpn;
 import org.apache.commons.net.util.SubnetUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -31,6 +32,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -133,6 +135,11 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
         } catch (Exception ex){
         	throw new AS_15_8_DispatcherException("Ошибка при создании заданий на проверку запрещенных ресурсов!", ex);
         }
+        if(checkUnitJobcheckUnitJobTemplates.size()==0){
+        	throw new AS_15_8_DispatcherException("Ошибка заполнения мероприятия " + arrangementJob.getId() + " ресурсами. Не было найдено ни одного ресурса для ЕРДИ "
+					+ arrangementJob.getErdiJobList().stream().map(erdiJob -> erdiJob.getId().toString()).collect(Collectors.joining(",")));
+		}
+		log.info("Для мероприятия " + arrangementJob.getId() + " был подготовлен список шаблонов из " + checkUnitJobcheckUnitJobTemplates.size() + " элементов");
         return buildCheckUnitJobsFromTemplates(checkUnitJobcheckUnitJobTemplates, arrangementJob.getId());
     }
 
@@ -232,6 +239,7 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
 
             }
         }
+        log.info("Для мероприятия " + arrangementId + " был подготовлен список из " + checkUnitJobs.size() + " элементов");
         return checkUnitJobs;
     }
     
@@ -292,7 +300,10 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
 				throw new AS_15_8_DispatcherException("Ошибка удаления списка запрещенных ресурсов мероприятия! Мероприятие " + arrangementId + " имеет недопустимый статус (запущено или завершено)");
 			}
 			arrangementResultRepo.deleteByArrangementIdAndErdiId(arrangementId, erdiId);
-		}catch (Exception ex){
+		}catch (EmptyResultDataAccessException ex){
+			log.info("У мероприятия "  + arrangementId + " для ЕРДИ " + erdiId + " нет списка ресурсов");
+		}
+		catch (Exception ex){
 			log.error("Ошибка удаления списка запрещённых ресурсов мероприятия " + arrangementId + " для ЕРДИ " + erdiId,ex);
 			throw new AS_15_8_DispatcherException("Ошибка удаления списка запрещенных ресурсов мероприятия!", ex);
 		}
