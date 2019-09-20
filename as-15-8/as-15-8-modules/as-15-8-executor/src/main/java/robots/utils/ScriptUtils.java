@@ -196,6 +196,26 @@ public class ScriptUtils {
                 useEtalon.equalsIgnoreCase("1");
     }
 
+    public static void type(WebElement element, long sleep, String query) {
+        if (sleep > 0L) {
+            query.codePoints().forEach(cp -> {
+                element.sendKeys(new String(
+                        Character.toChars(cp)));
+                try {
+                    Thread.sleep(sleep);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            });
+        } else {
+            element.sendKeys(query);
+        }
+    }
+
+    public static void scrollToBottom(JavascriptExecutor jsExecutor) {
+        jsExecutor.executeScript("window.scrollTo(0, document.body.scrollHeight)");
+    }
+
 
     // дикие эксперименты
 
