@@ -41,6 +41,7 @@ public class SearchSystemTest {
     public static Map<AccessToolParameters, String> googleParams() {
         Map<AccessToolParameters, String> params = new HashMap<>();
         params.put(SEARCH_SYSTEM_URL, "https://www.google.ru");
+        params.put(SEARCH_SYSTEM_RESULT_PAGE_TYPE, "pagination");
         params.put(SEARCH_SYSTEM_XPATH_INPUT_FIELD, "//input[@name=\"q\"]");
         params.put(SEARCH_SYSTEM_XPATH_CAPTCHA, "//form[@id=\"captcha-form\"]");
         params.put(SEARCH_SYSTEM_XPATH_NEXT_PAGE, "//*[@id=\"pnnext\"]");
