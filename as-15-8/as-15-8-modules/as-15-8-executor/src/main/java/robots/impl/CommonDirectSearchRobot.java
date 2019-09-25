@@ -224,8 +224,13 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
     }
 
     private boolean checkPageResult() {
-        return checkPageResult(new WebDriverWait(driver, SEARCH_RESULT_TIMEOUT)
-                .until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(xpathItemLink))));
+        try {
+            return checkPageResult(new WebDriverWait(driver, SEARCH_RESULT_TIMEOUT)
+                    .until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(xpathItemLink))));
+        } catch (TimeoutException e) {
+            log.debug("Results not found");
+            return false;
+        }
     }
 
     private boolean checkPageResult(List<WebElement> links) {
