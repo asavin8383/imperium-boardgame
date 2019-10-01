@@ -4,6 +4,11 @@ logging:
     config: config/logback-spring.xml
 selenium-hub-url: http://user:1q0p2w9o@192.168.5.12:4442/wd/hub
 robots:
+    search-system-direct:
+        platform: ANY
+        browser: chrome
+        app: search-system-direct
+        limit: 25
     google:
         platform: ANY
         browser: chrome

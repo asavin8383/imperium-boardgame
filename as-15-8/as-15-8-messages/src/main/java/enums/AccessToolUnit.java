@@ -5,6 +5,12 @@ public enum AccessToolUnit {
 	GOOGLE,
 	GOOGLE_API,
 	YANDEX,
+	MAIL,
+	YAHOO,
+	BING,
+	SPUTNIK,
+	DUCK_DUCK_GO,
+
 	VPN,
 	CAMELEO_XYZ,
 	HIDEMYASS,
@@ -12,5 +18,4 @@ public enum AccessToolUnit {
 	EXPRESS,
 	KASPERSKY,
 	TORGUARD;
-
 }

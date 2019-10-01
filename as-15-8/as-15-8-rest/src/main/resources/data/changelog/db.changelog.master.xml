@@ -1,9 +1,7 @@
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd
-    http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
     <include file="data/changelog/rest.0001.access_tools_categories.xml"/>
     <include file="data/changelog/rest.0002.access_tools_categories_fk.xml"/>
@@ -21,6 +19,7 @@
     <include file="data/changelog/rest.0014.search_query_traffic_units_content.xml"/>
     <include file="data/changelog/rest.0015.fk_search_phrases_violation.xml"/>
     <include file="data/changelog/rest.0016.fk_custom_erdi_violation.xml"/>
-
+    <include file="data/changelog/rest.0017.search_system_parameters.xml"/>
+    <include file="data/changelog/rest.0018.search_system_parameters.xml"/>
 
 </databaseChangeLog>

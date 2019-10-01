@@ -73,10 +73,11 @@ public class ArrangementJobCreationServiceImpl implements ArrangementJobCreation
             SearchSystemParameters parameters = accessTool.getSearchSystemParameters();
             result.put(AccessToolParameters.INPUT_DELAY, String.valueOf(parameters.getInputDelay()));
             result.put(AccessToolParameters.SEARCH_SYSTEM_URL, parameters.getSearchSystemUrl());
-            result.put(AccessToolParameters.INPUT_SEARCH_FIELD_XPATH_ID, parameters.getInputSearchFieldXpathId());
-            result.put(AccessToolParameters.INPUT_SEARCH_FIELD_CSS_SELECTOR, parameters.getInputSearchFieldCssSelector());
-            result.put(AccessToolParameters.BUTTON_SEARCH_FIELD_XPATH_ID, parameters.getButtonSearchFieldXpathId());
-            result.put(AccessToolParameters.BUTTON_SEARCH_FIELD_CSS_SELECTOR, parameters.getButtonSearchFieldCssSelector());
+            result.put(AccessToolParameters.SEARCH_SYSTEM_RESULT_PAGE_TYPE, parameters.getResultPageType());
+            result.put(AccessToolParameters.SEARCH_SYSTEM_XPATH_INPUT_FIELD, parameters.getInputFieldXpath());
+            result.put(AccessToolParameters.SEARCH_SYSTEM_XPATH_CAPTCHA, parameters.getCaptchaXpath());
+            result.put(AccessToolParameters.SEARCH_SYSTEM_XPATH_ITEM_LINK, parameters.getItemLinkXpath());
+            result.put(AccessToolParameters.SEARCH_SYSTEM_XPATH_NEXT_PAGE, parameters.getNextPageXpath());
         } else if (accessTool.getVpnParameters() != null){
             VPN_Parameters parameters = accessTool.getVpnParameters();
             result.put(AccessToolParameters.STUB_URL, parameters.getStubUrl());

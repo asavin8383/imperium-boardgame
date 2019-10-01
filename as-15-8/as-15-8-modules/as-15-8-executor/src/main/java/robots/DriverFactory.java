@@ -114,8 +114,11 @@ public class DriverFactory {
 			capability.setPlatform(platform);
 		else
 			capability.setPlatform(Platform.ANY);
-		if(Strings.isNotEmpty(appName))
+		if(Strings.isNotEmpty(appName)) {
 			capability.setCapability("applicationName", appName);
+			capability.setCapability("name", appName);
+		}
+		capability.setCapability("enableVNC", true);
 		return capability;
 	}
 

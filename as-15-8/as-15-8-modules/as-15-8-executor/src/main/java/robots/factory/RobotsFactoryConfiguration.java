@@ -1,29 +1,18 @@
 package robots.factory;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
+import enums.AccessToolUnit;
 import org.openqa.selenium.Platform;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
-
-import enums.AccessToolUnit;
 import robots.RobotDriverParameters;
-import robots.factory.impl.GoogleApiRobotsFactory;
-import robots.factory.impl.SeleniumAnonymizerRobotsFactory;
-import robots.factory.impl.SeleniumHolaRobotsFactory;
-import robots.factory.impl.SeleniumSearchRobotsFactory;
-import robots.factory.impl.SeleniumVpnRobotsFactory;
-import robots.impl.CameleoRobot;
-import robots.impl.GoogleApiRobot;
-import robots.impl.GoogleRobot;
-import robots.impl.HideMyAssRobot;
-import robots.impl.HolaRobot;
-import robots.impl.VPNRobot;
-import robots.impl.YandexRobot;
+import robots.factory.impl.*;
+import robots.impl.*;
+
+import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  * Конфигурация роботов для проверки ПС/ПАСД
@@ -50,7 +39,7 @@ public class RobotsFactoryConfiguration {
 	public RobotsFactory googleRobot() throws MalformedURLException {
 		return new SeleniumSearchRobotsFactory(
 			AccessToolUnit.GOOGLE,
-			GoogleRobot.class,
+			CommonDirectSearchRobot.class,
 			new RobotDriverParameters(
 				new URL(this.seleniumHubUrl),
 				Platform.valueOf(env.getProperty("robots.google.platform")),
@@ -80,14 +69,109 @@ public class RobotsFactoryConfiguration {
 	@Bean
 	public RobotsFactory yandexRobot() throws MalformedURLException {
 		return new SeleniumSearchRobotsFactory(
-			AccessToolUnit.YANDEX,
-			YandexRobot.class,
+			AccessToolUnit.YANDEX, // YandexRobot
+			CommonDirectSearchRobot.class,
 			new RobotDriverParameters(
 				new URL(this.seleniumHubUrl),
 				Platform.valueOf(env.getProperty("robots.yandex.platform")),
 				env.getProperty("robots.yandex.app"),
 				env.getProperty("robots.yandex.browser")),
 			Integer.parseInt(env.getProperty("robots.yandex.limit"))
+		);
+	}
+
+	/**
+	 * Робот проверки ПС Mail.ru
+	 * @return
+	 * @throws MalformedURLException
+	 */
+	@Bean
+	public RobotsFactory mailRobot() throws MalformedURLException {
+		return new SeleniumSearchRobotsFactory(
+			AccessToolUnit.MAIL,
+			CommonDirectSearchRobot.class,
+			new RobotDriverParameters(
+				new URL(this.seleniumHubUrl),
+				Platform.valueOf(env.getProperty("robots.search-system-direct.platform")),
+				env.getProperty("robots.search-system-direct.app"),
+				env.getProperty("robots.search-system-direct.browser")),
+			Integer.parseInt(env.getProperty("robots.search-system-direct.limit"))
+		);
+	}
+
+	/**
+	 * Робот проверки ПС Yahoo
+	 * @return
+	 * @throws MalformedURLException
+	 */
+	@Bean
+	public RobotsFactory yahooRobot() throws MalformedURLException {
+		return new SeleniumSearchRobotsFactory(
+			AccessToolUnit.YAHOO,
+			CommonDirectSearchRobot.class,
+			new RobotDriverParameters(
+				new URL(this.seleniumHubUrl),
+					Platform.valueOf(env.getProperty("robots.search-system-direct.platform")),
+					env.getProperty("robots.search-system-direct.app"),
+					env.getProperty("robots.search-system-direct.browser")),
+			Integer.parseInt(env.getProperty("robots.search-system-direct.limit"))
+		);
+	}
+
+	/**
+	 * Робот проверки ПС Bing
+	 * @return
+	 * @throws MalformedURLException
+	 */
+	@Bean
+	public RobotsFactory bingRobot() throws MalformedURLException {
+		return new SeleniumSearchRobotsFactory(
+			AccessToolUnit.BING,
+			CommonDirectSearchRobot.class,
+			new RobotDriverParameters(
+				new URL(this.seleniumHubUrl),
+					Platform.valueOf(env.getProperty("robots.search-system-direct.platform")),
+					env.getProperty("robots.search-system-direct.app"),
+					env.getProperty("robots.search-system-direct.browser")),
+			Integer.parseInt(env.getProperty("robots.search-system-direct.limit"))
+		);
+	}
+
+	/**
+	 * Робот проверки ПС Sputnik
+	 * @return
+	 * @throws MalformedURLException
+	 */
+	@Bean
+	public RobotsFactory sputnikRobot() throws MalformedURLException {
+		return new SeleniumSearchRobotsFactory(
+			AccessToolUnit.SPUTNIK,
+			CommonDirectSearchRobot.class,
+			new RobotDriverParameters(
+				new URL(this.seleniumHubUrl),
+					Platform.valueOf(env.getProperty("robots.search-system-direct.platform")),
+					env.getProperty("robots.search-system-direct.app"),
+					env.getProperty("robots.search-system-direct.browser")),
+			Integer.parseInt(env.getProperty("robots.search-system-direct.limit"))
+		);
+	}
+
+	/**
+	 * Робот проверки ПС DuckDuckGo
+	 * @return
+	 * @throws MalformedURLException
+	 */
+	@Bean
+	public RobotsFactory duckDuckGoRobot() throws MalformedURLException {
+		return new SeleniumSearchRobotsFactory(
+			AccessToolUnit.DUCK_DUCK_GO,
+			CommonDirectSearchRobot.class,
+			new RobotDriverParameters(
+				new URL(this.seleniumHubUrl),
+					Platform.valueOf(env.getProperty("robots.search-system-direct.platform")),
+					env.getProperty("robots.search-system-direct.app"),
+					env.getProperty("robots.search-system-direct.browser")),
+			Integer.parseInt(env.getProperty("robots.search-system-direct.limit"))
 		);
 	}
 
