@@ -28,7 +28,7 @@ services:
     deploy:
       placement:
         constraints:
-          - node.hostname == as158-pmk
+          - node.hostname == as158-selenium01
       mode: replicated
       replicas: 1
     networks:
@@ -49,7 +49,7 @@ services:
     deploy:
       placement:
         constraints:
-          - node.hostname == as158-pmk
+          - node.hostname == as158-selenium01
       mode: replicated
       replicas: 1
     networks:
@@ -70,7 +70,7 @@ services:
     deploy:
       placement:
         constraints:
-          - node.hostname == as158-pmk
+          - node.hostname == as158-selenium01
       mode: replicated
       replicas: 1
     networks:
@@ -80,8 +80,8 @@ services:
         published: 8080
         protocol: tcp
         mode: host
-    command: ["--status-uri", "http://192.168.5.12:8888",
-              "--webdriver-uri", "http://user:1q0p2w9o@192.168.5.12:4442"]
+    command: ["--status-uri", "http://192.168.5.75:8888",
+              "--webdriver-uri", "http://user:1q0p2w9o@192.168.5.75:4442"]
 
 networks:
   selenoid-net:
