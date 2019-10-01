@@ -17,7 +17,7 @@ services:
         target: /etc/selenoid/browsers.json
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - /opt/selenoid_swarm/logs:/opt/selenoid/logs
+      - /opt/selenoid/logs:/opt/selenoid/logs
     command: ["-container-network", "selenoid-net",
               "-conf", "/etc/selenoid/browsers.json",
               "-log-output-dir", "/opt/selenoid/logs"]
@@ -39,7 +39,7 @@ services:
         protocol: tcp
         mode: host
     volumes:
-      - "/opt/selenoid_swarm/ggr:/etc/grid-router"
+      - "/opt/selenoid/ggr:/etc/grid-router"
     command: ["-quotaDir", "/etc/grid-router/quota"]
   ggr-ui:
     image: dcr.ec-leasing.ru/as-15-8/selenoid/ggr-ui:1.1.2
@@ -60,7 +60,7 @@ services:
         protocol: tcp
         mode: host
     volumes:
-      - "/opt/selenoid_swarm/ggr:/etc/grid-router"
+      - "/opt/selenoid/ggr:/etc/grid-router"
   selenoid-ui:
     image: dcr.ec-leasing.ru/as-15-8/selenoid/selenoid-ui:1.8.1
     depends_on:
