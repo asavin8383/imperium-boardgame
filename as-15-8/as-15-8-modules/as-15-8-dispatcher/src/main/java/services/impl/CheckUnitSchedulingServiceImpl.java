@@ -1,10 +1,10 @@
 package services.impl;
 
-import analysis.AnalysisResult;
 import checkUnits.CheckUnit;
 import checkUnits.CheckUnitJob;
 import checkUnits.CheckUnitType;
-import enums.*;
+import enums.AccessToolParameters;
+import enums.AccessToolUnit;
 import exceptions.AS_15_8_DispatcherException;
 import jobs.ArrangementJob;
 import jobs.ERDIJob;
@@ -12,8 +12,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import model.ArrangementResult;
-import model.DetailResultsVpn;
+import model.ScheduleCheckUnit;
 import org.apache.commons.net.util.SubnetUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -21,18 +20,16 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
-import repositories.ArrangementResultRepository;
-import repositories.DetailResultsVpnRepository;
-import services.AnalysisResultService;
-import services.AnalysisResultServiceFactory;
-import services.CheckUnitJobService;
+import repositories.ScheduleCheckUnitRepo;
+import services.CheckUnitSchedulingService;
 
 import javax.annotation.PostConstruct;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.logging.Logger;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -42,12 +39,12 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor(onConstructor_={@Autowired})
 @Slf4j
-public class CheckUnitJobServiceImpl implements CheckUnitJobService {
+public class CheckUnitSchedulingServiceImpl implements CheckUnitSchedulingService {
 
     private final NamedParameterJdbcTemplate jdbcNamedTemplate;
     private final JdbcTemplate jdbcTemplate;
-    private final ArrangementResultRepository arrangementResultRepo;
-    private final DetailResultsVpnRepository detailResultsRepo;
+    private final ScheduleCheckUnitRepo scheduleCheckUnitRepo;
+
     private final List<Protocol> protocols = new ArrayList<>();
 
     @PostConstruct
@@ -68,13 +65,8 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
     }
 
     @Override
-    public List<CheckUnitJob> prepareJobs(ArrangementJob arrangementJob) {
-        switch (arrangementJob.getRunType()){
-            case START:
-                return prepareJobsForStart(arrangementJob);
-            default:
-                throw new AS_15_8_DispatcherException("Error preparing check unit jobs! Arrangement run type is not supported: " + arrangementJob.getRunType());
-        }
+    public void createScheduleCheckUnits(ArrangementJob arrangementJob) {
+        prepareJobsForStart(arrangementJob);
     }
 
     private List<CheckUnitJob> prepareJobsForStart(ArrangementJob arrangementJob) {
@@ -243,38 +235,17 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
         return checkUnitJobs;
     }
     
-	@Override
-	public ArrangementResult processJobResult(AnalysisResult result) {
-		ArrangementResult job = findJobByID(result.getJobID());
-		AnalysisResultService<? super AnalysisResult> service = AnalysisResultServiceFactory.getService(result.getClass());
-		job.setResult(service.processResult(result));  		
-		job.setScreenshot(result.getScreenshot());
-		job.setEtalonScreenshot(result.getEtalonScreenshot());
-		job.setEndDate(LocalDateTime.now());
-		return arrangementResultRepo.save(job);
-	}
-
-	@Override
-	public ExecutionStatus checkArrangementStatus(Long arrangementID) {
-		Long notFinishedJobsCount = arrangementResultRepo.countByResultNullOrResultIn(arrangementID,
-			Arrays.asList(
-				CheckUnitJobResult.PLANNED,
-				CheckUnitJobResult.RUNNING,
-				CheckUnitJobResult.CAPTCHA_DETECTED)
-			);
-		return notFinishedJobsCount > 0 ? ExecutionStatus.RUNNING : ExecutionStatus.FINISHED;
-	}
 
 
-    private Long saveCheckUnitJobAsResult(Long arrangementID, Long erdiID, CheckUnitJob checkUnitJob) {
+
+    private Long saveScheduleCheckUnit(Long arrangementID, Long erdiID, CheckUnitJob checkUnitJob) {
         try{
-            ArrangementResult arrangementResult = new ArrangementResult();
-            arrangementResult.setResult(CheckUnitJobResult.PLANNED);
-            arrangementResult.setArrangementId(arrangementID);
-            arrangementResult.setErdiId(erdiID);
-            arrangementResult.setCheckUnitType(checkUnitJob.getCheckUnit().getType());
-            arrangementResult.setCheckUnitValue(checkUnitJob.getCheckUnit().getValue());
-            return arrangementResultRepo.save(arrangementResult).getId();
+            ScheduleCheckUnit scheduleCheckUnit = new ScheduleCheckUnit();
+            scheduleCheckUnit.setArrangementId(arrangementID);
+            scheduleCheckUnit.setErdiId(erdiID);
+            scheduleCheckUnit.setCheckUnitType(checkUnitJob.getCheckUnit().getType());
+            scheduleCheckUnit.setCheckUnitValue(checkUnitJob.getCheckUnit().getValue());
+            return scheduleCheckUnitRepo.save(scheduleCheckUnit).getId();
         }catch (Exception ex){
             throw new AS_15_8_DispatcherException("Ошибка сохранения задания на проверку запрещенного ресурса!", ex);
         }
@@ -299,7 +270,7 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
 			if(!checkArrangementStatusForDelete(arrangementId)){
 				throw new AS_15_8_DispatcherException("Ошибка удаления списка запрещенных ресурсов мероприятия! Мероприятие " + arrangementId + " имеет недопустимый статус (запущено или завершено)");
 			}
-			arrangementResultRepo.deleteByArrangementIdAndErdiId(arrangementId, erdiId);
+			scheduleCheckUnitRepo.deleteByArrangementIdAndErdiId(arrangementId, erdiId);
 		}catch (EmptyResultDataAccessException ex){
 			log.info("У мероприятия "  + arrangementId + " для ЕРДИ " + erdiId + " нет списка ресурсов");
 		}
@@ -310,39 +281,16 @@ public class CheckUnitJobServiceImpl implements CheckUnitJobService {
 
 	}
 
-	@Override
-	public ArrangementResult updateJobStatus(Long jobID, CheckUnitJobResult status, String description) {
-		ArrangementResult job = findJobByID(jobID);
-		job.setResult(status);
-		job.setEndDate(LocalDateTime.now());
-		if(status == CheckUnitJobResult.INTERNAL_ERROR)
-			saveErrorToDetailResults(jobID, description);
-		return arrangementResultRepo.save(job);
-	}
-	
-	private ArrangementResult findJobByID(Long jobID) {
-		return arrangementResultRepo.findById(jobID)
-			.orElseThrow(() -> 
-				new AS_15_8_DispatcherException("Ошибка! Задание не найдено! ID: " + jobID)
-			);
-	}
+
 	
 	private CheckUnitJob createAndSaveCheckUnitJob(Long arrangementID, CheckUnitJobTemplate template, CheckUnit checkUnit) {
 		CheckUnitJob checkUnitJob = new CheckUnitJob();
 		checkUnitJob.setAccessToolUnit(template.getAccessToolUnit());
         checkUnitJob.getAccessToolParameters().putAll(template.getParameters());
         checkUnitJob.setCheckUnit(checkUnit);
-        Long ipJobID = saveCheckUnitJobAsResult(arrangementID, template.erdiId, checkUnitJob);
+        Long ipJobID = saveScheduleCheckUnit(arrangementID, template.erdiId, checkUnitJob);
         checkUnitJob.setJobID(ipJobID);
         return checkUnitJob;
-	}
-	
-	private void saveErrorToDetailResults(Long jobID, String exText) {
-		DetailResultsVpn detailResults = new DetailResultsVpn();
-		detailResults.setId(jobID);
-		detailResults.setResponseError(false);
-		detailResults.setStubScoreInfo(exText);
-		detailResultsRepo.save(detailResults);
 	}
 	
 	@Data

@@ -23,7 +23,4 @@ public interface ArrangementResultRepository extends JpaRepository<ArrangementRe
 	@Query("SELECT count(res) FROM ArrangementResult res WHERE res.arrangementId = :id AND (res.result IS NULL OR res.result IN :results)")
 	Long countByResultNullOrResultIn(@Param("id") Long id, @Param("results") List<CheckUnitJobResult> results);
 
-	@Transactional
-	Long deleteByArrangementIdAndErdiId(Long arrangementId, Long erdiId);
-	
 }

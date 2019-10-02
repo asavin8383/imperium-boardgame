@@ -1,0 +1,27 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <changeSet id="rest.0020" author="asavin">
+        <sql>
+            insert into schedule.schedule_check_units (id, content_id, arrangement_id, check_unit_type, check_unit_value)
+            SELECT id, content_id, arrangement_id, check_unit_type, check_unit_value from portal.arrangement_results
+            join schedule.schedule_period_check_units on arrangement_results.id = schedule_period_check_units.check_unit_id;
+        </sql>
+        <dropForeignKeyConstraint
+            baseTableSchemaName="schedule"
+            baseTableName="schedule_period_check_units"
+            constraintName="schedule_period_check_units_arrangement_results_id_fk"/>
+        <addForeignKeyConstraint
+            baseTableSchemaName="schedule"
+            baseTableName="schedule_period_check_units"
+            baseColumnNames="check_unit_id"
+            constraintName="schedule_period_check_units_schedule_check_units_id_fk"
+            referencedTableSchemaName="schedule"
+            referencedTableName="schedule_check_units"
+            referencedColumnNames="id"/>
+        <rollback>
+
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

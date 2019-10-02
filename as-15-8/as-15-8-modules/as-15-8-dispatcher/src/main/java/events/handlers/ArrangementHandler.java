@@ -2,7 +2,6 @@ package events.handlers;
 
 import arrangement.ArrangementStatusNotification;
 import enums.ArrangementEvents;
-import enums.ExecutionStatus;
 import events.DispatcherChannels;
 import exceptions.AS_15_8_DispatcherException;
 import jobs.ArrangementJob;
@@ -13,7 +12,7 @@ import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Service;
-import services.CheckUnitJobService;
+import services.CheckUnitSchedulingService;
 
 /**
  * Обработчик входящих сообщений от рест-сервиса с мероприятиями для заполнения
@@ -26,7 +25,7 @@ import services.CheckUnitJobService;
 @RequiredArgsConstructor(onConstructor_={@Autowired})
 public class ArrangementHandler {
 
-    private final CheckUnitJobService checkUnitJobService;
+    private final CheckUnitSchedulingService checkUnitSchedulingService;
 
     /**
      * Заполнение проверяемых ресурсов по ЕРДИ мероприятия
@@ -38,7 +37,7 @@ public class ArrangementHandler {
         log.info("Принято задание на проведение мероприятия: " + arrangementJob.toString());
         try {
             if(arrangementJob.getRunType().equals(ArrangementJob.JobRunType.START)) {
-                checkUnitJobService.prepareJobs(arrangementJob);
+                checkUnitSchedulingService.createScheduleCheckUnits(arrangementJob);
                 return new ArrangementStatusNotification(arrangementJob.getId(), ArrangementEvents.FILL);
             } else {
                 log.error("Тип запуска мероприятия не поддерживается: " + arrangementJob.getRunType());

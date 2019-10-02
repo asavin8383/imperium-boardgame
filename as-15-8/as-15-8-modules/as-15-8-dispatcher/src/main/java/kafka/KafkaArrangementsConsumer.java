@@ -1,5 +1,6 @@
 package kafka;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -18,16 +19,17 @@ import enums.AccessToolUnit;
 import exceptions.AS_15_8_DispatcherException;
 import jobs.ArrangementJob;
 import lombok.extern.slf4j.Slf4j;
-import services.CheckUnitJobService;
+import services.ArrangementResultService;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor(onConstructor_={@Autowired})
 public class KafkaArrangementsConsumer {
 
-	private CheckUnitJobService checkUnitJobService;
+	private final ArrangementResultService arrangementResultService;
 	
-	private KafkaTemplate<String, CheckUnitJob> checkUnitJobKafkaTemplate;
-	private KafkaTemplate<String, ExecutorControlMessage> controlMessagesTemplate;
+	private final KafkaTemplate<String, CheckUnitJob> checkUnitJobKafkaTemplate;
+	private final KafkaTemplate<String, ExecutorControlMessage> controlMessagesTemplate;
 
 
 	@Value("${spring.kafka.jobs-topic}")
@@ -35,15 +37,6 @@ public class KafkaArrangementsConsumer {
 
 	@Value("${spring.kafka.control-topic}")
 	private String controlTopicName;
-
-	@Autowired
-	public KafkaArrangementsConsumer(CheckUnitJobService checkUnitJobService,
-									 KafkaTemplate<String, CheckUnitJob> checkUnitJobKafkaTemplate,
-									 KafkaTemplate<String, ExecutorControlMessage> controlMessagesTemplate) {
-		this.checkUnitJobService = checkUnitJobService;
-		this.checkUnitJobKafkaTemplate = checkUnitJobKafkaTemplate;
-		this.controlMessagesTemplate = controlMessagesTemplate;
-	}
 
 	/*@KafkaListener(
 		topics = "${spring.kafka.arrangement-tasks-topic}",
@@ -53,7 +46,7 @@ public class KafkaArrangementsConsumer {
 		log.info("Принято задание на проведение мероприятия: " + arrangementJob.toString());
     	try {
     		if(arrangementJob.getRunType().equals(ArrangementJob.JobRunType.START)){
-				checkUnitJobService
+				arrangementResultService
 					.prepareJobs(arrangementJob)
 					.forEach(this::send);
 			}

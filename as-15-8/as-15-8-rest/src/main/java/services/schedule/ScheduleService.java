@@ -6,17 +6,14 @@ import lombok.extern.slf4j.Slf4j;
 import model.catalog.AccessTool;
 import model.enums.ScheduleStatus;
 import model.result.ArrangementResult;
-import model.schedule.Schedule;
-import model.schedule.SchedulePeriod;
-import model.schedule.SchedulePeriodArrangement;
-import model.schedule.SchedulePeriodCheckUnit;
+import model.schedule.*;
 import model.task.Arrangement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import repositories.ArrangementRepo;
-import repositories.ArrangementResultRepo;
 import repositories.GlobalParametersRepository;
 import repositories.ScheduleRepo;
+import repositories.schedule.ScheduleCheckUnitRepo;
 import repositories.schedule.SchedulePeriodArrangementRepo;
 
 import javax.transaction.Transactional;
@@ -37,16 +34,16 @@ public class ScheduleService {
 
     private final SchedulePeriodArrangementRepo schedulePeriodArrangementRepo;
 
-    private final ArrangementResultRepo arrangementResultRepo;
+    private final ScheduleCheckUnitRepo scheduleCheckUnitRepo;
 
     private final ArrangementRepo arrangementRepo;
 
     @Autowired
-    public ScheduleService(PlannedProcessingTimeService plannedProcessingTimeService, GlobalParametersRepository globalParametersRepository, ScheduleRepo scheduleRepo, SchedulePeriodArrangementRepo schedulePeriodArrangementRepo, ArrangementResultRepo arrangementResultRepo, ArrangementRepo arrangementRepo){
+    public ScheduleService(PlannedProcessingTimeService plannedProcessingTimeService, GlobalParametersRepository globalParametersRepository, ScheduleRepo scheduleRepo, SchedulePeriodArrangementRepo schedulePeriodArrangementRepo, ScheduleCheckUnitRepo scheduleCheckUnitRepo, ArrangementRepo arrangementRepo){
         this.plannedProcessingTimeService = plannedProcessingTimeService;
         this.scheduleRepo = scheduleRepo;
         this.schedulePeriodArrangementRepo = schedulePeriodArrangementRepo;
-        this.arrangementResultRepo = arrangementResultRepo;
+        this.scheduleCheckUnitRepo = scheduleCheckUnitRepo;
         this.arrangementRepo = arrangementRepo;
         try {
             this.totalWorkersCount = globalParametersRepository
@@ -161,7 +158,7 @@ public class ScheduleService {
                 if(nextCheckUnit != null){
                     if(schedulePeriod != schedule.getSchedulePeriods().last()) {
                         SchedulePeriod nextPeriod = schedule.getSchedulePeriodsAsTreeSet().higher(schedulePeriod);
-                        if (!containsArrangement(nextPeriod.getSchedulePeriodArrangements(), arrangement)) {
+                        if (nextPeriod!= null && !containsArrangement(nextPeriod.getSchedulePeriodArrangements(), arrangement)) {
                             nextPeriod.getSchedulePeriodArrangements().add(new SchedulePeriodArrangement(nextPeriod, arrangement));
                         }
                     } else {
@@ -271,9 +268,9 @@ public class ScheduleService {
 
     private void fillCheckUnits(Arrangement arrangement){
         List<SchedulePeriodArrangement> schedulePeriodArrangements = schedulePeriodArrangementRepo.findAllByArrangement(arrangement);
-        SortedSet<ArrangementResult> arrangementResults = new TreeSet<>(Comparator.comparingLong(ArrangementResult::getId));
+        SortedSet<ScheduleCheckUnit> arrangementResults = new TreeSet<>(Comparator.comparingLong(ScheduleCheckUnit::getId));
         log.debug("Поиск arrangementResults по мероприятию: {}", arrangement.getId());
-        arrangementResults.addAll(arrangementResultRepo.findAllByArrangement(arrangement));
+        arrangementResults.addAll(scheduleCheckUnitRepo.findAllByArrangement(arrangement));
         log.debug("Поиск arrangementResults по мероприятию: {} завершен", arrangement.getId());
         for(SchedulePeriodArrangement schedulePeriodArrangement : schedulePeriodArrangements){
             if(!arrangementResults.isEmpty()){
@@ -283,32 +280,32 @@ public class ScheduleService {
     }
 
 
-    private SortedSet<ArrangementResult> fillSchedulePeriodArrangement(SchedulePeriodArrangement schedulePeriodArrangement, SortedSet<ArrangementResult> arrangementResults){
+    private SortedSet<ScheduleCheckUnit> fillSchedulePeriodArrangement(SchedulePeriodArrangement schedulePeriodArrangement, SortedSet<ScheduleCheckUnit> scheduleCheckUnits){
         long totalTime = countSchedulePeriodArrangementTotalTime(schedulePeriodArrangement);
         long i = 1;
         log.debug("Заполняется SPA {}", schedulePeriodArrangement.getId());
-        for (ArrangementResult arrangementResult : arrangementResults){
+        for (ScheduleCheckUnit scheduleCheckUnit : scheduleCheckUnits){
             if (totalTime <= 0){
-                arrangementResults = arrangementResults.tailSet(arrangementResult);
-                return arrangementResults.tailSet(arrangementResult);
+                scheduleCheckUnits = scheduleCheckUnits.tailSet(scheduleCheckUnit);
+                return scheduleCheckUnits.tailSet(scheduleCheckUnit);
             }
             SchedulePeriodCheckUnit schedulePeriodCheckUnit = new SchedulePeriodCheckUnit();
             schedulePeriodCheckUnit.setSchedulePeriodArrangement(schedulePeriodArrangement);
-            schedulePeriodCheckUnit.setCheckUnit(arrangementResult);
+            schedulePeriodCheckUnit.setScheduleCheckUnit(scheduleCheckUnit);
             schedulePeriodCheckUnit.setExecutionNumber(i++);
             schedulePeriodArrangement.getSchedulePeriodCheckUnits().add(schedulePeriodCheckUnit);
             //schedulePeriodCheckUnitRepo.save(schedulePeriodCheckUnit);
-            long plannedProcessingTime = plannedProcessingTimeService.getProcessingTime(schedulePeriodArrangement.getArrangement().getAccessTool(), arrangementResult.getCheckUnitType());
+            long plannedProcessingTime = plannedProcessingTimeService.getProcessingTime(schedulePeriodArrangement.getArrangement().getAccessTool(), scheduleCheckUnit.getCheckUnitType());
             if (plannedProcessingTime <= 0){
                 AS_15_8_Exception.logAndThrow(log, String
-                        .format("Некорректное время обработки для ПАСД %s типа ресурса %s - значение: %d", schedulePeriodArrangement.getArrangement().getAccessTool().getName(), arrangementResult.getCheckUnitType(), plannedProcessingTime));
+                        .format("Некорректное время обработки для ПАСД %s типа ресурса %s - значение: %d", schedulePeriodArrangement.getArrangement().getAccessTool().getName(), scheduleCheckUnit.getCheckUnitType(), plannedProcessingTime));
             }
             totalTime -= plannedProcessingTime;
             log.debug("Добавлен новый CheckUinit: {}", schedulePeriodCheckUnit.getExecutionNumber());
         }
         schedulePeriodArrangementRepo.save(schedulePeriodArrangement);
         log.debug("SPA {} заполнено", schedulePeriodArrangement.getId());
-        return new TreeSet<>(Comparator.comparingLong(ArrangementResult::getId));
+        return new TreeSet<>(Comparator.comparingLong(ScheduleCheckUnit::getId));
     }
 
     private long countSchedulePeriodArrangementTotalTime(SchedulePeriodArrangement schedulePeriodArrangement){

@@ -5,13 +5,14 @@ import arrangement.ArrangementStatusNotification;
 import enums.ArrangementEvents;
 import enums.CheckUnitJobResult;
 import enums.ExecutionStatus;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.ArrangementResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
-import services.CheckUnitJobService;
+import services.ArrangementResultService;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -24,13 +25,11 @@ import java.io.StringWriter;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor(onConstructor_={@Autowired})
 public class KafkaAnalysisResultsConsumer {
 
-	@Autowired
-	private CheckUnitJobService checkUnitService;
-	
-	@Autowired
-	private ArrangementStatusProducer arrangementStatusProducer;
+	private final ArrangementResultService arrangementResultService;
+	private final ArrangementStatusProducer arrangementStatusProducer;
 	
     @KafkaListener(
     	topics = "${spring.kafka.analysis-results-topic}",
@@ -39,10 +38,10 @@ public class KafkaAnalysisResultsConsumer {
     public void consumeAnalysisResults(AnalysisResult analysisResult, Acknowledgment ack) {
 		log.info("Принято сообщение с анализом результатов проверки: " + analysisResult.getJobID() + ", " + analysisResult.getCheckUnit().getValue());
     	try {       		
-    		ArrangementResult jobResult = checkUnitService.processJobResult(analysisResult);
+    		ArrangementResult jobResult = arrangementResultService.processJobResult(analysisResult);
     		log.info("Результаты выполнения проверки успешно обработаны: " + analysisResult.getJobID() + ", " + analysisResult.getCheckUnit().getValue());
     		
-    		ExecutionStatus status = checkUnitService.checkArrangementStatus(jobResult.getArrangementId());
+    		ExecutionStatus status = arrangementResultService.checkArrangementStatus(jobResult.getArrangementId());
     		if(status == ExecutionStatus.FINISHED) {
     			log.info("Мероприятие успешно завешено: " + jobResult.getArrangementId());
     			arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(jobResult.getArrangementId(), ArrangementEvents.FINISH));
@@ -55,8 +54,8 @@ public class KafkaAnalysisResultsConsumer {
         		StringWriter sw = new StringWriter();
         		ex.printStackTrace(new PrintWriter(sw));
         		
-        		ArrangementResult jobResult = checkUnitService.updateJobStatus(analysisResult.getJobID(), CheckUnitJobResult.INTERNAL_ERROR, sw.toString());
-				ExecutionStatus status = checkUnitService.checkArrangementStatus(jobResult.getArrangementId());
+        		ArrangementResult jobResult = arrangementResultService.updateJobStatus(analysisResult.getJobID(), CheckUnitJobResult.INTERNAL_ERROR, sw.toString());
+				ExecutionStatus status = arrangementResultService.checkArrangementStatus(jobResult.getArrangementId());
         		if(status == ExecutionStatus.FINISHED) {
         			log.info("Мероприятие успешно завешено: " + jobResult.getArrangementId());
         			arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(jobResult.getArrangementId(), ArrangementEvents.FINISH));
