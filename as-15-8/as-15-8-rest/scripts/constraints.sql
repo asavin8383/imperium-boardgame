@@ -7,7 +7,7 @@ alter table portal.arrangements add constraint ck_status check ( status in ('NEW
 
 alter table portal.arrangement_results drop constraint if exists ck_result;
 alter table portal.arrangement_results add constraint ck_result check ( result in (
-'FORMED',
+'PLANNED',
 'RUNNING',
 'COMPLETED',
 'DOUBTFUL',

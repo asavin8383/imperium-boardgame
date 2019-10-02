@@ -1,0 +1,50 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <changeSet id="rest.0019" author="asavin">
+        <createTable schemaName="schedule" tableName="schedule_check_units">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="schedule_check_unitsPK"/>
+            </column>
+            <column name="content_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="arrangement_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="check_unit_type" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="check_unit_value" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint
+                baseTableSchemaName="schedule"
+                baseTableName="schedule_check_units"
+                baseColumnNames="content_id"
+                constraintName="schedule_check_units_content_id_fk"
+                referencedTableSchemaName="sor"
+                referencedTableName="content"
+                referencedColumnNames="id"
+                onUpdate="CASCADE"
+                onDelete="CASCADE"/>
+        <addForeignKeyConstraint
+                baseTableSchemaName="schedule"
+                baseTableName="schedule_check_units"
+                baseColumnNames="arrangement_id"
+                constraintName="schedule_check_units_arrangement_id_fk"
+                referencedTableSchemaName="portal"
+                referencedTableName="arrangements"
+                referencedColumnNames="id"
+                onUpdate="CASCADE"
+                onDelete="CASCADE"/>
+        <sql>
+            alter table schedule.schedule_check_units add constraint ck_check_unit_type check (check_unit_type in ('URL', 'DOMAIN', 'DOMAIN_MASK', 'IP_V4', 'IP_V6', 'IP_V4_SUBNET', 'IP_V6_SUBNET'))
+        </sql>
+        <rollback>
+            <dropTable schemaName="schedule" tableName="schedule_check_units"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

@@ -21,5 +21,6 @@
     <include file="data/changelog/rest.0016.fk_custom_erdi_violation.xml"/>
     <include file="data/changelog/rest.0017.search_system_parameters.xml"/>
     <include file="data/changelog/rest.0018.search_system_parameters.xml"/>
+    <include file="data/changelog/rest.0019.schedule_check_units.xml"/>
 
 </databaseChangeLog>

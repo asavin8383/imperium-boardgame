@@ -11,6 +11,7 @@ import lombok.ToString;
 import model.Views;
 import model.catalog.AccessTool;
 import model.result.ArrangementResult;
+import model.schedule.ScheduleCheckUnit;
 import model.schedule.SchedulePeriodArrangement;
 import model.traffic.Traffic;
 import stateMachine.ArrangementStateMachine;
@@ -106,11 +107,14 @@ public class Arrangement implements Serializable {
 
 	@OneToMany(cascade=CascadeType.ALL, mappedBy = "arrangement")
 	@JsonIgnore
+	private List<ScheduleCheckUnit> scheduleCheckUnits;
+
+	@OneToMany(cascade=CascadeType.ALL, mappedBy = "arrangement")
+	@JsonIgnore
 	private List<SchedulePeriodArrangement> schedulePeriodArrangements;
 
 	@ManyToOne
 	@JoinColumn(name = "traffic_id")
-	@JsonIgnore
 	private Traffic traffic;
 
 	/**Результат проведения мероприятия*/
