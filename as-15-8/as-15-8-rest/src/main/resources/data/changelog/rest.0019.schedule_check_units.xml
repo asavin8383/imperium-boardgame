@@ -25,7 +25,7 @@
                 baseTableName="schedule_check_units"
                 baseColumnNames="content_id"
                 constraintName="schedule_check_units_content_id_fk"
-                referencedTableSchemaName="sor"
+                referencedTableSchemaName="sa"
                 referencedTableName="content"
                 referencedColumnNames="id"
                 onUpdate="CASCADE"
