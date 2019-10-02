@@ -6,6 +6,7 @@ import enums.AccessToolUnit;
 import model.catalog.AccessTool;
 import model.result.ArrangementResult;
 import model.schedule.Schedule;
+import model.schedule.ScheduleCheckUnit;
 import model.schedule.SchedulePeriod;
 import model.schedule.SchedulePeriodArrangement;
 import model.task.Arrangement;
@@ -39,7 +40,7 @@ public class TestSchedule {
     @Test
     public void testSchedule(){
 
-        Map<Arrangement, TreeSet<ArrangementResult>> scheduleArrangements = new HashMap<>();
+        Map<Arrangement, TreeSet<ScheduleCheckUnit>> scheduleArrangements = new HashMap<>();
 
         scheduleArrangements.put(
             createArrangement("arr1", AccessToolUnit.GOOGLE, "09:00","12:00"),
@@ -80,10 +81,10 @@ public class TestSchedule {
         return arrangement;
     }
 
-    private TreeSet<ArrangementResult> generateCheckUnits(int count){
-        TreeSet<ArrangementResult> checkUnits = new TreeSet<>(Comparator.comparing(ArrangementResult::getCheckUnitValue));
+    private TreeSet<ScheduleCheckUnit> generateCheckUnits(int count){
+        TreeSet<ScheduleCheckUnit> checkUnits = new TreeSet<>(Comparator.comparing(ScheduleCheckUnit::getCheckUnitValue));
         for(int i = 0; i < count; i++){
-            ArrangementResult checkUnit = new ArrangementResult();
+            ScheduleCheckUnit checkUnit = new ScheduleCheckUnit();
             checkUnit.setCheckUnitType(CheckUnitType.URL);
             checkUnit.setCheckUnitValue("http://test"+i+".com");
             checkUnits.add(checkUnit);
