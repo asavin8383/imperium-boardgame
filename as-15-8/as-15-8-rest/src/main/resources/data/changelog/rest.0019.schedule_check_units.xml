@@ -44,6 +44,12 @@
             alter table schedule.schedule_check_units add constraint ck_check_unit_type check (check_unit_type in ('URL', 'DOMAIN', 'DOMAIN_MASK', 'IP_V4', 'IP_V6', 'IP_V4_SUBNET', 'IP_V6_SUBNET'))
         </sql>
         <rollback>
+            <dropForeignKeyConstraint baseTableSchemaName="schedule"
+                                      baseTableName="schedule_check_units"
+                                      constraintName="schedule_check_units_arrangement_id_fk"/>
+            <dropForeignKeyConstraint baseTableSchemaName="schedule"
+                                      baseTableName="schedule_check_units"
+                                      constraintName="schedule_check_units_content_id_fk"/>
             <dropTable schemaName="schedule" tableName="schedule_check_units"/>
         </rollback>
     </changeSet>
