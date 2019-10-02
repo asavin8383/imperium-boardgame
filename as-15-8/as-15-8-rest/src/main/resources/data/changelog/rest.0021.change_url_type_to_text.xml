@@ -1,0 +1,9 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <changeSet id="rest.0021" author="asavin">
+        <modifyDataType schemaName="portal" tableName="arrangement_results" columnName="check_unit_value" newDataType="TEXT"/>
+        <modifyDataType schemaName="schedule" tableName="schedule_check_units" columnName="check_unit_value" newDataType="TEXT"/>
+    </changeSet>
+</databaseChangeLog>

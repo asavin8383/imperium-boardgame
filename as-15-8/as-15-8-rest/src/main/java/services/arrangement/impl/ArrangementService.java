@@ -1,12 +1,12 @@
 package services.arrangement.impl;
 
 import enums.ExecutionStatus;
+import events.ArrangementChannels;
 import exceptions.AS_15_8_Exception;
 import jobs.ArrangementJob;
-import events.ArrangementChannels;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import model.result.ArrangementResult;
+import model.schedule.ScheduleCheckUnit;
 import model.task.Arrangement;
 import model.task.FormalTask;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +16,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 import repositories.ArrangementRepo;
-import repositories.ArrangementResultRepo;
+import repositories.schedule.ScheduleCheckUnitRepo;
 import services.arrangement.ArrangementJobCreationService;
 
 import java.util.*;
@@ -36,7 +36,7 @@ public class ArrangementService {
     private final ArrangementRepo arrangementRepo;
     private final ArrangementJobCreationService arrangementJobCreationService;
     private final ArrangementChannels source;
-    private final ArrangementResultRepo arrangementResultRepo;
+    private final ScheduleCheckUnitRepo scheduleCheckUnitRepo;
 
     public Arrangement saveArrangement(Arrangement arrangement, FormalTask formalTask){
         arrangement.setFormalTask(formalTask);
@@ -75,13 +75,13 @@ public class ArrangementService {
         return arrangementRepo.findPageByStatus(ExecutionStatus.FORMED, page);
     }
 
-    public Map<Arrangement, TreeSet<ArrangementResult>> getArrangementCheckUnits(List<Long> arrangementIds){
-        Map<Arrangement, TreeSet<ArrangementResult>> arrangementCheckUnits = new HashMap<>();
+    public Map<Arrangement, TreeSet<ScheduleCheckUnit>> getArrangementCheckUnits(List<Long> arrangementIds){
+        Map<Arrangement, TreeSet<ScheduleCheckUnit>> arrangementCheckUnits = new HashMap<>();
         arrangementIds.forEach(arrangementId -> {
             Arrangement arrangement = arrangementRepo.findById(arrangementId)
                     .orElseThrow(() -> new AS_15_8_Exception("Ошибка создания расписания! Мероприятие не было найдено по ID: " + arrangementId));
-            TreeSet<ArrangementResult> arrangementResults = new TreeSet<>(Comparator.comparingLong(ArrangementResult::getId));
-            arrangementResults.addAll(arrangementResultRepo.findAllByArrangement(arrangement));
+            TreeSet<ScheduleCheckUnit> arrangementResults = new TreeSet<>(Comparator.comparingLong(ScheduleCheckUnit::getId));
+            arrangementResults.addAll(scheduleCheckUnitRepo.findAllByArrangement(arrangement));
             arrangementCheckUnits.put(arrangement, arrangementResults);
         });
         return arrangementCheckUnits;
