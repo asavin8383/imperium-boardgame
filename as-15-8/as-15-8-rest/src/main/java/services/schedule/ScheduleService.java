@@ -290,7 +290,7 @@ public class ScheduleService {
             }
             SchedulePeriodCheckUnit schedulePeriodCheckUnit = new SchedulePeriodCheckUnit();
             schedulePeriodCheckUnit.setSchedulePeriodArrangement(schedulePeriodArrangement);
-            schedulePeriodCheckUnit.setScheduleCheckUnit(scheduleCheckUnit);
+            schedulePeriodCheckUnit.setCheckUnit(scheduleCheckUnit);
             schedulePeriodCheckUnit.setExecutionNumber(i++);
             schedulePeriodArrangement.getSchedulePeriodCheckUnits().add(schedulePeriodCheckUnit);
             //schedulePeriodCheckUnitRepo.save(schedulePeriodCheckUnit);

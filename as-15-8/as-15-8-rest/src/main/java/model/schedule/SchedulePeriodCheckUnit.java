@@ -19,9 +19,8 @@ public class SchedulePeriodCheckUnit {
     private SchedulePeriodArrangement schedulePeriodArrangement;
 
     @OneToOne(optional = false, fetch = FetchType.LAZY)
-    @Column(name = "check_unit_id")
     @MapsId
-    private ScheduleCheckUnit scheduleCheckUnit;
+    private ScheduleCheckUnit checkUnit;
 
     @Column(nullable = false)
     private Long executionNumber;
