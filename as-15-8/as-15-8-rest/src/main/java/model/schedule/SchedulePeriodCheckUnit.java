@@ -19,6 +19,7 @@ public class SchedulePeriodCheckUnit {
     private SchedulePeriodArrangement schedulePeriodArrangement;
 
     @OneToOne(optional = false, fetch = FetchType.LAZY)
+    @Column(name = "check_unit_id")
     @MapsId
     private ScheduleCheckUnit scheduleCheckUnit;
 
