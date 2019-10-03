@@ -2,5 +2,5 @@
 /.classpath
 /.project
 /.settings/
-/test-output/
+/kafka-output/
 /as-15-8-executor.jar

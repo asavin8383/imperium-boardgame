@@ -15,8 +15,8 @@ import lombok.Getter;
 import robots.DriverFactory;
 import robots.Robot;
 import robots.RobotDriverParameters;
-import robots.exceptions.Cancel_RobotScriptExecutionException;
-import robots.exceptions.RobotScriptExecutionException;
+import robots.exceptions.Cancel_ExecutionException;
+import robots.exceptions.ExecutionException;
 
 /**
  * Скрипт робота проверки ПС/ПАСД
@@ -57,24 +57,24 @@ public abstract class SeleniumRobot implements Robot {
 		this.scriptParams = scriptParams;
 	}
 
-	public ExecutionJobResult run(CheckUnit checkUnit) throws RobotScriptExecutionException {
+	public ExecutionJobResult run(CheckUnit checkUnit) throws ExecutionException {
 		try {
 			currentExecutionFuture = CompletableFuture.supplyAsync(() -> {
 					try {
 						return execute(checkUnit);
-					} catch (RobotScriptExecutionException ex) {
+					} catch (ExecutionException ex) {
 						throw new CompletionException(ex);
 					}
 				});
 			ExecutionJobResult jobResult = currentExecutionFuture.join();
 			return jobResult;
 		} catch (CancellationException ex) {
-			throw new Cancel_RobotScriptExecutionException(ex);
+			throw new Cancel_ExecutionException(ex);
 		} catch (CompletionException ex) {
-			if(ex.getCause() instanceof RobotScriptExecutionException)
-				throw (RobotScriptExecutionException) ex.getCause();
+			if(ex.getCause() instanceof ExecutionException)
+				throw (ExecutionException) ex.getCause();
 			else
-				throw new RobotScriptExecutionException(ex.getCause());
+				throw new ExecutionException(ex.getCause());
 		} finally {
 			currentExecutionFuture = null;
 		}
@@ -84,9 +84,9 @@ public abstract class SeleniumRobot implements Robot {
 	 * Метод, запускаюший выполнение скрипта робота
 	 * @param checkUnit Ресурс для проверки
 	 * @return
-	 * @throws RobotScriptExecutionException
+	 * @throws ExecutionException
 	 */
-	protected abstract ExecutionJobResult execute(CheckUnit checkUnit) throws RobotScriptExecutionException;
+	protected abstract ExecutionJobResult execute(CheckUnit checkUnit) throws ExecutionException;
 
 	protected WebDriver createDriver(String proxy, boolean enableLog) {
 		WebDriver driver = DriverFactory.createDriver(

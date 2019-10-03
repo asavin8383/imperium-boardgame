@@ -4,8 +4,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
-
-import kafka.KafkaConfiguration;
 import robots.factory.RobotsFactoryConfiguration;
 
 /**
@@ -14,8 +12,8 @@ import robots.factory.RobotsFactoryConfiguration;
  *
  */
 @SpringBootApplication
-@Import({RobotsFactoryConfiguration.class, KafkaConfiguration.class})
-@ComponentScan(basePackages={"common", "kafka", "robots.factory", "service"})
+@Import({RobotsFactoryConfiguration.class})
+@ComponentScan(basePackages={"common", "events", "robots.factory", "service"})
 public class ApplicationConfiguration{
 	
 	public static void main(String[] args) {

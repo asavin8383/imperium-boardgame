@@ -10,7 +10,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import robots.DriverFactory;
 import robots.ProxyUtils;
 import robots.RobotDriverParameters;
-import robots.exceptions.RobotScriptExecutionException;
+import robots.exceptions.ExecutionException;
 import robots.utils.HttpResponseHelper;
 import robots.utils.RobotScriptUtils;
 import robots.utils.ScriptUtils;
@@ -48,10 +48,10 @@ public class HolaRobot extends SeleniumRobot {
     }
 
     @Override
-	public ExecutionJobResult execute(CheckUnit checkUnit) throws RobotScriptExecutionException {
+	public ExecutionJobResult execute(CheckUnit checkUnit) throws ExecutionException {
         // работате только с хромом!
         if (!checkBrowserChrome())
-            throw new RobotScriptExecutionException("Ошибка, неверный браузер! Для данного робота поддерживатся только браузер CHROME!");
+            throw new ExecutionException("Ошибка, неверный браузер! Для данного робота поддерживатся только браузер CHROME!");
 
         String url = ScriptUtils.getCheckUnitValue(checkUnit);
 

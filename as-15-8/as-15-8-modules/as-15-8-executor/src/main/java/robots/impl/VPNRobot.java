@@ -7,7 +7,7 @@ import execution.ExecutionVpnJobResult;
 import org.openqa.selenium.WebDriver;
 import robots.ProxyUtils;
 import robots.RobotDriverParameters;
-import robots.exceptions.RobotScriptExecutionException;
+import robots.exceptions.ExecutionException;
 import robots.utils.HttpResponseHelper;
 import robots.utils.RobotScriptUtils;
 import robots.utils.ScriptUtils;
@@ -59,10 +59,10 @@ public class VPNRobot extends SeleniumRobot {
     }
 
     @Override
-	public ExecutionJobResult execute(CheckUnit checkUnit) throws RobotScriptExecutionException {
+	public ExecutionJobResult execute(CheckUnit checkUnit) throws ExecutionException {
         // работате только с хромом!
         if (!checkBrowserChrome())
-            throw new RobotScriptExecutionException("Ошибка, неверный браузер! Для данного робота поддерживатся только браузер CHROME!");
+            throw new ExecutionException("Ошибка, неверный браузер! Для данного робота поддерживатся только браузер CHROME!");
 
         String url = ScriptUtils.getCheckUnitValue(checkUnit);
 
@@ -96,7 +96,7 @@ public class VPNRobot extends SeleniumRobot {
                             message.setFinalUrlPage(finalUrl);
                         }
                     }
-                    catch (RobotScriptExecutionException e) {
+                    catch (ExecutionException e) {
                         throw new CompletionException(e);
                     }
                     finally {
@@ -131,7 +131,7 @@ public class VPNRobot extends SeleniumRobot {
                             if(pageResult.errorCodeChrome == null){
                                 message.setFinalUrlPageEtalon(finalUrl);
                             }
-                        } catch (RobotScriptExecutionException e) {
+                        } catch (ExecutionException e) {
                             throw new CompletionException(e);
                         } finally {
                             close(etalonDriver);
@@ -152,10 +152,10 @@ public class VPNRobot extends SeleniumRobot {
                 throw possible;
             }
             catch(Throwable impossible) {
-                throw new RobotScriptExecutionException(impossible);
+                throw new ExecutionException(impossible);
             }
         } catch (CancellationException ex) {
-        	throw new RobotScriptExecutionException("Робот был остановлен", ex);
+        	throw new ExecutionException("Робот был остановлен", ex);
         }
 
         message.setUseEtalon(this.useEtalon);

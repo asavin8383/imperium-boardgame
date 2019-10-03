@@ -7,8 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import robots.RobotDriverParameters;
-import robots.exceptions.Captcha_RobotScriptExecutionException;
-import robots.exceptions.RobotScriptExecutionException;
+import robots.exceptions.Captcha_ExecutionException;
+import robots.exceptions.ExecutionException;
 import robots.utils.EqualityTest;
 import robots.utils.ScriptUtils;
 
@@ -29,7 +29,7 @@ public class YandexRobot extends CommonDirectSearchRobot {
     }
 
     @Override
-    public ExecutionJobResult execute(CheckUnit checkUnit) throws RobotScriptExecutionException {
+    public ExecutionJobResult execute(CheckUnit checkUnit) throws ExecutionException {
         driver.get(getSearchSystemUrl());
 
         equalityTest = EqualityTest.forCheckUnit(checkUnit);
@@ -37,7 +37,7 @@ public class YandexRobot extends CommonDirectSearchRobot {
             return createMessage(true);
 
         if (captcha())
-            throw new Captcha_RobotScriptExecutionException(
+            throw new Captcha_ExecutionException(
                     "Обнаружена Captcha " + driver.getCurrentUrl());
 
         return createMessage(checkPaginatedSearchResult());

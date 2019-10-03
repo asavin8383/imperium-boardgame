@@ -10,8 +10,8 @@ import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import robots.RobotDriverParameters;
-import robots.exceptions.Captcha_RobotScriptExecutionException;
-import robots.exceptions.RobotScriptExecutionException;
+import robots.exceptions.Captcha_ExecutionException;
+import robots.exceptions.ExecutionException;
 import robots.exceptions.TimeoutScriptException;
 import robots.utils.EqualityTest;
 import robots.utils.ScriptUtils;
@@ -152,12 +152,12 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
 
 
     @Override
-    public ExecutionJobResult execute(CheckUnit checkUnit) throws RobotScriptExecutionException {
+    public ExecutionJobResult execute(CheckUnit checkUnit) throws ExecutionException {
         driver.get(searchSystemUrl);
         searchFor(checkUnit.getValue());
 
         if (captcha())
-            throw new Captcha_RobotScriptExecutionException(
+            throw new Captcha_ExecutionException(
                     "Обнаружена Captcha " + driver.getCurrentUrl());
 
         equalityTest = EqualityTest.forCheckUnit(checkUnit);
@@ -172,7 +172,7 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
                 driver.findElements(By.xpath(xpathCaptcha)).size() > 0;
     }
 
-    boolean checkContinuousSearchResult() throws RobotScriptExecutionException {
+    boolean checkContinuousSearchResult() throws ExecutionException {
         JavascriptExecutor jsExecutor = (JavascriptExecutor) driver;
         By linkLocator = By.xpath(xpathItemLink);
 
@@ -195,7 +195,7 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         return checkPageResult(links);
     }
 
-    boolean checkPaginatedSearchResult() throws RobotScriptExecutionException {
+    boolean checkPaginatedSearchResult() throws ExecutionException {
         JavascriptExecutor jsExecutor = (JavascriptExecutor) driver;
         do {
             ScriptUtils.waitPageLoading(driver);

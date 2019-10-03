@@ -9,7 +9,7 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import robots.RobotDriverParameters;
-import robots.exceptions.RobotScriptExecutionException;
+import robots.exceptions.ExecutionException;
 import robots.exceptions.TimeoutScriptException;
 import robots.utils.CloudflareUtils;
 import robots.utils.ScriptUtils;
@@ -26,7 +26,7 @@ public class CameleoRobot extends AnonymizerRobot {
 	}
 
     @Override
-    public ExecutionJobResult execute(CheckUnit checkUnit) throws RobotScriptExecutionException {
+    public ExecutionJobResult execute(CheckUnit checkUnit) throws ExecutionException {
         driver.get(CAMELEO_URL);
 
         try {
@@ -54,10 +54,10 @@ public class CameleoRobot extends AnonymizerRobot {
             log.info("TimeoutException при получении страницы", e);
             return getTimeoutMessage();
         } catch (NoSuchElementException e) {
-            throw new RobotScriptExecutionException(
+            throw new ExecutionException(
                     "Не удалось найти элементы навигации CameleoXYZ", e);
         } catch (InterruptedException e) {
-            throw new RobotScriptExecutionException(
+            throw new ExecutionException(
                     "Выполнение потока прервано", e);
         }
     }

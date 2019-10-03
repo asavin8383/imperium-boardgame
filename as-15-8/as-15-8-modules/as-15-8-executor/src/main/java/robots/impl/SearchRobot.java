@@ -7,8 +7,8 @@ import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import robots.RobotDriverParameters;
-import robots.exceptions.Captcha_RobotScriptExecutionException;
-import robots.exceptions.RobotScriptExecutionException;
+import robots.exceptions.Captcha_ExecutionException;
+import robots.exceptions.ExecutionException;
 import robots.exceptions.TimeoutScriptException;
 import robots.utils.EqualityTest;
 import robots.utils.ScriptUtils;
@@ -90,10 +90,10 @@ public abstract class SearchRobot extends SeleniumRobot {
     }
 
     boolean checkSearchResult(EqualityTest test)
-            throws RobotScriptExecutionException {
+            throws ExecutionException {
         do {
             if (captcha())
-                throw new Captcha_RobotScriptExecutionException(
+                throw new Captcha_ExecutionException(
                         "Обнаружена Captcha в Yandex");
 
             if (checkPageResult(test))

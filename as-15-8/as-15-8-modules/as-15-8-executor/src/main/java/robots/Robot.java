@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import checkUnits.CheckUnit;
 import execution.ExecutionJobResult;
-import robots.exceptions.RobotScriptExecutionException;
+import robots.exceptions.ExecutionException;
 
 /**
  * Интефейс скрипта робота
@@ -17,9 +17,9 @@ public interface Robot {
 	 * Метод выполнения скрипта робота
 	 * @param checkUnit
 	 * @return
-	 * @throws RobotScriptExecutionException
+	 * @throws ExecutionException
 	 */
-	ExecutionJobResult run(CheckUnit checkUnit) throws RobotScriptExecutionException;
+	ExecutionJobResult run(CheckUnit checkUnit) throws ExecutionException;
 	
 	/**
 	 * Метод уничтожения робота
