@@ -20,7 +20,6 @@
 		<module>as-15-8-rest</module>
 		<module>as-15-8-modules</module>
         <module>as-15-8-scheduler</module>
-        <module>as-15-8-nmap_proxy</module>
     </modules>
 
 	<distributionManagement>
