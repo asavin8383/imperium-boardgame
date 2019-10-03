@@ -20,8 +20,8 @@ import services.CheckUnitSchedulingService;
  * Author: asavin
  */
 @Slf4j
-@EnableBinding(DispatcherChannels.class)
 @Service
+@EnableBinding(DispatcherChannels.class)
 @RequiredArgsConstructor(onConstructor_={@Autowired})
 public class ArrangementHandler {
 
