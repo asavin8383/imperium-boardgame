@@ -2,6 +2,7 @@ package services.schedule;
 
 import enums.AccessToolParameters;
 import exceptions.AS_15_8_Exception;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import model.catalog.AccessTool;
 import model.enums.ScheduleStatus;
@@ -25,6 +26,7 @@ import java.util.*;
 @Slf4j
 public class ScheduleService {
 
+    @Getter
     private final int totalWorkersCount;
 
     private final PlannedProcessingTimeService plannedProcessingTimeService;

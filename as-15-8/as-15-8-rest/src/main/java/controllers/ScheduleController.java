@@ -2,6 +2,7 @@ package controllers;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import controllers.helpers.SortingHelper;
+import enums.AccessToolParameters;
 import enums.ExecutionStatus;
 import enums.SortingDirection;
 import exceptions.AS_15_8_Exception;
@@ -70,6 +71,10 @@ public class ScheduleController {
         return schedule;
     }
 
+    @GetMapping(path = "/total_workers_count")
+    public Integer getTotalWorkersCount(){
+        return scheduleService.getTotalWorkersCount();
+    }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @JsonView(Views.Full.class)
