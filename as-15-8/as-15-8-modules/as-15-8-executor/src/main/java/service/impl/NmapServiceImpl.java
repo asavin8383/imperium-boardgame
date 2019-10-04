@@ -7,9 +7,11 @@ import execution.ExecutionJobResult;
 import execution.NmapExecutionResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import nmap4j.core.flags.Flag;
 import nmap4j.core.nmap.ExecutionResults;
 import nmap4j.core.proxychains.ProxychainsConfigurator;
 import nmap4j.core.scans.BaseScan;
+import nmap4j.core.scans.IScan;
 import nmap4j.data.NMapRun;
 import nmap4j.parser.OnePassParser;
 import org.apache.logging.log4j.util.Strings;
@@ -63,6 +65,8 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
 
             baseScan.includeHost(checkUnitJob.getCheckUnit().getValue());
             baseScan.addPorts(Arrays.stream(portsToCheck).mapToInt(Integer::parseInt).toArray());
+            baseScan.addFlag(Flag.TREAT_HOSTS_AS_ONLINE);
+            baseScan.setOutputType(IScan.OutputType.XML, "output.xml");
 
             ExecutionResults results = baseScan.executeScan();
             log.info("Nmap запущен командой: " + results.getExecutedCommand());

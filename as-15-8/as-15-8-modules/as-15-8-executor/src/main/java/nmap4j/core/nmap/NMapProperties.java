@@ -181,10 +181,10 @@ public class NMapProperties {
     	//command.append( getBinDir() ) ;
     	//command.append( File.separator ) ;
     	command.append( COMMAND ) ;
-    	command.append( " " ) ;
-    	command.append( Flag.DATADIR ) ;
-    	command.append( " " ) ;
-    	command.append( getShareDir() ) ;
+    	//command.append( " " ) ;
+    	//command.append( Flag.DATADIR ) ;
+    	//command.append( " " ) ;
+    	//command.append( getShareDir() ) ;
     }
     
     return command.toString() ;

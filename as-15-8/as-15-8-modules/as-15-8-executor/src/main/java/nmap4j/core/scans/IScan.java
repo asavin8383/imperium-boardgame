@@ -48,7 +48,7 @@ import nmap4j.core.nmap.NMapProperties;
  * @author jsvede
  *
  */
- interface IScan {
+ public interface IScan {
   
   enum TimingFlag { PARANOID, SNEAKY, POLITE, NORMAL, AGGRESSIVE, INSANE }
   
