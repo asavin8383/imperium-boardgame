@@ -89,8 +89,8 @@ public class ArgumentProperties {
     if( flagMap.keySet().contains( flag ) && 
         flagMap.get( flag ) != null  )  {
       StringBuffer tempFlags = new StringBuffer() ;
-      tempFlags.append(  flagMap.get( flag ) ) ;
-      tempFlags.append(  "," ) ;
+      //tempFlags.append(  flagMap.get( flag ) ) ;
+      //tempFlags.append(  "," ) ;
       tempFlags.append( arg ) ;
       flagMap.remove(  flag ) ;
       flagMap.put( flag, tempFlags.toString() ) ;

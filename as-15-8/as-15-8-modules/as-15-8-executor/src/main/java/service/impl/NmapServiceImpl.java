@@ -74,6 +74,9 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
             OnePassParser opp = new OnePassParser();
             NMapRun nmapRun = opp.parse(results.getOutput(), OnePassParser.STRING_INPUT);
 
+            if(nmapRun == null)
+                throw new ExecutionException("Ошибка при проверке ресурса через nmap. Ошибка сохранения результата");
+
             NmapExecutionResult nmapExecutionResult = new NmapExecutionResult();
             nmapExecutionResult.setJobID(checkUnitJob.getJobID());
             nmapExecutionResult.setCheckUnit(checkUnitJob.getCheckUnit());
