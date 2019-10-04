@@ -119,8 +119,14 @@ public class ScheduleService {
             }
         }
 
-        for(SchedulePeriod schedulePeriod : schedule.getSchedulePeriods()){
-            //SchedulePeriod schedulePeriod = schedule.getSchedulePeriods().get(i);
+        for(int i = 0; i<schedule.getSchedulePeriods().size(); i++){
+            Iterator<SchedulePeriod> schedulePeriodIterator = schedule.getSchedulePeriods().iterator();
+            for(int j = 0; j < i; j++){
+                if(schedulePeriodIterator.hasNext())
+                    schedulePeriodIterator.next();
+            }
+
+            SchedulePeriod schedulePeriod = schedulePeriodIterator.next();
             Map<Arrangement, Double> arrangementDensities = calculateDensities(schedulePeriod, arrangementCheckUnits, nextCheckUnits);
             double totalPeriodDensity = arrangementDensities.values().stream().mapToDouble(Double::doubleValue).sum();
 

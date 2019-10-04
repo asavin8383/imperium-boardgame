@@ -13,10 +13,13 @@ import model.task.Arrangement;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
+import repositories.PlannedProcessingTimeRepo;
+import services.schedule.PlannedProcessingTimeService;
 import services.schedule.ScheduleService;
 
 import java.time.LocalTime;
@@ -43,10 +46,10 @@ public class TestSchedule {
         Map<Arrangement, TreeSet<ScheduleCheckUnit>> scheduleArrangements = new HashMap<>();
 
         scheduleArrangements.put(
-            createArrangement("arr1", AccessToolUnit.GOOGLE, "09:00","12:00"),
-            generateCheckUnits( 45000));
+            createArrangement("arr1", AccessToolUnit.GOOGLE, "09:00","09:05"),
+            generateCheckUnits( 2000));
 
-        scheduleArrangements.put(
+        /*scheduleArrangements.put(
             createArrangement("arr2", AccessToolUnit.YANDEX,"10:30", "11:30"),
             generateCheckUnits(15000));
 
@@ -56,7 +59,7 @@ public class TestSchedule {
 
         scheduleArrangements.put(
             createArrangement("arr4", AccessToolUnit.TORGUARD,"13:10", "16:30"),
-            generateCheckUnits(25000));
+            generateCheckUnits(25000));*/
 
         Schedule schedule = scheduleService.create(scheduleArrangements);
 
