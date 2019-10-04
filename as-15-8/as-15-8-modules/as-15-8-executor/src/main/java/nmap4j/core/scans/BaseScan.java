@@ -182,16 +182,16 @@ public class BaseScan implements IScan {
     
     switch( ot ) {
     case GREPPABLE:
-      argProps.addFlag( Flag.GREPPABLE_OUTPUT, fileName ) ;
+      argProps.replaceFlag( Flag.GREPPABLE_OUTPUT, fileName ) ;
       break;
     case SCRIPT_KIDDIE:
-      argProps.addFlag( Flag.SCRIPT_KIDDIE_OUPUT, fileName ) ;
+      argProps.replaceFlag( Flag.SCRIPT_KIDDIE_OUPUT, fileName ) ;
       break ;
     case NORMAL:
-      argProps.addFlag( Flag.NORMAL_OUTPUT, fileName ) ;
+      argProps.replaceFlag( Flag.NORMAL_OUTPUT, fileName ) ;
       break ;
     default:
-      argProps.addFlag( Flag.XML_OUTPUT, fileName ) ;
+      argProps.replaceFlag( Flag.XML_OUTPUT, fileName ) ;
       break ;
     }
   }
