@@ -67,7 +67,7 @@ import java.io.StringReader;
 public class OnePassParser implements NMap4JParserEventListener {
 	
 	public static final int STRING_INPUT = 1 ;
-	private static final int FILE_NAME_INPUT = 2 ;
+	public static final int FILE_NAME_INPUT = 2 ;
 	
 	private  NMapRun nmapRun ;
 

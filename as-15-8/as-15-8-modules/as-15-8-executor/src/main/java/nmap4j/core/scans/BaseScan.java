@@ -175,6 +175,8 @@ public class BaseScan implements IScan {
     }
   }
 
+
+
   @Override
   public void setOutputType( OutputType ot, String fName ) {
     String filePath;

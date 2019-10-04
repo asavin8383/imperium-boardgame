@@ -73,7 +73,7 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
             log.info("Ответ nmap: " + results.getOutput());
 
             OnePassParser opp = new OnePassParser();
-            NMapRun nmapRun = opp.parse(results.getOutput(), OnePassParser.STRING_INPUT);
+            NMapRun nmapRun = opp.parse(baseScan.getArgumentProperties().getFlagMap().get(Flag.XML_OUTPUT), OnePassParser.FILE_NAME_INPUT);
 
             if(nmapRun == null)
                 throw new ExecutionException("Ошибка при проверке ресурса через nmap. Ошибка сохранения результата");
