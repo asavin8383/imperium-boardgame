@@ -179,8 +179,8 @@ public class NMapProperties {
           command.append(proxyCommand);
           command.append(" ");
         }
-    	command.append( getBinDir() ) ;
-    	command.append( File.separator ) ;
+    	//command.append( getBinDir() ) ;
+    	//command.append( File.separator ) ;
     	command.append( COMMAND ) ;
     	command.append( " " ) ;
     	command.append( Flag.DATADIR ) ;

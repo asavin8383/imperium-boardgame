@@ -43,7 +43,7 @@ public class SendJobsToKafka {
     private String topicName;
 
     @Test
-    public void test() {
+    public void testGoogle() {
 
         for(long i = 10000; i<10010; i++) {
             CheckUnitJob checkUnitJob = new CheckUnitJob();
@@ -65,20 +65,47 @@ public class SendJobsToKafka {
                     .setHeader(KafkaHeaders.TOPIC, topicName)
                     .build();
 
-            ListenableFuture<SendResult<String, CheckUnitJob>> future = kafkaTemplate.send(message);
-
-            future.addCallback(new ListenableFutureCallback<SendResult<String, CheckUnitJob>>() {
-
-                @Override
-                public void onSuccess(SendResult<String, CheckUnitJob> result) {
-                    System.out.println("Сообщение успешно отправлено: "+ result.getProducerRecord().value().toString());
-                }
-                @Override
-                public void onFailure(Throwable ex) {
-                    System.out.println("Ошибка при отправке сообщения: " + ex.getMessage());
-                }
-            });
+            send(message);
         }
+    }
+
+    @Test
+    public void testNmap() {
+
+        for(long i = 10000; i<10010; i++) {
+            CheckUnitJob checkUnitJob = new CheckUnitJob();
+            checkUnitJob.setJobID(1L);
+            checkUnitJob.setAccessToolUnit(AccessToolUnit.KASPERSKY);
+
+            checkUnitJob.setCheckUnit(new CheckUnit(CheckUnitType.IP_V4, "174.138.5.40"));
+
+            checkUnitJob.getAccessToolParameters().put(AccessToolParameters.PROXY_TYPE, "http");
+            checkUnitJob.getAccessToolParameters().put(AccessToolParameters.PROXY_DNS_NAME, "192.168.5.194");
+            checkUnitJob.getAccessToolParameters().put(AccessToolParameters.PROXY_PORT, "3128");
+
+            Message<CheckUnitJob> message = MessageBuilder
+                    .withPayload(checkUnitJob)
+                    .setHeader(KafkaHeaders.TOPIC, topicName)
+                    .build();
+
+            send(message);
+        }
+    }
+
+    private void send(Message<CheckUnitJob> message){
+        ListenableFuture<SendResult<String, CheckUnitJob>> future = kafkaTemplate.send(message);
+
+        future.addCallback(new ListenableFutureCallback<SendResult<String, CheckUnitJob>>() {
+
+            @Override
+            public void onSuccess(SendResult<String, CheckUnitJob> result) {
+                System.out.println("Сообщение успешно отправлено: "+ result.getProducerRecord().value().toString());
+            }
+            @Override
+            public void onFailure(Throwable ex) {
+                System.out.println("Ошибка при отправке сообщения: " + ex.getMessage());
+            }
+        });
     }
 
     @Configuration
