@@ -183,7 +183,7 @@ public class BaseScan implements IScan {
     if( fName == null || (fName != null && fName.length() <= 0 ) ) {
       filePath = "-" ;
     } else {
-      filePath = nmapProps.getShareDir() + File.separator + fName;
+      filePath = /*nmapProps.getShareDir() + File.separator + */fName;
     }
 
     switch( ot ) {

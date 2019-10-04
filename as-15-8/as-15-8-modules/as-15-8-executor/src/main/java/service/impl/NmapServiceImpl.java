@@ -73,7 +73,7 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
             log.info("Ответ nmap: " + results.getOutput());
 
             OnePassParser opp = new OnePassParser();
-            NMapRun nmapRun = opp.parse(baseScan.getArgumentProperties().getFlagMap().get(Flag.XML_OUTPUT), OnePassParser.FILE_NAME_INPUT);
+            NMapRun nmapRun = opp.parse(baseScan.getArgumentProperties().getFlagMap().get(Flag.XML_OUTPUT.toString()), OnePassParser.FILE_NAME_INPUT);
 
             if(nmapRun == null)
                 throw new ExecutionException("Ошибка при проверке ресурса через nmap. Ошибка сохранения результата");
@@ -100,9 +100,6 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
 
             return nmapExecutionResult;
         } catch (Exception ex){
-            log.error("Nmap завершил работу с ошибкой: " + "jobID = " + checkUnitJob.getJobID() +
-                    " accessTool = " + checkUnitJob.getAccessToolUnit() +
-                    " checkUnit = " + checkUnitJob.getCheckUnit().getValue(), ex);
             throw new ExecutionException("Ошибка при проверке запрещенных ресуросов в nmap", ex);
         }
     }
