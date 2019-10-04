@@ -66,7 +66,7 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
             baseScan.includeHost(checkUnitJob.getCheckUnit().getValue());
             baseScan.addPorts(Arrays.stream(portsToCheck).mapToInt(Integer::parseInt).toArray());
             baseScan.addFlag(Flag.TREAT_HOSTS_AS_ONLINE);
-            baseScan.setOutputType(IScan.OutputType.XML, "output.xml");
+            //baseScan.setOutputType(IScan.OutputType.XML, "output.xml");
 
             ExecutionResults results = baseScan.executeScan();
             log.info("Nmap запущен командой: " + results.getExecutedCommand());
