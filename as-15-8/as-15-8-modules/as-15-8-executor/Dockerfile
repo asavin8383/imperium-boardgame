@@ -2,9 +2,9 @@ FROM openjdk:8-jdk-alpine
 
 LABEL Alex Shabalin <ashabalin@ec-leasing.ru>
 
-RUN apk add --no-cache nmap
-
-RUN apk add --no-cache proxychains-ng
+RUN apk add --no-cache nmap \
+    && apk add --no-cache proxychains-ng \
+    && mkdir -p /share/nmap
 
 ENV APP_PATH="/as-15-8-executor.jar" \
     LOG_PATH="/log" \

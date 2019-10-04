@@ -127,7 +127,6 @@ public class NMapProperties {
    * Returns the expected location of the share dir relative to the path set
    * or passed in at construction time. The value returned by this method is 
    * equivalent to that path variable +  filesystem dependent separator + bin .
-   * @return
    */
   public String getBinDir() { 
     return pathToNMap + File.separator + BIN ;
@@ -140,7 +139,7 @@ public class NMapProperties {
    * @return
    */
   public String getShareDir() {
-    return pathToNMap + File.separator + SHARE + File.separator + "nmap" ;
+    return SHARE + File.separator + "nmap" ;
   }
    
   /**
