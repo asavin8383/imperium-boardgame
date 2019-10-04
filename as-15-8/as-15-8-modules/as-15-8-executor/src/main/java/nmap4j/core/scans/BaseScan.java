@@ -38,6 +38,8 @@ import nmap4j.core.flags.ArgumentProperties;
 import nmap4j.core.flags.Flag;
 import nmap4j.core.nmap.*;
 
+import java.io.File;
+
 /**
  * This is the base class for all convenience scan classes.  The 
  * children of this class make it easy for users not familiar with NMap to 
@@ -175,23 +177,25 @@ public class BaseScan implements IScan {
 
   @Override
   public void setOutputType( OutputType ot, String fName ) {
-    String fileName  = fName ;
+    String filePath;
     if( fName == null || (fName != null && fName.length() <= 0 ) ) {
-      fileName = "-" ;
+      filePath = "-" ;
+    } else {
+      filePath = nmapProps.getShareDir() + File.separator + fName;
     }
-    
+
     switch( ot ) {
     case GREPPABLE:
-      argProps.replaceFlag( Flag.GREPPABLE_OUTPUT, fileName ) ;
+      argProps.replaceFlag( Flag.GREPPABLE_OUTPUT, filePath ) ;
       break;
     case SCRIPT_KIDDIE:
-      argProps.replaceFlag( Flag.SCRIPT_KIDDIE_OUPUT, fileName ) ;
+      argProps.replaceFlag( Flag.SCRIPT_KIDDIE_OUPUT, filePath ) ;
       break ;
     case NORMAL:
-      argProps.replaceFlag( Flag.NORMAL_OUTPUT, fileName ) ;
+      argProps.replaceFlag( Flag.NORMAL_OUTPUT, filePath ) ;
       break ;
     default:
-      argProps.replaceFlag( Flag.XML_OUTPUT, fileName ) ;
+      argProps.replaceFlag( Flag.XML_OUTPUT, filePath ) ;
       break ;
     }
   }
