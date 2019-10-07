@@ -49,6 +49,7 @@ public class Arrangement implements Serializable {
 	/**Название мероприятия*/
 	@NotNull
 	@ToString.Include
+	@EqualsAndHashCode.Include
 	@JsonView(Views.Brief.class)
 	private String title;
 
