@@ -34,7 +34,7 @@ public class SchedulePeriodArrangement {
     @NonNull
     private Arrangement arrangement;
 
-    @OneToMany(mappedBy = "schedulePeriodArrangement", fetch = FetchType.EAGER)
+    @OneToMany(cascade=CascadeType.ALL, mappedBy = "schedulePeriodArrangement", fetch = FetchType.EAGER)
     @JsonIgnore
     private List<SchedulePeriodCheckUnit> schedulePeriodCheckUnits;
 
