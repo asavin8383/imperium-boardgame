@@ -7,7 +7,9 @@ import enums.CheckUnitJobResult;
 import execution.ExecutionVpnJobResult;
 import lombok.Getter;
 import model.KeyWord;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 import service.AnalyzerService;
@@ -15,6 +17,10 @@ import service.AnalyzerService;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +37,9 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 
 	public static final String keyWordsSource = "classpath:key_words.json";
 	public static final int similarityThreshold = 85;
+
+	@Value("${spring.source_path}")
+	public String sourcePath;
 
 	@Getter
 	private List<KeyWord> keyWords = new ArrayList<>();
@@ -64,8 +73,35 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 			throw new AnalysisException(String.format("Ошибка во время анализа ПАСД (jobID=%d)", result.getJobID()), e);
 		}
 
-		analysisResult.setCheckResult(obtainResult(analysisResult, result));
+		CheckUnitJobResult checkUnitJobResult = obtainResult(analysisResult, result);
+		analysisResult.setCheckResult(checkUnitJobResult);
+		saveSources(analysisResult, result, checkUnitJobResult);
 		return analysisResult;
+	}
+
+	protected void saveSources(VpnAnalysisResult analysisResult, ExecutionVpnJobResult result, CheckUnitJobResult checkUnitJobResult){
+		if (
+			!analysisResult.hasError() &&
+			(checkUnitJobResult == DOUBTFUL || checkUnitJobResult == COMPLETED) &&
+			!StringUtils.isEmpty(sourcePath)
+		){
+			Path path = Paths.get(sourcePath);
+
+			String pageContent = result.getPageContent();
+			String pageContentEtalon = result.getPageContentEtalon();
+
+			pageContent = "STUB "  + (pageContent != null ? pageContent.replaceAll("\n", " ") : "");
+			pageContentEtalon = "NO_STUB " + (pageContentEtalon != null ? pageContentEtalon.replaceAll("\n", " ") : "");
+			String fullContent = pageContent + "\n" + pageContentEtalon + "\n\n";
+
+			try {
+				Files.write(path, fullContent.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+			}
+			catch (IOException e) {
+				e.printStackTrace();
+				throw new AnalysisException("Error write sources to file! " + path);
+			}
+		}
 	}
 
 	protected void prepareResult(VpnAnalysisResult aRes, ExecutionVpnJobResult jobRes) throws IOException {

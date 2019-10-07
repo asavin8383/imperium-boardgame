@@ -2,7 +2,7 @@ server:
     port: 11100
 logging:
     config: config/logback-spring.xml
-selenium-hub-url: http://user:1q0p2w9o@192.168.5.12:4442/wd/hub
+selenium-hub-url: http://user:1q0p2w9o@192.168.5.75:4442/wd/hub
 robots:
     search-system-direct:
         platform: ANY
