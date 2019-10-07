@@ -4,7 +4,7 @@ import java.io.*;
 
 public class ProxychainsConfigurator {
 
-    private static final String CONFIG_FILE_PATH = "/etc/proxychains/proxychains.conf";
+    private static final String CONFIG_FILE_PATH = "/etc/proxychains.conf";
 
     private String protocol;
     private String host;
@@ -18,8 +18,11 @@ public class ProxychainsConfigurator {
 
     public void configure() throws IOException {
         try(InputStreamReader isReader = new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("proxychains.conf"))){
+            File configFile = new File(CONFIG_FILE_PATH);
+            if(configFile.exists())
+                configFile.delete();
             try(BufferedReader br = new BufferedReader(isReader)){
-                try(PrintWriter writer = new PrintWriter(new File(CONFIG_FILE_PATH))){
+                try(PrintWriter writer = new PrintWriter(configFile)){
                     br.lines().forEach(line -> writer.println(line));
                     writer.println(this.protocol+" "+this.host+" "+this.port);
                 }
