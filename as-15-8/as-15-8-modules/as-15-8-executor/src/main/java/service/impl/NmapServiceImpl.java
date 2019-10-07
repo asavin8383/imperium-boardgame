@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nmap4j.core.flags.Flag;
 import nmap4j.core.nmap.ExecutionResults;
-import nmap4j.core.proxychains.ProxychainsConfigurator;
+import proxychains.ProxychainsConfigurator;
 import nmap4j.core.scans.BaseScan;
 import nmap4j.core.scans.IScan;
 import nmap4j.data.NMapRun;
