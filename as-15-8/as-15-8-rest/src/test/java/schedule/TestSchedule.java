@@ -32,7 +32,6 @@ import java.util.TreeSet;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {ApplicationConfiguration.class})
 @PropertySource("classpath:application.yml")
-@ActiveProfiles("dev_ashabalin")
 public class TestSchedule {
 
     @Autowired
@@ -46,14 +45,14 @@ public class TestSchedule {
         Map<Arrangement, TreeSet<ScheduleCheckUnit>> scheduleArrangements = new HashMap<>();
 
         scheduleArrangements.put(
-            createArrangement("arr1", AccessToolUnit.GOOGLE, "09:00","10:00"),
-            generateCheckUnits( 60));
+            createArrangement("arr1", AccessToolUnit.GOOGLE, "02:51","11:30"),
+            generateCheckUnits( 1000));
 
-        scheduleArrangements.put(
+        /*scheduleArrangements.put(
             createArrangement("arr2", AccessToolUnit.YANDEX,"09:00", "10:00"),
             generateCheckUnits(3000));
 
-        /*scheduleArrangements.put(
+        scheduleArrangements.put(
             createArrangement("arr3", AccessToolUnit.KASPERSKY,"11:15", "15:20"),
             generateCheckUnits(40000));
 

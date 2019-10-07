@@ -286,7 +286,9 @@ public class ScheduleService {
             }
             lastCompletionCheckUnit = checkUnit;
         }
-        return new ArrangementSchedulePeriodProcessing(processingTime / workersCount, lastCompletionCheckUnit);
+        return new ArrangementSchedulePeriodProcessing(
+                workersCount == 0 ? 0 : processingTime / workersCount,
+                lastCompletionCheckUnit);
     }
 
     private double calculateDensity(Set<ScheduleCheckUnit> checkUnits, Arrangement arrangement, LocalTime startTime, LocalTime endTime){
