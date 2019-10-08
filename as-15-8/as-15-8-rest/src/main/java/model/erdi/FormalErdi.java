@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.*;
 import model.Views;
+import model.traffic.ErdiTrafficUnit;
 import org.hibernate.annotations.Immutable;
 
 import javax.persistence.*;
@@ -32,12 +33,16 @@ public class FormalErdi implements Serializable {
     @ToString.Include
     private String erdiId;
 
+    @OneToMany(mappedBy = "content", fetch = FetchType.LAZY)
+    @JsonView(Views.Full.class)
+    private List<ContentResource> contentResources;
+
     @JsonIgnore
     @ToString.Include
     private Long initContentVersionId;
 
-    @OneToMany(mappedBy = "content")
+    @ManyToMany(mappedBy = "formalErdiList", cascade = CascadeType.REFRESH)
     @JsonIgnore
-    private List<ContentResource> contentResources;
+    private List<ErdiTrafficUnit> erdiTrafficUnits;
 
 }

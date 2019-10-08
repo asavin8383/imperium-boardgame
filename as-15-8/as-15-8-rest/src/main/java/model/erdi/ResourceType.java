@@ -1,5 +1,6 @@
 package model.erdi;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.*;
 import model.Views;
@@ -7,6 +8,7 @@ import org.hibernate.annotations.Immutable;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.List;
 
 @Entity
 @Immutable
@@ -19,21 +21,22 @@ public class ResourceType implements Serializable {
 
     public static final Long serialVersionUID = 1L;
 
-    public enum Type {
-        DOMAIN, IP, IPV6, IPSUBNET, IPV6SUBNET, URL
+    public enum Description {
+        // DOMAIN, IP, IPV6, IPSUBNET, IPV6SUBNET, URL
+        domain, ip, ipv6, ipsubnet, ipv6subnet, url
     }
 
-    @Converter(autoApply = true)
-    public static class TypeConverter implements AttributeConverter<Type, String> {
+    // @Converter(autoApply = true)
+    public static class DescriptionConverter implements AttributeConverter<Description, String> {
 
         @Override
-        public String convertToDatabaseColumn(Type type) {
+        public String convertToDatabaseColumn(Description type) {
             return type.toString().toLowerCase();
         }
 
         @Override
-        public Type convertToEntityAttribute(String s) {
-            return Type.valueOf(s.toUpperCase());
+        public Description convertToEntityAttribute(String s) {
+            return Description.valueOf(s.toUpperCase());
         }
     }
 
@@ -45,8 +48,13 @@ public class ResourceType implements Serializable {
 
     @Column(name = "dsc")
     @Enumerated(EnumType.STRING)
+    // @Convert(converter = DescriptionConverter.class)
     @JsonView(Views.Brief.class)
     @ToString.Include
-    private Type description;
+    private Description description;
+
+    @OneToMany(mappedBy = "resourceType")
+    @JsonIgnore
+    private List<ContentResource> contentResources;
 
 }

@@ -1,6 +1,6 @@
 package model.traffic;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -26,13 +26,6 @@ public class CustomErdiUnit {
     @EqualsAndHashCode.Include
     private Long id;
 
-    @ManyToOne(optional = false)
-    // cascade nothing, fetch eager
-    @JoinColumn(name = "custom_erdi_id", nullable = false)
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @ToString.Include
-    private CustomErdi customErdi;
-
     @NotNull
     @Column(nullable = false)
     //@Enumerated(EnumType.STRING)
@@ -45,5 +38,10 @@ public class CustomErdiUnit {
     @JsonView(Views.Brief.class)
     @ToString.Include
     private String value;
+
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "custom_erdi_id", nullable = false)
+    @JsonIgnore
+    private CustomErdi customErdi;
 
 }

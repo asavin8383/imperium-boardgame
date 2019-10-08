@@ -1,4 +1,4 @@
-package controllers;
+package controllers.traffic;
 
 import controllers.helpers.SortingHelper;
 import enums.SortingDirection;

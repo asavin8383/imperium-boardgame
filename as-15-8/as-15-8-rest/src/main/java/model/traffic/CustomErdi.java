@@ -43,18 +43,16 @@ public class CustomErdi implements Serializable {
 
     @OneToMany(mappedBy = "customErdi", orphanRemoval = true,
             cascade = { CascadeType.REFRESH, CascadeType.REMOVE })
-    @JsonIgnore
+    @JsonView(Views.Full.class)
     private List<CustomErdiUnit> customErdiUnits;
 
 
 
     @ManyToMany(mappedBy = "customErdiList")
-    // cascade nothing, fetch lazy
     @JsonIgnore
     private List<SearchQueryTrafficUnit> searchQueryTrafficUnits;
 
     @ManyToMany(mappedBy = "customErdiList")
-    // cascade nothing, fetch lazy
     @JsonIgnore
     private List<ErdiTrafficUnit> erdiTrafficUnits;
 

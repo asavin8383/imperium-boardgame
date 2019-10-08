@@ -43,10 +43,7 @@ public class SearchPhrase implements Serializable {
     @ToString.Include
     private Violation violation;
 
-
-
     @ManyToMany(mappedBy = "searchPhrases")
-    // cascade nothing, fetch lazy
     @JsonIgnore
     private List<SearchQueryTrafficUnit> trafficUnits;
 
