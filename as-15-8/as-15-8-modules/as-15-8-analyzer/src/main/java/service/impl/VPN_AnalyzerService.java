@@ -86,7 +86,6 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 			(checkUnitJobResult == DOUBTFUL || checkUnitJobResult == COMPLETED) &&
 			!StringUtils.isEmpty(sourcePath)
 		){
-			Path path = Paths.get(sourcePath);
 
 			String pageContent = result.getPageContent();
 			String pageContentEtalon = result.getPageContentEtalon();
@@ -95,12 +94,12 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 			pageContentEtalon = "NO_STUB " + (pageContentEtalon != null ? pageContentEtalon.replaceAll("\n", " ") : "");
 			String fullContent = pageContent + "\n" + pageContentEtalon + "\n";
 
-			try (FileOutputStream fos = new FileOutputStream(path.toFile())) {
+			try (FileOutputStream fos = new FileOutputStream(sourcePath)) {
 				fos.write(fullContent.getBytes());
 			}
 			catch (IOException e) {
 				e.printStackTrace();
-				throw new AnalysisException("Error write sources to file! " + path);
+				throw new AnalysisException("Error write sources to file! " + sourcePath);
 			}
 		}
 	}
