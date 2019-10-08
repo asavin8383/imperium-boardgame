@@ -27,13 +27,15 @@ public class SendCheckUnitToKafka {
 
 	@Autowired
     private KafkaTemplate<String, CheckUnitJob> kafkaTemplate;
-	
+
 	@Value("${spring.kafka.consume-topic}")
     private String topic;
 	
 	@Test
 	public void test() {
-		
+
+
+
 		for(long i = 10000; i<10010; i++) {
 			CheckUnitJob checkUnitJob = new CheckUnitJob();
 			checkUnitJob.setJobID(i);

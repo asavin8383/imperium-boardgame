@@ -15,7 +15,6 @@ import org.springframework.kafka.support.serializer.JsonSerializer;
 
 import jobs.ArrangementJob;
 
-@Configuration
 public class TestKafkaSenderConfig {
  
 	@Value("${spring.kafka.bootstrap-servers}")

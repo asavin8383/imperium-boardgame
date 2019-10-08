@@ -7,7 +7,7 @@ spring:
         bootstrap-servers: 192.168.5.12:9094,192.168.5.184:9094,192.168.5.211:9094
         auto-offset-reset: earliest
         analysis-execution-timeout: 1800000
-    source_path: c:\\Temp\sourceFilePath.txt
+    source_path: /home/master/sourceFile.txt
 
 ---
 
@@ -29,7 +29,7 @@ spring:
         consume-topic: exec_results
         produce-topic: analysis_results
         notification-topic: job_notifications
-        analysis-concurrency: 4
+        analysis-concurrency: 1
 
 ---
 

@@ -15,8 +15,7 @@ import kafka.KafkaConfiguration;
  *
  */
 @SpringBootApplication
-@Import({KafkaConfiguration.class})
-@ComponentScan(basePackages={"common", "kafka", "services", "repositories", "events"})
+@ComponentScan(basePackages={"common", "services", "repositories", "events"})
 @EnableJpaRepositories("repositories")
 @EntityScan("model")
 public class ApplicationConfiguration{
