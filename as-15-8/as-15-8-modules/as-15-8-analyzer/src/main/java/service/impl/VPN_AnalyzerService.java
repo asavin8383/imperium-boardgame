@@ -8,6 +8,7 @@ import execution.ExecutionVpnJobResult;
 import lombok.Getter;
 import model.KeyWord;
 import org.apache.commons.lang3.StringUtils;
+import org.jsoup.Jsoup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ResourceLoader;
@@ -90,9 +91,9 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 			String pageContent = result.getPageContent();
 			String pageContentEtalon = result.getPageContentEtalon();
 
-			pageContent = "STUB "  + (pageContent != null ? pageContent.replaceAll("\n", " ") : "");
-			pageContentEtalon = "NO_STUB " + (pageContentEtalon != null ? pageContentEtalon.replaceAll("\n", " ") : "");
-			String fullContent = pageContent + "\n" + pageContentEtalon + "\n\n";
+			pageContent = "STUB "  + clearResult(pageContent);
+			pageContentEtalon = "NO_STUB " + clearResult(pageContentEtalon);
+			String fullContent = pageContent + "\n" + pageContentEtalon + "\n";
 
 			try {
 				Files.write(path, fullContent.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
@@ -102,6 +103,11 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 				throw new AnalysisException("Error write sources to file! " + path);
 			}
 		}
+	}
+
+	private String clearResult(String result){
+		result = result != null ? result.replaceAll("\n", " ") : "";
+		return Jsoup.parse(result).text();
 	}
 
 	protected void prepareResult(VpnAnalysisResult aRes, ExecutionVpnJobResult jobRes) throws IOException {
