@@ -46,8 +46,8 @@ services:
             placement:
                 constraints:
                     - node.hostname == as158-pmk
-                mode: replicated
-                replicas: 1
+            mode: replicated
+            replicas: 1
         networks:
             - as-15-8-net
         environment:
