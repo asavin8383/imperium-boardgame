@@ -7,8 +7,8 @@ import lombok.Data;
 @AllArgsConstructor
 public class SearchPhraseParams {
 
-    protected boolean belongsTo;
-    protected Long trafficUnitId;
+    protected boolean returnAll;
+    protected Long searchTrafficUnitId;
     protected String phrase;
     protected Long violationId;
 

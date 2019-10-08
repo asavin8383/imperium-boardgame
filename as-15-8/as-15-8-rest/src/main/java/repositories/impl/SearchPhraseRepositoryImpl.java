@@ -3,7 +3,6 @@ package repositories.impl;
 import model.traffic.SearchPhrase;
 import model.traffic.SearchPhrase_;
 import model.traffic.SearchQueryTrafficUnit;
-import model.traffic.jointable.SearchQueryTrafficUnitPhrase;
 import org.springframework.beans.factory.annotation.Autowired;
 import repositories.SearchPhraseRepositoryCustom;
 import repositories.helpers.JoinCriteriaHelper;
@@ -21,30 +20,17 @@ public class SearchPhraseRepositoryImpl extends JoinCriteriaHelper<SearchPhrase,
         super(em);
     }
 
-    // copy-paste ...
-
     @Override
     protected List<Predicate> getPredicates(CriteriaQuery query, Root<SearchPhrase> root,
                                             Class<SearchPhrase> clazz, SearchPhraseParams params) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
         List<Predicate> predicates = new ArrayList<>();
 
-        if (params.getTrafficUnitId() != null) {
-
-            if (params.isBelongsTo()) {
-                Join<SearchPhrase, SearchQueryTrafficUnit> trafficUnitJoin =
-                        root.join(SearchPhrase_.trafficUnits, JoinType.LEFT);
-                predicates.add(cb.equal(
-                        trafficUnitJoin.get("id"), params.getTrafficUnitId()));
-            } else {
-                Subquery<Long> sub = query.subquery(Long.class);
-                Root<SearchQueryTrafficUnitPhrase> subRoot = sub.from(SearchQueryTrafficUnitPhrase.class);
-                sub.select(subRoot.get("id"));
-                sub.where(cb.and(
-                        cb.equal(subRoot.get("trafficUnitId"), params.getTrafficUnitId()),
-                        cb.equal(subRoot.get("searchPhraseId"), root.get("id"))));
-                predicates.add(cb.not(cb.exists(sub)));
-            }
+        if (! params.isReturnAll() && params.getSearchTrafficUnitId() != null) {
+            Join<SearchPhrase, SearchQueryTrafficUnit> trafficUnitJoin =
+                    root.join(SearchPhrase_.trafficUnits, JoinType.LEFT);
+            predicates.add(cb.equal(
+                    trafficUnitJoin.get("id"), params.getSearchTrafficUnitId()));
         }
 
         if (params.getPhrase() != null && params.getPhrase().length() > 0) {

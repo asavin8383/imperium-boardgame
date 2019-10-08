@@ -7,8 +7,9 @@ import lombok.Data;
 @AllArgsConstructor
 public class CustomErdiParams {
 
-    protected boolean belongsTo;
-    protected Long trafficUnitId;
+    protected boolean returnAll;
+    protected Long erdiTrafficUnitId;
+    protected Long searchTrafficUnitId;
     protected String value;
     protected Long violationId;
 

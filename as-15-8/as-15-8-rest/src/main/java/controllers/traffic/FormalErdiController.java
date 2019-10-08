@@ -32,16 +32,28 @@ public class FormalErdiController {
                                              @RequestParam(required = false) String sortingColumn,
                                              @RequestParam(defaultValue = "0") int pageNumber,
                                              @RequestParam(defaultValue = "10") int pageSize,
-                                             @RequestParam(defaultValue = "true") boolean belongsTo,
-                                             @RequestParam(required = false) Long trafficUnitId,
+                                             @RequestParam(defaultValue = "false") boolean returnAll,
+                                             @RequestParam(required = false) Long erdiTrafficUnitId,
+                                             @RequestParam(required = false) Long searchTrafficUnitId,
                                              @RequestParam(required = false) String query,
                                              @RequestParam(required = false) Long resourceTypeId) {
 
         Pageable page = PageRequest.of(pageNumber, pageSize,
                 SortingHelper.createSorting(sortingDirection, sortingColumn));
-        FormalErdiParams params = new FormalErdiParams(
-                belongsTo, trafficUnitId, query, resourceTypeId);
-        return formalErdiRepository.searchFor(FormalErdi.class, params, page);
+        FormalErdiParams params = new FormalErdiParams(returnAll,
+                erdiTrafficUnitId, searchTrafficUnitId, query, resourceTypeId);
+        Page<FormalErdi> result =
+                formalErdiRepository.searchFor(FormalErdi.class, params, page);
+
+        if (returnAll) {
+            if (erdiTrafficUnitId != null)
+                result.forEach(rec -> rec.setChecked(formalErdiRepository
+                        .belongsToErdiTrafficUnit(erdiTrafficUnitId, rec.getId())));
+            else if (searchTrafficUnitId != null)
+                result.forEach(rec -> rec.setChecked(formalErdiRepository
+                        .belongsToSearchTrafficUnit(searchTrafficUnitId, rec.getId())));
+        }
+        return result;
     }
 
     @GetMapping(path = "/{id}")

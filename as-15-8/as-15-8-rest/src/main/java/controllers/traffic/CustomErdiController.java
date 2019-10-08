@@ -34,16 +34,28 @@ public class CustomErdiController {
                                              @RequestParam(required = false) String sortingColumn,
                                              @RequestParam(defaultValue = "0") int pageNumber,
                                              @RequestParam(defaultValue = "10") int pageSize,
-                                             @RequestParam(defaultValue = "true") boolean belongsTo,
-                                             @RequestParam(required = false) Long trafficUnitId,
+                                             @RequestParam(defaultValue = "false") boolean returnAll,
+                                             @RequestParam(required = false) Long erdiTrafficUnitId,
+                                             @RequestParam(required = false) Long searchTrafficUnitId,
                                              @RequestParam(required = false) String query,
                                              //@RequestParam(required = false) Long resourceTypeId,
                                              @RequestParam(required = false) Long violationId) {
         Pageable page = PageRequest.of(pageNumber, pageSize,
                 SortingHelper.createSorting(sortingDirection, sortingColumn));
-        CustomErdiParams params = new CustomErdiParams(
-                belongsTo, trafficUnitId, query, violationId);
-        return customErdiRepository.searchFor(CustomErdi.class, params, page);
+        CustomErdiParams params = new CustomErdiParams(returnAll,
+                erdiTrafficUnitId, searchTrafficUnitId, query, violationId);
+        Page<CustomErdi> result =
+                customErdiRepository.searchFor(CustomErdi.class, params, page);
+
+        if (returnAll) {
+            if (erdiTrafficUnitId != null)
+                result.forEach(rec -> rec.setChecked(customErdiRepository
+                        .belongsToErdiTrafficUnit(erdiTrafficUnitId, rec.getId())));
+            else if (searchTrafficUnitId != null)
+                result.forEach(rec -> rec.setChecked(customErdiRepository
+                        .belongsToSearchTrafficUnit(searchTrafficUnitId, rec.getId())));
+        }
+        return result;
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)

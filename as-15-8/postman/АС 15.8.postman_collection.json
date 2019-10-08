@@ -1832,7 +1832,7 @@
 									}
 								],
 								"url": {
-									"raw": "{{url}}/erdi/formal?query=weedy&resourceTypeId=1&belongsTo=false&trafficUnitId=20",
+									"raw": "{{url}}/erdi/formal?",
 									"host": [
 										"{{url}}"
 									],
@@ -1843,19 +1843,28 @@
 									"query": [
 										{
 											"key": "query",
-											"value": "weedy"
+											"value": "weedy",
+											"disabled": true
 										},
 										{
 											"key": "resourceTypeId",
-											"value": "1"
+											"value": "1",
+											"disabled": true
 										},
 										{
-											"key": "belongsTo",
-											"value": "false"
+											"key": "returnAll",
+											"value": "false",
+											"disabled": true
 										},
 										{
-											"key": "trafficUnitId",
-											"value": "20"
+											"key": "erdiTrafficUnitId",
+											"value": "20",
+											"disabled": true
+										},
+										{
+											"key": "searchTrafficUnitId",
+											"value": "4",
+											"disabled": true
 										}
 									]
 								}
@@ -1906,7 +1915,7 @@
 									}
 								],
 								"url": {
-									"raw": "{{url}}/erdi/custom?violationId=1&belongsTo=false&trafficUnitId=23&query=custom",
+									"raw": "{{url}}/erdi/custom?returnAll=true&erdiTrafficUnitId=40",
 									"host": [
 										"{{url}}"
 									],
@@ -1917,19 +1926,26 @@
 									"query": [
 										{
 											"key": "violationId",
-											"value": "1"
+											"value": "1",
+											"disabled": true
 										},
 										{
-											"key": "belongsTo",
-											"value": "false"
-										},
-										{
-											"key": "trafficUnitId",
-											"value": "23"
+											"key": "returnAll",
+											"value": "true"
 										},
 										{
 											"key": "query",
-											"value": "custom"
+											"value": "custom",
+											"disabled": true
+										},
+										{
+											"key": "erdiTrafficUnitId",
+											"value": "40"
+										},
+										{
+											"key": "searchTrafficUnitId",
+											"value": "5",
+											"disabled": true
 										}
 									]
 								}
@@ -2219,7 +2235,7 @@
 									}
 								],
 								"url": {
-									"raw": "{{url}}/phrases?",
+									"raw": "{{url}}/phrases?violationId=1&returnAll=true&searchTrafficUnitId=31",
 									"host": [
 										"{{url}}"
 									],
@@ -2229,18 +2245,15 @@
 									"query": [
 										{
 											"key": "violationId",
-											"value": "1",
-											"disabled": true
+											"value": "1"
 										},
 										{
-											"key": "belongsTo",
-											"value": "false",
-											"disabled": true
+											"key": "returnAll",
+											"value": "true"
 										},
 										{
-											"key": "trafficUnitId",
-											"value": "23",
-											"disabled": true
+											"key": "searchTrafficUnitId",
+											"value": "31"
 										},
 										{
 											"key": "query",

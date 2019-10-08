@@ -1,6 +1,7 @@
 package model.traffic;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -17,6 +18,7 @@ import java.util.List;
 @Data
 @ToString(onlyExplicitlyIncluded = true)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CustomErdi implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -55,5 +57,14 @@ public class CustomErdi implements Serializable {
     @ManyToMany(mappedBy = "customErdiList")
     @JsonIgnore
     private List<ErdiTrafficUnit> erdiTrafficUnits;
+
+
+
+    @Transient
+    private Boolean checked;
+
+    public void setChecked(Boolean checked) {
+        this.checked = checked;
+    }
 
 }

@@ -1,10 +1,6 @@
 package repositories.impl;
 
-import model.traffic.CustomErdi;
-import model.traffic.CustomErdiUnit;
-import model.traffic.CustomErdi_;
-import model.traffic.ErdiTrafficUnit;
-import model.traffic.jointable.ErdiTrafficUnitCustom;
+import model.traffic.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import repositories.CustomErdiRepositoryCustom;
 import repositories.helpers.CustomErdiParams;
@@ -28,22 +24,18 @@ public class CustomErdiRepositoryImpl extends JoinCriteriaHelper<CustomErdi, Cus
         CriteriaBuilder cb = em.getCriteriaBuilder();
         List<Predicate> predicates = new ArrayList<>();
 
-        if (params.getTrafficUnitId() != null) {
+        if (! params.isReturnAll() && params.getErdiTrafficUnitId() != null) {
+            Join<CustomErdi, ErdiTrafficUnit> trafficUnitJoin =
+                    root.join(CustomErdi_.erdiTrafficUnits, JoinType.LEFT);
+            predicates.add(cb.equal(
+                    trafficUnitJoin.get("id"), params.getErdiTrafficUnitId()));
+        }
 
-            if (params.isBelongsTo()) {
-                Join<CustomErdi, ErdiTrafficUnit> trafficUnitJoin =
-                        root.join(CustomErdi_.erdiTrafficUnits, JoinType.LEFT);
-                predicates.add(cb.equal(
-                        trafficUnitJoin.get("id"), params.getTrafficUnitId()));
-            } else {
-                Subquery<Long> sub = query.subquery(Long.class);
-                Root<ErdiTrafficUnitCustom> subRoot = sub.from(ErdiTrafficUnitCustom.class);
-                sub.select(subRoot.get("id"));
-                sub.where(cb.and(
-                        cb.equal(subRoot.get("trafficUnitId"), params.getTrafficUnitId()),
-                        cb.equal(subRoot.get("customErdiId"), root.get("id"))));
-                predicates.add(cb.not(cb.exists(sub)));
-            }
+        if (! params.isReturnAll() && params.getSearchTrafficUnitId() != null) {
+            Join<CustomErdi, SearchQueryTrafficUnit> trafficUnitJoin =
+                    root.join(CustomErdi_.searchQueryTrafficUnits, JoinType.LEFT);
+            predicates.add(cb.equal(
+                    trafficUnitJoin.get("id"), params.getSearchTrafficUnitId()));
         }
 
         String value = params.getValue();

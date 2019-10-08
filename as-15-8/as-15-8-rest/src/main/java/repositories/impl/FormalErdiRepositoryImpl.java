@@ -4,7 +4,7 @@ import model.erdi.ContentResource;
 import model.erdi.FormalErdi;
 import model.erdi.FormalErdi_;
 import model.traffic.ErdiTrafficUnit;
-import model.traffic.jointable.ErdiTrafficUnitContent;
+import model.traffic.SearchQueryTrafficUnit;
 import repositories.FormalErdiRepositoryCustom;
 import repositories.helpers.FormalErdiParams;
 import repositories.helpers.JoinCriteriaHelper;
@@ -28,22 +28,18 @@ public class FormalErdiRepositoryImpl extends JoinCriteriaHelper<FormalErdi, For
         List<Predicate> predicates = new ArrayList<>();
         String value = params.getValue();
 
-        if (params.getTrafficUnitId() != null) {
+        if (! params.isReturnAll() && params.getErdiTrafficUnitId() != null) {
+            Join<FormalErdi, ErdiTrafficUnit> trafficUnitJoin =
+                    root.join(FormalErdi_.erdiTrafficUnits, JoinType.LEFT);
+            predicates.add(cb.equal(
+                    trafficUnitJoin.get("id"), params.getErdiTrafficUnitId()));
+        }
 
-            if (params.isBelongsTo()) {
-                Join<FormalErdi, ErdiTrafficUnit> trafficUnitJoin =
-                        root.join(FormalErdi_.erdiTrafficUnits, JoinType.LEFT);
-                predicates.add(cb.equal(
-                        trafficUnitJoin.get("id"), params.getTrafficUnitId()));
-            } else {
-                Subquery<Long> sub = query.subquery(Long.class);
-                Root<ErdiTrafficUnitContent> subRoot = sub.from(ErdiTrafficUnitContent.class);
-                sub.select(subRoot.get("id"));
-                sub.where(cb.and(
-                        cb.equal(subRoot.get("trafficUnitId"), params.getTrafficUnitId()),
-                        cb.equal(subRoot.get("contentId"), root.get("id"))));
-                predicates.add(cb.not(cb.exists(sub)));
-            }
+        if (! params.isReturnAll() && params.getSearchTrafficUnitId() != null) {
+            Join<FormalErdi, SearchQueryTrafficUnit> trafficUnitJoin =
+                    root.join(FormalErdi_.searchQueryTrafficUnits, JoinType.LEFT);
+            predicates.add(cb.equal(
+                    trafficUnitJoin.get("id"), params.getSearchTrafficUnitId()));
         }
 
         if (params.getResourceTypeId() != null || value != null && value.length() > 0) {

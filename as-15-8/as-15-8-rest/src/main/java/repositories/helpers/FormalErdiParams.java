@@ -9,8 +9,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class FormalErdiParams {
 
-    protected boolean belongsTo;
-    protected Long trafficUnitId;
+    protected boolean returnAll;
+    protected Long erdiTrafficUnitId;
+    protected Long searchTrafficUnitId;
     protected String value;
     protected Long resourceTypeId;
 

@@ -1,6 +1,7 @@
 package model.traffic;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -17,6 +18,7 @@ import java.util.List;
 @Data
 @ToString(onlyExplicitlyIncluded = true)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class SearchPhrase implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -46,5 +48,14 @@ public class SearchPhrase implements Serializable {
     @ManyToMany(mappedBy = "searchPhrases")
     @JsonIgnore
     private List<SearchQueryTrafficUnit> trafficUnits;
+
+
+
+    @Transient
+    private Boolean checked;
+
+    public void setChecked(Boolean checked) {
+        this.checked = checked;
+    }
 
 }
