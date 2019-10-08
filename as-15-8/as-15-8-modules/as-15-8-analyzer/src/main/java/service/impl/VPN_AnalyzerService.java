@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import service.AnalyzerService;
 
 import javax.annotation.PostConstruct;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -92,10 +93,10 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 
 			pageContent = "STUB "  + (pageContent != null ? pageContent.replaceAll("\n", " ") : "");
 			pageContentEtalon = "NO_STUB " + (pageContentEtalon != null ? pageContentEtalon.replaceAll("\n", " ") : "");
-			String fullContent = pageContent + "\n" + pageContentEtalon + "\n\n";
+			String fullContent = pageContent + "\n" + pageContentEtalon + "\n";
 
-			try {
-				Files.write(path, fullContent.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+			try (FileOutputStream fos = new FileOutputStream(path.toFile())) {
+				fos.write(fullContent.getBytes());
 			}
 			catch (IOException e) {
 				e.printStackTrace();
