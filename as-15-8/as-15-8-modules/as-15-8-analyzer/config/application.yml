@@ -1,87 +1,128 @@
 server:
-    port: 11200
+  port: 11200
 logging:
-    config: config/logback-spring.xml
+  config: config/logback-spring.xml
 spring:
-    kafka:
-        bootstrap-servers: 192.168.5.12:9094,192.168.5.184:9094,192.168.5.211:9094
-        auto-offset-reset: earliest
-        analysis-execution-timeout: 1800000
+  cloud:
+    stream:
+      bindings:
+        input:
+          content-type: application/json
+          group: analyzers
+        output:
+          content-type: application/json
+        notifications:
+          content-type: application/json
+      kafka:
+        binder:
+          brokers: 192.168.5.12:9094,192.168.5.184:9094,192.168.5.211:9094
+        bindings:
+          input:
+            consumer:
+              autoCommitOffset: false
+              ackEachRecord: true
+              configuration:
+                max.poll.records: 1
+                max.poll.interval.ms: 1800000
+          output:
+            producer:
+              configuration:
+                max.request.size: 10000000
 
 ---
 
 spring:
-    profiles: prod
+  profiles: prod
+  cloud.stream:
+    bindings:
+      input.destination: exec_results
+      output.destination: analysis_results
+      notifications.destination: job_notifications
     kafka:
-        bootstrap-servers: 10.97.220.141:9094,10.97.220.142:9094,10.97.220.143:9094
-        auto-offset-reset: earliest
-        consume-topic: exec_results
-        produce-topic: analysis_results
-        notification-topic: job_notifications
-        analysis-concurrency: 4
+      binder:
+        brokers: 10.97.220.141:9094,10.97.220.142:9094,10.97.220.143:9094
+      bindings.jobs.consumer:
+        concurrency: 4
 
 ---
 
 spring:
-    profiles: test
-    kafka:
-        consume-topic: exec_results
-        produce-topic: analysis_results
-        notification-topic: job_notifications
-        analysis-concurrency: 4
+  profiles: test
+  cloud.stream:
+    bindings:
+      input.destination: exec_results
+      output.destination: analysis_results
+      notifications.destination: job_notifications
+    kafka.bindings.jobs.consumer:
+        concurrency: 4
 
 ---
 
 spring:
-    profiles: dev_ashabalin
-    kafka:
-        consume-topic: exec_results_ashabalin
-        produce-topic: analysis_results_ashabalin
-        notification-topic: job_notifications_ashabalin
-        analysis-concurrency: 4
-        analysis-execution-timeout: 300000
-        
+  profiles: dev_ashabalin
+  cloud.stream:
+    bindings:
+      input.destination: exec_results_ashabalin
+      output.destination: analysis_results_ashabalin
+      notifications.destination: job_notifications_ashabalin
+    kafka.bindings.jobs.consumer:
+      concurrency: 4
+      configuration:
+        max.poll.interval.ms: 300000
+
 ---
 
 
 spring:
-    profiles: dev_asinyavin
-    kafka:
-        consume-topic: exec_results_asinyavin
-        produce-topic: analysis_results_asinyavin
-        notification-topic: job_notifications_asinyavin
-        analysis-concurrency: 4
-        analysis-execution-timeout: 300000
-        
----
-
-spring:
-    profiles: dev_asavin
-    kafka:
-        consume-topic: exec_results_asavin
-        produce-topic: analysis_results_asavin
-        notification-topic: job_notifications_asavin
-        analysis-concurrency: 4
-        analysis-execution-timeout: 300000
+  profiles: dev_asinyavin
+  cloud.stream:
+    bindings:
+      input.destination: exec_results_asinyavin
+      output.destination: analysis_results_asinyavin
+      notifications.destination: job_notifications_asinyavin
+    kafka.bindings.jobs.consumer:
+      concurrency: 4
+      configuration:
+        max.poll.interval.ms: 300000
 
 ---
 
 spring:
-    profiles: dev_pvorobiev
-    kafka:
-        consume-topic: exec_results_pvorobiev
-        produce-topic: analysis_results_pvorobiev
-        notification-topic: job_notifications_pvorobiev
-        analysis-concurrency: 4
-        analysis-execution-timeout: 300000
+  profiles: dev_asavin
+  cloud.stream:
+    bindings:
+      input.destination: exec_results_asavin
+      output.destination: analysis_results_asavin
+      notifications.destination: job_notifications_asavin
+    kafka.bindings.jobs.consumer:
+      concurrency: 4
+      configuration:
+        max.poll.interval.ms: 300000
 
 ---
 
 spring:
-    profiles: dev_jspirina
-    kafka:
-        consume-topic: exec_results_jspirina
-        produce-topic: analysis_results_jspirina
-        notification-topic: job_notifications_jspirina
-        analysis-concurrency: 4
-        analysis-execution-timeout: 300000
+  profiles: dev_pvorobiev
+  cloud.stream:
+    bindings:
+      input.destination: exec_results_pvorobiev
+      output.destination: analysis_results_pvorobiev
+      notifications.destination: job_notifications_pvorobiev
+    kafka.bindings.jobs.consumer:
+      concurrency: 4
+      configuration:
+        max.poll.interval.ms: 300000
+
+---
+
+spring:
+  profiles: dev_jspirina
+  cloud.stream:
+    bindings:
+      input.destination: exec_results_jspirina
+      output.destination: analysis_results_jspirina
+      notifications.destination: job_notifications_jspirina
+    kafka.bindings.jobs.consumer:
+      concurrency: 4
+      configuration:
+        max.poll.interval.ms: 300000

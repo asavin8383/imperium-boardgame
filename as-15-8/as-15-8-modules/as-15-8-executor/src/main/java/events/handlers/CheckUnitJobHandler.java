@@ -5,7 +5,9 @@ import checkUnits.CheckUnitStatusNotification;
 import enums.CheckUnitJobResult;
 import events.ExecutorChannels;
 import execution.ExecutionJobResult;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.kafka.support.Acknowledgment;
@@ -25,17 +27,10 @@ import java.io.StringWriter;
 @Service
 @EnableBinding(ExecutorChannels.class)
 @Slf4j
-//@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class CheckUnitJobHandler {
 
     private final ExecutorChannels executorChannels;
-
-    private final SubscribableChannel jobs;
-
-    public CheckUnitJobHandler(ExecutorChannels executorChannels, SubscribableChannel jobs){
-        this.executorChannels = executorChannels;
-        this.jobs = jobs;
-    }
 
     @StreamListener(ExecutorChannels.INPUT_JOBS)
     public void consumeCheckUnitJob(Message<CheckUnitJob> message){
@@ -43,9 +38,8 @@ public class CheckUnitJobHandler {
                 ", partition: "+message.getHeaders().get(KafkaHeaders.PARTITION_ID, String.class) +
                 ", offset: "+message.getHeaders().get(KafkaHeaders.OFFSET, Long.class));
         String verificationName = "";
+        Acknowledgment ack = message.getHeaders().get(KafkaHeaders.ACKNOWLEDGMENT, Acknowledgment.class);
         try {
-            Acknowledgment ack = message.getHeaders().get(KafkaHeaders.ACKNOWLEDGMENT, Acknowledgment.class);
-
             verificationName = "jobID = " + message.getPayload().getJobID() +
                     " accessTool = " + message.getPayload().getAccessToolUnit() +
                     " checkUnit = " + message.getPayload().getCheckUnit().getValue();
@@ -56,8 +50,6 @@ public class CheckUnitJobHandler {
                             .run(message.getPayload());
 
             sendExecutionResult(executionJobResult);
-            if(ack != null)
-                ack.acknowledge();
         } catch (Exception ex) {
             if(ex instanceof Cancel_ExecutionException) {
                 log.info("Выполнение проверки остановлено: " + verificationName);
@@ -75,6 +67,8 @@ public class CheckUnitJobHandler {
                 log.error("Ошибка при выполнении задания на проверку запрещенного ресурса: "+message.getPayload().getJobID(), ex);
             }
         }
+        if(ack != null)
+            ack.acknowledge();
     }
 
     /**
