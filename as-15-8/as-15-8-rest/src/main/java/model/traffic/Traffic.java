@@ -1,12 +1,12 @@
 package model.traffic;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import model.Views;
-import model.task.Arrangement;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -18,6 +18,7 @@ import java.util.List;
 @Data
 @ToString(onlyExplicitlyIncluded = true)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Traffic implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -37,12 +38,26 @@ public class Traffic implements Serializable {
     @ToString.Include
     private String name;
 
-    @OneToMany(mappedBy = "traffic")
-    @JsonIgnore
-    private List<Arrangement> arrangements;
-
-    @OneToMany(mappedBy = "traffic")
+    @OneToMany(mappedBy = "traffic", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<TrafficUnit> trafficUnits;
+
+
+
+    @Transient
+    @JsonView(Views.Full.class)
+    private ErdiTrafficUnit formalErdiUnit;
+
+    @Transient
+    @JsonView(Views.Full.class)
+    private ErdiTrafficUnit customErdiUnit;
+
+    @Transient
+    @JsonView(Views.Full.class)
+    private SearchQueryTrafficUnit searchPhraseUnit;
+
+    @Transient
+    @JsonView(Views.Full.class)
+    private List<SearchQueryTrafficUnit> searchTemplates;
 
 }

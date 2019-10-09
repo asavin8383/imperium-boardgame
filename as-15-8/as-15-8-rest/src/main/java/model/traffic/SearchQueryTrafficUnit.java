@@ -1,13 +1,18 @@
 package model.traffic;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import model.Views;
 import model.catalog.AccessToolsCategory;
+import model.enums.TrafficUnitType;
 import model.erdi.FormalErdi;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
+import utils.TrafficUnitUtils;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -15,57 +20,65 @@ import java.util.List;
 
 @Entity
 @Table(schema = "portal", name = "search_query_traffic_units")
+@PrimaryKeyJoinColumn(name = "traffic_unit_id", referencedColumnName = "id")
 @Data
-@ToString(onlyExplicitlyIncluded = true)
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class SearchQueryTrafficUnit implements Serializable {
+@ToString(callSuper = true, onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class SearchQueryTrafficUnit extends TrafficUnit implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Id
-    @JsonView(Views.Id.class)
-    @ToString.Include
-    @EqualsAndHashCode.Include
-    private Long trafficUnitId;
-
-    @MapsId
-    @OneToOne(optional = false, cascade = CascadeType.ALL, orphanRemoval = true)
-    // fetch eager, mappedBy = ?
-    // @JoinColumn(name = "traffic_unit_id", referencedColumnName = "id")
-    @JsonView(Views.Brief.class)
-    @ToString.Include
-    private TrafficUnit trafficUnit;
-
     @ManyToOne(optional = false)
-    // cascade nothing, fetch eager
     @JoinColumn(name = "category_id", nullable = false)
     @JsonView(Views.Brief.class)
-    // @ToString.Include
     private AccessToolsCategory category;
+
+    // todo check queryPattern ? regex ?
 
     @JsonView(Views.Brief.class)
     @ToString.Include
     private String queryPattern;
 
-    @ManyToMany // cascade nothing, fetch lazy
+    @ManyToMany(cascade = CascadeType.REFRESH)
     @JoinTable(schema = "portal", name = "search_query_traffic_units_custom_erdi",
             joinColumns = @JoinColumn(name = "traffic_unit_id"),
             inverseJoinColumns = @JoinColumn(name = "custom_erdi_id"))
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+//    @JsonView(Views.Full.class)
     private List<CustomErdi> customErdiList;
 
-    @ManyToMany // cascade nothing, fetch lazy
+    @ManyToMany(cascade = CascadeType.REFRESH)
     @JoinTable(schema = "portal", name = "search_query_traffic_units_content",
             joinColumns = @JoinColumn(name = "traffic_unit_id"),
             inverseJoinColumns = @JoinColumn(name = "content_id"))
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+//    @JsonView(Views.Full.class)
     private List<FormalErdi> formalErdiList;
 
-    @ManyToMany // cascade nothing, fetch lazy
+    @ManyToMany(cascade = CascadeType.REFRESH)
     @JoinTable(schema = "portal", name = "search_query_traffic_units_search_phrases",
             joinColumns = @JoinColumn(name = "traffic_unit_id"),
             inverseJoinColumns = @JoinColumn(name = "search_phrase_id"))
-    @JsonIgnore
+//    @JsonView(Views.Full.class)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<SearchPhrase> searchPhrases;
+
+    @Override
+    public boolean isEmpty() {
+        return StringUtils.isEmpty(getName()) && category == null &&
+                StringUtils.isEmpty(queryPattern) &&
+                CollectionUtils.isEmpty(customErdiList) &&
+                CollectionUtils.isEmpty(formalErdiList) &&
+                CollectionUtils.isEmpty(searchPhrases);
+    }
+
+    @Override
+    public TrafficUnitType getType() {
+        return isEmpty() ? null : StringUtils.isEmpty(getName()) ?
+                (StringUtils.isEmpty(queryPattern) ?
+                        TrafficUnitType.PHRASE : TrafficUnitType.TEMPLATE) :
+                TrafficUnitUtils.getType(this);
+    }
 
 }

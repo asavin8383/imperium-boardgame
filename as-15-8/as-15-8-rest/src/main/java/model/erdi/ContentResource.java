@@ -28,7 +28,7 @@ public class ContentResource implements Serializable {
     @EqualsAndHashCode.Include
     private Long id;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "content_id")
     @JsonIgnore
     private FormalErdi content;
@@ -38,10 +38,12 @@ public class ContentResource implements Serializable {
     @ToString.Include
     private String value;
 
-    @JsonIgnore
+    @JsonView(Views.Brief.class)
     @ToString.Include
     private LocalDateTime ts;
 
+    @ManyToOne
+    @JoinColumn(name = "resource_type_id")
     @JsonView(Views.Brief.class)
     @ToString.Include
     private ResourceType resourceType;

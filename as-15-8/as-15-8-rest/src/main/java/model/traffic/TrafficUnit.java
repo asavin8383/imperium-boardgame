@@ -1,11 +1,14 @@
 package model.traffic;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import model.Views;
+import model.enums.TrafficUnitType;
+import org.springframework.lang.Nullable;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -13,10 +16,12 @@ import java.io.Serializable;
 
 @Entity
 @Table(schema = "portal", name = "traffic_units")
+@Inheritance(strategy = InheritanceType.JOINED)
 @Data
 @ToString(onlyExplicitlyIncluded = true)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class TrafficUnit implements Serializable {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public abstract class TrafficUnit implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -37,9 +42,21 @@ public class TrafficUnit implements Serializable {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "traffic_id", nullable = false)
-            //foreignKey = @ForeignKey(name = "fk_traffic_units_traffic")
     @JsonIgnore
     @ToString.Include
     private Traffic traffic;
+
+
+
+    @Nullable
+    public abstract TrafficUnitType getType();
+
+    public abstract boolean isEmpty();
+
+
+
+    public boolean nonEmpty() {
+        return !isEmpty();
+    }
 
 }
