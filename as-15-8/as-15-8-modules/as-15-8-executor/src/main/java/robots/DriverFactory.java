@@ -98,6 +98,9 @@ public class DriverFactory {
 		options.addArguments("--disable-gpu");				// говорят частично решает проблему с рендерингом (скриншотом)
 		options.addArguments("--disable-features=VizDisplayCompositor");	// у кого-то в 73 версии устранило проблему: Timed out receiving message from renderer: 10.000
 		//options.setPageLoadStrategy(PageLoadStrategy.NORMAL);
+		LoggingPreferences logPrefs = new LoggingPreferences();
+		logPrefs.enable( LogType.PERFORMANCE, Level.ALL );
+		options.setCapability( "goog:loggingPrefs", logPrefs );
 	}
 
 	/**

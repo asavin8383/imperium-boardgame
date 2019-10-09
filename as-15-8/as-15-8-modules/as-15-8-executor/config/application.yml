@@ -71,18 +71,18 @@ spring:
 spring:
   profiles: prod
   cloud.stream:
-      bindings:
-        jobs:
-          destination: jobs
-        executionResults:
-          destination: exec_results
-        notifications:
-          destination: job_notifications
-      kafka:
-        binder:
-          brokers: 10.97.220.141:9094,10.97.220.142:9094,10.97.220.143:9094
-        bindings.jobs.consumer:
-          concurrency: 4
+    bindings:
+      jobs:
+        destination: jobs
+      executionResults:
+        destination: exec_results
+      notifications:
+        destination: job_notifications
+    kafka:
+      binder:
+        brokers: 10.97.220.141:9094,10.97.220.142:9094,10.97.220.143:9094
+      bindings.jobs.consumer:
+        concurrency: 4
 selenium-hub-url: http://10.97.220.147:4444/wd/hub
 
 ---

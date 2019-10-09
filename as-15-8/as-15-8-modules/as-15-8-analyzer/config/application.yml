@@ -28,6 +28,8 @@ spring:
             producer:
               configuration:
                 max.request.size: 10000000
+source_path_vpn: /log/content.txt
+source_path_anonym: /log/content.txt
 
 ---
 
@@ -54,7 +56,7 @@ spring:
       output.destination: analysis_results
       notifications.destination: job_notifications
     kafka.bindings.jobs.consumer:
-        concurrency: 4
+      concurrency: 4
 
 ---
 

@@ -8,7 +8,9 @@ import execution.ExecutionAnonymizerResult;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import model.KeyWord;
+import org.jsoup.Jsoup;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -17,6 +19,10 @@ import service.AnalyzerService;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,6 +39,10 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 	private static final int similarityThreshold = 30;
 
 	private static final int EMPTY_PAGE_SIZE = 1024;
+
+
+	@Value("${spring.source_path_anonym}")
+	public String sourcePath;
 
 	@Getter
 	private List<KeyWord> keyWords = new ArrayList<>();
@@ -56,6 +66,48 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 	public AnalysisResult analyzeResult(ExecutionAnonymizerResult executionResult) throws AnalysisException {
 		AnonymizerAnalysisResult analysisResult = new AnonymizerAnalysisResult();
 		analysisResult.setJobID(executionResult.getJobID());
+
+		obtainResult(analysisResult, executionResult);
+		saveSources(analysisResult, executionResult);
+
+		return analysisResult;
+	}
+
+	protected void saveSources(AnonymizerAnalysisResult analysisResult, ExecutionAnonymizerResult result){
+
+		CheckUnitJobResult checkUnitJobResult = analysisResult.getCheckResult();
+
+		if (
+				!analysisResult.hasError() &&
+				(checkUnitJobResult == DOUBTFUL || checkUnitJobResult == COMPLETED) &&
+				!StringUtils.isEmpty(sourcePath)
+		){
+			Path path = Paths.get(sourcePath);
+
+			String pageContent = result.getPageContent();
+			String pageContentEtalon = result.getEtalonPageContent();
+
+			pageContent = "STUB "  + clearResult(pageContent);
+			pageContentEtalon = "NO_STUB " + clearResult(pageContentEtalon);
+			String fullContent = pageContent + "\n" + pageContentEtalon + "\n\n";
+
+			try {
+				Files.write(path, fullContent.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+			}
+			catch (IOException e) {
+				e.printStackTrace();
+				throw new AnalysisException("Error write sources to file! " + path);
+			}
+		}
+	}
+
+	private String clearResult(String result){
+		result = result != null ? result.replaceAll("\n", " ") : "";
+		return Jsoup.parse(result).text();
+	}
+
+
+	protected AnalysisResult obtainResult(AnonymizerAnalysisResult analysisResult, ExecutionAnonymizerResult executionResult) throws AnalysisException {
 		analysisResult.setCheckUnit(executionResult.getCheckUnit());
 
 		analysisResult.setHttpStatus(executionResult.getHttpStatus());
