@@ -9,18 +9,23 @@ import java.util.Map;
 
 public class SeleniumHolaRobotsFactory extends SeleniumRobotsFactory {
 
+	private String crxFilePath;
 
     public SeleniumHolaRobotsFactory(AccessToolUnit accessToolUnit,
                              Class<? extends SeleniumRobot> scriptClass,
-                             RobotDriverParameters driverParams) {
+                             RobotDriverParameters driverParams,
+							 String crxFilePath) {
         super(accessToolUnit, scriptClass, driverParams);
+
+        this.crxFilePath = crxFilePath;
     }
 
 	@Override
 	protected Object[] getScriptArgs(Map<AccessToolParameters, String> params) {
 		return new Object[] {
 			this.driverParams,
-			params
+			params,
+			this.crxFilePath
 		};
 	}
 }

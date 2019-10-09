@@ -9,7 +9,6 @@ import java.util.Map;
 
 public class SeleniumSearchRobotsFactory extends SeleniumRobotsFactory {
 
-	// todo as db parameter
     private int searchResultLimit;
 
     public SeleniumSearchRobotsFactory(AccessToolUnit accessToolUnit,

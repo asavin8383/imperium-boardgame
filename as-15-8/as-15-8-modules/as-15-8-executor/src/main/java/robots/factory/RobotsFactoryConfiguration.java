@@ -231,7 +231,8 @@ public class RobotsFactoryConfiguration {
 				Platform.valueOf(env.getProperty("robots.hola.platform")),
 				env.getProperty("robots.hola.app"),
 				env.getProperty("robots.hola.browser")
-			)
+			),
+			env.getProperty("robots.hola.crx-file-path")
 		);
 	}
 

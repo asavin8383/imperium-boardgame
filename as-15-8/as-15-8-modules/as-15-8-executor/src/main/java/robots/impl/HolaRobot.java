@@ -16,6 +16,7 @@ import robots.utils.RobotScriptUtils;
 import robots.utils.ScriptUtils;
 import robots.utils.ScriptUtils.PageResult;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -24,13 +25,13 @@ import static robots.utils.HttpResponseHelper.HttpResponseMeta;
 
 public class HolaRobot extends SeleniumRobot {
 
-    private static final String CHROME_PROFILE = "C:\\Selenium\\Chrome";
-    private static final String HOLA_POPUP = "chrome-extension://gkojfkhlekighikafcpjkiklfbnlmeio/js/popup.html";
+    private String crxFilePath;
+
     protected String stubUrl;
     protected boolean useEtalon;
 
 
-    public HolaRobot(RobotDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams) {
+    public HolaRobot(RobotDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams, String crxFilePath) {
 
     	super(driverParams, scriptParams,
     			ProxyUtils.getFullProxy(
@@ -45,6 +46,8 @@ public class HolaRobot extends SeleniumRobot {
         this.useEtalon = ScriptUtils.useEtalon(scriptParams);
 
      	this.stubUrl = scriptParams.get(AccessToolParameters.STUB_URL);
+
+     	this.crxFilePath = crxFilePath;
     }
 
     @Override
@@ -82,19 +85,20 @@ public class HolaRobot extends SeleniumRobot {
             close(driver);
         }
 
-
-        // Тестируемая страница через Hola
         try {
             driver = DriverFactory.createChromeDriver(
                 getDriverParams().getHubURL(),
                 getDriverParams().getPlatformName(),
                 getDriverParams().getApplicationName(),
-                CHROME_PROFILE
+                crxFilePath
             );
 
-            driver.get(HOLA_POPUP); //собственное открытие страницы расширения (ВОЗМОЖНО для другой версии расширения ID будет другой)
-
             WebDriverWait wait = new WebDriverWait(driver, 60);
+            wait.until(webDriver -> webDriver != null && webDriver.getWindowHandles().size() > 1);
+
+            ArrayList<String> handles = new ArrayList<>(driver.getWindowHandles());
+            driver.switchTo().window(handles.get(1));
+
             // Конфигурируем холу на доступ для данного URL
             WebElement searchBox = wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("input")));
             searchBox.sendKeys(url);

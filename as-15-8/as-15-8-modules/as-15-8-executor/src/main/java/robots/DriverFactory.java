@@ -58,14 +58,15 @@ public class DriverFactory {
 
 		ChromeOptions options = new ChromeOptions();
 		setOptimalChromeOptions(options);
-		cpb.setCapability(ChromeOptions.CAPABILITY, options);
 
 		if (enableLog){
 			LoggingPreferences logPrefs = new LoggingPreferences();
 			logPrefs.enable(LogType.PERFORMANCE, Level.ALL);
+			options.setCapability("goog:loggingPrefs", logPrefs);
 			cpb.setCapability(CapabilityType.LOGGING_PREFS, logPrefs);
 		}
 
+		cpb.setCapability(ChromeOptions.CAPABILITY, options);
 		return new RemoteWebDriver(hubURL, cpb);
 	}
 
@@ -74,17 +75,26 @@ public class DriverFactory {
 	 * @param hubURL URL selenium хаба
 	 * @param platformName Имя платформы
 	 * @param appName Имя приложения (ПС/ПАСД)
-	 * @param profile пусть к папке профиля
+	 * @param pathToExtension crx файл расширения
 	 * @return
 	 */
-	public static WebDriver createChromeDriver(URL hubURL, Platform platformName, String appName, String profile) {
+	public static WebDriver createChromeDriver(URL hubURL, Platform platformName,
+											   String appName, String pathToExtension) {
+		DesiredCapabilities cpb = buildCapability(
+				platformName, appName, "chrome");
+
         ChromeOptions options = new ChromeOptions();
+		setOptimalChromeOptions(options);
 
-        options.setCapability("platform", platformName);
-        options.setCapability("applicationName", appName);
-        options.addArguments("user-data-dir=" + profile);
+//		LoggingPreferences logPrefs = new LoggingPreferences();
+//		logPrefs.enable(LogType.PERFORMANCE, Level.ALL);
+//		options.setCapability("goog:loggingPrefs", logPrefs);
+//		cpb.setCapability(CapabilityType.LOGGING_PREFS, logPrefs);
 
-        return new RemoteWebDriver(hubURL, options);
+		options.addArguments("--load-extension=" + pathToExtension);
+
+		cpb.setCapability(ChromeOptions.CAPABILITY, options);
+		return new RemoteWebDriver(hubURL, cpb);
     }
 
     private static void setOptimalChromeOptions(ChromeOptions options){

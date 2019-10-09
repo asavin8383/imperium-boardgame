@@ -30,6 +30,7 @@ robots:
   hola:
     platform: ANY
     browser: chrome
+    crx-file-path: /home/share/gkojfkhlekighikafcpjkiklfbnlmeio/1.145.963_0
   torguard:
     platform: ANY
     browser: chrome
