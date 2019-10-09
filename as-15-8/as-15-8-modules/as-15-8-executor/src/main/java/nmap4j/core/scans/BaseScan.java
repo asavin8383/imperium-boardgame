@@ -39,6 +39,7 @@ import nmap4j.core.flags.Flag;
 import nmap4j.core.nmap.*;
 
 import java.io.File;
+import java.nio.file.Path;
 
 /**
  * This is the base class for all convenience scan classes.  The 
@@ -71,14 +72,14 @@ public class BaseScan implements IScan {
 	  nmapProps.setPath( nmapPath ) ;
   }
 
-  public BaseScan(boolean useProxy){
+  public BaseScan(Path proxychainsConfig){
     this();
-    this.nmapProps.setUseProxy(useProxy);
+    this.nmapProps.setProxychainsConfig(proxychainsConfig);
   }
 
-  public BaseScan(String nmapPath, boolean useProxy){
+  public BaseScan(String nmapPath, Path proxychainsConfig){
     this(nmapPath);
-    this.nmapProps.setUseProxy(useProxy);
+    this.nmapProps.setProxychainsConfig(proxychainsConfig);
   }
 
   @Override

@@ -34,9 +34,12 @@
  */
 package nmap4j.core.nmap;
 
+import lombok.Getter;
+import lombok.Setter;
 import nmap4j.core.flags.Flag;
 
 import java.io.File;
+import java.nio.file.Path;
 
 /**
  * This class is used to manage the path to nmap.  This class attempts to look
@@ -61,11 +64,13 @@ import java.io.File;
 public class NMapProperties {
   
   private String pathToNMap ;
-  private boolean useProxy = false;
+  @Getter @Setter
+  private Path proxychainsConfig;
 
   private final String BIN;
   private final String SHARE;
   private final String COMMAND;
+  private final String PROXYCHAINS_COMMAND;
   
   /**
    * Constructs an instance of NMapProperties and looks in the environment
@@ -80,11 +85,12 @@ public class NMapProperties {
     BIN = "bin";
     SHARE = "share";
     COMMAND = "nmap";
+    PROXYCHAINS_COMMAND = "proxychains4";
   }
 
-  public NMapProperties(boolean useProxy){
+  public NMapProperties(Path proxychainsConfig){
     this();
-    this.useProxy = useProxy;
+    this.proxychainsConfig = proxychainsConfig;
   }
   
   /**
@@ -92,15 +98,13 @@ public class NMapProperties {
    * @param path Path to nmap
    */
   public NMapProperties( String path ) {
+    this();
     pathToNMap = path ;
-    BIN = "bin";
-    SHARE = "share";
-    COMMAND = "nmap";
   }
 
-  public NMapProperties(String path, boolean useProxy){
+  public NMapProperties(String path, Path proxychainsConfig){
     this(path);
-    this.useProxy = useProxy;
+    this.proxychainsConfig = proxychainsConfig;
   }
 
   /**
@@ -150,14 +154,6 @@ public class NMapProperties {
     return System.getProperty( "os.name" ) ;
   }
 
-  public boolean useProxy(){
-    return this.useProxy;
-  }
-
-  public void setUseProxy(boolean useProxy){
-    this.useProxy = useProxy;
-  }
-
   /**
    * This returns the full path to the nmap version to be executed.
    * @return
@@ -173,9 +169,10 @@ public class NMapProperties {
     	command.append( ".exe" ) ;
     } 
     else { //Linux or MacOsX case
-        if(useProxy) {
-          String proxyCommand = "proxychains4";
-          command.append(proxyCommand);
+        if(proxychainsConfig != null && proxychainsConfig.toFile().exists()) {
+          command.append(PROXYCHAINS_COMMAND);
+          command.append(" -f ");
+          command.append(proxychainsConfig.toAbsolutePath().toString());
           command.append(" ");
         }
     	//command.append( getBinDir() ) ;

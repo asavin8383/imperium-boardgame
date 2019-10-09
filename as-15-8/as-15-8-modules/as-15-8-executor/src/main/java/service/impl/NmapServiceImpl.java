@@ -59,47 +59,59 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
                 throw new ExecutionException("Ошибка при запуске проверки запрещенного ресурса. Сервис проверки остановлен!");
             log.info("Запуск проверки nmap: " + verificationName);
 
-            configureProxy(checkUnitJob);
+            ProxychainsConfigurator proxychainsConfigurator = null;
+            if(useProxy)
+                proxychainsConfigurator = createProxychainsConfigurator(checkUnitJob);
 
-            BaseScan baseScan = new BaseScan(nmapPath, useProxy);
+            try {
 
-            baseScan.includeHost(checkUnitJob.getCheckUnit().getValue());
-            baseScan.addPorts(Arrays.stream(portsToCheck).mapToInt(Integer::parseInt).toArray());
-            baseScan.addFlag(Flag.TREAT_HOSTS_AS_ONLINE);
-            baseScan.addFlag(Flag.CONNECT_SCAN);
-            baseScan.setOutputType(IScan.OutputType.XML, "output.xml");
+                BaseScan baseScan;
+                if(proxychainsConfigurator != null)
+                    baseScan = new BaseScan(nmapPath, proxychainsConfigurator.getConfigFile());
+                else
+                    baseScan = new BaseScan(nmapPath);
 
-            ExecutionResults results = baseScan.executeScan();
-            log.info("Nmap запущен командой: " + results.getExecutedCommand());
-            log.info("Ответ nmap: " + results.getOutput());
+                baseScan.includeHost(checkUnitJob.getCheckUnit().getValue());
+                baseScan.addPorts(Arrays.stream(portsToCheck).mapToInt(Integer::parseInt).toArray());
+                baseScan.addFlag(Flag.TREAT_HOSTS_AS_ONLINE);
+                baseScan.addFlag(Flag.CONNECT_SCAN);
+                baseScan.setOutputType(IScan.OutputType.XML, "output.xml");
 
-            OnePassParser opp = new OnePassParser();
-            NMapRun nmapRun = opp.parse(baseScan.getArgumentProperties().getFlagMap().get(Flag.XML_OUTPUT.toString()), OnePassParser.FILE_NAME_INPUT);
+                ExecutionResults results = baseScan.executeScan();
+                log.info("Nmap запущен командой: " + results.getExecutedCommand());
+                log.info("Ответ nmap: " + results.getOutput());
 
-            if(nmapRun == null)
-                throw new ExecutionException("Ошибка при проверке ресурса через nmap. Ошибка сохранения результата");
+                OnePassParser opp = new OnePassParser();
+                NMapRun nmapRun = opp.parse(baseScan.getArgumentProperties().getFlagMap().get(Flag.XML_OUTPUT.toString()), OnePassParser.FILE_NAME_INPUT);
 
-            NmapExecutionResult nmapExecutionResult = new NmapExecutionResult();
-            nmapExecutionResult.setJobID(checkUnitJob.getJobID());
-            nmapExecutionResult.setCheckUnit(checkUnitJob.getCheckUnit());
-            nmapExecutionResult.setAccessToolUnit(checkUnitJob.getAccessToolUnit());
-            nmapExecutionResult.setNmapLogs(results.getOutput());
+                if (nmapRun == null)
+                    throw new ExecutionException("Ошибка при проверке ресурса через nmap. Ошибка сохранения результата");
 
-            nmapRun.getHosts().forEach(host -> {
-                if(host.getAddresses().size() > 0) {
-                    Set<Long> openedPorts = new HashSet<>();
-                    host.getPorts().getPorts().forEach(port -> {
-                        if (port != null) {
-                            if (port.getState().getState().toLowerCase().equals("open")) {
-                                openedPorts.add(port.getPortId());
+                NmapExecutionResult nmapExecutionResult = new NmapExecutionResult();
+                nmapExecutionResult.setJobID(checkUnitJob.getJobID());
+                nmapExecutionResult.setCheckUnit(checkUnitJob.getCheckUnit());
+                nmapExecutionResult.setAccessToolUnit(checkUnitJob.getAccessToolUnit());
+                nmapExecutionResult.setNmapLogs(results.getOutput());
+
+                nmapRun.getHosts().forEach(host -> {
+                    if (host.getAddresses().size() > 0) {
+                        Set<Long> openedPorts = new HashSet<>();
+                        host.getPorts().getPorts().forEach(port -> {
+                            if (port != null) {
+                                if (port.getState().getState().toLowerCase().equals("open")) {
+                                    openedPorts.add(port.getPortId());
+                                }
                             }
-                        }
-                    });
-                    nmapExecutionResult.getOpenedPorts().put(host.getAddresses().get(0).getAddr(), openedPorts);
-                }
-            });
+                        });
+                        nmapExecutionResult.getOpenedPorts().put(host.getAddresses().get(0).getAddr(), openedPorts);
+                    }
+                });
 
-            return nmapExecutionResult;
+                return nmapExecutionResult;
+            } finally {
+                if(proxychainsConfigurator != null)
+                    proxychainsConfigurator.close();
+            }
         } catch (Exception ex){
             throw new ExecutionException("Ошибка при проверке запрещенных ресуросов в nmap", ex);
         }
@@ -125,17 +137,18 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
         return AbstractMessageListenerContainer.DEFAULT_PHASE - 9;
     }
 
-    private void configureProxy(CheckUnitJob checkUnitJob) throws IOException {
+    private ProxychainsConfigurator createProxychainsConfigurator(CheckUnitJob checkUnitJob) throws IOException, ExecutionException {
         String proxyType = checkUnitJob.getAccessToolParameters().get(AccessToolParameters.PROXY_TYPE);
         String proxyDns = checkUnitJob.getAccessToolParameters().get(AccessToolParameters.PROXY_DNS_NAME);
         if(Strings.isNotEmpty(proxyDns)){
-            new ProxychainsConfigurator(
+            return new ProxychainsConfigurator(
                     Strings.isNotEmpty(proxyType) ?
                             proxyType.toLowerCase().trim() :
                             "http",
                     proxyDns,
                     checkUnitJob.getAccessToolParameters().get(AccessToolParameters.PROXY_PORT)
-            ).configure();
+            );
         }
+        throw new ExecutionException("Ошибка создания конфигуратора proxychains. Не задан адрес прокси сервера");
     }
 }
