@@ -39,7 +39,7 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 	public static final String keyWordsSource = "classpath:key_words.json";
 	public static final int similarityThreshold = 85;
 
-	@Value("${spring.source_path_vpn}")
+	@Value("${source_path_vpn}")
 	public String sourcePath;
 
 	@Getter

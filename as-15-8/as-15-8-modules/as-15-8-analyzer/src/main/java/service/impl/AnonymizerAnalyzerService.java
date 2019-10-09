@@ -41,7 +41,7 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 	private static final int EMPTY_PAGE_SIZE = 1024;
 
 
-	@Value("${spring.source_path_anonym}")
+	@Value("${source_path_anonym}")
 	public String sourcePath;
 
 	@Getter
