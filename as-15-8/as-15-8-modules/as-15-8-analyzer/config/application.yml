@@ -7,7 +7,8 @@ spring:
         bootstrap-servers: 192.168.5.12:9094,192.168.5.184:9094,192.168.5.211:9094
         auto-offset-reset: earliest
         analysis-execution-timeout: 1800000
-    source_path: /log/content.txt
+    source_path_vpn: /log/content.txt
+    source_path_anonym: /log/content.txt
 
 ---
 
