@@ -93,7 +93,7 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 
 			pageContent = "STUB "  + clearResult(pageContent);
 			pageContentEtalon = result.getFinalUrlPageEtalon() + "NO_STUB " + clearResult(pageContentEtalon);
-			String fullContent = pageContent + "\n" + pageContentEtalon + "\n";
+			String fullContent = result.getFinalUrlPageEtalon() + "\n" + pageContent + "\n" + pageContentEtalon + "\n\n";
 
 			try {
 				Files.write(path, fullContent.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);

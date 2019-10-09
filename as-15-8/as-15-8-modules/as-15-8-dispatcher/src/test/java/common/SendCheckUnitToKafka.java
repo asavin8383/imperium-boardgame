@@ -60,7 +60,7 @@ public class SendCheckUnitToKafka {
 			.forEach(result -> {
 				CheckUnitJob checkUnitJob = new CheckUnitJob();
 				checkUnitJob.setJobID(1L);
-				checkUnitJob.setAccessToolUnit(AccessToolUnit.TORGUARD);
+				checkUnitJob.setAccessToolUnit(AccessToolUnit.KASPERSKY);
 
 				checkUnitJob.setCheckUnit(new CheckUnit(
 						CheckUnitType.valueOf(result.get("check_unit_type").toString()),
@@ -68,7 +68,7 @@ public class SendCheckUnitToKafka {
 					)
 				);
 
-				checkUnitJob.getAccessToolParameters().put(AccessToolParameters.PROXY_DNS_NAME, "192.168.5.10");
+				checkUnitJob.getAccessToolParameters().put(AccessToolParameters.PROXY_DNS_NAME, "192.168.5.194");
 				checkUnitJob.getAccessToolParameters().put(AccessToolParameters.PROXY_PORT, "3128");
 
 				Message<CheckUnitJob> message = MessageBuilder
@@ -129,13 +129,5 @@ public class SendCheckUnitToKafka {
 			return new KafkaTemplate<>(controlMessagesProducerFactory());
 		}
 	}
-}
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-class TestCheckUnit {
-	private CheckUnitType checkUnitType;
-	private String checkUnitValue;
 }
 
