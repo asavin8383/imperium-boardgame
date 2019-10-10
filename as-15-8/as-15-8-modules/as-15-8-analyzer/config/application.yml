@@ -37,14 +37,15 @@ spring:
   profiles: prod
   cloud.stream:
     bindings:
-      input.destination: exec_results
+      input:
+        destination: exec_results
+        consumer:
+          concurrency: 4
       output.destination: analysis_results
       notifications.destination: job_notifications
     kafka:
       binder:
         brokers: 10.97.220.141:9094,10.97.220.142:9094,10.97.220.143:9094
-      bindings.jobs.consumer:
-        concurrency: 4
 
 ---
 
@@ -52,11 +53,12 @@ spring:
   profiles: test
   cloud.stream:
     bindings:
-      input.destination: exec_results
+      input:
+        destination: exec_results
+        consumer:
+          concurrency: 1
       output.destination: analysis_results
       notifications.destination: job_notifications
-    kafka.bindings.jobs.consumer:
-      concurrency: 4
 
 ---
 
@@ -64,11 +66,13 @@ spring:
   profiles: dev_ashabalin
   cloud.stream:
     bindings:
-      input.destination: exec_results_ashabalin
+      input:
+        destination: exec_results_ashabalin
+        consumer:
+          concurrency: 7
       output.destination: analysis_results_ashabalin
       notifications.destination: job_notifications_ashabalin
     kafka.bindings.jobs.consumer:
-      concurrency: 4
       configuration:
         max.poll.interval.ms: 300000
 
@@ -79,11 +83,13 @@ spring:
   profiles: dev_asinyavin
   cloud.stream:
     bindings:
-      input.destination: exec_results_asinyavin
+      input:
+        destination: exec_results_asinyavin
+        consumer:
+          concurrency: 7
       output.destination: analysis_results_asinyavin
       notifications.destination: job_notifications_asinyavin
     kafka.bindings.jobs.consumer:
-      concurrency: 4
       configuration:
         max.poll.interval.ms: 300000
 
@@ -93,11 +99,13 @@ spring:
   profiles: dev_asavin
   cloud.stream:
     bindings:
-      input.destination: exec_results_asavin
+      input:
+        destination: exec_results_asavin
+        consumer:
+          concurrency: 7
       output.destination: analysis_results_asavin
       notifications.destination: job_notifications_asavin
     kafka.bindings.jobs.consumer:
-      concurrency: 4
       configuration:
         max.poll.interval.ms: 300000
 
@@ -107,11 +115,13 @@ spring:
   profiles: dev_pvorobiev
   cloud.stream:
     bindings:
-      input.destination: exec_results_pvorobiev
+      input:
+        destination: exec_results_pvorobiev
+        consumer:
+          concurrency: 7
       output.destination: analysis_results_pvorobiev
       notifications.destination: job_notifications_pvorobiev
     kafka.bindings.jobs.consumer:
-      concurrency: 4
       configuration:
         max.poll.interval.ms: 300000
 
@@ -121,10 +131,12 @@ spring:
   profiles: dev_jspirina
   cloud.stream:
     bindings:
-      input.destination: exec_results_jspirina
+      input:
+        destination: exec_results_jspirina
+        consumer:
+          concurrency: 7
       output.destination: analysis_results_jspirina
       notifications.destination: job_notifications_jspirina
     kafka.bindings.jobs.consumer:
-      concurrency: 4
       configuration:
         max.poll.interval.ms: 300000

@@ -75,6 +75,8 @@ spring:
     bindings:
       jobs:
         destination: jobs
+        consumer:
+          concurrency: 4
       executionResults:
         destination: exec_results
       notifications:
@@ -82,8 +84,6 @@ spring:
     kafka:
       binder:
         brokers: 10.97.220.141:9094,10.97.220.142:9094,10.97.220.143:9094
-      bindings.jobs.consumer:
-        concurrency: 4
 selenium-hub-url: http://10.97.220.147:4444/wd/hub
 
 ---
@@ -94,12 +94,12 @@ spring:
     bindings:
       jobs:
         destination: jobs
+        consumer:
+          concurrency: 4
       executionResults:
         destination: exec_results
       notifications:
         destination: job_notifications
-    kafka.bindings.jobs.consumer:
-      concurrency: 4
 
 ---
 
@@ -109,12 +109,13 @@ spring:
     bindings:
       jobs:
         destination: jobs_ashabalin
+        consumer:
+          concurrency: 7
       executionResults:
         destination: exec_results_ashabalin
       notifications:
         destination: job_notifications_ashabalin
     kafka.bindings.jobs.consumer:
-      concurrency: 7
       configuration:
         max.poll.interval.ms: 300000
 nmap:
@@ -129,12 +130,13 @@ spring:
     bindings:
       jobs:
         destination: jobs_asinyavin
+        consumer:
+          concurrency: 7
       executionResults:
         destination: exec_results_asinyavin
       notifications:
         destination: job_notifications_asinjavin
     kafka.bindings.jobs.consumer:
-      concurrency: 7
       configuration:
         max.poll.interval.ms: 300000
 
@@ -146,12 +148,13 @@ spring:
     bindings:
       jobs:
         destination: jobs_asavin
+        consumer:
+          concurrency: 7
       executionResults:
         destination: exec_results_asavin
       notifications:
         destination: job_notifications_asavin
     kafka.bindings.jobs.consumer:
-      concurrency: 7
       configuration:
         max.poll.interval.ms: 300000
 
@@ -163,12 +166,13 @@ spring:
     bindings:
       jobs:
         destination: jobs_pvorobiev
+        consumer:
+          concurrency: 7
       executionResults:
         destination: exec_results_pvorobiev
       notifications:
         destination: job_notifications_pvorobiev
     kafka.bindings.jobs.consumer:
-      concurrency: 7
       configuration:
         max.poll.interval.ms: 300000
 
@@ -180,11 +184,12 @@ spring:
     bindings:
       jobs:
         destination: jobs_jspirina
+        consumer:
+          concurrency: 7
       executionResults:
         destination: exec_results_jspirina
       notifications:
         destination: job_notifications_srodionova
     kafka.bindings.jobs.consumer:
-      concurrency: 7
       configuration:
         max.poll.interval.ms: 300000
