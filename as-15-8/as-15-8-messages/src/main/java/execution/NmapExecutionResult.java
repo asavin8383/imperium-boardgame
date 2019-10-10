@@ -15,7 +15,7 @@ import java.util.Set;
 @NoArgsConstructor
 public class NmapExecutionResult extends ExecutionJobResult {
 
-    private String nmapLogs;
+    private String nmapLog;
     private Map<String, Set<Long>> openedPorts = new HashMap<>();
 
 }
