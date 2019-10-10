@@ -41,12 +41,12 @@ import java.util.Map;
 public class SendCheckUnitToKafka {
 
 	@Autowired
-    private KafkaTemplate<String, CheckUnitJob> kafkaTemplate;
+    private KafkaTemplate<String, CheckUnitJob> testKafkaTemplate;
 
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
 
-	@Value("${spring.kafka.jobs-topic}")
+	@Value("${spring.cloud.stream.bindings.jobs.destination}")
     private String topic;
 	
 	@Test
@@ -60,7 +60,7 @@ public class SendCheckUnitToKafka {
 			.forEach(result -> {
 				CheckUnitJob checkUnitJob = new CheckUnitJob();
 				checkUnitJob.setJobID(1L);
-				checkUnitJob.setAccessToolUnit(AccessToolUnit.KASPERSKY);
+				checkUnitJob.setAccessToolUnit(AccessToolUnit.HOLA);
 
 				checkUnitJob.setCheckUnit(new CheckUnit(
 						CheckUnitType.valueOf(result.get("check_unit_type").toString()),
@@ -68,15 +68,15 @@ public class SendCheckUnitToKafka {
 					)
 				);
 
-				checkUnitJob.getAccessToolParameters().put(AccessToolParameters.PROXY_DNS_NAME, "192.168.5.194");
-				checkUnitJob.getAccessToolParameters().put(AccessToolParameters.PROXY_PORT, "3128");
+				/*checkUnitJob.getAccessToolParameters().put(AccessToolParameters.PROXY_DNS_NAME, "192.168.5.194");
+				checkUnitJob.getAccessToolParameters().put(AccessToolParameters.PROXY_PORT, "3128");*/
 
 				Message<CheckUnitJob> message = MessageBuilder
 						.withPayload(checkUnitJob)
 						.setHeader(KafkaHeaders.TOPIC, topic)
 						.build();
 
-				ListenableFuture<SendResult<String, CheckUnitJob>> future = kafkaTemplate.send(message);
+				ListenableFuture<SendResult<String, CheckUnitJob>> future = testKafkaTemplate.send(message);
 
 				future.addCallback(new ListenableFutureCallback<SendResult<String, CheckUnitJob>>() {
 
@@ -96,7 +96,7 @@ public class SendCheckUnitToKafka {
 	@Configuration
 	static class TestConfig {
 
-		@Value("${spring.kafka.bootstrap-servers}")
+		@Value("${spring.cloud.stream.kafka.binder.brokers}")
 		private String bootstrapServers;
 
 		@Bean
@@ -110,23 +110,13 @@ public class SendCheckUnitToKafka {
 		}
 
 		@Bean
-		public ProducerFactory<String, CheckUnitJob> producerFactory() {
+		public ProducerFactory<String, CheckUnitJob> testProducerFactory() {
 			return new DefaultKafkaProducerFactory<>(producerFactoryConfig());
 		}
 
 		@Bean
-		public ProducerFactory<String, ExecutorControlMessage> controlMessagesProducerFactory() {
-			return new DefaultKafkaProducerFactory<>(producerFactoryConfig());
-		}
-
-		@Bean
-		public KafkaTemplate<String, CheckUnitJob> kafkaTemplate() {
-			return new KafkaTemplate<>(producerFactory());
-		}
-
-		@Bean
-		public KafkaTemplate<String, ExecutorControlMessage> controlMessagesTemplate() {
-			return new KafkaTemplate<>(controlMessagesProducerFactory());
+		public KafkaTemplate<String, CheckUnitJob> testKafkaTemplate() {
+			return new KafkaTemplate<>(testProducerFactory());
 		}
 	}
 }

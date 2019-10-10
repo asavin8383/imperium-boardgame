@@ -92,7 +92,7 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 			String pageContentEtalon = result.getPageContentEtalon();
 
 			pageContent = "STUB "  + clearResult(pageContent);
-			pageContentEtalon = result.getFinalUrlPageEtalon() + "NO_STUB " + clearResult(pageContentEtalon);
+			pageContentEtalon = "NO_STUB " + clearResult(pageContentEtalon);
 			String fullContent = result.getFinalUrlPageEtalon() + "\n" + pageContent + "\n" + pageContentEtalon + "\n\n";
 
 			try {

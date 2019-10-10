@@ -89,7 +89,7 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 
 			pageContent = "STUB "  + clearResult(pageContent);
 			pageContentEtalon = "NO_STUB " + clearResult(pageContentEtalon);
-			String fullContent = pageContent + "\n" + pageContentEtalon + "\n\n";
+			String fullContent = result.getFinalUrl() + "\n" + pageContent + "\n" + pageContentEtalon + "\n\n";
 
 			try {
 				Files.write(path, fullContent.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
