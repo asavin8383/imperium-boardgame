@@ -9,6 +9,7 @@ import model.traffic.ErdiTrafficUnit;
 import model.traffic.SearchQueryTrafficUnit;
 import model.traffic.Traffic;
 import model.traffic.TrafficUnit;
+import model.traffic.projection.TrafficProjection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
@@ -49,6 +50,17 @@ public class TrafficService {
                 .withMatcher("name", contains().ignoreCase());
 
         return trafficRepository.findAll(Example.of(traffic, matcher), page);
+    }
+
+    public Page<TrafficProjection> getAllTrafficInfo(SortingDirection sortingDirection,
+                                                     String sortingColumn,
+                                                     int pageNumber,
+                                                     int pageSize,
+                                                     String query) {
+
+        PageRequest page = PageRequest.of(pageNumber, pageSize,
+                SortingHelper.createSorting(sortingDirection, sortingColumn));
+        return trafficRepository.findAllTrafficInfo(query, page);
     }
 
     public Traffic getTrafficById(Long id) {

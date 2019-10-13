@@ -34,33 +34,28 @@ public class SearchQueryTrafficUnit extends TrafficUnit implements Serializable 
     @JsonView(Views.Brief.class)
     private AccessToolsCategory category;
 
-    // todo check queryPattern ? regex ?
-
     @JsonView(Views.Brief.class)
     @ToString.Include
     private String queryPattern;
 
-    @ManyToMany(cascade = CascadeType.REFRESH)
+    @ManyToMany(cascade = {CascadeType.REFRESH, CascadeType.MERGE, CascadeType.REMOVE})
     @JoinTable(schema = "portal", name = "search_query_traffic_units_custom_erdi",
             joinColumns = @JoinColumn(name = "traffic_unit_id"),
             inverseJoinColumns = @JoinColumn(name = "custom_erdi_id"))
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-//    @JsonView(Views.Full.class)
     private List<CustomErdi> customErdiList;
 
-    @ManyToMany(cascade = CascadeType.REFRESH)
+    @ManyToMany(cascade = {CascadeType.REFRESH, CascadeType.MERGE, CascadeType.REMOVE})
     @JoinTable(schema = "portal", name = "search_query_traffic_units_content",
             joinColumns = @JoinColumn(name = "traffic_unit_id"),
             inverseJoinColumns = @JoinColumn(name = "content_id"))
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-//    @JsonView(Views.Full.class)
     private List<FormalErdi> formalErdiList;
 
-    @ManyToMany(cascade = CascadeType.REFRESH)
+    @ManyToMany(cascade = {CascadeType.REFRESH, CascadeType.MERGE, CascadeType.REMOVE})
     @JoinTable(schema = "portal", name = "search_query_traffic_units_search_phrases",
             joinColumns = @JoinColumn(name = "traffic_unit_id"),
             inverseJoinColumns = @JoinColumn(name = "search_phrase_id"))
-//    @JsonView(Views.Full.class)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<SearchPhrase> searchPhrases;
 

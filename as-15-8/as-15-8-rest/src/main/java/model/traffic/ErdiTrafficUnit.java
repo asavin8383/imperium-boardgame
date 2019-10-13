@@ -34,14 +34,14 @@ public class ErdiTrafficUnit extends TrafficUnit implements Serializable {
     @JsonView(Views.Brief.class)
     private AccessToolsCategory category;
 
-    @ManyToMany(cascade = CascadeType.REFRESH)
+    @ManyToMany(cascade = {CascadeType.REFRESH, CascadeType.MERGE, CascadeType.REMOVE})
     @JoinTable(schema = "portal", name = "erdi_traffic_units_custom_erdi",
             joinColumns = @JoinColumn(name = "traffic_unit_id"),
             inverseJoinColumns = @JoinColumn(name = "custom_erdi_id"))
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<CustomErdi> customErdiList;
 
-    @ManyToMany(cascade = CascadeType.REFRESH)
+    @ManyToMany(cascade = {CascadeType.REFRESH, CascadeType.MERGE, CascadeType.REMOVE})
     @JoinTable(schema = "portal", name = "erdi_traffic_units_content",
             joinColumns = @JoinColumn(name = "traffic_unit_id"),
             inverseJoinColumns = @JoinColumn(name = "content_id"))

@@ -40,7 +40,7 @@ public abstract class TrafficUnit implements Serializable {
     @ToString.Include
     private String name;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "traffic_id", nullable = false)
     @JsonIgnore
     @ToString.Include

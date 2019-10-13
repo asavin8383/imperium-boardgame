@@ -45,7 +45,7 @@ public class SearchPhrase implements Serializable {
     @ToString.Include
     private Violation violation;
 
-    @ManyToMany(mappedBy = "searchPhrases")
+    @ManyToMany(mappedBy = "searchPhrases", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<SearchQueryTrafficUnit> trafficUnits;
 

@@ -38,7 +38,8 @@ public class Traffic implements Serializable {
     @ToString.Include
     private String name;
 
-    @OneToMany(mappedBy = "traffic", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "traffic", orphanRemoval = true,
+            cascade = CascadeType.ALL)
     @JsonIgnore
     private List<TrafficUnit> trafficUnits;
 
