@@ -44,17 +44,17 @@ public class CustomErdi implements Serializable {
     private Violation violation;
 
     @OneToMany(mappedBy = "customErdi", orphanRemoval = true,
-            cascade = { CascadeType.REFRESH, CascadeType.REMOVE })
+            cascade = CascadeType.ALL)
     @JsonView(Views.Full.class)
     private List<CustomErdiUnit> customErdiUnits;
 
 
 
-    @ManyToMany(mappedBy = "customErdiList")
+    @ManyToMany(mappedBy = "customErdiList", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<SearchQueryTrafficUnit> searchQueryTrafficUnits;
 
-    @ManyToMany(mappedBy = "customErdiList")
+    @ManyToMany(mappedBy = "customErdiList", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<ErdiTrafficUnit> erdiTrafficUnits;
 

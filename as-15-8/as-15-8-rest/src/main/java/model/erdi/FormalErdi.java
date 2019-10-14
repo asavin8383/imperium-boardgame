@@ -44,11 +44,11 @@ public class FormalErdi implements Serializable {
     @ToString.Include
     private Long initContentVersionId;
 
-    @ManyToMany(mappedBy = "formalErdiList", cascade = CascadeType.REFRESH)
+    @ManyToMany(mappedBy = "formalErdiList", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<ErdiTrafficUnit> erdiTrafficUnits;
 
-    @ManyToMany(mappedBy = "formalErdiList", cascade = CascadeType.REFRESH)
+    @ManyToMany(mappedBy = "formalErdiList", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<SearchQueryTrafficUnit> searchQueryTrafficUnits;
 
