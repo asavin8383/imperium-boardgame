@@ -1,6 +1,6 @@
 package services.arrangement.impl;
 
-import enums.AccessToolParameters;
+import enums.AccessToolParameter;
 import exceptions.AS_15_8_Exception;
 import jobs.ArrangementJob;
 import jobs.ERDIJob;
@@ -67,41 +67,41 @@ public class ArrangementJobCreationServiceImpl implements ArrangementJobCreation
         }
     }
 
-    private Map<AccessToolParameters, String> prepareParameters(AccessTool accessTool){
-        Map<AccessToolParameters, String> result = new HashMap<>();
+    private Map<AccessToolParameter, String> prepareParameters(AccessTool accessTool){
+        Map<AccessToolParameter, String> result = new HashMap<>();
         if (accessTool.getSearchSystemParameters() != null){
             SearchSystemParameters parameters = accessTool.getSearchSystemParameters();
-            result.put(AccessToolParameters.INPUT_DELAY, String.valueOf(parameters.getInputDelay()));
-            result.put(AccessToolParameters.SEARCH_SYSTEM_URL, parameters.getSearchSystemUrl());
-            result.put(AccessToolParameters.SEARCH_SYSTEM_RESULT_PAGE_TYPE, parameters.getResultPageType());
-            result.put(AccessToolParameters.SEARCH_SYSTEM_XPATH_INPUT_FIELD, parameters.getInputFieldXpath());
-            result.put(AccessToolParameters.SEARCH_SYSTEM_XPATH_CAPTCHA, parameters.getCaptchaXpath());
-            result.put(AccessToolParameters.SEARCH_SYSTEM_XPATH_ITEM_LINK, parameters.getItemLinkXpath());
-            result.put(AccessToolParameters.SEARCH_SYSTEM_XPATH_NEXT_PAGE, parameters.getNextPageXpath());
+            result.put(AccessToolParameter.INPUT_DELAY, String.valueOf(parameters.getInputDelay()));
+            result.put(AccessToolParameter.SEARCH_SYSTEM_URL, parameters.getSearchSystemUrl());
+            result.put(AccessToolParameter.SEARCH_SYSTEM_RESULT_PAGE_TYPE, parameters.getResultPageType());
+            result.put(AccessToolParameter.SEARCH_SYSTEM_XPATH_INPUT_FIELD, parameters.getInputFieldXpath());
+            result.put(AccessToolParameter.SEARCH_SYSTEM_XPATH_CAPTCHA, parameters.getCaptchaXpath());
+            result.put(AccessToolParameter.SEARCH_SYSTEM_XPATH_ITEM_LINK, parameters.getItemLinkXpath());
+            result.put(AccessToolParameter.SEARCH_SYSTEM_XPATH_NEXT_PAGE, parameters.getNextPageXpath());
         } else if (accessTool.getVpnParameters() != null){
             VPN_Parameters parameters = accessTool.getVpnParameters();
-            result.put(AccessToolParameters.STUB_URL, parameters.getStubUrl());
-            result.put(AccessToolParameters.PROXY_DNS_NAME, parameters.getTechProxyDnsName());
-            result.put(AccessToolParameters.PROXY_PORT, parameters.getTechProxyPort());
-            result.put(AccessToolParameters.PROXY_USER, parameters.getTechProxyUser());
-            result.put(AccessToolParameters.PROXY_PASSWORD, parameters.getTechProxyPassword());
+            result.put(AccessToolParameter.STUB_URL, parameters.getStubUrl());
+            result.put(AccessToolParameter.PROXY_DNS_NAME, parameters.getTechProxyDnsName());
+            result.put(AccessToolParameter.PROXY_PORT, parameters.getTechProxyPort());
+            result.put(AccessToolParameter.PROXY_USER, parameters.getTechProxyUser());
+            result.put(AccessToolParameter.PROXY_PASSWORD, parameters.getTechProxyPassword());
         } else if (accessTool.getProxyParameters() != null) {
             ProxyParameters parameters = accessTool.getProxyParameters();
-            result.put(AccessToolParameters.STUB_URL, parameters.getStubUrl());
-            result.put(AccessToolParameters.PROXY_DNS_NAME, parameters.getProxyDnsName());
-            result.put(AccessToolParameters.PROXY_PORT, parameters.getProxyPort());
-            result.put(AccessToolParameters.PROXY_USER, parameters.getProxyUser());
-            result.put(AccessToolParameters.PROXY_PASSWORD, parameters.getProxyPassword());
+            result.put(AccessToolParameter.STUB_URL, parameters.getStubUrl());
+            result.put(AccessToolParameter.PROXY_DNS_NAME, parameters.getProxyDnsName());
+            result.put(AccessToolParameter.PROXY_PORT, parameters.getProxyPort());
+            result.put(AccessToolParameter.PROXY_USER, parameters.getProxyUser());
+            result.put(AccessToolParameter.PROXY_PASSWORD, parameters.getProxyPassword());
         } else if (accessTool.getAnonymizerParameters() != null) {
             AnonymizerParameters parameters = accessTool.getAnonymizerParameters();
-            result.put(AccessToolParameters.STUB_URL, parameters.getStubUrl());
-            result.put(AccessToolParameters.PROXY_DNS_NAME, parameters.getProxyDnsName());
-            result.put(AccessToolParameters.PROXY_PORT, parameters.getProxyPort());
+            result.put(AccessToolParameter.STUB_URL, parameters.getStubUrl());
+            result.put(AccessToolParameter.PROXY_DNS_NAME, parameters.getProxyDnsName());
+            result.put(AccessToolParameter.PROXY_PORT, parameters.getProxyPort());
         }
         return result;
     }
 
-    private Map<AccessToolParameters, String> prepareGlobalParameters(){
+    private Map<AccessToolParameter, String> prepareGlobalParameters(){
         return globalParametersRepo.findAll().stream()
             .collect(HashMap::new, (m,v)->m.put(v.getKey(), v.getValue()), HashMap::putAll);
     }

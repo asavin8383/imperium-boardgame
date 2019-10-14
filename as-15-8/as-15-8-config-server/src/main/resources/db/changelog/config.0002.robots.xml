@@ -1,0 +1,55 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+    <changeSet author="shabalinAI (generated)" id="1570778877811-1">
+        <createTable schemaName="config" tableName="robots">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="robotsPK"/>
+            </column>
+            <column name="access_tool" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="configuration_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1570778877811-2">
+        <createTable schemaName="config" tableName="robots_properties">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="robots_propertiesPK"/>
+            </column>
+            <column name="key" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="value" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="robot_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1570778877811-3">
+        <addForeignKeyConstraint baseColumnNames="configuration_id" baseTableName="robots" baseTableSchemaName="config" constraintName="robots_configurations_id_fk" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="configurations" referencedTableSchemaName="config" validate="true"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1570778877811-4">
+        <addForeignKeyConstraint baseColumnNames="robot_id" baseTableName="robots_properties" baseTableSchemaName="config" constraintName="robots_properties_robots_id_fk" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="robots" referencedTableSchemaName="config" validate="true"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1570778877811-5">
+        <dropColumn columnName="key" schemaName="config" tableName="configurations"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1570778877811-6">
+        <dropColumn columnName="value" schemaName="config" tableName="configurations"/>
+    </changeSet>
+    <changeSet id="1570778877811-7" author="shabalinAI (generated)">
+        <sql>
+            alter table config.robots add constraint ck_access_tool check ( access_tool in ('SEARCH_SYSTEM','VPN','PROXY', 'CAMELEO_XYZ', 'HIDEMYASS', 'HOLA'));
+        </sql>
+        <rollback>
+            alter table config.robots drop constraint if exists ck_access_tool;
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

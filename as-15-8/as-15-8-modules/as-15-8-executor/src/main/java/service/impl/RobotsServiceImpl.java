@@ -33,7 +33,7 @@ import java.util.Set;
 public class RobotsServiceImpl implements CheckUnitVerificationService {
 	
 	/** Список роботов */
-	private final List<RobotsFactory> robotFactories;
+	private final RobotsFactory robotsFactory;
 	
     private volatile Set<Robot> robots = new HashSet<>();
     
@@ -53,9 +53,9 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 			if(!this.isRunning)
 				throw new ExecutionException("Ошибка при запуске проверки запрещенного ресурса. Сервис проверки остановлен!");
 			log.info("Запуск робота: " + robotName);
-			
-			RobotsFactory robotFactory = getRobotFactory(checkUnitJob.getAccessToolUnit());
-			Robot robot = robotFactory.createRobot(checkUnitJob.getAccessToolParameters());
+
+			//TODO Добавить имя робота
+			Robot robot = robotsFactory.createRobot(checkUnitJob.getAccessToolUnit(), "");
 			
 			robots.add(robot);
 			
@@ -125,18 +125,5 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 	@Override
 	public int getPhase() {
 		return AbstractMessageListenerContainer.DEFAULT_PHASE - 10;
-	}
-	
-	/**
-	 * Метод получения робота для ПС/ПАСД
-	 * @param accessToolUnit ПС/ПАСД
-	 * @return Фабрика роботов
-	 */
-	private RobotsFactory getRobotFactory(AccessToolUnit accessToolUnit) {
-		for(RobotsFactory robotFactory : robotFactories) {
-			if(robotFactory.getAccessToolUnit().equals(accessToolUnit))
-				return robotFactory;
-		}
-		throw new IllegalArgumentException("Error creating robot! Robot for " + accessToolUnit + " is not supported");
 	}
 }

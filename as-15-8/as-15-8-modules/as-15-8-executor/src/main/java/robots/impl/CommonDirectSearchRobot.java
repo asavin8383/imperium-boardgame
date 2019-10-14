@@ -1,7 +1,7 @@
 package robots.impl;
 
 import checkUnits.CheckUnit;
-import enums.AccessToolParameters;
+import enums.AccessToolParameter;
 import execution.ExecutionJobResult;
 import execution.ExecutionPSJobResult;
 import lombok.extern.slf4j.Slf4j;
@@ -9,7 +9,6 @@ import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import robots.RobotDriverParameters;
 import robots.exceptions.Captcha_ExecutionException;
 import robots.exceptions.ExecutionException;
 import robots.exceptions.TimeoutScriptException;
@@ -79,30 +78,29 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
 
 
 
-    public CommonDirectSearchRobot(RobotDriverParameters driverParams,
-                            Map<AccessToolParameters, String> scriptParams,
-                            int searchLimit) {
+    public CommonDirectSearchRobot(Map<AccessToolParameter, String> scriptParams) {
 
-        super(driverParams, scriptParams);
-        setParams(scriptParams, searchLimit);
+        super(scriptParams);
+        setParams(scriptParams);
     }
 
-    private void setParams(Map<AccessToolParameters, String> scriptParams, int searchLimit) {
-        this.searchResultLimit = searchLimit > 0 ? searchLimit : DEFAULT_SEARCH_LIMIT;
+    private void setParams(Map<AccessToolParameter, String> scriptParams) {
+        this.searchResultLimit = scriptParams.containsKey(AccessToolParameter.SEARCH_RESULT_LIMIT) ?
+                Integer.parseInt(scriptParams.get(AccessToolParameter.SEARCH_RESULT_LIMIT)) : DEFAULT_SEARCH_LIMIT;
 
-        long delayParameterValue = scriptParams.containsKey(AccessToolParameters.INPUT_DELAY) ?
-                Long.parseLong(scriptParams.get(AccessToolParameters.INPUT_DELAY)) : DEFAULT_INPUT_DELAY;
+        long delayParameterValue = scriptParams.containsKey(AccessToolParameter.INPUT_DELAY) ?
+                Long.parseLong(scriptParams.get(AccessToolParameter.INPUT_DELAY)) : DEFAULT_INPUT_DELAY;
         this.inputDelay = delayParameterValue < 0 ? DEFAULT_INPUT_DELAY : delayParameterValue;
 
-        String strType = scriptParams.get(AccessToolParameters.SEARCH_SYSTEM_RESULT_PAGE_TYPE);
+        String strType = scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_RESULT_PAGE_TYPE);
         this.resultPageType = strType != null ?
                 ResultPageType.valueOf(strType.toUpperCase()) : ResultPageType.PAGINATION;
 
-        this.searchSystemUrl = scriptParams.get(AccessToolParameters.SEARCH_SYSTEM_URL);
-        this.xpathInputField = scriptParams.get(AccessToolParameters.SEARCH_SYSTEM_XPATH_INPUT_FIELD);
-        this.xpathCaptcha = scriptParams.get(AccessToolParameters.SEARCH_SYSTEM_XPATH_CAPTCHA);
-        this.xpathNextPage = scriptParams.get(AccessToolParameters.SEARCH_SYSTEM_XPATH_NEXT_PAGE);
-        this.xpathItemLink = scriptParams.get(AccessToolParameters.SEARCH_SYSTEM_XPATH_ITEM_LINK);
+        this.searchSystemUrl = scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_URL);
+        this.xpathInputField = scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_XPATH_INPUT_FIELD);
+        this.xpathCaptcha = scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_XPATH_CAPTCHA);
+        this.xpathNextPage = scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_XPATH_NEXT_PAGE);
+        this.xpathItemLink = scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_XPATH_ITEM_LINK);
     }
 
 

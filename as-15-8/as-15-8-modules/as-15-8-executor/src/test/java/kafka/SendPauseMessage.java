@@ -35,7 +35,7 @@ public class SendPauseMessage {
 	@Test
 	public void test() {
 			
-		ExecutorControlMessage controlMessage = new ExecutorControlMessage(AccessToolUnit.YANDEX, ControlCommand.STOP);
+		ExecutorControlMessage controlMessage = new ExecutorControlMessage(AccessToolUnit.CAMELEO_XYZ, ControlCommand.STOP);
 		
 		Message<ExecutorControlMessage> message = MessageBuilder
                 .withPayload(controlMessage)

@@ -2,31 +2,29 @@ package service.impl;
 
 import checkUnits.CheckUnitJob;
 import checkUnits.CheckUnitType;
-import enums.AccessToolParameters;
+import common.ExecutorProperties;
+import enums.AccessToolParameter;
+import enums.AccessToolUnit;
 import execution.ExecutionJobResult;
 import execution.NmapExecutionResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nmap4j.core.flags.Flag;
 import nmap4j.core.nmap.ExecutionResults;
-import proxychains.ProxychainsConfigurator;
 import nmap4j.core.scans.BaseScan;
 import nmap4j.core.scans.IScan;
 import nmap4j.data.NMapRun;
 import nmap4j.parser.OnePassParser;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.listener.AbstractMessageListenerContainer;
 import org.springframework.stereotype.Service;
+import proxychains.ProxychainsConfigurator;
 import robots.exceptions.ExecutionException;
 import service.CheckUnitVerificationService;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -35,14 +33,7 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
 
     private boolean isRunning = false;
 
-    @Value("${nmap.path}")
-    private String nmapPath;
-
-    @Value("#{new Boolean('${nmap.use-proxy}')}")
-    private Boolean useProxy;
-
-    @Value("${nmap.ports-to-check}")
-    private String[] portsToCheck;
+    private final ExecutorProperties executorProperties;
 
     @Override
     public List<CheckUnitType> getCheckUnitTypes(){
@@ -52,6 +43,7 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
     @Override
     public ExecutionJobResult run(CheckUnitJob checkUnitJob) throws ExecutionException {
         try {
+            ExecutorProperties.NmapProperties nmapProperties = executorProperties.getNmap();
             String verificationName = "jobID = " + checkUnitJob.getJobID() +
                     " accessTool = " + checkUnitJob.getAccessToolUnit() +
                     " checkUnit = " + checkUnitJob.getCheckUnit().getValue();
@@ -60,19 +52,20 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
             log.info("Запуск проверки nmap: " + verificationName);
 
             ProxychainsConfigurator proxychainsConfigurator = null;
-            if(useProxy)
-                proxychainsConfigurator = createProxychainsConfigurator(checkUnitJob);
+            if(nmapProperties.getUseProxy())
+                //TODO Вставить Имя робота!!!
+                proxychainsConfigurator = createProxychainsConfigurator(checkUnitJob.getAccessToolUnit(), "");
 
             try {
 
                 BaseScan baseScan;
                 if(proxychainsConfigurator != null)
-                    baseScan = new BaseScan(nmapPath, proxychainsConfigurator.getConfigFile());
+                    baseScan = new BaseScan(nmapProperties.getPath(), proxychainsConfigurator.getConfigFile());
                 else
-                    baseScan = new BaseScan(nmapPath);
+                    baseScan = new BaseScan(nmapProperties.getPath());
 
                 baseScan.includeHost(checkUnitJob.getCheckUnit().getValue());
-                baseScan.addPorts(Arrays.stream(portsToCheck).mapToInt(Integer::parseInt).toArray());
+                baseScan.addPorts(Arrays.stream(nmapProperties.getPortsToCheck()).mapToInt(Integer::parseInt).toArray());
                 baseScan.addFlag(Flag.TREAT_HOSTS_AS_ONLINE);
                 baseScan.addFlag(Flag.CONNECT_SCAN);
                 baseScan.setOutputType(IScan.OutputType.XML, "output.xml");
@@ -137,16 +130,20 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
         return AbstractMessageListenerContainer.DEFAULT_PHASE - 9;
     }
 
-    private ProxychainsConfigurator createProxychainsConfigurator(CheckUnitJob checkUnitJob) throws IOException, ExecutionException {
-        String proxyType = checkUnitJob.getAccessToolParameters().get(AccessToolParameters.PROXY_TYPE);
-        String proxyDns = checkUnitJob.getAccessToolParameters().get(AccessToolParameters.PROXY_DNS_NAME);
+    private ProxychainsConfigurator createProxychainsConfigurator(AccessToolUnit accessToolUnit, String robotName) throws IOException, ExecutionException {
+        Map<AccessToolParameter, String> robotProps = executorProperties.getProps().getAccessToolUnits()
+                .get(accessToolUnit).getRobotProps()
+                .get(robotName).getProps();
+        String proxyType = robotProps.get(AccessToolParameter.PROXY_TYPE);
+        String proxyDns = robotProps.get(AccessToolParameter.PROXY_DNS_NAME);
+        String proxyPort = robotProps.get(AccessToolParameter.PROXY_PORT);
         if(Strings.isNotEmpty(proxyDns)){
             return new ProxychainsConfigurator(
                     Strings.isNotEmpty(proxyType) ?
                             proxyType.toLowerCase().trim() :
                             "http",
                     proxyDns,
-                    checkUnitJob.getAccessToolParameters().get(AccessToolParameters.PROXY_PORT)
+                    proxyPort
             );
         }
         throw new ExecutionException("Ошибка создания конфигуратора proxychains. Не задан адрес прокси сервера");

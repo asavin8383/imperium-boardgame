@@ -6,17 +6,18 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
+import enums.AccessToolParameter;
+import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebDriver;
 
 import checkUnits.CheckUnit;
-import enums.AccessToolParameters;
 import execution.ExecutionJobResult;
 import lombok.Getter;
 import robots.DriverFactory;
 import robots.Robot;
-import robots.RobotDriverParameters;
 import robots.exceptions.Cancel_ExecutionException;
 import robots.exceptions.ExecutionException;
+import common.ExecutorProperties;
 
 /**
  * Скрипт робота проверки ПС/ПАСД
@@ -32,28 +33,24 @@ public abstract class SeleniumRobot implements Robot {
 	private CompletableFuture<ExecutionJobResult> currentExecutionFuture;
 
 	@Getter
-	private RobotDriverParameters driverParams;
+	private Map<AccessToolParameter, String> scriptParams;
 
-	@Getter
-	private Map<AccessToolParameters, String> scriptParams;
-
-	public SeleniumRobot(RobotDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams) {
-		this(driverParams, scriptParams, null);
+	public SeleniumRobot(Map<AccessToolParameter, String> scriptParams) {
+		this(scriptParams, null);
 	}
 
-	public SeleniumRobot(RobotDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams, String proxy) {
-		this(driverParams, scriptParams, proxy, true);
+	public SeleniumRobot(Map<AccessToolParameter, String> scriptParams, String proxy) {
+		this(scriptParams, proxy, true);
 	}
 
-	public SeleniumRobot(RobotDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams, String proxy, boolean enableLog) {
-		setParams(driverParams, scriptParams);
+	public SeleniumRobot(Map<AccessToolParameter, String> scriptParams, String proxy, boolean enableLog) {
+		setParams(scriptParams);
 		this.proxy = proxy;
 		this.enableLog = enableLog;
 		this.driver = createDriver(proxy, enableLog);
 	}
 
-	private void setParams(RobotDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams) {
-		this.driverParams = driverParams;
+	private void setParams(Map<AccessToolParameter, String> scriptParams) {
 		this.scriptParams = scriptParams;
 	}
 
@@ -90,10 +87,10 @@ public abstract class SeleniumRobot implements Robot {
 
 	protected WebDriver createDriver(String proxy, boolean enableLog) {
 		WebDriver driver = DriverFactory.createDriver(
-				getDriverParams().getHubURL(),
-				getDriverParams().getPlatformName(),
-				getDriverParams().getApplicationName(),
-				getDriverParams().getBrowserName(),
+				ExecutorProperties.getSeleniumHubUrl(),
+				Platform.valueOf(getScriptParams().get(AccessToolParameter.PLATFORM)),
+				getScriptParams().get(AccessToolParameter.APPLICATION),
+				getScriptParams().get(AccessToolParameter.BROWSER),
 				proxy, enableLog
 		);
 		return driver;

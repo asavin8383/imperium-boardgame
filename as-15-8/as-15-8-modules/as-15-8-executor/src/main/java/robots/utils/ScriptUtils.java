@@ -1,7 +1,7 @@
 package robots.utils;
 
 import checkUnits.CheckUnit;
-import enums.AccessToolParameters;
+import enums.AccessToolParameter;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -185,11 +185,11 @@ public class ScriptUtils {
         return null;
     }
 
-    public static boolean useEtalon(Map<AccessToolParameters, String> scriptParams){
+    public static boolean useEtalon(Map<AccessToolParameter, String> scriptParams){
         if (scriptParams == null)
             return true;
 
-        String useEtalon = scriptParams.get(AccessToolParameters.USE_ETALON);
+        String useEtalon = scriptParams.get(AccessToolParameter.USE_ETALON);
         return StringUtils.isEmpty(useEtalon) ||
                 useEtalon.equalsIgnoreCase("true") ||
                 useEtalon.equalsIgnoreCase("on") ||

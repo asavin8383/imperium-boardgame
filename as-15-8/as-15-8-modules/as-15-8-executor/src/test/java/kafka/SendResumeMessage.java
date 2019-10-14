@@ -35,7 +35,7 @@ public class SendResumeMessage {
 	@Test
 	public void test() {
 			
-		ExecutorControlMessage controlMessage = new ExecutorControlMessage(AccessToolUnit.YANDEX, ControlCommand.START);
+		ExecutorControlMessage controlMessage = new ExecutorControlMessage(AccessToolUnit.SEARCH_SYSTEM, ControlCommand.START);
 		
 		Message<ExecutorControlMessage> message = MessageBuilder
                 .withPayload(controlMessage)

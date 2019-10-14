@@ -1,14 +1,26 @@
-version: '3'
+version: '3.7'
 services:
-    as-15-8-rest:
-        container_name: as-15-8_REST
-        image: harbor.ec-leasing.ru/as_15_8/as-15-8-rest
-        restart: always
-        volumes:
-            - ~/as-15-8-rest/logs:/log
-            - ~/as-15-8-rest/config:/config
-        environment:
-            PROFILE: test
-            TZ: "Europe/Moscow"
-        ports:
-            - "15800:15800"
+  as-15-8-rest:
+    container_name: as-15-8_REST
+    image: harbor.ec-leasing.ru/as_15_8/as-15-8-rest
+    restart: always
+    volumes:
+      - ~/as-15-8-rest/logs:/log
+      - ~/as-15-8-rest/config:/config
+    environment:
+      PROFILE: test
+      TZ: "Europe/Moscow"
+    ports:
+      - "15800:15800"
+  as-15-8-config-server:
+    container_name: as-15-8_config-server
+    image: harbor.ec-leasing.ru/as_15_8/as-15-8-config-server
+    restart: always
+    volumes:
+      - ~/as-15-8-config-server/logs:/log
+      - ~/as-15-8-config-server/config:/config
+    environment:
+      PROFILE: test
+      TZ: "Europe/Moscow"
+    ports:
+      - "8081:8081"

@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import enums.AccessToolParameter;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -17,10 +18,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import checkUnits.CheckUnit;
-import enums.AccessToolParameters;
 import execution.ExecutionJobResult;
 import lombok.extern.slf4j.Slf4j;
-import robots.RobotDriverParameters;
 import robots.exceptions.ExecutionException;
 import robots.exceptions.TimeoutCheckingBrowserException;
 import robots.exceptions.TimeoutScriptException;
@@ -44,8 +43,8 @@ public class HideMyAssRobot extends AnonymizerRobot {
     private static final String AGREE_BUTTON_TEXT = "Agree & Connect".toLowerCase();
 
 
-    public HideMyAssRobot(RobotDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams) {
-		super(driverParams, scriptParams);
+    public HideMyAssRobot(Map<AccessToolParameter, String> scriptParams) {
+		super(scriptParams);
 	}
 
     @Override

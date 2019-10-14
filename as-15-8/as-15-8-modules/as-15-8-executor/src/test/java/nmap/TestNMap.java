@@ -22,7 +22,7 @@ public class TestNMap {
     @Test
     public void testNMap() {
         CheckUnitJob checkUnitJob = new CheckUnitJob();
-        checkUnitJob.setAccessToolUnit(AccessToolUnit.KASPERSKY);
+        checkUnitJob.setAccessToolUnit(AccessToolUnit.VPN);
         checkUnitJob.setJobID(1L);
         checkUnitJob.setCheckUnit(new CheckUnit(CheckUnitType.IP_V4, "192.167.1.1"));
 

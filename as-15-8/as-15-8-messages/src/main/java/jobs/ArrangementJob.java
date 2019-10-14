@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import enums.AccessToolParameters;
+import enums.AccessToolParameter;
 import enums.AccessToolUnit;
 import lombok.Data;
 import lombok.Getter;
@@ -46,6 +46,6 @@ public class ArrangementJob {
 
 	/** Набор параметров ПС/ПАСД*/
 	@Getter
-	private final Map<AccessToolParameters, String> accessToolParameters = new HashMap<>();
+	private final Map<AccessToolParameter, String> accessToolParameters = new HashMap<>();
 	
 }

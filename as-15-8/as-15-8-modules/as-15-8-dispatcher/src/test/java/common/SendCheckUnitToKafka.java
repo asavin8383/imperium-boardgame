@@ -3,12 +3,7 @@ package common;
 import checkUnits.CheckUnit;
 import checkUnits.CheckUnitJob;
 import checkUnits.CheckUnitType;
-import control.ExecutorControlMessage;
-import enums.AccessToolParameters;
 import enums.AccessToolUnit;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.junit.Test;
@@ -68,8 +63,8 @@ public class SendCheckUnitToKafka {
 					)
 				);
 
-				/*checkUnitJob.getAccessToolParameters().put(AccessToolParameters.PROXY_DNS_NAME, "192.168.5.194");
-				checkUnitJob.getAccessToolParameters().put(AccessToolParameters.PROXY_PORT, "3128");*/
+				/*checkUnitJob.getAccessToolParameters().put(AccessToolParameter.PROXY_DNS_NAME, "192.168.5.194");
+				checkUnitJob.getAccessToolParameters().put(AccessToolParameter.PROXY_PORT, "3128");*/
 
 				Message<CheckUnitJob> message = MessageBuilder
 						.withPayload(checkUnitJob)

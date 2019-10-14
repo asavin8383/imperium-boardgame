@@ -3,7 +3,7 @@ package services.impl;
 import checkUnits.CheckUnit;
 import checkUnits.CheckUnitJob;
 import checkUnits.CheckUnitType;
-import enums.AccessToolParameters;
+import enums.AccessToolParameter;
 import enums.AccessToolUnit;
 import exceptions.AS_15_8_DispatcherException;
 import jobs.ArrangementJob;
@@ -144,9 +144,8 @@ public class CheckUnitSchedulingServiceImpl implements CheckUnitSchedulingServic
         List<CheckUnitJob> checkUnitJobs = new ArrayList<>();
         for(CheckUnitJobTemplate template : checkUnitJobTemplates){
         	
-        	boolean isPS = template.getAccessToolUnit() == AccessToolUnit.GOOGLE ||
-        			template.getAccessToolUnit() == AccessToolUnit.GOOGLE_API ||
-        			template.getAccessToolUnit() == AccessToolUnit.YANDEX;
+        	boolean isPS = template.getAccessToolUnit() == AccessToolUnit.SEARCH_SYSTEM ||
+        			template.getAccessToolUnit() == AccessToolUnit.GOOGLE_API;
         	
             switch (template.checkUnitType) {
                 case URL:
@@ -286,7 +285,6 @@ public class CheckUnitSchedulingServiceImpl implements CheckUnitSchedulingServic
 	private CheckUnitJob createAndSaveCheckUnitJob(Long arrangementID, CheckUnitJobTemplate template, CheckUnit checkUnit) {
 		CheckUnitJob checkUnitJob = new CheckUnitJob();
 		checkUnitJob.setAccessToolUnit(template.getAccessToolUnit());
-        checkUnitJob.getAccessToolParameters().putAll(template.getParameters());
         checkUnitJob.setCheckUnit(checkUnit);
         Long ipJobID = saveScheduleCheckUnit(arrangementID, template.erdiId, checkUnitJob);
         checkUnitJob.setJobID(ipJobID);
@@ -304,7 +302,7 @@ public class CheckUnitSchedulingServiceImpl implements CheckUnitSchedulingServic
 	private static class CheckUnitJobTemplate {
 		private Long erdiId;
 		private AccessToolUnit accessToolUnit;
-		private final Map<AccessToolParameters, String> parameters = new HashMap<>();
+		private final Map<AccessToolParameter, String> parameters = new HashMap<>();
 		private CheckUnitType checkUnitType;
 		private String checkUnitValueTemplate;
 	}
@@ -312,9 +310,9 @@ public class CheckUnitSchedulingServiceImpl implements CheckUnitSchedulingServic
 	static class CheckUnitJobMapper{
 		
 		private AccessToolUnit accessToolUnit;
-		private Map<AccessToolParameters, String> parameters;
+		private Map<AccessToolParameter, String> parameters;
 		
-		CheckUnitJobMapper(AccessToolUnit accessToolUnit, Map<AccessToolParameters, String> parameters) {
+		CheckUnitJobMapper(AccessToolUnit accessToolUnit, Map<AccessToolParameter, String> parameters) {
 			this.accessToolUnit = accessToolUnit;
 			this.parameters = parameters;
 		}

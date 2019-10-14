@@ -5,7 +5,6 @@ import checkUnits.CheckUnitJob;
 import checkUnits.CheckUnitType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import common.ApplicationConfiguration;
-import enums.AccessToolParameters;
 import enums.AccessToolUnit;
 import events.ExecutorChannels;
 import execution.ExecutionJobResult;
@@ -41,17 +40,9 @@ public class IntegrationTests {
 
 		CheckUnitJob checkUnitJob = new CheckUnitJob();
 		checkUnitJob.setJobID(1L);
-		checkUnitJob.setAccessToolUnit(AccessToolUnit.GOOGLE);
+		checkUnitJob.setAccessToolUnit(AccessToolUnit.SEARCH_SYSTEM);
 
 		checkUnitJob.setCheckUnit(new CheckUnit(CheckUnitType.URL, "https://www.google.ru"));
-
-		checkUnitJob.getAccessToolParameters().put(AccessToolParameters.SEARCH_SYSTEM_URL, "https://www.google.ru");
-		checkUnitJob.getAccessToolParameters().put(AccessToolParameters.SEARCH_SYSTEM_XPATH_INPUT_FIELD, "//input[@name=\"q\"]");
-		checkUnitJob.getAccessToolParameters().put(AccessToolParameters.SEARCH_SYSTEM_XPATH_CAPTCHA, "//form[@id=\"captcha-form\"]");
-		checkUnitJob.getAccessToolParameters().put(AccessToolParameters.SEARCH_SYSTEM_XPATH_NEXT_PAGE, "//*[@id=\"pnnext\"]");
-		checkUnitJob.getAccessToolParameters().put(AccessToolParameters.SEARCH_SYSTEM_XPATH_ITEM_LINK, "//div[@class=\"g\"]//div[@class=\"r\"]/a[1]");
-		checkUnitJob.getAccessToolParameters().put(AccessToolParameters.INPUT_DELAY, "0");
-		checkUnitJob.getAccessToolParameters().put(AccessToolParameters.SEARCH_SYSTEM_RESULT_PAGE_TYPE, "pagination");
 
 		Message<CheckUnitJob> message = MessageBuilder
 				.withPayload(checkUnitJob)
@@ -65,7 +56,7 @@ public class IntegrationTests {
 	public void testNMap() throws IOException {
 
 		CheckUnitJob checkUnitJob = new CheckUnitJob();
-		checkUnitJob.setAccessToolUnit(AccessToolUnit.KASPERSKY);
+		checkUnitJob.setAccessToolUnit(AccessToolUnit.VPN);
 		checkUnitJob.setJobID(1L);
 		checkUnitJob.setCheckUnit(new CheckUnit(CheckUnitType.IP_V4, "192.167.1.1"));
 

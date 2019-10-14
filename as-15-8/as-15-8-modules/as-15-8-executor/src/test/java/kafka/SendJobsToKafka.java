@@ -4,7 +4,6 @@ import checkUnits.CheckUnit;
 import checkUnits.CheckUnitJob;
 import checkUnits.CheckUnitType;
 import control.ExecutorControlMessage;
-import enums.AccessToolParameters;
 import enums.AccessToolUnit;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -48,17 +47,10 @@ public class SendJobsToKafka {
         for(long i = 10000; i<10001; i++) {
             CheckUnitJob checkUnitJob = new CheckUnitJob();
             checkUnitJob.setJobID(1L);
-            checkUnitJob.setAccessToolUnit(AccessToolUnit.GOOGLE);
+            checkUnitJob.setAccessToolUnit(AccessToolUnit.SEARCH_SYSTEM);
 
             checkUnitJob.setCheckUnit(new CheckUnit(CheckUnitType.URL, "https://www.google.ru"));
 
-            checkUnitJob.getAccessToolParameters().put(AccessToolParameters.SEARCH_SYSTEM_URL, "https://www.google.ru");
-            checkUnitJob.getAccessToolParameters().put(AccessToolParameters.SEARCH_SYSTEM_XPATH_INPUT_FIELD, "//input[@name=\"q\"]");
-            checkUnitJob.getAccessToolParameters().put(AccessToolParameters.SEARCH_SYSTEM_XPATH_CAPTCHA, "//form[@id=\"captcha-form\"]");
-            checkUnitJob.getAccessToolParameters().put(AccessToolParameters.SEARCH_SYSTEM_XPATH_NEXT_PAGE, "//*[@id=\"pnnext\"]");
-            checkUnitJob.getAccessToolParameters().put(AccessToolParameters.SEARCH_SYSTEM_XPATH_ITEM_LINK, "//div[@class=\"g\"]//div[@class=\"r\"]/a[1]");
-            checkUnitJob.getAccessToolParameters().put(AccessToolParameters.INPUT_DELAY, "0");
-            checkUnitJob.getAccessToolParameters().put(AccessToolParameters.SEARCH_SYSTEM_RESULT_PAGE_TYPE, "pagination");
 
             Message<CheckUnitJob> message = MessageBuilder
                     .withPayload(checkUnitJob)
@@ -75,13 +67,9 @@ public class SendJobsToKafka {
         for(long i = 10000; i<10020; i++) {
             CheckUnitJob checkUnitJob = new CheckUnitJob();
             checkUnitJob.setJobID(1L);
-            checkUnitJob.setAccessToolUnit(AccessToolUnit.KASPERSKY);
+            checkUnitJob.setAccessToolUnit(AccessToolUnit.VPN);
 
             checkUnitJob.setCheckUnit(new CheckUnit(CheckUnitType.IP_V4, "174.138.5.40"));
-
-            checkUnitJob.getAccessToolParameters().put(AccessToolParameters.PROXY_TYPE, "http");
-            checkUnitJob.getAccessToolParameters().put(AccessToolParameters.PROXY_DNS_NAME, "192.168.5.194");
-            checkUnitJob.getAccessToolParameters().put(AccessToolParameters.PROXY_PORT, "3128");
 
             Message<CheckUnitJob> message = MessageBuilder
                     .withPayload(checkUnitJob)

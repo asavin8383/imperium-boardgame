@@ -1,8 +1,5 @@
 package robots.factory;
 
-import java.util.Map;
-
-import enums.AccessToolParameters;
 import enums.AccessToolUnit;
 import robots.Robot;
 
@@ -13,11 +10,5 @@ import robots.Robot;
  */
 public interface RobotsFactory {
 	
-	/**
-	 * Проверяемая ПС/ПАСД
-	 * @return
-	 */
-	AccessToolUnit getAccessToolUnit();
-	
-	Robot createRobot(Map<AccessToolParameters, String> params);
+	Robot createRobot(AccessToolUnit accessToolUnit, String robotName);
 }

@@ -1,12 +1,11 @@
 package robots.impl;
 
 import checkUnits.CheckUnit;
-import enums.AccessToolParameters;
+import enums.AccessToolParameter;
 import execution.ExecutionJobResult;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import robots.RobotDriverParameters;
 import robots.exceptions.Captcha_ExecutionException;
 import robots.exceptions.ExecutionException;
 import robots.utils.EqualityTest;
@@ -22,10 +21,8 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElemen
 @Slf4j(topic = "robots")
 public class YandexRobot extends CommonDirectSearchRobot {
 
-    public YandexRobot(RobotDriverParameters driverParams,
-                       Map<AccessToolParameters, String> scriptParams,
-                       int searchLimit) {
-        super(driverParams, scriptParams, searchLimit);
+    public YandexRobot(Map<AccessToolParameter, String> scriptParams) {
+        super(scriptParams);
     }
 
     @Override

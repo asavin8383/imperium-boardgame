@@ -48,7 +48,7 @@
         </rollingPolicy>
     </appender>
     
-    <logger name="kafka" level="INFO">
+    <logger name="events" level="INFO">
     	<appender-ref ref="MESSAGES_LOG" />
     	<appender-ref ref="Console" />
     </logger>

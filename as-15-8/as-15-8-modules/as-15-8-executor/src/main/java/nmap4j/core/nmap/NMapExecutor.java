@@ -106,7 +106,7 @@ public class NMapExecutor {
         fullCommand.append( " " ) ;
         fullCommand.append( nmapArguments.getFlags() ) ;
 
-       /*if(nmapProperties.useProxy()){
+       /*if(nmap.useProxy()){
             fullCommand.append(" ");
             fullCommand.append("2>/dev/null");
         }*/

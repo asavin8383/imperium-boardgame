@@ -1,7 +1,7 @@
 package robots.impl;
 
 import checkUnits.CheckUnit;
-import enums.AccessToolParameters;
+import enums.AccessToolParameter;
 import execution.ExecutionJobResult;
 import execution.ExecutionVpnJobResult;
 import org.openqa.selenium.*;
@@ -9,8 +9,8 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import robots.DriverFactory;
 import robots.ProxyUtils;
-import robots.RobotDriverParameters;
 import robots.exceptions.ExecutionException;
+import common.ExecutorProperties;
 import robots.utils.HttpResponseHelper;
 import robots.utils.RobotScriptUtils;
 import robots.utils.ScriptUtils;
@@ -31,23 +31,23 @@ public class HolaRobot extends SeleniumRobot {
     protected boolean useEtalon;
 
 
-    public HolaRobot(RobotDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams, String crxFilePath) {
+    public HolaRobot(Map<AccessToolParameter, String> scriptParams) {
 
-    	super(driverParams, scriptParams,
+    	super(scriptParams,
     			ProxyUtils.getFullProxy(
-    			scriptParams.get(AccessToolParameters.ETALON_PROXY_TYPE),
-    			scriptParams.get(AccessToolParameters.ETALON_PROXY_HOST),
-    			scriptParams.get(AccessToolParameters.ETALON_PROXY_PORT),
-    			scriptParams.get(AccessToolParameters.ETALON_PROXY_USERNAME),
-    			scriptParams.get(AccessToolParameters.ETALON_PROXY_PASSWORD)
+                        ExecutorProperties.getEtalon().getProxy().getType(),
+                        ExecutorProperties.getEtalon().getProxy().getHost(),
+                        ExecutorProperties.getEtalon().getProxy().getPort(),
+                        ExecutorProperties.getEtalon().getProxy().getUsername(),
+                        ExecutorProperties.getEtalon().getProxy().getPassword()
     			)
     		);
 
         this.useEtalon = ScriptUtils.useEtalon(scriptParams);
 
-     	this.stubUrl = scriptParams.get(AccessToolParameters.STUB_URL);
+     	this.stubUrl = scriptParams.get(AccessToolParameter.STUB_URL);
 
-     	this.crxFilePath = crxFilePath;
+     	this.crxFilePath = scriptParams.get(AccessToolParameter.CRX_FILE_PATH);
     }
 
     @Override
@@ -87,10 +87,10 @@ public class HolaRobot extends SeleniumRobot {
 
         try {
             driver = DriverFactory.createChromeDriver(
-                getDriverParams().getHubURL(),
-                getDriverParams().getPlatformName(),
-                getDriverParams().getApplicationName(),
-                crxFilePath
+                    ExecutorProperties.getSeleniumHubUrl(),
+                    Platform.valueOf(getScriptParams().get(AccessToolParameter.PLATFORM)),
+                    getScriptParams().get(AccessToolParameter.APPLICATION),
+                    crxFilePath
             );
 
             WebDriverWait wait = new WebDriverWait(driver, 60);
@@ -138,7 +138,7 @@ public class HolaRobot extends SeleniumRobot {
 
 
     public boolean checkBrowserChrome(){
-        return "chrome".equalsIgnoreCase(getDriverParams().getBrowserName());
+        return "chrome".equalsIgnoreCase(getScriptParams().get(AccessToolParameter.BROWSER));
     }
 
 }

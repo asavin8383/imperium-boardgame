@@ -1,7 +1,7 @@
 package robots;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import enums.AccessToolParameters;
+import enums.AccessToolParameter;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -31,15 +31,15 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
-import static enums.AccessToolParameters.*;
+import static enums.AccessToolParameter.*;
 
 @RunWith(JUnit4.class)
 public class SearchSystemTest {
     
     public static int LIMIT = 20;
 
-    public static Map<AccessToolParameters, String> googleParams() {
-        Map<AccessToolParameters, String> params = new HashMap<>();
+    public static Map<AccessToolParameter, String> googleParams() {
+        Map<AccessToolParameter, String> params = new HashMap<>();
         params.put(SEARCH_SYSTEM_URL, "https://www.google.ru");
         params.put(SEARCH_SYSTEM_RESULT_PAGE_TYPE, "pagination");
         params.put(SEARCH_SYSTEM_XPATH_INPUT_FIELD, "//input[@name=\"q\"]");
@@ -49,8 +49,8 @@ public class SearchSystemTest {
         return params;
     }
 
-    public static Map<AccessToolParameters, String> yandexParams() {
-        Map<AccessToolParameters, String> params = new HashMap<>();
+    public static Map<AccessToolParameter, String> yandexParams() {
+        Map<AccessToolParameter, String> params = new HashMap<>();
         params.put(SEARCH_SYSTEM_URL, "https://yandex.ru");
         params.put(SEARCH_SYSTEM_RESULT_PAGE_TYPE, "pagination");
         params.put(SEARCH_SYSTEM_XPATH_INPUT_FIELD, "//input[@name=\"text\"]");
@@ -60,8 +60,8 @@ public class SearchSystemTest {
         return params;
     }
 
-    public static Map<AccessToolParameters, String> bingParams() {
-        Map<AccessToolParameters, String> params = new HashMap<>();
+    public static Map<AccessToolParameter, String> bingParams() {
+        Map<AccessToolParameter, String> params = new HashMap<>();
         params.put(SEARCH_SYSTEM_URL, "https://www.bing.com/");
         params.put(SEARCH_SYSTEM_RESULT_PAGE_TYPE, "pagination");
         params.put(SEARCH_SYSTEM_XPATH_INPUT_FIELD, "//input[@id=\"sb_form_q\"]");
@@ -71,8 +71,8 @@ public class SearchSystemTest {
         return params;
     }
 
-    public static Map<AccessToolParameters, String> yahooParams() {
-        Map<AccessToolParameters, String> params = new HashMap<>();
+    public static Map<AccessToolParameter, String> yahooParams() {
+        Map<AccessToolParameter, String> params = new HashMap<>();
         params.put(SEARCH_SYSTEM_URL, "https://www.yahoo.com/");
         params.put(SEARCH_SYSTEM_RESULT_PAGE_TYPE, "pagination");
         params.put(SEARCH_SYSTEM_XPATH_INPUT_FIELD, "//input[@id=\"uh-search-box\"]");
@@ -82,8 +82,8 @@ public class SearchSystemTest {
         return params;
     }
 
-    public static Map<AccessToolParameters, String> sputnikParams() {
-        Map<AccessToolParameters, String> params = new HashMap<>();
+    public static Map<AccessToolParameter, String> sputnikParams() {
+        Map<AccessToolParameter, String> params = new HashMap<>();
         params.put(SEARCH_SYSTEM_URL, "https://www.sputnik.ru/");
         params.put(SEARCH_SYSTEM_RESULT_PAGE_TYPE, "pagination");
         params.put(SEARCH_SYSTEM_XPATH_INPUT_FIELD, "//*[@id=\"js-search-input\"]");
@@ -93,8 +93,8 @@ public class SearchSystemTest {
         return params;
     }
 
-    public static Map<AccessToolParameters, String> mailParams() {
-        Map<AccessToolParameters, String> params = new HashMap<>();
+    public static Map<AccessToolParameter, String> mailParams() {
+        Map<AccessToolParameter, String> params = new HashMap<>();
         params.put(SEARCH_SYSTEM_URL, "https://mail.ru/");
         params.put(SEARCH_SYSTEM_RESULT_PAGE_TYPE, "pagination");
         params.put(SEARCH_SYSTEM_XPATH_INPUT_FIELD, "//*[@id=\"q\"]");
@@ -104,8 +104,8 @@ public class SearchSystemTest {
         return params;
     }
 
-    public static Map<AccessToolParameters, String> duckParams() {
-        Map<AccessToolParameters, String> params = new HashMap<>();
+    public static Map<AccessToolParameter, String> duckParams() {
+        Map<AccessToolParameter, String> params = new HashMap<>();
         params.put(SEARCH_SYSTEM_URL, "https://duckduckgo.com");
         params.put(SEARCH_SYSTEM_RESULT_PAGE_TYPE, "continuous");
         params.put(SEARCH_SYSTEM_XPATH_INPUT_FIELD, "//input[@id=\"search_form_input_homepage\"]");
@@ -117,7 +117,7 @@ public class SearchSystemTest {
 
     @Test
     public void printLinks() throws InterruptedException {
-        Map<AccessToolParameters, String> params = mailParams();
+        Map<AccessToolParameter, String> params = mailParams();
         String xpathInputField = params.get(SEARCH_SYSTEM_XPATH_INPUT_FIELD);
         String xpathCaptcha = params.get(SEARCH_SYSTEM_XPATH_CAPTCHA);
         String xpathNext = params.get(SEARCH_SYSTEM_XPATH_NEXT_PAGE);

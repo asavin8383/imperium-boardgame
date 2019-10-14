@@ -2,7 +2,6 @@ package controllers;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import controllers.helpers.SortingHelper;
-import enums.AccessToolParameters;
 import enums.ExecutionStatus;
 import enums.SortingDirection;
 import exceptions.AS_15_8_Exception;
@@ -13,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Views;
 import model.enums.ScheduleStatus;
-import model.result.ArrangementResult;
 import model.schedule.Schedule;
 import model.schedule.ScheduleCheckUnit;
 import model.schedule.SchedulePeriod;

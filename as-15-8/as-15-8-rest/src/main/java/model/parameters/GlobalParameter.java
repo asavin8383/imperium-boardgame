@@ -1,6 +1,6 @@
 package model.parameters;
 
-import enums.AccessToolParameters;
+import enums.AccessToolParameter;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -18,7 +18,7 @@ public class GlobalParameter {
 
     @Id
     @Enumerated(EnumType.STRING)
-    private AccessToolParameters key;
+    private AccessToolParameter key;
 
     private String value;
 

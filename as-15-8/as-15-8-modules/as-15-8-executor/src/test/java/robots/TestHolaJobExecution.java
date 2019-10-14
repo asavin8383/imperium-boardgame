@@ -12,7 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import robots.exceptions.ExecutionException;
-import robots.factory.RobotsFactoryConfiguration;
+import robots.factory.RobotsFactory;
 import service.CheckUnitVerificationService;
 import service.CheckUnitVerificationServiceFactory;
 import service.impl.RobotsServiceImpl;
@@ -24,7 +24,7 @@ import java.io.File;
 import java.io.IOException;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {CheckUnitVerificationServiceFactory.class, RobotsServiceImpl.class, RobotsFactoryConfiguration.class})
+@SpringBootTest(classes = {CheckUnitVerificationServiceFactory.class, RobotsServiceImpl.class, RobotsFactory.class})
 @PropertySource("file:config/application.yml")
 public class TestHolaJobExecution
 {

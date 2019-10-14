@@ -1,6 +1,6 @@
 package services.schedule;
 
-import enums.AccessToolParameters;
+import enums.AccessToolParameter;
 import exceptions.AS_15_8_Exception;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -50,7 +50,7 @@ public class ScheduleService {
         this.arrangementRepo = arrangementRepo;
         try {
             this.totalWorkersCount = globalParametersRepository
-                    .findById(AccessToolParameters.TOTAL_WORKERS_COUNT)
+                    .findById(AccessToolParameter.TOTAL_WORKERS_COUNT)
                     .map(g -> Integer.parseInt(g.getValue()))
                     .orElseThrow(() -> new Exception("Параметр TOTAL_WORKERS_COUNT не задан"));
         } catch (Exception ex){
