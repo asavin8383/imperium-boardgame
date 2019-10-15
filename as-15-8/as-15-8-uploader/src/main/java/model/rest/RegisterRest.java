@@ -14,14 +14,14 @@ import java.util.Date;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class Register {
+public class RegisterRest {
     public Date updateTime;
     public Date updateTimeUrgently;
     public String formatVersion;
     public String reg;
     public String tns;
 
-    public Register(String updateTime, String updateTimeUrgently, String formatVersion, String reg, String tns) {
+    public RegisterRest(String updateTime, String updateTimeUrgently, String formatVersion, String reg, String tns) {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
 
         try {

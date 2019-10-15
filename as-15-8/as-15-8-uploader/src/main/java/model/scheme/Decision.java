@@ -13,7 +13,7 @@ public class Decision implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="decision_generator")
-	@SequenceGenerator(name="decision_generator", sequenceName="decision_id_seq", allocationSize=1)
+	@SequenceGenerator(name="decision_generator", sequenceName="sor.decision_id_seq", allocationSize=1)
 	@Column(name="id", nullable=false, updatable=false)
 	private Long id;
 

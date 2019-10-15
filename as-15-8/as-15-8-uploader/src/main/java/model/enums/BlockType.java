@@ -23,10 +23,14 @@ public enum BlockType {
     }
 
     public static BlockType parse(String value){
+        return BlockType.parse(value, DEFAULT);
+    }
+
+    public static BlockType parse(String value, BlockType def){
         for (BlockType b : BlockType.values()){
             if (b.value.equalsIgnoreCase(value))
                 return b;
         }
-        return DEFAULT;
+        return def;
     }
 }

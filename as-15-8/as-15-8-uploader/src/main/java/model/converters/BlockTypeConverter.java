@@ -10,7 +10,7 @@ import javax.persistence.Converter;
 public class BlockTypeConverter implements AttributeConverter<BlockType, String> {
     @Override
     public String convertToDatabaseColumn(BlockType blockType) {
-        return blockType == null ? BlockType.parse(null).getValue() : blockType.getValue();
+        return blockType == null ? null : blockType.getValue();
     }
 
     @Override

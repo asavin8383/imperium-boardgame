@@ -1,19 +1,25 @@
 package model.rest;
 
 import lombok.ToString;
+import parsers.DateSimpleAdapter;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import java.util.Date;
+
 
 @XmlType(name="decision")
 @ToString
 public class Decision {
-    @XmlAttribute
-    String date;
 
     @XmlAttribute
-    String number;
+    @XmlJavaTypeAdapter(DateSimpleAdapter.class)
+    public Date date;
 
     @XmlAttribute
-    String org;
+    public String number;
+
+    @XmlAttribute
+    public String org;
 }

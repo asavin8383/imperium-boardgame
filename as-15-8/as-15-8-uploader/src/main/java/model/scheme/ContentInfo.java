@@ -17,7 +17,7 @@ public class ContentInfo {
 
     @Id
     @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="content_info_generator")
-    @SequenceGenerator(name="content_info_generator", sequenceName="content_info_id_seq", allocationSize=1)
+    @SequenceGenerator(name="content_info_generator", sequenceName="sor.content_info_id_seq", allocationSize=1)
     private Long id;
 
     @ManyToOne(optional = false)
@@ -33,8 +33,11 @@ public class ContentInfo {
     @Column(nullable=false)
     private Date ts;
 
+    @Column(name = "entrytype_id", nullable = false)
+    private Long entryTypeId;
+
     @ManyToOne(optional = false)
-    @JoinColumn(name = "entrytype_id", referencedColumnName = "id")
+    @JoinColumn(name = "entrytype_id", referencedColumnName = "id", insertable = false, updatable = false)
     private EntryType entryType;
 
     @ManyToOne(optional = false)

@@ -1,25 +1,18 @@
 package common;
 
 import exceptions.ExceptionErdiParser;
-import model.scheme.ContentHistory;
-import model.scheme.ContentInfo;
-import model.scheme.Parameter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import repositories.*;
-import services.ParameterService;
+import restapi.ErdiRestClient;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
 
 
 /**
@@ -27,7 +20,7 @@ import java.util.Optional;
  *
  */
 @SpringBootApplication
-@ComponentScan(basePackages= {"common", "repositories", "schedule", "services"})
+@ComponentScan(basePackages= {"common", "repositories", "schedule", "services", "restapi"})
 @EnableJpaRepositories("repositories")
 @EntityScan("model")
 @EnableScheduling
@@ -49,7 +42,10 @@ public class ApplicationConfiguration {
 	RestApiHelper restApiHelper;
 
     @Autowired
-    ParameterService parameterService;
+    ErdiRestClient erdiRestClient;
+
+    @Autowired
+    ContentRepository contentRepository;
 
 
 	public static void main(String[] args) {
@@ -106,11 +102,20 @@ public class ApplicationConfiguration {
 		log.info(quote.toString());
 		*/
 
+		/*
         System.out.println("test1 --->" + parameterService.getParamValue("TEST1"));
         System.out.println("test2 --->" + parameterService.getParamValue("test2"));
         System.out.println("test2 --->" + parameterService.getParamValue("test2", null));
         System.out.println("test2 --->" + parameterService.getParamValue("test2", false));
         System.out.println("test3 --->" + parameterService.getParamValue("test2", true));
+        */
+
+
+		erdiRestClient.fillFullErdiToDB();
+		//erdiRestClient.removeLastContentVersion();
+		//erdiRestClient.removeLastContentVersion();
+		//erdiRestClient.removeLastContentVersion();
+		//erdiRestClient.removeLastContentVersion();
 
 		System.out.println("END ---------------------");
 

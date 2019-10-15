@@ -12,7 +12,7 @@ public class ContentHistory {
 
     @Id
     @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="content_history_generator")
-    @SequenceGenerator(name="content_historyn_generator", sequenceName="content_history_id_seq", allocationSize=1)
+    @SequenceGenerator(name="content_history_generator", sequenceName="sor.content_history_id_seq", allocationSize=1)
     private Long id;
 
     @ManyToOne(optional = false)

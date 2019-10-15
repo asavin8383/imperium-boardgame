@@ -12,7 +12,7 @@ public class Parameter {
 
     @Id
     @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="parameters_generator")
-    @SequenceGenerator(name="parameters_generator", sequenceName="parameters_id_seq", allocationSize=1)
+    @SequenceGenerator(name="parameters_generator", sequenceName="sor.parameters_id_seq", allocationSize=1)
     @Column(name="id", nullable=false)
     private Long id;
 

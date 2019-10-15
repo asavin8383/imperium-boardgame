@@ -21,10 +21,14 @@ public enum UrgencyType {
     }
 
     public static UrgencyType parse(Integer value){
+        return UrgencyType.parse(value, REGULAR_SPEED);
+    }
+
+    public static UrgencyType parse(Integer value, UrgencyType def){
         for (UrgencyType b : UrgencyType.values()){
             if (b.value.equals(value))
                 return b;
         }
-        return REGULAR_SPEED;
+        return def;
     }
 }

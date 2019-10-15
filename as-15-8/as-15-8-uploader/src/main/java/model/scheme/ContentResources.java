@@ -15,7 +15,7 @@ public class ContentResources implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="content_resources_generator")
-	@SequenceGenerator(name="content_resources_generator", sequenceName="content_resources_id_seq", allocationSize=1)
+	@SequenceGenerator(name="content_resources_generator", sequenceName="sor.content_resources_id_seq", allocationSize=1)
 	private Long id;
 
 	@ManyToOne(optional = false)

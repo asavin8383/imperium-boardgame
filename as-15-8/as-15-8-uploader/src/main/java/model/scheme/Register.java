@@ -13,7 +13,7 @@ public class Register implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="register_generator")
-	@SequenceGenerator(name="register_generator", sequenceName="register_id_seq", allocationSize=1)
+	@SequenceGenerator(name="register_generator", sequenceName="sor.register_id_seq", allocationSize=1)
 	@Column(name="id", nullable=false, updatable=false)
 	private Long id;
 
@@ -24,5 +24,5 @@ public class Register implements Serializable {
 	private Date updateTimeUrgently;
 
 	@Column(name="formatversion", nullable=false)
-	private Date formatVersion;
+	private String formatVersion;
 }

@@ -13,7 +13,7 @@ public class ContentVersion implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="content_version_generator")
-	@SequenceGenerator(name="content_version_generator", sequenceName="content_version_id_seq", allocationSize=1)
+	@SequenceGenerator(name="content_version_generator", sequenceName="sor.content_version_id_seq", allocationSize=1)
 	@Column(name="id", nullable=false, updatable=false)
 	private Long id;
 
@@ -27,5 +27,5 @@ public class ContentVersion implements Serializable {
 	private Date ppnDate;
 
 	@Column(nullable=false)
-	private Boolean success;
+	private Integer success = 1;
 }

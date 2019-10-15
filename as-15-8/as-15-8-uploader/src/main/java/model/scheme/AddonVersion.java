@@ -13,7 +13,7 @@ public class AddonVersion implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="addon_version_generator")
-	@SequenceGenerator(name="addon_version_generator", sequenceName="addon_version_id_seq", allocationSize=1)
+	@SequenceGenerator(name="addon_version_generator", sequenceName="sor.addon_version_id_seq", allocationSize=1)
 	@Column(name="id", nullable=false, updatable=false)
 	private Long id;
 
@@ -21,5 +21,5 @@ public class AddonVersion implements Serializable {
 	private Date ppnDate;
 
 	@Column(nullable=false)
-	private Boolean success;
+	private Integer success = 1;
 }

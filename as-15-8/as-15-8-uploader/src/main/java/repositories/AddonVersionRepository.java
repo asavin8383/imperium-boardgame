@@ -7,4 +7,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface AddonVersionRepository extends JpaRepository<AddonVersion, Long> {
+
+    AddonVersion findTopByIdNotNullOrderByIdDesc();
+
 }

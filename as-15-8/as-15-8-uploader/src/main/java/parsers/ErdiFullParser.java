@@ -1,8 +1,10 @@
 package parsers;
 
 import exceptions.ExceptionErdiParser;
+import model.rest.ContentDelete;
 import model.rest.ContentFull;
-import model.rest.Register;
+import model.rest.ContentRest;
+import model.rest.RegisterRest;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -28,7 +30,7 @@ public class ErdiFullParser {
         this.flushSize = flushSize;
     }
 
-    public void parse(InputStream is, BiFunction<Register, List<ContentFull>, Boolean> action) throws ExceptionErdiParser {
+    public void parse(InputStream is, BiFunction<RegisterRest, List<ContentRest>, Boolean> action) throws ExceptionErdiParser {
         XMLInputFactory inputFactory = XMLInputFactory.newInstance();
         XMLStreamReader reader = null;
 
@@ -49,7 +51,7 @@ public class ErdiFullParser {
     }
 
     private void readDocument(XMLStreamReader reader,
-                              BiFunction<Register, List<ContentFull>, Boolean> action) throws XMLStreamException, JAXBException {
+                              BiFunction<RegisterRest, List<ContentRest>, Boolean> action) throws XMLStreamException, JAXBException {
         while (reader.hasNext()) {
             int eventType = reader.next();
             switch (eventType) {
@@ -65,11 +67,11 @@ public class ErdiFullParser {
     }
 
     private void readRegister(XMLStreamReader reader,
-                              BiFunction<Register, List<ContentFull>, Boolean> action) throws XMLStreamException, JAXBException {
+                              BiFunction<RegisterRest, List<ContentRest>, Boolean> action) throws XMLStreamException, JAXBException {
 
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
 
-        Register register = new Register(
+        RegisterRest register = new RegisterRest(
                 reader.getAttributeValue(null, "updateTime"),
                 reader.getAttributeValue(null, "updateTimeUrgently"),
                 reader.getAttributeValue(null, "formatVersion"),
@@ -81,33 +83,54 @@ public class ErdiFullParser {
     }
 
     private void readRegisterContent(XMLStreamReader reader,
-                                     Register register,
-                                     BiFunction<Register, List<ContentFull>, Boolean> action) throws XMLStreamException, JAXBException {
+                                     RegisterRest register,
+                                     BiFunction<RegisterRest, List<ContentRest>, Boolean> action) throws XMLStreamException, JAXBException {
 
-        List<ContentFull> contents = new ArrayList<>();
+        List<ContentRest> contents = new ArrayList<>();
         Boolean needNext = true;
 
         while (needNext && reader.hasNext()) {
             int eType = reader.getEventType();
-            if (eType == XMLStreamReader.START_ELEMENT){
+            if (eType == XMLStreamReader.START_ELEMENT) {
                 String elementName = reader.getLocalName();
-                if (elementName.equals("content")){
-                    ContentFull content = readContent(reader);
-                    contents.add(content);
-                    needNext = flush(false, register, contents, action);
-                    continue;
+                try {
+                    if (elementName.equals("content")) {
+                        ContentFull content = readContentFull(reader);
+                        contents.add(content);
+                        needNext = flush(false, register, contents, action);
+                        continue;
+                    }
+                    else if (elementName.equals("delete")) {
+                        ContentDelete content = readContentDelete(reader);
+                        contents.add(content);
+                        needNext = flush(false, register, contents, action);
+                        continue;
+                    }
+                } catch (Exception e) {
+                    System.err.println("Error parsing content: " + elementName);
+                    // e.printStackTrace();
+                    // ignore
+                    e.printStackTrace();
+                    throw e;
                 }
             }
             reader.next();
         }
 
-        if (needNext){
-            flush(true, register, contents, action);
+        if (contents.size() > 0) {      // слив остатка
+            needNext = flush(true, register, contents, action);
+        }
+        if (needNext){                              // завершаем - пустым массивом
+            flush(true, register, new ArrayList<>(), action);
         }
     }
 
-    private Boolean flush(Boolean force, Register register, List<ContentFull> list, BiFunction<Register, List<ContentFull>, Boolean> action){
-        if (list.size() > 0 && (list.size() >= this.flushSize || force)){
+    private Boolean flush(Boolean force,
+                          RegisterRest register,
+                          List<ContentRest> list,
+                          BiFunction<RegisterRest, List<ContentRest>, Boolean> action)
+    {
+        if (list.size() >= this.flushSize || force){
             Boolean result = action.apply(register, list);
             list.clear();
             return result;
@@ -115,9 +138,15 @@ public class ErdiFullParser {
         return true;
     }
 
-    private ContentFull readContent(XMLStreamReader reader) throws JAXBException {
+    private ContentFull readContentFull(XMLStreamReader reader) throws JAXBException {
         JAXBContext context = JAXBContext.newInstance(ContentFull.class);
         Unmarshaller unmarshaller = context.createUnmarshaller();
         return (ContentFull) unmarshaller.unmarshal(reader);
+    }
+
+    private ContentDelete readContentDelete(XMLStreamReader reader) throws JAXBException {
+        JAXBContext context = JAXBContext.newInstance(ContentDelete.class);
+        Unmarshaller unmarshaller = context.createUnmarshaller();
+        return (ContentDelete) unmarshaller.unmarshal(reader);
     }
 }

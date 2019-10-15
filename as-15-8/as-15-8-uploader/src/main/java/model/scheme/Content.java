@@ -10,6 +10,9 @@ import javax.persistence.*;
 public class Content {
 
     @Id
+    @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="content_generator")
+    @SequenceGenerator(name="content_generator", sequenceName="sor.content_id_seq", allocationSize=1)
+    @Column(name="id", nullable=false, updatable=false)
     private Long id;
 
     @Column(nullable=false, name = "erdi_id")

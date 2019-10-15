@@ -2,25 +2,27 @@ package model.rest;
 
 
 import lombok.ToString;
+import parsers.DateTimeZoneSimpleAdapter;
 
 import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import java.util.Date;
 import java.util.List;
 
 
 @XmlRootElement(name="content")
-@ToString
-public class ContentFull {
-    @XmlAttribute
-    public Long id;
+@ToString(callSuper = true)
+public class ContentFull extends ContentRest {
 
     @XmlAttribute
-    public String includeTime;
+    @XmlJavaTypeAdapter(DateTimeZoneSimpleAdapter.class)
+    public Date includeTime;
 
     @XmlAttribute(required = false)
-    public String urgencyType;
+    public Integer urgencyType;
 
-    @XmlAttribute
-    public String entryType;
+    @XmlAttribute(name = "entryType")
+    public Long entryTypeId;
 
     @XmlAttribute(required = false)
     public String hash;
@@ -29,7 +31,8 @@ public class ContentFull {
     public String blockType;
 
     @XmlAttribute(required = false)
-    public String ts;
+    @XmlJavaTypeAdapter(DateTimeZoneSimpleAdapter.class)
+    public Date ts;
 
     @XmlElement
     public Decision decision;
