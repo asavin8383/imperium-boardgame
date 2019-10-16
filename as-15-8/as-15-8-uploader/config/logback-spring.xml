@@ -118,5 +118,9 @@
         <appender-ref ref="REST_LOG" />
         <appender-ref ref="Console" />
     </logger>
+
+    <logger name="restapi" level="INFO">
+        <appender-ref ref="Console" />
+    </logger>
  
 </configuration>

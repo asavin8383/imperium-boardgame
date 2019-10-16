@@ -37,6 +37,7 @@ public class ErdiLoaderService {
     private final ContentInfoRepository contentInfoRepository;
     private final ContentHistoryRepository contentHistoryRepository;
     private final ContentResourcesRepository contentResourcesRepository;
+    private final ContentDelRepository contentDelRepository;
     private final ParameterRepositoryImpl parameterRepository;
 
 
@@ -56,25 +57,42 @@ public class ErdiLoaderService {
             addonVersionRepository.save(addonVersion);
         }
 
+        System.out.println("Content version: " + newContentVersion.getId());
+
         Register register = createRegister(registerRest);
         registerRepository.save(register);
 
-        List<ContentFull> newFullContents = new ArrayList<>();
-        Map<ContentFull, Content> mapChangeContents = new LinkedHashMap<>();
-        Map<ContentDelete, Content> mapDeleteContents = new LinkedHashMap<>();
+        List<List<ContentRest>> parts = new ArrayList<>();
+        for (int i = 0; i < contentRests.size(); i++) {
+            if (i%10000 == 0){
+                parts.add(new ArrayList<>());
+            }
+            List<ContentRest> list = parts.get(parts.size()-1);
+            list.add(contentRests.get(i));
+        }
 
-        filterContents(contentRests, newFullContents, mapChangeContents, mapDeleteContents);
+        int count = 0;
+        for(List<ContentRest> listContentRest : parts){
+            count += listContentRest.size();
+            System.out.println("---> addAllContents : " + count);
 
-        System.out.println("----- newFullContents = " + newFullContents.size());
-        System.out.println(newFullContents);
-        System.out.println("----- mapChangeContents = " + mapChangeContents.size());
-        System.out.println(mapChangeContents);
-        System.out.println("----- mapDeleteContents = " + mapDeleteContents.size());
-        System.out.println(mapDeleteContents);
+            List<ContentFull> newFullContents = new ArrayList<>();
+            Map<ContentFull, Content> mapChangeContents = new LinkedHashMap<>();
+            Map<ContentDelete, Content> mapDeleteContents = new LinkedHashMap<>();
 
-        addContents(newFullContents, mapChangeContents, contentVersion);
-        changeContents(mapChangeContents, contentVersion, null);
-        deleteContents(mapDeleteContents, contentVersion);
+            filterContents(listContentRest, newFullContents, mapChangeContents, mapDeleteContents);
+
+            System.out.println("----- newFullContents = " + newFullContents.size());
+            //System.out.println(newFullContents);
+            System.out.println("----- mapChangeContents = " + mapChangeContents.size());
+            //System.out.println(mapChangeContents);
+            System.out.println("----- mapDeleteContents = " + mapDeleteContents.size());
+            //System.out.println(mapDeleteContents);
+
+            addContents(newFullContents, mapChangeContents, contentVersion);
+            changeContents(mapChangeContents, contentVersion, null);
+            deleteContents(mapDeleteContents, contentVersion, registerRest);
+        }
     }
 
 
@@ -160,37 +178,23 @@ public class ErdiLoaderService {
         if (lastContentVersion == null)
             return;
 
+        System.out.println("Remove version: " + lastContentVersion.getId());
+
         String sql =
-                "update sor.content_history HIST\n" +
-                "set end_dt = to_date('30000101', 'YYYYMMDD')\n" +
-                "from\n" +
-                "(\n" +
-                "\tselect CH.id, CH.end_dt as end_dt_prev, CH_LAST.st_dt as st_dt_last from\n" +
-                "\tsor.content_history CH\n" +
-                "\tjoin\n" +
-                "\t(select distinct content_id, st_dt from sor.content_history\n" +
-                "\twhere content_version_id = ?) CH_LAST\n" +
-                "\ton CH.content_id = CH_LAST.content_id\n" +
-                "\tjoin\n" +
-                "\t(select content_id, max(id) as id_prev from sor.content_history\n" +
-                "\twhere content_version_id < ? GROUP BY content_id) CH_PREV\n" +
-                "\ton CH.content_id = CH_PREV.content_id\n" +
-                "\twhere CH.id = CH_PREV.id_prev and CH.end_dt = CH_LAST.st_dt\n" +
-                ") HIST_UPD\n" +
-                "where HIST.id = HIST_UPD.id;";
+                "update sor.content_history h set end_dt=to_date('30000101', 'YYYYMMDD')\n" +
+                "where end_dt in (select ch.st_dt from sor.content_history ch where ch.content_version_id=?)";
 
-        jdbcTemplate.update(sql, lastContentVersion.getId(), lastContentVersion.getId());
-
+        jdbcTemplate.update(sql, lastContentVersion.getId());
         jdbcTemplate.update("delete FROM sor.content_history where content_version_id = ?", lastContentVersion.getId());
         jdbcTemplate.update("delete FROM sor.content_info where content_version_id = ?", lastContentVersion.getId());
         jdbcTemplate.update("delete FROM sor.content_resources where content_version_id = ?", lastContentVersion.getId());
         jdbcTemplate.update("delete FROM sor.decision where content_version_id = ?", lastContentVersion.getId());
+        jdbcTemplate.update("delete FROM sor.content_del where content_version_id = ?", lastContentVersion.getId());
         jdbcTemplate.update("delete FROM sor.content where init_content_version_id = ?", lastContentVersion.getId());
         jdbcTemplate.update("delete FROM sor.content_version where id = ?", lastContentVersion.getId());
     }
 
     public void removeAddonsByVersion(Long addonId){
-
     }
 
 
@@ -236,10 +240,25 @@ public class ErdiLoaderService {
                         mapChangeContents.put((ContentFull) contentRest, content);
                     }
                 }
-                else if (contentRest instanceof ContentDelete)  {
-                    if (content != null){
-                        mapDeleteContents.put((ContentDelete) contentRest, content);
-                    }
+            }
+        }
+
+        List<String> ids_del = contents.stream()
+                .filter(content -> content instanceof ContentDelete)
+                .map(content -> ""+content.id)
+                .collect(Collectors.toList());
+
+        if (ids_del.size() > 0) {
+            List<Content> list = contentRepository.findByErdiIdIn(ids_del);
+            Map<String, Content> mapContents = new HashMap<>();
+
+            for (Content cnt : list)
+                mapContents.put(cnt.getErdiId(), cnt);
+
+            for (ContentRest contentRest : contents) {
+                Content content = mapContents.get(""+contentRest.id);
+                if (contentRest instanceof ContentDelete && content != null) {
+                    mapDeleteContents.put((ContentDelete) contentRest, content);
                 }
             }
         }
@@ -258,7 +277,9 @@ public class ErdiLoaderService {
             newContents.add(cnt);
             mapFullContent.put(""+fc.id, fc);
         }
+        log.info("Start add content... size = " + fullContents.size());
         List<Content> savedContents = contentRepository.saveAll(newContents);
+        log.info("End");
 
         for(Content content : savedContents){
             ContentFull contentFull = mapFullContent.get(content.getErdiId());
@@ -269,7 +290,7 @@ public class ErdiLoaderService {
 
         System.out.println("************************ ADD");
         System.out.println("newDecisionList: " + savedContents.size());
-        System.out.println(savedContents);
+        //System.out.println(savedContents);
     }
 
 
@@ -286,35 +307,50 @@ public class ErdiLoaderService {
 
             newContentsInfoList.add(createContentInfo(cnt, contentVersion, cntFull));
             newContentResourcesList.addAll(createContentResources(cnt, contentVersion, cntFull));
-            newContentHistoryList.add(createContentHistory(cnt, contentVersion, addonVersion, null));
+            newContentHistoryList.add(createContentHistory(cnt, contentVersion, addonVersion, cntFull.includeTime, null));
         }
 
         System.out.println("************************ CHANGE");
         System.out.println("newContentsInfoList: " + newContentsInfoList.size());
-        System.out.println(newContentsInfoList);
+        //System.out.println(newContentsInfoList);
         System.out.println("newContentHistoryList: " + newContentHistoryList.size());
-        System.out.println(newContentHistoryList);
+        //System.out.println(newContentHistoryList);
         System.out.println("newContentResourcesList: " + newContentResourcesList.size());
-        System.out.println(newContentResourcesList);
+        //System.out.println(newContentResourcesList);
 
+        log.info("Start save ifo content... size = " + newContentsInfoList.size());
         contentInfoRepository.saveAll(newContentsInfoList);
+
+        log.info("Start save history... size = " + newContentHistoryList.size());
         contentHistoryRepository.saveAll(newContentHistoryList);
+
+        log.info("Start save resources... size = " + newContentResourcesList.size());
         contentResourcesRepository.saveAll(newContentResourcesList);
     }
 
-    public void deleteContents(Map<ContentDelete, Content> mapDeleteContents, ContentVersion contentVersion){
+    public void deleteContents(Map<ContentDelete, Content> mapDeleteContents, ContentVersion contentVersion, RegisterRest registerRest){
 
         List<ContentHistory> contentHistoryList = new ArrayList<>();
+        //List<ContentDel> contentDelList = new ArrayList<>();
+
         for(ContentDelete contentDelete : mapDeleteContents.keySet()){
             Content content = mapDeleteContents.get(contentDelete);
             ContentHistory newContentHistory =
-                    createContentHistory(content, contentVersion, null, new Date());    // todo - какую дату?
+                    createContentHistory(content, contentVersion, null, registerRest.updateTime, registerRest.updateTime);
             contentHistoryList.add(newContentHistory);
+            //contentDelList.add(createContentDel(content, contentVersion));
         }
         System.out.println("************************ DELETE");
         System.out.println("contentHistoryList: " + contentHistoryList.size());
+        //System.out.println(contentHistoryList);
+        //System.out.println("contentDelList: " + contentDelList.size());
+        //System.out.println(contentDelList);
 
+        //contentDelRepository.saveAll(contentDelList);
+
+        log.info("Start save delete history... size = " + contentHistoryList.size());
         contentHistoryRepository.saveAll(contentHistoryList);
+        log.info("End");
     }
 
     private ContentVersion createContentVersion(RegisterRest registerRest, boolean isDelta){
@@ -374,15 +410,25 @@ public class ErdiLoaderService {
             Content content,
             ContentVersion contentVersion,
             AddonVersion addonVersion,
+            Date startDate,
             Date endDate){
         ContentHistory contentHistory = new ContentHistory();
         contentHistory.setContent(content);
-        contentHistory.setPpnDate(new Date());              // todo - само выставялется?
+        contentHistory.setPpnDate(new Date());
         contentHistory.setContentVersion(contentVersion);   // если NULL, то выставляется триггером
         contentHistory.setAddonVersion(addonVersion);       // если NULL, то выставляется триггером
-        contentHistory.setStartDate(new Date());            // todo - какую дату установливать? ts, include или что-то еще?
+        contentHistory.setStartDate(startDate);
         contentHistory.setEndDate(endDate);                 // если NULL, то выставляется триггером
         return contentHistory;
+    }
+
+    private ContentDel createContentDel(
+            Content content,
+            ContentVersion contentVersion){
+        ContentDel contentDel = new ContentDel();
+        contentDel.setContent(content);
+        contentDel.setContentVersion(contentVersion);
+        return contentDel;
     }
 
     @Transactional

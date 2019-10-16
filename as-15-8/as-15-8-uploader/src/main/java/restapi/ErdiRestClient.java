@@ -67,9 +67,10 @@ public class ErdiRestClient {
 
         //erdiLoaderService.removeLastContentVersion();
 
-        readFullErdi(Paths.get(tempDir, "mytest.zip"));
+        //readFullErdi(Paths.get(tempDir, "mytest.zip"));
         //readFullErdi(Paths.get(tempDir, "mytest2.zip"));
         //readFullErdi(Paths.get(tempDir, "mytest3_delete.zip"));
+        readFullErdi(Paths.get(tempDir, "full_erdi_2019-10-02__02_10_44.zip"));
 
 
         if (true)
@@ -149,9 +150,11 @@ public class ErdiRestClient {
                 ErdiFullParser parser = new ErdiFullParser();
 
                 List<ContentRest> allContents = new ArrayList<>();
+                log.info("start parsing... ");
 
                 parser.parse(stream, (register, contents) -> {
                     allContents.addAll(contents);
+                    log.info("parsing... " + allContents.size());
 
                     if (contents.size() == 0){
                         erdiLoaderService.addAllContents(false, register, allContents);

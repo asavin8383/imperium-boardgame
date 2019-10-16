@@ -11,6 +11,8 @@ import java.io.Serializable;
 public class ContentDel implements Serializable {
 
 	@Id
+	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="content_del_generator")
+	@SequenceGenerator(name="content_del_generator", sequenceName="sor.content_del_id_seq", allocationSize=1)
 	private Long id;
 
 	@ManyToOne(optional = false)
