@@ -20,7 +20,7 @@ import java.io.IOException;
  *
  */
 @SpringBootApplication
-@ComponentScan(basePackages= {"common", "repositories", "schedule", "services", "restapi"})
+@ComponentScan(basePackages= {"common", "repositories", "controllers", "services", "restapi"})
 @EnableJpaRepositories("repositories")
 @EntityScan("model")
 @EnableScheduling
