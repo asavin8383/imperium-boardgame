@@ -3,12 +3,11 @@ package model.response;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
 public class RestResponsePASD {
     public boolean status;
     public PSADResponse response;
 
-    public List<PSEntry> getListPSEntry(){
+    public List<PASDEntry> getListPSEntry(){
         return response.PASDList.stream()
                 .map(entryContainer -> entryContainer.PASD)
                 .collect(Collectors.toList());
@@ -20,7 +19,7 @@ class PSADResponse {
 }
 
 class PSADEntryContainer {
-    public PSEntry PASD;
+    public PASDEntry PASD;
 }
 
 

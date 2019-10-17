@@ -13,6 +13,7 @@ import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestTemplate;
+import restapi.PASDRestClient;
 import restapi.PSRestClient;
 
 import javax.sql.DataSource;
@@ -27,6 +28,9 @@ public class RestTest
     @Autowired
     PSRestClient psRestClient;
 
+    @Autowired
+    PASDRestClient pasdRestClient;
+
     @Bean
     public RestTemplate restTemplateInit() {
         RestTemplate restTemplate = new RestTemplate();
@@ -34,10 +38,13 @@ public class RestTest
         return restTemplate;
     }
 
-    @Test
-    public void test1(){
-
+    public void testPS(){
         psRestClient.readFromNet();
+
+    }
+
+    public void testPASD(){
+        pasdRestClient.readFromNet();
 
     }
 

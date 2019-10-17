@@ -89,7 +89,7 @@ public class RestApiHelper {
 
         System.out.println("**************");
         RestResponsePASD resp = entity.getBody();
-        List<PSEntry> list = resp.getListPSEntry();
+        List<PASDEntry> list = resp.getListPSEntry();
 
         System.out.println(list.toString());
     }

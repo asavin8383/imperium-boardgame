@@ -1,7 +1,9 @@
 package restapi;
 
 import lombok.extern.slf4j.Slf4j;
+import model.response.PASDEntry;
 import model.response.PSEntry;
+import model.response.RestResponsePASD;
 import model.response.RestResponsePS;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,10 +20,10 @@ import java.util.List;
  */
 @Component
 @Slf4j
-public class PSRestClient
+public class PASDRestClient
 {
     @Autowired
-    PSDictionaryUpdater psDictionaryUpdater;
+    PASDDictionaryUpdater pasdDictionaryUpdater;
 
     @Autowired
     RestTemplate restTemplate;
@@ -32,16 +34,16 @@ public class PSRestClient
 
     public void readFromNet() {
         String base = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
-        String url = base + "getPSList/";
+        String url = base + "getPASDList/";
         log.info("GET from {}", url);
-        ResponseEntity<RestResponsePS> entity = restTemplate.getForEntity(url, RestResponsePS.class);
+        ResponseEntity<RestResponsePASD> entity = restTemplate.getForEntity(url, RestResponsePASD.class);
 
-        RestResponsePS resp = entity.getBody();
+        RestResponsePASD resp = entity.getBody();
 
-        List<PSEntry> list = resp.getListPSEntry();
+        List<PASDEntry> list = resp.getListPSEntry();
 
         log.info("Got PS records: {}", list.toString());
-        psDictionaryUpdater.insertRecords(list);
+        pasdDictionaryUpdater.insertRecords(list);
 
     }
 }
