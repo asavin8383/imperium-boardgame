@@ -17,7 +17,7 @@ public class CheckUnitJob {
 	private Long jobID;
 	
 	/** ПС/ПАСД */
-	private AccessToolUnit accessToolUnit;
+	private String accessTool;
 	
 	/** Проверяемый ресурс */
 	private CheckUnit checkUnit;

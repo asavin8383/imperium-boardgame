@@ -4,8 +4,6 @@ import checkUnits.CheckMethod;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Data;
 import model.Views;
-import model.catalog.AccessTool;
-
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -17,9 +15,7 @@ import java.io.Serializable;
  * Author: asavin
  */
 @Entity
-@Table(schema = "portal", name = "planned_processing_times",
-        uniqueConstraints=
-        @UniqueConstraint(columnNames={"access_tool_id", "check_method"}))
+@Table(schema = "portal", name = "planned_processing_times")
 @Data
 public class PlannedProcessingTime implements Serializable {
 
@@ -32,9 +28,9 @@ public class PlannedProcessingTime implements Serializable {
     @JsonView(Views.Id.class)
     private Long id;
 
-    @ManyToOne(optional = false, cascade = CascadeType.ALL)
-    @JsonView(Views.Full.class)
-    private AccessTool accessTool;
+    @JsonView(Views.Brief.class)
+    @NotNull
+    private String accessTool;
 
     @Enumerated(EnumType.STRING)
     @NotNull

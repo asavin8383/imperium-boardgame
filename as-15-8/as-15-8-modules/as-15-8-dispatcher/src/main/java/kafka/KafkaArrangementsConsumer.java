@@ -52,7 +52,7 @@ public class KafkaArrangementsConsumer {
 			}
 			//Если получили сообщение на перезапуск, нужно поднять сервис
 			else if(arrangementJob.getRunType().equals(ArrangementJob.JobRunType.RESTART)){
-				sendStartExecutorsMessage(arrangementJob.getAccessToolUnit());
+				sendStartExecutorsMessage(arrangementJob.getAccessTool());
 			}
     	} catch (Exception ex) {
     		log.error("Ошибка при обработке задания на проведение мероприятия: " + arrangementJob.toString(), ex);
@@ -85,9 +85,9 @@ public class KafkaArrangementsConsumer {
 		}
 	}
 
-	private void sendStartExecutorsMessage(AccessToolUnit accessToolUnit) {
+	private void sendStartExecutorsMessage(String accessTool) {
 		try {
-			ExecutorControlMessage controlMessage = new ExecutorControlMessage(accessToolUnit, ExecutorControlMessage.ControlCommand.START);
+			ExecutorControlMessage controlMessage = new ExecutorControlMessage(accessTool, ExecutorControlMessage.ControlCommand.START);
 
 			Message<ExecutorControlMessage> message = MessageBuilder
 					.withPayload(controlMessage)

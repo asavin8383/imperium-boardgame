@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ExecutorControlMessage {
 
-	private AccessToolUnit accessToolUnit;
+	private String accessTool;
 	
 	private ControlCommand command;
 	
