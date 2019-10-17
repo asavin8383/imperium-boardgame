@@ -21,6 +21,7 @@
 		<module>as-15-8-modules</module>
         <module>as-15-8-scheduler</module>
         <module>as-15-8-config-server</module>
+        <module>as-15-8-gateway</module>
     </modules>
 
 	<distributionManagement>

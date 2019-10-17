@@ -23,4 +23,16 @@ services:
       PROFILE: test
       TZ: "Europe/Moscow"
     ports:
-      - "8081:8081"
+      - "15802:15802"
+  as-15-8-gateway:
+    container_name: as-15-8_gateway
+    image: harbor.ec-leasing.ru/as_15_8/as-15-8-gateway
+    restart: always
+    volumes:
+      - ~/as-15-8-ppm/gateway/logs:/log
+      - ~/as-15-8-ppm/gateway/config:/config
+    environment:
+      PROFILE: test
+      TZ: "Europe/Moscow"
+    ports:
+      - "80:80"
