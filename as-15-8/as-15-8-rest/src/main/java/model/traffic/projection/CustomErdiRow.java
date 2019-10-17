@@ -2,7 +2,7 @@ package model.traffic.projection;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
-import model.traffic.Violation;
+import model.sor.Violation;
 
 import javax.persistence.Transient;
 import java.io.Serializable;

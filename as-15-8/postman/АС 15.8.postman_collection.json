@@ -1915,7 +1915,7 @@
 									}
 								],
 								"url": {
-									"raw": "{{url}}/erdi/custom?returnAll=true&erdiTrafficUnitId=40",
+									"raw": "{{url}}/erdi/custom?",
 									"host": [
 										"{{url}}"
 									],
@@ -1931,7 +1931,8 @@
 										},
 										{
 											"key": "returnAll",
-											"value": "true"
+											"value": "true",
+											"disabled": true
 										},
 										{
 											"key": "query",
@@ -1940,7 +1941,8 @@
 										},
 										{
 											"key": "erdiTrafficUnitId",
-											"value": "40"
+											"value": "40",
+											"disabled": true
 										},
 										{
 											"key": "searchTrafficUnitId",
@@ -2235,7 +2237,7 @@
 									}
 								],
 								"url": {
-									"raw": "{{url}}/phrases?violationId=1&returnAll=true&searchTrafficUnitId=31",
+									"raw": "{{url}}/phrases?",
 									"host": [
 										"{{url}}"
 									],
@@ -2245,15 +2247,18 @@
 									"query": [
 										{
 											"key": "violationId",
-											"value": "1"
+											"value": "1",
+											"disabled": true
 										},
 										{
 											"key": "returnAll",
-											"value": "true"
+											"value": "true",
+											"disabled": true
 										},
 										{
 											"key": "searchTrafficUnitId",
-											"value": "31"
+											"value": "31",
+											"disabled": true
 										},
 										{
 											"key": "query",
@@ -2565,7 +2570,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{url}}/traffic?query=test",
+							"raw": "{{url}}/traffic?",
 							"host": [
 								"{{url}}"
 							],
@@ -2597,10 +2602,6 @@
 									"key": "pageSize",
 									"value": "5",
 									"disabled": true
-								},
-								{
-									"key": "query",
-									"value": "test"
 								}
 							]
 						}
@@ -2626,7 +2627,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"name\": \"meeh traffic 2\",\n\n\t\"formalErdiUnit\": {\n\t\t\"category\": {\n\t\t\t\"id\": 0\n\t\t},\n\t\t\"formalErdiList\": [\n\t\t\t{ \"id\": 169111 },\n\t\t\t{ \"id\": 169112 }\n\t\t]\n\t},\n\t\"customErdiUnit\": {\n\t\t\"category\": {\n\t\t\t\"id\": 0\n\t\t},\n\t\t\"customErdiList\": [\n\t\t\t{ \"id\": 3 },\n\t\t\t{ \"id\": 4 }\n\t\t]\n\t},\n\t\"searchTemplates\": [\n\t\t{\n\t\t\t\"category\": { \"id\": 0 },\n\t\t\t\"queryPattern\": \"test patter $ERDI\",\n\t\t\t\"customErdiList\": [\n\t\t\t\t{ \"id\": 3 },\n\t\t\t\t{ \"id\": 4 }\n\t\t\t],\n\t\t\t\"formalErdiList\": [\n\t\t\t\t{ \"id\": 169111 }\n\t\t\t],\n\t\t\t\"searchPhrases\": [\n\t\t\t]\n\t\t}\n\t]\n}",
+							"raw": "{\n\t\"name\": \"meeh traffic\",\n\n\t\"formalErdiUnit\": {\n\t\t\"category\": {\n\t\t\t\"id\": 0\n\t\t},\n\t\t\"formalErdiList\": [\n\t\t\t{ \"id\": 169111 },\n\t\t\t{ \"id\": 169112 }\n\t\t]\n\t},\n\t\"customErdiUnit\": {\n\t\t\"category\": {\n\t\t\t\"id\": 0\n\t\t},\n\t\t\"customErdiList\": [\n\t\t\t{ \"id\": 3 },\n\t\t\t{ \"id\": 4 }\n\t\t]\n\t},\n\t\"searchPhraseUnit\": {\n\t\t\"queryPattern\": \"\",\n\t\t\"category\": {\n\t\t\t\"id\": 0\n\t\t},\n\t\t\"searchPhrases\": [\n\t\t\t{ \"id\": 3 },\n\t\t\t{ \"id\": 4 }\n\t\t]\n\t},\n\t\"searchTemplates\": [\n\t\t{\n\t\t\t\"category\": { \"id\": 0 },\n\t\t\t\"queryPattern\": \"test patter $ERDI\",\n\t\t\t\"customErdiList\": [\n\t\t\t\t{ \"id\": 3 },\n\t\t\t\t{ \"id\": 4 }\n\t\t\t],\n\t\t\t\"formalErdiList\": [\n\t\t\t\t{ \"id\": 169111 }\n\t\t\t],\n\t\t\t\"searchPhrases\": [\n\t\t\t]\n\t\t}\n\t]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -2747,6 +2748,122 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "Справочники",
+			"item": [
+				{
+					"name": "Получение списка нарушений",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"type": "text",
+								"value": "{{oper_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/violation?",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"violation"
+							],
+							"query": [
+								{
+									"key": "sortingDirection",
+									"value": "ASC",
+									"disabled": true
+								},
+								{
+									"key": "sortingColumn",
+									"value": "id",
+									"disabled": true
+								},
+								{
+									"key": "pageNumber",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "pageSize",
+									"value": "5",
+									"disabled": true
+								},
+								{
+									"key": "query",
+									"value": "12",
+									"disabled": true
+								},
+								{
+									"key": "deleted",
+									"value": "true",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Получение списка поисковых систем",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"type": "text",
+								"value": "{{oper_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/search_system?",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"search_system"
+							],
+							"query": [
+								{
+									"key": "sortingDirection",
+									"value": "ASC",
+									"disabled": true
+								},
+								{
+									"key": "sortingColumn",
+									"value": "id",
+									"disabled": true
+								},
+								{
+									"key": "pageNumber",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "pageSize",
+									"value": "5",
+									"disabled": true
+								},
+								{
+									"key": "name",
+									"value": "exist",
+									"disabled": true
+								},
+								{
+									"key": "hostname",
+									"value": "ru",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "Список средств доступа к запрещённым ресурсам",

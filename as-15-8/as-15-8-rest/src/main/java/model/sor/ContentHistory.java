@@ -1,4 +1,4 @@
-package model.erdi;
+package model.sor;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -7,18 +7,17 @@ import model.Views;
 import org.hibernate.annotations.Immutable;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Entity
 @Immutable
-@Table(schema = "sor", name = "content_resources")
+@Table(schema = "sor", name = "content_history")
 @Data
 @Setter(AccessLevel.PRIVATE)
 @ToString(onlyExplicitlyIncluded = true)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class ContentResource implements Serializable {
+public class ContentHistory implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -28,28 +27,32 @@ public class ContentResource implements Serializable {
     @EqualsAndHashCode.Include
     private Long id;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "content_id")
-    @JsonIgnore
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "content_id", referencedColumnName = "id")
+    @JsonView(Views.Full.class)
     private FormalErdi content;
 
-    @NotNull
+    @Column(name = "ppn_dt")
     @JsonView(Views.Brief.class)
     @ToString.Include
-    private String value;
+    private LocalDateTime creationDate;
 
+    @Column(name = "st_dt")
     @JsonView(Views.Brief.class)
     @ToString.Include
-    private LocalDateTime ts;
+    private LocalDateTime stDt;
 
-    @ManyToOne
-    @JoinColumn(name = "resource_type_id")
+    @Column(name = "end_dt")
     @JsonView(Views.Brief.class)
     @ToString.Include
-    private ResourceType resourceType;
+    private LocalDateTime endDate;
 
     @JsonIgnore
     @ToString.Include
     private Long contentVersionId;
+
+    @JsonIgnore
+    @ToString.Include
+    private Long addonVersionId;
 
 }

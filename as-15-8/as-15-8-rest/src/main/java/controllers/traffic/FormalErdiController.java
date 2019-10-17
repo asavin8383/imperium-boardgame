@@ -7,7 +7,7 @@ import exceptions.AS_15_8_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Views;
-import model.erdi.FormalErdi;
+import model.sor.FormalErdi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

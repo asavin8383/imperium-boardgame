@@ -9,7 +9,7 @@ import lombok.ToString;
 import model.Views;
 import model.catalog.AccessToolsCategory;
 import model.enums.TrafficUnitType;
-import model.erdi.FormalErdi;
+import model.sor.FormalErdi;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import utils.TrafficUnitUtils;

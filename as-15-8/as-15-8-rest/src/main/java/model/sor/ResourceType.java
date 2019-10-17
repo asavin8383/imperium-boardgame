@@ -1,4 +1,4 @@
-package model.erdi;
+package model.sor;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;

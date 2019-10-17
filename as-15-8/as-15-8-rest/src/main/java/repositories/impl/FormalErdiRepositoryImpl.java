@@ -1,8 +1,8 @@
 package repositories.impl;
 
-import model.erdi.ContentResource;
-import model.erdi.FormalErdi;
-import model.erdi.FormalErdi_;
+import model.sor.ContentResource;
+import model.sor.FormalErdi;
+import model.sor.FormalErdi_;
 import model.traffic.ErdiTrafficUnit;
 import model.traffic.SearchQueryTrafficUnit;
 import repositories.FormalErdiRepositoryCustom;

@@ -1,4 +1,4 @@
-package model.erdi;
+package model.sor;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -44,6 +44,8 @@ public class FormalErdi implements Serializable {
     @ToString.Include
     private Long initContentVersionId;
 
+    /* PORTAL */
+
     @ManyToMany(mappedBy = "formalErdiList", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<ErdiTrafficUnit> erdiTrafficUnits;
@@ -51,6 +53,16 @@ public class FormalErdi implements Serializable {
     @ManyToMany(mappedBy = "formalErdiList", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<SearchQueryTrafficUnit> searchQueryTrafficUnits;
+
+    /* SOR */
+
+    @OneToOne(mappedBy = "content", fetch = FetchType.LAZY)
+    private ContentInfo contentInfo;
+
+    @OneToOne(mappedBy = "content", fetch = FetchType.LAZY)
+    private ContentHistory contentHistory;
+
+    /* ДНО */
 
     @Transient
     private Boolean checked;
