@@ -111,7 +111,7 @@ public class ApplicationConfiguration {
         */
 
 
-		erdiRestClient.fillFullErdiToDB();
+		//erdiRestClient.fillFullErdiToDB();
 		//erdiRestClient.removeLastContentVersion();
 		//erdiRestClient.removeLastContentVersion();
 		//erdiRestClient.removeLastContentVersion();
