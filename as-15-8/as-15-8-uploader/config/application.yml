@@ -1,5 +1,5 @@
 server:
-    port: 15800
+    port: 15801
     tomcat:
         max-threads: 200
 logging:
@@ -28,6 +28,10 @@ spring:
         cors:
             origin: "*"
     rest_base_url: "http://bo.esoftproject.ru/register-vpn/api/as15-8"
+
+cron:
+    expression:
+        arrangement: "0 * * ? * *"
 ---
 
 spring:
@@ -41,7 +45,16 @@ spring:
     datasource:
         url: jdbc:postgresql://192.168.5.195:5432/asdb_test
 
-cron:
-    expression:
-        arrangement: "0 * * ? * *"
+---
+
+spring:
+    profiles: dev_asavin
+    jpa:
+        hibernate:
+            ddl-auto: none
+    liquibase:
+        enabled: true
+        change-log: classpath:/data/changelog/db.changelog.master.xml
+    datasource:
+        url: jdbc:postgresql://192.168.5.195:5432/asdb_test
 

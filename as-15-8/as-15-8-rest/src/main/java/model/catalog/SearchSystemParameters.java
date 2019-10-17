@@ -3,7 +3,8 @@ package model.catalog;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import java.io.Serializable;
 
 /**
@@ -19,9 +20,10 @@ public class SearchSystemParameters extends AccessToolParameters implements Seri
     private static final long serialVersionUID = 1L;
 
     private String searchSystemUrl;
-    private String inputSearchFieldXpathId;
-    private String inputSearchFieldCssSelector;
-    private String buttonSearchFieldXpathId;
-    private String buttonSearchFieldCssSelector;
+    private String resultPageType;
+    private String inputFieldXpath;
+    private String captchaXpath;
+    private String nextPageXpath;
+    private String itemLinkXpath;
     private int inputDelay;
 }

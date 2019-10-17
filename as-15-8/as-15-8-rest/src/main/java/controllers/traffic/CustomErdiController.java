@@ -1,0 +1,85 @@
+package controllers.traffic;
+
+import com.fasterxml.jackson.annotation.JsonView;
+import enums.SortingDirection;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import model.Views;
+import model.traffic.CustomErdi;
+import model.traffic.projection.CustomErdiRow;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
+import services.traffic.CustomErdiService;
+
+@RestController
+@RequestMapping(path = "/erdi/custom", produces = MediaType.APPLICATION_JSON_VALUE)
+@PreAuthorize("hasAnyRole('ROLE_OPERATOR','ROLE_ADMIN')")
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@Slf4j
+public class CustomErdiController {
+
+    private final CustomErdiService customErdiService;
+
+    @GetMapping
+    public Page<CustomErdi> getAllCustomErdi(@RequestParam(required = false) SortingDirection sortingDirection,
+                                             @RequestParam(required = false) String sortingColumn,
+                                             @RequestParam(defaultValue = "0") int pageNumber,
+                                             @RequestParam(defaultValue = "10") int pageSize,
+                                             @RequestParam(defaultValue = "false") boolean returnAll,
+                                             @RequestParam(required = false) Long erdiTrafficUnitId,
+                                             @RequestParam(required = false) Long searchTrafficUnitId,
+                                             @RequestParam(required = false) String query,
+                                             //@RequestParam(required = false) Long resourceTypeId,
+                                             @RequestParam(required = false) Long violationId) {
+        return customErdiService.getAllCustomErdi(sortingDirection, sortingColumn, pageNumber, pageSize,
+                returnAll, erdiTrafficUnitId, searchTrafficUnitId, query, violationId);
+    }
+
+    @GetMapping(path = "/row")
+    public Page<CustomErdiRow> getCustomErdiRows(@RequestParam(required = false) SortingDirection sortingDirection,
+                                                 @RequestParam(required = false) String sortingColumn,
+                                                 @RequestParam(defaultValue = "0") int pageNumber,
+                                                 @RequestParam(defaultValue = "10") int pageSize,
+                                                 @RequestParam(defaultValue = "false") boolean returnAll,
+                                                 @RequestParam(required = false) Long erdiTrafficUnitId,
+                                                 @RequestParam(required = false) Long searchTrafficUnitId,
+                                                 @RequestParam(required = false) String query,
+                                                 //@RequestParam(required = false) Long resourceTypeId,
+                                                 @RequestParam(required = false) Long violationId) {
+        return customErdiService.getCustomErdiRows(sortingDirection, sortingColumn, pageNumber, pageSize,
+                returnAll, erdiTrafficUnitId, searchTrafficUnitId, query, violationId);
+    }
+
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(code = HttpStatus.CREATED)
+    @JsonView(Views.Full.class)
+    public CustomErdi createCustomErdi(@RequestBody CustomErdi customErdi) {
+        return customErdiService.createCustomErdi(customErdi);
+    }
+
+    @GetMapping(path = "/{id}")
+    @JsonView(Views.Full.class)
+    public CustomErdi getCustomErdiById(@PathVariable Long id) {
+        return customErdiService.getCustomErdiById(id);
+    }
+
+    @Transactional
+    @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @JsonView(Views.Full.class)
+    public CustomErdi updateCustomErdi(@RequestBody CustomErdi newCustomErdi,
+                                       @PathVariable("id") CustomErdi customErdi) {
+        return customErdiService.updateCustomErdi(newCustomErdi, customErdi);
+    }
+
+    @DeleteMapping(path = "/{id}")
+    @ResponseStatus(code = HttpStatus.NO_CONTENT)
+    public void deleteCustomErdi(@PathVariable Long id) {
+        customErdiService.deleteCustomErdi(id);
+    }
+
+}

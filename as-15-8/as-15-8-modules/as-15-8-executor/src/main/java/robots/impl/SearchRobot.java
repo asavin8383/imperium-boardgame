@@ -1,21 +1,20 @@
 package robots.impl;
 
-import enums.AccessToolParameters;
+import enums.AccessToolParameter;
 import execution.ExecutionPSJobResult;
 import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
-import robots.RobotDriverParameters;
-import robots.exceptions.Captcha_RobotScriptExecutionException;
-import robots.exceptions.RobotScriptExecutionException;
+import robots.exceptions.Captcha_ExecutionException;
+import robots.exceptions.ExecutionException;
 import robots.exceptions.TimeoutScriptException;
 import robots.utils.EqualityTest;
 import robots.utils.ScriptUtils;
 
 import java.util.Map;
 
-import static enums.AccessToolParameters.INPUT_DELAY;
+import static enums.AccessToolParameter.INPUT_DELAY;
 import static robots.utils.ScriptUtils.findElementIfExists;
 
 public abstract class SearchRobot extends SeleniumRobot {
@@ -35,14 +34,13 @@ public abstract class SearchRobot extends SeleniumRobot {
     /** Задержка при вводе (мс) */
     private long inputDelay;
     
-	public SearchRobot(RobotDriverParameters driverParams,
-                        Map<AccessToolParameters, String> scriptParams,
-                        int searchLimit) {
+	public SearchRobot(Map<AccessToolParameter, String> scriptParams) {
 		
-		super(driverParams, scriptParams);
+		super(scriptParams);
 		this.checkedResultCount = 0;
 
-		this.searchResultLimit = searchLimit > 0 ? searchLimit : DEFAULT_SEARCH_LIMIT;
+		this.searchResultLimit = scriptParams.containsKey(AccessToolParameter.SEARCH_RESULT_LIMIT) ?
+                Integer.parseInt(scriptParams.get(AccessToolParameter.SEARCH_RESULT_LIMIT)) : DEFAULT_SEARCH_LIMIT;
 
 		long delayParameterValue = scriptParams.containsKey(INPUT_DELAY) ?
                 Long.parseLong(scriptParams.get(INPUT_DELAY)) : DEFAULT_INPUT_DELAY;
@@ -90,10 +88,10 @@ public abstract class SearchRobot extends SeleniumRobot {
     }
 
     boolean checkSearchResult(EqualityTest test)
-            throws RobotScriptExecutionException {
+            throws ExecutionException {
         do {
             if (captcha())
-                throw new Captcha_RobotScriptExecutionException(
+                throw new Captcha_ExecutionException(
                         "Обнаружена Captcha в Yandex");
 
             if (checkPageResult(test))

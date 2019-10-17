@@ -1,6 +1,5 @@
 package controllers;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import controllers.helpers.SortingHelper;
 import enums.ExecutionStatus;
@@ -14,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import model.Views;
 import model.enums.ScheduleStatus;
 import model.schedule.Schedule;
+import model.schedule.ScheduleCheckUnit;
 import model.schedule.SchedulePeriod;
 import model.task.Arrangement;
 import model.user.User;
@@ -69,6 +69,10 @@ public class ScheduleController {
         return schedule;
     }
 
+    @GetMapping(path = "/total_workers_count")
+    public Integer getTotalWorkersCount(){
+        return scheduleService.getTotalWorkersCount();
+    }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @JsonView(Views.Full.class)
@@ -141,7 +145,13 @@ public class ScheduleController {
             plannedDate = LocalDate.now();
         }
         log.info("Начало расчета расписания на дату: {}", plannedDate);
-        Schedule schedule = scheduleService.create(arrangementService.getArrangementCheckUnits(arrangementIds));
+        Map<Arrangement, TreeSet<ScheduleCheckUnit>> arrangementCheckUnits = arrangementService.getArrangementCheckUnits(arrangementIds);
+        for(Map.Entry<Arrangement, TreeSet<ScheduleCheckUnit>> entry: arrangementCheckUnits.entrySet()){
+            if(entry.getValue().isEmpty()){
+                AS_15_8_Exception.logAndThrow(log, "Ошибка создания расписания. У мероприятия " + entry.getKey().getId() + " пустое множество значений для проверки");
+            }
+        }
+        Schedule schedule = scheduleService.create(arrangementCheckUnits);
         log.info("Расчет расписания на дату {} завершен", plannedDate);
         schedule.setUser(user);
         schedule.setPlannedDate(plannedDate);

@@ -1,5 +1,6 @@
 package repositories;
 
+import enums.AccessToolUnit;
 import model.schedule.PlannedProcessingTime;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -13,5 +14,5 @@ import java.util.List;
 @Repository
 public interface PlannedProcessingTimeRepo extends JpaRepository<PlannedProcessingTime,Long> {
 
-    List<PlannedProcessingTime> findAllByAccessTool(Long accessToolId);
+    List<PlannedProcessingTime> findAllByAccessTool(String accessTool);
 }

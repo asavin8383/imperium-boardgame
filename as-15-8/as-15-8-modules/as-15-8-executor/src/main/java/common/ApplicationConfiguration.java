@@ -2,11 +2,8 @@ package common;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Import;
-
-import kafka.KafkaConfiguration;
-import robots.factory.RobotsFactoryConfiguration;
 
 /**
  * Конфигурация модуля запуска проверок мероприятий
@@ -14,8 +11,8 @@ import robots.factory.RobotsFactoryConfiguration;
  *
  */
 @SpringBootApplication
-@Import({RobotsFactoryConfiguration.class, KafkaConfiguration.class})
-@ComponentScan(basePackages={"common", "kafka", "robots.factory", "service"})
+@ComponentScan(basePackages={"common", "events", "robots.factory", "service"})
+@EnableConfigurationProperties(ExecutorProperties.class)
 public class ApplicationConfiguration{
 	
 	public static void main(String[] args) {

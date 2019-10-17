@@ -1,7 +1,7 @@
 package robots.impl;
 
 import checkUnits.CheckUnit;
-import enums.AccessToolParameters;
+import enums.AccessToolParameter;
 import execution.ExecutionJobResult;
 import execution.ExecutionVpnJobResult;
 import org.openqa.selenium.*;
@@ -9,13 +9,14 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import robots.DriverFactory;
 import robots.ProxyUtils;
-import robots.RobotDriverParameters;
-import robots.exceptions.RobotScriptExecutionException;
+import robots.exceptions.ExecutionException;
+import common.ExecutorProperties;
 import robots.utils.HttpResponseHelper;
 import robots.utils.RobotScriptUtils;
 import robots.utils.ScriptUtils;
 import robots.utils.ScriptUtils.PageResult;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -24,34 +25,36 @@ import static robots.utils.HttpResponseHelper.HttpResponseMeta;
 
 public class HolaRobot extends SeleniumRobot {
 
-    private static final String CHROME_PROFILE = "C:\\Selenium\\Chrome";
-    private static final String HOLA_POPUP = "chrome-extension://gkojfkhlekighikafcpjkiklfbnlmeio/js/popup.html";
+    private String crxFilePath;
+
     protected String stubUrl;
     protected boolean useEtalon;
 
 
-    public HolaRobot(RobotDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams) {
+    public HolaRobot(Map<AccessToolParameter, String> scriptParams) {
 
-    	super(driverParams, scriptParams,
+    	super(scriptParams,
     			ProxyUtils.getFullProxy(
-    			scriptParams.get(AccessToolParameters.ETALON_PROXY_TYPE),
-    			scriptParams.get(AccessToolParameters.ETALON_PROXY_HOST),
-    			scriptParams.get(AccessToolParameters.ETALON_PROXY_PORT),
-    			scriptParams.get(AccessToolParameters.ETALON_PROXY_USERNAME),
-    			scriptParams.get(AccessToolParameters.ETALON_PROXY_PASSWORD)
+                        ExecutorProperties.getEtalon().getProxy().getType(),
+                        ExecutorProperties.getEtalon().getProxy().getHost(),
+                        ExecutorProperties.getEtalon().getProxy().getPort(),
+                        ExecutorProperties.getEtalon().getProxy().getUsername(),
+                        ExecutorProperties.getEtalon().getProxy().getPassword()
     			)
     		);
 
         this.useEtalon = ScriptUtils.useEtalon(scriptParams);
 
-     	this.stubUrl = scriptParams.get(AccessToolParameters.STUB_URL);
+     	this.stubUrl = scriptParams.get(AccessToolParameter.STUB_URL);
+
+     	this.crxFilePath = scriptParams.get(AccessToolParameter.CRX_FILE_PATH);
     }
 
     @Override
-	public ExecutionJobResult execute(CheckUnit checkUnit) throws RobotScriptExecutionException {
+	public ExecutionJobResult execute(CheckUnit checkUnit) throws ExecutionException {
         // работате только с хромом!
         if (!checkBrowserChrome())
-            throw new RobotScriptExecutionException("Ошибка, неверный браузер! Для данного робота поддерживатся только браузер CHROME!");
+            throw new ExecutionException("Ошибка, неверный браузер! Для данного робота поддерживатся только браузер CHROME!");
 
         String url = ScriptUtils.getCheckUnitValue(checkUnit);
 
@@ -82,19 +85,20 @@ public class HolaRobot extends SeleniumRobot {
             close(driver);
         }
 
-
-        // Тестируемая страница через Hola
         try {
             driver = DriverFactory.createChromeDriver(
-                getDriverParams().getHubURL(),
-                getDriverParams().getPlatformName(),
-                getDriverParams().getApplicationName(),
-                CHROME_PROFILE
+                    ExecutorProperties.getSeleniumHubUrl(),
+                    Platform.valueOf(getScriptParams().get(AccessToolParameter.PLATFORM)),
+                    getScriptParams().get(AccessToolParameter.APPLICATION),
+                    crxFilePath
             );
 
-            driver.get(HOLA_POPUP); //собственное открытие страницы расширения (ВОЗМОЖНО для другой версии расширения ID будет другой)
-
             WebDriverWait wait = new WebDriverWait(driver, 60);
+            wait.until(webDriver -> webDriver != null && webDriver.getWindowHandles().size() > 1);
+
+            ArrayList<String> handles = new ArrayList<>(driver.getWindowHandles());
+            driver.switchTo().window(handles.get(1));
+
             // Конфигурируем холу на доступ для данного URL
             WebElement searchBox = wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("input")));
             searchBox.sendKeys(url);
@@ -134,7 +138,7 @@ public class HolaRobot extends SeleniumRobot {
 
 
     public boolean checkBrowserChrome(){
-        return "chrome".equalsIgnoreCase(getDriverParams().getBrowserName());
+        return "chrome".equalsIgnoreCase(getScriptParams().get(AccessToolParameter.BROWSER));
     }
 
 }

@@ -1,9 +1,7 @@
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd
-    http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
     <include file="data/changelog/rest.0001.access_tools_categories.xml"/>
     <include file="data/changelog/rest.0002.access_tools_categories_fk.xml"/>
@@ -17,6 +15,15 @@
     <include file="data/changelog/rest.0010.search_query_traffic_units.xml"/>
     <include file="data/changelog/rest.0011.search_query_traffic_units_custom_erdi.xml"/>
     <include file="data/changelog/rest.0012.search_query_traffic_units_search_phrases.xml"/>
-
+    <include file="data/changelog/rest.0013.erdi_traffic_units_content.xml"/>
+    <include file="data/changelog/rest.0014.search_query_traffic_units_content.xml"/>
+    <include file="data/changelog/rest.0015.fk_search_phrases_violation.xml"/>
+    <include file="data/changelog/rest.0016.fk_custom_erdi_violation.xml"/>
+    <include file="data/changelog/rest.0017.search_system_parameters.xml"/>
+    <include file="data/changelog/rest.0018.search_system_parameters.xml"/>
+    <include file="data/changelog/rest.0019.schedule_check_units.xml"/>
+    <include file="data/changelog/rest.0020.switch_schedule_period_check_units_fk.xml"/>
+    <include file="data/changelog/rest.0021.change_url_type_to_text.xml"/>
+    <include file="data/changelog/rest.0022.refactor_access_tools.xml"/>
 
 </databaseChangeLog>

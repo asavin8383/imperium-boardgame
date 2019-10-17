@@ -1,15 +1,14 @@
 package robots.impl;
 
 import checkUnits.CheckUnit;
-import enums.AccessToolParameters;
+import enums.AccessToolParameter;
 import execution.ExecutionJobResult;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
-import robots.RobotDriverParameters;
-import robots.exceptions.RobotScriptExecutionException;
+import robots.exceptions.ExecutionException;
 import robots.exceptions.TimeoutScriptException;
 import robots.utils.CloudflareUtils;
 import robots.utils.ScriptUtils;
@@ -21,12 +20,12 @@ public class CameleoRobot extends AnonymizerRobot {
 
 	private static final String CAMELEO_URL = "http://www.cameleo.xyz";
 	
-	public CameleoRobot(RobotDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams)  {
-		super(driverParams, scriptParams);
+	public CameleoRobot(Map<AccessToolParameter, String> scriptParams)  {
+		super(scriptParams);
 	}
 
     @Override
-    public ExecutionJobResult execute(CheckUnit checkUnit) throws RobotScriptExecutionException {
+    public ExecutionJobResult execute(CheckUnit checkUnit) throws ExecutionException {
         driver.get(CAMELEO_URL);
 
         try {
@@ -54,10 +53,10 @@ public class CameleoRobot extends AnonymizerRobot {
             log.info("TimeoutException при получении страницы", e);
             return getTimeoutMessage();
         } catch (NoSuchElementException e) {
-            throw new RobotScriptExecutionException(
+            throw new ExecutionException(
                     "Не удалось найти элементы навигации CameleoXYZ", e);
         } catch (InterruptedException e) {
-            throw new RobotScriptExecutionException(
+            throw new ExecutionException(
                     "Выполнение потока прервано", e);
         }
     }

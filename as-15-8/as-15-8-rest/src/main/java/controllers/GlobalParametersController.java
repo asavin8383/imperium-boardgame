@@ -1,7 +1,7 @@
 package controllers;
 
 import controllers.helpers.SortingHelper;
-import enums.AccessToolParameters;
+import enums.AccessToolParameter;
 import enums.SortingDirection;
 import model.parameters.GlobalParameter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +42,7 @@ public class GlobalParametersController {
 
     @PutMapping
     public GlobalParameter putGlobalParameter(
-            @RequestParam AccessToolParameters key,
+            @RequestParam AccessToolParameter key,
             @RequestParam String value) {
         return globalParametersRepo.findById(key)
             .map(globalParameter -> {

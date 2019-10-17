@@ -34,22 +34,17 @@ public class AccessTool implements Serializable{
 	@Column(name="id", nullable=false, updatable=false)
 	private Long id;
 	
+	/**Наименование*/
 	@NotNull
 	@Enumerated(EnumType.STRING)
 	@EqualsAndHashCode.Include
-	/**Наименование*/
 	private AccessToolUnit name;
 
+	/**Тип средства доступа*/
 	@NotNull
 	@Enumerated(EnumType.STRING)
-	/**Тип средства доступа*/
 	private AccessToolType type;
 	
-	@OneToMany(cascade=CascadeType.ALL, mappedBy = "accessTool")
-	@JsonIgnore
-	/**Список мероприятий, в которых проверяется данное средство доступа*/
-	private List<Arrangement> arrangements;
-
 	@OneToOne(mappedBy = "accessTool")
 	@JoinColumns({
 			@JoinColumn(name = "id", referencedColumnName = "access_tool_id"),
@@ -77,13 +72,4 @@ public class AccessTool implements Serializable{
 			@JoinColumn(name = "type", referencedColumnName = "access_tool_type")
 	})
 	private AnonymizerParameters anonymizerParameters;
-
-	@OneToMany(mappedBy = "accessTool")
-	@JsonIgnore
-	private List<PlannedProcessingTime> plannedProcessingTimes;
-
-	@ManyToOne
-	@JoinColumn(name="category_id")
-	@NotNull
-	private AccessToolsCategory accessToolsCategory;
 }

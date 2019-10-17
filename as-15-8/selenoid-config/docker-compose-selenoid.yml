@@ -1,0 +1,92 @@
+version: '3.7'
+services:
+  selenoid:
+    image: dcr.ec-leasing.ru/as-15-8/selenoid/selenoid-hub:1.9.2
+    deploy:
+      mode: global
+    networks:
+      - selenoid-net
+    ports:
+      - target: 4444
+        published: 4444
+        protocol: tcp
+        mode: host
+    hostname: "{{.Node.Hostname}}"
+    configs:
+      - source: selenoid_browsers
+        target: /etc/selenoid/browsers.json
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /opt/selenoid/logs:/opt/selenoid/logs
+    command: ["-container-network", "selenoid-net",
+              "-conf", "/etc/selenoid/browsers.json",
+              "-log-output-dir", "/opt/selenoid/logs"]
+  ggr:
+    image: dcr.ec-leasing.ru/as-15-8/selenoid/ggr:1.6.5
+    depends_on:
+      - selenoid
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == as158-selenium01
+      mode: replicated
+      replicas: 1
+    networks:
+      - selenoid-net
+    ports:
+      - target: 4444
+        published: 4442
+        protocol: tcp
+        mode: host
+    volumes:
+      - "/opt/selenoid/ggr:/etc/grid-router"
+    command: ["-quotaDir", "/etc/grid-router/quota"]
+  ggr-ui:
+    image: dcr.ec-leasing.ru/as-15-8/selenoid/ggr-ui:1.1.2
+    depends_on:
+      - selenoid
+      - ggr
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == as158-selenium01
+      mode: replicated
+      replicas: 1
+    networks:
+      - selenoid-net
+    ports:
+      - target: 8888
+        published: 8888
+        protocol: tcp
+        mode: host
+    volumes:
+      - "/opt/selenoid/ggr:/etc/grid-router"
+  selenoid-ui:
+    image: dcr.ec-leasing.ru/as-15-8/selenoid/selenoid-ui:1.8.1
+    depends_on:
+      - selenoid
+      - ggr
+      - ggr-ui
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == as158-selenium01
+      mode: replicated
+      replicas: 1
+    networks:
+      - selenoid-net
+    ports:
+      - target: 8080
+        published: 8080
+        protocol: tcp
+        mode: host
+    command: ["--status-uri", "http://192.168.5.75:8888",
+              "--webdriver-uri", "http://user:1q0p2w9o@192.168.5.75:4442"]
+
+networks:
+  selenoid-net:
+     external: true
+
+configs:
+  selenoid_browsers:
+    file: ./browsers.json

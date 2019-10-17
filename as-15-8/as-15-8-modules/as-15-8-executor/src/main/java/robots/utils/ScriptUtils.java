@@ -1,7 +1,7 @@
 package robots.utils;
 
 import checkUnits.CheckUnit;
-import enums.AccessToolParameters;
+import enums.AccessToolParameter;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -185,15 +185,35 @@ public class ScriptUtils {
         return null;
     }
 
-    public static boolean useEtalon(Map<AccessToolParameters, String> scriptParams){
+    public static boolean useEtalon(Map<AccessToolParameter, String> scriptParams){
         if (scriptParams == null)
             return true;
 
-        String useEtalon = scriptParams.get(AccessToolParameters.USE_ETALON);
+        String useEtalon = scriptParams.get(AccessToolParameter.USE_ETALON);
         return StringUtils.isEmpty(useEtalon) ||
                 useEtalon.equalsIgnoreCase("true") ||
                 useEtalon.equalsIgnoreCase("on") ||
                 useEtalon.equalsIgnoreCase("1");
+    }
+
+    public static void type(WebElement element, long sleep, String query) {
+        if (sleep > 0L) {
+            query.codePoints().forEach(cp -> {
+                element.sendKeys(new String(
+                        Character.toChars(cp)));
+                try {
+                    Thread.sleep(sleep);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            });
+        } else {
+            element.sendKeys(query);
+        }
+    }
+
+    public static void scrollToBottom(JavascriptExecutor jsExecutor) {
+        jsExecutor.executeScript("window.scrollTo(0, document.body.scrollHeight)");
     }
 
 

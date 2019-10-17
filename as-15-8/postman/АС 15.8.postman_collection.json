@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "bda04c34-885e-4a76-bc7f-de2506015ff4",
+		"_postman_id": "652e9574-5eb0-4e3e-ab33-aee3575f3672",
 		"name": "АС 15.8",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -1813,6 +1813,1057 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "Профильный трафик",
+			"item": [
+				{
+					"name": "ЕРДИ",
+					"item": [
+						{
+							"name": "Получение списка ЕРДИ",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"type": "text",
+										"value": "{{oper_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/erdi/formal?",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"erdi",
+										"formal"
+									],
+									"query": [
+										{
+											"key": "query",
+											"value": "weedy",
+											"disabled": true
+										},
+										{
+											"key": "resourceTypeId",
+											"value": "1",
+											"disabled": true
+										},
+										{
+											"key": "returnAll",
+											"value": "false",
+											"disabled": true
+										},
+										{
+											"key": "erdiTrafficUnitId",
+											"value": "20",
+											"disabled": true
+										},
+										{
+											"key": "searchTrafficUnitId",
+											"value": "4",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Получение ЕРДИ по ID",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"type": "text",
+										"value": "{{oper_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/erdi/formal/169111",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"erdi",
+										"formal",
+										"169111"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Пользовательские ЕРДИ",
+					"item": [
+						{
+							"name": "Получение списка ЕРДИ",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"type": "text",
+										"value": "{{oper_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/erdi/custom?",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"erdi",
+										"custom"
+									],
+									"query": [
+										{
+											"key": "violationId",
+											"value": "1",
+											"disabled": true
+										},
+										{
+											"key": "returnAll",
+											"value": "true",
+											"disabled": true
+										},
+										{
+											"key": "query",
+											"value": "custom",
+											"disabled": true
+										},
+										{
+											"key": "erdiTrafficUnitId",
+											"value": "40",
+											"disabled": true
+										},
+										{
+											"key": "searchTrafficUnitId",
+											"value": "5",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Добавление ЕРДИ",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"type": "text",
+										"value": "{{oper_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"name\": \"Custom ERDI 4\",\n\t\"violation\": { \"id\": 1 }\n}"
+								},
+								"url": {
+									"raw": "{{url}}/erdi/custom",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"erdi",
+										"custom"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Получение ЕРДИ по ID",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"type": "text",
+										"value": "{{oper_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/erdi/custom/3",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"erdi",
+										"custom",
+										"3"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Редактирование ЕРДИ",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"type": "text",
+										"value": "{{oper_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"name\": \"Changed Custom ERDI\",\n\t\"violation\": { \"id\": 1 }\n}"
+								},
+								"url": {
+									"raw": "{{url}}/erdi/custom/2",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"erdi",
+										"custom",
+										"2"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Удаление ЕРДИ",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"type": "text",
+										"value": "{{oper_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/erdi/custom/1",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"erdi",
+										"custom",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Получение списка юнитов",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"type": "text",
+										"value": "{{oper_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/erdi/custom/units?customErdiId=3",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"erdi",
+										"custom",
+										"units"
+									],
+									"query": [
+										{
+											"key": "customErdiId",
+											"value": "3"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Добавление юнита",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"type": "text",
+										"value": "{{oper_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"name\": \"Unit 2\",\n\t\"type\": \"URL\",\n\t\"value\": \"https://doom.ru/cp\"\n}"
+								},
+								"url": {
+									"raw": "{{url}}/erdi/custom/units?customErdiId=3",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"erdi",
+										"custom",
+										"units"
+									],
+									"query": [
+										{
+											"key": "customErdiId",
+											"value": "3"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Редактирование юнита",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"type": "text",
+										"value": "{{oper_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"type\": \"IP_V6\",\n\t\"value\": \"2001:db8::8a2e:370:7334\",\n\t\"customErdi\": {\"id\": 3}\n}"
+								},
+								"url": {
+									"raw": "{{url}}/erdi/custom/units/3",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"erdi",
+										"custom",
+										"units",
+										"3"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Удаление юнита",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"type": "text",
+										"value": "{{oper_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/erdi/custom/units/4",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"erdi",
+										"custom",
+										"units",
+										"4"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Поисковые фразы",
+					"item": [
+						{
+							"name": "Получение списка фраз",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"type": "text",
+										"value": "{{oper_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/phrases?",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"phrases"
+									],
+									"query": [
+										{
+											"key": "violationId",
+											"value": "1",
+											"disabled": true
+										},
+										{
+											"key": "returnAll",
+											"value": "true",
+											"disabled": true
+										},
+										{
+											"key": "searchTrafficUnitId",
+											"value": "31",
+											"disabled": true
+										},
+										{
+											"key": "query",
+											"value": "ы",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Добавление фразы",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"type": "text",
+										"value": "{{oper_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"phrase\": \"Пыня\",\n\t\"violation\": { \"id\": 1 }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/phrases",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"phrases"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Получение фразы по ID",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"type": "text",
+										"value": "{{oper_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/phrases/2",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"phrases",
+										"2"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Редактирование фразы",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"type": "text",
+										"value": "{{oper_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"phrase\": \"Пыня Краб\",\n\t\"violation\": { \"id\": 1 }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/phrases/3",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"phrases",
+										"3"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Удаление фразы",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"type": "text",
+										"value": "{{oper_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/phrases/5",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"phrases",
+										"5"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Поисковые шаблоны",
+					"item": [
+						{
+							"name": "Получение списка шаблонов",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"type": "text",
+										"value": "{{oper_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/templates?",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"templates"
+									],
+									"query": [
+										{
+											"key": "belongsTo",
+											"value": "false",
+											"disabled": true
+										},
+										{
+											"key": "trafficUnitId",
+											"value": "23",
+											"disabled": true
+										},
+										{
+											"key": "query",
+											"value": "ы",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Редактирование шаблона",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"type": "text",
+										"value": "{{oper_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"name\": \"meeh traffic 2_eanpqajx_TEMPLATE\",\n\t\"category\": { \"id\": 0 },\n\t\"queryPattern\": \"test patter $ERDI\",\n\t\"customErdiList\": [\n\t\t{ \"id\": 3 },\n\t\t{ \"id\": 4 }\n\t],\n\t\"searchPhrases\": [\n\t\t{ \"id\": 2 }\n\t]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/templates/41?",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"templates",
+										"41"
+									],
+									"query": [
+										{
+											"key": "belongsTo",
+											"value": "false",
+											"disabled": true
+										},
+										{
+											"key": "trafficUnitId",
+											"value": "23",
+											"disabled": true
+										},
+										{
+											"key": "query",
+											"value": "ы",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Удаление шаблона",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"type": "text",
+										"value": "{{oper_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"name\": \"meeh traffic 2_eanpqajx_TEMPLATE\",\n\t\"category\": { \"id\": 0 },\n\t\"queryPattern\": \"test patter $ERDI\",\n\t\"customErdiList\": [\n\t\t{ \"id\": 3 },\n\t\t{ \"id\": 4 }\n\t],\n\t\"searchPhrases\": [\n\t\t{ \"id\": 2 }\n\t]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/templates/41?",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"templates",
+										"41"
+									],
+									"query": [
+										{
+											"key": "belongsTo",
+											"value": "false",
+											"disabled": true
+										},
+										{
+											"key": "trafficUnitId",
+											"value": "23",
+											"disabled": true
+										},
+										{
+											"key": "query",
+											"value": "ы",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Получение списка трафиков",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"type": "text",
+								"value": "{{oper_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/traffic?",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"traffic"
+							],
+							"query": [
+								{
+									"key": "query",
+									"value": "test",
+									"disabled": true
+								},
+								{
+									"key": "sortingDirection",
+									"value": "ASC",
+									"disabled": true
+								},
+								{
+									"key": "sortingColumn",
+									"value": "id",
+									"disabled": true
+								},
+								{
+									"key": "pageNumber",
+									"value": "0",
+									"disabled": true
+								},
+								{
+									"key": "pageSize",
+									"value": "5",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Добавление трафика",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"type": "text",
+								"value": "{{oper_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"meeh traffic\",\n\n\t\"formalErdiUnit\": {\n\t\t\"category\": {\n\t\t\t\"id\": 0\n\t\t},\n\t\t\"formalErdiList\": [\n\t\t\t{ \"id\": 169111 },\n\t\t\t{ \"id\": 169112 }\n\t\t]\n\t},\n\t\"customErdiUnit\": {\n\t\t\"category\": {\n\t\t\t\"id\": 0\n\t\t},\n\t\t\"customErdiList\": [\n\t\t\t{ \"id\": 3 },\n\t\t\t{ \"id\": 4 }\n\t\t]\n\t},\n\t\"searchPhraseUnit\": {\n\t\t\"queryPattern\": \"\",\n\t\t\"category\": {\n\t\t\t\"id\": 0\n\t\t},\n\t\t\"searchPhrases\": [\n\t\t\t{ \"id\": 3 },\n\t\t\t{ \"id\": 4 }\n\t\t]\n\t},\n\t\"searchTemplates\": [\n\t\t{\n\t\t\t\"category\": { \"id\": 0 },\n\t\t\t\"queryPattern\": \"test patter $ERDI\",\n\t\t\t\"customErdiList\": [\n\t\t\t\t{ \"id\": 3 },\n\t\t\t\t{ \"id\": 4 }\n\t\t\t],\n\t\t\t\"formalErdiList\": [\n\t\t\t\t{ \"id\": 169111 }\n\t\t\t],\n\t\t\t\"searchPhrases\": [\n\t\t\t]\n\t\t}\n\t]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/traffic?",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"traffic"
+							],
+							"query": [
+								{
+									"key": "",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Получение трафика по ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"type": "text",
+								"value": "{{oper_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/traffic/22",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"traffic",
+								"22"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Редактирование трафика",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"type": "text",
+								"value": "{{oper_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"meeh_traff\",\n\n\t\"formalErdiUnit\": {\n\t\t\"id\": 22, \n\t\t\"name\": \"meeh traffic 2_lpetkqxm_FORMAL\",\n\t\t\"category\": {\n\t\t\t\"id\": 0\n\t\t},\n\t\t\"formalErdiList\": [\n\t\t\t{ \"id\": 169112 },\n\t\t\t{ \"id\": 169113 },\n\t\t\t{ \"id\": 169114 }\n\t\t]\n\t},\n\t\"customErdiUnit\": {\n\t\t\"id\": 23, \n\t\t\"name\": \"meeh traffic 2_eiebhjot_CUSTOM\",\n\t\t\"category\": {\n\t\t\t\"id\": 0\n\t\t},\n\t\t\"customErdiList\": [\n\t\t]\n\t},\n\t\"searchPhraseUnit\": {\n\t\t\"queryPattern\": \"\",\n\t\t\"category\": {\n\t\t\t\"id\": 0\n\t\t},\n\t\t\"searchPhrases\": [\n\t\t\t{ \"id\": 3 },\n\t\t\t{ \"id\": 4 }\n\t\t]\n\t}\n    \t\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/traffic/22?",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"traffic",
+								"22"
+							],
+							"query": [
+								{
+									"key": "",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Удаление трафика",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"type": "text",
+								"value": "{{oper_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/traffic/7",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"traffic",
+								"7"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Справочники",
+			"item": [
+				{
+					"name": "Получение списка нарушений",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"type": "text",
+								"value": "{{oper_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/violation?",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"violation"
+							],
+							"query": [
+								{
+									"key": "sortingDirection",
+									"value": "ASC",
+									"disabled": true
+								},
+								{
+									"key": "sortingColumn",
+									"value": "id",
+									"disabled": true
+								},
+								{
+									"key": "pageNumber",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "pageSize",
+									"value": "5",
+									"disabled": true
+								},
+								{
+									"key": "query",
+									"value": "12",
+									"disabled": true
+								},
+								{
+									"key": "deleted",
+									"value": "true",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Получение списка поисковых систем",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"type": "text",
+								"value": "{{oper_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/search_system?",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"search_system"
+							],
+							"query": [
+								{
+									"key": "sortingDirection",
+									"value": "ASC",
+									"disabled": true
+								},
+								{
+									"key": "sortingColumn",
+									"value": "id",
+									"disabled": true
+								},
+								{
+									"key": "pageNumber",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "pageSize",
+									"value": "5",
+									"disabled": true
+								},
+								{
+									"key": "name",
+									"value": "exist",
+									"disabled": true
+								},
+								{
+									"key": "hostname",
+									"value": "ru",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "Список средств доступа к запрещённым ресурсам",

@@ -1,0 +1,31 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <changeSet id="rest.0018" author="jspirina">
+
+        <update schemaName="portal"
+                tableName="search_system_parameters">
+            <column name="search_system_url" value="https://www.google.ru" />
+            <column name="input_field_xpath" value="//input[@name=&quot;q&quot;]" />
+            <column name="captcha_xpath" value="//form[@id=&quot;captcha-form&quot;]" />
+            <column name="next_page_xpath" value="//*[@id=&quot;pnnext&quot;]" />
+            <column name="item_link_xpath" value="//div[@class=&quot;g&quot;]//div[@class=&quot;r&quot;]/a[1]" />
+            <column name="result_page_type" value="pagination" />
+            <where>access_tool_id = 16</where>
+        </update>
+
+        <update schemaName="portal"
+                tableName="search_system_parameters">
+            <column name="search_system_url" value="https://yandex.ru" />
+            <column name="input_field_xpath" value="//input[@name=&quot;text&quot;]" />
+            <column name="captcha_xpath" value="//form[@action=&quot;/checkcaptcha&quot;]" />
+            <column name="next_page_xpath" value="//div[contains(@class, &quot;pager &quot;)]/a[last()]" />
+            <column name="item_link_xpath" value="//*[@class=&quot;serp-item&quot;]//div[contains(@class, &quot;organic__path&quot;)]/a[last()]" />
+            <column name="result_page_type" value="pagination" />
+            <where>access_tool_id = 17</where>
+        </update>
+
+    </changeSet>
+</databaseChangeLog>

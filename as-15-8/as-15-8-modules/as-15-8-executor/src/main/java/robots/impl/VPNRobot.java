@@ -1,13 +1,13 @@
 package robots.impl;
 
 import checkUnits.CheckUnit;
-import enums.AccessToolParameters;
+import enums.AccessToolParameter;
 import execution.ExecutionJobResult;
 import execution.ExecutionVpnJobResult;
 import org.openqa.selenium.WebDriver;
 import robots.ProxyUtils;
-import robots.RobotDriverParameters;
-import robots.exceptions.RobotScriptExecutionException;
+import robots.exceptions.ExecutionException;
+import common.ExecutorProperties;
 import robots.utils.HttpResponseHelper;
 import robots.utils.RobotScriptUtils;
 import robots.utils.ScriptUtils;
@@ -34,35 +34,35 @@ public class VPNRobot extends SeleniumRobot {
     CompletableFuture<Void> etalonPageGetterFuture;
 
 
-    public VPNRobot(RobotDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams) {
+    public VPNRobot(Map<AccessToolParameter, String> scriptParams) {
 
-    	super(driverParams, scriptParams,
+    	super(scriptParams,
     			ProxyUtils.getFullProxy(
-					scriptParams.get(AccessToolParameters.PROXY_TYPE),
-					scriptParams.get(AccessToolParameters.PROXY_DNS_NAME),
-					scriptParams.get(AccessToolParameters.PROXY_PORT),
-					scriptParams.get(AccessToolParameters.PROXY_USER),
-					scriptParams.get(AccessToolParameters.PROXY_PASSWORD)
+					scriptParams.get(AccessToolParameter.PROXY_TYPE),
+					scriptParams.get(AccessToolParameter.PROXY_DNS_NAME),
+					scriptParams.get(AccessToolParameter.PROXY_PORT),
+					scriptParams.get(AccessToolParameter.PROXY_USER),
+					scriptParams.get(AccessToolParameter.PROXY_PASSWORD)
     			)
     		);
 
         this.useEtalon = ScriptUtils.useEtalon(scriptParams);
 
     	etalonProxy = ProxyUtils.getFullProxy(
-    			scriptParams.get(AccessToolParameters.ETALON_PROXY_TYPE),
-    			scriptParams.get(AccessToolParameters.ETALON_PROXY_HOST),
-    			scriptParams.get(AccessToolParameters.ETALON_PROXY_PORT),
-    			scriptParams.get(AccessToolParameters.ETALON_PROXY_USERNAME),
-    			scriptParams.get(AccessToolParameters.ETALON_PROXY_PASSWORD)
+                ExecutorProperties.getEtalon().getProxy().getType(),
+                ExecutorProperties.getEtalon().getProxy().getHost(),
+                ExecutorProperties.getEtalon().getProxy().getPort(),
+                ExecutorProperties.getEtalon().getProxy().getUsername(),
+                ExecutorProperties.getEtalon().getProxy().getPassword()
 			);
-     	this.stubUrl = scriptParams.get(AccessToolParameters.STUB_URL);
+     	this.stubUrl = scriptParams.get(AccessToolParameter.STUB_URL);
     }
 
     @Override
-	public ExecutionJobResult execute(CheckUnit checkUnit) throws RobotScriptExecutionException {
+	public ExecutionJobResult execute(CheckUnit checkUnit) throws ExecutionException {
         // работате только с хромом!
         if (!checkBrowserChrome())
-            throw new RobotScriptExecutionException("Ошибка, неверный браузер! Для данного робота поддерживатся только браузер CHROME!");
+            throw new ExecutionException("Ошибка, неверный браузер! Для данного робота поддерживатся только браузер CHROME!");
 
         String url = ScriptUtils.getCheckUnitValue(checkUnit);
 
@@ -96,7 +96,7 @@ public class VPNRobot extends SeleniumRobot {
                             message.setFinalUrlPage(finalUrl);
                         }
                     }
-                    catch (RobotScriptExecutionException e) {
+                    catch (ExecutionException e) {
                         throw new CompletionException(e);
                     }
                     finally {
@@ -131,7 +131,7 @@ public class VPNRobot extends SeleniumRobot {
                             if(pageResult.errorCodeChrome == null){
                                 message.setFinalUrlPageEtalon(finalUrl);
                             }
-                        } catch (RobotScriptExecutionException e) {
+                        } catch (ExecutionException e) {
                             throw new CompletionException(e);
                         } finally {
                             close(etalonDriver);
@@ -152,10 +152,10 @@ public class VPNRobot extends SeleniumRobot {
                 throw possible;
             }
             catch(Throwable impossible) {
-                throw new RobotScriptExecutionException(impossible);
+                throw new ExecutionException(impossible);
             }
         } catch (CancellationException ex) {
-        	throw new RobotScriptExecutionException("Робот был остановлен", ex);
+        	throw new ExecutionException("Робот был остановлен", ex);
         }
 
         message.setUseEtalon(this.useEtalon);
@@ -164,7 +164,7 @@ public class VPNRobot extends SeleniumRobot {
     }
 
     private boolean checkBrowserChrome(){
-        return "chrome".equalsIgnoreCase(getDriverParams().getBrowserName());
+        return "chrome".equalsIgnoreCase(getScriptParams().get(AccessToolParameter.BROWSER));
     }
 
     @Override

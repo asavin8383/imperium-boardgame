@@ -4,8 +4,8 @@ import checkUnits.CheckUnitType;
 import common.ApplicationConfiguration;
 import enums.AccessToolUnit;
 import model.catalog.AccessTool;
-import model.result.ArrangementResult;
 import model.schedule.Schedule;
+import model.schedule.ScheduleCheckUnit;
 import model.schedule.SchedulePeriod;
 import model.schedule.SchedulePeriodArrangement;
 import model.task.Arrangement;
@@ -14,7 +14,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import services.schedule.ScheduleService;
 
@@ -28,7 +27,6 @@ import java.util.TreeSet;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {ApplicationConfiguration.class})
 @PropertySource("classpath:application.yml")
-@ActiveProfiles("dev_ashabalin")
 public class TestSchedule {
 
     @Autowired
@@ -39,15 +37,17 @@ public class TestSchedule {
     @Test
     public void testSchedule(){
 
-        Map<Arrangement, TreeSet<ArrangementResult>> scheduleArrangements = new HashMap<>();
+        int count = 1000;
+
+        Map<Arrangement, TreeSet<ScheduleCheckUnit>> scheduleArrangements = new HashMap<>();
 
         scheduleArrangements.put(
-            createArrangement("arr1", AccessToolUnit.GOOGLE, "09:00","12:00"),
-            generateCheckUnits( 45000));
+            createArrangement("arr1", "GOOGLE", "02:51","11:30"),
+            generateCheckUnits( count));
 
-        scheduleArrangements.put(
-            createArrangement("arr2", AccessToolUnit.YANDEX,"10:30", "11:30"),
-            generateCheckUnits(15000));
+        /*scheduleArrangements.put(
+            createArrangement("arr2", AccessToolUnit.YANDEX,"09:00", "10:00"),
+            generateCheckUnits(3000));
 
         scheduleArrangements.put(
             createArrangement("arr3", AccessToolUnit.KASPERSKY,"11:15", "15:20"),
@@ -55,7 +55,7 @@ public class TestSchedule {
 
         scheduleArrangements.put(
             createArrangement("arr4", AccessToolUnit.TORGUARD,"13:10", "16:30"),
-            generateCheckUnits(25000));
+            generateCheckUnits(25000));*/
 
         Schedule schedule = scheduleService.create(scheduleArrangements);
 
@@ -68,10 +68,7 @@ public class TestSchedule {
         }
     }
 
-    private Arrangement createArrangement(String name, AccessToolUnit accessToolUnit, String startTime, String endTime){
-        AccessTool accessTool = new AccessTool();
-        accessTool.setName(accessToolUnit);
-
+    private Arrangement createArrangement(String name, String accessTool, String startTime, String endTime){
         Arrangement arrangement = new Arrangement();
         arrangement.setTitle(name);
         arrangement.setAccessTool(accessTool);
@@ -80,10 +77,10 @@ public class TestSchedule {
         return arrangement;
     }
 
-    private TreeSet<ArrangementResult> generateCheckUnits(int count){
-        TreeSet<ArrangementResult> checkUnits = new TreeSet<>(Comparator.comparing(ArrangementResult::getCheckUnitValue));
+    private TreeSet<ScheduleCheckUnit> generateCheckUnits(int count){
+        TreeSet<ScheduleCheckUnit> checkUnits = new TreeSet<>(Comparator.comparing(ScheduleCheckUnit::getCheckUnitValue));
         for(int i = 0; i < count; i++){
-            ArrangementResult checkUnit = new ArrangementResult();
+            ScheduleCheckUnit checkUnit = new ScheduleCheckUnit();
             checkUnit.setCheckUnitType(CheckUnitType.URL);
             checkUnit.setCheckUnitValue("http://test"+i+".com");
             checkUnits.add(checkUnit);

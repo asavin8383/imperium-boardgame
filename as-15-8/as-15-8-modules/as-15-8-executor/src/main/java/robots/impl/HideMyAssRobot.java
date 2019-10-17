@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import enums.AccessToolParameter;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -17,11 +18,9 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import checkUnits.CheckUnit;
-import enums.AccessToolParameters;
 import execution.ExecutionJobResult;
 import lombok.extern.slf4j.Slf4j;
-import robots.RobotDriverParameters;
-import robots.exceptions.RobotScriptExecutionException;
+import robots.exceptions.ExecutionException;
 import robots.exceptions.TimeoutCheckingBrowserException;
 import robots.exceptions.TimeoutScriptException;
 import robots.utils.CloudflareUtils;
@@ -44,12 +43,12 @@ public class HideMyAssRobot extends AnonymizerRobot {
     private static final String AGREE_BUTTON_TEXT = "Agree & Connect".toLowerCase();
 
 
-    public HideMyAssRobot(RobotDriverParameters driverParams, Map<AccessToolParameters, String> scriptParams) {
-		super(driverParams, scriptParams);
+    public HideMyAssRobot(Map<AccessToolParameter, String> scriptParams) {
+		super(scriptParams);
 	}
 
     @Override
-    public ExecutionJobResult execute(CheckUnit checkUnit) throws RobotScriptExecutionException {
+    public ExecutionJobResult execute(CheckUnit checkUnit) throws ExecutionException {
 
         driver.manage().timeouts().pageLoadTimeout(WAIT_TIMEOUT_PAGE, TimeUnit.SECONDS);
 
@@ -92,7 +91,7 @@ public class HideMyAssRobot extends AnonymizerRobot {
                 log.info("Обнаружена captcha-form на HideMyAss");
                 return getErrorMessage(HIDEMYASS_CAPTCHA);
                /* if (false && !this.ignoreCaptcha) {
-                    throw new Captcha_RobotScriptExecutionException("Обнаружена captcha-form на HideMyAss");
+                    throw new Captcha_ExecutionException("Обнаружена captcha-form на HideMyAss");
                 }*/
             }
 

@@ -1,195 +1,188 @@
-server:
-    port: 11000
-logging:
-    config: config/logback-spring.xml
 spring:
-    kafka:
-        bootstrap-servers: 192.168.5.12:9094,192.168.5.184:9094,192.168.5.211:9094
-        group: dispatchers
-        auto-offset-reset: earliest
-    cloud:
-        stream:
-            bindings:
-                incomingArrangements:
-                    destination: arrangements
-                    content-type: application/json
-                    group: dispatchers
-                arrangementNotifications:
-                    content-type: application/json
-                    destination: arrangement_notifications
-            kafka:
-                binder:
-                    brokers: 192.168.5.12:9094,192.168.5.184:9094,192.168.5.211:9094
-                bindings:
-                    incomingArrangements:
-                        consumer:
-                            startOffset: earliest
-    datasource:
-        test-while-idle: true
-        validation-query: SELECT 1;
-        time-between-eviction-runs-millis: 300000
-        max-active: 5
-        username: as_user
-        password: as_user
-    jpa:
-        properties:
-            hibernate:
-                jdbc:
-                    lob:
-                        non_contextual_creation: true
-                format_sql: true
-        databasePlatform: org.hibernate.dialect.PostgreSQL9Dialect
+  cloud:
+    stream:
+      bindings:
+        jobs:
+          destination: jobs
+        incomingArrangements:
+          destination: arrangements
+          content-type: application/json
+          group: dispatchers
+        arrangementNotifications:
+          content-type: application/json
+          destination: arrangement_notifications
+      kafka:
+        bindings:
+          incomingArrangements:
+            consumer:
+              startOffset: earliest
+              application-id: dispatcher
+  datasource:
+    test-while-idle: true
+    validation-query: SELECT 1;
+    time-between-eviction-runs-millis: 300000
+    max-active: 5
+    username: as_user
+    password: as_user
+  jpa:
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
+        format_sql: true
+    databasePlatform: org.hibernate.dialect.PostgreSQL9Dialect
 
 ---
 
 spring:
-    profiles: prod
-    datasource:
-        url: jdbc:postgresql://10.97.220.144:5432/asdb
-    kafka:
-        bootstrap-servers: 10.97.220.141:9094,10.97.220.142:9094,10.97.220.143:9094
-        group: dispatchers
-        auto-offset-reset: earliest
-        arrangement-tasks-topic: arrangements
-        jobs-topic: jobs
-        analysis-results-topic: analysis_results
-        arrangement-notifications-topic: arrangement_notifications
-        notifications-topic: job_notifications
-        control-topic: exec_control
-        analysis-results-concurrency: 12
-        notifications-concurrency: 12
-    cloud:
-        stream:
-            kafka:
-                binder:
-                    brokers: 10.97.220.141:9094,10.97.220.142:9094,10.97.220.143:9094
+  profiles: prod
+  datasource:
+    url: jdbc:postgresql://10.97.220.144:5432/asdb
+  kafka:
+    bootstrap-servers: 10.97.220.141:9094,10.97.220.142:9094,10.97.220.143:9094
+    group: dispatchers
+    auto-offset-reset: earliest
+    arrangement-tasks-topic: arrangements
+    jobs-topic: jobs
+    analysis-results-topic: analysis_results
+    arrangement-notifications-topic: arrangement_notifications
+    notifications-topic: job_notifications
+    control-topic: exec_control
+    analysis-results-concurrency: 12
+    notifications-concurrency: 12
+  cloud:
+    stream:
+      kafka:
+        binder:
+          brokers: 10.97.220.141:9094,10.97.220.142:9094,10.97.220.143:9094
 
 ---
 
 spring:
-    profiles: test
-    datasource:
-        url: jdbc:postgresql://192.168.5.195:5432/asdb_test
-    kafka:
-        arrangement-tasks-topic: arrangements
-        jobs-topic: jobs
-        analysis-results-topic: analysis_results
-        arrangement-notifications-topic: arrangement_notifications
-        notifications-topic: job_notifications
-        control-topic: exec_control
-        analysis-results-concurrency: 12
-        notifications-concurrency: 12
+  profiles: test
+  datasource:
+    url: jdbc:postgresql://192.168.5.195:5432/asdb
+  kafka:
+    arrangement-tasks-topic: arrangements
+    jobs-topic: jobs
+    analysis-results-topic: analysis_results
+    arrangement-notifications-topic: arrangement_notifications
+    notifications-topic: job_notifications
+    control-topic: exec_control
+    analysis-results-concurrency: 12
+    notifications-concurrency: 12
 
 ---
 
 spring:
-    profiles: dev_ashabalin
-    datasource:
-        url: jdbc:postgresql://192.168.5.195:5432/asdb_test
-    kafka:
-        arrangement-tasks-topic: arrangements_ashabalin
-        jobs-topic: jobs_ashabalin
-        analysis-results-topic: analysis_results_ashabalin
-        arrangement-notifications-topic: arrangement_notifications_ashabalin
-        notifications-topic: job_notifications_ashabalin
-        control-topic: exec_control_ashabalin
-        analysis-results-concurrency: 12
-        notifications-concurrency: 12
-    cloud:
-        stream:
-            bindings:
-                incomingArrangements:
-                    destination: arrangements_ashabalin
-                arrangementNotifications:
-                    destination: arrangement_notifications_ashabalin
+  profiles: dev_ashabalin
+  datasource:
+    url: jdbc:postgresql://192.168.5.195:5432/asdb_test
+  kafka:
+    arrangement-tasks-topic: arrangements_ashabalin
+    jobs-topic: jobs_ashabalin
+    analysis-results-topic: analysis_results_ashabalin
+    arrangement-notifications-topic: arrangement_notifications_ashabalin
+    notifications-topic: job_notifications_ashabalin
+    control-topic: exec_control_ashabalin
+    analysis-results-concurrency: 12
+    notifications-concurrency: 12
+  cloud:
+    stream:
+      bindings:
+        incomingArrangements:
+          destination: arrangements_ashabalin
+        arrangementNotifications:
+          destination: arrangement_notifications_ashabalin
 
 ---
 
 spring:
-    profiles: dev_asinyavin
-    datasource:
-        url: jdbc:postgresql://192.168.5.195:5432/asdb_test
-    kafka:
-        arrangement-tasks-topic: arrangements_asinyavin
-        jobs-topic: jobs_asinyavin
-        analysis-results-topic: analysis_results_asinyavin
-        arrangement-notifications-topic: arrangement_notifications_asinyavin
-        notifications-topic: job_notifications_asinyavin
-        control-topic: exec_control_asinyavin
-        analysis-results-concurrency: 12
-        notifications-concurrency: 12
-    cloud:
-        stream:
-            bindings:
-                incomingArrangements:
-                    destination: arrangements_asinyavin
-                arrangementNotifications:
-                    destination: arrangement_notifications_asinyavin
+  profiles: dev_asinyavin
+  datasource:
+    url: jdbc:postgresql://192.168.5.195:5432/asdb_test
+  kafka:
+    arrangement-tasks-topic: arrangements_asinyavin
+    jobs-topic: jobs_asinyavin
+    analysis-results-topic: analysis_results_asinyavin
+    arrangement-notifications-topic: arrangement_notifications_asinyavin
+    notifications-topic: job_notifications_asinyavin
+    control-topic: exec_control_asinyavin
+    analysis-results-concurrency: 12
+    notifications-concurrency: 12
+  cloud:
+    stream:
+      bindings:
+        incomingArrangements:
+          destination: arrangements_asinyavin
+        arrangementNotifications:
+          destination: arrangement_notifications_asinyavin
 
 ---
 
 spring:
-    profiles: dev_asavin
-    datasource:
-        url: jdbc:postgresql://192.168.5.195:5432/asdb_test
-    kafka:
-        arrangement-tasks-topic: arrangements_asavin
-        jobs-topic: jobs_asavin
-        analysis-results-topic: analysis_asavin
-        arrangement-notifications-topic: arrangement_notifications_asavin
-        notifications-topic: job_notifications_asavin
-        control-topic: exec_control_asavin
-        analysis-results-concurrency: 12
-        notifications-concurrency: 12
-    cloud:
-        stream:
-            bindings:
-                incomingArrangements:
-                    destination: arrangements_asavin
-                arrangementNotifications:
-                    destination: arrangement_notifications_asavin
+  profiles: dev_asavin
+  datasource:
+    url: jdbc:postgresql://192.168.5.195:5432/asdb_test
+  kafka:
+    arrangement-tasks-topic: arrangements_asavin
+    jobs-topic: jobs_asavin
+    analysis-results-topic: analysis_asavin
+    arrangement-notifications-topic: arrangement_notifications_asavin
+    notifications-topic: job_notifications_asavin
+    control-topic: exec_control_asavin
+    analysis-results-concurrency: 12
+    notifications-concurrency: 12
+  cloud:
+    stream:
+      bindings:
+        incomingArrangements:
+          destination: arrangements_asavin
+        arrangementNotifications:
+          destination: arrangement_notifications_asavin
 ---
 
 spring:
-    profiles: dev_pvorobiev
-    datasource:
-        url: jdbc:postgresql://192.168.5.195:5432/asdb_test
-    kafka:
-        arrangement-tasks-topic: arrangements_pvorobiev
-        jobs-topic: jobs_pvorobiev
-        analysis-results-topic: analysis_results_pvorobiev
-        arrangement-notifications-topic: arrangement_notifications_pvorobiev
-        notifications-topic: job_notifications_pvorobiev
-        control-topic: exec_control_pvorobiev
-        analysis-results-concurrency: 12
-        notifications-concurrency: 12
-    cloud:
-        stream:
-            bindings:
-                incomingArrangements:
-                    destination: arrangements_pvorobiev
-                arrangementNotifications:
-                    destination: arrangement_notifications_pvorobiev
+  profiles: dev_pvorobiev
+  datasource:
+    url: jdbc:postgresql://192.168.5.195:5432/asdb_test
+  kafka:
+    arrangement-tasks-topic: arrangements_pvorobiev
+    jobs-topic: jobs_pvorobiev
+    analysis-results-topic: analysis_results_pvorobiev
+    arrangement-notifications-topic: arrangement_notifications_pvorobiev
+    notifications-topic: job_notifications_pvorobiev
+    control-topic: exec_control_pvorobiev
+    analysis-results-concurrency: 12
+    notifications-concurrency: 12
+  cloud:
+    stream:
+      bindings:
+        incomingArrangements:
+          destination: arrangements_pvorobiev
+        arrangementNotifications:
+          destination: arrangement_notifications_pvorobiev
 
 ---
 
 spring:
-    profiles: dev_jspirina
-    datasource:
-        url: jdbc:postgresql://192.168.5.195:5432/asdb_test
-    kafka:
-        arrangement-tasks-topic: arrangements_jspirina
-        jobs-topic: jobs_jspirina
-        analysis-results-topic: analysis_results_jspirina
-        arrangement-notifications-topic: arrangement_notifications_jspirina
-        notifications-topic: job_notifications_jspirina
-        control-topic: exec_control_jspirina
-        analysis-results-concurrency: 12
-        notifications-concurrency: 12
-    cloud:
-        stream:
-            bindings:
-                incomingArrangements:
-                    destination: arrangements_jspirina
-                arrangementNotifications:
-                    destination: arrangement_notifications_jspirina
+  profiles: dev_jspirina
+  datasource:
+    url: jdbc:postgresql://192.168.5.195:5432/asdb_test
+  kafka:
+    arrangement-tasks-topic: arrangements_jspirina
+    jobs-topic: jobs_jspirina
+    analysis-results-topic: analysis_results_jspirina
+    arrangement-notifications-topic: arrangement_notifications_jspirina
+    notifications-topic: job_notifications_jspirina
+    control-topic: exec_control_jspirina
+    analysis-results-concurrency: 12
+    notifications-concurrency: 12
+  cloud:
+    stream:
+      bindings:
+        incomingArrangements:
+          destination: arrangements_jspirina
+        arrangementNotifications:
+          destination: arrangement_notifications_jspirina

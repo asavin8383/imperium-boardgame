@@ -1,18 +1,10 @@
 package robots.impl;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
-
-import javax.imageio.ImageIO;
-
+import checkUnits.CheckUnit;
+import enums.AccessToolParameter;
+import execution.ExecutionJobResult;
+import execution.ExecutionPSJobResult;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -20,16 +12,18 @@ import org.json.JSONObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
-
-import checkUnits.CheckUnit;
-import checkUnits.CheckUnitType;
-import execution.ExecutionJobResult;
-import execution.ExecutionPSJobResult;
-import lombok.extern.slf4j.Slf4j;
 import robots.Robot;
-import robots.exceptions.RobotScriptExecutionException;
+import robots.exceptions.ExecutionException;
 import robots.utils.EqualityTest;
 import robots.utils.ScreenshotFromTextMaker;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class GoogleApiRobot implements Robot{
@@ -49,14 +43,15 @@ public class GoogleApiRobot implements Robot{
 	
 	private int searchLimit;
 	
-	public GoogleApiRobot(String searchSystemID, String key, String region, int searchLimit) {
-		this.searchSystemID = searchSystemID;
-		this.key = key;
-		this.searchLimit = searchLimit;
+	public GoogleApiRobot(Map<AccessToolParameter, String> scriptParams) {
+		this.searchSystemID = scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_ID);
+		this.key = scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_KEY);
+		this.region = scriptParams.get(AccessToolParameter.SEARCH_REGION);
+		this.searchLimit = Integer.parseInt(scriptParams.get(AccessToolParameter.SEARCH_RESULT_LIMIT));
 	}
-	
+
 	@Override
-	public ExecutionJobResult run(CheckUnit checkUnit) throws RobotScriptExecutionException {
+	public ExecutionJobResult run(CheckUnit checkUnit) throws ExecutionException {
 		try {
 			EqualityTest test = EqualityTest.forCheckUnit(checkUnit);
 			Map<String, List<String>> urls = searchUrlsInGoogle(checkUnit.getValue());
@@ -69,14 +64,14 @@ public class GoogleApiRobot implements Robot{
 			}
 			return createExecutionResult(false, urls.keySet().iterator().next());
 		} catch(Exception ex) {
-			throw new RobotScriptExecutionException(ex);
+			throw new ExecutionException(ex);
 		}
 	}
 
 	@Override
 	public void destroy() throws IOException { }
 	
-	private Map<String, List<String>> searchUrlsInGoogle(String query) throws JSONException, RobotScriptExecutionException {
+	private Map<String, List<String>> searchUrlsInGoogle(String query) throws JSONException, ExecutionException {
 		String url = createSearchUrl(query);
 
 		log.info("Поиск в Google по запросу: "+query);
@@ -105,7 +100,7 @@ public class GoogleApiRobot implements Robot{
 					break;
 				}
 			} else {
-				throw new RobotScriptExecutionException("Ошибка! От Google получен ответ, отличный от ожижаемого: status: "+response.getStatusCodeValue()+", body: "+response.getBody());
+				throw new ExecutionException("Ошибка! От Google получен ответ, отличный от ожижаемого: status: "+response.getStatusCodeValue()+", body: "+response.getBody());
 			}
 		}
 		return resp;
@@ -146,7 +141,7 @@ public class GoogleApiRobot implements Robot{
     	return builder.toString();
     }
     
-	public static void main(String[] args) throws RobotScriptExecutionException, IOException {
+	/*public static void main(String[] args) throws ExecutionException, IOException {
 		GoogleApiRobot script = new GoogleApiRobot("008760942635674233646:iomr_wlnhoi", "AIzaSyDD-B6NrOjC_Vyjhezdo8EruwH-xrqdT-8", "countryRU", 15);
 		ExecutionPSJobResult result = (ExecutionPSJobResult)script.run(new CheckUnit(CheckUnitType.URL, "https://cannabay.org"));
 		System.out.println(result.isLinkFound());
@@ -156,5 +151,5 @@ public class GoogleApiRobot implements Robot{
 		ImageIO.write(bImage2, "png", new File("D:\\output.png") );
 		
 		script.destroy();
-	}
+	}*/
 }

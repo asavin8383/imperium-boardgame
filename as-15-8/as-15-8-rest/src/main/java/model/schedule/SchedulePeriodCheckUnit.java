@@ -2,7 +2,6 @@ package model.schedule;
 
 import lombok.Data;
 import model.enums.SchedulePeriodCheckUnitStatus;
-import model.result.ArrangementResult;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -21,7 +20,7 @@ public class SchedulePeriodCheckUnit {
 
     @OneToOne(optional = false, fetch = FetchType.LAZY)
     @MapsId
-    private ArrangementResult checkUnit;
+    private ScheduleCheckUnit checkUnit;
 
     @Column(nullable = false)
     private Long executionNumber;

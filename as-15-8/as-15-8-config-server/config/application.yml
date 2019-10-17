@@ -1,0 +1,87 @@
+server:
+  port: 15802
+logging:
+  config: config/logback-spring.xml
+spring:
+  application.name: config_server
+  profiles.include: jdbc
+  liquibase:
+    enabled: true
+    change-log: classpath:db/db.changelog.master.xml
+  datasource:
+    test-while-idle: true
+    validation-query: SELECT 1;
+    time-between-eviction-runs-millis: 300000
+    max-active: 5
+    username: as_user
+    password: as_user
+  jpa:
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
+        format_sql: true
+    databasePlatform: org.hibernate.dialect.PostgreSQL9Dialect
+  cloud:
+    bus.trace.enabled: true
+    config:
+      bus:
+        enabled: true
+      server.jdbc:
+        sql: SELECT key, value from config.config where application=? and profile=? and label=?
+        order: 1
+        default-profile: test
+        default-label: latest
+    stream:
+      bindings:
+        springCloudBusInput:
+          group: config_server
+      kafka.binder:
+        brokers: 192.168.5.12:9094,192.168.5.184:9094,192.168.5.211:9094
+management.endpoints.web.exposure.include: bus-refresh
+
+---
+
+spring:
+  profiles: prod
+  datasource:
+    url: jdbc:postgresql://10.97.220.144:5432/asdb
+  cloud:
+    stream:
+      bindings:
+        springCloudBusInput:
+          destination: bus_config_output
+        springCloudBusOutput:
+          destination: bus_config_input
+
+---
+
+spring:
+  profiles: test
+  datasource:
+    url: jdbc:postgresql://192.168.5.195:5432/asdb_test
+  cloud:
+    stream:
+      bindings:
+        springCloudBusInput:
+          destination: bus_config_output
+        springCloudBusOutput:
+          destination: bus_config_input
+
+---
+
+spring:
+  profiles: dev_ashabalin
+  datasource:
+    url: jdbc:postgresql://192.168.5.195:5432/asdb_test
+  liquibase:
+    enabled: false
+    change-log: classpath:/db/db.changelog.master.xml
+  cloud:
+    stream:
+      bindings:
+        springCloudBusInput:
+          destination: bus_config_output_ashabalin
+        springCloudBusOutput:
+          destination: bus_config_input_ashabalin

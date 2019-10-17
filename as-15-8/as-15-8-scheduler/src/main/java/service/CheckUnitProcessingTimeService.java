@@ -10,28 +10,28 @@ import java.util.Optional;
 public class CheckUnitProcessingTimeService {
 
     private static Map<AccessToolUnit, Map<CheckUnitType, Integer>> checkUnitProcessingTimes = new HashMap<AccessToolUnit, Map<CheckUnitType, Integer>>(){{
-        put(AccessToolUnit.GOOGLE, new HashMap<CheckUnitType, Integer>(){{
+        put(AccessToolUnit.SEARCH_SYSTEM, new HashMap<CheckUnitType, Integer>(){{
             put(CheckUnitType.URL, 30);
             put(CheckUnitType.IP_V4, 30);
             put(CheckUnitType.IP_V6, 30);
             put(CheckUnitType.IP_V4_SUBNET, 120);
             put(CheckUnitType.IP_V6_SUBNET, 120);
         }});
-        put(AccessToolUnit.YANDEX, new HashMap<CheckUnitType, Integer>(){{
+        put(AccessToolUnit.VPN, new HashMap<CheckUnitType, Integer>(){{
             put(CheckUnitType.URL, 30);
             put(CheckUnitType.IP_V4, 30);
             put(CheckUnitType.IP_V6, 30);
             put(CheckUnitType.IP_V4_SUBNET, 120);
             put(CheckUnitType.IP_V6_SUBNET, 120);
         }});
-        put(AccessToolUnit.KASPERSKY, new HashMap<CheckUnitType, Integer>(){{
+        put(AccessToolUnit.PROXY, new HashMap<CheckUnitType, Integer>(){{
             put(CheckUnitType.URL, 30);
             put(CheckUnitType.IP_V4, 30);
             put(CheckUnitType.IP_V6, 30);
             put(CheckUnitType.IP_V4_SUBNET, 120);
             put(CheckUnitType.IP_V6_SUBNET, 120);
         }});
-        put(AccessToolUnit.TORGUARD, new HashMap<CheckUnitType, Integer>(){{
+        put(AccessToolUnit.HIDEMYASS, new HashMap<CheckUnitType, Integer>(){{
             put(CheckUnitType.URL, 30);
             put(CheckUnitType.IP_V4, 30);
             put(CheckUnitType.IP_V6, 30);

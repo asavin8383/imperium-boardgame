@@ -7,6 +7,8 @@ logging:
 spring:
     application:
         name: as15-8-rest
+    liquibase:
+      enabled: false
     datasource:
         test-while-idle: true
         validation-query: SELECT 1;
@@ -98,6 +100,9 @@ spring:
     jpa:
         hibernate:
             ddl-auto: none
+    liquibase:
+        enabled: true
+        change-log: classpath:data/changelog/db.changelog.master.xml
     datasource:
         url: jdbc:postgresql://192.168.5.195:5432/asdb
     cloud:
@@ -121,7 +126,7 @@ spring:
             ddl-auto: none
     liquibase:
         enabled: true
-        change-log: classpath:/data/changelog/db.changelog.master.xml
+        change-log: classpath:data/changelog/db.changelog.master.xml
     datasource:
         url: jdbc:postgresql://192.168.5.195:5432/asdb_test
     cloud:
@@ -201,6 +206,9 @@ spring:
     jpa:
         hibernate:
             ddl-auto: none
+    liquibase:
+        enabled: true
+        change-log: classpath:/data/changelog/db.changelog.master.xml
     datasource:
         url: jdbc:postgresql://192.168.5.195:5432/asdb_test
     cloud:

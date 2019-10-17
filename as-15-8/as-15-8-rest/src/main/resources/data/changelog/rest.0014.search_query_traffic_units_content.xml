@@ -1,0 +1,41 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd
+    http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <changeSet id="rest.0014" author="asavin">
+        <createTable tableName="search_query_traffic_units_content" schemaName="portal">
+            <column name="id" type="bigint" autoIncrement="true" >
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="traffic_unit_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="content_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint
+                baseTableSchemaName="portal"
+                baseTableName="search_query_traffic_units_content"
+                baseColumnNames="traffic_unit_id"
+                constraintName="fk_search_query_traffic_units"
+                referencedTableSchemaName="portal"
+                referencedTableName="search_query_traffic_units"
+                referencedColumnNames="traffic_unit_id"
+                onUpdate="CASCADE"
+                onDelete="CASCADE"/>
+        <addForeignKeyConstraint
+                baseTableSchemaName="portal"
+                baseTableName="search_query_traffic_units_content"
+                baseColumnNames="content_id"
+                constraintName="fk_content"
+                referencedTableSchemaName="sor"
+                referencedTableName="content"
+                referencedColumnNames="id"
+                onUpdate="CASCADE"
+                onDelete="CASCADE"/>
+    </changeSet>
+</databaseChangeLog>

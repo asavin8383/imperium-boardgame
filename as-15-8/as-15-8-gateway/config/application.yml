@@ -1,0 +1,56 @@
+server:
+  port: 80
+logging:
+  config: config/logback-spring.xml
+spring:
+  application.name: gateway
+zuul:
+  debug.request: true
+
+---
+
+spring:
+  profiles: prod
+zuul:
+  routes:
+    pod:
+      path: /pod/**
+      url: http://10.97.220.146:15801
+    config:
+      path: /config/**
+      url: http://10.97.220.145:15802
+    ppm:
+      path: /**
+      url: http://10.97.220.145:15800
+
+---
+
+spring:
+  profiles: test
+zuul:
+  routes:
+    pod:
+      path: /pod/**
+      url: http://192.168.5.210:15801
+    config:
+      path: /config/**
+      url: http://192.168.5.253:15802
+    ppm:
+      path: /**
+      url: http://192.168.5.253:15800
+
+---
+
+spring:
+  profiles: dev_ashabalin, dev_asavin, dev_pvorobiev, dev_jspirina, dev_asinyavin
+zuul:
+  routes:
+    pod:
+      path: /pod/**
+      url: http://localhost:15801
+    config:
+      path: /config/**
+      url: http://localhost:15802
+    ppm:
+      path: /**
+      url: http://localhost:15800

@@ -17,6 +17,12 @@ services:
               target: /config/application.yml
             - source: dispatcher-logback
               target: /config/logback-spring.xml
+        deploy:
+            placement:
+                constraints:
+                    - node.hostname == as158-pmk
+            mode: replicated
+            replicas: 1
     executor:
         image: harbor.ec-leasing.ru/as_15_8/as-15-8-executor:latest
         deploy:
@@ -37,7 +43,11 @@ services:
     analyzer:
         image: harbor.ec-leasing.ru/as_15_8/as-15-8-analyzer:latest
         deploy:
-            mode: global
+            placement:
+                constraints:
+                    - node.hostname == as158-pmk
+            mode: replicated
+            replicas: 1
         networks:
             - as-15-8-net
         environment:
