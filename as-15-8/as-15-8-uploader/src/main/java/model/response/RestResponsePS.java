@@ -8,7 +8,7 @@ public class RestResponsePS {
     public boolean status;
     public PSResponse response;
 
-    public List<PEntry> getListPSEntry(){
+    public List<PSEntry> getListPSEntry(){
         return response.PSList.stream()
                 .map(entryContainer -> entryContainer.PS)
                 .collect(Collectors.toList());
@@ -20,7 +20,7 @@ class PSResponse{
 }
 
 class PSEntryContainer {
-    public PEntry PS;
+    public PSEntry PS;
 }
 
 

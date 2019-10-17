@@ -8,7 +8,7 @@ public class RestResponsePASD {
     public boolean status;
     public PSADResponse response;
 
-    public List<PEntry> getListPSEntry(){
+    public List<PSEntry> getListPSEntry(){
         return response.PASDList.stream()
                 .map(entryContainer -> entryContainer.PASD)
                 .collect(Collectors.toList());
@@ -20,7 +20,7 @@ class PSADResponse {
 }
 
 class PSADEntryContainer {
-    public PEntry PASD;
+    public PSEntry PASD;
 }
 
 
