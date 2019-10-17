@@ -9,5 +9,7 @@
     <include file="data/changelog/uploader.0002.addon_change.xml"/>
     <include file="data/changelog/uploader.0003.parameters.xml"/>
     <include file="data/changelog/uploader.0005.make_history.xml"/>
+    <include file="data/changelog/uploader.0006.PSList.xml"/>
+    <include file="data/changelog/uploader.0007.PASDList.xml"/>
 
 </databaseChangeLog>
