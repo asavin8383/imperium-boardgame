@@ -4,6 +4,7 @@ import exceptions.ExceptionErdiParser;
 import lombok.extern.slf4j.Slf4j;
 import model.rest.SubType;
 import model.response.*;
+import model.rest.control.PodInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -53,6 +54,21 @@ public class RestApiHelper {
 
         this.restTemplate = restTemplate;
     }
+
+
+    public PodInfo getDateInfo(){
+        ResponseEntity<RestResponseDumpDate> entity = restTemplate.exchange(
+                baseUrl + "getLastDumpDate/",
+                HttpMethod.GET, null, RestResponseDumpDate.class);
+
+        System.out.println("**************");
+        RestResponseDumpDate resp = entity.getBody();
+        Long date = resp.getDumpLongDate();
+
+        PodInfo podInfo = new PodInfo(new Date(date), new Date(date));
+        return podInfo;
+    }
+
 
     public void test1(){
         ResponseEntity<RestResponsePS> entity = restTemplate.exchange(
