@@ -2,7 +2,7 @@ FROM openjdk:8-jdk-alpine
 
 LABEL Alex Shabalin <ashabalin@ec-leasing.ru>
 
-EXPOSE 15880
+EXPOSE 80
 
 ENV APP_PATH="/as-15-8-gateway.jar" \
     LOG_PATH="/log" \
