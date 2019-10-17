@@ -48,14 +48,14 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 	public ExecutionJobResult run(CheckUnitJob checkUnitJob) throws ExecutionException {
 		try {
 			String robotName = "jobID = " + checkUnitJob.getJobID() +
-                    " accessTool = " + checkUnitJob.getAccessToolUnit() +
+                    " accessTool = " + checkUnitJob.getAccessTool() +
                     " checkUnit = " + checkUnitJob.getCheckUnit().getValue();
 			if(!this.isRunning)
 				throw new ExecutionException("Ошибка при запуске проверки запрещенного ресурса. Сервис проверки остановлен!");
 			log.info("Запуск робота: " + robotName);
 
 			//TODO Добавить имя робота
-			Robot robot = robotsFactory.createRobot(checkUnitJob.getAccessToolUnit(), "");
+			Robot robot = robotsFactory.createRobot(checkUnitJob.getAccessTool(), "");
 			
 			robots.add(robot);
 			
@@ -82,7 +82,7 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 			robots.remove(robot);
 			message.setJobID(checkUnitJob.getJobID());
 			message.setCheckUnit(checkUnitJob.getCheckUnit());
-	        message.setAccessToolUnit(checkUnitJob.getAccessToolUnit());
+	        message.setAccessTool(checkUnitJob.getAccessTool());
 
 			log.info("Робот успешно завершил работу: "+robotName);
 			return message;

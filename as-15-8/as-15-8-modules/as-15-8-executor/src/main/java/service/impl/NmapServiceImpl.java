@@ -45,7 +45,7 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
         try {
             ExecutorProperties.NmapProperties nmapProperties = executorProperties.getNmap();
             String verificationName = "jobID = " + checkUnitJob.getJobID() +
-                    " accessTool = " + checkUnitJob.getAccessToolUnit() +
+                    " accessTool = " + checkUnitJob.getAccessTool() +
                     " checkUnit = " + checkUnitJob.getCheckUnit().getValue();
             if(!this.isRunning)
                 throw new ExecutionException("Ошибка при запуске проверки запрещенного ресурса. Сервис проверки остановлен!");
@@ -54,7 +54,7 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
             ProxychainsConfigurator proxychainsConfigurator = null;
             if(nmapProperties.getUseProxy())
                 //TODO Вставить Имя робота!!!
-                proxychainsConfigurator = createProxychainsConfigurator(checkUnitJob.getAccessToolUnit(), "");
+                proxychainsConfigurator = createProxychainsConfigurator(checkUnitJob.getAccessTool(), "");
 
             try {
 
@@ -83,7 +83,7 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
                 NmapExecutionResult nmapExecutionResult = new NmapExecutionResult();
                 nmapExecutionResult.setJobID(checkUnitJob.getJobID());
                 nmapExecutionResult.setCheckUnit(checkUnitJob.getCheckUnit());
-                nmapExecutionResult.setAccessToolUnit(checkUnitJob.getAccessToolUnit());
+                nmapExecutionResult.setAccessTool(checkUnitJob.getAccessTool());
                 nmapExecutionResult.setNmapLog(results.getOutput());
 
                 nmapRun.getHosts().forEach(host -> {

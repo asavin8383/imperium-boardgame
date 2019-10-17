@@ -41,7 +41,7 @@ public class CheckUnitJobHandler {
         Acknowledgment ack = message.getHeaders().get(KafkaHeaders.ACKNOWLEDGMENT, Acknowledgment.class);
         try {
             verificationName = "jobID = " + message.getPayload().getJobID() +
-                    " accessTool = " + message.getPayload().getAccessToolUnit() +
+                    " accessTool = " + message.getPayload().getAccessTool() +
                     " checkUnit = " + message.getPayload().getCheckUnit().getValue();
 
             ExecutionJobResult executionJobResult =

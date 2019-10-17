@@ -21,7 +21,7 @@ public abstract class ExecutionJobResult {
 	private Long jobID;
 	
 	/** ПС/ПАСД */
-	private AccessToolUnit accessToolUnit;
+	private String accessTool;
 	
 	/** Единица ЕРДИ для проверки */
 	private CheckUnit checkUnit;
