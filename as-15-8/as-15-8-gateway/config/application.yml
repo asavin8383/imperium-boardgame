@@ -1,5 +1,5 @@
 server:
-  port: 80
+  port: 15880
 logging:
   config: config/logback-spring.xml
 spring:
