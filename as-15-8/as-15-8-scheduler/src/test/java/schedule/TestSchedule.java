@@ -19,22 +19,22 @@ public class TestSchedule {
     @Test
     public void testSchedule(){
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
-        Arrangement arr1 = new Arrangement("arr1", AccessToolUnit.GOOGLE,
+        Arrangement arr1 = new Arrangement("arr1", AccessToolUnit.SEARCH_SYSTEM,
                 LocalTime.parse("09:00", formatter),
                 LocalTime.parse("12:00", formatter));
         generateCheckUnits(arr1, 45000);
 
-        Arrangement arr2 = new Arrangement("arr2", AccessToolUnit.YANDEX,
+        Arrangement arr2 = new Arrangement("arr2", AccessToolUnit.SEARCH_SYSTEM,
                 LocalTime.parse("10:30", formatter),
                 LocalTime.parse("11:30", formatter));
         generateCheckUnits(arr2, 15000);
 
-        Arrangement arr3 = new Arrangement("arr3", AccessToolUnit.KASPERSKY,
+        Arrangement arr3 = new Arrangement("arr3", AccessToolUnit.SEARCH_SYSTEM,
                 LocalTime.parse("11:15", formatter),
                 LocalTime.parse("15:20", formatter));
         generateCheckUnits(arr3, 40000);
 
-        Arrangement arr4 = new Arrangement("arr4", AccessToolUnit.TORGUARD,
+        Arrangement arr4 = new Arrangement("arr4", AccessToolUnit.SEARCH_SYSTEM,
                 LocalTime.parse("13:10", formatter),
                 LocalTime.parse("16:30", formatter));
         generateCheckUnits(arr4, 25000);

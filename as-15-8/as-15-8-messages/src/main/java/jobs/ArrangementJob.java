@@ -1,15 +1,14 @@
 package jobs;
 
+import enums.AccessToolParameter;
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import enums.AccessToolParameter;
-import enums.AccessToolUnit;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 /**
  * Задание на проверку мероприятия
@@ -30,7 +29,7 @@ public class ArrangementJob {
 	private JobRunType runType = JobRunType.START;
 	
 	/** ПС/ПАСД */
-	private AccessToolUnit accessToolUnit;
+	private String accessTool;
 
 	/** Список заданий на проверку ЕРДИ */
 	@Getter

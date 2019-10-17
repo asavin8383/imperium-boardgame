@@ -3,6 +3,7 @@ package services.impl;
 import checkUnits.CheckUnit;
 import checkUnits.CheckUnitJob;
 import checkUnits.CheckUnitType;
+import common.DispatcherProperties;
 import enums.AccessToolParameter;
 import enums.AccessToolUnit;
 import exceptions.AS_15_8_DispatcherException;
@@ -44,6 +45,7 @@ public class CheckUnitSchedulingServiceImpl implements CheckUnitSchedulingServic
     private final NamedParameterJdbcTemplate jdbcNamedTemplate;
     private final JdbcTemplate jdbcTemplate;
     private final ScheduleCheckUnitRepo scheduleCheckUnitRepo;
+    private final DispatcherProperties dispatcherProperties;
 
     private final List<Protocol> protocols = new ArrayList<>();
 
@@ -84,7 +86,7 @@ public class CheckUnitSchedulingServiceImpl implements CheckUnitSchedulingServic
                 .collect(Collectors.toList())
         );
 
-        CheckUnitJobMapper mapper = new CheckUnitJobMapper(arrangementJob.getAccessToolUnit(), arrangementJob.getAccessToolParameters());
+        CheckUnitJobMapper mapper = new CheckUnitJobMapper(arrangementJob.getAccessTool(), arrangementJob.getAccessToolParameters());
         List<CheckUnitJobTemplate> checkUnitJobcheckUnitJobTemplates;
         try {
             //noinspection SqlDialectInspection
@@ -143,9 +145,9 @@ public class CheckUnitSchedulingServiceImpl implements CheckUnitSchedulingServic
     private List<CheckUnitJob> buildCheckUnitJobsFromTemplates(List<CheckUnitJobTemplate> checkUnitJobTemplates, Long arrangementId){
         List<CheckUnitJob> checkUnitJobs = new ArrayList<>();
         for(CheckUnitJobTemplate template : checkUnitJobTemplates){
-        	
-        	boolean isPS = template.getAccessToolUnit() == AccessToolUnit.SEARCH_SYSTEM ||
-        			template.getAccessToolUnit() == AccessToolUnit.GOOGLE_API;
+        	AccessToolUnit accessToolUnit = AccessToolUnit.fromPropertyKey(dispatcherProperties.getAccessTools().get(template.getAccessTool()));
+        	boolean isPS = accessToolUnit == AccessToolUnit.SEARCH_SYSTEM ||
+					accessToolUnit == AccessToolUnit.GOOGLE_API;
         	
             switch (template.checkUnitType) {
                 case URL:
@@ -284,7 +286,7 @@ public class CheckUnitSchedulingServiceImpl implements CheckUnitSchedulingServic
 	
 	private CheckUnitJob createAndSaveCheckUnitJob(Long arrangementID, CheckUnitJobTemplate template, CheckUnit checkUnit) {
 		CheckUnitJob checkUnitJob = new CheckUnitJob();
-		checkUnitJob.setAccessToolUnit(template.getAccessToolUnit());
+		checkUnitJob.setAccessTool(template.getAccessTool());
         checkUnitJob.setCheckUnit(checkUnit);
         Long ipJobID = saveScheduleCheckUnit(arrangementID, template.erdiId, checkUnitJob);
         checkUnitJob.setJobID(ipJobID);
@@ -301,7 +303,7 @@ public class CheckUnitSchedulingServiceImpl implements CheckUnitSchedulingServic
 	@Data
 	private static class CheckUnitJobTemplate {
 		private Long erdiId;
-		private AccessToolUnit accessToolUnit;
+		private String accessTool;
 		private final Map<AccessToolParameter, String> parameters = new HashMap<>();
 		private CheckUnitType checkUnitType;
 		private String checkUnitValueTemplate;
@@ -309,18 +311,18 @@ public class CheckUnitSchedulingServiceImpl implements CheckUnitSchedulingServic
 	
 	static class CheckUnitJobMapper{
 		
-		private AccessToolUnit accessToolUnit;
+		private String accessTool;
 		private Map<AccessToolParameter, String> parameters;
 		
-		CheckUnitJobMapper(AccessToolUnit accessToolUnit, Map<AccessToolParameter, String> parameters) {
-			this.accessToolUnit = accessToolUnit;
+		CheckUnitJobMapper(String accessTool, Map<AccessToolParameter, String> parameters) {
+			this.accessTool = accessTool;
 			this.parameters = parameters;
 		}
 		
 		CheckUnitJobTemplate map(ResultSet rs, int rowNum) throws SQLException {
 			CheckUnitJobTemplate checkUnitJobTemplate = new CheckUnitJobTemplate();
 			checkUnitJobTemplate.setErdiId(rs.getLong("id"));
-			checkUnitJobTemplate.setAccessToolUnit(accessToolUnit);
+			checkUnitJobTemplate.setAccessTool(accessTool);
 			checkUnitJobTemplate.setCheckUnitType(CheckUnitType.valueOf(rs.getString("check_unit_type")));
 			checkUnitJobTemplate.setCheckUnitValueTemplate(rs.getString("check_unit_value"));
 			checkUnitJobTemplate.getParameters().putAll(parameters);

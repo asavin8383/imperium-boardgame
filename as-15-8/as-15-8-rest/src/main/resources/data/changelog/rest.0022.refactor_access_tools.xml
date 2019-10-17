@@ -1,0 +1,38 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <changeSet id="rest.0022_1" author="asavin">
+        <addColumn schemaName="portal" tableName="arrangements">
+            <column name="access_tool" type="VARCHAR(255)"/>
+        </addColumn>
+        <sql>
+            update portal.arrangements set access_tool = 'GOOGLE';
+        </sql>
+        <addNotNullConstraint schemaName="portal" tableName="arrangements" columnName="access_tool"/>
+        <rollback>
+            <dropColumn schemaName="portal" tableName="arrangements" columnName="access_tool"/>
+        </rollback>
+    </changeSet>
+    <changeSet id="0022_1_1" author="asavin">
+        <dropColumn schemaName="portal" tableName="arrangements" columnName="access_tool_id"/>
+    </changeSet>
+    <changeSet id="rest.0022_2" author="asavin">
+        <addColumn schemaName="portal" tableName="planned_processing_times">
+            <column name="access_tool" type="VARCHAR(255)"/>
+        </addColumn>
+        <sql>
+            update portal.planned_processing_times set access_tool = 'GOOGLE';
+        </sql>
+        <addNotNullConstraint schemaName="portal" tableName="planned_processing_times" columnName="access_tool"/>
+        <rollback>
+            <dropColumn schemaName="portal" tableName="planned_processing_times" columnName="access_tool"/>
+        </rollback>
+    </changeSet>
+    <changeSet id="rest.0022_2_1" author="asavin">
+        <dropColumn schemaName="portal" tableName="planned_processing_times" columnName="access_tool_id"/>
+    </changeSet>
+    <changeSet id="rest.0022_3" author="asavin">
+        <dropColumn schemaName="portal" tableName="access_tools" columnName="category_id"/>
+    </changeSet>
+</databaseChangeLog>

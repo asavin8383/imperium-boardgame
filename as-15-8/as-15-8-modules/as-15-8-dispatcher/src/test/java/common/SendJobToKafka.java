@@ -49,7 +49,7 @@ public class SendJobToKafka {
 		
 		ArrangementJob job = new ArrangementJob();
 		job.setId(100500L);
-		job.setAccessToolUnit(AccessToolUnit.SEARCH_SYSTEM);
+		job.setAccessTool("GOOGLE");
 		List<ERDIJob> erdi = new ArrayList<>();
 		erdi.add(new ERDIJob(169111L));
 		job.setErdiJobList(erdi);

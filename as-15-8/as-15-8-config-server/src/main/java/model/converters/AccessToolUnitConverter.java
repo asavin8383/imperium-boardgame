@@ -13,7 +13,7 @@ public class AccessToolUnitConverter implements AttributeConverter<AccessToolUni
     }
 
     @Override
-    public AccessToolUnit convertToEntityAttribute(String accessToolГтше) {
-        return AccessToolUnit.fromPropertyKey(accessToolГтше);
+    public AccessToolUnit convertToEntityAttribute(String accessToolUnit) {
+        return AccessToolUnit.fromPropertyKey(accessToolUnit);
     }
 }

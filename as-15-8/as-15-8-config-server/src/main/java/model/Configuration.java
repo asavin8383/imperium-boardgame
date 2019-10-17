@@ -30,7 +30,7 @@ public class Configuration {
 
     private String label = defaultLabel;
 
-    @OneToMany(cascade=CascadeType.ALL, mappedBy = "configuration")
+    @ManyToMany(cascade=CascadeType.ALL, mappedBy = "configurations")
     private final Set<Robot> robots = new HashSet<>();
 
     @OneToMany(cascade=CascadeType.ALL, mappedBy = "configuration")

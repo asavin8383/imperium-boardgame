@@ -40,8 +40,4 @@ public class AccessToolsCategory implements Serializable {
     @JsonView(Views.Full.class)
     private AccessToolsCategory parent;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "accessToolsCategory")
-    @JsonIgnore
-    private final Set<AccessTool> accessTools = new HashSet<>();
-
 }

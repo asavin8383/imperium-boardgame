@@ -8,5 +8,6 @@
     <include file="db/changelog/config.0003.access_tool_ck.xml" />
     <include file="db/changelog/config.0004.global_properties.xml" />
     <include file="db/changelog/config.0005.config_view.xml" />
+    <include file="db/changelog/config.0006.robots_configurations.xml" />
 
 </databaseChangeLog>

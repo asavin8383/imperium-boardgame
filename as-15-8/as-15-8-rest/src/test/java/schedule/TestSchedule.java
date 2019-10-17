@@ -4,7 +4,6 @@ import checkUnits.CheckUnitType;
 import common.ApplicationConfiguration;
 import enums.AccessToolUnit;
 import model.catalog.AccessTool;
-import model.result.ArrangementResult;
 import model.schedule.Schedule;
 import model.schedule.ScheduleCheckUnit;
 import model.schedule.SchedulePeriod;
@@ -13,13 +12,9 @@ import model.task.Arrangement;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
-import repositories.PlannedProcessingTimeRepo;
-import services.schedule.PlannedProcessingTimeService;
 import services.schedule.ScheduleService;
 
 import java.time.LocalTime;
@@ -42,11 +37,13 @@ public class TestSchedule {
     @Test
     public void testSchedule(){
 
+        int count = 1000;
+
         Map<Arrangement, TreeSet<ScheduleCheckUnit>> scheduleArrangements = new HashMap<>();
 
         scheduleArrangements.put(
-            createArrangement("arr1", AccessToolUnit.SEARCH_SYSTEM, "02:51","11:30"),
-            generateCheckUnits( 1000));
+            createArrangement("arr1", "GOOGLE", "02:51","11:30"),
+            generateCheckUnits( count));
 
         /*scheduleArrangements.put(
             createArrangement("arr2", AccessToolUnit.YANDEX,"09:00", "10:00"),
@@ -71,10 +68,7 @@ public class TestSchedule {
         }
     }
 
-    private Arrangement createArrangement(String name, AccessToolUnit accessToolUnit, String startTime, String endTime){
-        AccessTool accessTool = new AccessTool();
-        accessTool.setName(accessToolUnit);
-
+    private Arrangement createArrangement(String name, String accessTool, String startTime, String endTime){
         Arrangement arrangement = new Arrangement();
         arrangement.setTitle(name);
         arrangement.setAccessTool(accessTool);

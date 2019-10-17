@@ -24,5 +24,6 @@
     <include file="data/changelog/rest.0019.schedule_check_units.xml"/>
     <include file="data/changelog/rest.0020.switch_schedule_period_check_units_fk.xml"/>
     <include file="data/changelog/rest.0021.change_url_type_to_text.xml"/>
+    <include file="data/changelog/rest.0022.refactor_access_tools.xml"/>
 
 </databaseChangeLog>

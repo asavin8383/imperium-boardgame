@@ -11,8 +11,8 @@
 	<name>AS 15-8 rest endpoint</name>
 
 	<properties>
-		<spring.boot.version>2.1.4.RELEASE</spring.boot.version>
-		<spring.cloud.version>Greenwich.SR2</spring.cloud.version>
+		<spring.boot.version>2.1.9.RELEASE</spring.boot.version>
+		<spring.cloud.version>Greenwich.RELEASE</spring.cloud.version>
 		<liquibase-maven-plugin.version>3.8.0</liquibase-maven-plugin.version>
 	</properties>
 

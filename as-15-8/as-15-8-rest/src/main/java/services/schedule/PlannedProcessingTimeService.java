@@ -3,7 +3,6 @@ package services.schedule;
 import checkUnits.CheckMethod;
 import checkUnits.CheckUnitType;
 import lombok.RequiredArgsConstructor;
-import model.catalog.AccessTool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import repositories.PlannedProcessingTimeRepo;
@@ -18,7 +17,7 @@ public class PlannedProcessingTimeService {
 
     private final PlannedProcessingTimeRepo plannedProcessingTimeRepo;
 
-    private Map<AccessTool, Map<CheckMethod, Long>> processingTimes = new HashMap<>();
+    private Map<String, Map<CheckMethod, Long>> processingTimes = new HashMap<>();
 
     @PostConstruct
     public void loadTimes(){
@@ -36,7 +35,7 @@ public class PlannedProcessingTimeService {
 
     }
 
-    public long getProcessingTime(AccessTool accessTool, CheckUnitType checkUnitType){
+  long getProcessingTime(String accessTool, CheckUnitType checkUnitType){
         if(processingTimes.containsKey(accessTool)){
             if(processingTimes.get(accessTool).containsKey(checkUnitType.getCheckMethod()))
                 return processingTimes.get(accessTool).get(checkUnitType.getCheckMethod()) / 1000;

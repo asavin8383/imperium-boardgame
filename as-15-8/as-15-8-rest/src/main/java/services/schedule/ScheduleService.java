@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import model.catalog.AccessTool;
 import model.enums.ScheduleStatus;
 import model.schedule.*;
 import model.task.Arrangement;
@@ -267,7 +266,7 @@ public class ScheduleService {
         return isScheduleCorrect;
     }*/
 
-    private long countArrangementProcessingTime(Set<ScheduleCheckUnit> checkUnits, AccessTool accessTool){
+    private long countArrangementProcessingTime(Set<ScheduleCheckUnit> checkUnits, String accessTool){
         long processingTime = 0;
         for(ScheduleCheckUnit checkUnit : checkUnits){
             processingTime += plannedProcessingTimeService.getProcessingTime(accessTool, checkUnit.getCheckUnitType());
@@ -275,7 +274,7 @@ public class ScheduleService {
         return processingTime;
     }
 
-    private ArrangementSchedulePeriodProcessing calculateArrangementSchedulePeriodProcessing(SortedSet<ScheduleCheckUnit> checkedSet, int workersCount, AccessTool accessTool, LocalTime startTime, LocalTime endTime){
+    private ArrangementSchedulePeriodProcessing calculateArrangementSchedulePeriodProcessing(SortedSet<ScheduleCheckUnit> checkedSet, int workersCount, String accessTool, LocalTime startTime, LocalTime endTime){
         ScheduleCheckUnit lastCompletionCheckUnit = checkedSet.first();
         long maxProcessingTime = ChronoUnit.SECONDS.between(startTime, endTime) * workersCount;
         long processingTime = 0;
@@ -361,7 +360,7 @@ public class ScheduleService {
             long plannedProcessingTime = plannedProcessingTimeService.getProcessingTime(schedulePeriodArrangement.getArrangement().getAccessTool(), scheduleCheckUnit.getCheckUnitType());
             if (plannedProcessingTime <= 0){
                 AS_15_8_Exception.logAndThrow(log, String
-                        .format("Некорректное время обработки для ПАСД %s типа ресурса %s - значение: %d", schedulePeriodArrangement.getArrangement().getAccessTool().getName(), scheduleCheckUnit.getCheckUnitType(), plannedProcessingTime));
+                        .format("Некорректное время обработки для ПАСД %s типа ресурса %s - значение: %d", schedulePeriodArrangement.getArrangement().getAccessTool(), scheduleCheckUnit.getCheckUnitType(), plannedProcessingTime));
             }
             totalTime -= plannedProcessingTime;
             log.debug("Добавлен новый CheckUinit: {}", schedulePeriodCheckUnit.getExecutionNumber());

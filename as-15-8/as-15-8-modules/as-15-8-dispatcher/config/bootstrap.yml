@@ -1,0 +1,38 @@
+server:
+  port: 11100
+logging:
+  config: config/logback-spring.xml
+spring:
+  application.name: executor
+  cloud:
+    bus.trace.enabled: true
+    config:
+      bus:
+        enabled: true
+      uri: http://192.168.5.253:8081
+      profile: default
+      label: latest
+    stream:
+      kafka:
+        binder:
+          brokers: 192.168.5.12:9094,192.168.5.184:9094,192.168.5.211:9094
+
+---
+
+spring:
+  profiles: dev_ashabalin
+  cloud:
+    config:
+      uri: http://localhost:8081
+      profile: default
+      label: latest
+
+---
+
+spring:
+  profiles: dev_asavin
+  cloud:
+    config:
+      uri: http://localhost:8081
+      profile: default
+      label: latest

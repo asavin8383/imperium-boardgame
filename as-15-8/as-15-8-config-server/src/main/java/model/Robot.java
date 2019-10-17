@@ -26,9 +26,11 @@ public class Robot {
 
     private String name;
 
-    @ManyToOne(optional=false)
-    @JoinColumn(foreignKey = @ForeignKey(name = "robots_configurations_id_fk"))
-    private Configuration configuration;
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(schema = "config", name = "robots_configurations",
+            joinColumns = @JoinColumn(name = "robot_id", foreignKey = @ForeignKey(name = "robots_robots_configurations_id_fk")),
+            inverseJoinColumns = @JoinColumn(name = "configuration_id", foreignKey = @ForeignKey(name = "configurations_robots_configurations_id_fk")))
+    private final Set<Configuration> configurations;
 
     @OneToMany(cascade=CascadeType.ALL, mappedBy = "robot")
     private final Set<RobotProperty> robotProperties = new HashSet<>();
