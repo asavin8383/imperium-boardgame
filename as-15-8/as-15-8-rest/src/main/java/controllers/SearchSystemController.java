@@ -14,11 +14,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import repositories.SearchSystemRepository;
-
-import java.time.LocalDateTime;
+import utils.SorUtils;
 
 @RestController
-@RequestMapping(path = "/search_system", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(path = "/pod/search_system", produces = MediaType.APPLICATION_JSON_VALUE)
 @PreAuthorize("hasAnyRole('ROLE_OPERATOR','ROLE_ADMIN')")
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Slf4j
@@ -39,8 +38,7 @@ public class SearchSystemController {
                 .withIgnoreNullValues()
                 .withIgnoreCase()
                 .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
-        Example<SearchSystem> example = SearchSystem.example(matcher, name, hostname,
-                LocalDateTime.of(3000, 1, 1, 0, 0));
+        Example<SearchSystem> example = SearchSystem.example(matcher, name, hostname, SorUtils.getEndDate());
         return searchSystemRepository.findAll(example, page);
     }
 

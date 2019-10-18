@@ -9,4 +9,7 @@ public interface FormalErdiRepositoryCustom {
 
     Page<FormalErdi> searchFor(Class<FormalErdi> clazz, FormalErdiParams params, Pageable pageable);
 
+    Page<FormalErdi> findRelevant(String entryTypeId, String urgencyTypeId, String blockType,
+                                  String value, Integer resourceTypeId, Pageable pageable);
+
 }

@@ -27,9 +27,9 @@ public class ContentHistory implements Serializable {
     @EqualsAndHashCode.Include
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "content_id", referencedColumnName = "id")
-    @JsonView(Views.Full.class)
+    @JsonIgnore
     private FormalErdi content;
 
     @Column(name = "ppn_dt")
