@@ -3,17 +3,14 @@ package robots;
 import checkUnits.CheckUnit;
 import checkUnits.CheckUnitJob;
 import checkUnits.CheckUnitType;
-import enums.AccessToolUnit;
 import execution.ExecutionJobResult;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import robots.exceptions.ExecutionException;
 import robots.factory.RobotsFactory;
-import service.CheckUnitVerificationService;
 import service.CheckUnitVerificationServiceFactory;
 import service.impl.RobotsServiceImpl;
 
@@ -29,15 +26,12 @@ import java.io.IOException;
 public class TestHolaJobExecution
 {
 
-	@Autowired
-	private CheckUnitVerificationService service;
-
 	@Test
 	public void test() throws ExecutionException, IOException {
 
 		CheckUnitJob checkUnitJob = new CheckUnitJob();
 		checkUnitJob.setJobID(1L);
-		checkUnitJob.setAccessToolUnit(AccessToolUnit.HOLA);
+		checkUnitJob.setAccessTool("hola");
 
 		checkUnitJob.setCheckUnit(new CheckUnit(CheckUnitType.URL, "myip.ru"));
 

@@ -3,7 +3,6 @@ package robots;
 import checkUnits.CheckUnit;
 import checkUnits.CheckUnitJob;
 import checkUnits.CheckUnitType;
-import enums.AccessToolUnit;
 import execution.ExecutionJobResult;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,7 +30,7 @@ public class TestJobExecution {
 		
 		CheckUnitJob checkUnitJob = new CheckUnitJob();
 		checkUnitJob.setJobID(1L);
-		checkUnitJob.setAccessToolUnit(AccessToolUnit.SEARCH_SYSTEM);
+		checkUnitJob.setAccessTool("google");
 		
 		checkUnitJob.setCheckUnit(new CheckUnit(CheckUnitType.URL, "https://www.google.ru"));
 

@@ -1,6 +1,8 @@
 package kafka;
 
 import common.ApplicationConfiguration;
+import control.ExecutorControlMessage;
+import control.ExecutorControlMessage.ControlCommand;
 import lombok.RequiredArgsConstructor;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,10 +19,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
-import control.ExecutorControlMessage;
-import control.ExecutorControlMessage.ControlCommand;
-import enums.AccessToolUnit;
-
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes={ApplicationConfiguration.class})
 @PropertySource("classpath:application.yml")
@@ -35,7 +33,7 @@ public class SendResumeMessage {
 	@Test
 	public void test() {
 			
-		ExecutorControlMessage controlMessage = new ExecutorControlMessage(AccessToolUnit.SEARCH_SYSTEM, ControlCommand.START);
+		ExecutorControlMessage controlMessage = new ExecutorControlMessage("google", ControlCommand.START);
 		
 		Message<ExecutorControlMessage> message = MessageBuilder
                 .withPayload(controlMessage)

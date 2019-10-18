@@ -5,7 +5,6 @@ import checkUnits.CheckUnitJob;
 import checkUnits.CheckUnitType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import common.ApplicationConfiguration;
-import enums.AccessToolUnit;
 import events.ExecutorChannels;
 import execution.ExecutionJobResult;
 import org.junit.Test;
@@ -40,7 +39,7 @@ public class IntegrationTests {
 
 		CheckUnitJob checkUnitJob = new CheckUnitJob();
 		checkUnitJob.setJobID(1L);
-		checkUnitJob.setAccessToolUnit(AccessToolUnit.SEARCH_SYSTEM);
+		checkUnitJob.setAccessTool("google");
 
 		checkUnitJob.setCheckUnit(new CheckUnit(CheckUnitType.URL, "https://www.google.ru"));
 
@@ -56,7 +55,7 @@ public class IntegrationTests {
 	public void testNMap() throws IOException {
 
 		CheckUnitJob checkUnitJob = new CheckUnitJob();
-		checkUnitJob.setAccessToolUnit(AccessToolUnit.VPN);
+		checkUnitJob.setAccessTool("vpn");
 		checkUnitJob.setJobID(1L);
 		checkUnitJob.setCheckUnit(new CheckUnit(CheckUnitType.IP_V4, "192.167.1.1"));
 

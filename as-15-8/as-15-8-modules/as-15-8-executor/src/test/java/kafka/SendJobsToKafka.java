@@ -4,7 +4,6 @@ import checkUnits.CheckUnit;
 import checkUnits.CheckUnitJob;
 import checkUnits.CheckUnitType;
 import control.ExecutorControlMessage;
-import enums.AccessToolUnit;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.junit.Test;
@@ -47,7 +46,7 @@ public class SendJobsToKafka {
         for(long i = 10000; i<10001; i++) {
             CheckUnitJob checkUnitJob = new CheckUnitJob();
             checkUnitJob.setJobID(1L);
-            checkUnitJob.setAccessToolUnit(AccessToolUnit.SEARCH_SYSTEM);
+            checkUnitJob.setAccessTool("google");
 
             checkUnitJob.setCheckUnit(new CheckUnit(CheckUnitType.URL, "https://www.google.ru"));
 
@@ -67,7 +66,7 @@ public class SendJobsToKafka {
         for(long i = 10000; i<10020; i++) {
             CheckUnitJob checkUnitJob = new CheckUnitJob();
             checkUnitJob.setJobID(1L);
-            checkUnitJob.setAccessToolUnit(AccessToolUnit.VPN);
+            checkUnitJob.setAccessTool("vpn");
 
             checkUnitJob.setCheckUnit(new CheckUnit(CheckUnitType.IP_V4, "174.138.5.40"));
 
