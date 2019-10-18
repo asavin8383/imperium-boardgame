@@ -29,13 +29,14 @@ public class ParameterRepositoryExtend {
     }
 
     public void setParameterValue(String name, String value, boolean enabled){
-        Parameter parameter = parameterRepository.findByNameAndEnabled(name, enabled);
+        Integer intEnabled = enabled ? 1 : 0;
+        Parameter parameter = parameterRepository.findByNameAndEnabled(name, intEnabled);
         if (parameter == null){
             parameter = new Parameter();
         }
         parameter.setName(name);
         parameter.setValue(value);
-        parameter.setEnabled(enabled);
+        parameter.setEnabled(intEnabled);
 
         parameterRepository.save(parameter);
     }

@@ -4,6 +4,7 @@ package restapi;
 import exceptions.ExceptionErdiLoad;
 import exceptions.ExceptionErdiParser;
 import lombok.extern.slf4j.Slf4j;
+import model.response.DeltaIdEntry;
 import model.rest.ContentRest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,6 +29,7 @@ import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -48,6 +50,11 @@ public class ErdiRestClient {
     @Value("${spring.rest_base_url}")
     private String baseUrl;
 
+    private boolean isError = false;
+    private boolean isLoading = false;
+    private String errorMessage = "";
+    private String stateDetails = "";
+
 
     @Autowired
     public void restTemplateInit(RestTemplateBuilder restTemplateBuilder) {
@@ -59,68 +66,107 @@ public class ErdiRestClient {
 
 
     public void removeLastContentVersion() {
-        erdiLoaderService.removeLastContentVersion();
+        if (isLoading){
+            return;
+        }
+        try {
+            stateDetails = "Удаление последней контент версии";
+            erdiLoaderService.removeLastContentVersion();
+        }
+        catch (Exception e){
+            isError = true;
+            errorMessage = "Удаление последней версии завершилось с ошибкой";
+        }
+        finally {
+            stateDetails = "";
+            isLoading = false;
+        }
     }
 
+    public String getState(){
+        if (isLoading)
+            return "PROCESS";
 
-    public void fillFullErdiToDB() throws IOException, ExceptionErdiParser {
+        return (isError ? "ERROR" : "");
+    }
+
+    public String getStateDetails(){
+        return stateDetails;
+    }
+
+    public String getErrorMessage(){
+        return isError ? errorMessage : "";
+    }
+
+    public void loadFullERDI() throws IOException, ExceptionErdiParser {
+        if (isLoading){
+            return;
+        }
+        isLoading = true;
+        isError = false;
+        errorMessage = "";
+
+        boolean deleteTempFile = false;
+
+        /*
         //erdiLoaderService.clearAllScheme();
 
         //erdiLoaderService.removeLastContentVersion();
 
-        //readFullErdi(Paths.get(tempDir, "mytest.zip"));
-        //readFullErdi(Paths.get(tempDir, "mytest2.zip"));
-        //readFullErdi(Paths.get(tempDir, "mytest3_delete.zip"));
-        readFullErdi(Paths.get(tempDir, "full_erdi_2019-10-02__02_10_44.zip"));
-
+        //erdiToDB(Paths.get(tempDir, "mytest.zip"));
+        //erdiToDB(Paths.get(tempDir, "mytest2.zip"));
+        //erdiToDB(Paths.get(tempDir, "mytest3_delete.zip"));
+        erdiToDB(Paths.get(tempDir, "full_erdi_2019-10-02__02_10_44.zip"), null);
 
         if (true)
             return;
-
+        */
 
         DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd__hh_mm_ss");
-        //Path path = Paths.get(tempDir, String.format("full_erdi_%s.zip", dateFormat.format(new Date())));
-        Path path = Paths.get(tempDir, "full_erdi_2019-10-02__02_10_44.zip");
+        Path path = Paths.get(tempDir, String.format("full_erdi_%s.zip", dateFormat.format(new Date())));
 
         try{
-            //Files.deleteIfExists(path);
-            System.out.println("----> getting full ERDI: " + path.toString());
-            //getAndSaveFullErdi(path);
-        }
-        catch (Exception e){
-            try{
+            if (deleteTempFile) {
                 Files.deleteIfExists(path);
             }
-            catch (IOException ie){}
-            throw e;
-        }
 
-        try{
-            System.out.println("----> saving full ERDI: " + path.toString());
-            readFullErdi(path);
-            //Files.deleteIfExists(path);
+            File directory = path.toFile().getParentFile();
+            if (!directory.exists()){
+                directory.mkdirs();
+            }
+
+            stateDetails = "Загрузка полного справочника ЕРДИ";
+            getAndSaveFullErdi(path);
+
+            stateDetails = "Парсинг и заливка полного справочника ЕРДИ в БД";
+
+            //path = Paths.get(tempDir, "mytest.zip");
+            erdiToDB(path, null);
         }
         catch (Exception e){
-            /*try{
-                Files.deleteIfExists(path);
-            }
-            catch (IOException ie){}*/
+            errorMessage = "Ошибка загрузки полного справочника ЕРДИ";
+            isError = true;
             throw e;
         }
-
-        System.out.println("+++++++++++++++++");
-
-        //System.out.println(date);
+        finally {
+            isLoading = false;
+            stateDetails = "";
+            if (deleteTempFile){
+                try{
+                    Files.deleteIfExists(path);
+                }
+                catch (IOException ie){}
+            }
+        }
     }
 
-    public void getAndSaveFullErdi(Path path) throws IOException, RestClientException {
-
+    private void getAndSaveFullErdi(Path path) throws IOException, RestClientException {
         UriComponents uriComponents =
                 UriComponentsBuilder.fromUriString("{baseUrl}/getFullERDI/")
                         .build()
                         .expand(baseUrl);
 
-        System.out.println(uriComponents.toString());
+        System.out.println("----> getting full ERDI from service: " + uriComponents.toString());
 
         ResponseEntity<byte[]> entity = restTemplate.exchange(
                 uriComponents.toString(),
@@ -129,39 +175,40 @@ public class ErdiRestClient {
                 byte[].class
         );
 
-        File directory = path.toFile().getParentFile();
-        if (!directory.exists()){
-            directory.mkdirs();
-        }
-
         Files.write(path, entity.getBody());
+        System.out.println("----> full ERDI was write to file: " + path.toString());
     }
 
-    public void readFullErdi(Path path) throws IOException, ExceptionErdiParser {
-        System.out.println(path.toAbsolutePath().toString());
+    private void erdiToDB(Path path, DeltaIdEntry deltaIdEntry) throws IOException, ExceptionErdiParser {
+        System.out.printf("Try parsing %s, file: %s \n", deltaIdEntry != null ? "Delta ERDI" : "Full ERDI", path.toAbsolutePath().toString());
 
         ZipFile zipFile = new ZipFile(path.toFile());
         Enumeration<? extends ZipEntry> entries = zipFile.entries();
         while(entries.hasMoreElements()){
             ZipEntry entry = entries.nextElement();
-            System.out.println("Entry name = " + entry.getName());
-            if (entry.getName().equals("dump.xml")){
-                InputStream stream = zipFile.getInputStream(entry);
 
+            String entryName = (deltaIdEntry != null ? "dump_delta.xml" : "dump.xml");
+
+            if (entry.getName().equals(entryName)){
+                InputStream stream = zipFile.getInputStream(entry);
                 ErdiFullParser parser = new ErdiFullParser();
 
                 List<ContentRest> allContents = new ArrayList<>();
-                log.info("start parsing... ");
+                log.info("start parsing entry " + entryName + "...");
+                stateDetails = "Парсинг ЕРДИ";
 
                 parser.parse(stream, (register, contents) -> {
                     allContents.addAll(contents);
-                    log.info("parsing... " + allContents.size());
+                    log.info("parsing count... " + allContents.size());
+                    stateDetails = "Парсинг ЕРДИ (" + allContents.size() + ")";
 
                     if (contents.size() == 0){
                         try {
-                            erdiLoaderService.fillContents(null, register, allContents);
+                            stateDetails = "Заливка справочника ЕРДИ в БД";
+                            erdiLoaderService.fillContents(deltaIdEntry, register, allContents);
                         } catch (ExceptionErdiLoad exceptionErdiLoad) {
                             exceptionErdiLoad.printStackTrace();
+                            isError = true;
                         }
                         return false;
                     }

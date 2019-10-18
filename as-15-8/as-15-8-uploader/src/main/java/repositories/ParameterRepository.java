@@ -18,5 +18,5 @@ public interface ParameterRepository extends JpaRepository<Parameter, Long> {
     @Query(value = "SELECT value FROM Parameter WHERE lower(name) = lower(?1)")
     String getParameterValue(String name);
 
-    Parameter findByNameAndEnabled(String name, Boolean enabled);
+    Parameter findByNameAndEnabled(String name, Integer enabled);
 }

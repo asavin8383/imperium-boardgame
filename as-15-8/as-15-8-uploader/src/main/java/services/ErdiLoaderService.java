@@ -44,31 +44,9 @@ public class ErdiLoaderService {
     private final ContentDelRepository contentDelRepository;
     private final ParameterRepositoryExtend parameterRepository;
 
-    private boolean isLoading = false;
-    private boolean isError = false;
-    private String messageError = "";
-
-
-    public boolean getIsLoading(){
-        return isLoading;
-    }
-    public boolean getIsError(){
-        return isError;
-    }
-    public String getMessageError(){
-        return messageError;
-    }
-
 
     @Transactional
     public boolean fillContents(DeltaIdEntry deltaIdEntry, RegisterRest registerRest, List<ContentRest> contentRests) throws ExceptionErdiLoad {
-        if (isLoading){
-            return false;
-        }
-        isLoading = true;   // todo - сделать потоково независимую
-        isError = false;
-        messageError = "";
-
         System.out.printf("----- fillContents. size = %d, delta = %s",
                 contentRests.size(), (deltaIdEntry == null ? null : deltaIdEntry.toString()));
         System.out.println(registerRest);
@@ -93,7 +71,6 @@ public class ErdiLoaderService {
             }
 
             if (deltaIdEntry != null && deltaIdEntry.isEmpty.equals("1")) {
-                isLoading = false;
                 return true;
             }
 
@@ -148,12 +125,7 @@ public class ErdiLoaderService {
             }
         }
         catch (Exception e){
-            isError = true;
-            messageError = "Ошибка загрузки ЕРДИ";
             throw new ExceptionErdiLoad(e);
-        }
-        finally {
-            isLoading = false;
         }
         return true;
     }

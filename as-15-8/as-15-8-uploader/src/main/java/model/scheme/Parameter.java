@@ -20,5 +20,5 @@ public class Parameter {
 
     private String value;
 
-    private Boolean enabled;
+    private Integer enabled;
 }
