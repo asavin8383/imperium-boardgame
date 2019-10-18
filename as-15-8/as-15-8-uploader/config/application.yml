@@ -32,6 +32,34 @@ spring:
 cron:
     expression:
         arrangement: "0 * * ? * *"
+
+---
+
+spring:
+    profiles: prod
+    jpa:
+        hibernate:
+            ddl-auto: none
+    liquibase:
+        enabled: true
+        change-log: classpath:/data/changelog/db.changelog.master.xml
+    datasource:
+        url: jdbc:postgresql://10.97.220.144:5432/asdb
+
+
+---
+
+spring:
+    profiles: test
+    jpa:
+        hibernate:
+            ddl-auto: none
+    liquibase:
+        enabled: true
+        change-log: classpath:/data/changelog/db.changelog.master.xml
+    datasource:
+        url: jdbc:postgresql://192.168.5.195:5432/asdb
+
 ---
 
 spring:
