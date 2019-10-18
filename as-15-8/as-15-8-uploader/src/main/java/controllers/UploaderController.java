@@ -14,7 +14,7 @@ import java.util.Date;
 
 
 @RestController
-@RequestMapping(path = "/pod", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 public class UploaderController {
 
     @Autowired
