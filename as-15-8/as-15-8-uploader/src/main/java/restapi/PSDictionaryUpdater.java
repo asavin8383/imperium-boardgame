@@ -22,7 +22,7 @@ import java.util.List;
 public class PSDictionaryUpdater extends BaseDictionaryUpdater<PSEntry>
 {
     @Override
-    protected String getTable() { return "sor.PSList"; }
+    protected String getTable() { return "sor.ps"; }
 
     @Override
     protected String getId() { return "ps_id"; }
@@ -30,7 +30,7 @@ public class PSDictionaryUpdater extends BaseDictionaryUpdater<PSEntry>
     @Override
     protected void insertRecordInternal(PSEntry record, Date now) {
         log.info("inserting record {}", record);
-        jdbcTemplate.update("insert into sor.pslist(ppn_dt, eff_dt, orig_id, c_date, name, hostname) values (?,?,?,?,?,?)",
+        jdbcTemplate.update("insert into sor.ps(ppn_dt, eff_dt, orig_id, c_date, name, hostname) values (?,?,?,?,?,?)",
                 now, null, record.getId(), record.getDate(), record.getName(), record.getHostname()
         );
    }

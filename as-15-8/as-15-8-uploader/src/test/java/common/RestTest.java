@@ -31,18 +31,20 @@ public class RestTest
     @Autowired
     PASDRestClient pasdRestClient;
 
-    @Bean
+    /*@Bean
     public RestTemplate restTemplateInit() {
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor("test158", "test158"));
         return restTemplate;
-    }
+    }*/
 
+    @Test
     public void testPS(){
         psRestClient.readFromNet();
 
     }
 
+    @Test
     public void testPASD(){
         pasdRestClient.readFromNet();
 

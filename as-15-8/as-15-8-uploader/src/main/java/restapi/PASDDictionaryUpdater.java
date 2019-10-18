@@ -17,7 +17,7 @@ import java.util.Date;
 public class PASDDictionaryUpdater extends BaseDictionaryUpdater<PASDEntry>
 {
     @Override
-    protected String getTable() { return "sor.PASDList"; }
+    protected String getTable() { return "sor.pasd"; }
 
     @Override
     protected String getId() { return "pasd_id"; }
@@ -25,7 +25,7 @@ public class PASDDictionaryUpdater extends BaseDictionaryUpdater<PASDEntry>
     @Override
     protected void insertRecordInternal(PASDEntry record, Date now) {
         log.info("inserting record {}", record);
-        jdbcTemplate.update("insert into sor.PASDList(ppn_dt, eff_dt, orig_id, c_date, name, hostname, domainnames, servicedescription, networkaddresses, ipaccessfgis, credentials) values (?,?,?,?,?,?,?,?,?,?,?)",
+        jdbcTemplate.update("insert into sor.pasd(ppn_dt, eff_dt, orig_id, c_date, name, hostname, domainnames, servicedescription, networkaddresses, ipaccessfgis, credentials) values (?,?,?,?,?,?,?,?,?,?,?)",
                 now, null,
                 record.getId(), record.getDate(),
                 record.getName(), record.getHostname(), record.getDomainNames(), record.getServiceDescription(), record.getNetworkAddresses(), record.getIpAccessFgis(), record.getCredentials()

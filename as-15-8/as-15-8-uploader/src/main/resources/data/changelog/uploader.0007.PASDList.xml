@@ -7,7 +7,7 @@
 
 
     <changeSet id="uploader.0007" author="asin">
-        <createTable tableName="PASDList" schemaName="sor">
+        <createTable tableName="pasd" schemaName="sor">
             <column name="pasd_id" type="bigint" autoIncrement="true" >
                 <constraints primaryKey="true" nullable="false"/>
             </column>

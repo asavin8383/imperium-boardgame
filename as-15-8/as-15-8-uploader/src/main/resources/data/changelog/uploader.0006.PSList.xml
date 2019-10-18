@@ -7,7 +7,7 @@
 
 
     <changeSet id="uploader.0006" author="asin">
-        <createTable tableName="PSList" schemaName="sor">
+        <createTable tableName="ps" schemaName="sor">
             <column name="ps_id" type="bigint" autoIncrement="true" >
                 <constraints primaryKey="true" nullable="false"/>
             </column>
