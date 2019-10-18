@@ -1,5 +1,6 @@
 package model.scheme;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import model.converters.BlockTypeConverter;
 import model.converters.UrgencyTypeConverter;
@@ -22,6 +23,7 @@ public class ContentInfo {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "content_id", referencedColumnName = "id")
+    @JsonIgnore
     private Content content;
 
     @Column(nullable=false, name = "includetime")
@@ -34,7 +36,8 @@ public class ContentInfo {
     private Date ts;
 
     @Column(name = "entrytype_id", nullable = false)
-    private Long entryTypeId;
+    @JsonIgnore
+    private String entryTypeId;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "entrytype_id", referencedColumnName = "id", insertable = false, updatable = false)
@@ -42,6 +45,7 @@ public class ContentInfo {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "content_version_id", referencedColumnName = "id")
+    @JsonIgnore
     private ContentVersion contentVersion;
 
     @Column(name = "blocktype")

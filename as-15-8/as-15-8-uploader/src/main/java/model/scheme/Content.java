@@ -1,7 +1,10 @@
 package model.scheme;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+
 import javax.persistence.*;
+import java.util.List;
 
 
 @Entity
@@ -21,4 +24,9 @@ public class Content {
     @ManyToOne
     @JoinColumn(name = "init_content_version_id", referencedColumnName = "id")
     private ContentVersion contentVersion;
+
+    @OneToMany(mappedBy = "content")
+    @JsonIgnore
+    private List<ContentHistory> contentHistory;
+
 }

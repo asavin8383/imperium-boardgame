@@ -9,14 +9,14 @@ public enum UrgencyType {
     ;
 
     @Getter
-    private Integer value;
+    private String value;
 
     @Getter
     private String dsc;
 
 
     UrgencyType(Integer value, String dsc){
-        this.value = value;
+        this.value = value.toString();
         this.dsc = dsc;
     }
 

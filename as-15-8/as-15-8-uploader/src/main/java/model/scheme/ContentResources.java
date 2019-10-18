@@ -1,8 +1,10 @@
 package model.scheme;
 
 import checkUnits.CheckUnitType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import model.converters.ResourceTypeConverter;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
@@ -20,6 +22,7 @@ public class ContentResources implements Serializable {
 
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "content_id", referencedColumnName = "id")
+	@JsonIgnore
 	private Content content;
 
 	@Column(nullable=false)
@@ -34,5 +37,6 @@ public class ContentResources implements Serializable {
 
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "content_version_id", referencedColumnName = "id")
+	@JsonIgnore
 	private ContentVersion contentVersion;
 }

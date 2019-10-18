@@ -1832,12 +1832,11 @@
 									}
 								],
 								"url": {
-									"raw": "{{url}}/pod/erdi/formal?",
+									"raw": "{{url}}/erdi/formal?",
 									"host": [
 										"{{url}}"
 									],
 									"path": [
-										"pod",
 										"erdi",
 										"formal"
 									],
@@ -1884,15 +1883,14 @@
 									}
 								],
 								"url": {
-									"raw": "{{url}}/pod/erdi/formal/169111",
+									"raw": "{{url}}/erdi/formal/16911",
 									"host": [
 										"{{url}}"
 									],
 									"path": [
-										"pod",
 										"erdi",
 										"formal",
-										"169111"
+										"16911"
 									]
 								}
 							},
@@ -2755,220 +2753,248 @@
 			"name": "Справочники",
 			"item": [
 				{
-					"name": "Получение списка нарушений",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "X-AUTH-TOKEN",
-								"type": "text",
-								"value": "{{oper_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{url}}/pod/violation?",
-							"host": [
-								"{{url}}"
-							],
-							"path": [
-								"pod",
-								"violation"
-							],
-							"query": [
-								{
-									"key": "sortingDirection",
-									"value": "ASC",
-									"disabled": true
-								},
-								{
-									"key": "sortingColumn",
-									"value": "id",
-									"disabled": true
-								},
-								{
-									"key": "pageNumber",
-									"value": "1",
-									"disabled": true
-								},
-								{
-									"key": "pageSize",
-									"value": "5",
-									"disabled": true
-								},
-								{
-									"key": "query",
-									"value": "12",
-									"disabled": true
-								},
-								{
-									"key": "deleted",
-									"value": "true",
-									"disabled": true
+					"name": "Получение",
+					"item": [
+						{
+							"name": "Получение списка нарушений",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"type": "text",
+										"value": "{{oper_token}}",
+										"disabled": true
+									}
+								],
+								"url": {
+									"raw": "{{url_pod}}/subtype?",
+									"host": [
+										"{{url_pod}}"
+									],
+									"path": [
+										"subtype"
+									],
+									"query": [
+										{
+											"key": "sortingDirection",
+											"value": "ASC",
+											"disabled": true
+										},
+										{
+											"key": "sortingColumn",
+											"value": "id",
+											"disabled": true
+										},
+										{
+											"key": "pageNumber",
+											"value": "1",
+											"disabled": true
+										},
+										{
+											"key": "pageSize",
+											"value": "5",
+											"disabled": true
+										},
+										{
+											"key": "violationName",
+											"value": "порно",
+											"disabled": true
+										}
+									]
 								}
-							]
+							},
+							"response": []
+						},
+						{
+							"name": "Получение списка ПС",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"type": "text",
+										"value": "{{oper_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{url_pod}}/ps?",
+									"host": [
+										"{{url_pod}}"
+									],
+									"path": [
+										"ps"
+									],
+									"query": [
+										{
+											"key": "sortingDirection",
+											"value": "ASC",
+											"disabled": true
+										},
+										{
+											"key": "sortingColumn",
+											"value": "id",
+											"disabled": true
+										},
+										{
+											"key": "pageNumber",
+											"value": "1",
+											"disabled": true
+										},
+										{
+											"key": "pageSize",
+											"value": "5",
+											"disabled": true
+										},
+										{
+											"key": "name",
+											"value": "mail",
+											"disabled": true
+										},
+										{
+											"key": "hostname",
+											"value": "ru",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Получение списка ПАСД",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"type": "text",
+										"value": "{{oper_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{url_pod}}/pasd?",
+									"host": [
+										"{{url_pod}}"
+									],
+									"path": [
+										"pasd"
+									],
+									"query": [
+										{
+											"key": "sortingDirection",
+											"value": "ASC",
+											"disabled": true
+										},
+										{
+											"key": "sortingColumn",
+											"value": "id",
+											"disabled": true
+										},
+										{
+											"key": "pageNumber",
+											"value": "1",
+											"disabled": true
+										},
+										{
+											"key": "pageSize",
+											"value": "5",
+											"disabled": true
+										},
+										{
+											"key": "name",
+											"value": "сервис",
+											"disabled": true
+										},
+										{
+											"key": "hostname",
+											"value": "mail",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Получение списка ЕРДИ",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"type": "text",
+										"value": "{{oper_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{url_pod}}/erdi?",
+									"host": [
+										"{{url_pod}}"
+									],
+									"path": [
+										"erdi"
+									],
+									"query": [
+										{
+											"key": "sortingDirection",
+											"value": "ASC",
+											"disabled": true
+										},
+										{
+											"key": "sortingColumn",
+											"value": "id",
+											"disabled": true
+										},
+										{
+											"key": "pageNumber",
+											"value": "1",
+											"disabled": true
+										},
+										{
+											"key": "pageSize",
+											"value": "5",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
 						}
-					},
-					"response": []
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
 				},
 				{
-					"name": "Получение списка ПС",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "X-AUTH-TOKEN",
-								"type": "text",
-								"value": "{{oper_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{url}}/pod/search_system?",
-							"host": [
-								"{{url}}"
-							],
-							"path": [
-								"pod",
-								"search_system"
-							],
-							"query": [
-								{
-									"key": "sortingDirection",
-									"value": "ASC",
-									"disabled": true
-								},
-								{
-									"key": "sortingColumn",
-									"value": "id",
-									"disabled": true
-								},
-								{
-									"key": "pageNumber",
-									"value": "1",
-									"disabled": true
-								},
-								{
-									"key": "pageSize",
-									"value": "5",
-									"disabled": true
-								},
-								{
-									"key": "name",
-									"value": "exist",
-									"disabled": true
-								},
-								{
-									"key": "hostname",
-									"value": "ru",
-									"disabled": true
+					"name": "Обновление",
+					"item": [
+						{
+							"name": "Обновление списка ЕРДИ",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"type": "text",
+										"value": "{{oper_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{url_pod}}/erdi/update",
+									"host": [
+										"{{url_pod}}"
+									],
+									"path": [
+										"erdi",
+										"update"
+									]
 								}
-							]
+							},
+							"response": []
 						}
-					},
-					"response": []
-				},
-				{
-					"name": "Получение списка ПАСД",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "X-AUTH-TOKEN",
-								"type": "text",
-								"value": "{{oper_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{url}}/pod/pasd?",
-							"host": [
-								"{{url}}"
-							],
-							"path": [
-								"pod",
-								"pasd"
-							],
-							"query": [
-								{
-									"key": "sortingDirection",
-									"value": "ASC",
-									"disabled": true
-								},
-								{
-									"key": "sortingColumn",
-									"value": "id",
-									"disabled": true
-								},
-								{
-									"key": "pageNumber",
-									"value": "1",
-									"disabled": true
-								},
-								{
-									"key": "pageSize",
-									"value": "5",
-									"disabled": true
-								},
-								{
-									"key": "name",
-									"value": "exist",
-									"disabled": true
-								},
-								{
-									"key": "hostname",
-									"value": "ru",
-									"disabled": true
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Получение списка ЕРДИ",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "X-AUTH-TOKEN",
-								"type": "text",
-								"value": "{{oper_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{url}}/pod/erdi/formal/dict?",
-							"host": [
-								"{{url}}"
-							],
-							"path": [
-								"pod",
-								"erdi",
-								"formal",
-								"dict"
-							],
-							"query": [
-								{
-									"key": "sortingDirection",
-									"value": "ASC",
-									"disabled": true
-								},
-								{
-									"key": "sortingColumn",
-									"value": "id",
-									"disabled": true
-								},
-								{
-									"key": "pageNumber",
-									"value": "1",
-									"disabled": true
-								},
-								{
-									"key": "pageSize",
-									"value": "5",
-									"disabled": true
-								}
-							]
-						}
-					},
-					"response": []
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
 				}
 			],
 			"protocolProfileBehavior": {}

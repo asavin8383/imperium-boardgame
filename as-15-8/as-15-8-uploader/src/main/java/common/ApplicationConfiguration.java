@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.http.client.support.BasicAuthenticationInterceptor;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.client.RestTemplate;
 import repositories.*;
@@ -27,6 +28,7 @@ import java.io.IOException;
 @EnableJpaRepositories("repositories")
 @EntityScan("model")
 @EnableScheduling
+@EnableAsync
 public class ApplicationConfiguration {
 
 	@Autowired
@@ -56,6 +58,12 @@ public class ApplicationConfiguration {
         restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor("test158", "test158"));
         return restTemplate;
     }
+
+    // todo async security
+	/*@PostConstruct
+	public void init() {
+		SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
+	}*/
 
     public static void main(String[] args) {
 		SpringApplication.run(ApplicationConfiguration.class, args);

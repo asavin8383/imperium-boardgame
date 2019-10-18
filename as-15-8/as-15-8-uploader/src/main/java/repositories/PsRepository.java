@@ -1,9 +1,9 @@
 package repositories;
 
-import model.sor.SearchSystem;
+import model.scheme.PsRecord;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface SearchSystemRepository extends JpaRepository<SearchSystem, Integer> {
+public interface PsRepository extends JpaRepository<PsRecord, Integer> {
 }

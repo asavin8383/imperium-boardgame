@@ -1,7 +1,11 @@
 package model.scheme;
 
 import lombok.Data;
-import javax.persistence.*;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import java.io.Serializable;
 
 
@@ -11,7 +15,7 @@ import java.io.Serializable;
 public class EntryType implements Serializable {
 
 	@Id
-	private Long id;
+	private String id;
 
 	@Column(nullable=false)
 	private String dsc;

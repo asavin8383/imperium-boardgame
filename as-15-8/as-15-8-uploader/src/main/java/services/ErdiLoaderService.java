@@ -9,14 +9,15 @@ import model.enums.ParamSor;
 import model.enums.UrgencyType;
 import model.response.DeltaIdEntry;
 import model.rest.*;
-import model.scheme.*;
 import model.scheme.Decision;
+import model.scheme.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import repositories.*;
 import repositories.impl.ParameterRepositoryExtend;
+
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 import java.text.DateFormat;
@@ -340,7 +341,7 @@ public class ErdiLoaderService {
         cntInfo.setContent(content);
         cntInfo.setHash(contentFull.hash);
         cntInfo.setTs(contentFull.ts);
-        cntInfo.setEntryTypeId(contentFull.entryTypeId);
+        cntInfo.setEntryTypeId(contentFull.entryTypeId.toString());
         cntInfo.setContentVersion(contentVersion);
         cntInfo.setBlockType(BlockType.parse(contentFull.blockType, null));
         cntInfo.setUrgencyType(UrgencyType.parse(contentFull.urgencyType, null));

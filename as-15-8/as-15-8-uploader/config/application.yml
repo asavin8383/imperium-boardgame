@@ -86,3 +86,18 @@ spring:
     datasource:
         url: jdbc:postgresql://192.168.5.195:5432/asdb_test
 
+---
+
+spring:
+    profiles: dev_jspirina
+    path:
+        prefix: /pod
+    jpa:
+        hibernate:
+            ddl-auto: none
+    liquibase:
+        enabled: false
+        change-log: classpath:/data/changelog/db.changelog.master.xml
+    datasource:
+        url: jdbc:postgresql://192.168.5.195:5432/asdb_test
+

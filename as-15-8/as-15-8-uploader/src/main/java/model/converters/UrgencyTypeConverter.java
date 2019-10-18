@@ -10,7 +10,7 @@ import javax.persistence.Converter;
 public class UrgencyTypeConverter implements AttributeConverter<UrgencyType, Integer> {
     @Override
     public Integer convertToDatabaseColumn(UrgencyType urgencyType) {
-        return urgencyType == null ? null : urgencyType.getValue();
+        return urgencyType == null ? null : Integer.parseInt(urgencyType.getValue());
     }
 
     @Override
