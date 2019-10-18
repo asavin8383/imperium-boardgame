@@ -20,6 +20,4 @@ public class AddonVersion implements Serializable {
 	@Column(nullable=false, name = "ppn_dt")
 	private Date ppnDate;
 
-	@Column(nullable=false)
-	private Integer success = 1;
 }
