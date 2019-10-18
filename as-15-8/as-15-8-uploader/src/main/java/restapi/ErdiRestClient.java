@@ -1,6 +1,7 @@
 package restapi;
 
 
+import exceptions.ExceptionErdiLoad;
 import exceptions.ExceptionErdiParser;
 import lombok.extern.slf4j.Slf4j;
 import model.rest.ContentRest;
@@ -157,7 +158,11 @@ public class ErdiRestClient {
                     log.info("parsing... " + allContents.size());
 
                     if (contents.size() == 0){
-                        erdiLoaderService.addAllContents(false, register, allContents);
+                        try {
+                            erdiLoaderService.fillContents(null, register, allContents);
+                        } catch (ExceptionErdiLoad exceptionErdiLoad) {
+                            exceptionErdiLoad.printStackTrace();
+                        }
                         return false;
                     }
                     return true;

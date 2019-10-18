@@ -4,6 +4,12 @@ import lombok.Getter;
 
 public enum ParamSor {
 
+    IS_FULL_ERDI_LOADED(""),
+    DELTA_ID(""),
+    ACTUAL_DATE(""),
+
+
+
     VIOLATIONS_REG_DATE( ""),
     UPDATE_CONTENT_DATE(""),
     UPDATE_ADDON_DATE(""),

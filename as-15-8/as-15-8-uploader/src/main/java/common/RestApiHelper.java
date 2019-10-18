@@ -1,10 +1,14 @@
 package common;
 
 import exceptions.ExceptionErdiParser;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import model.enums.ParamSor;
 import model.rest.SubType;
 import model.response.*;
-import model.rest.control.PodInfo;
+import model.rest.control.PodState;
+import model.scheme.AddonVersion;
+import model.scheme.ContentVersion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -12,11 +16,16 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import parsers.ErdiAddonsParser;
 import parsers.ErdiFullParser;
+import repositories.AddonVersionRepository;
+import repositories.ContentVersionRepository;
+import repositories.impl.ParameterRepositoryExtend;
+import services.ErdiLoaderService;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,22 +33,31 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.concurrent.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 
 @Component
 @Slf4j
+@RequiredArgsConstructor(onConstructor_={@Autowired})
 public class RestApiHelper {
-
-    private RestTemplate restTemplate;
 
     private static final String urlRest = "";
     private static final String tempDir = "temp_dir";
+
+    private RestTemplate restTemplate;
+
+    private final ParameterRepositoryExtend parameterRepository;
+    private final ErdiLoaderService erdiLoaderService;
+    private final ContentVersionRepository contentVersionRepository;
+    private final AddonVersionRepository addonVersionRepository;;
 
 
     @Value("${spring.rest_base_url}")
@@ -56,18 +74,67 @@ public class RestApiHelper {
     }
 
 
-    public PodInfo getDateInfo(){
+    public PodState getLoadState() throws ParseException {
         ResponseEntity<RestResponseDumpDate> entity = restTemplate.exchange(
-                baseUrl + "getLastDumpDate/",
+                baseUrl + "/getLastDumpDate/",
                 HttpMethod.GET, null, RestResponseDumpDate.class);
 
-        System.out.println("**************");
         RestResponseDumpDate resp = entity.getBody();
-        Long date = resp.getDumpLongDate();
+        Date date = (resp == null ? null : resp.getDumpDate());
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
-        PodInfo podInfo = new PodInfo(new Date(date), new Date(date));
-        return podInfo;
+        String actualDumpDate = (date == null ? "" : dateFormat.format(date));
+        String dateUpdate = parameterRepository.getParameterValue(ParamSor.ACTUAL_DATE.name());
+        dateUpdate = dateUpdate == null ? "" : dateUpdate;
+
+        String state = erdiLoaderService.getIsLoading() ? "PROCESS" : (erdiLoaderService.getIsError() ? "ERROR" : "");
+        String errorMessage = !erdiLoaderService.getIsLoading() && erdiLoaderService.getIsError() ? erdiLoaderService.getMessageError() : "";
+
+        ContentVersion lastContentVersion = contentVersionRepository.findTopByIdNotNullOrderByIdDesc();
+        AddonVersion lastAddonVersion = addonVersionRepository.findTopByIdNotNullOrderByIdDesc();
+
+        PodState podState = new PodState(dateUpdate, actualDumpDate, state, errorMessage,
+                lastContentVersion == null ? null : lastContentVersion.getId(),
+                lastAddonVersion == null ? null : lastAddonVersion.getId());
+        return podState;
     }
+
+
+    public void startUpdateErdi(){
+        String strIsFullErdi = parameterRepository.getParameterValue(ParamSor.IS_FULL_ERDI_LOADED.name());
+        boolean isFullErdi = !StringUtils.isEmpty(strIsFullErdi) && strIsFullErdi.equals("1");
+
+        System.out.println("startUpdateErdi --> fullErdi = " + isFullErdi);
+
+        if (!isFullErdi){
+            System.out.println("Start load full erdi");
+        }
+        else {
+            System.out.println("Start load delta erdi");
+        }
+
+
+        try {
+            System.out.println("*****************");
+            Thread thread = new Thread(() -> {
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("+++++++++++");
+            });
+            thread.start();
+            System.out.println("*****************");
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
+
 
 
     public void test1(){
@@ -94,14 +161,14 @@ public class RestApiHelper {
         System.out.println(list.toString());
     }
 
-    public void test3(){
+    public void test3() throws ParseException {
         ResponseEntity<RestResponseDumpDate> entity = restTemplate.exchange(
                 baseUrl + "getLastDumpDate/",
                 HttpMethod.GET, null, RestResponseDumpDate.class);
 
         System.out.println("**************");
         RestResponseDumpDate resp = entity.getBody();
-        Long date = resp.getDumpLongDate();
+        Date date = resp.getDumpDate();
 
         System.out.println(date);
     }

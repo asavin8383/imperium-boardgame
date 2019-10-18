@@ -5,16 +5,15 @@ import model.scheme.Parameter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import repositories.ParameterRepository;
-import javax.persistence.EntityManager;
-
+import java.util.Optional;
 
 
 @Repository
 @RequiredArgsConstructor(onConstructor_={@Autowired})
-public class ParameterRepositoryImpl {
+public class ParameterRepositoryExtend {
 
-    private EntityManager em;
-    private ParameterRepository parameterRepository;
+    //private final EntityManager em;
+    private final ParameterRepository parameterRepository;
 
 
     public String getEnabledParameterValue(String name){

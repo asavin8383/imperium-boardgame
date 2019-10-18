@@ -7,16 +7,20 @@ import model.converters.CheckUnitTypeValueConverter;
 import model.enums.BlockType;
 import model.enums.ParamSor;
 import model.enums.UrgencyType;
+import model.response.DeltaIdEntry;
 import model.rest.*;
 import model.scheme.*;
 import model.scheme.Decision;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import repositories.*;
-import repositories.impl.ParameterRepositoryImpl;
+import repositories.impl.ParameterRepositoryExtend;
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -38,138 +42,120 @@ public class ErdiLoaderService {
     private final ContentHistoryRepository contentHistoryRepository;
     private final ContentResourcesRepository contentResourcesRepository;
     private final ContentDelRepository contentDelRepository;
-    private final ParameterRepositoryImpl parameterRepository;
+    private final ParameterRepositoryExtend parameterRepository;
+
+    private boolean isLoading = false;
+    private boolean isError = false;
+    private String messageError = "";
+
+
+    public boolean getIsLoading(){
+        return isLoading;
+    }
+    public boolean getIsError(){
+        return isError;
+    }
+    public String getMessageError(){
+        return messageError;
+    }
 
 
     @Transactional
-    public void addAllContents(boolean isDelta, RegisterRest registerRest, List<ContentRest> contentRests){
-        System.out.println("----- addAllContents: " + isDelta + ", size = " + contentRests.size());
+    public boolean fillContents(DeltaIdEntry deltaIdEntry, RegisterRest registerRest, List<ContentRest> contentRests) throws ExceptionErdiLoad {
+        if (isLoading){
+            return false;
+        }
+        isLoading = true;   // todo - сделать потоково независимую
+        isError = false;
+        messageError = "";
 
-        ContentVersion newContentVersion = createContentVersion(registerRest, isDelta);
-        ContentVersion contentVersion = contentVersionRepository.save(newContentVersion);
+        System.out.printf("----- fillContents. size = %d, delta = %s",
+                contentRests.size(), (deltaIdEntry == null ? null : deltaIdEntry.toString()));
         System.out.println(registerRest);
-        System.out.println(contentVersion);
 
-        AddonVersion addonVersion = addonVersionRepository.findTopByIdNotNullOrderByIdDesc();
-        if (addonVersion == null){
-            addonVersion = new AddonVersion();
-            addonVersion.setPpnDate(new Date());
-            addonVersionRepository.save(addonVersion);
-        }
+        try {
+            String strIsFullErdi = parameterRepository.getParameterValue(ParamSor.IS_FULL_ERDI_LOADED.name());
+            boolean isFullErdi = !StringUtils.isEmpty(strIsFullErdi) && strIsFullErdi.equals("1");
 
-        System.out.println("Content version: " + newContentVersion.getId());
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
-        Register register = createRegister(registerRest);
-        registerRepository.save(register);
-
-        List<List<ContentRest>> parts = new ArrayList<>();
-        for (int i = 0; i < contentRests.size(); i++) {
-            if (i%10000 == 0){
-                parts.add(new ArrayList<>());
+            if (deltaIdEntry == null){
+                parameterRepository.setParameterValue(ParamSor.IS_FULL_ERDI_LOADED.name(), "1");
+                parameterRepository.setParameterValue(ParamSor.DELTA_ID.name(), "");
+                parameterRepository.setParameterValue(ParamSor.ACTUAL_DATE.name(), dateFormat.format(registerRest.updateTime));
             }
-            List<ContentRest> list = parts.get(parts.size()-1);
-            list.add(contentRests.get(i));
+            else {
+                if (!isFullErdi){
+                    throw new ExceptionErdiLoad("Попытка загрузить дельту ЕРДИ когда отсутствует полное ЕРДИ");
+                }
+                parameterRepository.setParameterValue(ParamSor.DELTA_ID.name(), deltaIdEntry.deltaId);
+                parameterRepository.setParameterValue(ParamSor.ACTUAL_DATE.name(), dateFormat.format(deltaIdEntry.actualDate));
+            }
+
+            if (deltaIdEntry != null && deltaIdEntry.isEmpty.equals("1")) {
+                isLoading = false;
+                return true;
+            }
+
+            ContentVersion newContentVersion = createContentVersion(registerRest, deltaIdEntry != null);
+            ContentVersion contentVersion = contentVersionRepository.save(newContentVersion);
+            System.out.println(registerRest);
+            System.out.println(contentVersion);
+
+            AddonVersion addonVersion = addonVersionRepository.findTopByIdNotNullOrderByIdDesc();
+            if (addonVersion == null){
+                addonVersion = new AddonVersion();
+                addonVersion.setPpnDate(new Date());
+                addonVersionRepository.save(addonVersion);
+            }
+
+            System.out.println("Content version: " + newContentVersion.getId());
+            System.out.println("Addon version: " + addonVersion.getId());
+
+            Register register = createRegister(registerRest);
+            registerRepository.save(register);
+
+            List<List<ContentRest>> parts = new ArrayList<>();
+            for (int i = 0; i < contentRests.size(); i++) {
+                if (i%10000 == 0){
+                    parts.add(new ArrayList<>());
+                }
+                List<ContentRest> list = parts.get(parts.size()-1);
+                list.add(contentRests.get(i));
+            }
+
+            int count = 0;
+            for(List<ContentRest> listContentRest : parts){
+                count += listContentRest.size();
+                System.out.println("---> fillContents : " + count);
+
+                List<ContentFull> newFullContents = new ArrayList<>();
+                Map<ContentFull, Content> mapChangeContents = new LinkedHashMap<>();
+                Map<ContentDelete, Content> mapDeleteContents = new LinkedHashMap<>();
+
+                filterContents(listContentRest, newFullContents, mapChangeContents, mapDeleteContents);
+
+                System.out.println("----- newFullContents = " + newFullContents.size());
+                //System.out.println(newFullContents);
+                System.out.println("----- mapChangeContents = " + mapChangeContents.size());
+                //System.out.println(mapChangeContents);
+                System.out.println("----- mapDeleteContents = " + mapDeleteContents.size());
+                //System.out.println(mapDeleteContents);
+
+                addContents(newFullContents, mapChangeContents, contentVersion);
+                changeContents(mapChangeContents, contentVersion, null);
+                deleteContents(mapDeleteContents, contentVersion, registerRest);
+            }
         }
-
-        int count = 0;
-        for(List<ContentRest> listContentRest : parts){
-            count += listContentRest.size();
-            System.out.println("---> addAllContents : " + count);
-
-            List<ContentFull> newFullContents = new ArrayList<>();
-            Map<ContentFull, Content> mapChangeContents = new LinkedHashMap<>();
-            Map<ContentDelete, Content> mapDeleteContents = new LinkedHashMap<>();
-
-            filterContents(listContentRest, newFullContents, mapChangeContents, mapDeleteContents);
-
-            System.out.println("----- newFullContents = " + newFullContents.size());
-            //System.out.println(newFullContents);
-            System.out.println("----- mapChangeContents = " + mapChangeContents.size());
-            //System.out.println(mapChangeContents);
-            System.out.println("----- mapDeleteContents = " + mapDeleteContents.size());
-            //System.out.println(mapDeleteContents);
-
-            addContents(newFullContents, mapChangeContents, contentVersion);
-            changeContents(mapChangeContents, contentVersion, null);
-            deleteContents(mapDeleteContents, contentVersion, registerRest);
+        catch (Exception e){
+            isError = true;
+            messageError = "Ошибка загрузки ЕРДИ";
+            throw new ExceptionErdiLoad(e);
         }
-    }
-
-
-    @Transactional
-    public void startAddContent(boolean isDelta, RegisterRest registerRest) throws ExceptionErdiLoad
-    {
-        checkProcessOperation();
-
-        ContentVersion contentVersion = contentVersionRepository.save(createContentVersion(registerRest, isDelta));
-
-        AddonVersion addonVersion = addonVersionRepository.findTopByIdNotNullOrderByIdDesc();
-        if (addonVersion == null){
-            addonVersion = new AddonVersion();
-            addonVersion.setPpnDate(new Date());
-            addonVersionRepository.save(addonVersion);
+        finally {
+            isLoading = false;
         }
-
-        //addRegister(registerRest);
-
-        parameterRepository.setParameterValue(ParamSor.PROCESS_CONTENT_VERSION.name(), ""+contentVersion.getId());
-    }
-
-    /*
-    @Transactional
-    public void processAddContent(List<ContentRest> fullContents, List<ContentDelete> forDeleteContents) throws ExceptionErdiLoad
-    {
-        ContentVersion contentVersion = contentVersionRepository.findTopByIdNotNullOrderByIdDesc();
-        AddonVersion addonVersion = addonVersionRepository.findTopByIdNotNullOrderByIdDesc();
-
-        List<ContentFull> filteredNewFullContents = new ArrayList<>();
-        List<ContentFull> filteredModFullContents = new ArrayList<>();
-        List<Content> filteredModContents = new ArrayList<>();
-        List<Content> filteredDeleteContents = new ArrayList<>();
-
-        filterContents(fullContents, filteredNewFullContents, filteredModFullContents, filteredModContents, filteredDeleteContents);
-
-        List<Long> ids = forDeleteContents.stream()
-                .map(contentDelete -> contentDelete.id)
-                .collect(Collectors.toList());
-        if (ids.size() > 0){
-            filteredDeleteContents = contentRepository.findByErdiIdIn(ids);
-        }
-
-        addContents(filteredNewFullContents, contentVersion, addonVersion);
-
-        changeContents(filteredModFullContents, filteredModContents, contentVersion, addonVersion);
-
-        deleteContents(filteredDeleteContents);
-    }
-    */
-
-    @Transactional
-    public void finishAddContentVersion() throws ExceptionErdiLoad
-    {
-        parameterRepository.setParameterValue(ParamSor.PROCESS_CONTENT_VERSION.name(), null);
-    }
-
-
-    public void checkProcessOperation() throws ExceptionErdiLoad {
-        String processContentVersion = parameterRepository.getParameterValue(ParamSor.PROCESS_CONTENT_VERSION.name());
-        String processAddonVersion = parameterRepository.getParameterValue(ParamSor.PROCESS_ADDON_VERSION.name());
-
-        String processRemoveContentVersion = parameterRepository.getParameterValue(ParamSor.PROCESS_REMOVE_CONTENT_VERSION.name());
-        String processRemoveAddonVersion = parameterRepository.getParameterValue(ParamSor.PROCESS_REMOVE_ADDON_VERSION.name());
-
-        if (processContentVersion != null){
-            throw new ExceptionErdiLoad("Загрузка конетнта не завершилась! Версия " + processContentVersion);
-        }
-        if (processAddonVersion != null){
-            throw new ExceptionErdiLoad("Загрузка аддона не завершилась! Версия " + processAddonVersion);
-        }
-        if (processRemoveContentVersion != null){
-            throw new ExceptionErdiLoad("Удаление конетнта не завершилась! Версия >=" + processRemoveContentVersion);
-        }
-        if (processRemoveAddonVersion != null){
-            throw new ExceptionErdiLoad("Удаление аддона не завершилась! Версия =>" + processRemoveAddonVersion);
-        }
+        return true;
     }
 
     @Transactional
