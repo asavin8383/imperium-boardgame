@@ -54,8 +54,7 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 				throw new ExecutionException("Ошибка при запуске проверки запрещенного ресурса. Сервис проверки остановлен!");
 			log.info("Запуск робота: " + robotName);
 
-			//TODO Добавить имя робота
-			Robot robot = robotsFactory.createRobot(checkUnitJob.getAccessTool(), "");
+			Robot robot = robotsFactory.createRobot(checkUnitJob.getAccessTool());
 			
 			robots.add(robot);
 			

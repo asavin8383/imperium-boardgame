@@ -53,8 +53,7 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
 
             ProxychainsConfigurator proxychainsConfigurator = null;
             if(nmapProperties.getUseProxy())
-                //TODO Вставить Имя робота!!!
-                proxychainsConfigurator = createProxychainsConfigurator(checkUnitJob.getAccessTool(), "");
+                proxychainsConfigurator = createProxychainsConfigurator(checkUnitJob.getAccessTool());
 
             try {
 
@@ -130,10 +129,12 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
         return AbstractMessageListenerContainer.DEFAULT_PHASE - 9;
     }
 
-    private ProxychainsConfigurator createProxychainsConfigurator(AccessToolUnit accessToolUnit, String robotName) throws IOException, ExecutionException {
+    private ProxychainsConfigurator createProxychainsConfigurator(String accessTool) throws IOException, ExecutionException {
+        AccessToolUnit accessToolUnit = executorProperties.getAccessToolUnit(accessTool)
+                .orElseThrow(() -> new RuntimeException("Ошибка при получении скрипта для робота "+accessTool));
         Map<AccessToolParameter, String> robotProps = executorProperties.getProps().getAccessToolUnits()
                 .get(accessToolUnit).getRobotProps()
-                .get(robotName).getProps();
+                .get(accessTool).getProps();
         String proxyType = robotProps.get(AccessToolParameter.PROXY_TYPE);
         String proxyDns = robotProps.get(AccessToolParameter.PROXY_DNS_NAME);
         String proxyPort = robotProps.get(AccessToolParameter.PROXY_PORT);

@@ -13,6 +13,7 @@ import robots.impl.*;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -30,11 +31,13 @@ public class RobotsFactoryImpl implements RobotsFactory {
         put(AccessToolUnit.GOOGLE_API, GoogleApiRobot.class);
     }};
 
-    public Robot createRobot(AccessToolUnit accessToolUnit, String robotName){
+    public Robot createRobot(String accessTool){
+        AccessToolUnit accessToolUnit = robotsProperties.getAccessToolUnit(accessTool)
+                .orElseThrow(() -> new RuntimeException("Ошибка при получении скрипта для робота "+accessTool));
         Class<? extends Robot> scriptClass = scriptClasses.get(accessToolUnit);
-        Map<AccessToolParameter, String> robotProps = robotsProperties.getProps()
-                .getAccessToolUnits().get(accessToolUnit)
-                .getRobotProps().get(robotName).getProps();
+        Map<AccessToolParameter, String> robotProps =
+                robotsProperties.getProps().getAccessToolUnits().get(accessToolUnit)
+                .getRobotProps().get(accessTool).getProps();
         return createRobotInstance(scriptClass, robotProps);
     }
 

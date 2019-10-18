@@ -11,6 +11,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Data
 @ConfigurationProperties
@@ -52,6 +53,19 @@ public class ExecutorProperties {
             });
             props.getAccessToolUnits().put(accessToolUnit, accessToolUnitProps);
         });
+    }
+
+    public Optional<AccessToolUnit> getAccessToolUnit(String accessTool){
+        return props.getAccessToolUnits().entrySet()
+                .stream()
+                .filter(accessToolUnitProps ->
+                        accessToolUnitProps.getValue().getRobotProps().keySet()
+                                .stream()
+                                .filter(curAccessTool -> curAccessTool.equals(accessTool))
+                                .count() > 0
+                )
+                .map(accessToolUnitProps -> accessToolUnitProps.getKey())
+                .findFirst();
     }
 
     public static EtalonProperties getEtalon(){

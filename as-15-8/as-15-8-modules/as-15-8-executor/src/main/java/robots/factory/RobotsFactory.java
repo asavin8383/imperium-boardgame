@@ -10,5 +10,5 @@ import robots.Robot;
  */
 public interface RobotsFactory {
 	
-	Robot createRobot(AccessToolUnit accessToolUnit, String robotName);
+	Robot createRobot(String accessTool);
 }
