@@ -8,7 +8,7 @@ services:
       - ~/as-15-8-pod/uploader/logs:/log
       - ~/as-15-8-pod/uploader/config:/config
     environment:
-      PROFILE: test
+      PROFILE: prod
       TZ: "Europe/Moscow"
     ports:
       - "15801:15801"
