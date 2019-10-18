@@ -2,14 +2,13 @@ package restapi;
 
 import lombok.extern.slf4j.Slf4j;
 import model.response.PASDEntry;
-import model.response.PSEntry;
 import model.response.RestResponsePASD;
-import model.response.RestResponsePS;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+import restapi.updaters.PASDDictionaryUpdater;
 
 import java.util.List;
 

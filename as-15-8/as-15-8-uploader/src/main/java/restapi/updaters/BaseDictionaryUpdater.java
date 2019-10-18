@@ -1,5 +1,6 @@
-package restapi;
+package restapi.updaters;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -15,6 +16,7 @@ import java.util.Date;
  * Time: 15:08
  */
 @Component
+@Slf4j
 public abstract class BaseDictionaryUpdater<T>
 {
     @Autowired
@@ -33,6 +35,7 @@ public abstract class BaseDictionaryUpdater<T>
        // Дата обновления, будет одинакова во всех записях
         Date now = new Date();
         insertRecordInternal(record, now);
+        log.debug("1 record inserted");
         updateTable(now);
     }
 
@@ -46,6 +49,7 @@ public abstract class BaseDictionaryUpdater<T>
         Date now = new Date();
         for (T record: records)
             insertRecordInternal(record, now);
+        log.debug("{} records inserted", records.size());
         updateTable(now);
     }
 
@@ -78,49 +82,49 @@ public abstract class BaseDictionaryUpdater<T>
         String ID=getId();
         String TABLE= getTable();
 
+        String sql;
+        int rc;
+
         //-- Старые записи, для которых нет новых записей
         //-- Отправить в историю
-        jdbcTemplate.update("update " + TABLE + " set eff_dt = ? where " + ID + " in (" +
+        sql = "update " + TABLE + " set eff_dt = ? where " + ID + " in (" +
                 "select " + ID + " from " + TABLE + " old where eff_dt = '3000-01-01' and not exists(" +
                 "  select * from " + TABLE + " new where new.eff_dt is null " +
                 "  and new.orig_id = old.orig_id" +
-                ") )",
-                now
-        );
+                ") )";
+        log.debug(sql);
+        rc = jdbcTemplate.update(sql, now);
+        log.debug("{} removed records archived", rc);
 
         //-- Старые записи, для которых есть новые записи, у которых c_date больше
         //-- Отправить в историю
-        jdbcTemplate.update("update " + TABLE + " set eff_dt = ? where " + ID + " in (" +
+        sql = "update " + TABLE + " set eff_dt = ? where " + ID + " in (" +
                 "select " + ID +" from " + TABLE +" old where eff_dt = '3000-01-01' and exists(" +
                 "  select * from " + TABLE +" new where new.eff_dt is null " +
                 "  and new.orig_id = old.orig_id" +
                 "  and new.c_date > old.c_date" +
-                ") )",
-                now
-        );
-
-        //-- Новые записи, для которых есть старые записи, с совпадающими c_date и orig_id
-        //-- Удалить
-        jdbcTemplate.update("delete from " + TABLE +" where " + ID +" in (" +
-                "select " + ID +" from " + TABLE +" new where eff_dt is null and exists(" +
-                "  select * from " + TABLE +" old where old.eff_dt = '3000-01-01' " +
-                "  and new.orig_id = old.orig_id" +
-                "  and new.c_date = old.c_date" +
-                ") )"
-        );
+                ") )";
+        log.debug(sql);
+        rc = jdbcTemplate.update(sql, now);
+        log.debug("{} old records archived", rc);
 
         //-- Новые записи, для которых есть старые записи, с совпадающими orig_id и c_date равной или меньше сушествующей(!)
         //-- Удалить
-        jdbcTemplate.update("delete from " + TABLE +" where " + ID +" in (" +
+        sql ="delete from " + TABLE +" where " + ID +" in (" +
                 "select " + ID +" from " + TABLE +" new where eff_dt is null and exists(" +
                 "  select * from " + TABLE +" old where old.eff_dt = '3000-01-01' " +
                 "  and new.orig_id = old.orig_id" +
                 "  and new.c_date <= old.c_date" +
-                ") )"
-        );
+                ") )";
+        log.debug(sql);
+        rc = jdbcTemplate.update(sql);
+        log.debug("{} new redundant records removed", rc);
 
         // Все остальные новые записи помечаем как актуальные
-        jdbcTemplate.update("update " + TABLE +" set eff_dt = '3000-01-01' where eff_dt is null ");
+        sql = "update " + TABLE + " set eff_dt = '3000-01-01' where eff_dt is null ";
+        log.debug(sql);
+        rc = jdbcTemplate.update(sql);
+        log.debug("{} new records actualized", rc);
 
     }
 }
