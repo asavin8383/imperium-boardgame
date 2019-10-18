@@ -27,9 +27,9 @@ public class ContentInfo implements Serializable {
     @EqualsAndHashCode.Include
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "content_id", referencedColumnName = "id")
-    @JsonView(Views.Full.class)
+    @JsonIgnore
     private FormalErdi content;
 
     @Column(name = "includetime")
@@ -37,7 +37,7 @@ public class ContentInfo implements Serializable {
     @ToString.Include
     private LocalDateTime includeTime;
 
-    @JsonView(Views.Brief.class)
+    @JsonIgnore
     @ToString.Include
     private String hash;
 
@@ -45,15 +45,15 @@ public class ContentInfo implements Serializable {
     @ToString.Include
     private LocalDateTime ts;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne//(fetch = FetchType.LAZY)
     @JoinColumn(name = "entrytype_id", referencedColumnName = "id")
     @JsonView(Views.Full.class)
     private EntryType entryType;
 
-    @JoinColumn(name = "blocktype")
+    @Column(name = "blocktype")
     private String blockType;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne//(fetch = FetchType.LAZY)
     @JoinColumn(name = "urgencytype_id", referencedColumnName = "id")
     @JsonView(Views.Full.class)
     private EntryType urgencyType;

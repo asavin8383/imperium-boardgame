@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Immutable
-@Table(schema = "sor", name = "pslist")
+@Table(schema = "sor", name = "ps")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)

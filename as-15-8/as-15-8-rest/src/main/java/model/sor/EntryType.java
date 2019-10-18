@@ -26,7 +26,7 @@ public class EntryType implements Serializable {
     @JsonView(Views.Id.class)
     @ToString.Include
     @EqualsAndHashCode.Include
-    private Long id;
+    private String id;
 
     @Column(name = "dsc")
     @JsonView(Views.Brief.class)

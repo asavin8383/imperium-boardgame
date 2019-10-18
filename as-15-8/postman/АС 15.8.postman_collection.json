@@ -1832,11 +1832,12 @@
 									}
 								],
 								"url": {
-									"raw": "{{url}}/erdi/formal?",
+									"raw": "{{url}}/pod/erdi/formal?",
 									"host": [
 										"{{url}}"
 									],
 									"path": [
+										"pod",
 										"erdi",
 										"formal"
 									],
@@ -1883,11 +1884,12 @@
 									}
 								],
 								"url": {
-									"raw": "{{url}}/erdi/formal/169111",
+									"raw": "{{url}}/pod/erdi/formal/169111",
 									"host": [
 										"{{url}}"
 									],
 									"path": [
+										"pod",
 										"erdi",
 										"formal",
 										"169111"
@@ -2764,11 +2766,12 @@
 							}
 						],
 						"url": {
-							"raw": "{{url}}/violation?",
+							"raw": "{{url}}/pod/violation?",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
+								"pod",
 								"violation"
 							],
 							"query": [
@@ -2808,7 +2811,7 @@
 					"response": []
 				},
 				{
-					"name": "Получение списка поисковых систем",
+					"name": "Получение списка ПС",
 					"request": {
 						"method": "GET",
 						"header": [
@@ -2819,11 +2822,12 @@
 							}
 						],
 						"url": {
-							"raw": "{{url}}/search_system?",
+							"raw": "{{url}}/pod/search_system?",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
+								"pod",
 								"search_system"
 							],
 							"query": [
@@ -2855,6 +2859,110 @@
 								{
 									"key": "hostname",
 									"value": "ru",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Получение списка ПАСД",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"type": "text",
+								"value": "{{oper_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/pod/pasd?",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"pod",
+								"pasd"
+							],
+							"query": [
+								{
+									"key": "sortingDirection",
+									"value": "ASC",
+									"disabled": true
+								},
+								{
+									"key": "sortingColumn",
+									"value": "id",
+									"disabled": true
+								},
+								{
+									"key": "pageNumber",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "pageSize",
+									"value": "5",
+									"disabled": true
+								},
+								{
+									"key": "name",
+									"value": "exist",
+									"disabled": true
+								},
+								{
+									"key": "hostname",
+									"value": "ru",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Получение списка ЕРДИ",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"type": "text",
+								"value": "{{oper_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/pod/erdi/formal/dict?",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"pod",
+								"erdi",
+								"formal",
+								"dict"
+							],
+							"query": [
+								{
+									"key": "sortingDirection",
+									"value": "ASC",
+									"disabled": true
+								},
+								{
+									"key": "sortingColumn",
+									"value": "id",
+									"disabled": true
+								},
+								{
+									"key": "pageNumber",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "pageSize",
+									"value": "5",
 									"disabled": true
 								}
 							]

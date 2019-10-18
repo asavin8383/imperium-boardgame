@@ -56,11 +56,13 @@ public class FormalErdi implements Serializable {
 
     /* SOR */
 
-    @OneToOne(mappedBy = "content", fetch = FetchType.LAZY)
-    private ContentInfo contentInfo;
+    @OneToMany(mappedBy = "content", fetch = FetchType.LAZY)
+    @JsonView(Views.Full.class)
+    private List<ContentInfo> contentInfo;
 
-    @OneToOne(mappedBy = "content", fetch = FetchType.LAZY)
-    private ContentHistory contentHistory;
+    @OneToMany(mappedBy = "content", fetch = FetchType.LAZY)
+    @JsonView(Views.Full.class)
+    private List<ContentHistory> contentHistory;
 
     /* ДНО */
 
@@ -70,4 +72,5 @@ public class FormalErdi implements Serializable {
     public void setChecked(Boolean checked) {
         this.checked = checked;
     }
+
 }
