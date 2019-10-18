@@ -1,0 +1,14 @@
+version: '3.7'
+services:
+  as-15-8-uploader:
+    container_name: as-15-8-uploader
+    image: dcr.ec-leasing.ru/as-15-8/as-15-8-uploader
+    restart: always
+    volumes:
+      - ~/as-15-8-pod/uploader/logs:/log
+      - ~/as-15-8-pod/uploader/config:/config
+    environment:
+      PROFILE: test
+      TZ: "Europe/Moscow"
+    ports:
+      - "15801:15801"
