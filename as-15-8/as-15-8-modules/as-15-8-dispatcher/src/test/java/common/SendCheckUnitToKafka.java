@@ -55,7 +55,7 @@ public class SendCheckUnitToKafka {
 			.forEach(result -> {
 				CheckUnitJob checkUnitJob = new CheckUnitJob();
 				checkUnitJob.setJobID(1L);
-				checkUnitJob.setAccessToolUnit(AccessToolUnit.HOLA);
+				checkUnitJob.setAccessTool("hola");
 
 				checkUnitJob.setCheckUnit(new CheckUnit(
 						CheckUnitType.valueOf(result.get("check_unit_type").toString()),
