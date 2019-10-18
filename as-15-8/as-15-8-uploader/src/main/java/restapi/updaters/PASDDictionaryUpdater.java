@@ -1,8 +1,7 @@
-package restapi;
+package restapi.updaters;
 
 import lombok.extern.slf4j.Slf4j;
 import model.response.PASDEntry;
-import model.response.PSEntry;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -24,7 +23,7 @@ public class PASDDictionaryUpdater extends BaseDictionaryUpdater<PASDEntry>
 
     @Override
     protected void insertRecordInternal(PASDEntry record, Date now) {
-        log.info("inserting record {}", record);
+        log.debug("inserting record {}", record);
         jdbcTemplate.update("insert into sor.pasd(ppn_dt, eff_dt, orig_id, c_date, name, hostname, domainnames, servicedescription, networkaddresses, ipaccessfgis, credentials) values (?,?,?,?,?,?,?,?,?,?,?)",
                 now, null,
                 record.getId(), record.getDate(),

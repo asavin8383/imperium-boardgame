@@ -1,0 +1,38 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd
+    http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+
+    <changeSet id="uploader.0008" author="asin">
+        <createTable tableName="subtype" schemaName="sor">
+            <column name="subtype_id" type="bigint" autoIncrement="true" >
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="ppn_dt" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="eff_dt" type="timestamp">
+                <constraints nullable="true"/>
+            </column>
+            <column name="orig_id" type="varchar">
+                <constraints nullable="false"/>
+            </column>
+            <column name="c_date" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="registry_name" type="varchar">
+                <constraints nullable="false"/>
+            </column>
+            <column name="category_name" type="varchar">
+                <constraints nullable="true"/>
+            </column>
+            <column name="violation_name" type="varchar">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

@@ -11,5 +11,6 @@
     <include file="data/changelog/uploader.0005.make_history.xml"/>
     <include file="data/changelog/uploader.0006.PSList.xml"/>
     <include file="data/changelog/uploader.0007.PASDList.xml"/>
+    <include file="data/changelog/uploader.0008.SubTypeList.xml"/>
 
 </databaseChangeLog>

@@ -1,23 +1,15 @@
 package common;
 
-import model.response.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.client.RestTemplate;
 import restapi.PASDRestClient;
 import restapi.PSRestClient;
-
-import javax.sql.DataSource;
-import java.util.List;
+import restapi.SubTypeRestClient;
 
 @Configuration
 @RunWith(SpringRunner.class)
@@ -30,6 +22,9 @@ public class RestTest
 
     @Autowired
     PASDRestClient pasdRestClient;
+
+    @Autowired
+    SubTypeRestClient subTypeRestClient;
 
     /*@Bean
     public RestTemplate restTemplateInit() {
@@ -50,6 +45,10 @@ public class RestTest
 
     }
 
+    @Test
+    public void testSybType(){
+        subTypeRestClient.readFromNet();
 
+    }
 
 }
