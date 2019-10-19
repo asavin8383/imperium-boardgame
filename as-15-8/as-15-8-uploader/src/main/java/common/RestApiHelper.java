@@ -111,7 +111,7 @@ public class RestApiHelper {
 
         CompletableFuture
                 .runAsync(() -> {
-                    try{
+                    try {
                         if (!isFullErdi) {
                             System.out.println("Start load full erdi");
                             erdiRestClient.loadFullERDI();
@@ -122,10 +122,12 @@ public class RestApiHelper {
                             System.out.println("list = " + list.size());
                             System.out.println(list);
                         }
+                    } catch (Exception ex){
+                        throw new RuntimeException(ex);
                     }
-                    catch(Exception e){
-                        throw new CompletionException(e);
-                    }
+                }).exceptionally(ex -> {
+                    log.info("Ошибка при загрузке списка ЕРДИ", ex);
+                    throw new CompletionException(ex);
                 });
     }
 
