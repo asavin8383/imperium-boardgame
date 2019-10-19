@@ -12,7 +12,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import restapi.updaters.SubTypeDictionaryUpdater;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * User: asinjavin
@@ -27,7 +30,7 @@ public class SubTypeRestClient
     SubTypeDictionaryUpdater subTypeDictionaryUpdater;
 
     @Autowired
-    RestTemplate restTemplate;
+    RestTemplate registryAnonimyzersRestTemplate;
 
     @Value("${spring.rest_base_url}")
     private String baseUrl;
@@ -37,7 +40,7 @@ public class SubTypeRestClient
         String base = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
         String url = base + "getSubTypeList/";
         log.info("GET from {}", url);
-        ResponseEntity<RestResponseSubTypeList> entity = restTemplate.getForEntity(url, RestResponseSubTypeList.class);
+        ResponseEntity<RestResponseSubTypeList> entity = registryAnonimyzersRestTemplate.getForEntity(url, RestResponseSubTypeList.class);
 
         RestResponseSubTypeList resp = entity.getBody();
         System.out.println("resp = " + resp);

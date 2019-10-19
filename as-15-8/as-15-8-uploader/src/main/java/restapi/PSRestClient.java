@@ -25,7 +25,7 @@ public class PSRestClient
     PSDictionaryUpdater psDictionaryUpdater;
 
     @Autowired
-    RestTemplate restTemplate;
+    RestTemplate registryAnonimyzersRestTemplate;
 
     @Value("${spring.rest_base_url}")
     private String baseUrl;
@@ -35,7 +35,7 @@ public class PSRestClient
         String base = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
         String url = base + "getPSList/";
         log.info("GET from {}", url);
-        ResponseEntity<RestResponsePS> entity = restTemplate.getForEntity(url, RestResponsePS.class);
+        ResponseEntity<RestResponsePS> entity = registryAnonimyzersRestTemplate.getForEntity(url, RestResponsePS.class);
 
         RestResponsePS resp = entity.getBody();
 

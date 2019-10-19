@@ -64,7 +64,7 @@ public class ApplicationConfiguration {
 	private int proxyPort;
 
     @Bean
-    public RestTemplate restTemplateInit() {
+    public RestTemplate registryAnonimyzersRestTemplate() {
 		SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
 		if (!Strings.isEmpty(proxyIp)){
 			Proxy proxy = new Proxy(java.net.Proxy.Type.HTTP, new InetSocketAddress(proxyIp, proxyPort));

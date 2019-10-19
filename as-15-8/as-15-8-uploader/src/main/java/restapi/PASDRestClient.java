@@ -25,7 +25,7 @@ public class PASDRestClient
     PASDDictionaryUpdater pasdDictionaryUpdater;
 
     @Autowired
-    RestTemplate restTemplate;
+    RestTemplate registryAnonimyzersRestTemplate;
 
     @Value("${spring.rest_base_url}")
     private String baseUrl;
@@ -35,7 +35,7 @@ public class PASDRestClient
         String base = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
         String url = base + "getPASDList/";
         log.info("GET from {}", url);
-        ResponseEntity<RestResponsePASD> entity = restTemplate.getForEntity(url, RestResponsePASD.class);
+        ResponseEntity<RestResponsePASD> entity = registryAnonimyzersRestTemplate.getForEntity(url, RestResponsePASD.class);
 
         RestResponsePASD resp = entity.getBody();
 

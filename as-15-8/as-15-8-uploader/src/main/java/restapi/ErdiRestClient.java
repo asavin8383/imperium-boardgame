@@ -3,15 +3,14 @@ package restapi;
 
 import exceptions.ExceptionErdiLoad;
 import exceptions.ExceptionErdiParser;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.response.DeltaIdEntry;
 import model.rest.ContentRest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -37,12 +36,11 @@ import java.util.zip.ZipFile;
 
 @Component
 @Slf4j
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class ErdiRestClient {
 
-    private RestTemplate restTemplate;
-
-    @Autowired
-    ErdiLoaderService erdiLoaderService;
+    private final RestTemplate registryAnonimyzersRestTemplate;
+    private final ErdiLoaderService erdiLoaderService;
 
     private static final String urlRest = "";
     private static final String tempDir = "temp_dir";
@@ -54,15 +52,6 @@ public class ErdiRestClient {
     private boolean isLoading = false;
     private String errorMessage = "";
     private String stateDetails = "";
-
-
-    @Autowired
-    public void restTemplateInit(RestTemplateBuilder restTemplateBuilder) {
-        RestTemplate restTemplate = new RestTemplate();
-        restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor("test158", "test158"));
-
-        this.restTemplate = restTemplate;
-    }
 
 
     public void removeLastContentVersion() {
@@ -168,7 +157,7 @@ public class ErdiRestClient {
 
         System.out.println("----> getting full ERDI from service: " + uriComponents.toString());
 
-        ResponseEntity<byte[]> entity = restTemplate.exchange(
+        ResponseEntity<byte[]> entity = registryAnonimyzersRestTemplate.exchange(
                 uriComponents.toString(),
                 HttpMethod.GET,
                 null,
