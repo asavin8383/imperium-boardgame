@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "652e9574-5eb0-4e3e-ab33-aee3575f3672",
+		"_postman_id": "8e1e6a07-3461-47a1-9d0b-180fde9c500e",
 		"name": "АС 15.8",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -691,6 +691,7 @@
 							"response": []
 						}
 					],
+					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -794,6 +795,7 @@
 							"response": []
 						}
 					],
+					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -862,6 +864,7 @@
 							"response": []
 						}
 					],
+					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -1321,7 +1324,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "Пользователи",
@@ -1441,7 +1445,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "Параметры",
@@ -1582,7 +1587,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "Расписание",
@@ -1812,7 +1818,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "Профильный трафик",
@@ -2220,6 +2227,7 @@
 							"response": []
 						}
 					],
+					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -2747,7 +2755,8 @@
 					},
 					"response": []
 				}
-			]
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "Справочники",
@@ -2768,11 +2777,12 @@
 									}
 								],
 								"url": {
-									"raw": "{{url_pod}}/subtype?",
+									"raw": "{{url}}/pod/subtype?",
 									"host": [
-										"{{url_pod}}"
+										"{{url}}"
 									],
 									"path": [
+										"pod",
 										"subtype"
 									],
 									"query": [
@@ -2818,11 +2828,12 @@
 									}
 								],
 								"url": {
-									"raw": "{{url_pod}}/ps?",
+									"raw": "{{url}}/pod/ps?",
 									"host": [
-										"{{url_pod}}"
+										"{{url}}"
 									],
 									"path": [
+										"pod",
 										"ps"
 									],
 									"query": [
@@ -2873,11 +2884,12 @@
 									}
 								],
 								"url": {
-									"raw": "{{url_pod}}/pasd?",
+									"raw": "{{url}}/pod/pasd?",
 									"host": [
-										"{{url_pod}}"
+										"{{url}}"
 									],
 									"path": [
+										"pod",
 										"pasd"
 									],
 									"query": [
@@ -2928,11 +2940,12 @@
 									}
 								],
 								"url": {
-									"raw": "{{url_pod}}/erdi?",
+									"raw": "{{url}}/pod/erdi?",
 									"host": [
-										"{{url_pod}}"
+										"{{url}}"
 									],
 									"path": [
+										"pod",
 										"erdi"
 									],
 									"query": [
@@ -2991,6 +3004,85 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "Обновление ПАСД",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/pod/pasd/upload",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"pod",
+										"pasd",
+										"upload"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Обновление списка ПС",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/pod/ps/upload",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"pod",
+										"ps",
+										"upload"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Обновление списка нарушений",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/pod/subtype/upload",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"pod",
+										"subtype",
+										"upload"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "61f0ab93-78c5-428b-a68c-03842e2eb49c",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "84d0d0c8-c3e8-48cd-b489-41c5ca35af38",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
 						}
 					],
 					"protocolProfileBehavior": {},
@@ -3163,28 +3255,29 @@
 	],
 	"variable": [
 		{
-			"id": "86e85777-890c-42cc-8bd5-f6e82669068f",
+			"id": "489b47e5-4d0e-42d8-8c84-afe4a8e12499",
 			"key": "url",
 			"value": "http://localhost:15800",
 			"type": "string"
 		},
 		{
-			"id": "cb077cca-f27c-4c9e-85d5-71cb92f6a439",
+			"id": "89cc3b63-684e-4c0b-810b-7c308682ac7a",
 			"key": "oper_token",
 			"value": "",
 			"type": "string"
 		},
 		{
-			"id": "6868c443-76e8-469e-b1ca-f2c67d39b0dd",
+			"id": "fbb23960-51c2-48a9-b49b-589f93794900",
 			"key": "test_url",
 			"value": "http://192.168.5.253:15800",
 			"type": "string"
 		},
 		{
-			"id": "aed0f5bf-fa01-453c-a45c-bbdad85bd2ae",
+			"id": "d93d3dca-f150-4f40-924b-7298215afb2b",
 			"key": "admin_token",
 			"value": "",
 			"type": "string"
 		}
-	]
+	],
+	"protocolProfileBehavior": {}
 }
