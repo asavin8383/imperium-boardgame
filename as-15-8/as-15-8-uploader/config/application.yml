@@ -28,9 +28,11 @@ spring:
         cors:
             origin: "*"
     rest_base_url: "http://bo.esoftproject.ru/register-vpn/api/as15-8"
-    registry-anonymizers:
-        proxy-ip: "212.83.9.151"
-        proxy-port: 3128
+registry-anonymizers:
+    proxy-ip: "212.83.9.108"
+    proxy-port: 3128
+    username: test158
+    password: test158
 
 cron:
     expression:
@@ -54,8 +56,6 @@ spring:
 
 spring:
     profiles: test
-    registry-anonymizers:
-        proxy-ip: ""
     jpa:
         hibernate:
             ddl-auto: none
@@ -64,7 +64,8 @@ spring:
         change-log: classpath:/data/changelog/db.changelog.master.xml
     datasource:
         url: jdbc:postgresql://192.168.5.195:5432/asdb
-
+registry-anonymizers:
+    proxy-ip: ""
 ---
 
 spring:

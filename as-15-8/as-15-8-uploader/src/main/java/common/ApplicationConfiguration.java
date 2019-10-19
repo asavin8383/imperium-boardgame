@@ -9,6 +9,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.client.support.BasicAuthenticationInterceptor;
@@ -29,6 +30,7 @@ import java.net.Proxy;
  *
  */
 @SpringBootApplication
+@Import(RestTemplateConfiguration.class)
 @ComponentScan(basePackages= {"common", "repositories", "controllers", "services", "restapi"})
 @EnableJpaRepositories("repositories")
 @EntityScan("model")
@@ -36,7 +38,7 @@ import java.net.Proxy;
 @EnableAsync
 public class ApplicationConfiguration {
 
-	@Autowired
+	/*@Autowired
 	ContentVersionRepository contentVersionRepository;
 
 	@Autowired
@@ -55,25 +57,9 @@ public class ApplicationConfiguration {
     ErdiRestClient erdiRestClient;
 
     @Autowired
-    ContentRepository contentRepository;
+    ContentRepository contentRepository;*/
 
-	@Value("${spring.registry-anonymizers.proxy-ip}")
-	private String proxyIp;
 
-	@Value("${spring.registry-anonymizers.proxy-port}")
-	private int proxyPort;
-
-    @Bean
-    public RestTemplate registryAnonimyzersRestTemplate() {
-		SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-		if (!Strings.isEmpty(proxyIp)){
-			Proxy proxy = new Proxy(java.net.Proxy.Type.HTTP, new InetSocketAddress(proxyIp, proxyPort));
-			requestFactory.setProxy(proxy);
-		}
-        RestTemplate restTemplate = new RestTemplate(requestFactory);
-        restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor("test158", "test158"));
-        return restTemplate;
-    }
 
     // todo async security
 	/*@PostConstruct
