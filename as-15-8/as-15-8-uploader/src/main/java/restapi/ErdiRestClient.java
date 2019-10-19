@@ -37,10 +37,7 @@ import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
@@ -74,6 +71,8 @@ public class ErdiRestClient {
             return;
         }
         isLoading = true;
+        errorMessage = "";
+        isError = false;
 
         Long id = null;
         try {
@@ -233,7 +232,7 @@ public class ErdiRestClient {
             }
         }
         catch (Exception e){
-            errorMessage = "Ошибка загрузки дельта ЕРДИ";
+            errorMessage = StringUtils.isEmpty(errorMessage) ? "Ошибка загрузки дельта ЕРДИ" : errorMessage;
             isError = true;
             throw new ExceptionErdiParser(e);
         }
@@ -243,19 +242,21 @@ public class ErdiRestClient {
         }
     }
 
+    public Date getActualContentDate(){
+        ContentVersion lastContentVersion = contentVersionRepository.findTopByIdNotNullOrderByIdDesc();
+        Date actualDate = lastContentVersion == null ? null : (lastContentVersion.getRegUpdateTime() != null ?
+                lastContentVersion.getRegUpdateTime() : lastContentVersion.getDeltaUpdateTime());
+        return actualDate;
+    }
 
     public List<DeltaIdEntry> getLastDumpDeltaListByDate() throws ParseException {
-        String dateUpdate = parameterRepository.getParameterValue(ParamSor.ACTUAL_DATE.name());
-        //dateUpdate = "2017-09-22T09:23:13";
-
+        Date dateUpdate = getActualContentDate();
         System.out.println("dateUpdate = " + dateUpdate);
-        if (StringUtils.isEmpty(dateUpdate)){
+
+        if (dateUpdate == null){
             return new ArrayList<>();
         }
-
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-        Date date = dateFormat.parse(dateUpdate);
-        return getDumpDeltaListByDate(date);
+        return getDumpDeltaListByDate(dateUpdate);
     }
 
     @Transactional
@@ -277,12 +278,15 @@ public class ErdiRestClient {
 
     public List<DeltaIdEntry> getDumpDeltaListByDate(Date date) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
         String dateStr = dateFormat.format(date);
 
         UriComponents uriComponents =
                 UriComponentsBuilder.fromUriString("{baseUrl}/getDumpDeltaListByDate/{dateStr}/")
                         .build()
                         .expand(baseUrl, dateStr);
+
+        System.out.println(uriComponents.toString());
 
         ResponseEntity<RestResponseDeltaListByDate> entity;
         try {
@@ -294,7 +298,8 @@ public class ErdiRestClient {
             );
         }
         catch (Throwable e){
-            System.out.println("Ошибка загрузки списка дельт по дате: " + dateStr);
+            errorMessage = "Ошибка загрузки списка дельт по дате: " + dateStr;
+            System.out.println(errorMessage);
             throw e;
         }
 
@@ -357,7 +362,7 @@ public class ErdiRestClient {
 
 
     private void erdiToDB(Path path, DeltaIdEntry deltaIdEntry) throws IOException, ExceptionErdiParser {
-        log.info("Попытка парсинга {0}, file: {1}", deltaIdEntry != null ? "Delta ERDI" : "Full ERDI", path.toAbsolutePath().toString());
+        log.info("Попытка парсинга {}, file: {}", deltaIdEntry != null ? "Delta ERDI" : "Full ERDI", path.toAbsolutePath().toString());
 
         ZipFile zipFile = null;
 

@@ -21,6 +21,7 @@ import repositories.impl.ParameterRepositoryExtend;
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -45,6 +46,8 @@ public class ErdiLoaderService {
     private final ContentDelRepository contentDelRepository;
     private final ParameterRepositoryExtend parameterRepository;
 
+    private static final String actualDateFormat = "yyyy-MM-dd'T'HH:mm:ss";
+
 
     @Transactional
     public boolean fillContents(DeltaIdEntry deltaIdEntry, RegisterRest registerRest, List<ContentRest> contentRests) throws ExceptionErdiLoad {
@@ -53,30 +56,19 @@ public class ErdiLoaderService {
         System.out.println(registerRest);
 
         try {
-            String strIsFullErdi = parameterRepository.getParameterValue(ParamSor.IS_FULL_ERDI_LOADED.name());
-            boolean isFullErdi = !StringUtils.isEmpty(strIsFullErdi) && strIsFullErdi.equals("1");
-
-            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-
-            if (deltaIdEntry == null){
-                parameterRepository.setParameterValue(ParamSor.IS_FULL_ERDI_LOADED.name(), "1");
-                parameterRepository.setParameterValue(ParamSor.DELTA_ID.name(), "");
-                parameterRepository.setParameterValue(ParamSor.ACTUAL_DATE.name(), dateFormat.format(registerRest.updateTime));
-            }
-            else {
-                if (!isFullErdi){
+            if (deltaIdEntry != null){
+                ContentVersion fullContentVersion = contentVersionRepository.getTopByRegUpdateTimeNotNullOrderByIdDesc();
+                if (fullContentVersion == null){
                     throw new ExceptionErdiLoad("Попытка загрузить дельту ЕРДИ когда отсутствует полное ЕРДИ");
                 }
-
-                parameterRepository.setParameterValue(ParamSor.DELTA_ID.name(), deltaIdEntry.deltaId);
-                parameterRepository.setParameterValue(ParamSor.ACTUAL_DATE.name(), deltaIdEntry.actualDate);
             }
 
-            if (deltaIdEntry != null && deltaIdEntry.isEmpty.equals("1")) {
+            // пропускаем загрузку, контента нет
+            if (contentRests.size() == 0) {
                 return true;
             }
 
-            ContentVersion newContentVersion = createContentVersion(registerRest, deltaIdEntry != null);
+            ContentVersion newContentVersion = createContentVersion(registerRest, deltaIdEntry);
             ContentVersion contentVersion = contentVersionRepository.save(newContentVersion);
             System.out.println(registerRest);
             System.out.println(contentVersion);
@@ -231,6 +223,8 @@ public class ErdiLoaderService {
             return;
 
         List<Content> newContents = new ArrayList<>();
+        List<Decision> newDecision = new ArrayList<>();
+
         Map<String, ContentFull> mapFullContent = new HashMap<>();
         for (ContentFull fc : fullContents){
             Content cnt = new Content();
@@ -247,8 +241,11 @@ public class ErdiLoaderService {
             ContentFull contentFull = mapFullContent.get(content.getErdiId());
             if (contentFull != null){
                 mapNewContents.put(contentFull, content);
+                newDecision.add(createDecision(content, contentVersion, contentFull));
             }
         }
+
+        decisionRepository.saveAll(newDecision);
 
         //System.out.println("************************ ADD");
         //System.out.println("newDecisionList: " + savedContents.size());
@@ -315,15 +312,14 @@ public class ErdiLoaderService {
         //log.info("End");
     }
 
-    private ContentVersion createContentVersion(RegisterRest registerRest, boolean isDelta){
-        ContentVersion lastContentVersion = contentVersionRepository.findTopByIdNotNullOrderByIdDesc();
-        Date regUpdateTime = isDelta ? (lastContentVersion != null ? lastContentVersion.getRegUpdateTime() : registerRest.updateTime) : registerRest.updateTime;
-        Date deltaUpdateTime = isDelta ? registerRest.updateTime : null;
+    private ContentVersion createContentVersion(RegisterRest registerRest, DeltaIdEntry deltaIdEntry) throws ParseException {
+        DateFormat dateFormat = new SimpleDateFormat(actualDateFormat);
 
         ContentVersion contentVersion = new ContentVersion();
-        contentVersion.setRegUpdateTime(regUpdateTime);
-        contentVersion.setDeltaUpdateTime(deltaUpdateTime);
+        contentVersion.setRegUpdateTime(deltaIdEntry == null ? registerRest.updateTime : null);
+        contentVersion.setDeltaUpdateTime(deltaIdEntry == null ? null : dateFormat.parse(deltaIdEntry.actualDate));
         contentVersion.setPpnDate(new Date());          // проставляется автоматом
+        contentVersion.setDeltaId(deltaIdEntry == null ? null : Long.valueOf(deltaIdEntry.deltaId));
 
         return contentVersion;
     }

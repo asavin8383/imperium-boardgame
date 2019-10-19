@@ -3,7 +3,6 @@ package common;
 import exceptions.ExceptionErdiParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import model.enums.ParamSor;
 import model.response.*;
 import model.rest.SubType;
 import model.rest.control.PodState;
@@ -15,7 +14,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -74,23 +72,22 @@ public class RestApiHelper {
         RestResponseDumpDate resp = entity.getBody();
         Date dateDumpDate = (resp == null ? null : resp.getDumpDate());
         DateFormat dateFormat1 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-        DateFormat dateFormat2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
+        ContentVersion lastContentVersion = contentVersionRepository.findTopByIdNotNullOrderByIdDesc();
+        AddonVersion lastAddonVersion = addonVersionRepository.findTopByIdNotNullOrderByIdDesc();
+
+        Date dateUpdate = erdiRestClient.getActualContentDate();
+        String strDateUpdate = dateUpdate == null ? "" : dateFormat1.format(dateUpdate);
         String actualServerDumpDate = (dateDumpDate == null ? "" : dateFormat1.format(dateDumpDate));
-        String dateUpdate = parameterRepository.getParameterValue(ParamSor.ACTUAL_DATE.name());
-        dateUpdate = dateUpdate == null ? "" : dateFormat1.format(dateFormat2.parse(dateUpdate));
 
         String state = erdiRestClient.getState();
         String errorMessage = erdiRestClient.getErrorMessage();
         String stateDetails = erdiRestClient.getStateDetails();
 
-        ContentVersion lastContentVersion = contentVersionRepository.findTopByIdNotNullOrderByIdDesc();
-        AddonVersion lastAddonVersion = addonVersionRepository.findTopByIdNotNullOrderByIdDesc();
-
         List<ContentVersion> allContents = contentVersionRepository.findAll(Sort.by(Sort.Order.asc("id")));
         List<Long> allContentsInt = allContents.stream().map(contentVersion -> contentVersion.getId()).collect(Collectors.toList());
 
-        PodState podState = new PodState(dateUpdate, actualServerDumpDate, state, errorMessage, stateDetails,
+        PodState podState = new PodState(strDateUpdate, actualServerDumpDate, state, errorMessage, stateDetails,
                 lastContentVersion == null ? null : lastContentVersion.getId(),
                 lastAddonVersion == null ? null : lastAddonVersion.getId(),
                 allContentsInt);
@@ -99,8 +96,8 @@ public class RestApiHelper {
 
 
     public void startUpdateErdi(){
-        String strIsFullErdi = parameterRepository.getParameterValue(ParamSor.IS_FULL_ERDI_LOADED.name());
-        boolean isFullErdi = !StringUtils.isEmpty(strIsFullErdi) && strIsFullErdi.equals("1");
+        ContentVersion fullContentVersion = contentVersionRepository.getTopByRegUpdateTimeNotNullOrderByIdDesc();
+        boolean isFullErdi = fullContentVersion != null;
 
         log.info("---> Запуск зугрузки ЕРДИ: " + (isFullErdi ? "дельт" : "полного справочника"));
 
