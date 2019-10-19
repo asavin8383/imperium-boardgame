@@ -124,7 +124,7 @@ public class RestApiHelper {
                         }
                     }
                     catch(Exception e){
-                        e.printStackTrace();
+                        throw new CompletionException(e);
                     }
                 });
     }
