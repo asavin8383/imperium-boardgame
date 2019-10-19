@@ -1,13 +1,16 @@
 package common;
 
 import exceptions.ExceptionErdiParser;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -17,6 +20,8 @@ import restapi.ErdiRestClient;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 
 
 /**
@@ -52,9 +57,20 @@ public class ApplicationConfiguration {
     @Autowired
     ContentRepository contentRepository;
 
+	@Value("${spring.registry-anonymizers.proxy-ip}")
+	private String proxyIp;
+
+	@Value("${spring.registry-anonymizers.proxy-port}")
+	private int proxyPort;
+
     @Bean
     public RestTemplate restTemplateInit() {
-        RestTemplate restTemplate = new RestTemplate();
+		SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+		if (!Strings.isEmpty(proxyIp)){
+			Proxy proxy = new Proxy(java.net.Proxy.Type.HTTP, new InetSocketAddress(proxyIp, proxyPort));
+			requestFactory.setProxy(proxy);
+		}
+        RestTemplate restTemplate = new RestTemplate(requestFactory);
         restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor("test158", "test158"));
         return restTemplate;
     }

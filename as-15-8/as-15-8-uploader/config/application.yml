@@ -28,6 +28,9 @@ spring:
         cors:
             origin: "*"
     rest_base_url: "http://bo.esoftproject.ru/register-vpn/api/as15-8"
+    registry-anonymizers:
+        proxy-ip: "212.83.9.151"
+        proxy-port: 3128
 
 cron:
     expression:
@@ -51,6 +54,8 @@ spring:
 
 spring:
     profiles: test
+    registry-anonymizers:
+        proxy-ip: ""
     jpa:
         hibernate:
             ddl-auto: none

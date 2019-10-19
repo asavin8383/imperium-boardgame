@@ -35,4 +35,4 @@ services:
       PROFILE: test
       TZ: "Europe/Moscow"
     ports:
-      - "15880:80"
+      - "15880:15880"
