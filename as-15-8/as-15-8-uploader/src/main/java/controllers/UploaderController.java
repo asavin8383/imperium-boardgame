@@ -26,12 +26,21 @@ public class UploaderController {
     @GetMapping("/update_erdi")
     public void updateErdi() throws ParseException {
         restApiHelper.startUpdateErdi();
-        //restApiHelper.getDumpDeltaListByDate(new Date());
     }
 
     @GetMapping("/remove_last_content_version")
     public void removeLastContentVersion() throws ParseException {
         restApiHelper.removeLastContentVersion();
+    }
+
+    @GetMapping("/remove_content_version_to")
+    public void removeLastContentVersion(@RequestParam int version) throws ParseException {
+        restApiHelper.removeVersionTo(version);
+    }
+
+    @GetMapping("/set_parameter")
+    public String removeLastContentVersion(@RequestParam String name, @RequestParam String value) throws ParseException {
+        return restApiHelper.setParameter(name, value);
     }
 
     @GetMapping("/get_state")

@@ -48,8 +48,8 @@ public class ErdiLoaderService {
 
     @Transactional
     public boolean fillContents(DeltaIdEntry deltaIdEntry, RegisterRest registerRest, List<ContentRest> contentRests) throws ExceptionErdiLoad {
-        System.out.printf("----- fillContents. size = %d, delta = %s",
-                contentRests.size(), (deltaIdEntry == null ? null : deltaIdEntry.toString()));
+        log.info("=== START FILL ERDI ===");
+        System.out.printf("size = %d, delta = %s", contentRests.size(), (deltaIdEntry == null ? null : deltaIdEntry.toString()));
         System.out.println(registerRest);
 
         try {
@@ -67,8 +67,9 @@ public class ErdiLoaderService {
                 if (!isFullErdi){
                     throw new ExceptionErdiLoad("Попытка загрузить дельту ЕРДИ когда отсутствует полное ЕРДИ");
                 }
+
                 parameterRepository.setParameterValue(ParamSor.DELTA_ID.name(), deltaIdEntry.deltaId);
-                parameterRepository.setParameterValue(ParamSor.ACTUAL_DATE.name(), dateFormat.format(deltaIdEntry.actualDate));
+                parameterRepository.setParameterValue(ParamSor.ACTUAL_DATE.name(), deltaIdEntry.actualDate);
             }
 
             if (deltaIdEntry != null && deltaIdEntry.isEmpty.equals("1")) {
@@ -105,7 +106,7 @@ public class ErdiLoaderService {
             int count = 0;
             for(List<ContentRest> listContentRest : parts){
                 count += listContentRest.size();
-                System.out.println("---> fillContents : " + count);
+                log.info("=== Partition fill count: " + count);
 
                 List<ContentFull> newFullContents = new ArrayList<>();
                 Map<ContentFull, Content> mapChangeContents = new LinkedHashMap<>();
@@ -113,11 +114,11 @@ public class ErdiLoaderService {
 
                 filterContents(listContentRest, newFullContents, mapChangeContents, mapDeleteContents);
 
-                System.out.println("----- newFullContents = " + newFullContents.size());
+                //System.out.println("----- newFullContents = " + newFullContents.size());
                 //System.out.println(newFullContents);
-                System.out.println("----- mapChangeContents = " + mapChangeContents.size());
+                //System.out.println("----- mapChangeContents = " + mapChangeContents.size());
                 //System.out.println(mapChangeContents);
-                System.out.println("----- mapDeleteContents = " + mapDeleteContents.size());
+                //System.out.println("----- mapDeleteContents = " + mapDeleteContents.size());
                 //System.out.println(mapDeleteContents);
 
                 addContents(newFullContents, mapChangeContents, contentVersion);
@@ -128,6 +129,8 @@ public class ErdiLoaderService {
         catch (Exception e){
             throw new ExceptionErdiLoad(e);
         }
+
+        log.info("=== FINISH FILL ERDI ===");
         return true;
     }
 
@@ -236,9 +239,9 @@ public class ErdiLoaderService {
             newContents.add(cnt);
             mapFullContent.put(""+fc.id, fc);
         }
-        log.info("Start add content... size = " + fullContents.size());
+        //log.info("Start add content... size = " + fullContents.size());
         List<Content> savedContents = contentRepository.saveAll(newContents);
-        log.info("End");
+        //log.info("End");
 
         for(Content content : savedContents){
             ContentFull contentFull = mapFullContent.get(content.getErdiId());
@@ -247,8 +250,8 @@ public class ErdiLoaderService {
             }
         }
 
-        System.out.println("************************ ADD");
-        System.out.println("newDecisionList: " + savedContents.size());
+        //System.out.println("************************ ADD");
+        //System.out.println("newDecisionList: " + savedContents.size());
         //System.out.println(savedContents);
     }
 
@@ -269,21 +272,21 @@ public class ErdiLoaderService {
             newContentHistoryList.add(createContentHistory(cnt, contentVersion, addonVersion, cntFull.includeTime, null));
         }
 
-        System.out.println("************************ CHANGE");
-        System.out.println("newContentsInfoList: " + newContentsInfoList.size());
+        //System.out.println("************************ CHANGE");
+        //System.out.println("newContentsInfoList: " + newContentsInfoList.size());
         //System.out.println(newContentsInfoList);
-        System.out.println("newContentHistoryList: " + newContentHistoryList.size());
+        //System.out.println("newContentHistoryList: " + newContentHistoryList.size());
         //System.out.println(newContentHistoryList);
-        System.out.println("newContentResourcesList: " + newContentResourcesList.size());
+        //System.out.println("newContentResourcesList: " + newContentResourcesList.size());
         //System.out.println(newContentResourcesList);
 
-        log.info("Start save ifo content... size = " + newContentsInfoList.size());
+        //log.info("Start save ifo content... size = " + newContentsInfoList.size());
         contentInfoRepository.saveAll(newContentsInfoList);
 
-        log.info("Start save history... size = " + newContentHistoryList.size());
+        //log.info("Start save history... size = " + newContentHistoryList.size());
         contentHistoryRepository.saveAll(newContentHistoryList);
 
-        log.info("Start save resources... size = " + newContentResourcesList.size());
+        //log.info("Start save resources... size = " + newContentResourcesList.size());
         contentResourcesRepository.saveAll(newContentResourcesList);
     }
 
@@ -299,17 +302,17 @@ public class ErdiLoaderService {
             contentHistoryList.add(newContentHistory);
             //contentDelList.add(createContentDel(content, contentVersion));
         }
-        System.out.println("************************ DELETE");
-        System.out.println("contentHistoryList: " + contentHistoryList.size());
+        //System.out.println("************************ DELETE");
+        //System.out.println("contentHistoryList: " + contentHistoryList.size());
         //System.out.println(contentHistoryList);
         //System.out.println("contentDelList: " + contentDelList.size());
         //System.out.println(contentDelList);
 
         //contentDelRepository.saveAll(contentDelList);
 
-        log.info("Start save delete history... size = " + contentHistoryList.size());
+        //log.info("Start save delete history... size = " + contentHistoryList.size());
         contentHistoryRepository.saveAll(contentHistoryList);
-        log.info("End");
+        //log.info("End");
     }
 
     private ContentVersion createContentVersion(RegisterRest registerRest, boolean isDelta){

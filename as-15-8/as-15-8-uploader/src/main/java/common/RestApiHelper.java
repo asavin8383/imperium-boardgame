@@ -11,6 +11,7 @@ import model.scheme.AddonVersion;
 import model.scheme.ContentVersion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -24,6 +25,7 @@ import repositories.AddonVersionRepository;
 import repositories.ContentVersionRepository;
 import repositories.impl.ParameterRepositoryExtend;
 import restapi.ErdiRestClient;
+import services.ErdiLoaderService;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,6 +42,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -56,8 +59,8 @@ public class RestApiHelper {
 
     private final ParameterRepositoryExtend parameterRepository;
     private final ContentVersionRepository contentVersionRepository;
-    private final AddonVersionRepository addonVersionRepository;;
-    private final ErdiRestClient erdiRestClient;;
+    private final AddonVersionRepository addonVersionRepository;
+    private final ErdiRestClient erdiRestClient;
 
 
     @Value("${spring.rest_base_url}")
@@ -69,12 +72,13 @@ public class RestApiHelper {
                 HttpMethod.GET, null, RestResponseDumpDate.class);
 
         RestResponseDumpDate resp = entity.getBody();
-        Date date = (resp == null ? null : resp.getDumpDate());
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        Date dateDumpDate = (resp == null ? null : resp.getDumpDate());
+        DateFormat dateFormat1 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        DateFormat dateFormat2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
-        String actualDumpDate = (date == null ? "" : dateFormat.format(date));
+        String actualServerDumpDate = (dateDumpDate == null ? "" : dateFormat1.format(dateDumpDate));
         String dateUpdate = parameterRepository.getParameterValue(ParamSor.ACTUAL_DATE.name());
-        dateUpdate = dateUpdate == null ? "" : dateUpdate;
+        dateUpdate = dateUpdate == null ? "" : dateFormat1.format(dateFormat2.parse(dateUpdate));
 
         String state = erdiRestClient.getState();
         String errorMessage = erdiRestClient.getErrorMessage();
@@ -83,9 +87,13 @@ public class RestApiHelper {
         ContentVersion lastContentVersion = contentVersionRepository.findTopByIdNotNullOrderByIdDesc();
         AddonVersion lastAddonVersion = addonVersionRepository.findTopByIdNotNullOrderByIdDesc();
 
-        PodState podState = new PodState(dateUpdate, actualDumpDate, state, errorMessage, stateDetails,
+        List<ContentVersion> allContents = contentVersionRepository.findAll(Sort.by(Sort.Order.asc("id")));
+        List<Long> allContentsInt = allContents.stream().map(contentVersion -> contentVersion.getId()).collect(Collectors.toList());
+
+        PodState podState = new PodState(dateUpdate, actualServerDumpDate, state, errorMessage, stateDetails,
                 lastContentVersion == null ? null : lastContentVersion.getId(),
-                lastAddonVersion == null ? null : lastAddonVersion.getId());
+                lastAddonVersion == null ? null : lastAddonVersion.getId(),
+                allContentsInt);
         return podState;
     }
 
@@ -94,73 +102,46 @@ public class RestApiHelper {
         String strIsFullErdi = parameterRepository.getParameterValue(ParamSor.IS_FULL_ERDI_LOADED.name());
         boolean isFullErdi = !StringUtils.isEmpty(strIsFullErdi) && strIsFullErdi.equals("1");
 
-        System.out.println("startUpdateErdi --> fullErdi = " + isFullErdi);
+        log.info("---> Запуск зугрузки ЕРДИ: " + (isFullErdi ? "дельт" : "полного справочника"));
 
         CompletableFuture
                 .runAsync(() -> {
-                    try {
+                    try{
                         if (!isFullErdi) {
-                            System.out.println("Start load full erdi");
                             erdiRestClient.loadFullERDI();
-                        } else {
-                            System.out.println("Start load delta erdi");
-
-                            List<DeltaIdEntry> list = getLastDumpDeltaListByDate();
-                            System.out.println("list = " + list.size());
-                            System.out.println(list);
                         }
-                    } catch (Exception ex){
+                        else {
+                            erdiRestClient.loadAllDeltaERDI();
+                        }
+                    }
+                    catch(Exception ex){
                         throw new RuntimeException(ex);
                     }
                 }).exceptionally(ex -> {
-                    log.info("Ошибка при загрузке списка ЕРДИ", ex);
-                    throw new CompletionException(ex);
-                });
+            log.info("Ошибка при загрузке ЕРДИ", ex);
+            throw new CompletionException(ex);
+        });
     }
-
 
     public void removeLastContentVersion(){
         erdiRestClient.removeLastContentVersion();
     }
 
-    public List<DeltaIdEntry> getLastDumpDeltaListByDate() throws ParseException {
-        String dateUpdate = parameterRepository.getParameterValue(ParamSor.ACTUAL_DATE.name());
-        System.out.println("dateUpdate = " + dateUpdate);
-        if (StringUtils.isEmpty(dateUpdate)){
-            return new ArrayList<>();
-        }
-
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-        Date date = dateFormat.parse(dateUpdate);
-        return getDumpDeltaListByDate(date);
+    public void removeVersionTo(int version){
+        CompletableFuture
+                .runAsync(() -> {
+                    while(true){
+                        ContentVersion last = contentVersionRepository.findTopByIdNotNullOrderByIdDesc();
+                        if (last == null || version >= last.getId())
+                            return;
+                        erdiRestClient.removeLastContentVersion();
+                    }
+                });
     }
 
-
-    public List<DeltaIdEntry> getDumpDeltaListByDate(Date date) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd%20HH:mm:ss");
-        String dateStr = dateFormat.format(date);
-
-        UriComponents uriComponents =
-                UriComponentsBuilder.fromUriString("{baseUrl}/getDumpDeltaListByDate/{dateStr}/")
-                        .build()
-                        .expand(baseUrl, dateStr);
-
-        System.out.println(uriComponents.toString());
-
-        ResponseEntity<RestResponseDeltaListByDate> entity = restTemplate.exchange(
-                uriComponents.toString(),
-                HttpMethod.GET,
-                null,
-                RestResponseDeltaListByDate.class
-        );
-
-        RestResponseDeltaListByDate resp = entity.getBody();
-        System.out.println(resp.response);
-
-        return resp.response;
+    public String setParameter(String name, String value){
+        return erdiRestClient.setParameter(name, value);
     }
-
-
 
     public void test1(){
         ResponseEntity<RestResponsePS> entity = restTemplate.exchange(

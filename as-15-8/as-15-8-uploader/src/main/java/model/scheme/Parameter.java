@@ -19,6 +19,4 @@ public class Parameter {
     private String name;
 
     private String value;
-
-    private Integer enabled;
 }
