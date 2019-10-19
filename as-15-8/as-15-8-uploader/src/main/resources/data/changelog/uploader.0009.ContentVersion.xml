@@ -9,12 +9,6 @@
     <changeSet id="uploader.0009" author="pvorobiev">
         <addColumn schemaName="sor"
                    tableName="content_version">
-            <column name="full_actual_date" type="timestamp">
-                <constraints nullable="true"/>
-            </column>
-            <column name="delta_actual_date" type="timestamp">
-                <constraints nullable="true"/>
-            </column>
             <column name="delta_id" type="bigint">
                 <constraints nullable="true"/>
             </column>
