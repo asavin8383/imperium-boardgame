@@ -57,7 +57,7 @@ public class PasdController {
     public ResponseEntity<String> uploadPasd(){
         if (state != UploadingState.UPLOADING){
             state = UploadingState.UPLOADING;
-            CompletableFuture.runAsync(() -> uploadAndChangeStatus());
+            CompletableFuture.runAsync(this::uploadAndChangeStatus);
             return new ResponseEntity<>("Началась загрузка", HttpStatus.OK);
         }
         return new ResponseEntity<>("Загрузка данных в процессе", HttpStatus.PROCESSING);
@@ -67,7 +67,7 @@ public class PasdController {
         try {
             pasdRestClient.readFromNet();
         }catch (Exception ex){
-            log.error("Error uploading pasd: " + ex.getMessage());
+            log.error("Ошибка загрузки справочника ПАСД: " + ex.getMessage());
         }
         state = UploadingState.ACTIVE;
 
