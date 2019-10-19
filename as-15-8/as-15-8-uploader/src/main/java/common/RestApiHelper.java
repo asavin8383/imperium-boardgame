@@ -4,17 +4,15 @@ import exceptions.ExceptionErdiParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.enums.ParamSor;
-import model.rest.SubType;
 import model.response.*;
+import model.rest.SubType;
 import model.rest.control.PodState;
 import model.scheme.AddonVersion;
 import model.scheme.ContentVersion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
@@ -26,7 +24,6 @@ import repositories.AddonVersionRepository;
 import repositories.ContentVersionRepository;
 import repositories.impl.ParameterRepositoryExtend;
 import restapi.ErdiRestClient;
-import services.ErdiLoaderService;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,7 +38,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -54,7 +52,7 @@ public class RestApiHelper {
     private static final String urlRest = "";
     private static final String tempDir = "temp_dir";
 
-    private RestTemplate restTemplate;
+    private final RestTemplate restTemplate;
 
     private final ParameterRepositoryExtend parameterRepository;
     private final ContentVersionRepository contentVersionRepository;
@@ -64,17 +62,6 @@ public class RestApiHelper {
 
     @Value("${spring.rest_base_url}")
     private String baseUrl;
-
-
-    @Autowired
-    public void restTemplateInit(RestTemplateBuilder restTemplateBuilder) {
-
-        RestTemplate restTemplate = new RestTemplate();
-        restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor("test158", "test158"));
-
-        this.restTemplate = restTemplate;
-    }
-
 
     public PodState getLoadState() throws ParseException {
         ResponseEntity<RestResponseDumpDate> entity = restTemplate.exchange(
