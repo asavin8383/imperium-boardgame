@@ -13,6 +13,11 @@
                 <constraints nullable="true"/>
             </column>
         </addColumn>
+        <dropNotNullConstraint
+                schemaName="sor"
+                tableName="content_version"
+                columnDataType="timestamp"
+                columnName="reg_updatetime"/>
     </changeSet>
 
 </databaseChangeLog>

@@ -17,13 +17,16 @@ public class ContentVersion implements Serializable {
 	@Column(name="id", nullable=false, updatable=false)
 	private Long id;
 
-	@Column(nullable=false, name = "reg_updatetime")
+	@Column(nullable=true, name = "reg_updatetime")
 	private Date regUpdateTime;
 
-	@Column(nullable=false, name = "delta_updatetime")
+	@Column(nullable=true, name = "delta_updatetime")
 	private Date deltaUpdateTime;
 
 	@Column(nullable=false, name = "ppn_dt")
 	private Date ppnDate;
+
+	@Column(nullable=true, name = "delta_id")
+	private Long deltaId;
 
 }
