@@ -1,7 +1,9 @@
 package common;
 
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.netflix.zuul.EnableZuulProxy;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.cors.CorsConfiguration;
@@ -13,7 +15,9 @@ import org.springframework.web.filter.CorsFilter;
 public class SpringGatewayApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(SpringGatewayApplication.class, args);
+
+        //SpringApplication.run(SpringGatewayApplication.class, args);
+        new SpringApplicationBuilder(SpringGatewayApplication.class).web(WebApplicationType.SERVLET).run(args);
     }
 
     @Bean
