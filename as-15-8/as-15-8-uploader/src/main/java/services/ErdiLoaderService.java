@@ -147,7 +147,7 @@ public class ErdiLoaderService {
         jdbcTemplate.update("delete FROM sor.content where init_content_version_id = ?", lastContentVersion.getId());
         jdbcTemplate.update("delete FROM sor.content_version where id = ?", lastContentVersion.getId());
 
-        log.info("Removing version was completed");
+        log.info("Removing version completed");
     }
 
     public void removeAddonsByVersion(Long addonId){

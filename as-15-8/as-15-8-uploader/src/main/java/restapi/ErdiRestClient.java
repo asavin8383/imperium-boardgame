@@ -10,10 +10,14 @@ import model.enums.ParamSor;
 import model.response.DeltaIdEntry;
 import model.response.RestResponseDeltaErdi;
 import model.response.RestResponseDeltaListByDate;
+import model.response.RestResponseDumpDate;
 import model.rest.ContentRest;
+import model.rest.control.PodState;
+import model.scheme.AddonVersion;
 import model.scheme.ContentVersion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -23,6 +27,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import parsers.ErdiFullParser;
+import repositories.AddonVersionRepository;
 import repositories.ContentVersionRepository;
 import repositories.impl.ParameterRepositoryExtend;
 import services.ErdiLoaderService;
@@ -38,6 +43,8 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
@@ -52,7 +59,7 @@ public class ErdiRestClient {
     private final ErdiLoaderService erdiLoaderService;
     private final ParameterRepositoryExtend parameterRepository;
     private final ContentVersionRepository contentVersionRepository;
-
+    private final AddonVersionRepository addonVersionRepository;
 
     private static final String urlRest = "";
     private static final String tempDir = "temp_dir";
@@ -64,6 +71,88 @@ public class ErdiRestClient {
     private boolean isLoading = false;
     private String errorMessage = "";
     private String stateDetails = "";
+
+
+    public boolean getIsLoading(){
+        return isLoading;
+    }
+
+    public String getUpdateDate() {
+        DateFormat dateFormat = new SimpleDateFormat("HH:mm dd.MM.yyyy");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+        Date dateUpdate = getActualContentDate();
+        return dateUpdate == null ? "" : dateFormat.format(dateUpdate);
+    }
+
+    public PodState getLoadState() throws ParseException {
+        ResponseEntity<RestResponseDumpDate> entity = registryAnonimyzersRestTemplate.exchange(
+                baseUrl + "/getLastDumpDate/",
+                HttpMethod.GET, null, RestResponseDumpDate.class);
+
+        RestResponseDumpDate resp = entity.getBody();
+        Date dateDumpDate = (resp == null ? null : resp.getDumpDate());
+        DateFormat dateFormat1 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        dateFormat1.setTimeZone(TimeZone.getTimeZone("GMT"));
+
+        ContentVersion lastContentVersion = contentVersionRepository.findTopByIdNotNullOrderByIdDesc();
+        AddonVersion lastAddonVersion = addonVersionRepository.findTopByIdNotNullOrderByIdDesc();
+
+        Date dateUpdate = getActualContentDate();
+        String strDateUpdate = dateUpdate == null ? "" : dateFormat1.format(dateUpdate);
+
+        DateFormat dateFormat2 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        String actualServerDumpDate = (dateDumpDate == null ? "" : dateFormat2.format(dateDumpDate));
+
+        String state = getState();
+        String errorMessage = getErrorMessage();
+        String stateDetails = getStateDetails();
+
+        List<ContentVersion> allContents = contentVersionRepository
+                .findAll(Sort.by(Sort.Order.asc("id")));
+        List<Long> allContentsInt = allContents.stream()
+                .map(contentVersion -> contentVersion.getId())
+                .collect(Collectors.toList());
+
+        PodState podState = new PodState(strDateUpdate, actualServerDumpDate, state, errorMessage, stateDetails,
+                lastContentVersion == null ? null : lastContentVersion.getId(),
+                lastAddonVersion == null ? null : lastAddonVersion.getId(),
+                allContentsInt);
+        return podState;
+    }
+
+
+    public void startUpdateErdi(){
+        ContentVersion fullContentVersion = contentVersionRepository.getTopByRegUpdateTimeNotNullOrderByIdDesc();
+        boolean isFullErdi = fullContentVersion != null;
+
+        log.info("---> Запуск зугрузки ЕРДИ: " + (isFullErdi ? "дельт" : "полного справочника"));
+
+        try{
+            if (!isFullErdi) {
+                loadFullERDI();
+            }
+            else {
+                loadAllDeltaERDI();
+            }
+        }
+        catch(Exception ex){
+            log.error("Ошибка при загрузке ЕРДИ", ex);
+            throw new CompletionException(ex);
+        }
+    }
+
+
+    public void removeVersionTo(int version){
+        CompletableFuture
+                .runAsync(() -> {
+                    while(true){
+                        ContentVersion last = contentVersionRepository.findTopByIdNotNullOrderByIdDesc();
+                        if (last == null || version >= last.getId())
+                            return;
+                        removeLastContentVersion();
+                    }
+                });
+    }
 
 
     public void removeLastContentVersion() {
