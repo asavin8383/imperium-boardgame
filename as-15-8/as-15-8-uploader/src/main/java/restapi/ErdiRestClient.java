@@ -380,7 +380,7 @@ public class ErdiRestClient {
                     ErdiFullParser parser = new ErdiFullParser();
 
                     List<ContentRest> allContents = new ArrayList<>();
-                    log.info("Начат парсинг записи " + entryName + "...");
+                    log.info("Начат парсинг " + entryName + "...");
                     stateDetails = "Парсинг ЕРДИ";
 
                     parser.parse(stream, (register, contents) -> {

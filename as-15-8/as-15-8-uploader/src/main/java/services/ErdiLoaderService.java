@@ -132,11 +132,11 @@ public class ErdiLoaderService {
         if (lastContentVersion == null)
             return;
 
-        System.out.println("Remove version: " + lastContentVersion.getId());
+        log.info("Remove version: " + lastContentVersion.getId());
 
         String sql =
                 "update sor.content_history h set end_dt=to_date('30000101', 'YYYYMMDD')\n" +
-                "where end_dt in (select ch.st_dt from sor.content_history ch where ch.content_version_id=?)";
+                "where end_dt in (select ch.st_dt from sor.content_history ch where h.content_id = ch.content_id and ch.content_version_id=?)";
 
         jdbcTemplate.update(sql, lastContentVersion.getId());
         jdbcTemplate.update("delete FROM sor.content_history where content_version_id = ?", lastContentVersion.getId());
@@ -146,6 +146,8 @@ public class ErdiLoaderService {
         jdbcTemplate.update("delete FROM sor.content_del where content_version_id = ?", lastContentVersion.getId());
         jdbcTemplate.update("delete FROM sor.content where init_content_version_id = ?", lastContentVersion.getId());
         jdbcTemplate.update("delete FROM sor.content_version where id = ?", lastContentVersion.getId());
+
+        log.info("Removing version was completed");
     }
 
     public void removeAddonsByVersion(Long addonId){
