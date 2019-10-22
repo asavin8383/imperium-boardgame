@@ -2,7 +2,14 @@ server:
   port: 11200
 logging:
   config: config/logback-spring.xml
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka}
+  instance:
+    preferIpAddress: true
 spring:
+  application.name: analyzer
   cloud:
     stream:
       bindings:
@@ -28,8 +35,8 @@ spring:
             producer:
               configuration:
                 max.request.size: 10000000
-source_path_vpn: /log/content.txt
-source_path_anonym: /log/content.txt
+source_path_vpn: /logs/content.txt
+source_path_anonym: /logs/content.txt
 
 ---
 

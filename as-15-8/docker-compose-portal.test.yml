@@ -36,3 +36,15 @@ services:
       TZ: "Europe/Moscow"
     ports:
       - "15880:15880"
+  as-15-8-discovery:
+    container_name: as-15-8_discovery
+    image: harbor.ec-leasing.ru/as_15_8/as-15-8-discovery
+    restart: always
+    volumes:
+      - ~/as-15-8-ppm/discovery/logs:/log
+      - ~/as-15-8-ppm/discovery/config:/config
+    environment:
+      PROFILE: test
+      TZ: "Europe/Moscow"
+    ports:
+      - "8761:8761"

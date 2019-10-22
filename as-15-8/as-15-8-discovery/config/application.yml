@@ -1,0 +1,10 @@
+server:
+  port: 8761
+logging:
+  config: config/logback-spring.xml
+spring:
+  application.name: discovery
+eureka:
+  client:
+    registerWithEureka: false
+    fetchRegistry: false

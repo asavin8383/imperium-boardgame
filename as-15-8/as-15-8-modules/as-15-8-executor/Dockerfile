@@ -2,6 +2,8 @@ FROM openjdk:8-jdk-alpine
 
 LABEL Alex Shabalin <ashabalin@ec-leasing.ru>
 
+EXPOSE 11100
+
 RUN apk add --no-cache nmap \
     && apk add --no-cache proxychains-ng \
     && mkdir -p /share/nmap

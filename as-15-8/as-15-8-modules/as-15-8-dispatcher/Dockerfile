@@ -2,6 +2,8 @@ FROM openjdk:8-jdk-alpine
 
 LABEL Alex Shabalin <ashabalin@ec-leasing.ru>
 
+EXPOSE 11300
+
 ENV APP_PATH="/as-15-8-dispatcher.jar" \
     LOG_PATH="/log" \
     PROFILE="test"

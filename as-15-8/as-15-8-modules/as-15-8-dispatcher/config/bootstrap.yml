@@ -1,9 +1,15 @@
 server:
-  port: 11100
+  port: 11300
 logging:
   config: config/logback-spring.xml
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka}
+  instance:
+    preferIpAddress: true
 spring:
-  application.name: executor
+  application.name: dispatcher
   cloud:
     bus.trace.enabled: true
     config:

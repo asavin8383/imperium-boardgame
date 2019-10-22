@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
  * Author: asavin
  */
 @Service
-@RequiredArgsConstructor(onConstructor_={@Autowired})
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Slf4j
 public class CheckUnitSchedulingServiceImpl implements CheckUnitSchedulingService {
 

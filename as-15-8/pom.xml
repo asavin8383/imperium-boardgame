@@ -13,6 +13,10 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
+		<spring.boot.version>2.1.9.RELEASE</spring.boot.version>
+		<spring.cloud.version>Greenwich.RELEASE</spring.cloud.version>
+		<liquibase-maven-plugin.version>3.8.0</liquibase-maven-plugin.version>
+		<spring-for-liquibase.version>4.3.2.RELEASE</spring-for-liquibase.version>
 	</properties>
 
 	<modules>
@@ -23,7 +27,27 @@
         <module>as-15-8-config-server</module>
         <module>as-15-8-gateway</module>
         <module>as-15-8-uploader</module>
-    </modules>
+		<module>as-15-8-discovery</module>
+	</modules>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-dependencies</artifactId>
+				<version>${spring.boot.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>${spring.cloud.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<distributionManagement>
 		<!-- use the following if you're not using a snapshot version. -->
@@ -43,6 +67,18 @@
 	<build>
 		<pluginManagement>
 			<plugins>
+				<plugin>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-maven-plugin</artifactId>
+					<executions>
+						<execution>
+							<goals>
+								<goal>repackage</goal>
+							</goals>
+						</execution>
+					</executions>
+					<version>${spring.boot.version}</version>
+				</plugin>
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
 					<artifactId>lifecycle-mapping</artifactId>
@@ -66,6 +102,64 @@
 							</pluginExecutions>
 						</lifecycleMappingMetadata>
 					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.liquibase</groupId>
+					<artifactId>liquibase-maven-plugin</artifactId>
+					<version>${liquibase-maven-plugin.version}</version>
+					<configuration>
+						<diffIncludeSchema>true</diffIncludeSchema>
+						<outputDefaultSchema>true</outputDefaultSchema>
+						<propertyFile>src/main/resources/liquibase.properties</propertyFile>
+					</configuration>
+					<dependencies>
+						<dependency>
+							<groupId>org.liquibase.ext</groupId>
+							<artifactId>liquibase-hibernate5</artifactId>
+							<version>3.6</version>
+						</dependency>
+						<dependency>
+							<groupId>org.liquibase</groupId>
+							<artifactId>liquibase-core</artifactId>
+							<version>3.6.3</version>
+						</dependency>
+
+						<dependency>
+							<groupId>org.springframework</groupId>
+							<artifactId>spring-beans</artifactId>
+							<version>${spring-for-liquibase.version}</version>
+						</dependency>
+						<dependency>
+							<groupId>org.springframework</groupId>
+							<artifactId>spring-core</artifactId>
+							<version>${spring-for-liquibase.version}</version>
+						</dependency>
+						<dependency>
+							<groupId>org.springframework</groupId>
+							<artifactId>spring-context</artifactId>
+							<version>${spring-for-liquibase.version}</version>
+						</dependency>
+						<dependency>
+							<groupId>org.springframework</groupId>
+							<artifactId>spring-orm</artifactId>
+							<version>${spring-for-liquibase.version}</version>
+						</dependency>
+						<dependency>
+							<groupId>javax.xml.bind</groupId>
+							<artifactId>jaxb-api</artifactId>
+							<version>2.3.1</version>
+						</dependency>
+						<dependency>
+							<groupId>javax.validation</groupId>
+							<artifactId>validation-api</artifactId>
+							<version>2.0.1.Final</version>
+						</dependency>
+						<dependency>
+							<groupId>org.springframework.boot</groupId>
+							<artifactId>spring-boot-starter-data-jpa</artifactId>
+							<version>2.1.6.RELEASE</version>
+						</dependency>
+					</dependencies>
 				</plugin>
 			</plugins>
 		</pluginManagement>
