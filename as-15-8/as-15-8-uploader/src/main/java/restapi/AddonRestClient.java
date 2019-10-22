@@ -14,6 +14,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Date;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -35,6 +36,8 @@ public class AddonRestClient
     @Value("${spring.rest_base_url}")
     private String baseUrl;
 
+    public static final String ENTITY_NAME= "dumpAddons.xml";
+
     private XMLInputFactory xmlInputFactory;
 
     public AddonRestClient() {
@@ -47,9 +50,21 @@ public class AddonRestClient
      * Читаем в потоковом режиме
      * Пишем в базу с текущим временем
      */
-    public void readFromNet() {
+    public void readFullFromNet() {
         String base = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
         String url = base + "getFullERDIaddons/";
+        processZIP(url, new Date());
+
+    }
+
+    public void readDeltaFromNet(long id, Date date) {
+        String base = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
+        String url = base + "getDumpDeltaAddonsByDeltaId/"+id+"/";
+        processZIP(url, date);
+
+    }
+
+    private void processZIP(String url, Date date) {
         log.info("GET from {}", url);
         ResponseEntity<byte[]> entity = restTemplate.getForEntity(url, byte[].class);
 
@@ -57,14 +72,15 @@ public class AddonRestClient
         ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(resp));
         try {
             ZipEntry entry = zipInputStream.getNextEntry();
-            if (entry.getName().equalsIgnoreCase("dumpAddons.xml")) {
+            log.debug("Zip entry name = {}", entry);
+            if (ENTITY_NAME.equalsIgnoreCase(entry.getName())) {
                 XmlMapper mapper = new XmlMapper(xmlInputFactory);
 
                 XMLStreamReader sr = xmlInputFactory.createXMLStreamReader(zipInputStream);
                 sr.next(); // to point to <root>
                 sr.next(); // to point to root-element under root
 
-                int cnt = addonUpdater.insertAllJdbc(sr, mapper);
+                int cnt = addonUpdater.insertAllJdbc(sr, mapper, date);
 
                 log.info("{} addons processed", cnt);
 
@@ -72,7 +88,6 @@ public class AddonRestClient
         } catch (IOException | XMLStreamException e) {
             System.out.println(e);
         }
-
     }
 
 }

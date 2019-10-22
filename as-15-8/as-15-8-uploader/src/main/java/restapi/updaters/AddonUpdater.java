@@ -36,12 +36,13 @@ public class AddonUpdater
     JdbcTemplate jdbcTemplate;
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public int insertAllJdbc(XMLStreamReader sr, XmlMapper mapper) throws XMLStreamException, IOException {
+    public int insertAllJdbc(XMLStreamReader sr, XmlMapper mapper, Date date) throws XMLStreamException, IOException {
 
         // Кешируем текущие content_id и content_version_id для существующих ЕРДИ
         Map<Long, Long> erdiToContentId = new HashMap<>();
         Map<Long, Long> erdiToContentVersionId = new HashMap<>();
-        jdbcTemplate.query("select content_id, erdi_id, content_version_id from sor.content c inner join sor.content_history ch on c.id = ch.content_id", resultSet -> {
+        jdbcTemplate.query("select content_id, erdi_id, content_version_id " +
+                "from sor.content c inner join sor.content_history ch on c.id = ch.content_id and ch.end_dt='3000-01-01'", resultSet -> {
             Long erdi_id = resultSet.getLong("erdi_id");
 
             Long content_id = resultSet.getLong("content_id");
@@ -85,7 +86,7 @@ public class AddonUpdater
         addonVersionRepository.flush();
 
         Long addonVersionId = addonVersion.getId();
-        java.sql.Date now = new java.sql.Date(new Date().getTime());
+        java.sql.Date now = new java.sql.Date(date.getTime());
 
         log.info("Inserting {} addons with version {}", addonEntries.size(), addonVersionId);
 

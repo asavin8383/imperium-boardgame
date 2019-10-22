@@ -1,9 +1,7 @@
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd
-    http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
     <include file="data/changelog/uploader.0001.violation.xml"/>
     <include file="data/changelog/uploader.0002.addon_change.xml"/>
@@ -14,5 +12,6 @@
     <include file="data/changelog/uploader.0008.SubTypeList.xml"/>
     <include file="data/changelog/uploader.0009.ContentVersion.xml"/>
     <include file="data/changelog/uploader.0009.addon_change.xml"/>
+    <include file="data/changelog/uploader.0010.AddonVersion.xml"/>
 
 </databaseChangeLog>

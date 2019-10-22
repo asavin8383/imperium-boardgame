@@ -1,0 +1,20 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+
+    <changeSet id="uploader.0010" author="asin">
+        <addColumn schemaName="sor" tableName="addon_version">
+            <column name="reg_updatetime" type="timestamp">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        <addColumn schemaName="sor" tableName="addon_version">
+            <column name="delta_updatetime" type="timestamp">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>
