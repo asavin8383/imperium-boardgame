@@ -4,7 +4,6 @@ services:
     container_name: as-15-8_discovery
     image: harbor.ec-leasing.ru/as_15_8/as-15-8-discovery
     restart: always
-    hostname: as-15-8-ppm
     volumes:
       - ~/as-15-8-ppm/discovery/logs:/log
       - ~/as-15-8-ppm/discovery/config:/config
@@ -26,6 +25,7 @@ services:
     environment:
       PROFILE: test
       EUREKA_URI: http://192.168.5.253:8761/eureka
+      EXT_IP: 192.168.5.253
       TZ: "Europe/Moscow"
     ports:
       - "15880:15880"
@@ -43,6 +43,7 @@ services:
     environment:
       PROFILE: test
       EUREKA_URI: http://192.168.5.253:8761/eureka
+      EXT_IP: 192.168.5.253
       TZ: "Europe/Moscow"
     ports:
       - "15802:15802"
@@ -61,6 +62,7 @@ services:
     environment:
       PROFILE: test
       EUREKA_URI: http://192.168.5.253:8761/eureka
+      EXT_IP: 192.168.5.253
       TZ: "Europe/Moscow"
     ports:
       - "15800:15800"
