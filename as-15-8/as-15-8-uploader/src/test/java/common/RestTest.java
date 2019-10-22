@@ -12,6 +12,8 @@ import restapi.PASDRestClient;
 import restapi.PSRestClient;
 import restapi.SubTypeRestClient;
 
+import java.util.Date;
+
 @Configuration
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -55,7 +57,7 @@ public class RestTest
 
     @Test
     public void testDeltaAddons(){
-        addonRestClient.readDeltaFromNet(42);
+        addonRestClient.readDeltaFromNet(42, new Date());
     }
 
 }

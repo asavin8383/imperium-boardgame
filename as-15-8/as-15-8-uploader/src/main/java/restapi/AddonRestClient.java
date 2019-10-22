@@ -14,6 +14,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Date;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -52,18 +53,18 @@ public class AddonRestClient
     public void readFullFromNet() {
         String base = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
         String url = base + "getFullERDIaddons/";
-        readFromUrl(url);
+        processZIP(url, new Date());
 
     }
 
-    public void readDeltaFromNet(long id) {
+    public void readDeltaFromNet(long id, Date date) {
         String base = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
         String url = base + "getDumpDeltaAddonsByDeltaId/"+id+"/";
-        readFromUrl(url);
+        processZIP(url, date);
 
     }
 
-    private void readFromUrl(String url) {
+    private void processZIP(String url, Date date) {
         log.info("GET from {}", url);
         ResponseEntity<byte[]> entity = restTemplate.getForEntity(url, byte[].class);
 
@@ -79,7 +80,7 @@ public class AddonRestClient
                 sr.next(); // to point to <root>
                 sr.next(); // to point to root-element under root
 
-                int cnt = addonUpdater.insertAllJdbc(sr, mapper);
+                int cnt = addonUpdater.insertAllJdbc(sr, mapper, date);
 
                 log.info("{} addons processed", cnt);
 
