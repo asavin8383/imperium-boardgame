@@ -11,7 +11,6 @@ eureka:
 spring:
   application.name: executor
   cloud:
-    bus.trace.enabled: true
     config:
       bus.enabled: true
       discovery.enabled: true
