@@ -2,6 +2,13 @@ server:
   port: 15802
 logging:
   config: config/logback-spring.xml
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka}
+  instance:
+    preferIpAddress: true
+    ip-address: "${EXT_IP:localhost}"
 spring:
   application.name: config_server
   profiles.include: jdbc
@@ -72,7 +79,7 @@ spring:
 ---
 
 spring:
-  profiles: dev_ashabalin
+  profiles: dev_pvorobiev, dev_asavin, dev_ashabalin, dev_jspirina
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb_test
   liquibase:
@@ -85,3 +92,4 @@ spring:
           destination: bus_config_output_ashabalin
         springCloudBusOutput:
           destination: bus_config_input_ashabalin
+eureka.client.enabled: false

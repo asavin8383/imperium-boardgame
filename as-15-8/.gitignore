@@ -4,3 +4,5 @@
 **/*.iml
 **/*.jsfdia
 **/logs/
+**/target/
+/.idea

@@ -7,6 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+import restapi.AddonRestClient;
 import restapi.PASDRestClient;
 import restapi.PSRestClient;
 import restapi.SubTypeRestClient;
@@ -26,12 +27,8 @@ public class RestTest
     @Autowired
     SubTypeRestClient subTypeRestClient;
 
-    /*@Bean
-    public RestTemplate restTemplateInit() {
-        RestTemplate restTemplate = new RestTemplate();
-        restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor("test158", "test158"));
-        return restTemplate;
-    }*/
+    @Autowired
+    AddonRestClient addonRestClient;
 
     @Test
     public void testPS(){
@@ -49,6 +46,11 @@ public class RestTest
     public void testSybType(){
         subTypeRestClient.readFromNet();
 
+    }
+
+    @Test
+    public void testAddons(){
+        addonRestClient.readFromNet();
     }
 
 }

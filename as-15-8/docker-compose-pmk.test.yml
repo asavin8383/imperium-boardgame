@@ -1,0 +1,81 @@
+version: '3.7'
+networks:
+  as-15-8-net:
+    external: true
+services:
+  dispatcher:
+    image: harbor.ec-leasing.ru/as_15_8/as-15-8-dispatcher:latest
+    networks:
+      - as-15-8-net
+    environment:
+      PROFILE: test
+      EUREKA_URI: http://192.168.5.253:8761/eureka
+      TZ: "Europe/Moscow"
+    hostname: "{{.Node.Hostname}}"
+    volumes:
+      - ~/as-15-8-pmk/dispatcher/logs:/log
+    configs:
+      - source: dispatcher-config
+        target: /config/application.yml
+      - source: dispatcher-logback
+        target: /config/logback-spring.xml
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == as158-pmk
+      mode: replicated
+      replicas: 1
+  executor:
+    image: harbor.ec-leasing.ru/as_15_8/as-15-8-executor:latest
+    deploy:
+      mode: global
+    networks:
+      - as-15-8-net
+    stop_grace_period: 5m
+    environment:
+      PROFILE: test
+      EUREKA_URI: http://192.168.5.253:8761/eureka
+      TZ: "Europe/Moscow"
+    hostname: "{{.Node.Hostname}}"
+    volumes:
+      - ~/as-15-8-pmk/executor/logs:/log
+    configs:
+      - source: executor-config
+        target: /config/application.yml
+      - source: executor-logback
+        target: /config/logback-spring.xml
+  analyzer:
+    image: harbor.ec-leasing.ru/as_15_8/as-15-8-analyzer:latest
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == as158-pmk
+      mode: replicated
+      replicas: 1
+    networks:
+      - as-15-8-net
+    environment:
+      PROFILE: test
+      EUREKA_URI: http://192.168.5.253:8761/eureka
+      TZ: "Europe/Moscow"
+    hostname: "{{.Node.Hostname}}"
+    volumes:
+      - ~/as-15-8-pmk/analyzer/logs:/log
+    configs:
+      - source: analyzer-config
+        target: /config/application.yml
+      - source: analyzer-logback
+        target: /config/logback-spring.xml
+configs:
+  dispatcher-config:
+    file: dispatcher/config/application.yml
+  dispatcher-logback:
+    file: dispatcher/config/logback-spring.xml
+  executor-config:
+    file: executor/config/application.yml
+  executor-logback:
+    file: executor/config/logback-spring.xml
+  analyzer-config:
+    file: analyzer/config/application.yml
+  analyzer-logback:
+    file: analyzer/config/logback-spring.xml

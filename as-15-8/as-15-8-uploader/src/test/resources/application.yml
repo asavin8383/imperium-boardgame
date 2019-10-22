@@ -19,3 +19,8 @@ spring:
         temp:
           use_jdbc_metadata_defaults: false
 
+registry-anonymizers:
+    proxy-ip: "212.83.9.108"
+    proxy-port: 3128
+    username: test158
+    password: test158

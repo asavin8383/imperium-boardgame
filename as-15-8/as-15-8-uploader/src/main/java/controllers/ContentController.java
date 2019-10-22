@@ -1,6 +1,5 @@
 package controllers;
 
-import controllers.enums.UploadingState;
 import controllers.utils.SortingDirection;
 import controllers.utils.SortingHelper;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +18,8 @@ import restapi.ErdiRestClient;
 import services.ContentService;
 
 import java.text.ParseException;
+import java.util.Collections;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 @RestController
@@ -28,7 +29,6 @@ public class ContentController {
 
     private final ContentService contentService;
     private final ErdiRestClient erdiRestClient;
-
 
     @GetMapping(path = "/erdi")
     public ResponseEntity<Page<ContentService.ContentView>> getRelevantContent(
@@ -40,7 +40,8 @@ public class ContentController {
         if (!erdiRestClient.getIsLoading()) {
             Pageable page = PageRequest.of(pageNumber, pageSize,
                     SortingHelper.createSorting(sortingDirection, sortingColumn));
-
+            // ContentInfo: entry type, block type, urgency type
+            // ContentResources: value, check unit type
             Page<ContentService.ContentView> pageContent =
                     contentService.getRelevantContent(page);
             return new ResponseEntity<>(pageContent, HttpStatus.OK);
@@ -48,6 +49,11 @@ public class ContentController {
         else {
             return new ResponseEntity<>(null, HttpStatus.PROCESSING);
         }
+    }
+
+    @GetMapping(path = "/erdi/count")
+    public Map<String, Long> getRelevantCount() {
+        return Collections.singletonMap("count", contentService.getRelevantCount());
     }
 
     @GetMapping(path = "/update_erdi")

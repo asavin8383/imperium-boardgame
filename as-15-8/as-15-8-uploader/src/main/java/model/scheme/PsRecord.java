@@ -1,16 +1,14 @@
 package model.scheme;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import org.hibernate.annotations.Immutable;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.util.Date;
 
 @Entity
 @Immutable
@@ -37,24 +35,26 @@ public class PsRecord implements Serializable {
     private String hostname;
 
     @ToString.Include
+    @JsonIgnore
     private Integer origId;
 
+    @JsonIgnore
+//    @JsonFormat(timezone = "GMT+03:00")
     @ToString.Include
-    private LocalDateTime ppnDt;
+    private Date ppnDt;
 
+    @JsonIgnore
+//    @JsonFormat(timezone = "GMT+03:00")
     @ToString.Include
-    private LocalDateTime effDt;
+    private Date effDt;
 
+    @Column(name = "c_date")
+    @JsonProperty("cDate")
+    @JsonFormat(timezone = "GMT+03:00")
     @ToString.Include
-    private LocalDateTime cDate;
+    private Date crDate;
 
-    public static Example<PsRecord> example(ExampleMatcher matcher, String name,
-                                            String hostname, LocalDateTime effDt) {
-        PsRecord v = new PsRecord();
-        v.setEffDt(effDt);
-        v.setName(name);
-        v.setHostname(hostname);
-        return Example.of(v, matcher);
-    }
+    @Transient
+    private String source = "ППП Реестр анонимайзеров";
 
 }

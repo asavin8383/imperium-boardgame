@@ -1,38 +1,68 @@
 version: '3.7'
 services:
-  as-15-8-rest:
-    container_name: as-15-8_REST
-    image: harbor.ec-leasing.ru/as_15_8/as-15-8-rest
+  discovery:
+    container_name: as-15-8_discovery
+    image: harbor.ec-leasing.ru/as_15_8/as-15-8-discovery
     restart: always
     volumes:
-      - ~/as-15-8-ppm/rest/logs:/log
-      - ~/as-15-8-ppm/rest/config:/config
+      - ~/as-15-8-ppm/discovery/logs:/log
+      - ~/as-15-8-ppm/discovery/config:/config
     environment:
       PROFILE: test
       TZ: "Europe/Moscow"
     ports:
-      - "15800:15800"
-  as-15-8-config-server:
-    container_name: as-15-8_config-server
-    image: harbor.ec-leasing.ru/as_15_8/as-15-8-config-server
-    restart: always
-    volumes:
-      - ~/as-15-8-ppm/config-server/logs:/log
-      - ~/as-15-8-ppm/config-server/config:/config
-    environment:
-      PROFILE: test
-      TZ: "Europe/Moscow"
-    ports:
-      - "15802:15802"
-  as-15-8-gateway:
+      - "8761:8761"
+  gateway:
     container_name: as-15-8_gateway
     image: harbor.ec-leasing.ru/as_15_8/as-15-8-gateway
     restart: always
+    hostname: as-15-8-ppm
+    depends_on:
+      - discovery
     volumes:
       - ~/as-15-8-ppm/gateway/logs:/log
       - ~/as-15-8-ppm/gateway/config:/config
     environment:
       PROFILE: test
+      EUREKA_URI: http://192.168.5.253:8761/eureka
+      EXT_IP: 192.168.5.253
       TZ: "Europe/Moscow"
     ports:
       - "15880:15880"
+  config-server:
+    container_name: as-15-8_config-server
+    image: harbor.ec-leasing.ru/as_15_8/as-15-8-config-server
+    restart: always
+    hostname: as-15-8-ppm
+    depends_on:
+      - discovery
+      - gateway
+    volumes:
+      - ~/as-15-8-ppm/config-server/logs:/log
+      - ~/as-15-8-ppm/config-server/config:/config
+    environment:
+      PROFILE: test
+      EUREKA_URI: http://192.168.5.253:8761/eureka
+      EXT_IP: 192.168.5.253
+      TZ: "Europe/Moscow"
+    ports:
+      - "15802:15802"
+  rest:
+    container_name: as-15-8_rest
+    image: harbor.ec-leasing.ru/as_15_8/as-15-8-rest
+    restart: always
+    hostname: as-15-8-ppm
+    depends_on:
+      - discovery
+      - gateway
+      - config-server
+    volumes:
+      - ~/as-15-8-ppm/rest/logs:/log
+      - ~/as-15-8-ppm/rest/config:/config
+    environment:
+      PROFILE: test
+      EUREKA_URI: http://192.168.5.253:8761/eureka
+      EXT_IP: 192.168.5.253
+      TZ: "Europe/Moscow"
+    ports:
+      - "15800:15800"

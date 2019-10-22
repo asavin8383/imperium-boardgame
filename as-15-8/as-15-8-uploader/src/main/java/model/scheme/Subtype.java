@@ -1,16 +1,16 @@
 package model.scheme;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.util.Date;
 
 @Entity
 @Table(schema = "sor", name = "subtype")
@@ -31,17 +31,22 @@ public class Subtype implements Serializable {
     @EqualsAndHashCode.Include
     private Integer id;
 
-    @ToString.Include
-    private LocalDateTime ppnDt;
-
-    @ToString.Include
-    private LocalDateTime effDt;
-
-    @ToString.Include
-    private LocalDateTime cDate;
-
-    @ToString.Include
     @JsonIgnore
+//    @JsonFormat(timezone = "GMT+03:00")
+    @ToString.Include
+    private Date ppnDt;
+
+    @JsonIgnore
+//    @JsonFormat(timezone = "GMT+03:00")
+    @ToString.Include
+    private Date effDt;
+
+    @Column(name = "c_date")
+    @JsonProperty("cDate")@JsonFormat(timezone = "GMT+03:00")
+    @ToString.Include
+    private Date crDate;
+
+    @ToString.Include
     private String origId;
 
     @ToString.Include
@@ -52,12 +57,5 @@ public class Subtype implements Serializable {
 
     @ToString.Include
     private String violationName;
-
-    public static Example<Subtype> example(ExampleMatcher matcher, LocalDateTime effDt, String violationName) {
-        Subtype v =  new Subtype();
-        v.setEffDt(effDt);
-        v.setViolationName(violationName);
-        return Example.of(v, matcher);
-    }
 
 }

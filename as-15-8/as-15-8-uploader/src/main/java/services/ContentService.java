@@ -42,49 +42,13 @@ public class ContentService {
                     view.getId(), view.getContentVersionId(), resourceTypes));
 
         });
+        //.peek().filter()
         return contentPage;
     }
 
-/*    @Async("asyncExecutor")
-    public ResponseEntity<?> update() {
-//        log.info("@Async: " +
-//                SecurityContextHolder.getContext()
-//                .getAuthentication().getPrincipal());
-        try {
-            Thread.sleep(10000);
-        } catch (InterruptedException ignored) { }
-        service.update();
-        ResponseEntity.ok();
-        return ResponseEntity.ok().build();
-    }*/
-
-    /* @GetMapping(path = "/update")
-    public Callable<Void> update() {
-        return new Callable<Void>() {
-            @Override
-            public Void call() throws Exception {
-                try {
-                    Thread.sleep(10000);
-                } catch (InterruptedException ignored) { }
-                return service.update();
-            }
-        };
-    }*/
-
-    /*@GetMapping(path = "/update")
-    public DeferredResult<ResponseEntity<?>> update() {
-        DeferredResult<ResponseEntity<?>> output = new DeferredResult<>();
-
-        ForkJoinPool.commonPool().submit(() -> {
-            try {
-                Thread.sleep(10000);
-            } catch (InterruptedException e) {
-            }
-            output.setResult(ResponseEntity.ok().build());
-        });
-
-        return output;
-    }*/
+    public long getRelevantCount() {
+        return contentRepository.findRelevantCount();
+    }
 
     public static List<String> getResourceTypesFor(BlockType blockType) {
         // todo bi map

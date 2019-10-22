@@ -1,17 +1,14 @@
 package model.scheme;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import org.hibernate.annotations.Immutable;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.util.Date;
 
 @Entity
 @Immutable
@@ -50,33 +47,32 @@ public class PasdRecord implements Serializable {
     private String networkAddresses;
 
     @Column(name = "ipaccessfgis")
-    @JsonIgnore
     @ToString.Include
     private String ipAccessFgis;
 
-    @JsonIgnore
     @ToString.Include
     private String credentials;
 
     @ToString.Include
+    @JsonIgnore
     private Integer origId;
-    
-    @ToString.Include
-    private LocalDateTime ppnDt;
 
+    @JsonFormat(timezone = "GMT+03:00")
     @ToString.Include
-    private LocalDateTime effDt;
+    private Date ppnDt;
 
+    @JsonIgnore
+//    @JsonFormat(timezone = "GMT+03:00")
     @ToString.Include
-    private LocalDateTime cDate;
+    private Date effDt;
 
-    public static Example<PasdRecord> example(ExampleMatcher matcher, LocalDateTime effDt,
-                                              String name, String hostname) {
-        PasdRecord pasd =  new PasdRecord();
-        pasd.setEffDt(effDt);
-        pasd.setName(name);
-        pasd.setHostname(hostname);
-        return Example.of(pasd, matcher);
-    }
+    @Column(name = "c_date")
+    @JsonProperty("cDate")
+    @JsonFormat(timezone = "GMT+03:00")
+    @ToString.Include
+    private Date crDate;
+
+    @Transient
+    private String source = "ППП Реестр анонимайзеров";
 
 }

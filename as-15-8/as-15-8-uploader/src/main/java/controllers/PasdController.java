@@ -7,7 +7,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.scheme.PasdRecord;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +21,8 @@ import repositories.PasdRepository;
 import restapi.PASDRestClient;
 import utils.Utils;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 @RestController
@@ -37,20 +41,21 @@ public class PasdController {
                                         @RequestParam(required = false) String sortingColumn,
                                         @RequestParam(defaultValue = "0") int pageNumber,
                                         @RequestParam(defaultValue = "10") int pageSize,
-                                        @RequestParam(required = false) String name,
-                                        @RequestParam(required = false) String hostname) {
+                                        @RequestParam(required = false) String query) {
         if (state != UploadingState.UPLOADING) {
             Pageable page = PageRequest.of(pageNumber, pageSize,
                     SortingHelper.createSorting(sortingDirection, sortingColumn));
-            ExampleMatcher matcher = ExampleMatcher.matchingAll()
-                    .withIgnoreNullValues()
-                    .withIgnoreCase()
-                    .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
-            Example<PasdRecord> example = PasdRecord.example(matcher, Utils.getLocalEndDate(), name, hostname);
-            return new ResponseEntity<>(pasdRepository.findAll(example, page), HttpStatus.OK);
+            Page<PasdRecord> result = pasdRepository.findByEffDtAndQuery(
+                    Utils.getEndDate(), query, page);
+            return new ResponseEntity<>(result, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(null, HttpStatus.PROCESSING);
         }
+    }
+
+    @GetMapping(path = "/count")
+    public Map<String, Long> getPasdCount() {
+        return Collections.singletonMap("count", pasdRepository.count());
     }
 
     @GetMapping(path = "/upload")

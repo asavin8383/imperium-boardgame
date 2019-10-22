@@ -1,109 +1,88 @@
 server:
-    port: 15801
-    tomcat:
-        max-threads: 200
+  port: 15801
+  tomcat:
+    max-threads: 200
 logging:
-    config: config/logback-spring.xml
+  config: config/logback-spring.xml
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka}
+  instance:
+    preferIpAddress: true
+    ip-address: "${EXT_IP:localhost}"
 spring:
-    application:
-        name: as15-8-updater
-    datasource:
-        test-while-idle: true
-        validation-query: SELECT 1;
-        time-between-eviction-runs-millis: 300000
-        username: as_user
-        password: as_user
-    jpa:
-        properties:
-            hibernate:
-                jdbc:
-                    lob:
-                        non_contextual_creation: true
-                format_sql: true
-        databasePlatform: org.hibernate.dialect.PostgreSQL9Dialect
-    app:
-        jwt:
-            secret: Gk-Xun_Yrkd0zigpysWS
-            ttl: 86400
-        cors:
-            origin: "*"
-    rest_base_url: "http://bo.esoftproject.ru/register-vpn/api/as15-8"
+  application:
+    name: pod
+  datasource:
+    test-while-idle: true
+    validation-query: SELECT 1;
+    time-between-eviction-runs-millis: 300000
+    username: as_user
+    password: as_user
+  jpa:
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
+        format_sql: true
+    databasePlatform: org.hibernate.dialect.PostgreSQL9Dialect
+  app:
+    jwt:
+      secret: Gk-Xun_Yrkd0zigpysWS
+      ttl: 86400
+    cors:
+      origin: "*"
+  rest_base_url: "http://bo.esoftproject.ru/register-vpn/api/as15-8"
 registry-anonymizers:
-    proxy-ip: "212.83.9.108"
-    proxy-port: 3128
-    username: test158
-    password: test158
+  proxy-ip: "212.83.9.108"
+  proxy-port: 3128
+  username: test158
+  password: test158
 
 cron:
-    expression:
-        arrangement: "0 * * ? * *"
+  expression:
+    arrangement: "0 * * ? * *"
 
 ---
 
 spring:
-    profiles: prod
-    jpa:
-        hibernate:
-            ddl-auto: none
-    liquibase:
-        enabled: true
-        change-log: classpath:/data/changelog/db.changelog.master.xml
-    datasource:
-        url: jdbc:postgresql://10.97.220.144:5432/asdb
+  profiles: prod
+  jpa:
+    hibernate:
+      ddl-auto: none
+  liquibase:
+    enabled: true
+    change-log: classpath:/data/changelog/db.changelog.master.xml
+  datasource:
+    url: jdbc:postgresql://10.97.220.144:5432/asdb
 
 
 ---
 
 spring:
-    profiles: test
-    jpa:
-        hibernate:
-            ddl-auto: none
-    liquibase:
-        enabled: true
-        change-log: classpath:/data/changelog/db.changelog.master.xml
-    datasource:
-        url: jdbc:postgresql://192.168.5.195:5432/asdb
+  profiles: test
+  jpa:
+    hibernate:
+      ddl-auto: none
+  liquibase:
+    enabled: true
+    change-log: classpath:/data/changelog/db.changelog.master.xml
+  datasource:
+    url: jdbc:postgresql://192.168.5.195:5432/asdb
 registry-anonymizers:
-    proxy-ip: ""
+  proxy-ip: ""
 ---
 
 spring:
-    profiles: dev_pvorobiev
-    jpa:
-        hibernate:
-            ddl-auto: none
-    liquibase:
-        enabled: true
-        change-log: classpath:/data/changelog/db.changelog.master.xml
-    datasource:
-        url: jdbc:postgresql://192.168.5.195:5432/asdb_test
-
----
-
-spring:
-    profiles: dev_asavin
-    jpa:
-        hibernate:
-            ddl-auto: none
-    liquibase:
-        enabled: true
-        change-log: classpath:/data/changelog/db.changelog.master.xml
-    datasource:
-        url: jdbc:postgresql://192.168.5.195:5432/asdb_test
-
----
-
-spring:
-    profiles: dev_jspirina
-    path:
-        prefix: /pod
-    jpa:
-        hibernate:
-            ddl-auto: none
-    liquibase:
-        enabled: false
-        change-log: classpath:/data/changelog/db.changelog.master.xml
-    datasource:
-        url: jdbc:postgresql://192.168.5.195:5432/asdb_test
-
+  profiles: dev_pvorobiev, dev_asavin, dev_ashabalin, dev_jspirina
+  jpa:
+    hibernate:
+      ddl-auto: none
+  liquibase:
+    enabled: true
+    change-log: classpath:/data/changelog/db.changelog.master.xml
+  datasource:
+    url: jdbc:postgresql://192.168.5.195:5432/asdb_test
+eureka.client.enabled: false

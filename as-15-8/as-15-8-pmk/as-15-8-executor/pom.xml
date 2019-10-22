@@ -1,0 +1,39 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>as-15-8-executor</artifactId>
+	<parent>
+		<groupId>com.ecls.as-15-8</groupId>
+		<artifactId>as-15-8-pmk</artifactId>
+		<version>1.0</version>
+	</parent>
+
+	<dependencies>
+
+		<!-- Spring boot kafka -->
+		<dependency>
+		    <groupId>org.springframework.boot</groupId>
+		    <artifactId>spring-boot-starter-test</artifactId>
+		</dependency>
+
+		<!-- Selenium -->
+		<dependency>
+		    <groupId>org.seleniumhq.selenium</groupId>
+		    <artifactId>selenium-java</artifactId>
+		</dependency>
+        <!-- https://mvnrepository.com/artifact/org.iq80.leveldb/leveldb -->
+        <dependency>
+            <groupId>org.iq80.leveldb</groupId>
+            <artifactId>leveldb</artifactId>
+            <version>0.11</version>
+        </dependency>
+
+        <dependency>
+		    <groupId>junit</groupId>
+		    <artifactId>junit</artifactId>
+		    <scope>test</scope>
+		</dependency>
+
+    </dependencies>
+
+</project>
