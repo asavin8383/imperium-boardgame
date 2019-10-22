@@ -10,4 +10,6 @@ public interface AddonVersionRepository extends JpaRepository<AddonVersion, Long
 
     AddonVersion findTopByIdNotNullOrderByIdDesc();
 
+    AddonVersion getTopByRegUpdateTimeNotNullOrderByIdDesc();
+
 }

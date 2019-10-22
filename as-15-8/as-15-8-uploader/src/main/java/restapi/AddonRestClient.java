@@ -1,6 +1,7 @@
 package restapi;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import model.response.DeltaAddonEntry;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +16,13 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -49,9 +53,13 @@ public class AddonRestClient
         xmlInputFactory.setProperty(XMLInputFactory.IS_NAMESPACE_AWARE, Boolean.FALSE);
     }
 
+    @SneakyThrows
     public List<DeltaAddonEntry> readDeltaList() {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+
         List<DeltaAddonEntry> res = new ArrayList<>();
-        res.add(new DeltaAddonEntry(42, LocalDateTime.parse("2017-09-22T10:27:04"), false));
+        res.add(new DeltaAddonEntry(42, dateFormat.parse("2017-09-22T10:27:04"), false));
         return res;
     }
 
