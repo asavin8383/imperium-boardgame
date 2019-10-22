@@ -70,7 +70,7 @@ public class PasdRecord implements Serializable {
     @JsonProperty("cDate")
     @JsonFormat(timezone = "GMT+03:00")
     @ToString.Include
-    private Date crDate;
+    private Date cDate;
 
     @Transient
     private String source = "ППП Реестр анонимайзеров";
