@@ -121,25 +121,27 @@ public class ErdiRestClient {
         return podState;
     }
 
-
     public void startUpdateErdi(){
-        ContentVersion fullContentVersion = contentVersionRepository.getTopByRegUpdateTimeNotNullOrderByIdDesc();
-        boolean isFullErdi = fullContentVersion != null;
-
-        log.info("---> Запуск зугрузки ЕРДИ: " + (isFullErdi ? "дельт" : "полного справочника"));
+        if (isLoading)
+            return;
+        isLoading = true;
 
         try{
+            log.info("====== Начало обновления справочников");
             loadFullERDI();
             loadAllDeltaERDI();
             loadSybTypes();
             loadAddons();
+            log.info("====== Конец обновления справочников");
         }
         catch(Exception ex){
-            log.error("Ошибка при загрузке ЕРДИ", ex);
+            log.error("Ошибка обновлении справочников", ex);
             throw new CompletionException(ex);
         }
+        finally {
+            isLoading = false;
+        }
     }
-
 
     public void removeVersionTo(int version){
         CompletableFuture
@@ -155,10 +157,6 @@ public class ErdiRestClient {
 
 
     public void removeLastContentVersion() {
-        if (isLoading){
-            return;
-        }
-        isLoading = true;
         errorMessage = "";
         isError = false;
 
@@ -176,7 +174,6 @@ public class ErdiRestClient {
         }
         finally {
             stateDetails = isError ? errorMessage : "Удаление версии контента " + id + " прошло успешно!";
-            isLoading = false;
         }
     }
 
@@ -201,28 +198,10 @@ public class ErdiRestClient {
     }
 
     public void loadFullERDI() throws IOException, ExceptionErdiParser {
-        if (isLoading){
-            return;
-        }
-        isLoading = true;
         isError = false;
         errorMessage = "";
 
         boolean deleteTempFile = false;
-
-        /*
-        //erdiLoaderService.clearAllScheme();
-
-        //erdiLoaderService.removeLastContentVersion();
-
-        //erdiToDB(Paths.get(tempDir, "mytest.zip"));
-        //erdiToDB(Paths.get(tempDir, "mytest2.zip"));
-        //erdiToDB(Paths.get(tempDir, "mytest3_delete.zip"));
-        erdiToDB(Paths.get(tempDir, "full_erdi_2019-10-02__02_10_44.zip"), null);
-
-        if (true)
-            return;
-        */
 
         DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd__hh_mm_ss");
         Path path = Paths.get(tempDir, String.format("full_erdi_%s.zip", dateFormat.format(new Date())));
@@ -230,24 +209,29 @@ public class ErdiRestClient {
         try{
             ContentVersion fullContentVersion = contentVersionRepository.getTopByRegUpdateTimeNotNullOrderByIdDesc();
             boolean isFullErdi = (fullContentVersion != null);
-            if (!isFullErdi){
-                if (deleteTempFile) {
-                    Files.deleteIfExists(path);
-                }
 
-                File directory = path.toFile().getParentFile();
-                if (!directory.exists()){
-                    directory.mkdirs();
-                }
-
-                stateDetails = "Загрузка полного справочника ЕРДИ";
-                getAndSaveFullErdi(path);
-
-                stateDetails = "Парсинг и заливка полного справочника ЕРДИ в БД";
-
-                //path = Paths.get(tempDir, "mytest.zip");
-                erdiToDB(path, null);
+            if (isFullErdi){
+                return;
             }
+
+            log.info("---> Запуск загрузки полного справочника ЕРДИ");
+
+            if (deleteTempFile) {
+                Files.deleteIfExists(path);
+            }
+
+            File directory = path.toFile().getParentFile();
+            if (!directory.exists()){
+                directory.mkdirs();
+            }
+
+            stateDetails = "Загрузка полного справочника ЕРДИ";
+            getAndSaveFullErdi(path);
+
+            stateDetails = "Парсинг и заливка полного справочника ЕРДИ в БД";
+
+            //path = Paths.get(tempDir, "mytest.zip");
+            erdiToDB(path, null);
         }
         catch (Exception e){
             errorMessage = "Ошибка загрузки полного справочника ЕРДИ";
@@ -255,7 +239,6 @@ public class ErdiRestClient {
             throw e;
         }
         finally {
-            isLoading = false;
             stateDetails = isError ? errorMessage : "Загрузка полного справочника ЕРДИ прошла успешно";
             if (deleteTempFile){
                 try{
@@ -273,25 +256,16 @@ public class ErdiRestClient {
         if (!isFullAddons){
             System.out.println("Загрузка полного справочнка аддонов");
             addonRestClient.readFullFromNet();
-            System.out.println("Загрузка полного справочнка аддонов завершена");
         }
 
-        fullAddonVersion = addonVersionRepository.getTopByRegUpdateTimeNotNullOrderByIdDesc();
-        isFullAddons = fullAddonVersion != null;
-
-        if (isFullAddons){
-            System.out.println("Загрузка дельт аддонов");
-
-            List<DeltaAddonEntry> list = addonRestClient.readDeltaList();
-            if (list.size() > 0) {
-                for (DeltaAddonEntry deltaAddonEntry : list){
-                    System.out.println("Загрузка дельт адднон: " + deltaAddonEntry.toString());
-                    addonRestClient.readDeltaFromNet(deltaAddonEntry.getDeltaId(),
-                            deltaAddonEntry.getActualDate());
-                }
-
+        System.out.println("Загрузка дельт аддонов");
+        List<DeltaAddonEntry> list = addonRestClient.readDeltaList();
+        if (list.size() > 0) {
+            for (DeltaAddonEntry deltaAddonEntry : list){
+                System.out.println("Загрузка дельты аддона: " + deltaAddonEntry.toString());
+                addonRestClient.readDeltaFromNet(deltaAddonEntry.getDeltaId(),
+                        deltaAddonEntry.getActualDate());
             }
-            System.out.println("Загрузка дельт аддонов завершена");
         }
     }
 
@@ -335,10 +309,6 @@ public class ErdiRestClient {
     }
 
     public void loadAllDeltaERDI() throws ExceptionErdiParser {
-        if (isLoading){
-            return;
-        }
-        isLoading = true;
         isError = false;
         errorMessage = "";
 
@@ -351,6 +321,8 @@ public class ErdiRestClient {
             log.info(deltaList.toString());
 
             if (count > 0){
+                log.info("---> Запуск загрузки дельт ЕРДИ");
+
                 for(DeltaIdEntry deltaIdEntry : deltaList){
                     loadDeltaERDI(deltaIdEntry);
                     if (isError)
@@ -364,7 +336,6 @@ public class ErdiRestClient {
             throw new ExceptionErdiParser(e);
         }
         finally {
-            isLoading = false;
             stateDetails = isError ? errorMessage : "Загрузка дельт (" + count + ") ЕРДИ прошла успешно";
         }
     }
@@ -388,10 +359,6 @@ public class ErdiRestClient {
 
     @Transactional
     public String setParameter(String name, String value) {
-        if (isLoading){
-            return "НЕ удалось обновить параметр! Процесс занят: " + stateDetails;
-        }
-
         try{
             parameterRepository.setParameterValue(name, value);
         }
