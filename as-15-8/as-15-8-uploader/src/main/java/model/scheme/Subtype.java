@@ -42,9 +42,10 @@ public class Subtype implements Serializable {
     private Date effDt;
 
     @Column(name = "c_date")
-    @JsonProperty("cDate")@JsonFormat(timezone = "GMT+03:00")
+    @JsonProperty("cDate")
+    @JsonFormat(timezone = "GMT+03:00")
     @ToString.Include
-    private Date crDate;
+    private Date cDate;
 
     @ToString.Include
     private String origId;

@@ -3,6 +3,8 @@ package repositories;
 import model.enums.Dictionary;
 import model.scheme.PasdRecord;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import repositories.helper.DictionaryRepository;
 
@@ -16,8 +18,8 @@ public interface PasdRepository extends
 
     long countByEffDt(Date effDt);
 
-    // to do js - get single column
-    PasdRecord findFirstByEffDtOrderByCrDateDesc(Date effDt);
+    @Query(value = "select max(c_date) from sor.pasd where eff_dt = :effDt", nativeQuery = true)
+    Date findMaxCDateByEffDt(@Param("effDt") Date effDt);
 
     @Override
     default Dictionary getDictionaryType() {
@@ -31,6 +33,6 @@ public interface PasdRepository extends
 
     @Override
     default Date getUpdateDateTime(Date effDt) {
-        return findFirstByEffDtOrderByCrDateDesc(effDt).getCrDate();
+        return findMaxCDateByEffDt(effDt);
     }
 }

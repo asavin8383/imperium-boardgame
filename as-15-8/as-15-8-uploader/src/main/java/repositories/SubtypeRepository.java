@@ -3,6 +3,8 @@ package repositories;
 import model.enums.Dictionary;
 import model.scheme.Subtype;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import repositories.helper.DictionaryRepository;
 
@@ -18,8 +20,8 @@ public interface SubtypeRepository extends
 
     Subtype findByOrigId(String origId);
 
-    // to do js - get single column
-    Subtype findFirstByEffDtOrderByCrDateDesc(Date effDt);
+    @Query(value = "select max(c_date) from sor.ps where eff_dt = :effDt", nativeQuery = true)
+    Date findMaxCDateByEffDt(@Param("effDt") Date effDt);
 
     @Override
     default Dictionary getDictionaryType() {
@@ -33,6 +35,6 @@ public interface SubtypeRepository extends
 
     @Override
     default Date getUpdateDateTime(Date effDt) {
-        return findFirstByEffDtOrderByCrDateDesc(effDt).getCrDate();
+        return findMaxCDateByEffDt(effDt);
     }
 }
