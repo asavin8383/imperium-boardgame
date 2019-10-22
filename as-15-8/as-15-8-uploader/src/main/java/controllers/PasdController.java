@@ -21,8 +21,6 @@ import repositories.PasdRepository;
 import restapi.PASDRestClient;
 import utils.Utils;
 
-import java.util.Collections;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 @RestController
@@ -51,11 +49,6 @@ public class PasdController {
         } else {
             return new ResponseEntity<>(null, HttpStatus.PROCESSING);
         }
-    }
-
-    @GetMapping(path = "/count")
-    public Map<String, Long> getPasdCount() {
-        return Collections.singletonMap("count", pasdRepository.count());
     }
 
     @GetMapping(path = "/upload")

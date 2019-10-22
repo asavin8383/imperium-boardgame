@@ -21,8 +21,6 @@ import repositories.PsRepository;
 import restapi.PSRestClient;
 import utils.Utils;
 
-import java.util.Collections;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 @RestController
@@ -51,11 +49,6 @@ public class PsController {
         } else {
             return new ResponseEntity<>(null, HttpStatus.PROCESSING);
         }
-    }
-
-    @GetMapping(path = "/count")
-    public Map<String, Long> getPsCount() {
-        return Collections.singletonMap("count", psRepository.count());
     }
 
     @GetMapping(path = "/upload")

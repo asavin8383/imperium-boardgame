@@ -78,7 +78,8 @@ public class ErdiRestClient {
     }
 
     public String getUpdateDate() {
-        DateFormat dateFormat = new SimpleDateFormat("HH:mm dd.MM.yyyy");
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+        //DateFormat dateFormat = new SimpleDateFormat("HH:mm dd.MM.yyyy");
         dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
         Date dateUpdate = getActualContentDate();
         return dateUpdate == null ? "" : dateFormat.format(dateUpdate);

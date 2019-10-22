@@ -6,11 +6,12 @@ logging:
   config: config/logback-spring.xml
 eureka:
   client:
+    enabled: false
     serviceUrl:
       defaultZone: ${EUREKA_URI:http://localhost:8761/eureka}
   instance:
     preferIpAddress: true
-    ip-address: "${EXT_IP}"
+    ip-address: "${EXT_IP:localhost}"
 spring:
   application:
     name: pod
@@ -57,7 +58,12 @@ spring:
     change-log: classpath:/data/changelog/db.changelog.master.xml
   datasource:
     url: jdbc:postgresql://10.97.220.144:5432/asdb
-
+  rest_base_url: "https://arm-r.rkn.gov.ru/register-vpn/api/as15-8"
+registry-anonymizers:
+  proxy-ip: ""
+  proxy-port: 3128
+  username: As158
+  password: reEO964YnhOE
 
 ---
 
@@ -85,3 +91,4 @@ spring:
     change-log: classpath:/data/changelog/db.changelog.master.xml
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb_test
+eureka.client.enabled: false

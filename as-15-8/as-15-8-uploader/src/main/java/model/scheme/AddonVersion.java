@@ -1,9 +1,12 @@
 package model.scheme;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 
 @Entity
@@ -19,5 +22,9 @@ public class AddonVersion implements Serializable {
 
 	@Column(nullable=false, name = "ppn_dt")
 	private Date ppnDate;
+
+	@OneToMany(mappedBy = "addonVersion")
+	@JsonIgnore
+	private List<Addon> addons;
 
 }

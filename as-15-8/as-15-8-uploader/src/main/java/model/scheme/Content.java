@@ -25,8 +25,14 @@ public class Content {
     @JoinColumn(name = "init_content_version_id", referencedColumnName = "id")
     private ContentVersion contentVersion;
 
+
+
     @OneToMany(mappedBy = "content")
     @JsonIgnore
     private List<ContentHistory> contentHistory;
+
+    @OneToMany(mappedBy = "content")
+    @JsonIgnore
+    private List<Decision> decisions;
 
 }

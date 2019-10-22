@@ -1,23 +1,20 @@
 package services;
 
 import checkUnits.CheckUnitType;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import model.enums.BlockType;
-import model.scheme.ContentInfo;
-import model.scheme.ContentResources;
+import model.projection.ContentView;
+import model.scheme.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import repositories.ContentInfoRepository;
-import repositories.ContentRepository;
-import repositories.ContentResourcesRepository;
+import repositories.*;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,26 +25,38 @@ public class ContentService {
     private final ContentRepository contentRepository;
     private final ContentInfoRepository infoRepository;
     private final ContentResourcesRepository resourceRepository;
+    private final AddonRepository addonRepository;
+    private final SubtypeRepository subtypeRepository;
+    private final DecisionRepository decisionRepository;
 
     @Transactional
-    public Page<ContentView> getRelevantContent(Pageable page) {
-        Page<ContentView> contentPage = contentRepository.findRelevant(page);
-        contentPage.getContent().forEach(view -> {
-            view.setContentInfo(infoRepository.findOneByContentVersion_IdAndContent_Id(
-                    view.getContentVersionId(), view.getId()));
+    public Page<ContentView> getByEffDtAndQuery(Date effDt, String query, Pageable page) {
+        Page<ContentView> contentPage = contentRepository.findByEffDtAndQuery(effDt, query, page);
 
-            BlockType blockType = view.getContentInfo().getBlockType();
-            List<String> resourceTypes = getResourceTypesFor(blockType);
-            view.setExampleResource(resourceRepository.findOneByContentAndVersionAndTypeDsc(
-                    view.getId(), view.getContentVersionId(), resourceTypes));
+        contentPage.getContent().parallelStream().forEach(view -> {
+            Decision decision = decisionRepository.findByContent_IdAndContentVersion_Id(
+                    view.getContentId(), view.getContentVersionId());
+            ContentInfo info = infoRepository.findOneByContentVersion_IdAndContent_Id(
+                    view.getContentVersionId(), view.getContentId());
+            List<String> resourceTypes = getResourceTypesFor(info.getBlockType());
+            ContentResources res = resourceRepository.findOneByContentAndVersionAndTypeDsc(
+                    view.getContentId(), view.getContentVersionId(), resourceTypes);
 
+            view.setDecisionOrg(decision.getOrg());
+            view.setResourceValue(res.getValue());
+            view.setResourceType(res.getCheckUnitType().toString());
+
+            Addon addon = addonRepository.findTopByAddonVersion_IdOrderByIdDesc(view.getAddonVersionId());
+            if (addon != null && addon.getInfoTypeId() != null) {
+                Subtype subtype = subtypeRepository.findByOrigId(addon.getInfoTypeId());
+                view.setInfoTypeId(subtype.getOrigId());
+                view.setRegistryName(subtype.getRegistryName());
+                view.setCategoryName(subtype.getCategoryName());
+                view.setViolationName(subtype.getViolationName());
+            }
         });
-        //.peek().filter()
-        return contentPage;
-    }
 
-    public long getRelevantCount() {
-        return contentRepository.findRelevantCount();
+        return contentPage;
     }
 
     public static List<String> getResourceTypesFor(BlockType blockType) {
@@ -65,30 +74,6 @@ public class ContentService {
             default:
                 return Collections.singletonList(CheckUnitType.URL.toString().toLowerCase());
         }
-    }
-
-    @Data
-    @NoArgsConstructor
-    public static class ContentView {
-
-        private Long id;
-
-        private String erdiId;
-
-        private Long contentVersionId;
-
-        private ContentInfo contentInfo;
-
-        private ContentResources exampleResource;
-
-        @SuppressWarnings("unused")
-        public ContentView(Long id, String erdiId,
-                           Long contentVersionId) {
-            this.id = id;
-            this.erdiId = erdiId;
-            this.contentVersionId = contentVersionId;
-        }
-
     }
 
 }
