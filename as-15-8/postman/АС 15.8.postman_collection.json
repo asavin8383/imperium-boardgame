@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "8e1e6a07-3461-47a1-9d0b-180fde9c500e",
+		"_postman_id": "57fe0ded-ef0d-4877-8bb9-c02f80ac8a9e",
 		"name": "АС 15.8",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -2777,12 +2777,11 @@
 									}
 								],
 								"url": {
-									"raw": "{{url}}/pod/subtype?",
+									"raw": "{{url_pod}}/subtype?query=продажа",
 									"host": [
-										"{{url}}"
+										"{{url_pod}}"
 									],
 									"path": [
-										"pod",
 										"subtype"
 									],
 									"query": [
@@ -2807,9 +2806,8 @@
 											"disabled": true
 										},
 										{
-											"key": "violationName",
-											"value": "порно",
-											"disabled": true
+											"key": "query",
+											"value": "продажа"
 										}
 									]
 								}
@@ -2828,12 +2826,11 @@
 									}
 								],
 								"url": {
-									"raw": "{{url}}/pod/ps?",
+									"raw": "{{url_pod}}/ps?query=ru",
 									"host": [
-										"{{url}}"
+										"{{url_pod}}"
 									],
 									"path": [
-										"pod",
 										"ps"
 									],
 									"query": [
@@ -2858,14 +2855,8 @@
 											"disabled": true
 										},
 										{
-											"key": "name",
-											"value": "mail",
-											"disabled": true
-										},
-										{
-											"key": "hostname",
-											"value": "ru",
-											"disabled": true
+											"key": "query",
+											"value": "ru"
 										}
 									]
 								}
@@ -2884,12 +2875,11 @@
 									}
 								],
 								"url": {
-									"raw": "{{url}}/pod/pasd?",
+									"raw": "{{url_pod}}/pasd?query=mail",
 									"host": [
-										"{{url}}"
+										"{{url_pod}}"
 									],
 									"path": [
-										"pod",
 										"pasd"
 									],
 									"query": [
@@ -2914,14 +2904,8 @@
 											"disabled": true
 										},
 										{
-											"key": "name",
-											"value": "сервис",
-											"disabled": true
-										},
-										{
-											"key": "hostname",
-											"value": "mail",
-											"disabled": true
+											"key": "query",
+											"value": "mail"
 										}
 									]
 								}
@@ -3087,6 +3071,109 @@
 					],
 					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Список справочников",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"type": "text",
+								"value": "{{oper_token}}",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{url_pod}}/dict",
+							"host": [
+								"{{url_pod}}"
+							],
+							"path": [
+								"dict"
+							],
+							"query": [
+								{
+									"key": "sortingDirection",
+									"value": "ASC",
+									"disabled": true
+								},
+								{
+									"key": "sortingColumn",
+									"value": "id",
+									"disabled": true
+								},
+								{
+									"key": "pageNumber",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "pageSize",
+									"value": "5",
+									"disabled": true
+								},
+								{
+									"key": "violationName",
+									"value": "порно",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Справочник по коду",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"type": "text",
+								"value": "{{oper_token}}",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{url_pod}}/dict/ERDI",
+							"host": [
+								"{{url_pod}}"
+							],
+							"path": [
+								"dict",
+								"ERDI"
+							],
+							"query": [
+								{
+									"key": "sortingDirection",
+									"value": "ASC",
+									"disabled": true
+								},
+								{
+									"key": "sortingColumn",
+									"value": "id",
+									"disabled": true
+								},
+								{
+									"key": "pageNumber",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "pageSize",
+									"value": "5",
+									"disabled": true
+								},
+								{
+									"key": "violationName",
+									"value": "порно",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
 				}
 			],
 			"protocolProfileBehavior": {}

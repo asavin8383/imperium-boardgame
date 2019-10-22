@@ -1,15 +1,11 @@
 package model.scheme;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import org.hibernate.annotations.Immutable;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -50,33 +46,32 @@ public class PasdRecord implements Serializable {
     private String networkAddresses;
 
     @Column(name = "ipaccessfgis")
-    @JsonIgnore
     @ToString.Include
     private String ipAccessFgis;
 
-    @JsonIgnore
     @ToString.Include
     private String credentials;
 
     @ToString.Include
+    @JsonIgnore
     private Integer origId;
     
     @ToString.Include
     private LocalDateTime ppnDt;
 
     @ToString.Include
+    @JsonIgnore
     private LocalDateTime effDt;
 
+    @Column(name = "c_date")
+    @JsonProperty("cDate")
     @ToString.Include
-    private LocalDateTime cDate;
+    private LocalDateTime crDate;
 
-    public static Example<PasdRecord> example(ExampleMatcher matcher, LocalDateTime effDt,
-                                              String name, String hostname) {
-        PasdRecord pasd =  new PasdRecord();
-        pasd.setEffDt(effDt);
-        pasd.setName(name);
-        pasd.setHostname(hostname);
-        return Example.of(pasd, matcher);
-    }
+    @Transient
+    private String status = "Работает";
+
+    @Transient
+    private String source = "ППП Реестр анонимайзеров";
 
 }
