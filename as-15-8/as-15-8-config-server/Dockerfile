@@ -6,8 +6,7 @@ EXPOSE 15802
 
 ENV APP_PATH="/as-15-8-config-server.jar" \
     LOG_PATH="/log" \
-    CONF_PATH="/config" \
-    PROFILE="test"
+    CONF_PATH="/config"
 
 COPY target/as-15-8-config-server.jar $APP_PATH
 

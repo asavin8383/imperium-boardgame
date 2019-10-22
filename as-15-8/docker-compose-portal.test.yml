@@ -23,7 +23,7 @@ services:
       - ~/as-15-8-ppm/gateway/config:/config
     environment:
       PROFILE: test
-      EUREKA_URI: 192.168.5.253:8761/eureka
+      EUREKA_URI: http://192.168.5.253:8761/eureka
       TZ: "Europe/Moscow"
     ports:
       - "15880:15880"
@@ -39,7 +39,7 @@ services:
       - ~/as-15-8-ppm/config-server/config:/config
     environment:
       PROFILE: test
-      EUREKA_URI: 192.168.5.253:8761/eureka
+      EUREKA_URI: http://192.168.5.253:8761/eureka
       TZ: "Europe/Moscow"
     ports:
       - "15802:15802"
@@ -56,7 +56,7 @@ services:
       - ~/as-15-8-ppm/rest/config:/config
     environment:
       PROFILE: test
-      EUREKA_URI: 192.168.5.253:8761/eureka
+      EUREKA_URI: http://192.168.5.253:8761/eureka
       TZ: "Europe/Moscow"
     ports:
       - "15800:15800"

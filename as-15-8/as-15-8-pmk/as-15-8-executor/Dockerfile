@@ -2,16 +2,18 @@ FROM openjdk:8-jdk-alpine
 
 LABEL Alex Shabalin <ashabalin@ec-leasing.ru>
 
-EXPOSE 8761
+EXPOSE 11100
 
-ENV APP_PATH="/as-15-8-discovery.jar" \
-    LOG_PATH="/log" \
-    CONF_PATH="/config"
+RUN apk add --no-cache nmap \
+    && apk add --no-cache proxychains-ng \
+    && mkdir -p /share/nmap
 
-COPY target/as-15-8-discovery.jar $APP_PATH
+ENV APP_PATH="/as-15-8-executor.jar" \
+    LOG_PATH="/log"
 
 VOLUME $LOG_PATH
-VOLUME $CONF_PATH
+
+COPY /target/as-15-8-executor.jar $APP_PATH
 
 ENTRYPOINT ["java", \
          "-jar", \
@@ -19,4 +21,4 @@ ENTRYPOINT ["java", \
          "-Dspring.profiles.active=${PROFILE}", \
          "-Xms512M", \
          "-Xmx1024M", \
-         "/as-15-8-discovery.jar"]
+         "/as-15-8-executor.jar"]

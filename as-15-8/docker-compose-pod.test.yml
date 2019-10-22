@@ -9,7 +9,7 @@ services:
       - ~/as-15-8-pod/uploader/config:/config
     environment:
       PROFILE: test
-      EUREKA_URI: 192.168.5.253:8761/eureka
+      EUREKA_URI: http://192.168.5.253:8761/eureka
       TZ: "Europe/Moscow"
     ports:
       - "15801:15801"
