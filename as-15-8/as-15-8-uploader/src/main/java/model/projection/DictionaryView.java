@@ -1,20 +1,20 @@
-package model.response;
+package model.projection;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DictionaryView {
 
     private String code;
-    private int ordinal;
+    private Integer ordinal;
     private Long count;
     private String shortName;
     private String fullName;
-    private LocalDateTime updateDateTime;
+    private Date updateDateTime;
 
     public DictionaryView(String code, Long count, String shortName) {
         this.code = code;
@@ -24,7 +24,7 @@ public class DictionaryView {
 
     public DictionaryView(String code, int ordinal,
                           String shortName, String fullName,
-                          LocalDateTime updateDateTime) {
+                          Date updateDateTime) {
         this.code = code;
         this.ordinal = ordinal;
         this.shortName = shortName;

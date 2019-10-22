@@ -1,7 +1,7 @@
 package services;
 
 import model.enums.Dictionary;
-import model.response.DictionaryView;
+import model.projection.DictionaryView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import repositories.helper.DictionaryRepository;
@@ -30,16 +30,16 @@ public class DictionaryService {
                 .map(entry -> new DictionaryView(
                         entry.getKey().toString(),
                         entry.getValue().getCountByEffDt(
-                                Utils.getLocalEndDate()),
+                                Utils.getEndDate()),
                         entry.getKey().getShortName()))
                 .collect(Collectors.toList());
     }
 
     public DictionaryView getDictionaryView(Dictionary dictionary) {
         DictionaryRepository repository = repositoryMap.get(dictionary);
-        return new DictionaryView(dictionary.toString(), dictionary.ordinal(),
+        return new DictionaryView(dictionary.toString(), dictionary.getId(),
                 dictionary.getShortName(), dictionary.getFullName(),
-                repository.getUpdateDateTime(Utils.getLocalEndDate()));
+                repository.getUpdateDateTime(Utils.getEndDate()));
     }
 
 }

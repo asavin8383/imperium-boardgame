@@ -1,5 +1,6 @@
 package model.scheme;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
@@ -9,7 +10,7 @@ import lombok.ToString;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.util.Date;
 
 @Entity
 @Table(schema = "sor", name = "subtype")
@@ -30,21 +31,20 @@ public class Subtype implements Serializable {
     @EqualsAndHashCode.Include
     private Integer id;
 
-    // Дата изменения записи АС 15.8
-    // Дата и время получения сведений - max(ppn_dt)
-    @ToString.Include
     @JsonIgnore
-    private LocalDateTime ppnDt;
-
+//    @JsonFormat(timezone = "GMT+03:00")
     @ToString.Include
-    @JsonIgnore
-    private LocalDateTime effDt;
+    private Date ppnDt;
 
-    // Дата и время последнего изменения - max(cdate)
+    @JsonIgnore
+//    @JsonFormat(timezone = "GMT+03:00")
+    @ToString.Include
+    private Date effDt;
+
     @Column(name = "c_date")
-    @JsonProperty("cDate")
+    @JsonProperty("cDate")@JsonFormat(timezone = "GMT+03:00")
     @ToString.Include
-    private LocalDateTime crDate;
+    private Date crDate;
 
     @ToString.Include
     private String origId;
@@ -57,8 +57,5 @@ public class Subtype implements Serializable {
 
     @ToString.Include
     private String violationName;
-
-//    to do js - violation composite id
-//    public String getCompositeId()
 
 }

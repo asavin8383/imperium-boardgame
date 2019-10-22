@@ -12,8 +12,8 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.metamodel.SingularAttribute;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @AllArgsConstructor
@@ -22,7 +22,7 @@ public class GenericRelevantQuery<T> {
     private final EntityManager em;
     private final Class<T> tClass;
 
-    public Page<T> query(LocalDateTime effDt, SingularAttribute<T, LocalDateTime> effDtAttr,
+    public Page<T> query(Date effDt, SingularAttribute<T, Date> effDtAttr,
                          String query, List<SingularAttribute<T, String>> likeAttrs,
                          Pageable pageable) {
 

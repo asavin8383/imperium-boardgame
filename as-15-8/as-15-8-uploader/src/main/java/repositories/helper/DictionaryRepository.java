@@ -2,14 +2,14 @@ package repositories.helper;
 
 import model.enums.Dictionary;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 public interface DictionaryRepository {
 
     Dictionary getDictionaryType();
 
-    long getCountByEffDt(LocalDateTime effDt);
+    long getCountByEffDt(Date effDt);
 
-    LocalDateTime getUpdateDateTime(LocalDateTime effDt);
+    Date getUpdateDateTime(Date effDt);
 
 }

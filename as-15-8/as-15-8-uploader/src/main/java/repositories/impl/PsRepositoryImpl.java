@@ -11,8 +11,8 @@ import repositories.helper.GenericRelevantQuery;
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.metamodel.SingularAttribute;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -37,7 +37,7 @@ public class PsRepositoryImpl implements PsRepositoryCustom {
     }
 
     @Override
-    public Page<PsRecord> findByEffDtAndQuery(LocalDateTime effDt, String query, Pageable pageable) {
+    public Page<PsRecord> findByEffDtAndQuery(Date effDt, String query, Pageable pageable) {
         return relevantQuery.query(effDt, PsRecord_.effDt, query, getLikeAttrs(), pageable);
     }
 }

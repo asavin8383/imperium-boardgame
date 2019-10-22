@@ -15,6 +15,10 @@ public enum Dictionary {
         this.fullName = fullName;
     }
 
+    public int getId() {
+        return ordinal() + 1;
+    }
+
     public String getShortName() {
         return shortName;
     }
