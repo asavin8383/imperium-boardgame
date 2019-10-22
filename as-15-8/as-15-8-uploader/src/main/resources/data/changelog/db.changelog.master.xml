@@ -13,5 +13,6 @@
     <include file="data/changelog/uploader.0007.PASDList.xml"/>
     <include file="data/changelog/uploader.0008.SubTypeList.xml"/>
     <include file="data/changelog/uploader.0009.ContentVersion.xml"/>
+    <include file="data/changelog/uploader.0009.addon_change.xml"/>
 
 </databaseChangeLog>
