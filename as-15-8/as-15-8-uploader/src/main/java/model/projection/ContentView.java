@@ -1,11 +1,9 @@
 package model.projection;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
 @Data
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ContentView {
 
 //    http://192.168.5.182:8090/pages/viewpage.action?pageId=3801123
