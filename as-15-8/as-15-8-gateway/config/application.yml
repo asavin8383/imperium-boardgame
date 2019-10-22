@@ -25,3 +25,9 @@ zuul:
     ppm:
       path: /**
       serviceId: ppm
+
+---
+
+spring:
+  profiles: dev_pvorobiev, dev_asavin, dev_ashabalin, dev_jspirina
+eureka.client.enabled: false
