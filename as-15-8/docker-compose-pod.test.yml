@@ -11,6 +11,7 @@ services:
     environment:
       PROFILE: test
       EUREKA_URI: http://192.168.5.253:8761/eureka
+      EXT_IP: 192.168.5.210
       TZ: "Europe/Moscow"
     ports:
       - "15801:15801"
