@@ -47,7 +47,6 @@ public class RestTest
     @Test
     public void testSybType(){
         subTypeRestClient.readFromNet();
-
     }
 
     @Test

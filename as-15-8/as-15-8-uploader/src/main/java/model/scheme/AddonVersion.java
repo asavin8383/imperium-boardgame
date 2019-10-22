@@ -20,7 +20,13 @@ public class AddonVersion implements Serializable {
 	@Column(name="id", nullable=false, updatable=false)
 	private Long id;
 
-	@Column(nullable=false, name = "ppn_dt")
+    @Column(nullable = true, name = "reg_updatetime")
+    private Date regUpdateTime;
+
+    @Column(nullable = true, name = "delta_updatetime")
+    private Date deltaUpdateTime;
+
+    @Column(nullable=false, name = "ppn_dt")
 	private Date ppnDate;
 
 	@OneToMany(mappedBy = "addonVersion")

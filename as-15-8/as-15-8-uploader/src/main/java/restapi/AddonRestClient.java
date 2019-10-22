@@ -53,18 +53,17 @@ public class AddonRestClient
     public void readFullFromNet() {
         String base = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
         String url = base + "getFullERDIaddons/";
-        processZIP(url, new Date());
+        processZIP(url, new Date(), false);
 
     }
 
     public void readDeltaFromNet(long id, Date date) {
         String base = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
         String url = base + "getDumpDeltaAddonsByDeltaId/"+id+"/";
-        processZIP(url, date);
-
+        processZIP(url, date, true);
     }
 
-    private void processZIP(String url, Date date) {
+    private void processZIP(String url, Date date, boolean is_delta) {
         log.info("GET from {}", url);
         ResponseEntity<byte[]> entity = restTemplate.getForEntity(url, byte[].class);
 
@@ -80,7 +79,7 @@ public class AddonRestClient
                 sr.next(); // to point to <root>
                 sr.next(); // to point to root-element under root
 
-                int cnt = addonUpdater.insertAllJdbc(sr, mapper, date);
+                int cnt = addonUpdater.insertAllJdbc(sr, mapper, date, is_delta);
 
                 log.info("{} addons processed", cnt);
 

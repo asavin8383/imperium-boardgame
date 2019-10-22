@@ -36,7 +36,7 @@ public class AddonUpdater
     JdbcTemplate jdbcTemplate;
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public int insertAllJdbc(XMLStreamReader sr, XmlMapper mapper, Date date) throws XMLStreamException, IOException {
+    public int insertAllJdbc(XMLStreamReader sr, XmlMapper mapper, Date date, boolean is_delta) throws XMLStreamException, IOException {
 
         // Кешируем текущие content_id и content_version_id для существующих ЕРДИ
         Map<Long, Long> erdiToContentId = new HashMap<>();
@@ -82,6 +82,8 @@ public class AddonUpdater
 
         AddonVersion addonVersion = new AddonVersion();
         addonVersion.setPpnDate(new Date());
+        if (is_delta) addonVersion.setDeltaUpdateTime(new Date());
+        else addonVersion.setRegUpdateTime(new Date());
         addonVersionRepository.save(addonVersion);
         addonVersionRepository.flush();
 
