@@ -18,5 +18,5 @@ ENTRYPOINT ["java", \
          "-Dapplication.logpath=${LOG_PATH}", \
          "-Dspring.profiles.active=${PROFILE}", \
          "-Xms512M", \
-         "-Xmx1024M", \
+         "-Xmx4096M", \
          "/as-15-8-uploader.jar"]
