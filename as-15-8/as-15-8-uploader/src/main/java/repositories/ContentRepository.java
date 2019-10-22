@@ -5,9 +5,10 @@ import model.scheme.Content;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import repositories.helper.DictionaryRepository;
+import utils.Utils;
 
 import javax.transaction.Transactional;
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 
@@ -30,13 +31,13 @@ public interface ContentRepository extends
     }
 
     @Override
-    default long getCountByEffDt(LocalDateTime effDt) {
+    default long getCountByEffDt(Date effDt) {
         return this.findRelevantCount();
     }
 
     @Override
-    default LocalDateTime getUpdateDateTime(LocalDateTime effDt) {
-        return LocalDateTime.of(1, 1, 1, 1, 1);
+    default Date getUpdateDateTime(Date effDt) {
+        return Utils.getEndDate();
     }
 
 }

@@ -45,7 +45,7 @@ public class SubtypeController {
         Pageable page = PageRequest.of(pageNumber, pageSize,
                 SortingHelper.createSorting(sortingDirection, sortingColumn));
 
-        return subtypeRepository.findByEffDtAndQuery(Utils.getLocalEndDate(), query, page);
+        return subtypeRepository.findByEffDtAndQuery(Utils.getEndDate(), query, page);
     }
 
     @GetMapping(path = "/count")

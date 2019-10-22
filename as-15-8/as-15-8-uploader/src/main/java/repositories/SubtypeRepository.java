@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import repositories.helper.DictionaryRepository;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 @Repository
 public interface SubtypeRepository extends
@@ -14,10 +14,10 @@ public interface SubtypeRepository extends
         SubtypeRepositoryCustom,
         DictionaryRepository {
 
-    long countByEffDt(LocalDateTime effDt);
+    long countByEffDt(Date effDt);
 
     // to do js - get single column
-    Subtype findFirstByEffDtOrderByCrDateDesc(LocalDateTime effDt);
+    Subtype findFirstByEffDtOrderByCrDateDesc(Date effDt);
 
     @Override
     default Dictionary getDictionaryType() {
@@ -25,12 +25,12 @@ public interface SubtypeRepository extends
     }
 
     @Override
-    default long getCountByEffDt(LocalDateTime effDt) {
+    default long getCountByEffDt(Date effDt) {
         return this.countByEffDt(effDt);
     }
 
     @Override
-    default LocalDateTime getUpdateDateTime(LocalDateTime effDt) {
+    default Date getUpdateDateTime(Date effDt) {
         return findFirstByEffDtOrderByCrDateDesc(effDt).getCrDate();
     }
 }

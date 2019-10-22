@@ -1,5 +1,6 @@
 package model.scheme;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
@@ -7,7 +8,7 @@ import org.hibernate.annotations.Immutable;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.util.Date;
 
 @Entity
 @Immutable
@@ -55,21 +56,21 @@ public class PasdRecord implements Serializable {
     @ToString.Include
     @JsonIgnore
     private Integer origId;
-    
-    @ToString.Include
-    private LocalDateTime ppnDt;
 
+    @JsonFormat(timezone = "GMT+03:00")
     @ToString.Include
+    private Date ppnDt;
+
     @JsonIgnore
-    private LocalDateTime effDt;
+//    @JsonFormat(timezone = "GMT+03:00")
+    @ToString.Include
+    private Date effDt;
 
     @Column(name = "c_date")
     @JsonProperty("cDate")
+    @JsonFormat(timezone = "GMT+03:00")
     @ToString.Include
-    private LocalDateTime crDate;
-
-    @Transient
-    private String status = "Работает";
+    private Date crDate;
 
     @Transient
     private String source = "ППП Реестр анонимайзеров";

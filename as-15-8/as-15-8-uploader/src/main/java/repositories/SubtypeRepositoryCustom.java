@@ -4,10 +4,10 @@ import model.scheme.Subtype;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 public interface SubtypeRepositoryCustom {
 
-    Page<Subtype> findByEffDtAndQuery(LocalDateTime effDt, String query, Pageable pageable);
+    Page<Subtype> findByEffDtAndQuery(Date effDt, String query, Pageable pageable);
 
 }

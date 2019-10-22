@@ -46,7 +46,7 @@ public class PasdController {
             Pageable page = PageRequest.of(pageNumber, pageSize,
                     SortingHelper.createSorting(sortingDirection, sortingColumn));
             Page<PasdRecord> result = pasdRepository.findByEffDtAndQuery(
-                    Utils.getLocalEndDate(), query, page);
+                    Utils.getEndDate(), query, page);
             return new ResponseEntity<>(result, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(null, HttpStatus.PROCESSING);

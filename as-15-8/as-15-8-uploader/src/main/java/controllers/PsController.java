@@ -46,7 +46,7 @@ public class PsController {
             Pageable page = PageRequest.of(pageNumber, pageSize,
                     SortingHelper.createSorting(sortingDirection, sortingColumn));
             Page<PsRecord> result = psRepository.findByEffDtAndQuery(
-                    Utils.getLocalEndDate(), query, page);
+                    Utils.getEndDate(), query, page);
             return new ResponseEntity<>(result, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(null, HttpStatus.PROCESSING);
