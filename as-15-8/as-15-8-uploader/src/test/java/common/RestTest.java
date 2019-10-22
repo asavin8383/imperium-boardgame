@@ -50,7 +50,12 @@ public class RestTest
 
     @Test
     public void testAddons(){
-        addonRestClient.readFromNet();
+        addonRestClient.readFullFromNet();
+    }
+
+    @Test
+    public void testDeltaAddons(){
+        addonRestClient.readDeltaFromNet(42);
     }
 
 }

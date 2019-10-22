@@ -35,6 +35,8 @@ public class AddonRestClient
     @Value("${spring.rest_base_url}")
     private String baseUrl;
 
+    public static final String ENTITY_NAME= "dumpAddons.xml";
+
     private XMLInputFactory xmlInputFactory;
 
     public AddonRestClient() {
@@ -47,9 +49,21 @@ public class AddonRestClient
      * Читаем в потоковом режиме
      * Пишем в базу с текущим временем
      */
-    public void readFromNet() {
+    public void readFullFromNet() {
         String base = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
         String url = base + "getFullERDIaddons/";
+        readFromUrl(url);
+
+    }
+
+    public void readDeltaFromNet(long id) {
+        String base = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
+        String url = base + "getDumpDeltaAddonsByDeltaId/"+id+"/";
+        readFromUrl(url);
+
+    }
+
+    private void readFromUrl(String url) {
         log.info("GET from {}", url);
         ResponseEntity<byte[]> entity = restTemplate.getForEntity(url, byte[].class);
 
@@ -57,7 +71,8 @@ public class AddonRestClient
         ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(resp));
         try {
             ZipEntry entry = zipInputStream.getNextEntry();
-            if (entry.getName().equalsIgnoreCase("dumpAddons.xml")) {
+            log.debug("Zip entry name = {}", entry);
+            if (ENTITY_NAME.equalsIgnoreCase(entry.getName())) {
                 XmlMapper mapper = new XmlMapper(xmlInputFactory);
 
                 XMLStreamReader sr = xmlInputFactory.createXMLStreamReader(zipInputStream);
@@ -72,7 +87,6 @@ public class AddonRestClient
         } catch (IOException | XMLStreamException e) {
             System.out.println(e);
         }
-
     }
 
 }
