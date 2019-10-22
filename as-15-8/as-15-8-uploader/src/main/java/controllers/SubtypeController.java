@@ -21,8 +21,6 @@ import repositories.SubtypeRepository;
 import restapi.SubTypeRestClient;
 import utils.Utils;
 
-import java.util.Collections;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 @RestController
@@ -46,11 +44,6 @@ public class SubtypeController {
                 SortingHelper.createSorting(sortingDirection, sortingColumn));
 
         return subtypeRepository.findByEffDtAndQuery(Utils.getEndDate(), query, page);
-    }
-
-    @GetMapping(path = "/count")
-    public Map<String, Long> getViolationCount() {
-        return Collections.singletonMap("count", subtypeRepository.count());
     }
 
     @GetMapping(path = "/upload")

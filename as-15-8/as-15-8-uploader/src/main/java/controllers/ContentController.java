@@ -4,6 +4,7 @@ import controllers.utils.SortingDirection;
 import controllers.utils.SortingHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import model.projection.ContentView;
 import model.rest.control.PodState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,10 +17,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import restapi.ErdiRestClient;
 import services.ContentService;
+import utils.Utils;
 
 import java.text.ParseException;
-import java.util.Collections;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 @RestController
@@ -31,29 +31,23 @@ public class ContentController {
     private final ErdiRestClient erdiRestClient;
 
     @GetMapping(path = "/erdi")
-    public ResponseEntity<Page<ContentService.ContentView>> getRelevantContent(
+    public ResponseEntity<Page<ContentView>> getRelevantContent(
             @RequestParam(required = false) SortingDirection sortingDirection,
             @RequestParam(required = false) String sortingColumn,
             @RequestParam(defaultValue = "0") int pageNumber,
-            @RequestParam(defaultValue = "10") int pageSize) {
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(required = false) String query) {
 
         if (!erdiRestClient.getIsLoading()) {
             Pageable page = PageRequest.of(pageNumber, pageSize,
                     SortingHelper.createSorting(sortingDirection, sortingColumn));
-            // ContentInfo: entry type, block type, urgency type
-            // ContentResources: value, check unit type
-            Page<ContentService.ContentView> pageContent =
-                    contentService.getRelevantContent(page);
+            Page<ContentView> pageContent = contentService.getByEffDtAndQuery(
+                    Utils.getEndDate(), query, page);
             return new ResponseEntity<>(pageContent, HttpStatus.OK);
         }
         else {
             return new ResponseEntity<>(null, HttpStatus.PROCESSING);
         }
-    }
-
-    @GetMapping(path = "/erdi/count")
-    public Map<String, Long> getRelevantCount() {
-        return Collections.singletonMap("count", contentService.getRelevantCount());
     }
 
     @GetMapping(path = "/update_erdi")

@@ -16,6 +16,8 @@ public interface SubtypeRepository extends
 
     long countByEffDt(Date effDt);
 
+    Subtype findByOrigId(String origId);
+
     // to do js - get single column
     Subtype findFirstByEffDtOrderByCrDateDesc(Date effDt);
 
