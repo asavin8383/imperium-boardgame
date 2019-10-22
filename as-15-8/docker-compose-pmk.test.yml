@@ -11,6 +11,7 @@ services:
       PROFILE: test
       EUREKA_URI: http://192.168.5.253:8761/eureka
       TZ: "Europe/Moscow"
+    hostname: "{{.Node.Hostname}}"
     volumes:
       - ~/as-15-8-pmk/dispatcher/logs:/log
     configs:
@@ -35,6 +36,7 @@ services:
       PROFILE: test
       EUREKA_URI: http://192.168.5.253:8761/eureka
       TZ: "Europe/Moscow"
+    hostname: "{{.Node.Hostname}}"
     volumes:
       - ~/as-15-8-pmk/executor/logs:/log
     configs:
@@ -56,6 +58,7 @@ services:
       PROFILE: test
       EUREKA_URI: http://192.168.5.253:8761/eureka
       TZ: "Europe/Moscow"
+    hostname: "{{.Node.Hostname}}"
     volumes:
       - ~/as-15-8-pmk/analyzer/logs:/log
     configs:

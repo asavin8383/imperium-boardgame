@@ -4,6 +4,7 @@ services:
     container_name: as-15-8-uploader
     image: harbor.ec-leasing.ru/as_15_8/as-15-8-uploader
     restart: always
+    hostname: as-15-8-pod
     volumes:
       - ~/as-15-8-pod/uploader/logs:/log
       - ~/as-15-8-pod/uploader/config:/config

@@ -32,26 +32,8 @@
         <appender-ref ref="rootRollingFile" />
     </root>
 
-    <appender name="ROUTES_LOG"
-              class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOGS}/routes.log</file>
-        <encoder
-                class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <Pattern>%d %p %C{1.} [%t] %m%n</Pattern>
-        </encoder>
-
-        <rollingPolicy
-                class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOGS}/archived/routes-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
-            <timeBasedFileNamingAndTriggeringPolicy
-                    class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-                <maxFileSize>100MB</maxFileSize>
-            </timeBasedFileNamingAndTriggeringPolicy>
-        </rollingPolicy>
-    </appender>
-
-    <logger name="org.springframework.cloud.netflix.zuul.filters.route.SimpleHostRoutingFilter" level="DEBUG" additivity="false">
-        <appender-ref ref="ROUTES_LOG" />
+    <logger name="com.netflix.loadbalancer.LoadBalancerContext" level="DEBUG" additivity="false">
+        <appender-ref ref="rootRollingFile" />
     </logger>
  
 </configuration>
