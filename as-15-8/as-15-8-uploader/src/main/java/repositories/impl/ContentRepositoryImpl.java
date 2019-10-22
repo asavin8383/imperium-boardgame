@@ -28,13 +28,7 @@ public class ContentRepositoryImpl implements ContentRepositoryCustom {
     public Page<ContentService.ContentView> findRelevant(Pageable pageable) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
         Date endDate = Utils.getEndDate();
-
-        CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
-        Root<Content> countRoot = countQuery.from(Content.class);
-        Join<Content, ContentHistory> countHstJoin = countRoot.join(Content_.contentHistory);
-        countQuery.select(cb.count(countRoot));
-        countQuery.where(cb.equal(countHstJoin.get(ContentHistory_.endDate), endDate));
-        long total = em.createQuery(countQuery).getSingleResult();
+        long total = findRelevantCount();
 
         /* MAIN */
 
@@ -53,5 +47,19 @@ public class ContentRepositoryImpl implements ContentRepositoryCustom {
 
         List<ContentService.ContentView> result = query.getResultList();
         return new PageImpl<>(result, pageable, total);
+    }
+
+
+    @Override
+    public long findRelevantCount() {
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        Date endDate = Utils.getEndDate();
+
+        CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+        Root<Content> countRoot = countQuery.from(Content.class);
+        Join<Content, ContentHistory> countHstJoin = countRoot.join(Content_.contentHistory);
+        countQuery.select(cb.count(countRoot));
+        countQuery.where(cb.equal(countHstJoin.get(ContentHistory_.endDate), endDate));
+        return em.createQuery(countQuery).getSingleResult();
     }
 }

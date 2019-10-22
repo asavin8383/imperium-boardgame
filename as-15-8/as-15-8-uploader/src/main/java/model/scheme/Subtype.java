@@ -1,12 +1,11 @@
 package model.scheme;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -31,17 +30,23 @@ public class Subtype implements Serializable {
     @EqualsAndHashCode.Include
     private Integer id;
 
+    // Дата изменения записи АС 15.8
+    // Дата и время получения сведений - max(ppn_dt)
     @ToString.Include
+    @JsonIgnore
     private LocalDateTime ppnDt;
 
     @ToString.Include
+    @JsonIgnore
     private LocalDateTime effDt;
 
+    // Дата и время последнего изменения - max(cdate)
+    @Column(name = "c_date")
+    @JsonProperty("cDate")
     @ToString.Include
-    private LocalDateTime cDate;
+    private LocalDateTime crDate;
 
     @ToString.Include
-    @JsonIgnore
     private String origId;
 
     @ToString.Include
@@ -53,11 +58,7 @@ public class Subtype implements Serializable {
     @ToString.Include
     private String violationName;
 
-    public static Example<Subtype> example(ExampleMatcher matcher, LocalDateTime effDt, String violationName) {
-        Subtype v =  new Subtype();
-        v.setEffDt(effDt);
-        v.setViolationName(violationName);
-        return Example.of(v, matcher);
-    }
+//    to do js - violation composite id
+//    public String getCompositeId()
 
 }

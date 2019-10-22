@@ -1,14 +1,11 @@
 package model.scheme;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import org.hibernate.annotations.Immutable;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -37,24 +34,26 @@ public class PsRecord implements Serializable {
     private String hostname;
 
     @ToString.Include
+    @JsonIgnore
     private Integer origId;
 
     @ToString.Include
+    @JsonIgnore
     private LocalDateTime ppnDt;
 
     @ToString.Include
+    @JsonIgnore
     private LocalDateTime effDt;
 
+    @Column(name = "c_date")
+    @JsonProperty("cDate")
     @ToString.Include
-    private LocalDateTime cDate;
+    private LocalDateTime crDate;
 
-    public static Example<PsRecord> example(ExampleMatcher matcher, String name,
-                                            String hostname, LocalDateTime effDt) {
-        PsRecord v = new PsRecord();
-        v.setEffDt(effDt);
-        v.setName(name);
-        v.setHostname(hostname);
-        return Example.of(v, matcher);
-    }
+    @Transient
+    private String status = "Работает";
+
+    @Transient
+    private String source = "ППП Реестр анонимайзеров";
 
 }
