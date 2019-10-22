@@ -2,6 +2,7 @@ package restapi;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import lombok.extern.slf4j.Slf4j;
+import model.response.DeltaAddonEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +15,10 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -36,7 +40,7 @@ public class AddonRestClient
     @Value("${spring.rest_base_url}")
     private String baseUrl;
 
-    public static final String ENTITY_NAME= "dumpAddons.xml";
+    private static final String ENTITY_NAME= "dumpAddons.xml";
 
     private XMLInputFactory xmlInputFactory;
 
@@ -45,11 +49,12 @@ public class AddonRestClient
         xmlInputFactory.setProperty(XMLInputFactory.IS_NAMESPACE_AWARE, Boolean.FALSE);
     }
 
-    /**
-     * Находим во входном zip файл с именем dumpAddons.xml
-     * Читаем в потоковом режиме
-     * Пишем в базу с текущим временем
-     */
+    public List<DeltaAddonEntry> readDeltaList() {
+        List<DeltaAddonEntry> res = new ArrayList<>();
+        res.add(new DeltaAddonEntry(42, LocalDateTime.parse("2017-09-22T10:27:04"), false));
+        return res;
+    }
+
     public void readFullFromNet() {
         String base = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
         String url = base + "getFullERDIaddons/";
@@ -63,6 +68,14 @@ public class AddonRestClient
         processZIP(url, date, true);
     }
 
+    /**
+     * Находим во входном zip файл с именем {@value #ENTITY_NAME}
+     * Читаем в потоковом режиме
+     * Пишем в базу с заданным временем
+     * @param url -- откуда читаем
+     * @param date -- дата обновления
+     * @param is_delta -- читаем дельту или полную выгрузку
+     */
     private void processZIP(String url, Date date, boolean is_delta) {
         log.info("GET from {}", url);
         ResponseEntity<byte[]> entity = restTemplate.getForEntity(url, byte[].class);

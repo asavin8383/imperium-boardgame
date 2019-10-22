@@ -1,5 +1,7 @@
 package common;
 
+import lombok.extern.slf4j.Slf4j;
+import model.response.DeltaAddonEntry;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,11 +15,13 @@ import restapi.PSRestClient;
 import restapi.SubTypeRestClient;
 
 import java.util.Date;
+import java.util.List;
 
 @Configuration
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application.yml")
+@Slf4j
 public class RestTest
 {
     @Autowired
@@ -47,6 +51,12 @@ public class RestTest
     @Test
     public void testSybType(){
         subTypeRestClient.readFromNet();
+    }
+
+    @Test
+    public void testDeltaAddonsList(){
+        List<DeltaAddonEntry> list = addonRestClient.readDeltaList();
+        log.debug("DeltaAddonEntry list = " + list);
     }
 
     @Test
