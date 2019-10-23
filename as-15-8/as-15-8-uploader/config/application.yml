@@ -6,7 +6,6 @@ logging:
   config: config/logback-spring.xml
 eureka:
   client:
-    enabled: false
     serviceUrl:
       defaultZone: ${EUREKA_URI:http://localhost:8761/eureka}
   instance:
@@ -47,6 +46,8 @@ cron:
 
 ---
 
+eureka:
+  client.enabled: false
 spring:
   profiles: prod
   jpa:
