@@ -1,0 +1,16 @@
+version: '3.7'
+services:
+  rest:
+    container_name: ppt
+    image: harbor.ec-leasing.ru/as_15_8/as-15-8-ppt
+    restart: always
+    network_mode: "host"
+    volumes:
+      - ~/as-15-8-ppt/logs:/log
+      - ~/as-15-8-ppt/config:/config
+    environment:
+      PROFILE: test
+      GATEWAY_URI: http://192.168.5.253:15880
+      TZ: "Europe/Moscow"
+    ports:
+      - "15800:15800"

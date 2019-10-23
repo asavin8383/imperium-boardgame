@@ -21,14 +21,12 @@
 
 	<modules>
 		<module>as-15-8-messages</module>
-		<module>as-15-8-rest</module>
+		<module>as-15-8-ppt</module>
 		<module>as-15-8-pmk</module>
         <module>as-15-8-scheduler</module>
-        <module>as-15-8-config-server</module>
-        <module>as-15-8-gateway</module>
         <module>as-15-8-uploader</module>
-		<module>as-15-8-discovery</module>
-	</modules>
+        <module>as-15-8-smuf</module>
+    </modules>
 
 	<dependencyManagement>
 		<dependencies>
