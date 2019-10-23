@@ -12,6 +12,8 @@ eureka:
 spring:
   application.name: analyzer
   cloud:
+    config:
+      bus.enabled: false
     stream:
       bindings:
         input:
