@@ -69,7 +69,7 @@
         </rollingPolicy>
     </appender>
     
-    <logger name="service" level="INFO">
+    <logger name="service" level="DEBUG">
     	<appender-ref ref="SERVICES_LOG" />
     	<appender-ref ref="Console" />
     </logger>

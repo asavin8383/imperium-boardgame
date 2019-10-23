@@ -10,8 +10,6 @@ spring:
           content-type: application/json
         notifications:
           content-type: application/json
-        springCloudBusInput:
-          group: executors
       kafka:
         binder:
           brokers: 192.168.5.12:9094,192.168.5.184:9094,192.168.5.211:9094

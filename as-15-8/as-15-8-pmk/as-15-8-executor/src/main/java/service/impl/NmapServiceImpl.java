@@ -71,7 +71,7 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
 
                 ExecutionResults results = baseScan.executeScan();
                 log.info("Nmap запущен командой: " + results.getExecutedCommand());
-                log.info("Ответ nmap: " + results.getOutput());
+                log.debug("Ответ nmap: " + results.getOutput());
 
                 OnePassParser opp = new OnePassParser();
                 NMapRun nmapRun = opp.parse(baseScan.getArgumentProperties().getFlagMap().get(Flag.XML_OUTPUT.toString()), OnePassParser.FILE_NAME_INPUT);
