@@ -34,25 +34,31 @@ public class ContentService {
         Page<ContentView> contentPage = contentRepository.findByEffDtAndQuery(effDt, query, page);
 
         contentPage.getContent().parallelStream().forEach(view -> {
-            Decision decision = decisionRepository.findByContent_IdAndContentVersion_Id(
+            Decision decision = decisionRepository.findTopByContent_IdAndContentVersion_IdOrderByIdDesc(
                     view.getContentId(), view.getContentVersionId());
-            ContentInfo info = infoRepository.findOneByContentVersion_IdAndContent_Id(
+            if (decision != null) {
+                view.setDecisionOrg(decision.getOrg());
+            }
+
+            ContentInfo info = infoRepository.findByContentVersion_IdAndContent_Id(
                     view.getContentVersionId(), view.getContentId());
             List<String> resourceTypes = getResourceTypesFor(info.getBlockType());
-            ContentResources res = resourceRepository.findOneByContentAndVersionAndTypeDsc(
+            ContentResources res = resourceRepository.findTopByContentAndVersionAndTypeDsc(
                     view.getContentId(), view.getContentVersionId(), resourceTypes);
-
-            view.setDecisionOrg(decision.getOrg());
-            view.setResourceValue(res.getValue());
-            view.setResourceType(res.getCheckUnitType().toString());
+            if (res != null) {
+                view.setResourceValue(res.getValue());
+                view.setResourceType(res.getCheckUnitType().toString());
+            }
 
             Addon addon = addonRepository.findTopByAddonVersion_IdOrderByIdDesc(view.getAddonVersionId());
             if (addon != null && addon.getInfoTypeId() != null) {
-                Subtype subtype = subtypeRepository.findByOrigId(addon.getInfoTypeId());
-                view.setInfoTypeId(subtype.getOrigId());
-                view.setRegistryName(subtype.getRegistryName());
-                view.setCategoryName(subtype.getCategoryName());
-                view.setViolationName(subtype.getViolationName());
+                Subtype subtype = subtypeRepository.findTopByOrigIdOrderByIdDesc(addon.getInfoTypeId());
+                if (subtype != null) {
+                    view.setInfoTypeId(subtype.getOrigId());
+                    view.setRegistryName(subtype.getRegistryName());
+                    view.setCategoryName(subtype.getCategoryName());
+                    view.setViolationName(subtype.getViolationName());
+                }
             }
         });
 

@@ -18,7 +18,7 @@ public interface SubtypeRepository extends
 
     long countByEffDt(Date effDt);
 
-    Subtype findByOrigId(String origId);
+    Subtype findTopByOrigIdOrderByIdDesc(String origId);
 
     @Query(value = "select max(c_date) from sor.ps where eff_dt = :effDt", nativeQuery = true)
     Date findMaxCDateByEffDt(@Param("effDt") Date effDt);

@@ -10,7 +10,7 @@ import javax.transaction.Transactional;
 @Repository
 public interface DecisionRepository extends JpaRepository<Decision, Long> {
 
-    Decision findByContent_IdAndContentVersion_Id(Long contentId, Long contentVersionId);
+    Decision findTopByContent_IdAndContentVersion_IdOrderByIdDesc(Long contentId, Long contentVersionId);
 
     @Transactional
     void deleteByContentVersionId(Long contentVersionId);

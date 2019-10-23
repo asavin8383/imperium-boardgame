@@ -15,6 +15,6 @@ public interface ContentInfoRepository extends JpaRepository<ContentInfo, Long> 
     @Transactional
     void deleteByContentVersionId(Long contentVersionId);
 
-    ContentInfo findOneByContentVersion_IdAndContent_Id(Long contentVersionId, Long contentId);
+    ContentInfo findByContentVersion_IdAndContent_Id(Long contentVersionId, Long contentId);
 
 }
