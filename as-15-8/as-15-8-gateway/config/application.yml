@@ -14,6 +14,9 @@ zuul:
   debug.request: true
   sensitiveHeaders:
   ignored-headers: Access-Control-Allow-Credentials, Access-Control-Allow-Origin
+  host:
+    connect-timeout-millis: 60000
+    socket-timeout-millis: 120000
   routes:
     pod:
       path: /pod/**
