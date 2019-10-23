@@ -13,8 +13,8 @@ spring:
   application.name: analyzer
   cloud:
     config:
-      bus.enabled: false
-    stream:
-      kafka:
-        binder:
-          brokers: 192.168.5.12:9094,192.168.5.184:9094,192.168.5.211:9094
+      bus.enabled: true
+      discovery.enabled: true
+      discovery.serviceId: config_server
+      profile: default
+      label: latest
