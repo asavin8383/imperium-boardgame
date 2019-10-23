@@ -1,12 +1,12 @@
 version: '3.7'
 services:
   as-15-8-uploader:
-    container_name: as-15-8-uploader
-    image: dcr.ec-leasing.ru/as-15-8/as-15-8-uploader
+    container_name: pod
+    image: dcr.ec-leasing.ru/as-15-8/as-15-8-pod
     restart: always
     volumes:
-      - ~/as-15-8-pod/uploader/logs:/log
-      - ~/as-15-8-pod/uploader/config:/config
+      - ~/as-15-8-pod/logs:/log
+      - ~/as-15-8-pod/config:/config
     environment:
       PROFILE: prod
       TZ: "Europe/Moscow"
