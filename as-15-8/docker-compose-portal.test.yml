@@ -26,7 +26,6 @@ services:
     environment:
       PROFILE: test
       EUREKA_URI: http://192.168.5.253:8761/eureka
-      EXT_IP: 192.168.5.253
       TZ: "Europe/Moscow"
     ports:
       - "15880:15880"
@@ -44,7 +43,6 @@ services:
     environment:
       PROFILE: test
       EUREKA_URI: http://192.168.5.253:8761/eureka
-      EXT_IP: 192.168.5.253
       TZ: "Europe/Moscow"
     ports:
       - "15802:15802"
@@ -63,7 +61,6 @@ services:
     environment:
       PROFILE: test
       EUREKA_URI: http://192.168.5.253:8761/eureka
-      EXT_IP: 192.168.5.253
       TZ: "Europe/Moscow"
     ports:
       - "15800:15800"
