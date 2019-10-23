@@ -19,6 +19,8 @@ services:
     volumes:
       - ~/as-15-8-pmk/dispatcher/logs:/log
     configs:
+      - source: dispatcher-bootstrap
+        target: /config/bootstrap.yml
       - source: dispatcher-config
         target: /config/application.yml
       - source: dispatcher-logback
@@ -48,6 +50,8 @@ services:
     volumes:
       - ~/as-15-8-pmk/executor/logs:/log
     configs:
+      - source: executor-bootstrap
+        target: /config/bootstrap.yml
       - source: executor-config
         target: /config/application.yml
       - source: executor-logback
@@ -79,10 +83,14 @@ services:
       - source: analyzer-logback
         target: /config/logback-spring.xml
 configs:
+  dispatcher-bootstrap:
+    file: dispatcher/config/bootstrap.yml
   dispatcher-config:
     file: dispatcher/config/application.yml
   dispatcher-logback:
     file: dispatcher/config/logback-spring.xml
+  executor-bootstrap:
+    file: executor/config/bootstrap.yml
   executor-config:
     file: executor/config/application.yml
   executor-logback:
