@@ -14,7 +14,7 @@ eureka:
     instanceId: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port}
 spring:
   application:
-    name: ppm
+    name: ppt
   liquibase:
     enabled: false
   datasource:
@@ -44,7 +44,7 @@ spring:
           content-type: application/json
         inputArrangementNotifications:
           content-type: application/json
-          group: portal
+          group: ppt
       kafka:
         binder:
           brokers: 192.168.5.12:9094,192.168.5.184:9094,192.168.5.211:9094
