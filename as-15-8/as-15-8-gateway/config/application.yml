@@ -28,6 +28,10 @@ zuul:
     ppm:
       path: /**
       serviceId: ppm
+hystrix:
+  command:
+    default:
+      execution.isolation.thread.timeoutInMilliseconds: 120000
 
 ---
 
