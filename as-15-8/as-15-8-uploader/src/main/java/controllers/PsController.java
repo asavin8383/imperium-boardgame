@@ -47,7 +47,7 @@ public class PsController {
                     Utils.getEndDate(), query, page);
             return new ResponseEntity<>(result, HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(null, HttpStatus.ACCEPTED);
+            return new ResponseEntity<>(null, HttpStatus.OK);
         }
     }
 
