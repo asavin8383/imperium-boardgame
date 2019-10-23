@@ -9,7 +9,7 @@
         <version>1.0</version>
     </parent>
 
-    <artifactId>as-15-8-uploader</artifactId>
+    <artifactId>as-15-8-pod</artifactId>
     <name>AS 15.8 rest uploader</name>
 
     <dependencies>
