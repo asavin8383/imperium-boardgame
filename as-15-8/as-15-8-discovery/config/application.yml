@@ -1,14 +1,10 @@
 server:
   port: 8761
-gateway.url: ${GATEWAY_URI:http://localhost:15880}
 logging:
   config: config/logback-spring.xml
 spring:
   application.name: discovery
 eureka:
-  client:
-    serviceUrl:
-      defaultZone: ${gateway.url}/eureka
   instance:
     preferIpAddress: true
     instanceId: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port}

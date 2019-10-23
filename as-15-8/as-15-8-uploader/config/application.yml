@@ -2,12 +2,13 @@ server:
   port: 15801
   tomcat:
     max-threads: 200
+gateway.url: ${GATEWAY_URI:http://localhost:15880}
 logging:
   config: config/logback-spring.xml
 eureka:
   client:
     serviceUrl:
-      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka}
+      defaultZone: ${gateway.url}/eureka
   instance:
     preferIpAddress: true
     instanceId: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port}

@@ -10,7 +10,7 @@ services:
       - as-15-8-net
     environment:
       PROFILE: test
-      EUREKA_URI: http://192.168.5.253:8761/eureka
+      GATEWAY_URI: http://192.168.5.253:15880
       TZ: "Europe/Moscow"
     ports:
       - target: 11300
@@ -41,7 +41,7 @@ services:
     stop_grace_period: 5m
     environment:
       PROFILE: test
-      EUREKA_URI: http://192.168.5.253:8761/eureka
+      GATEWAY_URI: http://192.168.5.253:15880
       TZ: "Europe/Moscow"
     ports:
       - target: 11100
@@ -69,7 +69,7 @@ services:
       - as-15-8-net
     environment:
       PROFILE: test
-      EUREKA_URI: http://192.168.5.253:8761/eureka
+      GATEWAY_URI: http://192.168.5.253:15880
       TZ: "Europe/Moscow"
     ports:
       - target: 11200
