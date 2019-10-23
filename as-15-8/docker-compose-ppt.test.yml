@@ -2,7 +2,7 @@ version: '3.7'
 services:
   rest:
     container_name: ppt
-    image: harbor.ec-leasing.ru/as_15_8/ppt
+    image: harbor.ec-leasing.ru/as_15_8/as-15-8-ppt
     restart: always
     network_mode: "host"
     volumes:
