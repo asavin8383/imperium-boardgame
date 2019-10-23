@@ -8,7 +8,7 @@ eureka:
       defaultZone: ${EUREKA_URI:http://localhost:8761/eureka}
   instance:
     preferIpAddress: true
-    instanceId: ${server.address}:${spring.application.name}:${server.port}
+    instanceId: ${spring.cloud.client.ip-address}:${spring.application.name}:${server.port}
 spring:
   application.name: executor
   cloud:
