@@ -11,6 +11,8 @@ spring:
         arrangementNotifications:
           content-type: application/json
           destination: arrangement_notifications
+        springCloudBusInput:
+          group: dispatcher:${spring.cloud.client.ip-address}
       kafka:
         bindings:
           incomingArrangements:
@@ -63,15 +65,18 @@ spring:
   profiles: test
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb
-  kafka:
-    arrangement-tasks-topic: arrangements
-    jobs-topic: jobs
-    analysis-results-topic: analysis_results
-    arrangement-notifications-topic: arrangement_notifications
-    notifications-topic: job_notifications
-    control-topic: exec_control
-    analysis-results-concurrency: 12
-    notifications-concurrency: 12
+  cloud.stream:
+    bindings:
+      incomingArrangements:
+        destination: arrangements
+      arrangementNotifications:
+        destination: arrangement_notifications
+        consumer:
+          concurrency: 28
+      springCloudBusInput:
+        destination: bus_config_input
+      springCloudBusOutput:
+        destination: bus_config_output
 
 ---
 
@@ -95,6 +100,12 @@ spring:
           destination: arrangements_ashabalin
         arrangementNotifications:
           destination: arrangement_notifications_ashabalin
+          consumer:
+            concurrency: 7
+        springCloudBusInput:
+          destination: bus_config_input_ashabalin
+        springCloudBusOutput:
+          destination: bus_config_output_ashabalin
 
 ---
 
@@ -102,15 +113,6 @@ spring:
   profiles: dev_asinyavin
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb_test
-  kafka:
-    arrangement-tasks-topic: arrangements_asinyavin
-    jobs-topic: jobs_asinyavin
-    analysis-results-topic: analysis_results_asinyavin
-    arrangement-notifications-topic: arrangement_notifications_asinyavin
-    notifications-topic: job_notifications_asinyavin
-    control-topic: exec_control_asinyavin
-    analysis-results-concurrency: 12
-    notifications-concurrency: 12
   cloud:
     stream:
       bindings:
@@ -118,6 +120,12 @@ spring:
           destination: arrangements_asinyavin
         arrangementNotifications:
           destination: arrangement_notifications_asinyavin
+          consumer:
+            concurrency: 7
+        springCloudBusInput:
+          destination: bus_config_input_asinyavin
+        springCloudBusOutput:
+          destination: bus_config_output_asinyavin
 
 ---
 
@@ -125,15 +133,6 @@ spring:
   profiles: dev_asavin
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb_test
-  kafka:
-    arrangement-tasks-topic: arrangements_asavin
-    jobs-topic: jobs_asavin
-    analysis-results-topic: analysis_asavin
-    arrangement-notifications-topic: arrangement_notifications_asavin
-    notifications-topic: job_notifications_asavin
-    control-topic: exec_control_asavin
-    analysis-results-concurrency: 12
-    notifications-concurrency: 12
   cloud:
     stream:
       bindings:
@@ -141,21 +140,18 @@ spring:
           destination: arrangements_asavin
         arrangementNotifications:
           destination: arrangement_notifications_asavin
+          consumer:
+            concurrency: 7
+        springCloudBusInput:
+          destination: bus_config_input_asavin
+        springCloudBusOutput:
+          destination: bus_config_output_asavin
 ---
 
 spring:
   profiles: dev_pvorobiev
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb_test
-  kafka:
-    arrangement-tasks-topic: arrangements_pvorobiev
-    jobs-topic: jobs_pvorobiev
-    analysis-results-topic: analysis_results_pvorobiev
-    arrangement-notifications-topic: arrangement_notifications_pvorobiev
-    notifications-topic: job_notifications_pvorobiev
-    control-topic: exec_control_pvorobiev
-    analysis-results-concurrency: 12
-    notifications-concurrency: 12
   cloud:
     stream:
       bindings:
@@ -163,6 +159,12 @@ spring:
           destination: arrangements_pvorobiev
         arrangementNotifications:
           destination: arrangement_notifications_pvorobiev
+          consumer:
+            concurrency: 7
+        springCloudBusInput:
+          destination: bus_config_input_pvorobiev
+        springCloudBusOutput:
+          destination: bus_config_output_pvorobiev
 
 ---
 
@@ -170,15 +172,6 @@ spring:
   profiles: dev_jspirina
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb_test
-  kafka:
-    arrangement-tasks-topic: arrangements_jspirina
-    jobs-topic: jobs_jspirina
-    analysis-results-topic: analysis_results_jspirina
-    arrangement-notifications-topic: arrangement_notifications_jspirina
-    notifications-topic: job_notifications_jspirina
-    control-topic: exec_control_jspirina
-    analysis-results-concurrency: 12
-    notifications-concurrency: 12
   cloud:
     stream:
       bindings:
@@ -186,3 +179,9 @@ spring:
           destination: arrangements_jspirina
         arrangementNotifications:
           destination: arrangement_notifications_jspirina
+          consumer:
+            concurrency: 7
+        springCloudBusInput:
+          destination: bus_config_input_jspirina
+        springCloudBusOutput:
+          destination: bus_config_output_jspirina
