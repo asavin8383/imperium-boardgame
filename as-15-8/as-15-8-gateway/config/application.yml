@@ -10,7 +10,6 @@ eureka:
       defaultZone: ${EUREKA_URI:http://localhost:8761/eureka}
   instance:
     preferIpAddress: true
-    ip-address: "${EXT_IP}"
 zuul:
   debug.request: true
   sensitiveHeaders:
