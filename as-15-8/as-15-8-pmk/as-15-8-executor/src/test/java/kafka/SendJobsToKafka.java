@@ -68,7 +68,7 @@ public class SendJobsToKafka {
             checkUnitJob.setJobID(1L);
             checkUnitJob.setAccessTool("kaspersky");
 
-            checkUnitJob.setCheckUnit(new CheckUnit(CheckUnitType.IP_V4, "174.138.0.0/17"));
+            checkUnitJob.setCheckUnit(new CheckUnit(CheckUnitType.IP_V4_SUBNET, "174.138.0.0/17"));
 
             Message<CheckUnitJob> message = MessageBuilder
                     .withPayload(checkUnitJob)

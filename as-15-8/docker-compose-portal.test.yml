@@ -9,6 +9,7 @@ services:
       - ~/as-15-8-ppm/discovery/logs:/log
       - ~/as-15-8-ppm/discovery/config:/config
     environment:
+      GATEWAY_URI: http://192.168.5.253:15880
       PROFILE: test
       TZ: "Europe/Moscow"
     ports:
@@ -25,7 +26,7 @@ services:
       - ~/as-15-8-ppm/gateway/config:/config
     environment:
       PROFILE: test
-      EUREKA_URI: http://192.168.5.253:8761/eureka
+      GATEWAY_URI: http://192.168.5.253:15880
       TZ: "Europe/Moscow"
     ports:
       - "15880:15880"
@@ -42,7 +43,7 @@ services:
       - ~/as-15-8-ppm/config-server/config:/config
     environment:
       PROFILE: test
-      EUREKA_URI: http://192.168.5.253:8761/eureka
+      GATEWAY_URI: http://192.168.5.253:15880
       TZ: "Europe/Moscow"
     ports:
       - "15802:15802"
@@ -60,7 +61,7 @@ services:
       - ~/as-15-8-ppm/rest/config:/config
     environment:
       PROFILE: test
-      EUREKA_URI: http://192.168.5.253:8761/eureka
+      GATEWAY_URI: http://192.168.5.253:15880
       TZ: "Europe/Moscow"
     ports:
       - "15800:15800"
