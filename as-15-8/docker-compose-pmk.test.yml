@@ -1,12 +1,22 @@
 version: '3.7'
+networks:
+  as-15-8-net:
+    external:
+      name: "host"
 services:
   dispatcher:
     image: harbor.ec-leasing.ru/as_15_8/as-15-8-dispatcher:latest
+    networks:
+      - as-15-8-net
     environment:
       PROFILE: test
       EUREKA_URI: http://192.168.5.253:8761/eureka
       TZ: "Europe/Moscow"
-    network_mode: "host"
+    ports:
+      - target: 11300
+        published: 11300
+        protocol: tcp
+        mode: host
     volumes:
       - ~/as-15-8-pmk/dispatcher/logs:/log
     configs:
@@ -26,12 +36,18 @@ services:
     image: harbor.ec-leasing.ru/as_15_8/as-15-8-executor:latest
     deploy:
       mode: global
+    networks:
+      - as-15-8-net
     stop_grace_period: 5m
     environment:
       PROFILE: test
       EUREKA_URI: http://192.168.5.253:8761/eureka
       TZ: "Europe/Moscow"
-    network_mode: "host"
+    ports:
+      - target: 11100
+        published: 11100
+        protocol: tcp
+        mode: host
     volumes:
       - ~/as-15-8-pmk/executor/logs:/log
     configs:
@@ -49,11 +65,17 @@ services:
           - node.hostname == as158-pmk
       mode: replicated
       replicas: 1
+    networks:
+      - as-15-8-net
     environment:
       PROFILE: test
       EUREKA_URI: http://192.168.5.253:8761/eureka
       TZ: "Europe/Moscow"
-    network_mode: "host"
+    ports:
+      - target: 11200
+        published: 11200
+        protocol: tcp
+        mode: host
     volumes:
       - ~/as-15-8-pmk/analyzer/logs:/log
     configs:
