@@ -1,0 +1,20 @@
+server:
+  port: 11200
+logging:
+  config: config/logback-spring.xml
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka}
+  instance:
+    preferIpAddress: true
+    instanceId: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port}
+spring:
+  application.name: analyzer
+  cloud:
+    config:
+      bus.enabled: false
+    stream:
+      kafka:
+        binder:
+          brokers: 192.168.5.12:9094,192.168.5.184:9094,192.168.5.211:9094

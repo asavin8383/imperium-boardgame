@@ -79,6 +79,8 @@ services:
     volumes:
       - ~/as-15-8-pmk/analyzer/logs:/log
     configs:
+      - source: analyzer-bootstrap
+        target: /config/bootstrap.yml
       - source: analyzer-config
         target: /config/application.yml
       - source: analyzer-logback
@@ -96,6 +98,8 @@ configs:
     file: executor/config/application.yml
   executor-logback:
     file: executor/config/logback-spring.xml
+  analyzer-bootstrap:
+    file: analyzer/config/bootstrap.yml
   analyzer-config:
     file: analyzer/config/application.yml
   analyzer-logback:
