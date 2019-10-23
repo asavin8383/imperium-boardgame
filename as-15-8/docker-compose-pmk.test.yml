@@ -11,7 +11,11 @@ services:
       PROFILE: test
       EUREKA_URI: http://192.168.5.253:8761/eureka
       TZ: "Europe/Moscow"
-    hostname: "{{.Node.Hostname}}"
+    ports:
+      - target: 11300
+        published: 11300
+        protocol: tcp
+        mode: host
     volumes:
       - ~/as-15-8-pmk/dispatcher/logs:/log
     configs:
@@ -36,7 +40,11 @@ services:
       PROFILE: test
       EUREKA_URI: http://192.168.5.253:8761/eureka
       TZ: "Europe/Moscow"
-    hostname: "{{.Node.Hostname}}"
+    ports:
+      - target: 11100
+        published: 11100
+        protocol: tcp
+        mode: host
     volumes:
       - ~/as-15-8-pmk/executor/logs:/log
     configs:
@@ -58,7 +66,11 @@ services:
       PROFILE: test
       EUREKA_URI: http://192.168.5.253:8761/eureka
       TZ: "Europe/Moscow"
-    hostname: "{{.Node.Hostname}}"
+    ports:
+      - target: 11200
+        published: 11200
+        protocol: tcp
+        mode: host
     volumes:
       - ~/as-15-8-pmk/analyzer/logs:/log
     configs:
