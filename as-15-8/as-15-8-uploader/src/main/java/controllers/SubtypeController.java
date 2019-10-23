@@ -35,19 +35,22 @@ public class SubtypeController {
     private UploadingState state = UploadingState.ACTIVE;
 
     @GetMapping
-    public Page<Subtype> getViolationPage(@RequestParam(required = false) SortingDirection sortingDirection,
+    public ResponseEntity<Page<Subtype>> getViolationPage(@RequestParam(required = false) SortingDirection sortingDirection,
                                           @RequestParam(required = false) String sortingColumn,
                                           @RequestParam(defaultValue = "0") int pageNumber,
                                           @RequestParam(defaultValue = "10") int pageSize,
                                           @RequestParam(required = false) String query) {
-        Pageable page = PageRequest.of(pageNumber, pageSize,
-                SortingHelper.createSorting(sortingDirection, sortingColumn));
-
-        return subtypeRepository.findByEffDtAndQuery(Utils.getEndDate(), query, page);
+        if (state != UploadingState.UPLOADING) {
+            Pageable page = PageRequest.of(pageNumber, pageSize,
+                    SortingHelper.createSorting(sortingDirection, sortingColumn));
+            return new ResponseEntity<>(subtypeRepository.findByEffDtAndQuery(Utils.getEndDate(), query, page), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(null, HttpStatus.PROCESSING);
+        }
     }
 
     @GetMapping(path = "/upload")
-    public ResponseEntity<String> uploadPasd(){
+    public ResponseEntity<String> uploadSubtype(){
         if (state != UploadingState.UPLOADING){
             state = UploadingState.UPLOADING;
             CompletableFuture.runAsync(this::uploadAndChangeStatus);
