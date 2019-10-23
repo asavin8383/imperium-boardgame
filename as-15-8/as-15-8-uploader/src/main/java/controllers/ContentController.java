@@ -46,7 +46,7 @@ public class ContentController {
             return new ResponseEntity<>(pageContent, HttpStatus.OK);
         }
         else {
-            return new ResponseEntity<>(null, HttpStatus.PROCESSING);
+            return new ResponseEntity<>(null, HttpStatus.ACCEPTED);
         }
     }
 

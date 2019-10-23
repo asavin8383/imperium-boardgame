@@ -47,7 +47,7 @@ public class PasdController {
                     Utils.getEndDate(), query, page);
             return new ResponseEntity<>(result, HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(null, HttpStatus.PROCESSING);
+            return new ResponseEntity<>(null, HttpStatus.ACCEPTED);
         }
     }
 

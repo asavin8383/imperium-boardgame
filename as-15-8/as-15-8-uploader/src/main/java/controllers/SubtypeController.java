@@ -45,7 +45,7 @@ public class SubtypeController {
                     SortingHelper.createSorting(sortingDirection, sortingColumn));
             return new ResponseEntity<>(subtypeRepository.findByEffDtAndQuery(Utils.getEndDate(), query, page), HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(null, HttpStatus.PROCESSING);
+            return new ResponseEntity<>(null, HttpStatus.ACCEPTED);
         }
     }
 
