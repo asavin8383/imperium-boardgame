@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "57fe0ded-ef0d-4877-8bb9-c02f80ac8a9e",
+		"_postman_id": "755d6565-ef2c-4f47-8cc2-ea1b461a71d0",
 		"name": "АС 15.8",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -3085,7 +3085,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{url_pod}}/dict",
+							"raw": "{{url_pod}}/dict?",
 							"host": [
 								"{{url_pod}}"
 							],
@@ -3136,7 +3136,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{url_pod}}/dict/ERDI",
+							"raw": "{{url_pod}}/dict/ERDI?",
 							"host": [
 								"{{url_pod}}"
 							],
@@ -3174,6 +3174,59 @@
 						}
 					},
 					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Конфигурация",
+			"item": [
+				{
+					"name": "Executor",
+					"item": [
+						{
+							"name": "Получение конфигурации",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/config/executor/default/latest",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"config",
+										"executor",
+										"default",
+										"latest"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Обновление конфигурации",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/config/actuator/bus-refresh/executor",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"config",
+										"actuator",
+										"bus-refresh",
+										"executor"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
 				}
 			],
 			"protocolProfileBehavior": {}
