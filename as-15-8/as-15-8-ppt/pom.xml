@@ -8,7 +8,7 @@
 		<version>1.0</version>
 	</parent>
 	<artifactId>as-15-8-ppt</artifactId>
-	<name>AS 15-8 rest endpoint</name>
+	<name>as-15-8-ppt</name>
 
 	<dependencies>
 		<!-- Spring framework -->
@@ -119,12 +119,6 @@
 					<artifactId>HikariCP-java6</artifactId>
 				</exclusion>
 			</exclusions>
-		</dependency>
-
-		<!-- Lombok -->
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
 		</dependency>
 
 		<!-- Liquibase -->

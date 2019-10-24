@@ -30,6 +30,8 @@ spring:
 
 spring:
   profiles: prod
+  main:
+    banner-mode: "off"
   cloud.stream:
     bindings:
       jobs:
@@ -53,6 +55,8 @@ selenium-hub-url: http://10.97.220.147:4444/wd/hub
 
 spring:
   profiles: test
+  main:
+    banner-mode: "off"
   cloud.stream:
     bindings:
       jobs:

@@ -1,0 +1,28 @@
+server:
+  contextPath:   /auth
+  port: 15805
+logging:
+  #config: config/logback-spring.xml
+  level:
+    org.springframework.web: WARN
+    common: DEBUG
+    security: DEBUG
+    org.springframework.ldap: DEBUG
+ldap:
+  enabled: true
+  domain: designdiv.ecleasing.ru
+  urls: ldap://192.168.1.52:389/
+  base:
+    dn: OU=AS_15_8,DC=designdiv,DC=ecleasing,DC=ru
+  user:
+    dn:
+      pattern: sAMAccountName={0}
+  login:
+    role_oper: CN=ROLE_OPERATOR,OU=roles,OU=AS_15_8,DC=designdiv,DC=ecleasing,DC=ru
+    role_admin: CN=ROLE_ADMIN,OU=roles,OU=AS_15_8,DC=designdiv,DC=ecleasing,DC=ru
+    filter_oper: "(&(objectClass=user)(memberof=${ldap.login.role_oper}))"
+    filter_admin: "(&(objectClass=user)(memberof=${ldap.login.role_admin}))"
+client:
+  id: as-15-8
+  secret: as-15-8
+signing.key: secret

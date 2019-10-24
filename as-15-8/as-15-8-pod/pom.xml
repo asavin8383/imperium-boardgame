@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>as-15-8-pod</artifactId>
-    <name>AS 15.8 rest uploader</name>
+    <name>as-15-8-pod</name>
 
     <dependencies>
 

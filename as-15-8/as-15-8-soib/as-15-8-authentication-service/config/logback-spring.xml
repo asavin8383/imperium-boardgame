@@ -23,6 +23,9 @@
         <root level="INFO" additivity="false">
             <appender-ref ref="jsonConsoleAppender" />
         </root>
+        <logger name="com.netflix.loadbalancer.LoadBalancerContext" level="DEBUG" additivity="false">
+            <appender-ref ref="jsonConsoleAppender" />
+        </logger>
     </springProfile>
 
     <appender name="rootRollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -35,7 +38,7 @@
             <maxHistory>5</maxHistory>
         </rollingPolicy>
     </appender>
-    <root level="INFO" additivity="false">
+    <root level="WARN" additivity="false">
         <appender-ref ref="rootRollingFile" />
     </root>
 </configuration>

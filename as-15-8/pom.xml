@@ -27,6 +27,7 @@
         <module>as-15-8-scheduler</module>
         <module>as-15-8-pod</module>
         <module>as-15-8-smuf</module>
+        <module>as-15-8-soib</module>
     </modules>
 
 	<dependencyManagement>
@@ -57,6 +58,11 @@
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-sleuth</artifactId>
+		</dependency>
+		<!-- Lombok -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
 		</dependency>
 	</dependencies>
 

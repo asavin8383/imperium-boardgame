@@ -1,35 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
- 
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <springProperty scope="context" name="application_name" source="spring.application.name"/>
     <property name="LOGS" value="${application.logpath:-./logs}" />
- 
-    <appender name="Console"
-        class="ch.qos.logback.core.ConsoleAppender">
-        <layout class="ch.qos.logback.classic.PatternLayout">
-            <Pattern>%d %p %C{1.} [%t] %m%n</Pattern>
-        </layout>
-    </appender>
- 
-    <appender name="rootRollingFile"
-        class="ch.qos.logback.core.rolling.RollingFileAppender">
+
+    <springProfile name="test,prod">
+        <appender name="jsonConsoleAppender" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <includeMdc>false</includeMdc>
+                <fieldNames>
+                    <timestamp>timestamp</timestamp>
+                    <message>message</message>
+                    <thread>thread</thread>
+                    <logger>[ignore]</logger>
+                    <version>[ignore]</version>
+                    <levelValue>[ignore]</levelValue>
+                    <caller>[ignore]</caller>
+                    <stackTrace>exception</stackTrace>
+                </fieldNames>
+            </encoder>
+        </appender>
+        <root level="INFO" additivity="false">
+            <appender-ref ref="jsonConsoleAppender" />
+        </root>
+    </springProfile>
+
+    <appender name="rootRollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOGS}/root.log</file>
-        <encoder
-            class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <Pattern>%d %p %C{1.} [%t] %m%n</Pattern>
         </encoder>
- 
-        <rollingPolicy
-            class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOGS}/archived/root-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
-            <timeBasedFileNamingAndTriggeringPolicy
-                class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-                <maxFileSize>100MB</maxFileSize>
-            </timeBasedFileNamingAndTriggeringPolicy>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOGS}/root-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>5</maxHistory>
         </rollingPolicy>
     </appender>
-     
-    <root level="INFO">
+    <root level="INFO" additivity="false">
         <appender-ref ref="rootRollingFile" />
     </root>
- 
 </configuration>

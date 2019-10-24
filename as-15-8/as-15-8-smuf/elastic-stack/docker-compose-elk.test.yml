@@ -1,7 +1,8 @@
 version: "3.7"
 services:
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.2.0
+    container_name: elasticsearch
+    image: harbor.ec-leasing.ru/as_15_8/elk/elasticsearch:7.2.0
     ports:
       - "9200:9200"
     environment:
@@ -9,7 +10,8 @@ services:
     volumes:
       - ~/as-15-8-smuf/elasticsearch/data:/usr/share/elasticsearch/data:rw
   logstash:
-    image: docker.elastic.co/logstash/logstash:7.2.0
+    container_name: logstash
+    image: harbor.ec-leasing.ru/as_15_8/elk/logstash:7.2.0
     restart: on-failure
     depends_on:
       - elasticsearch
@@ -19,7 +21,8 @@ services:
     volumes:
       - ~/as-15-8-smuf/logstash/pipeline:/usr/share/logstash/pipeline:ro
   kibana:
-    image: docker.elastic.co/kibana/kibana:7.2.0
+    container_name: kibana
+    image: harbor.ec-leasing.ru/as_15_8/elk/kibana:7.2.0
     restart: on-failure
     depends_on:
       - elasticsearch
