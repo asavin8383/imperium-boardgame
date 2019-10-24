@@ -45,5 +45,12 @@ ribbon:
 ---
 
 spring:
-  profiles: dev_pvorobiev, dev_asavin, dev_ashabalin, dev_jspirina
+  profiles: test, prod
+  main:
+    banner-mode: "off"
+
+---
+
+spring:
+  profiles: dev_pvorobiev, dev_asavin, dev_ashabalin, dev_asinyavin, dev_jspirina
 eureka.client.enabled: false

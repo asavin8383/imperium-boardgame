@@ -4,31 +4,43 @@
     <springProperty scope="context" name="application_name" source="spring.application.name"/>
     <property name="LOGS" value="${application.logpath:-./logs}" />
 
-    <appender name="jsonConsoleAppender" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
-    </appender>
- 
-    <appender name="rootRollingFile"
-        class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <springProfile name="test,prod">
+        <appender name="jsonConsoleAppender" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <providers>
+                    <timestamp>
+                        <timeZone>UTC</timeZone>
+                    </timestamp>
+                    <logLevel/>
+                    <context/>
+                    <threadName/>
+                    <message/>
+                    <stackTrace/>
+                </providers>
+            </encoder>
+        </appender>
+        <root level="INFO" additivity="false">
+            <appender-ref ref="jsonConsoleAppender" />
+        </root>
+        <logger name="com.netflix.loadbalancer.LoadBalancerContext" level="DEBUG" additivity="false">
+            <appender-ref ref="jsonConsoleAppender" />
+        </logger>
+    </springProfile>
+
+    <appender name="rootRollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOGS}/root.log</file>
-        <encoder
-            class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <Pattern>%d %p %C{1.} [%t] %m%n</Pattern>
         </encoder>
- 
-        <rollingPolicy
-            class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOGS}/archived/root-%d{yyyy-MM-dd}.log</fileNamePattern>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOGS}/root-%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>5</maxHistory>
         </rollingPolicy>
     </appender>
-     
-    <root level="INFO">
+    <root level="INFO" additivity="false">
         <appender-ref ref="rootRollingFile" />
     </root>
-
     <logger name="com.netflix.loadbalancer.LoadBalancerContext" level="DEBUG" additivity="false">
         <appender-ref ref="rootRollingFile" />
     </logger>
- 
 </configuration>

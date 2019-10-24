@@ -1,0 +1,27 @@
+version: "3.7"
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.2.0
+    ports:
+      - "9200:9200"
+    environment:
+      - "discovery.type=single-node"
+    volumes:
+      - ~/as-15-8-smuf/elasticsearch/data:/usr/share/elasticsearch/data:rw
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.2.0
+    restart: on-failure
+    depends_on:
+      - elasticsearch
+    ports:
+      - "25826:25826"
+      - "5044:5044"
+    volumes:
+      - ~/as-15-8-smuf/logstash/pipeline:/usr/share/logstash/pipeline:ro
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.2.0
+    restart: on-failure
+    depends_on:
+      - elasticsearch
+    ports:
+      - "5601:5601"
