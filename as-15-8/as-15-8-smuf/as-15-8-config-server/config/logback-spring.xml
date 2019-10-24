@@ -3,6 +3,7 @@
 
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
     <springProperty scope="context" name="application_name" source="spring.application.name"/>
+    <springProperty scope="context" name="application_address" source="spring.cloud.client.ip-address"/>
     <property name="LOGS" value="${application.logpath:-./logs}" />
 
     <springProfile name="test,prod">

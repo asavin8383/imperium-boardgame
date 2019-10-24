@@ -100,6 +100,11 @@ services:
       mode: global
     networks:
       - as-15-8-net
+    ports:
+      - target: 58568
+        published: 58568
+        protocol: tcp
+        mode: host
     volumes:
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
