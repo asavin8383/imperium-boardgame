@@ -70,6 +70,8 @@ ldap:
 
 spring:
   profiles: prod
+  main:
+    banner-mode: "off"
   jpa:
     hibernate:
       ddl-auto: none
@@ -105,6 +107,8 @@ ldap:
 
 spring:
   profiles: test
+  main:
+    banner-mode: "off"
   jpa:
     hibernate:
       ddl-auto: none

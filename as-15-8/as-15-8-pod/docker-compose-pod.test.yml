@@ -14,3 +14,17 @@ services:
       TZ: "Europe/Moscow"
     ports:
       - "15801:15801"
+    labels:
+      collect_logs_with_filebeat: "true"
+      decode_log_event_to_json_object: "true"
+  filebeat:
+    container_name: filebeat
+    image: harbor.ec-leasing.ru/as_15_8/elk/filebeat:7.2.0
+    restart: on-failure
+    volumes:
+      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./filebeat/data:/usr/share/filebeat/data:rw
+    command: filebeat -e -strict.perms=false
+    user: root

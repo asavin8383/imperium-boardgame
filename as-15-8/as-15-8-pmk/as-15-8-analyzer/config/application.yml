@@ -35,6 +35,8 @@ source_path_anonym: /logs/content.txt
 
 spring:
   profiles: prod
+  main:
+    banner-mode: "off"
   cloud.stream:
     bindings:
       input:
@@ -55,6 +57,8 @@ spring:
 
 spring:
   profiles: test
+  main:
+    banner-mode: "off"
   cloud.stream:
     bindings:
       input:
