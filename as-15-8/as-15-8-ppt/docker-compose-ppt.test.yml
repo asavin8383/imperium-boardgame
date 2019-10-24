@@ -1,6 +1,6 @@
 version: '3.7'
 services:
-  rest:
+  ppt:
     container_name: ppt
     image: harbor.ec-leasing.ru/as_15_8/as-15-8-ppt
     restart: always

@@ -1,6 +1,6 @@
 version: '3.7'
 services:
-  as-15-8-uploader:
+  pod:
     container_name: pod
     image: harbor.ec-leasing.ru/as_15_8/as-15-8-pod
     restart: always

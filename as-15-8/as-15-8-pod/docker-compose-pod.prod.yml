@@ -1,14 +1,16 @@
 version: '3.7'
 services:
-  as-15-8-uploader:
+  pod:
     container_name: pod
     image: dcr.ec-leasing.ru/as-15-8/as-15-8-pod
     restart: always
+    network_mode: "host"
     volumes:
       - ~/as-15-8-pod/logs:/log
       - ~/as-15-8-pod/config:/config
     environment:
       PROFILE: prod
+      GATEWAY_URI: http://10.97.220.145:15880
       TZ: "Europe/Moscow"
     ports:
       - "15801:15801"

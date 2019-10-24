@@ -1,64 +1,96 @@
 version: '3.7'
 networks:
-    as-15-8-net:
-        external: true
+  as-15-8-net:
+    external:
+      name: "host"
 services:
-    dispatcher:
-        image: dcr.ec-leasing.ru/as-15-8/as-15-8-dispatcher:latest
-        networks:
-            - as-15-8-net
-        environment:
-            PROFILE: prod
-            TZ: Europe/Moscow
-        volumes:
-            - ~/as-15-8-modules/dispatcher-module/logs:/log
-        configs:
-            - source: dispatcher-config
-              target: /config/application.yml
-            - source: dispatcher-logback
-              target: /config/logback-spring.xml
-    executor:
-        image: dcr.ec-leasing.ru/as-15-8/as-15-8-executor:latest
-        deploy:
-            mode: global
-        networks:
-            - as-15-8-net
-        environment:
-            PROFILE: prod
-            TZ: Europe/Moscow
-        volumes:
-            - ~/as-15-8-modules/executor-module/logs:/log
-        configs:
-            - source: executor-config
-              target: /config/application.yml
-            - source: executor-logback
-              target: /config/logback-spring.xml
-    analyzer:
-        image: dcr.ec-leasing.ru/as-15-8/as-15-8-analyzer:latest
-        deploy:
-            mode: global
-        networks:
-            - as-15-8-net
-        environment:
-            PROFILE: prod
-            TZ: Europe/Moscow
-        volumes:
-            - ~/as-15-8-modules/analyzer-module/logs:/log
-        configs:
-            - source: analyzer-config
-              target: /config/application.yml
-            - source: analyzer-logback
-              target: /config/logback-spring.xml
+  dispatcher:
+    image: dcr.ec-leasing.ru/as-15-8/as-15-8-dispatcher:latest
+    networks:
+      - as-15-8-net
+    environment:
+      PROFILE: prod
+      GATEWAY_URI: http://10.97.220.145:15880
+      TZ: Europe/Moscow
+    ports:
+      - target: 11300
+        published: 11300
+        protocol: tcp
+        mode: host
+    volumes:
+      - ~/as-15-8-modules/dispatcher-module/logs:/log
+    configs:
+      - source: dispatcher-bootstrap
+        target: /config/bootstrap.yml
+      - source: dispatcher-config
+        target: /config/application.yml
+      - source: dispatcher-logback
+        target: /config/logback-spring.xml
+  executor:
+    image: dcr.ec-leasing.ru/as-15-8/as-15-8-executor:latest
+    deploy:
+      mode: global
+    networks:
+      - as-15-8-net
+    stop_grace_period: 5m
+    environment:
+      PROFILE: prod
+      GATEWAY_URI: http://10.97.220.145:15880
+      TZ: Europe/Moscow
+    ports:
+      - target: 11100
+        published: 11100
+        protocol: tcp
+        mode: host
+    volumes:
+      - ~/as-15-8-modules/executor-module/logs:/log
+    configs:
+      - source: executor-bootstrap
+        target: /config/bootstrap.yml
+      - source: executor-config
+        target: /config/application.yml
+      - source: executor-logback
+        target: /config/logback-spring.xml
+  analyzer:
+    image: dcr.ec-leasing.ru/as-15-8/as-15-8-analyzer:latest
+    deploy:
+      mode: global
+    networks:
+      - as-15-8-net
+    environment:
+      PROFILE: prod
+      GATEWAY_URI: http://10.97.220.145:15880
+      TZ: Europe/Moscow
+    ports:
+      - target: 11200
+        published: 11200
+        protocol: tcp
+        mode: host
+    volumes:
+      - ~/as-15-8-modules/analyzer-module/logs:/log
+    configs:
+      - source: analyzer-bootstrap
+        target: /config/bootstrap.yml
+      - source: analyzer-config
+        target: /config/application.yml
+      - source: analyzer-logback
+        target: /config/logback-spring.xml
 configs:
-    dispatcher-config:
-       file: dispatcher-module/config/application.yml
-    dispatcher-logback:
-       file: dispatcher-module/config/logback-spring.xml
-    executor-config:
-       file: executor-module/config/application.yml
-    executor-logback:
-       file: executor-module/config/logback-spring.xml
-    analyzer-config:
-       file: analyzer-module/config/application.yml
-    analyzer-logback:
-       file: analyzer-module/config/logback-spring.xml
+  dispatcher-bootstrap:
+    file: dispatcher/config/bootstrap.yml
+  dispatcher-config:
+    file: dispatcher/config/application.yml
+  dispatcher-logback:
+    file: dispatcher/config/logback-spring.xml
+  executor-bootstrap:
+    file: executor/config/bootstrap.yml
+  executor-config:
+    file: executor/config/application.yml
+  executor-logback:
+    file: executor/config/logback-spring.xml
+  analyzer-bootstrap:
+    file: analyzer/config/bootstrap.yml
+  analyzer-config:
+    file: analyzer/config/application.yml
+  analyzer-logback:
+    file: analyzer/config/logback-spring.xml

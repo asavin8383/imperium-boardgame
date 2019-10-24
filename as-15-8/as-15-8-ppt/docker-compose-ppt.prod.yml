@@ -1,14 +1,16 @@
 version: '3'
 services:
-  as-15-8-rest:
+  ppt:
     container_name: ppt
     image: dcr.ec-leasing.ru/as-15-8/as-15-8-ppt
     restart: always
+    network_mode: "host"
     volumes:
       - ~/as-15-8-ppt/logs:/log
       - ~/as-15-8-ppt/config:/config
     environment:
       PROFILE: prod
+      GATEWAY_URI: http://10.97.220.145:15880
       TZ: "Europe/Moscow"
     ports:
       - "15800:15800"
