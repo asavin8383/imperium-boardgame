@@ -7,7 +7,7 @@ logging:
     org.springframework.web: WARN
     common: DEBUG
     security: DEBUG
-    org.springframework.ldap: DEBUG
+    org.springframework.security: DEBUG
 ldap:
   enabled: true
   domain: designdiv.ecleasing.ru
@@ -22,7 +22,17 @@ ldap:
     role_admin: CN=ROLE_ADMIN,OU=roles,OU=AS_15_8,DC=designdiv,DC=ecleasing,DC=ru
     filter_oper: "(&(objectClass=user)(memberof=${ldap.login.role_oper}))"
     filter_admin: "(&(objectClass=user)(memberof=${ldap.login.role_admin}))"
-client:
-  id: as-15-8
-  secret: as-15-8
-signing.key: secret
+security:
+  oauth2:
+    client:
+      client-id: as-15-8
+      client-secret: as-15-8
+      scope: read,write
+      auto-approve-scopes: '.*'
+management:
+  health:
+    ldap:
+      enabled: false
+spring:
+  main:
+    allow-bean-definition-overriding: true
