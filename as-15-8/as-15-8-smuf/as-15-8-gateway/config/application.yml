@@ -32,13 +32,9 @@ zuul:
     ppm:
       path: /**
       serviceId: ppt
-hystrix:
-  command:
-    default:
-      execution.isolation.thread.timeoutInMilliseconds: 120000
 ribbon:
   ReadTimeout: 60000
-  connection-timeout: 3000
+  ConnectTimeout: 3000
   eureka:
     enabled: true
 

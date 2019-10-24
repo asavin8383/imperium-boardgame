@@ -13,6 +13,9 @@ services:
       TZ: "Europe/Moscow"
     ports:
       - "8761:8761"
+    labels:
+      collect_logs_with_filebeat: "true"
+      decode_log_event_to_json_object: "true"
   gateway:
     container_name: gateway
     image: harbor.ec-leasing.ru/as_15_8/as-15-8-gateway
@@ -49,11 +52,15 @@ services:
       TZ: "Europe/Moscow"
     ports:
       - "15802:15802"
+    labels:
+      collect_logs_with_filebeat: "true"
+      decode_log_event_to_json_object: "true"
   filebeat:
+    container_name: filebeat
     image: docker.elastic.co/beats/filebeat:7.2.0
     restart: on-failure
     volumes:
-      - ~/as-15-8-smuf/filebeat/filebeat.docker.yml:/usr/share/filebeat/filebeat.yml:ro
+      - ~/as-15-8-smuf/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./filebeat/data:/usr/share/filebeat/data:rw

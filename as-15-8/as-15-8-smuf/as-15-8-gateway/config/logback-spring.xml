@@ -7,16 +7,17 @@
     <springProfile name="test,prod">
         <appender name="jsonConsoleAppender" class="ch.qos.logback.core.ConsoleAppender">
             <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-                <providers>
-                    <timestamp>
-                        <timeZone>UTC</timeZone>
-                    </timestamp>
-                    <logLevel/>
-                    <context/>
-                    <threadName/>
-                    <message/>
-                    <stackTrace/>
-                </providers>
+                <includeMdc>false</includeMdc>
+                <fieldNames>
+                    <timestamp>timestamp</timestamp>
+                    <message>message</message>
+                    <thread>thread</thread>
+                    <logger>[ignore]</logger>
+                    <version>[ignore]</version>
+                    <levelValue>[ignore]</levelValue>
+                    <caller>[ignore]</caller>
+                    <stackTrace>exception</stackTrace>
+                </fieldNames>
             </encoder>
         </appender>
         <root level="INFO" additivity="false">
