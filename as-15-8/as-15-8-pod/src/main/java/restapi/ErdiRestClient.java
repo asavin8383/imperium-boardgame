@@ -6,11 +6,9 @@ import exceptions.ExceptionErdiLoad;
 import exceptions.ExceptionErdiParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import model.enums.ParamSor;
 import model.response.*;
 import model.rest.ContentRest;
 import model.rest.control.PodState;
-import model.scheme.Addon;
 import model.scheme.AddonVersion;
 import model.scheme.ContentVersion;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -525,7 +523,7 @@ public class ErdiRestClient {
         try {
             String content = new String(Files.readAllBytes(path));
             ObjectMapper mapper = new ObjectMapper();
-            RestResponseDeltaErdi restResponse = mapper.readValue(content, RestResponseDeltaErdi.class);
+            RestResponseStatusString restResponse = mapper.readValue(content, RestResponseStatusString.class);
             return !StringUtils.isEmpty(restResponse.response) && restResponse.response.equalsIgnoreCase("Not found");
         }
         catch (Exception e) {
