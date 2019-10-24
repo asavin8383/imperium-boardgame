@@ -52,6 +52,8 @@ eureka:
   client.enabled: false
 spring:
   profiles: prod
+  main:
+    banner-mode: "off"
   jpa:
     hibernate:
       ddl-auto: none
@@ -71,6 +73,8 @@ registry-anonymizers:
 
 spring:
   profiles: test
+  main:
+    banner-mode: "off"
   jpa:
     hibernate:
       ddl-auto: none

@@ -24,9 +24,6 @@
         <root level="INFO" additivity="false">
             <appender-ref ref="jsonConsoleAppender" />
         </root>
-        <logger name="org.hibernate" level="INFO" additivity="false">
-            <appender-ref ref="jsonConsoleAppender" />
-        </logger>
         <logger name="org.hibernate.SQL" level="DEBUG" additivity="false">
             <appender-ref ref="jsonConsoleAppender" />
         </logger>
@@ -45,9 +42,6 @@
     <root level="INFO" additivity="false">
         <appender-ref ref="rootRollingFile" />
     </root>
-    <logger name="org.hibernate" level="INFO" additivity="false">
-    	<appender-ref ref="rootRollingFile" />
-    </logger>
     <logger name="org.hibernate.SQL" level="DEBUG" additivity="false">
     	<appender-ref ref="rootRollingFile" />
     </logger>

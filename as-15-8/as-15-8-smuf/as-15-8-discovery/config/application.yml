@@ -8,3 +8,10 @@ eureka:
   instance:
     preferIpAddress: true
     instanceId: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port}
+
+---
+
+spring:
+  profiles: test, prod
+  main:
+    banner-mode: "off"
