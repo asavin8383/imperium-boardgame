@@ -1,0 +1,172 @@
+package services;
+
+
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import model.response.MissionEntry;
+import model.response.RestResponseMissions;
+import model.response.RestResponseStatusString;
+import model.rest.ContentFull;
+import model.scheme.Mission;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.lob.DefaultLobHandler;
+import org.springframework.jdbc.support.lob.LobHandler;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
+import repositories.MissionRepository;
+
+import javax.transaction.Transactional;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.text.ParseException;
+import java.util.*;
+import java.util.stream.Collectors;
+
+
+@Service
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
+public class MissionService {
+
+    private final RestTemplate restTemplate;
+    private final MissionRepository missionRepository;
+    private final JdbcTemplate jdbcTemplate;
+
+    @Value("${spring.rest_base_url}")
+    private String baseUrl;
+
+    @SneakyThrows
+    public void fillMissions() {
+        System.out.println("Загрузка списка попручений");
+        List<MissionEntry> missions = getMissionsFrom();
+        System.out.println("Список поручений:");
+        System.out.println(missions);
+
+        if (!missions.isEmpty()){
+            for(MissionEntry missionEntry : missions){
+                try {
+                    saveMissionWithConfirm(missionEntry);
+                }
+                catch(Exception e){
+                    System.err.println("Ошибка сохранения поручения: " + missionEntry.toString());
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    @Transactional
+    public void saveMissionWithConfirm(MissionEntry missionEntry) throws IOException, ParseException {
+        Mission mission = missionRepository.findByOrigId(missionEntry.getId());
+        if (mission != null){
+            System.out.println("Поручение уже есть в БД: " + missionEntry.toString());
+        }
+        else {
+            System.out.println("Добавляем поручение в БД: " + missionEntry.toString());
+            missionRepository.save(createMission(missionEntry));
+        }
+        confirmMission(missionEntry);
+    }
+
+    public ResponseEntity<byte[]> receivePdfFromDB(String id){
+        String sql = "select doc_file_data from sor.mission where orig_id = ?";
+
+        byte[] result = jdbcTemplate.queryForObject(sql, new Object[]{id}, this::mapPdf);
+        if (result != null) {
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
+    }
+
+    private byte[] mapPdf(ResultSet rs, int rowNum) throws SQLException {
+        LobHandler lobHandler = new DefaultLobHandler();
+        return lobHandler.getBlobAsBytes(rs,1);
+    }
+
+    private Mission createMission(MissionEntry missionEntry) throws ParseException, UnsupportedEncodingException {
+        Mission mission = new Mission();
+        mission.setOrigId(missionEntry.getId());
+        mission.setDocNum(missionEntry.docNum);
+        mission.setTypeCheck(missionEntry.typeCheck);
+        mission.setDateApproved(missionEntry.getDateApprovedDate());
+        mission.setDocFileData(missionEntry.getDocFileDataBytes());
+        return mission;
+    }
+
+    private List<MissionEntry> getMissionsFrom() throws IOException, RestClientException {
+        UriComponents uriComponents =
+                UriComponentsBuilder.fromUriString("{baseUrl}/getMissionsList/")
+                        .build()
+                        .expand(baseUrl);
+
+        System.out.println("----> getting missions from service: " + uriComponents.toString());
+
+        ResponseEntity<byte[]> entity = restTemplate.exchange(
+                uriComponents.toString(),
+                HttpMethod.GET,
+                null,
+                byte[].class
+        );
+        byte[] data = entity.getBody();
+
+        RestResponseStatusString restResponseStatusString =
+                getResponseStatusString(data);
+
+        if (restResponseStatusString == null){
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.enable(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT);
+            RestResponseMissions responseMissions = mapper.readValue(data, RestResponseMissions.class);
+            List<MissionEntry> list = responseMissions.getMissionList();
+            return list;
+        }
+        else {
+            System.out.println("Статус ответа: " + restResponseStatusString.response);
+            return new ArrayList<>();
+        }
+    }
+
+    private void confirmMission(MissionEntry missionEntry) throws IOException, RestClientException {
+        UriComponents uriComponents =
+                UriComponentsBuilder.fromUriString("{baseUrl}/confirmAcceptMission/{id}/")
+                        .build()
+                        .expand(baseUrl, missionEntry.id);
+
+        System.out.println("----> confirmAcceptMission to service: " + uriComponents.toString());
+
+        ResponseEntity<RestResponseStatusString> entity = restTemplate.exchange(
+                uriComponents.toString(),
+                HttpMethod.GET,
+                null,
+                RestResponseStatusString.class
+        );
+        RestResponseStatusString status = entity.getBody();
+
+        System.out.println("Результат подтверждения поручения: " + (status == null ? null : status.toString()));
+    }
+
+    private RestResponseStatusString getResponseStatusString(byte[] data){
+        if (data == null || data.length > 2048)
+            return null;
+
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(data, RestResponseStatusString.class);
+        }
+        catch (Exception e) {
+            //e.printStackTrace();
+            return null;
+        }
+    }
+
+}
