@@ -1,0 +1,55 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:appdba="http://www.datical.net/xml/ns/appdba" xmlns:datical="http://www.datical.net/xml/ns/datical" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+<changeSet id="0002.1" author="klychagin">
+    <sql>
+        INSERT INTO dm.access_tool_tp (access_tool_tp_id, shrt_nm, full_nm) VALUES (E'1', E'ПС', E'Поисковая система');
+        INSERT INTO dm.access_tool_tp (access_tool_tp_id, shrt_nm, full_nm) VALUES (E'2', E'ПАСД', E'Программно-аппаратное средство доступа');
+    </sql>
+    <rollback>
+        <sql>
+            delete from dm.access_tool_tp;
+        </sql>
+    </rollback>
+</changeSet>
+    <changeSet id="0002.2" author="klychagin">
+    <sql>
+    INSERT INTO dm.test_tp (test_tp_id, nm) VALUES (E'1', E'URL');
+    INSERT INTO dm.test_tp (test_tp_id, nm) VALUES (E'2', E'Доменных имён');
+    INSERT INTO dm.test_tp (test_tp_id, nm) VALUES (E'3', E'Маскируемых доменов');
+    INSERT INTO dm.test_tp (test_tp_id, nm) VALUES (E'4', E'IP-адресов');
+    INSERT INTO dm.test_tp (test_tp_id, nm) VALUES (E'5', E'Подсетей');
+    </sql>
+    <rollback>
+        <sql>
+            delete from dm.test_tp;
+        </sql>
+    </rollback>
+</changeSet>
+        <changeSet id="0002.3" author="klychagin">
+    <sql>
+        INSERT INTO dm.msr_prd_tp (msr_prd_tp_id, nm) VALUES (E'1', E'День');
+        INSERT INTO dm.msr_prd_tp (msr_prd_tp_id, nm) VALUES (E'2', E'Неделя');
+        INSERT INTO dm.msr_prd_tp (msr_prd_tp_id, nm) VALUES (E'3', E'Месяц');
+        INSERT INTO dm.msr_prd_tp (msr_prd_tp_id, nm) VALUES (E'4', E'Квартал');
+        INSERT INTO dm.msr_prd_tp (msr_prd_tp_id, nm) VALUES (E'5', E'Полугодие');
+        INSERT INTO dm.msr_prd_tp (msr_prd_tp_id, nm) VALUES (E'6', E'Год');
+    </sql>
+    <rollback>
+        <sql>
+            delete from dm.msr_prd_tp;
+        </sql>
+    </rollback>
+</changeSet>
+    <changeSet id="0002.4" author="klychagin">
+        <sql>
+            INSERT INTO dm.ind_tp (ind_tp_id, dsc) VALUES (E'1', E'В части ПС, шт.');
+            INSERT INTO dm.ind_tp (ind_tp_id, dsc) VALUES (E'2', E'В части ПАСД, шт.');
+            INSERT INTO dm.ind_tp (ind_tp_id, dsc) VALUES (E'3', E'Всего, шт.');
+        </sql>
+        <rollback>
+            <sql>
+                delete from dm.ind_tp;
+            </sql>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>
