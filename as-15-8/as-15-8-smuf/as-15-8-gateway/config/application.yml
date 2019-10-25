@@ -35,6 +35,7 @@ zuul:
       serviceId: ppt
     oauth:
       path: /oauth/**
+      stripPrefix: false
       serviceId: authentication_service
 ribbon:
   ReadTimeout: 60000
@@ -58,4 +59,3 @@ spring:
 
 spring:
   profiles: dev_pvorobiev, dev_asavin, dev_ashabalin, dev_asinyavin, dev_jspirina
-eureka.client.enabled: false
