@@ -5,8 +5,6 @@ logging:
   #config: config/logback-spring.xml
   level:
     org.springframework.web: WARN
-    common: DEBUG
-    security: DEBUG
     org.springframework.security: DEBUG
 ldap:
   enabled: true

@@ -32,11 +32,19 @@ zuul:
     ppm:
       path: /**
       serviceId: ppt
+    oauth:
+      path: /oauth/**
+      serviceId: authentication_service
 ribbon:
   ReadTimeout: 60000
   ConnectTimeout: 3000
   eureka:
     enabled: true
+security:
+  oauth2:
+    resource:
+      jwt:
+        key-value: as-15-8
 
 ---
 

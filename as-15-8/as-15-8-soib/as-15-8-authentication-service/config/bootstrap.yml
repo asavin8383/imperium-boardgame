@@ -1,6 +1,6 @@
 spring:
   application:
-    name: authenticationservice
+    name: authentication_service
   profiles:
     active:
       default

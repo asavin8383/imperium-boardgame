@@ -1,28 +1,21 @@
 package common;
 
 import exceptions.ExceptionErdiParser;
-import org.apache.logging.log4j.util.Strings;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.context.annotation.Bean;
+import org.springframework.boot.autoconfigure.security.oauth2.client.EnableOAuth2Sso;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
-import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.web.client.RestTemplate;
-import repositories.*;
-import restapi.ErdiRestClient;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
+import java.security.Principal;
 
 
 /**
@@ -36,6 +29,8 @@ import java.net.Proxy;
 @EntityScan("model")
 @EnableScheduling
 @EnableAsync
+@EnableOAuth2Sso
+@RestController
 public class ApplicationConfiguration {
 
 	/*@Autowired
@@ -66,6 +61,11 @@ public class ApplicationConfiguration {
 	public void init() {
 		SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
 	}*/
+
+	@RequestMapping("/")
+	public String home(Principal user) {
+		return "Hello " + user.getName();
+	}
 
     public static void main(String[] args) {
 		SpringApplication.run(ApplicationConfiguration.class, args);

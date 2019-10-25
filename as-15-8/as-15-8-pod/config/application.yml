@@ -4,7 +4,10 @@ server:
     max-threads: 200
 gateway.url: ${GATEWAY_URI:http://localhost:15880}
 logging:
-  config: config/logback-spring.xml
+#  config: config/logback-spring.xml
+  level:
+    org.springframework.web: WARN
+    org.springframework.security: DEBUG
 eureka:
   client:
     serviceUrl:
@@ -41,7 +44,15 @@ registry-anonymizers:
   proxy-port: 3128
   username: test158
   password: test158
-
+security:
+  oauth2:
+    client:
+      client-id: as-15-8
+      client-secret: as-15-8
+      access-token-uri: http://localhost:15805/oauth/token
+      user-authorization-uri: http://localhost:15805/oauth/authorize
+    resource:
+      user-info-uri: http://localhost:15805/me
 cron:
   expression:
     arrangement: "0 * * ? * *"
