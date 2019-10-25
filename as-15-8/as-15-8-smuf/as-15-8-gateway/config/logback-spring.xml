@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <springProperty scope="context" name="subsystem" source="subsystem"/>
     <springProperty scope="context" name="application_name" source="spring.application.name"/>
     <springProperty scope="context" name="application_address" source="spring.cloud.client.ip-address"/>
     <property name="LOGS" value="${application.logpath:-./logs}" />
@@ -24,9 +25,6 @@
         <root level="INFO" additivity="false">
             <appender-ref ref="jsonConsoleAppender" />
         </root>
-        <logger name="com.netflix.loadbalancer.LoadBalancerContext" level="DEBUG" additivity="false">
-            <appender-ref ref="jsonConsoleAppender" />
-        </logger>
     </springProfile>
 
     <appender name="rootRollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">

@@ -1,3 +1,4 @@
+subsystem: SMUF
 server:
   port: 15880
 logging:

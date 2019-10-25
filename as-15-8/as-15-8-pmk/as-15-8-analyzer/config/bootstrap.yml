@@ -1,3 +1,4 @@
+subsystem: PMK
 server:
   port: 11200
 gateway.url: ${GATEWAY_URI:http://localhost:15880}
