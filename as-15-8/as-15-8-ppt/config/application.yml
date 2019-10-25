@@ -1,3 +1,4 @@
+subsystem: PPT
 server:
   port: 15800
   tomcat:

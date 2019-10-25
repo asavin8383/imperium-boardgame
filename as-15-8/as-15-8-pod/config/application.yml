@@ -1,3 +1,4 @@
+subsystem: POD
 server:
   port: 15801
   tomcat:
