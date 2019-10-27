@@ -1,3 +1,4 @@
+config.url:  ${CONFIG_SERVER_URI:http://localhost:15802/ps}
 debug: false
 logging:
   level:

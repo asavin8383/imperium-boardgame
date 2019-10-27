@@ -18,7 +18,6 @@ public class GlobalProperty {
     private Long id;
 
     @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
     @Convert(converter = AccessToolParameterConverter.class)
     private AccessToolParameter key;
 
