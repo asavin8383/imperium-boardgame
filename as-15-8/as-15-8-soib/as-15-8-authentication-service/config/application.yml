@@ -2,7 +2,7 @@ server:
   contextPath:   /auth
   port: 15805
 logging:
-  #config: config/logback-spring.xml
+  config: config/logback-spring.xml
   level:
     org.springframework.web: WARN
     org.springframework.security: DEBUG
