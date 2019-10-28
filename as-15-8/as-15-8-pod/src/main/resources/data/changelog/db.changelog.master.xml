@@ -14,5 +14,6 @@
     <include file="data/changelog/uploader.0009.addon_change.xml"/>
     <include file="data/changelog/uploader.0010.AddonVersion.xml"/>
     <include file="data/changelog/uploader.0011.Mission.xml"/>
+    <include file="data/changelog/uploader.0012.Addon.xml"/>
 
 </databaseChangeLog>
