@@ -9,11 +9,11 @@ import javax.persistence.Converter;
 public class AccessToolUnitConverter implements AttributeConverter<AccessToolUnit, String> {
     @Override
     public String convertToDatabaseColumn(AccessToolUnit accessToolUnit) {
-        return accessToolUnit.propertyKey();
+        return accessToolUnit != null ? accessToolUnit.propertyKey() : null;
     }
 
     @Override
     public AccessToolUnit convertToEntityAttribute(String accessToolUnit) {
-        return AccessToolUnit.fromPropertyKey(accessToolUnit);
+        return accessToolUnit != null ? AccessToolUnit.fromPropertyKey(accessToolUnit) : null;
     }
 }

@@ -4,6 +4,7 @@ import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.web.client.RestTemplate;
@@ -26,6 +27,11 @@ public class RestTemplateConfiguration {
     @Value("${registry-anonymizers.password}")
     private String password;
 
+    /**
+     * Для общения с внешними системами, проксированный
+     * @return
+     */
+    @Primary
     @Bean
     public RestTemplate registryAnonimyzersRestTemplate() {
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
@@ -37,5 +43,15 @@ public class RestTemplateConfiguration {
         restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(username, password));
         return restTemplate;
     }
+
+    /**
+     * Для внутренних межсервисных взаимодействий
+     * @return
+     */
+    @Bean(name = "internal")
+    RestTemplate getRestTemplate() {
+        return new RestTemplate();
+    }
+
 
 }
