@@ -25,6 +25,7 @@
         <dependency>
             <groupId>org.springframework.security.oauth.boot</groupId>
             <artifactId>spring-security-oauth2-autoconfigure</artifactId>
+            <version>RELEASE</version>
         </dependency>
 
         <!--Spring Cloud -->
