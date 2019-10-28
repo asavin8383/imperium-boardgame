@@ -44,7 +44,6 @@
 
 
     <springProfile name="local_log">
-
         <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
             <layout class="ch.qos.logback.classic.PatternLayout">
                 <Pattern>
@@ -64,6 +63,5 @@
         <root level="INFO" additivity="false">
             <appender-ref ref="Console" />
         </root>
-
     </springProfile>
 </configuration>
