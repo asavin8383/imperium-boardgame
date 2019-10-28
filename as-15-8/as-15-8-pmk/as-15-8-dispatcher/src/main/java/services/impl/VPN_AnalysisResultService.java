@@ -64,6 +64,7 @@ public class VPN_AnalysisResultService implements AnalysisResultService<VpnAnaly
 		detailResultsVpn.setSimilarityOriginPercent(aRes.getSimilarityOriginPercent());
 		detailResultsVpn.setStubScoreInfo(aRes.getStubScoreInfo());
 		detailResultsVpn.setRedirectionDetected(aRes.getRedirectionDetected());
+		detailResultsVpn.setResultNLP(aRes.getResultNLP());
 
 		CheckUnitJobResult result = postAnalysis(detailResultsVpn, aRes);
 

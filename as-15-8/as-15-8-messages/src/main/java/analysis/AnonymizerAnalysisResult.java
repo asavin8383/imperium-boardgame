@@ -13,6 +13,7 @@ import lombok.ToString;
 public class AnonymizerAnalysisResult extends AnalysisResult implements StubAnalysisResult {
 
     private CheckUnitJobResult checkResult;
+    private String resultNLP;
 
     private Integer httpStatus;
     private Integer httpStatusEtalon;
