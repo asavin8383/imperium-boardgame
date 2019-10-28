@@ -24,8 +24,8 @@ import java.util.List;
 @Slf4j
 public class PSUploader
 {
-    @Value("${config.url}")
-    private String configUrl;
+    @Value("${gateway.url}")
+    private String gatewayUrl;
 
     @Autowired
     @Qualifier("internal")
@@ -44,7 +44,7 @@ public class PSUploader
         HttpEntity<List<PsRecord>> entity = new HttpEntity<>(all, headers);
 
         log.debug("Sending {} PS records", all.size());
-        restTemplate.postForObject(configUrl, entity, ResponseEntity.class);
+        restTemplate.postForObject(gatewayUrl, entity, ResponseEntity.class);
         log.debug("{} PS records sent successfully", all.size());
 
     }

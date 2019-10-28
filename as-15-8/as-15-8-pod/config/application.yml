@@ -55,6 +55,7 @@ eureka:
   client.enabled: false
 spring:
   profiles: prod
+  profiles.include: docker_log
   main:
     banner-mode: "off"
   jpa:
@@ -76,6 +77,7 @@ registry-anonymizers:
 
 spring:
   profiles: test
+  profiles.include: docker_log
   main:
     banner-mode: "off"
   jpa:
@@ -88,10 +90,12 @@ spring:
     url: jdbc:postgresql://192.168.5.195:5432/asdb
 registry-anonymizers:
   proxy-ip: ""
+
 ---
 
 spring:
   profiles: dev_pvorobiev, dev_asavin, dev_ashabalin, dev_jspirina
+  profiles.include: local_log
   jpa:
     hibernate:
       ddl-auto: none
