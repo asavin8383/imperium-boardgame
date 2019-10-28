@@ -37,7 +37,7 @@
             <maxHistory>5</maxHistory>
         </rollingPolicy>
     </appender>
-    <root level="DEBUG" additivity="false">
+    <root level="INFO" additivity="false">
         <appender-ref ref="rootRollingFile" />
     </root>
     <logger name="com.netflix.loadbalancer.LoadBalancerContext" level="DEBUG" additivity="false">

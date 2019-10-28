@@ -40,10 +40,38 @@
             <maxHistory>5</maxHistory>
         </rollingPolicy>
     </appender>
+    <logger name="org.hibernate.SQL" level="DEBUG" additivity="false">
+    	<appender-ref ref="rootRollingFile" />
+    </logger>
     <root level="INFO" additivity="false">
         <appender-ref ref="rootRollingFile" />
     </root>
-    <logger name="org.hibernate.SQL" level="DEBUG" additivity="false">
-    	<appender-ref ref="rootRollingFile" />
+
+    <appender name="securityRollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOGS}/security.log</file>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <Pattern>%d %p %C{1.} [%t] %m%n</Pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOGS}/security-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>5</maxHistory>
+        </rollingPolicy>
+    </appender>
+    <logger name= "org.springframework.security" level="DEBUG" additivity="false">
+        <appender-ref ref="securityRollingFile"/>
+    </logger>
+
+    <appender name="webRollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOGS}/web.log</file>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <Pattern>%d %p %C{1.} [%t] %m%n</Pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOGS}/web-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>5</maxHistory>
+        </rollingPolicy>
+    </appender>
+    <logger name= "org.springframework.web" level="DEBUG" additivity="false">
+        <appender-ref ref="webRollingFile"/>
     </logger>
 </configuration>
