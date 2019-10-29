@@ -7,13 +7,16 @@ import enums.CheckUnitJobResult;
 import execution.ExecutionVpnJobResult;
 import lombok.Getter;
 import model.KeyWord;
+import model.NLPCategory;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 import service.AnalyzerService;
+import service.ClassificationService;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -47,7 +50,11 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 
 	@Autowired
 	private ResourceLoader resourceLoader;
-	
+
+	@Autowired
+	@Qualifier("openNLPClassificator")
+	private ClassificationService classificationService;
+
 	@PostConstruct
 	public void initAnalyzer() {
 		try {
@@ -77,6 +84,7 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 		CheckUnitJobResult checkUnitJobResult = obtainResult(analysisResult, result);
 		analysisResult.setCheckResult(checkUnitJobResult);
 		saveSources(analysisResult, result, checkUnitJobResult);
+		obtainResultNLP(analysisResult, result);
 		return analysisResult;
 	}
 
@@ -103,6 +111,16 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 				throw new AnalysisException("Error write sources to file! " + path);
 			}
 		}
+	}
+
+	protected void obtainResultNLP(VpnAnalysisResult analysisResult, ExecutionVpnJobResult result){
+		String page = result.getPageContent();
+		page = page == null ? "" : page;
+
+		NLPCategory nlpCategory = classificationService.classify(page);
+		nlpCategory = nlpCategory == null ? NLPCategory.EXCEPTION : nlpCategory;
+
+		analysisResult.setResultNLP(nlpCategory.name());
 	}
 
 	private String clearResult(String result){

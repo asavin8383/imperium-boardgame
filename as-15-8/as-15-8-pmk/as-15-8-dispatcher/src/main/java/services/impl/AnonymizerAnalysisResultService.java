@@ -40,6 +40,7 @@ public class AnonymizerAnalysisResultService implements AnalysisResultService<An
 
 		detailResultsVpn.setResponseError(aRes.getErrorCode() != null);
 		detailResultsVpn.setRedirectionDetected(aRes.getRedirectionDetected());
+		detailResultsVpn.setResultNLP(aRes.getResultNLP());
 
 		detailVpnRepo.save(detailResultsVpn);
 

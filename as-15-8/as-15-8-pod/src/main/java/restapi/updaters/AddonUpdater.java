@@ -29,11 +29,15 @@ import java.util.*;
 @Slf4j
 public class AddonUpdater
 {
-    @Autowired
-    AddonVersionRepository addonVersionRepository;
+    private final AddonVersionRepository addonVersionRepository;
+
+    private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    JdbcTemplate jdbcTemplate;
+    public AddonUpdater(AddonVersionRepository addonVersionRepository, JdbcTemplate jdbcTemplate) {
+        this.addonVersionRepository = addonVersionRepository;
+        this.jdbcTemplate = jdbcTemplate;
+    }
 
     @Transactional(propagation = Propagation.REQUIRED)
     public int insertAllJdbc(XMLStreamReader sr, XmlMapper mapper, Date date, boolean is_delta) throws XMLStreamException, IOException {
@@ -92,16 +96,18 @@ public class AddonUpdater
 
         log.info("Inserting {} addons with version {}", addonEntries.size(), addonVersionId);
 
-        jdbcTemplate.batchUpdate("insert into sor.addon(addon_version_id, orig_id, info_type_id, visitors_cnt_russia, visitors_cnt_world) VALUES (?,?,?,?,?)",
+        jdbcTemplate.batchUpdate("insert into sor.addon(addon_version_id, content_id, orig_id, info_type_id, visitors_cnt_russia, visitors_cnt_world) VALUES (?,?,?,?,?,?)",
                 new BatchPreparedStatementSetter() {
+                    @SuppressWarnings("NullableProblems")
                     @Override
                     public void setValues(PreparedStatement pst, int i) throws SQLException {
                         AddonEntry addonEntry = addonEntries.get(i);
                         pst.setLong(1, addonVersionId);
-                        pst.setLong(2, addonEntry.getId());
-                        pst.setString(3, addonEntry.getInfoTypeId());
-                        pst.setObject(4, addonEntry.getVisitorsCntRussia());
-                        pst.setObject(5, addonEntry.getVisitorsCntWorld());
+                        pst.setLong(2, erdiToContentId.get(addonEntry.getId()));
+                        pst.setLong(3, addonEntry.getId());
+                        pst.setString(4, addonEntry.getInfoTypeId());
+                        pst.setObject(5, addonEntry.getVisitorsCntRussia());
+                        pst.setObject(6, addonEntry.getVisitorsCntWorld());
                     }
 
                     @Override
@@ -113,6 +119,7 @@ public class AddonUpdater
         log.info("Inserting {} content_histories with version {}", addonEntries.size(), addonVersionId);
         jdbcTemplate.batchUpdate("insert into sor.content_history(content_id, content_version_id, addon_version_id, st_dt) values (?,?,?,?)",
                 new BatchPreparedStatementSetter() {
+                    @SuppressWarnings("NullableProblems")
                     @Override
                     public void setValues(PreparedStatement pst, int i) throws SQLException {
                         AddonEntry addonEntry = addonEntries.get(i);
