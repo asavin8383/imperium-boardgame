@@ -114,8 +114,7 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 	}
 
 	protected void obtainResultNLP(VpnAnalysisResult analysisResult, ExecutionVpnJobResult result){
-		String page = result.getPageContent();
-		page = page == null ? "" : page;
+		String page = clearResult(result.getPageContent());
 
 		NLPCategory nlpCategory = classificationService.classify(page);
 		nlpCategory = nlpCategory == null ? NLPCategory.EXCEPTION : nlpCategory;
