@@ -223,8 +223,7 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 	}
 
 	protected void obtainResultNLP(AnonymizerAnalysisResult analysisResult, ExecutionAnonymizerResult result){
-		String page = result.getPageContent();
-		page = page == null ? "" : page;
+		String page = clearResult(result.getPageContent());
 
 		NLPCategory nlpCategory = classificationService.classify(page);
 		nlpCategory = nlpCategory == null ? NLPCategory.EXCEPTION : nlpCategory;
