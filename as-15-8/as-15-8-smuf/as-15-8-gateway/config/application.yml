@@ -52,6 +52,7 @@ security:
 
 spring:
   profiles: test, prod
+  profiles.include: docker_log
   main:
     banner-mode: "off"
 
@@ -59,3 +60,4 @@ spring:
 
 spring:
   profiles: dev_pvorobiev, dev_asavin, dev_ashabalin, dev_asinyavin, dev_jspirina
+  profiles.include: local_log
