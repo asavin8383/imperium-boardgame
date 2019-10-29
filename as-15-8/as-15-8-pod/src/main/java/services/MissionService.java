@@ -8,7 +8,6 @@ import lombok.SneakyThrows;
 import model.response.MissionEntry;
 import model.response.RestResponseMissions;
 import model.response.RestResponseStatusString;
-import model.rest.ContentFull;
 import model.scheme.Mission;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,8 +30,8 @@ import java.io.UnsupportedEncodingException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Service
@@ -86,7 +85,7 @@ public class MissionService {
         if (result != null) {
             return new ResponseEntity<>(result, HttpStatus.OK);
         }
-        return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>((byte[]) null, HttpStatus.NO_CONTENT);
     }
 
     private byte[] mapPdf(ResultSet rs, int rowNum) throws SQLException {
