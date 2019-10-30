@@ -12,6 +12,8 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -79,9 +81,21 @@ public class ScriptUtils {
         return new PageResult(pageContent, errorCode);
     }
 
+    public static byte[] getScreenshot(WebDriver webDriver)  {
+        String selectAll = Keys.chord(Keys.CONTROL, Keys.SHIFT, "5");
+        webDriver.findElement(By.tagName("html")).sendKeys(selectAll);
+        ScriptUtils.waitForSecondTabAndSwitchToIt(webDriver);
 
-    public static byte[] getScreenshot(WebDriver webDriver) {
+        By imgById = By.id("nsc_preview_img");
+        WebDriverWait wait = new WebDriverWait(webDriver, 30);
+        wait.until(ExpectedConditions.presenceOfElementLocated(imgById));
+        wait.until(driver -> !driver.findElement(imgById).getAttribute("src").isEmpty());
+        String base64Image = webDriver.findElement(imgById)
+                .getAttribute("src").split(",")[1];
+        return Base64.getDecoder().decode(base64Image);
+    }
 
+    public static byte[] getScreenshot(WebDriver webDriver, boolean old) {
         waitDriver(webDriver, 1);   // задержка скриншота, чтоб избежать белого экрана, т.к. некоторые сайты показывают контент не сразу.
 
         try {
@@ -119,6 +133,14 @@ public class ScriptUtils {
                 break;
         }
         return value;
+    }
+
+    public static void waitForSecondTabAndSwitchToIt(WebDriver webDriver) {
+        WebDriverWait wait = new WebDriverWait(webDriver, 60);
+        wait.until(driver -> driver != null && driver.getWindowHandles().size() > 1);
+
+        ArrayList<String> handles = new ArrayList<>(webDriver.getWindowHandles());
+        webDriver.switchTo().window(handles.get(1));
     }
 
     @Nullable

@@ -13,6 +13,9 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.net.URL;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.logging.Level;
 
 /**
@@ -58,6 +61,9 @@ public class DriverFactory {
 
 		ChromeOptions options = new ChromeOptions();
 		setOptimalChromeOptions(options);
+		setDownloadFolder(options, ChromeSettings.DOWNLOAD_FOLDER);
+		setLoadExtensions(options, Collections.singletonList(
+				ChromeSettings.Extension.NIMBUS));
 
 		if (enableLog){
 			LoggingPreferences logPrefs = new LoggingPreferences();
@@ -75,24 +81,18 @@ public class DriverFactory {
 	 * @param hubURL URL selenium хаба
 	 * @param platformName Имя платформы
 	 * @param appName Имя приложения (ПС/ПАСД)
-	 * @param pathToExtension crx файл расширения
+	 * @param extensions расширения
 	 * @return
 	 */
-	public static WebDriver createChromeDriver(URL hubURL, Platform platformName,
-											   String appName, String pathToExtension) {
+	public static WebDriver createChromeDriver(URL hubURL, Platform platformName, String appName,
+											   List<ChromeSettings.Extension> extensions) {
 		DesiredCapabilities cpb = buildCapability(
 				platformName, appName, "chrome");
 
         ChromeOptions options = new ChromeOptions();
 		setOptimalChromeOptions(options);
-
-//		LoggingPreferences logPrefs = new LoggingPreferences();
-//		logPrefs.enable(LogType.PERFORMANCE, Level.ALL);
-//		options.setCapability("goog:loggingPrefs", logPrefs);
-//		cpb.setCapability(CapabilityType.LOGGING_PREFS, logPrefs);
-
-		options.addArguments("--load-extension=" + pathToExtension);
-
+		setDownloadFolder(options, ChromeSettings.DOWNLOAD_FOLDER);
+		setLoadExtensions(options, extensions);
 		cpb.setCapability(ChromeOptions.CAPABILITY, options);
 		return new RemoteWebDriver(hubURL, cpb);
     }
@@ -110,6 +110,7 @@ public class DriverFactory {
 		//options.setPageLoadStrategy(PageLoadStrategy.NORMAL);
 		LoggingPreferences logPrefs = new LoggingPreferences();
 		logPrefs.enable( LogType.PERFORMANCE, Level.ALL );
+		logPrefs.enable( LogType.DRIVER, Level.ALL );
 		options.setCapability( "goog:loggingPrefs", logPrefs );
 	}
 
@@ -133,6 +134,23 @@ public class DriverFactory {
 		}
 		capability.setCapability("enableVNC", true);
 		return capability;
+	}
+
+	private static void setLoadExtensions(ChromeOptions options, List<ChromeSettings.Extension> extensions) {
+		options.addArguments("--user-data-dir=" + ChromeSettings.USER_DATA_FOLDER);
+		options.addArguments("--profile-directory=" + ChromeSettings.PROFILE_NAME);
+		options.addArguments("--load-extension=" + ChromeSettings.buildLoadExtensionArgValue(extensions));
+		options.addArguments("--auto-select-desktop-capture-source=Entire screen");
+	}
+
+	private static void setDownloadFolder(ChromeOptions options, String folder) {
+		HashMap<String, Object> chromePrefs = new HashMap<>();
+		chromePrefs.put("profile.default_content_settings.popups", 0);
+		chromePrefs.put("download.default_directory", ChromeSettings.DOWNLOAD_FOLDER);
+		chromePrefs.put("download.prompt_for_download", "false");
+
+		options.setExperimentalOption("prefs", chromePrefs);
+		options.addArguments("--test-type");
 	}
 
 	/**
