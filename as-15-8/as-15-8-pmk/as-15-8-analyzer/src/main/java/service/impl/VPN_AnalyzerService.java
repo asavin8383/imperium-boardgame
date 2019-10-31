@@ -135,6 +135,10 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 	}
 
 	protected void obtainResultNLP(VpnAnalysisResult analysisResult, ExecutionVpnJobResult result){
+	    if (StringUtils.isEmpty(analysisResult.getPageUrlFinal())){
+            log.info("NLP не запущен, URL пустой!");
+	        return;
+        }
 		log.info("Запуск NLP: " + analysisResult.getPageUrlFinal());
 		String page = clearResult(result.getPageContent());
 
