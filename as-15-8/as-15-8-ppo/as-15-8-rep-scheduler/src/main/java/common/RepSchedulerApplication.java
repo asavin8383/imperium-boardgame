@@ -1,6 +1,5 @@
 package common;
 
-import lombok.extern.java.Log;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -15,7 +14,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  * Date: 08.10.2019
  * Time: 16:02
  */
-@Log
 @SpringBootApplication
 @EnableScheduling
 @ComponentScan(basePackages = {"model", "controllers", "schedule"})

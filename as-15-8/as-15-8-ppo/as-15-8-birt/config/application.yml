@@ -1,6 +1,6 @@
 subsystem: PPO
 server:
-  port: 15812
+  port: 15813
 gateway.url: ${GATEWAY_URI:http://localhost:15880}
 eureka:
   client:
@@ -10,10 +10,7 @@ eureka:
     preferIpAddress: true
     instanceId: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port}
 spring:
-  application.name: report_scheduler
-  liquibase:
-    enabled: true
-    change-log: classpath:data/db.changelog.master.xml
+  application.name: report_generator
   datasource:
     test-while-idle: true
     validation-query: SELECT 1;
@@ -21,17 +18,6 @@ spring:
     max-active: 5
     username: as_user
     password: as_user
-  jpa:
-    properties:
-      hibernate:
-        jdbc:
-          lob:
-            non_contextual_creation: true
-        format_sql: true
-    databasePlatform: org.hibernate.dialect.PostgreSQL9Dialect
-app:
-  birt.url: 'http://localhost:15813/reglament/'
-  schedule: '5 0 * * * ?'
 
 ---
 
@@ -39,14 +25,7 @@ logging:
   config:
   level:
     root: info
-    model: debug
-    repositories: debug
-    controllers: debug
-    common: debug
-    schedule: debug
-    org.springframework.data: debug
-    org.springframework.web: debug
-    org.springframework.http: debug
+    birt: debug
 eureka:
   client:
     enabled: false
@@ -54,8 +33,6 @@ spring:
   profiles: dev_asin
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb_test
-  liquibase:
-    enabled: false
   cloud:
     bus.trace.enabled: false
     config:
@@ -65,11 +42,6 @@ spring:
       bindings:
         springCloudBusInput:
           group: config_server
-      kafka.binder:
-        brokers:
-app:
-  schedule: '*/10 * * * * ?'
-
 
 
 

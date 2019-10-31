@@ -1,5 +1,6 @@
-package com.ecl.birt;
+package birt;
 
+import lombok.extern.java.Log;
 import org.eclipse.birt.core.framework.Platform;
 import org.eclipse.birt.report.engine.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
@@ -22,6 +25,7 @@ import java.util.logging.Level;
  * Time: 5:28
  */
 
+@Log
 @Service
 class BirtFacade {
 
@@ -117,6 +121,11 @@ class BirtFacade {
         for (Map.Entry<String, ?> entry : params.entrySet()) {
             String name = entry.getKey();
             IParameterDefnBase parameterDefn = paramTask.getParameterDefn(name);
+            if (parameterDefn == null) {
+                log.warning("Unexpected parameter " + name + " = " + entry.getValue());
+                continue;
+            }
+
             int type = parameterDefn.getParameterType();
             Object value = entry.getValue();
 
@@ -139,7 +148,8 @@ class BirtFacade {
                             task.setParameterValue(name, Boolean.valueOf(value.toString()));
                             break;
                         case IScalarParameterDefn.TYPE_DATE:
-                            throw new RuntimeException("TYPE_DATE is not supported");
+                            task.setParameterValue(name, parseDate(value));
+                            break;
                         case IScalarParameterDefn.TYPE_DATE_TIME:
                             throw new RuntimeException("TYPE_DATE_TIME is not supported");
                         case IScalarParameterDefn.TYPE_TIME:
@@ -154,6 +164,15 @@ class BirtFacade {
         }
     }
 
+    private Object parseDate(Object value) {
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            return new java.sql.Date(sdf.parse((String) value).getTime());
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private IRenderOption getOptions(String repType) {// настройка выходного формата отчета
         if ("html".equalsIgnoreCase(repType)) {
             HTMLRenderOption options = new HTMLRenderOption();
@@ -164,6 +183,28 @@ class BirtFacade {
         } else if ("pdf".equalsIgnoreCase(repType)) {
             PDFRenderOption options = new PDFRenderOption();
             options.setOutputFormat("pdf");
+            return options;
+
+        } else if ("ppt".equalsIgnoreCase(repType)) {
+            RenderOption options = new RenderOption();
+            options.setOption(IRenderOption.EMITTER_ID, "org.eclipse.birt.report.engine.emitter.ppt");
+            options.setOutputFormat("ppt");
+            return options;
+
+        } else if ("pptx".equalsIgnoreCase(repType)) {
+            RenderOption options = new RenderOption();
+            options.setOption(IRenderOption.EMITTER_ID, "org.eclipse.birt.report.engine.emitter.pptx");
+            options.setOutputFormat("pptx");
+            return options;
+
+        } else if (repType.toLowerCase().contains("xls")) { //("xls".equalsIgnoreCase(repType)) {
+            IRenderOption options = new EXCELRenderOption();
+            options.setOutputFormat(repType);
+            return options;
+
+        } else if ("docx".equalsIgnoreCase(repType)) {
+            IRenderOption options = new DocxRenderOption();
+            options.setOutputFormat(repType);
             return options;
         }
         throw new RuntimeException("Unexpected report type '" + repType + "'");

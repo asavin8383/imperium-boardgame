@@ -69,6 +69,7 @@ public class OkReportService implements ReportService
 
             if (!response.isSuccessful()) throw new RuntimeException(response.code() + ": " + response.message());
 
+            report.setMime(response.header("Content-Type"));
             report.setFinish_dttm(new Timestamp(System.currentTimeMillis()));
             report.setStatus(ReportStatus.OK);
             //noinspection ConstantConditions
@@ -79,6 +80,7 @@ public class OkReportService implements ReportService
         } catch (Throwable e) {
             log.error(report.toString(), e);
             report.setStatus(ReportStatus.FAILED);
+            report.setReason(e.getMessage());
             reportRepository.saveAndFlush(report);
         }
 

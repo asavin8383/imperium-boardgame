@@ -1,4 +1,4 @@
-package com.ecl.birt;
+package birt;
 
 /**
  * User: asinjavin
