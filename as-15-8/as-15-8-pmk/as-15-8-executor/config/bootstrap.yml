@@ -20,3 +20,13 @@ spring:
       discovery.serviceId: config_server
       profile: default
       label: latest
+
+---
+
+spring:
+  profiles: dev_jspirina
+  cloud:
+    config:
+      uri: http://localhost:15802
+      profile: default
+      label: latest

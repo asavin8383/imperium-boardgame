@@ -27,11 +27,10 @@ import static robots.utils.HttpResponseHelper.HttpResponseMeta;
 
 public class HolaRobot extends SeleniumRobot {
 
-    private String crxFilePath;
-
     protected String stubUrl;
     protected boolean useEtalon;
 
+    private List<ChromeSettings.Extension> extensions;
 
     public HolaRobot(Map<AccessToolParameter, String> scriptParams) {
 
@@ -49,7 +48,9 @@ public class HolaRobot extends SeleniumRobot {
 
      	this.stubUrl = scriptParams.get(AccessToolParameter.STUB_URL);
 
-     	this.crxFilePath = scriptParams.get(AccessToolParameter.CRX_FILE_PATH);
+     	this.extensions = new ArrayList<>();
+        this.extensions.add(ChromeSettings.Extension.NIMBUS);
+        this.extensions.add(ChromeSettings.Extension.HOLA);
     }
 
     @Override
@@ -87,10 +88,6 @@ public class HolaRobot extends SeleniumRobot {
             close(driver);
         }
 
-        List<ChromeSettings.Extension> extensions = new ArrayList<>();
-        extensions.add(ChromeSettings.Extension.NIMBUS);
-        extensions.add(ChromeSettings.Extension.HOLA);
-
         try {
             driver = DriverFactory.createChromeDriver(
                     ExecutorProperties.getSeleniumHubUrl(),
@@ -99,9 +96,16 @@ public class HolaRobot extends SeleniumRobot {
                     extensions
             );
 
-            ScriptUtils.waitForSecondTabAndSwitchToIt(driver);
-            WebDriverWait wait = new WebDriverWait(driver, 60);
+            // opens empty tab
+            // ((JavascriptExecutor) driver).executeScript("window.open()");
 
+//            driver.get(ChromeSettings.Extension.HOLA.getPopupUrl());
+//            wait.until(ExpectedConditions.presenceOfElementLocated(
+//                    By.xpath("//div[@class=\"popular-view-footer\"]/a"))).click();
+
+            driver.get("https://hola.org/unblock/popular"); // todo config
+
+            WebDriverWait wait = new WebDriverWait(driver, 60);
             // Конфигурируем холу на доступ для данного URL
             WebElement searchBox = wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("input")));
             searchBox.sendKeys(url);
