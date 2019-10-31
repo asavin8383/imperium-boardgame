@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.RestStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -16,13 +17,13 @@ import org.springframework.web.util.UriComponentsBuilder;
  */
 @Service
 @Slf4j
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class PODExchange
 {
     @Value("${gateway.url}")
     private String gatewayUrl;
 
-    private final RestTemplate restTemplate;
+    @Autowired @Qualifier("internal")
+    private RestTemplate restTemplate;
 
 
     public boolean checkUrl(String url) {
