@@ -1,4 +1,6 @@
-package com.ecl;
+package schedule;
+
+import model.Report;
 
 /**
  * Фасад для создания отчета
@@ -9,5 +11,5 @@ package com.ecl;
  */
 public interface ReportService
 {
-    byte[] runReport(String report, ReportPeriod reportPeriod, String type);
+    void runReport(Report report);
 }

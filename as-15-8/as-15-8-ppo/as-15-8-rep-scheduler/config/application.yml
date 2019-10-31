@@ -1,36 +1,73 @@
+subsystem: PPO
+server:
+  port: 15812
+gateway.url: ${GATEWAY_URI:http://localhost:15880}
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${gateway.url}/eureka
+  instance:
+    preferIpAddress: true
+    instanceId: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port}
 spring:
-  main:
-    web-application-type: none
+  application.name: report_scheduler
+  liquibase:
+    enabled: true
+    change-log: classpath:data/db.changelog.master.xml
   datasource:
-    url: jdbc:postgresql://192.168.5.23:5432/db
-    username: postgres
-    password: postgres
-
+    test-while-idle: true
+    validation-query: SELECT 1;
+    time-between-eviction-runs-millis: 300000
+    max-active: 5
+    username: as_user
+    password: as_user
+  jpa:
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
+        format_sql: true
+    databasePlatform: org.hibernate.dialect.PostgreSQL9Dialect
 app:
-  birt: 'http://localhost:8092/reglament/'
-  schedule:
-#    day:     '*/10 * * * * ?'
-#    week:    '*/10 * * * * ?'
-#    month:   '*/12 * * * * ?'
-#    quarter: '*/12 * * * * ?'
-#    half:    '*/15 * * * * ?'
-#    year:    '*/15 * * * * ?'
-    day:     '5 0 * * * ?'
-    week:    '10 0 * * 2 ?'
-    month:   '10 0 1 * * ?'
-    quarter: '10 0 1 */4 * ?'
-    half:    '10 0 1 */6 * ?'
-    year:    '10 0 1 1 * ?'
-  reports:
-    day:
-      - Form1_report
-    week:
-      - Form1_report
-    month:
-      - Form1_report
-    quarter:
-      - Form1_report
-    half:
-      - Form1_report
-    year:
-      - Form1_report
+  birt.url: 'http://localhost:8092/reglament/'
+  schedule: '*/10 * * * * ?'
+#    day:     '5 0 * * * ?'
+
+---
+
+logging:
+  config:
+  level:
+    root: info
+    model: debug
+    repositories: debug
+    controllers: debug
+    common: debug
+    schedule: debug
+    org.springframework.data: debug
+    org.springframework.web: debug
+    org.springframework.http: debug
+eureka:
+  client:
+    enabled: false
+spring:
+  profiles: dev_asin
+  datasource:
+    url: jdbc:postgresql://192.168.5.195:5432/asdb_test
+  liquibase:
+    enabled: false
+  cloud:
+    bus.trace.enabled: false
+    config:
+      bus:
+        enabled: false
+    stream:
+      bindings:
+        springCloudBusInput:
+          group: config_server
+      kafka.binder:
+        brokers:
+
+
+
