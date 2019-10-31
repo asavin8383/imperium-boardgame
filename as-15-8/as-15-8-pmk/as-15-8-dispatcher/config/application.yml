@@ -59,6 +59,9 @@ spring:
     control-topic: exec_control
     analysis-results-concurrency: 12
     notifications-concurrency: 12
+  liquibase:
+    enabled: true
+    change-log: classpath:/data/changelog/db.changelog.master.xml
   cloud:
     stream:
       kafka:
@@ -73,6 +76,9 @@ spring:
     banner-mode: "off"
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb
+  liquibase:
+    enabled: true
+    change-log: classpath:/data/changelog/db.changelog.master.xml
   cloud.stream:
     bindings:
       incomingArrangements:
@@ -92,6 +98,9 @@ spring:
   profiles: dev_ashabalin
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb_test
+  liquibase:
+    enabled: true
+    change-log: classpath:/data/changelog/db.changelog.master.xml
   kafka:
     arrangement-tasks-topic: arrangements_ashabalin
     jobs-topic: jobs_ashabalin
@@ -121,6 +130,9 @@ spring:
   profiles: dev_asinyavin
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb_test
+  liquibase:
+    enabled: true
+    change-log: classpath:/data/changelog/db.changelog.master.xml
   cloud:
     stream:
       bindings:
@@ -141,6 +153,9 @@ spring:
   profiles: dev_asavin
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb_test
+  liquibase:
+    enabled: true
+    change-log: classpath:/data/changelog/db.changelog.master.xml
   cloud:
     stream:
       bindings:
@@ -160,6 +175,9 @@ spring:
   profiles: dev_pvorobiev
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb_test
+  liquibase:
+    enabled: true
+    change-log: classpath:/data/changelog/db.changelog.master.xml
   cloud:
     stream:
       bindings:
@@ -180,6 +198,9 @@ spring:
   profiles: dev_jspirina
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb_test
+  liquibase:
+    enabled: true
+    change-log: classpath:/data/changelog/db.changelog.master.xml
   cloud:
     stream:
       bindings:
