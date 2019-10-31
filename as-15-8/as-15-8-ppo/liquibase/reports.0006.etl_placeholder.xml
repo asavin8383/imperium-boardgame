@@ -1,0 +1,62 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:appdba="http://www.datical.net/xml/ns/appdba" xmlns:datical="http://www.datical.net/xml/ns/datical" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+<changeSet id="0006.1" author="klychagin">
+<createTable tableName="etl_placeholder" schemaName="dm">
+    <column name="dt" type="date"/>
+    <column name="is_end_of_week" type="boolean"/>
+    <column name="is_end_of_month" type="boolean"/>
+    <column name="is_end_of_quarter" type="boolean"/>
+    <column name="is_end_of_half" type="boolean"/>
+    <column name="is_end_of_year" type="boolean"/>
+    <column name="ppn_dttm" type="timestamp" defaultValueComputed="current_timestamp"/>
+</createTable>
+</changeSet>
+
+    <!--    <changeSet id="0006.2" author="klychagin">-->
+<!--        <sql>-->
+<!--            create or replace function dm.update_reports_data(dt date, is_end_of_month boolean, is_end_of_quarter boolean, is_end_of_half boolean, is_end_of_year boolean) returns void-->
+<!--    language plpgsql-->
+<!--as-->
+<!--$$-->
+<!--BEGIN-->
+<!--        insert into dm.test_at_stat_dm(msr_prd_id,-->
+<!--                                       access_tool_tp_id,-->
+<!--                                       access_tool_id,-->
+<!--                                       ppn_dttm,-->
+<!--                                       test_cnt_all,-->
+<!--                                       test_cnt_url,-->
+<!--                                       test_cnt_d,-->
+<!--                                       test_cnt_dm,-->
+<!--                                       test_cnt_ip,-->
+<!--                                       test_cnt_sn)-->
+<!--(select-->
+<!--msr_prd_id,-->
+<!--access_tool.access_tool_tp_id,-->
+<!--access_tool.id  access_tool_id,-->
+<!--       count(*) as test_cnt_all,-->
+<!--       count(*) filter ( where  check_unit_type='URL') as test_cnt_url,-->
+<!--       count(*) filter ( where check_unit_type='DOMAIN' )test_cnt_d,-->
+<!--       count(*) filter ( where check_unit_type='DOMAIN_MASK' )test_cnt_dm,-->
+<!--       count(*) filter ( where check_unit_type in ('IP_V4','IP_V6') )test_cnt_ip,-->
+<!--       count(*) filter ( where check_unit_type in ('IP_V4_SUBNET','IP_V6_SUBNET')) test_cnt_sn-->
+<!--from-->
+<!--     portal.arrangement_results join portal.arrangements-->
+<!--     on arrangement_results.arrangement_id = arrangements.id-->
+<!--     join dm.msr_prd on end_date between msr_prd.eff_dttm and msr_prd.end_dttm and msr_prd_tp_id=1-->
+<!--     join dm.access_tool on access_tool.nm=arrangements.access_tool-->
+<!--where date_trunc('day',arrangement_results.end_date)=dt-->
+<!--group by-->
+<!--msr_prd_id,-->
+<!--access_tool.id,-->
+<!--access_tool.access_tool_tp_id);-->
+<!--END;-->
+<!--$$;-->
+<!--        </sql>-->
+<!--   <rollback>-->
+<!--       <sql>-->
+<!--            function dm.update_reports_data(dt date, is_end_of_month boolean, is_end_of_quarter boolean, is_end_of_half boolean, is_end_of_year boolean);-->
+<!--       </sql>-->
+<!--   </rollback>-->
+<!--    </changeSet>-->
+</databaseChangeLog>
+

@@ -7,4 +7,6 @@
     <include file="./reports.0002.insert_dicts.xml"/>
     <include file="./reports.0003.generate_msr_prd.xml"/>
     <include file="./reports.0004.alter_at.xml"/>
+    <include file="./reports.0005.alter_at.xml"/>
+    <include file="./reports.0006.etl_placeholder.xml"/>
 </databaseChangeLog>
