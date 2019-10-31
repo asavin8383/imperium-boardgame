@@ -121,10 +121,6 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 	}
 
 	protected void checkFinalUrlForForbidden(VpnAnalysisResult analysisResult){
-		boolean check = podExchange.checkUrl(analysisResult.getFinalUrl());
-		log.info("TEST check forbidden: " + check + ", URL: " + analysisResult.getFinalUrl());
-
-		/*
 		if (analysisResult.getNeedTestFinalUrl() != null && analysisResult.getNeedTestFinalUrl()){
 			boolean check = podExchange.checkUrl(analysisResult.getFinalUrl());
 			if (check){
@@ -135,7 +131,7 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 				analysisResult.setStubScoreInfo(info + "Обнаружен редирект на запрещенный ресурс.");
 			}
 			log.info("Результат проверки URL на находжение в ЕРДИ: " + check + ", URL = " + analysisResult.getPageUrlFinal());
-		}*/
+		}
 	}
 
 	protected void obtainResultNLP(VpnAnalysisResult analysisResult, ExecutionVpnJobResult result){
