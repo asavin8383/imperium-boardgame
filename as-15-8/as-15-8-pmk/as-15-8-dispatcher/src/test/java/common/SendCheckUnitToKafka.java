@@ -95,13 +95,13 @@ public class SendCheckUnitToKafka {
 		String sql = "select 'URL' as check_unit_type, res.value as check_unit_value \n" +
 				"from sor.content_resources res \n" +
 				"where resource_type_id = 6 \n" +
-				"limit 100";
+				"limit 10 offset 10";
 
 		jdbcTemplate.queryForList(sql)
 				.forEach(result -> {
 					CheckUnitJob checkUnitJob = new CheckUnitJob();
 					checkUnitJob.setJobID(1L);
-					checkUnitJob.setAccessTool("kaspersky");
+					checkUnitJob.setAccessTool("express");
 
 					checkUnitJob.setCheckUnit(new CheckUnit(
 									CheckUnitType.valueOf(result.get("check_unit_type").toString()),

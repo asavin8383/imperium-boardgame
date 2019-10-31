@@ -17,6 +17,7 @@ public class ChromeSettings {
     public enum Extension {
 
         NIMBUS("bpconcjcammlapcogcnnelfmaeghhagj", "8.9.5_0", "/popup.html"),
+        GMAIL_SCREENSHOT("boepdnhlmfleonjnaoaemgcggppoikog", "1.0.0.21_0", "/popup.html"),
         HOLA("gkojfkhlekighikafcpjkiklfbnlmeio", "1.157.821_0", "/js/popup.html");
 
         private String stringId;
@@ -55,6 +56,10 @@ public class ChromeSettings {
                 .append(EXTENSION_FOLDER).append("/")
                 .append(ext.stringId).append("/")
                 .append(ext.version).toString();
+    }
+
+    public static Extension getScreenshotExtension() {
+        return Extension.GMAIL_SCREENSHOT;
     }
 
 }

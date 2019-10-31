@@ -89,9 +89,9 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 
 		CheckUnitJobResult checkUnitJobResult = obtainResult(analysisResult, result);
 		analysisResult.setCheckResult(checkUnitJobResult);
-		saveSources(analysisResult, result, checkUnitJobResult);
 		obtainResultNLP(analysisResult, result);
 		checkFinalUrlForForbidden(analysisResult);
+		saveSources(analysisResult, result, checkUnitJobResult);
 		return analysisResult;
 	}
 
@@ -135,6 +135,10 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 	}
 
 	protected void obtainResultNLP(VpnAnalysisResult analysisResult, ExecutionVpnJobResult result){
+	    if (StringUtils.isEmpty(analysisResult.getPageUrlFinal())){
+            log.info("NLP не запущен, URL пустой!");
+	        return;
+        }
 		log.info("Запуск NLP: " + analysisResult.getPageUrlFinal());
 		String page = clearResult(result.getPageContent());
 
