@@ -169,20 +169,22 @@ spring:
 
 spring:
   profiles: dev_jspirina
-  cloud.stream:
-    bindings:
-      jobs:
-        destination: jobs_jspirina
-        consumer:
-          concurrency: 7
-      executionResults:
-        destination: exec_results_jspirina
-      notifications:
-        destination: job_notifications_jspirina
-      springCloudBusInput:
-        destination: spring_cloud_bus_input_jspirina
-      springCloudBusOutput:
-        destination: spring_cloud_bus_output_jspirina
-    kafka.bindings.jobs.consumer:
-      configuration:
-        max.poll.interval.ms: 300000
+  cloud:
+    stream:
+      bindings:
+        jobs:
+          destination: jobs_jspirina
+          consumer:
+            concurrency: 7
+        executionResults:
+          destination: exec_results_jspirina
+        notifications:
+          destination: job_notifications_jspirina
+        springCloudBusInput:
+          destination: spring_cloud_bus_input_jspirina
+        springCloudBusOutput:
+          destination: spring_cloud_bus_output_jspirina
+      kafka.bindings.jobs.consumer:
+        configuration:
+          max.poll.interval.ms: 300000
+eureka.client.enabled: false

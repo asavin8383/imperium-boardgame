@@ -14,7 +14,6 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.net.URL;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -61,7 +60,6 @@ public class DriverFactory {
 
 		ChromeOptions options = new ChromeOptions();
 		setOptimalChromeOptions(options);
-		setDownloadFolder(options, ChromeSettings.DOWNLOAD_FOLDER);
 		setLoadExtensions(options, Collections.singletonList(
 				ChromeSettings.Extension.NIMBUS));
 
@@ -91,7 +89,6 @@ public class DriverFactory {
 
         ChromeOptions options = new ChromeOptions();
 		setOptimalChromeOptions(options);
-		setDownloadFolder(options, ChromeSettings.DOWNLOAD_FOLDER);
 		setLoadExtensions(options, extensions);
 		cpb.setCapability(ChromeOptions.CAPABILITY, options);
 		return new RemoteWebDriver(hubURL, cpb);
@@ -110,7 +107,6 @@ public class DriverFactory {
 		//options.setPageLoadStrategy(PageLoadStrategy.NORMAL);
 		LoggingPreferences logPrefs = new LoggingPreferences();
 		logPrefs.enable( LogType.PERFORMANCE, Level.ALL );
-		logPrefs.enable( LogType.DRIVER, Level.ALL );
 		options.setCapability( "goog:loggingPrefs", logPrefs );
 	}
 
@@ -141,16 +137,14 @@ public class DriverFactory {
 		options.addArguments("--profile-directory=" + ChromeSettings.PROFILE_NAME);
 		options.addArguments("--load-extension=" + ChromeSettings.buildLoadExtensionArgValue(extensions));
 		options.addArguments("--auto-select-desktop-capture-source=Entire screen");
-	}
 
-	private static void setDownloadFolder(ChromeOptions options, String folder) {
-		HashMap<String, Object> chromePrefs = new HashMap<>();
-		chromePrefs.put("profile.default_content_settings.popups", 0);
-		chromePrefs.put("download.default_directory", ChromeSettings.DOWNLOAD_FOLDER);
-		chromePrefs.put("download.prompt_for_download", "false");
+//		options.addArguments("--allow-http-screen-capture");
+//		options.addArguments("--enable-usermedia-screen-capturing");
+//		options.addArguments("--deny-permission-prompts");
 
-		options.setExperimentalOption("prefs", chromePrefs);
-		options.addArguments("--test-type");
+//		options.addArguments("--flag-switches-begin");
+//		options.addArguments("--enable-features=QuietNotificationPrompts");
+//		options.addArguments("--flag-switches-end");
 	}
 
 	/**

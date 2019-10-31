@@ -8,10 +8,6 @@ import java.util.stream.Collectors;
 @UtilityClass
 public class ChromeSettings {
 
-    public static final String DOWNLOAD_FOLDER = "/home/selenium/downloads";
-
-    public static final String SCREENSHOT_FILENAME = "screenshot";
-
     public static final String USER_DATA_FOLDER = "/home/selenium/chrome";
 
     public static final String EXTENSION_FOLDER = "Extensions";
