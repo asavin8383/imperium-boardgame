@@ -1,0 +1,36 @@
+spring:
+  main:
+    web-application-type: none
+  datasource:
+    url: jdbc:postgresql://192.168.5.23:5432/db
+    username: postgres
+    password: postgres
+
+app:
+  birt: 'http://localhost:8092/reglament/'
+  schedule:
+#    day:     '*/10 * * * * ?'
+#    week:    '*/10 * * * * ?'
+#    month:   '*/12 * * * * ?'
+#    quarter: '*/12 * * * * ?'
+#    half:    '*/15 * * * * ?'
+#    year:    '*/15 * * * * ?'
+    day:     '5 0 * * * ?'
+    week:    '10 0 * * 2 ?'
+    month:   '10 0 1 * * ?'
+    quarter: '10 0 1 */4 * ?'
+    half:    '10 0 1 */6 * ?'
+    year:    '10 0 1 1 * ?'
+  reports:
+    day:
+      - Form1_report
+    week:
+      - Form1_report
+    month:
+      - Form1_report
+    quarter:
+      - Form1_report
+    half:
+      - Form1_report
+    year:
+      - Form1_report

@@ -1,0 +1,38 @@
+{
+  "properties": [
+    {
+      "name": "app.birt",
+      "type": "java.lang.String",
+      "description": "BIRT service URL."
+    },
+    {
+      "name": "app.schedule.day",
+      "type": "java.lang.String",
+      "description": "Report schedule by day in CRON format."
+    },
+    {
+      "name": "app.schedule.week",
+      "type": "java.lang.String",
+      "description": "Report schedule by week in CRON format."
+    },
+    {
+      "name": "app.schedule.month",
+      "type": "java.lang.String",
+      "description": "Report schedule by month in CRON format."
+    },
+    {
+      "name": "app.schedule.quarter",
+      "type": "java.lang.String",
+      "description": "Report schedule by quarter in CRON format."
+    },
+    {
+      "name": "app.schedule.half",
+      "type": "java.lang.String",
+      "description": "Report schedule by half in CRON format."
+    },
+    {
+      "name": "app.schedule.year",
+      "type": "java.lang.String",
+      "description": "Report schedule by year in CRON format."
+    }
+  ] }
