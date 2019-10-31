@@ -28,6 +28,7 @@ spring:
             producer:
               configuration:
                 max.request.size: 10000000
+gateway.url: ${GATEWAY_URI:http://localhost:15880}
 source_path_vpn: /logs/content.txt
 source_path_anonym: /logs/content.txt
 
