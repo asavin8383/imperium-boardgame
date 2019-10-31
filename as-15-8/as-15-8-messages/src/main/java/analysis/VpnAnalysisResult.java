@@ -14,6 +14,7 @@ import lombok.ToString;
 public class VpnAnalysisResult extends AnalysisResult implements StubAnalysisResult {
 
 	private CheckUnitJobResult checkResult;
+	private String resultNLP;
 
 	private String responseErrorCode;
 	private String responseErrorCodeEtalon;
@@ -34,6 +35,7 @@ public class VpnAnalysisResult extends AnalysisResult implements StubAnalysisRes
 	private String stubUrl;
 	private Integer similarityOriginPercent;
 	private Boolean needTestFinalUrl;
+	private Boolean forbiddenFinalUrl;
 	private String stubScoreInfo;
 
 	@Override

@@ -2,7 +2,9 @@ package model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.ToString;
 import org.springframework.beans.factory.annotation.Value;
 
 import javax.persistence.*;
@@ -12,6 +14,8 @@ import java.util.Set;
 @Entity
 @Data
 @Table(schema = "config", name = "configurations")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(onlyExplicitlyIncluded = true)
 public class Configuration {
 
     @Getter
@@ -22,12 +26,19 @@ public class Configuration {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
+    @EqualsAndHashCode.Include
     private Long id;
 
+    @ToString.Include
+    @EqualsAndHashCode.Include
     private String application;
 
+    @ToString.Include
+    @EqualsAndHashCode.Include
     private String profile;
 
+    @ToString.Include
+    @EqualsAndHashCode.Include
     private String label = defaultLabel;
 
     @ManyToMany(cascade=CascadeType.ALL, mappedBy = "configurations")

@@ -23,8 +23,8 @@
 	<modules>
 		<module>as-15-8-messages</module>
 		<module>as-15-8-ppt</module>
+		<module>as-15-8-ppm</module>
 		<module>as-15-8-pmk</module>
-        <module>as-15-8-scheduler</module>
         <module>as-15-8-pod</module>
         <module>as-15-8-smuf</module>
         <module>as-15-8-soib</module>

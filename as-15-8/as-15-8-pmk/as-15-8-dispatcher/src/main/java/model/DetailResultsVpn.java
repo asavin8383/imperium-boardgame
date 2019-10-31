@@ -82,4 +82,7 @@ public class DetailResultsVpn implements Serializable  {
 
     @Column(name="stub_score_info")
     private String stubScoreInfo;
+
+    @Column(name="result_nlp")
+    private String resultNLP;
 }

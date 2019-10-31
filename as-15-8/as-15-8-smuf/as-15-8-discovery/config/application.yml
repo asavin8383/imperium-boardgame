@@ -14,5 +14,14 @@ eureka:
 
 spring:
   profiles: test, prod
+  profiles.include: docker_log
+  main:
+    banner-mode: "off"
+
+---
+
+spring:
+  profiles: dev_asavin, dev_ashabalin
+  profiles.include: local_log
   main:
     banner-mode: "off"

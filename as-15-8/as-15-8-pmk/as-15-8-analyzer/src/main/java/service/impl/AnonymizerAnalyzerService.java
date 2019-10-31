@@ -5,16 +5,20 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import common.AnalysisException;
 import enums.CheckUnitJobResult;
 import execution.ExecutionAnonymizerResult;
+import execution.ExecutionVpnJobResult;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import model.KeyWord;
+import model.NLPCategory;
 import org.jsoup.Jsoup;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import service.AnalyzerService;
+import service.ClassificationService;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -49,7 +53,11 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 
 	@Autowired
 	private ResourceLoader resourceLoader;
-	
+
+	@Autowired
+	@Qualifier("openNLPClassificator")
+	private ClassificationService classificationService;
+
 	@PostConstruct
 	public void initAnalyzer() {
 		try {
@@ -69,6 +77,7 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 
 		obtainResult(analysisResult, executionResult);
 		saveSources(analysisResult, executionResult);
+		obtainResultNLP(analysisResult, executionResult);
 
 		return analysisResult;
 	}
@@ -211,6 +220,15 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 
 		analysisResult.setCheckResult(DOUBTFUL);
 		return analysisResult;
+	}
+
+	protected void obtainResultNLP(AnonymizerAnalysisResult analysisResult, ExecutionAnonymizerResult result){
+		String page = clearResult(result.getPageContent());
+
+		NLPCategory nlpCategory = classificationService.classify(page);
+		nlpCategory = nlpCategory == null ? NLPCategory.EXCEPTION : nlpCategory;
+
+		analysisResult.setResultNLP(nlpCategory.name());
 	}
 
 	private CheckUnitJobResult obtainErrorResult(AnonymizerAnalysisResult aRes) {

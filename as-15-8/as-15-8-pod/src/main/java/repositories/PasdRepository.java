@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import repositories.helper.DictionaryRepository;
 
 import java.util.Date;
+import java.util.List;
 
 @Repository
 public interface PasdRepository extends
@@ -17,6 +18,9 @@ public interface PasdRepository extends
         DictionaryRepository {
 
     long countByEffDt(Date effDt);
+
+    @Query(value = "select pasd from PasdRecord pasd where eff_dt = '3000-01-01'")
+    List<PasdRecord> getAllActial();
 
     @Query(value = "select max(c_date) from sor.pasd where eff_dt = :effDt", nativeQuery = true)
     Date findMaxCDateByEffDt(@Param("effDt") Date effDt);

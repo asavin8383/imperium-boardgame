@@ -6,14 +6,19 @@ import common.AnalysisException;
 import enums.CheckUnitJobResult;
 import execution.ExecutionVpnJobResult;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import model.KeyWord;
+import model.NLPCategory;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
+import restapi.PODExchange;
 import service.AnalyzerService;
+import service.ClassificationService;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -34,6 +39,7 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
  *
  */
 @Service
+@Slf4j
 public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResult> {
 
 	public static final String keyWordsSource = "classpath:key_words.json";
@@ -47,7 +53,14 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 
 	@Autowired
 	private ResourceLoader resourceLoader;
-	
+
+	@Autowired
+	private PODExchange podExchange;
+
+	@Autowired
+	@Qualifier("openNLPClassificator")
+	private ClassificationService classificationService;
+
 	@PostConstruct
 	public void initAnalyzer() {
 		try {
@@ -77,6 +90,8 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 		CheckUnitJobResult checkUnitJobResult = obtainResult(analysisResult, result);
 		analysisResult.setCheckResult(checkUnitJobResult);
 		saveSources(analysisResult, result, checkUnitJobResult);
+		obtainResultNLP(analysisResult, result);
+		checkFinalUrlForForbidden(analysisResult);
 		return analysisResult;
 	}
 
@@ -103,6 +118,31 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 				throw new AnalysisException("Error write sources to file! " + path);
 			}
 		}
+	}
+
+	protected void checkFinalUrlForForbidden(VpnAnalysisResult analysisResult){
+		if (analysisResult.getNeedTestFinalUrl() != null && analysisResult.getNeedTestFinalUrl()){
+			boolean check = podExchange.checkUrl(analysisResult.getFinalUrl());
+			if (check){
+				analysisResult.setCheckResult(FORBIDDEN_CONTENT_DETECTED);
+				analysisResult.setForbiddenFinalUrl(true);
+				String info = analysisResult.getStubScoreInfo();
+				info = info == null ? "" : info + ". ";
+				analysisResult.setStubScoreInfo(info + "Обнаружен редирект на запрещенный ресурс.");
+			}
+			log.info("Результат проверки URL на находжение в ЕРДИ: " + check + ", URL = " + analysisResult.getPageUrlFinal());
+		}
+	}
+
+	protected void obtainResultNLP(VpnAnalysisResult analysisResult, ExecutionVpnJobResult result){
+		log.info("Запуск NLP: " + analysisResult.getPageUrlFinal());
+		String page = clearResult(result.getPageContent());
+
+		NLPCategory nlpCategory = classificationService.classify(page);
+		nlpCategory = nlpCategory == null ? NLPCategory.EXCEPTION : nlpCategory;
+
+		analysisResult.setResultNLP(nlpCategory.name());
+		log.info("Результат NLP: " + nlpCategory.name());
 	}
 
 	private String clearResult(String result){

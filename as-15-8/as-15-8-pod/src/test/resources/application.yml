@@ -1,3 +1,4 @@
+config.url:  ${CONFIG_SERVER_URI:http://localhost:15802/ps}
 debug: false
 logging:
   level:
@@ -18,6 +19,8 @@ spring:
       hibernate:
         temp:
           use_jdbc_metadata_defaults: false
+jwt.key: as-15-8
+gateway.url: ${GATEWAY_URI:http://localhost:15880}
 
 registry-anonymizers:
     proxy-ip: "212.83.9.108"

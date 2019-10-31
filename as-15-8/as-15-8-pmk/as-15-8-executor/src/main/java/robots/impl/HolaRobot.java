@@ -1,22 +1,24 @@
 package robots.impl;
 
 import checkUnits.CheckUnit;
+import common.ExecutorProperties;
 import enums.AccessToolParameter;
 import execution.ExecutionJobResult;
 import execution.ExecutionVpnJobResult;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import robots.ChromeSettings;
 import robots.DriverFactory;
 import robots.ProxyUtils;
 import robots.exceptions.ExecutionException;
-import common.ExecutorProperties;
 import robots.utils.HttpResponseHelper;
 import robots.utils.RobotScriptUtils;
 import robots.utils.ScriptUtils;
 import robots.utils.ScriptUtils.PageResult;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -25,11 +27,10 @@ import static robots.utils.HttpResponseHelper.HttpResponseMeta;
 
 public class HolaRobot extends SeleniumRobot {
 
-    private String crxFilePath;
-
     protected String stubUrl;
     protected boolean useEtalon;
 
+    private List<ChromeSettings.Extension> extensions;
 
     public HolaRobot(Map<AccessToolParameter, String> scriptParams) {
 
@@ -47,7 +48,9 @@ public class HolaRobot extends SeleniumRobot {
 
      	this.stubUrl = scriptParams.get(AccessToolParameter.STUB_URL);
 
-     	this.crxFilePath = scriptParams.get(AccessToolParameter.CRX_FILE_PATH);
+     	this.extensions = new ArrayList<>();
+        this.extensions.add(ChromeSettings.Extension.NIMBUS);
+        this.extensions.add(ChromeSettings.Extension.HOLA);
     }
 
     @Override
@@ -90,15 +93,19 @@ public class HolaRobot extends SeleniumRobot {
                     ExecutorProperties.getSeleniumHubUrl(),
                     Platform.valueOf(getScriptParams().get(AccessToolParameter.PLATFORM)),
                     getScriptParams().get(AccessToolParameter.APPLICATION),
-                    crxFilePath
+                    extensions
             );
 
+            // opens empty tab
+            // ((JavascriptExecutor) driver).executeScript("window.open()");
+
+//            driver.get(ChromeSettings.Extension.HOLA.getPopupUrl());
+//            wait.until(ExpectedConditions.presenceOfElementLocated(
+//                    By.xpath("//div[@class=\"popular-view-footer\"]/a"))).click();
+
+            driver.get("https://hola.org/unblock/popular"); // todo config
+
             WebDriverWait wait = new WebDriverWait(driver, 60);
-            wait.until(webDriver -> webDriver != null && webDriver.getWindowHandles().size() > 1);
-
-            ArrayList<String> handles = new ArrayList<>(driver.getWindowHandles());
-            driver.switchTo().window(handles.get(1));
-
             // Конфигурируем холу на доступ для данного URL
             WebElement searchBox = wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("input")));
             searchBox.sendKeys(url);

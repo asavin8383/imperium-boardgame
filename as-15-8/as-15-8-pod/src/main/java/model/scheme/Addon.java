@@ -20,6 +20,9 @@ public class Addon {
     private AddonVersion addonVersion;
 
     @Column
+    private Long content_id;
+
+    @Column
     private Long orig_id;
 
     @Column

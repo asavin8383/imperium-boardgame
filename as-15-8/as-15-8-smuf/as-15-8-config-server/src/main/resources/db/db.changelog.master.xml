@@ -9,5 +9,8 @@
     <include file="db/changelog/config.0004.global_properties.xml" />
     <include file="db/changelog/config.0005.config_view.xml" />
     <include file="db/changelog/config.0006.robots_configurations.xml" />
+    <include file="db/changelog/config.0007.robots.xml" />
+    <include file="db/changelog/config.0008.processing_times.xml" />
+    <include file="db/changelog/config.0009.config_view.xml" />
 
 </databaseChangeLog>

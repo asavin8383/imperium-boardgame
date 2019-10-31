@@ -5,10 +5,9 @@ server:
     max-threads: 200
 gateway.url: ${GATEWAY_URI:http://localhost:15880}
 logging:
-#  config: config/logback-spring.xml
+  config: config/logback-spring.xml
   level:
-    org.springframework.web: WARN
-    org.springframework.security: DEBUG
+    root: INFO
 eureka:
   client:
     serviceUrl:
@@ -45,18 +44,15 @@ registry-anonymizers:
   proxy-port: 3128
   username: test158
   password: test158
-security:
-  oauth2:
-    client:
-      client-id: as-15-8
-      client-secret: as-15-8
-      access-token-uri: http://localhost:15805/oauth/token
-      user-authorization-uri: http://localhost:15805/oauth/authorize
-    resource:
-      user-info-uri: http://localhost:15805/me
 cron:
   expression:
     arrangement: "0 * * ? * *"
+jwt.key: as-15-8
+security:
+  oauth2:
+    resource:
+      jwt:
+        key-value: as-15-8
 
 ---
 
@@ -64,6 +60,7 @@ eureka:
   client.enabled: false
 spring:
   profiles: prod
+  profiles.include: docker_log
   main:
     banner-mode: "off"
   jpa:
@@ -85,6 +82,7 @@ registry-anonymizers:
 
 spring:
   profiles: test
+  profiles.include: docker_log
   main:
     banner-mode: "off"
   jpa:
@@ -97,10 +95,12 @@ spring:
     url: jdbc:postgresql://192.168.5.195:5432/asdb
 registry-anonymizers:
   proxy-ip: ""
+
 ---
 
 spring:
   profiles: dev_pvorobiev, dev_asavin, dev_ashabalin, dev_jspirina
+  profiles.include: local_log
   jpa:
     hibernate:
       ddl-auto: none

@@ -1,20 +1,17 @@
 package common;
 
-import exceptions.ExceptionErdiParser;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.boot.autoconfigure.security.oauth2.client.EnableOAuth2Sso;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.PostConstruct;
-import java.io.IOException;
 import java.security.Principal;
 
 
@@ -29,40 +26,17 @@ import java.security.Principal;
 @EntityScan("model")
 @EnableScheduling
 @EnableAsync
-@EnableOAuth2Sso
+//@EnableResourceServer
 @RestController
 public class ApplicationConfiguration {
 
-	/*@Autowired
-	ContentVersionRepository contentVersionRepository;
-
-	@Autowired
-	AddonVersionRepository addonVersionRepository;
-
-	@Autowired
-	ContentHistoryRepository contentHistoryRepository;
-
-	@Autowired
-	ContentInfoRepository contentInfoRepository;
-
-	@Autowired
-	RestApiHelper restApiHelper;
-
-    @Autowired
-    ErdiRestClient erdiRestClient;
-
-    @Autowired
-    ContentRepository contentRepository;*/
-
-
-
-    // todo async security
+	// todo async security
 	/*@PostConstruct
 	public void init() {
 		SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
 	}*/
 
-	@RequestMapping("/")
+	@GetMapping("/")
 	public String home(Principal user) {
 		return "Hello " + user.getName();
 	}
@@ -72,71 +46,7 @@ public class ApplicationConfiguration {
 	}
 
 	@PostConstruct
-	public void test() throws IOException, ExceptionErdiParser {
+	public void test() {
 		System.out.println("START ---------------------");
-
-
-		//restApiHelper.test1();
-		//restApiHelper.test2();
-		//restApiHelper.test3();
-
-
-		//SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		//restApiHelper.test4(dateFormat.parse("2017-09-22 09:23:13"));
-
-		//restApiHelper.test5(140);
-		//restApiHelper.test6();
-		//restApiHelper.test7();
-
-		/*
-		List<ContentVersion> list = contentVersionRepository.findAll();
-		System.out.println("size = " + list.size());
-		System.out.println(list.toString());
-		*/
-
-		/*
-		List<AddonVersion> addons = addonVersionRepository.findAll();
-		System.out.println("size = " + addons.size());
-		System.out.println(addons.toString());
-		*/
-
-
-		//restApiHelper.test88();
-
-		/*
-		List<ContentInfo> list = contentInfoRepository.findAllById(Arrays.asList(1L, 2L));
-		System.out.println("ContentInfo --->");
-		System.out.println( list.toString() );
-		*/
-
-		/*
-		Optional<ContentInfo> opt = contentInfoRepository.findById(2L);
-		System.out.println("ContentInfo --->");
-		System.out.println( opt.toString() );
-		*/
-
-		/*
-		RestTemplate restTemplate = new RestTemplate();
-		Quote quote = restTemplate.getForObject("https://gturnquist-quoters.cfapps.io/api/random", Quote.class);
-		log.info(quote.toString());
-		*/
-
-		/*
-        System.out.println("test1 --->" + parameterService.getParamValue("TEST1"));
-        System.out.println("test2 --->" + parameterService.getParamValue("test2"));
-        System.out.println("test2 --->" + parameterService.getParamValue("test2", null));
-        System.out.println("test2 --->" + parameterService.getParamValue("test2", false));
-        System.out.println("test3 --->" + parameterService.getParamValue("test2", true));
-        */
-
-
-		//erdiRestClient.fillFullErdiToDB();
-		//erdiRestClient.removeLastContentVersion();
-		//erdiRestClient.removeLastContentVersion();
-		//erdiRestClient.removeLastContentVersion();
-		//erdiRestClient.removeLastContentVersion();
-
-		System.out.println("END ---------------------");
-
 	}
 }
