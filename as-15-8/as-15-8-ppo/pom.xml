@@ -5,6 +5,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>as-15-8-rep-scheduler</module>
+        <module>as-15-8-birt</module>
     </modules>
     <parent>
 		<groupId>com.ecls.as-15-8</groupId>
