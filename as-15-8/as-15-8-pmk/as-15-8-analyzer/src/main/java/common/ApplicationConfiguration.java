@@ -10,7 +10,7 @@ import org.springframework.context.annotation.ComponentScan;
  *
  */
 @SpringBootApplication
-@ComponentScan(basePackages={"common", "events", "service"})
+@ComponentScan(basePackages={"common", "events", "service", "restapi"})
 public class ApplicationConfiguration{
 	
 	public static void main(String[] args) {
