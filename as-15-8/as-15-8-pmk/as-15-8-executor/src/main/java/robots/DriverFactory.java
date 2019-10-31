@@ -61,7 +61,7 @@ public class DriverFactory {
 		ChromeOptions options = new ChromeOptions();
 		setOptimalChromeOptions(options);
 		setLoadExtensions(options, Collections.singletonList(
-				ChromeSettings.Extension.NIMBUS));
+				ChromeSettings.getScreenshotExtension()));
 
 		if (enableLog){
 			LoggingPreferences logPrefs = new LoggingPreferences();
@@ -137,14 +137,6 @@ public class DriverFactory {
 		options.addArguments("--profile-directory=" + ChromeSettings.PROFILE_NAME);
 		options.addArguments("--load-extension=" + ChromeSettings.buildLoadExtensionArgValue(extensions));
 		options.addArguments("--auto-select-desktop-capture-source=Entire screen");
-
-//		options.addArguments("--allow-http-screen-capture");
-//		options.addArguments("--enable-usermedia-screen-capturing");
-//		options.addArguments("--deny-permission-prompts");
-
-//		options.addArguments("--flag-switches-begin");
-//		options.addArguments("--enable-features=QuietNotificationPrompts");
-//		options.addArguments("--flag-switches-end");
 	}
 
 	/**

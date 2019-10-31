@@ -10,6 +10,7 @@ import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.util.StringUtils;
+import robots.ChromeSettings;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -81,21 +82,31 @@ public class ScriptUtils {
     }
 
     public static byte[] getScreenshot(WebDriver webDriver)  {
-        String captureBrowserWindow = Keys.chord(Keys.CONTROL, Keys.SHIFT, "5");
-        webDriver.findElement(By.tagName("html")).sendKeys(captureBrowserWindow);
-        ScriptUtils.waitForTab(webDriver, 2);
-        ArrayList<String> handles = new ArrayList<>(webDriver.getWindowHandles());
-        webDriver.switchTo().window(handles.get(1));
+        switchToTab(webDriver, 2);
 
-        By imgById = By.id("nsc_preview_img");
-        WebDriverWait wait = new WebDriverWait(webDriver, 30);
-        wait.until(ExpectedConditions.presenceOfElementLocated(imgById));
-        wait.until(driver -> !driver.findElement(imgById).getAttribute("src").isEmpty());
-        String base64Image = webDriver.findElement(imgById)
+        webDriver.get(ChromeSettings.getScreenshotExtension().getPopupUrl());
+        WebDriverWait wait = new WebDriverWait(webDriver, WAIT_TIMEOUT);
+        wait.until(ExpectedConditions.presenceOfElementLocated(
+                By.id("delay-desktop-capture"))).click();
+
+        ScriptUtils.waitForTab(webDriver, 2);
+        wait.until(driver -> driver != null &&
+                driver.getWindowHandles().size() < 2);
+        ScriptUtils.waitForTab(webDriver, 2);
+
+        switchToTab(webDriver, 2);
+        WebElement frame = wait.until(ExpectedConditions.presenceOfElementLocated(
+                By.xpath("//*[@id=\"iframe_container\"]/iframe")));
+        webDriver.switchTo().frame(frame);
+
+        String base64Image = wait
+                .until(ExpectedConditions.presenceOfElementLocated(
+                        By.xpath("//div[@id=\"container\"]/img")))
                 .getAttribute("src").split(",")[1];
 
+        // close screenshot tab
         webDriver.close();
-        webDriver.switchTo().window(handles.get(0));
+        switchToTab(webDriver, 1);
 
         return Base64.getDecoder().decode(base64Image);
     }

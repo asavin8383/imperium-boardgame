@@ -44,12 +44,12 @@ public class HolaRobot extends SeleniumRobot {
     			)
     		);
 
-        this.useEtalon = ScriptUtils.useEtalon(scriptParams);
+        this.useEtalon =  ScriptUtils.useEtalon(scriptParams);
 
      	this.stubUrl = scriptParams.get(AccessToolParameter.STUB_URL);
 
      	this.extensions = new ArrayList<>();
-        this.extensions.add(ChromeSettings.Extension.NIMBUS);
+        this.extensions.add(ChromeSettings.getScreenshotExtension());
         this.extensions.add(ChromeSettings.Extension.HOLA);
     }
 
@@ -109,7 +109,11 @@ public class HolaRobot extends SeleniumRobot {
             // Конфигурируем холу на доступ для данного URL
             WebElement searchBox = wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("input")));
             searchBox.sendKeys(url);
-            searchBox.sendKeys(Keys.ENTER);
+            try {
+                searchBox.sendKeys(Keys.ENTER);
+            } catch (StaleElementReferenceException e) {
+                driver.findElement(By.tagName("input")).sendKeys(Keys.ENTER);
+            }
 
             // Ждем, пока закончаться все редиректы
             Function<? super WebDriver, ?> pageLoaded =
