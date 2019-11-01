@@ -1,0 +1,55 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+    <changeSet author="san (generated)" id="1572530613084-7">
+        <createTable schemaName="schedule" tableName="arrangements">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="arrangementsPK"/>
+            </column>
+            <column name="access_tool" type="VARCHAR(255)"/>
+            <column name="creation_date" type="timestamptz"/>
+            <column name="max_workers_count" type="INTEGER"/>
+            <column name="planned_end_time" type="timestamptz"/>
+            <column name="planned_start_time" type="timestamptz"/>
+            <column name="title" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="san (generated)" id="1572530613084-8">
+        <addColumn schemaName="schedule" tableName="schedule_check_units">
+            <column name="erdi_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="san (generated)" id="1572530613084-9">
+        <addColumn schemaName="schedule" tableName="schedules">
+            <column name="user" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="san (generated)" id="1572530613084-10">
+        <addForeignKeyConstraint baseColumnNames="arrangement_id" baseTableName="schedule_period_arrangements" baseTableSchemaName="schedule" constraintName="FK_arrangements_schedule_period_arrangements" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="arrangements" referencedTableSchemaName="schedule" validate="true"/>
+    </changeSet>
+    <changeSet author="san (generated)" id="1572530613084-11">
+        <addForeignKeyConstraint baseColumnNames="arrangement_id" baseTableName="schedule_check_units" baseTableSchemaName="schedule" constraintName="FK_arrangements_schedule_check_units" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="arrangements" referencedTableSchemaName="schedule" validate="true"/>
+    </changeSet>
+    <changeSet author="san (generated)" id="1572530613084-12">
+        <dropForeignKeyConstraint baseTableName="schedules" baseTableSchemaName="schedule" constraintName="schedules_users_id_fk"/>
+    </changeSet>
+    <changeSet author="san (generated)" id="1572530613084-13">
+        <dropColumn columnName="content_id" schemaName="schedule" tableName="schedule_check_units"/>
+    </changeSet>
+    <changeSet author="san (generated)" id="1572530613084-14">
+        <dropColumn columnName="user_id" schemaName="schedule" tableName="schedules"/>
+    </changeSet>
+    <changeSet author="san (generated)" id="1572530613084-1">
+        <addNotNullConstraint columnDataType="bigint" columnName="arrangement_id" schemaName="schedule" tableName="schedule_period_arrangements"/>
+    </changeSet>
+    <changeSet author="san (generated)" id="1572530613084-3">
+        <addNotNullConstraint columnDataType="bigint" columnName="schedule_id" schemaName="schedule" tableName="schedule_periods"/>
+    </changeSet>
+    <changeSet author="san (generated)" id="1572530613084-4">
+        <addNotNullConstraint columnDataType="bigint" columnName="schedule_period_id" schemaName="schedule" tableName="schedule_period_arrangements"/>
+    </changeSet>
+    <changeSet author="san (generated)" id="1572530613084-5">
+        <dropNotNullConstraint columnDataType="varchar(255)" columnName="status" schemaName="schedule" tableName="schedule_period_check_units"/>
+    </changeSet>
+</databaseChangeLog>
