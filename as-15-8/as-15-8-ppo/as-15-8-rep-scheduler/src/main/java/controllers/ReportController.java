@@ -12,10 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import repositories.RegReportsTableRepository;
-import repositories.ReportRepository;
-import repositories.ReportStatRepository;
-import repositories.ReportTypeRepository;
+import repositories.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,19 +26,25 @@ import java.util.Optional;
 @RequestMapping("reports")
 public class ReportController
 {
+    private final ReportAdminStatRepository reportAdminStatRepository;
     private final ReportStatRepository reportStatRepository;
     private final RegReportsTableRepository regReportsTableRepository;
     private final ReportRepository reportRepository;
     private final ReportTypeRepository reportTypeRepository;
+    private final ReportAdminTableRepository reportAdminTableRepository;
 
     @Autowired
-    public ReportController(ReportStatRepository reportStatRepository,
+    public ReportController(ReportAdminStatRepository reportAdminStatRepository,
+                            ReportStatRepository reportStatRepository,
                             RegReportsTableRepository regReportsTableRepository,
-                            ReportRepository reportRepository, ReportTypeRepository reportTypeRepository) {
+                            ReportRepository reportRepository,
+                            ReportTypeRepository reportTypeRepository, ReportAdminTableRepository reportAdminTableRepository) {
+        this.reportAdminStatRepository = reportAdminStatRepository;
         this.reportStatRepository = reportStatRepository;
         this.regReportsTableRepository = regReportsTableRepository;
         this.reportRepository = reportRepository;
         this.reportTypeRepository = reportTypeRepository;
+        this.reportAdminTableRepository = reportAdminTableRepository;
     }
 
     /**
@@ -83,6 +86,7 @@ public class ReportController
 
     /**
      * 4. Запрос получения файла отчета по rep_id
+     *
      * @param rep_id
      * @return
      */
@@ -97,14 +101,33 @@ public class ReportController
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.setContentType(MediaType.parseMediaType(report.getMime()));
 
-        return new ResponseEntity<byte[]>(res.get().getData(), responseHeaders, HttpStatus.OK);
+        return new ResponseEntity<>(res.get().getData(), responseHeaders, HttpStatus.OK);
+    }
+
+
+    /**
+     * 5. Запрос для получения статистики о отчетах для админов
+     * select * from dm.v_api_reg_reports_admin_stat;
+     *
+     * @return
+     */
+    @GetMapping("admin/stat")
+    List<ReportAdminStat> getReportAdminStats() {
+        return reportAdminStatRepository.findAll();
+    }
+
+    /**
+     * 6. Запрос для таблицы для админа по типу отчета
+     * select * from  v_api_reg_reports_admin_table rep_tp_id=?
+     *
+     * @return
+     */
+    @GetMapping("admin/table/{rep_tp_id}")
+    List<ReportAdminTable> getReportAdminTable(@PathVariable long rep_tp_id) {
+        return reportAdminTableRepository.findByRepTpId(rep_tp_id);
     }
 
     /*
-5. Запрос для получения статистики о отчетах для админов
-select * from dm.v_api_reg_reports_admin_stat;
-6. Запрос для таблицы для админа по типу отчета
-select * from  v_api_reg_reports_admin_table rep_tp_id=?
 7. Запрос по перевыпуску отчета по rep_id и format
      */
 
