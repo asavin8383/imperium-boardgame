@@ -79,6 +79,66 @@ group by
                 msr_prd_st_dttm
         </createView>
     </changeSet>
+    <changeSet id="0009.6" author="klychagin">
+        <addColumn schemaName="dm" tableName="rep_tp">
+            <column name="shrt_nm" type="text"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="0009.6" author="klychagin">
+        <addColumn schemaName="dm" tableName="rep_tp">
+            <column name="shrt_nm" type="text"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="0009.7" author="klychagin">
+        <sql>
+            update dm.rep_tp set shrt_nm='Исполнение поручений' where rep_tp_id=1;
+            update dm.rep_tp set shrt_nm='Исполнение мероприятий' where rep_tp_id=2;
+            update dm.rep_tp set shrt_nm='Исполнение ИРТЗ' where rep_tp_id=3;
+        </sql>
+        <rollback>
+            <sql>
+                update d.rep_tp set shrt_nm=null;
+            </sql>
+        </rollback>
+    </changeSet>
+    <changeSet id="0009.8" author="klychagin">
+        <dropView schemaName="dm" viewName="v_api_reg_reports_stat"/>
+    </changeSet>
+    <changeSet id="0009.9" author="klychagin">
+        <dropView schemaName="dm" viewName="v_api_reg_reports_admin_stat"/>
+    </changeSet>
+    <changeSet id="0009.10" author="klychagin">
+        <createView viewName="v_api_reg_reports_stat" schemaName="dm">
+select
+    rr.rep_tp_id,
+    rep_tp.af_id || ' ' || rep_tp.shrt_nm as label,
+    count(*) cnt
+ from dm.reg_reports rr
+join dm.rep_tp on rr.rep_tp_id=rep_tp.rep_tp_id
+where status='OK' and rep_tp.type='REG'
+group by
+    rr.rep_tp_id,
+    rep_tp.af_id,
+    rep_tp.shrt_nm
+        </createView>
+    </changeSet>
+<changeSet id="0009.11" author="klychagin">
+        <createView viewName="v_api_reg_reports_admin_stat" schemaName="dm">
+select
+    rr.rep_tp_id,
+    rep_tp.af_id || ' ' || rep_tp.shrt_nm as label,
+    status,
+            count(*) cnt
+ from dm.reg_reports rr
+join dm.rep_tp on rr.rep_tp_id=rep_tp.rep_tp_id
+where rep_tp.type='REG' and status!='NEW'
+group by
+    rr.rep_tp_id,
+    rep_tp.af_id,
+            status,
+    rep_tp.shrt_nm
+        </createView>
+    </changeSet>
 </databaseChangeLog>
 
 
