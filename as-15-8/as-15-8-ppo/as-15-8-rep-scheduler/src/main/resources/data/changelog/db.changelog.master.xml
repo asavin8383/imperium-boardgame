@@ -9,5 +9,7 @@
     <include file="data/changelog/reports.0004.alter_at.xml"/>
     <include file="data/changelog/reports.0005.alter_at.xml"/>
     <include file="data/changelog/reports.0006.etl_placeholder.xml"/>
+    <include file="data/changelog/reports.0007.reports.xml"/>
     <include file="data/changelog/reports.0008.reports.xml"/>
+    <include file="data/changelog/reports.0009.api.xml"/>
 </databaseChangeLog>
