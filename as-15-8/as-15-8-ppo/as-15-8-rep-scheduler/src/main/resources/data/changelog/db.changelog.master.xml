@@ -1,0 +1,13 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <include file="data/changelog/reports.0001.init.xml"/>
+    <include file="data/changelog/reports.0002.insert_dicts.xml"/>
+    <include file="data/changelog/reports.0003.generate_msr_prd.xml"/>
+    <include file="data/changelog/reports.0004.alter_at.xml"/>
+    <include file="data/changelog/reports.0005.alter_at.xml"/>
+    <include file="data/changelog/reports.0006.etl_placeholder.xml"/>
+    <include file="data/changelog/reports.0008.reports.xml"/>
+</databaseChangeLog>

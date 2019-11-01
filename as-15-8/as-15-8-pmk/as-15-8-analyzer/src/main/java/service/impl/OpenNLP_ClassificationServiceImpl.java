@@ -14,14 +14,15 @@ import java.net.URL;
 @Qualifier("openNLPClassificator")
 public class OpenNLP_ClassificationServiceImpl implements ClassificationService {
 
+    public static final String nlpModelPath = "classpath:classification.bin";
 
     @Override
     public NLPCategory classify(String content) {
         try{
-            String resourcePath = "nlp_model/classification.bin";
-            URL resourceUrl = OpenNlpUtil.class.getClassLoader().getResource(resourcePath);
+            URL resourceUrl = new URL(nlpModelPath);
+            //URL resourceUrl = OpenNlpUtil.class.getClassLoader().getResource(resourcePath);
             if(resourceUrl == null) {
-                throw new NlpException("Ошибка прик категоризации текста! Не удалось найти дерево принятия решений среди ресурсов по пути " + resourcePath);
+                throw new NlpException("Ошибка прик категоризации текста! Не удалось найти дерево принятия решений среди ресурсов по пути " + resourceUrl);
             }
 
             String resultString = OpenNlpUtil.categorize(content, resourceUrl);

@@ -1,0 +1,118 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+<changeSet id="0007.1" author="klychagin">
+    <createTable schemaName="dm" tableName="rep_tp">
+        <column name="rep_tp_id" type="integer"/>
+        <column name="name" type="text"/>
+        <column name="type" type="text"/>
+        <column name="af_id" type="text"/>
+    </createTable>
+</changeSet>
+    <changeSet id="0007.2" author="klychagin">
+    <createTable tableName="reg_reports" schemaName="dm">
+    <column name="rep_id" type="bigint"/>
+    <column name="rep_tp_id" type="smallint"/>
+    <column name="rep_nm" type="text"/>
+    <column name="msr_prd_id" type="INTEGER"/>
+    <column name="msr_prd_st_dttm" type="timestamp"/>
+    <column name="msr_prd_end_dttm" type="timestamp"/>
+        <column name="msr_prd_tp" type="text"/>
+        <column name="msr_prd_caption" type="text"/>
+    <column name="status" type="text" defaultValue="NEW"/>
+    <column name="start_dttm" type="timestamp"/>
+    <column name="finish_dttm" type="timestamp"/>
+    <column name="mime" type="text"/>
+    <column name="data" type="bytea"/>
+    <column name="ppn_dttm" type="timestamp" defaultValueComputed="current_timestamp"/>
+</createTable>
+</changeSet>
+        <changeSet id="0007.3" author="klychagin">
+        <addForeignKeyConstraint baseTableSchemaName="dm" baseColumnNames="msr_prd_id" baseTableName="reg_reports" constraintName="reg_reports_msr_prd_fk" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="CASCADE"  referencedTableSchemaName="dm" referencedColumnNames="msr_prd_id" referencedTableName="msr_prd"/>
+</changeSet>
+
+    <changeSet id="0007.4" author="klychagin">
+
+        <sql>
+            insert into dm.rep_tp(rep_tp_id,name,type,af_id) values (1,'Отчёт по исполнению поручений на проведение мероприятий по контролю ОПС и владельцев ПАСД','REG','2.1');
+            insert into dm.rep_tp(rep_tp_id,name,type,af_id) values (2,'Отчёт по исполнению мероприятий по контролю ОПС и владельцев ПАСД','REG','2.2');
+            insert into dm.rep_tp(rep_tp_id,name,type,af_id) values (3,'Отчёт по проведению проверок ИРТЗ','REG','2.3');
+            insert into dm.rep_tp(rep_tp_id,name,type,af_id) values (4,'Отчёт по исполнению ОПС обязанности по исключению из поисковой выдачи сведений об ИРТЗ','PARAM','3.1');
+            insert into dm.rep_tp(rep_tp_id,name,type,af_id) values (5,'Справка по исполнению ОПС обязанности по исключению из поисковой выдачи сведений об ИРТЗ','PARAM','3.2');
+            insert into dm.rep_tp(rep_tp_id,name,type,af_id) values (6,'Отчёт по исполнению владельцами ПАСД обязанности по соблюдению запрета предоставлять возможность использования на территории Российской Федерации ПАСД для доступа к ИРТЗ','PARAM','3.3');
+            insert into dm.rep_tp(rep_tp_id,name,type,af_id) values (7,'Справка по исполнению владельцами ПАСД обязанности по соблюдению запрета предоставлять возможность использования на территории Российской Федерации ПАСД для доступа к ИРТЗ','PARAM','3.4');
+            insert into dm.rep_tp(rep_tp_id,name,type,af_id) values (8,'Акт проведения мероприятия по контролю ОПС','PARAM','3.5');
+            insert into dm.rep_tp(rep_tp_id,name,type,af_id) values (9,'Протокол проведения мероприятия по контролю ОПС','PARAM','3.6');
+            insert into dm.rep_tp(rep_tp_id,name,type,af_id) values (10,'Акт проведения мероприятия по контролю ПАСД','PARAM','3.7');
+            insert into dm.rep_tp(rep_tp_id,name,type,af_id) values (11,'Протокол проведения мероприятия по контролю ПАСД','PARAM','3.8');
+        </sql>
+        <rollback>
+            <sql>
+                delete from dm.rep_tp
+            </sql>
+        </rollback>
+    </changeSet>
+    <changeSet id="0007.5" author="klychagin">
+        <sql>
+                ALTER TABLE dm.reg_reports ADD CONSTRAINT check_status CHECK (status in ('NEW','RUNNING','FAILED','OK'));
+        </sql>
+    </changeSet>
+    <changeSet id="0007.6" author="klychagin">
+        <addAutoIncrement schemaName="dm" tableName="reg_reports" columnName="rep_id"/>
+    </changeSet>
+    <changeSet id="0007.7" author="klychagin">
+        <sql>
+insert into dm.reg_reports(rep_tp_id, rep_nm, msr_prd_id, msr_prd_st_dttm, msr_prd_end_dttm, msr_prd_tp,
+                           msr_prd_caption, mime)
+
+(select
+rep_tp.rep_tp_id rep_tp_id,
+rep_tp.name rep_nm,
+msr_prd_id,
+        msr_prd.eff_dttm msr_prd_st_dttm,
+        msr_prd.end_dttm msr_prd_end_dttm,
+        msr_prd_tp.nm msr_prd_tp,
+        msr_prd.caption msr_prd_caption,
+        'pdf'
+from dm.msr_prd join dm.rep_tp on type='REG'
+    join dm.msr_prd_tp on msr_prd.msr_prd_tp_id = msr_prd_tp.msr_prd_tp_id);
+
+insert into dm.reg_reports(rep_tp_id, rep_nm, msr_prd_id, msr_prd_st_dttm, msr_prd_end_dttm, msr_prd_tp,
+                           msr_prd_caption, mime)
+
+(select
+rep_tp.rep_tp_id rep_tp_id,
+rep_tp.name rep_nm,
+msr_prd_id,
+        msr_prd.eff_dttm msr_prd_st_dttm,
+        msr_prd.end_dttm msr_prd_end_dttm,
+        msr_prd_tp.nm msr_prd_tp,
+        msr_prd.caption msr_prd_caption,
+        'xlsx'
+from dm.msr_prd join dm.rep_tp on type='REG'
+    join dm.msr_prd_tp on msr_prd.msr_prd_tp_id = msr_prd_tp.msr_prd_tp_id);
+
+insert into dm.reg_reports(rep_tp_id, rep_nm, msr_prd_id, msr_prd_st_dttm, msr_prd_end_dttm, msr_prd_tp,
+                           msr_prd_caption, mime)
+
+(select
+rep_tp.rep_tp_id rep_tp_id,
+rep_tp.name rep_nm,
+msr_prd_id,
+        msr_prd.eff_dttm msr_prd_st_dttm,
+        msr_prd.end_dttm msr_prd_end_dttm,
+        msr_prd_tp.nm msr_prd_tp,
+        msr_prd.caption msr_prd_caption,
+        'docx'
+from dm.msr_prd join dm.rep_tp on type='REG'
+    join dm.msr_prd_tp on msr_prd.msr_prd_tp_id = msr_prd_tp.msr_prd_tp_id);
+
+        </sql>
+        <rollback>
+            <sql>
+                delete from dm.reg_reports;
+            </sql>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>
+

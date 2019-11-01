@@ -10,12 +10,14 @@ import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.util.StringUtils;
+import robots.ChromeSettings;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -79,9 +81,37 @@ public class ScriptUtils {
         return new PageResult(pageContent, errorCode);
     }
 
+    public static byte[] getScreenshot(WebDriver webDriver)  {
+        switchToTab(webDriver, 2);
 
-    public static byte[] getScreenshot(WebDriver webDriver) {
+        webDriver.get(ChromeSettings.getScreenshotExtension().getPopupUrl());
+        WebDriverWait wait = new WebDriverWait(webDriver, WAIT_TIMEOUT);
+        wait.until(ExpectedConditions.presenceOfElementLocated(
+                By.id("delay-desktop-capture"))).click();
 
+        ScriptUtils.waitForTab(webDriver, 2);
+        wait.until(driver -> driver != null &&
+                driver.getWindowHandles().size() < 2);
+        ScriptUtils.waitForTab(webDriver, 2);
+
+        switchToTab(webDriver, 2);
+        WebElement frame = wait.until(ExpectedConditions.presenceOfElementLocated(
+                By.xpath("//*[@id=\"iframe_container\"]/iframe")));
+        webDriver.switchTo().frame(frame);
+
+        String base64Image = wait
+                .until(ExpectedConditions.presenceOfElementLocated(
+                        By.xpath("//div[@id=\"container\"]/img")))
+                .getAttribute("src").split(",")[1];
+
+        // close screenshot tab
+        webDriver.close();
+        switchToTab(webDriver, 1);
+
+        return Base64.getDecoder().decode(base64Image);
+    }
+
+    public static byte[] getScreenshot(WebDriver webDriver, boolean old) {
         waitDriver(webDriver, 1);   // задержка скриншота, чтоб избежать белого экрана, т.к. некоторые сайты показывают контент не сразу.
 
         try {
@@ -119,6 +149,17 @@ public class ScriptUtils {
                 break;
         }
         return value;
+    }
+
+    public static void waitForTab(WebDriver webDriver, int tabIndex) { // one-based tab index
+        new WebDriverWait(webDriver, WAIT_TIMEOUT)
+                .until(driver -> driver != null &&
+                        driver.getWindowHandles().size() > tabIndex - 1);
+    }
+
+    public static void switchToTab(WebDriver webDriver, int tabIndex) { // one-based tab index
+        ArrayList<String> handles = new ArrayList<>(webDriver.getWindowHandles());
+        webDriver.switchTo().window(handles.get(tabIndex - 1));
     }
 
     @Nullable
@@ -226,31 +267,6 @@ public class ScriptUtils {
                 .until(ExpectedConditions.elementToBeClickable(locator));
     }
 
-    public static WebElement waitPresence(WebDriver driver, By locator, int timeoutInSeconds) {
-        return waitPresenceToAct(driver, locator, timeoutInSeconds, null);
-    }
-
-    public static WebElement waitPresenceToAct(WebDriver driver, By locator, int timeoutInSeconds,
-                                         Consumer<WebElement> action) {
-        WebElement element = new WebDriverWait(driver, timeoutInSeconds)
-                .withMessage("загрузка " + locator)
-                .until(ExpectedConditions.presenceOfElementLocated(locator));
-
-        return action != null ? actOnStaleRef(driver, element, locator, action) : element;
-    }
-
-    @Nullable
-    public static WebElement actOnStaleRef(WebDriver driver, WebElement element, By locator,
-                                     Consumer<WebElement> action) {
-        try {
-            return actOnStaleRef(element, action,
-                    () -> findElementIfExists(locator, driver));
-        } catch (StaleElementReferenceException e) {
-            e.addInfo("locator", locator.toString());
-            throw e;
-        }
-    }
-
     @Nullable
     public static WebElement actOnStaleRef(WebElement element,
                                      Consumer<WebElement> action,
@@ -269,38 +285,5 @@ public class ScriptUtils {
         }
         return element;
     }
-
-    @Nullable
-    public static <T> T actOnStaleRef(WebDriver driver, WebElement element,
-                                      By locator, T defaultValue,
-                                      Function<WebElement, T> action) {
-        try {
-            return actOnStaleRef(element, defaultValue, action,
-                    () -> findElementIfExists(locator, driver));
-        } catch (StaleElementReferenceException e) {
-            e.addInfo("locator", locator.toString());
-            throw e;
-        }
-    }
-
-    @Nullable
-    public static <T> T actOnStaleRef(WebElement element, T defaultValue,
-                                Function<WebElement, T> action,
-                                Supplier<WebElement> refresher) {
-        try {
-            try {
-                return action.apply(element);
-            } catch (StaleElementReferenceException e) {
-                element = refresher.get();
-                if (element != null)
-                    // still may throw exception
-                    return action.apply(element);
-            }
-        } catch (TimeoutException e) {
-            // ignore
-        }
-        return defaultValue;
-    }
-
 
 }

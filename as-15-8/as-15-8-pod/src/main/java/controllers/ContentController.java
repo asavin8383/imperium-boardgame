@@ -4,6 +4,7 @@ import controllers.utils.SortingDirection;
 import controllers.utils.SortingHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import model.controller.SearchErdiStatus;
 import model.projection.ContentView;
 import model.rest.control.PodState;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,12 +12,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import restapi.ErdiRestClient;
 import services.ContentService;
+import services.InfoService;
 import utils.Utils;
 
 import java.text.ParseException;
@@ -29,6 +32,7 @@ public class ContentController {
 
     private final ContentService contentService;
     private final ErdiRestClient erdiRestClient;
+    private final InfoService infoService;
 
     @GetMapping(path = "/erdi")
     public ResponseEntity<Page<ContentView>> getRelevantContent(
@@ -48,6 +52,13 @@ public class ContentController {
         else {
             return new ResponseEntity<>(null, HttpStatus.ACCEPTED);
         }
+    }
+
+    @GetMapping(path = "/check_erdi", produces = MediaType.APPLICATION_JSON_VALUE)
+    public SearchErdiStatus update(
+            @RequestParam(defaultValue = "") String url
+    ) {
+        return infoService.searchCheckUnit(url);
     }
 
     @GetMapping(path = "/update_erdi")

@@ -3,7 +3,6 @@ package common;
 import checkUnits.CheckUnit;
 import checkUnits.CheckUnitJob;
 import checkUnits.CheckUnitType;
-import enums.AccessToolUnit;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.junit.Test;
@@ -86,6 +85,50 @@ public class SendCheckUnitToKafka {
 					}
 				});
 			});
+	}
+
+	@Test
+	public void testNLP() {
+
+		System.out.println("-------------------------------");
+
+		String sql = "select 'URL' as check_unit_type, res.value as check_unit_value \n" +
+				"from sor.content_resources res \n" +
+				"where resource_type_id = 6 \n" +
+				"limit 10 offset 10";
+
+		jdbcTemplate.queryForList(sql)
+				.forEach(result -> {
+					CheckUnitJob checkUnitJob = new CheckUnitJob();
+					checkUnitJob.setJobID(1L);
+					checkUnitJob.setAccessTool("express");
+
+					checkUnitJob.setCheckUnit(new CheckUnit(
+									CheckUnitType.valueOf(result.get("check_unit_type").toString()),
+									result.get("check_unit_value").toString()
+							)
+					);
+
+					Message<CheckUnitJob> message = MessageBuilder
+							.withPayload(checkUnitJob)
+							.setHeader(KafkaHeaders.TOPIC, topic)
+							.build();
+
+					ListenableFuture<SendResult<String, CheckUnitJob>> future = testKafkaTemplate.send(message);
+
+					future.addCallback(new ListenableFutureCallback<SendResult<String, CheckUnitJob>>() {
+
+						@Override
+						public void onSuccess(SendResult<String, CheckUnitJob> result) {
+							System.out.println("Сообщение успешно отправлено: arrangenmentID " + result.getProducerRecord().value().toString());
+						}
+
+						@Override
+						public void onFailure(Throwable ex) {
+							System.out.println("Ошибка при отправке сообщения: " + ex.getMessage());
+						}
+					});
+				});
 	}
 
 	@Configuration

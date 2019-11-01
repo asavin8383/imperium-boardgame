@@ -1,0 +1,47 @@
+subsystem: PPO
+server:
+  port: 15813
+gateway.url: ${GATEWAY_URI:http://localhost:15880}
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${gateway.url}/eureka
+  instance:
+    preferIpAddress: true
+    instanceId: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port}
+spring:
+  application.name: report_generator
+  datasource:
+    test-while-idle: true
+    validation-query: SELECT 1;
+    time-between-eviction-runs-millis: 300000
+    max-active: 5
+    username: as_user
+    password: as_user
+
+---
+
+logging:
+  config:
+  level:
+    root: info
+    birt: debug
+eureka:
+  client:
+    enabled: false
+spring:
+  profiles: dev_asin
+  datasource:
+    url: jdbc:postgresql://192.168.5.195:5432/asdb_test
+  cloud:
+    bus.trace.enabled: false
+    config:
+      bus:
+        enabled: false
+    stream:
+      bindings:
+        springCloudBusInput:
+          group: config_server
+
+
+

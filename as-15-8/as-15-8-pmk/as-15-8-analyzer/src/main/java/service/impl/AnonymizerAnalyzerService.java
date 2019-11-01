@@ -76,8 +76,8 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 		analysisResult.setJobID(executionResult.getJobID());
 
 		obtainResult(analysisResult, executionResult);
-		saveSources(analysisResult, executionResult);
 		obtainResultNLP(analysisResult, executionResult);
+		saveSources(analysisResult, executionResult);
 
 		return analysisResult;
 	}

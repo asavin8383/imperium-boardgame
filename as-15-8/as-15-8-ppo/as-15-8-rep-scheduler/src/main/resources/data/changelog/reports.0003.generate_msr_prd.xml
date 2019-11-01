@@ -1,0 +1,127 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+<changeSet id="0003.1" author="klychagin">
+    <sql>
+insert into dm.msr_prd(msr_prd_id, msr_prd_tp_id, eff_dttm, end_dttm, caption)
+select
+M.m_id - 1 + row_number() OVER () as rnum,
+'1',
+a,
+TO_TIMESTAMP( CONCAT(TO_CHAR(a, 'YYYY-MM-DD'),' 23:59:59'), 'YYYY-MM-DD HH24:MI:SS')  at time zone 'UTC',
+TO_CHAR(a, 'DD.MM.YYYY')
+from generate_series('2019-01-01 00:00'::timestamp,
+                              '2020-12-31 00:00:00', '24 hours') as a,
+                (select COALESCE(max(msr_prd_id),0) + 1 as m_id from dm.msr_prd) as M;
+insert into dm.msr_prd(msr_prd_id, msr_prd_tp_id, eff_dttm, end_dttm, caption)
+select
+M.m_id - 1 + row_number() OVER () as rnum,
+'2',
+a,
+TO_TIMESTAMP( CONCAT(TO_CHAR(a, 'YYYY-MM-DD'),' 23:59:59'), 'YYYY-MM-DD HH24:MI:SS')  at time zone 'UTC' + interval '6' day,
+CONCAT(TO_CHAR(a, 'DD.MM.YYYY'), ' - ', TO_CHAR(a + interval '6' day, 'DD.MM.YYYY'))
+from generate_series('2019-01-01 00:00'::timestamp,
+                              '2020-12-31 00:00:00', '7 days') as a,
+                (select COALESCE(max(msr_prd_id),0) + 1 as m_id from dm.msr_prd) as M;
+insert into dm.msr_prd(msr_prd_id, msr_prd_tp_id, eff_dttm, end_dttm, caption)
+select
+M.m_id - 1 + row_number() OVER () as rnum,
+        '3',
+a,
+TO_TIMESTAMP( CONCAT(TO_CHAR(a, 'YYYY-MM-DD'),' 23:59:59'), 'YYYY-MM-DD HH24:MI:SS')  at time zone 'UTC' + interval '1' month - interval '1' day,
+case
+  when TO_CHAR(a, 'MM') = '01' then CONCAT('январь ', TO_CHAR(a, 'YYYY'), ' г.')
+  when TO_CHAR(a, 'MM') = '02' then CONCAT('февраль ', TO_CHAR(a, 'YYYY'), ' г.')
+  when TO_CHAR(a, 'MM') = '03' then CONCAT('март ', TO_CHAR(a, 'YYYY'), ' г.')
+  when TO_CHAR(a, 'MM') = '04' then CONCAT('апрель ', TO_CHAR(a, 'YYYY'), ' г.')
+     when TO_CHAR(a, 'MM') = '05' then CONCAT('май ', TO_CHAR(a, 'YYYY'), ' г.')
+  when TO_CHAR(a, 'MM') = '06' then CONCAT('июнь ', TO_CHAR(a, 'YYYY'), ' г.')
+  when TO_CHAR(a, 'MM') = '07' then CONCAT('июль ', TO_CHAR(a, 'YYYY'), ' г.')
+     when TO_CHAR(a, 'MM') = '08' then CONCAT('август ', TO_CHAR(a, 'YYYY'), ' г.')
+  when TO_CHAR(a, 'MM') = '09' then CONCAT('сентябрь ', TO_CHAR(a, 'YYYY'), ' г.')
+  when TO_CHAR(a, 'MM') = '10' then CONCAT('октябрь ', TO_CHAR(a, 'YYYY'), ' г.')
+  when TO_CHAR(a, 'MM') = '11' then CONCAT('ноябрь ', TO_CHAR(a, 'YYYY'), ' г.')
+  when TO_CHAR(a, 'MM') = '12' then CONCAT('декабрь ', TO_CHAR(a, 'YYYY'), ' г.')
+    end a
+from generate_series('2019-01-01 00:00'::timestamp,
+                              '2020-12-31 00:00:00', '1 month') as a,
+                (select COALESCE(max(msr_prd_id),0) + 1 as m_id from dm.msr_prd) as M;
+
+insert into dm.msr_prd(msr_prd_id, msr_prd_tp_id, eff_dttm, end_dttm, caption)
+select
+        M.m_id - 1 + row_number() OVER () as rnum,
+'4',
+a,
+TO_TIMESTAMP( CONCAT(TO_CHAR(a, 'YYYY-MM-DD'),' 23:59:59'), 'YYYY-MM-DD HH24:MI:SS')  at time zone 'UTC' + interval '3' month - interval '1' day,
+case
+  when TO_CHAR(a, 'MM') = '01' then CONCAT('1 квартал ', TO_CHAR(a, 'YYYY'), ' г.')
+  when TO_CHAR(a, 'MM') = '04' then CONCAT('2 квартал ', TO_CHAR(a, 'YYYY'), ' г.')
+  when TO_CHAR(a, 'MM') = '07' then CONCAT('3 квартал ', TO_CHAR(a, 'YYYY'), ' г.')
+  when TO_CHAR(a, 'MM') = '10' then CONCAT('4 квартал ', TO_CHAR(a, 'YYYY'), ' г.')
+    end a
+from generate_series('2019-01-01 00:00'::timestamp,
+                              '2020-12-31 00:00:00', '3 month') as a,
+                (select COALESCE(max(msr_prd_id),0) + 1 as m_id from dm.msr_prd) as M;
+insert into dm.msr_prd(msr_prd_id, msr_prd_tp_id, eff_dttm, end_dttm, caption)
+select
+        M.m_id - 1 + row_number() OVER () as rnum,
+'5',
+a,
+TO_TIMESTAMP( CONCAT(TO_CHAR(a, 'YYYY-MM-DD'),' 23:59:59'), 'YYYY-MM-DD HH24:MI:SS')  at time zone 'UTC' + interval '6' month - interval '1' day,
+case
+  when TO_CHAR(a, 'MM') = '01' then CONCAT('1 полугодие ', TO_CHAR(a, 'YYYY'), ' г.')
+  when TO_CHAR(a, 'MM') = '07' then CONCAT('2 полугодие ', TO_CHAR(a, 'YYYY'), ' г.')
+
+    end a
+
+from generate_series('2019-01-01 00:00'::timestamp,
+                              '2020-12-31 00:00:00', '6 month') as a,
+                (select COALESCE(max(msr_prd_id),0) + 1 as m_id from dm.msr_prd) as M;
+insert into dm.msr_prd(msr_prd_id, msr_prd_tp_id, eff_dttm, end_dttm, caption)
+select
+        M.m_id - 1 + row_number() OVER () as rnum,
+'6',
+a,
+TO_TIMESTAMP( CONCAT(TO_CHAR(a, 'YYYY-MM-DD'),' 23:59:59'), 'YYYY-MM-DD HH24:MI:SS')  at time zone 'UTC' + interval '1' year - interval '1' day,
+CONCAT(TO_CHAR(a, 'YYYY'), ' год')
+
+
+from generate_series('2019-01-01 00:00'::timestamp,
+                              '2020-12-31 00:00:00', '1 year') as a,
+                (select COALESCE(max(msr_prd_id),0) + 1 as m_id from dm.msr_prd) as M;
+    </sql>
+    <rollback>
+        <sql>
+            delete from dm.msr_prd;
+        </sql>
+    </rollback>
+</changeSet>
+<changeSet id="0003.2" author="klychagin">
+    <sql>
+insert into dm.msr_prd_hier(day_id, week_id, month_id, quarter_id, half_id, year_id)   (select msr_prd_id,1,1,1,1,1 from dm.msr_prd where msr_prd_tp_id=1);
+        update dm.msr_prd_hier h set week_id=(select m.msr_prd_id from dm.msr_prd m where msr_prd_tp_id=2
+                                                                              and m.eff_dttm&lt;=(select d.eff_dttm from dm.msr_prd d where d.msr_prd_id=h.day_id)
+                                                                              and  m.end_dttm&gt;=(select d.end_dttm from dm.msr_prd d where d.msr_prd_id=h.day_id));
+update dm.msr_prd_hier h set month_id=(select m.msr_prd_id from dm.msr_prd m where msr_prd_tp_id=3
+                                                                              and m.eff_dttm&lt;=(select d.eff_dttm from dm.msr_prd d where d.msr_prd_id=h.day_id)
+                                                                              and  m.end_dttm&gt;=(select d.end_dttm from dm.msr_prd d where d.msr_prd_id=h.day_id));
+update dm.msr_prd_hier h set quarter_id=(select m.msr_prd_id from dm.msr_prd m where msr_prd_tp_id=4
+                                                                              and m.eff_dttm&lt;=(select d.eff_dttm from dm.msr_prd d where d.msr_prd_id=h.day_id)
+                                                                              and  m.end_dttm&gt;=(select d.end_dttm from dm.msr_prd d where d.msr_prd_id=h.day_id));
+update dm.msr_prd_hier h set half_id=(select m.msr_prd_id from dm.msr_prd m where msr_prd_tp_id=5
+                                                                              and m.eff_dttm&lt;=(select d.eff_dttm from dm.msr_prd d where d.msr_prd_id=h.day_id)
+                                                                              and  m.end_dttm&gt;=(select d.end_dttm from dm.msr_prd d where d.msr_prd_id=h.day_id));
+update dm.msr_prd_hier h set year_id=(select m.msr_prd_id from dm.msr_prd m where msr_prd_tp_id=6
+                                                                              and m.eff_dttm&lt;=(select d.eff_dttm from dm.msr_prd d where d.msr_prd_id=h.day_id)
+                                                                              and  m.end_dttm&gt;=(select d.end_dttm from dm.msr_prd d where d.msr_prd_id=h.day_id));
+
+    </sql>
+        <rollback>
+        <sql>
+            delete from dm.msr_prd_hier;
+        </sql>
+    </rollback>
+</changeSet>
+
+</databaseChangeLog>
+

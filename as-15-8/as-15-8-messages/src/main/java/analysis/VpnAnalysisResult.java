@@ -35,6 +35,7 @@ public class VpnAnalysisResult extends AnalysisResult implements StubAnalysisRes
 	private String stubUrl;
 	private Integer similarityOriginPercent;
 	private Boolean needTestFinalUrl;
+	private Boolean forbiddenFinalUrl;
 	private String stubScoreInfo;
 
 	@Override
