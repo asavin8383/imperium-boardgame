@@ -9,6 +9,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import repositories.PasdRepository;
@@ -27,8 +28,8 @@ public class PASDUploader
     @Value("${gateway.url}")
     private String gatewayUrl;
 
-    @Autowired @Qualifier("internal")
-    RestTemplate restTemplate;
+    @Autowired
+    OAuth2RestTemplate oauth2RestTemplate;
 
     @Autowired
     PasdRepository pasdRepository;
@@ -42,7 +43,7 @@ public class PASDUploader
         HttpEntity<List<PasdRecord>> entity = new HttpEntity<>(all, headers);
 
         log.debug("Sending {} PS records", all.size());
-        restTemplate.postForObject(gatewayUrl, entity, ResponseEntity.class);
+        oauth2RestTemplate.postForObject(gatewayUrl, entity, ResponseEntity.class);
         log.debug("{} PS records sent successfully", all.size());
 
     }

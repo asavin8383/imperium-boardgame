@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Import;
  *
  */
 @SpringBootApplication
-@Import(RestTemplateConfiguration.class)
+@Import(Oauth2ClientConfiguration.class)
 @ComponentScan(basePackages={"common", "events", "service", "restapi"})
 public class ApplicationConfiguration{
 	

@@ -11,6 +11,15 @@ eureka:
   instance:
     preferIpAddress: true
     instanceId: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port}
+security:
+  oauth2:
+    resource:
+      tokenInfoUri: ${gateway.url}/security/oauth/check_token
+    client:
+      clientId: config-server
+      clientSecret: 1q0p2w9o
+      grantType: client_credentials
+      accessTokenUri: ${gateway.url}/security/oauth/token
 spring:
   application.name: config_server
   profiles.include: jdbc
@@ -54,6 +63,7 @@ management.endpoints.web.exposure.include: bus-refresh
 
 spring:
   profiles: prod
+  profiles.include: docker_log
   main:
     banner-mode: "off"
   datasource:
@@ -70,6 +80,7 @@ spring:
 
 spring:
   profiles: test
+  profiles.include: docker_log
   main:
     banner-mode: "off"
   datasource:
@@ -90,6 +101,7 @@ logging:
     root: info
 spring:
   profiles: dev_asin
+  profiles.include: local_log
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb_test
   liquibase:
@@ -109,7 +121,8 @@ spring:
 ---
 
 spring:
-  profiles: dev_pvorobiev, dev_asavin, dev_ashabalin
+  profiles: dev_pvorobiev, dev_asavin, dev_ashabalin, dev_jspirina
+  profiles.include: local_log
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb_test
   liquibase:
@@ -122,21 +135,3 @@ spring:
           destination: bus_config_output_ashabalin
         springCloudBusOutput:
           destination: bus_config_input_ashabalin
-
----
-
-spring:
-  profiles: dev_jspirina
-  datasource:
-    url: jdbc:postgresql://192.168.5.195:5432/asdb_test
-  liquibase:
-    enabled: false
-    change-log: classpath:/db/db.changelog.master.xml
-  cloud:
-    stream:
-      bindings:
-        springCloudBusInput:
-          destination: bus_config_output_ashabalin
-        springCloudBusOutput:
-          destination: bus_config_input_ashabalin
-eureka.client.enabled: false

@@ -9,7 +9,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.PostConstruct;
 import java.security.Principal;
@@ -20,14 +19,13 @@ import java.security.Principal;
  *
  */
 @SpringBootApplication
-@Import(RestTemplateConfiguration.class)
+@Import(Oauth2ClientConfiguration.class)
 @ComponentScan(basePackages= {"common", "repositories", "controllers", "services", "restapi"})
 @EnableJpaRepositories("repositories")
 @EntityScan("model")
 @EnableScheduling
 @EnableAsync
 //@EnableResourceServer
-@RestController
 public class ApplicationConfiguration {
 
 	// todo async security

@@ -10,7 +10,7 @@
 
 	<dependencies>
 
-		<!-- Spring boot kafka -->
+		<!-- Spring boot -->
 		<dependency>
 		    <groupId>org.springframework.boot</groupId>
 		    <artifactId>spring-boot-starter-test</artifactId>

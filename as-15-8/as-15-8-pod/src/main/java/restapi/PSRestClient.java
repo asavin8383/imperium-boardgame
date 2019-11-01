@@ -30,6 +30,9 @@ public class PSRestClient
     @Value("${spring.rest_base_url}")
     private String baseUrl;
 
+    @Autowired
+    private PSUploader psUploader;
+
 
     public void readFromNet() {
         String base = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
@@ -44,5 +47,6 @@ public class PSRestClient
         log.info("Got PS records: {}", list.toString());
         psDictionaryUpdater.insertRecords(list);
 
+        psUploader.upload();
     }
 }

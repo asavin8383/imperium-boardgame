@@ -17,7 +17,7 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import java.util.Collections;
 
 @Configuration
-public class WebSecurityConfigurer extends WebSecurityConfigurerAdapter {
+public class AuthentificationManagerConfigurer extends WebSecurityConfigurerAdapter {
 
     @Value("${ldap.urls}")
     private String ldapUrls;
@@ -63,14 +63,11 @@ public class WebSecurityConfigurer extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.antMatcher("/**").authorizeRequests()
+        http
+                .antMatcher("/**").authorizeRequests()
                 .antMatchers("/oauth/**")
                 .permitAll()
                 .anyRequest()
-                .authenticated().and()
-                .exceptionHandling()
-                .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/")).and().logout()
-                .logoutSuccessUrl("/").permitAll().and().csrf()
-                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
+                .authenticated();
     }
 }

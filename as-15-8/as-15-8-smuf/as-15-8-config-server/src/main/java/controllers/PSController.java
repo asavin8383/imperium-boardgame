@@ -4,6 +4,7 @@ import controllers.entity.PS;
 import lombok.extern.slf4j.Slf4j;
 import model.Robot;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,6 +36,7 @@ public class PSController
      * @param data
      */
     @PostMapping("ps")
+    @PreAuthorize("hasRole('ROLE_SYSTEM')")
     void uploadPS(@RequestBody List<PS> data) {
         log.info("Got {} robot records POSTed, trying to insert", data.size());
         Set<Long> all = robotRepository.findAll().stream().map(Robot::getOrig_id).collect(Collectors.toSet());

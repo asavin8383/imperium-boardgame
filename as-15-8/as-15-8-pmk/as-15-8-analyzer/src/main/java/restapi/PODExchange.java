@@ -6,6 +6,7 @@ import model.RestStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
@@ -23,7 +24,7 @@ public class PODExchange
     private String gatewayUrl;
 
     @Autowired @Qualifier("internal")
-    private RestTemplate restTemplate;
+    private OAuth2RestTemplate oAuth2RestTemplate;
 
 
     public boolean checkUrl(String url) {
@@ -36,7 +37,7 @@ public class PODExchange
 
         log.info("GET checkUrl from {}", uriComponents.toString());
 
-        RestStatus resp = restTemplate.getForObject(uriComponents.toString(), RestStatus.class);
+        RestStatus resp = oAuth2RestTemplate.getForObject(uriComponents.toString(), RestStatus.class);
         boolean res = resp != null && resp.status;
 
         log.info("Got checkUrl status: {}", res);

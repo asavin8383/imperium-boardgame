@@ -5,6 +5,7 @@ logging:
   config: config/logback-spring.xml
 spring:
   application.name: gateway
+  main.allow-bean-definition-overriding: true
 eureka:
   client:
     serviceUrl:
@@ -12,9 +13,17 @@ eureka:
   instance:
     preferIpAddress: true
     instanceId: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port}
+security:
+  basic.enabled: false
+  oauth2:
+    resource:
+      tokenInfoUri: http://${spring.cloud.client.ip-address}:${server.port}/security/oauth/check_token
+    client:
+      clientId: gateway
+      clientSecret: 1q0p2w9o
 zuul:
   debug.request: true
-  sensitiveHeaders:
+  sensitiveHeaders: Cookie,Set-Cookie
   ignored-headers: Access-Control-Allow-Credentials, Access-Control-Allow-Origin
   host:
     connect-timeout-millis: 60000
@@ -36,20 +45,14 @@ zuul:
     ppt:
       path: /**
       serviceId: ppt
-    oauth:
-      path: /oauth/**
-      stripPrefix: false
-      serviceId: authentication_service
+    security:
+      path: /security/**
+      serviceId: auth_server
 ribbon:
   ReadTimeout: 60000
   ConnectTimeout: 3000
   eureka:
     enabled: true
-security:
-  oauth2:
-    resource:
-      jwt:
-        key-value: as-15-8
 
 ---
 

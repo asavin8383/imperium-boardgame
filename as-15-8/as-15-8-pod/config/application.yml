@@ -15,9 +15,19 @@ eureka:
   instance:
     preferIpAddress: true
     instanceId: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port}
+security:
+  oauth2:
+    resource:
+      tokenInfoUri: ${gateway.url}/security/oauth/check_token
+    client:
+      clientId: pod
+      clientSecret: 1q0p2w9o
+      grantType: client_credentials
+      accessTokenUri: ${gateway.url}/security/oauth/token
 spring:
   application:
     name: pod
+  main.allow-bean-definition-overriding: true
   datasource:
     test-while-idle: true
     validation-query: SELECT 1;
@@ -47,12 +57,6 @@ registry-anonymizers:
 cron:
   expression:
     arrangement: "0 * * ? * *"
-jwt.key: as-15-8
-security:
-  oauth2:
-    resource:
-      jwt:
-        key-value: as-15-8
 
 ---
 
@@ -97,10 +101,12 @@ registry-anonymizers:
   proxy-ip: ""
 
 ---
-
+logging.level.org.springframework.web: DEBUG
 spring:
   profiles: dev_pvorobiev, dev_asavin, dev_ashabalin, dev_jspirina
   profiles.include: local_log
+  http:
+    log-request-details: true
   jpa:
     hibernate:
       ddl-auto: none
@@ -109,4 +115,3 @@ spring:
     change-log: classpath:/data/changelog/db.changelog.master.xml
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb_test
-eureka.client.enabled: false

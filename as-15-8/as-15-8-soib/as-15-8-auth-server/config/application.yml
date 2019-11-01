@@ -1,0 +1,72 @@
+logging:
+  config: config/logback-spring.xml
+  level:
+    org.springframework.web: WARN
+    org.springframework.security: DEBUG
+ldap:
+  enabled: true
+  domain: designdiv.ecleasing.ru
+  urls: ldap://192.168.1.52:389/
+  base:
+    dn: OU=AS_15_8,DC=designdiv,DC=ecleasing,DC=ru
+  user:
+    dn:
+      pattern: sAMAccountName={0}
+  login:
+    role_oper: CN=ROLE_OPERATOR,OU=roles,OU=AS_15_8,DC=designdiv,DC=ecleasing,DC=ru
+    role_admin: CN=ROLE_ADMIN,OU=roles,OU=AS_15_8,DC=designdiv,DC=ecleasing,DC=ru
+    filter_oper: "(&(objectClass=user)(memberof=${ldap.login.role_oper}))"
+    filter_admin: "(&(objectClass=user)(memberof=${ldap.login.role_admin}))"
+management:
+  health:
+    ldap:
+      enabled: false
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  liquibase:
+    enabled: true
+    change-log: classpath:db/db.changelog.master.xml
+  datasource:
+    test-while-idle: true
+    validation-query: SELECT 1;
+    time-between-eviction-runs-millis: 300000
+    max-active: 5
+    username: as_user
+    password: as_user
+  jpa:
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
+        format_sql: true
+    databasePlatform: org.hibernate.dialect.PostgreSQL9Dialect
+
+---
+
+spring:
+  profiles: prod
+  profiles.include: docker_log
+  main:
+    banner-mode: "off"
+  datasource:
+    url: jdbc:postgresql://10.97.220.144:5432/asdb
+
+---
+
+spring:
+  profiles: test
+  profiles.include: docker_log
+  main:
+    banner-mode: "off"
+  datasource:
+    url: jdbc:postgresql://192.168.5.195:5432/asdb
+
+---
+
+spring:
+  profiles: dev_pvorobiev, dev_asavin, dev_ashabalin, dev_jspirina
+  profiles.include: local_log
+  datasource:
+    url: jdbc:postgresql://192.168.5.195:5432/asdb_test

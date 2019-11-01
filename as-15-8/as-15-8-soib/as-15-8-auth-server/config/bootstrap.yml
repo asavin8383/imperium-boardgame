@@ -1,0 +1,13 @@
+server:
+  port: 15805
+gateway.url: ${GATEWAY_URI:http://localhost:15880}
+spring:
+  application.name: auth_server
+  profiles.active: default
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${gateway.url}/eureka
+  instance:
+    preferIpAddress: true
+    instanceId: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port}

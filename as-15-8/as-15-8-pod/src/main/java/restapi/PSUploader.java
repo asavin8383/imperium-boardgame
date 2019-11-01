@@ -9,8 +9,10 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 import repositories.PsRepository;
 
 import java.util.List;
@@ -28,15 +30,13 @@ public class PSUploader
     private String gatewayUrl;
 
     @Autowired
-    @Qualifier("internal")
-    RestTemplate restTemplate;
+    OAuth2RestTemplate oauth2RestTemplate;
 
     @Autowired
     PsRepository psRepository;
 
     public void upload() {
         List<PsRecord> all = psRepository.getAllActial();
-        RestTemplate restTemplate = new RestTemplate();
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -44,7 +44,7 @@ public class PSUploader
         HttpEntity<List<PsRecord>> entity = new HttpEntity<>(all, headers);
 
         log.debug("Sending {} PS records", all.size());
-        restTemplate.postForObject(gatewayUrl, entity, ResponseEntity.class);
+        oauth2RestTemplate.postForObject(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path("/config/ps").build().toString(), entity, ResponseEntity.class);
         log.debug("{} PS records sent successfully", all.size());
 
     }

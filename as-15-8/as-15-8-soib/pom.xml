@@ -12,6 +12,10 @@
     <artifactId>as-15-8-soib</artifactId>
     <packaging>pom</packaging>
 
+    <modules>
+        <module>as-15-8-auth-server</module>
+    </modules>
+
     <build>
         <finalName>${project.artifactId}</finalName>
         <sourceDirectory>src/main/java</sourceDirectory>
@@ -19,9 +23,4 @@
         <outputDirectory>target/classes</outputDirectory>
         <testOutputDirectory>target/test-classes</testOutputDirectory>
     </build>
-    <modules>
-        <module>as-15-8-authentication-service</module>
-    </modules>
-
-
 </project>

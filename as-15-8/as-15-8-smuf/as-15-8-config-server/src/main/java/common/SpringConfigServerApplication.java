@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
 @EnableConfigServer
-@ComponentScan(basePackages = {"model", "controllers"})
+@ComponentScan(basePackages = {"common", "model", "controllers"})
 @EntityScan("model")
 @EnableJpaRepositories("repositories")
 public class SpringConfigServerApplication {
