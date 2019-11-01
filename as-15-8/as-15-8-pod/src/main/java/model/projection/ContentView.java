@@ -7,7 +7,6 @@ import model.portal.SearchQueryTrafficUnitJoin;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Subselect;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
@@ -44,8 +43,8 @@ import java.util.List;
                 "                              else resources.resource_type_id = 6 \n" +
                 "                              end \n" +
                 "    group by content.id, history.content_version_id \n" +
-                ") select --count(help.content_id) \n" +
-                "      help.content_id as content_id, \n" +
+                ") select \n" +
+                "      help.content_id as id, \n" +
                 "      res.value as resource_value, \n" +
                 "      restype.dsc as resource_type, \n" +
                 "      subtype.orig_id as info_type_id, \n" +
@@ -68,10 +67,9 @@ public class ContentView {
 
     // 1 or erdiId ?
     @Id
-    @Column(name = "content_id")
     @ToString.Include
     @EqualsAndHashCode.Include
-    private Long contentId;
+    private Long id;
 
     // 12
     @ToString.Include

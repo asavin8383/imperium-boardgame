@@ -21,7 +21,7 @@ public class SearchQueryTrafficUnitJoin {
     private Long trafficUnitId;
 
     @ManyToOne
-    @JoinColumn(name = "content_id", referencedColumnName = "content_id")
+    @JoinColumn(name = "content_id", referencedColumnName = "id")
     private ContentView contentView;
 
 }

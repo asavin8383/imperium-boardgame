@@ -40,8 +40,7 @@ public class ContentViewSpecifications {
             Root<T> subRoot = subQuery.from(clazz);
             subQuery.select(subRoot.get("id"));
             subQuery.where(
-                    criteriaBuilder.equal(subRoot.get("contentView").get("contentId"),
-                            root.get("contentId")),
+                    criteriaBuilder.equal(subRoot.get("contentView").get("id"), root.get("id")),
                     criteriaBuilder.equal(subRoot.get("trafficUnitId"), trafficUnitId)
             );
             Predicate predicate = criteriaBuilder.not(criteriaBuilder.exists(subQuery));
