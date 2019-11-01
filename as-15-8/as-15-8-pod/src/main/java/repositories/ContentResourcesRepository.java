@@ -1,5 +1,6 @@
 package repositories;
 
+import model.scheme.Content;
 import model.scheme.ContentResources;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -14,6 +15,8 @@ import java.util.List;
 public interface ContentResourcesRepository extends JpaRepository<ContentResources, Long> {
 
     List<ContentResources> findByIdIn(List<Long> ids);
+
+    List<ContentResources> findAllByContent(Content content);
 
     @Transactional
     void deleteByContentVersionId(Long contentVersionId);

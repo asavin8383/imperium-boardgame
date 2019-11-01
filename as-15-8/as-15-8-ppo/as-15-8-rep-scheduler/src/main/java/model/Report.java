@@ -17,7 +17,7 @@ public class Report
 {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long rep_id;
+    private long repId;
 
     @Column
     private long rep_tp_id;

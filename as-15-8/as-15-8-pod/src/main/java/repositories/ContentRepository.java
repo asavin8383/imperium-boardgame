@@ -10,10 +10,7 @@ import java.util.List;
 
 
 @Repository
-public interface ContentRepository extends
-        JpaRepository<Content, Long>,
-        ContentRepositoryCustom,
-        DictionaryRepository {
+public interface ContentRepository extends JpaRepository<Content, Long>, DictionaryRepository {
 
     List<Content> findByErdiIdIn(List<String> ids);
 

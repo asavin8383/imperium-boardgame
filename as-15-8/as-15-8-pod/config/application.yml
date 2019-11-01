@@ -27,7 +27,6 @@ security:
 spring:
   application:
     name: pod
-  main.allow-bean-definition-overriding: true
   datasource:
     test-while-idle: true
     validation-query: SELECT 1;
@@ -101,12 +100,10 @@ registry-anonymizers:
   proxy-ip: ""
 
 ---
-logging.level.org.springframework.web: DEBUG
+
 spring:
   profiles: dev_pvorobiev, dev_asavin, dev_ashabalin, dev_jspirina
   profiles.include: local_log
-  http:
-    log-request-details: true
   jpa:
     hibernate:
       ddl-auto: none
@@ -115,3 +112,4 @@ spring:
     change-log: classpath:/data/changelog/db.changelog.master.xml
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb_test
+eureka.client.enabled: false

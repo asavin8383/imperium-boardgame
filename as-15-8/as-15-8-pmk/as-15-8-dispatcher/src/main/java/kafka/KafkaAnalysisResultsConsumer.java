@@ -23,6 +23,7 @@ import java.io.StringWriter;
  * Обработчик результатов анализа
  */
 
+//TODO удалить
 @Service
 @Slf4j
 @RequiredArgsConstructor(onConstructor_={@Autowired})

@@ -1,28 +1,108 @@
 package model.projection;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Data;
+import lombok.*;
+import model.portal.ErdiTrafficUnitJoin;
+import model.portal.SearchQueryTrafficUnitJoin;
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Subselect;
+
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import java.util.List;
 
 @Data
+@Setter(value = AccessLevel.PRIVATE)
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@Entity
+@Immutable
+@Subselect(
+        "with help as ( \n" +
+                "    select content.id                   as content_id, \n" +
+                "           max(addon.id)                as addon_id, \n" +
+                "           history.content_version_id   as content_version_id, \n" +
+                "           min(resources.id)            as resource_id \n" +
+                "    from sor.content content \n" +
+                "             join sor.content_history history \n" +
+                "                  on content.id = history.content_id \n" +
+                "                      and history.end_dt = to_date('30000101', 'YYYYMMDD') \n" +
+                "             left join sor.addon addon \n" +
+                "                       on content.id = addon.content_id and \n" +
+                "                          history.addon_version_id = addon.addon_version_id \n" +
+                "             join sor.content_info info \n" +
+                "                  on content.id = info.content_id and \n" +
+                "                     history.content_version_id = info.content_version_id \n" +
+                "             left join sor.content_resources resources \n" +
+                "                       on content.id = resources.content_id and \n" +
+                "                          history.content_version_id = info.content_version_id and \n" +
+                "                          case \n" +
+                "                              when info.blocktype like 'domain%' then resources.resource_type_id = 1 \n" +
+                "                              when info.blocktype = 'ip' then resource_type_id in (2, 3, 4, 5) \n" +
+                "                              else resources.resource_type_id = 6 \n" +
+                "                              end \n" +
+                "    group by content.id, history.content_version_id \n" +
+                ") select \n" +
+                "      help.content_id as id, \n" +
+                "      res.value as resource_value, \n" +
+                "      restype.dsc as resource_type, \n" +
+                "      subtype.orig_id as info_type_id, \n" +
+                "      subtype.registry_name as registry_name, \n" +
+                "      subtype.category_name as category_name, \n" +
+                "      subtype.violation_name as violation_name, \n" +
+                "      decision.org as decision_org \n" +
+                "from help \n" +
+                "         left join sor.content_resources res on help.resource_id = res.id \n" +
+                "         left join sor.resource_type restype on res.resource_type_id = restype.id \n" +
+                "         left join sor.addon addon on help.addon_id = addon.id \n" +
+                "         left join sor.subtype subtype on addon.info_type_id = subtype.orig_id and \n" +
+                "                                          subtype.eff_dt = to_date('30000101', 'YYYYMMDD') \n" +
+                "         join sor.decision decision on help.content_id = decision.content_id and \n" +
+                "                                       help.content_version_id = decision.content_version_id"
+)
 public class ContentView {
 
-//    http://192.168.5.182:8090/pages/viewpage.action?pageId=3801123
+    //    http://192.168.5.182:8090/pages/viewpage.action?pageId=3801123
 
-    // 1
-    // @Value("#{target.id}")
-    private Long contentId;
+    // 1 or erdiId ?
+    @Id
+    @ToString.Include
+    @EqualsAndHashCode.Include
+    private Long id;
 
-    // 1 ?
-    // @Value("#{target.erdiId}")
-    private String erdiId;
+    // 12
+    @ToString.Include
+    private String resourceValue;
 
-    // relevant version
-    // @Value("#{target.contentVersion.id}")
+    // 10
+    @ToString.Include
+    private String resourceType;
+
+    // 9
+    @ToString.Include
+    private String decisionOrg;
+
+    // 13
+    @ToString.Include
+    private String infoTypeId;
+
+    // 16
+    private String registryName;
+
+    // 17
+    private String categoryName;
+
+    // 18
+    private String violationName;
+
+    @OneToMany(mappedBy = "contentView")
     @JsonIgnore
-    private Long contentVersionId;
+    private List<ErdiTrafficUnitJoin> erdiTrafficUnits;
 
+    @OneToMany(mappedBy = "contentView")
     @JsonIgnore
-    private Long addonVersionId;
+    private List<SearchQueryTrafficUnitJoin> searchQueryTrafficUnits;
 
     // 2
     // @Value("#{target.contentInfo.includetime}")
@@ -47,13 +127,6 @@ public class ContentView {
     // @Value("#{target.contentInfo.urgencyType.dsc}")
 //    private String urgencyTypeDsc;
 
-    // 12
-    // @Value("#{target.contentResources[0].value}")
-    private String resourceValue;
-
-    // 10
-    // @Value("#{target.contentResources[0].checkUnitType}")
-    private String resourceType;
 
     // 11
     // max of selected resources dates ?
@@ -69,37 +142,10 @@ public class ContentView {
     // @Value("#{target.decision.number}")
 //    private String decisionNumber;
 
-    // 9
-    // @Value("#{target.decision.org}")
-    private String decisionOrg;
-
-    // 13 addon
-    private String infoTypeId;
-
     // 14 addon
 //    private Long visitorsCntRussia;
 
     // 15 addon
 //    private Long visitorsCntWorld;
 
-
-    /* Parse infoTypeId */
-
-    // 16
-    private String registryName;
-
-    // 17
-    private String categoryName;
-
-    // 18
-    private String violationName;
-
-    public ContentView(long contentId, String erdiId,
-                       Long contentVersionId,
-                       Long addonVersionId) {
-        this.contentId = contentId;
-        this.erdiId = erdiId;
-        this.contentVersionId = contentVersionId;
-        this.addonVersionId = addonVersionId;
-    }
 }

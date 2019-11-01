@@ -10,11 +10,15 @@ import org.springframework.messaging.SubscribableChannel;
  * Author: asavin
  */
 public interface DispatcherChannels {
-    String INPUT = "incomingArrangements";
+    String ARRANGEMENTS_INPUT = "incomingArrangements";
+    String ANALYSIS_RESULTS_INPUT = "inputAnalysisResults";
     String NOTIFICATIONS_OUTPUT = "arrangementNotifications";
 
-    @Input(INPUT)
+    @Input(ARRANGEMENTS_INPUT)
     SubscribableChannel incomingArrangements();
+
+    @Input(ANALYSIS_RESULTS_INPUT)
+    SubscribableChannel inputAnalysisResults();
 
     @Output(NOTIFICATIONS_OUTPUT)
     MessageChannel outputArrangementNotifications();
