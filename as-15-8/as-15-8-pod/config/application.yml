@@ -1,32 +1,5 @@
-subsystem: POD
-server:
-  port: 15801
-  tomcat:
-    max-threads: 200
-gateway.url: ${GATEWAY_URI:http://localhost:15880}
-logging:
-  config: config/logback-spring.xml
-  level:
-    root: INFO
-eureka:
-  client:
-    serviceUrl:
-      defaultZone: ${gateway.url}/eureka
-  instance:
-    preferIpAddress: true
-    instanceId: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port}
-security:
-  oauth2:
-    resource:
-      tokenInfoUri: ${gateway.url}/security/oauth/check_token
-    client:
-      clientId: pod
-      clientSecret: 1q0p2w9o
-      grantType: client_credentials
-      accessTokenUri: ${gateway.url}/security/oauth/token
+logging.level.root: INFO
 spring:
-  application:
-    name: pod
   datasource:
     test-while-idle: true
     validation-query: SELECT 1;

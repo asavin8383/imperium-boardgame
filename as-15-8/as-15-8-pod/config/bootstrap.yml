@@ -1,6 +1,8 @@
-subsystem: PPT
+subsystem: POD
 server:
   port: 15801
+  tomcat:
+    max-threads: 200
 gateway.url: ${GATEWAY_URI:http://localhost:15880}
 logging:
   config: config/logback-spring.xml
@@ -20,3 +22,12 @@ spring:
       discovery.serviceId: config_server
       profile: default
       label: latest
+security:
+  oauth2:
+    resource:
+      tokenInfoUri: ${gateway.url}/security/oauth/check_token
+    client:
+      clientId: pod
+      clientSecret: 1q0p2w9o
+      grantType: client_credentials
+      accessTokenUri: ${gateway.url}/security/oauth/token
