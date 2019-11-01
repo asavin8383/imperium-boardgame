@@ -14,6 +14,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CheckUnit {
 
+	/** Идентификатор ЕРДИ*/
+	private Long erdiId;
+
 	/** Тип проверяемой единицы */
 	private CheckUnitType type;
 	

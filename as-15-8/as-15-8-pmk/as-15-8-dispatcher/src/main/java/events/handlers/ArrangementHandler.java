@@ -31,7 +31,7 @@ public class ArrangementHandler {
      * Заполнение проверяемых ресурсов по ЕРДИ мероприятия
      * @param arrangementJob
      */
-    @StreamListener(DispatcherChannels.INPUT)
+    @StreamListener(DispatcherChannels.ARRANGEMENTS_INPUT)
     @SendTo(DispatcherChannels.NOTIFICATIONS_OUTPUT)
     public ArrangementStatusNotification createJobItems(ArrangementJob arrangementJob){
         log.info("Принято задание на проведение мероприятия: " + arrangementJob.toString());

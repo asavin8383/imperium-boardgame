@@ -1,17 +1,22 @@
 package controllers;
 
+import checkUnits.CheckUnit;
 import controllers.helpers.SortingHelper;
 import enums.SortingDirection;
 import model.erdi.ERDI;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
 import repositories.ERDIRepository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -25,6 +30,9 @@ import java.util.Optional;
 public class ERDIController {
 
     private ERDIRepository erdiRepo;
+
+    @Value("${gateway.url}")
+    private String gatewayUrl;
 
     @Autowired
     public ERDIController(ERDIRepository erdiRepo) {
@@ -57,4 +65,19 @@ public class ERDIController {
         }
         return null;
     }
+
+    @GetMapping(path = "/checkUnitList")
+    public List<CheckUnit> getCheckUnitsByErdi(@RequestParam("id") Long id){
+        String path = "/pod/checkUnits";
+        String uri = UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(path).queryParam("id", id).build().toString();
+        return WebClient.create()
+                .get()
+                .uri(uri)
+                .retrieve()
+                .bodyToFlux(CheckUnit.class)
+                .collectList()
+                .block();
+    }
+
+
 }
