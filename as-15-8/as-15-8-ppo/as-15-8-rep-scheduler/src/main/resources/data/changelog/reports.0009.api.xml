@@ -150,7 +150,7 @@ group by
                 msr_prd_tp,
                 msr_prd_caption,
                 max(finish_dttm) finish_dttm,
-                       jsonb_agg(json_build_object('rep_id',rep_id,'status',status,'format',format)) statuses
+                       jsonb_agg(json_build_object('rep_id',rep_id,'status',status,'format',format,'reason',reason)) statuses
                 from dm.reg_reports where status in ('OK','FAILED','RUNNING')
                 group by
                 rep_tp_id,
