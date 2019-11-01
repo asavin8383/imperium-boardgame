@@ -142,11 +142,21 @@ public class TrafficService {
 
     public static List<TrafficUnit> collectTrafficUnits(Traffic traffic) {
         List<TrafficUnit> units = new LinkedList<>();
-        units.add(traffic.getFormalErdiUnit());
+
+        ErdiTrafficUnit formalErdiUnit = traffic.getFormalErdiUnit();
+        formalErdiUnit.getFormalErdiList().forEach(erdiContentJoin ->
+                erdiContentJoin.setTrafficUnit(formalErdiUnit));
+        units.add(formalErdiUnit);
+
         units.add(traffic.getCustomErdiUnit());
         units.add(traffic.getSearchPhraseUnit());
-        if (! CollectionUtils.isEmpty(traffic.getSearchTemplates()) )
-            units.addAll(traffic.getSearchTemplates());
+
+        List<SearchQueryTrafficUnit> templates = traffic.getSearchTemplates();
+        if (! CollectionUtils.isEmpty(templates) ) {
+            templates.forEach(template -> template.getFormalErdiList().forEach(
+                    searchQueryContentJoin -> searchQueryContentJoin.setTrafficUnit(template)));
+            units.addAll(templates);
+        }
         return units;
     }
 

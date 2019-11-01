@@ -4,15 +4,24 @@ import liquibase.util.StringUtils;
 import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 import model.projection.ContentView;
+import model.projection.ContentView_;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.*;
-import java.util.Arrays;
+import javax.persistence.metamodel.SingularAttribute;
+import java.util.ArrayList;
+import java.util.List;
 
 @UtilityClass
 public class ContentViewSpecifications {
 
-    private static final String[] SEARCH_QUERY_COLUMNS = {"resourceValue", "resourceType", "decisionOrg"};
+    private static final List<SingularAttribute<ContentView, String>> SEARCH_QUERY_COLUMNS;
+    static {
+        SEARCH_QUERY_COLUMNS = new ArrayList<>(3);
+        SEARCH_QUERY_COLUMNS.add(ContentView_.resourceValue);
+        SEARCH_QUERY_COLUMNS.add(ContentView_.resourceType);
+        SEARCH_QUERY_COLUMNS.add(ContentView_.decisionOrg);
+    }
 
     public static Specification<ContentView> containsQueryString(String query) {
 
@@ -20,7 +29,8 @@ public class ContentViewSpecifications {
                 predicateContainsQuery(criteriaBuilder, root, query);
     }
 
-    public static <T> Specification<ContentView> containsInTrafficUnit(String query, String joinColumn,
+    public static <T> Specification<ContentView> containsInTrafficUnit(String query,
+                                                                       String joinColumn,
                                                                        @NonNull Long trafficUnitId) {
         return (Specification<ContentView>) (root, criteriaQuery, criteriaBuilder) -> {
             Join<ContentView, T> join = root.join(joinColumn);
@@ -53,7 +63,7 @@ public class ContentViewSpecifications {
     private Predicate predicateContainsQuery(CriteriaBuilder cb, Root<ContentView> root, String query) {
         String likeQuery = "%" + query + "%";
 
-        Predicate[] likePredicates = Arrays.stream(SEARCH_QUERY_COLUMNS)
+        Predicate[] likePredicates = SEARCH_QUERY_COLUMNS.stream()
                 .map(column -> cb.like(cb.lower(root.get(column)), likeQuery))
                 .toArray(Predicate[]::new);
 

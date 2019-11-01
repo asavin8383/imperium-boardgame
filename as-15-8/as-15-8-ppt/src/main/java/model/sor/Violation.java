@@ -6,8 +6,6 @@ import lombok.*;
 import model.Views;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Type;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -60,12 +58,5 @@ public class Violation implements Serializable {
             cascade = {CascadeType.MERGE, CascadeType.REFRESH})
     @JsonIgnore
     private List<Violation> children;
-
-
-
-    public static Example<Violation> example(ExampleMatcher matcher, String name, Boolean deleted) {
-        Violation v =  new Violation(null, null, name, deleted, null, null);
-        return Example.of(v, matcher);
-    }
 
 }
