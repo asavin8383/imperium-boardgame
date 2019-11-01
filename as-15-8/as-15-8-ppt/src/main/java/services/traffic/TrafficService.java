@@ -6,11 +6,7 @@ import exceptions.AS_15_8_Exception;
 import lombok.RequiredArgsConstructor;
 import model.enums.TrafficType;
 import model.enums.TrafficUnitType;
-import model.traffic.ErdiTrafficUnit;
-import model.traffic.SearchQueryTrafficUnit;
-import model.traffic.Traffic;
-import model.traffic.TrafficUnit;
-import model.traffic.projection.TrafficProjection;
+import model.traffic.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
@@ -53,15 +49,15 @@ public class TrafficService {
         return trafficRepository.findAll(Example.of(traffic, matcher), page);
     }
 
-    public Page<TrafficProjection> getAllTrafficInfo(SortingDirection sortingDirection,
-                                                     String sortingColumn,
-                                                     int pageNumber,
-                                                     int pageSize,
-                                                     String query) {
+    public Page<TrafficView> getAllTrafficInfo(SortingDirection sortingDirection,
+                                               String sortingColumn,
+                                               int pageNumber,
+                                               int pageSize,
+                                               String query) {
 
         PageRequest pageable = PageRequest.of(pageNumber, pageSize,
                 SortingHelper.createSorting(sortingDirection, sortingColumn));
-        Page<TrafficProjection> page =
+        Page<TrafficView> page =
                 trafficRepository.findAllTrafficInfo(query, pageable);
         page.getContent().parallelStream().forEach(traffic -> {
             long formalErdiCount = trafficRepository.countContentErdiByTrafficId(traffic.getId());

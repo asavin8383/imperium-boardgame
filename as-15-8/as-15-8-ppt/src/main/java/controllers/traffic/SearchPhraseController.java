@@ -34,24 +34,15 @@ public class SearchPhraseController {
             @RequestParam(required = false) String sortingColumn,
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize,
-            @RequestParam(defaultValue = "false") boolean returnAll,
-            @RequestParam(required = false) Long searchTrafficUnitId,
-            @RequestParam(required = false) Long violationId,
-            @RequestParam(required = false) String query) {
+            @RequestParam(required = false) String query,
+            @RequestParam(defaultValue = "false") boolean containsInTraffic,
+            @RequestParam(required = false) Long searchTrafficUnitId) {
 
         Pageable page = PageRequest.of(pageNumber, pageSize,
                 SortingHelper.createSorting(sortingDirection, sortingColumn));
         SearchPhraseParams params = new SearchPhraseParams(
-                returnAll, searchTrafficUnitId, query, violationId);
-        Page<SearchPhrase> result =
-                phraseRepository.searchFor(SearchPhrase.class, params, page);
-
-        if (returnAll && searchTrafficUnitId != null) {
-            result.forEach(rec -> rec.setChecked(phraseRepository
-                    .belongsToSearchTrafficUnit(searchTrafficUnitId, rec.getId())));
-        }
-
-        return result;
+                containsInTraffic, searchTrafficUnitId, query);
+        return phraseRepository.searchFor(SearchPhrase.class, params, page);
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)

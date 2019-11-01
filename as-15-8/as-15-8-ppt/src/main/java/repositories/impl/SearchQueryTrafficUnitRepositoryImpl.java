@@ -32,7 +32,7 @@ public class SearchQueryTrafficUnitRepositoryImpl extends JoinCriteriaHelper<Sea
 
         if (params.getTrafficUnitId() != null) {
 
-            if (params.isBelongsTo()) {
+            if (params.isContainsInTraffic()) {
                 predicates.add(cb.equal(root.get("traffic.id"), params.getTrafficUnitId()));
             } else {
                 predicates.add(cb.or(

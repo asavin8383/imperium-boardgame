@@ -1,77 +1,101 @@
 package services.traffic;
 
-import controllers.helpers.SortingHelper;
-import enums.SortingDirection;
 import exceptions.AS_15_8_Exception;
-import lombok.RequiredArgsConstructor;
+import liquibase.util.StringUtils;
+import lombok.NonNull;
 import model.traffic.CustomErdi;
-import model.traffic.projection.CustomErdiRow;
+import model.traffic.CustomErdiView;
+import model.traffic.CustomErdiView_;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import repositories.CustomErdiRepository;
-import repositories.helpers.CustomErdiParams;
+import repositories.CustomErdiViewRepository;
+
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.ListAttribute;
+import javax.persistence.metamodel.SingularAttribute;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class CustomErdiService {
 
+    private final List<SingularAttribute<CustomErdiView, String>> searchQueryColumns;
+
     private final CustomErdiRepository customErdiRepository;
+    private final CustomErdiViewRepository viewRepository;
 
-    public Page<CustomErdi> getAllCustomErdi(SortingDirection sortingDirection,
-                                             String sortingColumn,
-                                             int pageNumber,
-                                             int pageSize,
-                                             boolean returnAll,
-                                             Long erdiTrafficUnitId,
-                                             Long searchTrafficUnitId,
-                                             String query,
-                                             //Long resourceTypeId,
-                                             Long violationId) {
-        Pageable page = PageRequest.of(pageNumber, pageSize,
-                SortingHelper.createSorting(sortingDirection, sortingColumn));
-        CustomErdiParams params = new CustomErdiParams(returnAll,
-                erdiTrafficUnitId, searchTrafficUnitId, query, violationId);
-        Page<CustomErdi> result =
-                customErdiRepository.searchFor(CustomErdi.class, params, page);
+    @Autowired
+    public CustomErdiService(CustomErdiRepository customErdiRepository,
+                             CustomErdiViewRepository viewRepository) {
+        this.customErdiRepository = customErdiRepository;
+        this.viewRepository = viewRepository;
 
-        if (returnAll) {
-            if (erdiTrafficUnitId != null)
-                result.forEach(rec -> rec.setChecked(customErdiRepository
-                        .belongsToErdiTrafficUnit(erdiTrafficUnitId, rec.getId())));
-            else if (searchTrafficUnitId != null)
-                result.forEach(rec -> rec.setChecked(customErdiRepository
-                        .belongsToSearchTrafficUnit(searchTrafficUnitId, rec.getId())));
-        }
-        return result;
+        searchQueryColumns = new ArrayList<>(3);
+        searchQueryColumns.add(CustomErdiView_.name);
+        searchQueryColumns.add(CustomErdiView_.unitValue);
+        searchQueryColumns.add(CustomErdiView_.unitType);
     }
 
-    public Page<CustomErdiRow> getCustomErdiRows(SortingDirection sortingDirection,
-                                                 String sortingColumn,
-                                                 int pageNumber,
-                                                 int pageSize,
-                                                 boolean returnAll,
-                                                 Long erdiTrafficUnitId,
-                                                 Long searchTrafficUnitId,
-                                                 String query,
-                                                 Long violationId) {
-        Pageable page = PageRequest.of(pageNumber, pageSize,
-                SortingHelper.createSorting(sortingDirection, sortingColumn));
-        CustomErdiParams params = new CustomErdiParams(returnAll,
-                erdiTrafficUnitId, searchTrafficUnitId, query, violationId);
-        Page<CustomErdiRow> result = customErdiRepository.searchFor(params, page);
+    public Page<CustomErdiView> getCustomErdiView(Pageable pageable, String query,
+                                                  boolean containsInTraffic,
+                                                  Long erdiTrafficUnitId,
+                                                  Long searchTrafficUnitId) {
 
-        if (returnAll) {
-            if (erdiTrafficUnitId != null)
-                result.forEach(rec -> rec.setChecked(customErdiRepository
-                        .belongsToErdiTrafficUnit(erdiTrafficUnitId, rec.getCustomErdiId())));
-            else if (searchTrafficUnitId != null)
-                result.forEach(rec -> rec.setChecked(customErdiRepository
-                        .belongsToSearchTrafficUnit(searchTrafficUnitId, rec.getCustomErdiId())));
-        }
-        return result;
+        Specification<CustomErdiView> specification = getSpecification(query,
+                containsInTraffic, erdiTrafficUnitId, searchTrafficUnitId);
+        return specification == null ? viewRepository.findAll(pageable) :
+                viewRepository.findAll(specification, pageable);
+    }
+
+    private Specification<CustomErdiView> getSpecification(String query,
+                                                        boolean containsInTraffic,
+                                                        Long erdiTrafficUnitId,
+                                                        Long searchTrafficUnitId) {
+        if (erdiTrafficUnitId != null)
+            return containsInTrafficUnit(query, containsInTraffic, erdiTrafficUnitId,
+                            CustomErdiView_.erdiTrafficUnits);
+        else if (searchTrafficUnitId != null)
+            return containsInTrafficUnit(query, containsInTraffic, erdiTrafficUnitId,
+                    CustomErdiView_.searchQueryTrafficUnits);
+        else if (query != null && query.trim().length() > 0)
+            return (root, criteriaQuery, criteriaBuilder) ->
+                    predicateContainsQuery(criteriaBuilder, root, query);
+
+        return null;
+    }
+
+    private <T> Specification<CustomErdiView> containsInTrafficUnit(String query, boolean containsInTraffic,
+                                                                    @NonNull Long trafficUnitId,
+                                                                    ListAttribute<CustomErdiView, T> joinColumn) {
+        return (root, criteriaQuery, criteriaBuilder) -> {
+            Join<CustomErdiView, T> join = root.join(joinColumn);
+            Predicate predicate = criteriaBuilder.equal(
+                    join.get("trafficUnitId"), trafficUnitId);
+            if ( !containsInTraffic )
+                predicate = criteriaBuilder.or(criteriaBuilder.not(predicate),
+                        criteriaBuilder.isNull(join.get("trafficUnitId"))
+                );
+
+            return StringUtils.isEmpty(query) ? predicate : criteriaBuilder.and(
+                    predicate, predicateContainsQuery(criteriaBuilder, root, query));
+        };
+    }
+
+    private Predicate predicateContainsQuery(CriteriaBuilder cb, Root<CustomErdiView> root, String query) {
+        String likeQuery = "%" + query + "%";
+
+        Predicate[] likePredicates = searchQueryColumns.stream()
+                .map(column -> cb.like(cb.lower(root.get(column)), likeQuery.toLowerCase()))
+                .toArray(Predicate[]::new);
+
+        return cb.or(likePredicates);
     }
 
     public CustomErdi createCustomErdi(CustomErdi customErdi) {

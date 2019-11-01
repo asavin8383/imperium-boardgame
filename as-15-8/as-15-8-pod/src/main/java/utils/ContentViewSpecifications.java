@@ -64,7 +64,7 @@ public class ContentViewSpecifications {
         String likeQuery = "%" + query + "%";
 
         Predicate[] likePredicates = SEARCH_QUERY_COLUMNS.stream()
-                .map(column -> cb.like(cb.lower(root.get(column)), likeQuery))
+                .map(column -> cb.like(cb.lower(root.get(column)), likeQuery.toLowerCase()))
                 .toArray(Predicate[]::new);
 
         return cb.or(likePredicates);

@@ -59,13 +59,4 @@ public class CustomErdi implements Serializable {
     @JsonIgnore
     private List<ErdiTrafficUnit> erdiTrafficUnits;
 
-
-
-    @Transient
-    private Boolean checked;
-
-    public void setChecked(Boolean checked) {
-        this.checked = checked;
-    }
-
 }

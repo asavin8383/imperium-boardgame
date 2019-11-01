@@ -1,4 +1,4 @@
-package model.traffic.projection;
+package model.traffic;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
@@ -12,7 +12,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @RequiredArgsConstructor
-public class TrafficProjection {
+public class TrafficView {
     
     private final Long id;
     private final String name;
