@@ -1,7 +1,7 @@
 {
 	"info": {
-		"_postman_id": "755d6565-ef2c-4f47-8cc2-ea1b461a71d0",
-		"name": "АС 15.8",
+		"_postman_id": "1c95db9c-7bd8-468c-a020-3d50b303d55e",
+		"name": "АС 15.8 copy",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -1825,89 +1825,6 @@
 			"name": "Профильный трафик",
 			"item": [
 				{
-					"name": "ЕРДИ",
-					"item": [
-						{
-							"name": "Получение списка ЕРДИ",
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "X-AUTH-TOKEN",
-										"type": "text",
-										"value": "{{oper_token}}"
-									}
-								],
-								"url": {
-									"raw": "{{url}}/erdi/formal?",
-									"host": [
-										"{{url}}"
-									],
-									"path": [
-										"erdi",
-										"formal"
-									],
-									"query": [
-										{
-											"key": "query",
-											"value": "weedy",
-											"disabled": true
-										},
-										{
-											"key": "resourceTypeId",
-											"value": "1",
-											"disabled": true
-										},
-										{
-											"key": "returnAll",
-											"value": "false",
-											"disabled": true
-										},
-										{
-											"key": "erdiTrafficUnitId",
-											"value": "20",
-											"disabled": true
-										},
-										{
-											"key": "searchTrafficUnitId",
-											"value": "4",
-											"disabled": true
-										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Получение ЕРДИ по ID",
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "X-AUTH-TOKEN",
-										"type": "text",
-										"value": "{{oper_token}}"
-									}
-								],
-								"url": {
-									"raw": "{{url}}/erdi/formal/16911",
-									"host": [
-										"{{url}}"
-									],
-									"path": [
-										"erdi",
-										"formal",
-										"16911"
-									]
-								}
-							},
-							"response": []
-						}
-					],
-					"protocolProfileBehavior": {},
-					"_postman_isSubFolder": true
-				},
-				{
 					"name": "Пользовательские ЕРДИ",
 					"item": [
 						{
@@ -2578,7 +2495,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{url}}/traffic?",
+							"raw": "{{url}}/traffic",
 							"host": [
 								"{{url}}"
 							],
@@ -2635,7 +2552,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"name\": \"meeh traffic\",\n\n\t\"formalErdiUnit\": {\n\t\t\"category\": {\n\t\t\t\"id\": 0\n\t\t},\n\t\t\"formalErdiList\": [\n\t\t\t{ \"id\": 169111 },\n\t\t\t{ \"id\": 169112 }\n\t\t]\n\t},\n\t\"customErdiUnit\": {\n\t\t\"category\": {\n\t\t\t\"id\": 0\n\t\t},\n\t\t\"customErdiList\": [\n\t\t\t{ \"id\": 3 },\n\t\t\t{ \"id\": 4 }\n\t\t]\n\t},\n\t\"searchPhraseUnit\": {\n\t\t\"queryPattern\": \"\",\n\t\t\"category\": {\n\t\t\t\"id\": 0\n\t\t},\n\t\t\"searchPhrases\": [\n\t\t\t{ \"id\": 3 },\n\t\t\t{ \"id\": 4 }\n\t\t]\n\t},\n\t\"searchTemplates\": [\n\t\t{\n\t\t\t\"category\": { \"id\": 0 },\n\t\t\t\"queryPattern\": \"test patter $ERDI\",\n\t\t\t\"customErdiList\": [\n\t\t\t\t{ \"id\": 3 },\n\t\t\t\t{ \"id\": 4 }\n\t\t\t],\n\t\t\t\"formalErdiList\": [\n\t\t\t\t{ \"id\": 169111 }\n\t\t\t],\n\t\t\t\"searchPhrases\": [\n\t\t\t]\n\t\t}\n\t]\n}",
+							"raw": "{\n\t\"name\": \"test traffic\",\n\n\t\"formalErdiUnit\": {\n\t\t\"category\": {\n\t\t\t\"id\": 0\n\t\t},\n\t\t\"formalErdiList\": [\n\t\t\t{ \"id\": 247861 },\n\t\t\t{ \"id\": 247862 }\n\t\t]\n\t},\n\t\"customErdiUnit\": {\n\t\t\"category\": {\n\t\t\t\"id\": 0\n\t\t},\n\t\t\"customErdiList\": [\n\t\t\t{ \"id\": 3 },\n\t\t\t{ \"id\": 4 }\n\t\t]\n\t},\n\t\"searchPhraseUnit\": {\n\t\t\"queryPattern\": \"\",\n\t\t\"category\": {\n\t\t\t\"id\": 0\n\t\t},\n\t\t\"searchPhrases\": [\n\t\t\t{ \"id\": 3 },\n\t\t\t{ \"id\": 4 }\n\t\t]\n\t},\n\t\"searchTemplates\": [\n\t\t{\n\t\t\t\"category\": { \"id\": 0 },\n\t\t\t\"queryPattern\": \"test patter $ERDI\",\n\t\t\t\"customErdiList\": [\n\t\t\t\t{ \"id\": 3 },\n\t\t\t\t{ \"id\": 4 }\n\t\t\t],\n\t\t\t\"formalErdiList\": [\n\t\t\t\t{ \"id\": 247861 },\n\t\t\t\t{ \"id\": 247862 }\n\t\t\t],\n\t\t\t\"searchPhrases\": [\n\t\t\t]\n\t\t}\n\t]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -2673,13 +2590,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{url}}/traffic/22",
+							"raw": "{{url}}/traffic/32",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"traffic",
-								"22"
+								"32"
 							]
 						}
 					},
@@ -2750,6 +2667,50 @@
 							"path": [
 								"traffic",
 								"7"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Получение списка ЕРДИ",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"type": "text",
+								"value": "{{oper_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/pod/erdi?containsInTraffic=false&erdiTrafficUnitId=64",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"pod",
+								"erdi"
+							],
+							"query": [
+								{
+									"key": "query",
+									"value": "weedy",
+									"disabled": true
+								},
+								{
+									"key": "containsInTraffic",
+									"value": "false"
+								},
+								{
+									"key": "erdiTrafficUnitId",
+									"value": "64"
+								},
+								{
+									"key": "searchTrafficUnitId",
+									"value": "1",
+									"disabled": true
+								}
 							]
 						}
 					},
