@@ -139,6 +139,52 @@ group by
     rep_tp.shrt_nm
         </createView>
     </changeSet>
+    <changeSet id="0009.12" author="klychagin">
+        <dropView schemaName="dm" viewName="v_api_reg_reports_table"/>
+    </changeSet>
+        <changeSet id="0009.13" author="klychagin">
+        <createView viewName="v_api_reg_reports_table" schemaName="dm">
+                select
+                rep_tp_id,
+                msr_prd_id,
+                msr_prd_tp,
+                msr_prd_caption,
+                max(finish_dttm) finish_dttm,
+                       jsonb_agg(json_build_object('rep_id',rep_id,'status',status,'format',format)) statuses
+                from dm.reg_reports where status in ('OK','FAILED','RUNNING')
+                group by
+                rep_tp_id,
+                msr_prd_id,
+                msr_prd_tp,
+                msr_prd_caption,
+                msr_prd_st_dttm
+                order by rep_tp_id,msr_prd_tp,
+                msr_prd_st_dttm
+        </createView>
+    </changeSet>
+    <changeSet id="0009.14" author="klychagin">
+        <dropView schemaName="dm" viewName="v_api_reg_reports_admin_table"/>
+    </changeSet>
+       <changeSet id="0009.15" author="klychagin">
+        <createView viewName="v_api_reg_reports_admin_table" schemaName="dm">
+                select
+                rep_tp_id,
+                msr_prd_id,
+                msr_prd_tp,
+                msr_prd_caption,
+                max(finish_dttm) finish_dttm,
+                       jsonb_agg(json_build_object('rep_id',rep_id,'status',status,'format',format,'reason',reason)) statuses
+                from dm.reg_reports where status !='NEW'
+                group by
+                rep_tp_id,
+                msr_prd_id,
+                msr_prd_tp,
+                msr_prd_caption,
+                msr_prd_st_dttm
+                order by rep_tp_id,msr_prd_tp,
+                msr_prd_st_dttm
+        </createView>
+    </changeSet>
 </databaseChangeLog>
 
 
