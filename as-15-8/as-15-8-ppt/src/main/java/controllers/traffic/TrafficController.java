@@ -27,16 +27,6 @@ public class TrafficController {
     private final TrafficService trafficService;
 
     @GetMapping
-    public Page<Traffic> getAllTraffic(@RequestParam(required = false) SortingDirection sortingDirection,
-                                       @RequestParam(required = false) String sortingColumn,
-                                       @RequestParam(defaultValue = "0") int pageNumber,
-                                       @RequestParam(defaultValue = "10") int pageSize,
-                                       @RequestParam(required = false) String query) {
-
-        return trafficService.getAllTraffic(sortingDirection, sortingColumn, pageNumber, pageSize, query);
-    }
-
-    @GetMapping(path = "/extended")
     public Page<TrafficProjection> getAllTrafficInfo(
             @RequestParam(required = false) SortingDirection sortingDirection,
             @RequestParam(required = false) String sortingColumn,

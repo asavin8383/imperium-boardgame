@@ -1,85 +1,57 @@
 package services;
 
-import checkUnits.CheckUnitType;
 import lombok.RequiredArgsConstructor;
-import model.enums.BlockType;
+import model.portal.ErdiTrafficUnitJoin;
+import model.portal.SearchQueryTrafficUnitJoin;
 import model.projection.ContentView;
-import model.scheme.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import repositories.*;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
+import repositories.ContentViewRepository;
+import utils.ContentViewSpecifications;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class ContentService {
 
-    private final ContentRepository contentRepository;
-    private final ContentInfoRepository infoRepository;
-    private final ContentResourcesRepository resourceRepository;
-    private final AddonRepository addonRepository;
-    private final SubtypeRepository subtypeRepository;
-    private final DecisionRepository decisionRepository;
+    public static final String ERDI_TRAFFIC_UNIT_COLUMN = "erdiTrafficUnits";
+    public static final String SEARCH_QUERY_TRAFFIC_UNIT_COLUMN = "searchQueryTrafficUnits";
 
-    @Transactional
-    public Page<ContentView> getByEffDtAndQuery(Date effDt, String query, Pageable page) {
-        Page<ContentView> contentPage = contentRepository.findByEffDtAndQuery(effDt, query, page);
+    private final ContentViewRepository viewRepository;
 
-        contentPage.getContent().parallelStream().forEach(view -> {
-            Decision decision = decisionRepository.findTopByContent_IdAndContentVersion_IdOrderByIdDesc(
-                    view.getContentId(), view.getContentVersionId());
-            if (decision != null) {
-                view.setDecisionOrg(decision.getOrg());
-            }
-
-            ContentInfo info = infoRepository.findByContentVersion_IdAndContent_Id(
-                    view.getContentVersionId(), view.getContentId());
-            List<String> resourceTypes = getResourceTypesFor(info.getBlockType());
-            ContentResources res = resourceRepository.findTopByContentAndVersionAndTypeDsc(
-                    view.getContentId(), view.getContentVersionId(), resourceTypes);
-            if (res != null) {
-                view.setResourceValue(res.getValue());
-                view.setResourceType(res.getCheckUnitType().toString());
-            }
-
-            Addon addon = addonRepository.findTopByAddonVersion_IdOrderByIdDesc(view.getAddonVersionId());
-            if (addon != null && addon.getInfoTypeId() != null) {
-                Subtype subtype = subtypeRepository.findTopByOrigIdOrderByIdDesc(addon.getInfoTypeId());
-                if (subtype != null) {
-                    view.setInfoTypeId(subtype.getOrigId());
-                    view.setRegistryName(subtype.getRegistryName());
-                    view.setCategoryName(subtype.getCategoryName());
-                    view.setViolationName(subtype.getViolationName());
-                }
-            }
-        });
-
-        return contentPage;
+    public Page<ContentView> getFormalErdiView(Pageable pageable,
+                                               String query,
+                                               boolean containsInTraffic,
+                                               Long erdiTrafficUnitId,
+                                               Long searchTrafficUnitId) {
+        Specification<ContentView> specification = getSpecification(query, containsInTraffic,
+                erdiTrafficUnitId, searchTrafficUnitId);
+        return specification == null ? viewRepository.findAll(pageable) :
+                viewRepository.findAll(specification, pageable);
     }
 
-    public static List<String> getResourceTypesFor(BlockType blockType) {
-        // todo bi map
-        switch (blockType) {
-            case IP:
-                return Arrays
-                        .stream(CheckUnitType.values())
-                        .map(CheckUnitType::toString)
-                        .filter(type -> type.contains("ip"))
-                        .collect(Collectors.toList());
-            case DOMAIN:
-            case DOMAIN_MASK:
-                return Collections.singletonList(CheckUnitType.DOMAIN.toString().toLowerCase());
-            default:
-                return Collections.singletonList(CheckUnitType.URL.toString().toLowerCase());
-        }
+    private Specification<ContentView> getSpecification(String query,
+                                                        boolean containsInTraffic,
+                                                        Long erdiTrafficUnitId,
+                                                        Long searchTrafficUnitId) {
+        if (erdiTrafficUnitId != null)
+            return containsInTraffic ?
+                    ContentViewSpecifications.<ErdiTrafficUnitJoin>containsInTrafficUnit(
+                            query, ERDI_TRAFFIC_UNIT_COLUMN, erdiTrafficUnitId) :
+                    ContentViewSpecifications.notContainsInTrafficUnit(
+                            query, erdiTrafficUnitId, ErdiTrafficUnitJoin.class);
+        else if (searchTrafficUnitId != null)
+            return containsInTraffic ?
+                    ContentViewSpecifications.<SearchQueryTrafficUnitJoin>containsInTrafficUnit(
+                            query, SEARCH_QUERY_TRAFFIC_UNIT_COLUMN, searchTrafficUnitId) :
+                    ContentViewSpecifications.notContainsInTrafficUnit(
+                            query, searchTrafficUnitId, SearchQueryTrafficUnitJoin.class);
+        else if (query != null && query.trim().length() > 0)
+            return ContentViewSpecifications.containsQueryString(query);
+
+        return null;
     }
 
 }

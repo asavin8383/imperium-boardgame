@@ -4,6 +4,7 @@ import controllers.helpers.SortingHelper;
 import enums.SortingDirection;
 import exceptions.AS_15_8_Exception;
 import lombok.RequiredArgsConstructor;
+import model.enums.TrafficType;
 import model.enums.TrafficUnitType;
 import model.traffic.ErdiTrafficUnit;
 import model.traffic.SearchQueryTrafficUnit;
@@ -58,9 +59,31 @@ public class TrafficService {
                                                      int pageSize,
                                                      String query) {
 
-        PageRequest page = PageRequest.of(pageNumber, pageSize,
+        PageRequest pageable = PageRequest.of(pageNumber, pageSize,
                 SortingHelper.createSorting(sortingDirection, sortingColumn));
-        return trafficRepository.findAllTrafficInfo(query, page);
+        Page<TrafficProjection> page =
+                trafficRepository.findAllTrafficInfo(query, pageable);
+        page.getContent().parallelStream().forEach(traffic -> {
+            long formalErdiCount = trafficRepository.countContentErdiByTrafficId(traffic.getId());
+            long customErdiCount = trafficRepository.countCustomErdiByTrafficId(traffic.getId());
+            long searchPhrasesCount = trafficRepository.countSearcPhrasesByTrafficId(traffic.getId());
+            long searchTemplatesCount = trafficRepository.countSearchTemplatesByTrafficId(traffic.getId());
+            long dynamicCount = trafficRepository.countDynamicByTrafficId(traffic.getId());
+            long staticCount = formalErdiCount + customErdiCount + searchPhrasesCount + searchTemplatesCount;
+
+            traffic.setCount(staticCount + dynamicCount);
+            traffic.setType(getTrafficType(staticCount, dynamicCount));
+        });
+        return page;
+    }
+
+    public TrafficType getTrafficType(long staticCount, long dynamicCount) {
+        if (staticCount == 0 && dynamicCount > 0)
+            return TrafficType.DYNAMIC;
+        else if (staticCount > 0 && dynamicCount == 0)
+            return TrafficType.STATIC;
+        else
+            return TrafficType.MIXED;
     }
 
     public Traffic getTrafficById(Long id) {

@@ -1,9 +1,10 @@
 package model.traffic.projection;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import model.enums.TrafficType;
 
 import java.util.Date;
 import java.util.List;
@@ -15,13 +16,17 @@ public class TrafficProjection {
     
     private final Long id;
     private final String name;
-    private Integer count;
-    private String type;
+    private Long count;
+    private TrafficType type;
 
-    @JsonFormat(pattern = "HH:mm dd.MM.yy")
+    @JsonIgnore
+    //@JsonFormat(pattern = "HH:mm dd.MM.yy")
     private Date changedDate;
 
+    @JsonIgnore
     private List<String> accessToolTypes;
+
+    @JsonIgnore
     private List<String> resourceTypes;
 
 }

@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 import restapi.ErdiRestClient;
 import services.ContentService;
 import services.InfoService;
-import utils.Utils;
 
 import java.text.ParseException;
 import java.util.concurrent.CompletableFuture;
@@ -40,13 +39,16 @@ public class ContentController {
             @RequestParam(required = false) String sortingColumn,
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize,
-            @RequestParam(required = false) String query) {
+            @RequestParam(required = false) String query,
+            @RequestParam(defaultValue = "true") boolean containsInTraffic,
+            @RequestParam(required = false) Long erdiTrafficUnitId,
+            @RequestParam(required = false) Long searchTrafficUnitId) {
 
         if (!erdiRestClient.getIsLoading()) {
-            Pageable page = PageRequest.of(pageNumber, pageSize,
+            Pageable pageable = PageRequest.of(pageNumber, pageSize,
                     SortingHelper.createSorting(sortingDirection, sortingColumn));
-            Page<ContentView> pageContent = contentService.getByEffDtAndQuery(
-                    Utils.getEndDate(), query, page);
+            Page<ContentView> pageContent = contentService.getFormalErdiView(pageable,
+                    query, containsInTraffic, erdiTrafficUnitId, searchTrafficUnitId);
             return new ResponseEntity<>(pageContent, HttpStatus.OK);
         }
         else {
