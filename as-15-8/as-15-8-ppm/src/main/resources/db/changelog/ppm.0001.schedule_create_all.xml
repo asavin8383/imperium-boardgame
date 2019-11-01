@@ -1,0 +1,107 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+    <changeSet author="san (generated)" id="1572588281168-1">
+        <createTable schemaName="schedule" tableName="arrangements">
+            <column name="id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="arrangementsPK"/>
+            </column>
+            <column name="access_tool" type="text"/>
+            <column name="creation_date" type="timestamptz"/>
+            <column name="max_workers_count" type="INTEGER"/>
+            <column name="planned_end_time" type="timestamptz"/>
+            <column name="planned_start_time" type="timestamptz"/>
+            <column name="title" type="text"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="san (generated)" id="1572588281168-2">
+        <createTable schemaName="schedule" tableName="schedule_check_units">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="schedule_check_unitsPK"/>
+            </column>
+            <column name="check_unit_type" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="check_unit_value" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="erdi_id" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="arrangement_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="san (generated)" id="1572588281168-3">
+        <createTable schemaName="schedule" tableName="schedule_period_arrangements">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="schedule_period_arrangementsPK"/>
+            </column>
+            <column name="workers_count" type="INTEGER"/>
+            <column name="arrangement_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="schedule_period_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="san (generated)" id="1572588281168-4">
+        <createTable schemaName="schedule" tableName="schedule_period_check_units">
+            <column name="execution_number" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="text"/>
+            <column name="check_unit_id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="schedule_period_check_unitsPK"/>
+            </column>
+            <column name="schedule_period_arrangement_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="san (generated)" id="1572588281168-5">
+        <createTable schemaName="schedule" tableName="schedule_periods">
+            <column name="id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="schedule_periodsPK"/>
+            </column>
+            <column name="end_time" type="time"/>
+            <column name="start_time" type="time"/>
+            <column name="schedule_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="san (generated)" id="1572588281168-6">
+        <createTable schemaName="schedule" tableName="schedules">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="schedulesPK"/>
+            </column>
+            <column name="creation_date" type="timestamptz"/>
+            <column name="planned_date" type="date"/>
+            <column name="status" type="text"/>
+            <column name="user" type="text"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="san (generated)" id="1572588281168-7">
+        <addUniqueConstraint columnNames="schedule_period_arrangement_id, execution_number" constraintName="UK_schedule_period_check_units" schemaName="schedule" tableName="schedule_period_check_units"/>
+    </changeSet>
+    <changeSet author="san (generated)" id="1572588281168-8">
+        <addForeignKeyConstraint baseColumnNames="arrangement_id" baseTableName="schedule_period_arrangements" baseTableSchemaName="schedule" constraintName="FK_arrangements_schedule_period_arrangements" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="arrangements" referencedTableSchemaName="schedule" validate="true"/>
+    </changeSet>
+    <changeSet author="san (generated)" id="1572588281168-9">
+        <addForeignKeyConstraint baseColumnNames="schedule_id" baseTableName="schedule_periods" baseTableSchemaName="schedule" constraintName="FK_schedules_schedule_periods" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="schedules" referencedTableSchemaName="schedule" validate="true"/>
+    </changeSet>
+    <changeSet author="san (generated)" id="1572588281168-10">
+        <addForeignKeyConstraint baseColumnNames="arrangement_id" baseTableName="schedule_check_units" baseTableSchemaName="schedule" constraintName="FK_arrangements_schedule_check_units" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="arrangements" referencedTableSchemaName="schedule" validate="true"/>
+    </changeSet>
+    <changeSet author="san (generated)" id="1572588281168-11">
+        <addForeignKeyConstraint baseColumnNames="schedule_period_id" baseTableName="schedule_period_arrangements" baseTableSchemaName="schedule" constraintName="FK_schedule_periods_schedule_period_arrangements" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="schedule_periods" referencedTableSchemaName="schedule" validate="true"/>
+    </changeSet>
+    <changeSet author="san (generated)" id="1572588281168-12">
+        <addForeignKeyConstraint baseColumnNames="check_unit_id" baseTableName="schedule_period_check_units" baseTableSchemaName="schedule" constraintName="FK_schedule_check_units_schedule_period_check_units" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="schedule_check_units" referencedTableSchemaName="schedule" validate="true"/>
+    </changeSet>
+    <changeSet author="san (generated)" id="1572588281168-13">
+        <addForeignKeyConstraint baseColumnNames="schedule_period_arrangement_id" baseTableName="schedule_period_check_units" baseTableSchemaName="schedule" constraintName="FK_schedule_period_arrangements_schedule_period_check_units" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="schedule_period_arrangements" referencedTableSchemaName="schedule" validate="true"/>
+    </changeSet>
+</databaseChangeLog>
