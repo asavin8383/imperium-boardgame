@@ -8,11 +8,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import repositories.*;
+import schedule.ReportService;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,6 +24,7 @@ import java.util.Optional;
 @RequestMapping("reports")
 public class ReportController
 {
+    private final ReportService reportService;
     private final ReportAdminStatRepository reportAdminStatRepository;
     private final ReportStatRepository reportStatRepository;
     private final RegReportsTableRepository regReportsTableRepository;
@@ -34,11 +33,12 @@ public class ReportController
     private final ReportAdminTableRepository reportAdminTableRepository;
 
     @Autowired
-    public ReportController(ReportAdminStatRepository reportAdminStatRepository,
+    public ReportController(ReportService reportService, ReportAdminStatRepository reportAdminStatRepository,
                             ReportStatRepository reportStatRepository,
                             RegReportsTableRepository regReportsTableRepository,
                             ReportRepository reportRepository,
                             ReportTypeRepository reportTypeRepository, ReportAdminTableRepository reportAdminTableRepository) {
+        this.reportService = reportService;
         this.reportAdminStatRepository = reportAdminStatRepository;
         this.reportStatRepository = reportStatRepository;
         this.regReportsTableRepository = regReportsTableRepository;
@@ -127,9 +127,16 @@ public class ReportController
         return reportAdminTableRepository.findByRepTpId(rep_tp_id);
     }
 
-    /*
-7. Запрос по перевыпуску отчета по rep_id и format
+    /**
+     * 7. Запрос по перевыпуску отчета по rep_id
      */
+    @PostMapping("restart/{rep_id}")
+    void restart(@PathVariable long rep_id) {
+        Optional<Report> report = reportRepository.findByRepId(rep_id);
+        System.out.println("report = " + report);
+        if (!report.isPresent()) throw new ReportNotFound();
+        reportService.runReport(report.get());
+    }
 
 
 }
