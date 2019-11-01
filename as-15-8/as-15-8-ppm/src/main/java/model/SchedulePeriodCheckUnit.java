@@ -11,7 +11,6 @@ import javax.validation.constraints.NotNull;
 public class SchedulePeriodCheckUnit {
 
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(optional=false)

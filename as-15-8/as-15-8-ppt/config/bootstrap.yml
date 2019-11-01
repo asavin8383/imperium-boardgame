@@ -1,0 +1,22 @@
+subsystem: PPT
+server:
+  port: 15800
+gateway.url: ${GATEWAY_URI:http://localhost:15880}
+logging:
+  config: config/logback-spring.xml
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${gateway.url}/eureka
+  instance:
+    preferIpAddress: true
+    instanceId: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port}
+spring:
+  application.name: ppt
+  cloud:
+    config:
+      bus.enabled: false
+      discovery.enabled: true
+      discovery.serviceId: config_server
+      profile: default
+      label: latest

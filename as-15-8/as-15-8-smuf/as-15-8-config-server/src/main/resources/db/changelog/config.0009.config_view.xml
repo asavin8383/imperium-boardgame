@@ -22,7 +22,7 @@
             join config.configurations on robots_configurations.configuration_id = configurations.id and configurations.application = 'dispatcher'
             union
             select
-            robots.name || '.' || times.check_method "key",
+            'processing-times.' ||  robots.name || '.' || times.check_method "key",
             cast(times.processing_time as text) "value",
             robots_configurations.configuration_id configuration_id
             from config.robots robots

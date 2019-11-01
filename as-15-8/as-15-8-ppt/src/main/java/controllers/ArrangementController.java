@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import repositories.ArrangementRepo;
+import restapi.ArrangementUploader;
 import services.arrangement.ArrangementStatusService;
 import services.arrangement.impl.ArrangementService;
 import enums.ArrangementEvents;
@@ -42,6 +43,7 @@ public class ArrangementController {
     private final ArrangementExecutionHelper arrangementExecutionHelper;
     private final ArrangementStatusService arrangementStatusService;
     private final ArrangementService arrangementService;
+    private final ArrangementUploader arrangementUploader;
 
     @GetMapping
     public Page<Arrangement> findList(
@@ -128,6 +130,16 @@ public class ArrangementController {
         }
         arrangementService.fillArrangement(arrangement);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/upload")
+    public void uploadArrangement(@RequestParam("id") Arrangement arrangement){
+        if(arrangement!= null) {
+            arrangementUploader.updateArrangement(arrangement);
+        } else {
+            AS_15_8_Exception.logAndThrow(log, String.format("Ошибка отправки мероприятия в ППМ. Мероприятие не было найдено в БД"));
+        }
+
     }
 
     /**

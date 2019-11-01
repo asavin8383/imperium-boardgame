@@ -31,6 +31,9 @@ zuul:
       path: /config/**
       serviceId: config_server
     ppm:
+      path: /ppm/**
+      serviceId: ppm
+    ppt:
       path: /**
       serviceId: ppt
     oauth:

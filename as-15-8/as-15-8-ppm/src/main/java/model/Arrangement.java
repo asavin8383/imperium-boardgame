@@ -28,7 +28,6 @@ public class Arrangement implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
     @JsonView(Views.Id.class)
     @ToString.Include
     @EqualsAndHashCode.Include

@@ -19,8 +19,7 @@ import java.util.Set;
 public class SchedulePeriod implements Comparable<SchedulePeriod>{
 
     @Id
-    @GeneratedValue(strategy= GenerationType.SEQUENCE, generator="schedule_periods_generator")
-    @SequenceGenerator(name="schedule_periods_generator", schema= "schedule", sequenceName="schedule_periods_id_seq", allocationSize=1)
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
     @JsonView(Views.Id.class)
     private Long id;
 
