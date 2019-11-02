@@ -25,9 +25,7 @@ public class SearchPhrase implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "search_phrase_generator")
-    @SequenceGenerator(name = "search_phrase_generator",
-            schema = "portal", sequenceName = "search_phrases_id_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonView(Views.Id.class)
     @ToString.Include
     @EqualsAndHashCode.Include

@@ -1,0 +1,33 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+    <changeSet author="shabalinAI (generated)" id="1572679031850-1">
+        <dropTable schemaName="portal" tableName="search_query_traffic_units_custom_erdi"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1572679031850-2">
+        <dropTable schemaName="portal" tableName="search_query_traffic_units_content"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1572679031850-3">
+        <dropTable schemaName="portal" tableName="search_query_traffic_units_search_phrases"/>
+    </changeSet>
+
+    <changeSet author="shabalinAI (generated)" id="1572679031850-4">
+        <dropTable schemaName="portal" tableName="erdi_traffic_units_content"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1572679031850-5">
+        <dropTable schemaName="portal" tableName="erdi_traffic_units_custom_erdi"/>
+    </changeSet>
+
+    <changeSet author="shabalinAI (generated)" id="1572679031850-100">
+        <dropTable schemaName="portal" tableName="erdi_traffic_units"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1572679031850-102">
+        <dropTable schemaName="portal" tableName="search_query_traffic_units"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1572679031850-103">
+        <dropTable schemaName="portal" tableName="traffic_units"/>
+    </changeSet>
+
+</databaseChangeLog>

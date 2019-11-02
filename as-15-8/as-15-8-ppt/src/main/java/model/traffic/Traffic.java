@@ -11,6 +11,7 @@ import model.Views;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -24,9 +25,7 @@ public class Traffic implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "traffic_generator")
-    @SequenceGenerator(name = "traffic_generator",
-            schema = "portal", sequenceName = "traffic_id_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonView(Views.Id.class)
     @ToString.Include
     @EqualsAndHashCode.Include
@@ -41,9 +40,12 @@ public class Traffic implements Serializable {
     @OneToMany(mappedBy = "traffic", orphanRemoval = true,
             cascade = CascadeType.ALL)
     @JsonIgnore
-    private List<TrafficUnit> trafficUnits;
+    private List<ErdiTrafficUnit> erdiTrafficUnits;
 
-
+    @OneToMany(mappedBy = "traffic", orphanRemoval = true,
+            cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<SearchQueryTrafficUnit> searchQueryTrafficUnits;
 
     @Transient
     @JsonView(Views.Full.class)
@@ -61,4 +63,21 @@ public class Traffic implements Serializable {
     @JsonView(Views.Full.class)
     private List<SearchQueryTrafficUnit> searchTemplates;
 
+    public List<TrafficUnit> getTrafficUnits(){
+        List<TrafficUnit> units = new ArrayList<>();
+        units.addAll(erdiTrafficUnits);
+        units.addAll(searchQueryTrafficUnits);
+        return units;
+    }
+
+    public void setTrafficUnits(List<TrafficUnit> trafficUnits){
+        erdiTrafficUnits.clear();
+        searchQueryTrafficUnits.clear();
+        trafficUnits.forEach(trafficUnit -> {
+            if(trafficUnit instanceof ErdiTrafficUnit)
+                erdiTrafficUnits.add((ErdiTrafficUnit) trafficUnit);
+            else if(trafficUnit instanceof SearchQueryTrafficUnit)
+                searchQueryTrafficUnits.add((SearchQueryTrafficUnit) trafficUnit);
+        });
+    }
 }

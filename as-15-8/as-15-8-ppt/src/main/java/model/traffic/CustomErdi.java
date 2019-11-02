@@ -25,9 +25,7 @@ public class CustomErdi implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "custom_erdi_generator")
-    @SequenceGenerator(name = "custom_erdi_generator",
-            schema = "portal", sequenceName = "custom_erdi_id_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonView(Views.Id.class)
     @ToString.Include
     @EqualsAndHashCode.Include

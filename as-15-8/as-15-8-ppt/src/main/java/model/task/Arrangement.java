@@ -95,12 +95,6 @@ public class Arrangement implements Serializable {
 	@JsonIgnore
 	private FormalTask formalTask;
 
-
-
-	@OneToMany(cascade=CascadeType.ALL, mappedBy = "arrangement")
-	@JsonIgnore
-	private List<ArrangementItem> arrangementItems;
-
 	@OneToMany(cascade=CascadeType.ALL, mappedBy = "arrangement")
 	@JsonIgnore
 	private List<ArrangementResult> arrangementResults;

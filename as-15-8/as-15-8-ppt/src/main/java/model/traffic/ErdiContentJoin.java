@@ -16,9 +16,7 @@ import javax.persistence.*;
 public class ErdiContentJoin {
 
     @Id
-    @GeneratedValue(strategy= GenerationType.SEQUENCE, generator="erdi_content_generator")
-    @SequenceGenerator(name="erdi_content_generator", allocationSize = 1, schema= "portal",
-            sequenceName="erdi_traffic_units_content_id_seq")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
     @ToString.Include
     @EqualsAndHashCode.Include

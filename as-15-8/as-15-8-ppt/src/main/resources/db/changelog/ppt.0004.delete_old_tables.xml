@@ -1,0 +1,67 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+    <changeSet author="shabalinAI (generated)" id="1572687715659-30">
+        <dropForeignKeyConstraint baseTableName="anonymizer_parameters" baseTableSchemaName="portal" constraintName="anonymizer_parameters_access_tools_id_type_fk"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1572687715659-31">
+        <dropForeignKeyConstraint baseTableName="access_tools_categories" baseTableSchemaName="portal" constraintName="fk_access_tools_categories_id"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1572687715659-32">
+        <dropForeignKeyConstraint baseTableName="arrangement_items" baseTableSchemaName="portal" constraintName="fk_arrangement_items_arrangement_id"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1572687715659-33">
+        <dropForeignKeyConstraint baseTableName="proxy_parameters" baseTableSchemaName="portal" constraintName="proxy_parameters_access_tools_id_type_fk"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1572687715659-34">
+        <dropForeignKeyConstraint baseTableName="search_system_parameters" baseTableSchemaName="portal" constraintName="search_system_parameters_access_tools_id_type_fk"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1572687715659-35">
+        <dropForeignKeyConstraint baseTableName="vpn_parameters" baseTableSchemaName="portal" constraintName="vpn_parameters_access_tools_id_type_fk"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1572687715659-36">
+        <dropUniqueConstraint constraintName="uq_access_tools_id_type" schemaName="portal" tableName="access_tools"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1572687715659-37">
+        <dropUniqueConstraint constraintName="uq_anonymizer_parameters" schemaName="portal" tableName="anonymizer_parameters"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1572687715659-38">
+        <dropUniqueConstraint constraintName="uq_arrangement_items_arrangement_id_content_id" schemaName="portal" tableName="arrangement_items"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1572687715659-39">
+        <dropUniqueConstraint constraintName="uq_proxy_parameters" schemaName="portal" tableName="proxy_parameters"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1572687715659-41">
+        <dropUniqueConstraint constraintName="uq_search_system_parameters" schemaName="portal" tableName="search_system_parameters"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1572687715659-42">
+        <dropUniqueConstraint constraintName="uq_vpn_parameters" schemaName="portal" tableName="vpn_parameters"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1572687715659-43">
+        <dropTable schemaName="portal" tableName="access_tools"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1572687715659-44">
+        <dropTable schemaName="portal" tableName="anonymizer_parameters"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1572687715659-45">
+        <dropTable schemaName="portal" tableName="arrangement_items"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1572687715659-46">
+        <dropTable schemaName="portal" tableName="global_parameters"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1572687715659-47">
+        <dropTable schemaName="portal" tableName="proxy_parameters"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1572687715659-48">
+        <dropTable schemaName="portal" tableName="search_system_parameters"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1572687715659-49">
+        <dropTable schemaName="portal" tableName="vpn_parameters"/>
+    </changeSet>
+
+    <changeSet author="shabalinAI (generated)" id="1572687715659-1">
+        <dropNotNullConstraint columnDataType="text" columnName="access_tool" schemaName="portal" tableName="arrangements"/>
+    </changeSet>
+</databaseChangeLog>
