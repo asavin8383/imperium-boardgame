@@ -10,7 +10,7 @@ ENV APP_PATH="/as-15-8-birt.jar" \
 
 VOLUME $LOG_PATH
 
-COPY /target/as-15-8-analyzer.jar $APP_PATH
+COPY /target/as-15-8-birt.jar $APP_PATH
 
 ENTRYPOINT ["java", \
          "-jar", \

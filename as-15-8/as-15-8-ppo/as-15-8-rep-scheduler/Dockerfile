@@ -10,7 +10,7 @@ ENV APP_PATH="/as-15-8-rep-scheduler.jar" \
 
 VOLUME $LOG_PATH
 
-COPY /target/as-15-8-analyzer.jar $APP_PATH
+COPY /target/as-15-8-rep-scheduler.jar $APP_PATH
 
 ENTRYPOINT ["java", \
          "-jar", \
