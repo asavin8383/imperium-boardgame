@@ -69,9 +69,10 @@ public class OkReportService implements ReportService
 
             //noinspection ConstantConditions
             reportStatusService.markDone(report, response.header("Content-Type"), response.body().bytes());
+            log.info("Отчет {} успешно завершен", report.getRepId() );
 
         } catch (Throwable e) {
-            log.error(report.toString(), e);
+            log.error("Ошибка создания отчета " + report.toString(), e);
             reportStatusService.markFailed(report, e);
         }
 

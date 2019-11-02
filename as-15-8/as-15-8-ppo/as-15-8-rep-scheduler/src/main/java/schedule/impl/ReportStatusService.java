@@ -27,7 +27,10 @@ public class ReportStatusService
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     public void markStarted(Report report) {
         report.setStart_dttm(new Timestamp(System.currentTimeMillis()));
+        report.setFinish_dttm(null);
         report.setStatus(ReportStatus.RUNNING);
+        report.setReason(null);
+        report.setMime(null);
         reportRepository.saveAndFlush(report);
 
     }
