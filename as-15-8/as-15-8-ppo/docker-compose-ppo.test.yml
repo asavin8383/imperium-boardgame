@@ -1,0 +1,84 @@
+version: '3.7'
+networks:
+  as-15-8-net:
+    external:
+      name: "host"
+services:
+  birt:
+    image: harbor.ec-leasing.ru/as_15_8/as-15-8-birt:latest
+    networks:
+      - as-15-8-net
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == as158-ppo
+      mode: replicated
+      replicas: 1
+    environment:
+#      PROFILE: test
+      GATEWAY_URI: http://192.168.5.50:15880
+      TZ: "Europe/Moscow"
+    ports:
+      - target: 15813
+        published: 15813
+        protocol: tcp
+        mode: host
+    volumes:
+      - ~/as-15-8-ppo/birt/logs:/log
+    configs:
+      - source: birt-config
+        target: /config/application.yml
+    labels:
+      collect_logs_with_filebeat: "true"
+      decode_log_event_to_json_object: "true"
+  rep-scheduler:
+    image: harbor.ec-leasing.ru/as_15_8/as-15-8-rep-scheduler:latest
+    deploy:
+      mode: global
+    networks:
+      - as-15-8-net
+    stop_grace_period: 5m
+    environment:
+#      PROFILE: test
+      GATEWAY_URI: http://192.168.5.50:15880
+      TZ: "Europe/Moscow"
+    ports:
+      - target: 15812
+        published: 15812
+        protocol: tcp
+        mode: host
+    volumes:
+      - ~/as-15-8-ppo/rep-scheduler/logs:/log
+    configs:
+      - source: rep-scheduler-config
+        target: /config/application.yml
+    labels:
+      collect_logs_with_filebeat: "true"
+      decode_log_event_to_json_object: "true"
+  filebeat:
+    image: harbor.ec-leasing.ru/as_15_8/elk/filebeat:7.2.0
+    deploy:
+      mode: global
+    networks:
+      - as-15-8-net
+    ports:
+      - target: 58568
+        published: 58568
+        protocol: tcp
+        mode: host
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./filebeat/data:/usr/share/filebeat/data:rw
+    command: filebeat -e -strict.perms=false
+    user: root
+    configs:
+      - source: filebeat-config
+        target: /usr/share/filebeat/filebeat.yml
+configs:
+  birt-config:
+    file: birt/config/application.yml
+  rep-scheduler-config:
+    file: rep-scheduler/config/application.yml
+  filebeat-config:
+    file: filebeat/filebeat.yml
