@@ -2,8 +2,8 @@ package repositories.impl;
 
 import lombok.RequiredArgsConstructor;
 import model.traffic.Traffic;
+import model.traffic.TrafficView;
 import model.traffic.Traffic_;
-import model.traffic.projection.TrafficProjection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -25,9 +25,9 @@ public class TrafficRepositoryImpl implements TrafficRepositoryCustom {
     private final EntityManager em;
 
     @Override
-    public Page<TrafficProjection> findAllTrafficInfo(String name, Pageable pageable) {
+    public Page<TrafficView> findAllTrafficInfo(String name, Pageable pageable) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<TrafficProjection> mainQuery = cb.createQuery(TrafficProjection.class);
+        CriteriaQuery<TrafficView> mainQuery = cb.createQuery(TrafficView.class);
         Root<Traffic> mainRoot = mainQuery.from(Traffic.class);
 
         // join
@@ -44,7 +44,7 @@ public class TrafficRepositoryImpl implements TrafficRepositoryCustom {
                     cb.upper(mainRoot.get(Traffic_.name)),
                     "%" + name.toUpperCase() + "%"));
         }
-        TypedQuery<TrafficProjection> query = em.createQuery(mainQuery);
+        TypedQuery<TrafficView> query = em.createQuery(mainQuery);
 
         CriteriaQuery<Long> countQuery = em.getCriteriaBuilder().createQuery(Long.class);
         Root<Traffic> countRoot = countQuery.from(Traffic.class);
@@ -57,7 +57,7 @@ public class TrafficRepositoryImpl implements TrafficRepositoryCustom {
 
         query.setFirstResult(pageable.getPageNumber() * pageable.getPageSize());
         query.setMaxResults(pageable.getPageSize());
-        List<TrafficProjection> models = query.getResultList();
+        List<TrafficView> models = query.getResultList();
         return new PageImpl<>(models, pageable, total);
     }
 }

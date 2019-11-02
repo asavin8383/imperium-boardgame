@@ -26,20 +26,22 @@ public class SearchPhraseRepositoryImpl extends JoinCriteriaHelper<SearchPhrase,
         CriteriaBuilder cb = em.getCriteriaBuilder();
         List<Predicate> predicates = new ArrayList<>();
 
-        if (! params.isReturnAll() && params.getSearchTrafficUnitId() != null) {
+        if (params.getSearchTrafficUnitId() != null) {
             Join<SearchPhrase, SearchQueryTrafficUnit> trafficUnitJoin =
                     root.join(SearchPhrase_.trafficUnits, JoinType.LEFT);
-            predicates.add(cb.equal(
-                    trafficUnitJoin.get("id"), params.getSearchTrafficUnitId()));
+            Predicate eqPredicate = cb.equal(trafficUnitJoin.get("id"),
+                    params.getSearchTrafficUnitId());
+            if (params.isContainsInTrafficUnit()) {
+                predicates.add(eqPredicate);
+            } else {
+                predicates.add(cb.or(cb.not(eqPredicate),
+                        cb.isNull(trafficUnitJoin.get("id"))));
+            }
         }
 
         if (params.getPhrase() != null && params.getPhrase().length() > 0) {
             predicates.add(cb.like(cb.upper(root.get("phrase")),
                     '%' + params.getPhrase().toUpperCase() + '%'));
-        }
-
-        if (params.getViolationId() != null) {
-            predicates.add(cb.equal(root.get("violation"), params.getViolationId()));
         }
 
         return predicates;

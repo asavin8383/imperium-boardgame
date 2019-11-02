@@ -7,7 +7,7 @@ import lombok.Data;
 @AllArgsConstructor
 public class SearchTemplateParams {
 
-    protected boolean belongsTo;
+    protected boolean containsInTraffic;
     protected Long trafficUnitId;
     protected String template;
 
