@@ -15,9 +15,7 @@ services:
       - "15813:15813"
     volumes:
       - ~/as-15-8-ppo/birt/logs:/log
-    configs:
-      - source: birt-config
-        target: /config/application.yml
+      - ~/as-15-8-ppo/config:/config
     labels:
       collect_logs_with_filebeat: "true"
       decode_log_event_to_json_object: "true"
@@ -34,9 +32,7 @@ services:
       - "15812:15812"
     volumes:
       - ~/as-15-8-ppo/rep-scheduler/logs:/log
-    configs:
-      - source: rep-scheduler-config
-        target: /config/application.yml
+      - ~/as-15-8-ppt/config:/config
     labels:
       collect_logs_with_filebeat: "true"
       decode_log_event_to_json_object: "true"
@@ -50,8 +46,3 @@ services:
       - ./filebeat/data:/usr/share/filebeat/data:rw
     command: filebeat -e -strict.perms=false
     user: root
-configs:
-  birt-config:
-    file: birt/config/application.yml
-  rep-scheduler-config:
-    file: rep-scheduler/config/application.yml
