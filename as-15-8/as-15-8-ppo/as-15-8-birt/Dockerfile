@@ -3,19 +3,21 @@ FROM openjdk:8-jdk-alpine
 LABEL Kirill Lychagin <klychagin@ec-leasing.ru>
 
 EXPOSE 15813
+ENV PROFILE test
 
 ENV APP_PATH="/as-15-8-birt.jar" \
     LOG_PATH="/log" \
-    PROFILE="dev_asin"
+    CONF_PATH="/config"
 
 VOLUME $LOG_PATH
+VOLUME $CONF_PATH
 
-COPY /target/as-15-8-analyzer.jar $APP_PATH
+COPY /target/as-15-8-birt.jar  $APP_PATH
 
-ENTRYPOINT ["java", \
+CMD ["java", \
          "-jar", \
-         "-Dapplication.logpath=${LOG_PATH}", \
+         "-Dapplication.logpath=/log", \
          "-Dspring.profiles.active=${PROFILE}", \
          "-Xms512M", \
          "-Xmx1024M", \
-         "${APP_PATH}"]
+         "/as-15-8-birt.jar"]

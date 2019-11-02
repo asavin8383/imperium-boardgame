@@ -44,4 +44,27 @@ spring:
           group: config_server
 
 
+---
+
+logging:
+  config:
+  level:
+    root: info
+    birt: info
+eureka:
+  client:
+    enabled: false
+spring:
+  profiles: test
+  datasource:
+    url: jdbc:postgresql://192.168.5.195:5432/asdb_test
+  cloud:
+    bus.trace.enabled: false
+    config:
+      bus:
+        enabled: false
+    stream:
+      bindings:
+        springCloudBusInput:
+          group: config_server
 
