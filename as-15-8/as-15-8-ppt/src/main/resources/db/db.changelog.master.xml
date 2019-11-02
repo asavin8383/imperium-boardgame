@@ -26,5 +26,8 @@
     <include file="db/changelog/rest.0021.change_url_type_to_text.xml"/>
     <include file="db/changelog/rest.0022.refactor_access_tools.xml"/>
     <include file="db/changelog/ppt.0001.drop_old_user_schedule_tables.xml"/>
+    <include file="db/changelog/ppt.0002.drop_traffic_unit_tables.xml" />
+    <include file="db/changelog/ppt.0003.create_new_traffic.xml"/>
+    <include file="db/changelog/ppt.0004.delete_old_tables.xml"/>
 
 </databaseChangeLog>

@@ -18,9 +18,7 @@ import javax.validation.constraints.NotNull;
 public class CustomErdiUnit {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "custom_erdi_units_generator")
-    @SequenceGenerator(name = "custom_erdi_units_generator",
-            schema = "portal", sequenceName = "custom_erdi_units_id_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonView(Views.Id.class)
     @ToString.Include
     @EqualsAndHashCode.Include

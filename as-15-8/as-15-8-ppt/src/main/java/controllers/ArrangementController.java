@@ -161,11 +161,12 @@ public class ArrangementController {
      * @param arrangement мероприятие
      * @return Изменился ли статус
      */
+    //TODO Что то написать!!!
     private boolean isStatusChanged(Arrangement arrangement){
         //Если новому мероприятию запланировали дату запуска в будущем,
         // при этом не пустой список ЕРДИ,
         // оно становится FORMED
-        if(arrangement.getStatus().equals(ExecutionStatus.NEW) &&
+        /*if(arrangement.getStatus().equals(ExecutionStatus.NEW) &&
                 arrangement.getArrangementItems()!=null &&
                 arrangement.getArrangementItems().size() > 0){
             arrangement.sendEvent(ArrangementEvents.FILL);
@@ -176,7 +177,7 @@ public class ArrangementController {
                 arrangement.getArrangementItems()
                         .stream()
                         .map(arrangementItem -> arrangementItem.getId().toString())
-                        .collect(Collectors.joining("'")));
+                        .collect(Collectors.joining("'")));*/
         return false;
     }
 

@@ -1,5 +1,6 @@
 package model.traffic;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -35,6 +36,12 @@ public class ErdiTrafficUnit extends TrafficUnit implements Serializable {
     @JoinColumn(name = "category_id", nullable = false)
     @JsonView(Views.Brief.class)
     private AccessToolsCategory category;
+
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "traffic_id", nullable = false)
+    @JsonIgnore
+    @ToString.Include
+    private Traffic traffic;
 
     @ManyToMany(cascade = {CascadeType.REFRESH, CascadeType.MERGE, CascadeType.REMOVE})
     @JoinTable(schema = "portal", name = "erdi_traffic_units_custom_erdi",

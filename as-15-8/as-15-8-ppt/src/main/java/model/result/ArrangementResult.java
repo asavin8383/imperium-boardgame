@@ -1,18 +1,15 @@
 package model.result;
 
-import java.io.Serializable;
-import java.time.LocalDateTime;
-
-import javax.persistence.*;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import checkUnits.CheckUnitType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import enums.CheckUnitJobResult;
 import lombok.Data;
 import model.enums.UserResult;
-import model.erdi.ERDI;
 import model.task.Arrangement;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  * Результаты выполнения мероприятия
@@ -36,10 +33,8 @@ public class ArrangementResult implements Serializable {
     @JsonIgnore
     private Arrangement arrangement;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name="content_id", foreignKey = @ForeignKey(name = "FK_arrangement_results_content_id"))
-    @JsonIgnore
-    private ERDI erdi;
+    @Column(nullable = false)
+    private Long contentId;
 
     @Enumerated(EnumType.STRING)
     @Column(name="check_unit_type", nullable=false)

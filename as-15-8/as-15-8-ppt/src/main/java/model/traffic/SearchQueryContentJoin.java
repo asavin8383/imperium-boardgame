@@ -16,9 +16,7 @@ import javax.persistence.*;
 public class SearchQueryContentJoin {
 
     @Id
-    @GeneratedValue(strategy= GenerationType.SEQUENCE, generator="search_query_content_generator")
-    @SequenceGenerator(name="search_query_content_generator", allocationSize = 1, schema= "portal",
-            sequenceName="search_query_traffic_units_content_id_seq")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
     @ToString.Include
     @EqualsAndHashCode.Include

@@ -1,0 +1,135 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+    <changeSet author="shabalinAI (generated)" id="1572686542402-26">
+        <createTable schemaName="portal" tableName="erdi_traffic_units">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="erdi_traffic_unitsPK"/>
+            </column>
+            <column name="name" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="category_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="traffic_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1572686542402-27">
+        <createTable schemaName="portal" tableName="erdi_traffic_units_content">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="erdi_traffic_units_contentPK"/>
+            </column>
+            <column name="content_id" type="BIGINT"/>
+            <column name="traffic_unit_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1572686542402-28">
+        <createTable schemaName="portal" tableName="erdi_traffic_units_custom_erdi">
+            <column name="traffic_unit_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="custom_erdi_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1572686542402-31">
+        <createTable schemaName="portal" tableName="search_query_traffic_units">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="search_query_traffic_unitsPK"/>
+            </column>
+            <column name="name" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="query_pattern" type="text"/>
+            <column name="category_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="traffic_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1572686542402-32">
+        <createTable schemaName="portal" tableName="search_query_traffic_units_content">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="search_query_traffic_units_contentPK"/>
+            </column>
+            <column name="content_id" type="BIGINT"/>
+            <column name="traffic_unit_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1572686542402-33">
+        <createTable schemaName="portal" tableName="search_query_traffic_units_custom_erdi">
+            <column name="traffic_unit_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="custom_erdi_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1572686542402-34">
+        <createTable schemaName="portal" tableName="search_query_traffic_units_search_phrases">
+            <column name="traffic_unit_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="search_phrase_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1572686542402-37">
+        <addUniqueConstraint columnNames="name" constraintName="UC_ERDI_TRAFFIC_UNITSNAME_COL" schemaName="portal" tableName="erdi_traffic_units"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1572686542402-38">
+        <addUniqueConstraint columnNames="name" constraintName="UC_SEARCH_QUERY_TRAFFIC_UNITSNAME_COL" schemaName="portal" tableName="search_query_traffic_units"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1572686542402-40">
+        <addForeignKeyConstraint baseColumnNames="category_id" baseTableName="erdi_traffic_units" baseTableSchemaName="portal" constraintName="FK1gu4n1cuw89t8r544ir5vogju" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="access_tools_categories" referencedTableSchemaName="portal" validate="true"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1572686542402-41">
+        <addForeignKeyConstraint baseColumnNames="category_id" baseTableName="search_query_traffic_units" baseTableSchemaName="portal" constraintName="FK1oewjtwt54p83r614pg9ry61r" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="access_tools_categories" referencedTableSchemaName="portal" validate="true"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1572686542402-42">
+        <addForeignKeyConstraint baseColumnNames="traffic_unit_id" baseTableName="search_query_traffic_units_content" baseTableSchemaName="portal" constraintName="FK1pvgx6nxnx0cu36e9ekdsmwei" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="search_query_traffic_units" referencedTableSchemaName="portal" validate="true"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1572686542402-43">
+        <addForeignKeyConstraint baseColumnNames="violation_id" baseTableName="custom_erdi" baseTableSchemaName="portal" constraintName="FK2qhb9dvo2q55ucu95mh1lnxtg" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="violation" referencedTableSchemaName="sor" validate="true"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1572686542402-49">
+        <addForeignKeyConstraint baseColumnNames="traffic_unit_id" baseTableName="search_query_traffic_units_search_phrases" baseTableSchemaName="portal" constraintName="FKf0qnyces80nt3c2diie6vx45s" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="search_query_traffic_units" referencedTableSchemaName="portal" validate="true"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1572686542402-50">
+        <addForeignKeyConstraint baseColumnNames="traffic_unit_id" baseTableName="search_query_traffic_units_custom_erdi" baseTableSchemaName="portal" constraintName="FKf986ehewiq7itdkdg672i782p" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="search_query_traffic_units" referencedTableSchemaName="portal" validate="true"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1572686542402-51">
+        <addForeignKeyConstraint baseColumnNames="violation_id" baseTableName="search_phrases" baseTableSchemaName="portal" constraintName="FKfl94kp65kkwfjtlsjh3hrqr7u" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="violation" referencedTableSchemaName="sor" validate="true"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1572686542402-53">
+        <addForeignKeyConstraint baseColumnNames="custom_erdi_id" baseTableName="erdi_traffic_units_custom_erdi" baseTableSchemaName="portal" constraintName="FKiw4ux23ao3f94y4ukvi5cgdar" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="custom_erdi" referencedTableSchemaName="portal" validate="true"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1572686542402-54">
+        <addForeignKeyConstraint baseColumnNames="custom_erdi_id" baseTableName="search_query_traffic_units_custom_erdi" baseTableSchemaName="portal" constraintName="FKixg372jqg9jq414dvm9p5yxk5" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="custom_erdi" referencedTableSchemaName="portal" validate="true"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1572686542402-55">
+        <addForeignKeyConstraint baseColumnNames="traffic_unit_id" baseTableName="erdi_traffic_units_custom_erdi" baseTableSchemaName="portal" constraintName="FKklei2p1cdnupucu9hrry10kl" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="erdi_traffic_units" referencedTableSchemaName="portal" validate="true"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1572686542402-56">
+        <addForeignKeyConstraint baseColumnNames="traffic_unit_id" baseTableName="erdi_traffic_units_content" baseTableSchemaName="portal" constraintName="FKkqjmq3i7yo6xh2n9dafdk8myg" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="erdi_traffic_units" referencedTableSchemaName="portal" validate="true"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1572686542402-57">
+        <addForeignKeyConstraint baseColumnNames="search_phrase_id" baseTableName="search_query_traffic_units_search_phrases" baseTableSchemaName="portal" constraintName="FKkuh45xtlw6cv6mmh8aovq9so7" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="search_phrases" referencedTableSchemaName="portal" validate="true"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1572686542402-58">
+        <addForeignKeyConstraint baseColumnNames="traffic_id" baseTableName="search_query_traffic_units" baseTableSchemaName="portal" constraintName="FKm19ncett4u0xbn4u5wkf4wbdp" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="traffic" referencedTableSchemaName="portal" validate="true"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1572686542402-59">
+        <addForeignKeyConstraint baseColumnNames="traffic_id" baseTableName="erdi_traffic_units" baseTableSchemaName="portal" constraintName="FKtfv5l0wfhoby0i9h1uwvkvt69" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="traffic" referencedTableSchemaName="portal" validate="true"/>
+    </changeSet>
+
+</databaseChangeLog>
