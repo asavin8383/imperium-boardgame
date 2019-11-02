@@ -4,18 +4,15 @@ LABEL Kirill Lychagin <klychagin@ec-leasing.ru>
 
 EXPOSE 15813
 
-ENV APP_PATH="/as-15-8-birt.jar" \
-    LOG_PATH="/log" \
-    PROFILE="dev_asin"
 
-VOLUME $LOG_PATH
+VOLUME /log
 
-COPY /target/as-15-8-birt.jar $APP_PATH
+COPY /target/as-15-8-birt.jar /as-15-8-birt.jar
 
 CMD ["java", \
          "-jar", \
-         "-Dapplication.logpath=${LOG_PATH}", \
-         "-Dspring.profiles.active=${PROFILE}", \
+         "-Dapplication.logpath=/log", \
+         "-Dspring.profiles.active=dev_asin", \
          "-Xms512M", \
          "-Xmx1024M", \
          "/as-15-8-birt.jar"]

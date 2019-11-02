@@ -4,18 +4,14 @@ LABEL Kirill Lychagin <klychagin@ec-leasing.ru>
 
 EXPOSE 15812
 
-ENV APP_PATH="/as-15-8-rep-scheduler.jar" \
-    LOG_PATH="/log" \
-    PROFILE="dev_asin"
+VOLUME /log
 
-VOLUME $LOG_PATH
-
-COPY /target/as-15-8-rep-scheduler.jar $APP_PATH
+COPY /target/as-15-8-rep-scheduler.jar /as-15-8-rep-scheduler.jar
 
 CMD ["java", \
          "-jar", \
-         "-Dapplication.logpath=${LOG_PATH}", \
-         "-Dspring.profiles.active=${PROFILE}", \
+         "-Dapplication.logpath=/log", \
+         "-Dspring.profiles.active=dev_asin", \
          "-Xms512M", \
          "-Xmx1024M", \
          "/as-15-8-rep-scheduler.jar"]
