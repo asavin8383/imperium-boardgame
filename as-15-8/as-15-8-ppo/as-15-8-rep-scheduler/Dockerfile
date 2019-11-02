@@ -4,9 +4,14 @@ LABEL Kirill Lychagin <klychagin@ec-leasing.ru>
 
 EXPOSE 15812
 
-VOLUME /log
+ENV APP_PATH="/as-15-8-rep-scheduler.jar" \
+    LOG_PATH="/log" \
+    CONF_PATH="/config"
 
-COPY /target/as-15-8-rep-scheduler.jar /as-15-8-rep-scheduler.jar
+VOLUME $LOG_PATH
+VOLUME $CONF_PATH
+
+COPY /target/as-15-8-rep-scheduler.jar  $APP_PATH
 
 CMD ["java", \
          "-jar", \

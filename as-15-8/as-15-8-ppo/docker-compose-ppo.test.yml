@@ -32,7 +32,7 @@ services:
       - "15812:15812"
     volumes:
       - ~/as-15-8-ppo/rep-scheduler/logs:/log
-      - ~/as-15-8-ppt/config:/config
+      - ~/as-15-8-ppo/config:/config
     labels:
       collect_logs_with_filebeat: "true"
       decode_log_event_to_json_object: "true"

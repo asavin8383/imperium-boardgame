@@ -4,10 +4,14 @@ LABEL Kirill Lychagin <klychagin@ec-leasing.ru>
 
 EXPOSE 15813
 
+ENV APP_PATH="/as-15-8-birt.jar" \
+    LOG_PATH="/log" \
+    CONF_PATH="/config"
 
-VOLUME /log
+VOLUME $LOG_PATH
+VOLUME $CONF_PATH
 
-COPY /target/as-15-8-birt.jar /as-15-8-birt.jar
+COPY /target/as-15-8-birt.jar  $APP_PATH
 
 CMD ["java", \
          "-jar", \
