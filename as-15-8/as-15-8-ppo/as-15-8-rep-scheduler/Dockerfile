@@ -18,4 +18,4 @@ CMD ["java", \
          "-Dspring.profiles.active=${PROFILE}", \
          "-Xms512M", \
          "-Xmx1024M", \
-         "`echo ${APP_PATH}`"]
+         "/as-15-8-rep-scheduler.jar"]
