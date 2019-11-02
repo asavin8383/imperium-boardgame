@@ -1,6 +1,7 @@
 package model;
 
 import lombok.Data;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
@@ -56,6 +57,7 @@ public class Report
     @Column
     private String reason;
 
+    @ToString.Exclude
     @Column
     private byte[] data;
 
