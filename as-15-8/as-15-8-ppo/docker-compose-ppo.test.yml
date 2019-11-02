@@ -8,7 +8,7 @@ services:
       - as-15-8-net
     restart: always
     environment:
-#      PROFILE: test
+      PROFILE: test
       GATEWAY_URI: http://192.168.5.50:15880
       TZ: "Europe/Moscow"
     ports:
@@ -25,7 +25,7 @@ services:
     networks:
       - as-15-8-net
     environment:
-#      PROFILE: test
+      PROFILE: test
       GATEWAY_URI: http://192.168.5.50:15880
       TZ: "Europe/Moscow"
     ports:
