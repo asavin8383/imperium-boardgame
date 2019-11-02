@@ -142,6 +142,7 @@ public class CheckUnitSchedulingServiceImpl implements CheckUnitSchedulingServic
      * @param checkUnitJobTemplates список шаблонов
      * @return список заданий на проверки
      */
+    //TODO Исправить ЕРДИ айди!!!
     private List<CheckUnitJob> buildCheckUnitJobsFromTemplates(List<CheckUnitJobTemplate> checkUnitJobTemplates, Long arrangementId){
         List<CheckUnitJob> checkUnitJobs = new ArrayList<>();
         for(CheckUnitJobTemplate template : checkUnitJobTemplates){
@@ -154,7 +155,7 @@ public class CheckUnitSchedulingServiceImpl implements CheckUnitSchedulingServic
                 	checkUnitJobs.add(createAndSaveCheckUnitJob(
                 			arrangementId,
                 			template, 
-                			new CheckUnit(template.checkUnitType,
+                			new CheckUnit(1L, template.checkUnitType,
                                 template.checkUnitValueTemplate)));
                     break;
                 case DOMAIN:
@@ -162,14 +163,14 @@ public class CheckUnitSchedulingServiceImpl implements CheckUnitSchedulingServic
                 		checkUnitJobs.add(createAndSaveCheckUnitJob(
                     			arrangementId,
                     			template, 
-                    			new CheckUnit(template.checkUnitType,
+                    			new CheckUnit(1L, template.checkUnitType,
                             		template.checkUnitValueTemplate)));
                 	} else {
 	                    for (Protocol protocol : protocols){    
 	                    	checkUnitJobs.add(createAndSaveCheckUnitJob(
 	                        			arrangementId,
 	                        			template, 
-	                        			new CheckUnit(template.checkUnitType,
+	                        			new CheckUnit(1L, template.checkUnitType,
 	                                		protocol.getProtocol() + template.checkUnitValueTemplate)));
 	                    }
                 	}
@@ -184,14 +185,14 @@ public class CheckUnitSchedulingServiceImpl implements CheckUnitSchedulingServic
                         		checkUnitJobs.add(createAndSaveCheckUnitJob(
                             			arrangementId,
                             			template, 
-                            			new CheckUnit(CheckUnitType.DOMAIN,
+                            			new CheckUnit(1L, CheckUnitType.DOMAIN,
                                         		domainName)));
                         	} else {
 	                            for (Protocol protocol : protocols) {  
 	                            	checkUnitJobs.add(createAndSaveCheckUnitJob(
 	                            			arrangementId,
 	                            			template, 
-	                            			new CheckUnit(CheckUnitType.DOMAIN,
+	                            			new CheckUnit(1L, CheckUnitType.DOMAIN,
 	                                        		protocol.getProtocol() + domainName)));
 	                            }
                         	}
@@ -202,7 +203,7 @@ public class CheckUnitSchedulingServiceImpl implements CheckUnitSchedulingServic
                     	checkUnitJobs.add(createAndSaveCheckUnitJob(
                     			arrangementId,
                     			template, 
-                    			new CheckUnit(template.checkUnitType,
+                    			new CheckUnit(1L, template.checkUnitType,
                                 		protocol.getProtocol() + template.checkUnitValueTemplate + ":" + protocol.getPort())));
                     }
                     break;
@@ -211,7 +212,7 @@ public class CheckUnitSchedulingServiceImpl implements CheckUnitSchedulingServic
                     	checkUnitJobs.add(createAndSaveCheckUnitJob(
                     			arrangementId,
                     			template, 
-                    			new CheckUnit(template.checkUnitType,
+                    			new CheckUnit(1L, template.checkUnitType,
                                 		protocol.getProtocol() + "[" + template.checkUnitValueTemplate + "]"+ ":" + protocol.getPort() )));
                     }
                     break;
@@ -223,7 +224,7 @@ public class CheckUnitSchedulingServiceImpl implements CheckUnitSchedulingServic
                         	checkUnitJobs.add(createAndSaveCheckUnitJob(
                         			arrangementId,
                         			template, 
-                        			new CheckUnit(CheckUnitType.IP_V4,
+                        			new CheckUnit(1L, CheckUnitType.IP_V4,
                                     		protocol.getProtocol() + address + ":" + protocol.getPort())));
                         }
                     }

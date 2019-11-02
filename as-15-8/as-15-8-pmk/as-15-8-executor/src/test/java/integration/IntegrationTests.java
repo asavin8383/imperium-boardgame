@@ -41,7 +41,7 @@ public class IntegrationTests {
 		checkUnitJob.setJobID(1L);
 		checkUnitJob.setAccessTool("google");
 
-		checkUnitJob.setCheckUnit(new CheckUnit(CheckUnitType.URL, "https://www.google.ru"));
+		checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.URL, "https://www.google.ru"));
 
 		Message<CheckUnitJob> message = MessageBuilder
 				.withPayload(checkUnitJob)
@@ -57,7 +57,7 @@ public class IntegrationTests {
 		CheckUnitJob checkUnitJob = new CheckUnitJob();
 		checkUnitJob.setAccessTool("vpn");
 		checkUnitJob.setJobID(1L);
-		checkUnitJob.setCheckUnit(new CheckUnit(CheckUnitType.IP_V4, "192.167.1.1"));
+		checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.IP_V4, "192.167.1.1"));
 
 		Message<CheckUnitJob> message = MessageBuilder
 				.withPayload(checkUnitJob)

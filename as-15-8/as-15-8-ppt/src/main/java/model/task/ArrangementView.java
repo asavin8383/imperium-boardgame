@@ -1,8 +1,7 @@
 package model.task;
 
-import lombok.Data;
 import enums.ExecutionStatus;
-import model.user.User;
+import lombok.Data;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -23,9 +22,8 @@ public class ArrangementView implements Serializable {
     @GeneratedValue
     private Long id;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
-    private User user;
+    @Column(nullable = false)
+    private String user;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "arrangement_id", referencedColumnName = "id")

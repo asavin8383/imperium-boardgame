@@ -33,7 +33,7 @@ public class TestHolaJobExecution
 		checkUnitJob.setJobID(1L);
 		checkUnitJob.setAccessTool("hola");
 
-		checkUnitJob.setCheckUnit(new CheckUnit(CheckUnitType.URL, "myip.ru"));
+		checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.URL, "myip.ru"));
 
 		ExecutionJobResult executionJobResult = CheckUnitVerificationServiceFactory
 				.getService(checkUnitJob.getCheckUnit().getType())

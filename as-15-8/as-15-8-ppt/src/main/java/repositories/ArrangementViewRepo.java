@@ -1,7 +1,6 @@
 package repositories;
 
 import model.task.ArrangementView;
-import model.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -14,5 +13,5 @@ import java.util.List;
 @Repository
 public interface ArrangementViewRepo extends JpaRepository<ArrangementView, Long> {
 
-    List<ArrangementView> findAllByUserAndViewed(User user, boolean viewed);
+    List<ArrangementView> findAllByUserAndViewed(String user, boolean viewed);
 }

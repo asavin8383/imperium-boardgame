@@ -24,7 +24,7 @@ public class TestNMap {
         CheckUnitJob checkUnitJob = new CheckUnitJob();
         checkUnitJob.setAccessTool("vpn");
         checkUnitJob.setJobID(1L);
-        checkUnitJob.setCheckUnit(new CheckUnit(CheckUnitType.IP_V4, "174.138.5.46"));
+        checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.IP_V4, "174.138.5.46"));
 
         try {
             ExecutionJobResult executionJobResult = CheckUnitVerificationServiceFactory

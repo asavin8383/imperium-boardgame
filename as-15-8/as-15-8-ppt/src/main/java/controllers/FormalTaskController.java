@@ -7,18 +7,16 @@ import exceptions.AS_15_8_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.task.FormalTask;
-import model.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import repositories.FormalTaskRepository;
-import services.user.UserService;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -32,18 +30,13 @@ import java.util.concurrent.CompletionStage;
 public class FormalTaskController {
 
 	private final FormalTaskRepository formalTaskRepo;
-	private final UserService userService;
 
 	@PostMapping(consumes=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseStatus(HttpStatus.CREATED)
-	public CompletionStage<FormalTask> postFormalTask(@RequestBody FormalTask formalTask, Authentication auth) {
-		String userName = ((User)auth.getPrincipal()).getUserName();
-		return CompletableFuture.supplyAsync(() -> userService.getUserByUserName(userName))
-			.thenApply(user -> {
-					formalTask.setUser(user);
-					formalTask.setStatus(ExecutionStatus.NEW);
-					return formalTaskRepo.save(formalTask);
-				});
+	public FormalTask postFormalTask(@RequestBody FormalTask formalTask, Principal principal) {
+		formalTask.setUser(principal.getName());
+		formalTask.setStatus(ExecutionStatus.NEW);
+		return formalTaskRepo.save(formalTask);
 	}
 	
 	@GetMapping
