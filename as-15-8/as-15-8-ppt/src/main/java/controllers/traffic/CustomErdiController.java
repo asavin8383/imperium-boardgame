@@ -1,14 +1,17 @@
 package controllers.traffic;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import controllers.helpers.SortingHelper;
 import enums.SortingDirection;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Views;
 import model.traffic.CustomErdi;
-import model.traffic.projection.CustomErdiRow;
+import model.traffic.CustomErdiView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,33 +29,18 @@ public class CustomErdiController {
     private final CustomErdiService customErdiService;
 
     @GetMapping
-    public Page<CustomErdi> getAllCustomErdi(@RequestParam(required = false) SortingDirection sortingDirection,
-                                             @RequestParam(required = false) String sortingColumn,
-                                             @RequestParam(defaultValue = "0") int pageNumber,
-                                             @RequestParam(defaultValue = "10") int pageSize,
-                                             @RequestParam(defaultValue = "false") boolean returnAll,
-                                             @RequestParam(required = false) Long erdiTrafficUnitId,
-                                             @RequestParam(required = false) Long searchTrafficUnitId,
-                                             @RequestParam(required = false) String query,
-                                             //@RequestParam(required = false) Long resourceTypeId,
-                                             @RequestParam(required = false) Long violationId) {
-        return customErdiService.getAllCustomErdi(sortingDirection, sortingColumn, pageNumber, pageSize,
-                returnAll, erdiTrafficUnitId, searchTrafficUnitId, query, violationId);
-    }
-
-    @GetMapping(path = "/row")
-    public Page<CustomErdiRow> getCustomErdiRows(@RequestParam(required = false) SortingDirection sortingDirection,
-                                                 @RequestParam(required = false) String sortingColumn,
-                                                 @RequestParam(defaultValue = "0") int pageNumber,
-                                                 @RequestParam(defaultValue = "10") int pageSize,
-                                                 @RequestParam(defaultValue = "false") boolean returnAll,
-                                                 @RequestParam(required = false) Long erdiTrafficUnitId,
-                                                 @RequestParam(required = false) Long searchTrafficUnitId,
-                                                 @RequestParam(required = false) String query,
-                                                 //@RequestParam(required = false) Long resourceTypeId,
-                                                 @RequestParam(required = false) Long violationId) {
-        return customErdiService.getCustomErdiRows(sortingDirection, sortingColumn, pageNumber, pageSize,
-                returnAll, erdiTrafficUnitId, searchTrafficUnitId, query, violationId);
+    public Page<CustomErdiView> getCustomErdiRows(@RequestParam(required = false) SortingDirection sortingDirection,
+                                                  @RequestParam(required = false) String sortingColumn,
+                                                  @RequestParam(defaultValue = "0") int pageNumber,
+                                                  @RequestParam(defaultValue = "10") int pageSize,
+                                                  @RequestParam(required = false) String query,
+                                                  @RequestParam(defaultValue = "false") boolean containsInTraffic,
+                                                  @RequestParam(required = false) Long erdiTrafficUnitId,
+                                                  @RequestParam(required = false) Long searchTrafficUnitId) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize,
+                SortingHelper.createSorting(sortingDirection, sortingColumn));
+        return customErdiService.getCustomErdiView(pageable, query,
+                containsInTraffic, erdiTrafficUnitId, searchTrafficUnitId);
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)

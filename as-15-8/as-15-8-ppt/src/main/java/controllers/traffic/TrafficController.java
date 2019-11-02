@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Views;
 import model.traffic.Traffic;
-import model.traffic.projection.TrafficProjection;
+import model.traffic.TrafficView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -27,7 +27,7 @@ public class TrafficController {
     private final TrafficService trafficService;
 
     @GetMapping
-    public Page<TrafficProjection> getAllTrafficInfo(
+    public Page<TrafficView> getAllTrafficInfo(
             @RequestParam(required = false) SortingDirection sortingDirection,
             @RequestParam(required = false) String sortingColumn,
             @RequestParam(defaultValue = "0") int pageNumber,

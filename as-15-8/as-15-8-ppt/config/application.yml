@@ -32,12 +32,6 @@ spring:
             non_contextual_creation: true
         format_sql: true
     databasePlatform: org.hibernate.dialect.PostgreSQL9Dialect
-  app:
-    jwt:
-      secret: Gk-Xun_Yrkd0zigpysWS
-      ttl: 86400
-    cors:
-      origin: "*"
   cloud:
     stream:
       bindings:
@@ -49,23 +43,6 @@ spring:
       kafka:
         binder:
           brokers: 192.168.5.12:9094,192.168.5.184:9094,192.168.5.211:9094
-ldap:
-  enabled: true
-  domain: designdiv.ecleasing.ru
-  urls: ldap://192.168.1.52:389/
-  base:
-    dn: OU=AS_15_8,DC=designdiv,DC=ecleasing,DC=ru
-  user:
-    dn:
-      pattern: sAMAccountName={0}
-  login:
-    role_oper: CN=ROLE_OPERATOR,OU=roles,OU=AS_15_8,DC=designdiv,DC=ecleasing,DC=ru
-    role_admin: CN=ROLE_ADMIN,OU=roles,OU=AS_15_8,DC=designdiv,DC=ecleasing,DC=ru
-    filter_oper: "(&(objectClass=user)(memberof=${ldap.login.role_oper}))"
-    filter_admin: "(&(objectClass=user)(memberof=${ldap.login.role_admin}))"
-    #filter: "(&(objectClass=user)(userPrincipalName={0})(memberof=${ldap.login.role}))"
-  admin: sa
-  password: 12345
 
 ---
 
@@ -92,18 +69,6 @@ spring:
 cron:
   expression:
     arrangement: "0 * * ? * *"
-ldap:
-  enabled: true
-  domain: as158.ru
-  urls: ldap://10.97.220.140:389/
-  base:
-    dn: OU=AS_15_8,DC=as158,DC=ru
-  user:
-    dn:
-      pattern: sAMAccountName={0}
-  login:
-    role_oper: CN=ROLE_OPERATOR,OU=roles,OU=AS_15_8,DC=as158,DC=ru
-    role_admin: CN=ROLE_ADMIN,OU=roles,OU=AS_15_8,DC=as158,DC=ru
 
 ---
 
@@ -127,7 +92,6 @@ spring:
           destination: arrangements
         inputArrangementNotifications:
           destination: arrangement_notifications
-
 cron:
   expression:
     arrangement: "0 * * ? * *"
@@ -152,7 +116,6 @@ spring:
           destination: arrangements_asavin
         inputArrangementNotifications:
           destination: arrangement_notifications_asavin
-
 cron:
   expression:
     arrangement: "0 0 * ? * *"

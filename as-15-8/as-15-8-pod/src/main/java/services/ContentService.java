@@ -5,6 +5,8 @@ import model.portal.ErdiTrafficUnitJoin;
 import model.portal.SearchQueryTrafficUnitJoin;
 import model.projection.ContentView;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -13,6 +15,7 @@ import repositories.ContentViewRepository;
 import utils.ContentViewSpecifications;
 
 @Service
+@CacheConfig(cacheNames={"sor_content"})
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class ContentService {
 
@@ -21,6 +24,7 @@ public class ContentService {
 
     private final ContentViewRepository viewRepository;
 
+    @Cacheable
     public Page<ContentView> getFormalErdiView(Pageable pageable,
                                                String query,
                                                boolean containsInTraffic,

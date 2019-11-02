@@ -50,13 +50,4 @@ public class SearchPhrase implements Serializable {
     @JsonIgnore
     private List<SearchQueryTrafficUnit> trafficUnits;
 
-
-
-    @Transient
-    private Boolean checked;
-
-    public void setChecked(Boolean checked) {
-        this.checked = checked;
-    }
-
 }

@@ -57,6 +57,7 @@ public class SendCheckUnitToKafka {
 				checkUnitJob.setAccessTool("hola");
 
 				checkUnitJob.setCheckUnit(new CheckUnit(
+						1L,
 						CheckUnitType.valueOf(result.get("check_unit_type").toString()),
 						result.get("check_unit_value").toString()
 					)
@@ -104,9 +105,10 @@ public class SendCheckUnitToKafka {
 					checkUnitJob.setAccessTool("express");
 
 					checkUnitJob.setCheckUnit(new CheckUnit(
-									CheckUnitType.valueOf(result.get("check_unit_type").toString()),
-									result.get("check_unit_value").toString()
-							)
+					 1L,
+							CheckUnitType.valueOf(result.get("check_unit_type").toString()),
+							result.get("check_unit_value").toString()
+						)
 					);
 
 					Message<CheckUnitJob> message = MessageBuilder

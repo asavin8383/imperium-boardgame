@@ -1,7 +1,6 @@
 package controllers;
 
 import model.task.ArrangementView;
-import model.user.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,7 +25,7 @@ public class ArrangementViewController {
     }
 
     @GetMapping
-    public List<ArrangementView> findList(@RequestParam(value = "user_id") User user,
+    public List<ArrangementView> findList(@RequestParam(value = "user") String user,
                                           @RequestParam boolean viewed){
         return arrangementViewRepo.findAllByUserAndViewed(user, viewed);
     }

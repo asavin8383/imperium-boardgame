@@ -6,7 +6,6 @@ import exceptions.AS_15_8_Exception;
 import jobs.ArrangementJob;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import model.schedule.ScheduleCheckUnit;
 import model.task.Arrangement;
 import model.task.FormalTask;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,10 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 import repositories.ArrangementRepo;
-import repositories.schedule.ScheduleCheckUnitRepo;
 import services.arrangement.ArrangementJobCreationService;
-
-import java.util.*;
 
 /**
  * Creation date: 05.08.2019
@@ -36,7 +32,6 @@ public class ArrangementService {
     private final ArrangementRepo arrangementRepo;
     private final ArrangementJobCreationService arrangementJobCreationService;
     private final ArrangementChannels source;
-    private final ScheduleCheckUnitRepo scheduleCheckUnitRepo;
 
     public Arrangement saveArrangement(Arrangement arrangement, FormalTask formalTask){
         arrangement.setFormalTask(formalTask);
@@ -73,18 +68,6 @@ public class ArrangementService {
 
     public Page<Arrangement> findPageByStatus(ExecutionStatus status, PageRequest page){
         return arrangementRepo.findPageByStatus(ExecutionStatus.FORMED, page);
-    }
-
-    public Map<Arrangement, TreeSet<ScheduleCheckUnit>> getArrangementCheckUnits(List<Long> arrangementIds){
-        Map<Arrangement, TreeSet<ScheduleCheckUnit>> arrangementCheckUnits = new HashMap<>();
-        arrangementIds.forEach(arrangementId -> {
-            Arrangement arrangement = arrangementRepo.findById(arrangementId)
-                    .orElseThrow(() -> new AS_15_8_Exception("Ошибка создания расписания! Мероприятие не было найдено по ID: " + arrangementId));
-            TreeSet<ScheduleCheckUnit> arrangementResults = new TreeSet<>(Comparator.comparingLong(ScheduleCheckUnit::getId));
-            arrangementResults.addAll(scheduleCheckUnitRepo.findAllByArrangement(arrangement));
-            arrangementCheckUnits.put(arrangement, arrangementResults);
-        });
-        return arrangementCheckUnits;
     }
 
 }

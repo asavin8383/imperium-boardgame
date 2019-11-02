@@ -1,17 +1,13 @@
 package model.catalog;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import enums.AccessToolUnit;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import model.enums.AccessToolType;
-import model.schedule.PlannedProcessingTime;
-import model.task.Arrangement;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.util.List;
 
 /**
  * Средство доступа к запрещенным ресурсам (Поисковая система, VPN, анонимайзер и т.д.)

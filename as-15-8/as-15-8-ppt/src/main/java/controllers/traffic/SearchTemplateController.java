@@ -33,14 +33,14 @@ public class SearchTemplateController {
             @RequestParam(required = false) String sortingColumn,
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize,
-            @RequestParam(defaultValue = "true") boolean belongsTo,
-            @RequestParam(required = false) Long trafficId,
-            @RequestParam(required = false) String query) {
+            @RequestParam(required = false) String query,
+            @RequestParam(defaultValue = "true") boolean containsInTraffic,
+            @RequestParam(required = false) Long trafficId) {
 
         Pageable page = PageRequest.of(pageNumber, pageSize,
                 SortingHelper.createSorting(sortingDirection, sortingColumn));
         SearchTemplateParams params = new SearchTemplateParams(
-                belongsTo, trafficId, query);
+                containsInTraffic, trafficId, query);
         return repository.searchFor(SearchQueryTrafficUnit.class, params, page);
     }
 

@@ -1,10 +1,9 @@
 package model.task;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Data;
 import enums.ExecutionStatus;
+import lombok.Data;
 import model.enums.Priority;
-import model.user.User;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -37,9 +36,8 @@ public class FormalTask implements Serializable {
 	private String title;
 
 	/**Оператор, ответственный за задание*/
-	@ManyToOne(optional=false)
-	@JoinColumn(name="user_id", foreignKey = @ForeignKey(name = "FK_formal_tasks_user_id"))
-	private User user;
+	@Column(nullable = false)
+	private String user;
 
 	/**Статус задания*/
 	@Enumerated(EnumType.STRING)

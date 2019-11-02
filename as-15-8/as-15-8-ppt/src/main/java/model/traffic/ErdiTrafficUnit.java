@@ -9,7 +9,8 @@ import lombok.ToString;
 import model.Views;
 import model.catalog.AccessToolsCategory;
 import model.enums.TrafficUnitType;
-import model.sor.FormalErdi;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import utils.TrafficUnitUtils;
@@ -21,6 +22,7 @@ import java.util.List;
 @Entity
 @Table(schema = "portal", name = "erdi_traffic_units")
 @PrimaryKeyJoinColumn(name = "traffic_unit_id", referencedColumnName = "id")
+@OnDelete(action = OnDeleteAction.CASCADE)
 @Data
 @ToString(callSuper = true, onlyExplicitlyIncluded = true)
 @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
@@ -41,12 +43,9 @@ public class ErdiTrafficUnit extends TrafficUnit implements Serializable {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<CustomErdi> customErdiList;
 
-    @ManyToMany(cascade = {CascadeType.REFRESH, CascadeType.MERGE, CascadeType.REMOVE})
-    @JoinTable(schema = "portal", name = "erdi_traffic_units_content",
-            joinColumns = @JoinColumn(name = "traffic_unit_id"),
-            inverseJoinColumns = @JoinColumn(name = "content_id"))
+    @OneToMany(mappedBy = "trafficUnit", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private List<FormalErdi> formalErdiList;
+    private List<ErdiContentJoin> formalErdiList;
 
     @Override
     public boolean isEmpty() {
