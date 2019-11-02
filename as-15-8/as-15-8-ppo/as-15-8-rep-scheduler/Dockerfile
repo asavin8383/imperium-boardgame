@@ -18,4 +18,4 @@ CMD ["java", \
          "-Dspring.profiles.active=${PROFILE}", \
          "-Xms512M", \
          "-Xmx1024M", \
-         "${APP_PATH}"]
+         "`echo ${APP_PATH}`"]
