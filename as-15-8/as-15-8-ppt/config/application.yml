@@ -83,7 +83,7 @@ spring:
       ddl-auto: none
   liquibase:
     enabled: true
-    change-log: classpath:data/changelog/db.changelog.master.xml
+    change-log: classpath:db/db.changelog.master.xml
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb
   cloud:
