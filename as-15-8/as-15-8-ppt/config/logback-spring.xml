@@ -6,7 +6,7 @@
     <springProperty scope="context" name="application_address" source="spring.cloud.client.ip-address"/>
     <property name="LOGS" value="${application.logpath:-./logs}" />
 
-    <springProfile name="test,prod">
+    <springProfile name="docker_log">
         <appender name="jsonConsoleAppender" class="ch.qos.logback.core.ConsoleAppender">
             <encoder class="net.logstash.logback.encoder.LogstashEncoder">
                 <includeMdc>false</includeMdc>
@@ -33,18 +33,14 @@
             </rollingPolicy>
         </appender>
         <root level="INFO" additivity="false">
-            <appender-ref ref="rootRollingFile" />
             <appender-ref ref="jsonConsoleAppender" />
+            <appender-ref ref="rootRollingFile" />
         </root>
         <logger name="org.hibernate.SQL" level="DEBUG" additivity="false">
             <appender-ref ref="rootRollingFile" />
-            <appender-ref ref="jsonConsoleAppender" />
-        </logger>
-        <logger name="org.springframework.jdbc.core.JdbcTemplate" level="DEBUG">
-            <appender-ref ref="rootRollingFile" />
-            <appender-ref ref="jsonConsoleAppender" />
         </logger>
     </springProfile>
+
 
 
     <springProfile name="local_log">
@@ -56,13 +52,8 @@
             </layout>
         </appender>
 
-        <logger name= "org.springframework" level="INFO" additivity="false">
-            <appender-ref ref="Console"/>
-        </logger>
-
         <root level="INFO" additivity="false">
             <appender-ref ref="Console" />
         </root>
     </springProfile>
- 
 </configuration>
