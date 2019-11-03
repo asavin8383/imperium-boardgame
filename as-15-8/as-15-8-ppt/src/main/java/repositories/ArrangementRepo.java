@@ -19,11 +19,4 @@ public interface ArrangementRepo extends JpaRepository<Arrangement, Long>, Arran
 
     @Query("SELECT a FROM Arrangement a WHERE a.id = :id and a.status in ('NEW', 'FORMED')")
     Optional<Arrangement> findEditableArrangement(@Param("id") Long id);
-
-    @Query("select DISTINCT a " +
-            "from Arrangement a " +
-            "join a.schedulePeriodArrangements spa " +
-            "join spa.schedulePeriod sp " +
-            "where sp.schedule.id = :id")
-    List<Arrangement> findAllBySchedule(@Param("id") Long scheduleId);
 }

@@ -15,7 +15,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 import repositories.ArrangementRepo;
-import services.arrangement.ArrangementJobCreationService;
 
 /**
  * Creation date: 05.08.2019
@@ -30,7 +29,6 @@ import services.arrangement.ArrangementJobCreationService;
 public class ArrangementService {
 
     private final ArrangementRepo arrangementRepo;
-    private final ArrangementJobCreationService arrangementJobCreationService;
     private final ArrangementChannels source;
 
     public Arrangement saveArrangement(Arrangement arrangement, FormalTask formalTask){
@@ -42,7 +40,7 @@ public class ArrangementService {
      * Отправка мероприятия диспетчеру для детального заполнения
      * @param arrangement мероприятие
      */
-    public void fillArrangement(Arrangement arrangement){
+   /* public void fillArrangement(Arrangement arrangement){
         ArrangementJob arrangementJob = arrangementJobCreationService.createArrangementJob(arrangement);
         source
             .outputArrangementJobs()
@@ -52,7 +50,7 @@ public class ArrangementService {
                     .build()
                     );
         log.info("Мероприятие {} отправлено диспетчеру для заполнения", arrangement.getId());
-    }
+    }*/
 
     public void updateArrangementPlanInfo(Arrangement arrangement){
         if(arrangement.getPlannedStartTime()==null || arrangement.getPlannedEndTime() == null){
