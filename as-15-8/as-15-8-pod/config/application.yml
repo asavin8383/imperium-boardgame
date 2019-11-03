@@ -1,5 +1,6 @@
 logging.level.root: INFO
 spring:
+  main.allow-bean-definition-overriding: true
   datasource:
     test-while-idle: true
     validation-query: SELECT 1;
