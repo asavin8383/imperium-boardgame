@@ -12,7 +12,7 @@ import org.springframework.web.client.RestTemplate;
 
 @Configuration
 @EnableOAuth2Client
-public class Oauth2ClientConfiguration {
+public class OAuth2ClientConfiguration {
 
     /**
      * Для внутренних межсервисных взаимодействий

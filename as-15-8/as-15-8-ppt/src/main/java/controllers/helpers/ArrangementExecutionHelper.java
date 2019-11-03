@@ -2,11 +2,11 @@ package controllers.helpers;
 
 import jobs.ArrangementJob;
 import enums.ExecutionStatus;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import model.task.Arrangement;
-import services.arrangement.ArrangementJobCreationService;
 import services.arrangement.ArrangementJobExecutionService;
 
 /**
@@ -16,18 +16,11 @@ import services.arrangement.ArrangementJobExecutionService;
  */
 
 @Service
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
+//TODO Куда это теперь?
 public class ArrangementExecutionHelper {
 
-    private ArrangementJobCreationService arrangementJobCreationService;
-    private ArrangementJobExecutionService arrangementJobExecutionService;
-
-    @Autowired
-    public ArrangementExecutionHelper(ArrangementJobCreationService arrangementJobCreationService,
-                                      ArrangementJobExecutionService arrangementJobExecutionService) {
-        this.arrangementJobCreationService = arrangementJobCreationService;
-        this.arrangementJobExecutionService = arrangementJobExecutionService;
-
-    }
+    /*private final ArrangementJobExecutionService arrangementJobExecutionService;
 
     public void sendJobToDispatcher(Arrangement arrangement){
         //Если запуск по плану - стартуем все ЕРДИ. Если повторный, ЕРДИ не заполняем, достаточно ИД мероприятия
@@ -38,6 +31,6 @@ public class ArrangementExecutionHelper {
             arrangementJobExecutionService.run(arrangementJobCreationService.createBriefArrangementJob(arrangement));
         }
 
-    }
+    }*/
 
 }
