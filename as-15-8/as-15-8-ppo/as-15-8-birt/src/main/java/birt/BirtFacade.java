@@ -27,7 +27,7 @@ import java.util.logging.Level;
 
 @Log
 @Service
-class BirtFacade {
+public class BirtFacade {
 
     @Autowired
     DataSource dataSource;
@@ -73,7 +73,7 @@ class BirtFacade {
         System.out.println(tn + ": " + msg);
     }
 
-    byte[] createReport(InputStream reportfile, Map<String, ?> params, String repType) throws EngineException, SQLException {
+    public byte[] createReport(InputStream reportfile, Map<String, ?> params, String repType) throws EngineException, SQLException {
         ByteArrayOutputStream ostream = new ByteArrayOutputStream();
         reportType(reportfile, params, ostream, repType);
         return ostream.toByteArray();

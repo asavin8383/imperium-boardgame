@@ -1,5 +1,6 @@
-package birt;
+package controllers;
 
+import birt.BirtFacade;
 import enums.ReportType;
 import lombok.extern.java.Log;
 import org.eclipse.birt.report.engine.api.EngineException;
@@ -9,6 +10,7 @@ import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,6 +40,7 @@ public class BirtController
         this.fileTypeMap = new MimetypesFileTypeMap();
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
     @GetMapping(value = "/reglament/{reportName}/{format}")
     public ResponseEntity<?> createReport(HttpServletRequest params,
                                           @PathVariable String reportName,
