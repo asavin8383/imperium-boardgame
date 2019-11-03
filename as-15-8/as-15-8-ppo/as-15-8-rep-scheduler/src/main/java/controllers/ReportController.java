@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import repositories.*;
+import schedule.QueryService;
 import schedule.ReportService;
 
 import java.util.List;
@@ -24,6 +25,7 @@ import java.util.Optional;
 @RequestMapping("reports")
 public class ReportController
 {
+    private final QueryService queryService;
     private final ReportService reportService;
     private final ReportAdminStatRepository reportAdminStatRepository;
     private final ReportStatRepository reportStatRepository;
@@ -33,11 +35,12 @@ public class ReportController
     private final ReportAdminTableRepository reportAdminTableRepository;
 
     @Autowired
-    public ReportController(ReportService reportService, ReportAdminStatRepository reportAdminStatRepository,
+    public ReportController(QueryService queryService, ReportService reportService, ReportAdminStatRepository reportAdminStatRepository,
                             ReportStatRepository reportStatRepository,
                             RegReportsTableRepository regReportsTableRepository,
                             ReportRepository reportRepository,
                             ReportTypeRepository reportTypeRepository, ReportAdminTableRepository reportAdminTableRepository) {
+        this.queryService = queryService;
         this.reportService = reportService;
         this.reportAdminStatRepository = reportAdminStatRepository;
         this.reportStatRepository = reportStatRepository;
