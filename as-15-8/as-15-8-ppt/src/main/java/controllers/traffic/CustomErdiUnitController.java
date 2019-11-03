@@ -2,7 +2,7 @@ package controllers.traffic;
 
 import controllers.helpers.SortingHelper;
 import enums.SortingDirection;
-import exceptions.AS_15_8_Exception;
+import exceptions.AS_15_8_PPT_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.traffic.CustomErdi;
@@ -48,7 +48,7 @@ public class CustomErdiUnitController {
     @GetMapping(path = "/{id}")
     public CustomErdiUnit getCustomErdiUnit(@PathVariable Long id) {
         return unitRepository.findById(id).orElseThrow(() ->
-                new AS_15_8_Exception("Custom ERDI unit was not found by id: " + id));
+                new AS_15_8_PPT_Exception("Custom ERDI unit was not found by id: " + id));
     }
 
     @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)

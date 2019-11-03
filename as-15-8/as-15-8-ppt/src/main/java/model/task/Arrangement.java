@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import enums.ArrangementEvents;
 import enums.ExecutionStatus;
-import exceptions.AS_15_8_Exception;
+import exceptions.AS_15_8_PPT_Exception;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -131,7 +131,7 @@ public class Arrangement implements Serializable {
 				this.endTime = LocalTime.now();
 			}
 		} else {
-			throw new AS_15_8_Exception("Ошибка смены статуса мероприятия: " + stateMachine.getCurrentStatus() + " событием " + event);
+			throw new AS_15_8_PPT_Exception("Ошибка смены статуса мероприятия: " + stateMachine.getCurrentStatus() + " событием " + event);
 		}
 	}
 

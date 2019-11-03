@@ -1,5 +1,6 @@
 package checkUnits;
 
+import enums.AccessToolUnit;
 import lombok.Getter;
 
 /**
@@ -22,5 +23,13 @@ public enum CheckUnitType {
 
 	CheckUnitType(CheckMethod checkMethod) {
 		this.checkMethod = checkMethod;
+	}
+
+	public String propertyKey(){
+		return this.name().replaceAll("_", "-").toLowerCase();
+	}
+
+	public static CheckUnitType fromPropertyKey(String checkUnitType){
+		return CheckUnitType.valueOf(checkUnitType.replaceAll("-", "_").toUpperCase());
 	}
 }

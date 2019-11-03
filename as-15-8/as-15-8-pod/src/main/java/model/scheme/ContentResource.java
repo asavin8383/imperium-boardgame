@@ -13,7 +13,7 @@ import java.util.Date;
 @Entity
 @Table(schema="sor", name="content_resources")
 @Data
-public class ContentResources implements Serializable {
+public class ContentResource implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="content_resources_generator")

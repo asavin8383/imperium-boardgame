@@ -1,6 +1,6 @@
 package services.traffic;
 
-import exceptions.AS_15_8_Exception;
+import exceptions.AS_15_8_PPT_Exception;
 import liquibase.util.StringUtils;
 import lombok.NonNull;
 import model.traffic.CustomErdi;
@@ -104,7 +104,7 @@ public class CustomErdiService {
 
     public CustomErdi getCustomErdiById(Long id) {
         return customErdiRepository.findById(id).orElseThrow(() ->
-                new AS_15_8_Exception("Custom ERDI was not found by id: " + id));
+                new AS_15_8_PPT_Exception("Custom ERDI was not found by id: " + id));
     }
 
     public CustomErdi updateCustomErdi(CustomErdi newCustomErdi,

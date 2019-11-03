@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import exceptions.AS_15_8_Exception;
+import exceptions.AS_15_8_PPT_Exception;
 import lombok.extern.slf4j.Slf4j;
 import enums.ExecutionStatus;
 import model.task.Arrangement;
@@ -60,7 +60,7 @@ public class ArrangementStatusServiceImpl implements ArrangementStatusService {
 
                     return true;
                 })
-                .orElseThrow(() -> new AS_15_8_Exception("Error updating arrangement status! Formal task was not found by id: " + arrangement.getFormalTask().getId()));
+                .orElseThrow(() -> new AS_15_8_PPT_Exception("Error updating arrangement status! Formal task was not found by id: " + arrangement.getFormalTask().getId()));
     }
 
     private Optional<ExecutionStatus> determineFormalTaskStatus(FormalTask formalTask){

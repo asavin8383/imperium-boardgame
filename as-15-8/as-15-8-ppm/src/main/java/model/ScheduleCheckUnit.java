@@ -11,7 +11,6 @@ import java.io.Serializable;
 
 @Entity
 @Table(schema = "schedule", name = "schedule_check_units")
-@Immutable
 @Data
 public class ScheduleCheckUnit implements Serializable {
     private static final long serialVersionUID = 1L;
