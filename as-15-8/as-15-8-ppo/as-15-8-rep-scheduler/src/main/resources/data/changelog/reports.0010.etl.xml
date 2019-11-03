@@ -11,25 +11,25 @@
     <column name="ppn_dttm" type="timestamp" defaultValueComputed="current_timestamp"/>
 </createTable>
     </changeSet>
-    <changeSet id="0010.2" author="klychagin">
-        <sql>
-            create function dm.update_reports_data(rep_id bigint) returns void
-    language plpgsql
-as
-$$
-BEGIN
-     insert into dm.etl_placeholder(rep_id)
-     values (rep_id);
-END;
-$$;
+<!--    <changeSet id="0010.2" author="klychagin">-->
+<!--        <sql>-->
+<!--            create function dm.update_reports_data(rep_id bigint) returns void-->
+<!--    language plpgsql-->
+<!--as-->
+<!--$$-->
+<!--BEGIN-->
+<!--     insert into dm.etl_placeholder(rep_id)-->
+<!--     values (rep_id);-->
+<!--END;-->
+<!--$$;-->
 
-        </sql>
-        <rollback>
-            <sql>
-                drop function dm.update_reports_data(rep_id bigint);
-            </sql>
-        </rollback>
-    </changeSet>
+<!--        </sql>-->
+<!--        <rollback>-->
+<!--            <sql>-->
+<!--                drop function dm.update_reports_data(rep_id bigint);-->
+<!--            </sql>-->
+<!--        </rollback>-->
+<!--    </changeSet>-->
 
 </databaseChangeLog>
 
