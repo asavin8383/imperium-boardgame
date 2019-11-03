@@ -99,11 +99,12 @@ public class ArrangementController {
      * @return запущенное мероприятие
      */
     @GetMapping(path = "/run")
+    //TODO Теперь как то по другому
     public ResponseEntity<Arrangement> runArrangement(@RequestParam Long id){
         return arrangementRepo.findById(id)
             .map(arrangement -> {
                 if(arrangement.getStatus().equals(ExecutionStatus.FORMED)||arrangement.getStatus().equals(ExecutionStatus.ACTION_REQUIRED)) {
-                    arrangementExecutionHelper.sendJobToDispatcher(arrangement);
+                   // arrangementExecutionHelper.sendJobToDispatcher(arrangement);
                     //Устанавливаем дату запуска(актуально только для впервые запущенных мероприятий)
                     if(arrangement.getStatus().equals(ExecutionStatus.FORMED)){
                         arrangement.setStartTime(LocalTime.now());
@@ -124,11 +125,12 @@ public class ArrangementController {
      * @return статус запроса
      */
     @GetMapping(path = "/fill")
+    //TODO Теперь как то по другому
     public @ResponseBody ResponseEntity<String> fillArrangement(@RequestParam("id") Arrangement arrangement){
         if(arrangement.getPlannedStartTime() == null || arrangement.getPlannedEndTime() == null){
             AS_15_8_Exception.logAndThrow(log, String.format("Не заполнено плановое время начала или окончания мероприятия c ID: %d", arrangement.getId()));
         }
-        arrangementService.fillArrangement(arrangement);
+       // arrangementService.fillArrangement(arrangement);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

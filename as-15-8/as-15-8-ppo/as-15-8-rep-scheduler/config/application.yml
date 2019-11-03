@@ -11,6 +11,7 @@ eureka:
     instanceId: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port}
 spring:
   application.name: report_scheduler
+  main.allow-bean-definition-overriding: true
   liquibase:
     enabled: true
     change-log: classpath:data/db.changelog.master.xml
@@ -30,8 +31,17 @@ spring:
         format_sql: true
     databasePlatform: org.hibernate.dialect.PostgreSQL9Dialect
 app:
-  birt.url: 'http://localhost:15813/reglament/'
+  birt.url: ${gateway.url}/reglament/
   schedule: '5 0 * * * ?'
+security:
+  oauth2:
+    resource:
+      tokenInfoUri: ${gateway.url}/security/oauth/check_token
+    client:
+      clientId: pod
+      clientSecret: 1q0p2w9o
+      grantType: client_credentials
+      accessTokenUri: ${gateway.url}/security/oauth/token
 
 ---
 
@@ -68,6 +78,7 @@ spring:
       kafka.binder:
         brokers:
 app:
+  birt.url: 'http://localhost:15813/reglament/'
   schedule: '*/10 * * * * ?'
 
 
@@ -85,28 +96,15 @@ logging:
     org.springframework.data: info
     org.springframework.web: info
     org.springframework.http: info
-eureka:
-  client:
-    enabled: false
 spring:
   profiles: test
   datasource:
-    url: jdbc:postgresql://192.168.5.195:5432/asdb_test
+    url: jdbc:postgresql://192.168.5.195:5432/asdb
   liquibase:
-    enabled: false
-  cloud:
-    bus.trace.enabled: false
-    config:
-      bus:
-        enabled: false
-    stream:
-      bindings:
-        springCloudBusInput:
-          group: config_server
-      kafka.binder:
-        brokers:
+    enabled: true
+  main:
+    banner-mode: "off"
 app:
-  birt.url: 'http://birt:15813/reglament/'
   schedule: '*/10 * * * * ?'
 
 

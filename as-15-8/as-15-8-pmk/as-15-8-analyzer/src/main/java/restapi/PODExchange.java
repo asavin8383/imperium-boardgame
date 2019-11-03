@@ -23,17 +23,16 @@ public class PODExchange
     @Value("${gateway.url}")
     private String gatewayUrl;
 
-    @Autowired @Qualifier("internal")
+    @Autowired
     private OAuth2RestTemplate oAuth2RestTemplate;
 
-
     public boolean checkUrl(String url) {
-        String base = gatewayUrl.endsWith("/") ? gatewayUrl : gatewayUrl + "/";
         UriComponents uriComponents =
-                UriComponentsBuilder.fromUriString("{base}/pod/check_erdi")
+                UriComponentsBuilder
+                        .fromHttpUrl(gatewayUrl)
+                        .path("/pod/check_erdi")
                         .queryParam("url", url == null ? "" : url)
-                        .build()
-                        .expand(base);
+                        .build();
 
         log.info("GET checkUrl from {}", uriComponents.toString());
 

@@ -48,6 +48,12 @@ zuul:
     security:
       path: /security/**
       serviceId: auth_server
+    report_scheduler:
+      path: /report_scheduler/**
+      serviceId: report_scheduler
+    report_generator:
+      path: /report_generator/**
+      serviceId: report_generator
 ribbon:
   ReadTimeout: 60000
   ConnectTimeout: 3000
