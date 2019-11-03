@@ -16,7 +16,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  */
 @SpringBootApplication
 @EnableScheduling
-@ComponentScan(basePackages = {"model", "controllers", "schedule"})
+@ComponentScan(basePackages = {"common", "model", "controllers", "schedule"})
 @EntityScan("model")
 @EnableJpaRepositories("repositories")
 public class RepSchedulerApplication
