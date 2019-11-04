@@ -40,10 +40,6 @@
             <appender-ref ref="jsonConsoleAppender" />
             <appender-ref ref="rootRollingFile" />
         </logger>
-        <logger name="org.springframework.jdbc.core.JdbcTemplate" level="DEBUG">
-            <appender-ref ref="jsonConsoleAppender" />
-            <appender-ref ref="rootRollingFile" />
-        </logger>
     </springProfile>
 
     <springProfile name="local_log">
