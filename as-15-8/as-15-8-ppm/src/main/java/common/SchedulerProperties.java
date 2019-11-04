@@ -14,6 +14,8 @@ public class SchedulerProperties {
 
     private Long totalWorkersCount;
 
+    private final Map<String, String> accessTools = new HashMap<>();
+
     private Map<String, Map<CheckMethod, Long>> processingTimes = new HashMap<>();
 
     public long getProcessingTime(String accessTool, CheckUnitType checkUnitType){

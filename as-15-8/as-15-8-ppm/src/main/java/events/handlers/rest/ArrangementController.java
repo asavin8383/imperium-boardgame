@@ -1,8 +1,11 @@
 package events.handlers.rest;
 
 import arrangement.ArrangementStatusNotification;
+import checkUnits.CheckUnit;
+import common.SchedulerProperties;
+import enums.AccessToolUnit;
 import enums.ArrangementEvents;
-import enums.ExecutionStatus;
+import enums.Protocol;
 import events.producers.rest.ArrangementStatusUploader;
 import events.producers.rest.CheckUnitUploader;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +17,10 @@ import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import repositories.ArrangementRepo;
+import repositories.DomainMaskItemRepo;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -31,6 +37,8 @@ public class ArrangementController {
     private final ArrangementRepo arrangementRepo;
     private final CheckUnitUploader checkUnitUploader;
     private final ArrangementStatusUploader arrangementStatusUploader;
+    private final SchedulerProperties schedulerProperties;
+    private final DomainMaskItemRepo domainMaskItemRepo;
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public void replaceFormalTask(@RequestBody Arrangement newArrangement, @RequestParam("id") Arrangement arrangement) {
@@ -52,17 +60,47 @@ public class ArrangementController {
         arrangement.getScheduleCheckUnits().addAll(
         checkUnitUploader.getCheckUnitsByArrangementId(arrangement.getId())
             .stream()
-            .map(checkUnit -> {
-                ScheduleCheckUnit scheduleCheckUnit = new ScheduleCheckUnit();
-                scheduleCheckUnit.setArrangement(arrangement);
-                scheduleCheckUnit.setErdiId(checkUnit.getErdiId().toString());
-                scheduleCheckUnit.setCheckUnitType(checkUnit.getType());
-                scheduleCheckUnit.setCheckUnitValue(checkUnit.getValue());
-                return scheduleCheckUnit;
-            })
+            .flatMap(checkUnit -> createCheckUnits(arrangement, checkUnit).stream())
             .collect(Collectors.toList())
         );
         arrangementRepo.save(arrangement);
+    }
+
+    private List<ScheduleCheckUnit> createCheckUnits(Arrangement arrangement, CheckUnit checkUnit){
+        List<ScheduleCheckUnit> scheduleCheckUnits = new ArrayList<>();
+        switch (checkUnit.getType()){
+            case DOMAIN: {
+                AccessToolUnit accessToolUnit = AccessToolUnit.fromPropertyKey(schedulerProperties.getAccessTools().get(arrangement.getAccessTool()));
+                boolean isPS = accessToolUnit == AccessToolUnit.SEARCH_SYSTEM ||
+                        accessToolUnit == AccessToolUnit.GOOGLE_API;
+                if (isPS) {
+                    scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit, checkUnit.getValue()));
+                } else {
+                    for(Protocol value: Protocol.values()){
+                        scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit, value.getProtocol() + checkUnit.getValue()));
+                    }
+                }
+                return scheduleCheckUnits;
+            }
+            case DOMAIN_MASK: {
+                domainMaskItemRepo.findAllByDomainMask(checkUnit.getValue())
+                    .forEach(domainMaskItem -> scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit, domainMaskItem.getDomainMaskItem())));
+                return scheduleCheckUnits;
+            }
+            default: {
+                scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit, checkUnit.getValue()));
+                return scheduleCheckUnits;
+            }
+        }
+    }
+
+    private ScheduleCheckUnit createCheckUnit(Arrangement arrangement, CheckUnit checkUnit, String checkUnitValue){
+        ScheduleCheckUnit scheduleCheckUnit = new ScheduleCheckUnit();
+        scheduleCheckUnit.setArrangement(arrangement);
+        scheduleCheckUnit.setErdiId(checkUnit.getErdiId().toString());
+        scheduleCheckUnit.setCheckUnitType(checkUnit.getType());
+        scheduleCheckUnit.setCheckUnitValue(checkUnitValue);
+        return scheduleCheckUnit;
     }
 
 }
