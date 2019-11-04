@@ -2,13 +2,11 @@ package schedule.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import model.Report;
-import okhttp3.Call;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import schedule.ReportService;
 
 import javax.transaction.Transactional;
@@ -25,19 +23,19 @@ import java.text.SimpleDateFormat;
  */
 @Slf4j
 @Service
-public class OkReportService implements ReportService
+public class RestTemplateReportService implements ReportService
 {
     private final ReportStatusService reportStatusService;
 
-
-    private OkHttpClient client = new OkHttpClient();
+    private final RestTemplate restTemplate;
 
     @Value("${app.birt.url}")
     String birt_url;
 
     @Autowired
-    public OkReportService(ReportStatusService reportStatusService) {
+    public RestTemplateReportService(ReportStatusService reportStatusService, RestTemplate restTemplate) {
         this.reportStatusService = reportStatusService;
+        this.restTemplate = restTemplate;
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
@@ -59,16 +57,14 @@ public class OkReportService implements ReportService
 
             URL url = new URL(surl);
             log.debug("url = {}", url);
-            Request request = new Request.Builder().url(url).build();
 
-            Call call = client.newCall(request);
-            Response response = call.execute();
-            log.debug("response = {}", response);
+            ResponseEntity<byte[]> response=restTemplate.getForEntity(surl, byte[].class);
 
-            if (!response.isSuccessful()) throw new RuntimeException(response.code() + ": " + response.message());
+            log.debug("response = {}", response.getStatusCode());
 
-            //noinspection ConstantConditions
-            reportStatusService.markDone(report, response.header("Content-Type"), response.body().bytes());
+            if (response.getStatusCode().isError()) throw new RuntimeException(response.getStatusCode().value() + ": " + response.getStatusCode().getReasonPhrase());
+
+            reportStatusService.markDone(report, response.getHeaders().getContentType().toString(), response.getBody());
             log.info("Отчет {} успешно завершен", report.getRepId() );
 
         } catch (Throwable e) {

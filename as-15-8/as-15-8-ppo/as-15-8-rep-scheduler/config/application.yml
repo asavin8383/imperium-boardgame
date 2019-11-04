@@ -33,6 +33,11 @@ spring:
 app:
   birt.url: ${gateway.url}/reglament/
   schedule: '5 0 * * * ?'
+  sql:
+    # Вызывается перед запуском всех отчетов, без параметра
+    before-all:
+    # Вызывается перед запуском каждлго отчета, параметр -- rep_id из таблицы
+    before-each: select dm.update_reports_data(?)
 security:
   oauth2:
     resource:
