@@ -51,19 +51,11 @@ spring:
   profiles.include: local_log
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb_test
-  cloud:
-    bus.trace.enabled: false
-    config:
-      bus:
-        enabled: false
-    stream:
-      bindings:
-        springCloudBusInput:
-          group: config_server
-
 
 ---
 
+logging:
+  config:
 spring:
   profiles: test
   profiles.include: docker_log
