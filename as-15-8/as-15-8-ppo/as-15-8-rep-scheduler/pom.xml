@@ -51,6 +51,11 @@
             <artifactId>spring-security-oauth2-autoconfigure</artifactId>
             <version>RELEASE</version>
         </dependency>
+        <dependency>
+            <groupId>io.pivotal.spring.cloud</groupId>
+            <artifactId>spring-cloud-services-spring-connector</artifactId>
+            <version>2.1.4.RELEASE</version>
+        </dependency>
 
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
