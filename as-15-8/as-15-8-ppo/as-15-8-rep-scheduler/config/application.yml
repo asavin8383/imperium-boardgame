@@ -1,6 +1,8 @@
 subsystem: PPO
 server:
   port: 15812
+logging:
+  config: config/logback-spring.xml
 gateway.url: ${GATEWAY_URI:http://localhost:15880}
 eureka:
   client:
@@ -72,6 +74,7 @@ eureka:
     enabled: false
 spring:
   profiles: dev_asin
+  profiles.include: local_log
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb_test
   liquibase:
@@ -99,20 +102,9 @@ app:
 
 ---
 
-logging:
-  config:
-  level:
-    root: info
-    model: info
-    repositories: info
-    controllers: info
-    common: info
-    schedule: info
-    org.springframework.data: info
-    org.springframework.web: info
-    org.springframework.http: info
 spring:
   profiles: test
+  profiles.include: docker_log
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb
   liquibase:
