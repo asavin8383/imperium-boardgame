@@ -1,8 +1,6 @@
+subsystem: SOIB
 logging:
   config: config/logback-spring.xml
-  level:
-    org.springframework.web: WARN
-    org.springframework.security: DEBUG
 ldap:
   enabled: true
   domain: designdiv.ecleasing.ru
