@@ -69,9 +69,6 @@ logging:
     org.springframework.data: debug
     org.springframework.web: debug
     org.springframework.http: debug
-eureka:
-  client:
-    enabled: false
 spring:
   profiles: dev_asin
   profiles.include: local_log
@@ -79,25 +76,8 @@ spring:
     url: jdbc:postgresql://192.168.5.195:5432/asdb_test
   liquibase:
     enabled: false
-  cloud:
-    bus.trace.enabled: false
-    config:
-      bus:
-        enabled: false
-    stream:
-      bindings:
-        springCloudBusInput:
-          group: config_server
-      kafka.binder:
-        brokers:
 app:
-  birt.url: 'http://localhost:15813/reglament/'
   schedule: '*/10 * * * * ?'
-  sql:
-    # Вызывается перед запуском всех отчетов, без параметра
-    before-all:
-    # Вызывается перед запуском каждлго отчета, параметр -- rep_id из таблицы
-    before-each: select dm.update_reports_data(?)
 
 
 ---

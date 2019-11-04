@@ -76,5 +76,5 @@ spring:
 ---
 
 spring:
-  profiles: dev_pvorobiev, dev_asavin, dev_ashabalin, dev_asinyavin, dev_jspirina
+  profiles: dev_pvorobiev, dev_asavin, dev_ashabalin, dev_asinyavin, dev_jspirina, dev_asin
   profiles.include: local_log

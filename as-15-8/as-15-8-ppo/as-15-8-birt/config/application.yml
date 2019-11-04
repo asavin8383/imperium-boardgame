@@ -43,9 +43,6 @@ logging:
   level:
     root: info
     birt: debug
-eureka:
-  client:
-    enabled: false
 spring:
   profiles: dev_asin
   profiles.include: local_log
