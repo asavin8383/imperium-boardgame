@@ -37,6 +37,7 @@ source_path_anonym: /logs/content.txt
 
 spring:
   profiles: prod
+  profiles.include: docker_log
   main:
     banner-mode: "off"
   cloud.stream:
@@ -59,6 +60,7 @@ spring:
 
 spring:
   profiles: test
+  profiles.include: docker_log
   main:
     banner-mode: "off"
   cloud.stream:
@@ -78,6 +80,7 @@ spring:
 
 spring:
   profiles: dev_ashabalin
+  profiles.include: local_log
   cloud.stream:
     bindings:
       input:
@@ -99,6 +102,7 @@ spring:
 
 spring:
   profiles: dev_asinyavin
+  profiles.include: local_log
   cloud.stream:
     bindings:
       input:
@@ -119,6 +123,7 @@ spring:
 
 spring:
   profiles: dev_asavin
+  profiles.include: local_log
   cloud.stream:
     bindings:
       input:
@@ -139,6 +144,7 @@ spring:
 
 spring:
   profiles: dev_pvorobiev
+  profiles.include: local_log
   cloud.stream:
     bindings:
       input:
@@ -159,6 +165,7 @@ spring:
 
 spring:
   profiles: dev_jspirina
+  profiles.include: local_log
   cloud.stream:
     bindings:
       input:

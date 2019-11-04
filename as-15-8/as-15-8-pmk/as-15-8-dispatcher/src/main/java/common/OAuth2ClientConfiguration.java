@@ -49,4 +49,5 @@ public class OAuth2ClientConfiguration {
         args.setAdditionalFilters(filters);
         return (DiscoveryClient.DiscoveryClientOptionalArgs)args;
     }
+
 }

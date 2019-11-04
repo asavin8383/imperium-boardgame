@@ -6,13 +6,13 @@ logging:
   config: config/logback-spring.xml
 eureka:
   client:
+    serviceUrl:
+      defaultZone: ${gateway.url}/eureka
     oauth2:
       clientId: analyzer
       clientSecret: 1q0p2w9o
       grantType: client_credentials
       accessTokenUri: ${gateway.url}/security/oauth/token
-    serviceUrl:
-      defaultZone: ${gateway.url}/eureka
   instance:
     preferIpAddress: true
     instanceId: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port}
@@ -32,5 +32,12 @@ spring:
       bus.enabled: true
       discovery.enabled: true
       discovery.serviceId: config_server
+      fail-fast: true
       profile: default
       label: latest
+      client:
+        oauth2:
+          clientId: analyzer
+          clientSecret: 1q0p2w9o
+          grantType: client_credentials
+          accessTokenUri: ${gateway.url}/security/oauth/token
