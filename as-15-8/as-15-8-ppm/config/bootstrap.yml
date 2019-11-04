@@ -38,6 +38,6 @@ spring:
       client:
         oauth2:
           clientId: ppm
-            clientSecret: 1q0p2w9o
-            grantType: client_credentials
-            accessTokenUri: ${gateway.url}/security/oauth/token
+          clientSecret: 1q0p2w9o
+          grantType: client_credentials
+          accessTokenUri: ${gateway.url}/security/oauth/token
