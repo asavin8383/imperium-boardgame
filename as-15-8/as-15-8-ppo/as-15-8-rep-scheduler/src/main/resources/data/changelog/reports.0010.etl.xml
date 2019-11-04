@@ -11,6 +11,36 @@
     <column name="ppn_dttm" type="timestamp" defaultValueComputed="current_timestamp"/>
 </createTable>
     </changeSet>
+    <changeSet id="0010.3" author="klychagin">
+        <addColumn schemaName="dm" tableName="msr_prd">
+            <column name="is_end_of_week" type="boolean" defaultValue="false"/>
+            <column name="is_end_of_month" type="boolean" defaultValue="false"/>
+            <column name="is_end_of_quarter" type="boolean" defaultValue="false"/>
+            <column name="is_end_of_half" type="boolean" defaultValue="false"/>
+            <column name="is_end_of_year" type="boolean" defaultValue="false"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="0010.4" author="klychagin">
+        <sql>
+            update dm.msr_prd set is_end_of_week = true where EXTRACT(ISODOW FROM eff_dttm)=7;
+            update dm.msr_prd set is_end_of_month = true where msr_prd_tp_id=1 and date_trunc('day',eff_dttm)=
+(date_trunc('month', eff_dttm::date) + interval '1 month' - interval '1 day')::date;
+    update dm.msr_prd set is_end_of_quarter=true where msr_prd_tp_id=1  and eff_dttm::date in ('2019-03-31','2019-06-30','2019-09-30','2019-12-31',
+                                                                '2020-03-31','2020-06-30','2020-09-30','2020-12-31');
+update dm.msr_prd set is_end_of_half=true where msr_prd_tp_id=1  and eff_dttm::date in ('2019-06-30','2019-12-31',
+                                                                '2020-06-30','2020-12-31');
+update dm.msr_prd set is_end_of_year=true where msr_prd_tp_id=1  and eff_dttm::date in ('2019-12-31','2020-12-31');
+        </sql>
+        <rollback>
+            <sql>
+                update dm.msr_prd set is_end_of_week=false;
+                update dm.msr_prd set is_end_of_month=false;
+                update dm.msr_prd set is_end_of_quarter=false;
+                update dm.msr_prd set is_end_of_half=false;
+                update dm.msr_prd set is_end_of_year=false;
+            </sql>
+        </rollback>
+    </changeSet>
 <!--    <changeSet id="0010.2" author="klychagin">-->
 <!--        <sql>-->
 <!--            create function dm.update_reports_data(rep_id bigint) returns void-->
