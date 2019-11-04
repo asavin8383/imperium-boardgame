@@ -21,7 +21,9 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
                             "/eureka/js/**",
                             "/eureka/css/**",
                             "/eureka/images/**",
-                            "/eureka/fonts/**").permitAll()
+                            "/eureka/fonts/**",
+                            "/eureka/apps/**").permitAll()
+                    .antMatchers(HttpMethod.POST, "/eureka/peerreplication/batch/**").permitAll()
                     .antMatchers("/info", "/health").permitAll()
                 .anyRequest().hasRole("SYSTEM")
                 .and().httpBasic().and().csrf().disable();
