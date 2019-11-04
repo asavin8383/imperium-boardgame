@@ -51,9 +51,10 @@ public class RestTemplateReportService implements ReportService
             String from = dateFormat.format(report.getMsr_prd_st_dttm());
             String period = report.getMsr_prd_tp();
             String format = report.getFormat();
-            Object rptdesign = report.getRptdesign();
+            String rptdesign = report.getRptdesign();
 
             String surl = String.format("%s%s/%s?RPFD=%s&RPD=%s", birt_url, rptdesign, format, from, period);
+//            String url1 = UriComponentsBuilder.fromHttpUrl(birt_url).path(rptdesign+"/"+format).queryParam("RPFD", from).queryParam("RPD", period).build().toString();
 
             URL url = new URL(surl);
             log.debug("url = {}", url);
