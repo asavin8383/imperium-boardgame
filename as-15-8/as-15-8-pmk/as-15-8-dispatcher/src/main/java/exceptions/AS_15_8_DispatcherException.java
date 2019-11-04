@@ -20,10 +20,10 @@ public class AS_15_8_DispatcherException extends RuntimeException {
         super(message, cause);
     }
 
-    public static void logAndThrow(Logger logger, String message) {
+    public static AS_15_8_DispatcherException logAndGet(Logger logger, String message) {
         AS_15_8_DispatcherException e = new AS_15_8_DispatcherException(message);
         // log the stack trace as well
         logger.error(message);
-        throw e;
+        return e;
     }
 }

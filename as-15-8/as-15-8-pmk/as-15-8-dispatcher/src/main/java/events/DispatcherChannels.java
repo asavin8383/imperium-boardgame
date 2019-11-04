@@ -10,16 +10,22 @@ import org.springframework.messaging.SubscribableChannel;
  * Author: asavin
  */
 public interface DispatcherChannels {
-    String ARRANGEMENTS_INPUT = "incomingArrangements";
-    String ANALYSIS_RESULTS_INPUT = "inputAnalysisResults";
-    String NOTIFICATIONS_OUTPUT = "arrangementNotifications";
 
-    @Input(ARRANGEMENTS_INPUT)
-    SubscribableChannel incomingArrangements();
+    String INPUT_JOBS = "inputJobs";
+    String OUTPUT_JOBS = "outputJobs";
+    String INPUT_ANALYSIS_RESULTS = "inputAnalysisResults";
+    String INPUT_JOB_NOTIFICATIONS = "inputJobNotifications";
 
-    @Input(ANALYSIS_RESULTS_INPUT)
+    @Input(INPUT_JOBS)
+    SubscribableChannel inputJobs();
+
+    @Output(OUTPUT_JOBS)
+    MessageChannel outputJobs();
+
+    @Input(INPUT_ANALYSIS_RESULTS)
     SubscribableChannel inputAnalysisResults();
 
-    @Output(NOTIFICATIONS_OUTPUT)
-    MessageChannel outputArrangementNotifications();
+    @Input(INPUT_JOB_NOTIFICATIONS)
+    SubscribableChannel inputJobNotifications();
+
 }

@@ -40,7 +40,7 @@ public class CustomErdiUnitController {
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(code = HttpStatus.CREATED)
     public CustomErdiUnit createCustomErdiUnit(@RequestBody CustomErdiUnit customErdiUnit,
-                                               @RequestParam("customErdiId")CustomErdi customErdi) {
+                                               @RequestParam("customErdiId") CustomErdi customErdi) {
         customErdiUnit.setCustomErdi(customErdi);
         return unitRepository.save(customErdiUnit);
     }

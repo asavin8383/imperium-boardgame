@@ -26,10 +26,10 @@ public class CustomErdiUnit {
 
     @NotNull
     @Column(nullable = false)
-    //@Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.STRING)
     @JsonView(Views.Brief.class)
     @ToString.Include
-    private String type;
+    private Type type;
 
     @NotNull
     @Column(nullable = false)
@@ -41,5 +41,9 @@ public class CustomErdiUnit {
     @JoinColumn(name = "custom_erdi_id", nullable = false)
     @JsonIgnore
     private CustomErdi customErdi;
+
+    public enum Type {
+        URL, DOMAIN, DOMAIN_MASK, IP_V4, IP_V6, IP_V4_SUBNET, IP_V6_SUBNET
+    }
 
 }
