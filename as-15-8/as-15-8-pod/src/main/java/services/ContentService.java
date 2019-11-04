@@ -1,6 +1,7 @@
 package services;
 
 import lombok.RequiredArgsConstructor;
+import model.actualViews.ContentCheckUnit;
 import model.portal.ErdiTrafficUnitJoin;
 import model.portal.SearchQueryTrafficUnitJoin;
 import model.projection.ContentView;
@@ -11,8 +12,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import repositories.ContentCheckUnitRepository;
 import repositories.ContentViewRepository;
 import utils.ContentViewSpecifications;
+
+import java.util.List;
 
 @Service
 @CacheConfig(cacheNames={"sor_content"})
@@ -23,6 +27,7 @@ public class ContentService {
     public static final String SEARCH_QUERY_TRAFFIC_UNIT_COLUMN = "searchQueryTrafficUnits";
 
     private final ContentViewRepository viewRepository;
+    private final ContentCheckUnitRepository contentCheckUnitRepository;
 
     @Cacheable
     public Page<ContentView> getFormalErdiView(Pageable pageable,
@@ -34,6 +39,15 @@ public class ContentService {
                 erdiTrafficUnitId, searchTrafficUnitId);
         return specification == null ? viewRepository.findAll(pageable) :
                 viewRepository.findAll(specification, pageable);
+    }
+
+    /**
+     * Получение списка актуальных чек-юнитов по ИД ЕРДИ
+     * @param contentId ИД ЕРДИ
+     * @return список актуальных чек-юнитов
+     */
+    public List<ContentCheckUnit> getActualCheckUnits(Long contentId){
+        return contentCheckUnitRepository.findAllByContentId(contentId);
     }
 
     private Specification<ContentView> getSpecification(String query,

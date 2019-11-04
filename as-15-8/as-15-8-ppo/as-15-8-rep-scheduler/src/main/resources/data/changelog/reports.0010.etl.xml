@@ -1,0 +1,36 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="0010.1" author="klychagin">
+    <dropTable schemaName="dm" tableName="etl_placeholder"/>
+    </changeSet>
+    <changeSet id="0010.2" author="klychagin">
+        <createTable tableName="etl_placeholder" schemaName="dm">
+    <column name="rep_id" type="bigint"/>
+    <column name="ppn_dttm" type="timestamp" defaultValueComputed="current_timestamp"/>
+</createTable>
+    </changeSet>
+<!--    <changeSet id="0010.2" author="klychagin">-->
+<!--        <sql>-->
+<!--            create function dm.update_reports_data(rep_id bigint) returns void-->
+<!--    language plpgsql-->
+<!--as-->
+<!--$$-->
+<!--BEGIN-->
+<!--     insert into dm.etl_placeholder(rep_id)-->
+<!--     values (rep_id);-->
+<!--END;-->
+<!--$$;-->
+
+<!--        </sql>-->
+<!--        <rollback>-->
+<!--            <sql>-->
+<!--                drop function dm.update_reports_data(rep_id bigint);-->
+<!--            </sql>-->
+<!--        </rollback>-->
+<!--    </changeSet>-->
+
+</databaseChangeLog>
+
+

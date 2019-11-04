@@ -1,7 +1,7 @@
 package stateMachine;
 
 import enums.ArrangementEvents;
-import exceptions.AS_15_8_Exception;
+import exceptions.AS_15_8_PPT_Exception;
 import enums.ExecutionStatus;
 import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.config.StateMachineBuilder;
@@ -68,7 +68,7 @@ public class ArrangementStateMachine {
                     .event(ArrangementEvents.FINISH)
             ;
         } catch (Exception ex) {
-            throw new AS_15_8_Exception("Ошибка создания конечного автомата!", ex);
+            throw new AS_15_8_PPT_Exception("Ошибка создания конечного автомата!", ex);
         }
 
         return builder.build();

@@ -1,7 +1,7 @@
 package controllers.helpers;
 
 import enums.SortingDirection;
-import exceptions.AS_15_8_Exception;
+import exceptions.AS_15_8_PPT_Exception;
 import org.springframework.data.domain.Sort;
 
 /**
@@ -35,7 +35,7 @@ public class SortingHelper {
                 return sort.descending();
             }
             default: {
-                throw new AS_15_8_Exception("Error creatin sorting expression! Value is not supported: " + sortingDirection);
+                throw new AS_15_8_PPT_Exception("Error creatin sorting expression! Value is not supported: " + sortingDirection);
             }
 
         }

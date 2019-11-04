@@ -1,7 +1,6 @@
 package controllers;
 
 import checkUnits.CheckUnit;
-import checkUnits.CheckUnitType;
 import controllers.utils.SortingDirection;
 import controllers.utils.SortingHelper;
 import lombok.RequiredArgsConstructor;
@@ -9,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import model.controller.SearchErdiStatus;
 import model.projection.ContentView;
 import model.rest.control.PodState;
-import model.scheme.Content;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,10 +15,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import repositories.ContentResourcesRepository;
 import restapi.ErdiRestClient;
 import services.ContentService;
 import services.InfoService;
@@ -32,14 +30,13 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
+@PreAuthorize("hasAnyRole('ROLE_SYSTEM', 'ROLE_OPERATOR')")
 @Slf4j
 public class ContentController {
 
     private final ContentService contentService;
     private final ErdiRestClient erdiRestClient;
     private final InfoService infoService;
-    //TODO для теста убрать в сервис
-    private final ContentResourcesRepository contentResourcesRepository;
 
     @GetMapping(path = "/erdi")
     public ResponseEntity<Page<ContentView>> getRelevantContent(
@@ -96,9 +93,9 @@ public class ContentController {
     }
 
     @GetMapping("/checkUnits")
-    public List<CheckUnit> getCheckUnits(@RequestParam("id") Content content){
-        return contentResourcesRepository.findAllByContent(content).stream()
-            .map(contentResource -> new CheckUnit(content.getId(), contentResource.getCheckUnitType(), contentResource.getValue()))
+    public List<CheckUnit> getCheckUnits(@RequestParam("id") Long contentId){
+        return contentService.getActualCheckUnits(contentId).stream()
+            .map(contentCheckUnit -> new CheckUnit(contentId, contentCheckUnit.getCheckUnitType(), contentCheckUnit.getCheckUnitValue()))
             .collect(Collectors.toList());
     }
 

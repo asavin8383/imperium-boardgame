@@ -4,7 +4,7 @@ import checkUnits.CheckUnitType;
 import controllers.helpers.SortingHelper;
 import enums.CheckUnitJobResult;
 import enums.SortingDirection;
-import exceptions.AS_15_8_Exception;
+import exceptions.AS_15_8_PPT_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.enums.UserResult;
@@ -86,10 +86,11 @@ public class ArrangementResultsController {
     			UserResult result = null;
     			try {
     				result = UserResult.valueOf(userResult.get("userResult"));
-    			} catch (Exception ex) {AS_15_8_Exception.logAndThrow(log, "Ошибка сохранения результатов от пользователя: " + ex.getMessage()); }
+    			} catch (Exception ex) {
+                    throw AS_15_8_PPT_Exception.logAndGet(log, "Ошибка сохранения результатов от пользователя: " + ex.getMessage()); }
     			if(result == null) {
     				String errorMessage = "Ошибка! Результат " + userResult.get("userResult")+" не поддерживается!";
-    				log.error("Ошибка при сохранении результатов от пользователя", new AS_15_8_Exception(errorMessage));
+    				log.error("Ошибка при сохранении результатов от пользователя", new AS_15_8_PPT_Exception(errorMessage));
     				return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
     			}
     			arrResult.setUserResult(result);
@@ -98,7 +99,7 @@ public class ArrangementResultsController {
     			return new ResponseEntity<>(arrResult, HttpStatus.OK);
     		}).orElseGet(() -> {
     			String errorMessage = "Ошибка! Результат не найден по идентификатору: "+id;
-				log.error("Ошибка при сохранении результатов от пользователя", new AS_15_8_Exception(errorMessage));
+				log.error("Ошибка при сохранении результатов от пользователя", new AS_15_8_PPT_Exception(errorMessage));
 				return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
     		});
     }

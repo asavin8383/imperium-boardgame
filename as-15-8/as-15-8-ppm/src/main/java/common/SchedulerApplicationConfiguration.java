@@ -8,7 +8,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
-@ComponentScan(basePackages= {"common", "services", "repositories", "controllers"})
+@ComponentScan(basePackages= {"common", "services", "repositories", "controllers", "events"})
 @EnableConfigurationProperties(SchedulerProperties.class)
 @EnableJpaRepositories("repositories")
 @EntityScan("model")

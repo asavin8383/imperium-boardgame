@@ -8,8 +8,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import repositories.*;
+import schedule.QueryService;
 import schedule.ReportService;
 
 import java.util.List;
@@ -24,6 +26,7 @@ import java.util.Optional;
 @RequestMapping("reports")
 public class ReportController
 {
+    private final QueryService queryService;
     private final ReportService reportService;
     private final ReportAdminStatRepository reportAdminStatRepository;
     private final ReportStatRepository reportStatRepository;
@@ -33,11 +36,12 @@ public class ReportController
     private final ReportAdminTableRepository reportAdminTableRepository;
 
     @Autowired
-    public ReportController(ReportService reportService, ReportAdminStatRepository reportAdminStatRepository,
+    public ReportController(QueryService queryService, ReportService reportService, ReportAdminStatRepository reportAdminStatRepository,
                             ReportStatRepository reportStatRepository,
                             RegReportsTableRepository regReportsTableRepository,
                             ReportRepository reportRepository,
                             ReportTypeRepository reportTypeRepository, ReportAdminTableRepository reportAdminTableRepository) {
+        this.queryService = queryService;
         this.reportService = reportService;
         this.reportAdminStatRepository = reportAdminStatRepository;
         this.reportStatRepository = reportStatRepository;
@@ -53,6 +57,7 @@ public class ReportController
      *
      * @return
      */
+    @PreAuthorize("hasAnyRole('ROLE_OPERATOR')")
     @GetMapping("stat")
     public List<ReportStat> getStat() {
         return reportStatRepository.findAll();
@@ -65,6 +70,7 @@ public class ReportController
      * @param rep_tp_id
      * @return
      */
+    @PreAuthorize("hasAnyRole('ROLE_OPERATOR','ROLE_ADMIN')")
     @GetMapping("{rep_tp_id}")
     public ReportType getReportType(@PathVariable long rep_tp_id) {
         Optional<ReportType> res = reportTypeRepository.findById(rep_tp_id);
@@ -78,6 +84,7 @@ public class ReportController
      *
      * @return
      */
+    @PreAuthorize("hasAnyRole('ROLE_OPERATOR')")
     @GetMapping("table/{rep_tp_id}")
     public List<RegReportsTable> getRegReportsTable(@PathVariable long rep_tp_id) {
         return regReportsTableRepository.findAllByRepTpId(rep_tp_id);
@@ -90,6 +97,7 @@ public class ReportController
      * @param rep_id
      * @return
      */
+    @PreAuthorize("hasAnyRole('ROLE_OPERATOR','ROLE_ADMIN')")
     @GetMapping("data/{rep_id}")
     ResponseEntity<byte[]> getData(@PathVariable long rep_id) {
         Optional<Report> res = reportRepository.findByRepId(rep_id);
@@ -111,6 +119,7 @@ public class ReportController
      *
      * @return
      */
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @GetMapping("admin/stat")
     List<ReportAdminStat> getReportAdminStats() {
         return reportAdminStatRepository.findAll();
@@ -122,6 +131,7 @@ public class ReportController
      *
      * @return
      */
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @GetMapping("admin/table/{rep_tp_id}")
     List<ReportAdminTable> getReportAdminTable(@PathVariable long rep_tp_id) {
         return reportAdminTableRepository.findByRepTpId(rep_tp_id);
@@ -130,6 +140,7 @@ public class ReportController
     /**
      * 7. Запрос по перевыпуску отчета по rep_id
      */
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @PostMapping("restart/{rep_id}")
     void restart(@PathVariable long rep_id) {
         Optional<Report> report = reportRepository.findByRepId(rep_id);

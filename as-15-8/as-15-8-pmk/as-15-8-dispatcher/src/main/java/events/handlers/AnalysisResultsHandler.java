@@ -6,7 +6,7 @@ import enums.ArrangementEvents;
 import enums.CheckUnitJobResult;
 import enums.ExecutionStatus;
 import events.DispatcherChannels;
-import kafka.ArrangementStatusProducer;
+import events.producers.rest.ArrangementStatusProducer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.ArrangementResult;

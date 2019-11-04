@@ -3,7 +3,7 @@ package controllers;
 import controllers.helpers.SortingHelper;
 import enums.ExecutionStatus;
 import enums.SortingDirection;
-import exceptions.AS_15_8_Exception;
+import exceptions.AS_15_8_PPT_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.task.FormalTask;
@@ -88,7 +88,7 @@ public class FormalTaskController {
 					formalTaskRepo.delete(formalTask);
 					return formalTask.getId();
 				})
-				.orElseThrow(() -> new AS_15_8_Exception("Error deleting formal task! Formal task was not found by id: " + id));
+				.orElseThrow(() -> new AS_15_8_PPT_Exception("Error deleting formal task! Formal task was not found by id: " + id));
 	}
 
 	private FormalTask replaceFields(FormalTask newTask, FormalTask storedTask){

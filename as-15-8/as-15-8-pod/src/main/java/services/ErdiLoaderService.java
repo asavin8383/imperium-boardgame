@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.converters.CheckUnitTypeValueConverter;
 import model.enums.BlockType;
-import model.enums.ParamSor;
 import model.enums.UrgencyType;
 import model.response.DeltaIdEntry;
 import model.rest.*;
@@ -14,7 +13,6 @@ import model.scheme.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import repositories.*;
 import repositories.impl.ParameterRepositoryExtend;
 
@@ -260,14 +258,14 @@ public class ErdiLoaderService {
             return;
 
         List<ContentInfo> newContentsInfoList = new ArrayList<>();
-        List<ContentResources> newContentResourcesList = new ArrayList<>();
+        List<ContentResource> newContentResourceList = new ArrayList<>();
         List<ContentHistory> newContentHistoryList = new ArrayList<>();
 
         for (ContentFull cntFull : mapChangeContents.keySet()){
             Content cnt = mapChangeContents.get(cntFull);
 
             newContentsInfoList.add(createContentInfo(cnt, contentVersion, cntFull));
-            newContentResourcesList.addAll(createContentResources(cnt, contentVersion, cntFull));
+            newContentResourceList.addAll(createContentResources(cnt, contentVersion, cntFull));
             newContentHistoryList.add(createContentHistory(cnt, contentVersion, addonVersion, cntFull.includeTime, null));
         }
 
@@ -286,7 +284,7 @@ public class ErdiLoaderService {
         contentHistoryRepository.saveAll(newContentHistoryList);
 
         //log.info("Start save resources... size = " + newContentResourcesList.size());
-        contentResourcesRepository.saveAll(newContentResourcesList);
+        contentResourcesRepository.saveAll(newContentResourceList);
     }
 
     public void deleteContents(Map<ContentDelete, Content> mapDeleteContents, ContentVersion contentVersion, RegisterRest registerRest){
@@ -350,17 +348,17 @@ public class ErdiLoaderService {
         return cntInfo;
     }
 
-    private List<ContentResources> createContentResources(Content content, ContentVersion contentVersion, ContentFull contentFull){
-        List<ContentResources> list = new ArrayList<>();
+    private List<ContentResource> createContentResources(Content content, ContentVersion contentVersion, ContentFull contentFull){
+        List<ContentResource> list = new ArrayList<>();
         if (contentFull.types != null){
             for(ResourceType resourceType : contentFull.types){
-                ContentResources contentResources = new ContentResources();
-                contentResources.setContent(content);
-                contentResources.setValue(resourceType.value);
-                contentResources.setTs(contentFull.ts);
-                contentResources.setCheckUnitType(CheckUnitTypeValueConverter.convertToType(resourceType));
-                contentResources.setContentVersion(contentVersion);
-                list.add(contentResources);
+                ContentResource contentResource = new ContentResource();
+                contentResource.setContent(content);
+                contentResource.setValue(resourceType.value);
+                contentResource.setTs(contentFull.ts);
+                contentResource.setCheckUnitType(CheckUnitTypeValueConverter.convertToType(resourceType));
+                contentResource.setContentVersion(contentVersion);
+                list.add(contentResource);
             }
         }
         return list;

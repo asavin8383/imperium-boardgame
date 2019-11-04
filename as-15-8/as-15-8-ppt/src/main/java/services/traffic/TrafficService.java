@@ -2,7 +2,7 @@ package services.traffic;
 
 import controllers.helpers.SortingHelper;
 import enums.SortingDirection;
-import exceptions.AS_15_8_Exception;
+import exceptions.AS_15_8_PPT_Exception;
 import lombok.RequiredArgsConstructor;
 import model.enums.TrafficType;
 import model.enums.TrafficUnitType;
@@ -85,7 +85,7 @@ public class TrafficService {
     public Traffic getTrafficById(Long id) {
         return trafficRepository.findById(id)
                 .map(TrafficService::setBlockFields)
-                .orElseThrow(() -> new AS_15_8_Exception(
+                .orElseThrow(() -> new AS_15_8_PPT_Exception(
                         "Traffic was not found by id: " + id));
     }
 

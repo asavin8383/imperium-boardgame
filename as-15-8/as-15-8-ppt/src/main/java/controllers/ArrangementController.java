@@ -4,12 +4,11 @@ import controllers.helpers.ArrangementExecutionHelper;
 import controllers.helpers.SortingHelper;
 import enums.ExecutionStatus;
 import enums.SortingDirection;
-import exceptions.AS_15_8_Exception;
+import exceptions.AS_15_8_PPT_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.task.Arrangement;
 import model.task.FormalTask;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,13 +18,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import repositories.ArrangementRepo;
-import restapi.ArrangementUploader;
+import events.producers.rest.ppm.ArrangementUploader;
 import services.arrangement.ArrangementStatusService;
 import services.arrangement.impl.ArrangementService;
 import enums.ArrangementEvents;
 
 import java.time.LocalTime;
-import java.util.stream.Collectors;
 
 /**
  * Creation date: 21.05.2019
@@ -89,7 +87,7 @@ public class ArrangementController {
                     arrangementRepo.delete(arrangement);
                     return arrangement.getId();
                 })
-                .orElseThrow(() -> new AS_15_8_Exception("Error deleting arrangement! Arrangement was not found by id: " + id));
+                .orElseThrow(() -> new AS_15_8_PPT_Exception("Error deleting arrangement! Arrangement was not found by id: " + id));
     }
 
     /**
@@ -116,7 +114,7 @@ public class ArrangementController {
                 }
                 return new ResponseEntity<>(arrangement, HttpStatus.NOT_ACCEPTABLE);
             })
-            .orElseThrow(() -> new AS_15_8_Exception("Error running arrangement! Arrangement was not found by id: " + id));
+            .orElseThrow(() -> new AS_15_8_PPT_Exception("Error running arrangement! Arrangement was not found by id: " + id));
     }
 
     /**
@@ -124,22 +122,23 @@ public class ArrangementController {
      * @param arrangement - мероприятие для заполнение
      * @return статус запроса
      */
-    @GetMapping(path = "/fill")
+    //@GetMapping(path = "/fill")
     //TODO Теперь как то по другому
-    public @ResponseBody ResponseEntity<String> fillArrangement(@RequestParam("id") Arrangement arrangement){
+    /*public @ResponseBody ResponseEntity<String> fillArrangement(@RequestParam("id") Arrangement arrangement){
         if(arrangement.getPlannedStartTime() == null || arrangement.getPlannedEndTime() == null){
             AS_15_8_Exception.logAndThrow(log, String.format("Не заполнено плановое время начала или окончания мероприятия c ID: %d", arrangement.getId()));
         }
        // arrangementService.fillArrangement(arrangement);
         return new ResponseEntity<>(HttpStatus.OK);
-    }
+            .orElseThrow(() -> new AS_15_8_PPT_Exception("Error running arrangement! Arrangement was not found by id: " + id));
+    }*/
 
     @GetMapping(path = "/upload")
     public void uploadArrangement(@RequestParam("id") Arrangement arrangement){
         if(arrangement!= null) {
             arrangementUploader.updateArrangement(arrangement);
         } else {
-            AS_15_8_Exception.logAndThrow(log, String.format("Ошибка отправки мероприятия в ППМ. Мероприятие не было найдено в БД"));
+            throw AS_15_8_PPT_Exception.logAndGet(log, String.format("Ошибка отправки мероприятия в ППМ. Мероприятие не было найдено в БД"));
         }
 
     }

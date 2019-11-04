@@ -23,5 +23,4 @@ public class Oauth2ClientConfiguration {
         return new OAuth2RestTemplate(details, oauth2ClientContext);
     }
 
-
 }

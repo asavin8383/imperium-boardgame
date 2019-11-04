@@ -1,6 +1,6 @@
 package schedule;
 
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import model.Report;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -17,17 +17,18 @@ import java.util.List;
  * Date: 08.10.2019
  * Time: 16:16
  */
-@Log
+@Slf4j
 @Service
 public class SchedulerService
 {
+    private final QueryService queryService;
     private final ReportService reportService;
     private final ReportRepository reportRepository;
 
-//    private final ReportsBy reports;
 
     @Autowired
-    public SchedulerService(ReportService reportService, ReportRepository reportRepository) {
+    public SchedulerService(QueryService queryService, ReportService reportService, ReportRepository reportRepository) {
+        this.queryService = queryService;
         this.reportService = reportService;
         this.reportRepository = reportRepository;
     }
@@ -37,7 +38,9 @@ public class SchedulerService
     public void runDaily() {
         log.info("Запуск регламентных отчетов" );
         List<Report> todo = reportRepository.getTodo();
+        queryService.beforeAll();
         for (Report report : todo) {
+            queryService.beforeEach(report.getRepId());
             reportService.runReport(report);
         }
     }

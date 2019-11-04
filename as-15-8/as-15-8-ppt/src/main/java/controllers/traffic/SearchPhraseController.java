@@ -3,7 +3,7 @@ package controllers.traffic;
 import com.fasterxml.jackson.annotation.JsonView;
 import controllers.helpers.SortingHelper;
 import enums.SortingDirection;
-import exceptions.AS_15_8_Exception;
+import exceptions.AS_15_8_PPT_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Views;
@@ -56,7 +56,7 @@ public class SearchPhraseController {
     @JsonView(Views.Full.class)
     public SearchPhrase getPhraseById(@PathVariable Long id) {
         return phraseRepository.findById(id).orElseThrow(() ->
-                new AS_15_8_Exception("Search phrase was not found by id: " + id));
+                new AS_15_8_PPT_Exception("Search phrase was not found by id: " + id));
     }
 
     @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
