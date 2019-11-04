@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
@@ -24,7 +25,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class ArrangementStatusProducer {
 
-    private final RestTemplate restTemplate;
+    private final OAuth2RestTemplate restTemplate;
 
     @Value("${gateway.url}")
     private String gatewayUrl;
@@ -40,7 +41,7 @@ public class ArrangementStatusProducer {
         try {
             restTemplate.put(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(path).build().toString(), entity);
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
-            AS_15_8_DispatcherException.logAndThrow(log, String.format("Ошибка отправки сообщения с изменением статуса мероприятия %d в ППТ, код возврата %s", arrangementStatusNotification.getArrangementId(), ex.getStatusCode()));
+            AS_15_8_DispatcherException.logAndGet(log, String.format("Ошибка отправки сообщения с изменением статуса мероприятия %d в ППТ, код возврата %s", arrangementStatusNotification.getArrangementId(), ex.getStatusCode()));
         }
         log.info("Сообщение с изменением статуса мероприятия {} успешно отправлено в ППМ", arrangementStatusNotification.getArrangementId());
     }

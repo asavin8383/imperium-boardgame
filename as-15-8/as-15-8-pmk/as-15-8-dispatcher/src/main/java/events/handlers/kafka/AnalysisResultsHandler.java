@@ -1,4 +1,4 @@
-package events.handlers;
+package events.handlers.kafka;
 
 import analysis.AnalysisResult;
 import arrangement.ArrangementStatusNotification;
@@ -34,7 +34,7 @@ public class AnalysisResultsHandler {
     private final ArrangementResultService arrangementResultService;
     private final ArrangementStatusProducer arrangementStatusProducer;
 
-    @StreamListener(DispatcherChannels.ANALYSIS_RESULTS_INPUT)
+    @StreamListener(DispatcherChannels.INPUT_ANALYSIS_RESULTS)
     public void consumeAnalysisResults(AnalysisResult analysisResult) {
         log.info("Принято сообщение с анализом результатов проверки: " + analysisResult.getJobID() + ", " + analysisResult.getCheckUnit().getValue());
         try {

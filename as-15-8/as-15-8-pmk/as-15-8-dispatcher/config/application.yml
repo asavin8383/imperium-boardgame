@@ -3,15 +3,25 @@ spring:
   cloud:
     stream:
       bindings:
-        jobs:
-          destination: jobs
-        incomingArrangements:
-          destination: arrangements
+        inputJobs:
+          destination: scheduled_jobs
           content-type: application/json
           group: dispatchers
-        arrangementNotifications:
+          consumer:
+            concurrency: 12
+        outputJobs:
+          destination: jobs
           content-type: application/json
-          destination: arrangement_notifications
+        inputJobNotifications:
+          content-type: application/json
+          destination: job_notifications
+          group: dispatchers
+        inputAnalysisResults:
+          content-type: application/json
+          destination: analysis_results
+          group: dispatchers
+          consumer:
+            concurrency: 12
         springCloudBusInput:
           group: dispatcher:${spring.cloud.client.ip-address}
       kafka:
@@ -44,22 +54,11 @@ spring:
 
 spring:
   profiles: prod
+  profiles.include: docker_log
   main:
     banner-mode: "off"
   datasource:
     url: jdbc:postgresql://10.97.220.144:5432/asdb
-  kafka:
-    bootstrap-servers: 10.97.220.141:9094,10.97.220.142:9094,10.97.220.143:9094
-    group: dispatchers
-    auto-offset-reset: earliest
-    arrangement-tasks-topic: arrangements
-    jobs-topic: jobs
-    analysis-results-topic: analysis_results
-    arrangement-notifications-topic: arrangement_notifications
-    notifications-topic: job_notifications
-    control-topic: exec_control
-    analysis-results-concurrency: 12
-    notifications-concurrency: 12
   liquibase:
     enabled: true
     change-log: classpath:/data/changelog/db.changelog.master.xml
@@ -73,6 +72,7 @@ spring:
 
 spring:
   profiles: test
+  profiles.include: docker_log
   main:
     banner-mode: "off"
   datasource:
@@ -82,8 +82,6 @@ spring:
     change-log: classpath:/data/changelog/db.changelog.master.xml
   cloud.stream:
     bindings:
-      incomingArrangements:
-        destination: arrangements
       arrangementNotifications:
         destination: arrangement_notifications
         consumer:
@@ -97,29 +95,34 @@ spring:
 
 spring:
   profiles: dev_ashabalin
+  profiles.include: local_log
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb_test
   liquibase:
     enabled: true
     change-log: classpath:/data/changelog/db.changelog.master.xml
-  kafka:
-    arrangement-tasks-topic: arrangements_ashabalin
-    jobs-topic: jobs_ashabalin
-    analysis-results-topic: analysis_results_ashabalin
-    arrangement-notifications-topic: arrangement_notifications_ashabalin
-    notifications-topic: job_notifications_ashabalin
-    control-topic: exec_control_ashabalin
-    analysis-results-concurrency: 12
-    notifications-concurrency: 12
   cloud:
     stream:
       bindings:
-        incomingArrangements:
-          destination: arrangements_ashabalin
-        arrangementNotifications:
-          destination: arrangement_notifications_ashabalin
+        inputJobs:
+          destination: scheduled_jobs_ashabalin
+          content-type: application/json
+          group: dispatchers
           consumer:
-            concurrency: 7
+            concurrency: 12
+        outputJobs:
+          destination: jobs_ashabalin
+          content-type: application/json
+        inputJobNotifications:
+          content-type: application/json
+          destination: job_notifications_ashabalin
+          group: dispatchers
+        inputAnalysisResults:
+          destination: analysis_results_ashabalin
+          content-type: application/json
+          group: dispatchers
+          consumer:
+            concurrency: 12
         springCloudBusInput:
           destination: bus_config_input_ashabalin
         springCloudBusOutput:
@@ -129,6 +132,7 @@ spring:
 
 spring:
   profiles: dev_asin
+  profiles.include: local_log
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb_test
   liquibase:
@@ -137,21 +141,35 @@ spring:
   cloud:
     stream:
       bindings:
-        incomingArrangements:
-          destination: arrangements_asinyavin
-        arrangementNotifications:
-          destination: arrangement_notifications_asinyavin
+        inputJobs:
+          destination: scheduled_jobs_asin
+          content-type: application/json
+          group: dispatchers
           consumer:
-            concurrency: 7
+            concurrency: 12
+        outputJobs:
+          destination: jobs_asin
+          content-type: application/json
+        inputJobNotifications:
+          content-type: application/json
+          destination: job_notifications_asin
+          group: dispatchers
+        inputAnalysisResults:
+          destination: analysis_results_asin
+          content-type: application/json
+          group: dispatchers
+          consumer:
+            concurrency: 12
         springCloudBusInput:
-          destination: bus_config_input_asinyavin
+          destination: bus_config_input_asin
         springCloudBusOutput:
-          destination: bus_config_output_asinyavin
+          destination: bus_config_output_asin
 
 ---
 
 spring:
   profiles: dev_asavin
+  profiles.include: local_log
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb_test
   liquibase:
@@ -160,12 +178,25 @@ spring:
   cloud:
     stream:
       bindings:
-        incomingArrangements:
-          destination: arrangements_asavin
-        arrangementNotifications:
-          destination: arrangement_notifications_asavin
+        inputJobs:
+          destination: scheduled_jobs_asavin
+          content-type: application/json
+          group: dispatchers
           consumer:
-            concurrency: 7
+            concurrency: 12
+        outputJobs:
+          destination: jobs_asavin
+          content-type: application/json
+        inputJobNotifications:
+          content-type: application/json
+          destination: job_notifications_asavin
+          group: dispatchers
+        inputAnalysisResults:
+          destination: analysis_results_asavin
+          content-type: application/json
+          group: dispatchers
+          consumer:
+            concurrency: 12
         springCloudBusInput:
           destination: bus_config_input_asavin
         springCloudBusOutput:
@@ -174,6 +205,7 @@ spring:
 
 spring:
   profiles: dev_pvorobiev
+  profiles.include: local_log
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb_test
   liquibase:
@@ -182,12 +214,25 @@ spring:
   cloud:
     stream:
       bindings:
-        incomingArrangements:
-          destination: arrangements_pvorobiev
-        arrangementNotifications:
-          destination: arrangement_notifications_pvorobiev
+        inputJobs:
+          destination: scheduled_jobs_pvorobiev
+          content-type: application/json
+          group: dispatchers
           consumer:
-            concurrency: 7
+            concurrency: 12
+        outputJobs:
+          destination: jobs_pvorobiev
+          content-type: application/json
+        inputJobNotifications:
+          content-type: application/json
+          destination: job_notifications_pvorobiev
+          group: dispatchers
+        inputAnalysisResults:
+          destination: analysis_results_pvorobiev
+          content-type: application/json
+          group: dispatchers
+          consumer:
+            concurrency: 12
         springCloudBusInput:
           destination: bus_config_input_pvorobiev
         springCloudBusOutput:
@@ -197,6 +242,7 @@ spring:
 
 spring:
   profiles: dev_jspirina
+  profiles.include: local_log
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb_test
   liquibase:
@@ -205,12 +251,25 @@ spring:
   cloud:
     stream:
       bindings:
-        incomingArrangements:
-          destination: arrangements_jspirina
-        arrangementNotifications:
-          destination: arrangement_notifications_jspirina
+        inputJobs:
+          destination: scheduled_jobs_jspirina
+          content-type: application/json
+          group: dispatchers
           consumer:
-            concurrency: 7
+            concurrency: 12
+        outputJobs:
+          destination: jobs_jspirina
+          content-type: application/json
+        inputJobNotifications:
+          content-type: application/json
+          destination: job_notifications_jspirina
+          group: dispatchers
+        inputAnalysisResults:
+          destination: analysis_results_jspirina
+          content-type: application/json
+          group: dispatchers
+          consumer:
+            concurrency: 12
         springCloudBusInput:
           destination: bus_config_input_jspirina
         springCloudBusOutput:
