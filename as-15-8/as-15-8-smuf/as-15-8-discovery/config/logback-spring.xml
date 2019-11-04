@@ -51,5 +51,13 @@
         <root level="INFO" additivity="false">
             <appender-ref ref="Console" />
         </root>
+
+        <logger name= "org.springframework.security" level="DEBUG" additivity="false">
+            <appender-ref ref="Console"/>
+        </logger>
+
+        <logger name= "org.springframework.web" level="INFO" additivity="false">
+            <appender-ref ref="Console"/>
+        </logger>
     </springProfile>
 </configuration>

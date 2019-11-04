@@ -29,6 +29,7 @@ services:
     environment:
       PROFILE: test
       EUREKA_URI: http://192.168.5.50:8761
+      AUTH_SERVER_URI: http://192.168.5.70:15805
       TZ: "Europe/Moscow"
     ports:
       - "15880:15880"

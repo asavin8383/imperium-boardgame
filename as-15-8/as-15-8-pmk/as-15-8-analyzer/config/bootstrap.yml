@@ -6,6 +6,11 @@ logging:
   config: config/logback-spring.xml
 eureka:
   client:
+    oauth2:
+      clientId: analyzer
+      clientSecret: 1q0p2w9o
+      grantType: client_credentials
+      accessTokenUri: ${gateway.url}/security/oauth/token
     serviceUrl:
       defaultZone: ${gateway.url}/eureka
   instance:
