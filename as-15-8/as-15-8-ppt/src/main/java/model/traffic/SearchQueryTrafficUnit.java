@@ -47,18 +47,19 @@ public class SearchQueryTrafficUnit extends TrafficUnit implements Serializable 
     @ToString.Include
     private Traffic traffic;
 
-    @ManyToMany(cascade = {CascadeType.REFRESH, CascadeType.MERGE, CascadeType.REMOVE})
+    @ManyToMany
     @JoinTable(schema = "portal", name = "search_query_traffic_units_custom_erdi",
             joinColumns = @JoinColumn(name = "traffic_unit_id"),
             inverseJoinColumns = @JoinColumn(name = "custom_erdi_id"))
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<CustomErdi> customErdiList;
 
-    @OneToMany(mappedBy = "trafficUnit", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "trafficUnit",
+            cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<SearchQueryContentJoin> formalErdiList;
 
-    @ManyToMany(cascade = {CascadeType.REFRESH, CascadeType.MERGE, CascadeType.REMOVE})
+    @ManyToMany
     @JoinTable(schema = "portal", name = "search_query_traffic_units_search_phrases",
             joinColumns = @JoinColumn(name = "traffic_unit_id"),
             inverseJoinColumns = @JoinColumn(name = "search_phrase_id"))
@@ -67,7 +68,8 @@ public class SearchQueryTrafficUnit extends TrafficUnit implements Serializable 
 
     @Override
     public boolean isEmpty() {
-        return StringUtils.isEmpty(getName()) && category == null &&
+        return  getId() == null && category == null &&
+                StringUtils.isEmpty(getName()) &&
                 StringUtils.isEmpty(queryPattern) &&
                 CollectionUtils.isEmpty(customErdiList) &&
                 CollectionUtils.isEmpty(formalErdiList) &&
@@ -76,10 +78,19 @@ public class SearchQueryTrafficUnit extends TrafficUnit implements Serializable 
 
     @Override
     public TrafficUnitType getType() {
-        return isEmpty() ? null : StringUtils.isEmpty(getName()) ?
+        if (isEmpty()) throw new IllegalStateException(
+                "Cannot infer type for empty TrafficUnit");
+
+        return StringUtils.isEmpty(getName()) ?
                 (StringUtils.isEmpty(queryPattern) ?
                         TrafficUnitType.PHRASE : TrafficUnitType.TEMPLATE) :
                 TrafficUnitUtils.getType(this);
+    }
+
+    @Override
+    public void syncContentAssociation() {
+        if (formalErdiList != null)
+            formalErdiList.forEach(join -> join.setTrafficUnit(this));
     }
 
 }

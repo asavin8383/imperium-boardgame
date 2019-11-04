@@ -11,7 +11,6 @@ import model.Views;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -46,38 +45,4 @@ public class Traffic implements Serializable {
             cascade = CascadeType.ALL)
     @JsonIgnore
     private List<SearchQueryTrafficUnit> searchQueryTrafficUnits;
-
-    @Transient
-    @JsonView(Views.Full.class)
-    private ErdiTrafficUnit formalErdiUnit;
-
-    @Transient
-    @JsonView(Views.Full.class)
-    private ErdiTrafficUnit customErdiUnit;
-
-    @Transient
-    @JsonView(Views.Full.class)
-    private SearchQueryTrafficUnit searchPhraseUnit;
-
-    @Transient
-    @JsonView(Views.Full.class)
-    private List<SearchQueryTrafficUnit> searchTemplates;
-
-    public List<TrafficUnit> getTrafficUnits(){
-        List<TrafficUnit> units = new ArrayList<>();
-        units.addAll(erdiTrafficUnits);
-        units.addAll(searchQueryTrafficUnits);
-        return units;
-    }
-
-    public void setTrafficUnits(List<TrafficUnit> trafficUnits){
-        erdiTrafficUnits.clear();
-        searchQueryTrafficUnits.clear();
-        trafficUnits.forEach(trafficUnit -> {
-            if(trafficUnit instanceof ErdiTrafficUnit)
-                erdiTrafficUnits.add((ErdiTrafficUnit) trafficUnit);
-            else if(trafficUnit instanceof SearchQueryTrafficUnit)
-                searchQueryTrafficUnits.add((SearchQueryTrafficUnit) trafficUnit);
-        });
-    }
 }

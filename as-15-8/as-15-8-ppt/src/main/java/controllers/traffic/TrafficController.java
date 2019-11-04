@@ -6,7 +6,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Views;
 import model.traffic.Traffic;
-import model.traffic.TrafficView;
+import model.traffic.TrafficBriefView;
+import model.traffic.TrafficFullView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -27,38 +28,36 @@ public class TrafficController {
     private final TrafficService trafficService;
 
     @GetMapping
-    public Page<TrafficView> getAllTrafficInfo(
+    public Page<TrafficBriefView> getBriefTrafficList(
             @RequestParam(required = false) SortingDirection sortingDirection,
             @RequestParam(required = false) String sortingColumn,
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(required = false) String query) {
 
-        return trafficService.getAllTrafficInfo(
+        return trafficService.getBriefTrafficList(
                 sortingDirection, sortingColumn, pageNumber, pageSize, query);
     }
 
     @Transactional
     @GetMapping(path = "/{id}")
-    @JsonView(Views.Full.class)
-    public Traffic getTrafficById(@PathVariable Long id) {
+    public TrafficFullView getTrafficById(@PathVariable Long id) {
         return trafficService.getTrafficById(id);
     }
 
     @Transactional
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(code = HttpStatus.CREATED)
-    @JsonView(Views.Full.class)
-    public Traffic createTraffic(@RequestBody Traffic traffic) {
-        return trafficService.createTraffic(traffic);
+    public TrafficFullView createTraffic(@RequestBody TrafficFullView fullView) {
+        return trafficService.createTraffic(fullView);
     }
 
     @Transactional
     @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @JsonView(Views.Full.class)
-    public Traffic updateTraffic(@RequestBody Traffic newTraffic,
-                                 @PathVariable("id") Traffic oldTraffic) {
-        return trafficService.updateTraffic(newTraffic, oldTraffic);
+    public TrafficFullView updateTraffic(@RequestBody TrafficFullView fullView,
+                                         @PathVariable("id") Traffic traffic) {
+        return trafficService.updateTraffic(fullView, traffic);
     }
 
     @DeleteMapping(path = "/{id}")

@@ -5,66 +5,45 @@ import enums.SortingDirection;
 import exceptions.AS_15_8_PPT_Exception;
 import lombok.RequiredArgsConstructor;
 import model.enums.TrafficType;
-import model.enums.TrafficUnitType;
 import model.traffic.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import repositories.TrafficRepository;
 import utils.TrafficUnitUtils;
 
-import java.util.LinkedList;
+import javax.persistence.EntityManager;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
-
-import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.contains;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class TrafficService {
 
+    private final EntityManager em;
     private final TrafficRepository trafficRepository;
 
-    public Page<Traffic> getAllTraffic(SortingDirection sortingDirection,
-                                       String sortingColumn,
-                                       int pageNumber,
-                                       int pageSize,
-                                       String query) {
-
-        PageRequest page = PageRequest.of(pageNumber, pageSize,
-                SortingHelper.createSorting(sortingDirection, sortingColumn));
-
-        Traffic traffic = new Traffic();
-        traffic.setName(query);
-
-        ExampleMatcher matcher = ExampleMatcher.matching()
-                .withIgnoreNullValues()
-                .withMatcher("name", contains().ignoreCase());
-
-        return trafficRepository.findAll(Example.of(traffic, matcher), page);
-    }
-
-    public Page<TrafficView> getAllTrafficInfo(SortingDirection sortingDirection,
-                                               String sortingColumn,
-                                               int pageNumber,
-                                               int pageSize,
-                                               String query) {
+    public Page<TrafficBriefView> getBriefTrafficList(SortingDirection sortingDirection,
+                                                      String sortingColumn,
+                                                      int pageNumber,
+                                                      int pageSize,
+                                                      String query) {
 
         PageRequest pageable = PageRequest.of(pageNumber, pageSize,
                 SortingHelper.createSorting(sortingDirection, sortingColumn));
-        Page<TrafficView> page =
+        Page<TrafficBriefView> page =
                 trafficRepository.findAllTrafficInfo(query, pageable);
         page.getContent().parallelStream().forEach(traffic -> {
             long formalErdiCount = trafficRepository.countContentErdiByTrafficId(traffic.getId());
             long customErdiCount = trafficRepository.countCustomErdiByTrafficId(traffic.getId());
-            long searchPhrasesCount = trafficRepository.countSearcPhrasesByTrafficId(traffic.getId());
+            long searchPhrasesCount = trafficRepository.countSearchPhrasesByTrafficId(traffic.getId());
             long searchTemplatesCount = trafficRepository.countSearchTemplatesByTrafficId(traffic.getId());
-            long dynamicCount = trafficRepository.countDynamicByTrafficId(traffic.getId());
+            long dynamicCount = 0; //trafficRepository.countDynamicByTrafficId(traffic.getId());
             long staticCount = formalErdiCount + customErdiCount + searchPhrasesCount + searchTemplatesCount;
 
             traffic.setCount(staticCount + dynamicCount);
@@ -73,7 +52,7 @@ public class TrafficService {
         return page;
     }
 
-    public TrafficType getTrafficType(long staticCount, long dynamicCount) {
+    private TrafficType getTrafficType(long staticCount, long dynamicCount) {
         if (staticCount == 0 && dynamicCount > 0)
             return TrafficType.DYNAMIC;
         else if (staticCount > 0 && dynamicCount == 0)
@@ -82,104 +61,96 @@ public class TrafficService {
             return TrafficType.MIXED;
     }
 
-    public Traffic getTrafficById(Long id) {
+    public TrafficFullView getTrafficById(Long id) {
         return trafficRepository.findById(id)
-                .map(TrafficService::setBlockFields)
+                .map(TrafficService::convertToFullView)
                 .orElseThrow(() -> new AS_15_8_PPT_Exception(
                         "Traffic was not found by id: " + id));
     }
 
-    public Traffic createTraffic(Traffic traffic) {
-        traffic.setTrafficUnits(getNonEmptyUnits(traffic));
-        traffic.getTrafficUnits().forEach(unit -> {
-                    unit.setTraffic(traffic);
-                    unit.setName(TrafficUnitUtils.getNewName(traffic,
-                            Objects.requireNonNull(unit.getType())));
-                });
-
-        return setBlockFields(trafficRepository.save(traffic));
+    public TrafficFullView createTraffic(TrafficFullView fullView) {
+        Traffic traffic = convertToTraffic(fullView);
+        setNewUnitNames(traffic);
+        return convertToFullView(trafficRepository.save(traffic));
     }
 
-    public Traffic updateTraffic(Traffic newTraffic, Traffic oldTraffic) {
-        boolean updateUnitNames =
-                newTraffic.getName().compareTo(oldTraffic.getName()) != 0;
+    public TrafficFullView updateTraffic(TrafficFullView fullView, Traffic oldTraffic) {
+        boolean updateNames = fullView.getName().compareTo(oldTraffic.getName()) != 0;
 
-        newTraffic.setTrafficUnits(getNonEmptyUnits(newTraffic));
-        oldTraffic.setName(newTraffic.getName());
-        oldTraffic.setTrafficUnits(newTraffic.getTrafficUnits());
+        Traffic newTraffic = convertToTraffic(fullView);
+        newTraffic.setId(oldTraffic.getId());
 
-        if (updateUnitNames) {
-            oldTraffic.getTrafficUnits().stream()
-                    .filter(unit -> Objects.nonNull(unit.getName()))
-                    .forEach(unit -> unit.setName(TrafficUnitUtils
-                            .getUpdateName(oldTraffic, unit.getName())));
+        if (updateNames) {
+            setUnitNames(newTraffic.getErdiTrafficUnits(),
+                    newTraffic.getSearchQueryTrafficUnits(),
+                    unit -> {
+                if (StringUtils.isEmpty(unit.getName()))
+                    unit.setName(TrafficUnitUtils
+                            .getNewName(newTraffic, unit.getType()));
+                else
+                    unit.setName(TrafficUnitUtils
+                            .getUpdateName(newTraffic, unit.getName()));
+            });
+        } else {
+            setNewUnitNames(newTraffic);
         }
 
-        oldTraffic.getTrafficUnits().forEach(unit -> unit.setTraffic(oldTraffic));
-        oldTraffic.getTrafficUnits().stream()
-                .filter(unit -> Objects.isNull(unit.getName()))
-                .forEach(unit -> unit.setName(TrafficUnitUtils
-                        .getNewName(oldTraffic, Objects.requireNonNull(unit.getType()))));
-
-        return setBlockFields(trafficRepository.save(oldTraffic));
+        return convertToFullView(trafficRepository.save(newTraffic));
     }
 
     public void deleteTraffic(Long id) {
         trafficRepository.deleteById(id);
     }
 
-    private List<TrafficUnit> getNonEmptyUnits(Traffic traffic) {
-        List<TrafficUnit> units = collectTrafficUnits(traffic);
-        return units.stream()
+    private Traffic convertToTraffic(TrafficFullView fullView) {
+        Traffic traffic = new Traffic();
+        traffic.setId(fullView.getId());
+        traffic.setName(fullView.getName());
+        traffic.setSearchQueryTrafficUnits(collectUnits(
+                Stream.of(fullView.getSearchPhraseUnit()),
+                fullView.getSearchTemplates().stream(),
+                traffic));
+        traffic.setErdiTrafficUnits(collectUnits(
+                Stream.of(fullView.getFormalErdiUnit()),
+                Stream.of(fullView.getCustomErdiUnit()),
+                traffic));
+        return traffic;
+    }
+
+    private static TrafficFullView convertToFullView(Traffic traffic) {
+        TrafficFullView fullView = new TrafficFullView();
+        fullView.setId(traffic.getId());
+        fullView.setName(traffic.getName());
+        Stream.concat(traffic.getErdiTrafficUnits().stream(),
+                traffic.getSearchQueryTrafficUnits().stream())
+                .forEach(fullView::setUnit);
+        return fullView;
+    }
+
+    private <T extends TrafficUnit> List<T> collectUnits(Stream<T> a, Stream<T> b,
+                                                         Traffic traffic) {
+        return Stream.concat(a, b)
                 .filter(Objects::nonNull)
                 .filter(TrafficUnit::nonEmpty)
+                .peek(unit -> unit.setTraffic(traffic))
+                .peek(TrafficUnit::syncContentAssociation)
                 .collect(Collectors.toList());
     }
 
-    public static List<TrafficUnit> collectTrafficUnits(Traffic traffic) {
-        List<TrafficUnit> units = new LinkedList<>();
-
-        ErdiTrafficUnit formalErdiUnit = traffic.getFormalErdiUnit();
-        formalErdiUnit.getFormalErdiList().forEach(erdiContentJoin ->
-                erdiContentJoin.setTrafficUnit(formalErdiUnit));
-        units.add(formalErdiUnit);
-
-        units.add(traffic.getCustomErdiUnit());
-        units.add(traffic.getSearchPhraseUnit());
-
-        List<SearchQueryTrafficUnit> templates = traffic.getSearchTemplates();
-        if (! CollectionUtils.isEmpty(templates) ) {
-            templates.forEach(template -> template.getFormalErdiList().forEach(
-                    searchQueryContentJoin -> searchQueryContentJoin.setTrafficUnit(template)));
-            units.addAll(templates);
-        }
-        return units;
+    private void setNewUnitNames(Traffic traffic) {
+        setUnitNames(traffic.getErdiTrafficUnits(),
+                traffic.getSearchQueryTrafficUnits(),
+                unit -> unit.setName(TrafficUnitUtils
+                        .getNewName(traffic, unit.getType())));
     }
 
-    public static Traffic setBlockFields(Traffic traffic) {
-        List<SearchQueryTrafficUnit> searchTemplates = new LinkedList<>();
-        for (TrafficUnit trafficUnit : traffic.getTrafficUnits()) {
-            TrafficUnitType type = TrafficUnitUtils.getType(trafficUnit);
-            switch (type) {
-                case FORMAL:
-                    traffic.setFormalErdiUnit((ErdiTrafficUnit) trafficUnit);
-                    break;
-                case CUSTOM:
-                    traffic.setCustomErdiUnit((ErdiTrafficUnit) trafficUnit);
-                    break;
-                case PHRASE:
-                    traffic.setSearchPhraseUnit((SearchQueryTrafficUnit) trafficUnit);
-                    break;
-                case TEMPLATE:
-                    searchTemplates.add((SearchQueryTrafficUnit) trafficUnit);
-                    break;
-                case DYNAMIC:
-                    throw new UnsupportedOperationException("DYNAMIC not implemented");
-            }
-        }
-        if (! CollectionUtils.isEmpty(searchTemplates) )
-            traffic.setSearchTemplates(searchTemplates);
-        return traffic;
+    private void setUnitNames(List<ErdiTrafficUnit> erdiTrafficUnits,
+                                     List<SearchQueryTrafficUnit> searchQueryTrafficUnits,
+                                     Consumer<TrafficUnit> updater) {
+        Stream.concat(
+                erdiTrafficUnits.stream().map(TrafficUnit.class::cast),
+                searchQueryTrafficUnits.stream().map(TrafficUnit.class::cast)
+        ).forEach(updater);
     }
 
 }

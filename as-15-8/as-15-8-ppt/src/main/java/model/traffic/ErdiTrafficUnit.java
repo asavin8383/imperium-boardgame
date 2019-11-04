@@ -43,29 +43,40 @@ public class ErdiTrafficUnit extends TrafficUnit implements Serializable {
     @ToString.Include
     private Traffic traffic;
 
-    @ManyToMany(cascade = {CascadeType.REFRESH, CascadeType.MERGE, CascadeType.REMOVE})
+    @ManyToMany
     @JoinTable(schema = "portal", name = "erdi_traffic_units_custom_erdi",
             joinColumns = @JoinColumn(name = "traffic_unit_id"),
             inverseJoinColumns = @JoinColumn(name = "custom_erdi_id"))
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<CustomErdi> customErdiList;
 
-    @OneToMany(mappedBy = "trafficUnit", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "trafficUnit",
+            cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<ErdiContentJoin> formalErdiList;
 
     @Override
     public boolean isEmpty() {
-        return StringUtils.isEmpty(getName()) && category == null &&
+        return getId() == null && category == null &&
+                StringUtils.isEmpty(getName()) &&
                 CollectionUtils.isEmpty(customErdiList) &&
                 CollectionUtils.isEmpty(formalErdiList);
     }
 
     @Override
     public TrafficUnitType getType() {
-        return isEmpty() ? null : StringUtils.isEmpty(getName()) ?
+        if (isEmpty()) throw new IllegalStateException(
+                "Cannot infer type for empty TrafficUnit");
+
+        return StringUtils.isEmpty(getName()) ?
                 (CollectionUtils.isEmpty(formalErdiList) ?
                         TrafficUnitType.CUSTOM : TrafficUnitType.FORMAL) :
                 TrafficUnitUtils.getType(this);
+    }
+
+    @Override
+    public void syncContentAssociation() {
+        if (formalErdiList != null)
+            formalErdiList.forEach(join -> join.setTrafficUnit(this));
     }
 }

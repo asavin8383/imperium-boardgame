@@ -46,11 +46,11 @@ public class CustomErdi implements Serializable {
     @JsonView(Views.Full.class)
     private List<CustomErdiUnit> customErdiUnits;
 
-    @ManyToMany(mappedBy = "customErdiList", cascade = CascadeType.ALL)
+    @ManyToMany(mappedBy = "customErdiList")
     @JsonIgnore
     private List<SearchQueryTrafficUnit> searchQueryTrafficUnits;
 
-    @ManyToMany(mappedBy = "customErdiList", cascade = CascadeType.ALL)
+    @ManyToMany(mappedBy = "customErdiList")
     @JsonIgnore
     private List<ErdiTrafficUnit> erdiTrafficUnits;
 

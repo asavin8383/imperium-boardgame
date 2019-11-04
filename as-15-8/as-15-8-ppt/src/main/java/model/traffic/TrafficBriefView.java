@@ -12,7 +12,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @RequiredArgsConstructor
-public class TrafficView {
+public class TrafficBriefView {
     
     private final Long id;
     private final String name;

@@ -8,7 +8,7 @@ import lombok.Data;
 public class SearchTemplateParams {
 
     protected boolean containsInTraffic;
-    protected Long trafficUnitId;
+    protected Long trafficId;
     protected String template;
 
 }

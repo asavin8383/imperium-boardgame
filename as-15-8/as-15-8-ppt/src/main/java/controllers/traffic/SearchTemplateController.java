@@ -1,20 +1,20 @@
 package controllers.traffic;
 
-import com.fasterxml.jackson.annotation.JsonView;
 import controllers.helpers.SortingHelper;
 import enums.SortingDirection;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import model.Views;
 import model.traffic.SearchQueryTrafficUnit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import repositories.SearchQueryTrafficUnitRepository;
 import repositories.helpers.SearchTemplateParams;
 
@@ -42,37 +42,6 @@ public class SearchTemplateController {
         SearchTemplateParams params = new SearchTemplateParams(
                 containsInTraffic, trafficId, query);
         return repository.searchFor(SearchQueryTrafficUnit.class, params, page);
-    }
-
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    @JsonView(Views.Full.class)
-    public SearchQueryTrafficUnit createSearchTemplate(@RequestBody SearchQueryTrafficUnit template) {
-        return repository.save(template);
-    }
-
-    @GetMapping(path = "/{id}")
-    @JsonView(Views.Full.class)
-    public SearchQueryTrafficUnit getTemplateById(@PathVariable("id") SearchQueryTrafficUnit unit) {
-        return unit;
-    }
-
-    @PutMapping(path = "/{id}")
-    @JsonView(Views.Full.class)
-    public SearchQueryTrafficUnit updateTemplate(@RequestBody SearchQueryTrafficUnit newUnit,
-                                                 @PathVariable("id") SearchQueryTrafficUnit oldUnit) {
-        oldUnit.setQueryPattern(newUnit.getQueryPattern());
-        oldUnit.setCategory(newUnit.getCategory());
-        oldUnit.setFormalErdiList(newUnit.getFormalErdiList());
-        oldUnit.setCustomErdiList(newUnit.getCustomErdiList());
-        oldUnit.setSearchPhrases(newUnit.getSearchPhrases());
-
-        return repository.save(oldUnit);
-    }
-
-    @DeleteMapping(path = "/{id}")
-    @ResponseStatus(code = HttpStatus.NO_CONTENT)
-    public void deletePhrase(@PathVariable Long id) {
-        repository.deleteById(id);
     }
 
 }

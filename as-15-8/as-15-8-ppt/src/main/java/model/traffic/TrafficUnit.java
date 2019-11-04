@@ -8,7 +8,6 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import model.Views;
 import model.enums.TrafficUnitType;
-import org.springframework.lang.Nullable;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -33,17 +32,22 @@ public abstract class TrafficUnit implements Serializable {
     @NotNull
     @Column(nullable = false, unique = true)
     @JsonView(Views.Brief.class)
+    //@JsonProperty(access = JsonProperty.Access.READ_ONLY) todo forbid name editing by user
     @ToString.Include
     private String name;
 
-    @Nullable
+    public abstract void setTraffic(Traffic traffic);
+
+    public abstract void syncContentAssociation();
+
+    @JsonIgnore
     public abstract TrafficUnitType getType();
 
+    @JsonIgnore
     public abstract boolean isEmpty();
 
-    public boolean nonEmpty() {
+    @JsonIgnore
+    public final boolean nonEmpty() {
         return !isEmpty();
     }
-
-    public abstract void setTraffic(Traffic traffic);
 }

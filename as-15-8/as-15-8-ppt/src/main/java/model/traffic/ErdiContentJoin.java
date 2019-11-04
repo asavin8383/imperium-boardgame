@@ -22,7 +22,7 @@ public class ErdiContentJoin {
     @EqualsAndHashCode.Include
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name = "traffic_unit_id", referencedColumnName = "id")
     @ToString.Include
     private ErdiTrafficUnit trafficUnit;

@@ -2,16 +2,15 @@ package repositories.impl;
 
 import model.enums.TrafficUnitType;
 import model.traffic.SearchQueryTrafficUnit;
+import model.traffic.SearchQueryTrafficUnit_;
+import model.traffic.Traffic_;
 import org.springframework.beans.factory.annotation.Autowired;
 import repositories.SearchQueryTrafficUnitRepositoryCustom;
 import repositories.helpers.JoinCriteriaHelper;
 import repositories.helpers.SearchTemplateParams;
 
 import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,17 +27,15 @@ public class SearchQueryTrafficUnitRepositoryImpl extends JoinCriteriaHelper<Sea
         CriteriaBuilder cb = em.getCriteriaBuilder();
         List<Predicate> predicates = new ArrayList<>();
 
-        predicates.add(cb.like(root.get("name"), '%' + TrafficUnitType.TEMPLATE.toString()));
+        predicates.add(cb.like(root.get(SearchQueryTrafficUnit_.name), '%' + TrafficUnitType.TEMPLATE.toString()));
 
-        if (params.getTrafficUnitId() != null) {
-
+        if (params.getTrafficId() != null) {
+            Path<Long> pathTrafficId = root.get(SearchQueryTrafficUnit_.traffic).get(Traffic_.id);
             if (params.isContainsInTraffic()) {
-                predicates.add(cb.equal(root.get("traffic.id"), params.getTrafficUnitId()));
+                predicates.add(cb.equal(pathTrafficId, params.getTrafficId()));
             } else {
-                predicates.add(cb.or(
-                        cb.not(cb.equal(root.get("traffic.id"), params.getTrafficUnitId())),
-                        cb.isNull(root.get("traffic.id"))
-                ));
+                predicates.add(cb.or(cb.not(cb.equal(pathTrafficId,
+                        params.getTrafficId())), cb.isNull(pathTrafficId)));
             }
         }
 

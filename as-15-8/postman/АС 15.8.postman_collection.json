@@ -2509,218 +2509,6 @@
 					"_postman_isSubFolder": true
 				},
 				{
-					"name": "Поисковые шаблоны",
-					"item": [
-						{
-							"name": "Получение списка шаблонов",
-							"request": {
-								"auth": {
-									"type": "oauth2",
-									"oauth2": [
-										{
-											"key": "accessToken",
-											"value": "{{token}}",
-											"type": "string"
-										},
-										{
-											"key": "addTokenTo",
-											"value": "header",
-											"type": "string"
-										}
-									]
-								},
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "{{url}}/templates",
-									"host": [
-										"{{url}}"
-									],
-									"path": [
-										"templates"
-									],
-									"query": [
-										{
-											"key": "sortingDirection",
-											"value": "",
-											"disabled": true
-										},
-										{
-											"key": "sortingColumn",
-											"value": "",
-											"disabled": true
-										},
-										{
-											"key": "pageNumber",
-											"value": "",
-											"disabled": true
-										},
-										{
-											"key": "pageSize",
-											"value": "",
-											"disabled": true
-										},
-										{
-											"key": "query",
-											"value": "",
-											"disabled": true
-										},
-										{
-											"key": "containsInTraffic",
-											"value": "",
-											"disabled": true
-										},
-										{
-											"key": "trafficId",
-											"value": "",
-											"disabled": true
-										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Получение шаблона по ID",
-							"request": {
-								"auth": {
-									"type": "oauth2",
-									"oauth2": [
-										{
-											"key": "accessToken",
-											"value": "{{token}}",
-											"type": "string"
-										},
-										{
-											"key": "addTokenTo",
-											"value": "header",
-											"type": "string"
-										}
-									]
-								},
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "{{url}}/templates",
-									"host": [
-										"{{url}}"
-									],
-									"path": [
-										"templates"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Редактирование шаблона",
-							"request": {
-								"auth": {
-									"type": "oauth2",
-									"oauth2": [
-										{
-											"key": "accessToken",
-											"value": "{{token}}",
-											"type": "string"
-										},
-										{
-											"key": "addTokenTo",
-											"value": "header",
-											"type": "string"
-										}
-									]
-								},
-								"method": "PUT",
-								"header": [
-									{
-										"key": "Content-Type",
-										"name": "Content-Type",
-										"type": "text",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n\t\"name\": \"Template 1\",\n\t\"category\": { \"id\": 0 },\n\t\"queryPattern\": \"test pattern $ERDI\",\n\t\"customErdiList\": [\n\t\t{ \"id\": 31 }\n\t],\n\t\"formalErdiList\": [\n\t\t{ \"id\": 247861 },\n\t\t{ \"id\": 247862 }\n\t],\n\t\"searchPhrases\": [\n\t\t{ \"id\": 4 }\n\t]\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{url}}/templates",
-									"host": [
-										"{{url}}"
-									],
-									"path": [
-										"templates"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Удаление шаблона",
-							"request": {
-								"method": "DELETE",
-								"header": [
-									{
-										"key": "X-AUTH-TOKEN",
-										"type": "text",
-										"value": "{{oper_token}}"
-									},
-									{
-										"key": "Content-Type",
-										"name": "Content-Type",
-										"type": "text",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n\t\"name\": \"meeh traffic 2_eanpqajx_TEMPLATE\",\n\t\"category\": { \"id\": 0 },\n\t\"queryPattern\": \"test patter $ERDI\",\n\t\"customErdiList\": [\n\t\t{ \"id\": 3 },\n\t\t{ \"id\": 4 }\n\t],\n\t\"searchPhrases\": [\n\t\t{ \"id\": 2 }\n\t]\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{url}}/templates/41?",
-									"host": [
-										"{{url}}"
-									],
-									"path": [
-										"templates",
-										"41"
-									],
-									"query": [
-										{
-											"key": "belongsTo",
-											"value": "false",
-											"disabled": true
-										},
-										{
-											"key": "trafficUnitId",
-											"value": "23",
-											"disabled": true
-										},
-										{
-											"key": "query",
-											"value": "ы",
-											"disabled": true
-										}
-									]
-								}
-							},
-							"response": []
-						}
-					],
-					"protocolProfileBehavior": {},
-					"_postman_isSubFolder": true
-				},
-				{
 					"name": "Получение списка трафиков",
 					"request": {
 						"auth": {
@@ -2741,7 +2529,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{url}}/traffic?",
+							"raw": "{{url}}/traffic",
 							"host": [
 								"{{url}}"
 							],
@@ -2751,7 +2539,7 @@
 							"query": [
 								{
 									"key": "query",
-									"value": "test",
+									"value": "1",
 									"disabled": true
 								},
 								{
@@ -2782,13 +2570,23 @@
 				{
 					"name": "Добавление трафика",
 					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "{{token}}",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [
-							{
-								"key": "X-AUTH-TOKEN",
-								"type": "text",
-								"value": "{{oper_token}}"
-							},
 							{
 								"key": "Content-Type",
 								"name": "Content-Type",
@@ -2798,7 +2596,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"name\": \"test traffic\",\n\n\t\"formalErdiUnit\": {\n\t\t\"category\": {\n\t\t\t\"id\": 0\n\t\t},\n\t\t\"formalErdiList\": [\n\t\t\t{ \"id\": 247861 },\n\t\t\t{ \"id\": 247862 }\n\t\t]\n\t},\n\t\"customErdiUnit\": {\n\t\t\"category\": {\n\t\t\t\"id\": 0\n\t\t},\n\t\t\"customErdiList\": [\n\t\t\t{ \"id\": 3 },\n\t\t\t{ \"id\": 4 }\n\t\t]\n\t},\n\t\"searchPhraseUnit\": {\n\t\t\"queryPattern\": \"\",\n\t\t\"category\": {\n\t\t\t\"id\": 0\n\t\t},\n\t\t\"searchPhrases\": [\n\t\t\t{ \"id\": 3 },\n\t\t\t{ \"id\": 4 }\n\t\t]\n\t},\n\t\"searchTemplates\": [\n\t\t{\n\t\t\t\"category\": { \"id\": 0 },\n\t\t\t\"queryPattern\": \"test patter $ERDI\",\n\t\t\t\"customErdiList\": [\n\t\t\t\t{ \"id\": 3 },\n\t\t\t\t{ \"id\": 4 }\n\t\t\t],\n\t\t\t\"formalErdiList\": [\n\t\t\t\t{ \"id\": 247861 },\n\t\t\t\t{ \"id\": 247862 }\n\t\t\t],\n\t\t\t\"searchPhrases\": [\n\t\t\t]\n\t\t}\n\t]\n}",
+							"raw": "{\n\t\"name\": \"Traffic_2\",\n\n\t\"formalErdiUnit\": {\n\t\t\"category\": {\n                \"id\": 0,\n                \"name\": \"DEFAULT\",\n                \"parent\": null\n        },\n\t\t\"formalErdiList\": [\n\t\t\t{ \"id\": 247861 },\n\t\t\t{ \"id\": 247862 }\n\t\t]\n\t},\n\t\"customErdiUnit\": {\n\t\t\"category\": {\n                \"id\": 0,\n                \"name\": \"DEFAULT\",\n                \"parent\": null\n        },\n\t\t\"customErdiList\": [\n\t\t\t{ \"id\": 33 },\n\t\t\t{ \"id\": 34 }\n\t\t]\n\t},\n\t\"searchPhraseUnit\": {\n\t\t\"queryPattern\": \"\",\n\t\t\"category\": {\n                \"id\": 0,\n                \"name\": \"DEFAULT\",\n                \"parent\": null\n        },\n\t\t\"searchPhrases\": [\n\t\t\t{ \"id\": 7 }\n\t\t]\n\t},\n\t\"searchTemplates\": [\n\t\t{\n\t\t\t\"category\": {\n                \"id\": 0,\n                \"name\": \"DEFAULT\",\n                \"parent\": null\n            },\n\t\t\t\"queryPattern\": \"test patter $ERDI\",\n\t\t\t\"customErdiList\": [\n\t\t\t\t{ \"id\": 34 }\n\t\t\t],\n\t\t\t\"formalErdiList\": [\n\t\t\t\t{ \"id\": 247861 },\n\t\t\t\t{ \"id\": 247862 }\n\t\t\t],\n\t\t\t\"searchPhrases\": [\n\t\t\t]\n\t\t}\n\t]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -2827,22 +2625,31 @@
 				{
 					"name": "Получение трафика по ID",
 					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "{{token}}",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
-						"header": [
-							{
-								"key": "X-AUTH-TOKEN",
-								"type": "text",
-								"value": "{{oper_token}}"
-							}
-						],
+						"header": [],
 						"url": {
-							"raw": "{{url}}/traffic/32",
+							"raw": "{{url}}/traffic/54",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"traffic",
-								"32"
+								"54"
 							]
 						}
 					},
@@ -2851,13 +2658,23 @@
 				{
 					"name": "Редактирование трафика",
 					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "{{token}}",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
 						"method": "PUT",
 						"header": [
-							{
-								"key": "X-AUTH-TOKEN",
-								"type": "text",
-								"value": "{{oper_token}}"
-							},
 							{
 								"key": "Content-Type",
 								"name": "Content-Type",
@@ -2867,7 +2684,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"name\": \"meeh_traff\",\n\n\t\"formalErdiUnit\": {\n\t\t\"id\": 22, \n\t\t\"name\": \"meeh traffic 2_lpetkqxm_FORMAL\",\n\t\t\"category\": {\n\t\t\t\"id\": 0\n\t\t},\n\t\t\"formalErdiList\": [\n\t\t\t{ \"id\": 169112 },\n\t\t\t{ \"id\": 169113 },\n\t\t\t{ \"id\": 169114 }\n\t\t]\n\t},\n\t\"customErdiUnit\": {\n\t\t\"id\": 23, \n\t\t\"name\": \"meeh traffic 2_eiebhjot_CUSTOM\",\n\t\t\"category\": {\n\t\t\t\"id\": 0\n\t\t},\n\t\t\"customErdiList\": [\n\t\t]\n\t},\n\t\"searchPhraseUnit\": {\n\t\t\"queryPattern\": \"\",\n\t\t\"category\": {\n\t\t\t\"id\": 0\n\t\t},\n\t\t\"searchPhrases\": [\n\t\t\t{ \"id\": 3 },\n\t\t\t{ \"id\": 4 }\n\t\t]\n\t}\n    \t\n}",
+							"raw": "{\r\n\t\"name\": \"Traffic_1\",\r\n\r\n\t\"formalErdiUnit\": {\r\n        \"id\": 25,\r\n        \"name\": \"Traffic+2_nmmuzlot_FORMAL\",\r\n\t\t\"category\": {\r\n            \"id\": 0,\r\n            \"name\": \"DEFAULT\",\r\n            \"parent\": null\r\n        },\r\n\t\t\"formalErdiList\": [\r\n\t\t\t{ \"id\": 247862 }\r\n\t\t]\r\n\t},\r\n\t\"customErdiUnit\": {\r\n        \"id\": 26,\r\n        \"name\": \"Traffic+2_xiyrlssy_CUSTOM\",\r\n\t\t\"category\": {\r\n            \"id\": 0,\r\n            \"name\": \"DEFAULT\",\r\n            \"parent\": null\r\n        },\r\n\t\t\"customErdiList\": [\r\n\t\t\t{ \"id\": 33 },\r\n\t\t\t{ \"id\": 34 }\r\n\t\t]\r\n\t},\r\n\t\"searchPhraseUnit\": {\r\n        \"id\": 26,\r\n        \"name\": \"Traffic+2_ohrhbvjy_PHRASE\",\r\n\t\t\"queryPattern\": \"\",\r\n\t\t\"category\": {\r\n            \"id\": 0,\r\n            \"name\": \"DEFAULT\",\r\n            \"parent\": null\r\n        },\r\n\t\t\"searchPhrases\": [\r\n\t\t]\r\n\t},\r\n\t\"searchTemplates\": [\r\n\t\t{\r\n            \"id\": 27,\r\n            \"name\": \"Traffic+2_friongtt_TEMPLATE\",\r\n\t\t\t\"category\": {\r\n                \"id\": 0,\r\n                \"name\": \"DEFAULT\",\r\n                \"parent\": null\r\n            },\r\n\t\t\t\"queryPattern\": \"test pattern $ERDI fix\",\r\n\t\t\t\"customErdiList\": [\r\n\t\t\t\t{ \"id\": 33 }\r\n\t\t\t],\r\n\t\t\t\"formalErdiList\": [\r\n\t\t\t\t{ \"id\": 247862 },\r\n\t\t\t\t{ \"id\": 247863 }\r\n\t\t\t],\r\n\t\t\t\"searchPhrases\": [\r\n\t\t\t\t{ \"id\": 7}\r\n\t\t\t]\r\n\t\t}\r\n\t]\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -2875,13 +2692,13 @@
 							}
 						},
 						"url": {
-							"raw": "{{url}}/traffic/22?",
+							"raw": "{{url}}/traffic/54",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"traffic",
-								"22"
+								"54"
 							],
 							"query": [
 								{
@@ -2897,22 +2714,100 @@
 				{
 					"name": "Удаление трафика",
 					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "{{token}}",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
 						"method": "DELETE",
-						"header": [
-							{
-								"key": "X-AUTH-TOKEN",
-								"type": "text",
-								"value": "{{oper_token}}"
-							}
-						],
+						"header": [],
 						"url": {
-							"raw": "{{url}}/traffic/7",
+							"raw": "{{url}}/traffic/53",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"traffic",
-								"7"
+								"53"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Получение списка шаблонов",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "{{token}}",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/templates",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"templates"
+							],
+							"query": [
+								{
+									"key": "sortingDirection",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "sortingColumn",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "pageNumber",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "pageSize",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "query",
+									"value": "patter",
+									"disabled": true
+								},
+								{
+									"key": "containsInTraffic",
+									"value": "false",
+									"disabled": true
+								},
+								{
+									"key": "trafficId",
+									"value": "45",
+									"disabled": true
+								}
 							]
 						}
 					},
