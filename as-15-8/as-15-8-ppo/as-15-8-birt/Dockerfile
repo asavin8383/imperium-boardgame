@@ -14,7 +14,7 @@ VOLUME $CONF_PATH
 
 COPY /target/as-15-8-birt.jar  $APP_PATH
 
-CMD ["java", \
+ENTRYPOINT ["java", \
          "-jar", \
          "-Dapplication.logpath=/log", \
          "-Dspring.profiles.active=${PROFILE}", \
