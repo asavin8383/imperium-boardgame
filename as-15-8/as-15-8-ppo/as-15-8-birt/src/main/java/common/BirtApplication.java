@@ -10,7 +10,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 @SpringBootApplication
-@ComponentScan(basePackages = {"birt", "common"})
+@ComponentScan(basePackages = {"birt", "common","controllers"})
 public class BirtApplication
 {
 

@@ -6,6 +6,11 @@ eureka:
   client:
     serviceUrl:
       defaultZone: ${gateway.url}/eureka
+    oauth2:
+      clientId: report_scheduler
+      clientSecret: 1q0p2w9o
+      grantType: client_credentials
+      accessTokenUri: ${gateway.url}/security/oauth/token
   instance:
     preferIpAddress: true
     instanceId: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port}
@@ -33,12 +38,17 @@ spring:
 app:
   birt.url: ${gateway.url}/reglament/
   schedule: '5 0 * * * ?'
+  sql:
+    # Вызывается перед запуском всех отчетов, без параметра
+    before-all:
+    # Вызывается перед запуском каждлго отчета, параметр -- rep_id из таблицы
+    before-each: select dm.update_reports_data(?)
 security:
   oauth2:
     resource:
       tokenInfoUri: ${gateway.url}/security/oauth/check_token
     client:
-      clientId: pod
+      clientId: report_scheduler
       clientSecret: 1q0p2w9o
       grantType: client_credentials
       accessTokenUri: ${gateway.url}/security/oauth/token

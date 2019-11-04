@@ -9,6 +9,22 @@ eureka:
   instance:
     preferIpAddress: true
     instanceId: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port}
+  client:
+    fetch-registry: false
+    oauth2:
+      clientId: discovery
+      clientSecret: 1q0p2w9o
+      grantType: client_credentials
+      accessTokenUri: ${AUTH_SERVER_URI:http://localhost:15805}/oauth/token
+security:
+  oauth2:
+    resource:
+      tokenInfoUri: ${AUTH_SERVER_URI:http://localhost:15805}/oauth/check_token
+    client:
+      clientId: discovery
+      clientSecret: 1q0p2w9o
+      grantType: client_credentials
+      accessTokenUri: ${gateway.url}/security/oauth/token
 
 ---
 

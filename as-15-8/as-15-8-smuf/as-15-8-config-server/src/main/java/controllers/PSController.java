@@ -3,6 +3,7 @@ package controllers;
 import controllers.entity.PS;
 import lombok.extern.slf4j.Slf4j;
 import model.Robot;
+import model.RobotType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,14 +32,28 @@ public class PSController
     public PSController(RobotRepository robotRepository) {this.robotRepository = robotRepository;}
 
     /**
-     * Прием новых записей о ПС/ПАСД
-     * Т.к. формат в обоих случаях одинаков, пусть будет один endpoint
+     * Прием новых записей о ПС
      * @param data
      */
     @PostMapping("ps")
     @PreAuthorize("hasRole('ROLE_SYSTEM')")
     void uploadPS(@RequestBody List<PS> data) {
         log.info("Got {} robot records POSTed, trying to insert", data.size());
+        insert(data, RobotType.PS);
+    }
+
+    /**
+     * Прием новых записей о ПАСД
+     * @param data
+     */
+    @PostMapping("pasd")
+    @PreAuthorize("hasRole('ROLE_SYSTEM')")
+    void uploadPASD(@RequestBody List<PS> data) {
+        log.info("Got {} robot records POSTed, trying to insert", data.size());
+        insert(data, RobotType.PASD);
+    }
+
+    private void insert(@RequestBody List<PS> data, RobotType robotType) {
         Set<Long> all = robotRepository.findAll().stream().map(Robot::getOrig_id).collect(Collectors.toSet());
         log.debug("{} robot records already exists");
         int newCnt=0;
@@ -50,6 +65,7 @@ public class PSController
                 newRobot.setOrig_id(ps.getId());
                 newRobot.setOrig_name(ps.getName());
                 newRobot.setName(ps.getName() + "-" + ps.getId());
+                newRobot.setType(robotType);
                 robotRepository.save(newRobot);
                 newCnt++;
             }

@@ -1,6 +1,7 @@
 package common;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
@@ -14,7 +15,9 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
     public void configure(final HttpSecurity http) throws Exception {
         http
             .authorizeRequests()
-            .anyRequest().permitAll()
+                .antMatchers(HttpMethod.POST, "actuator/bus-refresh/**").hasRole("ADMIN")
+                .antMatchers(HttpMethod.GET, "/**").hasRole("CONFIG_CLIENT")
+            .anyRequest().authenticated()
         .and().httpBasic().disable().csrf().disable();
     }
 }

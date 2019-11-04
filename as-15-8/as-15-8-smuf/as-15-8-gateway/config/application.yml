@@ -10,6 +10,11 @@ eureka:
   client:
     serviceUrl:
       defaultZone: ${EUREKA_URI:http://localhost:8761}/eureka
+    oauth2:
+      clientId: gateway
+      clientSecret: 1q0p2w9o
+      grantType: client_credentials
+      accessTokenUri:  ${AUTH_SERVER_URI:http://localhost:15805}/oauth/token
   instance:
     preferIpAddress: true
     instanceId: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port}

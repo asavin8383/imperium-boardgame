@@ -8,6 +8,11 @@ eureka:
   client:
     serviceUrl:
       defaultZone: ${gateway.url}/eureka
+    oauth2:
+      clientId: ppm
+      clientSecret: 1q0p2w9o
+      grantType: client_credentials
+      accessTokenUri: ${gateway.url}/security/oauth/token
   instance:
     preferIpAddress: true
     instanceId: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port}
@@ -27,5 +32,12 @@ spring:
       bus.enabled: false
       discovery.enabled: true
       discovery.serviceId: config_server
+      fail-fast: true
       profile: default
       label: latest
+      client:
+        oauth2:
+          clientId: ppm
+            clientSecret: 1q0p2w9o
+            grantType: client_credentials
+            accessTokenUri: ${gateway.url}/security/oauth/token
