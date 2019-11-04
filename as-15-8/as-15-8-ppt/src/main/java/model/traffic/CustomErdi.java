@@ -37,17 +37,14 @@ public class CustomErdi implements Serializable {
     @ToString.Include
     private String name;
 
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.REFRESH, CascadeType.MERGE})
     @JoinColumn(name = "violation_id")
     @JsonView(Views.Brief.class)
     private Violation violation;
 
-    @OneToMany(mappedBy = "customErdi", orphanRemoval = true,
-            cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "customErdi", orphanRemoval = true, cascade = CascadeType.ALL)
     @JsonView(Views.Full.class)
     private List<CustomErdiUnit> customErdiUnits;
-
-
 
     @ManyToMany(mappedBy = "customErdiList", cascade = CascadeType.ALL)
     @JsonIgnore

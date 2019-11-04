@@ -6,9 +6,7 @@ import model.sor.Violation;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Subselect;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.ManyToMany;
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.List;
 
@@ -18,23 +16,21 @@ import java.util.List;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
 @Immutable
-@Subselect("with help as ( \n" +
-        "    select erdi.id as erdi_id, \n" +
-        "           min(unit.id) as unit_id \n" +
-        "    from portal.custom_erdi erdi \n" +
-        "    left join portal.custom_erdi_units unit \n" +
-        "        on erdi.id = unit.custom_erdi_id \n" +
-        "    group by erdi.id \n" +
-        ") select erdi.id as id, \n" +
-        "         erdi.name as name, \n" +
-        "         erdi.violation_id as violation, \n" +
-        "         unit.type as unit_type, \n" +
-        "         unit.value as unit_value \n" +
-        "from help \n" +
+@Subselect("select erdi.id as id, \n" +
+        "       erdi.name as name, \n" +
+        "       erdi.violation_id as violation_id, \n" +
+        "       unit.type as unit_type, \n" +
+        "       unit.value as unit_value \n" +
+        "from (select erdi.id as erdi_id, \n" +
+        "             min(unit.id) as unit_id \n" +
+        "      from portal.custom_erdi erdi \n" +
+        "      left join portal.custom_erdi_units unit  \n" +
+        "           on erdi.id = unit.custom_erdi_id \n" +
+        "      group by erdi.id) as help \n" +
         "join portal.custom_erdi erdi \n" +
-        "    on help.erdi_id = erdi.id \n" +
+        "  on help.erdi_id = erdi.id \n" +
         "left join portal.custom_erdi_units unit \n" +
-        "     on help.unit_id = unit.id")
+        "       on help.unit_id = unit.id")
 public class CustomErdiView implements Serializable {
 
     public static final long serialVersionUID = 1;
@@ -48,6 +44,9 @@ public class CustomErdiView implements Serializable {
     private String name;
 
     @ToString.Include
+    @ManyToOne
+    @JoinColumn(name = "violation_id",
+            referencedColumnName = "id")
     private Violation violation;
 
     @ToString.Include

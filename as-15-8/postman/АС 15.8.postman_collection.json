@@ -1,7 +1,7 @@
 {
 	"info": {
-		"_postman_id": "1c95db9c-7bd8-468c-a020-3d50b303d55e",
-		"name": "АС 15.8 copy",
+		"_postman_id": "8d7fd1c9-5f4b-4913-936f-fbb5f9e08046",
+		"name": "АС 15.8",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -1830,14 +1830,23 @@
 						{
 							"name": "Получение списка ЕРДИ",
 							"request": {
+								"auth": {
+									"type": "oauth2",
+									"oauth2": [
+										{
+											"key": "accessToken",
+											"value": "{{token}}",
+											"type": "string"
+										},
+										{
+											"key": "addTokenTo",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
 								"method": "GET",
-								"header": [
-									{
-										"key": "X-AUTH-TOKEN",
-										"type": "text",
-										"value": "{{oper_token}}"
-									}
-								],
+								"header": [],
 								"url": {
 									"raw": "{{url}}/erdi/custom?",
 									"host": [
@@ -1849,18 +1858,13 @@
 									],
 									"query": [
 										{
-											"key": "violationId",
-											"value": "1",
-											"disabled": true
-										},
-										{
-											"key": "returnAll",
-											"value": "true",
-											"disabled": true
-										},
-										{
 											"key": "query",
-											"value": "custom",
+											"value": "ip_v6",
+											"disabled": true
+										},
+										{
+											"key": "containsInTraffic",
+											"value": "true",
 											"disabled": true
 										},
 										{
@@ -1872,6 +1876,26 @@
 											"key": "searchTrafficUnitId",
 											"value": "5",
 											"disabled": true
+										},
+										{
+											"key": "sortingDirection",
+											"value": "DESC",
+											"disabled": true
+										},
+										{
+											"key": "sortingColumn",
+											"value": "id",
+											"disabled": true
+										},
+										{
+											"key": "pageNumber",
+											"value": "0",
+											"disabled": true
+										},
+										{
+											"key": "pageSize",
+											"value": "5",
+											"disabled": true
 										}
 									]
 								}
@@ -1881,13 +1905,23 @@
 						{
 							"name": "Добавление ЕРДИ",
 							"request": {
+								"auth": {
+									"type": "oauth2",
+									"oauth2": [
+										{
+											"key": "accessToken",
+											"value": "{{token}}",
+											"type": "string"
+										},
+										{
+											"key": "addTokenTo",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
 								"method": "POST",
 								"header": [
-									{
-										"key": "X-AUTH-TOKEN",
-										"type": "text",
-										"value": "{{oper_token}}"
-									},
 									{
 										"key": "Content-Type",
 										"name": "Content-Type",
@@ -1897,7 +1931,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"name\": \"Custom ERDI 4\",\n\t\"violation\": { \"id\": 1 }\n}"
+									"raw": "{\n\t\"name\": \"Custom ERDI 3\",\n\t\"violation\": {\n                \"id\": 1,\n                \"fullId\": \"cp\",\n                \"name\": \"cp\",\n                \"deleted\": true,\n                \"parent\": null\n    },\n    \"customErdiUnits\": [\n    \t{\n    \t\t\"type\": \"IP_V4\",\n    \t\t\"value\": \"104.31.87.1\"\n    \t},\n    \t{\n    \t\t\"type\": \"URL\",\n    \t\t\"value\": \"http://tbib.org/images/4607/72ceaf765d2472a4d278168fb16821de6409ff1a.jpeg?5121380\"\n    \t}\n    ]\n}"
 								},
 								"url": {
 									"raw": "{{url}}/erdi/custom",
@@ -1915,23 +1949,32 @@
 						{
 							"name": "Получение ЕРДИ по ID",
 							"request": {
+								"auth": {
+									"type": "oauth2",
+									"oauth2": [
+										{
+											"key": "accessToken",
+											"value": "{{token}}",
+											"type": "string"
+										},
+										{
+											"key": "addTokenTo",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
 								"method": "GET",
-								"header": [
-									{
-										"key": "X-AUTH-TOKEN",
-										"type": "text",
-										"value": "{{oper_token}}"
-									}
-								],
+								"header": [],
 								"url": {
-									"raw": "{{url}}/erdi/custom/3",
+									"raw": "{{url}}/erdi/custom/28",
 									"host": [
 										"{{url}}"
 									],
 									"path": [
 										"erdi",
 										"custom",
-										"3"
+										"28"
 									]
 								}
 							},
@@ -1940,13 +1983,23 @@
 						{
 							"name": "Редактирование ЕРДИ",
 							"request": {
+								"auth": {
+									"type": "oauth2",
+									"oauth2": [
+										{
+											"key": "accessToken",
+											"value": "{{token}}",
+											"type": "string"
+										},
+										{
+											"key": "addTokenTo",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
 								"method": "PUT",
 								"header": [
-									{
-										"key": "X-AUTH-TOKEN",
-										"type": "text",
-										"value": "{{oper_token}}"
-									},
 									{
 										"key": "Content-Type",
 										"name": "Content-Type",
@@ -1956,17 +2009,17 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"name\": \"Changed Custom ERDI\",\n\t\"violation\": { \"id\": 1 }\n}"
+									"raw": "{\r\n    \"name\": \"Custom ERDI 1 - changed\",\r\n    \"violation\": {\r\n        \"id\": 1,\r\n        \"fullId\": \"cp\",\r\n        \"name\": \"cp\",\r\n        \"deleted\": true,\r\n        \"parent\": null\r\n    }\r\n}"
 								},
 								"url": {
-									"raw": "{{url}}/erdi/custom/2",
+									"raw": "{{url}}/erdi/custom/28",
 									"host": [
 										"{{url}}"
 									],
 									"path": [
 										"erdi",
 										"custom",
-										"2"
+										"28"
 									]
 								}
 							},
@@ -1975,13 +2028,23 @@
 						{
 							"name": "Удаление ЕРДИ",
 							"request": {
+								"auth": {
+									"type": "oauth2",
+									"oauth2": [
+										{
+											"key": "accessToken",
+											"value": "{{token}}",
+											"type": "string"
+										},
+										{
+											"key": "addTokenTo",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
 								"method": "DELETE",
 								"header": [
-									{
-										"key": "X-AUTH-TOKEN",
-										"type": "text",
-										"value": "{{oper_token}}"
-									},
 									{
 										"key": "Content-Type",
 										"name": "Content-Type",
@@ -1990,14 +2053,14 @@
 									}
 								],
 								"url": {
-									"raw": "{{url}}/erdi/custom/1",
+									"raw": "{{url}}/erdi/custom/32",
 									"host": [
 										"{{url}}"
 									],
 									"path": [
 										"erdi",
 										"custom",
-										"1"
+										"32"
 									]
 								}
 							},
@@ -2006,16 +2069,25 @@
 						{
 							"name": "Получение списка юнитов",
 							"request": {
+								"auth": {
+									"type": "oauth2",
+									"oauth2": [
+										{
+											"key": "accessToken",
+											"value": "{{token}}",
+											"type": "string"
+										},
+										{
+											"key": "addTokenTo",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
 								"method": "GET",
-								"header": [
-									{
-										"key": "X-AUTH-TOKEN",
-										"type": "text",
-										"value": "{{oper_token}}"
-									}
-								],
+								"header": [],
 								"url": {
-									"raw": "{{url}}/erdi/custom/units?customErdiId=3",
+									"raw": "{{url}}/erdi/custom/units?customErdiId=31",
 									"host": [
 										"{{url}}"
 									],
@@ -2026,8 +2098,28 @@
 									],
 									"query": [
 										{
+											"key": "sortingDirection",
+											"value": "DESC",
+											"disabled": true
+										},
+										{
+											"key": "sortingColumn",
+											"value": "id",
+											"disabled": true
+										},
+										{
+											"key": "pageNumber",
+											"value": "0",
+											"disabled": true
+										},
+										{
+											"key": "pageSize",
+											"value": "5",
+											"disabled": true
+										},
+										{
 											"key": "customErdiId",
-											"value": "3"
+											"value": "31"
 										}
 									]
 								}
@@ -2037,13 +2129,23 @@
 						{
 							"name": "Добавление юнита",
 							"request": {
+								"auth": {
+									"type": "oauth2",
+									"oauth2": [
+										{
+											"key": "accessToken",
+											"value": "{{token}}",
+											"type": "string"
+										},
+										{
+											"key": "addTokenTo",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
 								"method": "POST",
 								"header": [
-									{
-										"key": "X-AUTH-TOKEN",
-										"type": "text",
-										"value": "{{oper_token}}"
-									},
 									{
 										"key": "Content-Type",
 										"name": "Content-Type",
@@ -2053,10 +2155,10 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"name\": \"Unit 2\",\n\t\"type\": \"URL\",\n\t\"value\": \"https://doom.ru/cp\"\n}"
+									"raw": "{\n\t\"type\": \"URL\",\n\t\"value\": \"https://doom.ru/cp\"\n}"
 								},
 								"url": {
-									"raw": "{{url}}/erdi/custom/units?customErdiId=3",
+									"raw": "{{url}}/erdi/custom/units?customErdiId=31",
 									"host": [
 										"{{url}}"
 									],
@@ -2068,7 +2170,7 @@
 									"query": [
 										{
 											"key": "customErdiId",
-											"value": "3"
+											"value": "31"
 										}
 									]
 								}
@@ -2078,13 +2180,23 @@
 						{
 							"name": "Редактирование юнита",
 							"request": {
+								"auth": {
+									"type": "oauth2",
+									"oauth2": [
+										{
+											"key": "accessToken",
+											"value": "{{token}}",
+											"type": "string"
+										},
+										{
+											"key": "addTokenTo",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
 								"method": "PUT",
 								"header": [
-									{
-										"key": "X-AUTH-TOKEN",
-										"type": "text",
-										"value": "{{oper_token}}"
-									},
 									{
 										"key": "Content-Type",
 										"name": "Content-Type",
@@ -2094,10 +2206,10 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"type\": \"IP_V6\",\n\t\"value\": \"2001:db8::8a2e:370:7334\",\n\t\"customErdi\": {\"id\": 3}\n}"
+									"raw": "{\n\t\"type\": \"IP_V6\",\n\t\"value\": \"2001:db8::8a2e:370:7334\",\n\t\"customErdi\": {\"id\": 31}\n}"
 								},
 								"url": {
-									"raw": "{{url}}/erdi/custom/units/3",
+									"raw": "{{url}}/erdi/custom/units/17",
 									"host": [
 										"{{url}}"
 									],
@@ -2105,7 +2217,7 @@
 										"erdi",
 										"custom",
 										"units",
-										"3"
+										"17"
 									]
 								}
 							},
@@ -2114,13 +2226,23 @@
 						{
 							"name": "Удаление юнита",
 							"request": {
+								"auth": {
+									"type": "oauth2",
+									"oauth2": [
+										{
+											"key": "accessToken",
+											"value": "{{token}}",
+											"type": "string"
+										},
+										{
+											"key": "addTokenTo",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
 								"method": "DELETE",
 								"header": [
-									{
-										"key": "X-AUTH-TOKEN",
-										"type": "text",
-										"value": "{{oper_token}}"
-									},
 									{
 										"key": "Content-Type",
 										"name": "Content-Type",
@@ -2129,7 +2251,7 @@
 									}
 								],
 								"url": {
-									"raw": "{{url}}/erdi/custom/units/4",
+									"raw": "{{url}}/erdi/custom/units/17",
 									"host": [
 										"{{url}}"
 									],
@@ -2137,7 +2259,7 @@
 										"erdi",
 										"custom",
 										"units",
-										"4"
+										"17"
 									]
 								}
 							},
@@ -2153,14 +2275,23 @@
 						{
 							"name": "Получение списка фраз",
 							"request": {
+								"auth": {
+									"type": "oauth2",
+									"oauth2": [
+										{
+											"key": "accessToken",
+											"value": "{{token}}",
+											"type": "string"
+										},
+										{
+											"key": "addTokenTo",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
 								"method": "GET",
-								"header": [
-									{
-										"key": "X-AUTH-TOKEN",
-										"type": "text",
-										"value": "{{oper_token}}"
-									}
-								],
+								"header": [],
 								"url": {
 									"raw": "{{url}}/phrases?",
 									"host": [
@@ -2171,23 +2302,38 @@
 									],
 									"query": [
 										{
-											"key": "violationId",
-											"value": "1",
+											"key": "query",
+											"value": "ы",
 											"disabled": true
 										},
 										{
-											"key": "returnAll",
-											"value": "true",
+											"key": "containsInTraffic",
+											"value": "false",
 											"disabled": true
 										},
 										{
 											"key": "searchTrafficUnitId",
-											"value": "31",
+											"value": "5",
 											"disabled": true
 										},
 										{
-											"key": "query",
-											"value": "ы",
+											"key": "sortingDirection",
+											"value": "DESC",
+											"disabled": true
+										},
+										{
+											"key": "sortingColumn",
+											"value": "id",
+											"disabled": true
+										},
+										{
+											"key": "pageNumber",
+											"value": "0",
+											"disabled": true
+										},
+										{
+											"key": "pageSize",
+											"value": "5",
 											"disabled": true
 										}
 									]
@@ -2198,13 +2344,23 @@
 						{
 							"name": "Добавление фразы",
 							"request": {
+								"auth": {
+									"type": "oauth2",
+									"oauth2": [
+										{
+											"key": "accessToken",
+											"value": "{{token}}",
+											"type": "string"
+										},
+										{
+											"key": "addTokenTo",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
 								"method": "POST",
 								"header": [
-									{
-										"key": "X-AUTH-TOKEN",
-										"type": "text",
-										"value": "{{oper_token}}"
-									},
 									{
 										"key": "Content-Type",
 										"name": "Content-Type",
@@ -2214,7 +2370,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"phrase\": \"Пыня\",\n\t\"violation\": { \"id\": 1 }\n}",
+									"raw": "{\n\t\"phrase\": \"Rhzr\",\n\t\"violation\": {\n                \"id\": 1,\n                \"fullId\": \"cp\",\n                \"name\": \"cp\",\n                \"deleted\": true,\n                \"parent\": null\n    }\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -2236,22 +2392,31 @@
 						{
 							"name": "Получение фразы по ID",
 							"request": {
+								"auth": {
+									"type": "oauth2",
+									"oauth2": [
+										{
+											"key": "accessToken",
+											"value": "{{token}}",
+											"type": "string"
+										},
+										{
+											"key": "addTokenTo",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
 								"method": "GET",
-								"header": [
-									{
-										"key": "X-AUTH-TOKEN",
-										"type": "text",
-										"value": "{{oper_token}}"
-									}
-								],
+								"header": [],
 								"url": {
-									"raw": "{{url}}/phrases/2",
+									"raw": "{{url}}/phrases/6",
 									"host": [
 										"{{url}}"
 									],
 									"path": [
 										"phrases",
-										"2"
+										"6"
 									]
 								}
 							},
@@ -2260,13 +2425,23 @@
 						{
 							"name": "Редактирование фразы",
 							"request": {
+								"auth": {
+									"type": "oauth2",
+									"oauth2": [
+										{
+											"key": "accessToken",
+											"value": "{{token}}",
+											"type": "string"
+										},
+										{
+											"key": "addTokenTo",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
 								"method": "PUT",
 								"header": [
-									{
-										"key": "X-AUTH-TOKEN",
-										"type": "text",
-										"value": "{{oper_token}}"
-									},
 									{
 										"key": "Content-Type",
 										"name": "Content-Type",
@@ -2276,7 +2451,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"phrase\": \"Пыня Краб\",\n\t\"violation\": { \"id\": 1 }\n}",
+									"raw": "{\n\t\"phrase\": \"Кряк\",\n\t\"violation\": {\n        \"id\": 1,\n        \"fullId\": \"cp\",\n        \"name\": \"cp\",\n        \"deleted\": true,\n        \"parent\": null\n    }\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -2284,13 +2459,13 @@
 									}
 								},
 								"url": {
-									"raw": "{{url}}/phrases/3",
+									"raw": "{{url}}/phrases/6",
 									"host": [
 										"{{url}}"
 									],
 									"path": [
 										"phrases",
-										"3"
+										"6"
 									]
 								}
 							},
@@ -2299,22 +2474,31 @@
 						{
 							"name": "Удаление фразы",
 							"request": {
+								"auth": {
+									"type": "oauth2",
+									"oauth2": [
+										{
+											"key": "accessToken",
+											"value": "{{token}}",
+											"type": "string"
+										},
+										{
+											"key": "addTokenTo",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
 								"method": "DELETE",
-								"header": [
-									{
-										"key": "X-AUTH-TOKEN",
-										"type": "text",
-										"value": "{{oper_token}}"
-									}
-								],
+								"header": [],
 								"url": {
-									"raw": "{{url}}/phrases/5",
+									"raw": "{{url}}/phrases/6",
 									"host": [
 										"{{url}}"
 									],
 									"path": [
 										"phrases",
-										"5"
+										"6"
 									]
 								}
 							},
@@ -2330,16 +2514,25 @@
 						{
 							"name": "Получение списка шаблонов",
 							"request": {
+								"auth": {
+									"type": "oauth2",
+									"oauth2": [
+										{
+											"key": "accessToken",
+											"value": "{{token}}",
+											"type": "string"
+										},
+										{
+											"key": "addTokenTo",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
 								"method": "GET",
-								"header": [
-									{
-										"key": "X-AUTH-TOKEN",
-										"type": "text",
-										"value": "{{oper_token}}"
-									}
-								],
+								"header": [],
 								"url": {
-									"raw": "{{url}}/templates?",
+									"raw": "{{url}}/templates",
 									"host": [
 										"{{url}}"
 									],
@@ -2348,18 +2541,38 @@
 									],
 									"query": [
 										{
-											"key": "belongsTo",
-											"value": "false",
+											"key": "sortingDirection",
+											"value": "",
 											"disabled": true
 										},
 										{
-											"key": "trafficUnitId",
-											"value": "23",
+											"key": "sortingColumn",
+											"value": "",
+											"disabled": true
+										},
+										{
+											"key": "pageNumber",
+											"value": "",
+											"disabled": true
+										},
+										{
+											"key": "pageSize",
+											"value": "",
 											"disabled": true
 										},
 										{
 											"key": "query",
-											"value": "ы",
+											"value": "",
+											"disabled": true
+										},
+										{
+											"key": "containsInTraffic",
+											"value": "",
+											"disabled": true
+										},
+										{
+											"key": "trafficId",
+											"value": "",
 											"disabled": true
 										}
 									]
@@ -2368,25 +2581,67 @@
 							"response": []
 						},
 						{
+							"name": "Получение шаблона по ID",
+							"request": {
+								"auth": {
+									"type": "oauth2",
+									"oauth2": [
+										{
+											"key": "accessToken",
+											"value": "{{token}}",
+											"type": "string"
+										},
+										{
+											"key": "addTokenTo",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/templates",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"templates"
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "Редактирование шаблона",
 							"request": {
+								"auth": {
+									"type": "oauth2",
+									"oauth2": [
+										{
+											"key": "accessToken",
+											"value": "{{token}}",
+											"type": "string"
+										},
+										{
+											"key": "addTokenTo",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
 								"method": "PUT",
 								"header": [
 									{
-										"key": "X-AUTH-TOKEN",
-										"type": "text",
-										"value": "{{oper_token}}"
-									},
-									{
 										"key": "Content-Type",
 										"name": "Content-Type",
-										"value": "application/json",
-										"type": "text"
+										"type": "text",
+										"value": "application/json"
 									}
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"name\": \"meeh traffic 2_eanpqajx_TEMPLATE\",\n\t\"category\": { \"id\": 0 },\n\t\"queryPattern\": \"test patter $ERDI\",\n\t\"customErdiList\": [\n\t\t{ \"id\": 3 },\n\t\t{ \"id\": 4 }\n\t],\n\t\"searchPhrases\": [\n\t\t{ \"id\": 2 }\n\t]\n}",
+									"raw": "{\n\t\"name\": \"Template 1\",\n\t\"category\": { \"id\": 0 },\n\t\"queryPattern\": \"test pattern $ERDI\",\n\t\"customErdiList\": [\n\t\t{ \"id\": 31 }\n\t],\n\t\"formalErdiList\": [\n\t\t{ \"id\": 247861 },\n\t\t{ \"id\": 247862 }\n\t],\n\t\"searchPhrases\": [\n\t\t{ \"id\": 4 }\n\t]\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -2394,30 +2649,12 @@
 									}
 								},
 								"url": {
-									"raw": "{{url}}/templates/41?",
+									"raw": "{{url}}/templates",
 									"host": [
 										"{{url}}"
 									],
 									"path": [
-										"templates",
-										"41"
-									],
-									"query": [
-										{
-											"key": "belongsTo",
-											"value": "false",
-											"disabled": true
-										},
-										{
-											"key": "trafficUnitId",
-											"value": "23",
-											"disabled": true
-										},
-										{
-											"key": "query",
-											"value": "ы",
-											"disabled": true
-										}
+										"templates"
 									]
 								}
 							},
@@ -2486,16 +2723,25 @@
 				{
 					"name": "Получение списка трафиков",
 					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "{{token}}",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
-						"header": [
-							{
-								"key": "X-AUTH-TOKEN",
-								"type": "text",
-								"value": "{{oper_token}}"
-							}
-						],
+						"header": [],
 						"url": {
-							"raw": "{{url}}/traffic",
+							"raw": "{{url}}/traffic?",
 							"host": [
 								"{{url}}"
 							],
@@ -2671,50 +2917,6 @@
 						}
 					},
 					"response": []
-				},
-				{
-					"name": "Получение списка ЕРДИ",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "X-AUTH-TOKEN",
-								"type": "text",
-								"value": "{{oper_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{url}}/pod/erdi?containsInTraffic=false&erdiTrafficUnitId=64",
-							"host": [
-								"{{url}}"
-							],
-							"path": [
-								"pod",
-								"erdi"
-							],
-							"query": [
-								{
-									"key": "query",
-									"value": "weedy",
-									"disabled": true
-								},
-								{
-									"key": "containsInTraffic",
-									"value": "false"
-								},
-								{
-									"key": "erdiTrafficUnitId",
-									"value": "64"
-								},
-								{
-									"key": "searchTrafficUnitId",
-									"value": "1",
-									"disabled": true
-								}
-							]
-						}
-					},
-					"response": []
 				}
 			],
 			"protocolProfileBehavior": {}
@@ -2723,319 +2925,23 @@
 			"name": "Справочники",
 			"item": [
 				{
-					"name": "Получение",
-					"item": [
-						{
-							"name": "Получение списка нарушений",
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "X-AUTH-TOKEN",
-										"type": "text",
-										"value": "{{oper_token}}",
-										"disabled": true
-									}
-								],
-								"url": {
-									"raw": "{{url_pod}}/subtype?query=продажа",
-									"host": [
-										"{{url_pod}}"
-									],
-									"path": [
-										"subtype"
-									],
-									"query": [
-										{
-											"key": "sortingDirection",
-											"value": "ASC",
-											"disabled": true
-										},
-										{
-											"key": "sortingColumn",
-											"value": "id",
-											"disabled": true
-										},
-										{
-											"key": "pageNumber",
-											"value": "1",
-											"disabled": true
-										},
-										{
-											"key": "pageSize",
-											"value": "5",
-											"disabled": true
-										},
-										{
-											"key": "query",
-											"value": "продажа"
-										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Получение списка ПС",
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "X-AUTH-TOKEN",
-										"type": "text",
-										"value": "{{oper_token}}"
-									}
-								],
-								"url": {
-									"raw": "{{url_pod}}/ps?query=ru",
-									"host": [
-										"{{url_pod}}"
-									],
-									"path": [
-										"ps"
-									],
-									"query": [
-										{
-											"key": "sortingDirection",
-											"value": "ASC",
-											"disabled": true
-										},
-										{
-											"key": "sortingColumn",
-											"value": "id",
-											"disabled": true
-										},
-										{
-											"key": "pageNumber",
-											"value": "1",
-											"disabled": true
-										},
-										{
-											"key": "pageSize",
-											"value": "5",
-											"disabled": true
-										},
-										{
-											"key": "query",
-											"value": "ru"
-										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Получение списка ПАСД",
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "X-AUTH-TOKEN",
-										"type": "text",
-										"value": "{{oper_token}}"
-									}
-								],
-								"url": {
-									"raw": "{{url_pod}}/pasd?query=mail",
-									"host": [
-										"{{url_pod}}"
-									],
-									"path": [
-										"pasd"
-									],
-									"query": [
-										{
-											"key": "sortingDirection",
-											"value": "ASC",
-											"disabled": true
-										},
-										{
-											"key": "sortingColumn",
-											"value": "id",
-											"disabled": true
-										},
-										{
-											"key": "pageNumber",
-											"value": "1",
-											"disabled": true
-										},
-										{
-											"key": "pageSize",
-											"value": "5",
-											"disabled": true
-										},
-										{
-											"key": "query",
-											"value": "mail"
-										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Получение списка ЕРДИ",
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "X-AUTH-TOKEN",
-										"type": "text",
-										"value": "{{oper_token}}"
-									}
-								],
-								"url": {
-									"raw": "{{url}}/pod/erdi?",
-									"host": [
-										"{{url}}"
-									],
-									"path": [
-										"pod",
-										"erdi"
-									],
-									"query": [
-										{
-											"key": "sortingDirection",
-											"value": "ASC",
-											"disabled": true
-										},
-										{
-											"key": "sortingColumn",
-											"value": "id",
-											"disabled": true
-										},
-										{
-											"key": "pageNumber",
-											"value": "1",
-											"disabled": true
-										},
-										{
-											"key": "pageSize",
-											"value": "5",
-											"disabled": true
-										}
-									]
-								}
-							},
-							"response": []
-						}
-					],
-					"protocolProfileBehavior": {},
-					"_postman_isSubFolder": true
-				},
-				{
-					"name": "Обновление",
-					"item": [
-						{
-							"name": "Обновление списка ЕРДИ",
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "X-AUTH-TOKEN",
-										"type": "text",
-										"value": "{{oper_token}}"
-									}
-								],
-								"url": {
-									"raw": "{{url_pod}}/erdi/update",
-									"host": [
-										"{{url_pod}}"
-									],
-									"path": [
-										"erdi",
-										"update"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Обновление ПАСД",
-							"request": {
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "{{url}}/pod/pasd/upload",
-									"host": [
-										"{{url}}"
-									],
-									"path": [
-										"pod",
-										"pasd",
-										"upload"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Обновление списка ПС",
-							"request": {
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "{{url}}/pod/ps/upload",
-									"host": [
-										"{{url}}"
-									],
-									"path": [
-										"pod",
-										"ps",
-										"upload"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Обновление списка нарушений",
-							"request": {
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "{{url}}/pod/subtype/upload",
-									"host": [
-										"{{url}}"
-									],
-									"path": [
-										"pod",
-										"subtype",
-										"upload"
-									]
-								}
-							},
-							"response": []
-						}
-					],
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"id": "61f0ab93-78c5-428b-a68c-03842e2eb49c",
-								"type": "text/javascript",
-								"exec": [
-									""
-								]
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"id": "84d0d0c8-c3e8-48cd-b489-41c5ca35af38",
-								"type": "text/javascript",
-								"exec": [
-									""
-								]
-							}
-						}
-					],
-					"protocolProfileBehavior": {},
-					"_postman_isSubFolder": true
-				},
-				{
 					"name": "Список справочников",
 					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "{{token}}",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [
 							{
@@ -3046,11 +2952,12 @@
 							}
 						],
 						"url": {
-							"raw": "{{url_pod}}/dict?",
+							"raw": "{{url}}/pod/dict",
 							"host": [
-								"{{url_pod}}"
+								"{{url}}"
 							],
 							"path": [
+								"pod",
 								"dict"
 							],
 							"query": [
@@ -3073,11 +2980,6 @@
 									"key": "pageSize",
 									"value": "5",
 									"disabled": true
-								},
-								{
-									"key": "violationName",
-									"value": "порно",
-									"disabled": true
 								}
 							]
 						}
@@ -3087,21 +2989,30 @@
 				{
 					"name": "Справочник по коду",
 					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "{{token}}",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
-						"header": [
-							{
-								"key": "X-AUTH-TOKEN",
-								"type": "text",
-								"value": "{{oper_token}}",
-								"disabled": true
-							}
-						],
+						"header": [],
 						"url": {
-							"raw": "{{url_pod}}/dict/ERDI?",
+							"raw": "{{url}}/pod/dict/ERDI?",
 							"host": [
-								"{{url_pod}}"
+								"{{url}}"
 							],
 							"path": [
+								"pod",
 								"dict",
 								"ERDI"
 							],
@@ -3131,6 +3042,348 @@
 									"value": "порно",
 									"disabled": true
 								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Получение списка нарушений",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "{{token}}",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/pod/subtype?",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"pod",
+								"subtype"
+							],
+							"query": [
+								{
+									"key": "sortingDirection",
+									"value": "ASC",
+									"disabled": true
+								},
+								{
+									"key": "sortingColumn",
+									"value": "id",
+									"disabled": true
+								},
+								{
+									"key": "pageNumber",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "pageSize",
+									"value": "5",
+									"disabled": true
+								},
+								{
+									"key": "query",
+									"value": "продажа",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Обновление списка нарушений",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/pod/subtype/upload",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"pod",
+								"subtype",
+								"upload"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Получение списка ПС",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "{{token}}",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/pod/ps?",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"pod",
+								"ps"
+							],
+							"query": [
+								{
+									"key": "sortingDirection",
+									"value": "ASC",
+									"disabled": true
+								},
+								{
+									"key": "sortingColumn",
+									"value": "id",
+									"disabled": true
+								},
+								{
+									"key": "pageNumber",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "pageSize",
+									"value": "5",
+									"disabled": true
+								},
+								{
+									"key": "query",
+									"value": "ru",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Обновление списка ПС",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/pod/ps/upload",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"pod",
+								"ps",
+								"upload"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Получение списка ПАСД",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "{{token}}",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/pod/pasd?",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"pod",
+								"pasd"
+							],
+							"query": [
+								{
+									"key": "sortingDirection",
+									"value": "ASC",
+									"disabled": true
+								},
+								{
+									"key": "sortingColumn",
+									"value": "id",
+									"disabled": true
+								},
+								{
+									"key": "pageNumber",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "pageSize",
+									"value": "5",
+									"disabled": true
+								},
+								{
+									"key": "query",
+									"value": "mail",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Обновление ПАСД",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/pod/pasd/upload",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"pod",
+								"pasd",
+								"upload"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Получение списка ЕРДИ",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "{{token}}",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"type": "text",
+								"value": "{{oper_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/pod/erdi?",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"pod",
+								"erdi"
+							],
+							"query": [
+								{
+									"key": "query",
+									"value": "weedy",
+									"disabled": true
+								},
+								{
+									"key": "containsInTraffic",
+									"value": "false",
+									"disabled": true
+								},
+								{
+									"key": "erdiTrafficUnitId",
+									"value": "64",
+									"disabled": true
+								},
+								{
+									"key": "searchTrafficUnitId",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "sortingDirection",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "sortingColumn",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "pageNumber",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "pageSize",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Обновление списка ЕРДИ",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"type": "text",
+								"value": "{{oper_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{url_pod}}/erdi/update",
+							"host": [
+								"{{url_pod}}"
+							],
+							"path": [
+								"erdi",
+								"update"
 							]
 						}
 					},
@@ -3193,6 +3446,169 @@
 			"protocolProfileBehavior": {}
 		},
 		{
+			"name": "Безопасность",
+			"item": [
+				{
+					"name": "Получение токена клиентом",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "1q0p2w9o",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "as-15-8",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "grant_type",
+									"value": "password",
+									"type": "text"
+								},
+								{
+									"key": "username",
+									"value": "jack",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "12345",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:15880/security/oauth/token",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "15880",
+							"path": [
+								"security",
+								"oauth",
+								"token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Получение токена внутренним сервисом",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "ppm",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "1q0p2w9o",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:15880/security/oauth/token",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "15880",
+							"path": [
+								"security",
+								"oauth",
+								"token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Проверка токена",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "ppm",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "1q0p2w9o",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJqYWNrIiwic2NvcGUiOlsiYmFyIiwicmVhZCIsIndyaXRlIl0sIm9yZ2FuaXphdGlvbiI6ImVjbCIsImV4cCI6MTU3MjQ0MDQ5NCwiYXV0aG9yaXRpZXMiOlsiUk9MRV9PUEVSQVRPUiJdLCJqdGkiOiIxZmMyM2M2Yy04MmZiLTRlOTktOTM1OS02MTcxOWU3YTY1NjYiLCJjbGllbnRfaWQiOiJhcy0xNS04In0.TdjiN6-EkC5XsZriNeQrz51QCVAD22FTqa5DXRJmcDI",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "http://localhost:15805/oauth/check_token?token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJ1c2VyX25hbWUiOiJqYWNrIiwic2NvcGUiOlsicmVhZCIsIndyaXRlIl0sIm9yZ2FuaXphdGlvbiI6ImVjbCIsImV4cCI6MTU3MjYxNzcwMywiYXV0aG9yaXRpZXMiOlsiUk9MRV9PUEVSQVRPUiJdLCJqdGkiOiJlNmFjNmFmZS1iNGM2LTRlZmItODBlNi1hNDJjN2M3MWUwODYiLCJjbGllbnRfaWQiOiJhcy0xNS04In0.ocbCwLy5Rnpo2_7sYKm4g_ctC7hk68NJuHI-3JcjWNJqWVLRb3yCaCyi5S3UjD8ih3u7ZA8lTJnzfpI6VHCHZc2h4fbOvcbjnytxPNOEUVIuDyQwmX5yp9uFKnddfB80STpNtA0bRnk9hGedXY_gObOdkTYUhx-XAtjZAI0GMCtWhU-WASL5XqGb5JDyL1cjx8IG40PR9Sp5pe1qyhe_dTlMFRjDS0ydv2xHXKKEbIwVL4H9W5oAjknX_tR_RZcPWyQSOioPJ_0seha1UwciGeAh3UYc-oMrew6TvoADd3TlRzgCzun4IFxghxX2YjPeFzM-4OvD5ryX0wYGkRydVA",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "15805",
+							"path": [
+								"oauth",
+								"check_token"
+							],
+							"query": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJ1c2VyX25hbWUiOiJqYWNrIiwic2NvcGUiOlsicmVhZCIsIndyaXRlIl0sIm9yZ2FuaXphdGlvbiI6ImVjbCIsImV4cCI6MTU3MjYxNzcwMywiYXV0aG9yaXRpZXMiOlsiUk9MRV9PUEVSQVRPUiJdLCJqdGkiOiJlNmFjNmFmZS1iNGM2LTRlZmItODBlNi1hNDJjN2M3MWUwODYiLCJjbGllbnRfaWQiOiJhcy0xNS04In0.ocbCwLy5Rnpo2_7sYKm4g_ctC7hk68NJuHI-3JcjWNJqWVLRb3yCaCyi5S3UjD8ih3u7ZA8lTJnzfpI6VHCHZc2h4fbOvcbjnytxPNOEUVIuDyQwmX5yp9uFKnddfB80STpNtA0bRnk9hGedXY_gObOdkTYUhx-XAtjZAI0GMCtWhU-WASL5XqGb5JDyL1cjx8IG40PR9Sp5pe1qyhe_dTlMFRjDS0ydv2xHXKKEbIwVL4H9W5oAjknX_tR_RZcPWyQSOioPJ_0seha1UwciGeAh3UYc-oMrew6TvoADd3TlRzgCzun4IFxghxX2YjPeFzM-4OvD5ryX0wYGkRydVA"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
 			"name": "Список средств доступа к запрещённым ресурсам",
 			"request": {
 				"method": "GET",
@@ -3219,6 +3635,21 @@
 		{
 			"name": "Получение токена",
 			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "1q0p2w9o",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "as-15-8",
+							"type": "string"
+						}
+					]
+				},
 				"method": "POST",
 				"header": [
 					{
@@ -3229,16 +3660,34 @@
 					}
 				],
 				"body": {
-					"mode": "raw",
-					"raw": "{\n\t\"username\": \"jack\",\n\t\"password\": \"12345\"\n}"
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "grant_type",
+							"value": "password",
+							"type": "text"
+						},
+						{
+							"key": "username",
+							"value": "jack",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "12345",
+							"type": "text"
+						}
+					]
 				},
 				"url": {
-					"raw": "{{url}}/gettoken?",
+					"raw": "{{url}}/security/oauth/token",
 					"host": [
 						"{{url}}"
 					],
 					"path": [
-						"gettoken"
+						"security",
+						"oauth",
+						"token"
 					],
 					"query": [
 						{

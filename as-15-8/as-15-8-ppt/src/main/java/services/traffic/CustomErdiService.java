@@ -3,6 +3,7 @@ package services.traffic;
 import exceptions.AS_15_8_PPT_Exception;
 import liquibase.util.StringUtils;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import model.traffic.CustomErdi;
 import model.traffic.CustomErdiView;
 import model.traffic.CustomErdiView_;
@@ -14,29 +15,27 @@ import org.springframework.stereotype.Service;
 import repositories.CustomErdiRepository;
 import repositories.CustomErdiViewRepository;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import javax.annotation.PostConstruct;
+import javax.persistence.criteria.*;
 import javax.persistence.metamodel.ListAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class CustomErdiService {
 
-    private final List<SingularAttribute<CustomErdiView, String>> searchQueryColumns;
+    private static final String TRAFFIC_ID_COLUMN = "id";
 
+    //private final EntityManager em;
     private final CustomErdiRepository customErdiRepository;
     private final CustomErdiViewRepository viewRepository;
 
-    @Autowired
-    public CustomErdiService(CustomErdiRepository customErdiRepository,
-                             CustomErdiViewRepository viewRepository) {
-        this.customErdiRepository = customErdiRepository;
-        this.viewRepository = viewRepository;
+    private List<SingularAttribute<CustomErdiView, String>> searchQueryColumns;
 
+    @PostConstruct
+    public void init() {
         searchQueryColumns = new ArrayList<>(3);
         searchQueryColumns.add(CustomErdiView_.name);
         searchQueryColumns.add(CustomErdiView_.unitValue);
@@ -62,7 +61,7 @@ public class CustomErdiService {
             return containsInTrafficUnit(query, containsInTraffic, erdiTrafficUnitId,
                             CustomErdiView_.erdiTrafficUnits);
         else if (searchTrafficUnitId != null)
-            return containsInTrafficUnit(query, containsInTraffic, erdiTrafficUnitId,
+            return containsInTrafficUnit(query, containsInTraffic, searchTrafficUnitId,
                     CustomErdiView_.searchQueryTrafficUnits);
         else if (query != null && query.trim().length() > 0)
             return (root, criteriaQuery, criteriaBuilder) ->
@@ -74,13 +73,14 @@ public class CustomErdiService {
     private <T> Specification<CustomErdiView> containsInTrafficUnit(String query, boolean containsInTraffic,
                                                                     @NonNull Long trafficUnitId,
                                                                     ListAttribute<CustomErdiView, T> joinColumn) {
+        // todo use join table only
         return (root, criteriaQuery, criteriaBuilder) -> {
-            Join<CustomErdiView, T> join = root.join(joinColumn);
+            Join<CustomErdiView, T> join = root.join(joinColumn, JoinType.LEFT);
             Predicate predicate = criteriaBuilder.equal(
-                    join.get("trafficUnitId"), trafficUnitId);
+                    join.get(TRAFFIC_ID_COLUMN), trafficUnitId);
             if ( !containsInTraffic )
                 predicate = criteriaBuilder.or(criteriaBuilder.not(predicate),
-                        criteriaBuilder.isNull(join.get("trafficUnitId"))
+                        criteriaBuilder.isNull(join.get(TRAFFIC_ID_COLUMN))
                 );
 
             return StringUtils.isEmpty(query) ? predicate : criteriaBuilder.and(
@@ -99,6 +99,13 @@ public class CustomErdiService {
     }
 
     public CustomErdi createCustomErdi(CustomErdi customErdi) {
+        /*customErdi = customErdiRepository.save(customErdi);
+        Violation v = em.merge(customErdi.getViolation());
+        customErdi.setViolation(v);
+        em.refresh(customErdi.getViolation());
+        return customErdi;*/
+        customErdi.getCustomErdiUnits().forEach(
+                unit -> unit.setCustomErdi(customErdi));
         return customErdiRepository.save(customErdi);
     }
 
@@ -111,7 +118,6 @@ public class CustomErdiService {
                                        CustomErdi customErdi) {
         customErdi.setName(newCustomErdi.getName());
         customErdi.setViolation(newCustomErdi.getViolation());
-        //customErdi.setCustomErdiUnits(newCustomErdi.getCustomErdiUnits());
         return customErdiRepository.save(customErdi);
     }
 

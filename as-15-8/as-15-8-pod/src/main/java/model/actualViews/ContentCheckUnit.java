@@ -1,11 +1,14 @@
 package model.actualViews;
 
 import checkUnits.CheckUnitType;
-import jdk.nashorn.internal.ir.annotations.Immutable;
 import lombok.Data;
 import model.actualViews.converters.CheckUnitConverter;
+import org.hibernate.annotations.Immutable;
 
-import javax.persistence.*;
+import javax.persistence.Convert;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 /**
  * Created by san
