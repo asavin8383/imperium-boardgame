@@ -1,6 +1,8 @@
 package controllers.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import model.RobotType;
 
 /**
  * User: asinjavin
@@ -13,4 +15,7 @@ public class PS
     Long id;
     String name;
     String hostname;
+
+    @JsonIgnore
+    RobotType type;
 }

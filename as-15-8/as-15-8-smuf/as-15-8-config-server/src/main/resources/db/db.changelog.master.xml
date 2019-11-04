@@ -12,5 +12,6 @@
     <include file="db/changelog/config.0007.robots.xml" />
     <include file="db/changelog/config.0008.processing_times.xml" />
     <include file="db/changelog/config.0009.config_view.xml" />
+    <include file="db/changelog/config.0010.robots.xml" />
 
 </databaseChangeLog>

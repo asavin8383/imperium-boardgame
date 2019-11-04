@@ -3,7 +3,6 @@ package restapi;
 import lombok.extern.slf4j.Slf4j;
 import model.scheme.PsRecord;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -11,7 +10,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import repositories.PsRepository;
 
@@ -26,14 +24,17 @@ import java.util.List;
 @Slf4j
 public class PSUploader
 {
-    @Value("${gateway.url}")
-    private String gatewayUrl;
+    @Value("${config.url}")
+    private String configUrl;
+
+    private final OAuth2RestTemplate oauth2RestTemplate;
+
+    private final PsRepository psRepository;
 
     @Autowired
-    OAuth2RestTemplate oauth2RestTemplate;
-
-    @Autowired
-    PsRepository psRepository;
+    public PSUploader(OAuth2RestTemplate oauth2RestTemplate, PsRepository psRepository) {this.oauth2RestTemplate = oauth2RestTemplate;
+        this.psRepository = psRepository;
+    }
 
     public void upload() {
         List<PsRecord> all = psRepository.getAllActial();
@@ -44,7 +45,7 @@ public class PSUploader
         HttpEntity<List<PsRecord>> entity = new HttpEntity<>(all, headers);
 
         log.debug("Sending {} PS records", all.size());
-        oauth2RestTemplate.postForObject(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path("/config/ps").build().toString(), entity, ResponseEntity.class);
+        oauth2RestTemplate.postForObject(UriComponentsBuilder.fromHttpUrl(configUrl).path("/config/ps").build().toString(), entity, ResponseEntity.class);
         log.debug("{} PS records sent successfully", all.size());
 
     }
