@@ -32,6 +32,7 @@ spring:
       bus.enabled: true
       discovery.enabled: true
       discovery.serviceId: config_server
+      fail-fast: true
       profile: default
       label: latest
       client:

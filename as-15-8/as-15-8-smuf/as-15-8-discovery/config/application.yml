@@ -15,16 +15,11 @@ eureka:
       clientId: discovery
       clientSecret: 1q0p2w9o
       grantType: client_credentials
-      accessTokenUri: http://localhost:15805/oauth/token
+      accessTokenUri: ${AUTH_SERVER_URI:http://localhost:15805}/oauth/token
 security:
   oauth2:
     resource:
-      tokenInfoUri: http://localhost:15805/oauth/check_token
-    client:
-      clientId: discovery
-      clientSecret: 1q0p2w9o
-      grantType: client_credentials
-      accessTokenUri: http://localhost:15805/oauth/token
+      tokenInfoUri: ${AUTH_SERVER_URI:http://localhost:15805}/oauth/check_token
 
 ---
 
