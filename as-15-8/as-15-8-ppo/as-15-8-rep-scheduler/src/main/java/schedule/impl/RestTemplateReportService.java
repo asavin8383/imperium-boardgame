@@ -7,10 +7,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 import schedule.ReportService;
 
 import javax.transaction.Transactional;
-import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
@@ -53,13 +53,17 @@ public class RestTemplateReportService implements ReportService
             String format = report.getFormat();
             String rptdesign = report.getRptdesign();
 
-            String surl = String.format("%s%s/%s?RPFD=%s&RPD=%s", birt_url, rptdesign, format, from, period);
-//            String url1 = UriComponentsBuilder.fromHttpUrl(birt_url).path(rptdesign+"/"+format).queryParam("RPFD", from).queryParam("RPD", period).build().toString();
+            String url = UriComponentsBuilder
+                    .fromHttpUrl(birt_url)
+                    .path("/reglament/{rptdesign}/{format}")
+                    .queryParam("RPFD", "{from}")
+                    .queryParam("RPD", "{period}")
+                    .buildAndExpand(rptdesign, format, from, period)
+                    .toString();
 
-            URL url = new URL(surl);
             log.debug("url = {}", url);
 
-            ResponseEntity<byte[]> response=restTemplate.getForEntity(surl, byte[].class);
+            ResponseEntity<byte[]> response=restTemplate.getForEntity(url, byte[].class);
 
             log.debug("response = {}", response.getStatusCode());
 
