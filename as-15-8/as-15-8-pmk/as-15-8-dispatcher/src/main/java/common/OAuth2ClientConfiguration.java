@@ -20,10 +20,7 @@ import java.util.List;
 
 @Configuration
 @EnableOAuth2Client
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class OAuth2ClientConfiguration {
-
-    private final EurekaOAuth2RequestDecorator eurekaOauth2RequestDecorator;
 
     /**
      * Для внутренних межсервисных взаимодействий
@@ -33,21 +30,6 @@ public class OAuth2ClientConfiguration {
     public OAuth2RestTemplate oauth2RestTemplate(OAuth2ClientContext oauth2ClientContext,
                                                  OAuth2ProtectedResourceDetails details) {
         return new OAuth2RestTemplate(details, oauth2ClientContext);
-    }
-
-    /**
-     * Бин для подключения к Eureka через Oauth.
-     * Переопределение по аналогии с io.pivotal.spring.cloud.service.eureka.EurekaOAuth2AutoConfiguration discoveryClientOptionalArgs
-     * Бин из автоконфигурации не создается, тк библиотека config server уже определяет такой бин
-     * @return
-     */
-    @Bean
-    public DiscoveryClient.DiscoveryClientOptionalArgs discoveryClientOptionalArgs() {
-        List<? super ClientFilterAdapter> filters = new ArrayList();
-        filters.add(new ClientFilterAdapter(this.eurekaOauth2RequestDecorator));
-        AbstractDiscoveryClientOptionalArgs args = new DiscoveryClient.DiscoveryClientOptionalArgs();
-        args.setAdditionalFilters(filters);
-        return (DiscoveryClient.DiscoveryClientOptionalArgs)args;
     }
 
 }

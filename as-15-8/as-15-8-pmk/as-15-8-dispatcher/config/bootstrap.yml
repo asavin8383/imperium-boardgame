@@ -29,8 +29,5 @@ spring:
   application.name: dispatcher
   cloud:
     config:
-      bus.enabled: true
-      discovery.enabled: true
-      discovery.serviceId: config_server
-      profile: default
-      label: latest
+      enabled: false
+      bus.enabled: false

@@ -16,7 +16,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @ComponentScan(basePackages={"common", "services", "repositories", "events"})
 @EnableJpaRepositories("repositories")
 @EntityScan("model")
-@EnableConfigurationProperties(DispatcherProperties.class)
 public class ApplicationConfiguration{
 	public static void main(String[] args) {
 		SpringApplication.run(ApplicationConfiguration.class, args);

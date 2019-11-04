@@ -3,6 +3,7 @@ package model;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.*;
 import model.Views;
+import model.enums.SchedulePeriodState;
 
 import javax.persistence.*;
 import java.time.LocalTime;
@@ -10,7 +11,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Data
-@NoArgsConstructor(force = true)
 @RequiredArgsConstructor
 @Entity
 @Table(name = "schedule_periods", schema = "schedule")
@@ -36,6 +36,11 @@ public class SchedulePeriod implements Comparable<SchedulePeriod>{
     @JsonView(Views.Brief.class)
     private LocalTime endTime;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @JsonView(Views.Brief.class)
+    private SchedulePeriodState schedulePeriodState = SchedulePeriodState.CREATED;
+
     @OneToMany(cascade=CascadeType.ALL, mappedBy = "schedulePeriod", fetch = FetchType.EAGER)
     @JsonView(Views.Full.class)
     private Set<SchedulePeriodArrangement> schedulePeriodArrangements = new HashSet<>();
@@ -43,5 +48,9 @@ public class SchedulePeriod implements Comparable<SchedulePeriod>{
     @Override
     public int compareTo(SchedulePeriod otherPeriod) {
         return this.getStartTime().compareTo(otherPeriod.getStartTime());
+    }
+
+    public SchedulePeriod(){
+        this.schedulePeriodState = SchedulePeriodState.CREATED;
     }
 }

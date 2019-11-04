@@ -5,4 +5,5 @@
 
     <include file="db/changelog/ppm.0001.schedule_create_all.xml"/>
     <include file="db/changelog/ppm.0002.domain_mask_items_create.xml"/>
+    <include file="db/changelog/ppm.0003.schedule_periods_add_state.xml"/>
 </databaseChangeLog>

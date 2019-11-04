@@ -90,10 +90,6 @@ spring:
         destination: arrangement_notifications
         consumer:
           concurrency: 28
-      springCloudBusInput:
-        destination: bus_config_input
-      springCloudBusOutput:
-        destination: bus_config_output
 
 ---
 
@@ -127,10 +123,6 @@ spring:
           group: dispatchers
           consumer:
             concurrency: 12
-        springCloudBusInput:
-          destination: bus_config_input_ashabalin
-        springCloudBusOutput:
-          destination: bus_config_output_ashabalin
 
 ---
 
@@ -164,10 +156,6 @@ spring:
           group: dispatchers
           consumer:
             concurrency: 12
-        springCloudBusInput:
-          destination: bus_config_input_asin
-        springCloudBusOutput:
-          destination: bus_config_output_asin
 
 ---
 
@@ -201,10 +189,7 @@ spring:
           group: dispatchers
           consumer:
             concurrency: 12
-        springCloudBusInput:
-          destination: bus_config_input_asavin
-        springCloudBusOutput:
-          destination: bus_config_output_asavin
+
 ---
 
 spring:
@@ -237,10 +222,6 @@ spring:
           group: dispatchers
           consumer:
             concurrency: 12
-        springCloudBusInput:
-          destination: bus_config_input_pvorobiev
-        springCloudBusOutput:
-          destination: bus_config_output_pvorobiev
 
 ---
 
@@ -274,7 +255,3 @@ spring:
           group: dispatchers
           consumer:
             concurrency: 12
-        springCloudBusInput:
-          destination: bus_config_input_jspirina
-        springCloudBusOutput:
-          destination: bus_config_output_jspirina
