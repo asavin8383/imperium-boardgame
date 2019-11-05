@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-import restapi.updaters.PSDictionaryUpdater;
+import updaters.PSDictionaryUpdater;
 
 import java.util.List;
 

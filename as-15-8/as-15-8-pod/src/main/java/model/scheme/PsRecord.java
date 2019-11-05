@@ -15,7 +15,7 @@ import java.util.Date;
 @Table(schema = "sor", name = "ps")
 @Data
 @NoArgsConstructor
-@Setter(AccessLevel.PRIVATE)
+@AllArgsConstructor
 @ToString(onlyExplicitlyIncluded = true)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class PsRecord implements Serializable {
@@ -23,6 +23,7 @@ public class PsRecord implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ps_id")
     @ToString.Include
     @EqualsAndHashCode.Include
@@ -30,7 +31,7 @@ public class PsRecord implements Serializable {
 
     @ToString.Include
     private String name;
-    
+
     @ToString.Include
     private String hostname;
 

@@ -8,7 +8,7 @@ import java.util.Date;
 @Data
 public class PASDEntry
 {
-    public long Id;
+    public Long Id;
 
     public String Name;
     public String Hostname;

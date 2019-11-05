@@ -14,7 +14,7 @@ public class PSEntry
 {
 
 
-    public long Id;
+    public Long Id;
     public String Name;
     public String Hostname;
 

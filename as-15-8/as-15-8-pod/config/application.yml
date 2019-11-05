@@ -77,7 +77,7 @@ registry-anonymizers:
 ---
 
 spring:
-  profiles: dev_pvorobiev, dev_asavin, dev_ashabalin, dev_jspirina
+  profiles: dev_pvorobiev, dev_asavin, dev_ashabalin, dev_jspirina, dev_asin
   profiles.include: local_log
   jpa:
     hibernate:
