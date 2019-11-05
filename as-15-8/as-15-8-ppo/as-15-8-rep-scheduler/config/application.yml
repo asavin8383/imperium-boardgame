@@ -41,6 +41,7 @@ app:
   birt.url: ${gateway.url}/report_generator
   schedule: '5 0 * * * ?'
   sql:
+    refresh-dm: select dm.update_at()
     # Вызывается перед запуском всех отчетов, без параметра
     before-all:
     # Вызывается перед запуском каждлго отчета, параметр -- rep_id из таблицы

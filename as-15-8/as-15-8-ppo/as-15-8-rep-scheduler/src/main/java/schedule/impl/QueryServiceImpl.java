@@ -24,6 +24,9 @@ public class QueryServiceImpl implements QueryService
     @Value("${app.sql.before-each:}")
     String sql_before_each;
 
+    @Value("${app.sql.refresh-dm:}")
+    String sql_refresh_dm;
+
     @Autowired
     public QueryServiceImpl(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -37,6 +40,11 @@ public class QueryServiceImpl implements QueryService
     @Override
     public void beforeEach(long rep_id) {
         runQuery(sql_before_each, rep_id);
+    }
+
+    @Override
+    public void refreshDatamart() {
+        runQuery(sql_refresh_dm);
     }
 
     private void runQuery(String sql, Object... params) {

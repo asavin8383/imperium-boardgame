@@ -11,4 +11,6 @@ public interface QueryService
 {
     void beforeAll();
     void beforeEach(long rep_id);
+
+    void refreshDatamart();
 }
