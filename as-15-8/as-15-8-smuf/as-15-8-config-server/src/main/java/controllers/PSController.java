@@ -6,10 +6,7 @@ import model.Robot;
 import model.RobotType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import repositories.RobotRepository;
 
 import java.util.List;
@@ -30,6 +27,16 @@ public class PSController
 
     @Autowired
     public PSController(RobotRepository robotRepository) {this.robotRepository = robotRepository;}
+
+    /**
+     * Получение робота по имени
+     * @param data
+     */
+    @GetMapping("access_tool_id")
+    @PreAuthorize("hasRole('ROLE_SYSTEM')")
+    List<Robot> findByName(@RequestParam String name) {
+        return robotRepository.findByOrigName(name);
+    }
 
     /**
      * Прием новых записей о ПС
@@ -63,7 +70,7 @@ public class PSController
                 log.debug("new robot record arrived: {}", ps);
                 Robot newRobot = new Robot();
                 newRobot.setOrig_id(ps.getId());
-                newRobot.setOrig_name(ps.getName());
+                newRobot.setOrigName(ps.getName());
                 newRobot.setName(ps.getName() + "-" + ps.getId());
                 newRobot.setType(robotType);
                 robotRepository.save(newRobot);

@@ -34,7 +34,7 @@ public class Robot {
     private Long orig_id;
 
     @Column
-    private String orig_name;
+    private String origName;
 
     @Column
     @Enumerated(EnumType.STRING)
