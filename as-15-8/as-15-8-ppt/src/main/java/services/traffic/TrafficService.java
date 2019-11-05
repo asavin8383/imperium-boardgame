@@ -5,19 +5,21 @@ import enums.SortingDirection;
 import exceptions.AS_15_8_PPT_Exception;
 import lombok.RequiredArgsConstructor;
 import model.enums.TrafficType;
-import model.traffic.*;
+import model.traffic.Traffic;
+import model.traffic.TrafficBriefView;
+import model.traffic.TrafficFullView;
+import model.traffic.TrafficUnit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import repositories.TrafficRepository;
 import utils.TrafficUnitUtils;
 
-import javax.persistence.EntityManager;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -25,7 +27,6 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class TrafficService {
 
-    private final EntityManager em;
     private final TrafficRepository trafficRepository;
 
     public Page<TrafficBriefView> getBriefTrafficList(SortingDirection sortingDirection,
@@ -70,32 +71,52 @@ public class TrafficService {
 
     public TrafficFullView createTraffic(TrafficFullView fullView) {
         Traffic traffic = convertToTraffic(fullView);
+        syncAssociation(traffic);
         setNewUnitNames(traffic);
         return convertToFullView(trafficRepository.save(traffic));
     }
 
+    @Transactional
     public TrafficFullView updateTraffic(TrafficFullView fullView, Traffic oldTraffic) {
-        boolean updateNames = fullView.getName().compareTo(oldTraffic.getName()) != 0;
+        /*boolean updateNames = fullView.getName().compareTo(oldTraffic.getName()) != 0;
 
         Traffic newTraffic = convertToTraffic(fullView);
-        newTraffic.setId(oldTraffic.getId());
+        oldTraffic.setName(newTraffic.getName());
+        syncAttachedUnits(oldTraffic.getErdiTrafficUnits(),
+                newTraffic.getErdiTrafficUnits());
+        syncAttachedUnits(oldTraffic.getSearchQueryTrafficUnits(),
+                newTraffic.getSearchQueryTrafficUnits());
+        syncAssociation(oldTraffic);
 
         if (updateNames) {
-            setUnitNames(newTraffic.getErdiTrafficUnits(),
-                    newTraffic.getSearchQueryTrafficUnits(),
-                    unit -> {
-                if (StringUtils.isEmpty(unit.getName()))
-                    unit.setName(TrafficUnitUtils
-                            .getNewName(newTraffic, unit.getType()));
-                else
-                    unit.setName(TrafficUnitUtils
-                            .getUpdateName(newTraffic, unit.getName()));
+            getUnitStream(oldTraffic).forEach(unit -> {
+                String name = StringUtils.isEmpty(unit.getName()) ?
+                        TrafficUnitUtils.getNewName(oldTraffic, unit.getType()) :
+                        TrafficUnitUtils.getUpdateName(oldTraffic, unit.getName());
+                unit.setName(name);
             });
         } else {
             setNewUnitNames(newTraffic);
         }
 
-        return convertToFullView(trafficRepository.save(newTraffic));
+        return convertToFullView(trafficRepository.save(oldTraffic));*/
+
+        Traffic newTraffic = convertToTraffic(fullView);
+        oldTraffic.setName(newTraffic.getName());
+
+        oldTraffic.getErdiTrafficUnits().clear();
+        oldTraffic.getSearchQueryTrafficUnits().clear();
+
+        oldTraffic = trafficRepository.save(oldTraffic);
+
+        oldTraffic.getErdiTrafficUnits().addAll(
+                newTraffic.getErdiTrafficUnits());
+        oldTraffic.getSearchQueryTrafficUnits().addAll(
+                newTraffic.getSearchQueryTrafficUnits());
+
+        syncAssociation(oldTraffic);
+        setNewUnitNames(newTraffic);
+        return convertToFullView(trafficRepository.save(oldTraffic));
     }
 
     public void deleteTraffic(Long id) {
@@ -108,12 +129,10 @@ public class TrafficService {
         traffic.setName(fullView.getName());
         traffic.setSearchQueryTrafficUnits(collectUnits(
                 Stream.of(fullView.getSearchPhraseUnit()),
-                fullView.getSearchTemplates().stream(),
-                traffic));
+                fullView.getSearchTemplates().stream()));
         traffic.setErdiTrafficUnits(collectUnits(
                 Stream.of(fullView.getFormalErdiUnit()),
-                Stream.of(fullView.getCustomErdiUnit()),
-                traffic));
+                Stream.of(fullView.getCustomErdiUnit())));
         return traffic;
     }
 
@@ -127,30 +146,39 @@ public class TrafficService {
         return fullView;
     }
 
-    private <T extends TrafficUnit> List<T> collectUnits(Stream<T> a, Stream<T> b,
-                                                         Traffic traffic) {
+    private <T extends TrafficUnit> List<T> collectUnits(Stream<T> a, Stream<T> b) {
         return Stream.concat(a, b)
                 .filter(Objects::nonNull)
                 .filter(TrafficUnit::nonEmpty)
-                .peek(unit -> unit.setTraffic(traffic))
-                .peek(TrafficUnit::syncContentAssociation)
                 .collect(Collectors.toList());
     }
 
+    private <T extends TrafficUnit> void syncAttachedUnits(List<T> attached,
+                                                           List<T> actual) {
+        // to do merge contents
+        attached.retainAll(actual);
+        actual.removeAll(attached);
+        attached.addAll(actual);
+    }
+
+    private void syncAssociation(Traffic traffic) {
+        getUnitStream(traffic)
+                .peek(unit -> unit.setTraffic(traffic))
+                .forEach(TrafficUnit::syncContentAssociation);
+    }
+
     private void setNewUnitNames(Traffic traffic) {
-        setUnitNames(traffic.getErdiTrafficUnits(),
-                traffic.getSearchQueryTrafficUnits(),
-                unit -> unit.setName(TrafficUnitUtils
+        getUnitStream(traffic)
+                .filter(unit -> StringUtils.isEmpty(unit.getName()))
+                .forEach(unit -> unit.setName(TrafficUnitUtils
                         .getNewName(traffic, unit.getType())));
     }
 
-    private void setUnitNames(List<ErdiTrafficUnit> erdiTrafficUnits,
-                                     List<SearchQueryTrafficUnit> searchQueryTrafficUnits,
-                                     Consumer<TrafficUnit> updater) {
-        Stream.concat(
-                erdiTrafficUnits.stream().map(TrafficUnit.class::cast),
-                searchQueryTrafficUnits.stream().map(TrafficUnit.class::cast)
-        ).forEach(updater);
+    private Stream<TrafficUnit> getUnitStream(Traffic traffic) {
+        return Stream.concat(
+                traffic.getErdiTrafficUnits().stream().map(TrafficUnit.class::cast),
+                traffic.getSearchQueryTrafficUnits().stream().map(TrafficUnit.class::cast)
+        );
     }
 
 }

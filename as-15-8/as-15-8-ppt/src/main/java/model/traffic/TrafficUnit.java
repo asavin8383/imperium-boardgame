@@ -2,6 +2,7 @@ package model.traffic;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -25,6 +26,7 @@ public abstract class TrafficUnit implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonView(Views.Id.class)
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @ToString.Include
     @EqualsAndHashCode.Include
     private Long id;
@@ -32,7 +34,7 @@ public abstract class TrafficUnit implements Serializable {
     @NotNull
     @Column(nullable = false, unique = true)
     @JsonView(Views.Brief.class)
-    //@JsonProperty(access = JsonProperty.Access.READ_ONLY) todo forbid name editing by user
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @ToString.Include
     private String name;
 
