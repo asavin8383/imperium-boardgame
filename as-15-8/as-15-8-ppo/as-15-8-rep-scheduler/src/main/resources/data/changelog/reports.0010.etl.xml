@@ -41,6 +41,12 @@ update dm.msr_prd set is_end_of_year=true where msr_prd_tp_id=1  and eff_dttm::d
             </sql>
         </rollback>
     </changeSet>
+    <changeSet id="0010.5" author="klychagin">
+        <addColumn schemaName="dm" tableName="access_tool">
+            <column name="eff_dttm" type="timestamp" defaultValueComputed="current_timestamp"></column>
+            <column name="end_dttm" type="timestamp" defaultValue="3000-01-01 00:00:00"></column>
+        </addColumn>
+    </changeSet>
 <!--    <changeSet id="0010.2" author="klychagin">-->
 <!--        <sql>-->
 <!--            create function dm.update_reports_data(rep_id bigint) returns void-->
