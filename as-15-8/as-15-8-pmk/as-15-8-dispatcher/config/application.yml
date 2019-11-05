@@ -30,10 +30,30 @@ spring:
           configuration:
             max.request.size: 10485760
         bindings:
-          incomingArrangements:
+          inputJobs:
             consumer:
-              startOffset: earliest
-              application-id: dispatcher
+              consumer:
+                autoCommitOffset: false
+                ackEachRecord: true
+                configuration:
+                  max.poll.records: 1
+                  max.poll.interval.ms: 3600000
+          inputJobNotifications:
+            consumer:
+              consumer:
+                autoCommitOffset: false
+                ackEachRecord: true
+                configuration:
+                  max.poll.records: 1
+                  max.poll.interval.ms: 3600000
+          inputAnalysisResults:
+            consumer:
+              consumer:
+                autoCommitOffset: false
+                ackEachRecord: true
+                configuration:
+                  max.poll.records: 1
+                  max.poll.interval.ms: 3600000
   datasource:
     test-while-idle: true
     validation-query: SELECT 1;
@@ -80,12 +100,6 @@ spring:
   liquibase:
     enabled: true
     change-log: classpath:/data/changelog/db.changelog.master.xml
-  cloud.stream:
-    bindings:
-      arrangementNotifications:
-        destination: arrangement_notifications
-        consumer:
-          concurrency: 28
 
 ---
 
