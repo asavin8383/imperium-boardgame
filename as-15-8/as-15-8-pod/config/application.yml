@@ -1,5 +1,7 @@
 logging.level.root: INFO
-config.url:  ${CONFIG_SERVER_URI:http://localhost:15802}
+gateway.url: ${GATEWAY_URI:http://localhost:15880}
+config.url:  ${gateway.url}/config
+rep_scheduler.url:  ${gateway.url}/report_scheduler
 spring:
   main.allow-bean-definition-overriding: true
   datasource:
@@ -77,8 +79,26 @@ registry-anonymizers:
 ---
 
 spring:
-  profiles: dev_pvorobiev, dev_asavin, dev_ashabalin, dev_jspirina, dev_asin
+  profiles: dev_pvorobiev, dev_asavin, dev_ashabalin, dev_jspirina
   profiles.include: local_log
+  jpa:
+    hibernate:
+      ddl-auto: none
+  liquibase:
+    enabled: true
+    change-log: classpath:/data/changelog/db.changelog.master.xml
+  datasource:
+    url: jdbc:postgresql://192.168.5.195:5432/asdb_test
+eureka.client.enabled: true
+
+---
+
+logging:
+  config:
+  level:
+    root: info
+spring:
+  profiles: dev_asin
   jpa:
     hibernate:
       ddl-auto: none

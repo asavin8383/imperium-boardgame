@@ -21,14 +21,21 @@ import java.util.List;
 @Slf4j
 public class PASDRestClient
 {
-    @Autowired
-    PASDDictionaryUpdater pasdDictionaryUpdater;
-
-    @Autowired
-    RestTemplate registryAnonimyzersRestTemplate;
-
     @Value("${spring.rest_base_url}")
     private String baseUrl;
+
+    private final PASDDictionaryUpdater pasdDictionaryUpdater;
+
+    private final RestTemplate registryAnonimyzersRestTemplate;
+
+    private final PASDUploader pasdUploader;
+
+    @Autowired
+    public PASDRestClient(PASDDictionaryUpdater pasdDictionaryUpdater, RestTemplate registryAnonimyzersRestTemplate, PASDUploader pasdUploader) {
+        this.pasdDictionaryUpdater = pasdDictionaryUpdater;
+        this.registryAnonimyzersRestTemplate = registryAnonimyzersRestTemplate;
+        this.pasdUploader = pasdUploader;
+    }
 
 
     public void readFromNet() {
@@ -43,6 +50,7 @@ public class PASDRestClient
 
         log.info("Got PS records: {}", list.toString());
         pasdDictionaryUpdater.insertRecords(list);
+        pasdUploader.upload();
 
     }
 }

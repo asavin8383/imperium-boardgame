@@ -87,14 +87,15 @@ public abstract class BaseDictionaryUpdater<T>
 
         //-- Старые записи, для которых нет новых записей
         //-- Отправить в историю
-        sql = "update " + TABLE + " set eff_dt = ? where " + ID + " in (" +
-                "select " + ID + " from " + TABLE + " old where eff_dt = '3000-01-01' and not exists(" +
-                "  select * from " + TABLE + " new where new.eff_dt is null " +
-                "  and new.orig_id = old.orig_id" +
-                ") )";
-        log.debug(sql);
-        rc = jdbcTemplate.update(sql, now);
-        log.debug("{} removed records archived", rc);
+        // Неактуально, т.к. мы можем вставлять записи вручную, по одной.
+//        sql = "update " + TABLE + " set eff_dt = ? where " + ID + " in (" +
+//                "select " + ID + " from " + TABLE + " old where eff_dt = '3000-01-01' and not exists(" +
+//                "  select * from " + TABLE + " new where new.eff_dt is null " +
+//                "  and new.orig_id = old.orig_id" +
+//                ") )";
+//        log.debug(sql);
+//        rc = jdbcTemplate.update(sql, now);
+//        log.debug("{} removed records archived", rc);
 
         //-- Старые записи, для которых есть новые записи, у которых c_date больше
         //-- Отправить в историю

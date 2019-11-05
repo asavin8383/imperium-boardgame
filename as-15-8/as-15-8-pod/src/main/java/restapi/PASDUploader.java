@@ -27,13 +27,16 @@ public class PASDUploader
     @Value("${config.url}")
     private String configUrl;
 
-    private final OAuth2RestTemplate oauth2RestTemplate;
+    @Value("${rep_scheduler.url}")
+    private String repUrl;
+
+    private final OAuth2RestTemplate restTemplate;
 
     private final PasdRepository pasdRepository;
 
     @Autowired
-    public PASDUploader(OAuth2RestTemplate oauth2RestTemplate, PasdRepository pasdRepository) {
-        this.oauth2RestTemplate = oauth2RestTemplate;
+    public PASDUploader(OAuth2RestTemplate restTemplate, PasdRepository pasdRepository) {
+        this.restTemplate = restTemplate;
         this.pasdRepository = pasdRepository;
     }
 
@@ -45,9 +48,10 @@ public class PASDUploader
 
         HttpEntity<List<PasdRecord>> entity = new HttpEntity<>(all, headers);
 
-        log.debug("Sending {} PASD records", all.size());
-        oauth2RestTemplate.postForObject(UriComponentsBuilder.fromHttpUrl(configUrl).path("/config/pasd").build().toString(), entity, ResponseEntity.class);
-        log.debug("{} PASD records sent successfully", all.size());
+        log.info("Sending {} PASD records", all.size());
+        restTemplate.postForObject(UriComponentsBuilder.fromHttpUrl(configUrl).path("/pasd").build().toString(), entity, ResponseEntity.class);
+        restTemplate.postForLocation(UriComponentsBuilder.fromHttpUrl(repUrl).path("/reports/dm/refresh").build().toString(), null);
+        log.info("{} PASD records sent successfully", all.size());
 
     }
 }

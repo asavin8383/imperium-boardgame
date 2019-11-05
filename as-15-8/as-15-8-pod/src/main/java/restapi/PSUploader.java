@@ -27,12 +27,15 @@ public class PSUploader
     @Value("${config.url}")
     private String configUrl;
 
-    private final OAuth2RestTemplate oauth2RestTemplate;
+    @Value("${rep_scheduler.url}")
+    private String repUrl;
+
+    private final OAuth2RestTemplate restTemplate;
 
     private final PsRepository psRepository;
 
     @Autowired
-    public PSUploader(OAuth2RestTemplate oauth2RestTemplate, PsRepository psRepository) {this.oauth2RestTemplate = oauth2RestTemplate;
+    public PSUploader(OAuth2RestTemplate restTemplate, PsRepository psRepository) {this.restTemplate = restTemplate;
         this.psRepository = psRepository;
     }
 
@@ -44,9 +47,10 @@ public class PSUploader
 
         HttpEntity<List<PsRecord>> entity = new HttpEntity<>(all, headers);
 
-        log.debug("Sending {} PS records", all.size());
-        oauth2RestTemplate.postForObject(UriComponentsBuilder.fromHttpUrl(configUrl).path("/config/ps").build().toString(), entity, ResponseEntity.class);
-        log.debug("{} PS records sent successfully", all.size());
+        log.info("Sending {} PS records", all.size());
+        restTemplate.postForObject(UriComponentsBuilder.fromHttpUrl(configUrl).path("/ps").build().toString(), entity, ResponseEntity.class);
+        restTemplate.postForLocation(UriComponentsBuilder.fromHttpUrl(repUrl).path("/reports/dm/refresh").build().toString(), null);
+        log.info("{} PS records sent successfully", all.size());
 
     }
 }
