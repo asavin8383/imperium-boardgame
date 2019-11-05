@@ -47,6 +47,25 @@ update dm.msr_prd set is_end_of_year=true where msr_prd_tp_id=1  and eff_dttm::d
             <column name="end_dttm" type="timestamp" defaultValue="3000-01-01 00:00:00"></column>
         </addColumn>
     </changeSet>
+    <changeSet id="0010.6" author="klychagin">
+        <addColumn schemaName="dm" tableName="reg_reports">
+            <column name="msr_prd_tp_id" type="smallint"/>
+        </addColumn>
+    </changeSet>
+        <changeSet id="0010.7" author="klychagin" >
+        <addForeignKeyConstraint baseTableSchemaName="dm" baseColumnNames="msr_prd_tp_id" baseTableName="reg_reports" constraintName="reg_msr_prd_tp_fk" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="CASCADE"  referencedTableSchemaName="dm" referencedColumnNames="msr_prd_tp_id" referencedTableName="msr_prd_tp"/>
+    </changeSet>
+    <changeSet id="0010.8" author="klychagin">
+        <sql>
+            update dm.reg_reports rr set msr_prd_tp_id=(select m.msr_prd_tp_id from dm.msr_prd m
+    where m.msr_prd_id=rr.msr_prd_id);
+        </sql>
+        <rollback>
+            <sql>
+                update dm.reg_reports set msr_prd_tp_id=null;
+            </sql>
+        </rollback>
+    </changeSet>
 <!--    <changeSet id="0010.2" author="klychagin">-->
 <!--        <sql>-->
 <!--            create function dm.update_reports_data(rep_id bigint) returns void-->
