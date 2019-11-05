@@ -1,12 +1,24 @@
 package services;
 
+import checkUnits.CheckUnit;
+import checkUnits.CheckUnitJob;
+import events.producers.kafka.CheckUnitJobProducer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import model.ScheduleCheckUnit;
+import model.SchedulePeriodCheckUnit;
+import model.SchedulePeriodCheckUnitStatus;
+import model.enums.SchedulePeriodState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import repositories.SchedulePeriodArrangementRepo;
+import repositories.SchedulePeriodCheckUnitRepo;
 import repositories.SchedulePeriodRepo;
 import repositories.ScheduleRepo;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 /**
  * Created by san
@@ -19,10 +31,41 @@ public class RunScheduleService {
 
     private final ScheduleRepo scheduleRepo;
     private final SchedulePeriodRepo schedulePeriodRepo;
+    private final SchedulePeriodArrangementRepo schedulePeriodArrangementRepo;
+    private final SchedulePeriodCheckUnitRepo schedulePeriodCheckUnitRepo;
+    private final CheckUnitJobProducer checkUnitJobProducer;
 
 
     @Scheduled(cron = "${app.schedule}")
     public void runSchedule(){
-
+        scheduleRepo.findAllByPlannedDate(LocalDate.now())
+            .forEach(schedule -> schedulePeriodRepo.findAllByScheduleAndSchedulePeriodStateAndAndStartTimeGreaterThan(schedule, SchedulePeriodState.CREATED, LocalTime.now())
+                .forEach(schedulePeriod -> {
+                    schedulePeriodArrangementRepo.findAllBySchedulePeriod(schedulePeriod)
+                        .forEach(schedulePeriodArrangement -> schedulePeriodCheckUnitRepo.findAllBySchedulePeriodArrangement(schedulePeriodArrangement)
+                            .forEach(this::runCheckUnit));
+                    schedulePeriod.setSchedulePeriodState(SchedulePeriodState.STARTED);
+                    schedulePeriodRepo.save(schedulePeriod);
+                }));
     }
+
+    private void runCheckUnit(SchedulePeriodCheckUnit schedulePeriodCheckUnit){
+        if (schedulePeriodCheckUnit.getStatus().equals(SchedulePeriodCheckUnitStatus.READY)){
+            String key = schedulePeriodCheckUnit.getSchedulePeriodArrangement().getArrangement().getId().toString() + "_" + schedulePeriodCheckUnit.getExecutionNumber();
+            sendCheckUnitJobToDispatcher(createCheckUnitJob(schedulePeriodCheckUnit.getCheckUnit()), key);
+        }
+    }
+
+    private void sendCheckUnitJobToDispatcher(CheckUnitJob checkUnitJob, String key){
+        checkUnitJobProducer.sendJobToDispatcher(checkUnitJob, key);
+    }
+
+    private CheckUnitJob createCheckUnitJob(ScheduleCheckUnit scheduleCheckUnit) {
+        CheckUnitJob checkUnitJob = new CheckUnitJob();
+        checkUnitJob.setArrangementId(scheduleCheckUnit.getArrangement().getId());
+        checkUnitJob.setAccessTool(scheduleCheckUnit.getArrangement().getAccessTool());
+        checkUnitJob.setCheckUnit(new CheckUnit(scheduleCheckUnit.getErdiId(), scheduleCheckUnit.getCheckUnitType(), scheduleCheckUnit.getCheckUnitValue()));
+        return checkUnitJob;
+    }
+
 }

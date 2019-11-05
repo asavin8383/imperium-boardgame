@@ -97,7 +97,7 @@ public class ArrangementController {
     private ScheduleCheckUnit createCheckUnit(Arrangement arrangement, CheckUnit checkUnit, String checkUnitValue){
         ScheduleCheckUnit scheduleCheckUnit = new ScheduleCheckUnit();
         scheduleCheckUnit.setArrangement(arrangement);
-        scheduleCheckUnit.setErdiId(checkUnit.getErdiId().toString());
+        scheduleCheckUnit.setErdiId(checkUnit.getErdiId());
         scheduleCheckUnit.setCheckUnitType(checkUnit.getType());
         scheduleCheckUnit.setCheckUnitValue(checkUnitValue);
         return scheduleCheckUnit;

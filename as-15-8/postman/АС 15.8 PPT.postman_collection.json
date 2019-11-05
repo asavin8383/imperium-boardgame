@@ -1,0 +1,2604 @@
+{
+	"info": {
+		"_postman_id": "77432ca4-0c4a-44c1-b14e-a6a72eead66b",
+		"name": "АС 15.8 PPT",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Формализованные задания",
+			"item": [
+				{
+					"name": "Мероприятия",
+					"item": [
+						{
+							"name": "Получение информации о мероприятии",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"value": "{{oper_token}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/arrangements?formalTaskId=3&sortingColumn=title&sortingDirection=DESC",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"arrangements"
+									],
+									"query": [
+										{
+											"key": "formalTaskId",
+											"value": "3"
+										},
+										{
+											"key": "id",
+											"value": "6",
+											"disabled": true
+										},
+										{
+											"key": "sortingColumn",
+											"value": "title"
+										},
+										{
+											"key": "sortingDirection",
+											"value": "DESC"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Получение информации о мероприятии",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "X-AUTH-TOKEN",
+												"value": "{{oper_token}}",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{url}}/arrangements?formalTaskId=3&id=6",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"arrangements"
+											],
+											"query": [
+												{
+													"key": "formalTaskId",
+													"value": "3"
+												},
+												{
+													"key": "id",
+													"value": "6"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "X-Content-Type-Options",
+											"value": "nosniff"
+										},
+										{
+											"key": "X-XSS-Protection",
+											"value": "1; mode=block"
+										},
+										{
+											"key": "Cache-Control",
+											"value": "no-cache, no-store, max-age=0, must-revalidate"
+										},
+										{
+											"key": "Pragma",
+											"value": "no-cache"
+										},
+										{
+											"key": "Expires",
+											"value": "0"
+										},
+										{
+											"key": "X-Frame-Options",
+											"value": "DENY"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json;charset=UTF-8"
+										},
+										{
+											"key": "Transfer-Encoding",
+											"value": "chunked"
+										},
+										{
+											"key": "Date",
+											"value": "Wed, 22 May 2019 08:41:51 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"content\": [\n        {\n            \"id\": 6,\n            \"title\": \"Тест\",\n            \"status\": \"PLANNED\",\n            \"creationDate\": \"2019-05-22T11:40:06.845\",\n            \"startDate\": null,\n            \"endDate\": null,\n            \"accessTool\": {\n                \"id\": 18,\n                \"name\": \"CAMELEO_XYZ\",\n                \"type\": \"ANONYMIZER\"\n            },\n            \"result\": null\n        }\n    ],\n    \"pageable\": {\n        \"sort\": {\n            \"sorted\": true,\n            \"unsorted\": false,\n            \"empty\": false\n        },\n        \"offset\": 0,\n        \"pageNumber\": 0,\n        \"pageSize\": 10,\n        \"paged\": true,\n        \"unpaged\": false\n    },\n    \"totalPages\": 1,\n    \"totalElements\": 1,\n    \"last\": true,\n    \"size\": 10,\n    \"number\": 0,\n    \"sort\": {\n        \"sorted\": true,\n        \"unsorted\": false,\n        \"empty\": false\n    },\n    \"first\": true,\n    \"numberOfElements\": 1,\n    \"empty\": false\n}"
+								}
+							]
+						},
+						{
+							"name": "Добавление мероприятия заданию",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"value": "{{oper_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"accessTool\": {\"id\": 1},\n    \"title\": \"Тест\",\n    \"startDate\": \"2019-05-27T12:00:00\",\n    \"endDate\": \"2019-05-27T15:00:00\"\n}"
+								},
+								"url": {
+									"raw": "{{url}}/arrangements?formalTaskId=13",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"arrangements"
+									],
+									"query": [
+										{
+											"key": "formalTaskId",
+											"value": "13"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Добавление мероприятия заданию",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "X-AUTH-TOKEN",
+												"value": "{{oper_token}}",
+												"type": "text"
+											},
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"accessTool\": {\"id\": 16},\n    \"title\": \"Тест\",\n    \"startDate\": null,\n    \"endDate\": null,\n    \"result\": null\n}"
+										},
+										"url": {
+											"raw": "{{url}}/arrangements?formalTaskId=3",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"arrangements"
+											],
+											"query": [
+												{
+													"key": "formalTaskId",
+													"value": "3"
+												}
+											]
+										}
+									},
+									"status": "Created",
+									"code": 201,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "X-Content-Type-Options",
+											"value": "nosniff"
+										},
+										{
+											"key": "X-XSS-Protection",
+											"value": "1; mode=block"
+										},
+										{
+											"key": "Cache-Control",
+											"value": "no-cache, no-store, max-age=0, must-revalidate"
+										},
+										{
+											"key": "Pragma",
+											"value": "no-cache"
+										},
+										{
+											"key": "Expires",
+											"value": "0"
+										},
+										{
+											"key": "X-Frame-Options",
+											"value": "DENY"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json;charset=UTF-8"
+										},
+										{
+											"key": "Transfer-Encoding",
+											"value": "chunked"
+										},
+										{
+											"key": "Date",
+											"value": "Wed, 22 May 2019 08:40:21 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"id\": 8,\n    \"title\": \"Тест\",\n    \"status\": \"PLANNED\",\n    \"creationDate\": \"2019-05-22T11:40:21.223\",\n    \"startDate\": null,\n    \"endDate\": null,\n    \"accessTool\": {\n        \"id\": 16,\n        \"name\": null,\n        \"type\": null\n    },\n    \"result\": null\n}"
+								}
+							]
+						},
+						{
+							"name": "Изменение мероприятия",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "X-AUTH-TOKEN",
+										"value": "{{oper_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"accessTool\": {\"id\": 16},\n    \"title\": \"Подготовка к запуску\",\n    \"startDate\": \"2019-05-27T12:00:00\",\n    \"endDate\": \"2019-05-27T15:00:00\"\n}"
+								},
+								"url": {
+									"raw": "{{url}}/arrangements?id=8",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"arrangements"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "8"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Изменение мероприятия",
+									"originalRequest": {
+										"method": "PUT",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											},
+											{
+												"key": "X-AUTH-TOKEN",
+												"value": "{{oper_token}}",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"accessTool\": {\"id\": 16},\n    \"title\": \"Подготовка к запуску\",\n    \"startDate\": \"2019-05-27T12:00:00\",\n    \"endDate\": \"2019-05-27T15:00:00\"\n}"
+										},
+										"url": {
+											"raw": "{{url}}/arrangements?id=8",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"arrangements"
+											],
+											"query": [
+												{
+													"key": "id",
+													"value": "8"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "X-Content-Type-Options",
+											"value": "nosniff"
+										},
+										{
+											"key": "X-XSS-Protection",
+											"value": "1; mode=block"
+										},
+										{
+											"key": "Cache-Control",
+											"value": "no-cache, no-store, max-age=0, must-revalidate"
+										},
+										{
+											"key": "Pragma",
+											"value": "no-cache"
+										},
+										{
+											"key": "Expires",
+											"value": "0"
+										},
+										{
+											"key": "X-Frame-Options",
+											"value": "DENY"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json;charset=UTF-8"
+										},
+										{
+											"key": "Transfer-Encoding",
+											"value": "chunked"
+										},
+										{
+											"key": "Date",
+											"value": "Mon, 27 May 2019 06:25:58 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"id\": 8,\n    \"title\": \"Подготовка к запуску\",\n    \"status\": \"PLANNED\",\n    \"creationDate\": \"2019-05-22T11:40:21.223\",\n    \"startDate\": \"2019-05-27T12:00:00\",\n    \"endDate\": \"2019-05-27T15:00:00\",\n    \"accessTool\": {\n        \"id\": 16,\n        \"name\": null,\n        \"type\": null\n    },\n    \"result\": null\n}"
+								}
+							]
+						},
+						{
+							"name": "Удаление мероприятия",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"value": "{{admin_token}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/arrangements?id=6",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"arrangements"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "6"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Получение списка ЕРДИ по фильтру",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"value": "{{oper_token}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/erdi?blocktype=IP&sortingColumn=id&sortingDirection=DESC",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"erdi"
+									],
+									"query": [
+										{
+											"key": "organization",
+											"value": "потребнадзор",
+											"disabled": true
+										},
+										{
+											"key": "blocktype",
+											"value": "IP"
+										},
+										{
+											"key": "sortingColumn",
+											"value": "id"
+										},
+										{
+											"key": "sortingDirection",
+											"value": "DESC"
+										},
+										{
+											"key": "id",
+											"value": "322865",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Добавление ЕРДИ мероприятию",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"value": "{{oper_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"arrangement\": {\"id\": 33},\n\t\"erdi\": {\"id\": 170670}\n}"
+								},
+								"url": {
+									"raw": "{{url}}/arrangement_items?",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"arrangement_items"
+									],
+									"query": [
+										{
+											"key": "",
+											"value": "5",
+											"disabled": true
+										},
+										{
+											"key": "",
+											"value": "1",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Запуск мероприятия",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"value": "{{oper_token}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/arrangements/run?id=5",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"arrangements",
+										"run"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "5"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Получение списка ЕРДИ мероприятия для сохранения в файл",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"value": "{{oper_token}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/arrangement_items/download?arrangementId=12",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"arrangement_items",
+										"download"
+									],
+									"query": [
+										{
+											"key": "arrangementId",
+											"value": "12"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Получение списка ЕРДИ мероприятия",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"type": "text",
+										"value": "{{oper_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/arrangement_items?arrangementId=1&sortingColumn=erdi.id&sortingDirection=DESC",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"arrangement_items"
+									],
+									"query": [
+										{
+											"key": "arrangementId",
+											"value": "1"
+										},
+										{
+											"key": "sortingColumn",
+											"value": "erdi.id"
+										},
+										{
+											"key": "sortingDirection",
+											"value": "DESC"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Загрузка списка ЕРДИ в мероприятие",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "X-AUTH-TOKEN",
+										"value": "{{oper_token}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "[\n    {\n        \"id\": 1\n    },\n    {\n        \"id\": 2\n    }\n]"
+								},
+								"url": {
+									"raw": "{{url}}/arrangement_items/upload?arrangementId=12",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"arrangement_items",
+										"upload"
+									],
+									"query": [
+										{
+											"key": "arrangementId",
+											"value": "12"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Запланировать мероприятие",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"value": "{{oper_token}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/arrangements/plan?id=28",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"arrangements",
+										"plan"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "28"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Заполнение мероприятия списком проверяемых ресурсов",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"value": "{{oper_token}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/arrangements/fill/?id=23",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"arrangements",
+										"fill",
+										""
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "23"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Результаты",
+					"item": [
+						{
+							"name": "Получение результатов мероприятия",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"value": "{{oper_token}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/results?arrangementId=43&sortingColumn=result&sortingDirection=DESC&checkUnitJobResults=TIMEOUT_ERROR",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"results"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "11",
+											"disabled": true
+										},
+										{
+											"key": "arrangementId",
+											"value": "43"
+										},
+										{
+											"key": "checkUnitValue",
+											"value": "anna",
+											"disabled": true
+										},
+										{
+											"key": "checkUnitType",
+											"value": "DOMAIN",
+											"disabled": true
+										},
+										{
+											"key": "sortingColumn",
+											"value": "result"
+										},
+										{
+											"key": "sortingDirection",
+											"value": "DESC"
+										},
+										{
+											"key": "checkUnitJobResults",
+											"value": "TIMEOUT_ERROR"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Получение скриншота",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"value": "{{oper_token}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/results/screenshot?id=258",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"results",
+										"screenshot"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "258"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Получение дополнительной информации",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": ""
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Просмотры",
+					"item": [
+						{
+							"name": "Список",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"value": "{{oper_token}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/arrangement_views?user_id=1&viewed=false",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"arrangement_views"
+									],
+									"query": [
+										{
+											"key": "user_id",
+											"value": "1"
+										},
+										{
+											"key": "viewed",
+											"value": "false"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Удаление",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"value": "{{oper_token}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/arrangement_views?id=3",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"arrangement_views"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "3"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Добавление формализованного задания",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"value": "{{oper_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"agreed\":true,\n\t\"author\":\"jack\",\n\t\"creationDate\":\"\",\n\t\"deadlineDate\":\"\",\n\t\"endDate\":\"\",\n\t\"fgisId\":\"\",\n\t\"id\":\"\",\n\t\"modificationDate\":\"\",\n\t\"priority\":\"URGENT\",\n\t\"startDate\":\"\",\n\t\"title\":\"test p oper\",\n\t\"user\":{\"id\":1,\"userName\":\"jack\",\"firstName\":null,\"secondName\":null,\"email\":null},\n\t\"plannedDate\":\"2019-09-28T17:26:00\"}"
+						},
+						"url": {
+							"raw": "{{url}}/formal_tasks",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"formal_tasks"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Добавление формализованного задания",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"value": "{{oper_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"title\": \"Задание на проверку\"\n}"
+								},
+								"url": {
+									"raw": "{{url}}/formal_tasks",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"formal_tasks"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Content-Type-Options",
+									"value": "nosniff"
+								},
+								{
+									"key": "X-XSS-Protection",
+									"value": "1; mode=block"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, no-store, max-age=0, must-revalidate"
+								},
+								{
+									"key": "Pragma",
+									"value": "no-cache"
+								},
+								{
+									"key": "Expires",
+									"value": "0"
+								},
+								{
+									"key": "X-Frame-Options",
+									"value": "DENY"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json;charset=UTF-8"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 22 May 2019 08:41:01 GMT"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": 4,\n    \"title\": \"Задание на проверку\",\n    \"user\": {\n        \"id\": 2,\n        \"userName\": \"jack\",\n        \"firstName\": \"jack\",\n        \"secondName\": \"jackson\",\n        \"email\": \"jack@jackson.ru\"\n    },\n    \"status\": \"PLANNED\",\n    \"creationDate\": \"2019-05-22T11:41:00.918\",\n    \"startDate\": null,\n    \"endDate\": null,\n    \"modificationDate\": null,\n    \"deadlineDate\": null,\n    \"author\": null,\n    \"agreed\": false,\n    \"fgisId\": null,\n    \"priority\": null,\n    \"informalTask\": null\n}"
+						}
+					]
+				},
+				{
+					"name": "Получение списка заданий",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"value": "{{oper_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/formal_tasks?sortingColumn=creationDate&sortingDirection=ASC",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"formal_tasks"
+							],
+							"query": [
+								{
+									"key": "pageSize",
+									"value": "4",
+									"disabled": true
+								},
+								{
+									"key": "pageNumber",
+									"value": "0",
+									"disabled": true
+								},
+								{
+									"key": "taskId",
+									"value": "3",
+									"disabled": true
+								},
+								{
+									"key": "userId",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "sortingColumn",
+									"value": "creationDate"
+								},
+								{
+									"key": "sortingDirection",
+									"value": "ASC"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Получение списка заданий",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"value": "{{oper_token}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/formal_tasks?taskId=55",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"formal_tasks"
+									],
+									"query": [
+										{
+											"key": "pageSize",
+											"value": "4",
+											"disabled": true
+										},
+										{
+											"key": "pageNumber",
+											"value": "0",
+											"disabled": true
+										},
+										{
+											"key": "taskId",
+											"value": "55"
+										},
+										{
+											"key": "userId",
+											"value": "1",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Set-Cookie",
+									"value": "JSESSIONID=D5BB63193BE10CC18577262347503C1F; Path=/; HttpOnly"
+								},
+								{
+									"key": "X-Content-Type-Options",
+									"value": "nosniff"
+								},
+								{
+									"key": "X-XSS-Protection",
+									"value": "1; mode=block"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, no-store, max-age=0, must-revalidate"
+								},
+								{
+									"key": "Pragma",
+									"value": "no-cache"
+								},
+								{
+									"key": "Expires",
+									"value": "0"
+								},
+								{
+									"key": "X-Frame-Options",
+									"value": "DENY"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json;charset=UTF-8"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 21 May 2019 14:16:56 GMT"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"content\": [\n        {\n            \"id\": 55,\n            \"title\": \"Тестовое задание\",\n            \"user\": {\n                \"id\": 48,\n                \"userName\": \"oper\",\n                \"firstName\": \"AS_15_8_oper\",\n                \"secondName\": null,\n                \"email\": null\n            },\n            \"status\": \"PLANNED\",\n            \"creationDate\": \"2019-05-20T17:06:49.097\",\n            \"startDate\": null,\n            \"endDate\": null,\n            \"modificationDate\": null,\n            \"deadlineDate\": null,\n            \"author\": null,\n            \"agreed\": false,\n            \"fgisId\": null,\n            \"priority\": null,\n            \"arrangementInfo\": [\n                {\n                    \"result\": null,\n                    \"accessTool\": \"GOOGLE\",\n                    \"endDate\": null,\n                    \"id\": 3,\n                    \"title\": \"Тест\",\n                    \"creationDate\": \"2019-05-21T09:06:42.745\",\n                    \"status\": \"PLANNED\"\n                }\n            ]\n        }\n    ],\n    \"pageable\": {\n        \"sort\": {\n            \"unsorted\": false,\n            \"sorted\": true,\n            \"empty\": false\n        },\n        \"offset\": 0,\n        \"pageNumber\": 0,\n        \"pageSize\": 10,\n        \"paged\": true,\n        \"unpaged\": false\n    },\n    \"totalElements\": 1,\n    \"totalPages\": 1,\n    \"last\": true,\n    \"size\": 10,\n    \"number\": 0,\n    \"sort\": {\n        \"unsorted\": false,\n        \"sorted\": true,\n        \"empty\": false\n    },\n    \"numberOfElements\": 1,\n    \"first\": true,\n    \"empty\": false\n}"
+						}
+					]
+				},
+				{
+					"name": "Изменение формализованного задания",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"value": "{{oper_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Тестовое задание\",\n    \"user\": {\"userName\": \"jack\"},\n    \"status\": \"PLANNED\",\n    \"creationDate\": \"2019-05-20T16:25:43.301\",\n    \"startDate\": null,\n    \"endDate\": null,\n    \"modificationDate\": null,\n    \"deadlineDate\": null,\n    \"author\": null,\n    \"agreed\": false,\n    \"fgisId\": null,\n    \"priority\": null\n}"
+						},
+						"url": {
+							"raw": "{{url}}/formal_tasks?id=4",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"formal_tasks"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "4"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Изменение формализованного задания",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"value": "{{oper_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"title\": \"Тестовое задание\",\n    \"user\": {\"userName\": \"jack\"},\n    \"status\": \"PLANNED\",\n    \"creationDate\": \"2019-05-20T16:25:43.301\",\n    \"startDate\": null,\n    \"endDate\": null,\n    \"modificationDate\": null,\n    \"deadlineDate\": null,\n    \"author\": null,\n    \"agreed\": false,\n    \"fgisId\": null,\n    \"priority\": null\n}"
+								},
+								"url": {
+									"raw": "{{url}}/formal_tasks?id=4",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"formal_tasks"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "4"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Content-Type-Options",
+									"value": "nosniff"
+								},
+								{
+									"key": "X-XSS-Protection",
+									"value": "1; mode=block"
+								},
+								{
+									"key": "Cache-Control",
+									"value": "no-cache, no-store, max-age=0, must-revalidate"
+								},
+								{
+									"key": "Pragma",
+									"value": "no-cache"
+								},
+								{
+									"key": "Expires",
+									"value": "0"
+								},
+								{
+									"key": "X-Frame-Options",
+									"value": "DENY"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json;charset=UTF-8"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 22 May 2019 08:42:28 GMT"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": 4,\n    \"title\": \"Задание на проверку\",\n    \"user\": {\n        \"id\": null,\n        \"userName\": \"jack\",\n        \"firstName\": null,\n        \"secondName\": null,\n        \"email\": null\n    },\n    \"status\": \"PLANNED\",\n    \"creationDate\": \"2019-05-22T11:41:00.918\",\n    \"startDate\": null,\n    \"endDate\": null,\n    \"modificationDate\": null,\n    \"deadlineDate\": null,\n    \"author\": null,\n    \"agreed\": false,\n    \"fgisId\": null,\n    \"priority\": null,\n    \"informalTask\": null\n}"
+						}
+					]
+				},
+				{
+					"name": "Группировка заданий по статусам",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"value": "{{oper_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/formal_tasks/group",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"formal_tasks",
+								"group"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Список заданий по статусу",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"value": "{{oper_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/formal_tasks/status?status=PLANNED",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"formal_tasks",
+								"status"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "PLANNED"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Удаление формализованных заданий",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"value": "{{oper_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/formal_tasks?id=6",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"formal_tasks"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "6"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Профильный трафик",
+			"item": [
+				{
+					"name": "Пользовательские ЕРДИ",
+					"item": [
+						{
+							"name": "Получение списка ЕРДИ",
+							"request": {
+								"auth": {
+									"type": "oauth2",
+									"oauth2": [
+										{
+											"key": "accessToken",
+											"value": "{{token}}",
+											"type": "string"
+										},
+										{
+											"key": "addTokenTo",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/erdi/custom?",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"erdi",
+										"custom"
+									],
+									"query": [
+										{
+											"key": "query",
+											"value": "ip_v6",
+											"disabled": true
+										},
+										{
+											"key": "containsInTraffic",
+											"value": "true",
+											"disabled": true
+										},
+										{
+											"key": "erdiTrafficUnitId",
+											"value": "40",
+											"disabled": true
+										},
+										{
+											"key": "searchTrafficUnitId",
+											"value": "5",
+											"disabled": true
+										},
+										{
+											"key": "sortingDirection",
+											"value": "DESC",
+											"disabled": true
+										},
+										{
+											"key": "sortingColumn",
+											"value": "id",
+											"disabled": true
+										},
+										{
+											"key": "pageNumber",
+											"value": "0",
+											"disabled": true
+										},
+										{
+											"key": "pageSize",
+											"value": "5",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Добавление ЕРДИ",
+							"request": {
+								"auth": {
+									"type": "oauth2",
+									"oauth2": [
+										{
+											"key": "accessToken",
+											"value": "{{token}}",
+											"type": "string"
+										},
+										{
+											"key": "addTokenTo",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"name\": \"Custom ERDI 3\",\n\t\"violation\": {\n                \"id\": 1,\n                \"fullId\": \"cp\",\n                \"name\": \"cp\",\n                \"deleted\": true,\n                \"parent\": null\n    },\n    \"customErdiUnits\": [\n    \t{\n    \t\t\"type\": \"IP_V4\",\n    \t\t\"value\": \"104.31.87.1\"\n    \t},\n    \t{\n    \t\t\"type\": \"URL\",\n    \t\t\"value\": \"http://tbib.org/images/4607/72ceaf765d2472a4d278168fb16821de6409ff1a.jpeg?5121380\"\n    \t}\n    ]\n}"
+								},
+								"url": {
+									"raw": "{{url}}/erdi/custom",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"erdi",
+										"custom"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Получение ЕРДИ по ID",
+							"request": {
+								"auth": {
+									"type": "oauth2",
+									"oauth2": [
+										{
+											"key": "accessToken",
+											"value": "{{token}}",
+											"type": "string"
+										},
+										{
+											"key": "addTokenTo",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/erdi/custom/28",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"erdi",
+										"custom",
+										"28"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Редактирование ЕРДИ",
+							"request": {
+								"auth": {
+									"type": "oauth2",
+									"oauth2": [
+										{
+											"key": "accessToken",
+											"value": "{{token}}",
+											"type": "string"
+										},
+										{
+											"key": "addTokenTo",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"Custom ERDI 1 - changed\",\r\n    \"violation\": {\r\n        \"id\": 1,\r\n        \"fullId\": \"cp\",\r\n        \"name\": \"cp\",\r\n        \"deleted\": true,\r\n        \"parent\": null\r\n    }\r\n}"
+								},
+								"url": {
+									"raw": "{{url}}/erdi/custom/28",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"erdi",
+										"custom",
+										"28"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Удаление ЕРДИ",
+							"request": {
+								"auth": {
+									"type": "oauth2",
+									"oauth2": [
+										{
+											"key": "accessToken",
+											"value": "{{token}}",
+											"type": "string"
+										},
+										{
+											"key": "addTokenTo",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/erdi/custom/32",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"erdi",
+										"custom",
+										"32"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Получение списка юнитов",
+							"request": {
+								"auth": {
+									"type": "oauth2",
+									"oauth2": [
+										{
+											"key": "accessToken",
+											"value": "{{token}}",
+											"type": "string"
+										},
+										{
+											"key": "addTokenTo",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/erdi/custom/units?customErdiId=31",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"erdi",
+										"custom",
+										"units"
+									],
+									"query": [
+										{
+											"key": "sortingDirection",
+											"value": "DESC",
+											"disabled": true
+										},
+										{
+											"key": "sortingColumn",
+											"value": "id",
+											"disabled": true
+										},
+										{
+											"key": "pageNumber",
+											"value": "0",
+											"disabled": true
+										},
+										{
+											"key": "pageSize",
+											"value": "5",
+											"disabled": true
+										},
+										{
+											"key": "customErdiId",
+											"value": "31"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Добавление юнита",
+							"request": {
+								"auth": {
+									"type": "oauth2",
+									"oauth2": [
+										{
+											"key": "accessToken",
+											"value": "{{token}}",
+											"type": "string"
+										},
+										{
+											"key": "addTokenTo",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"type\": \"URL\",\n\t\"value\": \"https://doom.ru/cp\"\n}"
+								},
+								"url": {
+									"raw": "{{url}}/erdi/custom/units?customErdiId=31",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"erdi",
+										"custom",
+										"units"
+									],
+									"query": [
+										{
+											"key": "customErdiId",
+											"value": "31"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Редактирование юнита",
+							"request": {
+								"auth": {
+									"type": "oauth2",
+									"oauth2": [
+										{
+											"key": "accessToken",
+											"value": "{{token}}",
+											"type": "string"
+										},
+										{
+											"key": "addTokenTo",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"type\": \"IP_V6\",\n\t\"value\": \"2001:db8::8a2e:370:7334\",\n\t\"customErdi\": {\"id\": 31}\n}"
+								},
+								"url": {
+									"raw": "{{url}}/erdi/custom/units/17",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"erdi",
+										"custom",
+										"units",
+										"17"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Удаление юнита",
+							"request": {
+								"auth": {
+									"type": "oauth2",
+									"oauth2": [
+										{
+											"key": "accessToken",
+											"value": "{{token}}",
+											"type": "string"
+										},
+										{
+											"key": "addTokenTo",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/erdi/custom/units/17",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"erdi",
+										"custom",
+										"units",
+										"17"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Поисковые фразы",
+					"item": [
+						{
+							"name": "Получение списка фраз",
+							"request": {
+								"auth": {
+									"type": "oauth2",
+									"oauth2": [
+										{
+											"key": "accessToken",
+											"value": "{{token}}",
+											"type": "string"
+										},
+										{
+											"key": "addTokenTo",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/phrases?",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"phrases"
+									],
+									"query": [
+										{
+											"key": "query",
+											"value": "ы",
+											"disabled": true
+										},
+										{
+											"key": "containsInTraffic",
+											"value": "false",
+											"disabled": true
+										},
+										{
+											"key": "searchTrafficUnitId",
+											"value": "5",
+											"disabled": true
+										},
+										{
+											"key": "sortingDirection",
+											"value": "DESC",
+											"disabled": true
+										},
+										{
+											"key": "sortingColumn",
+											"value": "id",
+											"disabled": true
+										},
+										{
+											"key": "pageNumber",
+											"value": "0",
+											"disabled": true
+										},
+										{
+											"key": "pageSize",
+											"value": "5",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Добавление фразы",
+							"request": {
+								"auth": {
+									"type": "oauth2",
+									"oauth2": [
+										{
+											"key": "accessToken",
+											"value": "{{token}}",
+											"type": "string"
+										},
+										{
+											"key": "addTokenTo",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"phrase\": \"Rhzr\",\n\t\"violation\": {\n                \"id\": 1,\n                \"fullId\": \"cp\",\n                \"name\": \"cp\",\n                \"deleted\": true,\n                \"parent\": null\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/phrases",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"phrases"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Получение фразы по ID",
+							"request": {
+								"auth": {
+									"type": "oauth2",
+									"oauth2": [
+										{
+											"key": "accessToken",
+											"value": "{{token}}",
+											"type": "string"
+										},
+										{
+											"key": "addTokenTo",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/phrases/6",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"phrases",
+										"6"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Редактирование фразы",
+							"request": {
+								"auth": {
+									"type": "oauth2",
+									"oauth2": [
+										{
+											"key": "accessToken",
+											"value": "{{token}}",
+											"type": "string"
+										},
+										{
+											"key": "addTokenTo",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"phrase\": \"Кряк\",\n\t\"violation\": {\n        \"id\": 1,\n        \"fullId\": \"cp\",\n        \"name\": \"cp\",\n        \"deleted\": true,\n        \"parent\": null\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/phrases/6",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"phrases",
+										"6"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Удаление фразы",
+							"request": {
+								"auth": {
+									"type": "oauth2",
+									"oauth2": [
+										{
+											"key": "accessToken",
+											"value": "{{token}}",
+											"type": "string"
+										},
+										{
+											"key": "addTokenTo",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/phrases/6",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"phrases",
+										"6"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Получение списка трафиков",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "{{token}}",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/traffic",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"traffic"
+							],
+							"query": [
+								{
+									"key": "query",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "sortingDirection",
+									"value": "ASC",
+									"disabled": true
+								},
+								{
+									"key": "sortingColumn",
+									"value": "id",
+									"disabled": true
+								},
+								{
+									"key": "pageNumber",
+									"value": "0",
+									"disabled": true
+								},
+								{
+									"key": "pageSize",
+									"value": "5",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Добавление трафика",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "{{token}}",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"Traffic_2\",\n\n\t\"formalErdiUnit\": {\n\t\t\"category\": {\n                \"id\": 0,\n                \"name\": \"DEFAULT\",\n                \"parent\": null\n        },\n\t\t\"formalErdiList\": [\n\t\t\t{ \"id\": 247861 },\n\t\t\t{ \"id\": 247862 }\n\t\t]\n\t},\n\t\"customErdiUnit\": {\n\t\t\"category\": {\n                \"id\": 0,\n                \"name\": \"DEFAULT\",\n                \"parent\": null\n        },\n\t\t\"customErdiList\": [\n\t\t\t{ \"id\": 33 },\n\t\t\t{ \"id\": 34 }\n\t\t]\n\t},\n\t\"searchPhraseUnit\": {\n\t\t\"queryPattern\": \"\",\n\t\t\"category\": {\n                \"id\": 0,\n                \"name\": \"DEFAULT\",\n                \"parent\": null\n        },\n\t\t\"searchPhrases\": [\n\t\t\t{ \"id\": 7 }\n\t\t]\n\t},\n\t\"searchTemplates\": [\n\t\t{\n\t\t\t\"category\": {\n                \"id\": 0,\n                \"name\": \"DEFAULT\",\n                \"parent\": null\n            },\n\t\t\t\"queryPattern\": \"test patter $ERDI\",\n\t\t\t\"customErdiList\": [\n\t\t\t\t{ \"id\": 34 }\n\t\t\t],\n\t\t\t\"formalErdiList\": [\n\t\t\t\t{ \"id\": 247861 },\n\t\t\t\t{ \"id\": 247862 }\n\t\t\t],\n\t\t\t\"searchPhrases\": [\n\t\t\t]\n\t\t}\n\t]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/traffic?",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"traffic"
+							],
+							"query": [
+								{
+									"key": "",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Получение трафика по ID",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "{{token}}",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/traffic/54",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"traffic",
+								"54"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Редактирование трафика",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "{{token}}",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"name\": \"Traffic_1\",\r\n\r\n\t\"formalErdiUnit\": {\r\n        \"id\": 25,\r\n        \"name\": \"Traffic+2_nmmuzlot_FORMAL\",\r\n\t\t\"category\": {\r\n            \"id\": 0,\r\n            \"name\": \"DEFAULT\",\r\n            \"parent\": null\r\n        },\r\n\t\t\"formalErdiList\": [\r\n\t\t\t{ \"id\": 247862 }\r\n\t\t]\r\n\t},\r\n\t\"customErdiUnit\": {\r\n        \"id\": 26,\r\n        \"name\": \"Traffic+2_xiyrlssy_CUSTOM\",\r\n\t\t\"category\": {\r\n            \"id\": 0,\r\n            \"name\": \"DEFAULT\",\r\n            \"parent\": null\r\n        },\r\n\t\t\"customErdiList\": [\r\n\t\t\t{ \"id\": 33 },\r\n\t\t\t{ \"id\": 34 }\r\n\t\t]\r\n\t},\r\n\t\"searchPhraseUnit\": {\r\n        \"id\": 26,\r\n        \"name\": \"Traffic+2_ohrhbvjy_PHRASE\",\r\n\t\t\"queryPattern\": \"\",\r\n\t\t\"category\": {\r\n            \"id\": 0,\r\n            \"name\": \"DEFAULT\",\r\n            \"parent\": null\r\n        },\r\n\t\t\"searchPhrases\": [\r\n\t\t]\r\n\t},\r\n\t\"searchTemplates\": [\r\n\t\t{\r\n            \"id\": 27,\r\n            \"name\": \"Traffic+2_friongtt_TEMPLATE\",\r\n\t\t\t\"category\": {\r\n                \"id\": 0,\r\n                \"name\": \"DEFAULT\",\r\n                \"parent\": null\r\n            },\r\n\t\t\t\"queryPattern\": \"test pattern $ERDI fix\",\r\n\t\t\t\"customErdiList\": [\r\n\t\t\t\t{ \"id\": 33 }\r\n\t\t\t],\r\n\t\t\t\"formalErdiList\": [\r\n\t\t\t\t{ \"id\": 247862 },\r\n\t\t\t\t{ \"id\": 247863 }\r\n\t\t\t],\r\n\t\t\t\"searchPhrases\": [\r\n\t\t\t\t{ \"id\": 7}\r\n\t\t\t]\r\n\t\t}\r\n\t]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/traffic/54",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"traffic",
+								"54"
+							],
+							"query": [
+								{
+									"key": "",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Удаление трафика",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "{{token}}",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/traffic/53",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"traffic",
+								"53"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Получение списка шаблонов",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "{{token}}",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/templates",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"templates"
+							],
+							"query": [
+								{
+									"key": "sortingDirection",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "sortingColumn",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "pageNumber",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "pageSize",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "query",
+									"value": "patter",
+									"disabled": true
+								},
+								{
+									"key": "containsInTraffic",
+									"value": "false",
+									"disabled": true
+								},
+								{
+									"key": "trafficId",
+									"value": "45",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Получение списка ЕРДИ (POD)",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "{{token}}",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"type": "text",
+								"value": "{{oper_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/pod/erdi?",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"pod",
+								"erdi"
+							],
+							"query": [
+								{
+									"key": "query",
+									"value": "weedy",
+									"disabled": true
+								},
+								{
+									"key": "containsInTraffic",
+									"value": "false",
+									"disabled": true
+								},
+								{
+									"key": "erdiTrafficUnitId",
+									"value": "64",
+									"disabled": true
+								},
+								{
+									"key": "searchTrafficUnitId",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "sortingDirection",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "sortingColumn",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "pageNumber",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "pageSize",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Получение токена",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "1q0p2w9o",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "as-15-8",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "grant_type",
+							"value": "password",
+							"type": "text"
+						},
+						{
+							"key": "username",
+							"value": "jack",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "12345",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{url}}/security/oauth/token",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"security",
+						"oauth",
+						"token"
+					],
+					"query": [
+						{
+							"key": "username",
+							"value": "jack",
+							"disabled": true
+						},
+						{
+							"key": "password",
+							"value": "12345",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Получение токена",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"username\": \"jack\",\n\t\"password\": \"12345\"\n}"
+						},
+						"url": {
+							"raw": "{{url}}/gettoken?",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"gettoken"
+							],
+							"query": [
+								{
+									"key": "username",
+									"value": "jack",
+									"disabled": true
+								},
+								{
+									"key": "password",
+									"value": "12345",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Cache-Control",
+							"value": "no-cache"
+						},
+						{
+							"key": "X-Content-Type-Options",
+							"value": "nosniff"
+						},
+						{
+							"key": "X-XSS-Protection",
+							"value": "1; mode=block"
+						},
+						{
+							"key": "X-Frame-Options",
+							"value": "DENY"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json;charset=UTF-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "273"
+						},
+						{
+							"key": "Date",
+							"value": "Wed, 22 May 2019 08:39:12 GMT"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"access_token\": \"eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJqYWNrIiwiZXhwIjoxNTU4NjAwNzUyLCJyb2xlcyI6IlJPTEVfT1BFUkFUT1IiLCJnaXZlbl9uYW1lIjpudWxsLCJmYW1pbHlfbmFtZSI6bnVsbH0.BOwI2ywHks_f-VOIFj1WpQWCf6b9id4iX4vZpiz2LXn5Db5KW-LrTmHHkn_GJryJ7CsPP5o4KE9wO0lRWr5TkA\",\n    \"role\": \"ROLE_OPERATOR\"\n}"
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "24db4130-c17e-42d2-b51c-795542744ceb",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "9eae378f-9a10-4c44-948a-b5ba6715fa14",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "489b47e5-4d0e-42d8-8c84-afe4a8e12499",
+			"key": "url",
+			"value": "http://localhost:15800",
+			"type": "string"
+		},
+		{
+			"id": "89cc3b63-684e-4c0b-810b-7c308682ac7a",
+			"key": "oper_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"id": "fbb23960-51c2-48a9-b49b-589f93794900",
+			"key": "test_url",
+			"value": "http://192.168.5.253:15800",
+			"type": "string"
+		},
+		{
+			"id": "d93d3dca-f150-4f40-924b-7298215afb2b",
+			"key": "admin_token",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"protocolProfileBehavior": {}
+}

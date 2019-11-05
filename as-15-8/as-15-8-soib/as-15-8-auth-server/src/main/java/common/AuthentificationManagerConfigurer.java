@@ -1,5 +1,7 @@
 package common;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,12 +13,12 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.ldap.authentication.ad.ActiveDirectoryLdapAuthenticationProvider;
-import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import services.UserDetailsMapper;
 
 import java.util.Collections;
 
 @Configuration
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class AuthentificationManagerConfigurer extends WebSecurityConfigurerAdapter {
 
     @Value("${ldap.urls}")
@@ -27,6 +29,8 @@ public class AuthentificationManagerConfigurer extends WebSecurityConfigurerAdap
 
     @Value("${ldap.base.dn}")
     private String ldapBaseDn;
+
+    private final UserDetailsMapper userDetailsMapper;
 
     @Override
     @Bean
@@ -57,7 +61,7 @@ public class AuthentificationManagerConfigurer extends WebSecurityConfigurerAdap
         provider.setConvertSubErrorCodesToExceptions(true);
         provider.setUseAuthenticationRequestCredentials(true);
         //provider.setSearchFilter(ldapFilter);
-        //provider.setUserDetailsContextMapper(userDetailsMapper);
+        provider.setUserDetailsContextMapper(userDetailsMapper);
         return provider;
     }
 

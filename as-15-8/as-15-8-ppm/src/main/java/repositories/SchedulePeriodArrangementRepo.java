@@ -1,6 +1,7 @@
 package repositories;
 
 import model.Arrangement;
+import model.SchedulePeriod;
 import model.SchedulePeriodArrangement;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -13,4 +14,6 @@ import java.util.List;
 public interface SchedulePeriodArrangementRepo extends JpaRepository<SchedulePeriodArrangement, Long> {
 
     List<SchedulePeriodArrangement> findAllByArrangement(Arrangement arrangement);
+
+    List<SchedulePeriodArrangement> findAllBySchedulePeriod(SchedulePeriod schedulePeriod);
 }
