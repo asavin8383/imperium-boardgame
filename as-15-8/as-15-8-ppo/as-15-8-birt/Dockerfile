@@ -12,6 +12,19 @@ ENV APP_PATH="/as-15-8-birt.jar" \
 VOLUME $LOG_PATH
 VOLUME $CONF_PATH
 
+
+#Install MS True Type, Ionicons and Font Awesome fonts
+RUN rm -rf /var/cache/apk/* && \
+    rm -rf /tmp/* && \
+    apk add --update msttcorefonts-installer && \
+    update-ms-fonts && \
+    mkdir /usr/share/fonts/ko && \
+    mkdir /usr/share/fonts/ko/TrueType && \
+    cp /usr/share/fonts/truetype/msttcorefonts/*.* /usr/share/fonts/ko/TrueType/ && \
+    rm -rf /var/cache/apk/* && \
+    rm -rf /tmp/*
+
+
 COPY /target/as-15-8-birt.jar  $APP_PATH
 
 ENTRYPOINT ["java", \
