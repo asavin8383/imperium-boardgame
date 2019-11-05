@@ -8,6 +8,7 @@ import enums.ArrangementEvents;
 import enums.Protocol;
 import events.producers.rest.ArrangementStatusUploader;
 import events.producers.rest.CheckUnitUploader;
+import exceptions.AS_15_8_PPM_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Arrangement;
@@ -41,7 +42,7 @@ public class ArrangementController {
     private final DomainMaskItemRepo domainMaskItemRepo;
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public void replaceFormalTask(@RequestBody Arrangement newArrangement, @RequestParam("id") Arrangement arrangement) {
+    public void updateArrangement(@RequestBody Arrangement newArrangement, @RequestParam("id") Arrangement arrangement) {
         log.info("Получено мероприятие {} для включения в расписание", newArrangement.getId());
         if(arrangement != null) {
             //Удаляем старое мероприятие
@@ -70,7 +71,11 @@ public class ArrangementController {
         List<ScheduleCheckUnit> scheduleCheckUnits = new ArrayList<>();
         switch (checkUnit.getType()){
             case DOMAIN: {
-                AccessToolUnit accessToolUnit = AccessToolUnit.fromPropertyKey(schedulerProperties.getAccessTools().get(arrangement.getAccessTool()));
+                String unitName = schedulerProperties.getAccessTools().get(arrangement.getAccessTool());
+                if(unitName == null) {
+                    throw AS_15_8_PPM_Exception.logAndGet(log, "Ошибка получения ПС/ПАСД по ключу: " + arrangement.getAccessTool());
+                }
+                AccessToolUnit accessToolUnit = AccessToolUnit.fromPropertyKey(unitName);
                 boolean isPS = accessToolUnit == AccessToolUnit.SEARCH_SYSTEM ||
                         accessToolUnit == AccessToolUnit.GOOGLE_API;
                 if (isPS) {

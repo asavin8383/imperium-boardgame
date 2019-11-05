@@ -34,7 +34,7 @@ public class FormalTaskController {
 	@PostMapping(consumes=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseStatus(HttpStatus.CREATED)
 	public FormalTask postFormalTask(@RequestBody FormalTask formalTask, Principal principal) {
-		formalTask.setUser(principal.getName());
+		formalTask.setOperator(principal.getName());
 		formalTask.setStatus(ExecutionStatus.NEW);
 		return formalTaskRepo.save(formalTask);
 	}
@@ -42,14 +42,14 @@ public class FormalTaskController {
 	@GetMapping
 	public Page<FormalTask> findList(
 			@RequestParam(required = false) Long taskId,
-			@RequestParam(required = false) Long userId,
+			@RequestParam(required = false) String operator,
 			@RequestParam(required = false) SortingDirection sortingDirection,
 			@RequestParam(required = false) String sortingColumn,
 			@RequestParam(defaultValue = "0") int pageNumber,
 			@RequestParam(defaultValue = "10") int pageSize){
 		PageRequest page = PageRequest.of(
 				pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
-		return formalTaskRepo.findPage(taskId, userId, page);
+		return formalTaskRepo.findPage(taskId, operator, page);
 	}
 
 	@PutMapping
@@ -99,7 +99,7 @@ public class FormalTaskController {
 		storedTask.setDeadlineDate(newTask.getDeadlineDate());
 		storedTask.setFgisId(newTask.getFgisId());
 		storedTask.setPriority(newTask.getPriority());
-		storedTask.setUser(newTask.getUser());
+		storedTask.setOperator(newTask.getOperator());
 		return storedTask;
 	}
 

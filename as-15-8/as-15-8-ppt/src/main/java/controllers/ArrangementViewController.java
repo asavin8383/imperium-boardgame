@@ -25,9 +25,9 @@ public class ArrangementViewController {
     }
 
     @GetMapping
-    public List<ArrangementView> findList(@RequestParam(value = "user") String user,
+    public List<ArrangementView> findList(@RequestParam String operator,
                                           @RequestParam boolean viewed){
-        return arrangementViewRepo.findAllByUserAndViewed(user, viewed);
+        return arrangementViewRepo.findAllByOperatorAndViewed(operator, viewed);
     }
 
     @PutMapping

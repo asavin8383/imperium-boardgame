@@ -37,9 +37,11 @@ public class ArrangementContentHandler {
         List<CheckUnit> checkUnits = new ArrayList<>();
         //TODO получать все остальные трафик-юниты тут же
         arrangement.getTraffic().getErdiTrafficUnits()
-            .forEach(erdiTrafficUnit -> {
-                checkUnits.addAll(checkUnitUploader.getCheckUnitsByContentId(erdiTrafficUnit.getId()));
-            });
+            .forEach(erdiTrafficUnit -> erdiTrafficUnit.getFormalErdiList()
+                .forEach(erdiContentJoin ->
+                    checkUnits.addAll(checkUnitUploader.getCheckUnitsByContentId(erdiContentJoin.getContentId()))
+                        )
+            );
         return checkUnits;
     }
 

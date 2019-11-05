@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import services.arrangement.ArrangementNotificationService;
@@ -25,7 +26,7 @@ public class ArrangementNotificationHandler {
     private final ArrangementNotificationService arrangementNotificationService;
 
     @PutMapping
-    public void consumeArrangementNotification(ArrangementStatusNotification arrangementStatusNotification){
+    public void consumeArrangementNotification(@RequestBody ArrangementStatusNotification arrangementStatusNotification){
         log.info("Получен запрос на изменение статуса мероприятия : " + arrangementStatusNotification.toString());
         try {
             arrangementNotificationService.processNotification(arrangementStatusNotification);

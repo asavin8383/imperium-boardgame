@@ -72,7 +72,7 @@ public class ArrangementStatusServiceImpl implements ArrangementStatusService {
     private void saveArrangementView(Arrangement arrangement){
         if (arrangement.getStatus().equals(ExecutionStatus.ACTION_REQUIRED) || arrangement.getStatus().equals(ExecutionStatus.FINISHED)){
             ArrangementView arrangementView = new ArrangementView();
-            arrangementView.setUser(arrangement.getFormalTask().getUser());
+            arrangementView.setOperator(arrangement.getFormalTask().getOperator());
             arrangementView.setArrangement(arrangement);
             arrangementView.setStatus(arrangement.getStatus());
             arrangementView.setViewed(false);

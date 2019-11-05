@@ -1,11 +1,31 @@
 package controllers;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import enums.ExecutionStatus;
+import enums.SortingDirection;
+import exceptions.AS_15_8_PPM_Exception;
+import helpers.SortingHelper;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import model.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
+import repositories.ArrangementRepo;
+import services.ScheduleService;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Creation date: 16.08.2019
@@ -17,12 +37,12 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class ScheduleController {
 
-    /*private final ArrangementService arrangementService;
+   /* private final ArrangementRepo arrangementRepo;
     private final ScheduleService scheduleService;
-    private final UserService userService;
 
     @GetMapping(path = "/arrangements")
     public Page<Arrangement> getArrangementsForSchedule(
+            @RequestParam(required = true) LocalDate plannedDate,
             @RequestParam(required = false) SortingDirection sortingDirection,
             @RequestParam(required = false) String sortingColumn,
             @RequestParam(defaultValue = "0") int pageNumber,
@@ -30,7 +50,7 @@ public class ScheduleController {
     ){
         PageRequest page = PageRequest.of(
                 pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
-        return arrangementService.findPageByStatus(ExecutionStatus.FORMED, page);
+        return arrangementRepo.findAll(page);
     }
 
     @GetMapping
@@ -50,8 +70,8 @@ public class ScheduleController {
     public Schedule postSchedule(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate plannedDate,
             @RequestBody List<Long> arrangementIds,
-            Authentication auth){
-        Schedule schedule = createSchedule(arrangementIds, ((User)auth.getPrincipal()).getUserName(), plannedDate);
+            @RequestParam String author){
+        Schedule schedule = createSchedule(arrangementIds, author, plannedDate);
         return scheduleService.saveSchedule(schedule);
     }
 
@@ -62,16 +82,16 @@ public class ScheduleController {
             @RequestParam("id") Schedule schedule,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate plannedDate,
             @RequestBody List<Arrangement> arrangements,
-            Authentication auth){
+            @RequestParam String operator){
         if(!(schedule.getStatus().equals(ScheduleStatus.NEW))){
-            AS_15_8_Exception.logAndThrow(log, String.format("Ошибка изменения расписания! Некорректный статус расписания с ИД: %d - %s", schedule.getId(), schedule.getStatus()));
+            throw AS_15_8_PPM_Exception.logAndGet(log, String.format("Ошибка изменения расписания! Некорректный статус расписания с ИД: %d - %s", schedule.getId(), schedule.getStatus()));
         }
         //Если изменились плановые значения времени, сначала нужно изменить само мероприятие
         arrangements.stream()
                 .filter(arrangement -> arrangement.getPlannedStartTime()!=null && arrangement.getPlannedEndTime()!=null)
                 .forEach(arrangementService::updateArrangementPlanInfo);
         List<Long> arrangementIds = arrangements.stream().map(Arrangement::getId).collect(Collectors.toList());
-        Schedule newSchedule = createSchedule(arrangementIds, ((User)auth.getPrincipal()).getUserName(), plannedDate);
+        Schedule newSchedule = createSchedule(arrangementIds, operator, plannedDate);
         newSchedule.setId(schedule.getId());
         return scheduleService.saveSchedule(newSchedule);
     }
@@ -82,7 +102,7 @@ public class ScheduleController {
             @RequestParam("id") Schedule schedule
     ) {
         if(!(schedule.getStatus().equals(ScheduleStatus.NEW))){
-            AS_15_8_Exception.logAndThrow(log, String.format("Ошибка планирования расписания! Некорректный статус расписания с ИД: %d - %s", schedule.getId(), schedule.getStatus()));
+            AS_15_8_PPM_Exception.logAndGet(log, String.format("Ошибка планирования расписания! Некорректный статус расписания с ИД: %d - %s", schedule.getId(), schedule.getStatus()));
         }
         return scheduleService.planSchedule(schedule);
     }
@@ -99,7 +119,7 @@ public class ScheduleController {
         SortedSet<SchedulePeriod> schedulePeriods = schedule.getSchedulePeriods();
         schedulePeriods.forEach(schedulePeriod -> schedulePeriod.getSchedulePeriodArrangements()
                 .forEach(schedulePeriodArrangement -> {
-                    BriefArrangement briefArrangement = new BriefArrangement(schedulePeriodArrangement.getArrangementId(), schedulePeriod.getStartTime(), schedulePeriod.getEndTime());
+                    BriefArrangement briefArrangement = new BriefArrangement(schedulePeriodArrangement.getArrangement().getId(), schedulePeriod.getStartTime(), schedulePeriod.getEndTime());
                     if(briefArrangements.contains(briefArrangement)){
                         briefArrangements.get(briefArrangements.indexOf(briefArrangement)).setPlannedEndTime(briefArrangement.getPlannedEndTime());
                     } else {
@@ -109,8 +129,7 @@ public class ScheduleController {
         return briefArrangements;
     }
 
-    private Schedule createSchedule(List<Long> arrangementIds, String userName, LocalDate plannedDate){
-        User user = userService.getUserByUserName(userName);
+    /*private Schedule createSchedule(List<Long> arrangementIds, String author, LocalDate plannedDate){
         if(plannedDate==null || plannedDate.isBefore(LocalDate.now())){
             plannedDate = LocalDate.now();
         }
@@ -118,12 +137,12 @@ public class ScheduleController {
         Map<Arrangement, TreeSet<ScheduleCheckUnit>> arrangementCheckUnits = arrangementService.getArrangementCheckUnits(arrangementIds);
         for(Map.Entry<Arrangement, TreeSet<ScheduleCheckUnit>> entry: arrangementCheckUnits.entrySet()){
             if(entry.getValue().isEmpty()){
-                AS_15_8_Exception.logAndThrow(log, "Ошибка создания расписания. У мероприятия " + entry.getKey().getId() + " пустое множество значений для проверки");
+                AS_15_8_PPM_Exception.logAndGet(log, "Ошибка создания расписания. У мероприятия " + entry.getKey().getId() + " пустое множество значений для проверки");
             }
         }
         Schedule schedule = scheduleService.create(arrangementCheckUnits);
         log.info("Расчет расписания на дату {} завершен", plannedDate);
-        schedule.setUser(user);
+        schedule.setUser(author);
         schedule.setPlannedDate(plannedDate);
         return schedule;
     }

@@ -37,7 +37,7 @@ public class FormalTask implements Serializable {
 
 	/**Оператор, ответственный за задание*/
 	@Column(nullable = false)
-	private String user;
+	private String operator;
 
 	/**Статус задания*/
 	@Enumerated(EnumType.STRING)

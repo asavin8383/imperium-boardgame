@@ -11,7 +11,7 @@
         </encoder>
     </appender>
 
-    <springProfile name="json">
+    <springProfile name="docker_log">
         <root>
             <appender-ref ref="JSON_STDOUT"/>
         </root>

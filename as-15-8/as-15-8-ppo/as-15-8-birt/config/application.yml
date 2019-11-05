@@ -38,11 +38,6 @@ security:
 
 ---
 
-logging:
-  config:
-  level:
-    root: info
-    birt: debug
 spring:
   profiles: dev_asin
   profiles.include: local_log
@@ -51,8 +46,6 @@ spring:
 
 ---
 
-logging:
-  config:
 spring:
   profiles: test
   profiles.include: docker_log

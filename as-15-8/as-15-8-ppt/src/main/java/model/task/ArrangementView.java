@@ -23,7 +23,7 @@ public class ArrangementView implements Serializable {
     private Long id;
 
     @Column(nullable = false)
-    private String user;
+    private String operator;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "arrangement_id", referencedColumnName = "id")

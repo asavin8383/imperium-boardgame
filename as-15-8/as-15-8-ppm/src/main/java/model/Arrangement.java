@@ -11,6 +11,7 @@ import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 /**Мероприятие в рамках формализованного задания*/
@@ -61,9 +62,9 @@ public class Arrangement implements Serializable {
 
     @OneToMany(cascade=CascadeType.ALL, mappedBy = "arrangement")
     @JsonIgnore
-    private List<ScheduleCheckUnit> scheduleCheckUnits;
+    private final List<ScheduleCheckUnit> scheduleCheckUnits = new ArrayList<>();
 
     @OneToMany(cascade=CascadeType.ALL, mappedBy = "arrangement")
     @JsonIgnore
-    private List<SchedulePeriodArrangement> schedulePeriodArrangements;
+    private final List<SchedulePeriodArrangement> schedulePeriodArrangements = new ArrayList<>();
 }
