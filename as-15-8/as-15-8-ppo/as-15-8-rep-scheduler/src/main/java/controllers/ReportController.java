@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import repositories.*;
+import schedule.QueryService;
 import schedule.ReportService;
 
 import java.util.List;
@@ -26,6 +27,7 @@ import java.util.Optional;
 public class ReportController
 {
     private final ReportService reportService;
+    private final QueryService queryService;
     private final ReportAdminStatRepository reportAdminStatRepository;
     private final ReportStatRepository reportStatRepository;
     private final RegReportsTableRepository regReportsTableRepository;
@@ -34,12 +36,13 @@ public class ReportController
     private final ReportAdminTableRepository reportAdminTableRepository;
 
     @Autowired
-    public ReportController(ReportService reportService, ReportAdminStatRepository reportAdminStatRepository,
+    public ReportController(ReportService reportService, QueryService queryService, ReportAdminStatRepository reportAdminStatRepository,
                             ReportStatRepository reportStatRepository,
                             RegReportsTableRepository regReportsTableRepository,
                             ReportRepository reportRepository,
                             ReportTypeRepository reportTypeRepository, ReportAdminTableRepository reportAdminTableRepository) {
         this.reportService = reportService;
+        this.queryService = queryService;
         this.reportAdminStatRepository = reportAdminStatRepository;
         this.reportStatRepository = reportStatRepository;
         this.regReportsTableRepository = regReportsTableRepository;
@@ -144,6 +147,15 @@ public class ReportController
         System.out.println("report = " + report);
         if (!report.isPresent()) throw new ReportNotFound();
         reportService.runReport(report.get());
+    }
+
+    /**
+     * ОБновление витрин
+     */
+    @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
+    @PostMapping("dm/refresh")
+    void restart1() {
+        queryService.refreshDatamart();
     }
 
 
