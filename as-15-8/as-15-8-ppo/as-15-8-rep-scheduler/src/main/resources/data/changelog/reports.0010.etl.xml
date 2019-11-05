@@ -11,6 +11,79 @@
     <column name="ppn_dttm" type="timestamp" defaultValueComputed="current_timestamp"/>
 </createTable>
     </changeSet>
+    <changeSet id="0010.3" author="klychagin">
+        <addColumn schemaName="dm" tableName="msr_prd">
+            <column name="is_end_of_week" type="boolean" defaultValue="false"/>
+            <column name="is_end_of_month" type="boolean" defaultValue="false"/>
+            <column name="is_end_of_quarter" type="boolean" defaultValue="false"/>
+            <column name="is_end_of_half" type="boolean" defaultValue="false"/>
+            <column name="is_end_of_year" type="boolean" defaultValue="false"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="0010.4" author="klychagin">
+        <sql>
+            update dm.msr_prd set is_end_of_week = true where EXTRACT(ISODOW FROM eff_dttm)=7;
+            update dm.msr_prd set is_end_of_month = true where msr_prd_tp_id=1 and date_trunc('day',eff_dttm)=
+(date_trunc('month', eff_dttm::date) + interval '1 month' - interval '1 day')::date;
+    update dm.msr_prd set is_end_of_quarter=true where msr_prd_tp_id=1  and eff_dttm::date in ('2019-03-31','2019-06-30','2019-09-30','2019-12-31',
+                                                                '2020-03-31','2020-06-30','2020-09-30','2020-12-31');
+update dm.msr_prd set is_end_of_half=true where msr_prd_tp_id=1  and eff_dttm::date in ('2019-06-30','2019-12-31',
+                                                                '2020-06-30','2020-12-31');
+update dm.msr_prd set is_end_of_year=true where msr_prd_tp_id=1  and eff_dttm::date in ('2019-12-31','2020-12-31');
+        </sql>
+        <rollback>
+            <sql>
+                update dm.msr_prd set is_end_of_week=false;
+                update dm.msr_prd set is_end_of_month=false;
+                update dm.msr_prd set is_end_of_quarter=false;
+                update dm.msr_prd set is_end_of_half=false;
+                update dm.msr_prd set is_end_of_year=false;
+            </sql>
+        </rollback>
+    </changeSet>
+    <changeSet id="0010.5" author="klychagin">
+        <addColumn schemaName="dm" tableName="access_tool">
+            <column name="eff_dttm" type="timestamp" defaultValueComputed="current_timestamp"></column>
+            <column name="end_dttm" type="timestamp" defaultValue="3000-01-01 00:00:00"></column>
+        </addColumn>
+    </changeSet>
+    <changeSet id="0010.6" author="klychagin">
+        <addColumn schemaName="dm" tableName="reg_reports">
+            <column name="msr_prd_tp_id" type="smallint"/>
+        </addColumn>
+    </changeSet>
+        <changeSet id="0010.7" author="klychagin" >
+        <addForeignKeyConstraint baseTableSchemaName="dm" baseColumnNames="msr_prd_tp_id" baseTableName="reg_reports" constraintName="reg_msr_prd_tp_fk" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="CASCADE"  referencedTableSchemaName="dm" referencedColumnNames="msr_prd_tp_id" referencedTableName="msr_prd_tp"/>
+    </changeSet>
+    <changeSet id="0010.8" author="klychagin">
+        <sql>
+            update dm.reg_reports rr set msr_prd_tp_id=(select m.msr_prd_tp_id from dm.msr_prd m
+    where m.msr_prd_id=rr.msr_prd_id);
+        </sql>
+        <rollback>
+            <sql>
+                update dm.reg_reports set msr_prd_tp_id=null;
+            </sql>
+        </rollback>
+    </changeSet>
+    <changeSet id="0010.9" author="klychagin">
+       <sqlFile encoding="UTF-8" splitStatements="false" path="data/sql/make_at_histroy.sql"/>
+        <rollback/>
+    </changeSet>
+    <changeSet id="0010.10" author="klychagin">
+        <sql>
+create  trigger make_at_hist_trg BEFORE insert on dm.access_tool
+    for each row execute procedure dm.make_at_history();
+        </sql>
+    </changeSet>
+    <changeSet id="0010.11" author="klychagin">
+       <sqlFile encoding="UTF-8" splitStatements="false" path="data/sql/dm_update_at.sql"/>
+        <rollback/>
+    </changeSet>
+    <changeSet id="0010.12" author="klychagin">
+       <sqlFile encoding="UTF-8" splitStatements="false" path="data/sql/dm_update_report_data.sql"/>
+        <rollback/>
+    </changeSet>
 <!--    <changeSet id="0010.2" author="klychagin">-->
 <!--        <sql>-->
 <!--            create function dm.update_reports_data(rep_id bigint) returns void-->
