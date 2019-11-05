@@ -28,7 +28,7 @@ security:
       clientSecret: 1q0p2w9o
 zuul:
   debug.request: true
-  sensitiveHeaders: Cookie,Set-Cookie
+  sensitiveHeaders:
   ignored-headers: Access-Control-Allow-Credentials, Access-Control-Allow-Origin
   host:
     connect-timeout-millis: 60000

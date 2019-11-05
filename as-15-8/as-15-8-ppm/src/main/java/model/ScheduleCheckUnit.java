@@ -25,7 +25,7 @@ public class ScheduleCheckUnit implements Serializable {
     private Arrangement arrangement;
 
     @Column(nullable=false)
-    private String erdiId;
+    private Long erdiId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable=false)

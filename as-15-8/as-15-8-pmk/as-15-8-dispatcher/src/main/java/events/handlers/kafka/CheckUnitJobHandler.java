@@ -50,7 +50,7 @@ public class CheckUnitJobHandler {
         try {
             ArrangementResult arrangementResult = checkUnitPersistingService.persistCheckUnitJob(message.getPayload());
             checkUnitJob.setJobID(arrangementResult.getId());
-            sendJobToExecutor(checkUnitJob);
+            sendJobToExecutor(checkUnitJob, message.getHeaders().get(KafkaHeaders.MESSAGE_KEY).toString());
         } catch (Exception ex) {
             log.error("Ошибка обработки задания на проверку чек-юнита " + checkUnitJob.toString() + " диспетчером", ex);
         }
@@ -59,13 +59,14 @@ public class CheckUnitJobHandler {
     }
 
     /**
-     * Метод отправки результата выполнения робота в тему Kafka
+     * Метод отправки задания роботу в тему Kafka
      * @param checkUnitJob Задание на проверку чек-юнита
      */
-    private void sendJobToExecutor(CheckUnitJob checkUnitJob) {
+    private void sendJobToExecutor(CheckUnitJob checkUnitJob, String key) {
         try {
             Message<CheckUnitJob> message = MessageBuilder
                     .withPayload(checkUnitJob)
+                    .setHeader(KafkaHeaders.MESSAGE_KEY, key)
                     .build();
 
             boolean send = dispatcherChannels.outputJobs().send(message);
