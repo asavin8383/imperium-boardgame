@@ -1,4 +1,4 @@
-package restapi.updaters;
+package updaters;
 
 import lombok.extern.slf4j.Slf4j;
 import model.response.PSEntry;
