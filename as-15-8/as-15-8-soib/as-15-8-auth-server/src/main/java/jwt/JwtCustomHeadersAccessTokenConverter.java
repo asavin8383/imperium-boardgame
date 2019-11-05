@@ -1,4 +1,4 @@
-package common;
+package jwt;
 
 import org.springframework.security.jwt.JwtHelper;
 import org.springframework.security.jwt.crypto.sign.RsaSigner;
@@ -18,7 +18,7 @@ public class JwtCustomHeadersAccessTokenConverter extends JwtAccessTokenConverte
     private JsonParser objectMapper = JsonParserFactory.create();
     private final RsaSigner signer;
 
-    JwtCustomHeadersAccessTokenConverter(Map<String, String> customHeaders, KeyPair keyPair) {
+    public JwtCustomHeadersAccessTokenConverter(Map<String, String> customHeaders, KeyPair keyPair) {
         super();
         super.setKeyPair(keyPair);
         this.signer = new RsaSigner((RSAPrivateKey) keyPair.getPrivate());
