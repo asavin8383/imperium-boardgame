@@ -31,7 +31,7 @@ public class FormalTaskRepositoryAdvancedImpl implements FormalTaskRepositoryAdv
 	}
 
 	@Override
-	public Page<FormalTask> findPage(Long id, Long userId, Pageable pageable) {
+	public Page<FormalTask> findPage(Long id, String operator, Pageable pageable) {
 		CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
 		CriteriaQuery<FormalTask> select = criteriaBuilder.createQuery(FormalTask.class);
 		Root<FormalTask> fromFormalTask = select.from(FormalTask.class);
@@ -41,8 +41,8 @@ public class FormalTaskRepositoryAdvancedImpl implements FormalTaskRepositoryAdv
 	    if (id != null) {
 	        predicates.add(criteriaBuilder.equal(fromFormalTask.get("id"), id));
 	    }
-	    if (userId != null) {
-	    	predicates.add(criteriaBuilder.equal(fromFormalTask.get("user").get("id"), userId));
+	    if (operator != null) {
+	    	predicates.add(criteriaBuilder.equal(fromFormalTask.get("operator"), operator));
 	    }
 	    select.where(predicates.toArray(new Predicate[0]));
 	    

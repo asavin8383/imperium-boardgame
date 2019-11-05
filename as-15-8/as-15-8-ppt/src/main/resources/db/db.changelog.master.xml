@@ -29,5 +29,6 @@
     <include file="db/changelog/ppt.0002.drop_traffic_unit_tables.xml" />
     <include file="db/changelog/ppt.0003.create_new_traffic.xml"/>
     <include file="db/changelog/ppt.0004.delete_old_tables.xml"/>
+    <include file="db/changelog/ppt.0005.formal_tasks_rename_user.xml"/>
 
 </databaseChangeLog>

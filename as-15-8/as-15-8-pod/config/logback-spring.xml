@@ -52,18 +52,18 @@
             </layout>
         </appender>
 
-        <logger name= "org.springframework.security" level="DEBUG" additivity="false">
+        <logger name= "org.springframework.security" level="INFO" additivity="false">
             <appender-ref ref="Console"/>
         </logger>
 
-        <logger name= "org.springframework.web" level="DEBUG" additivity="false">
+        <logger name= "org.springframework.web" level="INFO" additivity="false">
             <appender-ref ref="Console"/>
         </logger>
 
         <root level="INFO" additivity="false">
             <appender-ref ref="Console" />
         </root>
-        <logger name="org.hibernate.SQL" level="DEBUG" additivity="false">
+        <logger name="org.hibernate.SQL" level="INFO" additivity="false">
             <appender-ref ref="Console" />
         </logger>
     </springProfile>

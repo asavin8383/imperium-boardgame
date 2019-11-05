@@ -13,5 +13,5 @@ import java.util.List;
 @Repository
 public interface ArrangementViewRepo extends JpaRepository<ArrangementView, Long> {
 
-    List<ArrangementView> findAllByUserAndViewed(String user, boolean viewed);
+    List<ArrangementView> findAllByOperatorAndViewed(String operator, boolean viewed);
 }
