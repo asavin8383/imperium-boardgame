@@ -36,6 +36,9 @@ public class Report
     private String msr_prd_tp;
 
     @Column
+    private Long msr_prd_tp_id;
+
+    @Column
     @Enumerated(EnumType.STRING)
     private ReportStatus status;
 

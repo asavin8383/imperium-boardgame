@@ -144,7 +144,6 @@ public class ReportController
     @PostMapping("restart/{rep_id}")
     void restart(@PathVariable long rep_id) {
         Optional<Report> report = reportRepository.findByRepId(rep_id);
-        System.out.println("report = " + report);
         if (!report.isPresent()) throw new ReportNotFound();
         reportService.runReport(report.get());
     }

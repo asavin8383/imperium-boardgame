@@ -49,15 +49,15 @@ public class RestTemplateReportService implements ReportService
             log.info("Запуск отчета " + report);
 
             String from = dateFormat.format(report.getMsr_prd_st_dttm());
-            String period = report.getMsr_prd_tp();
+            Long period = report.getMsr_prd_tp_id();
             String format = report.getFormat();
             String rptdesign = report.getRptdesign();
 
             String url = UriComponentsBuilder
                     .fromHttpUrl(birt_url)
                     .path("/reglament/{rptdesign}/{format}")
-                    .queryParam("RPFD", "{from}")
-                    .queryParam("RPD", "{period}")
+                    .queryParam("dt", "{from}")
+                    .queryParam("prd_tp", "{period}")
                     .buildAndExpand(rptdesign, format, from, period)
                     .toString();
 
