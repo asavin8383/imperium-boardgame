@@ -53,7 +53,7 @@ public class ErdiTrafficUnit extends TrafficUnit implements Serializable {
     @OneToMany(mappedBy = "trafficUnit",
             cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private List<ErdiContentJoin> formalErdiList;
+    private List<ErdiTrafficUnitContent> formalErdiList;
 
     @Override
     public boolean isEmpty() {

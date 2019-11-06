@@ -1,13 +1,11 @@
 package events.handlers.kafka;
 
 import checkUnits.CheckUnitJob;
-import checkUnits.CheckUnitStatusNotification;
-import enums.CheckUnitJobResult;
 import events.DispatcherChannels;
 import exceptions.AS_15_8_DispatcherException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import model.ArrangementResult;
+import model.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
@@ -17,9 +15,6 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 import services.impl.CheckUnitPersistingService;
-
-import java.io.PrintWriter;
-import java.io.StringWriter;
 
 /**
  * Обработчик входящих сообщений от рест-сервиса с мероприятиями для заполнения
@@ -48,9 +43,9 @@ public class CheckUnitJobHandler {
                 ", offset: "+message.getHeaders().get(KafkaHeaders.OFFSET, Long.class));
         Acknowledgment ack = message.getHeaders().get(KafkaHeaders.ACKNOWLEDGMENT, Acknowledgment.class);
         try {
-            ArrangementResult arrangementResult = checkUnitPersistingService.persistCheckUnitJob(message.getPayload());
-            checkUnitJob.setJobID(arrangementResult.getId());
-            sendJobToExecutor(checkUnitJob, message.getHeaders().get(KafkaHeaders.MESSAGE_KEY).toString());
+            Result result = checkUnitPersistingService.persistCheckUnitJob(message.getPayload());
+            checkUnitJob.setJobID(result.getId());
+            sendJobToExecutor(checkUnitJob, message.getHeaders().get(KafkaHeaders.RECEIVED_MESSAGE_KEY));
         } catch (Exception ex) {
             log.error("Ошибка обработки задания на проверку чек-юнита " + checkUnitJob.toString() + " диспетчером", ex);
         }
@@ -62,7 +57,7 @@ public class CheckUnitJobHandler {
      * Метод отправки задания роботу в тему Kafka
      * @param checkUnitJob Задание на проверку чек-юнита
      */
-    private void sendJobToExecutor(CheckUnitJob checkUnitJob, String key) {
+    private void sendJobToExecutor(CheckUnitJob checkUnitJob, Object key) {
         try {
             Message<CheckUnitJob> message = MessageBuilder
                     .withPayload(checkUnitJob)

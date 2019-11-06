@@ -26,6 +26,14 @@ public class TrafficUnitUtils {
                 .append(type.name()).toString();
     }
 
+    public static String getNewName(String trafficName, TrafficUnitType type) {
+        return new StringBuilder()
+                //.append(traffic.getId().toString()).append(SEPARATOR)
+                .append(trafficName).append(SEPARATOR)
+                .append(generateRandomStringBounded()).append(SEPARATOR)
+                .append(type.name()).toString();
+    }
+
     public static String getUpdateName(Traffic traffic, String oldName) {
         String[] arr = oldName.split(SEPARATOR);
         arr[0] = getTrafficPart(traffic);

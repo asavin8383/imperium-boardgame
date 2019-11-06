@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import enums.CheckUnitJobResult;
-import model.ArrangementResult;
+import model.Result;
 
 
 /**
@@ -18,17 +18,17 @@ import model.ArrangementResult;
  */
 
 @Repository
-public interface ArrangementResultRepository extends JpaRepository<ArrangementResult, Long> {
+public interface ResultRepo extends JpaRepository<Result, Long> {
 	
-	@Query("SELECT count(res) FROM ArrangementResult res WHERE res.arrangementId = :id AND (res.result IS NULL OR res.result IN :results)")
+	@Query("SELECT count(res) FROM Result res WHERE res.arrangementId = :id AND (res.result IS NULL OR res.result IN :results)")
 	Long countByResultNullOrResultIn(@Param("id") Long id, @Param("results") List<CheckUnitJobResult> results);
 
-	List<ArrangementResult> findByArrangementId(Long arrangementId);
+	List<Result> findByArrangementId(Long arrangementId);
 
-	@Query(value = "select max(res.startDate) from ArrangementResult res where res.arrangementId = :id")
+	@Query(value = "select max(res.startDate) from Result res where res.arrangementId = :id")
 	LocalDateTime getMaxDateByArrangementId(@Param("id") Long id);
 
-	@Query(value = "select min(res.endDate) from ArrangementResult res where res.arrangementId = :id")
+	@Query(value = "select min(res.endDate) from Result res where res.arrangementId = :id")
 	LocalDateTime getMinDateByArrangementId(@Param("id") Long id);
 
 }

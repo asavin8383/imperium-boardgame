@@ -9,7 +9,7 @@ import events.DispatcherChannels;
 import events.producers.rest.ArrangementStatusProducer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import model.ArrangementResult;
+import model.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
@@ -38,7 +38,7 @@ public class AnalysisResultsHandler {
     public void consumeAnalysisResults(AnalysisResult analysisResult) {
         log.info("Принято сообщение с анализом результатов проверки: " + analysisResult.getJobID() + ", " + analysisResult.getCheckUnit().getValue());
         try {
-            ArrangementResult jobResult = arrangementResultService.processJobResult(analysisResult);
+            Result jobResult = arrangementResultService.processJobResult(analysisResult);
             log.info("Результаты выполнения проверки успешно обработаны: " + analysisResult.getJobID() + ", " + analysisResult.getCheckUnit().getValue());
 
             ExecutionStatus status = arrangementResultService.checkArrangementStatus(jobResult.getArrangementId());
@@ -54,7 +54,7 @@ public class AnalysisResultsHandler {
                 StringWriter sw = new StringWriter();
                 ex.printStackTrace(new PrintWriter(sw));
 
-                ArrangementResult jobResult = arrangementResultService.updateJobStatus(analysisResult.getJobID(), CheckUnitJobResult.INTERNAL_ERROR, sw.toString());
+                Result jobResult = arrangementResultService.updateJobStatus(analysisResult.getJobID(), CheckUnitJobResult.INTERNAL_ERROR, sw.toString());
                 ExecutionStatus status = arrangementResultService.checkArrangementStatus(jobResult.getArrangementId());
                 if(status == ExecutionStatus.FINISHED) {
                     log.info("Мероприятие завешено с ошибками: " + jobResult.getArrangementId());

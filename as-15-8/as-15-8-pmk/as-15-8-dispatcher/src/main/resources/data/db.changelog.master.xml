@@ -5,5 +5,9 @@
 
     <include file="data/changelog/dispatcher.0001.detail_results.xml"/>
     <include file="data/changelog/dispatcher.0002.detail_results_fix.xml"/>
+    <include file="data/changelog/dispatcher.0003.create_schema_results.xml"/>
+    <include file="data/changelog/dispatcher.0004.create_tables.xml"/>
+    <include file="data/changelog/dispatcher.0005.add_user_result.xml"/>
+    <include file="data/changelog/dispatcher.0006.check_constraints.xml"/>
 
 </databaseChangeLog>

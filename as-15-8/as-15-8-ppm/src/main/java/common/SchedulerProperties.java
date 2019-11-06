@@ -12,7 +12,7 @@ import java.util.Map;
 @ConfigurationProperties
 public class SchedulerProperties {
 
-    private Long totalWorkersCount;
+    private Integer totalWorkersCount;
 
     private final Map<String, String> accessTools = new HashMap<>();
 

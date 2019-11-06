@@ -20,6 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import repositories.ArrangementRepo;
+import services.ArrangementService;
 import services.ScheduleService;
 
 import java.time.LocalDate;
@@ -37,7 +38,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ScheduleController {
 
-   /* private final ArrangementRepo arrangementRepo;
+    private final ArrangementService arrangementService;
     private final ScheduleService scheduleService;
 
     @GetMapping(path = "/arrangements")
@@ -50,7 +51,7 @@ public class ScheduleController {
     ){
         PageRequest page = PageRequest.of(
                 pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
-        return arrangementRepo.findAll(page);
+        return arrangementService.findPage(page);
     }
 
     @GetMapping
@@ -129,7 +130,7 @@ public class ScheduleController {
         return briefArrangements;
     }
 
-    /*private Schedule createSchedule(List<Long> arrangementIds, String author, LocalDate plannedDate){
+    private Schedule createSchedule(List<Long> arrangementIds, String author, LocalDate plannedDate){
         if(plannedDate==null || plannedDate.isBefore(LocalDate.now())){
             plannedDate = LocalDate.now();
         }
@@ -142,7 +143,7 @@ public class ScheduleController {
         }
         Schedule schedule = scheduleService.create(arrangementCheckUnits);
         log.info("Расчет расписания на дату {} завершен", plannedDate);
-        schedule.setUser(author);
+        schedule.setAuthor(author);
         schedule.setPlannedDate(plannedDate);
         return schedule;
     }
@@ -158,6 +159,6 @@ public class ScheduleController {
         private LocalTime plannedStartTime;
         @JsonView(Views.Full.class)
         private LocalTime plannedEndTime;
-    }*/
+    }
 
 }

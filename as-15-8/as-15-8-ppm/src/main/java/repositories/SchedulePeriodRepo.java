@@ -16,6 +16,6 @@ import java.util.List;
 @Repository
 public interface SchedulePeriodRepo extends JpaRepository<SchedulePeriod, Long> {
 
-    public List<SchedulePeriod> findAllByScheduleAndSchedulePeriodStateAndAndStartTimeGreaterThan(Schedule schedule, SchedulePeriodState schedulePeriodState, LocalTime time);
+    public List<SchedulePeriod> findAllByScheduleAndSchedulePeriodStateAndAndStartTimeBefore(Schedule schedule, SchedulePeriodState schedulePeriodState, LocalTime time);
 
 }
