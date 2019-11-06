@@ -64,10 +64,8 @@ public class FormalTask implements Serializable {
 	@Enumerated(EnumType.STRING)
 	private Priority priority;
 
-	/**Ссылка на неформализованное задание*/
-	@ManyToOne
-	@JoinColumn(name="informal_task_id", foreignKey = @ForeignKey(name = "FK_formal_tasks_informal_task_id"))
-	private InformalTask informalTask;
+	/**Ссылка на id неформализованного задания (поручения)*/
+	private Long missionId;
 
 	/**Список мероприятий по заданию*/
 	@OneToMany(cascade=CascadeType.ALL,mappedBy="formalTask")

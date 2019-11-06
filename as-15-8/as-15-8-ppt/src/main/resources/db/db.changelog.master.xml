@@ -30,5 +30,6 @@
     <include file="db/changelog/ppt.0003.create_new_traffic.xml"/>
     <include file="db/changelog/ppt.0004.delete_old_tables.xml"/>
     <include file="db/changelog/ppt.0005.formal_tasks_rename_user.xml"/>
+    <include file="db/changelog/ppt.0006.formal_tasks_add_mission.xml"/>
 
 </databaseChangeLog>
