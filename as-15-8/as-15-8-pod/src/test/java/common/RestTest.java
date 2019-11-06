@@ -9,11 +9,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-import restapi.AddonRestClient;
-import restapi.PASDRestClient;
-import restapi.PSRestClient;
-import restapi.SubTypeRestClient;
+import rest.ActCheckResult;
+import rest.ActRequest;
+import restapi.*;
+import services.ActService;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -35,6 +36,12 @@ public class RestTest
 
     @Autowired
     AddonRestClient addonRestClient;
+
+    @Autowired
+    ErdiRestClient erdiRestClient;
+
+    @Autowired
+    ActService actService;
 
     @Test
     public void testPS(){
@@ -67,6 +74,23 @@ public class RestTest
     @Test
     public void testDeltaAddons(){
         addonRestClient.readDeltaFromNet(42, new Date());
+    }
+
+    @Test
+    public void runUpdateContent(){
+        erdiRestClient.startUpdateErdi();
+    }
+
+    @Test
+    public void testCreateAct(){
+        ActRequest actRequest = new ActRequest();
+        actRequest.arragementId = 338L;
+        actRequest.checkResults = new ArrayList<ActCheckResult>();
+        actRequest.startDate = "";
+        actRequest.endDate = "";
+        actRequest.topScreenShots = new ArrayList<>();
+
+        actService.createAct(actRequest);
     }
 
 }

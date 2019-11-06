@@ -24,6 +24,7 @@ import services.arrangement.impl.ArrangementService;
 import enums.ArrangementEvents;
 
 import java.time.LocalTime;
+import java.util.List;
 
 /**
  * Creation date: 21.05.2019
@@ -140,7 +141,18 @@ public class ArrangementController {
         } else {
             throw AS_15_8_PPT_Exception.logAndGet(log, String.format("Ошибка отправки мероприятия в ППМ. Мероприятие не было найдено в БД"));
         }
+    }
 
+    @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
+    @GetMapping("/access_tool")
+    String accessToolByArrangementId(@RequestParam Long arrangement_id) {
+        return arrangementRepo.getAccessTool(arrangement_id);
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
+    @GetMapping("/mission_id")
+    Long missionIdByArrangement(@RequestParam Long arrangement_id) {
+        return arrangementRepo.getMissionId(arrangement_id);
     }
 
     /**
