@@ -43,9 +43,15 @@ spring:
   profiles.include: local_log
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb_test
-
 ---
 
+logging:
+  config:
+  level:
+    birt: debug
+    common: debug
+    controlles: debug
+    root: info
 spring:
   profiles: test
   profiles.include: docker_log

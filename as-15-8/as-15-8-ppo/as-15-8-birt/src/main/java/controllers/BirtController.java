@@ -2,7 +2,7 @@ package controllers;
 
 import birt.BirtFacade;
 import enums.ReportType;
-import lombok.extern.java.Log;
+import lombok.extern.apachecommons.CommonsLog;
 import org.eclipse.birt.report.engine.api.EngineException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@Log
+@CommonsLog
 @SuppressWarnings("unused")
 public class BirtController
 {
@@ -57,7 +57,11 @@ public class BirtController
             Map<String, String> paramMap = getReportParams(params);
             byte[] data = birtFacade.createReport(reportTemplate, paramMap, format.name());
             String extension = getExtension(format);
-            return getByteResponse(reportName + "." + extension, data);
+
+            log.debug("Started " + reportName);
+            ResponseEntity<byte[]> byteResponse = getByteResponse(reportName + "." + extension, data);
+            log.info("Created " + reportName);
+            return byteResponse;
         }
 
     }

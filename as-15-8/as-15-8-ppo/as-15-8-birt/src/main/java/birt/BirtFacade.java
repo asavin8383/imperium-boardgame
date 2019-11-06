@@ -1,6 +1,6 @@
 package birt;
 
-import lombok.extern.java.Log;
+import lombok.extern.apachecommons.CommonsLog;
 import org.eclipse.birt.core.framework.Platform;
 import org.eclipse.birt.report.engine.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Level;
 
 /**
  * User: asin
@@ -25,7 +24,7 @@ import java.util.logging.Level;
  * Time: 5:28
  */
 
-@Log
+@CommonsLog
 @Service
 public class BirtFacade {
 
@@ -33,7 +32,7 @@ public class BirtFacade {
     DataSource dataSource;
     // различные переменные
     private IReportEngine engine;
-    private Level level = Level.WARNING;
+//    private Level level = Level.WARNING;
 
     private final ReentrantLock lock = new ReentrantLock();
 
@@ -48,7 +47,7 @@ public class BirtFacade {
             Platform.startup(config);
             IReportEngineFactory factory = (IReportEngineFactory) Platform.createFactoryObject(IReportEngineFactory.EXTENSION_REPORT_ENGINE_FACTORY);
             engine = factory.createReportEngine(config);
-            engine.changeLogLevel(level);
+//            engine.changeLogLevel(level);
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
@@ -67,11 +66,6 @@ public class BirtFacade {
         //Platform.shutdown();
     }
 
-    @SuppressWarnings("unused")
-    private void log(String msg) {
-        String tn = Thread.currentThread().getName();
-        System.out.println(tn + ": " + msg);
-    }
 
     public byte[] createReport(InputStream reportfile, Map<String, ?> params, String repType) throws EngineException, SQLException {
         ByteArrayOutputStream ostream = new ByteArrayOutputStream();
@@ -122,7 +116,7 @@ public class BirtFacade {
             String name = entry.getKey();
             IParameterDefnBase parameterDefn = paramTask.getParameterDefn(name);
             if (parameterDefn == null) {
-                log.warning("Unexpected parameter " + name + " = " + entry.getValue());
+                log.error("Unexpected parameter " + name + " = " + entry.getValue());
                 continue;
             }
 
