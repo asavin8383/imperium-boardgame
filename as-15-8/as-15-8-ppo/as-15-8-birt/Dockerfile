@@ -29,7 +29,7 @@ COPY /target/as-15-8-birt.jar  $APP_PATH
 
 ENTRYPOINT ["java", \
          "-jar", \
-         "-Dapplication.logpath=/log", \
+#         "-Dapplication.logpath=/log", \
          "-Dspring.profiles.active=${PROFILE}", \
          "-Xms512M", \
          "-Xmx1024M", \
