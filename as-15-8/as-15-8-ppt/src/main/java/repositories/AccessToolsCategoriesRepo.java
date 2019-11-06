@@ -12,4 +12,7 @@ import org.springframework.stereotype.Repository;
 public interface AccessToolsCategoriesRepo extends JpaRepository<AccessToolsCategory, Long> {
 
     AccessToolsCategory findByName(String name);
+
+    AccessToolsCategory findOneByOrderByIdDesc();
+
 }
