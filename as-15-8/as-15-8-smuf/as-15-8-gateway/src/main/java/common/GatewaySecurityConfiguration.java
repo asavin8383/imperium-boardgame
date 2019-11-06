@@ -19,6 +19,8 @@ public class GatewaySecurityConfiguration extends ResourceServerConfigurerAdapte
     public void configure(final HttpSecurity http) throws Exception {
         http
                 .cors().and()
+                .httpBasic().disable()
+                .csrf().disable()
                 .authorizeRequests()
                 .antMatchers("/security/oauth/**", "/eureka/**")
                 .permitAll()
