@@ -3,8 +3,8 @@ package services.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import exceptions.AS_15_8_DispatcherException;
-import model.ArrangementResult;
-import repositories.ArrangementResultRepository;
+import model.Result;
+import repositories.ResultRepo;
 
 /**
  * Базовый класс сервиса обработки анализа результатов проверки
@@ -14,13 +14,13 @@ import repositories.ArrangementResultRepository;
 public abstract class BaseAnalysisResultService {
 
 	@Autowired
-	private ArrangementResultRepository resultRepo;
+	private ResultRepo resultRepo;
 	
-	protected void updateJob(ArrangementResult job) {
+	protected void updateJob(Result job) {
 		resultRepo.save(job);
 	}
 	
-	protected ArrangementResult findJob(Long jobID) {
+	protected Result findJob(Long jobID) {
 		return resultRepo.findById(jobID)
 			.orElseThrow(() -> 
 				new AS_15_8_DispatcherException("Ошибка! Задание не найдено! ID: "+jobID)

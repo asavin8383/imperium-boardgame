@@ -9,6 +9,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface TrafficRepository extends JpaRepository<Traffic, Long>, TrafficRepositoryCustom {
 
+    boolean existsByName(String name);
+
     @Query(value = "select count(*) " +
             "from portal.erdi_traffic_units_content jointable " +
             "join portal.erdi_traffic_units units " +

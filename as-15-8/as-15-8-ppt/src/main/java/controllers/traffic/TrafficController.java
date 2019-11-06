@@ -46,10 +46,10 @@ public class TrafficController {
     }
 
     @Transactional
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping
     @ResponseStatus(code = HttpStatus.CREATED)
-    public TrafficFullView createTraffic(@RequestBody TrafficFullView fullView) {
-        return trafficService.createTraffic(fullView);
+    public TrafficFullView createTraffic() {
+        return trafficService.createTraffic();
     }
 
     @Transactional

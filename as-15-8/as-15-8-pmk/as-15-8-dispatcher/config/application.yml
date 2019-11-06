@@ -5,25 +5,17 @@ spring:
       bindings:
         inputJobs:
           destination: scheduled_jobs
-          content-type: application/json
           group: dispatchers
-          consumer:
-            concurrency: 12
+          consumer.concurrency: 12
         outputJobs:
           destination: jobs
-          content-type: application/json
         inputJobNotifications:
-          content-type: application/json
           destination: job_notifications
           group: dispatchers
         inputAnalysisResults:
-          content-type: application/json
           destination: analysis_results
           group: dispatchers
-          consumer:
-            concurrency: 12
-        springCloudBusInput:
-          group: dispatcher:${spring.cloud.client.ip-address}
+          consumer.concurrency: 12
       kafka:
         binder:
           brokers: 192.168.5.12:9094,192.168.5.184:9094,192.168.5.211:9094
@@ -104,164 +96,70 @@ spring:
 ---
 
 spring:
-  profiles: dev_ashabalin
+  profiles: dev_ashabalin, dev_asin, dev_asavin, dev_pvorobiev, dev_jspirina
   profiles.include: local_log
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb_test
   liquibase:
     enabled: true
-    change-log: classpath:/data/changelog/db.changelog.master.xml
+    change-log: classpath:/data/db.changelog.master.xml
+
+---
+
+spring:
+  profiles: dev_ashabalin
   cloud:
     stream:
       bindings:
-        inputJobs:
-          destination: scheduled_jobs_ashabalin
-          content-type: application/json
-          group: dispatchers
-          consumer:
-            concurrency: 12
-        outputJobs:
-          destination: jobs_ashabalin
-          content-type: application/json
-        inputJobNotifications:
-          content-type: application/json
-          destination: job_notifications_ashabalin
-          group: dispatchers
-        inputAnalysisResults:
-          destination: analysis_results_ashabalin
-          content-type: application/json
-          group: dispatchers
-          consumer:
-            concurrency: 12
+        inputJobs.destination: scheduled_jobs_ashabalin
+        outputJobs.destination: jobs_ashabalin
+        inputJobNotifications.destination: job_notifications_ashabalin
+        inputAnalysisResults.destination: analysis_results_ashabalin
 
 ---
 
 spring:
   profiles: dev_asin
-  profiles.include: local_log
-  datasource:
-    url: jdbc:postgresql://192.168.5.195:5432/asdb_test
-  liquibase:
-    enabled: true
-    change-log: classpath:/data/changelog/db.changelog.master.xml
   cloud:
     stream:
       bindings:
-        inputJobs:
-          destination: scheduled_jobs_asin
-          content-type: application/json
-          group: dispatchers
-          consumer:
-            concurrency: 12
-        outputJobs:
-          destination: jobs_asin
-          content-type: application/json
-        inputJobNotifications:
-          content-type: application/json
-          destination: job_notifications_asin
-          group: dispatchers
-        inputAnalysisResults:
-          destination: analysis_results_asin
-          content-type: application/json
-          group: dispatchers
-          consumer:
-            concurrency: 12
+        inputJobs.destination: scheduled_jobs_asin
+        outputJobs.destination: jobs_asin
+        inputJobNotifications.destination: job_notifications_asin
+        inputAnalysisResults.destination: analysis_results_asin
 
 ---
 
 spring:
   profiles: dev_asavin
-  profiles.include: local_log
-  datasource:
-    url: jdbc:postgresql://192.168.5.195:5432/asdb_test
-  liquibase:
-    enabled: true
-    change-log: classpath:/data/changelog/db.changelog.master.xml
   cloud:
     stream:
       bindings:
-        inputJobs:
-          destination: scheduled_jobs_asavin
-          content-type: application/json
-          group: dispatchers
-          consumer:
-            concurrency: 12
-        outputJobs:
-          destination: jobs_asavin
-          content-type: application/json
-        inputJobNotifications:
-          content-type: application/json
-          destination: job_notifications_asavin
-          group: dispatchers
-        inputAnalysisResults:
-          destination: analysis_results_asavin
-          content-type: application/json
-          group: dispatchers
-          consumer:
-            concurrency: 12
+        inputJobs.destination: scheduled_jobs_asavin
+        outputJobs.destination: jobs_asavin
+        inputJobNotifications.destination: job_notifications_asavin
+        inputAnalysisResults.destination: analysis_results_asavin
 
 ---
 
 spring:
   profiles: dev_pvorobiev
-  profiles.include: local_log
-  datasource:
-    url: jdbc:postgresql://192.168.5.195:5432/asdb_test
-  liquibase:
-    enabled: true
-    change-log: classpath:/data/changelog/db.changelog.master.xml
   cloud:
     stream:
       bindings:
-        inputJobs:
-          destination: scheduled_jobs_pvorobiev
-          content-type: application/json
-          group: dispatchers
-          consumer:
-            concurrency: 12
-        outputJobs:
-          destination: jobs_pvorobiev
-          content-type: application/json
-        inputJobNotifications:
-          content-type: application/json
-          destination: job_notifications_pvorobiev
-          group: dispatchers
-        inputAnalysisResults:
-          destination: analysis_results_pvorobiev
-          content-type: application/json
-          group: dispatchers
-          consumer:
-            concurrency: 12
+        inputJobs.destination: scheduled_jobs_pvorobiev
+        outputJobs.destination: jobs_pvorobiev
+        inputJobNotifications.destination: job_notifications_pvorobiev
+        inputAnalysisResults.destination: analysis_results_pvorobiev
 
 ---
 
 spring:
   profiles: dev_jspirina
-  profiles.include: local_log
-  datasource:
-    url: jdbc:postgresql://192.168.5.195:5432/asdb_test
-  liquibase:
-    enabled: true
-    change-log: classpath:/data/changelog/db.changelog.master.xml
   cloud:
     stream:
       bindings:
-        inputJobs:
-          destination: scheduled_jobs_jspirina
-          content-type: application/json
-          group: dispatchers
-          consumer:
-            concurrency: 12
-        outputJobs:
-          destination: jobs_jspirina
-          content-type: application/json
-        inputJobNotifications:
-          content-type: application/json
-          destination: job_notifications_jspirina
-          group: dispatchers
-        inputAnalysisResults:
-          destination: analysis_results_jspirina
-          content-type: application/json
-          group: dispatchers
-          consumer:
-            concurrency: 12
+        inputJobs.destination: scheduled_jobs_jspirina
+        outputJobs.destination: jobs_jspirina
+        inputJobNotifications.destination: job_notifications_jspirina
+        inputAnalysisResults.destination: analysis_results_jspirina

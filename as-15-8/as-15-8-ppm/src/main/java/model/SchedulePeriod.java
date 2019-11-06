@@ -7,10 +7,13 @@ import model.enums.SchedulePeriodState;
 
 import javax.persistence.*;
 import java.time.LocalTime;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Data
+@NoArgsConstructor
 @RequiredArgsConstructor
 @Entity
 @Table(name = "schedule_periods", schema = "schedule")
@@ -46,11 +49,7 @@ public class SchedulePeriod implements Comparable<SchedulePeriod>{
     private Set<SchedulePeriodArrangement> schedulePeriodArrangements = new HashSet<>();
 
     @Override
-    public int compareTo(SchedulePeriod otherPeriod) {
-        return this.getStartTime().compareTo(otherPeriod.getStartTime());
-    }
-
-    public SchedulePeriod(){
-        this.schedulePeriodState = SchedulePeriodState.CREATED;
+    public int compareTo(SchedulePeriod other) {
+        return Objects.compare(this, other, Comparator.comparing(SchedulePeriod::getStartTime));
     }
 }
