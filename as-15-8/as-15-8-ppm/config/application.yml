@@ -5,12 +5,15 @@ spring:
       bindings:
         outputJobs:
           destination: scheduled_jobs
-          content-type: application/json
       kafka:
         binder:
           brokers: 192.168.5.12:9094,192.168.5.184:9094,192.168.5.211:9094
           configuration:
             max.request.size: 10485760
+        bindings:
+          outputJobs:
+            producer.configuration:
+              key.serializer: org.apache.kafka.common.serialization.StringSerializer
   liquibase:
     enabled: false
   datasource:

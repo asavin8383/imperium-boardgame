@@ -10,9 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import repositories.ScheduleCheckUnitRepo;
-import repositories.SchedulePeriodArrangementRepo;
-import repositories.ScheduleRepo;
+import org.springframework.transaction.annotation.Transactional;
+import repositories.*;
 
 import javax.annotation.PostConstruct;
 import java.time.Duration;
@@ -29,12 +28,11 @@ public class ScheduleService {
     private int totalWorkersCount;
 
     private final SchedulerProperties schedulerProperties;
-
     private final ScheduleRepo scheduleRepo;
-
     private final SchedulePeriodArrangementRepo schedulePeriodArrangementRepo;
-
     private final ScheduleCheckUnitRepo scheduleCheckUnitRepo;
+    private final SchedulePeriodCheckUnitRepo schedulePeriodCheckUnitRepo;
+    private final ArrangementRepo arrangementRepo;
 
     @PostConstruct
     public void init(){
@@ -68,13 +66,13 @@ public class ScheduleService {
      * Установка статуса PLANNED расписанию
      * @return Запланированное расписание
      */
-    /*@Transactional
+    @Transactional
     public Schedule planSchedule(Schedule schedule){
         arrangementRepo.findAllBySchedule(schedule.getId())
                 .forEach(this::fillCheckUnits);
         schedule.setStatus(ScheduleStatus.PLANNED);
         return scheduleRepo.save(schedule);
-    }*/
+    }
 
     private Schedule createNewSchedule(Map<Arrangement, TreeSet<ScheduleCheckUnit>> arrangementCheckUnits){
         Schedule schedule = new Schedule();
@@ -242,7 +240,7 @@ public class ScheduleService {
     private ArrangementSchedulePeriodProcessing calculateArrangementSchedulePeriodProcessing(SortedSet<ScheduleCheckUnit> checkedSet, int workersCount, String accessTool, LocalTime startTime, LocalTime endTime){
         ScheduleCheckUnit lastCompletionCheckUnit = checkedSet.first();
         long maxProcessingTime = ChronoUnit.SECONDS.between(startTime, endTime) * workersCount;
-        long processingTime = 0;
+        long processingTime = 1;
         for(ScheduleCheckUnit checkUnit : checkedSet){
             processingTime += schedulerProperties.getProcessingTime(accessTool, checkUnit.getCheckUnitType());
             if(processingTime > maxProcessingTime){
@@ -251,7 +249,7 @@ public class ScheduleService {
             lastCompletionCheckUnit = checkUnit;
         }
         return new ArrangementSchedulePeriodProcessing(
-                workersCount == 0 ? 0 : processingTime / workersCount,
+                workersCount == 0 ? 1 : Math.max(processingTime / workersCount, 1),
                 lastCompletionCheckUnit);
     }
 
@@ -295,13 +293,13 @@ public class ScheduleService {
 
     private void fillCheckUnits(Arrangement arrangement){
         List<SchedulePeriodArrangement> schedulePeriodArrangements = schedulePeriodArrangementRepo.findAllByArrangement(arrangement);
-        SortedSet<ScheduleCheckUnit> arrangementResults = new TreeSet<>(Comparator.comparingLong(ScheduleCheckUnit::getId));
-        log.debug("Поиск arrangementResults по мероприятию: {}", arrangement.getId());
-        arrangementResults.addAll(scheduleCheckUnitRepo.findAllByArrangement(arrangement));
-        log.debug("Поиск arrangementResults по мероприятию: {} завершен", arrangement.getId());
+        SortedSet<ScheduleCheckUnit> scheduleCheckUnits = new TreeSet<>(Comparator.comparingLong(ScheduleCheckUnit::getId));
+        log.debug("Поиск scheduleCheckUnits по мероприятию: {}", arrangement.getId());
+        scheduleCheckUnits.addAll(scheduleCheckUnitRepo.findAllByArrangement(arrangement));
+        log.debug("Поиск scheduleCheckUnits по мероприятию: {} завершен", arrangement.getId());
         for(SchedulePeriodArrangement schedulePeriodArrangement : schedulePeriodArrangements){
-            if(!arrangementResults.isEmpty()){
-                arrangementResults = fillSchedulePeriodArrangement(schedulePeriodArrangement, arrangementResults);
+            if(!scheduleCheckUnits.isEmpty()){
+                scheduleCheckUnits = fillSchedulePeriodArrangement(schedulePeriodArrangement, scheduleCheckUnits);
             }
         }
     }
@@ -321,7 +319,7 @@ public class ScheduleService {
             schedulePeriodCheckUnit.setCheckUnit(scheduleCheckUnit);
             schedulePeriodCheckUnit.setExecutionNumber(i++);
             schedulePeriodArrangement.getSchedulePeriodCheckUnits().add(schedulePeriodCheckUnit);
-            //schedulePeriodCheckUnitRepo.save(schedulePeriodCheckUnit);
+            schedulePeriodCheckUnitRepo.save(schedulePeriodCheckUnit);
             long plannedProcessingTime = schedulerProperties.getProcessingTime(
                     schedulePeriodArrangement.getArrangement().getAccessTool(),
                     scheduleCheckUnit.getCheckUnitType());

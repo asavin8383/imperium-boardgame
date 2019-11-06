@@ -38,7 +38,7 @@ public class Schedule {
 
     @NotNull
     @JsonView(Views.Full.class)
-    private String user;
+    private String author;
 
     @Enumerated(EnumType.STRING)
     @NotNull

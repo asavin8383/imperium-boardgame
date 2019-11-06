@@ -6,4 +6,8 @@
     <include file="db/changelog/ppm.0001.schedule_create_all.xml"/>
     <include file="db/changelog/ppm.0002.domain_mask_items_create.xml"/>
     <include file="db/changelog/ppm.0003.schedule_periods_add_state.xml"/>
+    <include file="db/changelog/ppm.0004.arrangements.change_times.xml"/>
+    <include file="db/changelog/ppm.0005.schedule_change_user_to_author.xml"/>
+    <include file="db/changelog/ppm.0006.schedule_periods_auto_inc.xml"/>
+    <include file="db/changelog/ppm.0007.cascades.xml"/>
 </databaseChangeLog>

@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import repositories.ArrangementRepo;
 import repositories.DomainMaskItemRepo;
 
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -49,6 +50,13 @@ public class ArrangementController {
             arrangementRepo.delete(arrangement);
             log.info("Мероприятие {} удалено при замене", arrangement.getId());
         }
+        if(newArrangement.getPlannedStartTime()==null){
+            newArrangement.setPlannedStartTime(LocalTime.of(9,0));
+        }
+        if(newArrangement.getPlannedEndTime()==null){
+            newArrangement.setPlannedEndTime(LocalTime.of(18,0));
+        }
+        newArrangement.setMaxWorkersCount(schedulerProperties.getTotalWorkersCount());
         arrangementRepo.save(newArrangement);
         log.info("Мероприятие {} записано в БД", newArrangement.getId());
         getAndSaveArrangementCheckUnits(newArrangement);
