@@ -27,7 +27,3 @@ security:
       accessTokenUri: ${gateway.url}/security/oauth/token
 spring:
   application.name: dispatcher
-  cloud:
-    config:
-      enabled: false
-      bus.enabled: false
