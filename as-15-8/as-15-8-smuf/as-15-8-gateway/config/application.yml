@@ -53,8 +53,8 @@ zuul:
     security:
       path: /security/**
       serviceId: auth_server
-    report_scheduler:
-      path: /report_scheduler/**
+    ppo:
+      path: /ppo/**
       serviceId: report_scheduler
     report_generator:
       path: /report_generator/**
