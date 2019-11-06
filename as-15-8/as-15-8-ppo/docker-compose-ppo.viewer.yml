@@ -1,0 +1,21 @@
+version: '3.7'
+networks:
+  as-15-8-net:
+services:
+  birt:
+    image: harbor.ec-leasing.ru/as_15_8/as-15-8-rep-viewer:latest
+    networks:
+      - as-15-8-net
+    restart: always
+    environment:
+      PROFILE: test
+      GATEWAY_URI: http://192.168.5.50:15880
+      TZ: "Europe/Moscow"
+    ports:
+      - "15813:15813"
+    volumes:
+      - ~/as-15-8-ppo/birt/logs:/log
+      - ~/as-15-8-ppo/birt/config:/config
+    labels:
+      collect_logs_with_filebeat: "true"
+      decode_log_event_to_json_object: "true"
