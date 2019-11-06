@@ -2,7 +2,7 @@ version: '3.7'
 networks:
   as-15-8-net:
 services:
-  birt:
+  rep-viewer:
     image: harbor.ec-leasing.ru/as_15_8/as-15-8-rep-viewer:latest
     networks:
       - as-15-8-net
@@ -11,6 +11,18 @@ services:
       TZ: "Europe/Moscow"
     ports:
       - "8078:8080"
+    labels:
+      collect_logs_with_filebeat: "true"
+      decode_log_event_to_json_object: "true"
+  rep-gate:
+    image: harbor.ec-leasing.ru/as_15_8/as-15-8-rep-gate:latest
+    networks:
+      - as-15-8-net
+    restart: always
+    environment:
+      TZ: "Europe/Moscow"
+    ports:
+      - "8079:80"
     labels:
       collect_logs_with_filebeat: "true"
       decode_log_event_to_json_object: "true"
