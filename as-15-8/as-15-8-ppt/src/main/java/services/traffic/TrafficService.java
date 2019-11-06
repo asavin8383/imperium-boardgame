@@ -19,9 +19,7 @@ import utils.TrafficUnitUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -66,7 +64,7 @@ public class TrafficService {
 
     public TrafficFullView getTrafficById(Long id) {
         return trafficRepository.findById(id)
-                .map(TrafficService::convertToFullView)
+                .map(this::convertToFullView)
                 .orElseThrow(() -> new AS_15_8_PPT_Exception(
                         "Traffic was not found by id: " + id));
     }
@@ -93,8 +91,7 @@ public class TrafficService {
     public TrafficFullView updateTraffic(TrafficFullView fullView, Traffic oldTraffic) {
         boolean changeName = fullView.getName().compareTo(oldTraffic.getName()) != 0;
 
-        Traffic newTraffic = convertToTraffic(fullView);
-        oldTraffic.setName(newTraffic.getName());
+        oldTraffic.setName(fullView.getName());
 
         if (changeName) {
             getUnitStream(oldTraffic)
@@ -110,35 +107,12 @@ public class TrafficService {
         trafficRepository.deleteById(id);
     }
 
-    private Traffic convertToTraffic(TrafficFullView fullView) {
-        Traffic traffic = new Traffic();
-        traffic.setId(fullView.getId());
-        traffic.setName(fullView.getName());
-        // todo NullPointerException
-        traffic.setSearchQueryTrafficUnits(collectUnits(
-                Stream.of(fullView.getSearchPhraseUnit()),
-                fullView.getSearchTemplates().stream()));
-        traffic.setErdiTrafficUnits(collectUnits(
-                Stream.of(fullView.getFormalErdiUnit()),
-                Stream.of(fullView.getCustomErdiUnit())));
-        return traffic;
-    }
-
-    private static TrafficFullView convertToFullView(Traffic traffic) {
+    private TrafficFullView convertToFullView(Traffic traffic) {
         TrafficFullView fullView = new TrafficFullView();
         fullView.setId(traffic.getId());
         fullView.setName(traffic.getName());
-        Stream.concat(traffic.getErdiTrafficUnits().stream(),
-                traffic.getSearchQueryTrafficUnits().stream())
-                .forEach(fullView::setUnit);
+        getUnitStream(traffic).forEach(fullView::setUnit);
         return fullView;
-    }
-
-    private <T extends TrafficUnit> List<T> collectUnits(Stream<T> a, Stream<T> b) {
-        return Stream.concat(a, b)
-                .filter(Objects::nonNull)
-                .filter(TrafficUnit::nonEmpty)
-                .collect(Collectors.toList());
     }
 
     private void syncAssociation(Traffic traffic) {
@@ -148,10 +122,20 @@ public class TrafficService {
     }
 
     private Stream<TrafficUnit> getUnitStream(Traffic traffic) {
-        return Stream.concat(
-                traffic.getErdiTrafficUnits().stream().map(TrafficUnit.class::cast),
-                traffic.getSearchQueryTrafficUnits().stream().map(TrafficUnit.class::cast)
-        );
+        List<ErdiTrafficUnit> erdiUnits = traffic.getErdiTrafficUnits();
+        List<SearchQueryTrafficUnit> searchUnits = traffic.getSearchQueryTrafficUnits();
+        if (erdiUnits != null && searchUnits != null) {
+            return Stream.concat(
+                    erdiUnits.stream().map(TrafficUnit.class::cast),
+                    searchUnits.stream().map(TrafficUnit.class::cast)
+            );
+        } else if (erdiUnits != null) {
+            return erdiUnits.stream().map(TrafficUnit.class::cast);
+        } else if (searchUnits != null) {
+            return searchUnits.stream().map(TrafficUnit.class::cast);
+        } else {
+            return Stream.empty();
+        }
     }
 
     // todo multithreading & db changes
