@@ -2,6 +2,7 @@ package events.handlers.rest;
 
 import arrangement.ArrangementStatusNotification;
 import checkUnits.CheckUnit;
+import checkUnits.CheckUnitType;
 import common.SchedulerProperties;
 import enums.AccessToolUnit;
 import enums.ArrangementEvents;
@@ -87,31 +88,31 @@ public class ArrangementController {
                 boolean isPS = accessToolUnit == AccessToolUnit.SEARCH_SYSTEM ||
                         accessToolUnit == AccessToolUnit.GOOGLE_API;
                 if (isPS) {
-                    scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit, checkUnit.getValue()));
+                    scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit.getErdiId(), CheckUnitType.URL, checkUnit.getValue()));
                 } else {
                     for(Protocol value: Protocol.values()){
-                        scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit, value.getProtocol() + checkUnit.getValue()));
+                        scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit.getErdiId(), CheckUnitType.URL, value.getProtocol() + checkUnit.getValue()));
                     }
                 }
                 return scheduleCheckUnits;
             }
             case DOMAIN_MASK: {
                 domainMaskItemRepo.findAllByDomainMask(checkUnit.getValue())
-                    .forEach(domainMaskItem -> scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit, domainMaskItem.getDomainMaskItem())));
+                    .forEach(domainMaskItem -> scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit.getErdiId(), CheckUnitType.URL, domainMaskItem.getDomainMaskItem())));
                 return scheduleCheckUnits;
             }
             default: {
-                scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit, checkUnit.getValue()));
+                scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit.getErdiId(), checkUnit.getType(), checkUnit.getValue()));
                 return scheduleCheckUnits;
             }
         }
     }
 
-    private ScheduleCheckUnit createCheckUnit(Arrangement arrangement, CheckUnit checkUnit, String checkUnitValue){
+    private ScheduleCheckUnit createCheckUnit(Arrangement arrangement, Long erdiId, CheckUnitType checkUnitType, String checkUnitValue){
         ScheduleCheckUnit scheduleCheckUnit = new ScheduleCheckUnit();
         scheduleCheckUnit.setArrangement(arrangement);
-        scheduleCheckUnit.setErdiId(checkUnit.getErdiId());
-        scheduleCheckUnit.setCheckUnitType(checkUnit.getType());
+        scheduleCheckUnit.setErdiId(erdiId);
+        scheduleCheckUnit.setCheckUnitType(checkUnitType);
         scheduleCheckUnit.setCheckUnitValue(checkUnitValue);
         return scheduleCheckUnit;
     }

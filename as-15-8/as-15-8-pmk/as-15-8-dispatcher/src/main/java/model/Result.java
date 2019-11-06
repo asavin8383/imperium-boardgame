@@ -15,10 +15,10 @@ import java.time.LocalDateTime;
  * Результат проведения мероприятия по одноу из URL, входящих в состав ЕРДИ
  */
 @Entity
-@Table(schema = "portal", name = "arrangement_results",
+@Table(schema = "results", name = "results",
     uniqueConstraints = @UniqueConstraint(columnNames = {"arrangement_id", "content_id", "check_unit_type", "check_unit_value"}))
 @Data
-public class ArrangementResult implements Serializable {
+public class Result implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -57,7 +57,10 @@ public class ArrangementResult implements Serializable {
     private LocalDateTime startDate;
     private LocalDateTime endDate;
 
-    public ArrangementResult() {
+    private String userResult;
+    private String userDescription;
+
+    public Result() {
         this.startDate = LocalDateTime.now();
     }
 }

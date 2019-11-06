@@ -1,0 +1,32 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+    <changeSet id="dispatcher.0006" author="asavin">
+        <sql>
+            alter table results.results add constraint ck_result check ( result in (
+            'PLANNED',
+            'RUNNING',
+            'COMPLETED',
+            'DOUBTFUL',
+            'FORBIDDEN_CONTENT_DETECTED',
+            'CAPTCHA_DETECTED',
+            'DNS_ERROR',
+            'SOCKET_ERROR',
+            'HTTP_SERVER_SEND_NO_RESPONSE',
+            'PAGE_NOT_FOUND',
+            'INTERNAL_ERROR',
+            'TIMEOUT_ERROR' ));
+
+            alter table results.results add constraint ck_check_unit_type check (check_unit_type in ('URL', 'DOMAIN', 'DOMAIN_MASK', 'IP_V4', 'IP_V6', 'IP_V4_SUBNET', 'IP_V6_SUBNET'));
+
+            alter table results.results add constraint ck_user_result check (user_result in ('COMPLETED', 'DOUBTFUL', 'FORBIDDEN_CONTENT_DETECTED'));
+        </sql>
+        <rollback>
+            <sql>
+                alter table results.results drop constraint ck_result;
+                alter table results.results drop constraint ck_check_unit_type;
+                alter table results.results drop constraint ck_user_result;
+            </sql>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

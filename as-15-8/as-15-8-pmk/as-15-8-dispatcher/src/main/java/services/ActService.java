@@ -4,7 +4,7 @@ import enums.CheckUnitJobResult;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import model.ArrangementResult;
+import model.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -13,7 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
-import repositories.ArrangementResultRepository;
+import repositories.ResultRepo;
 import rest.ActRequest;
 import rest.ActCheckResult;
 import rest.ResponseStatusString;
@@ -34,12 +34,12 @@ public class ActService {
     private String configUrl;
 
     private final OAuth2RestTemplate oauth2RestTemplate;
-    private final ArrangementResultRepository arrangementResultRepo;
+    private final ResultRepo arrangementResultRepo;
     private static final int defMaxCountScreenShots = 10;
 
 
     public boolean createAct(Long arragementId){
-        List<ArrangementResult> list = arrangementResultRepo.findByArrangementId(arragementId);
+        List<Result> list = arrangementResultRepo.findByArrangementId(arragementId);
         log.info("Формирование акта. Всего результатов: " + list.size());
 
         if (list.size() == 0){
@@ -56,7 +56,7 @@ public class ActService {
         Set<CheckUnitJobResult> allowResults =
                 new HashSet<>(Arrays.asList(CheckUnitJobResult.values()));
 
-        for (ArrangementResult ares : list){
+        for (Result ares : list){
             ActCheckResult checkResult = new ActCheckResult();
             checkResult.checkResultId = ares.getId();
             checkResult.checkUnitType = ares.getCheckUnitType();

@@ -1,12 +1,13 @@
 package services.impl;
 
 import checkUnits.CheckUnitJob;
+import enums.CheckUnitJobResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import model.ArrangementResult;
+import model.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import repositories.ArrangementResultRepository;
+import repositories.ResultRepo;
 
 /**
  * Created by san
@@ -17,15 +18,16 @@ import repositories.ArrangementResultRepository;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class CheckUnitPersistingService {
 
-    private final ArrangementResultRepository arrangementResultRepository;
+    private final ResultRepo resultRepo;
 
-    public ArrangementResult persistCheckUnitJob(CheckUnitJob checkUnitJob){
-        ArrangementResult arrangementResult = new ArrangementResult();
-        arrangementResult.setArrangementId(checkUnitJob.getArrangementId());
-        arrangementResult.setErdiId(checkUnitJob.getCheckUnit().getErdiId());
-        arrangementResult.setCheckUnitType(checkUnitJob.getCheckUnit().getType());
-        arrangementResult.setCheckUnitValue(checkUnitJob.getCheckUnit().getValue());
-        return arrangementResultRepository.save(arrangementResult);
+    public Result persistCheckUnitJob(CheckUnitJob checkUnitJob){
+        Result result = new Result();
+        result.setArrangementId(checkUnitJob.getArrangementId());
+        result.setErdiId(checkUnitJob.getCheckUnit().getErdiId());
+        result.setCheckUnitType(checkUnitJob.getCheckUnit().getType());
+        result.setCheckUnitValue(checkUnitJob.getCheckUnit().getValue());
+        result.setResult(CheckUnitJobResult.RUNNING);
+        return resultRepo.save(result);
     }
 
 }

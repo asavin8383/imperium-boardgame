@@ -35,6 +35,7 @@ spring:
 
 spring:
   profiles: prod
+  profiles.include: docker_log
   main:
     banner-mode: "off"
   cloud.stream:
@@ -45,6 +46,7 @@ selenium-hub-url: http://10.97.220.147:4444/wd/hub
 
 spring:
   profiles: test
+  profiles.include: docker_log
   main:
     banner-mode: "off"
 
@@ -52,6 +54,7 @@ spring:
 
 spring:
   profiles: dev_ashabalin, dev_asin, dev_asavin, dev_pvorobiev, dev_jspirina
+  profiles.include: local_log
   cloud:
     stream:
       bindings:

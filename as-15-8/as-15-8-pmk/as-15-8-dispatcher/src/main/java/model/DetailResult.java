@@ -2,10 +2,7 @@ package model;
 
 import lombok.Data;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.io.Serializable;
 
 /**
@@ -13,15 +10,18 @@ import java.io.Serializable;
  */
 
 @Entity
-@Table(schema = "portal", name = "detail_results")
+@Table(schema = "results", name = "detail_results")
 @Data
-public class DetailResultsVpn implements Serializable  {
+public class DetailResult implements Serializable  {
 
-    private static final long serialVersionUID = 666L;
+    private static final long serialVersionUID = 1L;
 
     @Id
-    @Column(name="id", nullable=false, updatable=false, columnDefinition="bigint")
     private Long id;
+
+    @OneToOne(optional = false, fetch = FetchType.LAZY)
+    @MapsId
+    private Result result;
 
     @Column(name="response_error_code")
     private String responseErrorCode;

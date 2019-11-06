@@ -9,7 +9,7 @@ import events.DispatcherChannels;
 import events.producers.rest.ArrangementStatusProducer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import model.ArrangementResult;
+import model.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
@@ -41,7 +41,7 @@ public class JobNotificationHandler {
                 ", offset: "+message.getHeaders().get(KafkaHeaders.OFFSET, Long.class));
         Acknowledgment ack = message.getHeaders().get(KafkaHeaders.ACKNOWLEDGMENT, Acknowledgment.class);
         try {
-            ArrangementResult job = arrangementResultService.updateJobStatus(notification.getJobID(), notification.getCheckUnitStatus(), notification.getDescription());
+            Result job = arrangementResultService.updateJobStatus(notification.getJobID(), notification.getCheckUnitStatus(), notification.getDescription());
             if(notification.getCheckUnitStatus() == CheckUnitJobResult.CAPTCHA_DETECTED) {
                 ArrangementStatusNotification arrNotification = new ArrangementStatusNotification(job.getArrangementId(), ArrangementEvents.PAUSE);
                 arrangementStatusProducer.sendArrangementStatusMessage(arrNotification);
