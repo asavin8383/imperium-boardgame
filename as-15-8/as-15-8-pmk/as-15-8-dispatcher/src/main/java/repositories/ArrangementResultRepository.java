@@ -1,5 +1,6 @@
 package repositories;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,7 +11,6 @@ import org.springframework.stereotype.Repository;
 import enums.CheckUnitJobResult;
 import model.ArrangementResult;
 
-import javax.transaction.Transactional;
 
 /**
  * Creation date: 27.05.2019
@@ -22,5 +22,13 @@ public interface ArrangementResultRepository extends JpaRepository<ArrangementRe
 	
 	@Query("SELECT count(res) FROM ArrangementResult res WHERE res.arrangementId = :id AND (res.result IS NULL OR res.result IN :results)")
 	Long countByResultNullOrResultIn(@Param("id") Long id, @Param("results") List<CheckUnitJobResult> results);
+
+	List<ArrangementResult> findByArrangementId(Long arrangementId);
+
+	@Query(value = "select max(res.startDate) from ArrangementResult res where res.arrangementId = :id")
+	LocalDateTime getMaxDateByArrangementId(@Param("id") Long id);
+
+	@Query(value = "select min(res.endDate) from ArrangementResult res where res.arrangementId = :id")
+	LocalDateTime getMinDateByArrangementId(@Param("id") Long id);
 
 }

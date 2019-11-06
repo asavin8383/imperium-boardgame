@@ -4,13 +4,14 @@ spring:
     stream:
       bindings:
         input:
-          content-type: application/json
+          destination: exec_results
           group: analyzers
-        output:
-          content-type: application/json
-        notifications:
-          content-type: application/json
-        springCloudBusInput:
+          consumer.concurrency: 4
+        output.destination: analysis_results
+        notifications.destination: job_notifications
+        springCloudBusInput.destination: bus_config_input
+        springCloudBusOutput:
+          destination: bus_config_output
           group: analyzer:${spring.cloud.client.ip-address}
       kafka:
         binder:
@@ -41,17 +42,6 @@ spring:
   main:
     banner-mode: "off"
   cloud.stream:
-    bindings:
-      input:
-        destination: exec_results
-        consumer:
-          concurrency: 4
-      output.destination: analysis_results
-      notifications.destination: job_notifications
-      springCloudBusInput:
-        destination: bus_config_input
-      springCloudBusOutput:
-        destination: bus_config_output
     kafka:
       binder:
         brokers: 10.97.220.141:9094,10.97.220.142:9094,10.97.220.143:9094
@@ -66,118 +56,79 @@ spring:
   cloud.stream:
     bindings:
       input:
-        destination: exec_results
+        consumer.concurrency: 1
+
+---
+
+spring:
+  profiles: dev_ashabalin, dev_asinyavin, dev_asavin, dev_pvorobiev, dev_jspirina
+  profiles.include: local_log
+  cloud.stream:
+    bindings:
+      input:
         consumer:
-          concurrency: 1
-      output.destination: analysis_results
-      notifications.destination: job_notifications
-      springCloudBusInput:
-        destination: bus_config_input
-      springCloudBusOutput:
-        destination: bus_config_output
+          concurrency: 7
+    kafka.bindings.jobs.consumer:
+      configuration:
+        max.poll.interval.ms: 300000
 
 ---
 
 spring:
   profiles: dev_ashabalin
-  profiles.include: local_log
   cloud.stream:
     bindings:
-      input:
-        destination: exec_results_ashabalin
-        consumer:
-          concurrency: 7
+      input.destination: exec_results_ashabalin
       output.destination: analysis_results_ashabalin
       notifications.destination: job_notifications_ashabalin
-      springCloudBusInput:
-        destination: bus_config_input_ashabalin
-      springCloudBusOutput:
-        destination: bus_config_output_ashabalin
-    kafka.bindings.jobs.consumer:
-      configuration:
-        max.poll.interval.ms: 300000
+      springCloudBusInput.destination: bus_config_input_ashabalin
+      springCloudBusOutput.destination: bus_config_output_ashabalin
 
 ---
 
 
 spring:
   profiles: dev_asinyavin
-  profiles.include: local_log
   cloud.stream:
     bindings:
-      input:
-        destination: exec_results_asinyavin
-        consumer:
-          concurrency: 7
+      input.destination: exec_results_asinyavin
       output.destination: analysis_results_asinyavin
       notifications.destination: job_notifications_asinyavin
-      springCloudBusInput:
-        destination: bus_config_input_asinyavin
-      springCloudBusOutput:
-        destination: bus_config_output_asinyavin
-    kafka.bindings.jobs.consumer:
-      configuration:
-        max.poll.interval.ms: 300000
+      springCloudBusInput.destination: bus_config_input_asinyavin
+      springCloudBusOutput.destination: bus_config_output_asinyavin
 
 ---
 
 spring:
   profiles: dev_asavin
-  profiles.include: local_log
   cloud.stream:
     bindings:
-      input:
-        destination: exec_results_asavin
-        consumer:
-          concurrency: 7
+      input.destination: exec_results_asavin
       output.destination: analysis_results_asavin
       notifications.destination: job_notifications_asavin
-      springCloudBusInput:
-        destination: bus_config_input_asavin
-      springCloudBusOutput:
-        destination: bus_config_output_asavin
-    kafka.bindings.jobs.consumer:
-      configuration:
-        max.poll.interval.ms: 300000
+      springCloudBusInput.destination: bus_config_input_asavin
+      springCloudBusOutput.destination: bus_config_output_asavin
 
 ---
 
 spring:
   profiles: dev_pvorobiev
-  profiles.include: local_log
   cloud.stream:
     bindings:
-      input:
-        destination: exec_results_pvorobiev
-        consumer:
-          concurrency: 7
+      input. destination: exec_results_pvorobiev
       output.destination: analysis_results_pvorobiev
       notifications.destination: job_notifications_pvorobiev
-      springCloudBusInput:
-        destination: bus_config_input_pvorobiev
-      springCloudBusOutput:
-        destination: bus_config_output_pvorobiev
-    kafka.bindings.jobs.consumer:
-      configuration:
-        max.poll.interval.ms: 300000
+      springCloudBusInput.destination: bus_config_input_pvorobiev
+      springCloudBusOutput.destination: bus_config_output_pvorobiev
 
 ---
 
 spring:
   profiles: dev_jspirina
-  profiles.include: local_log
   cloud.stream:
     bindings:
-      input:
-        destination: exec_results_jspirina
-        consumer:
-          concurrency: 7
+      input.destination: exec_results_jspirina
       output.destination: analysis_results_jspirina
       notifications.destination: job_notifications_jspirina
-      springCloudBusInput:
-        destination: bus_config_input_jspirina
-      springCloudBusOutput:
-        destination: bus_config_output_jspirina
-    kafka.bindings.jobs.consumer:
-      configuration:
-        max.poll.interval.ms: 300000
+      springCloudBusInput.destination: bus_config_input_jspirina
+      springCloudBusOutput.destination: bus_config_output_jspirina

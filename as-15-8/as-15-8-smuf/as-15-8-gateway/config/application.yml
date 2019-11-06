@@ -47,14 +47,17 @@ zuul:
     ppm:
       path: /ppm/**
       serviceId: ppm
+    dispatcher:
+      path: /dispatcher/**
+      serviceId: dispatcher
     ppt:
       path: /**
       serviceId: ppt
     security:
       path: /security/**
       serviceId: auth_server
-    report_scheduler:
-      path: /report_scheduler/**
+    ppo:
+      path: /ppo/**
       serviceId: report_scheduler
     report_generator:
       path: /report_generator/**

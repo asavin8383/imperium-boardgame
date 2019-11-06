@@ -25,6 +25,7 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
+import services.ActService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,6 +40,9 @@ public class SendCheckUnitToKafka {
 
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
+
+	@Autowired
+	private ActService actService;
 
 	@Value("${spring.cloud.stream.bindings.jobs.destination}")
     private String topic;
@@ -131,6 +135,18 @@ public class SendCheckUnitToKafka {
 						}
 					});
 				});
+	}
+
+	@Test
+	public void testAct() {
+
+		System.out.println("BEGIN -------------------------------");
+
+		boolean res = actService.createAct(2L);
+		System.out.println("res = " + res);
+
+		System.out.println("END -------------------------------");
+
 	}
 
 	@Configuration

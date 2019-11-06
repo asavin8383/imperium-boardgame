@@ -60,7 +60,10 @@ spring:
     stream:
       bindings:
         springCloudBusInput:
+          destination: bus_config_output
           group: config_server
+        springCloudBusOutput:
+          destination: bus_config_input
       kafka.binder:
         brokers: 192.168.5.12:9094,192.168.5.184:9094,192.168.5.211:9094
 management.endpoints.web.exposure.include: bus-refresh
@@ -74,13 +77,6 @@ spring:
     banner-mode: "off"
   datasource:
     url: jdbc:postgresql://10.97.220.144:5432/asdb
-  cloud:
-    stream:
-      bindings:
-        springCloudBusInput:
-          destination: bus_config_output
-        springCloudBusOutput:
-          destination: bus_config_input
 
 ---
 
@@ -91,13 +87,17 @@ spring:
     banner-mode: "off"
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb
-  cloud:
-    stream:
-      bindings:
-        springCloudBusInput:
-          destination: bus_config_output
-        springCloudBusOutput:
-          destination: bus_config_input
+
+---
+
+spring:
+  profiles: dev_pvorobiev, dev_asavin, dev_ashabalin, dev_jspirina, dev_asin
+  profiles.include: local_log
+  datasource:
+    url: jdbc:postgresql://192.168.5.195:5432/asdb_test
+  liquibase:
+    enabled: false
+    change-log: classpath:/db/db.changelog.master.xml
 
 ---
 
@@ -107,26 +107,48 @@ logging:
     root: info
 spring:
   profiles: dev_asin
-  profiles.include: local_log
-  datasource:
-    url: jdbc:postgresql://192.168.5.195:5432/asdb_test
-  liquibase:
-    enabled: false
+  cloud:
+    stream:
+      bindings:
+        springCloudBusInput.destination: bus_config_output_asin
+        springCloudBusOutput.destination: bus_config_input_asin
 
 ---
 
 spring:
-  profiles: dev_pvorobiev, dev_asavin, dev_ashabalin, dev_jspirina
-  profiles.include: local_log
-  datasource:
-    url: jdbc:postgresql://192.168.5.195:5432/asdb_test
-  liquibase:
-    enabled: false
-    change-log: classpath:/db/db.changelog.master.xml
+  profiles: dev_ashabalin
   cloud:
     stream:
       bindings:
-        springCloudBusInput:
-          destination: bus_config_output_ashabalin
-        springCloudBusOutput:
-          destination: bus_config_input_ashabalin
+        springCloudBusInput.destination: bus_config_output_ashabalin
+        springCloudBusOutput.destination: bus_config_input_ashabalin
+
+---
+
+spring:
+  profiles: dev_pvorobiev
+  cloud:
+    stream:
+      bindings:
+        springCloudBusInput.destination: bus_config_output_pvorobiev
+        springCloudBusOutput.destination: bus_config_input_pvorobiev
+
+---
+
+spring:
+  profiles: dev_asavin
+  cloud:
+    stream:
+      bindings:
+        springCloudBusInput.destination: bus_config_output_asavin
+        springCloudBusOutput.destination: bus_config_input_asavin
+
+---
+
+spring:
+  profiles: dev_jspirina
+  cloud:
+    stream:
+      bindings:
+        springCloudBusInput. destination: bus_config_output_jspirina
+        springCloudBusOutput.destination: bus_config_input_jspirina
