@@ -4,9 +4,7 @@ import exceptions.AS_15_8_PPT_Exception;
 import liquibase.util.StringUtils;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import model.traffic.CustomErdi;
-import model.traffic.CustomErdiView;
-import model.traffic.CustomErdiView_;
+import model.traffic.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -73,15 +71,21 @@ public class CustomErdiService {
     private <T> Specification<CustomErdiView> containsInTrafficUnit(String query, boolean containsInTraffic,
                                                                     @NonNull Long trafficUnitId,
                                                                     ListAttribute<CustomErdiView, T> joinColumn) {
-        // todo use join table only
         return (root, criteriaQuery, criteriaBuilder) -> {
-            Join<CustomErdiView, T> join = root.join(joinColumn, JoinType.LEFT);
-            Predicate predicate = criteriaBuilder.equal(
-                    join.get(TRAFFIC_ID_COLUMN), trafficUnitId);
-            if ( !containsInTraffic )
-                predicate = criteriaBuilder.or(criteriaBuilder.not(predicate),
-                        criteriaBuilder.isNull(join.get(TRAFFIC_ID_COLUMN))
-                );
+            Predicate predicate;
+
+            if (containsInTraffic) {
+                Join<CustomErdiView, T> join = root.join(joinColumn, JoinType.LEFT);
+                predicate = criteriaBuilder.equal(join.get(TRAFFIC_ID_COLUMN), trafficUnitId);
+            } else {
+                Subquery<ErdiTrafficUnitCustom> sub = criteriaQuery.subquery(ErdiTrafficUnitCustom.class);
+                Root<ErdiTrafficUnitCustom> subRoot = sub.from(ErdiTrafficUnitCustom.class);
+                sub.select(subRoot);
+                sub.where(criteriaBuilder.and(
+                        criteriaBuilder.equal(subRoot.get(ErdiTrafficUnitCustom_.trafficUnit).get(ErdiTrafficUnit_.id), trafficUnitId),
+                        criteriaBuilder.equal(subRoot.get(ErdiTrafficUnitCustom_.customErdi).get(CustomErdi_.id), root.get("id"))));
+                predicate = criteriaBuilder.not(criteriaBuilder.exists(sub));
+            }
 
             return StringUtils.isEmpty(query) ? predicate : criteriaBuilder.and(
                     predicate, predicateContainsQuery(criteriaBuilder, root, query));

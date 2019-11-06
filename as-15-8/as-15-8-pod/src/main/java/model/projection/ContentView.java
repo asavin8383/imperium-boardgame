@@ -1,16 +1,11 @@
 package model.projection;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
-import model.portal.ErdiTrafficUnitJoin;
-import model.portal.SearchQueryTrafficUnitJoin;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Subselect;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import java.util.List;
 
 @Data
 @Setter(value = AccessLevel.PRIVATE)
@@ -95,14 +90,6 @@ public class ContentView {
 
     // 18
     private String violationName;
-
-    @OneToMany(mappedBy = "contentView")
-    @JsonIgnore
-    private List<ErdiTrafficUnitJoin> erdiTrafficUnits;
-
-    @OneToMany(mappedBy = "contentView")
-    @JsonIgnore
-    private List<SearchQueryTrafficUnitJoin> searchQueryTrafficUnits;
 
     // 2
     // @Value("#{target.contentInfo.includetime}")

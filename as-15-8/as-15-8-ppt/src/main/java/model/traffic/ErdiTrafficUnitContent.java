@@ -7,13 +7,16 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Entity
 @Table(schema = "portal", name = "erdi_traffic_units_content")
 @Data
 @ToString(onlyExplicitlyIncluded = true)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class ErdiContentJoin {
+public class ErdiTrafficUnitContent implements Serializable {
+
+    private static final long serialVersionUID = 1490702373249772220L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,4 +35,10 @@ public class ErdiContentJoin {
     @ToString.Include
     private Long contentId;
 
+    public ErdiTrafficUnitContent() { }
+
+    public ErdiTrafficUnitContent(ErdiTrafficUnit trafficUnit, Long contentId) {
+        this.trafficUnit = trafficUnit;
+        this.contentId = contentId;
+    }
 }

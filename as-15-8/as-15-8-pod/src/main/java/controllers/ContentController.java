@@ -46,16 +46,33 @@ public class ContentController {
             @RequestParam(required = false) String sortingColumn,
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize,
-            @RequestParam(required = false) String query,
-            @RequestParam(defaultValue = "true") boolean containsInTraffic,
-            @RequestParam(required = false) Long erdiTrafficUnitId,
-            @RequestParam(required = false) Long searchTrafficUnitId) {
+            @RequestParam(required = false) String query) {
 
         if (!erdiRestClient.getIsLoading()) {
             Pageable pageable = PageRequest.of(pageNumber, pageSize,
                     SortingHelper.createSorting(sortingDirection, sortingColumn));
-            Page<ContentView> pageContent = contentService.getFormalErdiView(pageable,
-                    query, containsInTraffic, erdiTrafficUnitId, searchTrafficUnitId);
+            Page<ContentView> pageContent =
+                    contentService.getFormalErdiView(query, pageable);
+            return new ResponseEntity<>(pageContent, HttpStatus.OK);
+        }
+        else {
+            return new ResponseEntity<>((Page<ContentView>) null, HttpStatus.ACCEPTED);
+        }
+    }
+
+    @PostMapping(path = "/erdi")
+    public ResponseEntity<Page<ContentView>> getContentByIds(
+            @RequestParam(required = false) SortingDirection sortingDirection,
+            @RequestParam(required = false) String sortingColumn,
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestBody List<Long> ids) {
+
+        if (!erdiRestClient.getIsLoading()) {
+            Pageable pageable = PageRequest.of(pageNumber, pageSize,
+                    SortingHelper.createSorting(sortingDirection, sortingColumn));
+            Page<ContentView> pageContent =
+                    contentService.getFormalErdiView(ids, pageable);
             return new ResponseEntity<>(pageContent, HttpStatus.OK);
         }
         else {
