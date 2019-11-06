@@ -47,6 +47,9 @@ zuul:
     ppm:
       path: /ppm/**
       serviceId: ppm
+    dispatcher:
+      path: /dispatcher/**
+      serviceId: dispatcher
     ppt:
       path: /**
       serviceId: ppt

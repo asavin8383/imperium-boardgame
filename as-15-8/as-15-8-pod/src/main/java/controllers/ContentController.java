@@ -16,10 +16,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import rest.ActRequest;
+import rest.ResponseStatusString;
 import restapi.ErdiRestClient;
+import services.ActService;
 import services.ContentService;
 import services.InfoService;
 
@@ -37,6 +38,7 @@ public class ContentController {
     private final ContentService contentService;
     private final ErdiRestClient erdiRestClient;
     private final InfoService infoService;
+    private final ActService actService;
 
     @GetMapping(path = "/erdi")
     public ResponseEntity<Page<ContentView>> getRelevantContent(
@@ -66,6 +68,12 @@ public class ContentController {
             @RequestParam(defaultValue = "") String url
     ) {
         return infoService.searchCheckUnit(url);
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
+    @PostMapping(path = "/create_act", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseStatusString createAct(@RequestBody ActRequest actRequest){
+        return actService.createAct(actRequest);
     }
 
     @GetMapping(path = "/update_erdi")
