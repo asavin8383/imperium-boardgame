@@ -1,7 +1,6 @@
 package controllers;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import enums.ExecutionStatus;
 import enums.SortingDirection;
 import exceptions.AS_15_8_PPM_Exception;
 import helpers.SortingHelper;
@@ -19,7 +18,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import repositories.ArrangementRepo;
 import services.ArrangementService;
 import services.ScheduleService;
 
@@ -43,7 +41,6 @@ public class ScheduleController {
 
     @GetMapping(path = "/arrangements")
     public Page<Arrangement> getArrangementsForSchedule(
-            @RequestParam(required = true) LocalDate plannedDate,
             @RequestParam(required = false) SortingDirection sortingDirection,
             @RequestParam(required = false) String sortingColumn,
             @RequestParam(defaultValue = "0") int pageNumber,
@@ -103,7 +100,7 @@ public class ScheduleController {
             @RequestParam("id") Schedule schedule
     ) {
         if(!(schedule.getStatus().equals(ScheduleStatus.NEW))){
-            AS_15_8_PPM_Exception.logAndGet(log, String.format("Ошибка планирования расписания! Некорректный статус расписания с ИД: %d - %s", schedule.getId(), schedule.getStatus()));
+            throw AS_15_8_PPM_Exception.logAndGet(log, String.format("Ошибка планирования расписания! Некорректный статус расписания с ИД: %d - %s", schedule.getId(), schedule.getStatus()));
         }
         return scheduleService.planSchedule(schedule);
     }
@@ -138,7 +135,7 @@ public class ScheduleController {
         Map<Arrangement, TreeSet<ScheduleCheckUnit>> arrangementCheckUnits = arrangementService.getArrangementCheckUnits(arrangementIds);
         for(Map.Entry<Arrangement, TreeSet<ScheduleCheckUnit>> entry: arrangementCheckUnits.entrySet()){
             if(entry.getValue().isEmpty()){
-                AS_15_8_PPM_Exception.logAndGet(log, "Ошибка создания расписания. У мероприятия " + entry.getKey().getId() + " пустое множество значений для проверки");
+                throw AS_15_8_PPM_Exception.logAndGet(log, "Ошибка создания расписания. У мероприятия " + entry.getKey().getId() + " пустое множество значений для проверки");
             }
         }
         Schedule schedule = scheduleService.create(arrangementCheckUnits);
@@ -151,7 +148,7 @@ public class ScheduleController {
     @Data
     @EqualsAndHashCode(onlyExplicitlyIncluded = true)
     @AllArgsConstructor
-    class BriefArrangement {
+    private static class BriefArrangement {
         @EqualsAndHashCode.Include
         @JsonView(Views.Id.class)
         private Long id;

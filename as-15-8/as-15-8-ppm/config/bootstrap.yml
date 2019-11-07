@@ -29,7 +29,7 @@ spring:
   application.name: ppm
   cloud:
     config:
-      bus.enabled: false
+      bus.enabled: true
       discovery.enabled: true
       discovery.serviceId: config_server
       fail-fast: true

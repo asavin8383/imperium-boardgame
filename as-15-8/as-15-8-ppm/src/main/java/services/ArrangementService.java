@@ -39,7 +39,7 @@ public class ArrangementService {
     }
 
     public Page<Arrangement> findPage(PageRequest page){
-        return arrangementRepo.findAll(page);
+        return arrangementRepo.findAllAvailableArrangements(page);
     }
 
     public Map<Arrangement, TreeSet<ScheduleCheckUnit>> getArrangementCheckUnits(List<Long> arrangementIds){

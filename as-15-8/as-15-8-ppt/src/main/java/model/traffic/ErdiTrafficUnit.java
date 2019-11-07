@@ -18,7 +18,7 @@ import utils.TrafficUnitUtils;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(schema = "portal", name = "erdi_traffic_units")
@@ -48,12 +48,12 @@ public class ErdiTrafficUnit extends TrafficUnit implements Serializable {
             joinColumns = @JoinColumn(name = "traffic_unit_id"),
             inverseJoinColumns = @JoinColumn(name = "custom_erdi_id"))
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private List<CustomErdi> customErdiList;
+    private Set<CustomErdi> customErdiList;
 
     @OneToMany(mappedBy = "trafficUnit",
             cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private List<ErdiTrafficUnitContent> formalErdiList;
+    private Set<ErdiTrafficUnitContent> formalErdiList;
 
     @Override
     public boolean isEmpty() {

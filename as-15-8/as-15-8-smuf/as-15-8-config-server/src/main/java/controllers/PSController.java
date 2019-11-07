@@ -1,9 +1,11 @@
 package controllers;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import controllers.entity.PS;
 import lombok.extern.slf4j.Slf4j;
 import model.Robot;
 import model.RobotType;
+import model.Views;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -32,8 +34,9 @@ public class PSController
      * Получение робота по имени
      * @param data
      */
-    @GetMapping("access_tool_id")
+    @PostMapping("access_tool_id")
     @PreAuthorize("hasRole('ROLE_SYSTEM')")
+    @JsonView(Views.Brief.class)
     List<Robot> findByName(@RequestParam String name) {
         return robotRepository.findByOrigName(name);
     }

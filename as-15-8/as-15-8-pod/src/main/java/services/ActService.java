@@ -3,9 +3,12 @@ package services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import exceptions.AS_15_8_POD_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import model.rest.control.AccessToolRobot;
+import model.rest.control.AccessToolRobotType;
 import model.rest.control.ActCheckResultPPP;
 import model.rest.control.ActRequestPPP;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,14 +47,22 @@ public class ActService {
 
     @SneakyThrows
     public ResponseStatusString createAct(ActRequest actRequest) {
+        log.info("Запрос на отправку акта в ППП: {}. Кол-во результатов: {}. Кол-во скриншотов: {}",
+                actRequest,
+                actRequest.checkResults.size(),
+                actRequest.topScreenShots.size());
+
+        AccessToolRobot robot = getAccessToolRobot(actRequest.arragementId);
+        AccessToolRobot robotPS = (robot.type == AccessToolRobotType.PS ? robot : new AccessToolRobot());
+        AccessToolRobot robotPASD = (robot.type == AccessToolRobotType.PASD ? robot : new AccessToolRobot());
 
         ActRequestPPP aReq = new ActRequestPPP();
-        aReq.MissionId = 0L;
+        aReq.MissionId = getExternalMissionIdByArrangementId(actRequest.arragementId);
         aReq.ArragementId = actRequest.arragementId;
-        aReq.PSId = null;
-        aReq.PASDId = null;
-        aReq.PSName = null;
-        aReq.PASDName = null;
+        aReq.PSId = robotPS.orig_id;
+        aReq.PASDId = robotPASD.orig_id;
+        aReq.PSName = robotPS.origName;
+        aReq.PASDName = robotPASD.origName;
         aReq.StartDate = actRequest.startDate;
         aReq.EndDate = actRequest.endDate;
 
@@ -76,8 +87,7 @@ public class ActService {
     }
 
     private ResponseStatusString send(ActRequestPPP actRequest, List<String> screenShots) throws JsonProcessingException {
-        System.out.println("send Act: ");
-        System.out.println(actRequest);
+        log.info("Отправка сформированного акта в ППП: {}", actRequest);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
@@ -117,12 +127,9 @@ public class ActService {
         HttpEntity<MultiValueMap<String, Object>> requestEntity =
                 new HttpEntity<>(body, headers);
 
-        log.info("Sending ACT with arragement ID = {}", actRequest.ArragementId);
-
         ResponseEntity<ResponseStatusString> response =
                 restTemplate.exchange(
                         UriComponentsBuilder.fromHttpUrl(baseUrl).path("/ArragementReport/").build().toString(),
-                        //UriComponentsBuilder.fromHttpUrl("http://localhost:8080").path("/ArragementReport666/").build().toString(),
                         HttpMethod.POST,
                         requestEntity,
                         ResponseStatusString.class);
@@ -131,15 +138,76 @@ public class ActService {
         HttpStatus httpStatus = response.getStatusCode();
         int code = httpStatus.value();
 
-        log.info("ACT with arragement ID = {}, status: {}, response: {}",
-                actRequest.ArragementId,
-                httpStatus.toString(),
-                responseStatus);
-
         responseStatus = responseStatus != null ? responseStatus :
                 new ResponseStatusString((code >= 200 && code < 300) || code == 302, null);
 
+        responseStatus.response = responseStatus.response != null ? responseStatus.response : httpStatus.toString();
+
+        log.info("Акт отправлен в ППП. Http-статус: {}, ответ: {}, данные акта: {}",
+                httpStatus.toString(),
+                responseStatus,
+                actRequest);
+
         return responseStatus;
+    }
+
+
+    private String getAccessTool(Long arrangementId){
+        String accessTool = restTemplate.getForObject(
+                UriComponentsBuilder.fromHttpUrl(gatewayUrl).path("/ppt/arrangements/access_tool")
+                        .queryParam("arrangement_id", arrangementId)
+                        .build().toString(),
+                String.class);
+
+        if (StringUtils.isEmpty(accessTool))
+            throw new AS_15_8_POD_Exception("accessTool не найден по arrangement ID = " + arrangementId);
+
+        return accessTool;
+    }
+
+    private AccessToolRobot getAccessToolRobot(Long arrangementId){
+        String accessTool = getAccessTool(arrangementId);
+
+        AccessToolRobot[] accessToolRobots = restTemplate.postForObject(
+                UriComponentsBuilder.fromHttpUrl(gatewayUrl).path("/config/access_tool_id")
+                        .queryParam("name", accessTool)
+                        .build().toString(),
+                new HttpEntity<>(new HttpHeaders()),
+                AccessToolRobot[].class);
+
+        if (accessToolRobots == null || accessToolRobots.length == 0)
+            throw new AS_15_8_POD_Exception("Robot не найден по accessTool = " + accessTool);
+
+        return accessToolRobots[0];
+    }
+
+    private Long getExternalMissionIdByArrangementId(Long arrangementId) {
+        Long missionId = getMissionId(arrangementId);
+        return getExternalMissionId(missionId);
+    }
+
+    private Long getMissionId(Long arrangementId){
+        Long missionId = restTemplate.getForObject(
+                UriComponentsBuilder.fromHttpUrl(gatewayUrl).path("/ppt/arrangements/mission_id")
+                        .queryParam("arrangement_id", arrangementId)
+                        .build().toString(),
+                Long.class);
+
+        if (missionId == null)
+            throw new AS_15_8_POD_Exception("mission не найден по arrangement ID = " + arrangementId);
+
+        return missionId;
+    }
+
+    private Long getExternalMissionId(Long id) {
+        if (id == null)
+            return null;
+
+        Long externalMissionId = missionRepository.getOriginId(id);
+        if (externalMissionId == null)
+            throw new AS_15_8_POD_Exception("externalMission не найден по mission ID = " + id);
+
+        return externalMissionId;
     }
 
 }

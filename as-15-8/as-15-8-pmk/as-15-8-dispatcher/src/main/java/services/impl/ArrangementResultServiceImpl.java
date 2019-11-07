@@ -55,9 +55,10 @@ public class ArrangementResultServiceImpl implements ArrangementResultService {
         Result job = findJobByID(jobID);
         job.setResult(status);
         job.setEndDate(LocalDateTime.now());
+        resultRepo.save(job);
         if(status == CheckUnitJobResult.INTERNAL_ERROR)
             saveErrorToDetailResults(jobID, description);
-        return resultRepo.save(job);
+        return job;
     }
 
     private Result findJobByID(Long jobID) {
@@ -71,7 +72,7 @@ public class ArrangementResultServiceImpl implements ArrangementResultService {
         DetailResult detailResult = new DetailResult();
         Result result = resultRepo.findById(jobID)
                 .orElseThrow(() -> AS_15_8_DispatcherException.logAndGet(log, String.format("Результат c ИД %d не найден в БД", jobID)));
-        detailResult.setId(jobID);
+        detailResult.setResult(result);
         detailResult.setResponseError(false);
         detailResult.setStubScoreInfo(exText);
         detailResultRepo.save(detailResult);

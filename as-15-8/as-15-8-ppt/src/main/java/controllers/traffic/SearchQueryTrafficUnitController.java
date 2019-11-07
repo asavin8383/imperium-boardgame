@@ -15,6 +15,7 @@ import repositories.SearchQueryTrafficUnitRepository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @RestController
 @RequestMapping(path = "/traffic/unit/query",
@@ -55,15 +56,12 @@ public class SearchQueryTrafficUnitController {
         return searchQueryTrafficUnitRepository.save(existing);
     }
 
-    private <T> void update(List<T> existing, List<T> changed) {
+    private <T> void update(Set<T> existing, Set<T> changed) {
         /*existing.retainAll(changed);
         changed.removeAll(existing);
         existing.addAll(changed);*/
 
-        for (T t : changed) {
-            if ( !existing.contains(t) )
-                existing.add(t);
-        }
+        existing.addAll(changed);
 
         for (T t : existing) {
             if ( !changed.contains(t) )
