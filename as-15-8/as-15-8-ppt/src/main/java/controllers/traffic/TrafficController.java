@@ -5,6 +5,7 @@ import enums.SortingDirection;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Views;
+import model.enums.AccessToolType;
 import model.traffic.Traffic;
 import model.traffic.TrafficBriefView;
 import model.traffic.TrafficFullView;
@@ -33,10 +34,11 @@ public class TrafficController {
             @RequestParam(required = false) String sortingColumn,
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize,
-            @RequestParam(required = false) String query) {
+            @RequestParam(required = false) String query,
+            @RequestParam(required = false) AccessToolType accessToolType) {
 
-        return trafficService.getBriefTrafficList(
-                sortingDirection, sortingColumn, pageNumber, pageSize, query);
+        return trafficService.getBriefTrafficList(sortingDirection, sortingColumn,
+                pageNumber, pageSize, query, accessToolType);
     }
 
     @Transactional
