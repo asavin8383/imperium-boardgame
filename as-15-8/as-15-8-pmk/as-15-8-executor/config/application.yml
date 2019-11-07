@@ -8,15 +8,12 @@ spring:
           destination: jobs
           group: executors
           consumer.concurrency: 4
-        executionResults:
-          destination: exec_results
-        notifications:
-          destination: job_notifications
+        executionResults.destination: exec_results
+        notifications.destination: job_notifications
         springCloudBusInput:
           destination: bus_config_input
           group: executor:${spring.cloud.client.ip-address}
-        springCloudBusOutput:
-          destination: bus_config_output
+        springCloudBusOutput.destination: bus_config_output
       kafka:
         binder:
           brokers: 192.168.5.12:9094,192.168.5.184:9094,192.168.5.211:9094
