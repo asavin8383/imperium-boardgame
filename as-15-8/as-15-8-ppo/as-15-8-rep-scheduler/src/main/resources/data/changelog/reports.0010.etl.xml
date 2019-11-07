@@ -84,25 +84,10 @@ create  trigger make_at_hist_trg BEFORE insert on dm.access_tool
        <sqlFile encoding="UTF-8" splitStatements="false" path="data/sql/dm_update_report_data.sql"/>
         <rollback/>
     </changeSet>
-<!--    <changeSet id="0010.2" author="klychagin">-->
-<!--        <sql>-->
-<!--            create function dm.update_reports_data(rep_id bigint) returns void-->
-<!--    language plpgsql-->
-<!--as-->
-<!--$$-->
-<!--BEGIN-->
-<!--     insert into dm.etl_placeholder(rep_id)-->
-<!--     values (rep_id);-->
-<!--END;-->
-<!--$$;-->
-
-<!--        </sql>-->
-<!--        <rollback>-->
-<!--            <sql>-->
-<!--                drop function dm.update_reports_data(rep_id bigint);-->
-<!--            </sql>-->
-<!--        </rollback>-->
-<!--    </changeSet>-->
+    <changeSet id="0010.13" author="klychagin">
+       <sqlFile encoding="UTF-8" splitStatements="false" path="data/sql/dm_update_report_data_2.sql"/>
+        <rollback/>
+    </changeSet>
 
 </databaseChangeLog>
 
