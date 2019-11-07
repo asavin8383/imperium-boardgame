@@ -74,7 +74,7 @@ spring:
         jobs.destination: jobs_ashabalin
         executionResults.destination: exec_results_ashabalin
         notifications.destination: job_notifications_ashabalin
-        springCloudBusInput. destination: bus_config_input_ashabalin
+        springCloudBusInput.destination: bus_config_input_ashabalin
         springCloudBusOutput.destination: bus_config_output_ashabalin
 
 ---
