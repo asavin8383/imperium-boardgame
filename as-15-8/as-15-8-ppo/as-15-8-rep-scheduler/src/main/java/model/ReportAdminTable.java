@@ -23,6 +23,8 @@ public class ReportAdminTable
 
     @Column long repTpId;
 
+    @Column String  rep_nm;
+
     @Column long msr_prd_id;
 
     @Column
