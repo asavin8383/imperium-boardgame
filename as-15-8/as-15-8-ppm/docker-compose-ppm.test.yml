@@ -1,24 +1,24 @@
 version: '3.7'
 services:
   ppt:
-    container_name: ppt
-    image: harbor.ec-leasing.ru/as_15_8/as-15-8-ppt
+    container_name: ppm
+    image: harbor.ec-leasing.ru/as_15_8/as-15-8-ppm
     restart: always
     network_mode: "host"
     volumes:
-      - ~/as-15-8-ppt/logs:/log
-      - ~/as-15-8-ppt/config:/config
+      - ~/as-15-8-ppm/logs:/log
+      - ~/as-15-8-ppm/config:/config
     environment:
       PROFILE: test
       GATEWAY_URI: http://192.168.5.50:15880
       TZ: "Europe/Moscow"
     ports:
-      - "15800:15800"
+      - "15803:15803"
     labels:
       collect_logs_with_filebeat: "true"
       decode_log_event_to_json_object: "true"
   filebeat:
-    container_name: filebeat_ppt
+    container_name: filebeat_ppm
     image: harbor.ec-leasing.ru/as_15_8/elk/filebeat:7.2.0
     restart: on-failure
     volumes:
