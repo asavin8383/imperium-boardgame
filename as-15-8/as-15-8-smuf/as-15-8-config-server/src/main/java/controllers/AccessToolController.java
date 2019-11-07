@@ -8,6 +8,7 @@ import model.Views;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import repositories.RobotRepository;
 
@@ -20,7 +21,7 @@ public class AccessToolController {
 
     private final RobotRepository robotRepository;
 
-    @GetMapping("/access_tools")
+    @PostMapping("/access_tools")
     @PreAuthorize("hasAnyRole('ROLE_OPERATOR')")
     @JsonView(Views.AccessTool.class)
     public List<Robot> getAccessTools(){
