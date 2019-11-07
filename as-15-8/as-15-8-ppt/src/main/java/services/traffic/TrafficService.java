@@ -3,23 +3,32 @@ package services.traffic;
 import controllers.helpers.SortingHelper;
 import enums.SortingDirection;
 import exceptions.AS_15_8_PPT_Exception;
+import liquibase.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import model.catalog.AccessToolsCategory;
+import model.enums.AccessToolType;
 import model.enums.TrafficType;
 import model.enums.TrafficUnitType;
 import model.traffic.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import repositories.AccessToolsCategoriesRepo;
 import repositories.TrafficRepository;
 import utils.TrafficUnitUtils;
 
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -31,15 +40,15 @@ public class TrafficService {
 
     public Page<TrafficBriefView> getBriefTrafficList(SortingDirection sortingDirection,
                                                       String sortingColumn,
-                                                      int pageNumber,
-                                                      int pageSize,
-                                                      String query) {
+                                                      int pageNumber, int pageSize,
+                                                      String query,
+                                                      AccessToolType accessToolType) {
 
         PageRequest pageable = PageRequest.of(pageNumber, pageSize,
                 SortingHelper.createSorting(sortingDirection, sortingColumn));
-        Page<TrafficBriefView> page =
-                trafficRepository.findAllTrafficInfo(query, pageable);
-        page.getContent().parallelStream().forEach(traffic -> {
+        Page<Traffic> traffics = trafficRepository.findAll(createTrafficSpecification(query, accessToolType), pageable);
+        List<TrafficBriefView> views = traffics.getContent().parallelStream().map(traffic -> {
+            TrafficBriefView view = new TrafficBriefView(traffic.getId(), traffic.getName());
             long formalErdiCount = trafficRepository.countContentErdiByTrafficId(traffic.getId());
             long customErdiCount = trafficRepository.countCustomErdiByTrafficId(traffic.getId());
             long searchPhrasesCount = trafficRepository.countSearchPhrasesByTrafficId(traffic.getId());
@@ -47,10 +56,11 @@ public class TrafficService {
             long dynamicCount = 0; //trafficRepository.countDynamicByTrafficId(traffic.getId());
             long staticCount = formalErdiCount + customErdiCount + searchPhrasesCount + searchTemplatesCount;
 
-            traffic.setCount(staticCount + dynamicCount);
-            traffic.setType(getTrafficType(staticCount, dynamicCount));
-        });
-        return page;
+            view.setCount(staticCount + dynamicCount);
+            view.setType(getTrafficType(staticCount, dynamicCount));
+            return view;
+        }).collect(Collectors.toList());
+        return new PageImpl<>(views, pageable, traffics.getTotalElements());
     }
 
     private TrafficType getTrafficType(long staticCount, long dynamicCount) {
@@ -170,6 +180,35 @@ public class TrafficService {
         unit.setCategory(category);
         unit.setTraffic(traffic);
         return unit;
+    }
+
+    private Specification<Traffic> createTrafficSpecification(String query, AccessToolType type) {
+        return (Specification<Traffic>) (root, criteriaQuery, criteriaBuilder) -> {
+            Predicate predicate = StringUtils.isEmpty(query) ? null :
+                    criteriaBuilder.like(root.get(Traffic_.name), "%" + query + "%");
+            if (type == AccessToolType.PASD) {
+                Subquery<Long> unitSubQuery = criteriaQuery.subquery(Long.class);
+                Root<SearchQueryTrafficUnit> unitRoot = unitSubQuery.from(SearchQueryTrafficUnit.class);
+
+                Subquery<Long> phraseSubQuery = unitSubQuery.subquery(Long.class);
+                Root<SearchQueryTrafficUnitPhrase> phraseRoot = phraseSubQuery.from(SearchQueryTrafficUnitPhrase.class);
+                Path<Long> joinPhraseUnitId = phraseRoot.get(SearchQueryTrafficUnitPhrase_.trafficUnit).get(SearchQueryTrafficUnit_.id);
+                phraseSubQuery.select(joinPhraseUnitId);
+                phraseSubQuery.where(criteriaBuilder.equal(joinPhraseUnitId, unitRoot.get(SearchQueryTrafficUnit_.id)));
+
+                unitSubQuery.select(unitRoot.get(SearchQueryTrafficUnit_.traffic).get(Traffic_.id));
+                unitSubQuery.where(
+                        criteriaBuilder.equal(unitRoot.get(SearchQueryTrafficUnit_.traffic).get(Traffic_.id), root.get(Traffic_.id)),
+                        criteriaBuilder.or(
+                                criteriaBuilder.like(unitRoot.get(SearchQueryTrafficUnit_.name), "%TEMPLATE"),
+                                criteriaBuilder.exists(phraseSubQuery)
+                        )
+                );
+                Predicate typePredicate = root.get(Traffic_.id).in(unitSubQuery);
+                predicate = predicate == null ? typePredicate : criteriaBuilder.and(predicate, typePredicate);
+            }
+            return predicate;
+        };
     }
 
 }
