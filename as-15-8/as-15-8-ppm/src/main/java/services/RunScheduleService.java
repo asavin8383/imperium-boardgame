@@ -1,8 +1,11 @@
 package services;
 
+import arrangement.ArrangementStatusNotification;
 import checkUnits.CheckUnit;
 import checkUnits.CheckUnitJob;
+import enums.ArrangementEvents;
 import events.producers.kafka.CheckUnitJobProducer;
+import events.producers.rest.ArrangementStatusUploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.ScheduleCheckUnit;
@@ -35,6 +38,7 @@ public class RunScheduleService {
     private final SchedulePeriodCheckUnitRepo schedulePeriodCheckUnitRepo;
     private final CheckUnitJobProducer checkUnitJobProducer;
     private final ScheduleCheckUnitRepo scheduleCheckUnitRepo;
+    private final ArrangementStatusUploader arrangementStatusUploader;
 
 
     @Scheduled(cron = "${app.schedule}")
@@ -43,8 +47,12 @@ public class RunScheduleService {
             .forEach(schedule -> schedulePeriodRepo.findAllByScheduleAndSchedulePeriodStateAndAndStartTimeBefore(schedule, SchedulePeriodState.CREATED, LocalTime.now())
                 .forEach(schedulePeriod -> {
                     schedulePeriodArrangementRepo.findAllBySchedulePeriod(schedulePeriod)
-                        .forEach(schedulePeriodArrangement -> schedulePeriodCheckUnitRepo.findAllBySchedulePeriodArrangement(schedulePeriodArrangement)
-                            .forEach(this::runCheckUnit));
+                        .forEach(schedulePeriodArrangement ->
+                        {
+                            arrangementStatusUploader.changeArrangementStatus(new ArrangementStatusNotification(schedulePeriodArrangement.getArrangement().getId(), ArrangementEvents.RUN));
+                            schedulePeriodCheckUnitRepo.findAllBySchedulePeriodArrangement(schedulePeriodArrangement)
+                                    .forEach(this::runCheckUnit);
+                        });
                     schedulePeriod.setSchedulePeriodState(SchedulePeriodState.STARTED);
                     schedulePeriodRepo.save(schedulePeriod);
                 }));

@@ -12,6 +12,4 @@ import lombok.ToString;
 @NoArgsConstructor
 public class PS_AnalysisJobResult extends AnalysisResult {
 
-	private CheckUnitJobResult checkResult;
-	
 }

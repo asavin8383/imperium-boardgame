@@ -1,6 +1,7 @@
 package services;
 
 import enums.CheckUnitJobResult;
+import model.Result;
 
 /**
  * Сервис для работы с результатами анализа проверок запрещенных ресурсов
@@ -12,9 +13,9 @@ public interface AnalysisResultService<T> {
 	
 	/**
 	 * Метод обработки результатов анализа проверок запрещенных ресурсов
-	 * @param result Результат анализа проверок запрещенных ресурсов
+	 * @param analysisResult Результат анализа проверок запрещенных ресурсов
 	 * @return
 	 */
-	CheckUnitJobResult processResult(T result);
+	void processResult(Result result, T analysisResult);
 	
 }

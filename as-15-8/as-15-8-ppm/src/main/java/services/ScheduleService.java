@@ -1,7 +1,10 @@
 package services;
 
+import arrangement.ArrangementStatusNotification;
 import common.SchedulerException;
 import common.SchedulerProperties;
+import enums.ArrangementEvents;
+import events.producers.rest.ArrangementStatusUploader;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -33,14 +36,14 @@ public class ScheduleService {
     private final ScheduleCheckUnitRepo scheduleCheckUnitRepo;
     private final SchedulePeriodCheckUnitRepo schedulePeriodCheckUnitRepo;
     private final ArrangementRepo arrangementRepo;
+    private final ArrangementStatusUploader arrangementStatusUploader;
 
     @PostConstruct
     public void init(){
         try {
             this.totalWorkersCount = Optional.ofNullable(
-                        schedulerProperties.getTotalWorkersCount())
-                    .orElseThrow(() -> new Exception("Параметр TOTAL_WORKERS_COUNT не задан"))
-                    .intValue();
+                    schedulerProperties.getTotalWorkersCount())
+                    .orElseThrow(() -> new Exception("Параметр TOTAL_WORKERS_COUNT не задан"));
         } catch (Exception ex){
             throw new SchedulerException("Ошибка при получении количества ресурсов из параметров в БД", ex);
         }
@@ -71,7 +74,15 @@ public class ScheduleService {
         arrangementRepo.findAllBySchedule(schedule.getId())
                 .forEach(this::fillCheckUnits);
         schedule.setStatus(ScheduleStatus.PLANNED);
-        return scheduleRepo.save(schedule);
+        scheduleRepo.save(schedule);
+        log.info("Изменяем статусы всем мероприятиям из расписания с ИД: {}", schedule.getId());
+        arrangementRepo.findAllBySchedule(schedule.getId()).forEach(
+            arrangement -> arrangementStatusUploader.changeArrangementStatus(
+                new ArrangementStatusNotification(arrangement.getId(), ArrangementEvents.SCHEDULE)
+            )
+        );
+        log.info("Cтатусы всех мероприятий из расписания с ИД: {} сохранены, мероприятие запланировано", schedule.getId());
+        return schedule;
     }
 
     private Schedule createNewSchedule(Map<Arrangement, TreeSet<ScheduleCheckUnit>> arrangementCheckUnits){
