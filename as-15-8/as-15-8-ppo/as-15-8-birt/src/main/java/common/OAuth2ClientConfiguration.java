@@ -9,7 +9,7 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.E
 
 @Configuration
 @EnableOAuth2Client
-public class Oauth2ClientConfiguration {
+public class OAuth2ClientConfiguration {
 
     /**
      * Для внутренних межсервисных взаимодействий

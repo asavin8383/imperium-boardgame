@@ -127,16 +127,16 @@ public class Arrangement implements Serializable {
 	public void sendEvent(ArrangementEvents event){
 		if(this.stateMachine.sendEvent(event)){
 			this.status = this.stateMachine.getCurrentStatus();
-			if (this.status.equals(ExecutionStatus.FINISHED)){
+			if (event.equals(ArrangementEvents.RUN) && this.status.equals(ExecutionStatus.FORMED)){
+				this.startTime = LocalTime.now();
+			}
+			if (this.status.equals(ExecutionStatus.FINISHED) || this.status.equals(ExecutionStatus.ERROR)){
 				this.endTime = LocalTime.now();
 			}
 		} else {
+			this.stateMachine.sendEvent(ArrangementEvents.FAIL);
 			throw new AS_15_8_PPT_Exception("Ошибка смены статуса мероприятия: " + stateMachine.getCurrentStatus() + " событием " + event);
 		}
 	}
 
-	private void setStatus(ExecutionStatus status){
-		this.status = status;
-		this.stateMachine = new ArrangementStateMachine(status);
-	}
 }

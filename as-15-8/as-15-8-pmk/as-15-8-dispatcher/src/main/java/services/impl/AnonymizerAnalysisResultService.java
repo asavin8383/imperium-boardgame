@@ -23,37 +23,34 @@ public class AnonymizerAnalysisResultService implements AnalysisResultService<An
 	private final ResultRepo resultRepo;
 
 	@Override
-	public CheckUnitJobResult processResult(AnonymizerAnalysisResult aRes) {
+	public void processResult(Result result, AnonymizerAnalysisResult analysisResult) {
 
 		DetailResult detailResult = new DetailResult();
 
-		Result result = resultRepo.findById(aRes.getJobID())
-				.orElseThrow(() -> AS_15_8_DispatcherException.logAndGet(log, String.format("Результат c ИД %d не найден в БД", aRes.getJobID())));
-
 		detailResult.setResult(result);
-		detailResult.setHttpStatus(aRes.getHttpStatus());
-		detailResult.setHttpStatusEtalon(aRes.getHttpStatusEtalon());
-		detailResult.setHttpHeaders(aRes.getHttpHeaders());
-		detailResult.setHttpHeadersEtalon(aRes.getHttpHeadersEtalon());
-		detailResult.setResponseErrorCode(aRes.getErrorCode());
-		detailResult.setPageSize(aRes.getPageSize());
-		detailResult.setUseEtalon(aRes.getUseEtalon());
-		detailResult.setResponseErrorCodeEtalon(aRes.getEtalonErrorCode());
-		detailResult.setPageSizeEtalon(aRes.getEtalonPageSize());
-		detailResult.setPageUrlFinal(aRes.getFinalUrl());
-		detailResult.setStubUrl(aRes.getStubUrl());
-		detailResult.setKeyWordsCount(aRes.getKeyWordsCount());
-		detailResult.setLinkCount(aRes.getLinkCount());
-		detailResult.setDomainNameCount(aRes.getDomainNameCount());
-		detailResult.setStubScoreInfo(aRes.getStubScoreInfo());
-		detailResult.setSimilarityOriginPercent(aRes.getSimilarityPercent());
 
-		detailResult.setResponseError(aRes.getErrorCode() != null);
-		detailResult.setRedirectionDetected(aRes.getRedirectionDetected());
-		detailResult.setResultNLP(aRes.getResultNLP());
+		detailResult.setHttpStatus(analysisResult.getHttpStatus());
+		detailResult.setHttpStatusEtalon(analysisResult.getHttpStatusEtalon());
+		detailResult.setHttpHeaders(analysisResult.getHttpHeaders());
+		detailResult.setHttpHeadersEtalon(analysisResult.getHttpHeadersEtalon());
+		detailResult.setResponseErrorCode(analysisResult.getErrorCode());
+		detailResult.setPageSize(analysisResult.getPageSize());
+		detailResult.setUseEtalon(analysisResult.getUseEtalon());
+		detailResult.setResponseErrorCodeEtalon(analysisResult.getEtalonErrorCode());
+		detailResult.setPageSizeEtalon(analysisResult.getEtalonPageSize());
+		detailResult.setPageUrlFinal(analysisResult.getFinalUrl());
+		detailResult.setStubUrl(analysisResult.getStubUrl());
+		detailResult.setKeyWordsCount(analysisResult.getKeyWordsCount());
+		detailResult.setLinkCount(analysisResult.getLinkCount());
+		detailResult.setDomainNameCount(analysisResult.getDomainNameCount());
+		detailResult.setStubScoreInfo(analysisResult.getStubScoreInfo());
+		detailResult.setSimilarityOriginPercent(analysisResult.getSimilarityPercent());
+
+		detailResult.setResponseError(analysisResult.getErrorCode() != null);
+		detailResult.setRedirectionDetected(analysisResult.getRedirectionDetected());
+		detailResult.setResultNLP(analysisResult.getResultNLP());
 
 		detailVpnRepo.save(detailResult);
 
-		return aRes.getCheckResult();
 	}
 }

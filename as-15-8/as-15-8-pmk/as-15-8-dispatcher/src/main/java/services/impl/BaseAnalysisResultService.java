@@ -16,10 +16,6 @@ public abstract class BaseAnalysisResultService {
 	@Autowired
 	private ResultRepo resultRepo;
 	
-	protected void updateJob(Result job) {
-		resultRepo.save(job);
-	}
-	
 	protected Result findJob(Long jobID) {
 		return resultRepo.findById(jobID)
 			.orElseThrow(() -> 

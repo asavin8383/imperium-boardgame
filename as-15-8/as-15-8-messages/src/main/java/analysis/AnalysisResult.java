@@ -2,6 +2,7 @@ package analysis;
 
 import checkUnits.CheckUnit;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import enums.CheckUnitJobResult;
 import lombok.Data;
 
 /**
@@ -18,6 +19,9 @@ public abstract class AnalysisResult {
 
     /** Единица ЕРДИ для проверки */
     private CheckUnit checkUnit;
+
+    /** Результат проверки **/
+    private CheckUnitJobResult checkResult;
 
     /**Скриншот полученной при проверке страницы*/
     private byte[] screenshot;

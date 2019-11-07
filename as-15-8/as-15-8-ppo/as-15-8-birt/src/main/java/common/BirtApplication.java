@@ -1,8 +1,11 @@
 package common;
 
+import org.slf4j.bridge.SLF4JBridgeHandler;
+import org.slf4j.impl.StaticLoggerBinder;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
+import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 
@@ -14,15 +17,7 @@ import java.util.logging.LogManager;
 
 @SpringBootApplication
 @ComponentScan(basePackages = {"birt", "common","controllers"})
-public class BirtApplication
-{
-    static {
-        try (InputStream stream = BirtApplication.class.getClassLoader().getResourceAsStream("logging.properties")) {
-            LogManager.getLogManager().readConfiguration(stream);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+public class BirtApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(BirtApplication.class, args);
