@@ -86,8 +86,8 @@ spring:
       jobs.destination: jobs_asinyavin
       executionResults.destination: exec_results_asinyavin
       notifications.destination: job_notifications_asinjavin
-      springCloudBusInput.destination: spring_cloud_bus_input_asinyavin
-      springCloudBusOutput.destination: spring_cloud_bus_output_asinyavin
+      springCloudBusInput.destination: bus_config_input_asinyavin
+      springCloudBusOutput.destination: bus_config_output_asinyavin
 
 ---
 
@@ -98,8 +98,8 @@ spring:
       jobs.destination: jobs_asavin
       executionResults.destination: exec_results_asavin
       notifications.destination: job_notifications_asavin
-      springCloudBusInput.destination: spring_cloud_bus_input_asavin
-      springCloudBusOutput.destination: spring_cloud_bus_output_asavin
+      springCloudBusInput.destination: bus_config_input_asavin
+      springCloudBusOutput.destination: bus_config_output_asavin
 
 ---
 
@@ -110,8 +110,8 @@ spring:
       jobs.destination: jobs_pvorobiev
       executionResults.destination: exec_results_pvorobiev
       notifications.destination: job_notifications_pvorobiev
-      springCloudBusInput.destination: spring_cloud_bus_input_pvorobiev
-      springCloudBusOutput.destination: spring_cloud_bus_output_pvorobiev
+      springCloudBusInput.destination: bus_config_input_pvorobiev
+      springCloudBusOutput.destination: bus_config_output_pvorobiev
 
 ---
 
@@ -123,6 +123,6 @@ spring:
         jobs.destination: jobs_jspirina
         executionResults.destination: exec_results_jspirina
         notifications.destination: job_notifications_jspirina
-        springCloudBusInput.destination: spring_cloud_bus_input_jspirina
-        springCloudBusOutput.destination: spring_cloud_bus_output_jspirina
+        springCloudBusInput.destination: bus_config_input_jspirina
+        springCloudBusOutput.destination: bus_config_output_jspirina
 eureka.client.enabled: false
