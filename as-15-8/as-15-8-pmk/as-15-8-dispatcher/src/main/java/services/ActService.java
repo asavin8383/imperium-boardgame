@@ -40,12 +40,8 @@ public class ActService {
 
     public boolean createAct(Long arragementId){
         List<Result> list = arrangementResultRepo.findByArrangementId(arragementId);
-        log.info("Формирование акта. Всего результатов: " + list.size());
-
-        if (list.size() == 0){
-            log.info("Формирование акта завершено. Результатов нет!");
-            return false;
-        }
+        log.info("Подготовка данных для акта. ID мероприятия: {}. Всего результатов: {}",
+                arragementId, list.size());
 
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
@@ -83,36 +79,34 @@ public class ActService {
         ActRequest actRequest = new ActRequest();
         actRequest.arragementId = arragementId;
         actRequest.checkResults = checkResults;
-        actRequest.startDate = dateFormat.format(minDate);
-        actRequest.endDate = dateFormat.format(maxDate);
+        actRequest.startDate = minDate != null ? dateFormat.format(minDate) : "";
+        actRequest.endDate = maxDate != null ? dateFormat.format(maxDate) : "";
         actRequest.topScreenShots = topScreenShots;
 
-        System.out.println("*********************");
-        System.out.println(actRequest);
-        send(actRequest);
+        ResponseStatusString res = send(actRequest);
 
-        return true;
+        return res.status;
     }
 
-    public void send(@NonNull ActRequest actRequest) {
+    public ResponseStatusString send(@NonNull ActRequest actRequest) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         HttpEntity<ActRequest> entity = new HttpEntity<>(actRequest, headers);
 
-        log.info("Sending Act Request with arragement ID = {}. CheckResults size: {}",
-                actRequest.arragementId,
-                actRequest.checkResults.size());
+        log.info("Отправка данных на ПОД для формирования акта: {}. Кол-во результатов: {}. Кол-во скриншотов: {}",
+                actRequest,
+                actRequest.checkResults.size(),
+                actRequest.topScreenShots.size());
 
-        String url = UriComponentsBuilder.fromHttpUrl(configUrl).path("/pod/create_act").build().toString();
-        System.out.println(url);
         ResponseStatusString response = oauth2RestTemplate.postForObject(
-                url,
+                UriComponentsBuilder.fromHttpUrl(configUrl).path("/pod/create_act").build().toString(),
                 entity,
                 ResponseStatusString.class);
 
-        log.info("Act Request with arragement ID = {} sent successfully. Response: {}",
-                actRequest.arragementId, response);
+        log.info("Статус отправки акта в ПОД: {}. Акт: {}", response, actRequest);
+
+        return response;
     }
 
     private Date ldt2date(LocalDateTime ldt){

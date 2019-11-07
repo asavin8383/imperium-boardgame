@@ -16,5 +16,7 @@ public class ActRequestPPP {
     public String PASDName;
     public String StartDate;   // YYYY-MM-DDTHH24:MI:SS
     public String EndDate;     // YYYY-MM-DDTHH24:MI:SS
+
+    @ToString.Exclude
     public List<ActCheckResultPPP> CheckResults;
 }

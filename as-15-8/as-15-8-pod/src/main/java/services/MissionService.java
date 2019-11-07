@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import model.response.MissionEntry;
 import model.response.RestResponseMissions;
 import model.response.RestResponseStatusString;
@@ -36,6 +37,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
+@Slf4j
 public class MissionService {
 
     private final RestTemplate restTemplate;
@@ -47,18 +49,22 @@ public class MissionService {
 
     @SneakyThrows
     public void fillMissions() {
-        System.out.println("Загрузка списка попручений");
+        fillMissionsWithConfirm(true);
+    }
+
+    @SneakyThrows
+    public void fillMissionsWithConfirm(boolean confirm) {
+        log.info("Загрузка списка попручений");
         List<MissionEntry> missions = getMissionsFrom();
-        System.out.println("Список поручений:");
-        System.out.println(missions);
+        log.info("Список поручений: {}", missions);
 
         if (!missions.isEmpty()){
             for(MissionEntry missionEntry : missions){
                 try {
-                    saveMissionWithConfirm(missionEntry);
+                    saveMissionWithConfirm(missionEntry, confirm);
                 }
                 catch(Exception e){
-                    System.err.println("Ошибка сохранения поручения: " + missionEntry.toString());
+                    log.error("Ошибка сохранения поручения: " + missionEntry.toString());
                     e.printStackTrace();
                 }
             }
@@ -66,16 +72,18 @@ public class MissionService {
     }
 
     @Transactional
-    public void saveMissionWithConfirm(MissionEntry missionEntry) throws IOException, ParseException {
+    public void saveMissionWithConfirm(MissionEntry missionEntry, boolean confirm) throws IOException, ParseException {
         Mission mission = missionRepository.findByOrigId(missionEntry.getId());
         if (mission != null){
-            System.out.println("Поручение уже есть в БД: " + missionEntry.toString());
+            log.info("Поручение уже есть в БД: " + missionEntry.toString());
         }
         else {
-            System.out.println("Добавляем поручение в БД: " + missionEntry.toString());
+            log.info("Добавляем поручение в БД: " + missionEntry.toString());
             missionRepository.save(createMission(missionEntry));
         }
-        confirmMission(missionEntry);
+        if (confirm){
+            confirmMission(missionEntry);
+        }
     }
 
     public ResponseEntity<byte[]> receivePdfFromDB(String id){
@@ -109,7 +117,7 @@ public class MissionService {
                         .build()
                         .expand(baseUrl);
 
-        System.out.println("----> getting missions from service: " + uriComponents.toString());
+        log.info("----> getting missions from service: " + uriComponents.toString());
 
         ResponseEntity<byte[]> entity = restTemplate.exchange(
                 uriComponents.toString(),
@@ -130,7 +138,7 @@ public class MissionService {
             return list;
         }
         else {
-            System.out.println("Статус ответа: " + restResponseStatusString.response);
+            log.info("Статус ответа: " + restResponseStatusString.response);
             return new ArrayList<>();
         }
     }
@@ -141,7 +149,7 @@ public class MissionService {
                         .build()
                         .expand(baseUrl, missionEntry.id);
 
-        System.out.println("----> confirmAcceptMission to service: " + uriComponents.toString());
+        log.info("----> confirmAcceptMission to service: " + uriComponents.toString());
 
         ResponseEntity<RestResponseStatusString> entity = restTemplate.exchange(
                 uriComponents.toString(),
@@ -151,7 +159,7 @@ public class MissionService {
         );
         RestResponseStatusString status = entity.getBody();
 
-        System.out.println("Результат подтверждения поручения: " + (status == null ? null : status.toString()));
+        log.info("Результат подтверждения поручения: " + (status == null ? null : status.toString()));
     }
 
     private RestResponseStatusString getResponseStatusString(byte[] data){

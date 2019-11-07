@@ -9,10 +9,10 @@ spring:
           consumer.concurrency: 4
         output.destination: analysis_results
         notifications.destination: job_notifications
-        springCloudBusInput.destination: bus_config_input
-        springCloudBusOutput:
-          destination: bus_config_output
+        springCloudBusInput:
+          destination: bus_config_input
           group: analyzer:${spring.cloud.client.ip-address}
+        springCloudBusOutput.destination: bus_config_output
       kafka:
         binder:
           brokers: 192.168.5.12:9094,192.168.5.184:9094,192.168.5.211:9094

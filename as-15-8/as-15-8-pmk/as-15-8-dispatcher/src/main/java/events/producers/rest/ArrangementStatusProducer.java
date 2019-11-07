@@ -31,7 +31,7 @@ public class ArrangementStatusProducer {
     private String gatewayUrl;
 
     public void sendArrangementStatusMessage(ArrangementStatusNotification arrangementStatusNotification){
-        String path = "/ppt/arrangement_notifications";
+        String path = "/ppt/arrangements/status";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
