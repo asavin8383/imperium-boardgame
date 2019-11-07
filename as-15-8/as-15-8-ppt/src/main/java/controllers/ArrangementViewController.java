@@ -7,6 +7,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import repositories.ArrangementViewRepo;
 
+import java.security.Principal;
 import java.util.List;
 
 /**
@@ -25,9 +26,8 @@ public class ArrangementViewController {
     }
 
     @GetMapping
-    public List<ArrangementView> findList(@RequestParam String operator,
-                                          @RequestParam boolean viewed){
-        return arrangementViewRepo.findAllByOperatorAndViewed(operator, viewed);
+    public List<ArrangementView> findList(@RequestParam boolean viewed, Principal principal){
+        return arrangementViewRepo.findAllByOperatorAndViewed(principal.getName(), viewed);
     }
 
     @PutMapping
