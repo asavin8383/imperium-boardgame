@@ -1,4 +1,4 @@
-package events.handlers.rest;
+package controllers;
 
 import arrangement.ArrangementStatusNotification;
 import checkUnits.CheckUnit;
