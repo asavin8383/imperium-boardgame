@@ -10,8 +10,4 @@
             <column name="user_result" type="text"/>
         </addColumn>
     </changeSet>
-    <changeSet author="san (generated)" id="1573052060455-1">
-        <dropUniqueConstraint constraintName="UKmrw39osw2naoxh3l0ytt8une1" schemaName="HIBERNATE" tableName="results"/>
-        <addUniqueConstraint columnNames="arrangement_id, content_id, check_unit_type, check_unit_value" constraintName="UKmrw39osw2naoxh3l0ytt8une1" schemaName="HIBERNATE" tableName="results"/>
-    </changeSet>
 </databaseChangeLog>

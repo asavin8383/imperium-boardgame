@@ -101,6 +101,14 @@ public class ArrangementController {
                     .forEach(domainMaskItem -> scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit.getErdiId(), CheckUnitType.URL, domainMaskItem.getDomainMaskItem())));
                 return scheduleCheckUnits;
             }
+            case IP_V4: {
+                if (checkUnit.getValue().matches("\\\\\\d{1,3}$")){
+                    scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit.getErdiId(), CheckUnitType.IP_V4_SUBNET, checkUnit.getValue()));
+                } else {
+                    scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit.getErdiId(), checkUnit.getType(), checkUnit.getValue()));
+                }
+                return scheduleCheckUnits;
+            }
             default: {
                 scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit.getErdiId(), checkUnit.getType(), checkUnit.getValue()));
                 return scheduleCheckUnits;

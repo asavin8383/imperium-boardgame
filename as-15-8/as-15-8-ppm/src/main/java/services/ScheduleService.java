@@ -338,6 +338,7 @@ public class ScheduleService {
         return new TreeSet<>(Comparator.comparingLong(ScheduleCheckUnit::getId));
     }
 
+    //TODO переписать на единый метод
     private long countSchedulePeriodArrangementTotalTime(SchedulePeriodArrangement schedulePeriodArrangement){
         SchedulePeriod schedulePeriod = schedulePeriodArrangement.getSchedulePeriod();
         long durationMS = Duration.between(schedulePeriod.getStartTime(), schedulePeriod.getEndTime()).toMillis();
