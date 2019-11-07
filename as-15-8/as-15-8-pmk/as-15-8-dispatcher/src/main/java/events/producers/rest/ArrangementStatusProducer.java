@@ -43,6 +43,6 @@ public class ArrangementStatusProducer {
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
             AS_15_8_DispatcherException.logAndGet(log, String.format("Ошибка отправки сообщения с изменением статуса мероприятия %d в ППТ, код возврата %s", arrangementStatusNotification.getArrangementId(), ex.getStatusCode()));
         }
-        log.info("Сообщение с изменением статуса мероприятия {} успешно отправлено в ППМ", arrangementStatusNotification.getArrangementId());
+        log.info("Сообщение с изменением статуса мероприятия {} успешно отправлено в ППТ", arrangementStatusNotification.getArrangementId());
     }
 }

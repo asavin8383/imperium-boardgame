@@ -16,6 +16,7 @@ import services.AnalysisResultService;
 import services.AnalysisResultServiceFactory;
 import services.ArrangementResultService;
 
+import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 
@@ -29,14 +30,17 @@ public class ArrangementResultServiceImpl implements ArrangementResultService {
 
 
     @Override
-    public Result processJobResult(AnalysisResult result) {
-        Result job = findJobByID(result.getJobID());
-        AnalysisResultService<? super AnalysisResult> service = AnalysisResultServiceFactory.getService(result.getClass());
-        job.setResult(service.processResult(result));
-        job.setScreenshot(result.getScreenshot());
-        job.setEtalonScreenshot(result.getEtalonScreenshot());
-        job.setEndDate(LocalDateTime.now());
-        return resultRepo.save(job);
+    @Transactional
+    public Result processJobResult(AnalysisResult analysisResult) {
+        Result result = findJobByID(analysisResult.getJobID());
+        AnalysisResultService<? super AnalysisResult> service = AnalysisResultServiceFactory.getService(analysisResult.getClass());
+        result.setScreenshot(analysisResult.getScreenshot());
+        result.setEtalonScreenshot(analysisResult.getEtalonScreenshot());
+        result.setEndDate(LocalDateTime.now());
+        result.setResult(analysisResult.getCheckResult());
+        resultRepo.save(result);
+        service.processResult(result, analysisResult);
+        return result;
     }
 
     @Override
@@ -52,13 +56,13 @@ public class ArrangementResultServiceImpl implements ArrangementResultService {
 
     @Override
     public Result updateJobStatus(Long jobID, CheckUnitJobResult status, String description) {
-        Result job = findJobByID(jobID);
-        job.setResult(status);
-        job.setEndDate(LocalDateTime.now());
-        resultRepo.save(job);
+        Result result = findJobByID(jobID);
+        result.setResult(status);
+        result.setEndDate(LocalDateTime.now());
+        resultRepo.save(result);
         if(status == CheckUnitJobResult.INTERNAL_ERROR)
-            saveErrorToDetailResults(jobID, description);
-        return job;
+            saveErrorToDetailResults(result, description);
+        return result;
     }
 
     private Result findJobByID(Long jobID) {
@@ -68,10 +72,9 @@ public class ArrangementResultServiceImpl implements ArrangementResultService {
                 );
     }
 
-    private void saveErrorToDetailResults(Long jobID, String exText) {
+    @Transactional
+    private void saveErrorToDetailResults(Result result, String exText) {
         DetailResult detailResult = new DetailResult();
-        Result result = resultRepo.findById(jobID)
-                .orElseThrow(() -> AS_15_8_DispatcherException.logAndGet(log, String.format("Результат c ИД %d не найден в БД", jobID)));
         detailResult.setResult(result);
         detailResult.setResponseError(false);
         detailResult.setStubScoreInfo(exText);
