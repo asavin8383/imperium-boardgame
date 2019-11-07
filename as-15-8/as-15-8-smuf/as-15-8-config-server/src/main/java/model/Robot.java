@@ -43,11 +43,11 @@ public class Robot {
 
     @Column
     @Enumerated(EnumType.STRING)
-    @JsonView(Views.Brief.class)
+    @JsonView({Views.Brief.class, Views.AccessTool.class})
     private RobotType type;
 
     @Column
-    @JsonView(Views.Brief.class)
+    @JsonView({Views.Brief.class, Views.AccessTool.class})
     private String name;
 
     @ToString.Exclude
