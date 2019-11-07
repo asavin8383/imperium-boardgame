@@ -9,5 +9,6 @@
     <include file="data/changelog/dispatcher.0004.create_tables.xml"/>
     <include file="data/changelog/dispatcher.0005.add_user_result.xml"/>
     <include file="data/changelog/dispatcher.0006.check_constraints.xml"/>
+    <include file="data/changelog/dispatcher.0007.results_indices.xml"/>
 
 </databaseChangeLog>

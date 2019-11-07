@@ -71,7 +71,7 @@ public class ArrangementResultServiceImpl implements ArrangementResultService {
         DetailResult detailResult = new DetailResult();
         Result result = resultRepo.findById(jobID)
                 .orElseThrow(() -> AS_15_8_DispatcherException.logAndGet(log, String.format("Результат c ИД %d не найден в БД", jobID)));
-        detailResult.setId(jobID);
+        detailResult.setResult(result);
         detailResult.setResponseError(false);
         detailResult.setStubScoreInfo(exText);
         detailResultRepo.save(detailResult);
