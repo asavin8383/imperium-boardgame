@@ -30,7 +30,7 @@ public class VPN_AnalysisResultService implements AnalysisResultService<VpnAnaly
 		Result result = resultRepo.findById(aRes.getJobID())
 				.orElseThrow(() -> AS_15_8_DispatcherException.logAndGet(log, String.format("Результат c ИД %d не найден в БД", aRes.getJobID())));
 
-		detailResult.setResult(result);
+		detailResult.setId(result.getId());
 		detailResult.setHttpStatus(aRes.getHttpStatus());
 		detailResult.setHttpStatusEtalon(aRes.getHttpStatusEtalon());
 		detailResult.setHttpHeaders(aRes.getHttpHeaders());

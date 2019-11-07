@@ -1,6 +1,8 @@
 package repositories;
 
 import model.Arrangement;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -21,4 +23,10 @@ public interface ArrangementRepo extends JpaRepository<Arrangement, Long> {
             "join spa.schedulePeriod sp " +
             "where sp.schedule.id = :id")
     List<Arrangement> findAllBySchedule(@Param("id") Long scheduleId);
+
+    @Query("select DISTINCT a " +
+            "from Arrangement a " +
+            "left join a.schedulePeriodArrangements spa " +
+            "where spa.id is null")
+    Page<Arrangement> findAllAvailableArrangements(Pageable pageable);
 }

@@ -55,9 +55,10 @@ public class ArrangementResultServiceImpl implements ArrangementResultService {
         Result job = findJobByID(jobID);
         job.setResult(status);
         job.setEndDate(LocalDateTime.now());
+        resultRepo.save(job);
         if(status == CheckUnitJobResult.INTERNAL_ERROR)
             saveErrorToDetailResults(jobID, description);
-        return resultRepo.save(job);
+        return job;
     }
 
     private Result findJobByID(Long jobID) {
