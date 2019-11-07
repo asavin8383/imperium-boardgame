@@ -18,7 +18,7 @@ import utils.TrafficUnitUtils;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(schema = "portal", name = "search_query_traffic_units")
@@ -52,19 +52,19 @@ public class SearchQueryTrafficUnit extends TrafficUnit implements Serializable 
             joinColumns = @JoinColumn(name = "traffic_unit_id"),
             inverseJoinColumns = @JoinColumn(name = "custom_erdi_id"))
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private List<CustomErdi> customErdiList;
+    private Set<CustomErdi> customErdiList;
 
     @OneToMany(mappedBy = "trafficUnit",
             cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private List<SearchQueryContentJoin> formalErdiList;
+    private Set<SearchQueryContentJoin> formalErdiList;
 
     @ManyToMany
     @JoinTable(schema = "portal", name = "search_query_traffic_units_search_phrases",
             joinColumns = @JoinColumn(name = "traffic_unit_id"),
             inverseJoinColumns = @JoinColumn(name = "search_phrase_id"))
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private List<SearchPhrase> searchPhrases;
+    private Set<SearchPhrase> searchPhrases;
 
     @Override
     public boolean isEmpty() {
