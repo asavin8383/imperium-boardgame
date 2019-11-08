@@ -10,6 +10,9 @@ spring:
     time-between-eviction-runs-millis: 300000
     username: as_user
     password: as_user
+  liquibase:
+    enabled: true
+    change-log: classpath:/data/db.changelog.master.xml
   jpa:
     properties:
       hibernate:
@@ -46,9 +49,6 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none
-  liquibase:
-    enabled: true
-    change-log: classpath:/data/changelog/db.changelog.master.xml
   datasource:
     url: jdbc:postgresql://10.97.220.144:5432/asdb
   rest_base_url: "https://arm-r.rkn.gov.ru/register-vpn/api/as15-8"
@@ -68,9 +68,6 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none
-  liquibase:
-    enabled: true
-    change-log: classpath:/data/changelog/db.changelog.master.xml
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb
 registry-anonymizers:
@@ -85,8 +82,7 @@ spring:
     hibernate:
       ddl-auto: none
   liquibase:
-    enabled: true
-    change-log: classpath:/data/changelog/db.changelog.master.xml
+    enabled: false
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb_test
 eureka.client.enabled: true
@@ -104,7 +100,7 @@ spring:
       ddl-auto: none
   liquibase:
     enabled: true
-    change-log: classpath:/data/changelog/db.changelog.master.xml
+    change-log: classpath:/data/db.changelog.master.xml
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb_test
 eureka.client.enabled: true

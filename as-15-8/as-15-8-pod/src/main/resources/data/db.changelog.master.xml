@@ -17,5 +17,6 @@
     <include file="data/changelog/uploader.0012.Addon.xml"/>
     <include file="data/changelog/pod.0001.mat_view_check_units.xml"/>
     <include file="data/changelog/uploader.0013.OrigIdSeq.xml"/>
+    <include file="data/changelog/pod.0002.mat_view_content.xml"/>
 
 </databaseChangeLog>

@@ -16,6 +16,7 @@ import repositories.ContentViewRepository;
 import utils.ContentViewSpecifications;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @CacheConfig(cacheNames={"sor_content"})
@@ -36,6 +37,11 @@ public class ContentService {
     @Cacheable
     public Page<ContentView> getFormalErdiView(List<Long> ids, Pageable pageable) {
         return viewRepository.findAllByIdIn(ids, pageable);
+    }
+
+    @Cacheable
+    public Optional<ContentView> getFormalErdiView(Long id) {
+        return viewRepository.findById(id);
     }
 
     /**

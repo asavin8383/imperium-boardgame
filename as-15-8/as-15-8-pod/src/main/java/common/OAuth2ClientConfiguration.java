@@ -18,7 +18,7 @@ import java.net.Proxy;
 
 @Configuration
 @EnableOAuth2Client
-public class Oauth2ClientConfiguration {
+public class OAuth2ClientConfiguration {
 
     @Value("${registry-anonymizers.proxy-ip}")
     private String proxyIp;

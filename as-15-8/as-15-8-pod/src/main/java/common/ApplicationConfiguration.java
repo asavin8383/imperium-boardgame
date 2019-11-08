@@ -21,7 +21,6 @@ import java.security.Principal;
  *
  */
 @SpringBootApplication
-@Import(Oauth2ClientConfiguration.class)
 @ComponentScan(basePackages= {"common", "repositories", "controllers", "services", "restapi", "updaters"})
 @EnableJpaRepositories("repositories")
 @EntityScan("model")
