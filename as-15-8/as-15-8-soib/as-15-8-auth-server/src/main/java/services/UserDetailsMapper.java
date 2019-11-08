@@ -23,8 +23,10 @@ import java.util.Collection;
 public class UserDetailsMapper extends LdapUserDetailsMapper {
 
     @Override
-    public org.springframework.security.core.userdetails.UserDetails mapUserFromContext(DirContextOperations ctx, String username,
-                                                                                        Collection<? extends GrantedAuthority> authorities) {
+    public UserDetails mapUserFromContext(
+            DirContextOperations ctx, String username,
+            Collection<? extends GrantedAuthority> authorities) {
+
         LdapUserDetails userDetails = (LdapUserDetails) super.mapUserFromContext(ctx, username, authorities);
         Attributes attributes = ctx.getAttributes();
 
