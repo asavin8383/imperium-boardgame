@@ -134,7 +134,6 @@ public class Arrangement implements Serializable {
 				this.endTime = LocalTime.now();
 			}
 		} else {
-			this.stateMachine.sendEvent(ArrangementEvents.FAIL);
 			throw new AS_15_8_PPT_Exception("Ошибка смены статуса мероприятия: " + stateMachine.getCurrentStatus() + " событием " + event);
 		}
 	}

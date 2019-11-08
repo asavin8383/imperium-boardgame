@@ -37,6 +37,7 @@ public class ScheduleService {
     private final SchedulePeriodCheckUnitRepo schedulePeriodCheckUnitRepo;
     private final ArrangementRepo arrangementRepo;
     private final ArrangementStatusUploader arrangementStatusUploader;
+    private final SchedulePeriodRepo schedulePeriodRepo;
 
     @PostConstruct
     public void init(){
@@ -55,6 +56,11 @@ public class ScheduleService {
 
     public void deleteSchedule(Schedule schedule){
         scheduleRepo.delete(schedule);
+    }
+
+    public void clearSchedulePeriods(Schedule schedule){
+        schedule.getSchedulePeriods().forEach(schedulePeriod -> schedulePeriodRepo.delete(schedulePeriod));
+        schedule.getSchedulePeriods().clear();
     }
 
     public Schedule create(Map<Arrangement, TreeSet<ScheduleCheckUnit>> arrangementCheckUnits){
@@ -81,7 +87,7 @@ public class ScheduleService {
                 new ArrangementStatusNotification(arrangement.getId(), ArrangementEvents.SCHEDULE)
             )
         );
-        log.info("Cтатусы всех мероприятий из расписания с ИД: {} сохранены, мероприятие запланировано", schedule.getId());
+        log.info("Cтатусы всех мероприятий из расписания с ИД: {} сохранены, расписание запланировано", schedule.getId());
         return schedule;
     }
 

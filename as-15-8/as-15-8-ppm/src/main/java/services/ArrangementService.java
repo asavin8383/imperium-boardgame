@@ -42,6 +42,10 @@ public class ArrangementService {
         return arrangementRepo.findAllAvailableArrangements(page);
     }
 
+    public List<Arrangement> findAllAvailableArrangements(){
+        return arrangementRepo.findAllAvailableArrangements();
+    }
+
     public Map<Arrangement, TreeSet<ScheduleCheckUnit>> getArrangementCheckUnits(List<Long> arrangementIds){
         Map<Arrangement, TreeSet<ScheduleCheckUnit>> arrangementCheckUnits = new HashMap<>();
         arrangementIds.forEach(arrangementId -> {

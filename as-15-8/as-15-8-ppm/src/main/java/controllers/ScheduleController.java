@@ -69,7 +69,7 @@ public class ScheduleController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate plannedDate,
             @RequestBody List<Long> arrangementIds,
             @RequestParam String author){
-        Schedule schedule = createSchedule(arrangementIds, author, plannedDate);
+        Schedule schedule = createSchedule(filterAvailableArrangements(arrangementIds), author, plannedDate);
         return scheduleService.saveSchedule(schedule);
     }
 
@@ -80,18 +80,25 @@ public class ScheduleController {
             @RequestParam("id") Schedule schedule,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate plannedDate,
             @RequestBody List<Arrangement> arrangements,
-            @RequestParam String operator){
+            @RequestParam String author){
         if(!(schedule.getStatus().equals(ScheduleStatus.NEW))){
             throw AS_15_8_PPM_Exception.logAndGet(log, String.format("Ошибка изменения расписания! Некорректный статус расписания с ИД: %d - %s", schedule.getId(), schedule.getStatus()));
         }
+        //Сначала исключим из расписания все периоды
+        scheduleService.clearSchedulePeriods(schedule);
         //Если изменились плановые значения времени, сначала нужно изменить само мероприятие
         arrangements.stream()
                 .filter(arrangement -> arrangement.getPlannedStartTime()!=null && arrangement.getPlannedEndTime()!=null)
                 .forEach(arrangementService::updateArrangementPlanInfo);
         List<Long> arrangementIds = arrangements.stream().map(Arrangement::getId).collect(Collectors.toList());
-        Schedule newSchedule = createSchedule(arrangementIds, operator, plannedDate);
-        newSchedule.setId(schedule.getId());
-        return scheduleService.saveSchedule(newSchedule);
+        Schedule newSchedule = createSchedule(filterAvailableArrangements(arrangementIds), author, plannedDate);
+        schedule.setSchedulePeriods(newSchedule.getSchedulePeriods());
+        schedule.getSchedulePeriods().forEach(schedulePeriod -> schedulePeriod.setSchedule(schedule));
+        schedule.setAuthor(author);
+        if (plannedDate != null) {
+            schedule.setPlannedDate(plannedDate);
+        }
+        return scheduleService.saveSchedule(schedule);
     }
 
     @PutMapping(path = "/plan")
@@ -117,7 +124,7 @@ public class ScheduleController {
         SortedSet<SchedulePeriod> schedulePeriods = schedule.getSchedulePeriods();
         schedulePeriods.forEach(schedulePeriod -> schedulePeriod.getSchedulePeriodArrangements()
                 .forEach(schedulePeriodArrangement -> {
-                    BriefArrangement briefArrangement = new BriefArrangement(schedulePeriodArrangement.getArrangement().getId(), schedulePeriod.getStartTime(), schedulePeriod.getEndTime());
+                    BriefArrangement briefArrangement = new BriefArrangement(schedulePeriodArrangement.getArrangement().getId(), schedulePeriodArrangement.getArrangement().getTitle(), schedulePeriod.getStartTime(), schedulePeriod.getEndTime());
                     if(briefArrangements.contains(briefArrangement)){
                         briefArrangements.get(briefArrangements.indexOf(briefArrangement)).setPlannedEndTime(briefArrangement.getPlannedEndTime());
                     } else {
@@ -125,6 +132,17 @@ public class ScheduleController {
                     }
                 }));
         return briefArrangements;
+    }
+
+    private List<Long> filterAvailableArrangements(List<Long> arrangementIds){
+        List<Long> availableIds =
+                arrangementService.findAllAvailableArrangements()
+                        .stream()
+                        .mapToLong(Arrangement::getId)
+                        .boxed()
+                        .collect(Collectors.toList());
+        arrangementIds.removeIf(id -> !availableIds.contains(id));
+        return arrangementIds;
     }
 
     private Schedule createSchedule(List<Long> arrangementIds, String author, LocalDate plannedDate){
@@ -152,6 +170,8 @@ public class ScheduleController {
         @EqualsAndHashCode.Include
         @JsonView(Views.Id.class)
         private Long id;
+        @JsonView(Views.Full.class)
+        private String title;
         @JsonView(Views.Full.class)
         private LocalTime plannedStartTime;
         @JsonView(Views.Full.class)
