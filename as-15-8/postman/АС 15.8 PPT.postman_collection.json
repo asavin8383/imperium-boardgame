@@ -158,7 +158,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"accessTool\": \"yandex\",\n    \"title\": \"Тест Yandex\",\n    \"startDate\": \"2019-05-27T12:00:00\",\n    \"endDate\": \"2019-05-27T15:00:00\",\n    \"traffic\": { \"id\": 59 } \n}"
+									"raw": "{\n    \"accessTool\": \"kaspersky\",\n    \"title\": \"Тест Kaspersky\",\n    \"startDate\": \"2019-05-27T12:00:00\",\n    \"endDate\": \"2019-05-27T15:00:00\",\n    \"traffic\": { \"id\": 59 } \n}"
 								},
 								"url": {
 									"raw": "{{url}}/arrangements?formalTaskId=4",
@@ -1383,7 +1383,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{url}}/erdi/formal?containsInTraffic=true&erdiTrafficUnitId=42",
+									"raw": "{{url}}/erdi/formal?containsInTraffic=false&erdiTrafficUnitId=42",
 									"host": [
 										"{{url}}"
 									],
@@ -1414,7 +1414,7 @@
 										},
 										{
 											"key": "containsInTraffic",
-											"value": "true"
+											"value": "false"
 										},
 										{
 											"key": "erdiTrafficUnitId",
@@ -2593,7 +2593,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{url}}/traffic",
+							"raw": "{{url}}/traffic?accessToolType=PASD",
 							"host": [
 								"{{url}}"
 							],
@@ -2625,6 +2625,10 @@
 									"key": "pageSize",
 									"value": "5",
 									"disabled": true
+								},
+								{
+									"key": "accessToolType",
+									"value": "PASD"
 								}
 							]
 						}
@@ -2725,7 +2729,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n\t\"name\": \"Traffic_1\",\r\n\r\n\t\"formalErdiUnit\": {\r\n        \"id\": 33,\r\n        \"name\": \"Traffic+21_mzffgasp_FORMAL\",\r\n\t\t\"category\": {\r\n            \"id\": 0,\r\n            \"name\": \"DEFAULT\",\r\n            \"parent\": null\r\n        },\r\n\t\t\"formalErdiList\": [\r\n\t\t\t{ \"id\": 247862 }\r\n\t\t]\r\n\t},\r\n\t\"customErdiUnit\": {\r\n        \"id\": 34,\r\n        \"name\": \"Traffic+21_zpdewlbu_CUSTOM\",\r\n\t\t\"category\": {\r\n            \"id\": 0,\r\n            \"name\": \"DEFAULT\",\r\n            \"parent\": null\r\n        },\r\n\t\t\"customErdiList\": [\r\n\t\t\t{ \"id\": 33 },\r\n\t\t\t{ \"id\": 34 }\r\n\t\t]\r\n\t},\r\n\t\"searchPhraseUnit\": {\r\n        \"id\": 32,\r\n        \"name\": \"Traffic+21_nyywtvnv_PHRASE\",\r\n\t\t\"queryPattern\": \"\",\r\n\t\t\"category\": {\r\n            \"id\": 0,\r\n            \"name\": \"DEFAULT\",\r\n            \"parent\": null\r\n        },\r\n\t\t\"searchPhrases\": [\r\n\t\t]\r\n\t},\r\n\t\"searchTemplates\": [\r\n\t\t{\r\n            \"id\": 33,\r\n            \"name\": \"Traffic+21_oydeqohz_TEMPLATE\",\r\n\t\t\t\"category\": {\r\n                \"id\": 0,\r\n                \"name\": \"DEFAULT\",\r\n                \"parent\": null\r\n            },\r\n\t\t\t\"queryPattern\": \"test pattern $ERDI fix\",\r\n\t\t\t\"customErdiList\": [\r\n\t\t\t\t{ \"id\": 33 }\r\n\t\t\t],\r\n\t\t\t\"formalErdiList\": [\r\n\t\t\t\t{ \"id\": 247862 },\r\n\t\t\t\t{ \"id\": 247863 }\r\n\t\t\t],\r\n\t\t\t\"searchPhrases\": [\r\n\t\t\t\t{ \"id\": 7}\r\n\t\t\t]\r\n\t\t}\r\n\t]\r\n}",
+							"raw": "{\r\n\t\"name\": \"Traffic_Test_Update\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -2733,13 +2737,13 @@
 							}
 						},
 						"url": {
-							"raw": "{{url}}/traffic/60",
+							"raw": "{{url}}/traffic/63",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"traffic",
-								"60"
+								"63"
 							],
 							"query": [
 								{

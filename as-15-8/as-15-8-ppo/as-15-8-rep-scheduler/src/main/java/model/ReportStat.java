@@ -18,6 +18,9 @@ import javax.persistence.Table;
 public class ReportStat
 {
     @Id
+    long rowid;
+
+    @Column
     long rep_tp_id;
 
     @Column

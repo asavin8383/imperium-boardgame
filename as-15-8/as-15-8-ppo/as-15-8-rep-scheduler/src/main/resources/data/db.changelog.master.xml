@@ -13,4 +13,7 @@
     <include file="data/changelog/reports.0008.reports.xml"/>
     <include file="data/changelog/reports.0009.api.xml"/>
     <include file="data/changelog/reports.0010.etl.xml"/>
+    <include file="data/changelog/reports.0011.api-id.xml"/>
+    <include file="data/changelog/reports.0012.api-name.xml"/>
+    <include file="data/changelog/reports.0013.api-short-name.xml"/>
 </databaseChangeLog>
