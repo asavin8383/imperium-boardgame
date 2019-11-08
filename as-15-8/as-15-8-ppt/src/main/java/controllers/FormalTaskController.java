@@ -6,6 +6,7 @@ import enums.SortingDirection;
 import exceptions.AS_15_8_PPT_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import model.task.ArrangementStatistics;
 import model.task.FormalTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -79,6 +80,11 @@ public class FormalTaskController {
 		PageRequest page = PageRequest.of(
 				pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
 		return formalTaskRepo.findAllByStatus(status, page);
+	}
+
+	@GetMapping(path="/summary")
+	public List<ArrangementStatistics> getSummary(){
+		return formalTaskRepo.findSummaryByStatus();
 	}
 
 	@DeleteMapping

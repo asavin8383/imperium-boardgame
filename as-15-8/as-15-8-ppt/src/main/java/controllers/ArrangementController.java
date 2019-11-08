@@ -1,29 +1,25 @@
 package controllers;
 
-import controllers.helpers.ArrangementExecutionHelper;
 import controllers.helpers.SortingHelper;
 import enums.ExecutionStatus;
 import enums.SortingDirection;
+import events.producers.rest.ppm.ArrangementUploader;
 import exceptions.AS_15_8_PPT_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.task.Arrangement;
+import model.task.ArrangementStatistics;
 import model.task.FormalTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import repositories.ArrangementRepo;
-import events.producers.rest.ppm.ArrangementUploader;
-import services.arrangement.ArrangementStatusService;
 import services.arrangement.impl.ArrangementService;
-import enums.ArrangementEvents;
 
-import java.time.LocalTime;
 import java.util.List;
 
 /**
@@ -39,8 +35,6 @@ import java.util.List;
 public class ArrangementController {
 
     private final ArrangementRepo arrangementRepo;
-    private final ArrangementExecutionHelper arrangementExecutionHelper;
-    private final ArrangementStatusService arrangementStatusService;
     private final ArrangementService arrangementService;
     private final ArrangementUploader arrangementUploader;
 
@@ -57,6 +51,23 @@ public class ArrangementController {
         return arrangementRepo.findPage(formalTaskId, id, page);
     }
 
+    @GetMapping(path="/summary")
+    public List<ArrangementStatistics> getSummary(){
+        return arrangementRepo.findSummaryByStatus();
+    }
+
+    @GetMapping(path = "/status")
+    public Page<Arrangement> findListByStatus(
+            @RequestParam ExecutionStatus status,
+            @RequestParam(required = false) SortingDirection sortingDirection,
+            @RequestParam(required = false) String sortingColumn,
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize){
+        PageRequest page = PageRequest.of(
+                pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
+        return arrangementRepo.findAllByStatus(status, page);
+    }
+
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(code = HttpStatus.CREATED)
     public Arrangement postArrangement(@RequestBody Arrangement arrangement, @RequestParam("formalTaskId") FormalTask formalTask){
@@ -69,18 +80,6 @@ public class ArrangementController {
         return arrangementRepo.save(replaceFields(newArrangement, arrangement));
     }
 
-    @PostMapping(path = "/plan")
-    public ResponseEntity<Arrangement> planArrangement(@RequestParam Long id){
-        return arrangementRepo.findById(id)
-                .map(arrangement -> {
-                    //Проверим, не нужно ли сменить статус(сначала у мероприятия, а потом и у задания)
-                    if(isStatusChanged(arrangement)){
-                        arrangementStatusService.processArrangementStatusChange(arrangement);
-                    }
-                    return new ResponseEntity<>(arrangement, HttpStatus.OK);
-                }).orElseGet(()-> new ResponseEntity<>(null, HttpStatus.NO_CONTENT));
-    }
-
     @DeleteMapping
     public Long deleteArrangement(@RequestParam Long id) {
         return arrangementRepo.findById(id)
@@ -91,67 +90,25 @@ public class ArrangementController {
                 .orElseThrow(() -> new AS_15_8_PPT_Exception("Error deleting arrangement! Arrangement was not found by id: " + id));
     }
 
-    /**
-     * Запуск мероприятия на выполнение
-     * Необходимым условием запуска является статус "FORMED"
-     * @param id идентификатор мероприятия
-     * @return запущенное мероприятие
-     */
-    @GetMapping(path = "/run")
-    //TODO Теперь как то по другому
-    public ResponseEntity<Arrangement> runArrangement(@RequestParam Long id){
-        return arrangementRepo.findById(id)
-            .map(arrangement -> {
-                if(arrangement.getStatus().equals(ExecutionStatus.FORMED)||arrangement.getStatus().equals(ExecutionStatus.ACTION_REQUIRED)) {
-                   // arrangementExecutionHelper.sendJobToDispatcher(arrangement);
-                    //Устанавливаем дату запуска(актуально только для впервые запущенных мероприятий)
-                    if(arrangement.getStatus().equals(ExecutionStatus.FORMED)){
-                        arrangement.setStartTime(LocalTime.now());
-                    }
-                    arrangement.sendEvent(ArrangementEvents.RUN);
-                    arrangementStatusService.processArrangementStatusChange(arrangement);
-                    arrangementRepo.save(arrangement);
-                    return new ResponseEntity<>(arrangement, HttpStatus.OK);
-                }
-                return new ResponseEntity<>(arrangement, HttpStatus.NOT_ACCEPTABLE);
-            })
-            .orElseThrow(() -> new AS_15_8_PPT_Exception("Error running arrangement! Arrangement was not found by id: " + id));
-    }
-
-    /**
-     * Заполнение мероприятия в зависимости по списку ЕРДИ
-     * @param arrangement - мероприятие для заполнение
-     * @return статус запроса
-     */
-    //@GetMapping(path = "/fill")
-    //TODO Теперь как то по другому
-    /*public @ResponseBody ResponseEntity<String> fillArrangement(@RequestParam("id") Arrangement arrangement){
-        if(arrangement.getPlannedStartTime() == null || arrangement.getPlannedEndTime() == null){
-            AS_15_8_Exception.logAndThrow(log, String.format("Не заполнено плановое время начала или окончания мероприятия c ID: %d", arrangement.getId()));
-        }
-       // arrangementService.fillArrangement(arrangement);
-        return new ResponseEntity<>(HttpStatus.OK);
-            .orElseThrow(() -> new AS_15_8_PPT_Exception("Error running arrangement! Arrangement was not found by id: " + id));
-    }*/
 
     @GetMapping(path = "/upload")
     public void uploadArrangement(@RequestParam("id") Arrangement arrangement){
         if(arrangement!= null) {
             arrangementUploader.updateArrangement(arrangement);
         } else {
-            throw AS_15_8_PPT_Exception.logAndGet(log, String.format("Ошибка отправки мероприятия в ППМ. Мероприятие не было найдено в БД"));
+            throw AS_15_8_PPT_Exception.logAndGet(log, "Ошибка отправки мероприятия в ППМ. Мероприятие не было найдено в БД");
         }
     }
 
     @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
     @GetMapping("/access_tool")
-    String accessToolByArrangementId(@RequestParam Long arrangement_id) {
+    public String accessToolByArrangementId(@RequestParam Long arrangement_id) {
         return arrangementRepo.getAccessTool(arrangement_id);
     }
 
     @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
     @GetMapping("/mission_id")
-    Long missionIdByArrangement(@RequestParam Long arrangement_id) {
+    public Long missionIdByArrangement(@RequestParam Long arrangement_id) {
         return arrangementRepo.getMissionId(arrangement_id);
     }
 
@@ -168,33 +125,5 @@ public class ArrangementController {
         arrangement.setPlannedEndTime(newArrangement.getPlannedEndTime());
         return arrangement;
     }
-
-    /**
-     * Проверяет состояние мероприятия и меняет ему статус при выполнении условий смены
-     * @param arrangement мероприятие
-     * @return Изменился ли статус
-     */
-    //TODO Что то написать!!!
-    private boolean isStatusChanged(Arrangement arrangement){
-        //Если новому мероприятию запланировали дату запуска в будущем,
-        // при этом не пустой список ЕРДИ,
-        // оно становится FORMED
-        /*if(arrangement.getStatus().equals(ExecutionStatus.NEW) &&
-                arrangement.getArrangementItems()!=null &&
-                arrangement.getArrangementItems().size() > 0){
-            arrangement.sendEvent(ArrangementEvents.FILL);
-            log.info("Arrangement status changed to " + arrangement.getStatus());
-            return true;
-        }
-        log.warn("Arrangement status was not changed. Arrangement items: " +
-                arrangement.getArrangementItems()
-                        .stream()
-                        .map(arrangementItem -> arrangementItem.getId().toString())
-                        .collect(Collectors.joining("'")));*/
-        return false;
-    }
-
-
-
 
 }
