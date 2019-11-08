@@ -138,6 +138,18 @@ public class ReportController
     }
 
     /**
+     * 6'. Полный запрос для таблицы для админа
+     * select * from  v_api_reg_reports_admin_table rep_tp_id=?
+     *
+     * @return
+     */
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    @GetMapping("admin/table")
+    List<ReportAdminTable> getReportAdminTableFull() {
+        return reportAdminTableRepository.findAll();
+    }
+
+    /**
      * 7. Запрос по перевыпуску отчета по rep_id
      */
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")

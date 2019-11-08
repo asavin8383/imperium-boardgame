@@ -17,7 +17,9 @@ import javax.persistence.Table;
 @Table(schema = "dm", name = "v_api_reg_reports_admin_stat")
 public class ReportAdminStat
 {
-    @Id long rep_tp_id;
+    @Id long rowid;
+
+    @Column long rep_tp_id;
 
     @Column
     String  label;
