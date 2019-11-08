@@ -1,6 +1,10 @@
 package repositories;
 
+import enums.ExecutionStatus;
 import model.task.Arrangement;
+import model.task.ArrangementStatistics;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -25,4 +29,14 @@ public interface ArrangementRepo extends JpaRepository<Arrangement, Long>, Arran
 
     @Query(value = "SELECT a.formalTask.missionId FROM Arrangement a WHERE a.id = :id")
     Long getMissionId(@Param("id") Long id);
+
+    Page<Arrangement> findAllByStatus(ExecutionStatus status, Pageable pageable);
+
+    @Query("SELECT " +
+            "    new model.task.ArrangementStatistics(a.status, COUNT(a)) " +
+            "FROM " +
+            "    Arrangement a " +
+            "GROUP BY " +
+            "    a.status")
+    List<ArrangementStatistics> findSummaryByStatus();
 }
