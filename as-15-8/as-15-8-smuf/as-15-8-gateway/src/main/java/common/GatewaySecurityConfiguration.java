@@ -25,7 +25,12 @@ public class GatewaySecurityConfiguration extends ResourceServerConfigurerAdapte
                 .authorizeRequests()
                     .antMatchers("/security/oauth/**", "/eureka/**")
                     .permitAll()
-                    .antMatchers(HttpMethod.GET, "/pod/erdi/single/**").permitAll()
+                    .antMatchers(HttpMethod.GET,
+                            "/pod/erdi/single/**",
+                            "/pod/erdi/checkUnits/**",
+                            "/arrangements/checkUnits/**",
+                            "/ppt/arrangements/checkUnits/**"
+                    ).permitAll()
                     .antMatchers("/**")
                     .authenticated();
     }

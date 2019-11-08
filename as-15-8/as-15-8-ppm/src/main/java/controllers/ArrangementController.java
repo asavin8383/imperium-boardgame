@@ -8,7 +8,7 @@ import enums.AccessToolUnit;
 import enums.ArrangementEvents;
 import enums.Protocol;
 import events.producers.rest.ArrangementStatusUploader;
-import events.producers.rest.CheckUnitUploader;
+import webClients.PPT_WebClient;
 import exceptions.AS_15_8_PPM_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +24,8 @@ import repositories.DomainMaskItemRepo;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.stream.Collectors;
 
 /**
@@ -38,7 +40,7 @@ import java.util.stream.Collectors;
 public class ArrangementController {
 
     private final ArrangementRepo arrangementRepo;
-    private final CheckUnitUploader checkUnitUploader;
+    private final PPT_WebClient PPTWebClient;
     private final ArrangementStatusUploader arrangementStatusUploader;
     private final SchedulerProperties schedulerProperties;
     private final DomainMaskItemRepo domainMaskItemRepo;
@@ -62,17 +64,20 @@ public class ArrangementController {
         log.info("Мероприятие {} записано в БД", newArrangement.getId());
         getAndSaveArrangementCheckUnits(newArrangement);
         log.info("Мероприятие {} готово к включению в расписание", newArrangement.getId());
-        ArrangementStatusNotification arrangementStatusNotification = new ArrangementStatusNotification(newArrangement.getId(), ArrangementEvents.FILL);
-        arrangementStatusUploader.changeArrangementStatus(arrangementStatusNotification);
+        CompletableFuture.runAsync(() -> {
+            ArrangementStatusNotification arrangementStatusNotification = new ArrangementStatusNotification(newArrangement.getId(), ArrangementEvents.FILL);
+            arrangementStatusUploader.changeArrangementStatus(arrangementStatusNotification);
+        }).exceptionally(throwable -> {throw new CompletionException(throwable);});
     }
 
     private void getAndSaveArrangementCheckUnits(Arrangement arrangement){
         arrangement.getScheduleCheckUnits().addAll(
-        checkUnitUploader.getCheckUnitsByArrangementId(arrangement.getId())
+        PPTWebClient.getCheckUnitsByArrangementId(arrangement.getId())
             .stream()
             .flatMap(checkUnit -> createCheckUnits(arrangement, checkUnit).stream())
             .collect(Collectors.toList())
         );
+        log.info("Получен список чек-юнитов мероприятия {} от ППТ", arrangement.getId());
         arrangementRepo.save(arrangement);
     }
 

@@ -1,8 +1,13 @@
 package webClients;
 
+import checkUnits.CheckUnit;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import exceptions.AS_15_8_PPT_Exception;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
@@ -11,9 +16,9 @@ import reactor.core.scheduler.Schedulers;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class POD_WebClient {
 
     private static final String GET_ERDI_URI = "/pod/erdi/single";
@@ -46,6 +51,30 @@ public class POD_WebClient {
                         .build().toString())
                 .retrieve()
                 .bodyToMono(ObjectNode.class);
+    }
+
+    public Flux<CheckUnit> fetchCheckUnits(List<Long> contentIds) {
+        return Flux.fromIterable(contentIds)
+                .parallel()
+                .runOn(Schedulers.parallel())
+                .flatMap(this::getCheckUnitsByContentId)
+                .sequential();
+    }
+
+    private Flux<CheckUnit> getCheckUnitsByContentId(Long contentId){
+        String path = "/pod/erdi/checkUnits";
+        String uri = UriComponentsBuilder.fromUriString(path).queryParam("id", contentId).build().toString();
+
+        try {
+            log.info("Получение чек-юнитов ЕРДИ {} по запросу: {}", contentId, uri);
+            return webClient.get()
+                    .uri(uri)
+                    .retrieve()
+                    .bodyToFlux(CheckUnit.class);
+            //return Arrays.asList(oAuth2RestTemplate.getForObject(uri, CheckUnit[].class));
+        } catch (HttpClientErrorException | HttpServerErrorException ex) {
+            throw AS_15_8_PPT_Exception.logAndGet(log, String.format("Ошибка получения чек-юнитов ЕРДИ %d в ППТ, код возврата %s", contentId, ex.getStatusCode()));
+        }
     }
 
 }

@@ -109,8 +109,8 @@ public class ContentController {
         erdiRestClient.removeVersionTo(version);
     }
 
-    @GetMapping("/checkUnits")
-    @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
+    @GetMapping("/erdi/checkUnits")
+    //@PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
     public List<CheckUnit> getCheckUnits(@RequestParam("id") Long contentId){
         return contentService.getActualCheckUnits(contentId).stream()
             .map(contentCheckUnit -> new CheckUnit(contentId, contentCheckUnit.getCheckUnitType(), contentCheckUnit.getCheckUnitValue()))

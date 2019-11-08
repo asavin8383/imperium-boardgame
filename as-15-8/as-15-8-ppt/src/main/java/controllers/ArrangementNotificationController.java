@@ -1,4 +1,4 @@
-package events.handlers.rest;
+package controllers;
 
 import arrangement.ArrangementStatusNotification;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +21,7 @@ import services.arrangement.ArrangementNotificationService;
 @RequestMapping(path = "/arrangements/status", produces = MediaType.APPLICATION_JSON_VALUE)
 @PreAuthorize("hasRole('ROLE_SYSTEM')")
 @RequiredArgsConstructor(onConstructor_={@Autowired})
-public class ArrangementNotificationHandler {
+public class ArrangementNotificationController {
 
     private final ArrangementNotificationService arrangementNotificationService;
 
