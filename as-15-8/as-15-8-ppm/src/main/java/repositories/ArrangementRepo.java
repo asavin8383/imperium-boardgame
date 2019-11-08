@@ -29,4 +29,10 @@ public interface ArrangementRepo extends JpaRepository<Arrangement, Long> {
             "left join a.schedulePeriodArrangements spa " +
             "where spa.id is null")
     Page<Arrangement> findAllAvailableArrangements(Pageable pageable);
+
+    @Query("select DISTINCT a " +
+            "from Arrangement a " +
+            "left join a.schedulePeriodArrangements spa " +
+            "where spa.id is null")
+    List<Arrangement> findAllAvailableArrangements();
 }

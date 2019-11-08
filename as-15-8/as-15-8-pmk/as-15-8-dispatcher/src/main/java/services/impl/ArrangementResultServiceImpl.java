@@ -55,6 +55,7 @@ public class ArrangementResultServiceImpl implements ArrangementResultService {
     }
 
     @Override
+    @Transactional
     public Result updateJobStatus(Long jobID, CheckUnitJobResult status, String description) {
         Result result = findJobByID(jobID);
         result.setResult(status);
@@ -73,7 +74,7 @@ public class ArrangementResultServiceImpl implements ArrangementResultService {
     }
 
     @Transactional
-    private void saveErrorToDetailResults(Result result, String exText) {
+    void saveErrorToDetailResults(Result result, String exText) {
         DetailResult detailResult = new DetailResult();
         detailResult.setResult(result);
         detailResult.setResponseError(false);
