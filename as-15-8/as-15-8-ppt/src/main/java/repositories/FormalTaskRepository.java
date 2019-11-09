@@ -16,6 +16,8 @@ public interface FormalTaskRepository extends JpaRepository<FormalTask, Long>, F
 
 	Page<FormalTask> findAllByStatus(ExecutionStatus status, Pageable pageable);
 
+	Page<FormalTask> findAllByStatusIn(List<ExecutionStatus> statuses, Pageable pageable);
+
 	@Query("SELECT " +
 			"    new model.task.ArrangementStatistics(f.status, COUNT(f)) " +
 			"FROM " +

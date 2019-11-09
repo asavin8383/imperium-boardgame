@@ -68,6 +68,18 @@ public class ArrangementController {
         return arrangementRepo.findAllByStatus(status, page);
     }
 
+    @GetMapping(path = "/statuses")
+    public Page<Arrangement> findListByStatuses(
+            @RequestParam List<ExecutionStatus> statuses,
+            @RequestParam(required = false) SortingDirection sortingDirection,
+            @RequestParam(required = false) String sortingColumn,
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize){
+        PageRequest page = PageRequest.of(
+                pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
+        return arrangementRepo.findAllByStatusIn(statuses, page);
+    }
+
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(code = HttpStatus.CREATED)
     public Arrangement postArrangement(@RequestBody Arrangement arrangement, @RequestParam("formalTaskId") FormalTask formalTask){

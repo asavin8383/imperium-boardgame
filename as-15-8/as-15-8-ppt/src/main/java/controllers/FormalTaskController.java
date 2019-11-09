@@ -82,6 +82,18 @@ public class FormalTaskController {
 		return formalTaskRepo.findAllByStatus(status, page);
 	}
 
+	@GetMapping(path = "/statuses")
+	public Page<FormalTask> findListByStatuses(
+			@RequestParam List<ExecutionStatus> statuses,
+			@RequestParam(required = false) SortingDirection sortingDirection,
+			@RequestParam(required = false) String sortingColumn,
+			@RequestParam(defaultValue = "0") int pageNumber,
+			@RequestParam(defaultValue = "10") int pageSize){
+		PageRequest page = PageRequest.of(
+				pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
+		return formalTaskRepo.findAllByStatusIn(statuses, page);
+	}
+
 	@GetMapping(path="/summary")
 	public List<ArrangementStatistics> getSummary(){
 		return formalTaskRepo.findSummaryByStatus();
