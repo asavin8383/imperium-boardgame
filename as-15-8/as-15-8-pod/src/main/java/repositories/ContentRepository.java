@@ -14,9 +14,4 @@ public interface ContentRepository extends JpaRepository<Content, Long>, Diction
 
     List<Content> findByErdiIdIn(List<String> ids);
 
-    List<Content> findByIdIn(List<Long> ids);
-
-    @Transactional
-    void deleteByContentVersionId(Long contentVersionId);
-
 }

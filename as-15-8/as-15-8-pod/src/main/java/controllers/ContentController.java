@@ -26,6 +26,7 @@ import services.InfoService;
 
 import java.text.ParseException;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -63,9 +64,9 @@ public class ContentController {
 
     @GetMapping(path = "/erdi/single")
     //@PreAuthorize("hasAnyRole('ROLE_OPERATOR')")
-    public ContentView getContentById(
-            @RequestParam("id") ContentView contentView) {
-        return contentView;
+    public Optional<ContentView> getContentById(
+            @RequestParam Long id) {
+        return contentService.getFormalErdiView(id);
     }
 
     @GetMapping(path = "/check_erdi", produces = MediaType.APPLICATION_JSON_VALUE)

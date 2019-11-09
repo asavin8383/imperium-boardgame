@@ -16,6 +16,7 @@ import reactor.core.scheduler.Schedulers;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -50,7 +51,8 @@ public class POD_WebClient {
                         .queryParam("id", id)
                         .build().toString())
                 .retrieve()
-                .bodyToMono(ObjectNode.class);
+                .bodyToMono(ObjectNode.class)
+                .doOnError(ex -> log.error("Ошибка при получении ЕРДИ по id: "+id, ex));
     }
 
     public Flux<CheckUnit> fetchCheckUnits(List<Long> contentIds) {
@@ -70,7 +72,8 @@ public class POD_WebClient {
             return webClient.get()
                     .uri(uri)
                     .retrieve()
-                    .bodyToFlux(CheckUnit.class);
+                    .bodyToFlux(CheckUnit.class)
+                    .doOnError(ex -> log.error("Ошибка при получении CheckUnit по ЕРДИ id: "+contentId, ex));
             //return Arrays.asList(oAuth2RestTemplate.getForObject(uri, CheckUnit[].class));
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
             throw AS_15_8_PPT_Exception.logAndGet(log, String.format("Ошибка получения чек-юнитов ЕРДИ %d в ППТ, код возврата %s", contentId, ex.getStatusCode()));
