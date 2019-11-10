@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import services.ArrangementService;
 import services.ScheduleService;
 
+import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
@@ -68,8 +69,8 @@ public class ScheduleController {
     public Schedule postSchedule(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate plannedDate,
             @RequestBody List<Long> arrangementIds,
-            @RequestParam String author){
-        Schedule schedule = createSchedule(filterAvailableArrangements(arrangementIds), author, plannedDate);
+            Principal principal){
+        Schedule schedule = createSchedule(filterAvailableArrangements(arrangementIds), principal.getName(), plannedDate);
         return scheduleService.saveSchedule(schedule);
     }
 
@@ -80,7 +81,7 @@ public class ScheduleController {
             @RequestParam("id") Schedule schedule,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate plannedDate,
             @RequestBody List<Arrangement> arrangements,
-            @RequestParam String author){
+            Principal principal){
         if(!(schedule.getStatus().equals(ScheduleStatus.NEW))){
             throw AS_15_8_PPM_Exception.logAndGet(log, String.format("Ошибка изменения расписания! Некорректный статус расписания с ИД: %d - %s", schedule.getId(), schedule.getStatus()));
         }
@@ -91,10 +92,10 @@ public class ScheduleController {
                 .filter(arrangement -> arrangement.getPlannedStartTime()!=null && arrangement.getPlannedEndTime()!=null)
                 .forEach(arrangementService::updateArrangementPlanInfo);
         List<Long> arrangementIds = arrangements.stream().map(Arrangement::getId).collect(Collectors.toList());
-        Schedule newSchedule = createSchedule(filterAvailableArrangements(arrangementIds), author, plannedDate);
+        Schedule newSchedule = createSchedule(filterAvailableArrangements(arrangementIds), principal.getName(), plannedDate);
         schedule.setSchedulePeriods(newSchedule.getSchedulePeriods());
         schedule.getSchedulePeriods().forEach(schedulePeriod -> schedulePeriod.setSchedule(schedule));
-        schedule.setAuthor(author);
+        schedule.setAuthor(principal.getName());
         if (plannedDate != null) {
             schedule.setPlannedDate(plannedDate);
         }

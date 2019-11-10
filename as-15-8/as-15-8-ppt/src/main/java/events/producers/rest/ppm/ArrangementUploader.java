@@ -24,13 +24,14 @@ import org.springframework.web.util.UriComponentsBuilder;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class ArrangementUploader {
 
+    private final String ARRANGEMENTS_URI = "/ppm/arrangements";
+
     @Value("${gateway.url}")
     private String gatewayUrl;
 
     private final OAuth2RestTemplate oAuth2RestTemplate;
 
     public void updateArrangement(Arrangement arrangement){
-        String path = "/ppm/arrangements";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -40,7 +41,7 @@ public class ArrangementUploader {
 
         log.info("Отправка мероприятия в ППМ: {}", arrangement.getId());
         try {
-            oAuth2RestTemplate.put(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(path).queryParam("id", arrangement.getId()).build().toString(), entity);
+            oAuth2RestTemplate.put(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(ARRANGEMENTS_URI).queryParam("id", arrangement.getId()).build().toString(), entity);
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
              throw AS_15_8_PPT_Exception.logAndGet(log, String.format("Ошибка отправки мероприятия %d в ППМ, код возврата %s", arrangement.getId(), ex.getStatusCode()));
         }
