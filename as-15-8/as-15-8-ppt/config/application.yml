@@ -14,8 +14,7 @@ eureka:
     preferIpAddress: true
     instanceId: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port}
 spring:
-  application:
-    name: ppt
+  application.name: ppt
   main.allow-bean-definition-overriding: true
   liquibase:
     enabled: false
@@ -144,8 +143,13 @@ cron:
 
 ---
 
+logging:
+  config:
+  level:
+    root: info
+    org.hibernate.SQL: info
 spring:
-  profiles: dev_asinyavin
+  profiles: dev_asin
   profiles.include: local_log
   jpa:
     hibernate:
@@ -162,7 +166,6 @@ spring:
 cron:
   expression:
     arrangement: "0 * * ? * *"
-eureka.client.enabled: false
 
 ---
 
