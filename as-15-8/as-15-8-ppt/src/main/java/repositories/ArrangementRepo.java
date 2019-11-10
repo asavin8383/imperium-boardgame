@@ -1,5 +1,6 @@
 package repositories;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import enums.ExecutionStatus;
 import model.task.Arrangement;
 import model.task.ArrangementStatistics;
@@ -9,6 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import rest.ArrangementActData;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,12 +25,6 @@ public interface ArrangementRepo extends JpaRepository<Arrangement, Long>, Arran
 
     @Query("SELECT a FROM Arrangement a WHERE a.id = :id and a.status in ('NEW', 'FORMED')")
     Optional<Arrangement> findEditableArrangement(@Param("id") Long id);
-
-    @Query(value = "SELECT a.accessTool FROM Arrangement a WHERE a.id = :id")
-    String getAccessTool(@Param("id") Long id);
-
-    @Query(value = "SELECT a.formalTask.missionId FROM Arrangement a WHERE a.id = :id")
-    Long getMissionId(@Param("id") Long id);
 
     Page<Arrangement> findAllByStatus(ExecutionStatus status, Pageable pageable);
 
@@ -49,4 +45,9 @@ public interface ArrangementRepo extends JpaRepository<Arrangement, Long>, Arran
                     "join u.formalErdiList f"
     )
     List<Long> listContentIdsByArrangementId(@Param("id") Long id);
+
+    @Query("select new rest.ArrangementActData(f.missionId, a.accessTool) " +
+            "from Arrangement a " +
+            "join a.formalTask f on a.id = :id")
+    ArrangementActData findArrangementActData(@Param("id") Long id);
 }

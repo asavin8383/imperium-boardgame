@@ -20,9 +20,10 @@ import java.util.Optional;
 
 @Service
 @Slf4j
-public class POD_WebClient {
+public class PodWebClient {
 
     private static final String GET_ERDI_URI = "/pod/erdi/single";
+    private static final String GET_CHECK_UNITS_URL = "/pod/erdi/checkUnits";
 
     @Value("${gateway.url}")
     private String gatewayUrl;
@@ -37,7 +38,7 @@ public class POD_WebClient {
     public List<ObjectNode> fetchErdi(List<Long> erdiIds) {
         return Flux.fromIterable(erdiIds)
                 .parallel()
-                .runOn(Schedulers.parallel())
+                .runOn(Schedulers.elastic())
                 .flatMap(this::getErdi)
                 .sequential()
                 .collectList()
@@ -58,14 +59,16 @@ public class POD_WebClient {
     public Flux<CheckUnit> fetchCheckUnits(List<Long> contentIds) {
         return Flux.fromIterable(contentIds)
                 .parallel()
-                .runOn(Schedulers.parallel())
+                .runOn(Schedulers.elastic())
                 .flatMap(this::getCheckUnitsByContentId)
                 .sequential();
     }
 
     private Flux<CheckUnit> getCheckUnitsByContentId(Long contentId){
-        String path = "/pod/erdi/checkUnits";
-        String uri = UriComponentsBuilder.fromUriString(path).queryParam("id", contentId).build().toString();
+        String uri = UriComponentsBuilder
+                .fromUriString(GET_CHECK_UNITS_URL)
+                .queryParam("id", contentId)
+                .build().toString();
 
         try {
             log.info("Получение чек-юнитов ЕРДИ {} по запросу: {}", contentId, uri);

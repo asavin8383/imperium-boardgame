@@ -15,10 +15,10 @@ import javax.persistence.Enumerated;
 @ToString
 public class AccessToolRobot {
 
-    public Long orig_id;
-    public String origName;
+    private Long origId;
+    private String origName;
 
     @Enumerated(EnumType.STRING)
-    public AccessToolRobotType type;
+    private AccessToolRobotType type;
 
 }

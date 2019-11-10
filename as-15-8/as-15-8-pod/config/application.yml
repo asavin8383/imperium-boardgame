@@ -2,6 +2,8 @@ logging.level.root: INFO
 gateway.url: ${GATEWAY_URI:http://localhost:15880}
 config.url:  ${gateway.url}/config
 rep_scheduler.url:  ${gateway.url}/report_scheduler
+act:
+  screenshotes.max-count: 10
 spring:
   main.allow-bean-definition-overriding: true
   datasource:

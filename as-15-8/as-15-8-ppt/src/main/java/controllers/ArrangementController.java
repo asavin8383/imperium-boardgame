@@ -18,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import repositories.ArrangementRepo;
+import rest.ArrangementActData;
 import services.arrangement.impl.ArrangementService;
 
 import java.util.List;
@@ -113,15 +114,9 @@ public class ArrangementController {
     }
 
     @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
-    @GetMapping("/access_tool")
-    public String accessToolByArrangementId(@RequestParam Long arrangement_id) {
-        return arrangementRepo.getAccessTool(arrangement_id);
-    }
-
-    @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
-    @GetMapping("/mission_id")
-    public Long missionIdByArrangement(@RequestParam Long arrangement_id) {
-        return arrangementRepo.getMissionId(arrangement_id);
+    @GetMapping("/act_data")
+    public ArrangementActData accessToolByArrangementId(Long arrangement_id) {
+        return arrangementRepo.findArrangementActData(arrangement_id);
     }
 
     /**

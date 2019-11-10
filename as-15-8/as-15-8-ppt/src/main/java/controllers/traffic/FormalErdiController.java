@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.traffic.ErdiTrafficUnit;
 import model.traffic.ErdiTrafficUnitContent;
-import model.traffic.TrafficUnit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -21,11 +20,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import repositories.ErdiContentJoinRepository;
-import repositories.ErdiTrafficUnitRepository;
-import webClients.POD_WebClient;
+import webClients.PodWebClient;
 
-import javax.management.ObjectName;
-import java.math.BigInteger;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,7 +32,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class FormalErdiController {
 
-    private final POD_WebClient podWebClient;
+    private final PodWebClient podWebClient;
     private final ErdiContentJoinRepository erdiContentJoinRepository;
 
     @GetMapping

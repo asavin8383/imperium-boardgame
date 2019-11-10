@@ -20,6 +20,8 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
                             "/erdi/single/**",
                             "/erdi/checkUnits/**"
                     ).permitAll()
+                    .antMatchers(HttpMethod.POST,
+                            "/act/**").permitAll()
                 .anyRequest().authenticated()
             .and()
                 .httpBasic().disable();

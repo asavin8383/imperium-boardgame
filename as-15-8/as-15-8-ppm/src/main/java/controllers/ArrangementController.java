@@ -8,7 +8,7 @@ import enums.AccessToolUnit;
 import enums.ArrangementEvents;
 import enums.Protocol;
 import events.producers.rest.ArrangementStatusUploader;
-import webClients.PPT_WebClient;
+import webClients.PptWebClient;
 import exceptions.AS_15_8_PPM_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 public class ArrangementController {
 
     private final ArrangementRepo arrangementRepo;
-    private final PPT_WebClient PPTWebClient;
+    private final PptWebClient PPTWebClient;
     private final ArrangementStatusUploader arrangementStatusUploader;
     private final SchedulerProperties schedulerProperties;
     private final DomainMaskItemRepo domainMaskItemRepo;

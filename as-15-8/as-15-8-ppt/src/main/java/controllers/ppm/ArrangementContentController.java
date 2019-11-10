@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import repositories.ArrangementRepo;
-import webClients.POD_WebClient;
+import webClients.PodWebClient;
 
 import java.util.List;
 
@@ -27,7 +27,7 @@ import java.util.List;
 public class ArrangementContentController {
 
     private final ArrangementRepo arrangementRepo;
-    private final POD_WebClient pod_webClient;
+    private final PodWebClient pod_webClient;
 
     @GetMapping
     public Flux<CheckUnit> getAndSendCheckUnits(@RequestParam("id") Long arrangementId) {

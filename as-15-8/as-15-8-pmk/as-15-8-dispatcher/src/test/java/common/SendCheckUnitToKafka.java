@@ -142,8 +142,7 @@ public class SendCheckUnitToKafka {
 
 		System.out.println("BEGIN -------------------------------");
 
-		boolean res = actService.createAct(2L);
-		System.out.println("res = " + res);
+		actService.createAct(2L);
 
 		System.out.println("END -------------------------------");
 

@@ -21,7 +21,7 @@ import java.security.Principal;
  *
  */
 @SpringBootApplication
-@ComponentScan(basePackages= {"common", "repositories", "controllers", "services", "restapi", "updaters"})
+@ComponentScan(basePackages= {"common", "repositories", "controllers", "services", "restapi", "updaters", "webClient"})
 @EnableJpaRepositories("repositories")
 @EntityScan("model")
 @EnableScheduling

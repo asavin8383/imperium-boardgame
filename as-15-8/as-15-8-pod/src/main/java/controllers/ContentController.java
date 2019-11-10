@@ -39,7 +39,6 @@ public class ContentController {
     private final ContentService contentService;
     private final ErdiRestClient erdiRestClient;
     private final InfoService infoService;
-    private final ActService actService;
 
     @GetMapping(path = "/erdi")
     @PreAuthorize("hasAnyRole('ROLE_OPERATOR')")
@@ -74,12 +73,6 @@ public class ContentController {
             @RequestParam(defaultValue = "") String url
     ) {
         return infoService.searchCheckUnit(url);
-    }
-
-    @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
-    @PostMapping(path = "/create_act", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseStatusString createAct(@RequestBody ActRequest actRequest){
-        return actService.createAct(actRequest);
     }
 
     @GetMapping(path = "/update_erdi")

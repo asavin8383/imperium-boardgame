@@ -24,7 +24,7 @@ import java.util.List;
 @Service
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class PPT_WebClient {
+public class PptWebClient {
 
     @Value("${gateway.url}")
     private String gatewayUrl;

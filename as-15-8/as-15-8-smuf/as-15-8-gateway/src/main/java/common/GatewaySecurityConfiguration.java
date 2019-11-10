@@ -29,8 +29,11 @@ public class GatewaySecurityConfiguration extends ResourceServerConfigurerAdapte
                             "/pod/erdi/single/**",
                             "/pod/erdi/checkUnits/**",
                             "/arrangements/checkUnits/**",
-                            "/ppt/arrangements/checkUnits/**"
-                    ).permitAll()
+                            "/ppt/arrangements/checkUnits/**",
+                            "/dispatcher/act/checkResult/**",
+                            "/dispatcher/act/screenshots/**").permitAll()
+                    .antMatchers(HttpMethod.POST,
+                            "/pod/act/**").permitAll()
                     .antMatchers("/**")
                     .authenticated();
     }

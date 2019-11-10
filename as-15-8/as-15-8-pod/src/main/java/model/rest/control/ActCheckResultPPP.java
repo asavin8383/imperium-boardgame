@@ -4,8 +4,8 @@ import lombok.Data;
 
 @Data
 public class ActCheckResultPPP {
-    public Long CheckResultId;
-    public String CheckUnitType;
-    public String CheckUnitValue;
-    public String Date;    // 2019-08-15T18:58:00
+    private Long checkResultId;
+    private String checkUnitType;
+    private String checkUnitValue;
+    private String date;    // 2019-08-15T18:58:00
 }
