@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClientException;
@@ -58,6 +59,7 @@ public class ErdiRestClient {
     private final AddonVersionRepository addonVersionRepository;
     private final SubTypeRestClient subTypeRestClient;
     private final AddonRestClient addonRestClient;
+    private final JdbcTemplate jdbcTemplate;
 
     private static final String urlRest = "";
     private static final String tempDir = "temp_dir";
@@ -130,6 +132,7 @@ public class ErdiRestClient {
             loadAllDeltaERDI();
             loadSybTypes();
             loadAddons();
+            refreshViews();
             log.info("====== Конец обновления справочников");
         }
         catch(Exception ex){
@@ -265,6 +268,12 @@ public class ErdiRestClient {
                         deltaAddonEntry.getActualDate());
             }
         }
+    }
+
+    private void refreshViews(){
+        log.info("---> Обновление MATERIALIZED VIEWS");
+        jdbcTemplate.execute("REFRESH MATERIALIZED VIEW sor.check_units");
+        jdbcTemplate.execute("REFRESH MATERIALIZED VIEW sor.content_view");
     }
 
 
