@@ -5,6 +5,7 @@ import controllers.utils.SortingDirection;
 import controllers.utils.SortingHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import model.response.PSEntry;
 import model.scheme.PsRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -14,12 +15,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import repositories.PsRepository;
 import restapi.PSRestClient;
+import services.DictionaryService;
 import utils.Utils;
 
 import java.util.concurrent.CompletableFuture;
@@ -33,6 +32,7 @@ public class PsController {
 
     private final PsRepository psRepository;
     private final PSRestClient psRestClient;
+    private final DictionaryService dictionaryService;
     private UploadingState state = UploadingState.ACTIVE;
 
     @GetMapping
@@ -50,6 +50,16 @@ public class PsController {
         } else {
             return new ResponseEntity<>((Page<PsRecord>) null, HttpStatus.ACCEPTED);
         }
+    }
+
+    @PostMapping
+    public void postPS(@RequestBody PSEntry entry) {
+        dictionaryService.createPs(entry);
+    }
+
+    @DeleteMapping
+    public void deletePS(@RequestParam Long id) {
+        dictionaryService.deletePs(id);
     }
 
     @GetMapping(path = "/upload")

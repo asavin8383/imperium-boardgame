@@ -52,6 +52,28 @@ public class PSController
         insert(data, RobotType.PASD);
     }
 
+    /**
+     * Уданеие ПС
+     * @param id
+     */
+    @DeleteMapping("ps")
+    @PreAuthorize("hasRole('ROLE_SYSTEM')")
+    void deletePS(@RequestParam Long id) {
+        log.info("Got request, trying to delete PS with id {}", id);
+        delete(id, RobotType.PS);
+    }
+
+    /**
+     * Удаление ПАСД
+     * @param id
+     */
+    @DeleteMapping("pasd")
+    @PreAuthorize("hasRole('ROLE_SYSTEM')")
+    void deletePASD(@RequestParam Long id) {
+        log.info("Got request, trying to delete PASD with id {}", id);
+        delete(id, RobotType.PASD);
+    }
+
     private void insert(@RequestBody List<PS> data, RobotType robotType) {
         Set<Long> all = robotRepository.findAll().stream().map(Robot::getOrigId).collect(Collectors.toSet());
         log.debug("{} robot records already exists");
@@ -70,6 +92,10 @@ public class PSController
             }
         }
         log.info("{} new robot records inserted", newCnt);
+    }
+
+    private void delete(Long id, RobotType robotType) {
+        robotRepository.deleteByOrigIdAndType(id, robotType);
     }
 
 }
