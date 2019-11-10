@@ -8,10 +8,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Result;
 import model.DetailResult;
+import model.ResultScreenShot;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import repositories.ResultRepo;
 import repositories.DetailResultRepo;
+import repositories.ResultScreenShotRepo;
 import services.AnalysisResultService;
 import services.AnalysisResultServiceFactory;
 import services.ArrangementResultService;
@@ -26,6 +28,7 @@ import java.util.Arrays;
 public class ArrangementResultServiceImpl implements ArrangementResultService {
 
     private final ResultRepo resultRepo;
+    private final ResultScreenShotRepo resultScreenShotRepo;
     private final DetailResultRepo detailResultRepo;
 
 
@@ -34,11 +37,13 @@ public class ArrangementResultServiceImpl implements ArrangementResultService {
     public Result processJobResult(AnalysisResult analysisResult) {
         Result result = findJobByID(analysisResult.getJobID());
         AnalysisResultService<? super AnalysisResult> service = AnalysisResultServiceFactory.getService(analysisResult.getClass());
-        result.setScreenshot(analysisResult.getScreenshot());
-        result.setEtalonScreenshot(analysisResult.getEtalonScreenshot());
         result.setEndDate(LocalDateTime.now());
         result.setResult(analysisResult.getCheckResult());
         resultRepo.save(result);
+        ResultScreenShot resultScreenShot = resultScreenShotRepo.getOne(analysisResult.getJobID());
+        resultScreenShot.setScreenshot(analysisResult.getScreenshot());
+        resultScreenShot.setEtalonScreenshot(analysisResult.getEtalonScreenshot());
+        resultScreenShotRepo.save(resultScreenShot);
         service.processResult(result, analysisResult);
         return result;
     }

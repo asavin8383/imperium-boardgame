@@ -3,7 +3,9 @@ package controllers;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Result;
+import model.ResultScreenShot;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import repositories.ResultRepo;
+import repositories.ResultScreenShotRepo;
 import rest.ActCheckResult;
 import services.ActService;
 
@@ -23,9 +26,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Base64;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 
 @RestController
@@ -35,7 +37,8 @@ import java.util.stream.Stream;
 public class ActController {
 
     private final ActService actService;
-    private final ResultRepo arrangementResultRepo;
+    private final ResultRepo resultRepo;
+    private final ResultScreenShotRepo resultScreenShotRepo;
 
     private DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
@@ -50,7 +53,7 @@ public class ActController {
     public Flux<ActCheckResult> getActCheckResult(Long arrangementId){
         log.info("Подготовка результатов мероприятия для акта. ID мероприятия: {}", arrangementId);
         return Flux.fromIterable(
-                    arrangementResultRepo.findByArrangementId(arrangementId))
+                    resultRepo.findAllByArrangementId(arrangementId))
                 .map(this::createActCheckResult);
     }
 
@@ -58,13 +61,11 @@ public class ActController {
     public Flux<String> getActScreenshots(Long arrangementId,
                                           @RequestParam(defaultValue = "10") Long maxCountScreenShots) {
         log.info("Подготовка скриншотов для акта. ID мероприятия: {}", arrangementId);
-        Stream<Result> streamResult = arrangementResultRepo
-                .findByArrangementId(arrangementId)
-                .stream();
-        if(maxCountScreenShots > 0)
-            streamResult = streamResult.limit(maxCountScreenShots);
+        PageRequest page = PageRequest.of(0, maxCountScreenShots.intValue());
+        List<ResultScreenShot> screenShots = resultScreenShotRepo
+                .findAllByArrangementId(arrangementId, page);
 
-        return Flux.fromIterable(streamResult.collect(Collectors.toList()))
+        return Flux.fromIterable(screenShots)
                 .map(this::createActBase64Screenshot)
                 .filter(Objects::nonNull);
     }
@@ -80,8 +81,8 @@ public class ActController {
         return checkResult;
     }
 
-    private String createActBase64Screenshot(Result result){
-        byte[] screen = result.getScreenshot();
+    private String createActBase64Screenshot(ResultScreenShot resultScreenShot){
+        byte[] screen = resultScreenShot.getScreenshot();
         if (screen != null && screen.length > 0)
             return Base64.getEncoder().encodeToString(screen);
         return null;
