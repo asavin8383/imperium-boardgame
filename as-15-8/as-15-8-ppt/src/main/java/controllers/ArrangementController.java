@@ -17,10 +17,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
 import repositories.ArrangementRepo;
 import services.arrangement.impl.ArrangementService;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Creation date: 21.05.2019
@@ -49,6 +51,12 @@ public class ArrangementController {
         PageRequest page = PageRequest.of(
                 pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
         return arrangementRepo.findPage(formalTaskId, id, page);
+    }
+
+    @GetMapping("{id}")
+    public Arrangement findById(@PathVariable Long id){
+        Optional<Arrangement> byId = arrangementRepo.findById(id);
+        return byId.orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND, "Arrangement not found " + id));
     }
 
     @GetMapping(path="/summary")
