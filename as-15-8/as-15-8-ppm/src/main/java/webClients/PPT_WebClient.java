@@ -26,6 +26,8 @@ import java.util.List;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class PPT_WebClient {
 
+    private final String CHECK_UNITS_URI = "/ppt/arrangements/checkUnits";
+
     @Value("${gateway.url}")
     private String gatewayUrl;
 
@@ -33,8 +35,7 @@ public class PPT_WebClient {
 
     //TODO вернуть Webclient
     public List<CheckUnit> getCheckUnitsByArrangementId(Long arrangementId){
-        String path = "/ppt/arrangements/checkUnits";
-        String uri = UriComponentsBuilder.fromUriString(path).queryParam("id", arrangementId).build().toString();
+        String uri = UriComponentsBuilder.fromUriString(CHECK_UNITS_URI).queryParam("id", arrangementId).build().toString();
         try {
             log.info("Получение чек-юнитов мероприятия {} по запросу: {}", arrangementId, uri);
             return WebClient.create(gatewayUrl)
