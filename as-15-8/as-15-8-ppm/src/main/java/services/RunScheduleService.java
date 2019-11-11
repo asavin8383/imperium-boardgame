@@ -4,7 +4,7 @@ import arrangement.ArrangementStatusNotification;
 import checkUnits.CheckUnit;
 import checkUnits.CheckUnitJob;
 import enums.ArrangementEvents;
-import events.producers.kafka.CheckUnitJobProducer;
+import events.producers.CheckUnitJobProducer;
 import restapi.ArrangementStatusUploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

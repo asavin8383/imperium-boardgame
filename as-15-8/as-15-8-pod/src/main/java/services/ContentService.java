@@ -28,10 +28,7 @@ public class ContentService {
 
     @Cacheable
     public Page<ContentView> getFormalErdiView(String query, Pageable pageable) {
-        Specification<ContentView> specification = StringUtils.isEmpty(query) ?
-                null : ContentViewSpecifications.containsQueryString(query);
-        return specification == null ? viewRepository.findAll(pageable) :
-                viewRepository.findAll(specification, pageable);
+        return viewRepository.findAllByQuery(query, pageable);
     }
 
     @Cacheable
