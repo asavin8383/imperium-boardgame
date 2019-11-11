@@ -4,17 +4,12 @@ logging:
 ldap:
   enabled: true
   domain: designdiv.ecleasing.ru
-  urls: ldap://192.168.1.52:389/
-  base:
-    dn: OU=AS_15_8,DC=designdiv,DC=ecleasing,DC=ru
-  user:
-    dn:
-      pattern: sAMAccountName={0}
-  login:
-    role_oper: CN=ROLE_OPERATOR,OU=roles,OU=AS_15_8,DC=designdiv,DC=ecleasing,DC=ru
-    role_admin: CN=ROLE_ADMIN,OU=roles,OU=AS_15_8,DC=designdiv,DC=ecleasing,DC=ru
-    filter_oper: "(&(objectClass=user)(memberof=${ldap.login.role_oper}))"
-    filter_admin: "(&(objectClass=user)(memberof=${ldap.login.role_admin}))"
+  source:
+    url: ldap://192.168.1.52:389/
+    base: OU=AS_15_8,DC=designdiv,DC=ecleasing,DC=ru
+    userDn: sa
+    password: 12345
+    pooled: true
 management:
   health:
     ldap:
@@ -64,7 +59,19 @@ spring:
 ---
 
 spring:
-  profiles: dev_pvorobiev, dev_asavin, dev_ashabalin, dev_jspirina, dev_asin
+  profiles: dev_pvorobiev, dev_asavin, dev_ashabalin, dev_jspirina
+  profiles.include: local_log
+  datasource:
+    url: jdbc:postgresql://192.168.5.195:5432/asdb_test
+
+---
+
+logging:
+  config:
+  level:
+    root: info
+spring:
+  profiles: dev_asin
   profiles.include: local_log
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb_test

@@ -12,7 +12,5 @@ import lombok.ToString;
 @NoArgsConstructor
 public class NMapAnalysisJobResult extends AnalysisResult {
 
-	private CheckUnitJobResult checkResult;
-
 	private String nmapLog;
 }

@@ -10,6 +10,6 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ResponseStatusString {
-    public boolean status;
-    public String response;
+    private boolean status;
+    private String response;
 }

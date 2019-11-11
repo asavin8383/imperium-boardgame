@@ -42,30 +42,66 @@ public class ArrangementStateMachine {
                     .withExternal()
                     .source(ExecutionStatus.NEW).target(ExecutionStatus.FORMED)
                     .event(ArrangementEvents.FILL)
+
                     .and()
                     .withExternal()
                     .source(ExecutionStatus.NEW).target(ExecutionStatus.ERROR)
                     .event(ArrangementEvents.FAIL)
+
                     .and()
                     .withExternal()
                     .source(ExecutionStatus.FORMED).target(ExecutionStatus.SCHEDULED)
                     .event(ArrangementEvents.SCHEDULE)
+
+                    .and()
+                    .withExternal()
+                    .source(ExecutionStatus.FORMED).target(ExecutionStatus.FORMED)
+                    .event(ArrangementEvents.FILL)
+
                     .and()
                     .withExternal()
                     .source(ExecutionStatus.SCHEDULED).target(ExecutionStatus.RUNNING)
                     .event(ArrangementEvents.RUN)
+
                     .and()
                     .withExternal()
                     .source(ExecutionStatus.RUNNING).target(ExecutionStatus.ACTION_REQUIRED)
                     .event(ArrangementEvents.PAUSE)
+
+                    .and()
+                    .withExternal()
+                    .source(ExecutionStatus.RUNNING).target(ExecutionStatus.RUNNING)
+                    .event(ArrangementEvents.RUN)
+
                     .and()
                     .withExternal()
                     .source(ExecutionStatus.ACTION_REQUIRED).target(ExecutionStatus.RUNNING)
                     .event(ArrangementEvents.RESTORE)
+
                     .and()
                     .withExternal()
                     .source(ExecutionStatus.RUNNING).target(ExecutionStatus.FINISHED)
                     .event(ArrangementEvents.FINISH)
+
+                    .and()
+                    .withExternal()
+                    .source(ExecutionStatus.FORMED).target(ExecutionStatus.ERROR)
+                    .event(ArrangementEvents.FAIL)
+
+                    .and()
+                    .withExternal()
+                    .source(ExecutionStatus.SCHEDULED).target(ExecutionStatus.ERROR)
+                    .event(ArrangementEvents.FAIL)
+
+                    .and()
+                    .withExternal()
+                    .source(ExecutionStatus.ACTION_REQUIRED).target(ExecutionStatus.ERROR)
+                    .event(ArrangementEvents.FAIL)
+
+                    .and()
+                    .withExternal()
+                    .source(ExecutionStatus.RUNNING).target(ExecutionStatus.ERROR)
+                    .event(ArrangementEvents.FAIL)
             ;
         } catch (Exception ex) {
             throw new AS_15_8_PPT_Exception("Ошибка создания конечного автомата!", ex);

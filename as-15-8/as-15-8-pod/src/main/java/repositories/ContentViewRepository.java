@@ -12,6 +12,4 @@ import java.util.List;
 @Repository
 public interface ContentViewRepository extends JpaRepository<ContentView, Long>, JpaSpecificationExecutor<ContentView> {
 
-    Page<ContentView> findAllByIdIn(List<Long> ids, Pageable pageable);
-
 }

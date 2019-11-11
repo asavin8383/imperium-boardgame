@@ -3,13 +3,16 @@ package common;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.ldap.core.ContextSource;
+import org.springframework.ldap.core.LdapTemplate;
+import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.ldap.authentication.ad.ActiveDirectoryLdapAuthenticationProvider;
@@ -21,13 +24,13 @@ import java.util.Collections;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class AuthentificationManagerConfigurer extends WebSecurityConfigurerAdapter {
 
-    @Value("${ldap.urls}")
+    @Value("${ldap.source.url}")
     private String ldapUrls;
 
     @Value("${ldap.domain}")
     private String adDomain;
 
-    @Value("${ldap.base.dn}")
+    @Value("${ldap.source.base}")
     private String ldapBaseDn;
 
     private final UserDetailsMapper userDetailsMapper;
@@ -46,7 +49,9 @@ public class AuthentificationManagerConfigurer extends WebSecurityConfigurerAdap
 
     @Override
     protected void configure(AuthenticationManagerBuilder authManagerBuilder) throws Exception {
-        authManagerBuilder.authenticationProvider(activeDirectoryLdapAuthenticationProvider()).userDetailsService(userDetailsService());
+        authManagerBuilder
+                .authenticationProvider(activeDirectoryLdapAuthenticationProvider())
+                .userDetailsService(userDetailsService());
     }
 
     @Bean
@@ -60,18 +65,18 @@ public class AuthentificationManagerConfigurer extends WebSecurityConfigurerAdap
                 new ActiveDirectoryLdapAuthenticationProvider(adDomain, ldapUrls, ldapBaseDn);
         provider.setConvertSubErrorCodesToExceptions(true);
         provider.setUseAuthenticationRequestCredentials(true);
-        //provider.setSearchFilter(ldapFilter);
         provider.setUserDetailsContextMapper(userDetailsMapper);
         return provider;
     }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http
-                .antMatcher("/**").authorizeRequests()
-                .antMatchers("/oauth/**")
-                .permitAll()
-                .anyRequest()
-                .authenticated();
+    @Bean
+    @ConfigurationProperties(prefix="ldap.source")
+    public LdapContextSource contextSource() {
+        return new LdapContextSource();
+    }
+
+    @Bean
+    public LdapTemplate ldapTemplate(ContextSource contextSource) {
+        return new LdapTemplate(contextSource);
     }
 }

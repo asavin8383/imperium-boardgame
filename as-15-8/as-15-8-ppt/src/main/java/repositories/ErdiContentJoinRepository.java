@@ -2,6 +2,7 @@ package repositories;
 
 import model.traffic.ErdiTrafficUnit;
 import model.traffic.ErdiTrafficUnitContent;
+import model.traffic.TrafficUnit;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -23,6 +24,8 @@ public interface ErdiContentJoinRepository extends JpaRepository<ErdiTrafficUnit
                     "from portal.erdi_traffic_units_content " +
                     "where traffic_unit_id = :trafficUnitId")
     Page<Long> findContentIdByTrafficUnit(@Param("trafficUnitId") Long trafficUnitId, Pageable pageable);
+
+    Page<ErdiTrafficUnitContent> findByTrafficUnit(TrafficUnit trafficUnit, Pageable pageable);
 
     @Query(nativeQuery = true, value =
             "select content.id " +

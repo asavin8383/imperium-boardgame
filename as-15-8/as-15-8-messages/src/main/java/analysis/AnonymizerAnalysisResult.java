@@ -12,7 +12,6 @@ import lombok.ToString;
 @NoArgsConstructor
 public class AnonymizerAnalysisResult extends AnalysisResult implements StubAnalysisResult {
 
-    private CheckUnitJobResult checkResult;
     private String resultNLP;
 
     private Integer httpStatus;

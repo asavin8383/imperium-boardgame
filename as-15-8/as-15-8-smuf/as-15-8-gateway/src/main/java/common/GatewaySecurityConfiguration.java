@@ -3,6 +3,7 @@ package common;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableOAuth2Client;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
@@ -22,10 +23,19 @@ public class GatewaySecurityConfiguration extends ResourceServerConfigurerAdapte
                 .httpBasic().disable()
                 .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/security/oauth/**", "/eureka/**")
-                .permitAll()
-                .antMatchers("/**")
-                .authenticated();
+                    .antMatchers("/security/oauth/**", "/eureka/**")
+                    .permitAll()
+                    .antMatchers(HttpMethod.GET,
+                            "/pod/erdi/single/**",
+                            "/pod/erdi/checkUnits/**",
+                            "/arrangements/checkUnits/**",
+                            "/ppt/arrangements/checkUnits/**",
+                            "/dispatcher/act/checkResult/**",
+                            "/dispatcher/act/screenshots/**").permitAll()
+                    .antMatchers(HttpMethod.POST,
+                            "/pod/act/**").permitAll()
+                    .antMatchers("/**")
+                    .authenticated();
     }
 
     @Bean

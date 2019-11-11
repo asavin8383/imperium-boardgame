@@ -35,7 +35,7 @@ public class Robot {
 
     @Column
     @JsonView(Views.Brief.class)
-    private Long orig_id;
+    private Long origId;
 
     @Column
     @JsonView(Views.Brief.class)

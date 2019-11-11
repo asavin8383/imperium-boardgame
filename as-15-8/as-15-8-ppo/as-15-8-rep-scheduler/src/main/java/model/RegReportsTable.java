@@ -19,8 +19,9 @@ import java.sql.Timestamp;
 @Table(schema = "dm", name = "v_api_reg_reports_table")
 public class RegReportsTable
 {
+    @Id long rowid;
     @Column long repTpId;
-    @Id long msr_prd_id;
+    @Column long msr_prd_id;
     @Column String msr_prd_tp;
     @Column String msr_prd_caption;
     @Column Timestamp finish_dttm;

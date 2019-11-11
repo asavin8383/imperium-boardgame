@@ -1,0 +1,23 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <include file="data/changelog/uploader.0001.violation.xml"/>
+    <include file="data/changelog/uploader.0002.addon_change.xml"/>
+    <include file="data/changelog/uploader.0003.parameters.xml"/>
+    <include file="data/changelog/uploader.0005.make_history.xml"/>
+    <include file="data/changelog/uploader.0006.PSList.xml"/>
+    <include file="data/changelog/uploader.0007.PASDList.xml"/>
+    <include file="data/changelog/uploader.0008.SubTypeList.xml"/>
+    <include file="data/changelog/uploader.0009.ContentVersion.xml"/>
+    <include file="data/changelog/uploader.0009.addon_change.xml"/>
+    <include file="data/changelog/uploader.0010.AddonVersion.xml"/>
+    <include file="data/changelog/uploader.0011.Mission.xml"/>
+    <include file="data/changelog/uploader.0012.Addon.xml"/>
+    <include file="data/changelog/pod.0001.mat_view_check_units.xml"/>
+    <include file="data/changelog/uploader.0013.OrigIdSeq.xml"/>
+    <include file="data/changelog/pod.0002.mat_view_content.xml"/>
+    <include file="data/changelog/pod.0003.mat_view_check_units.xml"/>
+
+</databaseChangeLog>

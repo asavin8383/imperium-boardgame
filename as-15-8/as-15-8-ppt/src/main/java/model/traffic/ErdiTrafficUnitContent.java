@@ -22,17 +22,18 @@ public class ErdiTrafficUnitContent implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
     @ToString.Include
-    @EqualsAndHashCode.Include
     private Long id;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "traffic_unit_id", referencedColumnName = "id")
     @ToString.Include
+    @EqualsAndHashCode.Include
     private ErdiTrafficUnit trafficUnit;
 
     // для единообразия json при сохранении трафика
     @JsonProperty("id")
     @ToString.Include
+    @EqualsAndHashCode.Include
     private Long contentId;
 
     public ErdiTrafficUnitContent() { }

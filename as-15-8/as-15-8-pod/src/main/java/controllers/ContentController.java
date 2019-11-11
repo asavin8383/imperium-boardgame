@@ -26,21 +26,22 @@ import services.InfoService;
 
 import java.text.ParseException;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-@PreAuthorize("hasAnyRole('ROLE_SYSTEM', 'ROLE_OPERATOR')")
+//@PreAuthorize("hasAnyRole('ROLE_SYSTEM', 'ROLE_OPERATOR')")
 @Slf4j
 public class ContentController {
 
     private final ContentService contentService;
     private final ErdiRestClient erdiRestClient;
     private final InfoService infoService;
-    private final ActService actService;
 
     @GetMapping(path = "/erdi")
+    @PreAuthorize("hasAnyRole('ROLE_OPERATOR')")
     public ResponseEntity<Page<ContentView>> getRelevantContent(
             @RequestParam(required = false) SortingDirection sortingDirection,
             @RequestParam(required = false) String sortingColumn,
@@ -60,24 +61,11 @@ public class ContentController {
         }
     }
 
-    @PostMapping(path = "/erdi")
-    public ResponseEntity<Page<ContentView>> getContentByIds(
-            @RequestParam(required = false) SortingDirection sortingDirection,
-            @RequestParam(required = false) String sortingColumn,
-            @RequestParam(defaultValue = "0") int pageNumber,
-            @RequestParam(defaultValue = "10") int pageSize,
-            @RequestBody List<Long> ids) {
-
-        if (!erdiRestClient.getIsLoading()) {
-            Pageable pageable = PageRequest.of(pageNumber, pageSize,
-                    SortingHelper.createSorting(sortingDirection, sortingColumn));
-            Page<ContentView> pageContent =
-                    contentService.getFormalErdiView(ids, pageable);
-            return new ResponseEntity<>(pageContent, HttpStatus.OK);
-        }
-        else {
-            return new ResponseEntity<>((Page<ContentView>) null, HttpStatus.ACCEPTED);
-        }
+    @GetMapping(path = "/erdi/single")
+    //@PreAuthorize("hasAnyRole('ROLE_OPERATOR')")
+    public Optional<ContentView> getContentById(
+            @RequestParam Long id) {
+        return contentService.getFormalErdiView(id);
     }
 
     @GetMapping(path = "/check_erdi", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -87,13 +75,8 @@ public class ContentController {
         return infoService.searchCheckUnit(url);
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
-    @PostMapping(path = "/create_act", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseStatusString createAct(@RequestBody ActRequest actRequest){
-        return actService.createAct(actRequest);
-    }
-
     @GetMapping(path = "/update_erdi")
+    @PreAuthorize("hasAnyRole('ROLE_OPERATOR')")
     public ResponseEntity<String> update() {
         if (!erdiRestClient.getIsLoading()){
             CompletableFuture.runAsync(erdiRestClient::startUpdateErdi);
@@ -103,21 +86,25 @@ public class ContentController {
     }
 
     @GetMapping("/get_update_date")
+    @PreAuthorize("hasAnyRole('ROLE_OPERATOR')")
     public String getUpdateDate() {
         return erdiRestClient.getUpdateDate();
     }
 
     @GetMapping("/get_state")
+    @PreAuthorize("hasAnyRole('ROLE_OPERATOR')")
     public PodState getState() throws ParseException {
         return erdiRestClient.getLoadState();
     }
 
     @GetMapping("/remove_content_version_to")
+    @PreAuthorize("hasAnyRole('ROLE_OPERATOR')")
     public void removeLastContentVersion(@RequestParam int version) {
         erdiRestClient.removeVersionTo(version);
     }
 
-    @GetMapping("/checkUnits")
+    @GetMapping("/erdi/checkUnits")
+    //@PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
     public List<CheckUnit> getCheckUnits(@RequestParam("id") Long contentId){
         return contentService.getActualCheckUnits(contentId).stream()
             .map(contentCheckUnit -> new CheckUnit(contentId, contentCheckUnit.getCheckUnitType(), contentCheckUnit.getCheckUnitValue()))

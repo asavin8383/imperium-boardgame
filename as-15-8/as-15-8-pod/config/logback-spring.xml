@@ -52,7 +52,7 @@
             </layout>
         </appender>
 
-        <logger name= "org.springframework.security" level="INFO" additivity="false">
+        <logger name= "org.springframework.security" level="DEBUG" additivity="false">
             <appender-ref ref="Console"/>
         </logger>
 

@@ -3,6 +3,7 @@ package model;
 import checkUnits.CheckUnitType;
 import enums.CheckUnitJobResult;
 import lombok.Data;
+import model.enums.UserResult;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
@@ -44,20 +45,12 @@ public class Result implements Serializable {
     @Column(name="result", nullable=false)
     private CheckUnitJobResult result;
 
-    @Lob
-    @Column(name="screenshot", columnDefinition="bytea")
-    @Type(type="org.hibernate.type.BinaryType")
-    private byte[] screenshot;
-
-    @Lob
-    @Column(name="etalon_screenshot", columnDefinition="bytea")
-    @Type(type="org.hibernate.type.BinaryType")
-    private byte[] etalonScreenshot;
-
     private LocalDateTime startDate;
     private LocalDateTime endDate;
 
-    private String userResult;
+    @Enumerated(EnumType.STRING)
+    private UserResult userResult;
+
     private String userDescription;
 
     public Result() {

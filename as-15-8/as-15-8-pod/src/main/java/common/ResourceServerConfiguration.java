@@ -1,6 +1,7 @@
 package common;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
@@ -15,6 +16,12 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
         http
             .antMatcher("/**")
                 .authorizeRequests()
+                    .antMatchers(HttpMethod.GET,
+                            "/erdi/single/**",
+                            "/erdi/checkUnits/**"
+                    ).permitAll()
+                    .antMatchers(HttpMethod.POST,
+                            "/act/**").permitAll()
                 .anyRequest().authenticated()
             .and()
                 .httpBasic().disable();

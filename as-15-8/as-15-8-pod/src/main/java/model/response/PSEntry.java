@@ -12,8 +12,6 @@ import java.util.Date;
 @NoArgsConstructor
 public class PSEntry
 {
-
-
     public Long Id;
     public String Name;
     public String Hostname;

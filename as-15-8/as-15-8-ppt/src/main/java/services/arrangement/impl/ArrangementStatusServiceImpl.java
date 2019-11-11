@@ -3,6 +3,7 @@ package services.arrangement.impl;
 import java.util.Comparator;
 import java.util.Optional;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,20 +25,12 @@ import services.arrangement.ArrangementStatusService;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class ArrangementStatusServiceImpl implements ArrangementStatusService {
 
-    private ArrangementRepo arrangementRepo;
-    private FormalTaskRepository formalTaskRepo;
-    private ArrangementViewRepo arrangementViewRepo;
-
-    @Autowired
-    public ArrangementStatusServiceImpl(ArrangementRepo arrangementRepo,
-                                        FormalTaskRepository formalTaskRepo,
-                                        ArrangementViewRepo arrangementViewRepo) {
-        this.arrangementRepo = arrangementRepo;
-        this.formalTaskRepo = formalTaskRepo;
-        this.arrangementViewRepo = arrangementViewRepo;
-    }
+    private final ArrangementRepo arrangementRepo;
+    private final FormalTaskRepository formalTaskRepo;
+    private final ArrangementViewRepo arrangementViewRepo;
 
     @Override
     @Transactional

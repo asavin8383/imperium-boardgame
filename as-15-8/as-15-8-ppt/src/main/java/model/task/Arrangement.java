@@ -5,9 +5,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import enums.ArrangementEvents;
 import enums.ExecutionStatus;
 import exceptions.AS_15_8_PPT_Exception;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import lombok.*;
 import model.Views;
 import model.result.ArrangementResult;
 import model.traffic.Traffic;
@@ -54,6 +52,7 @@ public class Arrangement implements Serializable {
 	@NotNull
 	@ToString.Include
 	@JsonView(Views.Brief.class)
+	@Getter
 	private ExecutionStatus status;
 	
 	/**Дата создания*/
@@ -113,7 +112,6 @@ public class Arrangement implements Serializable {
 	public Arrangement() {
 		this.creationDate = LocalDateTime.now();
 		this.status = ExecutionStatus.NEW;
-		this.stateMachine = new ArrangementStateMachine(this.status);
 	}
 
 	public Long getDurationInMinutes(){
@@ -125,9 +123,13 @@ public class Arrangement implements Serializable {
 	}
 
 	public void sendEvent(ArrangementEvents event){
+		this.stateMachine = new ArrangementStateMachine(this.status);
 		if(this.stateMachine.sendEvent(event)){
 			this.status = this.stateMachine.getCurrentStatus();
-			if (this.status.equals(ExecutionStatus.FINISHED)){
+			if (event.equals(ArrangementEvents.RUN) && this.status.equals(ExecutionStatus.FORMED)){
+				this.startTime = LocalTime.now();
+			}
+			if (this.status.equals(ExecutionStatus.FINISHED) || this.status.equals(ExecutionStatus.ERROR)){
 				this.endTime = LocalTime.now();
 			}
 		} else {
@@ -135,8 +137,4 @@ public class Arrangement implements Serializable {
 		}
 	}
 
-	private void setStatus(ExecutionStatus status){
-		this.status = status;
-		this.stateMachine = new ArrangementStateMachine(status);
-	}
 }

@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import repositories.RobotRepository;
 
@@ -26,5 +27,16 @@ public class AccessToolController {
     @JsonView(Views.AccessTool.class)
     public List<Robot> getAccessTools(){
         return robotRepository.findAll();
+    }
+
+    /**
+     * Получение робота по имени
+     * @param data
+     */
+    @PostMapping("access_tool_id")
+    @PreAuthorize("hasRole('ROLE_SYSTEM')")
+    @JsonView(Views.Brief.class)
+    public List<Robot> findByName(@RequestParam String name) {
+        return robotRepository.findByName(name);
     }
 }

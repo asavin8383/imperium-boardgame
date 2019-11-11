@@ -23,7 +23,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 import repositories.MissionRepository;
 import rest.ActCheckResult;
 import rest.ActRequest;
+import rest.ArrangementActData;
 import rest.ResponseStatusString;
+import webClient.DispatcherWebClient;
 
 import java.util.ArrayList;
 import java.util.Base64;
@@ -37,6 +39,7 @@ public class ActService {
 
     private final OAuth2RestTemplate restTemplate;
     private final MissionRepository missionRepository;
+    private final DispatcherWebClient dispatcherWebClient;
 
     @Value("${spring.rest_base_url}")
     private String baseUrl;
@@ -47,38 +50,44 @@ public class ActService {
 
     @SneakyThrows
     public ResponseStatusString createAct(ActRequest actRequest) {
-        log.info("Запрос на отправку акта в ППП: {}. Кол-во результатов: {}. Кол-во скриншотов: {}",
-                actRequest,
-                actRequest.checkResults.size(),
-                actRequest.topScreenShots.size());
+        log.info("Запрос на отправку акта в ППП: {}", actRequest);
 
-        AccessToolRobot robot = getAccessToolRobot(actRequest.arragementId);
-        AccessToolRobot robotPS = (robot.type == AccessToolRobotType.PS ? robot : new AccessToolRobot());
-        AccessToolRobot robotPASD = (robot.type == AccessToolRobotType.PASD ? robot : new AccessToolRobot());
+        ArrangementActData actData = getArrangementActData(actRequest.getArragementId());
+        AccessToolRobot robot = getAccessToolRobot(actData.getAccessTool());
+        AccessToolRobot robotPS = (robot.getType() == AccessToolRobotType.PS ? robot : new AccessToolRobot());
+        AccessToolRobot robotPASD = (robot.getType() == AccessToolRobotType.PASD ? robot : new AccessToolRobot());
 
         ActRequestPPP aReq = new ActRequestPPP();
-        aReq.MissionId = getExternalMissionIdByArrangementId(actRequest.arragementId);
-        aReq.ArragementId = actRequest.arragementId;
-        aReq.PSId = robotPS.orig_id;
-        aReq.PASDId = robotPASD.orig_id;
-        aReq.PSName = robotPS.origName;
-        aReq.PASDName = robotPASD.origName;
-        aReq.StartDate = actRequest.startDate;
-        aReq.EndDate = actRequest.endDate;
+        aReq.setMissionId(getExternalMissionId(actData.getMissionId()));
+        aReq.setArragementId(actRequest.getArragementId());
+        aReq.setPsId(robotPS.getOrigId());
+        aReq.setPasdId(robotPASD.getOrigId());
+        aReq.setPsName(robotPS.getOrigName());
+        aReq.setPasdName(robotPASD.getOrigName());
+        aReq.setStartDate(actRequest.getStartDate());
+        aReq.setEndDate(actRequest.getEndDate());
 
+        List<ActCheckResult> actCheckResults = dispatcherWebClient.getActCheckResults(actRequest.getArragementId());
+        log.info("Получены результаты выполнения мероприятия для акта: ID мероприятия {}, количество: {}",
+                actRequest.getArragementId(),
+                actCheckResults.size());
         List<ActCheckResultPPP> checkResults = new ArrayList<>();
-        for (ActCheckResult actCheckResult : actRequest.checkResults){
+        for (ActCheckResult actCheckResult : actCheckResults){
             ActCheckResultPPP achRes = new ActCheckResultPPP();
-            achRes.CheckResultId = actCheckResult.checkResultId;
-            achRes.CheckUnitType = actCheckResult.checkUnitType.name();
-            achRes.CheckUnitValue = actCheckResult.checkUnitValue;
-            achRes.Date = actCheckResult.date;
+            achRes.setCheckResultId(actCheckResult.getCheckResultId());
+            achRes.setCheckUnitType(actCheckResult.getCheckUnitType().name());
+            achRes.setCheckUnitValue(actCheckResult.getCheckUnitValue());
+            achRes.setDate(actCheckResult.getDate());
             checkResults.add(achRes);
         }
-        aReq.CheckResults = checkResults;
+        aReq.setCheckResults(checkResults);
 
+        List<String> screenshotes = dispatcherWebClient.getActScreenshotesBase64(actRequest.getArragementId());
+        log.info("Получены скриншоты выполнения мероприятия для акта: ID мероприятия {}, количество: {}",
+                actRequest.getArragementId(),
+                screenshotes.size());
         try{
-            return send(aReq, actRequest.topScreenShots);
+            return send(aReq, screenshotes);
         }
         catch (Exception e){
             e.printStackTrace();
@@ -109,7 +118,7 @@ public class ActService {
         body.add("jsonData", jsonDataEntity);
 
         for (int i = 0; i < screenShots.size(); i++){
-            String screen = screenShots.get(i);
+            String screen = screenShots.get(i).trim();
             byte[] bytes = StringUtils.isEmpty(screen) ? new byte[]{} : Base64.getDecoder().decode(screen);
             String name = "images["+i+"]";
 
@@ -141,7 +150,8 @@ public class ActService {
         responseStatus = responseStatus != null ? responseStatus :
                 new ResponseStatusString((code >= 200 && code < 300) || code == 302, null);
 
-        responseStatus.response = responseStatus.response != null ? responseStatus.response : httpStatus.toString();
+        responseStatus.setResponse(responseStatus.getResponse() != null ?
+                responseStatus.getResponse() : httpStatus.toString());
 
         log.info("Акт отправлен в ППП. Http-статус: {}, ответ: {}, данные акта: {}",
                 httpStatus.toString(),
@@ -151,23 +161,7 @@ public class ActService {
         return responseStatus;
     }
 
-
-    private String getAccessTool(Long arrangementId){
-        String accessTool = restTemplate.getForObject(
-                UriComponentsBuilder.fromHttpUrl(gatewayUrl).path("/ppt/arrangements/access_tool")
-                        .queryParam("arrangement_id", arrangementId)
-                        .build().toString(),
-                String.class);
-
-        if (StringUtils.isEmpty(accessTool))
-            throw new AS_15_8_POD_Exception("accessTool не найден по arrangement ID = " + arrangementId);
-
-        return accessTool;
-    }
-
-    private AccessToolRobot getAccessToolRobot(Long arrangementId){
-        String accessTool = getAccessTool(arrangementId);
-
+    private AccessToolRobot getAccessToolRobot(String accessTool){
         AccessToolRobot[] accessToolRobots = restTemplate.postForObject(
                 UriComponentsBuilder.fromHttpUrl(gatewayUrl).path("/config/access_tool_id")
                         .queryParam("name", accessTool)
@@ -181,22 +175,17 @@ public class ActService {
         return accessToolRobots[0];
     }
 
-    private Long getExternalMissionIdByArrangementId(Long arrangementId) {
-        Long missionId = getMissionId(arrangementId);
-        return getExternalMissionId(missionId);
-    }
-
-    private Long getMissionId(Long arrangementId){
-        Long missionId = restTemplate.getForObject(
-                UriComponentsBuilder.fromHttpUrl(gatewayUrl).path("/ppt/arrangements/mission_id")
+    private ArrangementActData getArrangementActData(Long arrangementId){
+        ArrangementActData arrangementActData = restTemplate.getForObject(
+                UriComponentsBuilder.fromHttpUrl(gatewayUrl).path("/ppt/arrangements/act_data")
                         .queryParam("arrangement_id", arrangementId)
                         .build().toString(),
-                Long.class);
+                ArrangementActData.class);
 
-        if (missionId == null)
-            throw new AS_15_8_POD_Exception("mission не найден по arrangement ID = " + arrangementId);
+        if (arrangementActData == null)
+            throw new AS_15_8_POD_Exception("Данные мероприятия не найдены по arrangement ID = " + arrangementId);
 
-        return missionId;
+        return arrangementActData;
     }
 
     private Long getExternalMissionId(Long id) {

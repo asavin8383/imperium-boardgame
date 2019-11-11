@@ -31,17 +31,6 @@ public class PSController
     public PSController(RobotRepository robotRepository) {this.robotRepository = robotRepository;}
 
     /**
-     * Получение робота по имени
-     * @param data
-     */
-    @PostMapping("access_tool_id")
-    @PreAuthorize("hasRole('ROLE_SYSTEM')")
-    @JsonView(Views.Brief.class)
-    List<Robot> findByName(@RequestParam String name) {
-        return robotRepository.findByOrigName(name);
-    }
-
-    /**
      * Прием новых записей о ПС
      * @param data
      */
@@ -63,8 +52,30 @@ public class PSController
         insert(data, RobotType.PASD);
     }
 
+    /**
+     * Уданеие ПС
+     * @param id
+     */
+    @DeleteMapping("ps")
+    @PreAuthorize("hasRole('ROLE_SYSTEM')")
+    void deletePS(@RequestParam Long id) {
+        log.info("Got request, trying to delete PS with id {}", id);
+        delete(id, RobotType.PS);
+    }
+
+    /**
+     * Удаление ПАСД
+     * @param id
+     */
+    @DeleteMapping("pasd")
+    @PreAuthorize("hasRole('ROLE_SYSTEM')")
+    void deletePASD(@RequestParam Long id) {
+        log.info("Got request, trying to delete PASD with id {}", id);
+        delete(id, RobotType.PASD);
+    }
+
     private void insert(@RequestBody List<PS> data, RobotType robotType) {
-        Set<Long> all = robotRepository.findAll().stream().map(Robot::getOrig_id).collect(Collectors.toSet());
+        Set<Long> all = robotRepository.findAll().stream().map(Robot::getOrigId).collect(Collectors.toSet());
         log.debug("{} robot records already exists");
         int newCnt=0;
         for (PS ps : data) {
@@ -72,7 +83,7 @@ public class PSController
             if (!exists) {
                 log.debug("new robot record arrived: {}", ps);
                 Robot newRobot = new Robot();
-                newRobot.setOrig_id(ps.getId());
+                newRobot.setOrigId(ps.getId());
                 newRobot.setOrigName(ps.getName());
                 newRobot.setName(ps.getName() + "-" + ps.getId());
                 newRobot.setType(robotType);
@@ -81,6 +92,10 @@ public class PSController
             }
         }
         log.info("{} new robot records inserted", newCnt);
+    }
+
+    private void delete(Long id, RobotType robotType) {
+        robotRepository.deleteByOrigIdAndType(id, robotType);
     }
 
 }

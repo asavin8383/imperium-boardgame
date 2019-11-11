@@ -1,5 +1,6 @@
 package services.impl;
 
+import model.Result;
 import org.springframework.stereotype.Service;
 
 import analysis.PS_AnalysisJobResult;
@@ -16,7 +17,7 @@ import services.AnalysisResultService;
 public class PS_AnalysisResultService implements AnalysisResultService<PS_AnalysisJobResult> {
 	
 	@Override
-	public CheckUnitJobResult processResult(PS_AnalysisJobResult result) {
-		return result.getCheckResult();
+	public void processResult(Result result, PS_AnalysisJobResult analysisResult) {
+
 	}
 }

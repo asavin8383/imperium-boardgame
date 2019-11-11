@@ -84,11 +84,9 @@ public class RestTest
     @Test
     public void testCreateAct(){
         ActRequest actRequest = new ActRequest();
-        actRequest.arragementId = 338L;
-        actRequest.checkResults = new ArrayList<ActCheckResult>();
-        actRequest.startDate = "";
-        actRequest.endDate = "";
-        actRequest.topScreenShots = new ArrayList<>();
+        actRequest.setArragementId(338L);
+        actRequest.setStartDate("");
+        actRequest.setEndDate("");
 
         actService.createAct(actRequest);
     }

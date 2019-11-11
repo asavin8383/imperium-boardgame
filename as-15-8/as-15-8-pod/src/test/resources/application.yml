@@ -11,7 +11,7 @@ spring:
     driver-class-name: org.postgresql.Driver
   liquibase:
     enabled: false
-    change-log: classpath:/data/changelog/db.changelog.master.xml
+    change-log: classpath:/data/db.changelog.master.xml
 #  rest_base_url: "http://localhost:8080/"
   rest_base_url: "http://bo.esoftproject.ru/register-vpn/api/as15-8"
   jpa:

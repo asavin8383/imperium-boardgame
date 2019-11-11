@@ -36,14 +36,7 @@
             <appender-ref ref="rootRollingFile" />
             <appender-ref ref="jsonConsoleAppender" />
         </root>
-        <logger name="org.hibernate.SQL" level="DEBUG" additivity="false">
-            <appender-ref ref="rootRollingFile" />
-            <appender-ref ref="jsonConsoleAppender" />
-        </logger>
-        <logger name="org.springframework.jdbc.core.JdbcTemplate" level="DEBUG">
-            <appender-ref ref="rootRollingFile" />
-            <appender-ref ref="jsonConsoleAppender" />
-        </logger>
+
     </springProfile>
 
 
@@ -56,8 +49,8 @@
             </layout>
         </appender>
 
-        <logger name= "org.springframework" level="INFO" additivity="false">
-            <appender-ref ref="Console"/>
+        <logger name="org.hibernate.SQL" level="INFO" additivity="false">
+            <appender-ref ref="Console" />
         </logger>
 
         <root level="INFO" additivity="false">

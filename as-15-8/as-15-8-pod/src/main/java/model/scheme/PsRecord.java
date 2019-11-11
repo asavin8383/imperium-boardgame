@@ -56,6 +56,14 @@ public class PsRecord implements Serializable {
     private Date cDate;
 
     @Transient
-    private String source = "ППП Реестр анонимайзеров";
+    private String source = "";
+
+    @PostLoad
+    private void postLoad() {
+        if (origId < 0)
+            source = "АС 15.8";
+        else
+            source = "ППП Реестр анонимайзеров";
+    }
 
 }

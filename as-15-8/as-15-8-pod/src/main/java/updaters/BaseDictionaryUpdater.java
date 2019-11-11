@@ -128,4 +128,20 @@ public abstract class BaseDictionaryUpdater<T>
         log.debug("{} new records actualized", rc);
 
     }
+
+    /**
+     * Метод для отправки актуальной записи в историю
+     * @param orig_id
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void archiveRecordByOrigId(Long orig_id) {
+        String TABLE= getTable();
+        Date now = new Date();
+        int rc = 0;
+
+        String sql = "update " + TABLE + " set eff_dt = ? where orig_id = ? and eff_dt = '3000-01-01'";
+        log.debug(sql);
+        rc = jdbcTemplate.update(sql, now, orig_id);
+        log.debug("{} record records archived", rc);
+    }
 }

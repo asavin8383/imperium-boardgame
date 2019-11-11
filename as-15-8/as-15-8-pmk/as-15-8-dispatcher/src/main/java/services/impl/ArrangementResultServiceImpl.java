@@ -8,14 +8,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Result;
 import model.DetailResult;
+import model.ResultScreenShot;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import repositories.ResultRepo;
 import repositories.DetailResultRepo;
+import repositories.ResultScreenShotRepo;
 import services.AnalysisResultService;
 import services.AnalysisResultServiceFactory;
 import services.ArrangementResultService;
 
+import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 
@@ -25,18 +28,24 @@ import java.util.Arrays;
 public class ArrangementResultServiceImpl implements ArrangementResultService {
 
     private final ResultRepo resultRepo;
+    private final ResultScreenShotRepo resultScreenShotRepo;
     private final DetailResultRepo detailResultRepo;
 
 
     @Override
-    public Result processJobResult(AnalysisResult result) {
-        Result job = findJobByID(result.getJobID());
-        AnalysisResultService<? super AnalysisResult> service = AnalysisResultServiceFactory.getService(result.getClass());
-        job.setResult(service.processResult(result));
-        job.setScreenshot(result.getScreenshot());
-        job.setEtalonScreenshot(result.getEtalonScreenshot());
-        job.setEndDate(LocalDateTime.now());
-        return resultRepo.save(job);
+    @Transactional
+    public Result processJobResult(AnalysisResult analysisResult) {
+        Result result = findJobByID(analysisResult.getJobID());
+        AnalysisResultService<? super AnalysisResult> service = AnalysisResultServiceFactory.getService(analysisResult.getClass());
+        result.setEndDate(LocalDateTime.now());
+        result.setResult(analysisResult.getCheckResult());
+        resultRepo.save(result);
+        ResultScreenShot resultScreenShot = resultScreenShotRepo.getOne(analysisResult.getJobID());
+        resultScreenShot.setScreenshot(analysisResult.getScreenshot());
+        resultScreenShot.setEtalonScreenshot(analysisResult.getEtalonScreenshot());
+        resultScreenShotRepo.save(resultScreenShot);
+        service.processResult(result, analysisResult);
+        return result;
     }
 
     @Override
@@ -51,14 +60,15 @@ public class ArrangementResultServiceImpl implements ArrangementResultService {
     }
 
     @Override
+    @Transactional
     public Result updateJobStatus(Long jobID, CheckUnitJobResult status, String description) {
-        Result job = findJobByID(jobID);
-        job.setResult(status);
-        job.setEndDate(LocalDateTime.now());
-        resultRepo.save(job);
+        Result result = findJobByID(jobID);
+        result.setResult(status);
+        result.setEndDate(LocalDateTime.now());
+        resultRepo.save(result);
         if(status == CheckUnitJobResult.INTERNAL_ERROR)
-            saveErrorToDetailResults(jobID, description);
-        return job;
+            saveErrorToDetailResults(result, description);
+        return result;
     }
 
     private Result findJobByID(Long jobID) {
@@ -68,10 +78,9 @@ public class ArrangementResultServiceImpl implements ArrangementResultService {
                 );
     }
 
-    private void saveErrorToDetailResults(Long jobID, String exText) {
+    @Transactional
+    void saveErrorToDetailResults(Result result, String exText) {
         DetailResult detailResult = new DetailResult();
-        Result result = resultRepo.findById(jobID)
-                .orElseThrow(() -> AS_15_8_DispatcherException.logAndGet(log, String.format("Результат c ИД %d не найден в БД", jobID)));
         detailResult.setResult(result);
         detailResult.setResponseError(false);
         detailResult.setStubScoreInfo(exText);
