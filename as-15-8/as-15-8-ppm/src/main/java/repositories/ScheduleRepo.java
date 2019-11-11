@@ -9,6 +9,7 @@ import java.util.List;
 
 public interface ScheduleRepo extends JpaRepository<Schedule, Long> {
 
-    List<Schedule> findAllByPlannedDateAndStatus(LocalDate plannedDate, ScheduleStatus status);
+    List<Schedule> findAllByPlannedDate(LocalDate plannedDate);
 
+    List<Schedule> findAllByPlannedDateAndStatus(LocalDate plannedDate, ScheduleStatus status);
 }
