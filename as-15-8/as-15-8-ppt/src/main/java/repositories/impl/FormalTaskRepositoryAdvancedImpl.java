@@ -52,16 +52,4 @@ public class FormalTaskRepositoryAdvancedImpl implements FormalTaskRepositoryAdv
 	    
 	}
 
-	@Override
-	public List<?> getFormalTasksGroupingByStatus(){
-		CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
-		CriteriaQuery<Object[]> select = criteriaBuilder.createQuery(Object[].class);
-		Root<FormalTask> fromFormalTask = select.from(FormalTask.class);
-
-		select.multiselect(fromFormalTask.get(FormalTask_.STATUS), criteriaBuilder.count(fromFormalTask));
-		select.groupBy(fromFormalTask.get(FormalTask_.STATUS));
-
-		return em.createQuery(select).getResultList();
-	}
-
 }
