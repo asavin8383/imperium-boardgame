@@ -17,13 +17,7 @@ RUN rm -rf /var/cache/apk/* && \
     rm -rf /tmp/*
 
 #Download Birt Runtime
-RUN wget "http://ftp-stud.fht-esslingen.de/pub/Mirrors/eclipse/birt/downloads/drops/R-R1-4.8.0-201806261756/birt-runtime-4.8.0-20180626.zip" -O /tmp/birt-runtime.zip && \
-    mkdir "/tmp/birt-runtime" && \
-    unzip "/tmp/birt-runtime.zip" -d /tmp/birt-runtime && \
-    # mkdir "$WEBAPPS_PATH" && \
-    ls /tmp/birt-runtime/ && \
-    mv "/tmp/birt-runtime/WebViewerExample/" "$WEBAPPS_PATH/$BIRT_APP" && \
-    rm -rf /tmp/*
+    COPY "birt-runtime/WebViewerExample/" "$WEBAPPS_PATH/$BIRT_APP"
 
 #Install MSSQL, PostgreSQL and MySql drivers
 RUN ls "$WEBAPPS_PATH/$BIRT_APP" && \
@@ -33,7 +27,7 @@ RUN ls "$WEBAPPS_PATH/$BIRT_APP" && \
     tar -xf "/tmp/sqljdbc_6.0.8112.200_enu.tar.gz" -C "$WEBAPPS_PATH/$BIRT_APP/WEB-INF/lib/" --strip-components=3 sqljdbc_6.0/enu/jre8/sqljdbc42.jar && \
     tar -xf "/tmp/mysql-connector-java-5.1.46.tar.gz" -C "$WEBAPPS_PATH/$BIRT_APP/WEB-INF/lib/" --strip-components=1 mysql-connector-java-5.1.46/mysql-connector-java-5.1.46-bin.jar && \
     rm -rf /tmp/*
-
+COPY *.rptdesign "$WEBAPPS_PATH/$BIRT_APP/"
 # #Create the reports folder
 # RUN mkdir "$BIRT_VIEWER_WORKING_FOLDER" && \
 #     mkdir "$BIRT_VIEWER_WORKING_FOLDER/samples"
