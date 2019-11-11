@@ -16,10 +16,12 @@ import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import repositories.FormalTaskRepository;
+import rest.MissionData;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -104,16 +106,45 @@ public class FormalTaskController {
 				.orElseThrow(() -> new AS_15_8_PPT_Exception("Error deleting formal task! Formal task was not found by id: " + id));
 	}
 
+	@PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
+	@PostMapping(path = "/create_with_mission")
+	public void postFormalTask(@RequestBody MissionData missionData, Principal principal) {
+		log.info("Запрос создания FormalTask по поручению: {}", missionData);
+		if (missionData.getId() == null || missionData.getName() == null)
+			throw new AS_15_8_PPT_Exception("Не заданы все требуемые поля: id, name");
+
+		createFormalTaskByMission(missionData, principal.getName());
+	}
+
 	private FormalTask replaceFields(FormalTask newTask, FormalTask storedTask){
 		storedTask.setTitle(newTask.getTitle());
 		storedTask.setModificationDate(LocalDateTime.now());
 		storedTask.setAgreed(newTask.isAgreed());
 		storedTask.setAuthor(newTask.getAuthor());
 		storedTask.setDeadlineDate(newTask.getDeadlineDate());
-		storedTask.setFgisId(newTask.getFgisId());
 		storedTask.setPriority(newTask.getPriority());
 		storedTask.setOperator(newTask.getOperator());
 		return storedTask;
+	}
+
+	private FormalTask createFormalTaskByMission(MissionData missionData, String operator){
+		Long cnt = formalTaskRepo.countByMissionId(missionData.getId());
+		if (cnt > 0) {
+			log.info("FormalTask не создан. Причина: missionId = {} уже существует", missionData.getId());
+			return null;
+		}
+
+		FormalTask formalTask = new FormalTask();
+		formalTask.setTitle(missionData.getName());
+		formalTask.setMissionId(missionData.getId());
+		formalTask.setCreationDate(LocalDateTime.now());
+		formalTask.setAgreed(true);
+		formalTask.setStatus(ExecutionStatus.NEW);
+		formalTask.setOperator(operator);
+		FormalTask res = formalTaskRepo.save(formalTask);
+
+		log.info("Создан FormalTask: {}", res);
+		return res;
 	}
 
 }

@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -25,4 +26,8 @@ public interface FormalTaskRepository extends JpaRepository<FormalTask, Long>, F
 			"GROUP BY " +
 			"    f.status")
 	List<ExecutionStatusStatistics> findSummaryByStatus();
+
+
+	@Query("SELECT COUNT(f) FROM FormalTask f WHERE f.missionId=:missionId")
+	Long countByMissionId(@Param("missionId") Long missionId);
 }

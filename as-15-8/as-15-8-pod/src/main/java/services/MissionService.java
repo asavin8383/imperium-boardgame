@@ -12,18 +12,18 @@ import model.response.RestResponseStatusString;
 import model.scheme.Mission;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.lob.DefaultLobHandler;
 import org.springframework.jdbc.support.lob.LobHandler;
+import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import repositories.MissionRepository;
+import rest.MissionData;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
@@ -40,12 +40,16 @@ import java.util.List;
 @Slf4j
 public class MissionService {
 
-    private final RestTemplate restTemplate;
+    private final OAuth2RestTemplate oAuth2RestTemplate;
+    private final RestTemplate anonymizerRestTemplate;
     private final MissionRepository missionRepository;
     private final JdbcTemplate jdbcTemplate;
 
     @Value("${spring.rest_base_url}")
     private String baseUrl;
+
+    @Value("${gateway.url}")
+    private String gatewayUrl;
 
     @SneakyThrows
     public void fillMissions() {
@@ -79,11 +83,26 @@ public class MissionService {
         }
         else {
             log.info("Добавляем поручение в БД: " + missionEntry.toString());
-            missionRepository.save(createMission(missionEntry));
+            mission = missionRepository.save(createMission(missionEntry));
         }
+
+        sendMissionDataToPPT(mission);
+
         if (confirm){
             confirmMission(missionEntry);
         }
+    }
+
+    private void sendMissionDataToPPT(Mission mission){
+        MissionData missionData = new MissionData(mission.getId(), "Поручение " + mission.getDocNum());
+        log.info("Отправка поручения в PPT: {}" + missionData);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<MissionData> entity = new HttpEntity<>(missionData, headers);
+        oAuth2RestTemplate.postForObject(
+                UriComponentsBuilder.fromHttpUrl(gatewayUrl).path("/ppt/formal_tasks/create_with_mission").build().toString(),
+                entity, ResponseEntity.class);
     }
 
     public ResponseEntity<byte[]> receivePdfFromDB(String id){
@@ -119,7 +138,7 @@ public class MissionService {
 
         log.info("----> getting missions from service: " + uriComponents.toString());
 
-        ResponseEntity<byte[]> entity = restTemplate.exchange(
+        ResponseEntity<byte[]> entity = anonymizerRestTemplate.exchange(
                 uriComponents.toString(),
                 HttpMethod.GET,
                 null,
@@ -151,7 +170,7 @@ public class MissionService {
 
         log.info("----> confirmAcceptMission to service: " + uriComponents.toString());
 
-        ResponseEntity<RestResponseStatusString> entity = restTemplate.exchange(
+        ResponseEntity<RestResponseStatusString> entity = anonymizerRestTemplate.exchange(
                 uriComponents.toString(),
                 HttpMethod.GET,
                 null,
