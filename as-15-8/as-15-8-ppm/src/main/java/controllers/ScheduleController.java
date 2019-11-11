@@ -55,10 +55,16 @@ public class ScheduleController {
     }
 
     @GetMapping("/all")
-    @JsonView(Views.Full.class)
-    public List<Schedule> getScheduleList(
-            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate plannedDate){
-        return scheduleRepo.findAllByPlannedDate(plannedDate);
+    @JsonView(Views.Brief.class)
+    public Page<Schedule> getScheduleList(
+            @RequestParam(value = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate plannedDate,
+            @RequestParam(required = false) SortingDirection sortingDirection,
+            @RequestParam(required = false) String sortingColumn,
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize){
+        PageRequest page = PageRequest.of(
+                pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
+        return scheduleRepo.findAllByPlannedDate(plannedDate == null ? LocalDate.now() : plannedDate, page);
     }
 
     @GetMapping

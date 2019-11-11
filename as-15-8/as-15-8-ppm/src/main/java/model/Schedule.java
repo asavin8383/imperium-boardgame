@@ -28,21 +28,21 @@ public class Schedule {
     private Long id;
 
     @NotNull
-    @JsonView(Views.Full.class)
+    @JsonView(Views.Brief.class)
     @ToString.Include
     private LocalDate plannedDate;
 
     @NotNull
-    @JsonView(Views.Full.class)
+    @JsonView(Views.Brief.class)
     private LocalDateTime creationDate;
 
     @NotNull
-    @JsonView(Views.Full.class)
+    @JsonView(Views.Brief.class)
     private String author;
 
     @Enumerated(EnumType.STRING)
     @NotNull
-    @JsonView(Views.Full.class)
+    @JsonView(Views.Brief.class)
     @ToString.Include
     private ScheduleStatus status;
 
