@@ -56,7 +56,8 @@ public class ScheduleController {
 
     @GetMapping("/all")
     @JsonView(Views.Full.class)
-    public List<Schedule> getScheduleList(@RequestParam("date") LocalDate plannedDate){
+    public List<Schedule> getScheduleList(
+            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate plannedDate){
         return scheduleRepo.findAllByPlannedDate(plannedDate);
     }
 
