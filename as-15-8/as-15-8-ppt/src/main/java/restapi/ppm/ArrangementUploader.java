@@ -1,4 +1,4 @@
-package events.producers.rest.ppm;
+package restapi.ppm;
 
 import exceptions.AS_15_8_PPT_Exception;
 import lombok.RequiredArgsConstructor;

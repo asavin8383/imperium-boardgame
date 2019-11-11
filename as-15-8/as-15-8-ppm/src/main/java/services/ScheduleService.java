@@ -4,7 +4,7 @@ import arrangement.ArrangementStatusNotification;
 import common.SchedulerException;
 import common.SchedulerProperties;
 import enums.ArrangementEvents;
-import events.producers.rest.ArrangementStatusUploader;
+import restapi.ArrangementStatusUploader;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;

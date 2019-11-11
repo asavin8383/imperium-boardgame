@@ -1,4 +1,4 @@
-package events.producers.rest.pod;
+package restapi.pod;
 
 import checkUnits.CheckUnit;
 import exceptions.AS_15_8_PPT_Exception;

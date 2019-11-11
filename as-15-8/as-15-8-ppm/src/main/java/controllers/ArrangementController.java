@@ -7,7 +7,7 @@ import common.SchedulerProperties;
 import enums.AccessToolUnit;
 import enums.ArrangementEvents;
 import enums.Protocol;
-import events.producers.rest.ArrangementStatusUploader;
+import restapi.ArrangementStatusUploader;
 import webClients.PptWebClient;
 import exceptions.AS_15_8_PPM_Exception;
 import lombok.RequiredArgsConstructor;

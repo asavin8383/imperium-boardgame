@@ -1,9 +1,10 @@
 package controllers;
 
 import controllers.helpers.SortingHelper;
+import enums.ArrangementEvents;
 import enums.ExecutionStatus;
 import enums.SortingDirection;
-import events.producers.rest.ppm.ArrangementUploader;
+import restapi.ppm.ArrangementUploader;
 import exceptions.AS_15_8_PPT_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -97,7 +98,7 @@ public class ArrangementController {
     }
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Arrangement replaceFormalTask(@RequestBody Arrangement newArrangement, @RequestParam("id") Arrangement arrangement) {
+    public Arrangement update(@RequestBody Arrangement newArrangement, @RequestParam("id") Arrangement arrangement) {
         return arrangementRepo.save(replaceFields(newArrangement, arrangement));
     }
 

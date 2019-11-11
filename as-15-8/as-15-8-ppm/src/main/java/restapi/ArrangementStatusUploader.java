@@ -1,4 +1,4 @@
-package events.producers.rest;
+package restapi;
 
 import arrangement.ArrangementStatusNotification;
 import exceptions.AS_15_8_PPM_Exception;

@@ -1,4 +1,4 @@
-package events.handlers.kafka;
+package events.handlers;
 
 import analysis.AnalysisResult;
 import arrangement.ArrangementStatusNotification;
@@ -6,7 +6,7 @@ import enums.ArrangementEvents;
 import enums.CheckUnitJobResult;
 import enums.ExecutionStatus;
 import events.DispatcherChannels;
-import events.producers.rest.ArrangementStatusProducer;
+import restapi.ArrangementStatusProducer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Result;

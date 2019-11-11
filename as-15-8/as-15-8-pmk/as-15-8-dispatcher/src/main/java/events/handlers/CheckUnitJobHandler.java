@@ -1,4 +1,4 @@
-package events.handlers.kafka;
+package events.handlers;
 
 import checkUnits.CheckUnitJob;
 import events.DispatcherChannels;

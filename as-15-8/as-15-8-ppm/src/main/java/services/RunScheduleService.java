@@ -5,7 +5,7 @@ import checkUnits.CheckUnit;
 import checkUnits.CheckUnitJob;
 import enums.ArrangementEvents;
 import events.producers.kafka.CheckUnitJobProducer;
-import events.producers.rest.ArrangementStatusUploader;
+import restapi.ArrangementStatusUploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.ScheduleCheckUnit;
