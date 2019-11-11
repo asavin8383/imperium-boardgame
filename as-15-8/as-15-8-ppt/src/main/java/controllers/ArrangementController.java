@@ -9,7 +9,7 @@ import exceptions.AS_15_8_PPT_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.task.Arrangement;
-import model.task.ArrangementStatistics;
+import model.task.ExecutionStatusStatistics;
 import model.task.FormalTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -62,7 +62,7 @@ public class ArrangementController {
     }
 
     @GetMapping(path="/summary")
-    public List<ArrangementStatistics> getSummary(){
+    public List<ExecutionStatusStatistics> getSummary(){
         return arrangementRepo.findSummaryByStatus();
     }
 

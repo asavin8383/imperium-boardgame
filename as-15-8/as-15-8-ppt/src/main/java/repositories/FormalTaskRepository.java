@@ -1,7 +1,7 @@
 package repositories;
 
 import enums.ExecutionStatus;
-import model.task.ArrangementStatistics;
+import model.task.ExecutionStatusStatistics;
 import model.task.FormalTask;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,10 +19,10 @@ public interface FormalTaskRepository extends JpaRepository<FormalTask, Long>, F
 	Page<FormalTask> findAllByStatusIn(List<ExecutionStatus> statuses, Pageable pageable);
 
 	@Query("SELECT " +
-			"    new model.task.ArrangementStatistics(f.status, COUNT(f)) " +
+			"    new model.task.ExecutionStatusStatistics(f.status, COUNT(f)) " +
 			"FROM " +
 			"    FormalTask f " +
 			"GROUP BY " +
 			"    f.status")
-	List<ArrangementStatistics> findSummaryByStatus();
+	List<ExecutionStatusStatistics> findSummaryByStatus();
 }

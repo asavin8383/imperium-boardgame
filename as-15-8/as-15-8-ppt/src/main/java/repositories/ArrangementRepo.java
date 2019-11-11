@@ -1,9 +1,8 @@
 package repositories;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import enums.ExecutionStatus;
 import model.task.Arrangement;
-import model.task.ArrangementStatistics;
+import model.task.ExecutionStatusStatistics;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -31,12 +30,12 @@ public interface ArrangementRepo extends JpaRepository<Arrangement, Long>, Arran
     Page<Arrangement> findAllByStatusIn(List<ExecutionStatus> statuses, Pageable pageable);
 
     @Query("SELECT " +
-            "    new model.task.ArrangementStatistics(a.status, COUNT(a)) " +
+            "    new model.task.ExecutionStatusStatistics(a.status, COUNT(a)) " +
             "FROM " +
             "    Arrangement a " +
             "GROUP BY " +
             "    a.status")
-    List<ArrangementStatistics> findSummaryByStatus();
+    List<ExecutionStatusStatistics> findSummaryByStatus();
 
     @Query(
             "SELECT f.contentId from Arrangement a " +

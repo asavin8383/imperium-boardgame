@@ -10,7 +10,7 @@ import lombok.Data;
  */
 @Data
 @AllArgsConstructor
-public class ArrangementStatistics {
+public class ExecutionStatusStatistics {
     private ExecutionStatus executionStatus;
     private Long number;
 }
