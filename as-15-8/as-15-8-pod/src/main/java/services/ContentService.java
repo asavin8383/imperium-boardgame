@@ -3,6 +3,7 @@ package services;
 import lombok.RequiredArgsConstructor;
 import model.actualViews.ContentCheckUnit;
 import model.projection.ContentView;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
@@ -28,7 +29,10 @@ public class ContentService {
 
     @Cacheable
     public Page<ContentView> getFormalErdiView(String query, Pageable pageable) {
-        return viewRepository.findAllByQuery(query, pageable);
+        if(Strings.isNotEmpty(query))
+            return viewRepository.findAllByQuery(query, pageable);
+        else
+            return viewRepository.findAll(pageable);
     }
 
     @Cacheable

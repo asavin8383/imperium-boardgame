@@ -25,6 +25,9 @@ public class CheckUnitTypeValueConverter {
         else if (resourceType instanceof TypeIpSubnet){
             return CheckUnitType.IP_V4_SUBNET;
         }
+        else if (resourceType instanceof TypeIp6Subnet){
+            return CheckUnitType.IP_V6_SUBNET;
+        }
         else if (resourceType instanceof TypeUrl){
             return CheckUnitType.URL;
         }

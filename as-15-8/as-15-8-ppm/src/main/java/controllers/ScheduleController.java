@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import repositories.ScheduleRepo;
 import services.ArrangementService;
 import services.ScheduleService;
 
@@ -39,6 +40,7 @@ public class ScheduleController {
 
     private final ArrangementService arrangementService;
     private final ScheduleService scheduleService;
+    private final ScheduleRepo scheduleRepo;
 
     @GetMapping(path = "/arrangements")
     public Page<Arrangement> getArrangementsForSchedule(
@@ -50,6 +52,12 @@ public class ScheduleController {
         PageRequest page = PageRequest.of(
                 pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
         return arrangementService.findPage(page);
+    }
+
+    @GetMapping("/all")
+    @JsonView(Views.Full.class)
+    public List<Schedule> getScheduleList(@RequestParam("date") LocalDate plannedDate){
+        return scheduleRepo.findAllByPlannedDate(plannedDate);
     }
 
     @GetMapping
