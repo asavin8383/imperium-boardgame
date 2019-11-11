@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface ScheduleRepo extends JpaRepository<Schedule, Long> {
 
-    Page<Schedule> findAllByPlannedDate(LocalDate plannedDate, Pageable pageable);
+    List<Schedule> findAllByPlannedDate(LocalDate plannedDate);
 
     List<Schedule> findAllByPlannedDateAndStatus(LocalDate plannedDate, ScheduleStatus status);
 }
