@@ -17,6 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import repositories.DetailResultRepo;
 import repositories.ResultRepo;
 import repositories.ResultScreenShotRepo;
 
@@ -35,6 +36,7 @@ import java.util.Map;
 public class ResultsController {
 
     private final ResultRepo resultRepo;
+    private final DetailResultRepo detailResultRepo;
     private final ResultScreenShotRepo resultScreenShotRepo;
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -67,8 +69,8 @@ public class ResultsController {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     @GetMapping(path = "/details")
-    public DetailResult getDetails(@RequestParam("id") DetailResult detailResult){
-        return detailResult;
+    public DetailResult getDetails(@RequestParam Long id){
+        return detailResultRepo.getOne(id);
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")

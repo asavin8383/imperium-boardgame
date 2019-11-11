@@ -64,6 +64,7 @@ spring:
             non_contextual_creation: true
         format_sql: true
     databasePlatform: org.hibernate.dialect.PostgreSQL9Dialect
+  jackson.serialization.FAIL_ON_EMPTY_BEANS: false
 
 ---
 
