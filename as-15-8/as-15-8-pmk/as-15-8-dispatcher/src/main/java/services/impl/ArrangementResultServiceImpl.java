@@ -78,8 +78,7 @@ public class ArrangementResultServiceImpl implements ArrangementResultService {
                 );
     }
 
-    @Transactional
-    void saveErrorToDetailResults(Result result, String exText) {
+    private void saveErrorToDetailResults(Result result, String exText) {
         DetailResult detailResult = new DetailResult();
         detailResult.setResult(result);
         detailResult.setResponseError(false);

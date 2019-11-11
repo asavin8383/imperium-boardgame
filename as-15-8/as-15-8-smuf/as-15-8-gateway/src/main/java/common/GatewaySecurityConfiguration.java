@@ -31,7 +31,9 @@ public class GatewaySecurityConfiguration extends ResourceServerConfigurerAdapte
                             "/arrangements/checkUnits/**",
                             "/ppt/arrangements/checkUnits/**",
                             "/dispatcher/act/checkResult/**",
-                            "/dispatcher/act/screenshots/**").permitAll()
+                            "/dispatcher/act/screenshots/**",
+                            "/dispatcher/results/screenshot/**",
+                            "/dispatcher/results/etalon_screenshot/**").permitAll()
                     .antMatchers(HttpMethod.POST,
                             "/pod/act/**").permitAll()
                     .antMatchers("/**")
