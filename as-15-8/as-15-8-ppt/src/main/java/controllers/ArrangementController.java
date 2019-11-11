@@ -138,6 +138,7 @@ public class ArrangementController {
         arrangement.setTitle(newArrangement.getTitle());
         arrangement.setPlannedStartTime(newArrangement.getPlannedStartTime());
         arrangement.setPlannedEndTime(newArrangement.getPlannedEndTime());
+        arrangement.setTraffic(newArrangement.getTraffic());
         return arrangement;
     }
 
