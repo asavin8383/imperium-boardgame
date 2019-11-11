@@ -94,11 +94,6 @@ public class FormalTaskController {
 		return formalTaskRepo.findAllByStatusIn(statuses, page);
 	}
 
-	@GetMapping(path="/summary")
-	public List<ExecutionStatusStatistics> getSummary(){
-		return formalTaskRepo.findSummaryByStatus();
-	}
-
 	@DeleteMapping
 	public Long deleteFormalTask(@RequestParam Long id) {
 		return formalTaskRepo.findById(id)
