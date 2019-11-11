@@ -54,7 +54,7 @@ public class ScheduleController {
         return arrangementService.findPage(page);
     }
 
-    @GetMapping
+    @GetMapping("/all")
     @JsonView(Views.Full.class)
     public List<Schedule> getScheduleList(@RequestParam("date") LocalDate plannedDate){
         return scheduleRepo.findAllByPlannedDate(plannedDate);
