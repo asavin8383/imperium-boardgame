@@ -30,7 +30,7 @@ public interface ArrangementRepo extends JpaRepository<Arrangement, Long>, Arran
     Page<Arrangement> findAllByStatusIn(List<ExecutionStatus> statuses, Pageable pageable);
 
     @Query("SELECT " +
-            "    new model.task.ArrangementStatistics(a.status, COUNT(a)) " +
+            "    new model.task.ExecutionStatusStatistics(a.status, COUNT(a)) " +
             "FROM " +
             "    Arrangement a " +
             "GROUP BY " +
