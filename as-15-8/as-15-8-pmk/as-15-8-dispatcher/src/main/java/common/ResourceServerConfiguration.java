@@ -18,7 +18,10 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
                 .authorizeRequests()
                 .antMatchers(HttpMethod.GET,
                         "/act/checkResult/**",
-                        "/act/screenshots/**").permitAll()
+                        "/act/screenshots/**",
+                        "/results/screenshot/**",
+                        "/results/etalon_screenshot/**")
+                .permitAll()
                 .anyRequest().authenticated()
             .and()
                 .httpBasic().disable();
