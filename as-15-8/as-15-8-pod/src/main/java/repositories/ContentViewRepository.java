@@ -14,7 +14,7 @@ import java.util.List;
 @Repository
 public interface ContentViewRepository extends JpaRepository<ContentView, Long>, JpaSpecificationExecutor<ContentView> {
 
-    @Query("select distinct с from ContentView c " +
+    @Query("select distinct c from ContentView c " +
             "where lower(c.id) like lower(concat('%',:query,'%')) " +
             "or lower(c.categoryName) like lower(concat('%',:query,'%')) " +
             "or lower(c.decisionOrg) like lower(concat('%',:query,'%')) " +
