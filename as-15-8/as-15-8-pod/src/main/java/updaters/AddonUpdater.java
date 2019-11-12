@@ -117,7 +117,7 @@ public class AddonUpdater
         });
 
         log.info("Inserting {} content_histories with version {}", addonEntries.size(), addonVersionId);
-        jdbcTemplate.batchUpdate("insert into sor.content_history(content_id, content_version_id, addon_version_id, st_dt, ppn_dt) values (?,?,?,?)",
+        jdbcTemplate.batchUpdate("insert into sor.content_history(content_id, content_version_id, addon_version_id, st_dt, ppn_dt) values (?,?,?,?,?)",
                 new BatchPreparedStatementSetter() {
                     @SuppressWarnings("NullableProblems")
                     @Override
