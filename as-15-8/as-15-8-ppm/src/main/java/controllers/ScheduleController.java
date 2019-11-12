@@ -16,6 +16,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import repositories.ScheduleRepo;
@@ -80,13 +81,17 @@ public class ScheduleController {
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @JsonView(Views.Full.class)
-    @ResponseStatus(code = HttpStatus.CREATED)
-    public Schedule postSchedule(
+    public ResponseEntity<Schedule> postSchedule(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate plannedDate,
             @RequestBody List<Long> arrangementIds,
             Principal principal){
-        Schedule schedule = createSchedule(filterAvailableArrangements(arrangementIds), principal.getName(), plannedDate);
-        return scheduleService.saveSchedule(schedule);
+        List<Long> filteredArrangementIds = filterAvailableArrangements(arrangementIds);
+        if (filteredArrangementIds.size()>0) {
+            Schedule schedule = createSchedule(filteredArrangementIds, principal.getName(), plannedDate);
+            return new ResponseEntity<>(scheduleService.saveSchedule(schedule), HttpStatus.CREATED);
+        } else {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }
     }
 
     @PutMapping
