@@ -18,6 +18,7 @@ import repositories.*;
 
 import javax.annotation.PostConstruct;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -96,8 +97,10 @@ public class ScheduleService {
 
         TreeSet<LocalTime> scheduleIntervals = new TreeSet<>();
         for(Arrangement arrangement : arrangementCheckUnits.keySet()){
-            scheduleIntervals.add(arrangement.getPlannedStartTime());
-            scheduleIntervals.add(arrangement.getPlannedEndTime());
+            //Проверяем, что мероприятие не просрочено, добавляем 5 минут по умолчанию
+            long timeDuration = ChronoUnit.SECONDS.between(arrangement.getPlannedStartTime(), LocalDateTime.now()) + 300;
+            scheduleIntervals.add(arrangement.getPlannedStartTime().plusSeconds(timeDuration));
+            scheduleIntervals.add(arrangement.getPlannedEndTime().plusSeconds(timeDuration));
         }
 
         for(LocalTime startOfPeriod : scheduleIntervals){
