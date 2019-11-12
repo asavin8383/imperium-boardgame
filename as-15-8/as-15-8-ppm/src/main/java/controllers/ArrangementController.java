@@ -83,6 +83,7 @@ public class ArrangementController {
         arrangementRepo.save(arrangement);
     }
 
+    //TODO привести в соответствие
     private List<ScheduleCheckUnit> createCheckUnits(Arrangement arrangement, CheckUnit checkUnit){
         List<ScheduleCheckUnit> scheduleCheckUnits = new ArrayList<>();
         switch (checkUnit.getType()){

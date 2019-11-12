@@ -72,7 +72,7 @@ public class FormalTask implements Serializable {
 	
 	public FormalTask() {
 		this.creationDate = LocalDateTime.now();
-		this.status = ExecutionStatus.FORMED;
+		this.status = ExecutionStatus.NEW;
 	}
 
 }
