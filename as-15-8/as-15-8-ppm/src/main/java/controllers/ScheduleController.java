@@ -16,7 +16,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import repositories.ScheduleRepo;
@@ -79,19 +78,16 @@ public class ScheduleController {
         return scheduleService.getTotalWorkersCount();
     }
 
+    //TODO кидать 400
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @JsonView(Views.Full.class)
-    public ResponseEntity<Schedule> postSchedule(
+    @ResponseStatus(HttpStatus.CREATED)
+    public Schedule postSchedule(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate plannedDate,
             @RequestBody List<Long> arrangementIds,
             Principal principal){
-        List<Long> filteredArrangementIds = filterAvailableArrangements(arrangementIds);
-        if (filteredArrangementIds.size()>0) {
-            Schedule schedule = createSchedule(filteredArrangementIds, principal.getName(), plannedDate);
-            return new ResponseEntity<>(scheduleService.saveSchedule(schedule), HttpStatus.CREATED);
-        } else {
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-        }
+        Schedule schedule = createSchedule(filterAvailableArrangements(arrangementIds), principal.getName(), plannedDate);
+        return scheduleService.saveSchedule(schedule);
     }
 
     @PutMapping
@@ -155,7 +151,7 @@ public class ScheduleController {
         return briefArrangements;
     }
 
-    private List<Long> filterAvailableArrangements(List<Long> arrangementIds){
+    private synchronized List<Long> filterAvailableArrangements(List<Long> arrangementIds){
         List<Long> availableIds =
                 arrangementService.findAllAvailableArrangements()
                         .stream()
@@ -163,6 +159,9 @@ public class ScheduleController {
                         .boxed()
                         .collect(Collectors.toList());
         arrangementIds.removeIf(id -> !availableIds.contains(id));
+        if (availableIds.size() == 0){
+            throw AS_15_8_PPM_Exception.logAndGet(log,"Ошибка сохранения расписания. Список мероприятий не содержит незапланнированных мероприятий");
+        }
         return arrangementIds;
     }
 
