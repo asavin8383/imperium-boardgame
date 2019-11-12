@@ -167,11 +167,6 @@ public class ScheduleController {
         }
         log.info("Начало расчета расписания на дату: {}", plannedDate);
         Map<Arrangement, TreeSet<ScheduleCheckUnit>> arrangementCheckUnits = arrangementService.getArrangementCheckUnits(availableIds);
-        for(Map.Entry<Arrangement, TreeSet<ScheduleCheckUnit>> entry: arrangementCheckUnits.entrySet()){
-            if(entry.getValue().isEmpty()){
-                throw AS_15_8_PPM_Exception.logAndGet(log, "Ошибка создания расписания. У мероприятия " + entry.getKey().getId() + " пустое множество значений для проверки");
-            }
-        }
         Schedule newSchedule = scheduleService.create(arrangementCheckUnits);
         log.info("Расчет расписания на дату {} завершен", plannedDate);
         if(schedule != null) {

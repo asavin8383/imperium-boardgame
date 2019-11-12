@@ -56,6 +56,7 @@ public class Schedule {
         this.status = ScheduleStatus.NEW;
     }
 
+    @SuppressWarnings("unchecked")
     public TreeSet<SchedulePeriod> getSchedulePeriodsAsTreeSet(){
         return (TreeSet)this.getSchedulePeriods();
     }
