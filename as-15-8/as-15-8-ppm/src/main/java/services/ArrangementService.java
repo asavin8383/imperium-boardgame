@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import repositories.ArrangementRepo;
 import repositories.ScheduleCheckUnitRepo;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -48,16 +49,22 @@ public class ArrangementService {
         return arrangementRepo.findAllAvailableArrangements();
     }
 
-    public Map<Arrangement, TreeSet<ScheduleCheckUnit>> getArrangementCheckUnits(List<Long> arrangementIds){
+    public Map<Arrangement, TreeSet<ScheduleCheckUnit>> getArrangementCheckUnits(List<Long> arrangementIds, LocalDate plannedDate){
         Map<Arrangement, TreeSet<ScheduleCheckUnit>> arrangementCheckUnits = new HashMap<>();
         arrangementIds.forEach(arrangementId -> {
             Arrangement arrangement = arrangementRepo.findById(arrangementId)
                     .orElseThrow(() -> new AS_15_8_PPM_Exception("Ошибка создания расписания! Мероприятие не было найдено по ID: " + arrangementId));
 
+
             //Проверяем, что мероприятие не просрочено, добавляем 5 минут по умолчанию
-            long timeDuration = ChronoUnit.SECONDS.between(arrangement.getPlannedStartTime(), LocalDateTime.now()) + 300;
-            arrangement.setPlannedStartTime(arrangement.getPlannedStartTime().plusSeconds(timeDuration));
-            arrangement.setPlannedEndTime(arrangement.getPlannedEndTime().plusSeconds(timeDuration));
+            long timeDuration = ChronoUnit.SECONDS.between(
+                    LocalDateTime.of(plannedDate, arrangement.getPlannedStartTime()),
+                    LocalDateTime.now())
+                    + 300;
+            if(timeDuration > 0) {
+                arrangement.setPlannedStartTime(arrangement.getPlannedStartTime().plusSeconds(timeDuration));
+                arrangement.setPlannedEndTime(arrangement.getPlannedEndTime().plusSeconds(timeDuration));
+            }
 
             TreeSet<ScheduleCheckUnit> arrangementResults = new TreeSet<>(Comparator.comparingLong(ScheduleCheckUnit::getId));
             arrangementResults.addAll(scheduleCheckUnitRepo.findAllByArrangement(arrangement));

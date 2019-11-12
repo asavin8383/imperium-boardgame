@@ -27,7 +27,7 @@ public class OAuth2ClientConfiguration {
 
     /**
      * Для внутренних межсервисных взаимодействий
-     * @return
+     * @return OAuth2RestTemplate
      */
     @Bean
     public OAuth2RestTemplate oauth2RestTemplate(OAuth2ClientContext oauth2ClientContext,
@@ -39,9 +39,10 @@ public class OAuth2ClientConfiguration {
      * Бин для подключения к Eureka через Oauth.
      * Переопределение по аналогии с io.pivotal.spring.cloud.service.eureka.EurekaOAuth2AutoConfiguration discoveryClientOptionalArgs
      * Бин из автоконфигурации не создается, тк библиотека config server уже определяет такой бин
-     * @return
+     * @return Бин из автоконфигурации
      */
     @Bean
+    @SuppressWarnings("unsafe")
     public DiscoveryClient.DiscoveryClientOptionalArgs discoveryClientOptionalArgs() {
         List<? super ClientFilterAdapter> filters = new ArrayList();
         filters.add(new ClientFilterAdapter(this.eurekaOauth2RequestDecorator));
