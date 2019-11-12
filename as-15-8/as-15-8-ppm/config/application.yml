@@ -7,7 +7,7 @@ spring:
           destination: scheduled_jobs
         springCloudBusInput:
           destination: bus_config_input
-          group: executor:${spring.cloud.client.ip-address}
+          group: ppm
         springCloudBusOutput:
           destination: bus_config_output
       kafka:
