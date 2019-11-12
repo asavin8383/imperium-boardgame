@@ -24,7 +24,8 @@ spring:
         format_sql: true
     databasePlatform: org.hibernate.dialect.PostgreSQL9Dialect
   app:
-    schedule.missions: '*/1 * * * * ?'
+    schedule:
+      missions: '0 */1 * * * ?'
     jwt:
       secret: Gk-Xun_Yrkd0zigpysWS
       ttl: 86400

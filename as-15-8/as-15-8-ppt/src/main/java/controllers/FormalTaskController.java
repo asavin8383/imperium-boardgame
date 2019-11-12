@@ -37,7 +37,7 @@ public class FormalTaskController {
 	@PostMapping(consumes=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseStatus(HttpStatus.CREATED)
 	public FormalTask postFormalTask(@RequestBody FormalTask formalTask, Principal principal) {
-		formalTask.setOperator(principal.getName());
+		formalTask.setAuthor(principal.getName());
 		formalTask.setStatus(ExecutionStatus.NEW);
 		return formalTaskRepo.save(formalTask);
 	}

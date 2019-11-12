@@ -14,7 +14,7 @@ public class SchedulerService {
 
     private final MissionService missionService;
 
-    @Scheduled(cron = "${app.schedule.missions}")
+    @Scheduled(cron = "${spring.app.schedule.missions}")
     public void runMissionLoad() {
         log.info("[Scheduler] Запуск получения списка поручений из ППП Анонимайзера");
         missionService.fillMissions();
