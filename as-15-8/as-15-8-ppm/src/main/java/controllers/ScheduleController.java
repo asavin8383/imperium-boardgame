@@ -57,13 +57,13 @@ public class ScheduleController {
     @GetMapping("/all")
     @JsonView(Views.Brief.class)
     public List<Schedule> getScheduleList(
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate plannedDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate plannedDate/*,
             @RequestParam(required = false) SortingDirection sortingDirection,
             @RequestParam(required = false) String sortingColumn,
             @RequestParam(defaultValue = "0") int pageNumber,
-            @RequestParam(defaultValue = "10") int pageSize){
-        PageRequest page = PageRequest.of(
-                pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
+            @RequestParam(defaultValue = "10") int pageSize*/){
+//        PageRequest page = PageRequest.of(
+//                pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
         return scheduleRepo.findAllByPlannedDate(plannedDate == null ? LocalDate.now() : plannedDate);
     }
 
@@ -86,8 +86,7 @@ public class ScheduleController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate plannedDate,
             @RequestBody List<Long> arrangementIds,
             Principal principal){
-        Schedule schedule = createSchedule(arrangementIds, principal.getName(), plannedDate);
-        return scheduleService.saveSchedule(schedule);
+        return saveSchedule(arrangementIds, principal.getName(), plannedDate);
     }
 
     @PutMapping
@@ -101,21 +100,14 @@ public class ScheduleController {
         if(!(schedule.getStatus().equals(ScheduleStatus.NEW))){
             throw AS_15_8_PPM_Exception.logAndGet(log, String.format("Ошибка изменения расписания! Некорректный статус расписания с ИД: %d - %s", schedule.getId(), schedule.getStatus()));
         }
-        //Сначала исключим из расписания все периоды
-        scheduleService.clearSchedulePeriods(schedule);
+
         //Если изменились плановые значения времени, сначала нужно изменить само мероприятие
         arrangements.stream()
                 .filter(arrangement -> arrangement.getPlannedStartTime()!=null && arrangement.getPlannedEndTime()!=null)
                 .forEach(arrangementService::updateArrangementPlanInfo);
         List<Long> arrangementIds = arrangements.stream().map(Arrangement::getId).collect(Collectors.toList());
-        Schedule newSchedule = createSchedule(arrangementIds, principal.getName(), plannedDate);
-        schedule.setSchedulePeriods(newSchedule.getSchedulePeriods());
-        schedule.getSchedulePeriods().forEach(schedulePeriod -> schedulePeriod.setSchedule(schedule));
-        schedule.setAuthor(principal.getName());
-        if (plannedDate != null) {
-            schedule.setPlannedDate(plannedDate);
-        }
-        return scheduleService.saveSchedule(schedule);
+
+        return saveSchedule(arrangementIds, principal.getName(), plannedDate, schedule);
     }
 
     @PutMapping(path = "/plan")
@@ -151,13 +143,20 @@ public class ScheduleController {
         return briefArrangements;
     }
 
+    private synchronized Schedule saveSchedule(List<Long> arrangementIds, String author, LocalDate plannedDate){
+        return saveSchedule(arrangementIds, author, plannedDate, null);
+    }
 
-    private synchronized Schedule createSchedule(List<Long> arrangementIds, String author, LocalDate plannedDate){
+    private synchronized Schedule saveSchedule(List<Long> arrangementIds, String author, LocalDate plannedDate, Schedule schedule){
+        //Сначала исключим из расписания все периоды
+        if(schedule != null)
+            scheduleService.clearSchedulePeriods(schedule);
+
         List<Long> availableIds =
                 arrangementService.findAllAvailableArrangements()
                         .stream()
                         .mapToLong(Arrangement::getId)
-                        .filter(id -> arrangementIds.contains(id))
+                        .filter(arrangementIds::contains)
                         .boxed()
                         .collect(Collectors.toList());
         if (availableIds.size() == 0){
@@ -173,11 +172,18 @@ public class ScheduleController {
                 throw AS_15_8_PPM_Exception.logAndGet(log, "Ошибка создания расписания. У мероприятия " + entry.getKey().getId() + " пустое множество значений для проверки");
             }
         }
-        Schedule schedule = scheduleService.create(arrangementCheckUnits);
+        Schedule newSchedule = scheduleService.create(arrangementCheckUnits);
         log.info("Расчет расписания на дату {} завершен", plannedDate);
+        if(schedule != null) {
+           schedule.setSchedulePeriods(newSchedule.getSchedulePeriods());
+           for(SchedulePeriod schedulePeriod : schedule.getSchedulePeriods())
+               schedulePeriod.setSchedule(schedule);
+        } else {
+            schedule = newSchedule;
+        }
         schedule.setAuthor(author);
         schedule.setPlannedDate(plannedDate);
-        return schedule;
+        return scheduleService.saveSchedule(schedule);
     }
 
     @Data
