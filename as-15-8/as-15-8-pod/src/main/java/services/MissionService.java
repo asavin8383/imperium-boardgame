@@ -3,6 +3,7 @@ package services;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import exceptions.AS_15_8_POD_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +46,8 @@ public class MissionService {
     private final MissionRepository missionRepository;
     private final JdbcTemplate jdbcTemplate;
 
+    private boolean stateLoading = false;
+
     @Value("${spring.rest_base_url}")
     private String baseUrl;
 
@@ -58,20 +61,37 @@ public class MissionService {
 
     @SneakyThrows
     public void fillMissionsWithConfirm(boolean confirm) {
-        log.info("Загрузка списка попручений");
-        List<MissionEntry> missions = getMissionsFrom();
-        log.info("Список поручений: {}", missions);
+        if (stateLoading){
+            log.info("Загрузка поручений уже проводится в данный момент.");
+            return;
+        }
 
-        if (!missions.isEmpty()){
-            for(MissionEntry missionEntry : missions){
-                try {
-                    saveMissionWithConfirm(missionEntry, confirm);
-                }
-                catch(Exception e){
-                    log.error("Ошибка сохранения поручения: " + missionEntry.toString());
-                    e.printStackTrace();
+        stateLoading = true;        // todo - не хватает потокобезопасности!
+        try{
+            log.info("Старт загрузки списка попручений");
+            List<MissionEntry> missions = getMissionsFrom();
+            log.info("Список поручений: {}", missions);
+
+            boolean isError = false;
+            if (!missions.isEmpty()){
+                for(MissionEntry missionEntry : missions){
+                    try {
+                        saveMissionWithConfirm(missionEntry, confirm);
+                    }
+                    catch(Exception e){
+                        isError = true;
+                        log.error("Ошибка сохранения поручения: " + missionEntry.toString());
+                        e.printStackTrace();
+                    }
                 }
             }
+            log.info("Загрузка поручений завершена {}", isError ? "с ошибками" : "успешно");
+        }
+        catch (Exception e){
+            throw new AS_15_8_POD_Exception("Ошибка загрузки поручений!", e);
+        }
+        finally{
+            stateLoading = false;
         }
     }
 
