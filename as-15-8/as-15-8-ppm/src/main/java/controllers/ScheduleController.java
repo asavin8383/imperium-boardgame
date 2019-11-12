@@ -166,7 +166,7 @@ public class ScheduleController {
             plannedDate = LocalDate.now();
         }
         log.info("Начало расчета расписания на дату: {}", plannedDate);
-        Map<Arrangement, TreeSet<ScheduleCheckUnit>> arrangementCheckUnits = arrangementService.getArrangementCheckUnits(availableIds);
+        Map<Arrangement, TreeSet<ScheduleCheckUnit>> arrangementCheckUnits = arrangementService.getArrangementCheckUnits(availableIds, plannedDate);
         Schedule newSchedule = scheduleService.create(arrangementCheckUnits);
         log.info("Расчет расписания на дату {} завершен", plannedDate);
         if(schedule != null) {
