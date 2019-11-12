@@ -86,7 +86,7 @@ public class ScheduleController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate plannedDate,
             @RequestBody List<Long> arrangementIds,
             Principal principal){
-        Schedule schedule = createSchedule(filterAvailableArrangements(arrangementIds), principal.getName(), plannedDate);
+        Schedule schedule = createSchedule(arrangementIds, principal.getName(), plannedDate);
         return scheduleService.saveSchedule(schedule);
     }
 
@@ -108,7 +108,7 @@ public class ScheduleController {
                 .filter(arrangement -> arrangement.getPlannedStartTime()!=null && arrangement.getPlannedEndTime()!=null)
                 .forEach(arrangementService::updateArrangementPlanInfo);
         List<Long> arrangementIds = arrangements.stream().map(Arrangement::getId).collect(Collectors.toList());
-        Schedule newSchedule = createSchedule(filterAvailableArrangements(arrangementIds), principal.getName(), plannedDate);
+        Schedule newSchedule = createSchedule(arrangementIds, principal.getName(), plannedDate);
         schedule.setSchedulePeriods(newSchedule.getSchedulePeriods());
         schedule.getSchedulePeriods().forEach(schedulePeriod -> schedulePeriod.setSchedule(schedule));
         schedule.setAuthor(principal.getName());
@@ -151,21 +151,18 @@ public class ScheduleController {
         return briefArrangements;
     }
 
-    private synchronized List<Long> filterAvailableArrangements(List<Long> arrangementIds){
+
+    private synchronized Schedule createSchedule(List<Long> arrangementIds, String author, LocalDate plannedDate){
         List<Long> availableIds =
                 arrangementService.findAllAvailableArrangements()
                         .stream()
                         .mapToLong(Arrangement::getId)
                         .boxed()
                         .collect(Collectors.toList());
-        arrangementIds.removeIf(id -> !availableIds.contains(id));
         if (availableIds.size() == 0){
             throw AS_15_8_PPM_Exception.logAndGet(log,"Ошибка сохранения расписания. Список мероприятий не содержит незапланнированных мероприятий");
         }
-        return arrangementIds;
-    }
-
-    private Schedule createSchedule(List<Long> arrangementIds, String author, LocalDate plannedDate){
+        arrangementIds.removeIf(id -> !availableIds.contains(id));
         if(plannedDate==null || plannedDate.isBefore(LocalDate.now())){
             plannedDate = LocalDate.now();
         }
