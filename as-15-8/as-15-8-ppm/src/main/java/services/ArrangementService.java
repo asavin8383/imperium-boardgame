@@ -14,6 +14,7 @@ import repositories.ScheduleCheckUnitRepo;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
@@ -61,9 +62,12 @@ public class ArrangementService {
                     LocalDateTime.of(plannedDate, arrangement.getPlannedStartTime()),
                     LocalDateTime.now())
                     + 300;
+
+            LocalTime startTime = arrangement.getPlannedStartTime().plusSeconds(timeDuration);
+            LocalTime endTime = arrangement.getPlannedEndTime().plusSeconds(timeDuration);
             if(timeDuration > 0) {
-                arrangement.setPlannedStartTime(arrangement.getPlannedStartTime().plusSeconds(timeDuration));
-                arrangement.setPlannedEndTime(arrangement.getPlannedEndTime().plusSeconds(timeDuration));
+                arrangement.setPlannedStartTime(startTime);
+                arrangement.setPlannedEndTime(endTime.isAfter(startTime) ? endTime : LocalTime.MIDNIGHT.minusSeconds(1));
             }
 
             TreeSet<ScheduleCheckUnit> arrangementResults = new TreeSet<>(Comparator.comparingLong(ScheduleCheckUnit::getId));
