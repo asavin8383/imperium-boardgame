@@ -115,8 +115,14 @@ spring:
 
 ---
 
+logging:
+  config:
+  level:
+    root: info
 spring:
   profiles: dev_asin
+  datasource:
+    url: jdbc:postgresql://192.168.5.195:5432/asdb_test
   cloud:
     stream:
       bindings:

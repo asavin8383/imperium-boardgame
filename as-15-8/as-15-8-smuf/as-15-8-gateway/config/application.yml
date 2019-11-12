@@ -80,5 +80,15 @@ spring:
 ---
 
 spring:
-  profiles: dev_pvorobiev, dev_asavin, dev_ashabalin, dev_asinyavin, dev_jspirina, dev_asin
+  profiles: dev_pvorobiev, dev_asavin, dev_ashabalin, dev_asinyavin, dev_jspirina
+  profiles.include: local_log
+
+---
+
+logging:
+  config:
+  level:
+    root: info
+spring:
+  profiles: dev_asin
   profiles.include: local_log
