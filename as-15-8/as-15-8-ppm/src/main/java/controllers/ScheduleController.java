@@ -157,17 +157,17 @@ public class ScheduleController {
                 arrangementService.findAllAvailableArrangements()
                         .stream()
                         .mapToLong(Arrangement::getId)
+                        .filter(id -> arrangementIds.contains(id))
                         .boxed()
                         .collect(Collectors.toList());
         if (availableIds.size() == 0){
             throw AS_15_8_PPM_Exception.logAndGet(log,"Ошибка сохранения расписания. Список мероприятий не содержит незапланнированных мероприятий");
         }
-        arrangementIds.removeIf(id -> !availableIds.contains(id));
         if(plannedDate==null || plannedDate.isBefore(LocalDate.now())){
             plannedDate = LocalDate.now();
         }
         log.info("Начало расчета расписания на дату: {}", plannedDate);
-        Map<Arrangement, TreeSet<ScheduleCheckUnit>> arrangementCheckUnits = arrangementService.getArrangementCheckUnits(arrangementIds);
+        Map<Arrangement, TreeSet<ScheduleCheckUnit>> arrangementCheckUnits = arrangementService.getArrangementCheckUnits(availableIds);
         for(Map.Entry<Arrangement, TreeSet<ScheduleCheckUnit>> entry: arrangementCheckUnits.entrySet()){
             if(entry.getValue().isEmpty()){
                 throw AS_15_8_PPM_Exception.logAndGet(log, "Ошибка создания расписания. У мероприятия " + entry.getKey().getId() + " пустое множество значений для проверки");
