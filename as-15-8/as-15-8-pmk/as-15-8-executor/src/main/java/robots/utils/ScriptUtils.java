@@ -1,6 +1,7 @@
 package robots.utils;
 
 import checkUnits.CheckUnit;
+import common.ExecutorProperties;
 import enums.AccessToolParameter;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -85,7 +86,7 @@ public class ScriptUtils {
         switchToTab(webDriver, 2);
 
         webDriver.get(ChromeSettings.getScreenshotExtension().getPopupUrl());
-        WebDriverWait wait = new WebDriverWait(webDriver, WAIT_TIMEOUT);
+        WebDriverWait wait = new WebDriverWait(webDriver, ExecutorProperties.getScreenshotWaitTimeout());
         wait.until(ExpectedConditions.presenceOfElementLocated(
                 By.id("delay-desktop-capture"))).click();
 
