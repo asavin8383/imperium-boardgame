@@ -18,7 +18,6 @@ import services.AnalysisResultService;
 public class VPN_AnalysisResultService implements AnalysisResultService<VpnAnalysisResult> {
 
 	private final DetailResultRepo detailResultRepo;
-	private final ResultRepo resultRepo;
 
 	@Override
 	public void processResult(Result result, VpnAnalysisResult analysisResult) {

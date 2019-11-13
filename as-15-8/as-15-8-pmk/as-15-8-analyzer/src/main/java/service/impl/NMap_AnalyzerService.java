@@ -30,10 +30,10 @@ public class NMap_AnalyzerService implements AnalyzerService<NmapExecutionResult
 	}
 
 	private CheckUnitJobResult obtainResult(NmapExecutionResult result) {
-		int openedPortsCount = result.getOpenedPorts().values()
+		long availableHostsCount = result
+				.getAvailableHosts()
 				.stream()
-				.mapToInt(portsOfHost -> portsOfHost.size())
-				.sum();
-		return openedPortsCount > 0 ? FORBIDDEN_CONTENT_DETECTED : COMPLETED;
+				.count();
+		return availableHostsCount > 0 ? FORBIDDEN_CONTENT_DETECTED : COMPLETED;
 	}
 }
