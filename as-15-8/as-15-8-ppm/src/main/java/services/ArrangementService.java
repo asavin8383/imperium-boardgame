@@ -67,7 +67,7 @@ public class ArrangementService {
             LocalTime endTime = arrangement.getPlannedEndTime().plusSeconds(timeDuration);
             if(timeDuration > 0) {
                 arrangement.setPlannedStartTime(startTime);
-                arrangement.setPlannedEndTime(endTime.isAfter(startTime) ? endTime : LocalTime.MIDNIGHT.minusSeconds(1));
+                arrangement.setPlannedEndTime(endTime.isBefore(startTime) ? endTime : LocalTime.MIDNIGHT.minusSeconds(1));
             }
 
             TreeSet<ScheduleCheckUnit> arrangementResults = new TreeSet<>(Comparator.comparingLong(ScheduleCheckUnit::getId));
