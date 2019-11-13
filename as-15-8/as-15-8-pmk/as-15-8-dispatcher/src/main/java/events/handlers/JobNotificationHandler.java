@@ -6,17 +6,16 @@ import enums.ArrangementEvents;
 import enums.CheckUnitJobResult;
 import enums.ExecutionStatus;
 import events.DispatcherChannels;
-import restapi.ArrangementStatusProducer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
-import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Service;
+import restapi.ArrangementStatusProducer;
 import services.ArrangementResultService;
 
 /**
@@ -37,9 +36,8 @@ public class JobNotificationHandler {
     public void consumeJobNotifications(Message<CheckUnitStatusNotification> message) {
         CheckUnitStatusNotification notification = message.getPayload();
         log.info("\n   ---->>> Принято сообщение с уведомлением от проверки: " + notification.toString() +
-                ", partition: "+message.getHeaders().get(KafkaHeaders.PARTITION_ID, String.class) +
+                ", partition: "+message.getHeaders().get(KafkaHeaders.RECEIVED_PARTITION_ID, String.class) +
                 ", offset: "+message.getHeaders().get(KafkaHeaders.OFFSET, Long.class));
-        Acknowledgment ack = message.getHeaders().get(KafkaHeaders.ACKNOWLEDGMENT, Acknowledgment.class);
         try {
             Result job = arrangementResultService.updateJobStatus(notification.getJobID(), notification.getCheckUnitStatus(), notification.getDescription());
             if(notification.getCheckUnitStatus() == CheckUnitJobResult.CAPTCHA_DETECTED) {
@@ -55,7 +53,5 @@ public class JobNotificationHandler {
         } catch (Exception ex) {
             log.error("Ошибка при обработке уведомления от проверки: " + notification.getJobID() + ", " + notification.getCheckUnitStatus(), ex);
         }
-        if(ack != null)
-            ack.acknowledge();
     }
 }

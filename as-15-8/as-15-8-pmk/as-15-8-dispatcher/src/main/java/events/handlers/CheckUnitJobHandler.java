@@ -9,7 +9,6 @@ import model.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
-import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
@@ -39,9 +38,8 @@ public class CheckUnitJobHandler {
     public void createJobItems(Message<CheckUnitJob> message){
         CheckUnitJob checkUnitJob = message.getPayload();
         log.info("\n   ---->>> Принято задание: " + checkUnitJob.toString() +
-                ", partition: "+message.getHeaders().get(KafkaHeaders.PARTITION_ID, String.class) +
+                ", partition: "+message.getHeaders().get(KafkaHeaders.RECEIVED_PARTITION_ID, String.class) +
                 ", offset: "+message.getHeaders().get(KafkaHeaders.OFFSET, Long.class));
-        Acknowledgment ack = message.getHeaders().get(KafkaHeaders.ACKNOWLEDGMENT, Acknowledgment.class);
         try {
             Result result = checkUnitPersistingService.persistCheckUnitJob(message.getPayload());
             checkUnitJob.setJobID(result.getId());
@@ -49,8 +47,6 @@ public class CheckUnitJobHandler {
         } catch (Exception ex) {
             log.error("Ошибка обработки задания на проверку чек-юнита " + checkUnitJob.toString() + " диспетчером", ex);
         }
-        if(ack != null)
-            ack.acknowledge();
     }
 
     /**
