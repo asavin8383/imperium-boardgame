@@ -37,10 +37,8 @@ public class ExecutionResultsHandler {
         log.info("Принято задание на анализ: " +
                 "ID: "+job.getJobID() +
                 ", checkUnit: "+job.getCheckUnit().getValue() +
-                ", partition: "+message.getHeaders().get(KafkaHeaders.PARTITION_ID, String.class) +
+                ", partition: "+message.getHeaders().get(KafkaHeaders.RECEIVED_PARTITION_ID, String.class) +
                 ", offset: "+message.getHeaders().get(KafkaHeaders.OFFSET, Long.class));
-
-        Acknowledgment ack = message.getHeaders().get(KafkaHeaders.ACKNOWLEDGMENT, Acknowledgment.class);
         try {
             AnalyzerService<? super ExecutionJobResult> service = AnalyzerServiceFactory.getService(job.getClass());
             AnalysisResult analysisResult = service.analyzeResult(job);
@@ -50,8 +48,6 @@ public class ExecutionResultsHandler {
             log.error("Ошибка при обработке задания на анализ результатов проверки ПС/ПАСД : " + job.getJobID() + ", " + job.getCheckUnit().getValue(), ex);
             sendErrorNotification(job.getJobID(), ex);
         }
-        if(ack != null)
-            ack.acknowledge();
     }
 
     /**

@@ -4,6 +4,7 @@ import arrangement.ArrangementStatusNotification;
 import common.SchedulerException;
 import common.SchedulerProperties;
 import enums.ArrangementEvents;
+import exceptions.AS_15_8_PPM_Exception;
 import restapi.ArrangementStatusUploader;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,6 +19,7 @@ import repositories.*;
 
 import javax.annotation.PostConstruct;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -59,7 +61,7 @@ public class ScheduleService {
     }
 
     public void clearSchedulePeriods(Schedule schedule){
-        schedule.getSchedulePeriods().forEach(schedulePeriod -> schedulePeriodRepo.delete(schedulePeriod));
+        schedule.getSchedulePeriods().forEach(schedulePeriodRepo::delete);
         schedule.getSchedulePeriods().clear();
     }
 
@@ -95,7 +97,11 @@ public class ScheduleService {
         Schedule schedule = new Schedule();
 
         TreeSet<LocalTime> scheduleIntervals = new TreeSet<>();
-        for(Arrangement arrangement : arrangementCheckUnits.keySet()){
+        for(Map.Entry<Arrangement, TreeSet<ScheduleCheckUnit>> arrangementEntry : arrangementCheckUnits.entrySet()){
+            Arrangement arrangement = arrangementEntry.getKey();
+            if(arrangementEntry.getValue().isEmpty()){
+                throw AS_15_8_PPM_Exception.logAndGet(log, "Ошибка создания расписания. У мероприятия " + arrangement.getId() + " пустое множество значений для проверки");
+            }
             scheduleIntervals.add(arrangement.getPlannedStartTime());
             scheduleIntervals.add(arrangement.getPlannedEndTime());
         }

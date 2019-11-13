@@ -4,7 +4,7 @@ import arrangement.ArrangementStatusNotification;
 import checkUnits.CheckUnit;
 import checkUnits.CheckUnitJob;
 import enums.ArrangementEvents;
-import events.producers.kafka.CheckUnitJobProducer;
+import events.producers.CheckUnitJobProducer;
 import restapi.ArrangementStatusUploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,6 +49,7 @@ public class RunScheduleService {
                     schedulePeriodArrangementRepo.findAllBySchedulePeriod(schedulePeriod)
                         .forEach(schedulePeriodArrangement ->
                         {
+                            log.debug("Запуск на выполнение schedulePeriodArrangement с ИД {}", schedulePeriodArrangement.getId());
                             arrangementStatusUploader.changeArrangementStatus(new ArrangementStatusNotification(schedulePeriodArrangement.getArrangement().getId(), ArrangementEvents.RUN));
                             schedulePeriodCheckUnitRepo.findAllBySchedulePeriodArrangement(schedulePeriodArrangement)
                                     .forEach(this::runCheckUnit);
@@ -59,9 +60,11 @@ public class RunScheduleService {
     }
 
     private void runCheckUnit(SchedulePeriodCheckUnit schedulePeriodCheckUnit){
+        log.debug("Запуск чек-юнита: {} {}", schedulePeriodCheckUnit.getId(), schedulePeriodCheckUnit.getCheckUnit().getCheckUnitValue());
         if (schedulePeriodCheckUnit.getStatus().equals(SchedulePeriodCheckUnitStatus.READY)){
             String key = schedulePeriodCheckUnit.getSchedulePeriodArrangement().getArrangement().getId().toString() + "_" + schedulePeriodCheckUnit.getExecutionNumber();
             sendCheckUnitJobToDispatcher(createCheckUnitJob(scheduleCheckUnitRepo.getOne(schedulePeriodCheckUnit.getId())), key);
+            log.debug("Чек-юнит отправлен на диспетчер. Ключ: {} , значение: {} {}", key, schedulePeriodCheckUnit.getId(), schedulePeriodCheckUnit.getCheckUnit().getCheckUnitValue());
         }
     }
 

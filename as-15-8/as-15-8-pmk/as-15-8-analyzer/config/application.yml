@@ -16,20 +16,20 @@ spring:
       kafka:
         binder:
           brokers: 192.168.5.12:9094,192.168.5.184:9094,192.168.5.211:9094
+          minPartitionCount: 28
           configuration:
             max.request.size: 10485760
         bindings:
           input:
             consumer:
-              autoCommitOffset: false
               ackEachRecord: true
               configuration:
                 max.poll.records: 1
-                max.poll.interval.ms: 1800000
+                max.poll.interval.ms: 5000
           output:
             producer:
               configuration:
-                max.request.size: 10000000
+                max.request.size: 10485760
 gateway.url: ${GATEWAY_URI:http://localhost:15880}
 source_path_vpn: /logs/content.txt
 source_path_anonym: /logs/content.txt

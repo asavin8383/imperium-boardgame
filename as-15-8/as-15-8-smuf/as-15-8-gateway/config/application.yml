@@ -27,6 +27,7 @@ security:
       clientId: gateway
       clientSecret: 1q0p2w9o
 zuul:
+  semaphore.maxSemaphores: 1000000
   debug.request: true
   sensitiveHeaders:
   ignored-headers: Access-Control-Allow-Credentials, Access-Control-Allow-Origin
@@ -79,5 +80,15 @@ spring:
 ---
 
 spring:
-  profiles: dev_pvorobiev, dev_asavin, dev_ashabalin, dev_asinyavin, dev_jspirina, dev_asin
+  profiles: dev_pvorobiev, dev_asavin, dev_ashabalin, dev_asinyavin, dev_jspirina
+  profiles.include: local_log
+
+---
+
+logging:
+  config:
+  level:
+    root: info
+spring:
+  profiles: dev_asin
   profiles.include: local_log

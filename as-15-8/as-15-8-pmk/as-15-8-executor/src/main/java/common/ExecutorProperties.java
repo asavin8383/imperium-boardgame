@@ -1,5 +1,6 @@
 package common;
 
+import com.netflix.http4.NFHttpClient;
 import enums.AccessToolParameter;
 import enums.AccessToolUnit;
 import lombok.Data;
@@ -26,8 +27,12 @@ public class ExecutorProperties {
 
     private NmapProperties nmap;
 
+    private String screenshotWaitTimeout;
+
 
     private static EtalonProperties etalonExtProperties;
+
+    private static Long screenShotWaitTimeoutExt;
 
     private static URL seleniumHubUrlExt;
 
@@ -38,6 +43,9 @@ public class ExecutorProperties {
     private void loadProps() throws MalformedURLException {
         etalonExtProperties = etalon;
         seleniumHubUrlExt = new URL(seleniumHubUrl);
+        try {
+            screenShotWaitTimeoutExt = Long.parseLong(screenshotWaitTimeout);
+        } catch(NumberFormatException ex) {screenShotWaitTimeoutExt = 30L;}
 
         this.props = new AccessToolUnits();
         robots.forEach((accessToolUnitString, accessToolUnitPropsMap) ->{
@@ -75,6 +83,8 @@ public class ExecutorProperties {
     public static URL getSeleniumHubUrl(){
         return seleniumHubUrlExt;
     }
+
+    public static Long getScreenshotWaitTimeout() { return screenShotWaitTimeoutExt; }
 
     @Data
     public static class AccessToolUnits{

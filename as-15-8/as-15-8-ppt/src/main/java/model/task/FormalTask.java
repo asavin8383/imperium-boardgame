@@ -58,8 +58,6 @@ public class FormalTask implements Serializable {
 	private String author;
 	/**Признак согласования*/
 	private boolean agreed;
-	/**Идентификатор ФГИС*/
-	private String fgisId;
 	/**Приоритет*/
 	@Enumerated(EnumType.STRING)
 	private Priority priority;
@@ -74,7 +72,7 @@ public class FormalTask implements Serializable {
 	
 	public FormalTask() {
 		this.creationDate = LocalDateTime.now();
-		this.status = ExecutionStatus.FORMED;
+		this.status = ExecutionStatus.NEW;
 	}
 
 }

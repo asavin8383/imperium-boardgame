@@ -66,11 +66,7 @@ services:
   analyzer:
     image: harbor.ec-leasing.ru/as_15_8/as-15-8-analyzer:latest
     deploy:
-      placement:
-        constraints:
-          - node.hostname == as158-pmk
-      mode: replicated
-      replicas: 1
+      mode: global
     networks:
       - as-15-8-net
     environment:

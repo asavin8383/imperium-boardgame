@@ -1,6 +1,7 @@
-package events.producers.kafka;
+package events.producers;
 
 import checkUnits.CheckUnitJob;
+import events.PPM_Channels;
 import exceptions.AS_15_8_PPM_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

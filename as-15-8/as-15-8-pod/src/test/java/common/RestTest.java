@@ -13,6 +13,7 @@ import rest.ActCheckResult;
 import rest.ActRequest;
 import restapi.*;
 import services.ActService;
+import services.MissionService;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -42,6 +43,9 @@ public class RestTest
 
     @Autowired
     ActService actService;
+
+    @Autowired
+    MissionService missionService;
 
     @Test
     public void testPS(){
@@ -89,6 +93,11 @@ public class RestTest
         actRequest.setEndDate("");
 
         actService.createAct(actRequest);
+    }
+
+    @Test
+    public void testGetMissions(){
+        missionService.fillMissionsWithConfirm(false);
     }
 
 }

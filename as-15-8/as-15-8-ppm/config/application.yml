@@ -7,7 +7,7 @@ spring:
           destination: scheduled_jobs
         springCloudBusInput:
           destination: bus_config_input
-          group: executor:${spring.cloud.client.ip-address}
+          group: ppm
         springCloudBusOutput:
           destination: bus_config_output
       kafka:
@@ -38,7 +38,8 @@ spring:
         format_sql: true
     databasePlatform: org.hibernate.dialect.PostgreSQL9Dialect
 app:
-  schedule: "0 * * ? * *"
+ #  second, minute, hour, day of month, month, day(s) of week
+ schedule: "0 * * ? * *"
 
 ---
 
@@ -80,6 +81,9 @@ logging:
   config:
   level:
     root: debug
+app:
+  #  second, minute, hour, day of month, month, day(s) of week
+  schedule: "0 1 1 1 1 *"
 spring:
   profiles: dev_asin
   datasource:

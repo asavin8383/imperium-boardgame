@@ -41,7 +41,9 @@ public class ContentFull extends ContentRest {
             @XmlElement(name = "ip", type = TypeIp.class),
             @XmlElement(name = "ipv6", type = TypeIp6.class),
             @XmlElement(name = "domain", type = TypeDomain.class),
-            @XmlElement(name = "url", type = TypeUrl.class)
+            @XmlElement(name = "url", type = TypeUrl.class),
+            @XmlElement(name = "ipSubnet", type = TypeIpSubnet.class),
+            @XmlElement(name = "ipv6Subnet", type = TypeIp6Subnet.class)
     })
     public List<ResourceType> types;
 

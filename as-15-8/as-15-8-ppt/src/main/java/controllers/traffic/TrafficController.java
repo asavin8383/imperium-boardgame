@@ -1,10 +1,8 @@
 package controllers.traffic;
 
-import com.fasterxml.jackson.annotation.JsonView;
 import enums.SortingDirection;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import model.Views;
 import model.enums.AccessToolType;
 import model.traffic.Traffic;
 import model.traffic.TrafficBriefView;
@@ -56,7 +54,6 @@ public class TrafficController {
 
     @Transactional
     @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @JsonView(Views.Full.class)
     public TrafficFullView updateTraffic(@RequestBody TrafficFullView fullView,
                                          @PathVariable("id") Traffic traffic) {
         return trafficService.updateTraffic(fullView, traffic);

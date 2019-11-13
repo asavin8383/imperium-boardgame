@@ -35,10 +35,9 @@ public class CheckUnitJobHandler {
     @StreamListener(ExecutorChannels.INPUT_JOBS)
     public void consumeCheckUnitJob(Message<CheckUnitJob> message){
         log.info("\n   ---->>> Принято задание: " + message.getPayload().toString() +
-                ", partition: "+message.getHeaders().get(KafkaHeaders.PARTITION_ID, String.class) +
+                ", partition: "+message.getHeaders().get(KafkaHeaders.RECEIVED_PARTITION_ID, String.class) +
                 ", offset: "+message.getHeaders().get(KafkaHeaders.OFFSET, Long.class));
         String verificationName = "";
-        Acknowledgment ack = message.getHeaders().get(KafkaHeaders.ACKNOWLEDGMENT, Acknowledgment.class);
         try {
             verificationName = "jobID = " + message.getPayload().getJobID() +
                     " accessTool = " + message.getPayload().getAccessTool() +
@@ -67,8 +66,6 @@ public class CheckUnitJobHandler {
                 log.error("Ошибка при выполнении задания на проверку запрещенного ресурса: "+message.getPayload().getJobID(), ex);
             }
         }
-        if(ack != null)
-            ack.acknowledge();
     }
 
     /**

@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import repositories.ArrangementRepo;
 import repositories.DomainMaskItemRepo;
 
+import javax.transaction.Transactional;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,6 +47,7 @@ public class ArrangementController {
     private final DomainMaskItemRepo domainMaskItemRepo;
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @Transactional
     public void updateArrangement(@RequestBody Arrangement newArrangement, @RequestParam("id") Arrangement arrangement) {
         log.info("Получено мероприятие {} для включения в расписание", newArrangement.getId());
         if(arrangement != null) {
@@ -81,6 +83,7 @@ public class ArrangementController {
         arrangementRepo.save(arrangement);
     }
 
+    //TODO привести в соответствие
     private List<ScheduleCheckUnit> createCheckUnits(Arrangement arrangement, CheckUnit checkUnit){
         List<ScheduleCheckUnit> scheduleCheckUnits = new ArrayList<>();
         switch (checkUnit.getType()){

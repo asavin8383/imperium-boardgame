@@ -6,14 +6,16 @@ import enums.ArrangementEvents;
 import enums.CheckUnitJobResult;
 import enums.ExecutionStatus;
 import events.DispatcherChannels;
-import restapi.ArrangementStatusProducer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
+import org.springframework.kafka.support.KafkaHeaders;
+import org.springframework.messaging.Message;
 import org.springframework.stereotype.Service;
+import restapi.ArrangementStatusProducer;
 import services.ArrangementResultService;
 
 import java.io.PrintWriter;
@@ -35,8 +37,12 @@ public class AnalysisResultsHandler {
     private final ArrangementStatusProducer arrangementStatusProducer;
 
     @StreamListener(DispatcherChannels.INPUT_ANALYSIS_RESULTS)
-    public void consumeAnalysisResults(AnalysisResult analysisResult) {
-        log.info("Принято сообщение с анализом результатов проверки: " + analysisResult.getJobID() + ", " + analysisResult.getCheckUnit().getValue());
+    public void consumeAnalysisResults(Message<AnalysisResult> analysisResultMessage) {
+        AnalysisResult analysisResult = analysisResultMessage.getPayload();
+        log.info("\n   ---->>> Принято сообщение с анализом результатов проверки: " +
+                analysisResult.getJobID() + ", " + analysisResult.getCheckUnit().getValue() +
+                ". partition: " + analysisResultMessage.getHeaders().get(KafkaHeaders.RECEIVED_PARTITION_ID, String.class) +
+                ", offset: " + analysisResultMessage.getHeaders().get(KafkaHeaders.OFFSET, Long.class));
         try {
             Result jobResult = arrangementResultService.processJobResult(analysisResult);
             log.info("Результаты выполнения проверки успешно обработаны: " + analysisResult.getJobID() + ", " + analysisResult.getCheckUnit().getValue());
@@ -46,7 +52,6 @@ public class AnalysisResultsHandler {
                 log.info("Мероприятие успешно завешено: " + jobResult.getArrangementId());
                 arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(jobResult.getArrangementId(), ArrangementEvents.FINISH));
             }
-
         } catch (Exception ex) {
             try {
                 log.error("Ошибка при обработке сообщения с анализом результатов проверки: " + analysisResult.getJobID() + ", " + analysisResult.getCheckUnit().getValue(), ex);
