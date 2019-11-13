@@ -19,5 +19,6 @@
     <include file="data/changelog/uploader.0013.OrigIdSeq.xml"/>
     <include file="data/changelog/pod.0002.mat_view_content.xml"/>
     <include file="data/changelog/pod.0003.mat_view_check_units.xml"/>
+    <include file="data/changelog/uploader.0014.irtz_type.xml"/>
 
 </databaseChangeLog>
