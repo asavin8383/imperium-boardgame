@@ -23,7 +23,7 @@ update sor.content_info cii set irtz_type=(
        count(*) filter ( where resource_type_id=1 ) cnt_domain,
        count(*) filter ( where resource_type_id in (2,3)  ) cnt_ip,
        count(*) filter ( where resource_type_id in (4,5) ) cnt_subnet,
-       count(*) filter ( where resource_type_id=1 and value like '%*%' ) cnt_domain_mask
+       count(*) filter ( where resource_type_id=7) cnt_domain_mask
 from   sor.content_resources cr where cr.content_id=cii.content_id and cr.content_version_id=cii.content_version_id
                                             ) d on 1=1)
 where irtz_type is null;
