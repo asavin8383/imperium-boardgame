@@ -105,10 +105,14 @@ public class ContentController {
 
     @GetMapping("/erdi/checkUnits")
     //@PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
-    public List<CheckUnit> getCheckUnits(@RequestParam("id") Long contentId){
-        return contentService.getActualCheckUnits(contentId).stream()
+    public ResponseEntity<List<CheckUnit>> getCheckUnits(@RequestParam("id") Long contentId){
+        List<CheckUnit> checkUnits = contentService.getActualCheckUnits(contentId).stream()
             .map(contentCheckUnit -> new CheckUnit(contentId, contentCheckUnit.getCheckUnitType(), contentCheckUnit.getCheckUnitValue()))
             .collect(Collectors.toList());
+        if(checkUnits.size() > 0)
+            return ResponseEntity.ok(checkUnits);
+        else
+            return ResponseEntity.badRequest().build();
     }
 
 }
