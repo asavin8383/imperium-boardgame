@@ -41,7 +41,7 @@ public class AnalysisResultsHandler {
         AnalysisResult analysisResult = analysisResultMessage.getPayload();
         log.info("\n   ---->>> Принято сообщение с анализом результатов проверки: " +
                 analysisResult.getJobID() + ", " + analysisResult.getCheckUnit().getValue() +
-                ". partition: " + analysisResultMessage.getHeaders().get(KafkaHeaders.RECEIVED_PARTITION_ID, String.class) +
+                ". partition: " + analysisResultMessage.getHeaders().get(KafkaHeaders.RECEIVED_PARTITION_ID, Integer.class) +
                 ", offset: " + analysisResultMessage.getHeaders().get(KafkaHeaders.OFFSET, Long.class));
         try {
             Result jobResult = arrangementResultService.processJobResult(analysisResult);

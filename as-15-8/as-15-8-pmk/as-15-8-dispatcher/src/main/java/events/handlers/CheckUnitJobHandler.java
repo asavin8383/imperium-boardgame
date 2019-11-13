@@ -38,7 +38,7 @@ public class CheckUnitJobHandler {
     public void createJobItems(Message<CheckUnitJob> message){
         CheckUnitJob checkUnitJob = message.getPayload();
         log.info("\n   ---->>> Принято задание: " + checkUnitJob.toString() +
-                ", partition: "+message.getHeaders().get(KafkaHeaders.RECEIVED_PARTITION_ID, String.class) +
+                ", partition: "+message.getHeaders().get(KafkaHeaders.RECEIVED_PARTITION_ID, Integer.class) +
                 ", offset: "+message.getHeaders().get(KafkaHeaders.OFFSET, Long.class));
         try {
             Result result = checkUnitPersistingService.persistCheckUnitJob(message.getPayload());

@@ -10,10 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
-import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 import robots.exceptions.Cancel_ExecutionException;
@@ -35,7 +33,7 @@ public class CheckUnitJobHandler {
     @StreamListener(ExecutorChannels.INPUT_JOBS)
     public void consumeCheckUnitJob(Message<CheckUnitJob> message){
         log.info("\n   ---->>> Принято задание: " + message.getPayload().toString() +
-                ", partition: "+message.getHeaders().get(KafkaHeaders.RECEIVED_PARTITION_ID, String.class) +
+                ", partition: "+message.getHeaders().get(KafkaHeaders.RECEIVED_PARTITION_ID, Integer.class) +
                 ", offset: "+message.getHeaders().get(KafkaHeaders.OFFSET, Long.class));
         String verificationName = "";
         try {

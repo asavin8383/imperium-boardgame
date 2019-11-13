@@ -37,7 +37,7 @@ public class ExecutionResultsHandler {
         log.info("Принято задание на анализ: " +
                 "ID: "+job.getJobID() +
                 ", checkUnit: "+job.getCheckUnit().getValue() +
-                ", partition: "+message.getHeaders().get(KafkaHeaders.RECEIVED_PARTITION_ID, String.class) +
+                ", partition: "+message.getHeaders().get(KafkaHeaders.RECEIVED_PARTITION_ID, Integer.class) +
                 ", offset: "+message.getHeaders().get(KafkaHeaders.OFFSET, Long.class));
         try {
             AnalyzerService<? super ExecutionJobResult> service = AnalyzerServiceFactory.getService(job.getClass());

@@ -36,7 +36,7 @@ public class JobNotificationHandler {
     public void consumeJobNotifications(Message<CheckUnitStatusNotification> message) {
         CheckUnitStatusNotification notification = message.getPayload();
         log.info("\n   ---->>> Принято сообщение с уведомлением от проверки: " + notification.toString() +
-                ", partition: "+message.getHeaders().get(KafkaHeaders.RECEIVED_PARTITION_ID, String.class) +
+                ", partition: "+message.getHeaders().get(KafkaHeaders.RECEIVED_PARTITION_ID, Integer.class) +
                 ", offset: "+message.getHeaders().get(KafkaHeaders.OFFSET, Long.class));
         try {
             Result job = arrangementResultService.updateJobStatus(notification.getJobID(), notification.getCheckUnitStatus(), notification.getDescription());
