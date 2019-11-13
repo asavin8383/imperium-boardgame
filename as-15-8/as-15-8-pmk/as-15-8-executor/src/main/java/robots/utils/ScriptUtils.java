@@ -86,14 +86,14 @@ public class ScriptUtils {
         switchToTab(webDriver, 2);
 
         webDriver.get(ChromeSettings.getScreenshotExtension().getPopupUrl());
-        WebDriverWait wait = new WebDriverWait(webDriver, ExecutorProperties.getScreenshotWaitTimeout());
+        WebDriverWait wait = new WebDriverWait(webDriver, 5000);
         wait.until(ExpectedConditions.presenceOfElementLocated(
-                By.id("delay-desktop-capture"))).click();
+                By.id("desktop"))).click();
 
         ScriptUtils.waitForTab(webDriver, 2);
-        wait.until(driver -> driver != null &&
-                driver.getWindowHandles().size() < 2);
-        ScriptUtils.waitForTab(webDriver, 2);
+//        wait.until(driver -> driver != null &&
+//                driver.getWindowHandles().size() < 2);
+//        ScriptUtils.waitForTab(webDriver, 2);
 
         switchToTab(webDriver, 2);
         WebElement frame = wait.until(ExpectedConditions.presenceOfElementLocated(
