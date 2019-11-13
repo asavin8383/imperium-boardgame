@@ -187,7 +187,6 @@ spring:
 cron:
   expression:
     arrangement: "0 * * ? * *"
-eureka.client.enabled: true
 
 ---
 
