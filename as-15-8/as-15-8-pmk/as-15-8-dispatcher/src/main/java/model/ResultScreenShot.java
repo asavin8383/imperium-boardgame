@@ -1,5 +1,6 @@
 package model;
 
+import enums.CheckUnitJobResult;
 import lombok.Data;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Type;
@@ -34,4 +35,8 @@ public class ResultScreenShot implements Serializable {
     @Column(name="etalon_screenshot", columnDefinition="bytea")
     @Type(type="org.hibernate.type.BinaryType")
     private byte[] etalonScreenshot;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name="result", nullable=false)
+    private CheckUnitJobResult result;
 }

@@ -39,7 +39,7 @@ public class IntegrationTests {
 
 		CheckUnitJob checkUnitJob = new CheckUnitJob();
 		checkUnitJob.setJobID(1L);
-		checkUnitJob.setAccessTool("google");
+		checkUnitJob.setAccessTool("GOOGLE");
 
 		checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.URL, "https://www.google.ru"));
 

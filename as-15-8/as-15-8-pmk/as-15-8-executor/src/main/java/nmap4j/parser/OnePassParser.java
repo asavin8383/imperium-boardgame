@@ -103,7 +103,7 @@ public class OnePassParser implements NMap4JParserEventListener {
 	      
 	      
 	    }catch(SAXException | ParserConfigurationException | IOException se) {
-	      se.printStackTrace();
+	      	throw new RuntimeException("Ошибка при разборе результатов выполнения Nmap", se);
 	    }
 
         NMapXmlHandler.removeListener( this ) ;

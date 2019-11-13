@@ -1,5 +1,6 @@
 package controllers;
 
+import enums.CheckUnitJobResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Result;
@@ -24,10 +25,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Base64;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 
 @RestController
@@ -52,8 +50,9 @@ public class ActController {
     @GetMapping(path = "/checkResult", produces = MediaType.APPLICATION_STREAM_JSON_VALUE)
     public Flux<ActCheckResult> getActCheckResult(Long arrangementId){
         log.info("Подготовка результатов мероприятия для акта. ID мероприятия: {}", arrangementId);
+        List<CheckUnitJobResult> resultFilter = Arrays.asList(CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED);
         return Flux.fromIterable(
-                    resultRepo.findAllByArrangementId(arrangementId))
+                    resultRepo.findByArrangementIdAndResultIn(arrangementId, resultFilter))
                 .map(this::createActCheckResult);
     }
 
@@ -61,9 +60,10 @@ public class ActController {
     public Flux<String> getActScreenshots(Long arrangementId,
                                           @RequestParam(defaultValue = "10") Long maxCountScreenShots) {
         log.info("Подготовка скриншотов для акта. ID мероприятия: {}", arrangementId);
+        List<CheckUnitJobResult> resultFilter = Arrays.asList(CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED);
         PageRequest page = PageRequest.of(0, maxCountScreenShots.intValue());
         List<ResultScreenShot> screenShots = resultScreenShotRepo
-                .findAllByArrangementId(arrangementId, page);
+                .findByArrangementIdAndResultIn(arrangementId, resultFilter, page);
 
         return Flux.fromIterable(screenShots)
                 .map(this::createActBase64Screenshot)

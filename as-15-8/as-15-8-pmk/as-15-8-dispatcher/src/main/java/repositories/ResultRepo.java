@@ -1,6 +1,7 @@
 package repositories;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -26,6 +27,8 @@ public interface ResultRepo extends JpaRepository<Result, Long> {
 	Long countByResultNullOrResultIn(@Param("id") Long id, @Param("results") List<CheckUnitJobResult> results);
 
 	List<Result> findAllByArrangementId(Long id);
+	List<Result> findByArrangementIdAndResultIn(Long arrangementId, Collection<CheckUnitJobResult> results);
+
 	Page<Result> findAllByArrangementId(Long id, Pageable pageable);
 	@Query("select DISTINCT r from Result r" +
 			" where r.arrangementId = :arr_id and" +
