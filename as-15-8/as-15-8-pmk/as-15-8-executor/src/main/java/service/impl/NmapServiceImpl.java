@@ -14,6 +14,7 @@ import nmap4j.core.nmap.ExecutionResults;
 import nmap4j.core.scans.BaseScan;
 import nmap4j.core.scans.IScan;
 import nmap4j.data.NMapRun;
+import nmap4j.data.host.ports.Port;
 import nmap4j.parser.OnePassParser;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,15 +88,18 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
 
                 nmapRun.getHosts().forEach(host -> {
                     if (host.getAddresses().size() > 0) {
-                        Set<Long> openedPorts = new HashSet<>();
-                        host.getPorts().getPorts().forEach(port -> {
+                        boolean isHostAvailable = false;
+                        for(Port port : host.getPorts().getPorts()) {
                             if (port != null) {
-                                if (port.getState().getState().toLowerCase().equals("open")) {
-                                    openedPorts.add(port.getPortId());
+                                String portState = port.getState().getState().toLowerCase();
+                                if (!portState.equals("filtered")) {
+                                    isHostAvailable = true;
+                                    break;
                                 }
                             }
-                        });
-                        nmapExecutionResult.getOpenedPorts().put(host.getAddresses().get(0).getAddr(), openedPorts);
+                        }
+                        if(isHostAvailable)
+                            nmapExecutionResult.getAvailableHosts().add(host.getAddresses().get(0).getAddr());
                     }
                 });
 

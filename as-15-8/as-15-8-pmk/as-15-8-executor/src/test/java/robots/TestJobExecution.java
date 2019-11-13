@@ -29,9 +29,9 @@ public class TestJobExecution {
 		
 		CheckUnitJob checkUnitJob = new CheckUnitJob();
 		checkUnitJob.setJobID(1L);
-		checkUnitJob.setAccessTool("hola");
+		checkUnitJob.setAccessTool("GOOGLE");
 		
-		checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.URL, "https://www.google.ru"));
+		checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.URL, "https://cannabay.org"));
 
 		ExecutionJobResult executionJobResult = CheckUnitVerificationServiceFactory
 				.getService(checkUnitJob.getCheckUnit().getType())

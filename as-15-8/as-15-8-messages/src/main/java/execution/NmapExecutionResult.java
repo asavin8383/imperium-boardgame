@@ -5,8 +5,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
 import java.util.Set;
 
 @Data
@@ -16,6 +15,6 @@ import java.util.Set;
 public class NmapExecutionResult extends ExecutionJobResult {
 
     private String nmapLog;
-    private Map<String, Set<Long>> openedPorts = new HashMap<>();
+    private Set<String> availableHosts = new HashSet<>();
 
 }

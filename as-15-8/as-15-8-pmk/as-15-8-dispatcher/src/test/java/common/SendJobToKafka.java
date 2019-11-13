@@ -41,7 +41,7 @@ public class SendJobToKafka {
 	@Autowired
     private KafkaTemplate<String, ArrangementJob> kafkaTemplate;
 	
-	@Value("${spring.cloud.stream.bindings.incomingArrangements.destination}")
+	@Value("${spring.cloud.stream.bindings.inputJobs.destination}")
     private String topic;
 	
 	@Test
