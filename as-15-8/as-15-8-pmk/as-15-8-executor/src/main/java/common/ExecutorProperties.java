@@ -69,7 +69,7 @@ public class ExecutorProperties {
                 .filter(accessToolUnitProps ->
                         accessToolUnitProps.getValue().getRobotProps().keySet()
                                 .stream()
-                                .filter(curAccessTool -> curAccessTool.equals(accessTool.toLowerCase()))
+                                .filter(curAccessTool -> curAccessTool.toLowerCase().equals(accessTool.toLowerCase()))
                                 .count() > 0
                 )
                 .map(accessToolUnitProps -> accessToolUnitProps.getKey())
