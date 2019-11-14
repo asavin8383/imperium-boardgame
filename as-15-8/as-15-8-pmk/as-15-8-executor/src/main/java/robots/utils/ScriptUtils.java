@@ -12,8 +12,13 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.util.StringUtils;
 import robots.ChromeSettings;
+import ru.yandex.qatools.ashot.AShot;
 
 import javax.annotation.Nullable;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -83,24 +88,42 @@ public class ScriptUtils {
     }
 
     public static byte[] getScreenshot(WebDriver webDriver)  {
-        switchToTab(webDriver, 2);
+        try{
+            switchToTab(webDriver, 2);
 
-        webDriver.get(ChromeSettings.getScreenshotExtension().getPopupUrl());
-        WebDriverWait wait = new WebDriverWait(webDriver, WAIT_TIMEOUT);
-        wait.until(ExpectedConditions.presenceOfElementLocated(
-                By.id("desktop"))).click();
+            webDriver.get(ChromeSettings.getScreenshotExtension().getPopupUrl());
+            WebDriverWait wait = new WebDriverWait(webDriver, WAIT_TIMEOUT);
+            wait.until(ExpectedConditions.presenceOfElementLocated(
+                    By.id("desktop"))).click();
 
-        ScriptUtils.waitForTab(webDriver, 2);
-//        wait.until(driver -> driver != null &&
-//                driver.getWindowHandles().size() < 2);
-//        ScriptUtils.waitForTab(webDriver, 2);
+            ScriptUtils.waitForTab(webDriver, 2);
+    //        wait.until(driver -> driver != null &&
+    //                driver.getWindowHandles().size() < 2);
+    //        ScriptUtils.waitForTab(webDriver, 2);
 
-        switchToTab(webDriver, 2);
-        WebElement frame = wait.until(ExpectedConditions.presenceOfElementLocated(
-                By.xpath("//*[@id=\"iframe_container\"]/iframe")));
-        webDriver.switchTo().frame(frame);
+            switchToTab(webDriver, 2);
+            WebElement frame = wait.until(ExpectedConditions.presenceOfElementLocated(
+                    By.xpath("//*[@id=\"iframe_container\"]/iframe")));
+            webDriver.switchTo().frame(frame);
 
-        String base64Image = wait
+            wait.until(ExpectedConditions.presenceOfElementLocated(
+                        By.xpath("//div[@id=\"container\"]")));
+
+            waitDriver(webDriver, 1);
+
+            BufferedImage originalImage =
+                    new AShot().takeScreenshot(webDriver,
+                            webDriver.findElement(By.xpath("//div[@id=\"container\"]"))).getImage();
+
+            try(ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+                ImageIO.write(originalImage, "png", baos);
+                baos.flush();
+                return baos.toByteArray();
+            }
+        }catch(Exception ex){
+            throw new RuntimeException("Ошибка получения скриншота", ex);
+        }
+        /*String base64Image = wait
                 .until(ExpectedConditions.presenceOfElementLocated(
                         By.xpath("//div[@id=\"container\"]/img")))
                 .getAttribute("src").split(",")[1];
@@ -109,7 +132,7 @@ public class ScriptUtils {
         webDriver.close();
         switchToTab(webDriver, 1);
 
-        return Base64.getDecoder().decode(base64Image);
+        return Base64.getDecoder().decode(base64Image);*/
     }
 
     public static byte[] getScreenshot(WebDriver webDriver, boolean old) {

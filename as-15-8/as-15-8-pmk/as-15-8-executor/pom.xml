@@ -33,6 +33,11 @@
 		    <groupId>org.seleniumhq.selenium</groupId>
 		    <artifactId>selenium-java</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>ru.yandex.qatools.ashot</groupId>
+			<artifactId>ashot</artifactId>
+			<version>1.5.4</version>
+		</dependency>
         <!-- https://mvnrepository.com/artifact/org.iq80.leveldb/leveldb -->
         <dependency>
             <groupId>org.iq80.leveldb</groupId>
