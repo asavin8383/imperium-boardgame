@@ -73,6 +73,7 @@ spring:
         notifications.destination: job_notifications_ashabalin
         springCloudBusInput.destination: bus_config_input_ashabalin
         springCloudBusOutput.destination: bus_config_output_ashabalin
+nmap.path: C:\Program Files (x86)\Nmap
 
 ---
 

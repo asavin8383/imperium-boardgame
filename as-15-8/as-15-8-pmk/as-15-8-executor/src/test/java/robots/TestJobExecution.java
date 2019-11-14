@@ -29,9 +29,9 @@ public class TestJobExecution {
 		
 		CheckUnitJob checkUnitJob = new CheckUnitJob();
 		checkUnitJob.setJobID(1L);
-		checkUnitJob.setAccessTool("GOOGLE");
+		checkUnitJob.setAccessTool("kaspersky");
 		
-		checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.URL, "https://cannabay.org"));
+		checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.IP_V4, "185.248.101.170"));
 
 		ExecutionJobResult executionJobResult = CheckUnitVerificationServiceFactory
 				.getService(checkUnitJob.getCheckUnit().getType())
