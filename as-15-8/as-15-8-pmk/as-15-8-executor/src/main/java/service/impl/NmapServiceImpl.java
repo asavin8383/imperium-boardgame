@@ -166,6 +166,7 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
         OnePassParser opp = new OnePassParser();
         log.info("Парсинг результата: " + outputFile.toAbsolutePath().toString());
         NMapRun nmapRun = opp.parse(outputFile.toAbsolutePath().toString(), OnePassParser.FILE_NAME_INPUT);
+        log.info("Результат разобран: " + outputFile.toAbsolutePath().toString());
         if (nmapRun == null)
             throw new NullPointerException("Ошибка парсинга результата. Результат пустой.");
         return nmapRun;
