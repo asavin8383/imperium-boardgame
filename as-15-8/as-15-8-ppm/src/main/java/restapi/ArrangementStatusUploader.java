@@ -23,13 +23,15 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class ArrangementStatusUploader {
+
+    private final String URI = "/ppt/arrangements/status";
+
     @Value("${gateway.url}")
     private String gatewayUrl;
 
     private final OAuth2RestTemplate oAuth2RestTemplate;
 
     public void changeArrangementStatus(ArrangementStatusNotification arrangementStatusNotification){
-        String path = "/ppt/arrangements/status";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -37,7 +39,7 @@ public class ArrangementStatusUploader {
 
         log.info("Отправка запроса на изменения статуса мероприятия в ППТ: {}", arrangementStatusNotification.toString());
         try {
-            oAuth2RestTemplate.put(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(path).build().toString(), entity);
+            oAuth2RestTemplate.put(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(URI).build().toString(), entity);
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
             throw AS_15_8_PPM_Exception.logAndGet(log, String.format("Ошибка отправки запроса на изменение статуса мероприятия в ППТ, код возврата %s", ex.getStatusCode()));
         }

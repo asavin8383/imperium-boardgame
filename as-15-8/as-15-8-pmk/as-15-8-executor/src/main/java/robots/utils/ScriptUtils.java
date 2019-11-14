@@ -91,9 +91,9 @@ public class ScriptUtils {
                 By.id("desktop"))).click();
 
         ScriptUtils.waitForTab(webDriver, 2);
-        wait.until(driver -> driver != null &&
-                driver.getWindowHandles().size() < 2);
-        ScriptUtils.waitForTab(webDriver, 2);
+//        wait.until(driver -> driver != null &&
+//                driver.getWindowHandles().size() < 2);
+//        ScriptUtils.waitForTab(webDriver, 2);
 
         switchToTab(webDriver, 2);
         WebElement frame = wait.until(ExpectedConditions.presenceOfElementLocated(
