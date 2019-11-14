@@ -108,7 +108,7 @@
             </structure>
         </scalar-parameter>
         <scalar-parameter name="SSi" id="12">
-            <text-property name="promptText">Перечень ПС</text-property>
+            <text-property name="promptText">Перечень ПАСД</text-property>
             <property name="valueType">dynamic</property>
             <property name="isRequired">true</property>
             <property name="dataSetName">SSi</property>
@@ -417,9 +417,9 @@
                 </structure>
             </list-property>
             <xml-property name="queryText"><![CDATA[select orig_id, label from (
-(select orig_id, name as label,2  ord from sor.ps where eff_dt='3000-01-01 00:00:00')
+(select orig_id, name as label,2  ord from sor.pasd where eff_dt='3000-01-01 00:00:00')
 union
-(select 0 orig_id,'Все ПС' as label,1 ord)) d order by ord, label]]></xml-property>
+(select 0 orig_id,'Все ПАСД' as label,1 ord)) d order by ord, label]]></xml-property>
             <xml-property name="designerValues"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <model:DesignValues xmlns:design="http://www.eclipse.org/datatools/connectivity/oda/design" xmlns:model="http://www.eclipse.org/birt/report/model/adapter/odaModel">
   <Version>2.0</Version>
@@ -514,9 +514,9 @@ this.queryText=this.queryText + " where  d.orig_id = ANY('{"+queryStr+"}'::bigin
                 </structure>
             </list-property>
             <xml-property name="queryText"><![CDATA[with d as (select orig_id, label from (
-(select orig_id, name as label,2  ord from sor.ps where eff_dt='3000-01-01 00:00:00')
+(select orig_id, name as label,2  ord from sor.pasd where eff_dt='3000-01-01 00:00:00')
 union
-(select 0 orig_id,'Все ПС' as label,1 ord)) d order by ord, label)
+(select 0 orig_id,'Все ПАСД' as label,1 ord)) d order by ord, label)
 select string_agg(label,', ') as caption  from d]]></xml-property>
             <xml-property name="designerValues"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <model:DesignValues xmlns:design="http://www.eclipse.org/datatools/connectivity/oda/design" xmlns:model="http://www.eclipse.org/birt/report/model/adapter/odaModel">
@@ -1545,7 +1545,7 @@ this.queryText = this.queryText + " group by  at.nm order by at.nm";]]></method>
          join sor.content_info ci on ch.content_id = ci.content_id and ch.content_version_id=ci.content_version_id
                    join config.robots on robots.name=a.access_tool
                   join dm.access_tool at on robots.orig_id=at.orig_id and a.creation_date>=at.eff_dttm and a.creation_date<at.end_dttm
-and ((robots.type='PS' and at.access_tool_tp_id=1))
+and ((robots.type='PASD' and at.access_tool_tp_id=2))
          left join sor.addon on addon.content_id = ch.content_id and addon.addon_version_id=ch.addon_version_id
 join dm.msr_prd on msr_prd.msr_prd_tp_id=? and r.end_date between msr_prd.eff_dttm and msr_prd.end_dttm
 join (select distinct  on (r2.check_unit_value) r2.check_unit_value,r2.result from results.results r2 
@@ -1554,7 +1554,7 @@ and msr_prd2.eff_dttm::date=?
 order by check_unit_value,end_date desc nulls last ) last_r on r.check_unit_value=last_r.check_unit_value
 where
 msr_prd.eff_dttm::date=?
-and access_tool_tp_id=1]]></xml-property>
+and access_tool_tp_id=2]]></xml-property>
             <xml-property name="designerValues"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <model:DesignValues xmlns:design="http://www.eclipse.org/datatools/connectivity/oda/design" xmlns:model="http://www.eclipse.org/birt/report/model/adapter/odaModel">
   <Version>2.0</Version>
@@ -1894,6 +1894,8 @@ dense_rank() over (order by at.nm) as                                           
            when ci.irtz_type = 'url' then '     URL'
            when ci.irtz_type = 'domain' then '     Доменных имен'
            when ci.irtz_type = 'domain-mask' then '     Доменных имен по маске'
+           when ci.irtz_type = 'subnet' then '     Подсетей'
+           when ci.irtz_type = 'ip' then '     IP-адресов'
            when ci.irtz_type is null then 'Общее количесто ИРТЗ'
            else 'Прочее' end
                                           as                                                          blocktype,
@@ -1907,7 +1909,7 @@ from results.results r
                 join config.robots on robots.name = a.access_tool
          join dm.access_tool at
               on robots.orig_id = at.orig_id and a.creation_date >= at.eff_dttm and a.creation_date < at.end_dttm
-                  and ((robots.type = 'PS' and at.access_tool_tp_id = 1))
+                  and ((robots.type = 'PASD' and at.access_tool_tp_id = 2))
 left join sor.addon on addon.content_id = ch.content_id and addon.addon_version_id=ch.addon_version_id
          join dm.msr_prd on msr_prd.msr_prd_tp_id = ? and r.end_date between msr_prd.eff_dttm and msr_prd.end_dttm
          join (select distinct on (r2.check_unit_value) r2.check_unit_value, r2.result
@@ -1918,7 +1920,7 @@ left join sor.addon on addon.content_id = ch.content_id and addon.addon_version_
                order by check_unit_value, end_date desc nulls last) last_r
             on r.check_unit_value = last_r.check_unit_value
 where msr_prd.eff_dttm::date = ?
-  and access_tool_tp_id = 1 ]]></xml-property>
+  and access_tool_tp_id = 2 ]]></xml-property>
             <xml-property name="designerValues"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <model:DesignValues xmlns:design="http://www.eclipse.org/datatools/connectivity/oda/design" xmlns:model="http://www.eclipse.org/birt/report/model/adapter/odaModel">
   <Version>2.0</Version>
@@ -2307,7 +2309,7 @@ from results.results r
          join config.robots on robots.name = a.access_tool
          join dm.access_tool at
               on robots.orig_id = at.orig_id and a.creation_date >= at.eff_dttm and a.creation_date < at.end_dttm
-                  and ((robots.type = 'PS' and at.access_tool_tp_id = 1))
+                  and ((robots.type = 'PASD' and at.access_tool_tp_id = 2))
          left join sor.addon on addon.content_id = ch.content_id and addon.addon_version_id=ch.addon_version_id
          left join sor.subtype on addon.info_type_id = subtype.orig_id and subtype.eff_dt = '3000-01-01 00:00:00'
 join dm.msr_prd on msr_prd.msr_prd_tp_id=? and r.end_date between msr_prd.eff_dttm and msr_prd.end_dttm
@@ -2320,7 +2322,7 @@ join dm.msr_prd on msr_prd.msr_prd_tp_id=? and r.end_date between msr_prd.eff_dt
             on r.check_unit_value = last_r.check_unit_value
 where
 msr_prd.eff_dttm::date=?
-and access_tool_tp_id=1]]></xml-property>
+and access_tool_tp_id=2]]></xml-property>
             <xml-property name="designerValues"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <model:DesignValues xmlns:design="http://www.eclipse.org/datatools/connectivity/oda/design" xmlns:model="http://www.eclipse.org/birt/report/model/adapter/odaModel">
   <Version>2.0</Version>
@@ -2726,6 +2728,7 @@ this.queryText = this.queryText + " order by at.nm "]]></method>
        case when r.result='FORBIDDEN_CONTENT_DETECTED' then 'Обнаружен запрещенный контент'
             when r.result='DOUBTFUL' then 'Сомнительный контент'
             when r.result='COMPLETED' then 'Нет нарушения'
+            when r.result ilike '%ERROR%' then 'Ошибка'
             else 'Прочее' end result,
             r.result result_code,
             msr_prd.caption
@@ -2736,11 +2739,11 @@ from results.results r
          join config.robots on robots.name = a.access_tool
          join dm.access_tool at
               on robots.orig_id = at.orig_id and a.creation_date >= at.eff_dttm and a.creation_date < at.end_dttm
-                  and ((robots.type = 'PS' and at.access_tool_tp_id = 1))
+                  and ((robots.type = 'PASD' and at.access_tool_tp_id = 2))
          left join sor.addon on addon.content_id = ch.content_id and addon.addon_version_id=ch.addon_version_id
          join dm.msr_prd on msr_prd.msr_prd_tp_id = ? and r.end_date between msr_prd.eff_dttm and msr_prd.end_dttm
 where msr_prd.eff_dttm::date = ?
-  and access_tool_tp_id = 1]]></xml-property>
+  and access_tool_tp_id = 2]]></xml-property>
             <xml-property name="designerValues"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <model:DesignValues xmlns:design="http://www.eclipse.org/datatools/connectivity/oda/design" xmlns:model="http://www.eclipse.org/birt/report/model/adapter/odaModel">
   <Version>2.0</Version>
@@ -2909,7 +2912,14 @@ where msr_prd.eff_dttm::date = ?
                         <property name="fontSize">12pt</property>
                         <property name="fontWeight">bold</property>
                         <property name="textAlign">center</property>
-                        <text-property name="text">Отчёт по исполнению ОПС обязанности по исключению из поисковой выдачи сведений об ИРТЗ</text-property>
+                        <text-property name="text">Отчёт по исполнению владельцами ПАСД обязанности по соблюдению запрета</text-property>
+                    </label>
+                    <label id="878">
+                        <property name="fontFamily">"Times New Roman"</property>
+                        <property name="fontSize">12pt</property>
+                        <property name="fontWeight">bold</property>
+                        <property name="textAlign">center</property>
+                        <text-property name="text">предоставлять возможность использования на территории Российской Федерации ПАСД для доступа к ИРТЗ</text-property>
                     </label>
                     <label id="128">
                         <property name="fontFamily">"Times New Roman"</property>
@@ -3078,7 +3088,7 @@ where msr_prd.eff_dttm::date = ?
                                 <label id="218">
                                     <property name="fontFamily">"Times New Roman"</property>
                                     <property name="textAlign">left</property>
-                                    <text-property name="text">Перечень ПС:</text-property>
+                                    <text-property name="text">Перечень ПАСД:</text-property>
                                 </label>
                             </cell>
                             <cell id="261">
@@ -3180,7 +3190,8 @@ where msr_prd.eff_dttm::date = ?
                                 <label id="219">
                                     <property name="fontFamily">"Times New Roman"</property>
                                     <property name="textAlign">left</property>
-                                    <text-property name="text">Включение в отчёт раздела «Общие показатели исполнения ОПС обязанности по исключению из поисковой выдачи сведений об ИРТЗ»:</text-property>
+                                    <text-property name="text">Включение в отчёт раздела «Общие показатели исполнения ОПС обязанности соблюдению запрета&#13;
+предоставлять возможность использования на территории Российской Федерации ПАСД для доступа к ИРТЗ»:</text-property>
                                 </label>
                             </cell>
                             <cell id="265">
@@ -3281,7 +3292,8 @@ where msr_prd.eff_dttm::date = ?
                                 <label id="220">
                                     <property name="fontFamily">"Times New Roman"</property>
                                     <property name="textAlign">left</property>
-                                    <text-property name="text">Включение в отчёт раздела «Показатели исполнения ОПС обязанности по исключению из поисковой выдачи сведений об ИРТЗ в разрезе – тип записи реестра»: </text-property>
+                                    <text-property name="text">Включение в отчёт раздела «Показатели исполнения ОПС обязанности по соблюдению запрета&#13;
+предоставлять возможность использования на территории Российской Федерации ПАСД для доступа к ИРТЗ в разрезе – тип записи реестра»: </text-property>
                                 </label>
                             </cell>
                             <cell id="269">
@@ -3382,7 +3394,8 @@ where msr_prd.eff_dttm::date = ?
                                 <label id="221">
                                     <property name="fontFamily">"Times New Roman"</property>
                                     <property name="textAlign">left</property>
-                                    <text-property name="text">Включение в отчёт раздела «Показатели исполнения ОПС обязанности по исключению из поисковой выдачи сведений об ИРТЗ в разрезе – тип запрещённой информации»:</text-property>
+                                    <text-property name="text">Включение в отчёт раздела «Показатели исполнения ОПС обязанности по соблюдению запрета&#13;
+предоставлять возможность использования на территории Российской Федерации ПАСД для доступа к ИРТЗ в разрезе – тип запрещённой информации»: </text-property>
                                 </label>
                             </cell>
                             <cell id="273">
@@ -3483,7 +3496,7 @@ where msr_prd.eff_dttm::date = ?
                                 <label id="222">
                                     <property name="fontFamily">"Times New Roman"</property>
                                     <property name="textAlign">left</property>
-                                    <text-property name="text">Включение в отчёт раздела «Результаты проведения проверок по исполнению ОПС обязанности по исключе-нию из поисковой выдачи сведений об ИРТЗ в разрезе ПС»:</text-property>
+                                    <text-property name="text">Включение в отчёт раздела «Результаты проведения проверок по исполнению ПАСД обязанности по соблюдению запрета предоставлять возможность использования на территории Российской Федерации ПАСД для доступа к ИРТЗ в разрезе ПАСД»:</text-property>
                                 </label>
                             </cell>
                             <cell id="277">
@@ -4436,7 +4449,7 @@ where msr_prd.eff_dttm::date = ?
                         <property name="fontWeight">bold</property>
                         <property name="textAlign">left</property>
                         <property name="display">inline</property>
-                        <text-property name="text">2 Общие показатели исполнения ОПС обязанности по исключению из поисковой выдачи сведений об ИРТЗ за отчётный период:</text-property>
+                        <text-property name="text">2 Общие показатели исполнения владельцами ПАСД обязанности по соблюдению запрета предоставлять возможность использования на территории Российской Федерации ПАСД для доступа к ИРТЗ за отчётный период:</text-property>
                     </label>
                     <data id="419">
                         <property name="backgroundAttachment">scroll</property>
@@ -4691,7 +4704,7 @@ where msr_prd.eff_dttm::date = ?
                                         <property name="showIfBlank">false</property>
                                         <property name="canShrink">false</property>
                                         <property name="overflow">hidden</property>
-                                        <text-property name="text">ПС</text-property>
+                                        <text-property name="text">Название ПАСД</text-property>
                                     </label>
                                 </cell>
                                 <cell id="455">
@@ -5106,7 +5119,7 @@ where msr_prd.eff_dttm::date = ?
                         <property name="fontWeight">bold</property>
                         <property name="textAlign">left</property>
                         <property name="display">inline</property>
-                        <text-property name="text">3 Показатели исполнения ОПС обязанности по исключению из поисковой выдачи сведений об ИРТЗ в разрезе – тип записи реестра – за отчётный период: </text-property>
+                        <text-property name="text">3 Показатели исполнения владельцами ПАСД обязанности по соблюдению запрета предоставлять возможность использования на террито-рии Российской Федерации ПАСД для доступа к ИРТЗ в разрезе – тип записи реестра – за отчётный период: </text-property>
                     </label>
                     <data id="490">
                         <property name="backgroundAttachment">scroll</property>
@@ -5259,7 +5272,7 @@ where msr_prd.eff_dttm::date = ?
                                         <property name="fontFamily">"Times New Roman"</property>
                                         <property name="fontSize">12pt</property>
                                         <property name="textAlign">left</property>
-                                        <expression name="valueExpr">'3.'+row["group_nm"]+' Показатели исполнения ПС '+row["access_tool_name"]+' обязанности по исключению из поисковой выдачи сведений об ИРТЗ в разрезе – тип записи реестра – за отчётный период: '+row["caption"]</expression>
+                                        <expression name="valueExpr">'3.'+row["group_nm"]+' Показатели исполнения ПАСД '+row["access_tool_name"]+' обязанности по соблюдению запрета предоставлять возможность использования на территории Российской Федерации ПАСД для доступа к ИРТЗ в разрезе – тип записи реестра – за отчётный период: '+row["caption"]</expression>
                                         <property name="contentType">html</property>
                                     </text-data>
                                 </cell>
@@ -5267,7 +5280,7 @@ where msr_prd.eff_dttm::date = ?
                         </header>
                         <group id="549">
                             <property name="groupName">at_group</property>
-                            <expression name="keyExpr" type="javascript">'3.'+row["group_nm"]+' Показатели исполнения ПС '+row["access_tool_name"]+' обязанности по исключению из поисковой выдачи сведений об ИРТЗ в разрезе – тип записи реестра – за от-чётный период: '+row["caption"]</expression>
+                            <expression name="keyExpr" type="javascript">'3.'+row["group_nm"]+' Показатели исполнения ПАСД '+row["access_tool_name"]+' обязанности по соблюдению запрета предоставлять возможность использования на территории Российской Федерации ПАСД для доступа к ИРТЗ в разрезе – тип записи реестра – за отчётный период: '+row["caption"]</expression>
                             <property name="hideDetail">false</property>
                             <list-property name="sort">
                                 <structure>
@@ -5849,7 +5862,7 @@ where msr_prd.eff_dttm::date = ?
                         <property name="fontWeight">bold</property>
                         <property name="textAlign">left</property>
                         <property name="display">inline</property>
-                        <text-property name="text">4 Показатели исполнения ОПС обязанности по исключению из поисковой выдачи сведений об ИРТЗ в разрезе – тип запрещённой инфор-мации – за отчётный период: </text-property>
+                        <text-property name="text">4 Показатели исполнения владельцами ПАСД обязанности по соблюдению запрета предоставлять возможность использования на террито-рии Российской Федерации ПАСД для доступа к ИРТЗ в разрезе – тип запрещённой информации – за отчётный период: </text-property>
                     </label>
                     <data id="597">
                         <property name="backgroundAttachment">scroll</property>
@@ -5993,7 +6006,7 @@ where msr_prd.eff_dttm::date = ?
                         </column>
                         <group id="650">
                             <property name="groupName">at_group</property>
-                            <expression name="keyExpr" type="javascript">'4.'+row["group_nm"]+' Показатели исполнения ПС '+row["access_tool_name"]+' обязанности по исключению из поисковой выдачи сведений об ИРТЗ в разрезе – тип запрещённой информации – за отчётный период: '+row["caption"]</expression>
+                            <expression name="keyExpr" type="javascript">'4.'+row["group_nm"]+' Показатели исполнения ПАСД '+row["access_tool_name"]+' обязанности по соблюдению запрета предоставлять возможность использования на территории Российской Федерации ПАСД для доступа к ИРТЗ – тип запрещённой информации – за отчётный период: '+row["caption"]</expression>
                             <property name="hideDetail">false</property>
                             <list-property name="sort">
                                 <structure>
@@ -6057,7 +6070,7 @@ where msr_prd.eff_dttm::date = ?
                                             <property name="showIfBlank">false</property>
                                             <property name="canShrink">false</property>
                                             <property name="overflow">hidden</property>
-                                            <expression name="valueExpr">'4.'+row["group_nm"]+' Показатели исполнения ПС '+row["access_tool_name"]+' обязанности по исключению из поисковой выдачи сведений об ИРТЗ в разрезе – тип запрещённой информации – за отчётный период: '+row["caption"]</expression>
+                                            <expression name="valueExpr">'4.'+row["group_nm"]+' Показатели исполнения ПАСД '+row["access_tool_name"]+' обязанности по соблюдению запрета предоставлять возможность использования на территории Российской Федерации ПАСД для доступа к ИРТЗ – тип запрещённой информации – за отчётный период: '+row["caption"]</expression>
                                             <property name="contentType">html</property>
                                         </text-data>
                                     </cell>
@@ -6621,7 +6634,7 @@ where msr_prd.eff_dttm::date = ?
                         <property name="fontWeight">bold</property>
                         <property name="textAlign">left</property>
                         <property name="display">inline</property>
-                        <text-property name="text">5 Результаты проведения проверок по исполнению ОПС обязанности по исключению из поисковой выдачи сведений об ИРТЗ в разрезе ПС за отчётный период:</text-property>
+                        <text-property name="text">Результаты проведения проверок по исполнению владельцами ПАСД обязанности по соблюдению запрета предоставлять возможность использования на территории Российской Федерации ПАСД для доступа к ИРТЗ в разрезе ПАСД за отчётный период:</text-property>
                     </label>
                     <data id="693">
                         <property name="backgroundAttachment">scroll</property>
