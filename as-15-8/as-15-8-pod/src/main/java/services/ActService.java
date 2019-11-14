@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import repositories.MissionRepository;
 import rest.ActCheckResult;
@@ -37,6 +38,7 @@ import java.util.List;
 @Slf4j
 public class ActService {
 
+    private final RestTemplate anonymizerRestTemplate;
     private final OAuth2RestTemplate restTemplate;
     private final MissionRepository missionRepository;
     private final DispatcherWebClient dispatcherWebClient;
@@ -137,7 +139,7 @@ public class ActService {
                 new HttpEntity<>(body, headers);
 
         ResponseEntity<ResponseStatusString> response =
-                restTemplate.exchange(
+                anonymizerRestTemplate.exchange(
                         UriComponentsBuilder.fromHttpUrl(baseUrl).path("/ArragementReport/").build().toString(),
                         HttpMethod.POST,
                         requestEntity,
