@@ -18,6 +18,8 @@ import nmap4j.data.host.ports.Port;
 import nmap4j.parser.OnePassParser;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.kafka.listener.AbstractMessageListenerContainer;
 import org.springframework.stereotype.Service;
 import proxychains.ProxychainsConfigurator;
@@ -25,9 +27,14 @@ import robots.exceptions.ExecutionException;
 import service.CheckUnitVerificationService;
 
 import java.io.IOException;
-import java.util.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 @Service
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class NmapServiceImpl implements CheckUnitVerificationService {
@@ -38,7 +45,7 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
 
     @Override
     public List<CheckUnitType> getCheckUnitTypes(){
-        return Arrays.asList(CheckUnitType.IP_V4, CheckUnitType.IP_V4_SUBNET);
+        return Arrays.asList(CheckUnitType.IP_V4, CheckUnitType.IP_V4_SUBNET, CheckUnitType.IP_V6, CheckUnitType.IP_V6_SUBNET);
     }
 
     @Override
@@ -48,16 +55,15 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
             String verificationName = "jobID = " + checkUnitJob.getJobID() +
                     " accessTool = " + checkUnitJob.getAccessTool() +
                     " checkUnit = " + checkUnitJob.getCheckUnit().getValue();
-            if(!this.isRunning)
-                throw new ExecutionException("Ошибка при запуске проверки запрещенного ресурса. Сервис проверки остановлен!");
+           /* if(!this.isRunning)
+                throw new ExecutionException("Ошибка при запуске проверки запрещенного ресурса. Сервис проверки остановлен!");*/
             log.info("Запуск проверки nmap: " + verificationName);
 
             ProxychainsConfigurator proxychainsConfigurator = null;
-            if(nmapProperties.getUseProxy())
-                proxychainsConfigurator = createProxychainsConfigurator(checkUnitJob.getAccessTool());
-
+            Path outputFile = Files.createTempFile("job_" + checkUnitJob.getJobID() + "_output", ".xml");
             try {
-
+                if(nmapProperties.getUseProxy())
+                    proxychainsConfigurator = createProxychainsConfigurator(checkUnitJob.getAccessTool());
                 BaseScan baseScan;
                 if(proxychainsConfigurator != null)
                     baseScan = new BaseScan(nmapProperties.getPath(), proxychainsConfigurator.getConfigFile());
@@ -68,17 +74,19 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
                 baseScan.addPorts(Arrays.stream(nmapProperties.getPortsToCheck()).mapToInt(Integer::parseInt).toArray());
                 baseScan.addFlag(Flag.TREAT_HOSTS_AS_ONLINE);
                 baseScan.addFlag(Flag.CONNECT_SCAN);
-                baseScan.setOutputType(IScan.OutputType.XML, "job_" + checkUnitJob.getJobID() + "_output.xml");
+                if(checkUnitJob.getCheckUnit().getType().equals(CheckUnitType.IP_V6) ||
+                        checkUnitJob.getCheckUnit().getType().equals(CheckUnitType.IP_V6_SUBNET)){
+                    baseScan.addFlag(Flag.IPV6);
+                }
+                baseScan.setOutputType(IScan.OutputType.XML, outputFile.toAbsolutePath().toString());
 
                 ExecutionResults results = baseScan.executeScan();
-                log.info("Nmap запущен командой: " + results.getExecutedCommand());
-                log.debug("Ответ nmap: " + results.getOutput());
 
-                OnePassParser opp = new OnePassParser();
-                NMapRun nmapRun = opp.parse(baseScan.getArgumentProperties().getFlagMap().get(Flag.XML_OUTPUT.toString()), OnePassParser.FILE_NAME_INPUT);
+                log.info("Job: " + checkUnitJob.getJobID() + ". Nmap запущен командой: " + results.getExecutedCommand());
+                log.info("Job: " + checkUnitJob.getJobID() + ". Ответ nmap: " + results.getOutput());
+                log.info("Job: " + checkUnitJob.getJobID() + ". Результат nmap: " + new String(Files.readAllBytes(outputFile)));
 
-                if (nmapRun == null)
-                    throw new ExecutionException("Ошибка при проверке ресурса через nmap. Ошибка сохранения результата");
+                NMapRun nmapRun = parseNmapResult(outputFile);
 
                 NmapExecutionResult nmapExecutionResult = new NmapExecutionResult();
                 nmapExecutionResult.setJobID(checkUnitJob.getJobID());
@@ -107,9 +115,12 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
             } finally {
                 if(proxychainsConfigurator != null)
                     proxychainsConfigurator.close();
+                if(outputFile != null && outputFile.toFile().exists())
+                    if(!outputFile.toFile().delete())
+                        log.warn("Ошибка удаления файла с результатом работы nmap. Job: "+checkUnitJob.getJobID());
             }
         } catch (Exception ex){
-            throw new ExecutionException("Ошибка при проверке запрещенных ресуросов в nmap", ex);
+            throw new ExecutionException("Job: " + checkUnitJob.getJobID() + ". Ошибка при проверке запрещенных ресуросов в nmap", ex);
         }
     }
 
@@ -152,5 +163,15 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
             );
         }
         throw new ExecutionException("Ошибка создания конфигуратора proxychains. Не задан адрес прокси сервера");
+    }
+
+    private NMapRun parseNmapResult(Path outputFile) {
+        OnePassParser opp = new OnePassParser();
+        log.info("Парсинг результата: " + outputFile.toAbsolutePath().toString()+". Class id: " + System.identityHashCode(this));
+        NMapRun nmapRun = opp.parse(outputFile.toAbsolutePath().toString(), OnePassParser.FILE_NAME_INPUT);
+        log.info("Результат разобран: " + outputFile.toAbsolutePath().toString()+". Class id: " + System.identityHashCode(this));
+        if (nmapRun == null)
+            throw new NullPointerException("Ошибка парсинга результата. Результат пустой.");
+        return nmapRun;
     }
 }

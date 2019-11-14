@@ -68,7 +68,7 @@ import java.util.List;
  */
 public class NMapXmlHandler extends DefaultHandler {
 	
-	private static List<NMap4JParserEventListener> listeners ;
+	private List<NMap4JParserEventListener> listeners ;
 	
 	private INMapRunHandler runHandler ;
 	
@@ -126,14 +126,14 @@ public class NMapXmlHandler extends DefaultHandler {
 		}
 	}
 	
-	static void addListener(NMap4JParserEventListener listener) {
+	void addListener(NMap4JParserEventListener listener) {
 		if( listeners == null ) {
 			 listeners = new ArrayList<>() ;
 		}
 		listeners.add( listener ) ;
 	}
 	
-	static void removeListener(NMap4JParserEventListener listener) {
+	void removeListener(NMap4JParserEventListener listener) {
 		listeners.remove( listener ) ;
 	}
 

@@ -30,6 +30,8 @@ public class CheckUnitJobHandler {
 
     private final ExecutorChannels executorChannels;
 
+    private final CheckUnitVerificationServiceFactory checkUnitVerificationServiceFactory;
+
     @StreamListener(ExecutorChannels.INPUT_JOBS)
     public void consumeCheckUnitJob(Message<CheckUnitJob> message){
         log.info("\n   ---->>> Принято задание: " + message.getPayload().toString() +
@@ -42,7 +44,7 @@ public class CheckUnitJobHandler {
                     " checkUnit = " + message.getPayload().getCheckUnit().getValue();
 
             ExecutionJobResult executionJobResult =
-                    CheckUnitVerificationServiceFactory
+                    checkUnitVerificationServiceFactory
                             .getService(message.getPayload().getCheckUnit().getType())
                             .run(message.getPayload());
 

@@ -2,11 +2,12 @@ package service.impl;
 
 import checkUnits.CheckUnitJob;
 import checkUnits.CheckUnitType;
-import enums.AccessToolUnit;
 import execution.ExecutionJobResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.kafka.listener.AbstractMessageListenerContainer;
 import org.springframework.stereotype.Service;
 import robots.Robot;
@@ -17,10 +18,7 @@ import robots.factory.RobotsFactory;
 import service.CheckUnitVerificationService;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Сервис управления роботами Selenium
@@ -28,6 +26,7 @@ import java.util.Set;
  *
  */
 @Service
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class RobotsServiceImpl implements CheckUnitVerificationService {
@@ -41,7 +40,7 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 
 	@Override
 	public List<CheckUnitType> getCheckUnitTypes(){
-		return Arrays.asList(CheckUnitType.URL);
+		return Collections.singletonList(CheckUnitType.URL);
 	}
 
 	@Override
@@ -50,8 +49,8 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 			String robotName = "jobID = " + checkUnitJob.getJobID() +
                     " accessTool = " + checkUnitJob.getAccessTool() +
                     " checkUnit = " + checkUnitJob.getCheckUnit().getValue();
-			if(!this.isRunning)
-				throw new ExecutionException("Ошибка при запуске проверки запрещенного ресурса. Сервис проверки остановлен!");
+			/*if(!this.isRunning)
+				throw new ExecutionException("Ошибка при запуске проверки запрещенного ресурса. Сервис проверки остановлен!");*/
 			log.info("Запуск робота: " + robotName);
 
 			Robot robot = robotsFactory.createRobot(checkUnitJob.getAccessTool());

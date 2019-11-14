@@ -2,6 +2,8 @@ package service;
 
 import checkUnits.CheckUnitType;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.ObjectFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,22 +16,15 @@ import java.util.Map;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class CheckUnitVerificationServiceFactory {
 
-    private final List<CheckUnitVerificationService> verificationServices;
+    private final ObjectProvider<List<CheckUnitVerificationService>> verificationServices;
 
-    private static Map<CheckUnitType, CheckUnitVerificationService> verificationServicesCache = new HashMap<>();
-
-    @PostConstruct
-    private void init(){
-        verificationServices.forEach(
-                service -> service.getCheckUnitTypes().forEach(
-                        checkUnitType -> verificationServicesCache.put(checkUnitType, service)));
-    }
-
-    public static CheckUnitVerificationService getService(CheckUnitType checkUnitType){
-        CheckUnitVerificationService service = verificationServicesCache.get(checkUnitType);
-        if(service == null)
-            throw new RuntimeException("Ошибка! Тип запрещенного ресурса " + checkUnitType + " не поддерживается");
-        return service;
+    public CheckUnitVerificationService getService(CheckUnitType checkUnitType){
+        List<CheckUnitVerificationService> services = verificationServices.getIfAvailable();
+        for(CheckUnitVerificationService service : services){
+            if(service.getCheckUnitTypes().contains(checkUnitType))
+                return service;
+        }
+        throw new RuntimeException("Ошибка! Тип запрещенного ресурса " + checkUnitType + " не поддерживается");
     }
 
 }

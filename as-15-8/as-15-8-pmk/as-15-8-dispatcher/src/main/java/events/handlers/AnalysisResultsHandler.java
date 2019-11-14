@@ -40,7 +40,7 @@ public class AnalysisResultsHandler {
     public void consumeAnalysisResults(Message<AnalysisResult> analysisResultMessage) {
         AnalysisResult analysisResult = analysisResultMessage.getPayload();
         log.info("\n   ---->>> Принято сообщение с анализом результатов проверки: " +
-                analysisResult.getJobID() + ", " + analysisResult.getCheckUnit().getValue() +
+                analysisResult.getJobID() + ", " + analysisResult.getCheckUnit().getValue() + ", результат: " + analysisResult.getCheckResult() +
                 ". partition: " + analysisResultMessage.getHeaders().get(KafkaHeaders.RECEIVED_PARTITION_ID, Integer.class) +
                 ", offset: " + analysisResultMessage.getHeaders().get(KafkaHeaders.OFFSET, Long.class));
         try {
