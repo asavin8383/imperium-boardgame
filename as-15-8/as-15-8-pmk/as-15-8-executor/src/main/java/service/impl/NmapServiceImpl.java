@@ -73,11 +73,13 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
                 baseScan.addFlag(Flag.CONNECT_SCAN);
                 baseScan.setOutputType(IScan.OutputType.XML, outputFile.toAbsolutePath().toString());
 
+                log.info("Установлен файл для записи результата: "+checkUnitJob.getJobID()+", Файл: "+outputFile.toAbsolutePath().toString());
                 ExecutionResults results = baseScan.executeScan();
                 log.info("Job: " + checkUnitJob.getJobID() + ". Nmap запущен командой: " + results.getExecutedCommand());
-                log.debug("Job: " + checkUnitJob.getJobID() + ". Ответ nmap: " + results.getOutput());
+                log.info("Job: " + checkUnitJob.getJobID() + ". Ответ nmap: " + results.getOutput());
 
                 OnePassParser opp = new OnePassParser();
+                log.info("Парсинг результата: "+checkUnitJob.getJobID()+", Файл: "+outputFile.toAbsolutePath().toString());
                 NMapRun nmapRun = opp.parse(outputFile.toAbsolutePath().toString(), OnePassParser.FILE_NAME_INPUT);
 
                 if (nmapRun == null)
