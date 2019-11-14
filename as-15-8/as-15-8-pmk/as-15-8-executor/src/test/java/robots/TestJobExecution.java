@@ -5,8 +5,10 @@ import checkUnits.CheckUnitJob;
 import checkUnits.CheckUnitType;
 import common.ApplicationConfiguration;
 import execution.ExecutionJobResult;
+import lombok.RequiredArgsConstructor;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -22,8 +24,11 @@ import java.io.IOException;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {ApplicationConfiguration.class})
 @PropertySource("file:config/application.yml")
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class TestJobExecution {
-	
+
+	private final CheckUnitVerificationServiceFactory checkUnitVerificationServiceFactory;
+
 	@Test
 	public void test() throws ExecutionException, IOException {
 		
@@ -33,7 +38,7 @@ public class TestJobExecution {
 		
 		checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.URL, "Http://cannabay.org"));
 
-		ExecutionJobResult executionJobResult = CheckUnitVerificationServiceFactory
+		ExecutionJobResult executionJobResult = checkUnitVerificationServiceFactory
 				.getService(checkUnitJob.getCheckUnit().getType())
 				.run(checkUnitJob);
 

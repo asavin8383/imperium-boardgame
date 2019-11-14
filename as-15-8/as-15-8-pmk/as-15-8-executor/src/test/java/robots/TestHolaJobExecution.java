@@ -4,8 +4,10 @@ import checkUnits.CheckUnit;
 import checkUnits.CheckUnitJob;
 import checkUnits.CheckUnitType;
 import execution.ExecutionJobResult;
+import lombok.RequiredArgsConstructor;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -23,8 +25,10 @@ import java.io.IOException;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {CheckUnitVerificationServiceFactory.class, RobotsServiceImpl.class, RobotsFactory.class})
 @PropertySource("file:config/application.yml")
-public class TestHolaJobExecution
-{
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
+public class TestHolaJobExecution {
+
+	private final CheckUnitVerificationServiceFactory checkUnitVerificationServiceFactory;
 
 	@Test
 	public void test() throws ExecutionException, IOException {
@@ -35,7 +39,7 @@ public class TestHolaJobExecution
 
 		checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.URL, "myip.ru"));
 
-		ExecutionJobResult executionJobResult = CheckUnitVerificationServiceFactory
+		ExecutionJobResult executionJobResult = checkUnitVerificationServiceFactory
 				.getService(checkUnitJob.getCheckUnit().getType())
 				.run(checkUnitJob);
 
