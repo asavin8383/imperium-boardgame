@@ -37,4 +37,9 @@ public class SchedulePeriodArrangement {
 
     @JsonView(Views.Brief.class)
     private Integer workersCount;
+
+    @JsonView(Views.Brief.class)
+    public Long getArrangementId(){
+        return arrangement == null ? null : arrangement.getId();
+    }
 }
