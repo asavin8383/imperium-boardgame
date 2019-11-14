@@ -12,8 +12,8 @@ services:
     ports:
       - "15813:15813"
     volumes:
-      - ~/AS-15-8-ppo/birt/logs:/log
-      - ~/AS-15-8-ppo/birt/config:/config
+      - ~/as-15-8-ppo/birt/logs:/log
+      - ~/as-15-8-ppo/birt/config:/config
     labels:
       collect_logs_with_filebeat: "true"
       decode_log_event_to_json_object: "true"
@@ -29,8 +29,8 @@ services:
     ports:
       - "15812:15812"
     volumes:
-      - ~/AS-15-8-ppo/rep-scheduler/logs:/log
-      - ~/AS-15-8-ppo/rep-scheduler/config:/config
+      - ~/as-15-8-ppo/rep-scheduler/logs:/log
+      - ~/as-15-8-ppo/rep-scheduler/config:/config
     labels:
       collect_logs_with_filebeat: "true"
       decode_log_event_to_json_object: "true"
