@@ -17,4 +17,5 @@
     <include file="data/changelog/reports.0012.api-name.xml"/>
     <include file="data/changelog/reports.0013.api-short-name.xml"/>
     <include file="data/changelog/reports.0014.irtz_type.xml"/>
+    <include file="data/changelog/reports.0015.fix_weeks.xml"/>
 </databaseChangeLog>
