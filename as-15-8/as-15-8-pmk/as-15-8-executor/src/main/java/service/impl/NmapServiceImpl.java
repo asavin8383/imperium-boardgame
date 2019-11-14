@@ -25,7 +25,11 @@ import robots.exceptions.ExecutionException;
 import service.CheckUnitVerificationService;
 
 import java.io.IOException;
-import java.util.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -53,11 +57,10 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
             log.info("Запуск проверки nmap: " + verificationName);
 
             ProxychainsConfigurator proxychainsConfigurator = null;
-            if(nmapProperties.getUseProxy())
-                proxychainsConfigurator = createProxychainsConfigurator(checkUnitJob.getAccessTool());
-
+            Path outputFile = Files.createTempFile("job_" + checkUnitJob.getJobID() + "_output", ".xml");
             try {
-
+                if(nmapProperties.getUseProxy())
+                    proxychainsConfigurator = createProxychainsConfigurator(checkUnitJob.getAccessTool());
                 BaseScan baseScan;
                 if(proxychainsConfigurator != null)
                     baseScan = new BaseScan(nmapProperties.getPath(), proxychainsConfigurator.getConfigFile());
@@ -68,17 +71,17 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
                 baseScan.addPorts(Arrays.stream(nmapProperties.getPortsToCheck()).mapToInt(Integer::parseInt).toArray());
                 baseScan.addFlag(Flag.TREAT_HOSTS_AS_ONLINE);
                 baseScan.addFlag(Flag.CONNECT_SCAN);
-                baseScan.setOutputType(IScan.OutputType.XML, "job_" + checkUnitJob.getJobID() + "_output.xml");
+                baseScan.setOutputType(IScan.OutputType.XML, outputFile.toAbsolutePath().toString());
 
                 ExecutionResults results = baseScan.executeScan();
-                log.info("Nmap запущен командой: " + results.getExecutedCommand());
-                log.debug("Ответ nmap: " + results.getOutput());
+                log.info("Job: " + checkUnitJob.getJobID() + ". Nmap запущен командой: " + results.getExecutedCommand());
+                log.debug("Job: " + checkUnitJob.getJobID() + ". Ответ nmap: " + results.getOutput());
 
                 OnePassParser opp = new OnePassParser();
-                NMapRun nmapRun = opp.parse(baseScan.getArgumentProperties().getFlagMap().get(Flag.XML_OUTPUT.toString()), OnePassParser.FILE_NAME_INPUT);
+                NMapRun nmapRun = opp.parse(outputFile.toAbsolutePath().toString(), OnePassParser.FILE_NAME_INPUT);
 
                 if (nmapRun == null)
-                    throw new ExecutionException("Ошибка при проверке ресурса через nmap. Ошибка сохранения результата");
+                    throw new ExecutionException("Job: " + checkUnitJob.getJobID() + ". Ошибка при проверке ресурса через nmap. Ошибка парсинга результата");
 
                 NmapExecutionResult nmapExecutionResult = new NmapExecutionResult();
                 nmapExecutionResult.setJobID(checkUnitJob.getJobID());
@@ -107,6 +110,8 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
             } finally {
                 if(proxychainsConfigurator != null)
                     proxychainsConfigurator.close();
+                if(outputFile != null && outputFile.toFile().exists())
+                    outputFile.toFile().delete();
             }
         } catch (Exception ex){
             throw new ExecutionException("Ошибка при проверке запрещенных ресуросов в nmap", ex);
