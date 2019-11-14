@@ -81,12 +81,14 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
                 log.info("Job: " + checkUnitJob.getJobID() + ". Nmap запущен командой: " + results.getExecutedCommand());
                 log.info("Job: " + checkUnitJob.getJobID() + ". Ответ nmap: " + results.getOutput());
 
-                OnePassParser opp = new OnePassParser();
-                log.info("Парсинг результата: "+checkUnitJob.getJobID()+", Файл: "+outputFile.toAbsolutePath().toString());
-                NMapRun nmapRun = opp.parse(outputFile.toAbsolutePath().toString(), OnePassParser.FILE_NAME_INPUT);
-
-                if (nmapRun == null)
-                    throw new ExecutionException("Job: " + checkUnitJob.getJobID() + ". Ошибка при проверке ресурса через nmap. Ошибка парсинга результата");
+                NMapRun nmapRun = null;
+                synchronized(nmapRun) {
+                    OnePassParser opp = new OnePassParser();
+                    log.info("Парсинг результата: " + checkUnitJob.getJobID() + ", Файл: " + outputFile.toAbsolutePath().toString());
+                    nmapRun = opp.parse(outputFile.toAbsolutePath().toString(), OnePassParser.FILE_NAME_INPUT);
+                    if (nmapRun == null)
+                        throw new ExecutionException("Job: " + checkUnitJob.getJobID() + ". Ошибка при проверке ресурса через nmap. Ошибка парсинга результата");
+                }
 
                 NmapExecutionResult nmapExecutionResult = new NmapExecutionResult();
                 nmapExecutionResult.setJobID(checkUnitJob.getJobID());
