@@ -29,6 +29,7 @@ import service.CheckUnitVerificationService;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -76,17 +77,13 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
                 baseScan.addFlag(Flag.CONNECT_SCAN);
                 baseScan.setOutputType(IScan.OutputType.XML, outputFile.toAbsolutePath().toString());
 
-                log.info("Установлен файл для записи результата: "+checkUnitJob.getJobID()+", Файл: "+outputFile.toAbsolutePath().toString());
                 ExecutionResults results = baseScan.executeScan();
+
                 log.info("Job: " + checkUnitJob.getJobID() + ". Nmap запущен командой: " + results.getExecutedCommand());
                 log.info("Job: " + checkUnitJob.getJobID() + ". Ответ nmap: " + results.getOutput());
+                log.info("Job: " + checkUnitJob.getJobID() + ". Результат nmap: " + new String(Files.readAllBytes(outputFile)));
 
-                NMapRun nmapRun;
-                try{
-                    nmapRun = parseNmapResult(outputFile);
-                } catch (Exception ex){
-                    throw new ExecutionException("Ошибка при проверке ресурса через nmap.", ex);
-                }
+                NMapRun nmapRun = parseNmapResult(outputFile);
 
                 NmapExecutionResult nmapExecutionResult = new NmapExecutionResult();
                 nmapExecutionResult.setJobID(checkUnitJob.getJobID());
@@ -120,7 +117,7 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
                         log.warn("Ошибка удаления файла с результатом работы nmap. Job: "+checkUnitJob.getJobID());
             }
         } catch (Exception ex){
-            throw new ExecutionException("Ошибка при проверке запрещенных ресуросов в nmap", ex);
+            throw new ExecutionException("Job: " + checkUnitJob.getJobID() + ". Ошибка при проверке запрещенных ресуросов в nmap", ex);
         }
     }
 
@@ -170,7 +167,7 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
         log.info("Парсинг результата: " + outputFile.toAbsolutePath().toString());
         NMapRun nmapRun = opp.parse(outputFile.toAbsolutePath().toString(), OnePassParser.FILE_NAME_INPUT);
         if (nmapRun == null)
-            throw new RuntimeException("Ошибка парсинга результата. Результат пустой.");
+            throw new NullPointerException("Ошибка парсинга результата. Результат пустой.");
         return nmapRun;
     }
 }
