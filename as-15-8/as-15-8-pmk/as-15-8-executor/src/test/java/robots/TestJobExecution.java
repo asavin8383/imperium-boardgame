@@ -5,7 +5,6 @@ import checkUnits.CheckUnitJob;
 import checkUnits.CheckUnitType;
 import common.ApplicationConfiguration;
 import execution.ExecutionJobResult;
-import lombok.RequiredArgsConstructor;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +19,9 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {ApplicationConfiguration.class})
@@ -34,20 +36,20 @@ public class TestJobExecution {
 		
 		CheckUnitJob checkUnitJob = new CheckUnitJob();
 		checkUnitJob.setJobID(1L);
-		checkUnitJob.setAccessTool("kaspersky");
+		checkUnitJob.setAccessTool("yandex");
 		
-		//checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.URL, "Http://cannabay.org"));
-		checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.IP_V6, "2606:4700:0030:0000:0000:0000:681b:b458"));
+		checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.URL, "Http://cannabay.org"));
+		//checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.IP_V6, "2606:4700:0030:0000:0000:0000:681b:b458"));
 
 		ExecutionJobResult executionJobResult = checkUnitVerificationServiceFactory
 				.getService(checkUnitJob.getCheckUnit().getType())
 				.run(checkUnitJob);
 
 //		Files.write(Paths.get("output.jpg"), executionJobResult.getScreenshot(),
-//		StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-		//ByteArrayInputStream bis = new ByteArrayInputStream(executionJobResult.getScreenshot());
-		//BufferedImage bImage2 = ImageIO.read(bis);
-		//ImageIO.write(bImage2, "jpg", new File("output.jpg") );
+//			StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+		ByteArrayInputStream bis = new ByteArrayInputStream(executionJobResult.getScreenshot());
+		BufferedImage bImage2 = ImageIO.read(bis);
+		ImageIO.write(bImage2, "jpg", new File("output.jpg") );
 
 		System.out.println(executionJobResult.toString());
 	}
