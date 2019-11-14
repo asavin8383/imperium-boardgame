@@ -26,7 +26,6 @@ spring:
           inputJobs:
             consumer:
               consumer:
-                autoCommitOffset: false
                 ackEachRecord: true
                 configuration:
                   max.poll.records: 1
