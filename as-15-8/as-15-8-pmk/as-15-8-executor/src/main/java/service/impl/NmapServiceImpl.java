@@ -162,7 +162,7 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
         throw new ExecutionException("Ошибка создания конфигуратора proxychains. Не задан адрес прокси сервера");
     }
 
-    private synchronized NMapRun parseNmapResult(Path outputFile) {
+    private NMapRun parseNmapResult(Path outputFile) {
         OnePassParser opp = new OnePassParser();
         log.info("Парсинг результата: " + outputFile.toAbsolutePath().toString()+". Class id: " + System.identityHashCode(this));
         NMapRun nmapRun = opp.parse(outputFile.toAbsolutePath().toString(), OnePassParser.FILE_NAME_INPUT);
