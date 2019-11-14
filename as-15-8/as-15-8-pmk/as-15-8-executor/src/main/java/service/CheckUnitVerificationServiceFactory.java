@@ -3,6 +3,7 @@ package service;
 import checkUnits.CheckUnitType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -25,6 +26,7 @@ public class CheckUnitVerificationServiceFactory {
                         checkUnitType -> verificationServicesCache.put(checkUnitType, service)));
     }
 
+    @Lookup
     public static CheckUnitVerificationService getService(CheckUnitType checkUnitType){
         CheckUnitVerificationService service = verificationServicesCache.get(checkUnitType);
         if(service == null)

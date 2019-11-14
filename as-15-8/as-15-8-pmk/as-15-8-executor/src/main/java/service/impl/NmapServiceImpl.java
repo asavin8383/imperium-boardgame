@@ -18,6 +18,8 @@ import nmap4j.data.host.ports.Port;
 import nmap4j.parser.OnePassParser;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.kafka.listener.AbstractMessageListenerContainer;
 import org.springframework.stereotype.Service;
 import proxychains.ProxychainsConfigurator;
@@ -32,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class NmapServiceImpl implements CheckUnitVerificationService {
@@ -113,7 +116,8 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
                 if(proxychainsConfigurator != null)
                     proxychainsConfigurator.close();
                 if(outputFile != null && outputFile.toFile().exists())
-                    outputFile.toFile().delete();
+                    if(!outputFile.toFile().delete())
+                        log.warn("Ошибка удаления файла с результатом работы nmap. Job: "+checkUnitJob.getJobID());
             }
         } catch (Exception ex){
             throw new ExecutionException("Ошибка при проверке запрещенных ресуросов в nmap", ex);

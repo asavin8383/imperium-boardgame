@@ -31,7 +31,7 @@ public class TestJobExecution {
 		checkUnitJob.setJobID(1L);
 		checkUnitJob.setAccessTool("kaspersky");
 		
-		checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.IP_V4, "185.248.101.170"));
+		checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.URL, "Http://cannabay.org"));
 
 		ExecutionJobResult executionJobResult = CheckUnitVerificationServiceFactory
 				.getService(checkUnitJob.getCheckUnit().getType())
