@@ -20,5 +20,8 @@
     <include file="data/changelog/pod.0002.mat_view_content.xml"/>
     <include file="data/changelog/pod.0003.mat_view_check_units.xml"/>
     <include file="data/changelog/uploader.0014.irtz_type.xml"/>
+    <include file="data/changelog/pod.0004.irtz_types_resourse_types.xml"/>
+    <include file="data/changelog/pod.0005.mat_view_check_units.xml"/>
+    <include file="data/changelog/pod.0006.domain_mask_items.xml"/>
 
 </databaseChangeLog>

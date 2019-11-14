@@ -1,0 +1,27 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+
+
+<changeSet id="0015.1" author="klychagin">
+    <sql>
+update dm.msr_prd set eff_dttm=eff_dttm - INTERVAL '1 DAY' where msr_prd_tp_id=2 and extract (isodow from eff_dttm)=2;
+update dm.msr_prd set end_dttm=end_dttm - INTERVAL '1 DAY' where msr_prd_tp_id=2 and extract (isodow from end_dttm)=1;
+update dm.msr_prd set caption=to_char(eff_dttm,'dd.mm.yyyy') ||' - '||to_char(end_dttm,'dd.mm.yyyy') where msr_prd_tp_id=2;
+        update dm.msr_prd_hier h set week_id=(select m.msr_prd_id from dm.msr_prd m where msr_prd_tp_id=2
+                                                                              and m.eff_dttm&lt;=(select d.eff_dttm from dm.msr_prd d where d.msr_prd_id=h.day_id)
+                                                                              and  m.end_dttm&gt;=(select d.end_dttm from dm.msr_prd d where d.msr_prd_id=h.day_id));
+    </sql>
+    </changeSet>
+<changeSet id="0016.1" author="klychagin">
+    <sql>
+ update dm.reg_reports  r set (msr_prd_caption,msr_prd_st_dttm,msr_prd_end_dttm)
+    =(select m.caption, m.eff_dttm, m.end_dttm  from dm.msr_prd m
+    where m.msr_prd_id=r.msr_prd_id  ) where r.msr_prd_tp_id=2;
+    </sql>
+    </changeSet>
+
+</databaseChangeLog>
+
+
