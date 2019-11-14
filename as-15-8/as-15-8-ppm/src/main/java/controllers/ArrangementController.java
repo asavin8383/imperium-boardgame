@@ -8,6 +8,7 @@ import enums.AccessToolUnit;
 import enums.ArrangementEvents;
 import enums.Protocol;
 import restapi.ArrangementStatusUploader;
+import restapi.pod.DomainMaskUploader;
 import webClients.PptWebClient;
 import exceptions.AS_15_8_PPM_Exception;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import repositories.ArrangementRepo;
-import repositories.DomainMaskItemRepo;
 
 import javax.transaction.Transactional;
 import java.time.LocalTime;
@@ -44,7 +44,7 @@ public class ArrangementController {
     private final PptWebClient PPTWebClient;
     private final ArrangementStatusUploader arrangementStatusUploader;
     private final SchedulerProperties schedulerProperties;
-    private final DomainMaskItemRepo domainMaskItemRepo;
+    private final DomainMaskUploader domainMaskUploader;
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @Transactional
@@ -105,16 +105,8 @@ public class ArrangementController {
                 return scheduleCheckUnits;
             }
             case DOMAIN_MASK: {
-                domainMaskItemRepo.findAllByDomainMask(checkUnit.getValue())
-                    .forEach(domainMaskItem -> scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit.getErdiId(), CheckUnitType.URL, domainMaskItem.getDomainMaskItem())));
-                return scheduleCheckUnits;
-            }
-            case IP_V4: {
-                if (checkUnit.getValue().matches("\\\\\\d{1,3}$")){
-                    scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit.getErdiId(), CheckUnitType.IP_V4_SUBNET, checkUnit.getValue()));
-                } else {
-                    scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit.getErdiId(), checkUnit.getType(), checkUnit.getValue()));
-                }
+                domainMaskUploader.getDomainMaskItems(checkUnit.getValue())
+                    .forEach(domainMaskItem -> scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit.getErdiId(), CheckUnitType.URL, domainMaskItem)));
                 return scheduleCheckUnits;
             }
             default: {

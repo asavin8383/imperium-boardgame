@@ -57,5 +57,15 @@
     <changeSet id="uploader.0020" author="klychagin">
                <sqlFile encoding="UTF-8" splitStatements="false" path="data/sql/sor_set_irtz_type.sql"/>
     </changeSet>
+     <changeSet id="uploader.0021" author="klychagin">
+        <createIndex schemaName="sor" tableName="content_history" indexName="content_history_content_id_idx">
+            <column name="content_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet id="uploader.0022" author="klychagin">
+        <createIndex schemaName="sor" tableName="content_history" indexName="content_history_content_version_id_idx">
+            <column name="content_version_id"/>
+        </createIndex>
+    </changeSet>
 </databaseChangeLog>
 

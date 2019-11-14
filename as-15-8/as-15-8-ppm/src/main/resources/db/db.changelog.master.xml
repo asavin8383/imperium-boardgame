@@ -10,4 +10,5 @@
     <include file="db/changelog/ppm.0005.schedule_change_user_to_author.xml"/>
     <include file="db/changelog/ppm.0006.schedule_periods_auto_inc.xml"/>
     <include file="db/changelog/ppm.0007.cascades.xml"/>
+    <include file="db/changelog/ppm.0008.domain_mask_items_drop.xml"/>
 </databaseChangeLog>

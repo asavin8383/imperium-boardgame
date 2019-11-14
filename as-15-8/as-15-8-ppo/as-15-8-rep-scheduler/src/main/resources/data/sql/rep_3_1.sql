@@ -11,6 +11,8 @@ select
 
 from portal.arrangements  a join results.results r on a.id=r.arrangement_id
 
+
+
 -- Базовый запрос
 
 
@@ -143,11 +145,38 @@ and access_tool_tp_id=1
 group by grouping sets ((  msr_prd.caption,at.nm),(  msr_prd.caption,at.nm,coalesce(subtype.violation_name,subtype.category_name,subtype.registry_name)) ) order by at.nm,coalesce(subtype.violation_name,subtype.category_name,subtype.registry_name) nulls first
 ;
 
+-- раздел 5
+select dense_rank() over (order by at.nm)                                             as            group_nm,
+       row_number() over (order by at.nm)                                           rn,
+       at.nm as                                                                     access_tool_name,
+       r.check_unit_value,
+       case
+           when coalesce(ci.blocktype, 'default') = 'default' then 'URL'
+           when coalesce(ci.blocktype, 'default') = 'domain' then 'Доменных имен'
+           when coalesce(ci.blocktype, 'default') = 'domain-mask' then 'Доменных имен по маске'
+           when coalesce(ci.blocktype, 'default') = 'domain-mask' then 'Доменных имен по маске'
+           when coalesce(ci.blocktype, 'default') = 'domain-mask' then 'Доменных имен по маске'
+           when coalesce(ci.blocktype, 'default') = 'domain-mask' then 'Доменных имен по маске'
+           else 'Прочее' end
+                                          as                                                          blocktype,
+       r.result
+from results.results r
+         join portal.arrangements a on r.arrangement_id = a.id
+         join sor.content c on r.content_id = c.id
+         join sor.content_info ci on c.id = ci.content_id
+         join config.robots on robots.name = a.access_tool
+         join dm.access_tool at
+              on robots.orig_id = at.orig_id and a.creation_date >= at.eff_dttm and a.creation_date < at.end_dttm
+                  and ((robots.type = 'PS' and at.access_tool_tp_id = 1))
+         left join sor.addon on addon.content_id = c.id
+         join dm.msr_prd on msr_prd.msr_prd_tp_id = 1 and r.end_date between msr_prd.eff_dttm and msr_prd.end_dttm
+where msr_prd.eff_dttm::date = '2019-11-07'
+  and access_tool_tp_id = 1
+order by at.nm
+;
 
 
-
-
-
+select * from sor.blocktype;
 select * from sor.content;
 select * from sor.blocktype order by blocktype;
 select * from results.results;
