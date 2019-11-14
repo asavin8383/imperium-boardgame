@@ -81,13 +81,11 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
                 log.info("Job: " + checkUnitJob.getJobID() + ". Nmap запущен командой: " + results.getExecutedCommand());
                 log.info("Job: " + checkUnitJob.getJobID() + ". Ответ nmap: " + results.getOutput());
 
-                NMapRun nmapRun = null;
-                synchronized(nmapRun) {
-                    OnePassParser opp = new OnePassParser();
-                    log.info("Парсинг результата: " + checkUnitJob.getJobID() + ", Файл: " + outputFile.toAbsolutePath().toString());
-                    nmapRun = opp.parse(outputFile.toAbsolutePath().toString(), OnePassParser.FILE_NAME_INPUT);
-                    if (nmapRun == null)
-                        throw new ExecutionException("Job: " + checkUnitJob.getJobID() + ". Ошибка при проверке ресурса через nmap. Ошибка парсинга результата");
+                NMapRun nmapRun;
+                try{
+                    nmapRun = parseNmapResult(outputFile);
+                } catch (Exception ex){
+                    throw new ExecutionException("Ошибка при проверке ресурса через nmap.", ex);
                 }
 
                 NmapExecutionResult nmapExecutionResult = new NmapExecutionResult();
@@ -165,5 +163,14 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
             );
         }
         throw new ExecutionException("Ошибка создания конфигуратора proxychains. Не задан адрес прокси сервера");
+    }
+
+    private synchronized NMapRun parseNmapResult(Path outputFile) {
+        OnePassParser opp = new OnePassParser();
+        log.info("Парсинг результата: " + outputFile.toAbsolutePath().toString());
+        NMapRun nmapRun = opp.parse(outputFile.toAbsolutePath().toString(), OnePassParser.FILE_NAME_INPUT);
+        if (nmapRun == null)
+            throw new RuntimeException("Ошибка парсинга результата. Результат пустой.");
+        return nmapRun;
     }
 }
