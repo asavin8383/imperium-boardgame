@@ -24,10 +24,10 @@ import java.io.IOException;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {ApplicationConfiguration.class})
 @PropertySource("file:config/application.yml")
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class TestJobExecution {
 
-	private final CheckUnitVerificationServiceFactory checkUnitVerificationServiceFactory;
+	@Autowired
+	private CheckUnitVerificationServiceFactory checkUnitVerificationServiceFactory;
 
 	@Test
 	public void test() throws ExecutionException, IOException {
@@ -36,7 +36,8 @@ public class TestJobExecution {
 		checkUnitJob.setJobID(1L);
 		checkUnitJob.setAccessTool("kaspersky");
 		
-		checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.URL, "Http://cannabay.org"));
+		//checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.URL, "Http://cannabay.org"));
+		checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.IP_V6, "2606:4700:0030:0000:0000:0000:681b:b458"));
 
 		ExecutionJobResult executionJobResult = checkUnitVerificationServiceFactory
 				.getService(checkUnitJob.getCheckUnit().getType())
@@ -44,9 +45,9 @@ public class TestJobExecution {
 
 //		Files.write(Paths.get("output.jpg"), executionJobResult.getScreenshot(),
 //		StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-		ByteArrayInputStream bis = new ByteArrayInputStream(executionJobResult.getScreenshot());
-		BufferedImage bImage2 = ImageIO.read(bis);
-		ImageIO.write(bImage2, "jpg", new File("output.jpg") );
+		//ByteArrayInputStream bis = new ByteArrayInputStream(executionJobResult.getScreenshot());
+		//BufferedImage bImage2 = ImageIO.read(bis);
+		//ImageIO.write(bImage2, "jpg", new File("output.jpg") );
 
 		System.out.println(executionJobResult.toString());
 	}

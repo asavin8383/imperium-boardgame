@@ -29,7 +29,6 @@ import service.CheckUnitVerificationService;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +45,7 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
 
     @Override
     public List<CheckUnitType> getCheckUnitTypes(){
-        return Arrays.asList(CheckUnitType.IP_V4, CheckUnitType.IP_V4_SUBNET);
+        return Arrays.asList(CheckUnitType.IP_V4, CheckUnitType.IP_V4_SUBNET, CheckUnitType.IP_V6, CheckUnitType.IP_V6_SUBNET);
     }
 
     @Override
@@ -75,6 +74,10 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
                 baseScan.addPorts(Arrays.stream(nmapProperties.getPortsToCheck()).mapToInt(Integer::parseInt).toArray());
                 baseScan.addFlag(Flag.TREAT_HOSTS_AS_ONLINE);
                 baseScan.addFlag(Flag.CONNECT_SCAN);
+                if(checkUnitJob.getCheckUnit().getType().equals(CheckUnitType.IP_V6) ||
+                        checkUnitJob.getCheckUnit().getType().equals(CheckUnitType.IP_V6_SUBNET)){
+                    baseScan.addFlag(Flag.IPV6);
+                }
                 baseScan.setOutputType(IScan.OutputType.XML, outputFile.toAbsolutePath().toString());
 
                 ExecutionResults results = baseScan.executeScan();
