@@ -79,7 +79,7 @@ public class OnePassParser implements NMap4JParserEventListener {
 		nmxh = new NMapXmlHandler(nmrh) ;
 	}
 	
-	public NMapRun parse(String input, int type  ) {
+	public synchronized NMapRun parse(String input, int type  ) {
 		
 		NMapXmlHandler.addListener( this ) ;
 		

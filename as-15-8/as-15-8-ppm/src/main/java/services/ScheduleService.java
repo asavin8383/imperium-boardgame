@@ -263,12 +263,13 @@ public class ScheduleService {
     private ArrangementSchedulePeriodProcessing calculateArrangementSchedulePeriodProcessing(SortedSet<ScheduleCheckUnit> checkedSet, int workersCount, String accessTool, LocalTime startTime, LocalTime endTime){
         ScheduleCheckUnit lastCompletionCheckUnit = checkedSet.first();
         long maxProcessingTime = ChronoUnit.SECONDS.between(startTime, endTime) * workersCount;
-        long processingTime = 1;
+        long processingTime = 0;
         for(ScheduleCheckUnit checkUnit : checkedSet){
-            processingTime += schedulerProperties.getProcessingTime(accessTool, checkUnit.getCheckUnitType());
-            if(processingTime > maxProcessingTime){
+            long checkUnitProcessingTime = schedulerProperties.getProcessingTime(accessTool, checkUnit.getCheckUnitType());
+            if((processingTime + checkUnitProcessingTime) > maxProcessingTime){
                 break;
             }
+            processingTime += checkUnitProcessingTime;
             lastCompletionCheckUnit = checkUnit;
         }
         return new ArrangementSchedulePeriodProcessing(
