@@ -1,4 +1,4 @@
-package model;
+package model.scheme;
 
 import lombok.Data;
 
@@ -9,7 +9,7 @@ import javax.persistence.*;
  * Date: 04.11.2019
  */
 @Entity
-@Table(schema = "schedule", name = "domain_mask_items")
+@Table(schema = "sor", name = "domain_mask_items")
 @Data
 public class DomainMaskItem {
 

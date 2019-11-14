@@ -1,0 +1,36 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <changeSet id="pod.0004" author="asavin">
+        <createTable schemaName="sor" tableName="irtz_types_resourse_types">
+            <column name="irtz_type" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="resourse_type_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addUniqueConstraint schemaName="sor" tableName="irtz_types_resourse_types" columnNames="irtz_type, resourse_type_id" constraintName="UC_types"/>
+        <addForeignKeyConstraint
+                baseTableSchemaName="sor"
+                baseTableName="irtz_types_resourse_types"
+                baseColumnNames="resourse_type_id"
+                constraintName="FK_resourse_type_id"
+                referencedTableSchemaName="sor"
+                referencedTableName="resource_type"
+                referencedColumnNames="id" onUpdate="CASCADE" onDelete="CASCADE"/>
+        <sql>
+            insert into sor.irtz_types_resourse_types (irtz_type, resourse_type_id) values ('domain', 1);
+            insert into sor.irtz_types_resourse_types (irtz_type, resourse_type_id) values ('ip', 2);
+            insert into sor.irtz_types_resourse_types (irtz_type, resourse_type_id) values ('ip', 3);
+            insert into sor.irtz_types_resourse_types (irtz_type, resourse_type_id) values ('ip', 4);
+            insert into sor.irtz_types_resourse_types (irtz_type, resourse_type_id) values ('ip', 5);
+            insert into sor.irtz_types_resourse_types (irtz_type, resourse_type_id) values ('url', 6);
+            insert into sor.irtz_types_resourse_types (irtz_type, resourse_type_id) values ('domain-mask', 7);
+        </sql>
+        <rollback>
+            <dropTable schemaName="sor" tableName="irtz_types_resourse_types"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>
