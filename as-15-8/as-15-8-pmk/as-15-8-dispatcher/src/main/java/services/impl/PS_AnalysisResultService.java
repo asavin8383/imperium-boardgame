@@ -1,10 +1,8 @@
 package services.impl;
 
+import analysis.PS_AnalysisJobResult;
 import model.Result;
 import org.springframework.stereotype.Service;
-
-import analysis.PS_AnalysisJobResult;
-import enums.CheckUnitJobResult;
 import services.AnalysisResultService;
 
 /**
