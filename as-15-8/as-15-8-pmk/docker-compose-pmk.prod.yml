@@ -130,4 +130,4 @@ configs:
   analyzer-logback:
     file: analyzer/config/logback-spring.xml
   filebeat-config:
-    file: filebeat/filebeat.prod.yml
+    file: filebeat/filebeat.yml
