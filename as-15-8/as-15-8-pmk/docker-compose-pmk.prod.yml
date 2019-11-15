@@ -11,7 +11,7 @@ services:
     deploy:
       placement:
         constraints:
-          - node.hostname == as-15-8-pmk
+          - node.hostname == master
       mode: replicated
       replicas: 1
     environment:
