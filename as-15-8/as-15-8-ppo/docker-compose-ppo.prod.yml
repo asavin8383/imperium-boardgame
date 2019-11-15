@@ -35,6 +35,7 @@ services:
       collect_logs_with_filebeat: "true"
       decode_log_event_to_json_object: "true"
   filebeat:
+    container_name: filebeat_ppo
     image: dcr.ec-leasing.ru/as-15-8/elk/filebeat:7.2.0
     restart: on-failure
     volumes:
