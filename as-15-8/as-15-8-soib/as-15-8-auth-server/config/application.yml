@@ -51,7 +51,7 @@ ldap:
     url: ldap://10.97.220.140:389/
     base: OU=AS_15_8,DC=as158,DC=ru
     userDn: sa
-    password: 12345
+    password: 1qaz@WSXQwerty123
 
 ---
 
