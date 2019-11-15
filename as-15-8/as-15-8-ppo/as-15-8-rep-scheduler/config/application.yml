@@ -58,6 +58,34 @@ security:
 
 ---
 
+spring:
+  profiles: prod
+  profiles.include: docker_log
+  datasource:
+    url: jdbc:postgresql://10.97.220.144:5432/asdb
+  liquibase:
+    enabled: true
+  main:
+    banner-mode: "off"
+app:
+  schedule: '*/10 * * * * ?'
+
+---
+
+spring:
+  profiles: test
+  profiles.include: docker_log
+  datasource:
+    url: jdbc:postgresql://192.168.5.195:5432/asdb
+  liquibase:
+    enabled: true
+  main:
+    banner-mode: "off"
+app:
+  schedule: '*/10 * * * * ?'
+
+---
+
 logging:
   config:
   level:
@@ -79,21 +107,3 @@ spring:
     enabled: false
 app:
   schedule: '*/10 * * * * ?'
-
-
----
-
-spring:
-  profiles: test
-  profiles.include: docker_log
-  datasource:
-    url: jdbc:postgresql://192.168.5.195:5432/asdb
-  liquibase:
-    enabled: true
-  main:
-    banner-mode: "off"
-app:
-  schedule: '*/10 * * * * ?'
-
-
-
