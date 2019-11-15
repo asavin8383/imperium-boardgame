@@ -9,8 +9,11 @@ services:
       - ~/as-15-8-ppm/logs:/log
       - ~/as-15-8-ppm/config:/config
     environment:
-      PROFILE: prod
-      GATEWAY_URI: http://10.97.220.145:15880
+      PROFILE: test
+      GATEWAY_URI: http://10.97.220.134:15880
       TZ: "Europe/Moscow"
     ports:
       - "15803:15803"
+    labels:
+      collect_logs_with_filebeat: "true"
+      decode_log_event_to_json_object: "true"
