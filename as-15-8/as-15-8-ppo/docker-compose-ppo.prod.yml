@@ -6,7 +6,7 @@ services:
     network_mode: "host"
     restart: always
     environment:
-      PROFILE: test
+      PROFILE: prod
       GATEWAY_URI: http://10.97.220.134:15880
       TZ: "Europe/Moscow"
     ports:
@@ -23,7 +23,7 @@ services:
     restart: always
     network_mode: "host"
     environment:
-      PROFILE: test
+      PROFILE: prod
       GATEWAY_URI: http://10.97.220.134:15880
       TZ: "Europe/Moscow"
     ports:
@@ -38,7 +38,7 @@ services:
     image: dcr.ec-leasing.ru/as-15-8/elk/filebeat:7.2.0
     restart: on-failure
     volumes:
-      - ./filebeat/filebeat.prod.yml:/usr/share/filebeat/filebeat.yml:ro
+      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./filebeat/data:/usr/share/filebeat/data:rw

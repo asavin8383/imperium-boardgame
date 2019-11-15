@@ -9,7 +9,7 @@ services:
       - ~/as-15-8-smuf/discovery/logs:/log
       - ~/as-15-8-smuf/discovery/config:/config
     environment:
-      PROFILE: test
+      PROFILE: prod
       AUTH_SERVER_URI: http://10.97.220.136:15805
       TZ: "Europe/Moscow"
     ports:
@@ -28,7 +28,7 @@ services:
       - ~/as-15-8-smuf/gateway/logs:/log
       - ~/as-15-8-smuf/gateway/config:/config
     environment:
-      PROFILE: test
+      PROFILE: prod
       EUREKA_URI: http://10.97.220.134:8761
       AUTH_SERVER_URI: http://10.97.220.136:15805
       TZ: "Europe/Moscow"
@@ -49,7 +49,7 @@ services:
       - ~/as-15-8-smuf/config-server/logs:/log
       - ~/as-15-8-smuf/config-server/config:/config
     environment:
-      PROFILE: test
+      PROFILE: prod
       GATEWAY_URI: http://10.97.220.134:15880
       TZ: "Europe/Moscow"
     ports:
@@ -62,7 +62,7 @@ services:
     image: dcr.ec-leasing.ru/as-15-8/elk/filebeat:7.2.0
     restart: on-failure
     volumes:
-      - ./filebeat/filebeat.prod.yml:/usr/share/filebeat/filebeat.yml:ro
+      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./filebeat/data:/usr/share/filebeat/data:rw

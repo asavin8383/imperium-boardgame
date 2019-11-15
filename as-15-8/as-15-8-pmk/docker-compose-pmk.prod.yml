@@ -11,11 +11,11 @@ services:
     deploy:
       placement:
         constraints:
-          - node.hostname == pmk
+          - node.hostname == master
       mode: replicated
       replicas: 1
     environment:
-      PROFILE: test
+      PROFILE: prod
       GATEWAY_URI: http://10.97.220.134:15880
       TZ: "Europe/Moscow"
     ports:
@@ -43,7 +43,7 @@ services:
       - as-15-8-net
     stop_grace_period: 5m
     environment:
-      PROFILE: test
+      PROFILE: prod
       GATEWAY_URI: http://10.97.220.134:15880
       TZ: "Europe/Moscow"
     ports:
@@ -70,7 +70,7 @@ services:
     networks:
       - as-15-8-net
     environment:
-      PROFILE: test
+      PROFILE: prod
       GATEWAY_URI: http://10.97.220.134:15880
       TZ: "Europe/Moscow"
     ports:
@@ -130,4 +130,4 @@ configs:
   analyzer-logback:
     file: analyzer/config/logback-spring.xml
   filebeat-config:
-    file: filebeat/filebeat.prod.yml
+    file: filebeat/filebeat.yml
