@@ -9,7 +9,7 @@ services:
       - ~/as-15-8-ppt/logs:/log
       - ~/as-15-8-ppt/config:/config
     environment:
-      PROFILE: test
+      PROFILE: prod
       GATEWAY_URI: http://10.97.220.134:15880
       TZ: "Europe/Moscow"
     ports:

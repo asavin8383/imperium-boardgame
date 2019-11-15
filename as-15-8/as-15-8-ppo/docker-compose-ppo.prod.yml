@@ -6,7 +6,7 @@ services:
     network_mode: "host"
     restart: always
     environment:
-      PROFILE: test
+      PROFILE: prod
       GATEWAY_URI: http://10.97.220.134:15880
       TZ: "Europe/Moscow"
     ports:
@@ -23,7 +23,7 @@ services:
     restart: always
     network_mode: "host"
     environment:
-      PROFILE: test
+      PROFILE: prod
       GATEWAY_URI: http://10.97.220.134:15880
       TZ: "Europe/Moscow"
     ports:

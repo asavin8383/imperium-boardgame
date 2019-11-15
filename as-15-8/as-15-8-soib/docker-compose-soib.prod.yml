@@ -9,7 +9,7 @@ services:
       - ~/as-15-8-soib/auth-server/logs:/log
       - ~/as-15-8-soib/auth-server/config:/config
     environment:
-      PROFILE: test
+      PROFILE: prod
       EUREKA_URI: http://10.97.220.134:8761
       TZ: "Europe/Moscow"
     ports:
