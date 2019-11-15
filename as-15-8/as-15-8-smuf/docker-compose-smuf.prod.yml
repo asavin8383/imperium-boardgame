@@ -10,9 +10,13 @@ services:
       - ~/as-15-8-smuf/discovery/config:/config
     environment:
       PROFILE: test
+      AUTH_SERVER_URI: http://10.97.220.136:15805
       TZ: "Europe/Moscow"
     ports:
       - "8761:8761"
+    labels:
+      collect_logs_with_filebeat: "true"
+      decode_log_event_to_json_object: "true"
   gateway:
     container_name: gateway
     image: dcr.ec-leasing.ru/as-15-8/as-15-8-gateway
@@ -25,10 +29,14 @@ services:
       - ~/as-15-8-smuf/gateway/config:/config
     environment:
       PROFILE: test
-      EUREKA_URI: http://10.97.220.145:8761
+      EUREKA_URI: http://10.97.220.134:8761
+      AUTH_SERVER_URI: http://10.97.220.136:15805
       TZ: "Europe/Moscow"
     ports:
       - "15880:15880"
+    labels:
+      collect_logs_with_filebeat: "true"
+      decode_log_event_to_json_object: "true"
   config-server:
     container_name: config-server
     image: dcr.ec-leasing.ru/as-15-8/as-15-8-config-server
@@ -42,7 +50,21 @@ services:
       - ~/as-15-8-smuf/config-server/config:/config
     environment:
       PROFILE: test
-      GATEWAY_URI: http://10.97.220.145:15880
+      GATEWAY_URI: http://10.97.220.134:15880
       TZ: "Europe/Moscow"
     ports:
       - "15802:15802"
+    labels:
+      collect_logs_with_filebeat: "true"
+      decode_log_event_to_json_object: "true"
+  filebeat:
+    container_name: filebeat
+    image: dcr.ec-leasing.ru/as-15-8/elk/filebeat:7.2.0
+    restart: on-failure
+    volumes:
+      - ./filebeat/filebeat.prod.yml:/usr/share/filebeat/filebeat.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./filebeat/data:/usr/share/filebeat/data:rw
+    command: filebeat -e -strict.perms=false
+    user: root

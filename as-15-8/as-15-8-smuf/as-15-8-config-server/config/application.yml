@@ -77,6 +77,10 @@ spring:
     banner-mode: "off"
   datasource:
     url: jdbc:postgresql://10.97.220.144:5432/asdb
+  cloud.stream:
+    kafka:
+      binder:
+        brokers: 10.97.220.178:9092,10.97.220.179:9092,10.97.220.180:9092
 
 ---
 
