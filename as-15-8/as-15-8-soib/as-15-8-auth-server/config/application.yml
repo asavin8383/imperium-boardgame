@@ -45,6 +45,13 @@ spring:
     banner-mode: "off"
   datasource:
     url: jdbc:postgresql://10.97.220.144:5432/asdb
+ldap:
+  domain: as158.ru
+  source:
+    url: ldap://10.97.220.140:389/
+    base: OU=AS_15_8,DC=as158,DC=ru
+    userDn: sa
+    password: 12345
 
 ---
 
