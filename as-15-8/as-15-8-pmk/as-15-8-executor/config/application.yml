@@ -36,8 +36,8 @@ spring:
   main:
     banner-mode: "off"
   cloud.stream:
-    kafka. binder.brokers: 10.97.220.141:9094,10.97.220.142:9094,10.97.220.143:9094
-selenium-hub-url: http://10.97.220.147:4444/wd/hub
+    kafka. binder.brokers: 10.97.220.178:9092,10.97.220.179:9092,10.97.220.180:9092
+selenium-hub-url: http://user:1q0p2w9o@10.97.220.165:4442/wd/hub
 
 ---
 
