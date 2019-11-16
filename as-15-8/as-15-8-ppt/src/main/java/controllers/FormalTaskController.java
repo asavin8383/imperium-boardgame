@@ -20,8 +20,7 @@ import rest.MissionData;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -107,6 +106,23 @@ public class FormalTaskController {
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
+	@GetMapping(path = "/confirm_success_sent", produces = MediaType.APPLICATION_STREAM_JSON_VALUE)
+	public void confirmSuccessSent(Long arrangementId){
+		log.info("Уведомление об успешной отправке мероприятия. ID мероприятия: {}", arrangementId);
+
+		FormalTask formalTask = formalTaskRepo.getByArrangementId(arrangementId);
+		if (formalTask != null && formalTask.getStatus() == ExecutionStatus.FINISHED){
+			formalTask.setStatus(ExecutionStatus.ACT_SENT);
+			formalTaskRepo.save(formalTask);
+			log.info("Состояние у FormalTask с id = {} изменено на : {}", formalTask.getId(), ExecutionStatus.ACT_SENT);
+		}
+		else {
+			log.info("Состояние FormalTask (arrangementId = {}) не изменилось", arrangementId);
+		}
+	}
+
+
+	@PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
 	@PostMapping(path = "/create_with_mission")
 	public void postFormalTask(@RequestBody MissionData missionData, Principal principal) {
 		log.info("Запрос создания FormalTask по поручению: {}", missionData);
@@ -125,6 +141,21 @@ public class FormalTaskController {
 		storedTask.setPriority(newTask.getPriority());
 		storedTask.setOperator(newTask.getOperator());
 		return storedTask;
+	}
+
+	@GetMapping(path = "/ready_for_act")
+	public Boolean readyForAct(@RequestParam Long id){
+		Optional<FormalTask> optFormalTask = formalTaskRepo.findById(id);
+		if (!optFormalTask.isPresent())
+			throw new AS_15_8_PPT_Exception("FormalTask не найден, id = " + id);
+
+		FormalTask formalTask = optFormalTask.get();
+
+		Set<ExecutionStatus> states =
+				new HashSet<>(Arrays.asList(ExecutionStatus.FINISHED, ExecutionStatus.ACT_SENT));
+		Boolean res =
+				formalTask.getMissionId() != null && states.contains(formalTask.getStatus());
+		return res;
 	}
 
 	private FormalTask createFormalTaskByMission(MissionData missionData, String operator){

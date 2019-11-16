@@ -43,8 +43,6 @@ cron:
 
 ---
 
-eureka:
-  client.enabled: false
 spring:
   profiles: prod
   profiles.include: docker_log

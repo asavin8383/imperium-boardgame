@@ -22,6 +22,7 @@ spring:
         bindings:
           input:
             consumer:
+              concurrency: 1
               ackEachRecord: true
               configuration:
                 max.poll.records: 1
@@ -44,7 +45,7 @@ spring:
   cloud.stream:
     kafka:
       binder:
-        brokers: 10.97.220.141:9094,10.97.220.142:9094,10.97.220.143:9094
+        brokers: 10.97.220.178:9092,10.97.220.179:9092,10.97.220.180:9092
 source_path_vpn:
 source_path_anonym:
 
@@ -55,10 +56,6 @@ spring:
   profiles.include: docker_log
   main:
     banner-mode: "off"
-  cloud.stream:
-    bindings:
-      input:
-        consumer.concurrency: 1
 source_path_vpn:
 source_path_anonym:
 

@@ -78,7 +78,7 @@ public class PodWebClient {
                     .doOnError(ex -> log.error("Ошибка при получении CheckUnit по ЕРДИ id: "+contentId, ex));
             //return Arrays.asList(oAuth2RestTemplate.getForObject(uri, CheckUnit[].class));
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
-            throw AS_15_8_PPT_Exception.logAndGet(log, String.format("Ошибка получения чек-юнитов ЕРДИ %d в ППТ, код возврата %s", contentId, ex.getStatusCode()));
+            throw AS_15_8_PPT_Exception.logAndGet(log, String.format("Ошибка получения чек-юнитов ЕРДИ %d в ППТ, код возврата %s", contentId, ex.getStatusCode()), ex);
         }
     }
 
