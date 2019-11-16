@@ -3,6 +3,7 @@ package repositories;
 import enums.ExecutionStatus;
 import model.task.ExecutionStatusStatistics;
 import model.task.FormalTask;
+import model.task.Arrangement;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -30,4 +31,8 @@ public interface FormalTaskRepository extends JpaRepository<FormalTask, Long>, F
 
 	@Query("SELECT COUNT(f) FROM FormalTask f WHERE f.missionId=:missionId")
 	Long countByMissionId(@Param("missionId") Long missionId);
+
+
+	@Query("SELECT a.formalTask FROM Arrangement a WHERE a.id=:arrangementId")
+	FormalTask getByArrangementId(@Param("arrangementId") Long id);
 }
