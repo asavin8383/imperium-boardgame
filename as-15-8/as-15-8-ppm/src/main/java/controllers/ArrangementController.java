@@ -7,26 +7,26 @@ import common.SchedulerProperties;
 import enums.AccessToolUnit;
 import enums.ArrangementEvents;
 import enums.Protocol;
-import restapi.ArrangementStatusUploader;
-import restapi.pod.DomainMaskUploader;
-import webClients.PptWebClient;
 import exceptions.AS_15_8_PPM_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Arrangement;
 import model.ScheduleCheckUnit;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import repositories.ArrangementRepo;
+import restapi.ArrangementStatusUploader;
+import restapi.pod.DomainMaskUploader;
+import webClients.PptWebClient;
 
 import javax.transaction.Transactional;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.stream.Collectors;
 
 /**
@@ -48,28 +48,33 @@ public class ArrangementController {
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @Transactional
-    public void updateArrangement(@RequestBody Arrangement newArrangement, @RequestParam("id") Arrangement arrangement) {
-        log.info("Получено мероприятие {} для включения в расписание", newArrangement.getId());
-        if(arrangement != null) {
-            //Удаляем старое мероприятие
-            arrangementRepo.delete(arrangement);
-            log.info("Мероприятие {} удалено при замене", arrangement.getId());
-        }
-        if(newArrangement.getPlannedStartTime()==null){
-            newArrangement.setPlannedStartTime(LocalTime.of(9,0));
-        }
-        if(newArrangement.getPlannedEndTime()==null){
-            newArrangement.setPlannedEndTime(LocalTime.of(18,0));
-        }
-        newArrangement.setMaxWorkersCount(schedulerProperties.getTotalWorkersCount());
-        arrangementRepo.save(newArrangement);
-        log.info("Мероприятие {} записано в БД", newArrangement.getId());
-        getAndSaveArrangementCheckUnits(newArrangement);
-        log.info("Мероприятие {} готово к включению в расписание", newArrangement.getId());
-        CompletableFuture.runAsync(() -> {
+    public ResponseEntity<String> updateArrangement(@RequestBody Arrangement newArrangement, @RequestParam("id") Arrangement arrangement) {
+        try {
+            log.info("Получено мероприятие {} для включения в расписание", newArrangement.getId());
+            if (arrangement != null) {
+                //Удаляем старое мероприятие
+                arrangementRepo.delete(arrangement);
+                log.info("Мероприятие {} удалено при замене", arrangement.getId());
+            }
+            if (newArrangement.getPlannedStartTime() == null) {
+                newArrangement.setPlannedStartTime(LocalTime.of(9, 0));
+            }
+            if (newArrangement.getPlannedEndTime() == null) {
+                newArrangement.setPlannedEndTime(LocalTime.of(18, 0));
+            }
+            newArrangement.setMaxWorkersCount(schedulerProperties.getTotalWorkersCount());
+            getAndSaveArrangementCheckUnits(newArrangement);
+            log.info("Мероприятие {} готово к включению в расписание", newArrangement.getId());
             ArrangementStatusNotification arrangementStatusNotification = new ArrangementStatusNotification(newArrangement.getId(), ArrangementEvents.FILL);
             arrangementStatusUploader.changeArrangementStatus(arrangementStatusNotification);
-        }).exceptionally(throwable -> {throw new CompletionException(throwable);});
+            return ResponseEntity.ok().build();
+        } catch (IllegalStateException ex) {
+            log.error("Ошибка при формировании мероприятия", ex);
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        } catch (Exception ex) {
+            log.error("Ошибка при формировании мероприятия", ex);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+        }
     }
 
     private void getAndSaveArrangementCheckUnits(Arrangement arrangement){
@@ -80,10 +85,14 @@ public class ArrangementController {
             .collect(Collectors.toList())
         );
         log.info("Получен список чек-юнитов мероприятия {} от ППТ", arrangement.getId());
-        arrangementRepo.save(arrangement);
+        if(arrangement.getScheduleCheckUnits().size() > 0){
+            arrangementRepo.save(arrangement);
+        } else {
+            throw new IllegalStateException("Ошибка формирования мероприятия " + arrangement.getId() +
+                    "  в ППМ. Трафик не содержит значений для проверки");
+        }
     }
 
-    //TODO привести в соответствие
     private List<ScheduleCheckUnit> createCheckUnits(Arrangement arrangement, CheckUnit checkUnit){
         List<ScheduleCheckUnit> scheduleCheckUnits = new ArrayList<>();
         switch (checkUnit.getType()){
