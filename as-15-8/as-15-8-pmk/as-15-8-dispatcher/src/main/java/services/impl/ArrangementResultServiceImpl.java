@@ -43,7 +43,7 @@ public class ArrangementResultServiceImpl implements ArrangementResultService {
         if((analysisResult.getScreenshot() != null && analysisResult.getScreenshot().length > 0) ||
                 (analysisResult.getEtalonScreenshot() != null && analysisResult.getEtalonScreenshot().length > 0)){
             ResultScreenShot resultScreenShot = new ResultScreenShot();
-            resultScreenShot.setId(analysisResult.getJobID());
+            resultScreenShot.setResult(result);
             resultScreenShot.setScreenshot(analysisResult.getScreenshot());
             resultScreenShot.setEtalonScreenshot(analysisResult.getEtalonScreenshot());
             resultScreenShotRepo.save(resultScreenShot);
