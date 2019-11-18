@@ -1,5 +1,7 @@
 package services.arrangement.impl;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.Optional;
 
@@ -46,6 +48,9 @@ public class ArrangementStatusServiceImpl implements ArrangementStatusService {
                         .ifPresent(status -> {
                             if(!formalTask.getStatus().equals(status)){
                                 formalTask.setStatus(status);
+                                if(status.equals(ExecutionStatus.FINISHED)){
+                                    formalTask.setEndDate(LocalDateTime.now());
+                                }
                                 formalTaskRepo.save(formalTask);
                                 log.info("Formal task status changed. Formal task id: " + formalTask.getId() + ", new status: " + formalTask.getStatus());
                             }
