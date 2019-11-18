@@ -16,9 +16,10 @@ public class ChromeSettings {
 
     public enum Extension {
 
-        NIMBUS("bpconcjcammlapcogcnnelfmaeghhagj", "8.9.5_0", "/popup.html"),
+        //NIMBUS("bpconcjcammlapcogcnnelfmaeghhagj", "8.9.5_0", "/popup.html"),
         GMAIL_SCREENSHOT("boepdnhlmfleonjnaoaemgcggppoikog", "1.0.0.21_0", "/popup.html"),
         HOLA("gkojfkhlekighikafcpjkiklfbnlmeio", "1.157.821_0", "/js/popup.html");
+        //AWESOME_SCREEN("nlipoenfbbikpbjkfpfillcgkoblgpmj", "4.2.10_0", "/popup.html");
 
         private String stringId;
         private String version;
