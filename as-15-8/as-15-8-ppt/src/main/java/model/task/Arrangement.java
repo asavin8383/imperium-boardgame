@@ -136,4 +136,8 @@ public class Arrangement implements Serializable {
 		}
 	}
 
+	public Long getFormalTaskId(){
+		return this.formalTask == null ? null : this.formalTask.getId();
+	}
+
 }
