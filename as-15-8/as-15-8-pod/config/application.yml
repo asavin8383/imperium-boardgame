@@ -95,13 +95,14 @@ logging:
   config:
   level:
     root: info
+    org.springframework.http: debug
 spring:
   profiles: dev_asin
   jpa:
     hibernate:
       ddl-auto: none
   liquibase:
-    enabled: true
+    enabled: false
     change-log: classpath:/data/db.changelog.master.xml
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb_test

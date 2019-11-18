@@ -79,6 +79,8 @@ nmap.path: C:\Program Files (x86)\Nmap
 
 spring:
   profiles: dev_asin
+  liquibase:
+    enabled: false
   cloud.stream:
     bindings:
       jobs.destination: jobs_asinyavin

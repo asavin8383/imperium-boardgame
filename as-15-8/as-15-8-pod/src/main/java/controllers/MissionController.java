@@ -11,13 +11,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import repositories.MissionRepository;
 import services.MissionService;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.net.URLConnection;
 import java.util.concurrent.CompletableFuture;
 
 
@@ -46,14 +47,26 @@ public class MissionController {
             Page<Mission> result = missionRepository.findByQuery(query, page);
             return new ResponseEntity<>(result, HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(null, HttpStatus.ACCEPTED);
+            return new ResponseEntity<>((Page<Mission>) null, HttpStatus.ACCEPTED);
         }
     }
 
-    @GetMapping(path = "/get_image", produces = MediaType.IMAGE_PNG_VALUE)
+    @GetMapping(path = "/get_image")
     public @ResponseBody
-    ResponseEntity<byte[]> getPdf(@RequestParam String id){
-        return missionService.receivePdfFromDB(id);
+    ResponseEntity<byte[]> getPdf(@RequestParam long id) throws IOException {
+        byte[] result = missionService.receivePdfFromDB(id);
+
+        if (result != null) {
+            HttpHeaders responseHeaders = new HttpHeaders();
+            String mime = URLConnection.guessContentTypeFromStream(new ByteArrayInputStream(result));
+            if (mime == null) mime = "application/octet-stream";
+            responseHeaders.setContentType(MediaType.parseMediaType(mime));
+            responseHeaders.setContentDisposition(ContentDisposition.parse("inline"));
+            log.debug("responseHeaders {}", responseHeaders.toString());
+            return new ResponseEntity<>(result, responseHeaders, HttpStatus.OK);
+        }
+        return new ResponseEntity<>((byte[]) null, HttpStatus.NO_CONTENT);
+
     }
 
     @GetMapping(path = "/load")
