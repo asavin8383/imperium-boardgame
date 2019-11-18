@@ -5,9 +5,11 @@ import com.fasterxml.jackson.annotation.JsonView;
 import enums.ArrangementEvents;
 import enums.ExecutionStatus;
 import exceptions.AS_15_8_PPT_Exception;
-import lombok.*;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 import model.Views;
-import model.result.ArrangementResult;
 import model.traffic.Traffic;
 import stateMachine.ArrangementStateMachine;
 
@@ -18,7 +20,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 
 /**Мероприятие в рамках формализованного задания*/
 
@@ -60,23 +61,21 @@ public class Arrangement implements Serializable {
 	@JsonView(Views.Brief.class)
 	private LocalDateTime creationDate;
 
-	/** Дата завершения */
-	@JsonView(Views.Brief.class)
-	private LocalDate completionDate;
-
-	/**Плановая дата начала*/
+	/**Плановая время начала*/
 	@JsonView(Views.Brief.class)
 	private LocalTime plannedStartTime;
-	/**Плановая дата окончания*/
+
+	/**Плановое время окончания*/
 	@JsonView(Views.Brief.class)
 	private LocalTime plannedEndTime;
 
 	/**Дата начала*/
 	@JsonView(Views.Brief.class)
-	private LocalTime startTime;
-	/**Дата окончания*/
+	private LocalDate startDate;
+
+	/** Дата завершения */
 	@JsonView(Views.Brief.class)
-	private LocalTime endTime;
+	private LocalDate completionDate;
 
 	/** Максимальное количество обработчиков мероприятия */
 	@JsonView(Views.Brief.class)
@@ -94,17 +93,17 @@ public class Arrangement implements Serializable {
 	@JsonIgnore
 	private FormalTask formalTask;
 
-	@OneToMany(cascade=CascadeType.ALL, mappedBy = "arrangement")
-	@JsonIgnore
-	private List<ArrangementResult> arrangementResults;
-
 	@ManyToOne
 	@JoinColumn(name = "traffic_id")
 	private Traffic traffic;
 
-	/**Результат проведения мероприятия*/
+	/**Текстовый комментарий*/
 	@JsonView(Views.Brief.class)
-    private String result;
+    private String comment;
+
+	/**Дополнительная текстовая информация*/
+	@JsonView(Views.Brief.class)
+	private String info;
 
     @Transient
     private ArrangementStateMachine stateMachine;
@@ -122,19 +121,23 @@ public class Arrangement implements Serializable {
 		}
 	}
 
-	public void sendEvent(ArrangementEvents event){
+	public void sendEvent(ArrangementEvents event, LocalDate eventDate){
 		this.stateMachine = new ArrangementStateMachine(this.status);
 		if(this.stateMachine.sendEvent(event)){
 			this.status = this.stateMachine.getCurrentStatus();
-			if (event.equals(ArrangementEvents.RUN) && this.status.equals(ExecutionStatus.FORMED)){
-				this.startTime = LocalTime.now();
+			if (event.equals(ArrangementEvents.RUN) && this.status.equals(ExecutionStatus.RUNNING)){
+				this.startDate = eventDate;
 			}
-			if (this.status.equals(ExecutionStatus.FINISHED) || this.status.equals(ExecutionStatus.ERROR)){
-				this.endTime = LocalTime.now();
+			if (this.status.equals(ExecutionStatus.FINISHED)){
+				this.completionDate = eventDate;
 			}
 		} else {
 			throw new AS_15_8_PPT_Exception("Ошибка смены статуса мероприятия: " + stateMachine.getCurrentStatus() + " событием " + event);
 		}
+	}
+
+	public Long getFormalTaskId(){
+		return this.formalTask == null ? null : this.formalTask.getId();
 	}
 
 }

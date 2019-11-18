@@ -1,8 +1,8 @@
 version: '3.7'
 networks:
   as-15-8-net:
-    external:
-      name: "host"
+    name: "host"
+    external: true
 services:
   dispatcher:
     image: harbor.ec-leasing.ru/as_15_8/as-15-8-dispatcher:latest

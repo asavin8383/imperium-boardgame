@@ -23,8 +23,7 @@ import repositories.ArrangementRepo;
 import rest.ArrangementActData;
 import services.arrangement.impl.ArrangementService;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Creation date: 21.05.2019
@@ -116,10 +115,48 @@ public class ArrangementController {
     @GetMapping(path = "/upload")
     public void uploadArrangement(@RequestParam("id") Arrangement arrangement){
         if(arrangement!= null) {
-            arrangementUploader.updateArrangement(arrangement);
+            //В ППМ отправляем только не запланированные мероприятия
+            if(arrangement.getStatus().equals(ExecutionStatus.NEW) || arrangement.getStatus().equals(ExecutionStatus.FORMED)){
+                arrangementUploader.updateArrangement(arrangement);
+            } else {
+                throw AS_15_8_PPT_Exception.logAndGet(log, "Ошибка отправки мероприятия в ППМ. Мероприятие " + arrangement.getId() + " имеет недопустимый статус: " + arrangement.getStatus());
+            }
         } else {
             throw AS_15_8_PPT_Exception.logAndGet(log, "Ошибка отправки мероприятия в ППМ. Мероприятие не было найдено в БД");
         }
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
+    @GetMapping(path = "/confirm_success_sent", produces = MediaType.APPLICATION_STREAM_JSON_VALUE)
+    public void confirmSuccessSent(Long arrangementId){
+        log.info("Уведомление об успешной отправке мероприятия. ID мероприятия: {}", arrangementId);
+
+        Optional<Arrangement> optionalArrangement = arrangementRepo.findById(arrangementId);
+        Arrangement arrangement = optionalArrangement.orElse(null);
+        if (arrangement != null && arrangement.getStatus() == ExecutionStatus.FINISHED){
+            arrangement.setStatus(ExecutionStatus.ACT_SENT);
+            arrangementRepo.save(arrangement);
+            log.info("Состояние у Arrangement с id = {} изменено на : {}", arrangement.getId(), ExecutionStatus.ACT_SENT);
+        }
+        else {
+            log.info("Состояние Arrangement с id = {} не изменилось", arrangementId);
+        }
+    }
+
+    @GetMapping(path = "/ready_for_act")
+    public Boolean readyForAct(@RequestParam Long id){
+        Optional<Arrangement> optArrangement = arrangementRepo.findById(id);
+        if (!optArrangement.isPresent())
+            throw new AS_15_8_PPT_Exception("Arrangement не найден, id = " + id);
+
+        Arrangement arrangement = optArrangement.get();
+        FormalTask formalTask = arrangement.getFormalTask();
+
+        Set<ExecutionStatus> states =
+                new HashSet<>(Arrays.asList(ExecutionStatus.FINISHED, ExecutionStatus.ACT_SENT));
+        Boolean res =
+                formalTask.getMissionId() != null && states.contains(arrangement.getStatus());
+        return res;
     }
 
     @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")

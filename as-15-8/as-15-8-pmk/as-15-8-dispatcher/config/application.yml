@@ -6,7 +6,7 @@ spring:
         inputJobs:
           destination: scheduled_jobs
           group: dispatchers
-          consumer.concurrency: 28
+          consumer.concurrency: 24
         outputJobs:
           destination: jobs
         inputJobNotifications:
@@ -15,11 +15,11 @@ spring:
         inputAnalysisResults:
           destination: analysis_results
           group: dispatchers
-          consumer.concurrency: 28
+          consumer.concurrency: 24
       kafka:
         binder:
-          brokers: 192.168.5.12:9094,192.168.5.184:9094,192.168.5.211:9094
-          minPartitionCount: 28
+          brokers: 192.168.5.12:9094,192.168.5.33:9094,192.168.5.184:9094
+          minPartitionCount: 24
           configuration:
             max.request.size: 10485760
         bindings:
@@ -79,7 +79,7 @@ spring:
     stream:
       kafka:
         binder:
-          brokers: 10.97.220.141:9094,10.97.220.142:9094,10.97.220.143:9094
+          brokers: 10.97.220.178:9092,10.97.220.179:9092,10.97.220.180:9092
 
 ---
 

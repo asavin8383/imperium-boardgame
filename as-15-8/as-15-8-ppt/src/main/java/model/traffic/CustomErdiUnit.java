@@ -1,5 +1,6 @@
 package model.traffic;
 
+import checkUnits.CheckUnitType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Data;
@@ -29,7 +30,7 @@ public class CustomErdiUnit {
     @Enumerated(EnumType.STRING)
     @JsonView(Views.Brief.class)
     @ToString.Include
-    private Type type;
+    private CheckUnitType type;
 
     @NotNull
     @Column(nullable = false)
@@ -41,9 +42,5 @@ public class CustomErdiUnit {
     @JoinColumn(name = "custom_erdi_id", nullable = false)
     @JsonIgnore
     private CustomErdi customErdi;
-
-    public enum Type {
-        URL, DOMAIN, DOMAIN_MASK, IP_V4, IP_V6, IP_V4_SUBNET, IP_V6_SUBNET
-    }
 
 }

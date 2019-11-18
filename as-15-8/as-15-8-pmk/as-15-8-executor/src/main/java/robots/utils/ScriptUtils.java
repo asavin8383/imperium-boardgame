@@ -1,28 +1,28 @@
 package robots.utils;
 
 import checkUnits.CheckUnit;
-import common.ExecutorProperties;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import enums.AccessToolParameter;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.openqa.selenium.*;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.util.StringUtils;
-import robots.ChromeSettings;
-import ru.yandex.qatools.ashot.AShot;
 
 import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
-import java.util.Map;
+import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
@@ -87,12 +87,26 @@ public class ScriptUtils {
         return new PageResult(pageContent, errorCode);
     }
 
-    public static byte[] getScreenshot(WebDriver webDriver)  {
-        try{
-            switchToTab(webDriver, 2);
+    public static byte[] getScreenshot(WebDriver driver)  {
+        try {
+            try(InputStream inputStream = ScriptUtils.class.getClassLoader().getResourceAsStream("takeScreenshot.js")){
+                String script = IOUtils.toString(inputStream, Charset.forName("UTF-8"));
+                JavascriptExecutor js = (JavascriptExecutor) driver;
+                String imgBase64 = js.executeAsyncScript(script).toString();
+                return Base64.getDecoder().decode(imgBase64);
+            }
+        } catch(Exception ex){
+            throw new RuntimeException("Ошибка получения скриншота", ex);
+        }
+    }
 
+    /*public static byte[] getScreenshot(WebDriver webDriver)  {
+        try{
+
+            ((JavascriptExecutor)webDriver).executeScript("window.open()");
+            switchToTab(webDriver, 2);
             webDriver.get(ChromeSettings.getScreenshotExtension().getPopupUrl());
-            WebDriverWait wait = new WebDriverWait(webDriver, WAIT_TIMEOUT);
+            WebDriverWait wait = new WebDriverWait(webDriver, 100000000);
             wait.until(ExpectedConditions.presenceOfElementLocated(
                     By.id("desktop"))).click();
 
@@ -111,7 +125,13 @@ public class ScriptUtils {
 
             waitDriver(webDriver, 1);
 
-            BufferedImage originalImage =
+           /* String imgElemPath = "//div[contains(@class, \"editor-container\")]";
+            WebElement imgElem = wait.until(ExpectedConditions
+                    .presenceOfElementLocated(By.xpath(imgElemPath)))
+                    .findElement(By.xpath(imgElemPath));*/
+
+           // return getSeleniumScreenshot(webDriver, imgElem);
+            /*BufferedImage originalImage =
                     new AShot().takeScreenshot(webDriver,
                             webDriver.findElement(By.xpath("//div[@id=\"container\"]"))).getImage();
 
@@ -120,19 +140,37 @@ public class ScriptUtils {
                 baos.flush();
                 return baos.toByteArray();
             }
+            String base64Image = wait
+                    .until(ExpectedConditions.presenceOfElementLocated(
+                            By.xpath("//div[@id=\"container\"]/img")))
+                    .getAttribute("src").split(",")[1];
+
+            // close screenshot tab
+            webDriver.close();
+            switchToTab(webDriver, 1);
+
+            return Base64.getDecoder().decode(base64Image);
         }catch(Exception ex){
             throw new RuntimeException("Ошибка получения скриншота", ex);
         }
-        /*String base64Image = wait
-                .until(ExpectedConditions.presenceOfElementLocated(
-                        By.xpath("//div[@id=\"container\"]/img")))
-                .getAttribute("src").split(",")[1];
+    }*/
 
-        // close screenshot tab
-        webDriver.close();
-        switchToTab(webDriver, 1);
+    private static byte[] getSeleniumScreenshot(WebDriver driver, WebElement ele) throws IOException {
+        File screenshot = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
+        BufferedImage  fullImg = ImageIO.read(screenshot);
 
-        return Base64.getDecoder().decode(base64Image);*/
+        Point point = ele.getLocation();
+
+        int eleWidth = ele.getSize().getWidth();
+        int eleHeight = ele.getSize().getHeight();
+
+        BufferedImage eleScreenshot= fullImg.getSubimage(point.getX(), point.getY(),
+                eleWidth, eleHeight);
+        try(ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            ImageIO.write(eleScreenshot, "png", baos);
+            baos.flush();
+            return baos.toByteArray();
+        }
     }
 
     public static byte[] getScreenshot(WebDriver webDriver, boolean old) {

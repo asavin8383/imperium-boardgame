@@ -39,10 +39,12 @@ security:
 ---
 
 spring:
-  profiles: dev_asin
-  profiles.include: local_log
+  profiles: prod
+  profiles.include: docker_log
   datasource:
-    url: jdbc:postgresql://192.168.5.195:5432/asdb_test
+    url: jdbc:postgresql://10.97.220.144:5432/asdb
+  main:
+    banner-mode: "off"
 
 ---
 
@@ -53,3 +55,11 @@ spring:
     url: jdbc:postgresql://192.168.5.195:5432/asdb
   main:
     banner-mode: "off"
+
+---
+
+spring:
+  profiles: dev_asin
+  profiles.include: local_log
+  datasource:
+    url: jdbc:postgresql://192.168.5.195:5432/asdb_test

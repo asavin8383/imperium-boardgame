@@ -14,7 +14,7 @@ import java.io.Serializable;
  */
 
 @Entity
-@Table(schema = "results", name = "results")
+@Table(schema = "results", name = "result_screenshots")
 @Data
 public class ResultScreenShot implements Serializable {
 
@@ -23,8 +23,9 @@ public class ResultScreenShot implements Serializable {
     @Id
     private Long id;
 
-    @Column(name = "arrangement_id", nullable = false)
-    private Long arrangementId;
+    @OneToOne(optional = false)
+    @MapsId
+    private Result result;
 
     @Lob
     @Column(name="screenshot", columnDefinition="bytea")
@@ -36,7 +37,4 @@ public class ResultScreenShot implements Serializable {
     @Type(type="org.hibernate.type.BinaryType")
     private byte[] etalonScreenshot;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name="result", nullable=false)
-    private CheckUnitJobResult result;
 }

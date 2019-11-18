@@ -20,8 +20,7 @@ import rest.MissionData;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -39,6 +38,7 @@ public class FormalTaskController {
 	public FormalTask postFormalTask(@RequestBody FormalTask formalTask, Principal principal) {
 		formalTask.setAuthor(principal.getName());
 		formalTask.setStatus(ExecutionStatus.NEW);
+		formalTask.setCreationDate(LocalDateTime.now());
 		return formalTaskRepo.save(formalTask);
 	}
 	
