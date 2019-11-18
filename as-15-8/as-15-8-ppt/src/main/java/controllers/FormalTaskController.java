@@ -144,21 +144,6 @@ public class FormalTaskController {
 		return storedTask;
 	}
 
-	@GetMapping(path = "/ready_for_act")
-	public Boolean readyForAct(@RequestParam Long id){
-		Optional<FormalTask> optFormalTask = formalTaskRepo.findById(id);
-		if (!optFormalTask.isPresent())
-			throw new AS_15_8_PPT_Exception("FormalTask не найден, id = " + id);
-
-		FormalTask formalTask = optFormalTask.get();
-
-		Set<ExecutionStatus> states =
-				new HashSet<>(Arrays.asList(ExecutionStatus.FINISHED, ExecutionStatus.ACT_SENT));
-		Boolean res =
-				formalTask.getMissionId() != null && states.contains(formalTask.getStatus());
-		return res;
-	}
-
 	private FormalTask createFormalTaskByMission(MissionData missionData, String operator){
 		Long cnt = formalTaskRepo.countByMissionId(missionData.getId());
 		if (cnt > 0) {

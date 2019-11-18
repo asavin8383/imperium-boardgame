@@ -23,8 +23,7 @@ import repositories.ArrangementRepo;
 import rest.ArrangementActData;
 import services.arrangement.impl.ArrangementService;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Creation date: 21.05.2019
@@ -125,6 +124,22 @@ public class ArrangementController {
         } else {
             throw AS_15_8_PPT_Exception.logAndGet(log, "Ошибка отправки мероприятия в ППМ. Мероприятие не было найдено в БД");
         }
+    }
+
+    @GetMapping(path = "/ready_for_act")
+    public Boolean readyForAct(@RequestParam Long id){
+        Optional<Arrangement> optArrangement = arrangementRepo.findById(id);
+        if (!optArrangement.isPresent())
+            throw new AS_15_8_PPT_Exception("Arrangement не найден, id = " + id);
+
+        Arrangement arrangement = optArrangement.get();
+        FormalTask formalTask = arrangement.getFormalTask();
+
+        Set<ExecutionStatus> states =
+                new HashSet<>(Arrays.asList(ExecutionStatus.FINISHED, ExecutionStatus.ACT_SENT));
+        Boolean res =
+                formalTask.getMissionId() != null && states.contains(arrangement.getStatus());
+        return res;
     }
 
     @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
