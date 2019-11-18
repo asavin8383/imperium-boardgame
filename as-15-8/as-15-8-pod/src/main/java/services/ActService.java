@@ -157,7 +157,7 @@ public class ActService {
                 responseStatus,
                 actRequest);
 
-        if (responseStatus.isStatus())
+        if (!responseStatus.isStatus())
             throw new AS_15_8_POD_Exception("Ошибка отправки акта в ППП РА: " + responseStatus.getResponse());
 
         try {
