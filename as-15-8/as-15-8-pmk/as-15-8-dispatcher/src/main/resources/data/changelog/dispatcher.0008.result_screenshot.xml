@@ -1,0 +1,21 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+    <changeSet author="san (generated)" id="1574081532902-2">
+        <createTable schemaName="results" tableName="result_screenshots">
+            <column name="etalon_screenshot" type="BYTEA"/>
+            <column name="screenshot" type="BYTEA"/>
+            <column name="result_id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="result_screenshotsPK"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="san (generated)" id="1574081532902-3">
+        <addForeignKeyConstraint baseColumnNames="result_id" baseTableName="result_screenshots" baseTableSchemaName="results" constraintName="FKmuh7eldspcwr2s5rkq0g0xop0" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="results" referencedTableSchemaName="results" validate="true"/>
+    </changeSet>
+    <changeSet author="san (generated)" id="1574081532902-4">
+        <dropColumn columnName="etalon_screenshot" schemaName="results" tableName="results"/>
+    </changeSet>
+    <changeSet author="san (generated)" id="1574081532902-5">
+        <dropColumn columnName="screenshot" schemaName="results" tableName="results"/>
+    </changeSet>
+</databaseChangeLog>
