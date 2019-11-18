@@ -170,11 +170,11 @@ public class ActService {
     }
 
     private void notifyActConfirmed(Long arrangementId){
-        log.info("Отправка в PPT уведомления об успшном подтверждении акта в ППП, arrangementId = {}" + arrangementId);
+        log.info("Отправка в PPT уведомления об успшном подтверждении акта в ППП Анонимайзере, arrangementId = {}" + arrangementId);
         restTemplate.getForObject(
                 UriComponentsBuilder
                         .fromHttpUrl(gatewayUrl)
-                        .path("/ppt/formal_tasks/confirm_success_sent")
+                        .path("/ppt/arrangements/confirm_success_sent")
                         .queryParam("arrangementId", arrangementId)
                         .build().toString(),
                 String.class
