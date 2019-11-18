@@ -1,7 +1,9 @@
 package services.arrangement.impl;
 
 import arrangement.ArrangementStatusNotification;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import repositories.ArrangementRepo;
@@ -15,23 +17,21 @@ import services.arrangement.ArrangementStatusService;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class ArrangementNotificationServiceImpl implements ArrangementNotificationService {
 
-    private ArrangementRepo arrangementRepo;
-    private ArrangementStatusService arrangementStatusService;
-
-    @Autowired
-    public ArrangementNotificationServiceImpl(ArrangementRepo arrangementRepo,
-                                              ArrangementStatusService arrangementStatusService) {
-        this.arrangementRepo = arrangementRepo;
-        this.arrangementStatusService = arrangementStatusService;
-    }
+    private final ArrangementRepo arrangementRepo;
+    private final ArrangementStatusService arrangementStatusService;
 
     @Override
     public void processNotification(ArrangementStatusNotification arrangementStatusNotification) {
         arrangementRepo.findById(arrangementStatusNotification.getArrangementId())
             .map(arrangement -> {
-                arrangement.sendEvent(arrangementStatusNotification.getEvent());
+                if (Strings.isNotEmpty(arrangementStatusNotification.getInfo())){
+                    arrangement.setInfo(arrangementStatusNotification.getInfo());
+                    arrangementRepo.save(arrangement);
+                }
+                arrangement.sendEvent(arrangementStatusNotification.getEvent(), arrangementStatusNotification.getEventDate());
                 try {
                     arrangementStatusService.processArrangementStatusChange(arrangement);
                     log.info("Статус мероприятия {} сменился на: {}", arrangement.getId(), arrangement.getStatus());

@@ -24,4 +24,11 @@ public class AS_15_8_PPM_Exception extends RuntimeException {
         logger.error(message);
         return e;
     }
+
+    public static AS_15_8_PPM_Exception logAndGet(Logger logger, String message, Throwable ex) {
+        AS_15_8_PPM_Exception e = new AS_15_8_PPM_Exception(message, ex);
+        // log the stack trace as well
+        logger.error(message, ex);
+        return e;
+    }
 }

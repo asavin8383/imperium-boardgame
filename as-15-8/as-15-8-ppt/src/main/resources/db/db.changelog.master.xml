@@ -32,5 +32,8 @@
     <include file="db/changelog/ppt.0005.formal_tasks_rename_user.xml"/>
     <include file="db/changelog/ppt.0006.formal_tasks_add_mission.xml"/>
     <include file="db/changelog/ppt.0007.formal_tasks_rem_field.xml"/>
+    <include file="db/changelog/ppt.0008.arrangements_comment_and_info.xml"/>
+    <include file="db/changelog/ppt.0009.arrangements_start_end_date.xml"/>
+    <include file="db/changelog/ppt.0010.arrangements_completion_date.xml"/>
 
 </databaseChangeLog>

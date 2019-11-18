@@ -38,7 +38,7 @@ public class TestJobExecution {
 		checkUnitJob.setJobID(1L);
 		checkUnitJob.setAccessTool("yandex");
 		
-		checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.URL, "Http://cannabay.org"));
+		checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.URL, "http://cannabay.org"));
 		//checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.IP_V6, "2606:4700:0030:0000:0000:0000:681b:b458"));
 
 		ExecutionJobResult executionJobResult = checkUnitVerificationServiceFactory
@@ -49,7 +49,7 @@ public class TestJobExecution {
 //			StandardOpenOption.CREATE, StandardOpenOption.APPEND);
 		ByteArrayInputStream bis = new ByteArrayInputStream(executionJobResult.getScreenshot());
 		BufferedImage bImage2 = ImageIO.read(bis);
-		ImageIO.write(bImage2, "jpg", new File("output.jpg") );
+		ImageIO.write(bImage2, "png", new File("output.png") );
 
 		System.out.println(executionJobResult.toString());
 	}

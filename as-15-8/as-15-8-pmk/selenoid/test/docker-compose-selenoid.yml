@@ -12,7 +12,7 @@ services:
         protocol: tcp
         mode: host
     hostname: "{{.Node.Hostname}}"
-    environment:
+    environment:doc
       TZ: "Europe/Moscow"
     configs:
       - source: selenoid_browsers

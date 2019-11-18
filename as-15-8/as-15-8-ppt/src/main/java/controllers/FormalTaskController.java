@@ -38,6 +38,7 @@ public class FormalTaskController {
 	public FormalTask postFormalTask(@RequestBody FormalTask formalTask, Principal principal) {
 		formalTask.setAuthor(principal.getName());
 		formalTask.setStatus(ExecutionStatus.NEW);
+		formalTask.setCreationDate(LocalDateTime.now());
 		return formalTaskRepo.save(formalTask);
 	}
 	
@@ -104,6 +105,23 @@ public class FormalTaskController {
 				})
 				.orElseThrow(() -> new AS_15_8_PPT_Exception("Error deleting formal task! Formal task was not found by id: " + id));
 	}
+
+	@PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
+	@GetMapping(path = "/confirm_success_sent", produces = MediaType.APPLICATION_STREAM_JSON_VALUE)
+	public void confirmSuccessSent(Long arrangementId){
+		log.info("Уведомление об успешной отправке мероприятия. ID мероприятия: {}", arrangementId);
+
+		FormalTask formalTask = formalTaskRepo.getByArrangementId(arrangementId);
+		if (formalTask != null && formalTask.getStatus() == ExecutionStatus.FINISHED){
+			formalTask.setStatus(ExecutionStatus.ACT_SENT);
+			formalTaskRepo.save(formalTask);
+			log.info("Состояние у FormalTask с id = {} изменено на : {}", formalTask.getId(), ExecutionStatus.ACT_SENT);
+		}
+		else {
+			log.info("Состояние FormalTask (arrangementId = {}) не изменилось", arrangementId);
+		}
+	}
+
 
 	@PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
 	@PostMapping(path = "/create_with_mission")

@@ -116,7 +116,12 @@ public class ArrangementController {
     @GetMapping(path = "/upload")
     public void uploadArrangement(@RequestParam("id") Arrangement arrangement){
         if(arrangement!= null) {
-            arrangementUploader.updateArrangement(arrangement);
+            //В ППМ отправляем только не запланированные мероприятия
+            if(arrangement.getStatus().equals(ExecutionStatus.NEW) || arrangement.getStatus().equals(ExecutionStatus.FORMED)){
+                arrangementUploader.updateArrangement(arrangement);
+            } else {
+                throw AS_15_8_PPT_Exception.logAndGet(log, "Ошибка отправки мероприятия в ППМ. Мероприятие " + arrangement.getId() + " имеет недопустимый статус: " + arrangement.getStatus());
+            }
         } else {
             throw AS_15_8_PPT_Exception.logAndGet(log, "Ошибка отправки мероприятия в ППМ. Мероприятие не было найдено в БД");
         }

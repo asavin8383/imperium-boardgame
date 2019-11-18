@@ -150,17 +150,35 @@ public class ActService {
         int code = httpStatus.value();
 
         responseStatus = responseStatus != null ? responseStatus :
-                new ResponseStatusString((code >= 200 && code < 300) || code == 302, null);
-
-        responseStatus.setResponse(responseStatus.getResponse() != null ?
-                responseStatus.getResponse() : httpStatus.toString());
+                new ResponseStatusString(false, httpStatus.toString());
 
         log.info("Акт отправлен в ППП. Http-статус: {}, ответ: {}, данные акта: {}",
                 httpStatus.toString(),
                 responseStatus,
                 actRequest);
 
+        try {
+            if (responseStatus.isStatus())
+                notifyActConfirmed(actRequest.getArragementId());
+        }
+        catch(Exception ee){
+            log.error("Ошибка отпрвки уведомления в Dispatcher. ArragementId = " + actRequest.getArragementId());
+            ee.printStackTrace();
+        }
+
         return responseStatus;
+    }
+
+    private void notifyActConfirmed(Long arrangementId){
+        log.info("Отправка в PPT уведомления об успшном подтверждении акта в ППП, arrangementId = {}" + arrangementId);
+        restTemplate.getForObject(
+                UriComponentsBuilder
+                        .fromHttpUrl(gatewayUrl)
+                        .path("/ppt/formal_tasks/confirm_success_sent")
+                        .queryParam("arrangementId", arrangementId)
+                        .build().toString(),
+                String.class
+        );
     }
 
     private AccessToolRobot getAccessToolRobot(String accessTool){
