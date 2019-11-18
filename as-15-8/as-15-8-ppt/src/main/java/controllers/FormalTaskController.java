@@ -107,23 +107,6 @@ public class FormalTaskController {
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
-	@GetMapping(path = "/confirm_success_sent", produces = MediaType.APPLICATION_STREAM_JSON_VALUE)
-	public void confirmSuccessSent(Long arrangementId){
-		log.info("Уведомление об успешной отправке мероприятия. ID мероприятия: {}", arrangementId);
-
-		FormalTask formalTask = formalTaskRepo.getByArrangementId(arrangementId);
-		if (formalTask != null && formalTask.getStatus() == ExecutionStatus.FINISHED){
-			formalTask.setStatus(ExecutionStatus.ACT_SENT);
-			formalTaskRepo.save(formalTask);
-			log.info("Состояние у FormalTask с id = {} изменено на : {}", formalTask.getId(), ExecutionStatus.ACT_SENT);
-		}
-		else {
-			log.info("Состояние FormalTask (arrangementId = {}) не изменилось", arrangementId);
-		}
-	}
-
-
-	@PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
 	@PostMapping(path = "/create_with_mission")
 	public void postFormalTask(@RequestBody MissionData missionData, Principal principal) {
 		log.info("Запрос создания FormalTask по поручению: {}", missionData);

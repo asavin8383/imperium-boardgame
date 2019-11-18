@@ -126,6 +126,23 @@ public class ArrangementController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
+    @GetMapping(path = "/confirm_success_sent", produces = MediaType.APPLICATION_STREAM_JSON_VALUE)
+    public void confirmSuccessSent(Long arrangementId){
+        log.info("Уведомление об успешной отправке мероприятия. ID мероприятия: {}", arrangementId);
+
+        Optional<Arrangement> optionalArrangement = arrangementRepo.findById(arrangementId);
+        Arrangement arrangement = optionalArrangement.orElse(null);
+        if (arrangement != null && arrangement.getStatus() == ExecutionStatus.FINISHED){
+            arrangement.setStatus(ExecutionStatus.ACT_SENT);
+            arrangementRepo.save(arrangement);
+            log.info("Состояние у Arrangement с id = {} изменено на : {}", arrangement.getId(), ExecutionStatus.ACT_SENT);
+        }
+        else {
+            log.info("Состояние Arrangement с id = {} не изменилось", arrangementId);
+        }
+    }
+
     @GetMapping(path = "/ready_for_act")
     public Boolean readyForAct(@RequestParam Long id){
         Optional<Arrangement> optArrangement = arrangementRepo.findById(id);
