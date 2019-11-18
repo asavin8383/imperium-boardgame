@@ -1,4 +1,4 @@
-var done = arguments[0];
+let done = arguments[0];
 try {
     const displayMediaOptions = {
         video: {
