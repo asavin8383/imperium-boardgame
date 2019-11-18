@@ -157,12 +157,14 @@ public class ActService {
                 responseStatus,
                 actRequest);
 
+        if (!responseStatus.isStatus())
+            throw new AS_15_8_POD_Exception("Ошибка отправки акта в ППП РА: " + responseStatus.getResponse());
+
         try {
-            if (responseStatus.isStatus())
-                notifyActConfirmed(actRequest.getArragementId());
+            notifyActConfirmed(actRequest.getArragementId());
         }
         catch(Exception ee){
-            log.error("Ошибка отпрвки уведомления в Dispatcher. ArragementId = " + actRequest.getArragementId());
+            log.error("Ошибка отпрвки уведомления в Dispatcher. ArrangementId = " + actRequest.getArragementId());
             ee.printStackTrace();
         }
 
