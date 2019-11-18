@@ -40,10 +40,14 @@ public class ArrangementResultServiceImpl implements ArrangementResultService {
         result.setEndDate(LocalDateTime.now());
         result.setResult(analysisResult.getCheckResult());
         resultRepo.save(result);
-        ResultScreenShot resultScreenShot = resultScreenShotRepo.getOne(analysisResult.getJobID());
-        resultScreenShot.setScreenshot(analysisResult.getScreenshot());
-        resultScreenShot.setEtalonScreenshot(analysisResult.getEtalonScreenshot());
-        resultScreenShotRepo.save(resultScreenShot);
+        if((analysisResult.getScreenshot() != null && analysisResult.getScreenshot().length > 0) ||
+                (analysisResult.getEtalonScreenshot() != null && analysisResult.getEtalonScreenshot().length > 0)){
+            ResultScreenShot resultScreenShot = new ResultScreenShot();
+            resultScreenShot.setId(analysisResult.getJobID());
+            resultScreenShot.setScreenshot(analysisResult.getScreenshot());
+            resultScreenShot.setEtalonScreenshot(analysisResult.getEtalonScreenshot());
+            resultScreenShotRepo.save(resultScreenShot);
+        }
         service.processResult(result, analysisResult);
         return result;
     }
