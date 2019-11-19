@@ -125,7 +125,7 @@ public class MissionService {
                 entity, ResponseEntity.class);
     }
 
-    public byte[] receivePdfFromDB(long id){
+    public byte[] receiveMissionDocumentFromDB(long id){
         String sql = "select doc_file_data from sor.mission where id = ?";
 
         return jdbcTemplate.queryForObject(sql, new Object[]{id}, this::mapPdf);
