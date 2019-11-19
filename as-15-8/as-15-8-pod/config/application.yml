@@ -25,7 +25,7 @@ spring:
     databasePlatform: org.hibernate.dialect.PostgreSQL9Dialect
   app:
     schedule:
-      missions: '0 0 0 ? * * *'
+      missions: '0 0 0 * * ?'
     jwt:
       secret: Gk-Xun_Yrkd0zigpysWS
       ttl: 86400
