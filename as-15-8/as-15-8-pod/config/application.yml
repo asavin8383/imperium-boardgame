@@ -53,12 +53,12 @@ spring:
       ddl-auto: none
   datasource:
     url: jdbc:postgresql://10.97.220.144:5432/asdb
-  rest_base_url: "https://arm-r.rkn.gov.ru/register-vpn/api/as15-8"
+#  rest_base_url: "https://arm-r.rkn.gov.ru/register-vpn/api/as15-8"
 registry-anonymizers:
   proxy-ip: ""
   proxy-port: 3128
-  username: As158
-  password: reEO964YnhOE
+#  username: As158
+#  password: reEO964YnhOE
 
 ---
 
