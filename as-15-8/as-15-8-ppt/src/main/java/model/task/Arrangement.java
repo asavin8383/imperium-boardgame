@@ -55,11 +55,16 @@ public class Arrangement implements Serializable {
 	@JsonView(Views.Brief.class)
 	@Getter
 	private ExecutionStatus status;
-	
+
 	/**Дата создания*/
 	@ToString.Include
 	@JsonView(Views.Brief.class)
 	private LocalDateTime creationDate;
+
+	/**Дата планового завершения*/
+	@ToString.Include
+	@JsonView(Views.Brief.class)
+	private LocalDateTime deadlineDate;
 
 	/**Плановая время начала*/
 	@JsonView(Views.Brief.class)
@@ -107,7 +112,7 @@ public class Arrangement implements Serializable {
 
     @Transient
     private ArrangementStateMachine stateMachine;
-	
+
 	public Arrangement() {
 		this.creationDate = LocalDateTime.now();
 		this.status = ExecutionStatus.NEW;
