@@ -36,9 +36,9 @@ public class TestJobExecution {
 		
 		CheckUnitJob checkUnitJob = new CheckUnitJob();
 		checkUnitJob.setJobID(1L);
-		checkUnitJob.setAccessTool("yandex");
+		checkUnitJob.setAccessTool("hola");
 		
-		checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.URL, "http://cannabay.org"));
+		checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.URL, "http://bet1xbet.ru"));
 		//checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.IP_V6, "2606:4700:0030:0000:0000:0000:681b:b458"));
 
 		ExecutionJobResult executionJobResult = checkUnitVerificationServiceFactory
