@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface MissionRepository extends JpaRepository<Mission, Integer>, MissionRepositoryCustom{
+public interface MissionRepository extends JpaRepository<Mission, Long>, MissionRepositoryCustom{
 
     List<Mission> findByOrigIdIn(List<String> ids);
 
