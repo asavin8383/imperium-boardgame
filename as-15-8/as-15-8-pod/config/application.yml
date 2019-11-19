@@ -25,7 +25,7 @@ spring:
     databasePlatform: org.hibernate.dialect.PostgreSQL9Dialect
   app:
     schedule:
-      missions: '0 */1 * * * ?'
+      missions: '0 0 0 * * ?'
     jwt:
       secret: Gk-Xun_Yrkd0zigpysWS
       ttl: 86400
@@ -46,6 +46,9 @@ cron:
 spring:
   profiles: prod
   profiles.include: docker_log
+  app:
+    schedule:
+      missions: '0 */1 * * * ?'
   main:
     banner-mode: "off"
   jpa:
@@ -53,12 +56,12 @@ spring:
       ddl-auto: none
   datasource:
     url: jdbc:postgresql://10.97.220.144:5432/asdb
-  rest_base_url: "https://arm-r.rkn.gov.ru/register-vpn/api/as15-8"
+#  rest_base_url: "https://arm-r.rkn.gov.ru/register-vpn/api/as15-8"
 registry-anonymizers:
   proxy-ip: ""
   proxy-port: 3128
-  username: As158
-  password: reEO964YnhOE
+#  username: As158
+#  password: reEO964YnhOE
 
 ---
 
@@ -95,13 +98,14 @@ logging:
   config:
   level:
     root: info
+    org.springframework.http: debug
 spring:
   profiles: dev_asin
   jpa:
     hibernate:
       ddl-auto: none
   liquibase:
-    enabled: true
+    enabled: false
     change-log: classpath:/data/db.changelog.master.xml
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb_test

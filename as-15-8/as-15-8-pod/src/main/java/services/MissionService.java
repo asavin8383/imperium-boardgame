@@ -125,14 +125,10 @@ public class MissionService {
                 entity, ResponseEntity.class);
     }
 
-    public ResponseEntity<byte[]> receivePdfFromDB(String id){
-        String sql = "select doc_file_data from sor.mission where orig_id = ?";
+    public byte[] receiveMissionDocumentFromDB(long id){
+        String sql = "select doc_file_data from sor.mission where id = ?";
 
-        byte[] result = jdbcTemplate.queryForObject(sql, new Object[]{id}, this::mapPdf);
-        if (result != null) {
-            return new ResponseEntity<>(result, HttpStatus.OK);
-        }
-        return new ResponseEntity<>((byte[]) null, HttpStatus.NO_CONTENT);
+        return jdbcTemplate.queryForObject(sql, new Object[]{id}, this::mapPdf);
     }
 
     private byte[] mapPdf(ResultSet rs, int rowNum) throws SQLException {

@@ -63,7 +63,7 @@ spring:
 ---
 
 spring:
-  profiles: dev_asavin, dev_ashabalin, dev_asin, dev_pvorobiev, dev_jspirina
+  profiles: dev_asavin, dev_ashabalin, dev_pvorobiev, dev_jspirina
   profiles.include: local_log
   jpa:
     hibernate:
@@ -77,6 +77,9 @@ logging:
   config:
   level:
     root: info
+    org.springframework.web: debug
     org.hibernate.SQL: info
 spring:
   profiles: dev_asin
+  datasource:
+    url: jdbc:postgresql://192.168.5.195:5432/asdb_test

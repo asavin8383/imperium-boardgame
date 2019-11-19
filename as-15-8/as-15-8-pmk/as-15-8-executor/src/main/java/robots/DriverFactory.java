@@ -33,8 +33,8 @@ public class DriverFactory {
 	 * @param browserName Имя браузера
 	 * @return
 	 */
-	public static WebDriver createDriver(URL hubURL, Platform platformName, String appName, String browserName) {
-		return createDriver(hubURL, platformName, appName, browserName, null, false);
+	public static WebDriver createDriver(URL hubURL, Platform platformName, String appName, String browserName, String checkUrl) {
+		return createDriver(hubURL, platformName, appName, browserName, null, false, checkUrl);
 	}
 
 	/**
@@ -46,7 +46,14 @@ public class DriverFactory {
 	 * @param proxy прокси
 	 * @return
 	 */
-	public static WebDriver createDriver(URL hubURL, Platform platformName, String appName, String browserName, String proxy, boolean enableLog) {
+	public static WebDriver createDriver(
+			URL hubURL,
+			Platform platformName,
+			String appName,
+			String browserName,
+			String proxy,
+			boolean enableLog,
+			String checkUrl) {
 		DesiredCapabilities cpb = buildCapability(platformName, appName, browserName);
 
 		Proxy oProxy = ProxyUtils.getSeleniumProxy(proxy);
@@ -59,7 +66,7 @@ public class DriverFactory {
 		}
 
 		ChromeOptions options = new ChromeOptions();
-		setOptimalChromeOptions(options);
+		setOptimalChromeOptions(options, checkUrl);
 		setLoadExtensions(options, Collections.singletonList(
 				ChromeSettings.getScreenshotExtension()));
 
@@ -83,18 +90,18 @@ public class DriverFactory {
 	 * @return
 	 */
 	public static WebDriver createChromeDriver(URL hubURL, Platform platformName, String appName,
-											   List<ChromeSettings.Extension> extensions) {
+											   List<ChromeSettings.Extension> extensions, String checkUrl) {
 		DesiredCapabilities cpb = buildCapability(
 				platformName, appName, "chrome");
 
         ChromeOptions options = new ChromeOptions();
-		setOptimalChromeOptions(options);
+		setOptimalChromeOptions(options, checkUrl);
 		setLoadExtensions(options, extensions);
 		cpb.setCapability(ChromeOptions.CAPABILITY, options);
 		return new RemoteWebDriver(hubURL, cpb);
     }
 
-    private static void setOptimalChromeOptions(ChromeOptions options){
+    private static void setOptimalChromeOptions(ChromeOptions options, String checkUrl){
 		options.addArguments("--start-maximized");
 		options.addArguments("--ignore-certificate-errors");
 		options.addArguments("--disable-popup-blocking");
@@ -108,6 +115,13 @@ public class DriverFactory {
 		LoggingPreferences logPrefs = new LoggingPreferences();
 		logPrefs.enable( LogType.PERFORMANCE, Level.ALL );
 		options.setCapability( "goog:loggingPrefs", logPrefs );
+
+		options.addArguments("--user-data-dir=" + ChromeSettings.USER_DATA_FOLDER);
+		options.addArguments("--profile-directory=" + ChromeSettings.PROFILE_NAME);
+		options.addArguments("--auto-select-desktop-capture-source=Entire screen");
+		options.addArguments("--allow-http-screen-capture");
+		options.addArguments("--enable-blink-features=GetUserMedia");
+		options.addArguments("--unsafely-treat-insecure-origin-as-secure=" + checkUrl);
 	}
 
 	/**
@@ -133,10 +147,7 @@ public class DriverFactory {
 	}
 
 	private static void setLoadExtensions(ChromeOptions options, List<ChromeSettings.Extension> extensions) {
-		options.addArguments("--user-data-dir=" + ChromeSettings.USER_DATA_FOLDER);
-		options.addArguments("--profile-directory=" + ChromeSettings.PROFILE_NAME);
 		options.addArguments("--load-extension=" + ChromeSettings.buildLoadExtensionArgValue(extensions));
-		options.addArguments("--auto-select-desktop-capture-source=Entire screen");
 	}
 
 	/**
