@@ -92,8 +92,10 @@ public class ScriptUtils {
             try(InputStream inputStream = ScriptUtils.class.getClassLoader().getResourceAsStream("takeScreenshot.js")){
                 String script = IOUtils.toString(inputStream, Charset.forName("UTF-8"));
                 JavascriptExecutor js = (JavascriptExecutor) driver;
-                String imgBase64 = js.executeAsyncScript(script).toString();
-                return Base64.getDecoder().decode(imgBase64);
+                String scriptAnswer = js.executeAsyncScript(script).toString();
+                if(scriptAnswer.startsWith("Error"))
+                    throw new RuntimeException("Ошибка в скрипте получения скриншота: "+scriptAnswer);
+                return Base64.getDecoder().decode(scriptAnswer);
             }
         } catch(Exception ex){
             throw new RuntimeException("Ошибка получения скриншота", ex);
