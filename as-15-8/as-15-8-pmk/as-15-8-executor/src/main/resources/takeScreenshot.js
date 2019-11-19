@@ -20,7 +20,7 @@ try {
                     context.drawImage(bitmap, 0, 0);
                     done(canvas.toDataURL('image/png;base64,').replace('data:image/png;base64,', ''));
                 });
-            }, 1000);
+            }, 3000);
         });
 } catch(err) {
     console.error("Error: " + err);
