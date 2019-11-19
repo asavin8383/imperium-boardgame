@@ -100,7 +100,7 @@ public class ScheduleService {
         for(Map.Entry<Arrangement, TreeSet<ScheduleCheckUnit>> arrangementEntry : arrangementCheckUnits.entrySet()){
             Arrangement arrangement = arrangementEntry.getKey();
             if(arrangementEntry.getValue().isEmpty()){
-                throw AS_15_8_PPM_Exception.logAndGet(log, "Ошибка создания расписания. У мероприятия " + arrangement.getId() + " пустое множество значений для проверки");
+                throw new AS_15_8_PPM_Exception("Ошибка создания расписания. У мероприятия " + arrangement.getId() + " пустое множество значений для проверки");
             }
             scheduleIntervals.add(arrangement.getPlannedStartTime());
             scheduleIntervals.add(arrangement.getPlannedEndTime());
