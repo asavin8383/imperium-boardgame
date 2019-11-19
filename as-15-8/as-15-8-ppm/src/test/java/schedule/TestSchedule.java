@@ -25,7 +25,10 @@ import java.util.TreeSet;
 public class TestSchedule {
 
     @Autowired
-    private ScheduleCreationService scheduleService;
+    private ScheduleCreationService scheduleCreationService;
+
+    @Autowired
+    private ScheduleService scheduleService;
 
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 
@@ -50,12 +53,13 @@ public class TestSchedule {
             createArrangement("arr4", AccessToolUnit.TORGUARD,"13:10", "16:30"),
             generateCheckUnits(25000));*/
 
-        Schedule schedule = scheduleService.create(scheduleArrangements);
+        Schedule schedule = scheduleCreationService.create(scheduleArrangements);
+        scheduleService.planSchedule(schedule);
 
         for(SchedulePeriod schedulePeriod : schedule.getSchedulePeriods()){
             System.out.print(formatter.format(schedulePeriod.getStartTime()) + " - " + formatter.format(schedulePeriod.getEndTime()) + ": ");
             for(SchedulePeriodArrangement schedulePeriodArrangement : schedulePeriod.getSchedulePeriodArrangements()){
-                System.out.print(schedulePeriodArrangement.getArrangement().getTitle() + " " + schedulePeriodArrangement.getWorkersCount() + ", ");
+                System.out.print(schedulePeriodArrangement.getArrangement().getTitle() + " " + schedulePeriodArrangement.getWorkersCount());
             }
             System.out.print("\r\n");
         }
