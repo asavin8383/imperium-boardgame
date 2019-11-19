@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+import services.ScheduleCreationService;
 import services.ScheduleService;
 
 import java.time.LocalTime;
@@ -24,7 +25,7 @@ import java.util.TreeSet;
 public class TestSchedule {
 
     @Autowired
-    private ScheduleService scheduleService;
+    private ScheduleCreationService scheduleService;
 
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 
@@ -35,7 +36,7 @@ public class TestSchedule {
 
         scheduleArrangements.put(
                 createArrangement("arr1", "hola", "11:00:00","11:30:00"),
-                generateCheckUnits( 76));
+                generateCheckUnits( 10));
 
         /*scheduleArrangements.put(
             createArrangement("arr2", AccessToolUnit.YANDEX,"09:00", "10:00"),
