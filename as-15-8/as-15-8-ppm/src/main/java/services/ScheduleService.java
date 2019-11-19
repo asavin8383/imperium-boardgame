@@ -269,11 +269,13 @@ public class ScheduleService {
             if((processingTime + checkUnitProcessingTime) > maxProcessingTime){
                 break;
             }
-            processingTime += checkUnitProcessingTime;
             lastCompletionCheckUnit = checkUnit;
+            processingTime += checkUnitProcessingTime;
         }
         return new ArrangementSchedulePeriodProcessing(
-                workersCount == 0 ? 1 : Math.max(processingTime / workersCount, 1),
+                workersCount == 0 ? 1 : Math.max(
+                        (int) Math.ceil((double)processingTime / workersCount),
+                        1),
                 lastCompletionCheckUnit);
     }
 
