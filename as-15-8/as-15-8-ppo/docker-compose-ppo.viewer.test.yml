@@ -1,24 +1,41 @@
 version: '3.7'
 services:
   rep-viewer:
+    build:
+      context: "./as-15-8-rep-viewer"
     image: harbor.ec-leasing.ru/as_15_8/as-15-8-rep-viewer:latest
-    network_mode: "host"
     restart: always
     environment:
+      GATEWAY_URI: http://192.168.5.50:15880
       TZ: "Europe/Moscow"
     ports:
       - "8078:8080"
     labels:
       collect_logs_with_filebeat: "true"
       decode_log_event_to_json_object: "true"
+    networks:
+      net:
   rep-gate:
+    build:
+      context: "./as-15-8-rep-gate"
     image: harbor.ec-leasing.ru/as_15_8/as-15-8-rep-gate:latest
-    network_mode: "host"
     restart: always
     environment:
+      GATEWAY_URI: http://192.168.5.50:15880
+      PROFILE: "test"
+      BASIC_AUTH: "YmlydC12aWV3ZXI6MXEwcDJ3OW8="
+      CLIENTID: "birt-viewer"
+      CLIENT_SECRET: "1q0p2w9o"
       TZ: "Europe/Moscow"
     ports:
       - "8079:80"
     labels:
       collect_logs_with_filebeat: "true"
       decode_log_event_to_json_object: "true"
+    volumes:
+      - ~/as-15-8-ppo/rep-gate/config:/config
+
+    networks:
+      net:
+networks:
+  net:
