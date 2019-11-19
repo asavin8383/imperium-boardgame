@@ -22,9 +22,6 @@ navigator.mediaDevices.getDisplayMedia(displayMediaOptions)
                 done("Error: " + ex.toString())
             });
         }, 3000)
-        .catch(ex => {
-            done("Error: " + ex.toString())
-        });
     }).catch(ex => {
          done("Error: " + ex.toString())
     });
