@@ -23,5 +23,5 @@ try {
             }, 3000);
         });
 } catch(err) {
-    console.error("Error: " + err);
+    done("Error: " + err.toString());
 }
