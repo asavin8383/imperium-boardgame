@@ -120,8 +120,9 @@ public class DriverFactory {
 		options.addArguments("--profile-directory=" + ChromeSettings.PROFILE_NAME);
 		options.addArguments("--auto-select-desktop-capture-source=Entire screen");
 		options.addArguments("--allow-http-screen-capture");
-		options.addArguments("--enable-blink-features=GetUserMedia");
-		options.addArguments("--unsafely-treat-insecure-origin-as-secure=" + checkUrl);
+		options.addArguments("--ignore-certificate-errors");
+		options.addArguments("--ignore-urlfetcher-cert-requests");
+		options.addArguments("--unsafely-treat-insecure-origin-as-secure=" + checkUrl.replaceFirst("https", "http"));
 	}
 
 	/**
