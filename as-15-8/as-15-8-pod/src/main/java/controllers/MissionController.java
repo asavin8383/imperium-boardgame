@@ -84,7 +84,6 @@ public class MissionController {
             return new ResponseEntity<>(result, responseHeaders, HttpStatus.OK);
         }
         return new ResponseEntity<>((byte[]) null, HttpStatus.NO_CONTENT);
-
     }
 
     @GetMapping(path = "/load")
