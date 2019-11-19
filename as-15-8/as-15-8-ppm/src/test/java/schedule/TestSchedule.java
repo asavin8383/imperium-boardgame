@@ -27,9 +27,6 @@ public class TestSchedule {
     @Autowired
     private ScheduleCreationService scheduleCreationService;
 
-    @Autowired
-    private ScheduleService scheduleService;
-
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 
     @Test
@@ -39,7 +36,7 @@ public class TestSchedule {
 
         scheduleArrangements.put(
                 createArrangement("arr1", "hola", "11:00:00","11:30:00"),
-                generateCheckUnits( 10));
+                generateCheckUnits( 18));
 
         /*scheduleArrangements.put(
             createArrangement("arr2", AccessToolUnit.YANDEX,"09:00", "10:00"),
@@ -54,7 +51,6 @@ public class TestSchedule {
             generateCheckUnits(25000));*/
 
         Schedule schedule = scheduleCreationService.create(scheduleArrangements);
-        scheduleService.planSchedule(schedule);
 
         for(SchedulePeriod schedulePeriod : schedule.getSchedulePeriods()){
             System.out.print(formatter.format(schedulePeriod.getStartTime()) + " - " + formatter.format(schedulePeriod.getEndTime()) + ": ");

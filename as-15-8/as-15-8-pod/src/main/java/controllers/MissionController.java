@@ -63,6 +63,7 @@ public class MissionController {
             Detector detector = new DefaultDetector();
             Metadata metadata = new Metadata();
             String mime = detector.detect(new ByteArrayInputStream(result), metadata).toString();
+            log.info("Запрошен документ оригинального поручения: "+id+" Тип документа определен как "+mime);
 
             HttpHeaders responseHeaders = new HttpHeaders();
             //String mime = URLConnection.guessContentTypeFromStream(new ByteArrayInputStream(result));
