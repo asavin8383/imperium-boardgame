@@ -137,8 +137,9 @@ public class DriverFactory {
 		options.addArguments("--profile-directory=" + ChromeSettings.PROFILE_NAME);
 		options.addArguments("--load-extension=" + ChromeSettings.buildLoadExtensionArgValue(extensions));
 		options.addArguments("--auto-select-desktop-capture-source=Entire screen");
-		options.addArguments("--disable-default-apps");
-		options.addArguments("--disable-sync");
+		options.addArguments("--allow-http-screen-capture");
+		options.addArguments("--enable-usermedia-screen-capturing");
+		options.addArguments("--ignore-certificate-errors");
 	}
 
 	/**
