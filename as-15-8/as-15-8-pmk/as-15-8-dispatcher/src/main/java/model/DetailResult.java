@@ -1,6 +1,5 @@
 package model;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -20,7 +19,7 @@ public class DetailResult implements Serializable  {
     @Id
     private Long id;
 
-    @OneToOne(optional = false, fetch = FetchType.LAZY)
+    @OneToOne(optional = false)
     @MapsId
     private Result result;
 

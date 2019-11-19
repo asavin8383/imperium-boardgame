@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import repositories.ScheduleRepo;
 import services.ArrangementService;
+import services.ScheduleCreationService;
 import services.ScheduleService;
 
 import java.security.Principal;
@@ -40,6 +41,7 @@ public class ScheduleController {
 
     private final ArrangementService arrangementService;
     private final ScheduleService scheduleService;
+    private final ScheduleCreationService scheduleCreationService;
     private final ScheduleRepo scheduleRepo;
 
     @GetMapping(path = "/arrangements")
@@ -75,7 +77,7 @@ public class ScheduleController {
 
     @GetMapping(path = "/total_workers_count")
     public Integer getTotalWorkersCount(){
-        return scheduleService.getTotalWorkersCount();
+        return scheduleCreationService.getTotalWorkersCount();
     }
 
     //TODO кидать 400
@@ -107,7 +109,7 @@ public class ScheduleController {
                 .forEach(arrangementService::updateArrangementPlanInfo);
         List<Long> arrangementIds = arrangements.stream().map(Arrangement::getId).collect(Collectors.toList());
 
-        return saveSchedule(arrangementIds, principal.getName(), plannedDate, schedule);
+        return scheduleService.saveSchedule(arrangementIds, principal.getName(), plannedDate, schedule);
     }
 
     @PutMapping(path = "/plan")
@@ -144,41 +146,7 @@ public class ScheduleController {
     }
 
     private synchronized Schedule saveSchedule(List<Long> arrangementIds, String author, LocalDate plannedDate){
-        return saveSchedule(arrangementIds, author, plannedDate, null);
-    }
-
-    private synchronized Schedule saveSchedule(List<Long> arrangementIds, String author, LocalDate plannedDate, Schedule schedule){
-        //Сначала исключим из расписания все периоды
-        if(schedule != null)
-            scheduleService.clearSchedulePeriods(schedule);
-
-        List<Long> availableIds =
-                arrangementService.findAllAvailableArrangements()
-                        .stream()
-                        .mapToLong(Arrangement::getId)
-                        .filter(arrangementIds::contains)
-                        .boxed()
-                        .collect(Collectors.toList());
-        if (availableIds.size() == 0){
-            throw AS_15_8_PPM_Exception.logAndGet(log,"Ошибка сохранения расписания. Список мероприятий не содержит незапланнированных мероприятий");
-        }
-        if(plannedDate==null || plannedDate.isBefore(LocalDate.now())){
-            plannedDate = LocalDate.now();
-        }
-        log.info("Начало расчета расписания на дату: {}", plannedDate);
-        Map<Arrangement, TreeSet<ScheduleCheckUnit>> arrangementCheckUnits = arrangementService.getArrangementCheckUnits(availableIds, plannedDate);
-        Schedule newSchedule = scheduleService.create(arrangementCheckUnits);
-        log.info("Расчет расписания на дату {} завершен", plannedDate);
-        if(schedule != null) {
-           schedule.setSchedulePeriods(newSchedule.getSchedulePeriods());
-           for(SchedulePeriod schedulePeriod : schedule.getSchedulePeriods())
-               schedulePeriod.setSchedule(schedule);
-        } else {
-            schedule = newSchedule;
-        }
-        schedule.setAuthor(author);
-        schedule.setPlannedDate(plannedDate);
-        return scheduleService.saveSchedule(schedule);
+        return scheduleService.saveSchedule(arrangementIds, author, plannedDate, null);
     }
 
     @Data

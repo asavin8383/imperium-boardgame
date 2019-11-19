@@ -108,7 +108,7 @@ public class VPNRobot extends SeleniumRobot {
                 .runAsync(() -> {
                     if (useEtalon){
                         try {
-                        	etalonDriver = createDriver(etalonProxy, true);
+                        	etalonDriver = createDriver(etalonProxy, true, checkUnit.getValue());
                             PageResult pageResult = RobotScriptUtils.loadPage(url, etalonDriver);
 
                             HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(etalonDriver,

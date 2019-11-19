@@ -47,7 +47,6 @@ public abstract class SeleniumRobot implements Robot {
 		setParams(scriptParams);
 		this.proxy = proxy;
 		this.enableLog = enableLog;
-		this.driver = createDriver(proxy, enableLog);
 	}
 
 	private void setParams(Map<AccessToolParameter, String> scriptParams) {
@@ -56,6 +55,7 @@ public abstract class SeleniumRobot implements Robot {
 
 	public ExecutionJobResult run(CheckUnit checkUnit) throws ExecutionException {
 		try {
+			this.driver = createDriver(proxy, enableLog, checkUnit.getValue());
 			currentExecutionFuture = CompletableFuture.supplyAsync(() -> {
 					try {
 						return execute(checkUnit);
@@ -85,13 +85,15 @@ public abstract class SeleniumRobot implements Robot {
 	 */
 	protected abstract ExecutionJobResult execute(CheckUnit checkUnit) throws ExecutionException;
 
-	protected WebDriver createDriver(String proxy, boolean enableLog) {
+	protected WebDriver createDriver(String proxy, boolean enableLog, String checkUrl) {
 		WebDriver driver = DriverFactory.createDriver(
 				ExecutorProperties.getSeleniumHubUrl(),
 				Platform.valueOf(getScriptParams().get(AccessToolParameter.PLATFORM)),
 				getScriptParams().get(AccessToolParameter.APPLICATION),
 				getScriptParams().get(AccessToolParameter.BROWSER),
-				proxy, enableLog
+				proxy,
+				enableLog,
+				checkUrl
 		);
 		return driver;
 	}
