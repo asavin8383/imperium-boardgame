@@ -57,8 +57,8 @@ public class MissionController {
     }
 
     @GetMapping(path = "/get_image")
-    public @ResponseBody
-    ResponseEntity<byte[]> getOriginalMissionDocument(@RequestParam("id") Mission mission) throws IOException, MimeTypeException {
+    public @ResponseBody ResponseEntity<byte[]> getOriginalMissionDocument(
+            @RequestParam("id") Mission mission) throws IOException, MimeTypeException {
         byte[] result = missionService.receiveMissionDocumentFromDB(mission.getId());
         if (result != null && result.length > 0) {
 

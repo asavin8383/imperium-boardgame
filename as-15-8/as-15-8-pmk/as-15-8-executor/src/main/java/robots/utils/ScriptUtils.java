@@ -89,6 +89,9 @@ public class ScriptUtils {
 
     public static byte[] getScreenshot(WebDriver driver)  {
         try {
+            String currentTab = driver.getWindowHandle();
+            ArrayList<String> tabs = new ArrayList<>(driver.getWindowHandles());
+            waitForTab(driver, tabs.indexOf(currentTab));
             try(InputStream inputStream = ScriptUtils.class.getClassLoader().getResourceAsStream("takeScreenshot.js")){
                 String script = IOUtils.toString(inputStream, Charset.forName("UTF-8"));
                 JavascriptExecutor js = (JavascriptExecutor) driver;
@@ -157,7 +160,7 @@ public class ScriptUtils {
         }
     }*/
 
-    private static byte[] getSeleniumScreenshot(WebDriver driver, WebElement ele) throws IOException {
+   /* private static byte[] getSeleniumScreenshot(WebDriver driver, WebElement ele) throws IOException {
         File screenshot = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
         BufferedImage  fullImg = ImageIO.read(screenshot);
 
@@ -184,7 +187,7 @@ public class ScriptUtils {
         catch (TimeoutException te){
             return null;        // вероятно, загрузка страницы была прервана по явному таймауту, поэтому DOM не сформировался.
         }
-    }
+    }*/
 
     public static String getCurrentUrl(WebDriver webDriver) {
         try{
