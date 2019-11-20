@@ -3,5 +3,5 @@ token=`curl --request POST   --url $GATEWAY_URI'/security/oauth/token?grant_type
 curl --request POST \
   --url $GATEWAY_URI/eureka/apps/birt-viewer \
   --header 'authorization: Bearer '${token} \
-  --header 'content-type: application/xml' \
-  --data '@/config/eureka_init_'$PROFILE'.xml'
+  --header 'content-type: application/json' \
+  --data '@/config/eureka_init_'$PROFILE'.json'

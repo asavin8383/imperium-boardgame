@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 token=`curl --request POST   --url $GATEWAY_URI'/security/oauth/token?grant_type=client_credentials&clientid='$CLIENTID'&client_secret='$CLIENT_SECRET   --header 'authorization: Basic '${BASIC_AUTH}  | jq -r .access_token`
-curl --request PUT \
-  --url $GATEWAY_URI/eureka/apps/birt-viewer/birt-viewer:192.168.5.50:15880 \
+instanceId=`cat /config/eureka_init_test.json | jq -r .instance.instanceId`
+echo "sending hearthbeat ..."
+curl -I --request PUT \
+  --url $GATEWAY_URI/eureka/apps/birt-viewer/$instanceId \
   --header 'authorization: Bearer '$token
