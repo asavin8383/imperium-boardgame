@@ -20,7 +20,7 @@ import rest.MissionData;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -41,7 +41,7 @@ public class FormalTaskController {
 		formalTask.setCreationDate(LocalDateTime.now());
 		return formalTaskRepo.save(formalTask);
 	}
-	
+
 	@GetMapping
 	public Page<FormalTask> findList(
 			@RequestParam(required = false) Long taskId,
@@ -53,6 +53,11 @@ public class FormalTaskController {
 		PageRequest page = PageRequest.of(
 				pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
 		return formalTaskRepo.findPage(taskId, operator, page);
+	}
+
+	@GetMapping("{task}")
+	public FormalTask findById(@PathVariable FormalTask task){
+		return task;
 	}
 
 	@PutMapping

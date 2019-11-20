@@ -35,5 +35,6 @@
     <include file="db/changelog/ppt.0008.arrangements_comment_and_info.xml"/>
     <include file="db/changelog/ppt.0009.arrangements_start_end_date.xml"/>
     <include file="db/changelog/ppt.0010.arrangements_completion_date.xml"/>
+    <include file="db/changelog/ppt.0011.arrangements_deadline_date.xml"/>
 
 </databaseChangeLog>

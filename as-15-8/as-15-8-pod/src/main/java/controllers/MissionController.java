@@ -65,12 +65,12 @@ public class MissionController {
             Detector detector = new DefaultDetector();
             Metadata metadata = new Metadata();
             String mime = detector.detect(new ByteArrayInputStream(result), metadata).toString();
-            String documentName = "Поручение " + mission.getOrigId();
+            String documentName = "Поручение_" + mission.getOrigId();
             if (Strings.isEmpty(mime)) {
                 mime = "application/octet-stream";
             } else {
                 String documentExtension = TikaConfig.getDefaultConfig().getMimeRepository().forName(mime).getExtension();
-                documentName += "." + documentExtension;
+                documentName += documentExtension;
             }
 
             log.info("Запрошен документ оригинального поручения: "+mission.getOrigId() +
