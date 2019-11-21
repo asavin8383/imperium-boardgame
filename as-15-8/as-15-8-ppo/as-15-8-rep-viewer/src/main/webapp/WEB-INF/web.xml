@@ -49,14 +49,14 @@
 	</context-param>
 
 	<!--
-		Settings for how to deal with the url report path. e.g. "http://host/repo/test.rptdesign". 
-		
+		Settings for how to deal with the url report path. e.g. "http://host/repo/test.rptdesign".
+
 		Following values are supported:
-		
+
 		<all> 		- All paths.
 		<domain>	- Only the paths with host matches current domain. Note the comparison is literal, "127.0.0.1" and "localhost" are considered as different hosts.
 		<none> 		- URL paths are not supported.
-		
+
 		Defaults to "domain".
 	-->
 	<context-param>
@@ -162,8 +162,16 @@
 		<filter-name>ViewerFilter</filter-name>
 		<filter-class>org.eclipse.birt.report.filter.ViewerFilter</filter-class>
 	</filter>
+	<filter>
+		<filter-name>DBSaverFilter</filter-name>
+		<filter-class>servlet.DBSaverFilter</filter-class>
+	</filter>
 	<filter-mapping>
 		<filter-name>ViewerFilter</filter-name>
+		<servlet-name>ViewerServlet</servlet-name>
+	</filter-mapping>
+	<filter-mapping>
+		<filter-name>DBSaverFilter</filter-name>
 		<servlet-name>ViewerServlet</servlet-name>
 	</filter-mapping>
 	<filter-mapping>
