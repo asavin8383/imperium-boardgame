@@ -7,6 +7,8 @@
         <!--<groupId>com.ecls.as-15-8</groupId>-->
         <!--<version>1.0</version>-->
     <!--</parent>-->
+    <groupId>com.ecls.as-15-8</groupId>
+    <version>1.0</version>
 
     <modelVersion>4.0.0</modelVersion>
 
@@ -16,7 +18,7 @@
             <groupId>org.apache.tomcat.embed</groupId>
             <artifactId>tomcat-embed-core</artifactId>
             <version>9.0.16</version>
-            <scope>compile</scope>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
@@ -24,15 +26,87 @@
             <version>2.6</version>
             <scope>compile</scope>
         </dependency>
+
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+            <version>2.1.3.RELEASE</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
+        </dependency>
+
+
+
+        <dependency>
+            <groupId>com.innoventsolutions.birt.runtime</groupId>
+            <artifactId>org.eclipse.birt.runtime_4.8.0-20180626</artifactId>
+            <version>4.8.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.innoventsolutions.birt.runtime</groupId>
+                    <artifactId>org.eclipse.orbit.mongodb_3.2.2.v20170222-2110</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.eclipse.birt.runtime/viewservlets -->
+        <!-- https://mvnrepository.com/artifact/org.eclipse.birt.runtime/viewservlets -->
+        <dependency>
+            <groupId>org.eclipse.birt.runtime</groupId>
+            <artifactId>viewservlets</artifactId>
+            <version>4.5.0</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/javax.xml/jaxrpc-api -->
+        <dependency>
+            <groupId>javax.xml</groupId>
+            <artifactId>jaxrpc-api</artifactId>
+            <version>1.1</version>
+        </dependency>
+
+
+        <!-- Это важно, без этого Birt работать не будет -->
+                <dependency>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                    <exclusions>
+                        <exclusion>
+                            <groupId>ch.qos.logback</groupId>
+                            <artifactId>logback-classic</artifactId>
+                        </exclusion>
+                    </exclusions>
+                </dependency>
+
         <!--<dependency>-->
-            <!--<groupId>org.springframework</groupId>-->
-            <!--<artifactId>spring-test</artifactId>-->
-            <!--<version>5.1.5.RELEASE</version>-->
-            <!--<scope>compile</scope>-->
+            <!--<groupId>org.springframework.cloud</groupId>-->
+            <!--<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>-->
         <!--</dependency>-->
+
+        <!--<dependency>-->
+            <!--<groupId>org.springframework.boot</groupId>-->
+            <!--<artifactId>spring-boot-starter-security</artifactId>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>org.springframework.security.oauth.boot</groupId>-->
+            <!--<artifactId>spring-security-oauth2-autoconfigure</artifactId>-->
+            <!--<version>RELEASE</version>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>io.pivotal.spring.cloud</groupId>-->
+            <!--<artifactId>spring-cloud-services-spring-connector</artifactId>-->
+            <!--<version>2.1.4.RELEASE</version>-->
+        <!--</dependency>-->
+
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+
     </dependencies>
-    <groupId>com.ecls.as-15-8</groupId>
-    <version>1.0</version>
 
     <packaging>war</packaging>
 
