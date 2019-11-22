@@ -13,9 +13,11 @@ RUN apk update \
  && apk add jq \
  && rm -rf /var/cache/apk/*
 
-COPY init_eureka.sh /init_eureka.sh
-COPY run.sh /run.sh
-RUN chmod +x /init_eureka.sh && chmod +x /run.sh
+COPY *.sh /
+RUN chmod +x /init_eureka.sh \
+    && chmod +x /run.sh \
+    && chmod +x /hearthbeat_eureka.sh
+
 COPY nginx.conf /nginx.conf
 COPY bearer.lua /bearer.lua
 

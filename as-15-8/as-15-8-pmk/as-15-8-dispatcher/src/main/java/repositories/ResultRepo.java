@@ -28,6 +28,7 @@ public interface ResultRepo extends JpaRepository<Result, Long> {
 
 	List<Result> findAllByArrangementId(Long id);
 	List<Result> findByArrangementIdAndResultIn(Long arrangementId, Collection<CheckUnitJobResult> results);
+	Page<Result> findByArrangementIdAndResultIn(Long arrangementId, Collection<CheckUnitJobResult> results, Pageable pageable);
 
 	Page<Result> findAllByArrangementId(Long id, Pageable pageable);
 	@Query("select DISTINCT r from Result r" +

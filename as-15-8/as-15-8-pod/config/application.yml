@@ -25,7 +25,8 @@ spring:
     databasePlatform: org.hibernate.dialect.PostgreSQL9Dialect
   app:
     schedule:
-      missions: '0 0 0 * * ?'
+#      missions: '0 0 0 * * ?'
+      missions: '0 */1 * * * ?'
     jwt:
       secret: Gk-Xun_Yrkd0zigpysWS
       ttl: 86400
@@ -48,7 +49,8 @@ spring:
   profiles.include: docker_log
   app:
     schedule:
-      missions: '0 */1 * * * ?'
+      missions: '0 0 0 * * ?'
+#      missions: '0 */1 * * * ?'
   main:
     banner-mode: "off"
   jpa:

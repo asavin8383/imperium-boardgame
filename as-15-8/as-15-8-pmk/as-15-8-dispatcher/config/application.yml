@@ -142,6 +142,8 @@ spring:
         outputJobs.destination: jobs_asavin
         inputJobNotifications.destination: job_notifications_asavin
         inputAnalysisResults.destination: analysis_results_asavin
+  datasource:
+    url: jdbc:postgresql://192.168.5.195:5432/asdb_test2
 
 ---
 
