@@ -1,0 +1,19 @@
+subsystem: PPO
+#server:
+#  port: 15814
+spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration
+
+  application.name: report_viever
+  main.allow-bean-definition-overriding: true
+  datasource:
+    url: jdbc:postgresql://192.168.5.195:5432/asdb_test
+    test-while-idle: true
+    validation-query: SELECT 1;
+    time-between-eviction-runs-millis: 300000
+    max-active: 5
+    username: as_user
+    password: as_user
