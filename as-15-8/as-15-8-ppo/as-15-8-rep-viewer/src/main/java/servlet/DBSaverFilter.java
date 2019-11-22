@@ -25,7 +25,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
 
@@ -61,6 +60,7 @@ public class DBSaverFilter implements javax.servlet.Filter
             System.out.println("\n");
             System.out.println("request.getMethod() = " + request.getMethod());
             System.out.println("request.getQueryString() = " + request.getQueryString());
+            System.out.println("request.getParameterMap = " + request.getParameterMap());
 
             if (request.getMethod().equalsIgnoreCase("POST")) {
 
@@ -71,57 +71,8 @@ public class DBSaverFilter implements javax.servlet.Filter
                         getRequestWrapper(request, requestStream),
                         getResponseWrapper(response, responseStream));
 
-                System.out.println("request = " + request.getQueryString());
-
-                String rptdesign = request.getParameter("__report");
-                System.out.println("rptdesign " + rptdesign);
-
-                String format = request.getParameter("__format");
-                if (format == null) format = "html";
-                System.out.println("format " + format);
-
-                String sessionId = request.getParameter("__sessionId");
-                System.out.println("sessionId " + sessionId);
-
-                String mime = response.getHeader("Content-Type");
-                System.out.println("mime " + mime);
-
-                SoapOperation soapOperation = getSoapOperation(sessionId, requestStream);
-//                System.out.println("soapOperation " + new ObjectMapper().writeValueAsString(soapOperation));
-                System.out.println("soapOperation " + new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(soapOperation));
-                Map<String, String> params = soapOperation.params();
-                System.out.println("rep_params " + params);
-
-                String RPD = params.get("RPD");
-                System.out.println("RPD = " + RPD);
-
-
-                String RPFD = params.get("RPFD");
-                System.out.println("RPFD = " + RPFD);
-
                 try {
-                    Report report = new Report();
-                    report.setData(responseStream.toByteArray());
-                    report.setRptdesign(rptdesign);
-                    report.setFormat(format);
-                    report.setMime(mime);
-                    report.setParams(new ObjectMapper().writeValueAsString(soapOperation));
-                    report.setUsername(quessUsername());
-
-                    if (RPD != null) {
-                        Integer msr_prd_tp_id = Integer.valueOf(RPD);
-                        Optional<MsrPrdTp> msrPrdTp = msrPrdTpRepository.findById(msr_prd_tp_id);
-                        report.setMsr_prd_tp_id(msr_prd_tp_id);
-                        msrPrdTp.ifPresent(msrPrdTp1 -> report.setMsr_prd_tp(msrPrdTp1.getNm()));
-                    }
-
-                    if (RPFD!=null) {
-                        LocalDate start = LocalDate.parse(RPFD);
-                        report.setMsr_prd_st_dttm(start);
-                    }
-
-                    System.out.println("report = " + report);
-                    reportRepository.saveAndFlush(report);
+                    writeReport(request, response, requestStream, responseStream);
                 } catch (Throwable e) {
                     e.printStackTrace();
                     throw e;
@@ -137,14 +88,49 @@ public class DBSaverFilter implements javax.servlet.Filter
         }
     }
 
-    private String quessUsername() {
-        return "anonymous";
-//        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-//        if (principal instanceof UserDetails) {
-//            String username = ((UserDetails) principal).getUsername();
-//        } else {
-//            String username = principal.toString();
-//        }
+    private void writeReport(HttpServletRequest request, HttpServletResponse response, ByteArrayOutputStream requestStream, ByteArrayOutputStream responseStream) throws IOException {
+
+        String mime = response.getHeader("Content-Type");
+
+        String rptdesign = request.getParameter("__report");
+        String format = request.getParameter("__format");
+        if (format == null) format = "html";
+
+        SoapOperation reportParamsSoap = getSoapParams(request, requestStream);
+        System.out.println("reportParamsSoap " + new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(reportParamsSoap));
+        Map<String, String> params = reportParamsSoap.params();
+        System.out.println("rep_params " + params);
+
+        String RPD = params.get("RPD");
+        String RPFD = params.get("RPFD");
+        String username = params.get("username");
+        String rep_nm = params.get("rep_nm");
+        String rep_tp_id = params.get("rep_tp_id");
+
+        Report report = new Report();
+        report.setData(responseStream.toByteArray());
+        report.setRptdesign(rptdesign);
+        report.setFormat(format);
+        report.setMime(mime);
+        report.setParams(new ObjectMapper().writeValueAsString(reportParamsSoap));
+        report.setUsername(username);
+        report.setRep_nm(rep_nm);
+        report.setRep_tp_id(rep_tp_id != null ? Integer.valueOf(rep_tp_id) : null);
+
+        if (RPD != null) {
+            Integer msr_prd_tp_id = Integer.valueOf(RPD);
+            Optional<MsrPrdTp> msrPrdTp = msrPrdTpRepository.findById(msr_prd_tp_id);
+            report.setMsr_prd_tp_id(msr_prd_tp_id);
+            msrPrdTp.ifPresent(msrPrdTp1 -> report.setMsr_prd_tp(msrPrdTp1.getNm()));
+        }
+
+        if (RPFD != null) {
+            LocalDate start = LocalDate.parse(RPFD);
+            report.setMsr_prd_st_dttm(start);
+        }
+
+        System.out.println("report = " + report);
+        reportRepository.saveAndFlush(report);
     }
 
     private SoapOperation readRequest(ByteArrayOutputStream requestStream) throws IOException {
@@ -159,8 +145,10 @@ public class DBSaverFilter implements javax.servlet.Filter
         return xmlMapper.readValue(new ByteArrayInputStream(byteArray), Envelope.class).getBody().getGetUpdatedObjects().getOperation();
     }
 
-    private SoapOperation getSoapOperation(String sessionId, ByteArrayOutputStream requestStream) throws IOException {
+    private SoapOperation getSoapParams(HttpServletRequest request, ByteArrayOutputStream requestStream) throws IOException {
         try {
+            String sessionId = request.getParameter("__sessionId");
+            System.out.println("sessionId = " + sessionId);
             System.out.println("requestStream " + requestStream.toString());
             SoapOperation soapOperation = readRequest(requestStream);
             System.out.println("soapOperation = " + soapOperation);
