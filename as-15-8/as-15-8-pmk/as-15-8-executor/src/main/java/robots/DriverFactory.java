@@ -1,5 +1,6 @@
 package robots;
 
+import common.ExecutorProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.openqa.selenium.Platform;
@@ -13,7 +14,6 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.net.URL;
-import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -33,8 +33,8 @@ public class DriverFactory {
 	 * @param browserName Имя браузера
 	 * @return
 	 */
-	public static WebDriver createDriver(URL hubURL, Platform platformName, String appName, String browserName, String checkUrl) {
-		return createDriver(hubURL, platformName, appName, browserName, null, false, checkUrl);
+	public static WebDriver createDriver(URL hubURL, Platform platformName, String appName, String browserName) {
+		return createDriver(hubURL, platformName, appName, browserName, null, false);
 	}
 
 	/**
@@ -52,8 +52,7 @@ public class DriverFactory {
 			String appName,
 			String browserName,
 			String proxy,
-			boolean enableLog,
-			String checkUrl) {
+			boolean enableLog) {
 		DesiredCapabilities cpb = buildCapability(platformName, appName, browserName);
 
 		Proxy oProxy = ProxyUtils.getSeleniumProxy(proxy);
@@ -66,9 +65,7 @@ public class DriverFactory {
 		}
 
 		ChromeOptions options = new ChromeOptions();
-		setOptimalChromeOptions(options, checkUrl);
-		setLoadExtensions(options, Collections.singletonList(
-				ChromeSettings.getScreenshotExtension()));
+		setOptimalChromeOptions(options);
 
 		if (enableLog){
 			LoggingPreferences logPrefs = new LoggingPreferences();
@@ -90,18 +87,18 @@ public class DriverFactory {
 	 * @return
 	 */
 	public static WebDriver createChromeDriver(URL hubURL, Platform platformName, String appName,
-											   List<ChromeSettings.Extension> extensions, String checkUrl) {
+											   List<ChromeSettings.Extension> extensions) {
 		DesiredCapabilities cpb = buildCapability(
 				platformName, appName, "chrome");
 
         ChromeOptions options = new ChromeOptions();
-		setOptimalChromeOptions(options, checkUrl);
+		setOptimalChromeOptions(options);
 		setLoadExtensions(options, extensions);
 		cpb.setCapability(ChromeOptions.CAPABILITY, options);
 		return new RemoteWebDriver(hubURL, cpb);
     }
 
-    private static void setOptimalChromeOptions(ChromeOptions options, String checkUrl){
+    private static void setOptimalChromeOptions(ChromeOptions options){
 		options.addArguments("--start-maximized");
 		options.addArguments("--ignore-certificate-errors");
 		options.addArguments("--disable-popup-blocking");
@@ -116,13 +113,9 @@ public class DriverFactory {
 		logPrefs.enable( LogType.PERFORMANCE, Level.ALL );
 		options.setCapability( "goog:loggingPrefs", logPrefs );
 
-		options.addArguments("--user-data-dir=" + ChromeSettings.USER_DATA_FOLDER);
-		options.addArguments("--profile-directory=" + ChromeSettings.PROFILE_NAME);
+		options.addArguments("--user-data-dir=" + ExecutorProperties.getChromeProperties().getUserDataDir());
+		options.addArguments("--profile-directory=" + ExecutorProperties.getChromeProperties().getProfileName());
 		options.addArguments("--auto-select-desktop-capture-source=Entire screen");
-		options.addArguments("--allow-http-screen-capture");
-		options.addArguments("--ignore-certificate-errors");
-		options.addArguments("--ignore-urlfetcher-cert-requests");
-		options.addArguments("--unsafely-treat-insecure-origin-as-secure=" + checkUrl.replaceFirst("https", "http"));
 	}
 
 	/**

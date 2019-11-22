@@ -23,6 +23,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.kafka.listener.AbstractMessageListenerContainer;
 import org.springframework.stereotype.Service;
 import proxychains.ProxychainsConfigurator;
+import rest.ArrangementActData;
 import robots.exceptions.ExecutionException;
 import service.CheckUnitVerificationService;
 
@@ -44,6 +45,11 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
     private final ExecutorProperties executorProperties;
 
     @Override
+    public List<AccessToolUnit> getAccessToolUnits() {
+        return Arrays.asList(AccessToolUnit.VPN, AccessToolUnit.PROXY);
+    }
+
+    @Override
     public List<CheckUnitType> getCheckUnitTypes(){
         return Arrays.asList(CheckUnitType.IP_V4, CheckUnitType.IP_V4_SUBNET, CheckUnitType.IP_V6, CheckUnitType.IP_V6_SUBNET);
     }
@@ -51,6 +57,11 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
     @Override
     public ExecutionJobResult run(CheckUnitJob checkUnitJob) throws ExecutionException {
         try {
+
+            if(!executorProperties.getAccessToolUnit(checkUnitJob.getAccessTool()).equals(AccessToolUnit.VPN) &&
+                    !executorProperties.getAccessToolUnit(checkUnitJob.getAccessTool()).equals(AccessToolUnit.PROXY))
+                throw new ExecutionException("Ошибка! ПС/ПАСД " + checkUnitJob.getAccessTool() + " не поддерживает проверку с помощью NMAP");
+
             ExecutorProperties.NmapProperties nmapProperties = executorProperties.getNmap();
             String verificationName = "jobID = " + checkUnitJob.getJobID() +
                     " accessTool = " + checkUnitJob.getAccessTool() +

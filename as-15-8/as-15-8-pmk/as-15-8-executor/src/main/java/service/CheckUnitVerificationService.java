@@ -2,6 +2,7 @@ package service;
 
 import checkUnits.CheckUnitJob;
 import checkUnits.CheckUnitType;
+import enums.AccessToolUnit;
 import execution.ExecutionJobResult;
 import org.springframework.context.SmartLifecycle;
 import robots.exceptions.ExecutionException;
@@ -14,6 +15,8 @@ import java.util.List;
  *
  */
 public interface CheckUnitVerificationService extends SmartLifecycle {
+
+	List<AccessToolUnit> getAccessToolUnits();
 
 	List<CheckUnitType> getCheckUnitTypes();
 

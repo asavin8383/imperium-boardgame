@@ -2,6 +2,7 @@ package service.impl;
 
 import checkUnits.CheckUnitJob;
 import checkUnits.CheckUnitType;
+import enums.AccessToolUnit;
 import execution.ExecutionJobResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,9 +39,21 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
     
     private boolean isRunning = false;
 
+    public List<AccessToolUnit> getAccessToolUnits() {
+    	return Arrays.asList(
+    		AccessToolUnit.SEARCH_SYSTEM,
+			AccessToolUnit.PROXY,
+			AccessToolUnit.VPN,
+			AccessToolUnit.CAMELEO_XYZ,
+			AccessToolUnit.HIDEMYASS,
+			AccessToolUnit.HOLA,
+			AccessToolUnit.GOOGLE_API
+		);
+    }
+
 	@Override
-	public List<CheckUnitType> getCheckUnitTypes(){
-		return Collections.singletonList(CheckUnitType.URL);
+	public List<CheckUnitType> getCheckUnitTypes() {
+    	return Collections.singletonList(CheckUnitType.URL);
 	}
 
 	@Override

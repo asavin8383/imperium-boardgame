@@ -17,8 +17,7 @@ import robots.utils.RobotScriptUtils;
 import robots.utils.ScriptUtils;
 import robots.utils.ScriptUtils.PageResult;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -27,10 +26,10 @@ import static robots.utils.HttpResponseHelper.HttpResponseMeta;
 
 public class HolaRobot extends SeleniumRobot {
 
-    protected String stubUrl;
-    protected boolean useEtalon;
+    private String stubUrl;
+    private boolean useEtalon;
 
-    private List<ChromeSettings.Extension> extensions;
+    private ChromeSettings.Extension extension;
 
     public HolaRobot(Map<AccessToolParameter, String> scriptParams) {
 
@@ -44,13 +43,15 @@ public class HolaRobot extends SeleniumRobot {
     			)
     		);
 
-        this.useEtalon =  ScriptUtils.useEtalon(scriptParams);
+        this.useEtalon =  ExecutorProperties.getEtalon().getEnabled();
 
      	this.stubUrl = scriptParams.get(AccessToolParameter.STUB_URL);
 
-     	this.extensions = new ArrayList<>();
-        this.extensions.add(ChromeSettings.getScreenshotExtension());
-        this.extensions.add(ChromeSettings.Extension.HOLA);
+     	this.extension = new ChromeSettings.Extension(
+     	        scriptParams.get(AccessToolParameter.EXTENSION_ID),
+                scriptParams.get(AccessToolParameter.EXTENSION_VERSION),
+                scriptParams.get(AccessToolParameter.EXTENSION_POPUP)
+        );
     }
 
     @Override
@@ -93,8 +94,7 @@ public class HolaRobot extends SeleniumRobot {
                     ExecutorProperties.getSeleniumHubUrl(),
                     Platform.valueOf(getScriptParams().get(AccessToolParameter.PLATFORM)),
                     getScriptParams().get(AccessToolParameter.APPLICATION),
-                    extensions,
-                    checkUnit.getValue()
+                    Collections.singletonList(extension)
             );
 
             // opens empty tab
@@ -147,9 +147,7 @@ public class HolaRobot extends SeleniumRobot {
         return message;
     }
 
-
-
-    public boolean checkBrowserChrome(){
+    private boolean checkBrowserChrome(){
         return "chrome".equalsIgnoreCase(getScriptParams().get(AccessToolParameter.BROWSER));
     }
 

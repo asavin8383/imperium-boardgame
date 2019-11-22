@@ -44,14 +44,15 @@ public abstract class AnonymizerRobot extends SeleniumRobot {
                         scriptParams.get(AccessToolParameter.PROXY_PASSWORD)
                 ));
 
-        this.useEtalon = ScriptUtils.useEtalon(scriptParams);
+        ExecutorProperties.EtalonProperties etalonProperties = ExecutorProperties.getEtalon();
+        this.useEtalon = etalonProperties.getEnabled();
 
         this.etalonProxy = ProxyUtils.getFullProxy(
-                ExecutorProperties.getEtalon().getProxy().getType(),
-                ExecutorProperties.getEtalon().getProxy().getHost(),
-                ExecutorProperties.getEtalon().getProxy().getPort(),
-                ExecutorProperties.getEtalon().getProxy().getUsername(),
-                ExecutorProperties.getEtalon().getProxy().getPassword()
+                etalonProperties.getProxy().getType(),
+                etalonProperties.getProxy().getHost(),
+                etalonProperties.getProxy().getPort(),
+                etalonProperties.getProxy().getUsername(),
+                etalonProperties.getProxy().getPassword()
         );
 
         String ignoreCaptchaApps = scriptParams.get(AccessToolParameter.IGNORE_CAPTCHA_APPS);
@@ -96,8 +97,7 @@ public abstract class AnonymizerRobot extends SeleniumRobot {
                     getScriptParams().get(AccessToolParameter.APPLICATION),
                     getScriptParams().get(AccessToolParameter.BROWSER),
                     etalonProxy,
-                    true,
-                    checkUnit.getValue());
+                    true);
 
             driver.get(ScriptUtils.getCheckUnitValue(checkUnit));
             ScriptUtils.PageResult etalon = loadEtalon();

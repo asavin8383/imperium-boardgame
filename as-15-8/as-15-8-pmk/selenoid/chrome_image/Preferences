@@ -1,0 +1,617 @@
+{
+    "account_id_migration_state": 2,
+    "account_tracker_service_last_update": "13218473992404796",
+    "alternate_error_pages": {
+        "enabled": false
+    },
+    "autocomplete": {
+        "retention_policy_last_version": 75
+    },
+    "autofill": {
+        "credit_card_enabled": false,
+        "enabled": false,
+        "japan_city_field_migrated_to_street_address": true,
+        "orphan_rows_removed": true,
+        "profile_enabled": false
+    },
+    "browser": {
+        "check_default_browser": false,
+        "window_placement": {
+            "bottom": 1070,
+            "left": 10,
+            "maximized": true,
+            "right": 955,
+            "top": 32,
+            "work_area_bottom": 1080,
+            "work_area_left": 0,
+            "work_area_right": 1920,
+            "work_area_top": 22
+        }
+    },
+    "countryid_at_install": -1,
+    "data_reduction": {
+        "network_properties": {},
+        "this_week_number": 2602,
+        "this_week_services_downstream_foreground_kb": {
+            "25921771": 18,
+            "35565745": 1,
+            "95682324": 3,
+            "112189210": 1,
+            "117649486": 437
+        },
+        "this_week_user_traffic_contenttype_downstream_kb": {
+            "0": 2338
+        }
+    },
+    "distribution": {
+        "import_bookmarks": false,
+        "import_history": false,
+        "import_search_engine": false,
+        "make_chrome_default_for_user": false,
+        "skip_first_run_ui": true
+    },
+    "dns_prefetching": {
+        "enabled": false
+    },
+    "download": {
+        "directory_upgrade": true
+    },
+    "extensions": {
+        "alerts": {
+            "initialized": true
+        },
+        "chrome_url_overrides": {},
+        "settings": {
+            "aapnijgdinlhnhlmodcfapnahmbfebeb": {
+                "active_permissions": {
+                    "api": [
+                        "management",
+                        "tabs"
+                    ],
+                    "explicit_host": [
+                        "<all_urls>",
+                        "chrome://favicon/*"
+                    ],
+                    "manifest_permissions": []
+                },
+                "commands": {},
+                "content_settings": [],
+                "creation_flags": 38,
+                "events": [],
+                "from_bookmark": false,
+                "from_webstore": false,
+                "granted_permissions": {
+                    "api": [
+                        "management",
+                        "tabs"
+                    ],
+                    "explicit_host": [
+                        "<all_urls>",
+                        "chrome://favicon/*"
+                    ],
+                    "manifest_permissions": []
+                },
+                "incognito_content_settings": [],
+                "incognito_preferences": {},
+                "install_time": "13218473992189275",
+                "location": 8,
+                "never_activated_since_loaded": true,
+                "newAllowFileAccess": true,
+                "path": "/tmp/.com.google.Chrome.wrz4GJ/internal",
+                "preferences": {},
+                "regular_only_preferences": {},
+                "state": 1,
+                "was_installed_by_default": false,
+                "was_installed_by_oem": false
+            },
+            "ahfgeienlihckogmohjhadlkjgocpleb": {
+                "active_permissions": {
+                    "api": [
+                        "management",
+                        "system.display",
+                        "system.storage",
+                        "webstorePrivate",
+                        "system.cpu",
+                        "system.memory",
+                        "system.network"
+                    ],
+                    "manifest_permissions": []
+                },
+                "app_launcher_ordinal": "t",
+                "commands": {},
+                "content_settings": [],
+                "creation_flags": 1,
+                "events": [],
+                "from_bookmark": false,
+                "from_webstore": false,
+                "incognito_content_settings": [],
+                "incognito_preferences": {},
+                "install_time": "13218473992065231",
+                "location": 5,
+                "manifest": {
+                    "app": {
+                        "launch": {
+                            "web_url": "https://chrome.google.com/webstore"
+                        },
+                        "urls": [
+                            "https://chrome.google.com/webstore"
+                        ]
+                    },
+                    "description": "Discover great apps, games, extensions and themes for Google Chrome.",
+                    "icons": {
+                        "16": "webstore_icon_16.png",
+                        "128": "webstore_icon_128.png"
+                    },
+                    "key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCtl3tO0osjuzRsf6xtD2SKxPlTfuoy7AWoObysitBPvH5fE1NaAA1/2JkPWkVDhdLBWLaIBPYeXbzlHp3y4Vv/4XG+aN5qFE3z+1RU/NqkzVYHtIpVScf3DjTYtKVL66mzVGijSoAIwbFCC3LpGdaoe6Q1rSRDp76wR6jjFzsYwQIDAQAB",
+                    "name": "Web Store",
+                    "permissions": [
+                        "webstorePrivate",
+                        "management",
+                        "system.cpu",
+                        "system.display",
+                        "system.memory",
+                        "system.network",
+                        "system.storage"
+                    ],
+                    "version": "0.2"
+                },
+                "never_activated_since_loaded": true,
+                "page_ordinal": "n",
+                "path": "/opt/google/chrome/resources/web_store",
+                "preferences": {},
+                "regular_only_preferences": {},
+                "state": 1,
+                "was_installed_by_default": false,
+                "was_installed_by_oem": false
+            },
+            "gkojfkhlekighikafcpjkiklfbnlmeio": {
+                "active_permissions": {
+                    "api": [
+                        "contextMenus",
+                        "cookies",
+                        "proxy",
+                        "storage",
+                        "tabs",
+                        "webNavigation",
+                        "webRequest",
+                        "webRequestBlocking"
+                    ],
+                    "explicit_host": [
+                        "<all_urls>",
+                        "chrome://favicon/*"
+                    ],
+                    "manifest_permissions": [],
+                    "scriptable_host": [
+                        "https://*.hola.org/*"
+                    ]
+                },
+                "commands": {},
+                "content_settings": [],
+                "creation_flags": 9,
+                "events": [],
+                "from_bookmark": false,
+                "from_webstore": true,
+                "granted_permissions": {
+                    "api": [
+                        "contextMenus",
+                        "cookies",
+                        "proxy",
+                        "storage",
+                        "tabs",
+                        "webNavigation",
+                        "webRequest",
+                        "webRequestBlocking"
+                    ],
+                    "explicit_host": [
+                        "<all_urls>",
+                        "chrome://favicon/*"
+                    ],
+                    "manifest_permissions": [],
+                    "scriptable_host": [
+                        "https://*.hola.org/*"
+                    ]
+                },
+                "incognito_content_settings": [],
+                "incognito_preferences": {},
+                "install_time": "13218474064110199",
+                "location": 1,
+                "manifest": {
+                    "background": {
+                        "page": "js/bg.html"
+                    },
+                    "browser_action": {
+                        "default_icon": "js/bext/vpn/ui/img/icon19.png",
+                        "default_popup": "js/popup.html",
+                        "default_title": "Hola Free VPN Proxy Unblocker"
+                    },
+                    "content_scripts": [
+                        {
+                            "all_frames": true,
+                            "js": [
+                                "js/bext/vpn/bg/cs_hola.js"
+                            ],
+                            "matches": [
+                                "https://*.hola.org/*"
+                            ],
+                            "run_at": "document_start"
+                        }
+                    ],
+                    "content_security_policy": "script-src 'self' https://client.hola.org https://ajax.cdnjs.com https://cdnjs.cloudflare.com https://client1-holanetworksltd.netdna-ssl.com https://client2-holanetworksltd.netdna-ssl.com https://client3-holanetworksltd.netdna-ssl.com https://ajax.googleapis.com https://ssl.google-analytics.com https://d3vxrebhmlc47q.cloudfront.net https://client-cdn1.hola.org https://client-cdn2.hola.org https://client-cdn3.hola.org https://client-cdn4.hola.org https://client-cdn5.hola.org https://w5t6c5u8.map2.ssl.hwcdn.net https://m3a2r7m3.map2.ssl.hwcdn.net https://p6y7c8h9.map2.ssl.hwcdn.net https://d6g3b3z8.map2.ssl.hwcdn.net https://f9t5n3y6.map2.ssl.hwcdn.net https://s6m9m3g5.map2.ssl.hwcdn.net https://d2ew0cz5tszpw.cloudfront.net https://holaalt-holanetworksltd.netdna-ssl.com https://cdn4.hola.org https://cdn.jsdelivr.net https://clientalt-holanetworksltd.netdna-ssl.com https://ssl.google-analytics.com; object-src 'self'",
+                    "current_locale": "en_US",
+                    "default_locale": "en",
+                    "description": "Unblock websites blocked in your country, company or school with Hola. Hola is free and easy to use!",
+                    "homepage_url": "https://hola.org",
+                    "icons": {
+                        "16": "js/bext/vpn/ui/img/icon16.png",
+                        "48": "js/bext/vpn/ui/img/icon48.png",
+                        "128": "js/bext/vpn/ui/img/icon128.png"
+                    },
+                    "incognito": "split",
+                    "key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC3YOSz7vDWj4WatsffMfOjv0bt8gMXFxKRPml/oRE7VmpRLT8b/vq7em+EZj3AKlj0fAOvrU1YjubIIMlTCZc/RKjNYNjxM4/+4RXGOKbQkM6wWNuQ7prP4Mu0IGBDiVs19dKSwkknAgco2/U4DA6kVXJ4hwedTLlfUsRSN5MKfQIDAQAB",
+                    "manifest_version": 2,
+                    "minimum_chrome_version": "49",
+                    "name": "Hola Free VPN Proxy Unblocker",
+                    "optional_permissions": [
+                        "privacy"
+                    ],
+                    "permissions": [
+                        "proxy",
+                        "webRequest",
+                        "webRequestBlocking",
+                        "<all_urls>",
+                        "storage",
+                        "tabs",
+                        "webNavigation",
+                        "cookies",
+                        "contextMenus"
+                    ],
+                    "short_name": "Hola VPN",
+                    "update_url": "https://clients2.google.com/service/update2/crx",
+                    "version": "1.159.160",
+                    "web_accessible_resources": [
+                        "/js/popup.html",
+                        "/js/animation_arrow.html",
+                        "/js/bext/vpn/bg/sim_dns_block.html",
+                        "/js/bext/vpn/bg/tz_spoof.js"
+                    ]
+                },
+                "needs_sync": true,
+                "never_activated_since_loaded": true,
+                "path": "gkojfkhlekighikafcpjkiklfbnlmeio/1.159.160_0",
+                "preferences": {},
+                "regular_only_preferences": {
+                    "proxy": {
+                        "mode": "pac_script",
+                        "pac_mandatory": false,
+                        "pac_url": "data:application/x-ns-proxy-autoconfig;base64,dmFyIHBhY19lbmdpbmUgPSAoZnVuY3Rpb24gcXVpbmUoemJyb3dzZXIpewoKdmFyIEUgPSB7fTsKRS5kZWZfZXh0ID0gWydnaWYnLCAncG5nJywgJ2pwZycsICdtcDMnLCAnY3NzJywgJ21wNCcsICd3bXYnLCAnZmx2JywgJ3N3ZicsCiAgICAnbWt2JywgJ2ljbycsICdmNHYnLCAnaDI2NCcsICd3ZWJwJywgJ3dlYm0nLCAndHMnXTsKCnZhciBnX3BhY19lbmdpbmUgPSB7fTsKCmZ1bmN0aW9uIGxvZygpewogICAgdmFyIGFyZ3MgPSBBcnJheS5mcm9tKGFyZ3VtZW50cykubWFwKGZ1bmN0aW9uKG8pewogICAgICAgIHJldHVybiBKU09OLnN0cmluZ2lmeShvKTsgfSk7CiAgICB2YXIgdGV4dCA9IG5ldyBEYXRlKCkudG9JU09TdHJpbmcoKSsnICcrYXJncy5qb2luKCcgJyk7CiAgICBpZiAodHlwZW9mIGJyb3dzZXIhPSd1bmRlZmluZWQnICYmIGJyb3dzZXIucnVudGltZSkKICAgICAgICBicm93c2VyLnJ1bnRpbWUuc2VuZE1lc3NhZ2Uoe2lkOiAncGFjX2xvZycsIGRhdGE6IHRleHR9KTsKICAgIGVsc2UgaWYgKHR5cGVvZiBhbGVydCE9J3VuZGVmaW5lZCcpCiAgICAgICAgYWxlcnQodGV4dCk7Cn0KCmZ1bmN0aW9uIHBhY19yZWRpcih1cmwsIGhvc3QsIGRvX3JlZGlyKXsKICAgIGlmICghZG9fcmVkaXIgfHwgIWdfcGFjX2VuZ2luZS5yZWRpcl9kaXJlY3QpCiAgICAgICAgcmV0dXJuIHtwcm94eTogZmFsc2UsIHN0cjogJ0RJUkVDVCd9OwogICAgdmFyIGlwID0gRS5kbnNfcmVzb2x2ZXIoaG9zdCk7CiAgICBpZiAoemJyb3dzZXIuaXNJbk5ldChpcCwgJzEwLjAuMC4wJywgJzI1NS4wLjAuMCcpIHx8CiAgICAgICAgemJyb3dzZXIuaXNJbk5ldChpcCwgJzE3Mi4xNi4wLjAnLCAnMjU1LjI0MC4wLjAnKSB8fAogICAgICAgIHpicm93c2VyLmlzSW5OZXQoaXAsICcxOTIuMTY4LjAuMCcsICcyNTUuMjU1LjAuMCcpIHx8CiAgICAgICAgemJyb3dzZXIuaXNJbk5ldChpcCwgJzEyNy4wLjAuMCcsICcyNTUuMC4wLjAnKSkKICAgIHsKICAgICAgICByZXR1cm4ge3Byb3h5OiBmYWxzZSwgc3RyOiAnRElSRUNUJ307CiAgICB9CiAgICBpZiAoemJyb3dzZXIuaXNQbGFpbkhvc3ROYW1lKGhvc3QpKQogICAgICAgIHJldHVybiB7cHJveHk6IGZhbHNlLCBzdHI6ICdESVJFQ1QnfTsKICAgIHZhciBtID0gdXJsLm1hdGNoKC9eLis6KFswLTldKylcLy4qJC8pOwogICAgaWYgKG0gJiYgbS5sZW5ndGg9PTIgJiYgbVsxXSE9JzgwJykKICAgICAgICByZXR1cm4ge3Byb3h5OiBmYWxzZSwgc3RyOiAnRElSRUNUJ307CiAgICBpZiAodXJsLm1hdGNoKC9eaHR0cHM6LiokLykpCiAgICAgICAgcmV0dXJuIHtwcm94eTogZmFsc2UsIHN0cjogJ0RJUkVDVCd9OwogICAgcmV0dXJuIHtwcm94eTogZmFsc2UsCiAgICAgICAgc3RyOiAnUFJPWFkgMTI3LjAuMC4xOicrZ19wYWNfZW5naW5lLnJlZGlyX3BvcnQrJzsgRElSRUNUJ307Cn0KCmZ1bmN0aW9uIGdldF9leHQodXJsKXsKICAgIHZhciBleHQgPSAnJywgaW5kZXggPSB1cmwuaW5kZXhPZignPycpOwogICAgaWYgKGluZGV4Pj0wKQogICAgICAgIHVybCA9IHVybC5zbGljZSgwLCBpbmRleCk7CiAgICB2YXIgZXh0X2luZGV4ID0gdXJsLmxhc3RJbmRleE9mKCcuJywgdXJsLmxlbmd0aCk7CiAgICB2YXIgX2V4dF9pbmRleCA9IHVybC5sYXN0SW5kZXhPZignLycsIHVybC5sZW5ndGgpOwogICAgaWYgKGV4dF9pbmRleD49MCAmJiBleHRfaW5kZXg+X2V4dF9pbmRleCkKICAgICAgICBleHQgPSB1cmwuc2xpY2UoZXh0X2luZGV4KzEpOwogICAgZWxzZSBpZiAoX2V4dF9pbmRleD49MCkKICAgICAgICBleHQgPSB1cmwuc2xpY2UoX2V4dF9pbmRleCsxKTsKICAgIHJldHVybiBleHQ7Cn0KCmZ1bmN0aW9uIGlzX2lwKGhvc3QpeyByZXR1cm4gL15cZCtcLlxkK1wuXGQrXC5cZCskLy50ZXN0KGhvc3QpOyB9CgpmdW5jdGlvbiBoYW5kbGVfdGhlbih2YWx1ZSwgdXJsLCBob3N0LCBkb19yZWRpciwgZXhjZXB0aW9uLCBvcmlnX3Byb3h5KXsKICAgIGlmICh2YWx1ZT09J0RJUkVDVCcpCiAgICAgICAgcmV0dXJuIHBhY19yZWRpcih1cmwsIGhvc3QsIGRvX3JlZGlyKTsKICAgIHZhciBuID0gdmFsdWUuc3BsaXQoJyAnKTsKICAgIGlmIChleGNlcHRpb24gJiYgblswXT09J1BST1hZJykKICAgIHsKICAgICAgICBpZiAobi5sZW5ndGg9PTEpCiAgICAgICAgICAgIHJldHVybiBudWxsOwogICAgICAgIGlmICghblsxXS5pbmRleE9mKCdYWCcpICYmIG9yaWdfcHJveHkpCiAgICAgICAgewogICAgICAgICAgICB2YXIgYyA9IG9yaWdfcHJveHkuc3BsaXQoJyAnKVsxXS5zcGxpdCgnLicpWzBdOwogICAgICAgICAgICByZXR1cm4ge3Byb3h5OiB0cnVlLCBzdHI6ICdQUk9YWSAnK25bMV0ucmVwbGFjZSgnWFgnLCBjKX07CiAgICAgICAgfQogICAgfQogICAgaWYgKG4ubGVuZ3RoPDIpCiAgICAgICAgcmV0dXJuIHBhY19yZWRpcih1cmwsIGhvc3QsIGRvX3JlZGlyKTsKICAgIGVsc2UgaWYgKCF7UFJPWFk6IDEsIFNPQ0tTOiAxLCBTT0NLUzU6IDEsIEhUVFBTOiAxfVtuWzBdXSkKICAgICAgICByZXR1cm4gcGFjX3JlZGlyKHVybCwgaG9zdCwgZG9fcmVkaXIpOwogICAgaWYgKGdfcGFjX2VuZ2luZS5leHQpCiAgICAgICAgcmV0dXJuIHtwcm94eTogdHJ1ZSwgc3RyOiB2YWx1ZX07CiAgICByZXR1cm4ge3Byb3h5OiB0cnVlLCBzdHI6ICdQUk9YWSAxMjcuMC4wLjE6JytnX3BhY19lbmdpbmUucHJveHlfcG9ydH07Cn0KCmZ1bmN0aW9uIGhvc3RfY2IobmFtZSwgcnVsZSwgY21kLCB1cmwsIGhvc3QsIGRvX3JlZGlyLCBvcHQpewogICAgaWYgKCFjbWRbJ2lmJ10pCiAgICB7CiAgICAgICAgaWYgKGNtZC5kc3RfZG5zKQogICAgICAgIHsKICAgICAgICAgICAgcmV0dXJuIGhhbmRsZV90aGVuKGNtZC50aGVuLCB1cmwsIGhvc3QsIGRvX3JlZGlyLCBvcHQuZXhjZXB0aW9uLAogICAgICAgICAgICAgICAgb3B0Lm9yaWdfcHJveHkpOwogICAgICAgIH0KICAgICAgICBjbWRbJ2lmJ10gPSBbXTsKICAgIH0KICAgIHZhciBleHQgPSBnZXRfZXh0KHVybCk7CiAgICBmb3IgKHZhciBpPTA7IGk8Y21kWydpZiddLmxlbmd0aDsgaSsrKQogICAgewogICAgICAgIHZhciBfaWYgPSBjbWRbJ2lmJ11baV07CiAgICAgICAgdmFyIGFyZyA9IG51bGwsIHZhbHVlID0gbnVsbDsKICAgICAgICB2YXIgdHlwZSA9ICc9PSc7CiAgICAgICAgaWYgKCFfaWYudGhlbikKICAgICAgICAgICAgY29udGludWU7CiAgICAgICAgaWYgKF9pZi50eXBlKQogICAgICAgICAgICB0eXBlID0gX2lmLnR5cGU7CiAgICAgICAgaWYgKF9pZi5ob3N0KQogICAgICAgIHsKICAgICAgICAgICAgYXJnID0gaG9zdDsKICAgICAgICAgICAgdmFsdWUgPSBfaWYuaG9zdDsKICAgICAgICB9CiAgICAgICAgZWxzZSBpZiAoX2lmLnVybCkKICAgICAgICB7CiAgICAgICAgICAgIGFyZyA9IHVybDsKICAgICAgICAgICAgdmFsdWUgPSBfaWYudXJsOwogICAgICAgIH0KICAgICAgICBlbHNlIGlmIChfaWYuZXh0KQogICAgICAgIHsKICAgICAgICAgICAgYXJnID0gZXh0OwogICAgICAgICAgICB2YWx1ZSA9IF9pZi5leHQ7CiAgICAgICAgICAgIGlmICh2YWx1ZT09J2RlZi1leHQnICYmICEodmFsdWUgPSBydWxlWydkZWYtZXh0J10pKQogICAgICAgICAgICAgICAgdmFsdWUgPSBFLmRlZl9leHQ7CiAgICAgICAgfQogICAgICAgIGVsc2UgaWYgKF9pZi5tYWluKQogICAgICAgIHsKICAgICAgICAgICAgYXJnID0gb3B0LmlzX21haW47CiAgICAgICAgICAgIHZhbHVlID0gX2lmLm1haW47CiAgICAgICAgfQogICAgICAgIGVsc2UKICAgICAgICAgICAgY29udGludWU7CiAgICAgICAgdmFyIGNtcDsKICAgICAgICBzd2l0Y2ggKHR5cGUpCiAgICAgICAgewogICAgICAgIGNhc2UgJz09JzogY21wID0gYXJnPT12YWx1ZTsgYnJlYWs7CiAgICAgICAgY2FzZSAnIT0nOiBjbXAgPSBhcmchPXZhbHVlOyBicmVhazsKICAgICAgICBjYXNlICc9fic6IGNtcCA9IGFyZy5tYXRjaCh2YWx1ZSk7IGJyZWFrOwogICAgICAgIGNhc2UgJyF+JzogY21wID0gIWFyZy5tYXRjaCh2YWx1ZSk7IGJyZWFrOwogICAgICAgIGNhc2UgJz1hJzoKICAgICAgICBjYXNlICdpbic6IGNtcCA9IHZhbHVlLmluZGV4T2YoYXJnKSE9LTE7IGJyZWFrOwogICAgICAgIGNhc2UgJyFhJzoKICAgICAgICBjYXNlICdub3RfaW4nOiBjbXAgPSB2YWx1ZS5pbmRleE9mKGFyZyk9PS0xOyBicmVhazsKICAgICAgICBjYXNlICc9byc6IGNtcCA9ICEhdmFsdWVbYXJnXTsgYnJlYWs7CiAgICAgICAgY2FzZSAnIW8nOiBjbXAgPSAhdmFsdWVbYXJnXTsgYnJlYWs7CiAgICAgICAgZGVmYXVsdDogY29udGludWU7CiAgICAgICAgfQogICAgICAgIGlmIChjbXApCiAgICAgICAgewogICAgICAgICAgICByZXR1cm4gaGFuZGxlX3RoZW4oX2lmLnRoZW4sIHVybCwgaG9zdCwgZG9fcmVkaXIsIG9wdC5leGNlcHRpb24sCiAgICAgICAgICAgICAgICBvcHQub3JpZ19wcm94eSk7CiAgICAgICAgfQogICAgICAgIGlmIChfaWZbJ2Vsc2UnXSkKICAgICAgICB7CiAgICAgICAgICAgIHJldHVybiBoYW5kbGVfdGhlbihfaWZbJ2Vsc2UnXSwgdXJsLCBob3N0LCBkb19yZWRpciwKICAgICAgICAgICAgICAgIG9wdC5leGNlcHRpb24sIG9wdC5vcmlnX3Byb3h5KTsKICAgICAgICB9CiAgICB9CiAgICByZXR1cm4gaGFuZGxlX3RoZW4oY21kLnRoZW4sIHVybCwgaG9zdCwgZG9fcmVkaXIsIG9wdC5leGNlcHRpb24sCiAgICAgICAgb3B0Lm9yaWdfcHJveHkpOwp9CgpmdW5jdGlvbiBpbmV0X2F0b24oc3RyKXsKICAgIHZhciBsYWRkciA9IDAsIGksIHBhcnRzID0gL14oXGQrKVwuKFxkKylcLihcZCspXC4oXGQrKSQvLmV4ZWMoc3RyKTsKICAgIGlmICghcGFydHMpCiAgICAgICAgcmV0dXJuIG51bGw7CiAgICBwYXJ0cy5zaGlmdCgpOwogICAgZm9yIChpPTA7IGk8cGFydHMubGVuZ3RoOyBpKyspCiAgICB7CiAgICAgICAgbGFkZHIgKj0gMjU2OwogICAgICAgIGxhZGRyICs9ICtwYXJ0c1tpXTsKICAgIH0KICAgIHJldHVybiBsYWRkcjsKfQoKZnVuY3Rpb24gYWRkKG5hbWUsIHJ1bGUsIGNtZCwgaG9zdHMpewogICAgaWYgKCFjbWRbbmFtZV0pCiAgICAgICAgcmV0dXJuOwogICAgZm9yICh2YXIgaSA9IDA7IGk8Y21kW25hbWVdLmxlbmd0aDsgaSsrKQogICAgewogICAgICAgIHZhciB2YWwgPSBjbWRbbmFtZV1baV07CiAgICAgICAgaG9zdHNbbmFtZV1bdmFsXSA9IGZ1bmN0aW9uKHVybCwgaG9zdCwgZG9fcmVkaXIsIG9wdCl7CiAgICAgICAgICAgIHJldHVybiBob3N0X2NiKG5hbWUsIHJ1bGUsIGNtZCwgdXJsLCBob3N0LCBkb19yZWRpciwgb3B0KTsgfTsKICAgIH0KICAgIHJldHVybiB0cnVlOwp9CgpmdW5jdGlvbiBzZXRfcnVsZShuYW1lLCBydWxlLCBjbWQsIGhvc3RzKXsKICAgIHZhciBfY2lmID0gY21kWydpZiddLCBpOwogICAgaWYgKF9jaWYpCiAgICB7CiAgICAgICAgZm9yIChpPTA7IGk8X2NpZi5sZW5ndGg7IGkrKykKICAgICAgICB7CiAgICAgICAgICAgIHZhciBfaWYgPSBfY2lmW2ldOwogICAgICAgICAgICBpZiAoX2lmLnR5cGU9PSc9ficgfHwgX2lmLnR5cGU9PSchficpCiAgICAgICAgICAgIHsKICAgICAgICAgICAgICAgIGlmIChfaWYuaG9zdCkKICAgICAgICAgICAgICAgICAgICBfaWYuaG9zdCA9IG5ldyBSZWdFeHAoX2lmLmhvc3QpOwogICAgICAgICAgICAgICAgZWxzZSBpZiAoX2lmLnVybCkKICAgICAgICAgICAgICAgICAgICBfaWYudXJsID0gbmV3IFJlZ0V4cChfaWYudXJsKTsKICAgICAgICAgICAgICAgIGVsc2UgaWYgKF9pZi5leHQpCiAgICAgICAgICAgICAgICAgICAgX2lmLmV4dCA9IG5ldyBSZWdFeHAoX2lmLmV4dCk7CiAgICAgICAgICAgIH0KICAgICAgICB9CiAgICB9CiAgICBpZiAoIWNtZC5ob3N0cykKICAgIHsKICAgICAgICBpZiAoYWRkKCdyb290X3VybHMnLCBydWxlLCBjbWQsIGhvc3RzKSkKICAgICAgICAgICAgcmV0dXJuOwogICAgICAgIGlmIChhZGQoJ3NyY19jb3VudHJ5JywgcnVsZSwgY21kLCBob3N0cykpCiAgICAgICAgICAgIHJldHVybjsKICAgICAgICBob3N0cy5ob3N0c1snKiddID0gZnVuY3Rpb24odXJsLCBob3N0LCBkb19yZWRpciwgb3B0KXsKICAgICAgICAgICAgcmV0dXJuIGhvc3RfY2IobmFtZSwgcnVsZSwgY21kLCB1cmwsIGhvc3QsIGRvX3JlZGlyLCBvcHQpOyB9OwogICAgICAgIHJldHVybjsKICAgIH0KICAgIGZvciAoaT0wOyBpPGNtZC5ob3N0cy5sZW5ndGg7IGkrKykKICAgIHsKICAgICAgICB2YXIgX2hvc3QgPSBjbWQuaG9zdHNbaV0sIG47CiAgICAgICAgaWYgKG4gPSBfaG9zdC5tYXRjaCgvXigoXGR7MSwzfVwuKXszfVxkezEsM30pKFwvKFxkKykpPyQvKSkKICAgICAgICB7CiAgICAgICAgICAgIGlmICghY21kLmlwcykKICAgICAgICAgICAgICAgIGNtZC5pcHMgPSBbXTsKICAgICAgICAgICAgdmFyIGJpdHMgPSAzMiAtIChuWzRdID8gK25bNF0gOiAzMik7CiAgICAgICAgICAgIGlmIChiaXRzPDApCiAgICAgICAgICAgICAgICBiaXRzID0gMDsKICAgICAgICAgICAgdmFyIG1hc2sgPSBpbmV0X2F0b24oblsxXSkgPj4+IGJpdHMgPDwgYml0czsKICAgICAgICAgICAgaG9zdHMuaXBzLnB1c2goe21hc2s6IG1hc2ssIGJpdHM6IGJpdHMsCiAgICAgICAgICAgICAgICBmdW5jOiBmdW5jdGlvbih1cmwsIGhvc3QsIGRvX3JlZGlyLCBleGNlcHRpb24pewogICAgICAgICAgICAgICAgICAgIHJldHVybiBob3N0X2NiKG5hbWUsIHJ1bGUsIGNtZCwgdXJsLCBob3N0LCBkb19yZWRpciwKICAgICAgICAgICAgICAgICAgICAgICAgZXhjZXB0aW9uKTsKICAgICAgICAgICAgICAgIH19KTsKICAgICAgICAgICAgY29udGludWU7CiAgICAgICAgfQogICAgICAgIGhvc3RzLmhvc3RzW19ob3N0XSA9IGZ1bmN0aW9uKHVybCwgaG9zdCwgZG9fcmVkaXIsIG9wdCl7CiAgICAgICAgICAgIHJldHVybiBob3N0X2NiKG5hbWUsIHJ1bGUsIGNtZCwgdXJsLCBob3N0LCBkb19yZWRpciwgb3B0KTsgfTsKICAgIH0KfQoKZnVuY3Rpb24gcGFyc2VfY21kcyhuYW1lLCBydWxlLCBydWxlcywgaG9zdHMsIGJ5X3J1bGVzKXsKICAgIHZhciBjbWRzID0gcnVsZS5jbWRzOwogICAgaWYgKCFjbWRzKQogICAgICAgIHJldHVybjsKICAgIGZvciAodmFyIGk9MDsgaTxjbWRzLmxlbmd0aDsgaSsrKQogICAgewogICAgICAgIHZhciBjbWQgPSBjbWRzW2ldOwogICAgICAgIGlmIChjbWQucnVsZSkKICAgICAgICB7CiAgICAgICAgICAgIHZhciBfbmFtZSA9IGNtZC5ydWxlOwogICAgICAgICAgICByZXR1cm4gcGFyc2VfY21kcyhfbmFtZSwgcnVsZXNbX25hbWVdLCBydWxlcywgaG9zdHMpOwogICAgICAgIH0KICAgICAgICBpZiAoIWNtZC5ob3N0cyAmJiAhYnlfcnVsZXMgJiYgIWNtZC5yb290X3VybHMgJiYgIWNtZC5zcmNfY291bnRyeSkKICAgICAgICAgICAgY29udGludWU7CiAgICAgICAgaWYgKCFjbWQudGhlbikKICAgICAgICAgICAgY29udGludWU7CiAgICAgICAgc2V0X3J1bGUobmFtZSwgcnVsZSwgY21kLCBob3N0cyk7CiAgICB9Cn0KZnVuY3Rpb24gcGFyc2VfbWF0Y2gobmFtZSwgcnVsZSwgcnVsZXMsIGhvc3RzLCBieV9ydWxlcyl7CiAgICB2YXIgbWF0Y2ggPSBydWxlLm1hdGNoOwogICAgaWYgKCFtYXRjaCB8fCAhbWF0Y2gucnVsZXMgfHwgIW1hdGNoLnJvb3RfdXJscykKICAgICAgICByZXR1cm47CiAgICB2YXIgcmVzID0gW107CiAgICBmb3IgKHZhciBpPTA7IGk8bWF0Y2gucnVsZXMubGVuZ3RoOyBpKyspCiAgICB7CiAgICAgICAgdmFyIGV4LCByID0gbWF0Y2gucnVsZXNbaV07CiAgICAgICAgcmVzLnB1c2goZXggPSBnZXRfZXhjZXB0aW9ucygpKTsKICAgICAgICBwYXJzZV9jbWRzKG5hbWUsIHIsIG1hdGNoLCBleCwgYnlfcnVsZXMpOwogICAgICAgIGV4LmZzcmNfY291bnRyeSA9IHIuc3JjX2NvdW50cnk7CiAgICAgICAgZXguZnByb3h5X2NvdW50cnkgPSByLnByb3h5X2NvdW50cnk7CiAgICB9CiAgICBtYXRjaC5yb290X3VybHMuZm9yRWFjaChmdW5jdGlvbihyb290X3VybCl7CiAgICAgICAgaG9zdHMubWF0Y2hfcm9vdF91cmxbcm9vdF91cmxdID0gcmVzOyB9KTsKfQpmdW5jdGlvbiBoZXhfZGVjb2RlKGgpewogICAgdmFyIHMgPSAnJzsKICAgIGZvciAodmFyIGkgPSAwOyBpIDwgaC5sZW5ndGg7IGkrPTIpCiAgICAgICAgcyArPSBTdHJpbmcuZnJvbUNoYXJDb2RlKHBhcnNlSW50KGguc3Vic3RyKGksIDIpLCAxNikpOwogICAgcmV0dXJuIGRlY29kZVVSSUNvbXBvbmVudChlc2NhcGUocykpOwp9CmZ1bmN0aW9uIGxvY2FsX2hvbGFfY2IodXJsKXsKICAgIHZhciBuOwogICAgdHJ5IHsKICAgICAgICBpZiAobiA9IHVybC5tYXRjaCgvXmh0dHA6XC9cLyguKikubG9jYWwuaG9sYVwvPyQvKSkKICAgICAgICAgICAgbiA9IEpTT04ucGFyc2UoaGV4X2RlY29kZShuWzFdKSk7CiAgICB9IGNhdGNoKGUpeyBuID0gbnVsbDsgfQogICAgaWYgKCFuIHx8IG4ua2V5IT1nX3BhY19lbmdpbmUua2V5KQogICAgICAgIHJldHVybiB7cHJveHk6IDAsIHN0cjogJ1BST1hZIDEyNy4wLjAuMTowJ307CiAgICBpZiAoIWdfcGFjX2VuZ2luZS5sb2NhbF9yZWRpcikKICAgIHsKICAgICAgICBnX3BhY19lbmdpbmUubG9jYWxfcmVkaXIgPSB7fTsKICAgICAgICBnX3BhY19lbmdpbmUubG9jYWxfY291bnRlciA9IDA7CiAgICB9CiAgICB2YXIgc2V0ID0gbi5zZXQ7CiAgICB2YXIgcHJveHkgPSBuLnByb3h5OwogICAgdmFyIGVudHJ5ID0gZ19wYWNfZW5naW5lLmxvY2FsX3JlZGlyW3NldF07CiAgICBpZiAoIWVudHJ5IHx8IGVudHJ5LnByb3h5ICE9IHByb3h5KQogICAgICAgIGVudHJ5ID0gZ19wYWNfZW5naW5lLmxvY2FsX3JlZGlyW3NldF0gPSB7cHJveHk6IHByb3h5fTsKICAgIGVudHJ5LnRzID0gRGF0ZS5ub3coKTsKICAgIHJldHVybiB7cHJveHk6IDAsIHN0cjogJ1BST1hZIDEyNy4wLjAuMTowJ307Cn0KCmZ1bmN0aW9uIGdldF9leGNlcHRpb25zKCl7CiAgICB2YXIgZSA9IHtpcHM6IFtdLCBtYXRjaF9yb290X3VybDogW119OwogICAgWydob3N0cycsICdyb290X3VybHMnLCAnc3JjX2NvdW50cnknXS5mb3JFYWNoKGZ1bmN0aW9uKG5hbWUpewogICAgICAgIGVbbmFtZV0gPSB7fTsKICAgICAgICBlW25hbWUrJ19jYWNoZSddID0ge307CiAgICAgICAgZVtuYW1lKydfY291bnRlciddID0gMDsKICAgIH0pOwogICAgcmV0dXJuIGU7Cn0KCkUuaW5pdCA9IGZ1bmN0aW9uKGpzb24sIG9wdGlvbnMpewogICAgb3B0aW9ucyA9IG9wdGlvbnN8fHt9OwogICAgZ19wYWNfZW5naW5lID0gewogICAgICAgIGhvc3RzOiB7CiAgICAgICAgICAgIGhvc3RzOiB7fSwKICAgICAgICAgICAgaXBzOiBbXSwKICAgICAgICAgICAgaG9zdHNfY2FjaGU6IHt9LAogICAgICAgICAgICBob3N0c19jb3VudGVyOiAwLAogICAgICAgIH0sCiAgICAgICAgZXhjZXB0aW9uczogZ2V0X2V4Y2VwdGlvbnMoKSwKICAgICAgICBleGNlcHRpb25zX3BsdXM6IGdldF9leGNlcHRpb25zKCksCiAgICAgICAgZXh0OiBvcHRpb25zLmV4dHx8MCwKICAgICAgICBieV9ydWxlczogb3B0aW9ucy5ieV9ydWxlc3x8MCwKICAgICAgICBkb19yZWRpcjogb3B0aW9ucy5kb19yZWRpcnx8MCwKICAgICAgICByZWRpcl9kaXJlY3Q6IG9wdGlvbnMucmVkaXJfZGlyZWN0PT09dW5kZWZpbmVkIHx8IG9wdGlvbnMucmVkaXJfZGlyZWN0LAogICAgICAgIHByb3h5X3BvcnQ6IG9wdGlvbnMucHJveHlfcG9ydHx8Njg1NywKICAgICAgICByZWRpcl9wb3J0OiBvcHRpb25zLnJlZGlyX3BvcnR8fDY4NTAsCiAgICAgICAga2V5OiBvcHRpb25zLmtleSwKICAgICAgICBpbml0ZWQ6IHRydWUsCiAgICB9OwogICAgaWYgKCFqc29uLnVuYmxvY2tlcl9ydWxlcykKICAgICAgICByZXR1cm4gLTE7CiAgICB2YXIgcnVsZXMgPSBqc29uLnVuYmxvY2tlcl9ydWxlcywgcnVsZSwgaTsKICAgIGlmICghZ19wYWNfZW5naW5lLmJ5X3J1bGVzKQogICAgewogICAgICAgIGZvciAoaSBpbiBydWxlcykKICAgICAgICB7CiAgICAgICAgICAgIHJ1bGUgPSBydWxlc1tpXTsKICAgICAgICAgICAgaWYgKHJ1bGUuaW50ZXJuYWwgfHwgZ19wYWNfZW5naW5lLmV4dCAmJiAhcnVsZS5lbmFibGVkKQogICAgICAgICAgICAgICAgY29udGludWU7CiAgICAgICAgICAgIHBhcnNlX2NtZHMoaSwgcnVsZSwgcnVsZXMsIGdfcGFjX2VuZ2luZS5ob3N0cyk7CiAgICAgICAgfQogICAgfQogICAgZWxzZQogICAgewogICAgICAgIGdfcGFjX2VuZ2luZS5ydWxlcyA9IHt9OwogICAgICAgIGZvciAoaSBpbiBydWxlcykKICAgICAgICB7CiAgICAgICAgICAgIHJ1bGUgPSBydWxlc1tpXTsKICAgICAgICAgICAgaWYgKHJ1bGUuaW50ZXJuYWwgfHwgZ19wYWNfZW5naW5lLmV4dCAmJiAhcnVsZS5lbmFibGVkKQogICAgICAgICAgICAgICAgY29udGludWU7CiAgICAgICAgICAgIGlmICghcnVsZS5yb290X3VybCkKICAgICAgICAgICAgewogICAgICAgICAgICAgICAgcGFyc2VfY21kcyhpLCBydWxlLCBydWxlcywgZ19wYWNfZW5naW5lLmhvc3RzKTsKICAgICAgICAgICAgICAgIGNvbnRpbnVlOwogICAgICAgICAgICB9CiAgICAgICAgICAgIGlmICghcnVsZS5jbWRzKQogICAgICAgICAgICAgICAgY29udGludWU7CiAgICAgICAgICAgIGdfcGFjX2VuZ2luZS5ydWxlc1tpXSA9IHtob3N0czoge30sIGlwczogW10sIGhvc3RzX2NhY2hlOiB7fSwKICAgICAgICAgICAgICAgIGhvc3RzX2NvdW50ZXI6IDB9OwogICAgICAgICAgICBwYXJzZV9jbWRzKGksIHJ1bGUsIHJ1bGVzLCBnX3BhY19lbmdpbmUucnVsZXNbaV0sIDEpOwogICAgICAgIH0KICAgIH0KICAgIGdfcGFjX2VuZ2luZS5ob3N0cy5ob3N0c1snbG9jYWwuaG9sYSddID0gbG9jYWxfaG9sYV9jYjsKICAgIGdfcGFjX2VuZ2luZS5ob3N0cy5ob3N0c1snMTI3LjI1NS4yNTUuMjU1J10gPSBmdW5jdGlvbih1cmwsIGhvc3QpewogICAgICAgIHJldHVybiB7cHJveHk6IDAsIHN0cjogJ1BST1hZICcraG9zdCsnOjAnfTsgfTsKICAgIHJ1bGVzID0ganNvbi51bmJsb2NrZXJfZ2xvYmFsc3x8e307CiAgICBmb3IgKGkgaW4gcnVsZXMpCiAgICB7CiAgICAgICAgcnVsZSA9IHJ1bGVzW2ldOwogICAgICAgIHBhcnNlX2NtZHMoaSwgcnVsZSwgcnVsZXMsIGdfcGFjX2VuZ2luZS5leGNlcHRpb25zKTsKICAgICAgICBwYXJzZV9tYXRjaChpLCBydWxlLCBydWxlcywgZ19wYWNfZW5naW5lLmV4Y2VwdGlvbnMpOwogICAgfQogICAgcnVsZXMgPSBqc29uLnVuYmxvY2tlcl9wbHVzfHx7fTsKICAgIGZvciAoaSBpbiBydWxlcykKICAgIHsKICAgICAgICBydWxlID0gcnVsZXNbaV07CiAgICAgICAgcGFyc2VfY21kcyhpLCBydWxlLCBydWxlcywgZ19wYWNfZW5naW5lLmV4Y2VwdGlvbnNfcGx1cyk7CiAgICAgICAgcGFyc2VfbWF0Y2goaSwgcnVsZSwgcnVsZXMsIGdfcGFjX2VuZ2luZS5leGNlcHRpb25zX3BsdXMpOwogICAgfQogICAgcmV0dXJuIDA7Cn07CgpFLmZpcmVmb3hfaW5pdCA9IGZ1bmN0aW9uKGJyb3dzZXIpewogICAgYnJvd3Nlci5ydW50aW1lLm9uTWVzc2FnZS5hZGRMaXN0ZW5lcihmdW5jdGlvbihtc2cpewogICAgICAgIHN3aXRjaCAobXNnLmlkKQogICAgICAgIHsKICAgICAgICBjYXNlICdpbml0JzogRS5pbml0KG1zZy5qc29uLCBtc2cub3B0aW9ucyk7IGJyZWFrOwogICAgICAgIH0KICAgIH0pOwogICAgYnJvd3Nlci5ydW50aW1lLnNlbmRNZXNzYWdlKHtpZDogJ2luaXQnLCBmcm9tX3BhY19zY3JpcHQ6IHRydWV9KTsKfTsKCmZ1bmN0aW9uIGZpbmRfcHJveHlfZm9yX3ZhbCh1cmwsIGhvc3QsIGhvc3RzLCBvcHQpewogICAgb3B0ID0gb3B0fHx7fTsKICAgIGlmICghb3B0Lm5hbWUgfHwgIW9wdC52YWwpCiAgICAgICAgcmV0dXJuOwogICAgdmFyIGRvX3JlZGlyID0gZ19wYWNfZW5naW5lLmRvX3JlZGlyOwogICAgdmFyIGNhY2hlID0gb3B0Lm5hbWUrJ19jYWNoZScsIGNvdW50ZXIgPSBvcHQubmFtZSsnX2NvdW50ZXInOwogICAgaWYgKGhvc3RzW2NhY2hlXSkKICAgIHsKICAgICAgICB2YXIgYyA9IGhvc3RzW2NhY2hlXVtvcHQudmFsXTsKICAgICAgICBpZiAoYyAmJiBjLmZ1bmMpCiAgICAgICAgICAgIHJldHVybiBjLmZ1bmModXJsLCBob3N0LCBkb19yZWRpciwgb3B0KTsKICAgICAgICBpZiAoYykKICAgICAgICAgICAgcmV0dXJuIHBhY19yZWRpcih1cmwsIGhvc3QsIGRvX3JlZGlyKTsKICAgIH0KICAgIGlmIChob3N0c1tjb3VudGVyXT41MDAwKQogICAgewogICAgICAgIGhvc3RzW2NvdW50ZXJdID0gMDsKICAgICAgICBob3N0c1tjYWNoZV0gPSB7fTsKICAgIH0KICAgIHZhciBmdW5jOwogICAgaWYgKCEoZnVuYyA9IGhvc3RzW29wdC5uYW1lXVtvcHQudmFsXSkpCiAgICAgICAgcmV0dXJuOwogICAgaG9zdHNbY2FjaGVdW29wdC52YWxdID0ge2Z1bmM6IGZ1bmN9OwogICAgaG9zdHNbY291bnRlcl0rKzsKICAgIHJldHVybiBmdW5jKHVybCwgaG9zdCwgZG9fcmVkaXIsIG9wdCk7Cn0KCmZ1bmN0aW9uIGZpbmRfcHJveHlfZm9yX3VybCh1cmwsIGhvc3QsIGhvc3RzLCBvcHQpewogICAgb3B0ID0gb3B0fHx7fTsKICAgIHZhciBkb19yZWRpciA9IGdfcGFjX2VuZ2luZS5kb19yZWRpcjsKICAgIGlmIChob3N0cy5ob3N0c19jYWNoZSkKICAgIHsKICAgICAgICB2YXIgYyA9IGhvc3RzLmhvc3RzX2NhY2hlW2hvc3RdOwogICAgICAgIGlmIChjICYmIGMuZnVuYykKICAgICAgICAgICAgcmV0dXJuIGMuZnVuYyh1cmwsIGhvc3QsIGRvX3JlZGlyLCBvcHQpOwogICAgICAgIGlmIChjKQogICAgICAgICAgICByZXR1cm4gcGFjX3JlZGlyKHVybCwgaG9zdCwgZG9fcmVkaXIpOwogICAgfQogICAgaWYgKGhvc3RzLmhvc3RzX2NvdW50ZXI+NTAwMCkKICAgIHsKICAgICAgICBob3N0cy5ob3N0c19jb3VudGVyID0gMDsKICAgICAgICBob3N0cy5ob3N0c19jYWNoZSA9IHt9OwogICAgfQogICAgaWYgKGlzX2lwKGhvc3QpKQogICAgewogICAgICAgIHZhciBpcCA9IGluZXRfYXRvbihob3N0KTsKICAgICAgICB2YXIgaXBzID0gaG9zdHMuaXBzOwogICAgICAgIGZvciAodmFyIGk9MDsgaTxpcHMubGVuZ3RoOyBpKyspCiAgICAgICAgewogICAgICAgICAgICB2YXIgX2lwID0gaXBzW2ldOwogICAgICAgICAgICBpZiAoKGlwID4+PiBfaXAuYml0cyA8PCBfaXAuYml0cyleX2lwLm1hc2spCiAgICAgICAgICAgICAgICBjb250aW51ZTsKICAgICAgICAgICAgaG9zdHMuaG9zdHNfY2FjaGVbaG9zdF0gPSB7ZnVuYzogX2lwLmZ1bmN9OwogICAgICAgICAgICBob3N0cy5ob3N0c19jb3VudGVyKys7CiAgICAgICAgICAgIHJldHVybiBfaXAuZnVuYyh1cmwsIGhvc3QsIGRvX3JlZGlyLCBvcHQpOwogICAgICAgIH0KICAgIH0KICAgIHZhciBpbmRleCA9IC0xOwogICAgZm9yICg7OykKICAgIHsKICAgICAgICB2YXIgZnVuYyA9IGhvc3RzLmhvc3RzWycqJ118fGhvc3RzLmhvc3RzW2hvc3Quc3Vic3RyKGluZGV4KzEpXTsKICAgICAgICBpZiAoZnVuYykKICAgICAgICB7CiAgICAgICAgICAgIGhvc3RzLmhvc3RzX2NhY2hlW2hvc3RdID0ge2Z1bmM6IGZ1bmN9OwogICAgICAgICAgICBob3N0cy5ob3N0c19jb3VudGVyKys7CiAgICAgICAgICAgIHJldHVybiBmdW5jKHVybCwgaG9zdCwgZG9fcmVkaXIsIG9wdCk7CiAgICAgICAgfQogICAgICAgIGlmICgoaW5kZXggPSBob3N0LmluZGV4T2YoJy4nLCBpbmRleCsxKSk8MCkKICAgICAgICAgICAgYnJlYWs7CiAgICB9CiAgICBpZiAob3B0LmV4Y2VwdGlvbikKICAgICAgICByZXR1cm4gbnVsbDsKICAgIGhvc3RzLmhvc3RzX2NhY2hlW2hvc3RdID0ge307CiAgICBob3N0cy5ob3N0c19jb3VudGVyKys7CiAgICByZXR1cm4gcGFjX3JlZGlyKHVybCwgaG9zdCwgZG9fcmVkaXIpOwp9CgpFLkZpbmRQcm94eUZvclVSTCA9IGZ1bmN0aW9uKHVybCwgaG9zdCl7CiAgICB2YXIgcGFjID0gZ19wYWNfZW5naW5lLCBsb2NhbHMgPSBwYWMubG9jYWxfcmVkaXIsIHJldDsKICAgIGlmICghcGFjLmluaXRlZCkKICAgICAgICByZXR1cm4gJ0RJUkVDVCc7CiAgICBpZiAoaG9zdC5tYXRjaCgvXiguKilcLmxvY2FsXC5ob2xhJC8pKQogICAgICAgIGhvc3QgPSAnbG9jYWwuaG9sYSc7CiAgICBpZiAoaG9zdC5tYXRjaCgvXiguKilcLnRyaWdnZXJcLmhvbGFcLm9yZyQvKSkKICAgICAgICBob3N0ID0gaG9zdC5yZXBsYWNlKCcudHJpZ2dlci5ob2xhLm9yZycsICcnKTsKICAgIGlmIChsb2NhbHMgJiYgaG9zdCE9J2xvY2FsLmhvbGEnKQogICAgewogICAgICAgIHZhciB0aGVuID0gbG9jYWxzW3VybF07CiAgICAgICAgaWYgKHRoZW4gJiYgRGF0ZS5ub3coKSAtIHRoZW4udHMgPiAyMDAwKQogICAgICAgIHsKICAgICAgICAgICAgdGhlbiA9IGZhbHNlOwogICAgICAgICAgICBkZWxldGUgbG9jYWxzW3VybF07CiAgICAgICAgfQogICAgICAgIGlmICh0aGVuKQogICAgICAgICAgICByZXQgPSBoYW5kbGVfdGhlbih0aGVuLnByb3h5LCB1cmwsIGhvc3QsIHBhYy5kb19yZWRpcik7CiAgICAgICAgcGFjLmxvY2FsX2NvdW50ZXIrKzsKICAgICAgICBpZiAoIShwYWMubG9jYWxfY291bnRlciUxMDAwKSkKICAgICAgICB7CiAgICAgICAgICAgIHZhciBjdXJfdHMgPSBEYXRlLm5vdygpOwogICAgICAgICAgICBmb3IgKHZhciBpIGluIGxvY2FscykKICAgICAgICAgICAgewogICAgICAgICAgICAgICAgdmFyIGxvY2FsID0gbG9jYWxzW2ldOwogICAgICAgICAgICAgICAgaWYgKGN1cl90cy1sb2NhbC50cyA+IDEwMDAwKQogICAgICAgICAgICAgICAgICAgIGRlbGV0ZSBsb2NhbHNbaV07CiAgICAgICAgICAgIH0KICAgICAgICAgICAgcGFjLmxvY2FsX2NvdW50ZXIgPSAwOwogICAgICAgIH0KICAgIH0KICAgIGlmICghcmV0KQogICAgICAgIHJldCA9IGZpbmRfcHJveHlfZm9yX3VybCh1cmwsIGhvc3QsIHBhYy5ob3N0cyk7CiAgICBpZiAocmV0LnByb3h5KQogICAgewogICAgICAgIHZhciBleCA9IGZpbmRfcHJveHlfZm9yX3VybCh1cmwsIGhvc3QsIHBhYy5leGNlcHRpb25zLAogICAgICAgICAgICB7ZXhjZXB0aW9uOiAxLCBvcmlnX3Byb3h5OiByZXQuc3RyfSk7CiAgICAgICAgaWYgKGV4KQogICAgICAgICAgICByZXQgPSBleDsKICAgIH0KICAgIHJldHVybiByZXQuc3RyOwp9OwoKRS5maW5kX3Byb3h5X2Zvcl91cmxfcnVsZSA9IGZ1bmN0aW9uKHJ1bGUsIHVybCwgaG9zdCwgaXNfbWFpbiwgbm9fZ2xvYmFsKXsKICAgIHZhciBwYWMgPSBnX3BhY19lbmdpbmUsIHJldDsKICAgIGlmIChob3N0Lm1hdGNoKC9eKC4qKVwudHJpZ2dlclwuaG9sYVwub3JnLykpCiAgICB7CiAgICAgICAgaG9zdCA9IGhvc3QucmVwbGFjZSgnLnRyaWdnZXIuaG9sYS5vcmcnLCAnJyk7CiAgICAgICAgdXJsID0gdXJsLnJlcGxhY2UoJy50cmlnZ2VyLmhvbGEub3JnJywgJycpOwogICAgfQogICAgdmFyIHIgPSBwYWMucnVsZXMgJiYgcnVsZSA/IHBhYy5ydWxlc1tydWxlXSA6IHBhYy5ob3N0czsKICAgIGlmICghcikKICAgICAgICByZXR1cm4gJ0RJUkVDVCc7CiAgICByZXQgPSBmaW5kX3Byb3h5X2Zvcl91cmwodXJsLCBob3N0LCByLCB7aXNfbWFpbjogaXNfbWFpbn0pOwogICAgaWYgKHJldC5wcm94eSAmJiAhbm9fZ2xvYmFsKQogICAgewogICAgICAgIHZhciBleCA9IGZpbmRfcHJveHlfZm9yX3VybCh1cmwsIGhvc3QsIHBhYy5leGNlcHRpb25zLAogICAgICAgICAgICB7ZXhjZXB0aW9uOiAxLCBvcmlnX3Byb3h5OiByZXQuc3RyfSk7CiAgICAgICAgaWYgKGV4KQogICAgICAgICAgICByZXQgPSBleDsKICAgIH0KICAgIHJldHVybiByZXQuc3RyOwp9OwoKZnVuY3Rpb24gZmluZF9wcm94eV9mb3JfdXJsX2V4Y2VwdGlvbih1cmwsIGhvc3QsIHJ1bGVzLCBvcmlnLCBvcHQpewogICAgdmFyIHJldCA9IGZpbmRfcHJveHlfZm9yX3VybCh1cmwsIGhvc3QsIHJ1bGVzLCB7ZXhjZXB0aW9uOiAxLAogICAgICAgIG9yaWdfcHJveHk6IG9yaWd9KTsKICAgIGlmICghcmV0ICYmIG9wdC5yb290X3VybCkKICAgIHsKICAgICAgICByZXQgPSBmaW5kX3Byb3h5X2Zvcl92YWwodXJsLCBob3N0LCBydWxlcywge25hbWU6ICdyb290X3VybHMnLAogICAgICAgICAgICB2YWw6IG9wdC5yb290X3VybCwgb3JpZ19wcm94eTogb3JpZywgZXhjZXB0aW9uOiAxfSk7CiAgICB9CiAgICBpZiAoIXJldCAmJiBvcHQuc3JjX2NvdW50cnkpCiAgICB7CiAgICAgICAgcmV0ID0gZmluZF9wcm94eV9mb3JfdmFsKHVybCwgaG9zdCwgcnVsZXMsIHtuYW1lOiAnc3JjX2NvdW50cnknLAogICAgICAgICAgICB2YWw6IG9wdC5zcmNfY291bnRyeSwgb3JpZ19wcm94eTogb3JpZywgZXhjZXB0aW9uOiAxfSk7CiAgICB9CiAgICByZXR1cm4gcmV0Owp9CgpmdW5jdGlvbiBmaW5kX3Byb3h5X2Zvcl9tYXRjaCh1cmwsIGhvc3QsIHJ1bGVzLCBvcmlnLCBvcHQpewogICAgb3B0ID0gb3B0fHx7fTsKICAgIHZhciBtciwgbXJ1bGVzOwogICAgaWYgKCFydWxlcy5tYXRjaF9yb290X3VybCB8fCAhb3B0LnJvb3RfdXJsIHx8CiAgICAgICAgIShtcnVsZXMgPSBydWxlcy5tYXRjaF9yb290X3VybFtvcHQucm9vdF91cmxdKSkKICAgIHsKICAgICAgICByZXR1cm4gb3B0Lm9yaWdfcHJveHk7CiAgICB9CiAgICBtciA9IG1ydWxlcy5maW5kKGZ1bmN0aW9uKHIpewogICAgICAgIHJldHVybiAhci5mc3JjX2NvdW50cnkgJiYgIXIuZnByb3h5X2NvdW50cnkgfHwKICAgICAgICAgICAgKHIuZnNyY19jb3VudHJ5fHxbXSkuaW5jbHVkZXMob3B0LnNyY19jb3VudHJ5KSB8fAogICAgICAgICAgICAoci5mcHJveHlfY291bnRyeXx8W10pLmluY2x1ZGVzKG9wdC5wcm94eV9jb3VudHJ5KTsKICAgIH0pOwogICAgaWYgKG1yKQogICAgICAgIHJldHVybiBmaW5kX3Byb3h5X2Zvcl91cmxfZXhjZXB0aW9uKHVybCwgaG9zdCwgbXIsIG9yaWcsIG9wdCk7Cn0KCkUuZmluZF9wcm94eV9mb3JfdXJsX2V4Y2VwdGlvbiA9IGZ1bmN0aW9uKHVybCwgaG9zdCwgb3JpZywgb3B0KXsKICAgIGlmICghZ19wYWNfZW5naW5lLmluaXRlZCkKICAgICAgICByZXR1cm4gb3JpZzsKICAgIG9wdCA9IG9wdHx8e307CiAgICB2YXIgcnVsZXMgPSBvcHQuaXNfdHJpYWx8fG9wdC5wcmVtaXVtID8gZ19wYWNfZW5naW5lLmV4Y2VwdGlvbnNfcGx1cyA6CiAgICAgICAgZ19wYWNfZW5naW5lLmV4Y2VwdGlvbnM7CiAgICB2YXIgcmV0OwogICAgaWYgKCEocmV0ID0gZmluZF9wcm94eV9mb3JfbWF0Y2godXJsLCBob3N0LCBydWxlcywgb3JpZywgb3B0KSkpCiAgICAgICAgcmV0ID0gZmluZF9wcm94eV9mb3JfdXJsX2V4Y2VwdGlvbih1cmwsIGhvc3QsIHJ1bGVzLCBvcmlnLCBvcHQpOwogICAgcmV0dXJuIHJldCA/IHJldC5zdHIgOiBvcmlnOwp9OwoKRS50ID0gewogICAgZ2xvYmFsX3ZhcjogZnVuY3Rpb24oKXsgcmV0dXJuIGdfcGFjX2VuZ2luZTsgfSwKICAgIHBhY19yZWRpcjogcGFjX3JlZGlyLAogICAgZ2V0X2V4dDogZ2V0X2V4dCwKfTsKCkUuZ2VuX3BhYyA9IGZ1bmN0aW9uKGpzb24sIG9wdGlvbnMpewogICAgcmV0dXJuICd2YXIgcGFjX2VuZ2luZSA9ICgnK3F1aW5lKycpKHtcbicKICAgICAgICArJyAgICBpc0luTmV0OiBpc0luTmV0LCBpc1BsYWluSG9zdE5hbWU6IGlzUGxhaW5Ib3N0TmFtZX0pO1xuJwogICAgICAgICsnZnVuY3Rpb24gRmluZFByb3h5Rm9yVVJMKHVybCwgaG9zdCl7XG4nCiAgICAgICAgKycgICAgcmV0dXJuIHBhY19lbmdpbmUuRmluZFByb3h5Rm9yVVJMKHVybCwgaG9zdCk7XG4nCiAgICAgICAgKyd9XG4nCiAgICAgICAgKydwYWNfZW5naW5lLmRuc19yZXNvbHZlciA9IGRuc1Jlc29sdmU7XG4nCiAgICAgICAgKydwYWNfZW5naW5lLmluaXQoJytKU09OLnN0cmluZ2lmeShqc29uKSsnLCAnCiAgICAgICAgICAgICtKU09OLnN0cmluZ2lmeShvcHRpb25zKSsnKTtcbic7Cn07CgpFLmdlbl9maXJlZm94X3BhYyA9IGZ1bmN0aW9uKCl7CiAgICByZXR1cm4gJ3ZhciBwYWNfZW5naW5lID0gKCcrcXVpbmUrJykoe30pO1xuJwogICAgICAgICsnZnVuY3Rpb24gRmluZFByb3h5Rm9yVVJMKHVybCwgaG9zdCl7XG4nCiAgICAgICAgKycgICAgcmV0dXJuIHBhY19lbmdpbmUuRmluZFByb3h5Rm9yVVJMKHVybCwgaG9zdCk7XG4nCiAgICAgICAgKyd9XG4nCiAgICAgICAgKydwYWNfZW5naW5lLmZpcmVmb3hfaW5pdChicm93c2VyKTtcbic7Cn07CgpyZXR1cm4gRTsgfSkoewogICAgaXNJbk5ldDogaXNJbk5ldCwgaXNQbGFpbkhvc3ROYW1lOiBpc1BsYWluSG9zdE5hbWV9KTsKZnVuY3Rpb24gRmluZFByb3h5Rm9yVVJMKHVybCwgaG9zdCl7CiAgICByZXR1cm4gcGFjX2VuZ2luZS5GaW5kUHJveHlGb3JVUkwodXJsLCBob3N0KTsKfQpwYWNfZW5naW5lLmRuc19yZXNvbHZlciA9IGRuc1Jlc29sdmU7CnBhY19lbmdpbmUuaW5pdCh7InVuYmxvY2tlcl9ydWxlcyI6e319LCB7ImRvX3JlZGlyIjpmYWxzZSwiZXh0IjoxLCJrZXkiOiI2ZmZkOWI5OTFmNjQ2OThiOTM0N2ZiYjJiNWFlZDNhNjFlOGZlMTExMDI5ZDg3YzVkMjZhM2VmMzI5N2ViMTcifSk7Cg=="
+                    }
+                },
+                "state": 1,
+                "uninstall_url": "https://client.hola.org/client_cgi/uninstall?perr=1&uuid=f95331ce22d38a482987e18b0951c7a6&browser=chrome&version=1.159.160",
+                "was_installed_by_default": false,
+                "was_installed_by_oem": false
+            },
+            "mfehgcgbbipciphmccgaenjidiccnmng": {
+                "active_permissions": {
+                    "api": [
+                        "cloudPrintPrivate"
+                    ],
+                    "manifest_permissions": []
+                },
+                "commands": {},
+                "content_settings": [],
+                "creation_flags": 1,
+                "events": [],
+                "from_bookmark": false,
+                "from_webstore": false,
+                "incognito_content_settings": [],
+                "incognito_preferences": {},
+                "install_time": "13218473992064466",
+                "location": 5,
+                "manifest": {
+                    "app": {
+                        "launch": {
+                            "web_url": "https://www.google.com/cloudprint"
+                        },
+                        "urls": [
+                            "https://www.google.com/cloudprint/enable_chrome_connector"
+                        ]
+                    },
+                    "description": "Cloud Print",
+                    "display_in_launcher": false,
+                    "icons": {},
+                    "key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDqOhnwk4+HXVfGyaNsAQdU/js1Na56diW08oF1MhZiwzSnJsEaeuMN9od9q9N4ZdK3o1xXOSARrYdE+syV7Dl31nf6qz3A6K+D5NHe6sSB9yvYlIiN37jdWdrfxxE0pRYEVYZNTe3bzq3NkcYJlOdt1UPcpJB+isXpAGUKUvt7EQIDAQAB",
+                    "name": "Cloud Print",
+                    "permissions": [
+                        "cloudPrintPrivate"
+                    ],
+                    "version": "0.1"
+                },
+                "never_activated_since_loaded": true,
+                "path": "/opt/google/chrome/resources/cloud_print",
+                "preferences": {},
+                "regular_only_preferences": {},
+                "state": 1,
+                "was_installed_by_default": false,
+                "was_installed_by_oem": false
+            },
+            "mhjfbmdgcfjbbpaeojofohoefgiehjai": {
+                "active_permissions": {
+                    "api": [
+                        "contentSettings",
+                        "fileSystem",
+                        "fileSystem.write",
+                        "metricsPrivate",
+                        "resourcesPrivate"
+                    ],
+                    "explicit_host": [
+                        "chrome://resources/*"
+                    ],
+                    "manifest_permissions": []
+                },
+                "commands": {},
+                "content_settings": [],
+                "creation_flags": 1,
+                "events": [],
+                "from_bookmark": false,
+                "from_webstore": false,
+                "incognito_content_settings": [],
+                "incognito_preferences": {},
+                "install_time": "13218473992065857",
+                "location": 5,
+                "manifest": {
+                    "content_security_policy": "script-src 'self' 'wasm-eval' blob: filesystem: chrome://resources; object-src * blob: externalfile: file: filesystem: data:; plugin-types application/x-google-chrome-pdf",
+                    "description": "",
+                    "incognito": "split",
+                    "key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDN6hM0rsDYGbzQPQfOygqlRtQgKUXMfnSjhIBL7LnReAVBEd7ZmKtyN2qmSasMl4HZpMhVe2rPWVVwBDl6iyNE/Kok6E6v6V3vCLGsOpQAuuNVye/3QxzIldzG/jQAdWZiyXReRVapOhZtLjGfywCvlWq7Sl/e3sbc0vWybSDI2QIDAQAB",
+                    "manifest_version": 2,
+                    "mime_types": [
+                        "application/pdf"
+                    ],
+                    "mime_types_handler": "index.html",
+                    "name": "Chrome PDF Viewer",
+                    "offline_enabled": true,
+                    "permissions": [
+                        "chrome://resources/",
+                        "contentSettings",
+                        "metricsPrivate",
+                        "resourcesPrivate",
+                        {
+                            "fileSystem": [
+                                "write"
+                            ]
+                        }
+                    ],
+                    "version": "1"
+                },
+                "never_activated_since_loaded": true,
+                "path": "/opt/google/chrome/resources/pdf",
+                "preferences": {},
+                "regular_only_preferences": {},
+                "state": 1,
+                "was_installed_by_default": false,
+                "was_installed_by_oem": false
+            }
+        },
+        "toolbar": [
+            "aapnijgdinlhnhlmodcfapnahmbfebeb",
+            "gkojfkhlekighikafcpjkiklfbnlmeio"
+        ]
+    },
+    "gaia_cookie": {
+        "changed_time": 1574000396.899831,
+        "hash": "2jmj7l5rSw0yVb/vlWAYkK/YBwk="
+    },
+    "gcm": {
+        "product_category_for_subtypes": "com.chrome.linux"
+    },
+    "google": {
+        "services": {
+            "signin_scoped_device_id": "10a52a67-8e45-41c1-819b-c34fc8f9ef54"
+        }
+    },
+    "invalidator": {
+        "client_id": "pwFlLqgMBRIFVZuErwD+PQ=="
+    },
+    "language_model_counters": {
+        "en": 1
+    },
+    "media": {
+        "device_id_salt": "96B3D6D3C0006BF9D8D55DFCE9238128",
+        "engagement": {
+            "schema_version": 4
+        }
+    },
+    "ntp": {
+        "num_personal_suggestions": 1
+    },
+    "plugins": {
+        "plugins_list": []
+    },
+    "previews": {
+        "litepage": {
+            "user-needs-notification": false
+        }
+    },
+    "profile": {
+        "avatar_index": 26,
+        "content_settings": {
+            "exceptions": {
+                "accessibility_events": {},
+                "app_banner": {},
+                "auto_select_certificate": {},
+                "automatic_downloads": {},
+                "autoplay": {},
+                "background_sync": {},
+                "bluetooth_guard": {},
+                "client_hints": {},
+                "clipboard": {},
+                "cookies": {},
+                "durable_storage": {},
+                "flash_data": {},
+                "geolocation": {},
+                "images": {},
+                "important_site_info": {},
+                "intent_picker_auto_display": {},
+                "javascript": {},
+                "media_engagement": {
+                    "https://chrome.google.com:443,*": {
+                        "last_modified": "13218474074436712",
+                        "setting": {
+                            "audiblePlaybacks": 0,
+                            "audioContextPlaybacks": 0,
+                            "hasHighScore": false,
+                            "highScoreChanges": 0,
+                            "lastMediaPlaybackTime": 0,
+                            "mediaElementPlaybacks": 0,
+                            "mediaPlaybacks": 0,
+                            "significantPlaybacks": 0,
+                            "visits": 1,
+                            "visitsWithMediaTag": 0
+                        }
+                    }
+                },
+                "media_stream_camera": {},
+                "media_stream_mic": {},
+                "midi_sysex": {},
+                "mixed_script": {},
+                "notifications": {},
+                "password_protection": {},
+                "payment_handler": {},
+                "permission_autoblocking_data": {},
+                "plugins": {},
+                "popups": {},
+                "ppapi_broker": {},
+                "protocol_handler": {},
+                "sensors": {},
+                "serial_chooser_data": {},
+                "serial_guard": {},
+                "site_engagement": {
+                    "https://chrome.google.com:443,*": {
+                        "last_modified": "13218474045659666",
+                        "setting": {
+                            "lastEngagementTime": 13218474045659622,
+                            "lastShortcutLaunchTime": 0,
+                            "pointsAddedToday": 2.1,
+                            "rawScore": 2.1
+                        }
+                    }
+                },
+                "sound": {},
+                "ssl_cert_decisions": {},
+                "subresource_filter": {},
+                "subresource_filter_data": {},
+                "usb_chooser_data": {},
+                "usb_guard": {}
+            },
+            "pattern_pairs": {
+                "https://*,*": {
+                    "media-stream": {
+                        "audio": "Allow",
+                        "video": "Allow"
+                    }
+                },
+                "http://*,*": {
+                    "media-stream": {
+                        "audio": "Allow",
+                        "video": "Allow"
+                    }
+                }
+            },
+            "pref_version": 1
+        },
+        "managed_default_content_settings": {
+            "media_stream": 1,
+            "media_stream_camera": 1
+        },
+        "default_content_setting_values": {
+            "geolocation": 1
+        },
+        "default_content_settings": {
+            "media_stream": 1,
+            "media_stream_camera": 1,
+            "geolocation": 1,
+            "mouselock": 1,
+            "notifications": 1,
+            "popups": 1,
+            "ppapi-broker": 1
+        },
+        "exit_type": "none",
+        "exited_cleanly": true,
+        "last_engagement_time": "13218474045659622",
+        "last_time_obsolete_http_credentials_removed": 1574000452.128963,
+        "local_profile_id": 6912899,
+        "managed_user_id": "",
+        "name": "Person 1",
+        "password_manager_enabled": false
+    },
+    "protection": {
+        "macs": {
+            "browser": {
+                "show_home_button": "9DDE23BD288B95F7CE675BBD01A9E2B63A7624B8C3CDB431097FDF3F63AB4E51"
+            },
+            "default_search_provider_data": {
+                "template_url_data": "705F2D2FDD2FF483A1A9E675DFD71CCB223E81A2CEBF5D20C031A68B0020CF77"
+            },
+            "extensions": {
+                "settings": {
+                    "aapnijgdinlhnhlmodcfapnahmbfebeb": "4248A05116328B6E3F4D400102747E68353561D1681A32D6F7E66CB953CDF5CE",
+                    "ahfgeienlihckogmohjhadlkjgocpleb": "A7BEFB3C6E46E4C47ECB48C078ADC579A19DDC35E2965E27E6BFFE4431A4A413",
+                    "gkojfkhlekighikafcpjkiklfbnlmeio": "AAAE6DA137270DD4B2736916F599ADB5A155783897A957787E63B0CBC5D94E5C",
+                    "mfehgcgbbipciphmccgaenjidiccnmng": "C9E20F27EC064FC29B20E32ED1DEBC50E49E840C30E796FC2DB56C4930D399BB",
+                    "mhjfbmdgcfjbbpaeojofohoefgiehjai": "15C7C69EB4DAD1D14F72A2BC7B9D8835F455902445F6A96828749B181EE9DF4D"
+                }
+            },
+            "google": {
+                "services": {
+                    "account_id": "07620F46EF9994C94D86883494C13E89DC6509B3D4E8978B2E18F6776C85CDBF",
+                    "last_account_id": "8452449E1468A5CF585BF23BDC52A3CA1BED67E36262AAE4BAC3583936F8B7AB",
+                    "last_username": "C202CF3B01A560B8B7D71D3B0076B61126EF72F4B11D79B3EA6E3661DB757E93",
+                    "username": "1CA30EB4EEE885888D93E71C93383D2E2A14715338EDF9B157FF935504B57767"
+                }
+            },
+            "homepage": "B2A199504AEACAAD5C3A7BB4A96D9C3A9536D7A29672EB4DA3B9552B8D39C49C",
+            "homepage_is_newtabpage": "306C67E79E036278678ED45B3C668C4421665A206FC4B97F053015981C8BAAE2",
+            "media": {
+                "storage_id_salt": "C29149AE129B959FDEB0CA9E54B924BF0A8BAF533937C017ADFBC9AA2FC7BC0C"
+            },
+            "pinned_tabs": "33059F0A9D5AD996AA6A3DDBFC05B6B58E67DA878AEB3497F593EAE6D19EAC66",
+            "prefs": {
+                "preference_reset_time": "7B22235E8A603BE387D81441C8C88F0C4E591567147FA05BE235C96189AC4490"
+            },
+            "safebrowsing": {
+                "incidents_sent": "F1827D0C55798CE7843DAF5DDEAB06A9BB2F9628970A5DCDA2543102436E4749"
+            },
+            "search_provider_overrides": "99AC1EA12DA6196886F08A934B3B5006A725063DF41E9D0EE38F1FCFFDFDD5B0",
+            "session": {
+                "restore_on_startup": "74E1D625EF359DDAF159A835BC3731F9BCEC2AFE542FE783845A6292F572D0F5",
+                "startup_urls": "D7174760A7168B445632139CD74E389AA027590889201AF1A252FFDE27B0531D"
+            }
+        }
+    },
+    "safebrowsing": {
+        "enabled": false
+    },
+    "search": {
+        "suggest_enabled": false
+    },
+    "signin": {
+        "AccountReconcilor": {
+            "kDiceMigrationOnStartup2": true
+        },
+        "allowed": true
+    },
+    "spellcheck": {
+        "dictionaries": [
+            "en-US"
+        ],
+        "dictionary": ""
+    },
+    "token_service": {
+        "dice_compatible": true
+    },
+    "translate": {
+        "enabled": false
+    },
+    "translate_site_blacklist_with_time": {}
+}
