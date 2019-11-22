@@ -14,7 +14,9 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.net.URL;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 
 /**
@@ -119,10 +121,6 @@ public class DriverFactory {
 		options.addArguments("--user-data-dir=" + ChromeSettings.USER_DATA_FOLDER);
 		options.addArguments("--profile-directory=" + ChromeSettings.PROFILE_NAME);
 		options.addArguments("--auto-select-desktop-capture-source=Entire screen");
-		options.addArguments("--allow-http-screen-capture");
-		options.addArguments("--ignore-certificate-errors");
-		options.addArguments("--ignore-urlfetcher-cert-requests");
-		options.addArguments("--unsafely-treat-insecure-origin-as-secure=" + checkUrl.replaceFirst("https", "http"));
 	}
 
 	/**

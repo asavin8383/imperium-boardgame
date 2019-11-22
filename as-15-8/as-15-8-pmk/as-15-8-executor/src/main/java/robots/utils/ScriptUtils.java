@@ -44,7 +44,7 @@ public class ScriptUtils {
         public String errorCodeChrome;
     }
 
-    public static Integer WAIT_TIMEOUT = 30;
+    public static Integer WAIT_TIMEOUT = 30000;
     public static Integer WAIT_DRIVER_DEFAULT = 3;
 
 
