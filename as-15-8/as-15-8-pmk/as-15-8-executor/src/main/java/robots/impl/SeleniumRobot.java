@@ -92,8 +92,7 @@ public abstract class SeleniumRobot implements Robot {
 				getScriptParams().get(AccessToolParameter.APPLICATION),
 				getScriptParams().get(AccessToolParameter.BROWSER),
 				proxy,
-				enableLog,
-				checkUrl
+				enableLog
 		);
 		return driver;
 	}

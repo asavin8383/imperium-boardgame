@@ -3,6 +3,7 @@ package robots.utils;
 import checkUnits.CheckUnit;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import common.ExecutorProperties;
 import enums.AccessToolParameter;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -44,7 +45,7 @@ public class ScriptUtils {
         public String errorCodeChrome;
     }
 
-    public static Integer WAIT_TIMEOUT = 30;
+    public static Integer WAIT_TIMEOUT = 30000;
     public static Integer WAIT_DRIVER_DEFAULT = 3;
 
 
@@ -104,90 +105,6 @@ public class ScriptUtils {
             throw new RuntimeException("Ошибка получения скриншота", ex);
         }
     }
-
-    /*public static byte[] getScreenshot(WebDriver webDriver)  {
-        try{
-
-            ((JavascriptExecutor)webDriver).executeScript("window.open()");
-            switchToTab(webDriver, 2);
-            webDriver.get(ChromeSettings.getScreenshotExtension().getPopupUrl());
-            WebDriverWait wait = new WebDriverWait(webDriver, 100000000);
-            wait.until(ExpectedConditions.presenceOfElementLocated(
-                    By.id("desktop"))).click();
-
-            ScriptUtils.waitForTab(webDriver, 2);
-    //        wait.until(driver -> driver != null &&
-    //                driver.getWindowHandles().size() < 2);
-    //        ScriptUtils.waitForTab(webDriver, 2);
-
-            switchToTab(webDriver, 2);
-            WebElement frame = wait.until(ExpectedConditions.presenceOfElementLocated(
-                    By.xpath("//*[@id=\"iframe_container\"]/iframe")));
-            webDriver.switchTo().frame(frame);
-
-            wait.until(ExpectedConditions.presenceOfElementLocated(
-                        By.xpath("//div[@id=\"container\"]")));
-
-            waitDriver(webDriver, 1);
-
-           /* String imgElemPath = "//div[contains(@class, \"editor-container\")]";
-            WebElement imgElem = wait.until(ExpectedConditions
-                    .presenceOfElementLocated(By.xpath(imgElemPath)))
-                    .findElement(By.xpath(imgElemPath));*/
-
-           // return getSeleniumScreenshot(webDriver, imgElem);
-            /*BufferedImage originalImage =
-                    new AShot().takeScreenshot(webDriver,
-                            webDriver.findElement(By.xpath("//div[@id=\"container\"]"))).getImage();
-
-            try(ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-                ImageIO.write(originalImage, "png", baos);
-                baos.flush();
-                return baos.toByteArray();
-            }
-            String base64Image = wait
-                    .until(ExpectedConditions.presenceOfElementLocated(
-                            By.xpath("//div[@id=\"container\"]/img")))
-                    .getAttribute("src").split(",")[1];
-
-            // close screenshot tab
-            webDriver.close();
-            switchToTab(webDriver, 1);
-
-            return Base64.getDecoder().decode(base64Image);
-        }catch(Exception ex){
-            throw new RuntimeException("Ошибка получения скриншота", ex);
-        }
-    }*/
-
-   /* private static byte[] getSeleniumScreenshot(WebDriver driver, WebElement ele) throws IOException {
-        File screenshot = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
-        BufferedImage  fullImg = ImageIO.read(screenshot);
-
-        Point point = ele.getLocation();
-
-        int eleWidth = ele.getSize().getWidth();
-        int eleHeight = ele.getSize().getHeight();
-
-        BufferedImage eleScreenshot= fullImg.getSubimage(point.getX(), point.getY(),
-                eleWidth, eleHeight);
-        try(ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            ImageIO.write(eleScreenshot, "png", baos);
-            baos.flush();
-            return baos.toByteArray();
-        }
-    }
-
-    public static byte[] getScreenshot(WebDriver webDriver, boolean old) {
-        waitDriver(webDriver, 1);   // задержка скриншота, чтоб избежать белого экрана, т.к. некоторые сайты показывают контент не сразу.
-
-        try {
-            return ((TakesScreenshot) webDriver).getScreenshotAs(OutputType.BYTES);
-        }
-        catch (TimeoutException te){
-            return null;        // вероятно, загрузка страницы была прервана по явному таймауту, поэтому DOM не сформировался.
-        }
-    }*/
 
     public static String getCurrentUrl(WebDriver webDriver) {
         try{
@@ -291,17 +208,6 @@ public class ScriptUtils {
             }
         }
         return null;
-    }
-
-    public static boolean useEtalon(Map<AccessToolParameter, String> scriptParams){
-        if (scriptParams == null)
-            return true;
-
-        String useEtalon = scriptParams.get(AccessToolParameter.USE_ETALON);
-        return StringUtils.isEmpty(useEtalon) ||
-                useEtalon.equalsIgnoreCase("true") ||
-                useEtalon.equalsIgnoreCase("on") ||
-                useEtalon.equalsIgnoreCase("1");
     }
 
     public static void type(WebElement element, long sleep, String query) {

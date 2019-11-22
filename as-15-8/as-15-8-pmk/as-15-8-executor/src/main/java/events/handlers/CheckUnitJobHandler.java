@@ -45,7 +45,7 @@ public class CheckUnitJobHandler {
 
             ExecutionJobResult executionJobResult =
                     checkUnitVerificationServiceFactory
-                            .getService(message.getPayload().getCheckUnit().getType())
+                            .getService(message.getPayload())
                             .run(message.getPayload());
 
             sendExecutionResult(executionJobResult);
