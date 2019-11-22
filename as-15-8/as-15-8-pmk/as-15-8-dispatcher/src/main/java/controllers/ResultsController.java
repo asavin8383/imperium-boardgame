@@ -45,7 +45,7 @@ public class ResultsController {
     @GetMapping
     public Page<Result> findList(
             @RequestParam Long arrangementId,
-            @RequestParam(required = false) List<CheckUnitJobResult> checkUnitJobResult,
+            @RequestParam(required = false) List<CheckUnitJobResult> checkUnitJobResults,
             @RequestParam(required = false) String query,
             @RequestParam(required = false) SortingDirection sortingDirection,
             @RequestParam(required = false) String sortingColumn,
@@ -53,8 +53,8 @@ public class ResultsController {
             @RequestParam(defaultValue = "10") int pageSize){
         PageRequest page = PageRequest.of(
                 pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
-        if (checkUnitJobResult != null) {
-            return resultRepo.findByArrangementIdAndResultIn(arrangementId, checkUnitJobResult, page);
+        if (checkUnitJobResults != null) {
+            return resultRepo.findByArrangementIdAndResultIn(arrangementId, checkUnitJobResults, page);
         } else {
             return Strings.isEmpty(query) ?
                     resultRepo.findAllByArrangementId(arrangementId, page) :
