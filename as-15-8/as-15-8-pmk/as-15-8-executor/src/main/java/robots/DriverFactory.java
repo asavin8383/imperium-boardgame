@@ -1,5 +1,6 @@
 package robots;
 
+import common.ExecutorProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.openqa.selenium.Platform;
@@ -69,8 +70,6 @@ public class DriverFactory {
 
 		ChromeOptions options = new ChromeOptions();
 		setOptimalChromeOptions(options, checkUrl);
-		setLoadExtensions(options, Collections.singletonList(
-				ChromeSettings.getScreenshotExtension()));
 
 		if (enableLog){
 			LoggingPreferences logPrefs = new LoggingPreferences();
@@ -118,8 +117,8 @@ public class DriverFactory {
 		logPrefs.enable( LogType.PERFORMANCE, Level.ALL );
 		options.setCapability( "goog:loggingPrefs", logPrefs );
 
-		options.addArguments("--user-data-dir=" + ChromeSettings.USER_DATA_FOLDER);
-		options.addArguments("--profile-directory=" + ChromeSettings.PROFILE_NAME);
+		options.addArguments("--user-data-dir=" + ExecutorProperties.getChromeProperties().getUserDataDir());
+		options.addArguments("--profile-directory=" + ExecutorProperties.getChromeProperties().getProfileName());
 		options.addArguments("--auto-select-desktop-capture-source=Entire screen");
 	}
 

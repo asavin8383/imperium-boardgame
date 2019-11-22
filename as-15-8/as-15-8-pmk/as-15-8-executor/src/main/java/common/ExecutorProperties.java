@@ -1,6 +1,5 @@
 package common;
 
-import com.netflix.http4.NFHttpClient;
 import enums.AccessToolParameter;
 import enums.AccessToolUnit;
 import lombok.Data;
@@ -27,10 +26,12 @@ public class ExecutorProperties {
 
     private NmapProperties nmap;
 
-    private String screenshotWaitTimeout;
+    private ChromeProperties chrome;
 
 
     private static EtalonProperties etalonExtProperties;
+
+    private static ChromeProperties chromeProperties;
 
     private static Long screenShotWaitTimeoutExt;
 
@@ -43,9 +44,7 @@ public class ExecutorProperties {
     private void loadProps() throws MalformedURLException {
         etalonExtProperties = etalon;
         seleniumHubUrlExt = new URL(seleniumHubUrl);
-        try {
-            screenShotWaitTimeoutExt = Long.parseLong(screenshotWaitTimeout);
-        } catch(NumberFormatException ex) {screenShotWaitTimeoutExt = 30L;}
+        chromeProperties = chrome;
 
         this.props = new AccessToolUnits();
         robots.forEach((accessToolUnitString, accessToolUnitPropsMap) ->{
@@ -68,11 +67,9 @@ public class ExecutorProperties {
                 .stream()
                 .filter(accessToolUnitProps ->
                         accessToolUnitProps.getValue().getRobotProps().keySet()
-                                .stream()
-                                .filter(curAccessTool -> curAccessTool.toLowerCase().equals(accessTool.toLowerCase()))
-                                .count() > 0
+                                .stream().anyMatch(curAccessTool -> curAccessTool.toLowerCase().equals(accessTool.toLowerCase()))
                 )
-                .map(accessToolUnitProps -> accessToolUnitProps.getKey())
+                .map(Map.Entry::getKey)
                 .findFirst();
     }
 
@@ -80,11 +77,13 @@ public class ExecutorProperties {
         return etalonExtProperties;
     }
 
+    public static ChromeProperties getChromeProperties(){
+        return chromeProperties;
+    }
+
     public static URL getSeleniumHubUrl(){
         return seleniumHubUrlExt;
     }
-
-    public static Long getScreenshotWaitTimeout() { return screenShotWaitTimeoutExt; }
 
     @Data
     public static class AccessToolUnits{
@@ -109,7 +108,7 @@ public class ExecutorProperties {
         private Proxy proxy;
 
         @Data
-        public static class Proxy{
+        public static class Proxy {
             private String type;
             private String host;
             private String port;
@@ -119,9 +118,16 @@ public class ExecutorProperties {
     }
 
     @Data
-    public static class NmapProperties{
+    public static class NmapProperties {
         private String path;
         private Boolean useProxy;
         private String[] portsToCheck;
+    }
+
+    @Data
+    public static class ChromeProperties {
+        private String userDataDir;
+        private String extensionsDir;
+        private String profileName;
     }
 }

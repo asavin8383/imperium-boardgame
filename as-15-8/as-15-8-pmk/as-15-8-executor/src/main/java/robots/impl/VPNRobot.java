@@ -1,13 +1,13 @@
 package robots.impl;
 
 import checkUnits.CheckUnit;
+import common.ExecutorProperties;
 import enums.AccessToolParameter;
 import execution.ExecutionJobResult;
 import execution.ExecutionVpnJobResult;
 import org.openqa.selenium.WebDriver;
 import robots.ProxyUtils;
 import robots.exceptions.ExecutionException;
-import common.ExecutorProperties;
 import robots.utils.HttpResponseHelper;
 import robots.utils.RobotScriptUtils;
 import robots.utils.ScriptUtils;
@@ -24,14 +24,14 @@ import static robots.utils.HttpResponseHelper.HttpResponseMeta;
 
 public class VPNRobot extends SeleniumRobot {
 
-    protected boolean useEtalon;
-    protected String etalonProxy;
-    protected String stubUrl;
+    private boolean useEtalon;
+    private String etalonProxy;
+    private String stubUrl;
 
-    protected volatile WebDriver etalonDriver;
+    private volatile WebDriver etalonDriver;
 
-    CompletableFuture<Void> pageGetterFuture;
-    CompletableFuture<Void> etalonPageGetterFuture;
+    private CompletableFuture<Void> pageGetterFuture;
+    private CompletableFuture<Void> etalonPageGetterFuture;
 
 
     public VPNRobot(Map<AccessToolParameter, String> scriptParams) {
@@ -46,14 +46,15 @@ public class VPNRobot extends SeleniumRobot {
     			)
     		);
 
-        this.useEtalon = ScriptUtils.useEtalon(scriptParams);
+        ExecutorProperties.EtalonProperties etalonProperties = ExecutorProperties.getEtalon();
+        this.useEtalon = etalonProperties.getEnabled();
 
     	etalonProxy = ProxyUtils.getFullProxy(
-                ExecutorProperties.getEtalon().getProxy().getType(),
-                ExecutorProperties.getEtalon().getProxy().getHost(),
-                ExecutorProperties.getEtalon().getProxy().getPort(),
-                ExecutorProperties.getEtalon().getProxy().getUsername(),
-                ExecutorProperties.getEtalon().getProxy().getPassword()
+                etalonProperties.getProxy().getType(),
+                etalonProperties.getProxy().getHost(),
+                etalonProperties.getProxy().getPort(),
+                etalonProperties.getProxy().getUsername(),
+                etalonProperties.getProxy().getPassword()
 			);
      	this.stubUrl = scriptParams.get(AccessToolParameter.STUB_URL);
     }

@@ -7,14 +7,6 @@ package enums;
  */
 
 public enum AccessToolParameter {
-    //global
-    ETALON_PROXY_TYPE,
-    ETALON_PROXY_HOST,
-    ETALON_PROXY_PORT,
-    ETALON_PROXY_USERNAME,
-    ETALON_PROXY_PASSWORD,
-    USE_ETALON,
-    TOTAL_WORKERS_COUNT,
 
     //robots
     BROWSER,
@@ -39,7 +31,11 @@ public enum AccessToolParameter {
     PROXY_USER,
     PROXY_PASSWORD,
     IGNORE_CAPTCHA_APPS,
-    CRX_FILE_PATH,
+
+    //extensions
+    EXTENSION_ID,
+    EXTENSION_VERSION,
+    EXTENSION_POPUP,
 
     //google-api
     SEARCH_SYSTEM_ID,
