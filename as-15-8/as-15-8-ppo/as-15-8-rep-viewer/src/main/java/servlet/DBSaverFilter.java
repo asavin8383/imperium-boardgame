@@ -1,8 +1,14 @@
 package servlet;
 
+import model.Report;
 import org.apache.commons.io.input.TeeInputStream;
 import org.apache.commons.io.output.TeeOutputStream;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
+import org.springframework.stereotype.Component;
+import repositories.ReportRepository;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -17,8 +23,22 @@ import java.io.IOException;
  * Date: 21.11.2019
  * Time: 15:41
  */
+@Component("DBSaverFilter")
 public class DBSaverFilter implements javax.servlet.Filter
 {
+    final ReportRepository reportRepository;
+
+    @Autowired
+    public DBSaverFilter(ReportRepository reportRepository) {this.reportRepository = reportRepository;}
+
+    @PostConstruct
+    public void init() {
+        System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    }
 
     public void destroy() {
     }
@@ -48,6 +68,14 @@ public class DBSaverFilter implements javax.servlet.Filter
             System.out.println("request = " + request.getQueryString());
             System.out.println("responseStream = " + responseStream.size());
             System.out.println("requestStream = " + requestStream.toString());
+
+            if (request.getMethod().equalsIgnoreCase("POST")) {
+                Report report = new Report();
+                report.setData(responseStream.toByteArray());
+                report.setRptdesign(request.getParameter("__report"));
+                report.setFormat("html");
+                reportRepository.saveAndFlush(report);
+            }
 
         } else {
             System.err.println("DBSaverFilter.doFilter NOT HTTP");

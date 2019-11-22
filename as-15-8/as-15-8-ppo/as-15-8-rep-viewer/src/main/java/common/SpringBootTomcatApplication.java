@@ -2,8 +2,11 @@ package common;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 /**
  * User: asinjavin
@@ -11,7 +14,9 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
  * Time: 22:47
  */
 @SpringBootApplication
-//        (exclude = {MongoAutoConfiguration.class, MongoDataAutoConfiguration.class})
+@ComponentScan(basePackages = {"common", "servlet", "repositories"})
+@EnableJpaRepositories("repositories")
+@EntityScan("model")
 public class SpringBootTomcatApplication extends SpringBootServletInitializer
 {
 }
