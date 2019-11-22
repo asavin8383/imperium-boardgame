@@ -1,6 +1,7 @@
 package controllers;
 
 import controllers.helpers.SortingHelper;
+import enums.CheckUnitJobResult;
 import enums.SortingDirection;
 import exceptions.AS_15_8_DispatcherException;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ import repositories.DetailResultRepo;
 import repositories.ResultRepo;
 import repositories.ResultScreenShotRepo;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -43,6 +45,7 @@ public class ResultsController {
     @GetMapping
     public Page<Result> findList(
             @RequestParam Long arrangementId,
+            @RequestParam(required = false) List<CheckUnitJobResult> checkUnitJobResult,
             @RequestParam(required = false) String query,
             @RequestParam(required = false) SortingDirection sortingDirection,
             @RequestParam(required = false) String sortingColumn,
@@ -50,9 +53,13 @@ public class ResultsController {
             @RequestParam(defaultValue = "10") int pageSize){
         PageRequest page = PageRequest.of(
                 pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
-        return Strings.isEmpty(query) ?
-                resultRepo.findAllByArrangementId(arrangementId, page) :
-                resultRepo.findAllByArrangementAndQuery(arrangementId, query, page);
+        if (checkUnitJobResult != null) {
+            return resultRepo.findByArrangementIdAndResultIn(arrangementId, checkUnitJobResult, page);
+        } else {
+            return Strings.isEmpty(query) ?
+                    resultRepo.findAllByArrangementId(arrangementId, page) :
+                    resultRepo.findAllByArrangementAndQuery(arrangementId, query, page);
+        }
     }
 
     @GetMapping(path = "/screenshot", produces = MediaType.IMAGE_PNG_VALUE)
