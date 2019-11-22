@@ -45,8 +45,8 @@ public class DBSaverFilter implements javax.servlet.Filter
             System.out.println("DBSaverFilter.doFilter DONE");
 
             System.out.println("\n\n");
-            System.out.println("responseStream = " + responseStream.toString());
-            System.out.println("\n\n");
+            System.out.println("request = " + request.getQueryString());
+            System.out.println("responseStream = " + responseStream.size());
             System.out.println("requestStream = " + requestStream.toString());
 
         } else {
