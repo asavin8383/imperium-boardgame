@@ -97,8 +97,7 @@ public abstract class AnonymizerRobot extends SeleniumRobot {
                     getScriptParams().get(AccessToolParameter.APPLICATION),
                     getScriptParams().get(AccessToolParameter.BROWSER),
                     etalonProxy,
-                    true,
-                    checkUnit.getValue());
+                    true);
 
             driver.get(ScriptUtils.getCheckUnitValue(checkUnit));
             ScriptUtils.PageResult etalon = loadEtalon();

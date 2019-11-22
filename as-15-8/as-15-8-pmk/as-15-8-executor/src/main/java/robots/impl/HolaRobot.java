@@ -94,8 +94,7 @@ public class HolaRobot extends SeleniumRobot {
                     ExecutorProperties.getSeleniumHubUrl(),
                     Platform.valueOf(getScriptParams().get(AccessToolParameter.PLATFORM)),
                     getScriptParams().get(AccessToolParameter.APPLICATION),
-                    Collections.singletonList(extension),
-                    checkUnit.getValue()
+                    Collections.singletonList(extension)
             );
 
             // opens empty tab
