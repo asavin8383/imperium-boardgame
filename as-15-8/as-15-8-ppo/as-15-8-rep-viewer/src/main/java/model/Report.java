@@ -1,10 +1,13 @@
 package model;
 
+import com.fasterxml.jackson.annotation.JsonRawValue;
 import lombok.Data;
 import lombok.ToString;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
  * User: asinjavin
@@ -31,16 +34,16 @@ public class Report
     Integer msr_prd_id;
 
     @Column
-    Timestamp msr_prd_st_dttm;
+    LocalDate msr_prd_st_dttm;
 
     @Column
-    Timestamp msr_prd_end_dttm;
+    LocalDateTime msr_prd_end_dttm;
 
     @Column
     String msr_prd_tp;
 
     @Column
-    Long msr_prd_tp_id;
+    Integer msr_prd_tp_id;
 
     @Column
     String msr_prd_caption;
@@ -58,7 +61,11 @@ public class Report
     @Column
     String format;
 
-//    params ;
-//            username;
+    @JsonRawValue
+    @Column(columnDefinition = "jsonb")
+    String params;
+
+    @Column
+    String username;
 
 }
