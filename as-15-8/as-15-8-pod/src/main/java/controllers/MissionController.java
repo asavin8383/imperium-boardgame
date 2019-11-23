@@ -56,8 +56,8 @@ public class MissionController {
         }
     }
 
-    @GetMapping("{mission}")
-    public Mission getMission(@PathVariable Mission mission){
+    @GetMapping("/single")
+    public Mission getMission(@RequestParam("id") Mission mission){
         return mission;
     }
 
