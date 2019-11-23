@@ -18,7 +18,7 @@ public class UsersController {
     private final LdapUsersService usersService;
 
     @GetMapping("/operator")
-    @PreAuthorize("hasAnyRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasAnyRole('ROLE_OPERATOR','ROLE_SYSTEM')")
     public List<String> getOperators(String role) {
         return usersService.getUserNamesByRole("ROLE_OPERATOR");
     }
