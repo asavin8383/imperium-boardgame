@@ -107,8 +107,10 @@ public class MissionService {
             mission = missionRepository.save(createMission(missionEntry));
             MissionAttachment missionAttachment = new MissionAttachment();
             missionAttachment.setMission(mission);
+            log.info("Добавляем вложение поручения в БД: " + missionEntry.toString());
             missionAttachment.setAttachment(missionEntry.getDocFileDataBytes());
             missionAttachmentRepo.save(missionAttachment);
+            log.info("Поручение вместе с вложением успешно сохранены в БД: " + missionEntry.toString());
         }
 
         sendMissionDataToPPT(mission);
