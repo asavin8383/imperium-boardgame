@@ -112,17 +112,13 @@ public class ScriptUtils {
 
     public static byte[] getScreenshot(WebDriver webDriver)  {
         try{
-            ((JavascriptExecutor)webDriver).executeScript("window.open()");
-
-            int tabIndex = webDriver.getWindowHandles().size() - 1;
-            switchToTab(webDriver, tabIndex);
-            webDriver.get(ChromeSettings.getScreenshotExtension().getPopupUrl());
+            switchToTab(webDriver, 2);
             WebDriverWait wait = new WebDriverWait(webDriver, WAIT_TIMEOUT);
             wait.until(ExpectedConditions.presenceOfElementLocated(
                     By.id("screen"))).click();
 
-            ScriptUtils.waitForTab(webDriver, tabIndex);
-            switchToTab(webDriver, tabIndex);
+            ScriptUtils.waitForTab(webDriver, 2);
+            switchToTab(webDriver, 2);
 
             String base64Image = wait
                     .until(ExpectedConditions.presenceOfElementLocated(
@@ -131,7 +127,7 @@ public class ScriptUtils {
 
             // close screenshot tab
             webDriver.close();
-            switchToTab(webDriver, tabIndex -1);
+            switchToTab(webDriver, 1);
 
             return Base64.getDecoder().decode(base64Image);
         }catch(Exception ex){
@@ -290,6 +286,13 @@ public class ScriptUtils {
             // ignore
         }
         return element;
+    }
+
+    public static void openScreenshotExtension(WebDriver driver){
+        ((JavascriptExecutor)driver).executeScript("window.open()");
+        switchToTab(driver, 2);
+        driver.get(ChromeSettings.getScreenshotExtension().getPopupUrl());
+        switchToTab(driver, 1);
     }
 
 }
