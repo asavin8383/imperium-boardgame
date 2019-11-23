@@ -46,7 +46,7 @@ public class FormalTaskController {
 	@Value("${gateway.url}")
 	private String gatewayUrl;
 
-	private final static String SOIB_URI = "/user/operator";
+	private final static String SOIB_URI = "/security/user/operator";
 
 	@PostMapping(consumes=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseStatus(HttpStatus.CREATED)
