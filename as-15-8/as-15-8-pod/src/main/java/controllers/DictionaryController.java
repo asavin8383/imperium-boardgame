@@ -2,7 +2,7 @@ package controllers;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import model.enums.Dictionary;
+import enums.Dictionary;
 import model.projection.DictionaryView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;

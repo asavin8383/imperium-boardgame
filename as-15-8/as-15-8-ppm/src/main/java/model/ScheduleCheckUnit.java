@@ -4,7 +4,6 @@ import checkUnits.CheckUnitType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Data;
-import org.springframework.data.annotation.Immutable;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -24,7 +23,6 @@ public class ScheduleCheckUnit implements Serializable {
     @JsonIgnore
     private Arrangement arrangement;
 
-    @Column(nullable=false)
     private Long erdiId;
 
     @Enumerated(EnumType.STRING)

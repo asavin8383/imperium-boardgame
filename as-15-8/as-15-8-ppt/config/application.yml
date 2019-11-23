@@ -73,6 +73,14 @@ spring:
 
 ---
 
+spring:
+  profiles: dev_asavin
+  datasource:
+    url: jdbc:postgresql://192.168.5.195:5432/asdb_test2
+
+
+---
+
 logging:
   config:
   level:

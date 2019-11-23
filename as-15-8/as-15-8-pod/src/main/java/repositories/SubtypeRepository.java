@@ -1,6 +1,6 @@
 package repositories;
 
-import model.enums.Dictionary;
+import enums.Dictionary;
 import model.scheme.Subtype;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -8,7 +8,9 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import repositories.helper.DictionaryRepository;
 
+import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.Optional;
 
 @Repository
 public interface SubtypeRepository extends
@@ -37,4 +39,6 @@ public interface SubtypeRepository extends
     default Date getUpdateDateTime(Date effDt) {
         return findMaxCDateByEffDt(effDt);
     }
+
+    Optional<Subtype> findByOrigIdAndEffDt(String origId, Date effDt);
 }

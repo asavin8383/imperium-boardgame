@@ -103,11 +103,6 @@ public class CustomErdiService {
     }
 
     public CustomErdi createCustomErdi(CustomErdi customErdi) {
-        /*customErdi = customErdiRepository.save(customErdi);
-        Violation v = em.merge(customErdi.getViolation());
-        customErdi.setViolation(v);
-        em.refresh(customErdi.getViolation());
-        return customErdi;*/
         customErdi.getCustomErdiUnits().forEach(
                 unit -> unit.setCustomErdi(customErdi));
         return customErdiRepository.save(customErdi);
@@ -121,7 +116,7 @@ public class CustomErdiService {
     public CustomErdi updateCustomErdi(CustomErdi newCustomErdi,
                                        CustomErdi customErdi) {
         customErdi.setName(newCustomErdi.getName());
-        customErdi.setViolation(newCustomErdi.getViolation());
+        customErdi.setSubtypeId(newCustomErdi.getSubtypeId());
         return customErdiRepository.save(customErdi);
     }
 

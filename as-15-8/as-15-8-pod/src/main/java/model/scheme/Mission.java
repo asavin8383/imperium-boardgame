@@ -27,13 +27,6 @@ public class Mission {
     @Column(nullable=false, name = "type_check")
     private Integer typeCheck;
 
-    @Lob
-    @Column(nullable=true, name = "doc_file_data", columnDefinition="bytea")
-    @Type(type="org.hibernate.type.BinaryType")
-    @Basic(fetch = FetchType.LAZY)
-    @JsonIgnore
-    private byte[] docFileData;
-
     @Column(nullable=false, name = "date_approved")
     private Date dateApproved;
 }

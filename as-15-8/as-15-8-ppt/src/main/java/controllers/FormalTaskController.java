@@ -9,29 +9,44 @@ import lombok.extern.slf4j.Slf4j;
 import model.task.ExecutionStatusStatistics;
 import model.task.FormalTask;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.util.UriComponentsBuilder;
 import repositories.FormalTaskRepository;
 import rest.MissionData;
+import services.ClientNotificationService;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 @RestController
 @RequestMapping(path="/formal_tasks", produces=MediaType.APPLICATION_JSON_VALUE)
-@PreAuthorize("hasAnyRole('ROLE_OPERATOR','ROLE_ADMIN')")
+@PreAuthorize("hasAnyRole('ROLE_OPERATOR')")
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Slf4j
 public class FormalTaskController {
 
 	private final FormalTaskRepository formalTaskRepo;
+	private final ClientNotificationService clientNotificationService;
+	private final OAuth2RestTemplate oAuth2RestTemplate;
+
+	@Value("${gateway.url}")
+	private String gatewayUrl;
+
+	private final static String SOIB_URI = "/user/operator";
 
 	@PostMapping(consumes=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseStatus(HttpStatus.CREATED)
@@ -111,7 +126,7 @@ public class FormalTaskController {
 				.orElseThrow(() -> new AS_15_8_PPT_Exception("Error deleting formal task! Formal task was not found by id: " + id));
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
+	@PreAuthorize("hasRole('ROLE_SYSTEM')")
 	@PostMapping(path = "/create_with_mission")
 	public void postFormalTask(@RequestBody MissionData missionData, Principal principal) {
 		log.info("Запрос создания FormalTask по поручению: {}", missionData);
@@ -119,6 +134,13 @@ public class FormalTaskController {
 			throw new AS_15_8_PPT_Exception("Не заданы все требуемые поля: id, name");
 
 		createFormalTaskByMission(missionData, principal.getName());
+		//Сохранение уведомления в БД
+		getOperatorsFromAuthServer().forEach(operator ->
+				clientNotificationService.saveNotification(operator,
+			"Получено новое поручение из ППП РА: " + missionData.getName()
+				)
+		);
+
 	}
 
 	private FormalTask replaceFields(FormalTask newTask, FormalTask storedTask){
@@ -132,11 +154,11 @@ public class FormalTaskController {
 		return storedTask;
 	}
 
-	private FormalTask createFormalTaskByMission(MissionData missionData, String operator){
+	private void createFormalTaskByMission(MissionData missionData, String operator){
 		Long cnt = formalTaskRepo.countByMissionId(missionData.getId());
 		if (cnt > 0) {
 			log.info("FormalTask не создан. Причина: missionId = {} уже существует", missionData.getId());
-			return null;
+			return;
 		}
 
 		FormalTask formalTask = new FormalTask();
@@ -149,7 +171,21 @@ public class FormalTaskController {
 		FormalTask res = formalTaskRepo.save(formalTask);
 
 		log.info("Создан FormalTask: {}", res);
-		return res;
+	}
+
+	private List<String> getOperatorsFromAuthServer(){
+		log.info("Отправка запроса на получение списка операторов сервису аутентификации");
+		try {
+			List<String> operators = new ArrayList<>();
+			String[] queryResult = oAuth2RestTemplate.getForObject(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(SOIB_URI).build().toString(), String[].class);
+			if(queryResult != null){
+				operators = Arrays.asList(queryResult);
+			}
+			log.info("Получено {} операторов", operators.size());
+			return operators;
+		} catch (HttpClientErrorException | HttpServerErrorException ex) {
+			throw AS_15_8_PPT_Exception.logAndGet(log, String.format("Ошибка отправки запроса на получение списка операторов сервису аутентификации, код возврата %s", ex.getStatusCode()));
+		}
 	}
 
 }

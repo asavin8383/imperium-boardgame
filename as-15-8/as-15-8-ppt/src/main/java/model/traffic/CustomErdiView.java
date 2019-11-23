@@ -2,11 +2,12 @@ package model.traffic;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
-import model.sor.Violation;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Subselect;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import java.io.Serializable;
 import java.util.List;
 
@@ -44,10 +45,7 @@ public class CustomErdiView implements Serializable {
     private String name;
 
     @ToString.Include
-    @ManyToOne
-    @JoinColumn(name = "violation_id",
-            referencedColumnName = "id")
-    private Violation violation;
+    private Long violationId;
 
     @ToString.Include
     private String unitType;

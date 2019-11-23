@@ -36,5 +36,8 @@
     <include file="db/changelog/ppt.0009.arrangements_start_end_date.xml"/>
     <include file="db/changelog/ppt.0010.arrangements_completion_date.xml"/>
     <include file="db/changelog/ppt.0011.arrangements_deadline_date.xml"/>
+    <include file="db/changelog/ppt.0012.drop_foreign_key_violation.xml"/>
+    <include file="db/changelog/ppt.0013.violation_to_subtype.xml"/>
+    <include file="db/changelog/ppt.0014.add_client_notifications.xml"/>
 
 </databaseChangeLog>
