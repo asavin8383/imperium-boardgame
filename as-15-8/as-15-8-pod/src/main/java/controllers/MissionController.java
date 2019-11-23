@@ -7,7 +7,6 @@ import controllers.utils.SortingHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.scheme.Mission;
-import model.scheme.MissionAttachment;
 import org.apache.logging.log4j.util.Strings;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.detect.DefaultDetector;
@@ -57,9 +56,9 @@ public class MissionController {
         }
     }
 
-    @GetMapping("{mission}")
-    public Mission getMission(@PathVariable Mission mission){
-        return mission;
+    @GetMapping("{origId}")
+    public Mission getMission(@PathVariable String origId){
+        return missionRepository.findByOrigId(origId);
     }
 
     @GetMapping(path = "/get_image")

@@ -106,7 +106,7 @@ public class MissionService {
             log.info("Добавляем поручение в БД: " + missionEntry.toString());
             mission = missionRepository.save(createMission(missionEntry));
             MissionAttachment missionAttachment = new MissionAttachment();
-            missionAttachment.setMission(missionRepository.getOne(mission.getId()));
+            missionAttachment.setMission(mission);
             log.info("Добавляем вложение поручения в БД: " + missionEntry.toString());
             missionAttachment.setAttachment(missionEntry.getDocFileDataBytes());
             missionAttachmentRepo.save(missionAttachment);
