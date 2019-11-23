@@ -3,6 +3,7 @@ package robots;
 import common.ExecutorProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.Proxy;
 import org.openqa.selenium.WebDriver;
@@ -12,6 +13,7 @@ import org.openqa.selenium.logging.LoggingPreferences;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import robots.utils.ScriptUtils;
 
 import java.net.URL;
 import java.util.Collections;
@@ -77,7 +79,9 @@ public class DriverFactory {
 		}
 
 		cpb.setCapability(ChromeOptions.CAPABILITY, options);
-		return new RemoteWebDriver(hubURL, cpb);
+		WebDriver driver = new RemoteWebDriver(hubURL, cpb);
+		ScriptUtils.openScreenshotExtension(driver);
+		return driver;
 	}
 
 	/**
@@ -97,7 +101,9 @@ public class DriverFactory {
 		setOptimalChromeOptions(options);
 		setLoadExtensions(options, extensions);
 		cpb.setCapability(ChromeOptions.CAPABILITY, options);
-		return new RemoteWebDriver(hubURL, cpb);
+		WebDriver driver = new RemoteWebDriver(hubURL, cpb);
+		ScriptUtils.openScreenshotExtension(driver);
+		return driver;
     }
 
     private static void setOptimalChromeOptions(ChromeOptions options){
