@@ -21,7 +21,7 @@ public class MissionAttachment implements Serializable {
     @Id
     private Long id;
 
-    @OneToOne(optional = false, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToOne(optional = false)
     @MapsId
     private Mission mission;
 
