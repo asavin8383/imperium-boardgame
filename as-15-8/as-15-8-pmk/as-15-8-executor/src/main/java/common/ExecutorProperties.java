@@ -28,12 +28,14 @@ public class ExecutorProperties {
 
     private ChromeProperties chrome;
 
+    private ScreenshotProperties screenshot;
+
 
     private static EtalonProperties etalonExtProperties;
 
     private static ChromeProperties chromeProperties;
 
-    private static Long screenShotWaitTimeoutExt;
+    private static ScreenshotProperties screenshotProperties;
 
     private static URL seleniumHubUrlExt;
 
@@ -45,6 +47,7 @@ public class ExecutorProperties {
         etalonExtProperties = etalon;
         seleniumHubUrlExt = new URL(seleniumHubUrl);
         chromeProperties = chrome;
+        screenshotProperties = screenshot;
 
         this.props = new AccessToolUnits();
         robots.forEach((accessToolUnitString, accessToolUnitPropsMap) ->{
@@ -84,6 +87,8 @@ public class ExecutorProperties {
     public static URL getSeleniumHubUrl(){
         return seleniumHubUrlExt;
     }
+
+    public static ScreenshotProperties getScreenshotProperties() { return screenshotProperties; }
 
     @Data
     public static class AccessToolUnits{
@@ -129,5 +134,12 @@ public class ExecutorProperties {
         private String userDataDir;
         private String extensionsDir;
         private String profileName;
+    }
+
+    @Data
+    public static class ScreenshotProperties{
+        private String extId;
+        private String extVersion;
+        private String extPopup;
     }
 }

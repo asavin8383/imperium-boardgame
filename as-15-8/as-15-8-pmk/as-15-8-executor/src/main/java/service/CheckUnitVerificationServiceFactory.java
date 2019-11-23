@@ -26,9 +26,8 @@ public class CheckUnitVerificationServiceFactory {
     public CheckUnitVerificationService getService(CheckUnitJob checkUnitJob){
         List<CheckUnitVerificationService> services = verificationServices.getIfAvailable();
         AccessToolUnit accessToolUnit = executorProperties.getAccessToolUnit(checkUnitJob.getAccessTool())
-                .orElseThrow(() -> {
-                    throw new RuntimeException("Ошибка получения сервиса для выполнения проверки. ПС/ПАСД не определен в системе: " + checkUnitJob.getAccessTool());
-                });
+                .orElseThrow(() ->
+                        new RuntimeException("Ошибка получения сервиса для выполнения проверки. ПС/ПАСД не определен в системе: " + checkUnitJob.getAccessTool()));
         for(CheckUnitVerificationService service : services){
             if(service.getCheckUnitTypes().contains(checkUnitJob.getCheckUnit().getType()) &&
                 service.getAccessToolUnits().contains(accessToolUnit))

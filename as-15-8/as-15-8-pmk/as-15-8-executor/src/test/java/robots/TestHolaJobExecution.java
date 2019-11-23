@@ -40,7 +40,7 @@ public class TestHolaJobExecution {
 		checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.URL, "myip.ru"));
 
 		ExecutionJobResult executionJobResult = checkUnitVerificationServiceFactory
-				.getService(checkUnitJob.getCheckUnit().getType())
+				.getService(checkUnitJob)
 				.run(checkUnitJob);
 
 		ByteArrayInputStream bis = new ByteArrayInputStream(executionJobResult.getScreenshot());
