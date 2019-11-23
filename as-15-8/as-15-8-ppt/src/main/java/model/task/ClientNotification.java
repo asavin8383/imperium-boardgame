@@ -1,6 +1,7 @@
 package model.task;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(schema = "portal", name = "client_notifications")
 @Data
+@NoArgsConstructor
 public class ClientNotification implements Serializable {
 
     private static final long serialVersionUID = 1L;
