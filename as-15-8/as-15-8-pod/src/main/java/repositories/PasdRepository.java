@@ -1,6 +1,6 @@
 package repositories;
 
-import model.enums.Dictionary;
+import enums.Dictionary;
 import model.scheme.PasdRecord;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

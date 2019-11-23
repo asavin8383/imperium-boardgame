@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import model.Views;
-import model.sor.Violation;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -38,11 +37,10 @@ public class SearchPhrase implements Serializable {
     private String phrase;
 
     @NotNull
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "violation_id")
+    @Column(nullable = false)
     @JsonView(Views.Brief.class)
     @ToString.Include
-    private Violation violation;
+    private String subtypeId;
 
     @ManyToMany(mappedBy = "searchPhrases")
     @JsonIgnore

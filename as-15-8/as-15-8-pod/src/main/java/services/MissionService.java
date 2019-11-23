@@ -11,10 +11,10 @@ import model.response.MissionEntry;
 import model.response.RestResponseMissions;
 import model.response.RestResponseStatusString;
 import model.scheme.Mission;
+import model.scheme.MissionAttachment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.lob.DefaultLobHandler;
 import org.springframework.jdbc.support.lob.LobHandler;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
@@ -23,6 +23,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
+import repositories.MissionAttachmentRepo;
 import repositories.MissionRepository;
 import rest.MissionData;
 
@@ -44,7 +45,7 @@ public class MissionService {
     private final OAuth2RestTemplate oAuth2RestTemplate;
     private final RestTemplate anonymizerRestTemplate;
     private final MissionRepository missionRepository;
-    private final JdbcTemplate jdbcTemplate;
+    private final MissionAttachmentRepo missionAttachmentRepo;
 
     private boolean stateLoading = false;
 
@@ -104,6 +105,12 @@ public class MissionService {
         else {
             log.info("Добавляем поручение в БД: " + missionEntry.toString());
             mission = missionRepository.save(createMission(missionEntry));
+            MissionAttachment missionAttachment = new MissionAttachment();
+            missionAttachment.setMission(mission);
+            log.info("Добавляем вложение поручения в БД: " + missionEntry.toString());
+            missionAttachment.setAttachment(missionEntry.getDocFileDataBytes());
+            missionAttachmentRepo.save(missionAttachment);
+            log.info("Поручение вместе с вложением успешно сохранены в БД: " + missionEntry.toString());
         }
 
         sendMissionDataToPPT(mission);
@@ -115,7 +122,7 @@ public class MissionService {
 
     private void sendMissionDataToPPT(Mission mission){
         MissionData missionData = new MissionData(mission.getId(), "Поручение " + mission.getDocNum());
-        log.info("Отправка поручения в PPT: {}" + missionData);
+        log.info("Отправка поручения в PPT: " + missionData);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -126,9 +133,7 @@ public class MissionService {
     }
 
     public byte[] receiveMissionDocumentFromDB(long id){
-        String sql = "select doc_file_data from sor.mission where id = ?";
-
-        return jdbcTemplate.queryForObject(sql, new Object[]{id}, this::mapPdf);
+        return missionAttachmentRepo.getOne(id).getAttachment();
     }
 
     private byte[] mapPdf(ResultSet rs, int rowNum) throws SQLException {
@@ -142,7 +147,6 @@ public class MissionService {
         mission.setDocNum(missionEntry.docNum);
         mission.setTypeCheck(missionEntry.typeCheck);
         mission.setDateApproved(missionEntry.getDateApprovedDate());
-        mission.setDocFileData(missionEntry.getDocFileDataBytes());
         return mission;
     }
 
@@ -169,8 +173,7 @@ public class MissionService {
             ObjectMapper mapper = new ObjectMapper();
             mapper.enable(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT);
             RestResponseMissions responseMissions = mapper.readValue(data, RestResponseMissions.class);
-            List<MissionEntry> list = responseMissions.getMissionList();
-            return list;
+            return responseMissions.getMissionList();
         }
         else {
             log.info("Статус ответа: " + restResponseStatusString.response);

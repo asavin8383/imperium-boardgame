@@ -1,6 +1,6 @@
 package repositories.helper;
 
-import model.enums.Dictionary;
+import enums.Dictionary;
 
 import java.util.Date;
 

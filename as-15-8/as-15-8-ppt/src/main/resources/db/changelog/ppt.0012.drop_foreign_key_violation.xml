@@ -1,0 +1,12 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+    <changeSet author="san (generated)" id="1574325288551-23">
+        <dropForeignKeyConstraint baseTableName="custom_erdi" baseTableSchemaName="portal" constraintName="FK2qhb9dvo2q55ucu95mh1lnxtg"/>
+    </changeSet>
+    <changeSet author="san (generated)" id="1574325288551-24">
+        <dropForeignKeyConstraint baseTableName="search_phrases" baseTableSchemaName="portal" constraintName="FKfl94kp65kkwfjtlsjh3hrqr7u"/>
+    </changeSet>
+    <changeSet author="san (generated)" id="1574325288551-12">
+        <addNotNullConstraint columnDataType="bigint" columnName="traffic_unit_id" schemaName="portal" tableName="erdi_traffic_units_content"/>
+    </changeSet>
+</databaseChangeLog>

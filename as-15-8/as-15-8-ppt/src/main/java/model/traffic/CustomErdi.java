@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import model.Views;
-import model.sor.Violation;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -37,10 +36,8 @@ public class CustomErdi implements Serializable {
     @ToString.Include
     private String name;
 
-    @ManyToOne(cascade = {CascadeType.REFRESH, CascadeType.MERGE})
-    @JoinColumn(name = "violation_id")
     @JsonView(Views.Brief.class)
-    private Violation violation;
+    private String subtypeId;
 
     @OneToMany(mappedBy = "customErdi", orphanRemoval = true, cascade = CascadeType.ALL)
     @JsonView(Views.Full.class)

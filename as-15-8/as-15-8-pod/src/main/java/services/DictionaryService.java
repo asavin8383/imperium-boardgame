@@ -2,7 +2,7 @@ package services;
 
 import exceptions.AS_15_8_POD_Exception;
 import lombok.extern.slf4j.Slf4j;
-import model.enums.Dictionary;
+import enums.Dictionary;
 import model.projection.DictionaryView;
 import model.response.PASDEntry;
 import model.response.PSEntry;

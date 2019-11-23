@@ -3,6 +3,7 @@ package controllers;
 import controllers.enums.UploadingState;
 import controllers.utils.SortingDirection;
 import controllers.utils.SortingHelper;
+import exceptions.AS_15_8_POD_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.scheme.Subtype;
@@ -21,6 +22,7 @@ import repositories.SubtypeRepository;
 import restapi.SubTypeRestClient;
 import utils.Utils;
 
+import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
 
 @RestController
@@ -47,6 +49,13 @@ public class SubtypeController {
         } else {
             return new ResponseEntity<>(null, HttpStatus.ACCEPTED);
         }
+    }
+
+    @GetMapping("/single")
+    public Subtype getSubtype(@RequestParam String origId){
+        return subtypeRepository
+                .findByOrigIdAndEffDt(origId, Utils.getEndDate())
+                .orElseThrow(() -> AS_15_8_POD_Exception.logAndGet(log, "Нарушение с оригинальным ИД " + origId + " не найдено в БД ПОД"));
     }
 
     @GetMapping(path = "/upload")

@@ -1,6 +1,8 @@
 package controllers;
 
+import lombok.RequiredArgsConstructor;
 import model.task.ArrangementView;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,14 +18,11 @@ import java.util.List;
  */
 @RestController
 @RequestMapping(path = "/arrangement_views", produces = MediaType.APPLICATION_JSON_VALUE)
-@PreAuthorize("hasAnyRole('ROLE_OPERATOR', 'ROLE_ADMIN')")
+@PreAuthorize("hasRole('ROLE_OPERATOR')")
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class ArrangementViewController {
 
-    private ArrangementViewRepo arrangementViewRepo;
-
-    public ArrangementViewController(ArrangementViewRepo arrangementViewRepo) {
-        this.arrangementViewRepo = arrangementViewRepo;
-    }
+    private final ArrangementViewRepo arrangementViewRepo;
 
     @GetMapping
     public List<ArrangementView> findList(@RequestParam boolean viewed, Principal principal){

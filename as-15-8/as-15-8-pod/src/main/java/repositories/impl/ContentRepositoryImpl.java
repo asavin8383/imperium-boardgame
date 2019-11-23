@@ -1,7 +1,7 @@
 package repositories.impl;
 
 import lombok.RequiredArgsConstructor;
-import model.enums.Dictionary;
+import enums.Dictionary;
 import model.scheme.ContentHistory;
 import model.scheme.ContentHistory_;
 import model.scheme.ContentInfo;

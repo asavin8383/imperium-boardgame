@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import model.Views;
+import model.task.Arrangement;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -40,6 +41,11 @@ public class Traffic implements Serializable {
             cascade = CascadeType.ALL)
     @JsonIgnore
     private List<ErdiTrafficUnit> erdiTrafficUnits;
+
+    @OneToMany(mappedBy = "traffic", orphanRemoval = true,
+            cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<Arrangement> arrangements;
 
     @OneToMany(mappedBy = "traffic", orphanRemoval = true,
             cascade = CascadeType.ALL)

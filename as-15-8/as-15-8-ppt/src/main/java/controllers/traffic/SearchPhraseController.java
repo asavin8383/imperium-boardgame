@@ -74,7 +74,7 @@ public class SearchPhraseController {
 
     private SearchPhrase merge(SearchPhrase newPhrase, SearchPhrase oldPhrase) {
         oldPhrase.setPhrase(newPhrase.getPhrase());
-        oldPhrase.setViolation(newPhrase.getViolation());
+        oldPhrase.setSubtypeId(newPhrase.getSubtypeId());
         return oldPhrase;
     }
 

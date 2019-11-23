@@ -1,11 +1,13 @@
-package model.enums;
+package enums;
 
 public enum Dictionary {
 
     ERDI("ЕРДИ", "Записи ЕРДИ"),
     PS("ПС", "Поисковые системы"),
     PASD("ПАСД", "Программно-аппаратные средства доступа"),
-    SUBTYPE("Типы нарушений", "Типы нарушений");
+    SUBTYPE("Типы нарушений", "Типы нарушений"),
+    USER_ERDI("Пользовательские ЕРДИ", "Пользовательские записи ЕРДИ"),
+    SEARCH_PHRASES("Поисковые фразы", "Поисковые фразы");
 
     private String shortName;
     private String fullName;

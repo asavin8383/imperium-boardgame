@@ -23,5 +23,7 @@
     <include file="data/changelog/pod.0004.irtz_types_resourse_types.xml"/>
     <include file="data/changelog/pod.0005.mat_view_check_units.xml"/>
     <include file="data/changelog/pod.0006.domain_mask_items.xml"/>
+    <include file="data/changelog/pod.0007.mission_attachments.xml"/>
+    <include file="data/changelog/pod.0008.mission_attachments_FK.xml"/>
 
 </databaseChangeLog>
