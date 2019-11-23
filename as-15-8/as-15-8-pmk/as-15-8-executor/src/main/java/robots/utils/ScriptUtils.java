@@ -12,9 +12,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.openqa.selenium.*;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.interactions.Action;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.support.WebExchangeBindException;
+import robots.ChromeSettings;
 
 import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
@@ -88,7 +92,7 @@ public class ScriptUtils {
         return new PageResult(pageContent, errorCode);
     }
 
-    public static byte[] getScreenshot(WebDriver driver)  {
+    /*public static byte[] getScreenshot(WebDriver driver)  {
         try {
             String currentTab = driver.getWindowHandle();
             ArrayList<String> tabs = new ArrayList<>(driver.getWindowHandles());
@@ -102,6 +106,35 @@ public class ScriptUtils {
                 return Base64.getDecoder().decode(scriptAnswer);
             }
         } catch(Exception ex){
+            throw new RuntimeException("Ошибка получения скриншота", ex);
+        }
+    }*/
+
+    public static byte[] getScreenshot(WebDriver webDriver)  {
+        try{
+            ((JavascriptExecutor)webDriver).executeScript("window.open()");
+
+            int tabIndex = webDriver.getWindowHandles().size() - 1;
+            switchToTab(webDriver, tabIndex);
+            webDriver.get(ChromeSettings.getScreenshotExtension().getPopupUrl());
+            WebDriverWait wait = new WebDriverWait(webDriver, WAIT_TIMEOUT);
+            wait.until(ExpectedConditions.presenceOfElementLocated(
+                    By.id("screen"))).click();
+
+            ScriptUtils.waitForTab(webDriver, tabIndex);
+            switchToTab(webDriver, tabIndex);
+
+            String base64Image = wait
+                    .until(ExpectedConditions.presenceOfElementLocated(
+                            By.xpath("//img")))
+                    .getAttribute("src").split(",")[1];
+
+            // close screenshot tab
+            webDriver.close();
+            switchToTab(webDriver, tabIndex -1);
+
+            return Base64.getDecoder().decode(base64Image);
+        }catch(Exception ex){
             throw new RuntimeException("Ошибка получения скриншота", ex);
         }
     }

@@ -11,8 +11,11 @@ public class ChromeSettings {
 
     private static ExecutorProperties.ChromeProperties chromeProperties;
 
+    private static ExecutorProperties.ScreenshotProperties screenshotProperties;
+
     static {
         chromeProperties = ExecutorProperties.getChromeProperties();
+        screenshotProperties = ExecutorProperties.getScreenshotProperties();
     }
 
     public class Extension {
@@ -55,4 +58,11 @@ public class ChromeSettings {
                 .append(ext.version).toString();
     }
 
+    public static Extension getScreenshotExtension(){
+        return new Extension(
+                screenshotProperties.getExtId(),
+                screenshotProperties.getExtVersion(),
+                screenshotProperties.getExtPopup()
+        );
+    }
 }

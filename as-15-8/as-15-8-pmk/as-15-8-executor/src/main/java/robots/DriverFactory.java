@@ -14,6 +14,7 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.net.URL;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -65,6 +66,7 @@ public class DriverFactory {
 		}
 
 		ChromeOptions options = new ChromeOptions();
+		setLoadExtensions(options, Collections.singletonList(ChromeSettings.getScreenshotExtension()));
 		setOptimalChromeOptions(options);
 
 		if (enableLog){
@@ -101,13 +103,13 @@ public class DriverFactory {
     private static void setOptimalChromeOptions(ChromeOptions options){
 		options.addArguments("--start-maximized");
 		options.addArguments("--ignore-certificate-errors");
-		options.addArguments("--disable-popup-blocking");
+		//options.addArguments("--disable-popup-blocking");
 		//options.addArguments("--headless");
 		//options.addArguments("--window-size=1920,1080");
 		//options.addArguments("--no-sandbox");				// избавляет от некоторых проблем с таймаутом, рендерингом, но не безопасно!
 		options.addArguments("--dns-prefetch-disable");		// отключение предварительной выборки DNS. в теории должно ускорить работу
-		options.addArguments("--disable-gpu");				// говорят частично решает проблему с рендерингом (скриншотом)
-		options.addArguments("--disable-features=VizDisplayCompositor");	// у кого-то в 73 версии устранило проблему: Timed out receiving message from renderer: 10.000
+		//options.addArguments("--disable-gpu");				// говорят частично решает проблему с рендерингом (скриншотом)
+		//options.addArguments("--disable-features=VizDisplayCompositor");	// у кого-то в 73 версии устранило проблему: Timed out receiving message from renderer: 10.000
 		//options.setPageLoadStrategy(PageLoadStrategy.NORMAL);
 		LoggingPreferences logPrefs = new LoggingPreferences();
 		logPrefs.enable( LogType.PERFORMANCE, Level.ALL );
@@ -116,6 +118,11 @@ public class DriverFactory {
 		options.addArguments("--user-data-dir=" + ExecutorProperties.getChromeProperties().getUserDataDir());
 		options.addArguments("--profile-directory=" + ExecutorProperties.getChromeProperties().getProfileName());
 		options.addArguments("--auto-select-desktop-capture-source=Entire screen");
+
+		//Для отображения полного URL
+		options.addArguments("--enable-experimental-web-platform-features");
+		options.addArguments("--enable-features=TemporaryUnexpireFlagsM76");
+		options.addArguments("--disable-features=OmniboxUIExperimentHideSteadyStateUrlScheme,OmniboxUIExperimentHideSteadyStateUrlTrivialSubdomains");
 	}
 
 	/**

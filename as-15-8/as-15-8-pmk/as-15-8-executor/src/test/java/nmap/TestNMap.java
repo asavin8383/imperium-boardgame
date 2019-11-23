@@ -33,7 +33,7 @@ public class TestNMap {
 
         try {
             ExecutionJobResult executionJobResult = checkUnitVerificationServiceFactory
-                    .getService(checkUnitJob.getCheckUnit().getType())
+                    .getService(checkUnitJob)
                     .run(checkUnitJob);
 
             ObjectMapper mapper = new ObjectMapper();

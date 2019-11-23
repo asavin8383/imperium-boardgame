@@ -1,5 +1,20 @@
+let screenshot;
+
+chrome.contextMenus.create({
+    title: "AS-15-8-Screenshot",
+    contexts:["page", "selection", "image", "link"],
+    onclick: openExt
+});
+
+function openExt(info, tab){
+    chrome.tabs.create({
+        url: '/popup.html',
+        active: true
+    });
+}
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.type === 'DESKTOP_SCREENSHOT') {
+    if (request.type === 'takeScreenshot') {
         try {
             const displayMediaOptions = {
                 video: {
@@ -19,7 +34,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                                 canvas.height = bitmap.height;
                                 let context = canvas.getContext('2d');
                                 context.drawImage(bitmap, 0, 0);
-                                sendResponse(canvas.toDataURL('image/png;base64,').replace('data:image/png;base64,', ''));
+                                screenshot = canvas.toDataURL('image/png;base64,');
+                                chrome.tabs.create({
+                                    url: '/screenshot.html',
+                                    active: true
+                                });
+                                sendResponse();
                             }).catch(ex => {
                                 sendResponse("Error: " + ex.toString())
                             });
@@ -30,6 +50,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         } catch(ex) {
             sendResponse("Error: " + ex.toString());
         };
+    }
+    if (request.type === 'getScreenshot') {
+        sendResponse({screenshot: screenshot});
     }
     return true;
 });
