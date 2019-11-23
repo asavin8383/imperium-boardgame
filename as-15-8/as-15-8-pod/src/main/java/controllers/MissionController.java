@@ -56,9 +56,9 @@ public class MissionController {
         }
     }
 
-    @GetMapping("{origId}")
-    public Mission getMission(@PathVariable String origId){
-        return missionRepository.findByOrigId(origId);
+    @GetMapping("{mission}")
+    public Mission getMission(@PathVariable Mission mission){
+        return mission;
     }
 
     @GetMapping(path = "/get_image")
