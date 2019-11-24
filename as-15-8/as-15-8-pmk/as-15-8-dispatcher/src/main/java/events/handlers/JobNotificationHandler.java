@@ -16,7 +16,7 @@ import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Service;
 import restapi.ArrangementStatusProducer;
-import services.ArrangementResultService;
+import services.ResultService;
 
 /**
  * Created by san
@@ -29,7 +29,7 @@ import services.ArrangementResultService;
 @RequiredArgsConstructor(onConstructor_={@Autowired})
 public class JobNotificationHandler {
 
-    private final ArrangementResultService arrangementResultService;
+    private final ResultService resultService;
     private final ArrangementStatusProducer arrangementStatusProducer;
 
     @StreamListener(DispatcherChannels.INPUT_JOB_NOTIFICATIONS)
@@ -39,12 +39,12 @@ public class JobNotificationHandler {
                 ", partition: "+message.getHeaders().get(KafkaHeaders.RECEIVED_PARTITION_ID, Integer.class) +
                 ", offset: "+message.getHeaders().get(KafkaHeaders.OFFSET, Long.class));
         try {
-            Result job = arrangementResultService.updateJobStatus(notification.getJobID(), notification.getCheckUnitStatus(), notification.getDescription());
+            Result job = resultService.updateJobStatus(notification.getJobID(), notification.getCheckUnitStatus(), notification.getDescription());
             if(notification.getCheckUnitStatus() == CheckUnitJobResult.CAPTCHA_DETECTED) {
                 ArrangementStatusNotification arrNotification = new ArrangementStatusNotification(job.getArrangementId(), ArrangementEvents.PAUSE);
                 arrangementStatusProducer.sendArrangementStatusMessage(arrNotification);
             } else {
-                ExecutionStatus status = arrangementResultService.checkArrangementStatus(job.getArrangementId());
+                ExecutionStatus status = resultService.checkArrangementStatus(job.getArrangementId());
                 if(status == ExecutionStatus.FINISHED) {
                     log.info("Мероприятие успешно завешено: " + job.getArrangementId());
                     arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(job.getArrangementId(), ArrangementEvents.FINISH));

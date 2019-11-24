@@ -33,7 +33,8 @@ public class GatewaySecurityConfiguration extends ResourceServerConfigurerAdapte
                             "/dispatcher/act/checkResult/**",
                             "/dispatcher/act/screenshots/**",
                             "/dispatcher/results/screenshot/**",
-                            "/dispatcher/results/etalon_screenshot/**").permitAll()
+                            "/dispatcher/results/etalon_screenshot/**",
+                            "/dispatcher/results/nmap_log/**").permitAll()
                     .antMatchers(HttpMethod.POST,
                             "/pod/act/**").permitAll()
                     .antMatchers("/**")

@@ -10,16 +10,16 @@ import java.io.Serializable;
  */
 
 @Entity
-@Table(schema = "results", name = "detail_results")
+@Table(schema = "results", name = "pasd_detail_results")
 @Data
-public class DetailResult implements Serializable  {
+public class PasdDetailResult implements Serializable  {
 
     private static final long serialVersionUID = 1L;
 
     @Id
     private Long id;
 
-    @OneToOne(optional = false)
+    @OneToOne(optional = false, fetch = FetchType.LAZY)
     @MapsId
     private Result result;
 

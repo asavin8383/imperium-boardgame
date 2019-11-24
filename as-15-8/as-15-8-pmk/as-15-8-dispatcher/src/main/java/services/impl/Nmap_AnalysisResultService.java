@@ -2,11 +2,14 @@ package services.impl;
 
 import analysis.NMapAnalysisJobResult;
 import lombok.RequiredArgsConstructor;
-import model.DetailResult;
+import model.NmapDetailResult;
+import model.PasdDetailResult;
 import model.Result;
+import model.enums.CheckType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import repositories.DetailResultRepo;
+import repositories.NmapDetailResultRepo;
+import repositories.PasdDetailResultRepo;
 import services.AnalysisResultService;
 
 /**
@@ -19,16 +22,18 @@ import services.AnalysisResultService;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class Nmap_AnalysisResultService implements AnalysisResultService<NMapAnalysisJobResult> {
 
-	private final DetailResultRepo detailResultRepo;
+	private final NmapDetailResultRepo nmapDetailResultRepo;
 
 	@Override
-	public void processResult(Result result, NMapAnalysisJobResult analysisResult) {
-		DetailResult detailResult = new DetailResult();
+	public CheckType getCheckType() {
+		return CheckType.NMAP;
+	}
 
-		detailResult.setResult(result);
-
-		detailResult.setStubScoreInfo(analysisResult.getNmapLog());
-
-		detailResultRepo.save(detailResult);
+	@Override
+	public void saveResult(Result result, NMapAnalysisJobResult analysisResult) {
+		NmapDetailResult nmapDetailResult = new NmapDetailResult();
+		nmapDetailResult.setResult(result);
+		nmapDetailResult.setLog(analysisResult.getNmapLog());
+		nmapDetailResultRepo.save(nmapDetailResult);
 	}
 }

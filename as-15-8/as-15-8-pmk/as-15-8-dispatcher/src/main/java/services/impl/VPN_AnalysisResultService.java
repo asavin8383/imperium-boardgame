@@ -3,12 +3,12 @@ package services.impl;
 import analysis.VpnAnalysisResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import model.DetailResult;
+import model.PasdDetailResult;
 import model.Result;
+import model.enums.CheckType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import repositories.DetailResultRepo;
-import repositories.ResultRepo;
+import repositories.PasdDetailResultRepo;
 import services.AnalysisResultService;
 
 
@@ -17,38 +17,43 @@ import services.AnalysisResultService;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class VPN_AnalysisResultService implements AnalysisResultService<VpnAnalysisResult> {
 
-	private final DetailResultRepo detailResultRepo;
+	private final PasdDetailResultRepo pasdDetailResultRepo;
 
 	@Override
-	public void processResult(Result result, VpnAnalysisResult analysisResult) {
+	public CheckType getCheckType() {
+		return CheckType.PASD;
+	}
 
-		DetailResult detailResult = new DetailResult();
+	@Override
+	public void saveResult(Result result, VpnAnalysisResult analysisResult) {
 
-		detailResult.setResult(result);
+		PasdDetailResult pasdDetailResult = new PasdDetailResult();
 
-		detailResult.setHttpStatus(analysisResult.getHttpStatus());
-		detailResult.setHttpStatusEtalon(analysisResult.getHttpStatusEtalon());
-		detailResult.setHttpHeaders(analysisResult.getHttpHeaders());
-		detailResult.setHttpHeadersEtalon(analysisResult.getHttpHeadersEtalon());
-		detailResult.setResponseErrorCode(analysisResult.getResponseErrorCode());
-		detailResult.setResponseErrorCodeEtalon(analysisResult.getResponseErrorCodeEtalon());
-		detailResult.setResponseError(analysisResult.getResponseError());
-		detailResult.setUseEtalon(analysisResult.getUseEtalon());
-		detailResult.setPageSize(analysisResult.getPageSize());
-		detailResult.setPageSizeEtalon(analysisResult.getPageSizeEtalon());
-		detailResult.setKeyWordsCount(analysisResult.getKeyWordsCount());
-		detailResult.setLinkCount(analysisResult.getLinkCount());
-		detailResult.setDomainNameCount(analysisResult.getDomainNameCount());
-		detailResult.setPageUrlFinal(analysisResult.getPageUrlFinal());
-		detailResult.setPageUrlFinalEtalon(analysisResult.getPageUrlFinalEtalon());
-		detailResult.setStubUrl(analysisResult.getStubUrl());
-		detailResult.setSimilarityOriginPercent(analysisResult.getSimilarityOriginPercent());
-		detailResult.setStubScoreInfo(analysisResult.getStubScoreInfo());
-		detailResult.setRedirectionDetected(analysisResult.getRedirectionDetected());
-		detailResult.setResultNLP(analysisResult.getResultNLP());
-		detailResult.setForbiddenFinalUrl(analysisResult.getForbiddenFinalUrl());
+		pasdDetailResult.setResult(result);
 
-		detailResultRepo.save(detailResult);
+		pasdDetailResult.setHttpStatus(analysisResult.getHttpStatus());
+		pasdDetailResult.setHttpStatusEtalon(analysisResult.getHttpStatusEtalon());
+		pasdDetailResult.setHttpHeaders(analysisResult.getHttpHeaders());
+		pasdDetailResult.setHttpHeadersEtalon(analysisResult.getHttpHeadersEtalon());
+		pasdDetailResult.setResponseErrorCode(analysisResult.getResponseErrorCode());
+		pasdDetailResult.setResponseErrorCodeEtalon(analysisResult.getResponseErrorCodeEtalon());
+		pasdDetailResult.setResponseError(analysisResult.getResponseError());
+		pasdDetailResult.setUseEtalon(analysisResult.getUseEtalon());
+		pasdDetailResult.setPageSize(analysisResult.getPageSize());
+		pasdDetailResult.setPageSizeEtalon(analysisResult.getPageSizeEtalon());
+		pasdDetailResult.setKeyWordsCount(analysisResult.getKeyWordsCount());
+		pasdDetailResult.setLinkCount(analysisResult.getLinkCount());
+		pasdDetailResult.setDomainNameCount(analysisResult.getDomainNameCount());
+		pasdDetailResult.setPageUrlFinal(analysisResult.getPageUrlFinal());
+		pasdDetailResult.setPageUrlFinalEtalon(analysisResult.getPageUrlFinalEtalon());
+		pasdDetailResult.setStubUrl(analysisResult.getStubUrl());
+		pasdDetailResult.setSimilarityOriginPercent(analysisResult.getSimilarityOriginPercent());
+		pasdDetailResult.setStubScoreInfo(analysisResult.getStubScoreInfo());
+		pasdDetailResult.setRedirectionDetected(analysisResult.getRedirectionDetected());
+		pasdDetailResult.setResultNLP(analysisResult.getResultNLP());
+		pasdDetailResult.setForbiddenFinalUrl(analysisResult.getForbiddenFinalUrl());
+
+		pasdDetailResultRepo.save(pasdDetailResult);
 
 	}
 }

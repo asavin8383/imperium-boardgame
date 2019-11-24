@@ -1,10 +1,10 @@
 package repositories;
 
-import model.DetailResult;
+import model.PasdDetailResult;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 
 @Repository
-public interface DetailResultRepo extends JpaRepository<DetailResult, Long> {
+public interface PasdDetailResultRepo extends JpaRepository<PasdDetailResult, Long> {
 }

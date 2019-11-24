@@ -6,8 +6,7 @@ import enums.SortingDirection;
 import exceptions.AS_15_8_DispatcherException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import model.DetailResult;
-import model.Result;
+import model.*;
 import model.enums.UserResult;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,9 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import repositories.DetailResultRepo;
-import repositories.ResultRepo;
-import repositories.ResultScreenShotRepo;
+import repositories.*;
 
 import java.util.List;
 import java.util.Map;
@@ -38,8 +35,11 @@ import java.util.Map;
 public class ResultsController {
 
     private final ResultRepo resultRepo;
-    private final DetailResultRepo detailResultRepo;
     private final ResultScreenShotRepo resultScreenShotRepo;
+    private final PasdDetailResultRepo pasdDetailResultRepo;
+    private final PsDetailResultRepo psDetailResultRepo;
+    private final NmapDetailResultRepo nmapDetailResultRepo;
+    private final ErrorDetailResultRepo errorDetailResultRepo;
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     @GetMapping
@@ -65,19 +65,56 @@ public class ResultsController {
     @GetMapping(path = "/screenshot", produces = MediaType.IMAGE_PNG_VALUE)
     public @ResponseBody
     ResponseEntity<byte[]> getScreenshot(@RequestParam Long id){
-        return new ResponseEntity<>(resultScreenShotRepo.getOne(id).getScreenshot(), HttpStatus.OK);
+        return resultScreenShotRepo.findById(id)
+                .map(resultScreenShot -> ResponseEntity.ok(resultScreenShot.getScreenshot()))
+                .orElse(ResponseEntity.noContent().build());
     }
 
     @GetMapping(path = "/etalon_screenshot", produces = MediaType.IMAGE_PNG_VALUE)
     public @ResponseBody
     ResponseEntity<byte[]> getEtalonScreenshot(@RequestParam Long id){
-        return new ResponseEntity<>(resultScreenShotRepo.getOne(id).getEtalonScreenshot(), HttpStatus.OK);
+        return resultScreenShotRepo.findById(id)
+                .map(resultScreenShot -> ResponseEntity.ok(resultScreenShot.getEtalonScreenshot()))
+                .orElse(ResponseEntity.noContent().build());
+    }
+
+    @GetMapping(path = "/nmap_log", produces = MediaType.TEXT_PLAIN_VALUE)
+    public @ResponseBody ResponseEntity<String> getNmapLog(@RequestParam Long id){
+        return nmapDetailResultRepo.findById(id)
+                .map(nmapDetailResult -> ResponseEntity.ok(nmapDetailResult.getLog()))
+                .orElse(ResponseEntity.noContent().build());
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     @GetMapping(path = "/details")
-    public DetailResult getDetails(@RequestParam Long id){
-        return detailResultRepo.getOne(id);
+    public ResponseEntity<PasdDetailResult> getPasdDetails(@RequestParam Long id){
+        return pasdDetailResultRepo.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.noContent().build());
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @GetMapping(path = "/details/ps")
+    public ResponseEntity<PsDetailResult> getPsDetails(@RequestParam Long id) {
+        return psDetailResultRepo.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.noContent().build());
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @GetMapping(path = "/details/nmap")
+    public ResponseEntity<NmapDetailResult> getNmapDetails(@RequestParam Long id) {
+        return nmapDetailResultRepo.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.noContent().build());
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @GetMapping(path = "/details/error")
+    public ResponseEntity<ErrorDetailResult> getErrorDetails(@RequestParam Long id) {
+        return errorDetailResultRepo.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.noContent().build());
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")

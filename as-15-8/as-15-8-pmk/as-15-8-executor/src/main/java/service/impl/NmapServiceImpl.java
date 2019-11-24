@@ -23,7 +23,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.kafka.listener.AbstractMessageListenerContainer;
 import org.springframework.stereotype.Service;
 import proxychains.ProxychainsConfigurator;
-import rest.ArrangementActData;
 import robots.exceptions.ExecutionException;
 import service.CheckUnitVerificationService;
 
@@ -57,11 +56,7 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
     @Override
     public ExecutionJobResult run(CheckUnitJob checkUnitJob) throws ExecutionException {
         try {
-
-            if(!executorProperties.getAccessToolUnit(checkUnitJob.getAccessTool()).equals(AccessToolUnit.VPN) &&
-                    !executorProperties.getAccessToolUnit(checkUnitJob.getAccessTool()).equals(AccessToolUnit.PROXY))
-                throw new ExecutionException("Ошибка! ПС/ПАСД " + checkUnitJob.getAccessTool() + " не поддерживает проверку с помощью NMAP");
-
+            checkJob(checkUnitJob);
             ExecutorProperties.NmapProperties nmapProperties = executorProperties.getNmap();
             String verificationName = "jobID = " + checkUnitJob.getJobID() +
                     " accessTool = " + checkUnitJob.getAccessTool() +
@@ -131,7 +126,10 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
                         log.warn("Ошибка удаления файла с результатом работы nmap. Job: "+checkUnitJob.getJobID());
             }
         } catch (Exception ex){
-            throw new ExecutionException("Job: " + checkUnitJob.getJobID() + ". Ошибка при проверке запрещенных ресуросов в nmap", ex);
+            if(ex instanceof ExecutionException)
+                throw (ExecutionException) ex;
+            else
+                throw new ExecutionException("Job: " + checkUnitJob.getJobID() + ". Ошибка при проверке запрещенных ресуросов в nmap", ex);
         }
     }
 
@@ -153,6 +151,14 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
     @Override
     public int getPhase() {
         return AbstractMessageListenerContainer.DEFAULT_PHASE - 9;
+    }
+
+    private void checkJob(CheckUnitJob checkUnitJob) throws ExecutionException {
+        AccessToolUnit accessToolUnit = executorProperties.getAccessToolUnit(checkUnitJob.getAccessTool())
+                .orElseThrow(() ->
+                        new ExecutionException("Ошибка получения сервиса для выполнения проверки. ПС/ПАСД не определен в системе: " + checkUnitJob.getAccessTool()));
+        if(!accessToolUnit.equals(AccessToolUnit.VPN) && !accessToolUnit.equals(AccessToolUnit.PROXY))
+            throw new ExecutionException("Ошибка! ПС/ПАСД " + checkUnitJob.getAccessTool() + " не поддерживает проверку с помощью NMAP");
     }
 
     private ProxychainsConfigurator createProxychainsConfigurator(String accessTool) throws IOException, ExecutionException {

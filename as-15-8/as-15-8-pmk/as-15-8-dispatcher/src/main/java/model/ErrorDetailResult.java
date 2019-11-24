@@ -1,0 +1,22 @@
+package model;
+
+import lombok.Data;
+
+import javax.persistence.*;
+
+@Entity
+@Table(schema = "results", name = "error_detail_results")
+@Data
+public class ErrorDetailResult {
+
+    private static final long serialVersionUID = 1L;
+
+    @Id
+    private Long id;
+
+    @OneToOne(optional = false, fetch = FetchType.LAZY)
+    @MapsId
+    private Result result;
+
+    private String error;
+}

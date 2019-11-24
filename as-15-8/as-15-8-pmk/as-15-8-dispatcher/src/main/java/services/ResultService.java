@@ -9,9 +9,9 @@ import model.Result;
 
 import java.util.List;
 
-public interface ArrangementResultService {
+public interface ResultService {
 
-    Result processJobResult(AnalysisResult result);
+    Result saveJobResult(AnalysisResult result);
 
     Result updateJobStatus(Long jobID, CheckUnitJobResult status, String description);
 
