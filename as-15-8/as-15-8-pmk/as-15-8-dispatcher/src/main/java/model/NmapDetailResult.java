@@ -14,7 +14,7 @@ public class NmapDetailResult {
     @Id
     private Long id;
 
-    @OneToOne(optional = false)
+    @OneToOne(optional = false, fetch = FetchType.LAZY)
     @MapsId
     private Result result;
 
