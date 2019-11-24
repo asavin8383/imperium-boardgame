@@ -2,6 +2,7 @@ package services;
 
 import enums.CheckUnitJobResult;
 import model.Result;
+import model.enums.CheckType;
 
 /**
  * Сервис для работы с результатами анализа проверок запрещенных ресурсов
@@ -10,12 +11,14 @@ import model.Result;
  *
  */
 public interface AnalysisResultService<T> {
-	
+
+	CheckType getCheckType();
+
 	/**
 	 * Метод обработки результатов анализа проверок запрещенных ресурсов
 	 * @param analysisResult Результат анализа проверок запрещенных ресурсов
 	 * @return
 	 */
-	void processResult(Result result, T analysisResult);
+	void saveResult(Result result, T analysisResult);
 	
 }

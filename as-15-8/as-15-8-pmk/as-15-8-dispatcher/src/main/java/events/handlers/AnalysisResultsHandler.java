@@ -16,7 +16,7 @@ import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Service;
 import restapi.ArrangementStatusProducer;
-import services.ArrangementResultService;
+import services.ResultService;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -33,7 +33,7 @@ import java.io.StringWriter;
 @RequiredArgsConstructor(onConstructor_={@Autowired})
 public class AnalysisResultsHandler {
 
-    private final ArrangementResultService arrangementResultService;
+    private final ResultService resultService;
     private final ArrangementStatusProducer arrangementStatusProducer;
 
     @StreamListener(DispatcherChannels.INPUT_ANALYSIS_RESULTS)
@@ -44,10 +44,10 @@ public class AnalysisResultsHandler {
                 ". partition: " + analysisResultMessage.getHeaders().get(KafkaHeaders.RECEIVED_PARTITION_ID, Integer.class) +
                 ", offset: " + analysisResultMessage.getHeaders().get(KafkaHeaders.OFFSET, Long.class));
         try {
-            Result jobResult = arrangementResultService.processJobResult(analysisResult);
+            Result jobResult = resultService.saveJobResult(analysisResult);
             log.info("Результаты выполнения проверки успешно обработаны: " + analysisResult.getJobID() + ", " + analysisResult.getCheckUnit().getValue());
 
-            ExecutionStatus status = arrangementResultService.checkArrangementStatus(jobResult.getArrangementId());
+            ExecutionStatus status = resultService.checkArrangementStatus(jobResult.getArrangementId());
             if(status == ExecutionStatus.FINISHED) {
                 log.info("Мероприятие успешно завешено: " + jobResult.getArrangementId());
                 arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(jobResult.getArrangementId(), ArrangementEvents.FINISH));
@@ -59,8 +59,8 @@ public class AnalysisResultsHandler {
                 StringWriter sw = new StringWriter();
                 ex.printStackTrace(new PrintWriter(sw));
 
-                Result jobResult = arrangementResultService.updateJobStatus(analysisResult.getJobID(), CheckUnitJobResult.INTERNAL_ERROR, sw.toString());
-                ExecutionStatus status = arrangementResultService.checkArrangementStatus(jobResult.getArrangementId());
+                Result jobResult = resultService.updateJobStatus(analysisResult.getJobID(), CheckUnitJobResult.INTERNAL_ERROR, sw.toString());
+                ExecutionStatus status = resultService.checkArrangementStatus(jobResult.getArrangementId());
                 if(status == ExecutionStatus.FINISHED) {
                     log.info("Мероприятие завешено с ошибками: " + jobResult.getArrangementId());
                     arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(jobResult.getArrangementId(), ArrangementEvents.FINISH));

@@ -1,0 +1,41 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+    <changeSet author="shabalinAI (generated)" id="1574584376211-2">
+        <createTable schemaName="results" tableName="error_detail_results">
+            <column name="error" type="text"/>
+            <column name="result_id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="error_detail_resultsPK"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1574584376211-3">
+        <createTable schemaName="results" tableName="nmap_detail_results">
+            <column name="log" type="text"/>
+            <column name="result_id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="nmap_detail_resultsPK"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1574584376211-5">
+        <createTable schemaName="results" tableName="ps_detail_results">
+            <column name="description" type="text"/>
+            <column name="result_id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="ps_detail_resultsPK"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="1574584376211-6" author="shabalinAI (generated)">
+        <renameTable oldTableName="detail_results" newTableName="pasd_detail_results" schemaName="results"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1574584376211-7">
+        <addForeignKeyConstraint baseColumnNames="result_id" baseTableName="error_detail_results" baseTableSchemaName="results" constraintName="FKbi1bqt4ds0yl9h7tniq1t81p1" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="results" referencedTableSchemaName="results" validate="true"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1574584376211-8">
+        <addForeignKeyConstraint baseColumnNames="result_id" baseTableName="ps_detail_results" baseTableSchemaName="results" constraintName="FKju3bp10jnbp9nh1ol0isffac1" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="results" referencedTableSchemaName="results" validate="true"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1574584376211-9">
+        <addForeignKeyConstraint baseColumnNames="result_id" baseTableName="nmap_detail_results" baseTableSchemaName="results" constraintName="FKtey6ddj2634d0r4ny6xxn58rq" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="results" referencedTableSchemaName="results" validate="true"/>
+    </changeSet>
+</databaseChangeLog>

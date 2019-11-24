@@ -6,17 +6,18 @@ import enums.ExecutionStatus;
 import exceptions.AS_15_8_DispatcherException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import model.ErrorDetailResult;
 import model.Result;
-import model.DetailResult;
 import model.ResultScreenShot;
+import model.enums.CheckType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import repositories.ErrorDetailResultRepo;
 import repositories.ResultRepo;
-import repositories.DetailResultRepo;
 import repositories.ResultScreenShotRepo;
 import services.AnalysisResultService;
 import services.AnalysisResultServiceFactory;
-import services.ArrangementResultService;
+import services.ResultService;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
@@ -25,21 +26,21 @@ import java.util.Arrays;
 @Service
 @RequiredArgsConstructor(onConstructor_={@Autowired})
 @Slf4j
-public class ArrangementResultServiceImpl implements ArrangementResultService {
+public class ResultServiceImpl implements ResultService {
 
     private final ResultRepo resultRepo;
     private final ResultScreenShotRepo resultScreenShotRepo;
-    private final DetailResultRepo detailResultRepo;
+    private final ErrorDetailResultRepo errorDetailResultRepo;
 
 
     @Override
     @Transactional
-    public Result processJobResult(AnalysisResult analysisResult) {
+    public Result saveJobResult(AnalysisResult analysisResult) {
         Result result = findJobByID(analysisResult.getJobID());
         AnalysisResultService<? super AnalysisResult> service = AnalysisResultServiceFactory.getService(analysisResult.getClass());
         result.setEndDate(LocalDateTime.now());
+        result.setCheckType(service.getCheckType());
         result.setResult(analysisResult.getCheckResult());
-        resultRepo.save(result);
         if((analysisResult.getScreenshot() != null && analysisResult.getScreenshot().length > 0) ||
                 (analysisResult.getEtalonScreenshot() != null && analysisResult.getEtalonScreenshot().length > 0)){
             ResultScreenShot resultScreenShot = new ResultScreenShot();
@@ -48,7 +49,7 @@ public class ArrangementResultServiceImpl implements ArrangementResultService {
             resultScreenShot.setEtalonScreenshot(analysisResult.getEtalonScreenshot());
             resultScreenShotRepo.save(resultScreenShot);
         }
-        service.processResult(result, analysisResult);
+        service.saveResult(result, analysisResult);
         return result;
     }
 
@@ -69,9 +70,12 @@ public class ArrangementResultServiceImpl implements ArrangementResultService {
         Result result = findJobByID(jobID);
         result.setResult(status);
         result.setEndDate(LocalDateTime.now());
-        resultRepo.save(result);
-        if(status == CheckUnitJobResult.INTERNAL_ERROR)
-            saveErrorToDetailResults(result, description);
+        if(status == CheckUnitJobResult.INTERNAL_ERROR) {
+            result.setCheckType(CheckType.ERROR);
+            saveResultAsError(result, description);
+        } else {
+            resultRepo.save(result);
+        }
         return result;
     }
 
@@ -82,11 +86,10 @@ public class ArrangementResultServiceImpl implements ArrangementResultService {
                 );
     }
 
-    private void saveErrorToDetailResults(Result result, String exText) {
-        DetailResult detailResult = new DetailResult();
-        detailResult.setResult(result);
-        detailResult.setResponseError(false);
-        detailResult.setStubScoreInfo(exText);
-        detailResultRepo.save(detailResult);
+    private void saveResultAsError(Result result, String exText) {
+        ErrorDetailResult errorDetailResult = new ErrorDetailResult();
+        errorDetailResult.setResult(result);
+        errorDetailResult.setError(exText);
+        errorDetailResultRepo.save(errorDetailResult);
     }
 }

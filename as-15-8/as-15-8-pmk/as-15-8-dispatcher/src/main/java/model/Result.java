@@ -3,6 +3,7 @@ package model;
 import checkUnits.CheckUnitType;
 import enums.CheckUnitJobResult;
 import lombok.Data;
+import model.enums.CheckType;
 import model.enums.UserResult;
 import org.hibernate.annotations.Type;
 
@@ -33,6 +34,9 @@ public class Result implements Serializable {
 
     @Column(name = "content_id", nullable = false)
     private Long erdiId;
+
+    @Enumerated(EnumType.STRING)
+    private CheckType checkType;
 
     @Enumerated(EnumType.STRING)
     @Column(name="check_unit_type", nullable=false)

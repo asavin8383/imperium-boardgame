@@ -1,15 +1,14 @@
 package services.impl;
 
 import analysis.AnonymizerAnalysisResult;
-import enums.CheckUnitJobResult;
-import exceptions.AS_15_8_DispatcherException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import model.DetailResult;
+import model.PasdDetailResult;
 import model.Result;
+import model.enums.CheckType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import repositories.DetailResultRepo;
+import repositories.PasdDetailResultRepo;
 import repositories.ResultRepo;
 import services.AnalysisResultService;
 
@@ -19,38 +18,43 @@ import services.AnalysisResultService;
 @Slf4j
 public class AnonymizerAnalysisResultService implements AnalysisResultService<AnonymizerAnalysisResult> {
 
-	private final DetailResultRepo detailVpnRepo;
+	private final PasdDetailResultRepo detailVpnRepo;
 	private final ResultRepo resultRepo;
 
 	@Override
-	public void processResult(Result result, AnonymizerAnalysisResult analysisResult) {
+	public CheckType getCheckType() {
+		return CheckType.PASD;
+	}
 
-		DetailResult detailResult = new DetailResult();
+	@Override
+	public void saveResult(Result result, AnonymizerAnalysisResult analysisResult) {
 
-		detailResult.setResult(result);
+		PasdDetailResult pasdDetailResult = new PasdDetailResult();
 
-		detailResult.setHttpStatus(analysisResult.getHttpStatus());
-		detailResult.setHttpStatusEtalon(analysisResult.getHttpStatusEtalon());
-		detailResult.setHttpHeaders(analysisResult.getHttpHeaders());
-		detailResult.setHttpHeadersEtalon(analysisResult.getHttpHeadersEtalon());
-		detailResult.setResponseErrorCode(analysisResult.getErrorCode());
-		detailResult.setPageSize(analysisResult.getPageSize());
-		detailResult.setUseEtalon(analysisResult.getUseEtalon());
-		detailResult.setResponseErrorCodeEtalon(analysisResult.getEtalonErrorCode());
-		detailResult.setPageSizeEtalon(analysisResult.getEtalonPageSize());
-		detailResult.setPageUrlFinal(analysisResult.getFinalUrl());
-		detailResult.setStubUrl(analysisResult.getStubUrl());
-		detailResult.setKeyWordsCount(analysisResult.getKeyWordsCount());
-		detailResult.setLinkCount(analysisResult.getLinkCount());
-		detailResult.setDomainNameCount(analysisResult.getDomainNameCount());
-		detailResult.setStubScoreInfo(analysisResult.getStubScoreInfo());
-		detailResult.setSimilarityOriginPercent(analysisResult.getSimilarityPercent());
+		pasdDetailResult.setResult(result);
 
-		detailResult.setResponseError(analysisResult.getErrorCode() != null);
-		detailResult.setRedirectionDetected(analysisResult.getRedirectionDetected());
-		detailResult.setResultNLP(analysisResult.getResultNLP());
+		pasdDetailResult.setHttpStatus(analysisResult.getHttpStatus());
+		pasdDetailResult.setHttpStatusEtalon(analysisResult.getHttpStatusEtalon());
+		pasdDetailResult.setHttpHeaders(analysisResult.getHttpHeaders());
+		pasdDetailResult.setHttpHeadersEtalon(analysisResult.getHttpHeadersEtalon());
+		pasdDetailResult.setResponseErrorCode(analysisResult.getErrorCode());
+		pasdDetailResult.setPageSize(analysisResult.getPageSize());
+		pasdDetailResult.setUseEtalon(analysisResult.getUseEtalon());
+		pasdDetailResult.setResponseErrorCodeEtalon(analysisResult.getEtalonErrorCode());
+		pasdDetailResult.setPageSizeEtalon(analysisResult.getEtalonPageSize());
+		pasdDetailResult.setPageUrlFinal(analysisResult.getFinalUrl());
+		pasdDetailResult.setStubUrl(analysisResult.getStubUrl());
+		pasdDetailResult.setKeyWordsCount(analysisResult.getKeyWordsCount());
+		pasdDetailResult.setLinkCount(analysisResult.getLinkCount());
+		pasdDetailResult.setDomainNameCount(analysisResult.getDomainNameCount());
+		pasdDetailResult.setStubScoreInfo(analysisResult.getStubScoreInfo());
+		pasdDetailResult.setSimilarityOriginPercent(analysisResult.getSimilarityPercent());
 
-		detailVpnRepo.save(detailResult);
+		pasdDetailResult.setResponseError(analysisResult.getErrorCode() != null);
+		pasdDetailResult.setRedirectionDetected(analysisResult.getRedirectionDetected());
+		pasdDetailResult.setResultNLP(analysisResult.getResultNLP());
+
+		detailVpnRepo.save(pasdDetailResult);
 
 	}
 }
