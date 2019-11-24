@@ -19,7 +19,7 @@ import java.util.List;
 @Immutable
 @Subselect("select erdi.id as id, \n" +
         "       erdi.name as name, \n" +
-        "       erdi.violation_id as violation_id, \n" +
+        "       erdi.subtype_id as subtype_id, \n" +
         "       unit.type as unit_type, \n" +
         "       unit.value as unit_value \n" +
         "from (select erdi.id as erdi_id, \n" +
@@ -45,7 +45,7 @@ public class CustomErdiView implements Serializable {
     private String name;
 
     @ToString.Include
-    private Long violationId;
+    private Long subtypeId;
 
     @ToString.Include
     private String unitType;
