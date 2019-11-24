@@ -6,6 +6,7 @@ logging:
   config: config/logback-spring.xml
 eureka:
   client:
+    fetchRegistry: false
     serviceUrl:
       defaultZone: ${gateway.url}/eureka
     oauth2:

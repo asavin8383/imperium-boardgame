@@ -6,6 +6,7 @@ logging:
 gateway.url: ${GATEWAY_URI:http://localhost:15880}
 eureka:
   client:
+    fetchRegistry: false
     serviceUrl:
       defaultZone: ${gateway.url}/eureka
     oauth2:
