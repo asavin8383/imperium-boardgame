@@ -115,7 +115,7 @@ public class ArrangementContentController {
     private List<CheckUnit> fillErdi(SearchQueryTrafficUnit searchQueryTrafficUnit) {
         List<CheckUnit> checkUnits = new ArrayList<>();
         String searchQueryPattern = searchQueryTrafficUnit.getQueryPattern();
-        if(searchQueryPattern.contains(SearchQueryPattern.ERDI.getPattern())){
+        if(searchQueryPattern != null && searchQueryPattern.contains(SearchQueryPattern.ERDI.getPattern())){
             List<Long> contentIds = searchQueryTrafficUnit.getFormalErdiList()
                 .stream()
                 .mapToLong(SearchQueryContentJoin::getContentId)
