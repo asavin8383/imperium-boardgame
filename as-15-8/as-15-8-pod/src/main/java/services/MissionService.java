@@ -27,7 +27,6 @@ import repositories.MissionAttachmentRepo;
 import repositories.MissionRepository;
 import rest.MissionData;
 
-import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -47,7 +46,6 @@ public class MissionService {
     private final RestTemplate anonymizerRestTemplate;
     private final MissionRepository missionRepository;
     private final MissionAttachmentRepo missionAttachmentRepo;
-    private final EntityManager entityManager;
 
     private boolean stateLoading = false;
 
@@ -106,9 +104,15 @@ public class MissionService {
         }
         else {
             log.info("Добавляем поручение в БД: " + missionEntry.toString());
-            mission = missionRepository.save(createMission(missionEntry));
+            mission = createMission(missionEntry);
             if (missionEntry.getDocFileDataBytes() != null && missionEntry.getDocFileDataBytes().length >0) {
-                saveMissionAttachment(mission.getId(), missionEntry.getDocFileDataBytes());
+                MissionAttachment missionAttachment = new MissionAttachment();
+                missionAttachment.setMission(mission);
+                log.info("Добавляем вложение поручения {} в БД", missionEntry.toString());
+                missionAttachment.setAttachment(missionEntry.getDocFileDataBytes());
+                missionAttachmentRepo.save(missionAttachment);
+            } else {
+                mission = missionRepository.save(mission);
             }
             log.info("Поручение вместе с вложением успешно сохранены в БД: " + missionEntry.toString());
         }
@@ -118,15 +122,6 @@ public class MissionService {
         if (confirm){
             confirmMission(missionEntry);
         }
-    }
-
-    private void saveMissionAttachment(Long missionId, byte[] attachment) {
-        Mission mission = entityManager.find(Mission.class, missionId);
-        MissionAttachment missionAttachment = new MissionAttachment();
-        missionAttachment.setMission(mission);
-        log.info("Добавляем вложение поручения {} в БД", missionId);
-        missionAttachment.setAttachment(attachment);
-        entityManager.persist(missionAttachment);
     }
 
     private void sendMissionDataToPPT(Mission mission){
