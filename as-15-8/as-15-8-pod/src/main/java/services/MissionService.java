@@ -27,6 +27,7 @@ import repositories.MissionAttachmentRepo;
 import repositories.MissionRepository;
 import rest.MissionData;
 
+import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -46,6 +47,7 @@ public class MissionService {
     private final RestTemplate anonymizerRestTemplate;
     private final MissionRepository missionRepository;
     private final MissionAttachmentRepo missionAttachmentRepo;
+    private final EntityManager entityManager;
 
     private boolean stateLoading = false;
 
@@ -118,15 +120,13 @@ public class MissionService {
         }
     }
 
-    @Transactional
     void saveMissionAttachment(Long missionId, byte[] attachment) {
-        Mission mission = missionRepository.findById(missionId)
-                .orElseThrow(() -> new AS_15_8_POD_Exception("Оригинальное поручение с id " + missionId + " не было найдено в БД"));
+        Mission mission = entityManager.find(Mission.class, missionId);
         MissionAttachment missionAttachment = new MissionAttachment();
         missionAttachment.setMission(mission);
         log.info("Добавляем вложение поручения {} в БД", missionId);
         missionAttachment.setAttachment(attachment);
-        missionAttachmentRepo.save(missionAttachment);
+        entityManager.persist(missionAttachment);
     }
 
     private void sendMissionDataToPPT(Mission mission){
