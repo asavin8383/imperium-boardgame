@@ -6,7 +6,7 @@ logging:
   config: config/logback-spring.xml
 eureka:
   client:
-    fetchRegistry: true
+    fetchRegistry: false
     serviceUrl:
       defaultZone: ${gateway.url}/eureka
     oauth2:
@@ -31,8 +31,7 @@ spring:
   cloud:
     config:
       bus.enabled: true
-      discovery.enabled: true
-      discovery.serviceId: config_server
+      uri: ${gateway.url}/config
       fail-fast: true
       profile: default
       label: latest
