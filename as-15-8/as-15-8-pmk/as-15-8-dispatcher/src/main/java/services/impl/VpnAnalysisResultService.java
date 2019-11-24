@@ -15,7 +15,7 @@ import services.AnalysisResultService;
 @Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class VPN_AnalysisResultService implements AnalysisResultService<VpnAnalysisResult> {
+public class VpnAnalysisResultService implements AnalysisResultService<VpnAnalysisResult> {
 
 	private final PasdDetailResultRepo pasdDetailResultRepo;
 
@@ -55,5 +55,10 @@ public class VPN_AnalysisResultService implements AnalysisResultService<VpnAnaly
 
 		pasdDetailResultRepo.save(pasdDetailResult);
 
+	}
+
+	@Override
+	public String getErrorText(VpnAnalysisResult analysisResult) {
+		return analysisResult.getStubScoreInfo();
 	}
 }

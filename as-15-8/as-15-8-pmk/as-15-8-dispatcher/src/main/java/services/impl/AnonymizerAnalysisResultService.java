@@ -57,4 +57,9 @@ public class AnonymizerAnalysisResultService implements AnalysisResultService<An
 		detailVpnRepo.save(pasdDetailResult);
 
 	}
+
+	@Override
+	public String getErrorText(AnonymizerAnalysisResult analysisResult) {
+		return analysisResult.getStubScoreInfo();
+	}
 }

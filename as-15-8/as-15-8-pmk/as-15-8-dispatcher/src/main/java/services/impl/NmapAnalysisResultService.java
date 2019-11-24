@@ -20,7 +20,7 @@ import services.AnalysisResultService;
  */
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class Nmap_AnalysisResultService implements AnalysisResultService<NMapAnalysisJobResult> {
+public class NmapAnalysisResultService implements AnalysisResultService<NMapAnalysisJobResult> {
 
 	private final NmapDetailResultRepo nmapDetailResultRepo;
 
@@ -35,5 +35,10 @@ public class Nmap_AnalysisResultService implements AnalysisResultService<NMapAna
 		nmapDetailResult.setResult(result);
 		nmapDetailResult.setLog(analysisResult.getNmapLog());
 		nmapDetailResultRepo.save(nmapDetailResult);
+	}
+
+	@Override
+	public String getErrorText(NMapAnalysisJobResult analysisResult) {
+		return analysisResult.getNmapLog();
 	}
 }

@@ -39,8 +39,14 @@ public class ResultServiceImpl implements ResultService {
         Result result = findJobByID(analysisResult.getJobID());
         AnalysisResultService<? super AnalysisResult> service = AnalysisResultServiceFactory.getService(analysisResult.getClass());
         result.setEndDate(LocalDateTime.now());
-        result.setCheckType(service.getCheckType());
         result.setResult(analysisResult.getCheckResult());
+        if(analysisResult.getCheckResult().equals(CheckUnitJobResult.INTERNAL_ERROR)) {
+            result.setCheckType(CheckType.ERROR);
+            saveResultAsError(result, service.getErrorText(analysisResult));
+        } else {
+            result.setCheckType(service.getCheckType());
+            service.saveResult(result, analysisResult);
+        }
         if((analysisResult.getScreenshot() != null && analysisResult.getScreenshot().length > 0) ||
                 (analysisResult.getEtalonScreenshot() != null && analysisResult.getEtalonScreenshot().length > 0)){
             ResultScreenShot resultScreenShot = new ResultScreenShot();
@@ -49,7 +55,6 @@ public class ResultServiceImpl implements ResultService {
             resultScreenShot.setEtalonScreenshot(analysisResult.getEtalonScreenshot());
             resultScreenShotRepo.save(resultScreenShot);
         }
-        service.saveResult(result, analysisResult);
         return result;
     }
 

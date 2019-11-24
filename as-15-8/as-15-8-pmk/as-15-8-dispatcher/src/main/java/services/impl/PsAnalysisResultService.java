@@ -18,7 +18,7 @@ import services.AnalysisResultService;
  */
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class PS_AnalysisResultService implements AnalysisResultService<PS_AnalysisJobResult> {
+public class PsAnalysisResultService implements AnalysisResultService<PS_AnalysisJobResult> {
 
 	private final PsDetailResultRepo psDetailResultRepo;
 
@@ -34,4 +34,9 @@ public class PS_AnalysisResultService implements AnalysisResultService<PS_Analys
 		psDetailResult.setDescription(analysisResult.getDescription());
 		psDetailResultRepo.save(psDetailResult);
 	}
+
+    @Override
+    public String getErrorText(PS_AnalysisJobResult analysisResult) {
+        return analysisResult.getDescription();
+    }
 }
