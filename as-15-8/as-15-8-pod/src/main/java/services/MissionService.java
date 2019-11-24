@@ -120,7 +120,7 @@ public class MissionService {
         }
     }
 
-    void saveMissionAttachment(Long missionId, byte[] attachment) {
+    private void saveMissionAttachment(Long missionId, byte[] attachment) {
         Mission mission = entityManager.find(Mission.class, missionId);
         MissionAttachment missionAttachment = new MissionAttachment();
         missionAttachment.setMission(mission);
