@@ -17,6 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import repositories.CustomErdiViewRepository;
 import services.traffic.CustomErdiService;
 
 @RestController
@@ -27,6 +28,7 @@ import services.traffic.CustomErdiService;
 public class CustomErdiController {
 
     private final CustomErdiService customErdiService;
+    private final CustomErdiViewRepository customErdiViewRepository;
 
     @GetMapping
     public Page<CustomErdiView> getCustomErdiRows(@RequestParam(required = false) SortingDirection sortingDirection,
@@ -39,8 +41,16 @@ public class CustomErdiController {
                                                   @RequestParam(required = false) Long searchTrafficUnitId) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize,
                 SortingHelper.createSorting(sortingDirection, sortingColumn));
-        return customErdiService.getCustomErdiView(pageable, query,
-                containsInTraffic, erdiTrafficUnitId, searchTrafficUnitId);
+        if(query == null) {
+            query = "";
+        }
+        if(erdiTrafficUnitId != null) {
+            return customErdiViewRepository.findAllByErdiTrafficUnitsContainingAndQuery(erdiTrafficUnitId, query, pageable);
+        } else if (searchTrafficUnitId != null) {
+            return customErdiViewRepository.findAllBySearchQueryTrafficUnitsContainingAndQuery(searchTrafficUnitId, query, pageable);
+        } else {
+            return customErdiViewRepository.findAllByQuery(query, pageable);
+        }
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
