@@ -118,7 +118,8 @@ public class MissionService {
         }
     }
 
-    private void saveMissionAttachment(Long missionId, byte[] attachment) {
+    @Transactional
+    void saveMissionAttachment(Long missionId, byte[] attachment) {
         Mission mission = missionRepository.findById(missionId)
                 .orElseThrow(() -> new AS_15_8_POD_Exception("Оригинальное поручение с id " + missionId + " не было найдено в БД"));
         MissionAttachment missionAttachment = new MissionAttachment();
