@@ -29,8 +29,4 @@ public class Mission {
 
     @Column(nullable=false, name = "date_approved")
     private Date dateApproved;
-
-    @OneToOne
-    @JsonIgnore
-    private MissionAttachment missionAttachment;
 }

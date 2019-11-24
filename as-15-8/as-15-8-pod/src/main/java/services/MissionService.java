@@ -105,11 +105,9 @@ public class MissionService {
         else {
             log.info("Добавляем поручение в БД: " + missionEntry.toString());
             mission = missionRepository.save(createMission(missionEntry));
-            MissionAttachment missionAttachment = new MissionAttachment();
-            missionAttachment.setMission(mission);
-            log.info("Добавляем вложение поручения в БД: " + missionEntry.toString());
-            missionAttachment.setAttachment(missionEntry.getDocFileDataBytes());
-            missionAttachmentRepo.save(missionAttachment);
+            if (missionEntry.getDocFileDataBytes() != null && missionEntry.getDocFileDataBytes().length >0) {
+                saveMissionAttachment(mission.getId(), missionEntry.getDocFileDataBytes());
+            }
             log.info("Поручение вместе с вложением успешно сохранены в БД: " + missionEntry.toString());
         }
 
@@ -118,6 +116,17 @@ public class MissionService {
         if (confirm){
             confirmMission(missionEntry);
         }
+    }
+
+    @Transactional
+    void saveMissionAttachment(Long missionId, byte[] attachment) {
+        Mission mission = missionRepository.findById(missionId)
+                .orElseThrow(() -> new AS_15_8_POD_Exception("Оригинальное поручение с id " + missionId + " не было найдено в БД"));
+        MissionAttachment missionAttachment = new MissionAttachment();
+        missionAttachment.setMission(mission);
+        log.info("Добавляем вложение поручения {} в БД", missionId);
+        missionAttachment.setAttachment(attachment);
+        missionAttachmentRepo.save(missionAttachment);
     }
 
     private void sendMissionDataToPPT(Mission mission){
