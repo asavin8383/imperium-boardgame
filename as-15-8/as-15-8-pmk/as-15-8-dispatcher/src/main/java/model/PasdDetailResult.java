@@ -1,5 +1,6 @@
 package model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -21,6 +22,7 @@ public class PasdDetailResult implements Serializable  {
 
     @OneToOne(optional = false, fetch = FetchType.LAZY)
     @MapsId
+    @JsonIgnore
     private Result result;
 
     @Column(name="response_error_code")

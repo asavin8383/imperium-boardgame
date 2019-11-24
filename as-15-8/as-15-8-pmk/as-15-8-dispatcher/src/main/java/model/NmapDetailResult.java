@@ -1,5 +1,6 @@
 package model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -16,6 +17,7 @@ public class NmapDetailResult {
 
     @OneToOne(optional = false, fetch = FetchType.LAZY)
     @MapsId
+    @JsonIgnore
     private Result result;
 
     private String log;
