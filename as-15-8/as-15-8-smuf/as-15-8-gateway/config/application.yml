@@ -31,9 +31,6 @@ zuul:
   debug.request: true
   sensitiveHeaders:
   ignored-headers: Access-Control-Allow-Credentials, Access-Control-Allow-Origin
-  host:
-    connect-timeout-millis: 60000
-    socket-timeout-millis: 120000
   routes:
     eureka:
       path: /eureka/**
@@ -64,8 +61,9 @@ zuul:
       path: /report_generator/**
       serviceId: report_generator
 ribbon:
-  ReadTimeout: 60000
-  ConnectTimeout: 3000
+  ReadTimeout: 120000
+  ConnectTimeout: 60000
+  SocketTimeout: 120000
   eureka:
     enabled: true
 
