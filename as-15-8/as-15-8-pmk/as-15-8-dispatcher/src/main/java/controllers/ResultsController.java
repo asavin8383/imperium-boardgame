@@ -65,13 +65,24 @@ public class ResultsController {
     @GetMapping(path = "/screenshot", produces = MediaType.IMAGE_PNG_VALUE)
     public @ResponseBody
     ResponseEntity<byte[]> getScreenshot(@RequestParam Long id){
-        return new ResponseEntity<>(resultScreenShotRepo.getOne(id).getScreenshot(), HttpStatus.OK);
+        return resultScreenShotRepo.findById(id)
+                .map(resultScreenShot -> ResponseEntity.ok(resultScreenShot.getScreenshot()))
+                .orElse(ResponseEntity.noContent().build());
     }
 
     @GetMapping(path = "/etalon_screenshot", produces = MediaType.IMAGE_PNG_VALUE)
     public @ResponseBody
     ResponseEntity<byte[]> getEtalonScreenshot(@RequestParam Long id){
-        return new ResponseEntity<>(resultScreenShotRepo.getOne(id).getEtalonScreenshot(), HttpStatus.OK);
+        return resultScreenShotRepo.findById(id)
+                .map(resultScreenShot -> ResponseEntity.ok(resultScreenShot.getEtalonScreenshot()))
+                .orElse(ResponseEntity.noContent().build());
+    }
+
+    @GetMapping(path = "/nmap_log", produces = MediaType.TEXT_PLAIN_VALUE)
+    public @ResponseBody ResponseEntity<String> getNmapLog(@RequestParam Long id){
+        return nmapDetailResultRepo.findById(id)
+                .map(nmapDetailResult -> ResponseEntity.ok(nmapDetailResult.getLog()))
+                .orElse(ResponseEntity.noContent().build());
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
