@@ -137,7 +137,9 @@ public class MissionService {
     }
 
     public byte[] receiveMissionDocumentFromDB(long id){
-        return missionAttachmentRepo.getOne(id).getAttachment();
+        return missionAttachmentRepo.findById(id)
+            .map(MissionAttachment::getAttachment)
+            .orElseThrow(() -> new AS_15_8_POD_Exception("Поручение с ИД " + id + " не имеет вложений"));
     }
 
     private byte[] mapPdf(ResultSet rs, int rowNum) throws SQLException {
