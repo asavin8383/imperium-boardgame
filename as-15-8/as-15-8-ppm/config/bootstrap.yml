@@ -31,8 +31,7 @@ spring:
   cloud:
     config:
       bus.enabled: true
-      discovery.enabled: true
-      discovery.serviceId: config_server
+      uri: ${gateway.url}/config
       fail-fast: true
       profile: default
       label: latest
