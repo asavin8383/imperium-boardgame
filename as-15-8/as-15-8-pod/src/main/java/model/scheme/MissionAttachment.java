@@ -23,6 +23,7 @@ public class MissionAttachment implements Serializable {
 
     @OneToOne(optional = false, fetch = FetchType.LAZY)
     @MapsId
+    @JsonIgnore
     private Mission mission;
 
     @Lob
