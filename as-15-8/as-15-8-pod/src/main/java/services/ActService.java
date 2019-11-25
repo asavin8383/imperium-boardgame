@@ -138,21 +138,14 @@ public class ActService {
         HttpEntity<MultiValueMap<String, Object>> requestEntity =
                 new HttpEntity<>(body, headers);
 
-        ResponseEntity<String> response =
+        ResponseEntity<ResponseStatusString> response =
                 anonymizerRestTemplate.exchange(
                         UriComponentsBuilder.fromHttpUrl(baseUrl).path("/ArragementReport/").build().toString(),
                         HttpMethod.POST,
                         requestEntity,
-                        String.class);
+                        ResponseStatusString.class);
 
-        log.info("------ response");
-        log.info(response.getBody());
-
-        log.info("-------- ArragementReport test");
-        ResponseStatusString test = new ResponseStatusString(false, "test");
-
-
-        ResponseStatusString responseStatus = new ResponseStatusString(false, "test"); //response.getBody();
+        ResponseStatusString responseStatus = response.getBody();
         HttpStatus httpStatus = response.getStatusCode();
 
         responseStatus = responseStatus != null ? responseStatus :
