@@ -43,19 +43,7 @@ public class PptWebClient {
         try {
             log.info("Получение чек-юнитов мероприятия {} по запросу: {}", arrangementId, uri);
 
-            HttpClient httpClient = HttpClient.create()
-                    .tcpConfiguration(tcpClient -> {
-                        tcpClient = tcpClient.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, requestTimeout.intValue());
-                        tcpClient = tcpClient.doOnConnected(conn -> conn
-                                .addHandlerLast(new ReadTimeoutHandler(requestTimeout, TimeUnit.MILLISECONDS)));
-                        return tcpClient;
-                    });
-
-            return WebClient
-                    .builder()
-                    .clientConnector(new ReactorClientHttpConnector(httpClient))
-                    .baseUrl(gatewayUrl)
-                    .build()
+            return WebClient.create(gatewayUrl)
                     .get()
                     .uri(uri)
                     .retrieve()

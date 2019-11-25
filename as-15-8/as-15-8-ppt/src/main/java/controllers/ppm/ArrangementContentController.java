@@ -43,16 +43,17 @@ public class ArrangementContentController {
     private final SearchQueryTrafficUnitRepository searchQueryTrafficUnitRepository;
 
     @GetMapping
-    public Flux<CheckUnit> getAndSendCheckUnits(@RequestParam("id") Long arrangementId) {
+    public ParallelFlux<CheckUnit> getAndSendCheckUnits(@RequestParam("id") Long arrangementId) {
 
         //TODO получать все остальные трафик-юниты тут же
         List<Long> contentIds = arrangementRepo.listContentIdsByArrangementId(arrangementId);
-        ParallelFlux<CheckUnit> checkUnitFlux = pod_webClient.fetchCheckUnits(contentIds);
-        return Flux
+       // ParallelFlux<CheckUnit> checkUnitFlux = pod_webClient.fetchCheckUnits(contentIds);
+       /* return Flux
                 .concat(checkUnitFlux,
                         Flux.fromIterable(getCustomErdiCheckUnits(arrangementId)),
                         Flux.fromIterable(getSearchPhrasesCheckUnits(arrangementId))
-                );
+                );*/
+       return pod_webClient.fetchCheckUnits(contentIds);
     }
 
     private List<CheckUnit> getCustomErdiCheckUnits(Long arrangementId){
