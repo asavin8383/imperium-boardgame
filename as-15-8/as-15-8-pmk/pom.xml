@@ -50,12 +50,6 @@
             <version>2.1.4.RELEASE</version>
         </dependency>
 
-		<!-- Spring Cloud Discovery -->
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
-		</dependency>
-
 		<!-- Spring Cloud Stream -->
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
