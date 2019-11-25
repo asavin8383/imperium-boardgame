@@ -52,6 +52,12 @@
             <version>2.1.4.RELEASE</version>
         </dependency>
 
+        <!-- Eureka client -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+        </dependency>
+
         <!-- Apache Tika -->
         <dependency>
             <groupId>org.apache.tika</groupId>
