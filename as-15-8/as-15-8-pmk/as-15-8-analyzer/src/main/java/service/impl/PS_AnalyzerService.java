@@ -51,6 +51,9 @@ public class PS_AnalyzerService implements AnalyzerService<ExecutionPSJobResult>
 			for(String url : urls){
 				description += url + "\n";
 			}
+			if (urls.size() == 0){
+				description += "<записи отсутствуют>";
+			}
 			description += "\n";
 			description += "Список запрещенных URL:\n";
 
