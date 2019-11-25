@@ -61,7 +61,7 @@ public class ActService {
 
         ActRequestPPP aReq = new ActRequestPPP();
         aReq.setMissionId(getExternalMissionId(actData.getMissionId()));
-        aReq.setArragementId(actRequest.getArragementId());
+        aReq.setArrangementId(actRequest.getArragementId());
         aReq.setPsId(robotPS.getOrigId());
         aReq.setPasdId(robotPASD.getOrigId());
         aReq.setPsName(robotPS.getOrigName());
@@ -161,10 +161,10 @@ public class ActService {
             throw new AS_15_8_POD_Exception("Ошибка отправки акта в ППП РА: " + responseStatus.getResponse());
 
         try {
-            notifyActConfirmed(actRequest.getArragementId());
+            notifyActConfirmed(actRequest.getArrangementId());
         }
         catch(Exception ee){
-            log.error("Ошибка отпрвки уведомления в Dispatcher. ArrangementId = " + actRequest.getArragementId());
+            log.error("Ошибка отпрвки уведомления в Dispatcher. ArrangementId = " + actRequest.getArrangementId());
             ee.printStackTrace();
         }
 
