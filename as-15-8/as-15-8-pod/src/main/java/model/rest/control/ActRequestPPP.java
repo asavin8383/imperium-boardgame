@@ -18,7 +18,7 @@ public class ActRequestPPP {
     @JsonProperty("PSId")
     private Long psId;
 
-    @JsonProperty("PSId")
+    @JsonProperty("PASDId")
     private Long pasdId;
 
     @JsonProperty("PSName")
@@ -34,5 +34,6 @@ public class ActRequestPPP {
     private String endDate;     // YYYY-MM-DDTHH24:MI:SS
 
     @ToString.Exclude
+    @JsonProperty("CheckResultId")
     private List<ActCheckResultPPP> checkResults;
 }
