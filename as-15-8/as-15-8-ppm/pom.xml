@@ -52,7 +52,7 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Spring Cloud Discovery -->
+        <!-- Eureka client -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>

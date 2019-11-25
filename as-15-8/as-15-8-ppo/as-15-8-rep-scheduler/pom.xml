@@ -30,7 +30,7 @@
             <artifactId>spring-boot-configuration-processor</artifactId>
         </dependency>
 
-        <!--Spring Cloud Dependencies-->
+        <!-- Eureka client -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>

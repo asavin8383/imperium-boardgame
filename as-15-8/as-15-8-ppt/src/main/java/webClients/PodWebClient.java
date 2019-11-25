@@ -2,8 +2,12 @@ package webClients;
 
 import checkUnits.CheckUnit;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.netflix.discovery.shared.transport.decorator.EurekaHttpClientDecorator;
+import com.netflix.discovery.shared.transport.decorator.RetryableEurekaHttpClient;
 import exceptions.AS_15_8_PPT_Exception;
+import io.pivotal.spring.cloud.service.eureka.ClientFilterAdapter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.net.NioEndpoint;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -57,9 +61,9 @@ public class PodWebClient {
 
     public Flux<CheckUnit> fetchCheckUnits(List<Long> contentIds) {
         return Flux.fromIterable(contentIds)
-                .parallel()
-                .runOn(Schedulers.elastic())
-                .flatMap(this::getCheckUnitsByContentId, false,100)
+                .parallel(10)
+                .runOn(Schedulers.newParallel("checkUnits", 10))
+                .flatMap(this::getCheckUnitsByContentId)
                 .sequential();
     }
 
