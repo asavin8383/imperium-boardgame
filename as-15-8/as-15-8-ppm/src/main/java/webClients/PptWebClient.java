@@ -12,6 +12,7 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -33,12 +34,13 @@ public class PptWebClient {
         String uri = UriComponentsBuilder.fromUriString(CHECK_UNITS_URI).queryParam("id", arrangementId).build().toString();
         try {
             log.info("Получение чек-юнитов мероприятия {} по запросу: {}", arrangementId, uri);
+
             return WebClient.create(gatewayUrl)
                     .get()
                     .uri(uri)
                     .retrieve()
                     .bodyToFlux(CheckUnit.class)
-                    .log("checkUnits", Level.INFO)
+                    .timeout(Duration.ofMillis(3600000))
                     .collectList()
                     .block();
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
