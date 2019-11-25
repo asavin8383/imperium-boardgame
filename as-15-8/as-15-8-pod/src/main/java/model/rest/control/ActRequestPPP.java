@@ -9,7 +9,7 @@ import java.util.List;
 @Data
 @ToString
 public class ActRequestPPP {
-    //@JsonProperty("MissionId")
+    @JsonProperty("MissionId")
     private Long missionId;
 
     @JsonProperty("ArragementId")
