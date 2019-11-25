@@ -1,6 +1,7 @@
 package robots.impl;
 
 import checkUnits.CheckUnit;
+import checkUnits.CheckUnitType;
 import enums.AccessToolParameter;
 import execution.ExecutionJobResult;
 import execution.ExecutionPSJobResult;
@@ -16,9 +17,11 @@ import robots.utils.EqualityTest;
 import robots.utils.ScriptUtils;
 
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j(topic = "robots")
 public class CommonDirectSearchRobot extends SeleniumRobot {
@@ -76,6 +79,9 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
     /** Кол-во проверенных ссылок */
     protected Integer counter = 0;
 
+
+    /** список юрлов */
+    List<String> urls = new ArrayList<>();
 
 
     public CommonDirectSearchRobot(Map<AccessToolParameter, String> scriptParams) {
@@ -138,15 +144,17 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
     }
 
 
-
     final ExecutionPSJobResult createMessage(boolean linkFound) {
+        return createMessage(linkFound, null);
+    }
+    final ExecutionPSJobResult createMessage(boolean linkFound, List<String> urls) {
         ExecutionPSJobResult message = new ExecutionPSJobResult();
         message.setLinkFound(linkFound);
         message.setError(false);
         message.setScreenshot(ScriptUtils.getScreenshot(driver));
+        message.setUrls(urls);
         return message;
     }
-
 
 
     @Override
@@ -157,6 +165,16 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         if (captcha())
             throw new Captcha_ExecutionException(
                     "Обнаружена Captcha " + driver.getCurrentUrl());
+
+        if (checkUnit.getType() == CheckUnitType.SEARCH_PHRASE){
+            List<WebElement> links = resultPageType == ResultPageType.PAGINATION ?
+                    getPaginatedLinks() : getContinuousLinks();
+            List<String> urls =
+                    links.stream()
+                    .map(webElement -> extractUrl(webElement))
+                    .collect(Collectors.toList());
+            return createMessage(false, urls);
+        }
 
         equalityTest = EqualityTest.forCheckUnit(checkUnit);
 
@@ -170,7 +188,7 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
                 driver.findElements(By.xpath(xpathCaptcha)).size() > 0;
     }
 
-    boolean checkContinuousSearchResult() throws ExecutionException {
+    List<WebElement> getContinuousLinks() throws ExecutionException {
         JavascriptExecutor jsExecutor = (JavascriptExecutor) driver;
         By linkLocator = By.xpath(xpathItemLink);
 
@@ -190,6 +208,11 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
             links = driver.findElements(linkLocator);
         }
 
+        return links;
+    }
+
+    boolean checkContinuousSearchResult() throws ExecutionException {
+        List<WebElement> links = getContinuousLinks();
         return checkPageResult(links);
     }
 
@@ -206,6 +229,25 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         } while (counter < searchResultLimit && nextPage());
 
         return false;
+    }
+
+    List<WebElement> getPaginatedLinks() throws ExecutionException {
+        List<WebElement> links = new ArrayList<>();
+        JavascriptExecutor jsExecutor = (JavascriptExecutor) driver;
+        do {
+            ScriptUtils.waitPageLoading(driver);
+            List<WebElement> listNext = new WebDriverWait(driver, SEARCH_RESULT_TIMEOUT)
+                    .until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(xpathItemLink)));
+
+            if(listNext != null)
+                links.addAll(listNext);
+
+            // for yahoo before clicking next page element
+            ScriptUtils.scrollToBottom(jsExecutor);
+
+        }
+        while (links.size() < searchResultLimit && nextPage());
+        return links;
     }
 
     String extractUrl(WebElement element) {
