@@ -45,7 +45,7 @@ public class CustomErdiView implements Serializable {
     private String name;
 
     @ToString.Include
-    private Long subtypeId;
+    private String subtypeId;
 
     @ToString.Include
     private String unitType;

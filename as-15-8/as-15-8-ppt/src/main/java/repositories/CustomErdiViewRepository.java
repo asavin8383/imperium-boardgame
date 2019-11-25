@@ -21,7 +21,7 @@ public interface CustomErdiViewRepository extends
             "or lower(view.name) like lower(concat('%',:query,'%')) " +
             "or lower(view.unitType) like lower(concat('%',:query,'%')) " +
             "or lower(view.unitValue) like lower(concat('%',:query,'%')) " +
-            "or lower(view.subtypeId) like lower(concat('%',:query,'%')) "
+            "or concat(view.subtypeId, '') like lower(concat('%',:query,'%')) "
     )
     Page<CustomErdiView> findAllByErdiTrafficUnitsContainingAndQuery(@Param("unit_id") Long erdiTrafficUnitId, @Param("query") String query, Pageable pageable);
 
@@ -31,7 +31,7 @@ public interface CustomErdiViewRepository extends
             "or lower(view.name) like lower(concat('%',:query,'%')) " +
             "or lower(view.unitType) like lower(concat('%',:query,'%')) " +
             "or lower(view.unitValue) like lower(concat('%',:query,'%')) " +
-            "or lower(view.subtypeId) like lower(concat('%',:query,'%')) "
+            "or concat(view.subtypeId, '') like lower(concat('%',:query,'%')) "
     )
     Page<CustomErdiView> findAllBySearchQueryTrafficUnitsContainingAndQuery(@Param("unit_id") Long searchQueryTrafficUnitId, @Param("query") String query, Pageable pageable);
 
@@ -40,7 +40,7 @@ public interface CustomErdiViewRepository extends
             "or lower(view.name) like lower(concat('%',:query,'%')) " +
             "or lower(view.unitType) like lower(concat('%',:query,'%')) " +
             "or lower(view.unitValue) like lower(concat('%',:query,'%')) " +
-            "or lower(view.subtypeId) like lower(concat('%',:query,'%')) "
+            "or concat(view.subtypeId, '') like lower(concat('%',:query,'%')) "
     )
     Page<CustomErdiView> findAllByQuery(@Param("query") String query, Pageable pageable);
 }
