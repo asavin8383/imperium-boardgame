@@ -9,11 +9,14 @@ import execution.ExecutionPSJobResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import rest.ResponseStatusString;
 import restapi.PODExchange;
 import service.AnalyzerService;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import static enums.CheckUnitJobResult.COMPLETED;
 import static enums.CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED;
@@ -57,16 +60,16 @@ public class PS_AnalyzerService implements AnalyzerService<ExecutionPSJobResult>
 			description += "\n";
 			description += "Список запрещенных URL:\n";
 
-			List<String> findUrls = new ArrayList<>();
+			Map<String, String> findUrls = new LinkedHashMap<>();
 			for(String url : urls){
-				boolean check = podExchange.checkUrl(url);
-				if (check){
-					findUrls.add(url);
-
+                ResponseStatusString check = podExchange.checkUrl(url);
+				if (check.isStatus()){
+					findUrls.put(url, check.getResponse());
 				}
 			}
-			for(String url : findUrls){
-				description += url + "\n";
+			for(String url : findUrls.keySet()){
+			    String erdiId = findUrls.get(url);
+				description += "ERDI: " + erdiId + ", URL: " + url + "\n";
 			}
 			if (findUrls.size() == 0){
 				description += "<записи отсутствуют>";

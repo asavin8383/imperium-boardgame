@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriUtils;
 import org.apache.commons.validator.routines.InetAddressValidator;
+import rest.ResponseStatusString;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -28,12 +29,12 @@ public class InfoService {
     public static final String UTF8 = StandardCharsets.UTF_8.name();
 
 
-    public SearchErdiStatus searchCheckUnit(String url){
-        SearchErdiStatus searchErdiStatus = new SearchErdiStatus();
-        searchErdiStatus.setStatus(false);
+    public ResponseStatusString searchCheckUnit(String url){
+        ResponseStatusString result = new ResponseStatusString();
+        result.setStatus(false);
 
         if (StringUtils.isEmpty(url)){
-            return searchErdiStatus;
+            return result;
         }
 
         if (!url.startsWith("http")){
@@ -46,7 +47,7 @@ public class InfoService {
         }
         catch (MalformedURLException e) {
             e.printStackTrace();
-            return searchErdiStatus;
+            return result;
         }
 
         String host = u.getHost();
@@ -110,8 +111,9 @@ public class InfoService {
         log.info("Result on search check unit: " + (list.size() > 0) + ", for URL: " + url);
         //log.info(list.toString());
 
-        searchErdiStatus.setStatus(list.size() > 0);
-        return searchErdiStatus;
+        result.setStatus(list.size() > 0);
+        result.setResponse(list.size() == 0 ? "" : ""+list.get(0).getErdiId());
+        return result;
     }
 
 }
