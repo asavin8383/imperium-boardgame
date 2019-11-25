@@ -16,6 +16,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.ParallelFlux;
 import reactor.core.scheduler.Schedulers;
 
 import javax.annotation.PostConstruct;
@@ -59,12 +60,11 @@ public class PodWebClient {
                 .doOnError(ex -> log.error("Ошибка при получении ЕРДИ по id: "+id, ex));
     }
 
-    public Flux<CheckUnit> fetchCheckUnits(List<Long> contentIds) {
+    public ParallelFlux<CheckUnit> fetchCheckUnits(List<Long> contentIds) {
         return Flux.fromIterable(contentIds)
                 .parallel(10)
                 .runOn(Schedulers.parallel())
-                .flatMap(this::getCheckUnitsByContentId, true, 10)
-                .sequential();
+                .flatMap(this::getCheckUnitsByContentId, true, 10);
     }
 
     private Flux<CheckUnit> getCheckUnitsByContentId(Long contentId){

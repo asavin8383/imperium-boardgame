@@ -40,7 +40,6 @@ public class PptWebClient {
                     .uri(uri)
                     .retrieve()
                     .bodyToFlux(CheckUnit.class)
-                    .timeout(Duration.ofMillis(3600000))
                     .collectList()
                     .block();
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
@@ -49,5 +48,4 @@ public class PptWebClient {
             throw AS_15_8_PPM_Exception.logAndGet(log, String.format("Ошибка получения чек-юнитов мероприятия %d в ППМ", arrangementId), ex);
         }
     }
-
 }
