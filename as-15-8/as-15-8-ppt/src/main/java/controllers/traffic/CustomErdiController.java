@@ -36,7 +36,6 @@ public class CustomErdiController {
                                                   @RequestParam(defaultValue = "0") int pageNumber,
                                                   @RequestParam(defaultValue = "10") int pageSize,
                                                   @RequestParam(required = false) String query,
-                                                  @RequestParam(defaultValue = "false") boolean containsInTraffic,
                                                   @RequestParam(required = false) Long erdiTrafficUnitId,
                                                   @RequestParam(required = false) Long searchTrafficUnitId) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize,
