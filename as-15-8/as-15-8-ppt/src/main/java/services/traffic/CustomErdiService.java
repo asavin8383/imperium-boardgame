@@ -117,6 +117,9 @@ public class CustomErdiService {
                                        CustomErdi customErdi) {
         customErdi.setName(newCustomErdi.getName());
         customErdi.setSubtypeId(newCustomErdi.getSubtypeId());
+        customErdi.getCustomErdiUnits().clear();
+        newCustomErdi.getCustomErdiUnits().forEach(customErdiUnit -> customErdiUnit.setCustomErdi(customErdi));
+        customErdi.getCustomErdiUnits().addAll(newCustomErdi.getCustomErdiUnits());
         return customErdiRepository.save(customErdi);
     }
 
