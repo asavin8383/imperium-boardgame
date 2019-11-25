@@ -43,7 +43,7 @@ public class ArrangementUploader {
         try {
             oAuth2RestTemplate.put(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(ARRANGEMENTS_URI).queryParam("id", arrangement.getId()).build().toString(), entity);
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
-             throw AS_15_8_PPT_Exception.logAndGet(log, String.format("Ошибка отправки мероприятия %d в ППМ, код возврата %s", arrangement.getId(), ex.getStatusCode()));
+             throw AS_15_8_PPT_Exception.logAndGet(log, String.format("Ошибка отправки мероприятия %d в ППМ, код возврата %s", arrangement.getId(), ex.getStatusCode()), ex);
         }
         log.info("Мероприятие {} успешно отправлено в ППМ", arrangement.getId());
     }
