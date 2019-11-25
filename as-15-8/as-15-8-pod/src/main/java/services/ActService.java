@@ -147,7 +147,6 @@ public class ActService {
 
         ResponseStatusString responseStatus = response.getBody();
         HttpStatus httpStatus = response.getStatusCode();
-        int code = httpStatus.value();
 
         responseStatus = responseStatus != null ? responseStatus :
                 new ResponseStatusString(false, httpStatus.toString());
