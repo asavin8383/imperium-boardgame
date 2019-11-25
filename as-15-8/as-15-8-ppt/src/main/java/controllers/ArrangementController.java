@@ -1,7 +1,6 @@
 package controllers;
 
 import controllers.helpers.SortingHelper;
-import enums.ArrangementEvents;
 import enums.ExecutionStatus;
 import enums.SortingDirection;
 import restapi.ppm.ArrangementUploader;
@@ -92,13 +91,27 @@ public class ArrangementController {
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(code = HttpStatus.CREATED)
     public Arrangement postArrangement(@RequestBody Arrangement arrangement, @RequestParam("formalTaskId") FormalTask formalTask){
+        checkAndSetDeadlineDate(formalTask, arrangement);
         return arrangementService.saveArrangement(arrangement, formalTask);
 
     }
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public Arrangement update(@RequestBody Arrangement newArrangement, @RequestParam("id") Arrangement arrangement) {
+        if(arrangement == null){
+            throw AS_15_8_PPT_Exception.logAndGet(log, "Ошибка изменения мероприятия! Мероприятие не было найдено в БД");
+        }
+        checkAndSetDeadlineDate(arrangement.getFormalTask(), newArrangement);
         return arrangementRepo.save(replaceFields(newArrangement, arrangement));
+    }
+
+    private void checkAndSetDeadlineDate(FormalTask formalTask, Arrangement arrangement){
+        if(formalTask == null){
+            throw AS_15_8_PPT_Exception.logAndGet(log, "Ошибка установки даты 'Выполнить до' мероприятию " + arrangement.getId() + ". Поручение не найдено в БД");
+        }
+        if(formalTask.getDeadlineDate() != null && (arrangement.getDeadlineDate() == null || arrangement.getDeadlineDate().isAfter(formalTask.getDeadlineDate()))){
+            arrangement.setDeadlineDate(formalTask.getDeadlineDate());
+        }
     }
 
     @DeleteMapping
@@ -176,6 +189,7 @@ public class ArrangementController {
         arrangement.setTitle(newArrangement.getTitle());
         arrangement.setPlannedStartTime(newArrangement.getPlannedStartTime());
         arrangement.setPlannedEndTime(newArrangement.getPlannedEndTime());
+        arrangement.setDeadlineDate(newArrangement.getDeadlineDate());
         arrangement.setTraffic(newArrangement.getTraffic());
         return arrangement;
     }

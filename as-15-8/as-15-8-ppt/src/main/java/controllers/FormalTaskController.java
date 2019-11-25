@@ -6,6 +6,7 @@ import enums.SortingDirection;
 import exceptions.AS_15_8_PPT_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import model.task.Arrangement;
 import model.task.ExecutionStatusStatistics;
 import model.task.FormalTask;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,8 +30,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
+import java.util.Optional;
 
 @RestController
 @RequestMapping(path="/formal_tasks", produces=MediaType.APPLICATION_JSON_VALUE)
@@ -76,15 +76,12 @@ public class FormalTaskController {
 	}
 
 	@PutMapping
-	public CompletionStage<FormalTask> replaceFormalTask(@RequestBody FormalTask newFormalTask, @RequestParam Long id){
-		return CompletableFuture.supplyAsync(() -> formalTaskRepo.findById(id))
-			.thenApply(curFormalTask -> curFormalTask
-				.map(formalTask -> formalTaskRepo.save(replaceFields(newFormalTask, formalTask)))
-				.orElseGet(() -> {
-					newFormalTask.setId(id);
-					return formalTaskRepo.save(newFormalTask);
-				})
-			);
+	public FormalTask replaceFormalTask(@RequestBody FormalTask newFormalTask, @RequestParam("id") FormalTask existingTask){
+		if (existingTask == null) {
+			return formalTaskRepo.save(newFormalTask);
+		} else {
+			return formalTaskRepo.save(replaceFields(newFormalTask, existingTask));
+		}
 	}
 
 	@GetMapping(path = "/summary")
@@ -148,10 +145,36 @@ public class FormalTaskController {
 		storedTask.setModificationDate(LocalDateTime.now());
 		storedTask.setAgreed(newTask.isAgreed());
 		storedTask.setAuthor(newTask.getAuthor());
-		storedTask.setDeadlineDate(newTask.getDeadlineDate());
+		storedTask.setDeadlineDate(checkDeadlineDate(storedTask, newTask.getDeadlineDate()));
+		//Всем мероприятиям изменим дату "Выполнить до"
+		storedTask.getArrangements()
+				.forEach(arrangement -> {
+					if (arrangement.getStatus() == ExecutionStatus.NEW) {
+						arrangement.setDeadlineDate(storedTask.getDeadlineDate());
+					}
+				});
 		storedTask.setPriority(newTask.getPriority());
 		storedTask.setOperator(newTask.getOperator());
 		return storedTask;
+	}
+
+	/**
+	 * Проверка валидности даты "Выполнить до"
+	 * @param formalTask Поручение
+	 * @param newDate устанавливаемая дата "Выполнить до"
+	 * @return Проверенная дата
+	 */
+	private LocalDateTime checkDeadlineDate(FormalTask formalTask, LocalDateTime newDate){
+		Optional<LocalDateTime> optMinDate = formalTask.getArrangements()
+				.stream()
+				.filter(arrangement -> arrangement.getCompletionDate() != null)
+				.map(Arrangement::getCompletionDate)
+				.min(LocalDateTime::compareTo);
+		if(optMinDate.isPresent()){
+			return optMinDate.get().isAfter(formalTask.getDeadlineDate()) ? optMinDate.get() : formalTask.getDeadlineDate();
+		} else {
+			return formalTask.getDeadlineDate();
+		}
 	}
 
 	private void createFormalTaskByMission(MissionData missionData, String operator){

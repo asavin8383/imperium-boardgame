@@ -50,6 +50,7 @@ public class SearchQueryTrafficUnitController {
     @PutMapping(path = "/{id}")
     public SearchQueryTrafficUnit updateTemplate(@PathVariable("id") SearchQueryTrafficUnit existing,
                                                  @RequestBody SearchQueryTrafficUnit changed) {
+        existing.setQueryPattern(changed.getQueryPattern());
         update(existing.getFormalErdiList(), changed.getFormalErdiList());
         update(existing.getCustomErdiList(), changed.getCustomErdiList());
         update(existing.getSearchPhrases(), changed.getSearchPhrases());
@@ -57,15 +58,15 @@ public class SearchQueryTrafficUnitController {
     }
 
     private <T> void update(Set<T> existing, Set<T> changed) {
-        /*existing.retainAll(changed);
-        changed.removeAll(existing);
-        existing.addAll(changed);*/
+        if (changed == null){
+            existing.clear();
+        } else {
+            existing.addAll(changed);
 
-        existing.addAll(changed);
-
-        for (T t : existing) {
-            if ( !changed.contains(t) )
-                existing.remove(t);
+            for (T t : existing) {
+                if (!changed.contains(t))
+                    existing.remove(t);
+            }
         }
     }
 

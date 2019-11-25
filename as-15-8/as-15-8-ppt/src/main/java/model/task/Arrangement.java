@@ -76,11 +76,11 @@ public class Arrangement implements Serializable {
 
 	/**Дата начала*/
 	@JsonView(Views.Brief.class)
-	private LocalDate startDate;
+	private LocalDateTime startDate;
 
 	/** Дата завершения */
 	@JsonView(Views.Brief.class)
-	private LocalDate completionDate;
+	private LocalDateTime completionDate;
 
 	/** Максимальное количество обработчиков мероприятия */
 	@JsonView(Views.Brief.class)
@@ -126,7 +126,7 @@ public class Arrangement implements Serializable {
 		}
 	}
 
-	public void sendEvent(ArrangementEvents event, LocalDate eventDate){
+	public void sendEvent(ArrangementEvents event, LocalDateTime eventDate){
 		this.stateMachine = new ArrangementStateMachine(this.status);
 		if(this.stateMachine.sendEvent(event)){
 			this.status = this.stateMachine.getCurrentStatus();

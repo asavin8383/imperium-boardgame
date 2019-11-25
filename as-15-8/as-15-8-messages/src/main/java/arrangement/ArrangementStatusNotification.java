@@ -1,10 +1,12 @@
 package arrangement;
 
 import enums.ArrangementEvents;
-import enums.ExecutionStatus;
-import lombok.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
  * Creation date: 28.05.2019
@@ -29,7 +31,7 @@ public class ArrangementStatusNotification {
     private String info = "";
 
     /**Дата события*/
-    private LocalDate eventDate = LocalDate.now();
+    private LocalDateTime eventDate = LocalDateTime.now();
 
     public ArrangementStatusNotification(Long arrangementId, ArrangementEvents event, String info){
         this.arrangementId = arrangementId;
