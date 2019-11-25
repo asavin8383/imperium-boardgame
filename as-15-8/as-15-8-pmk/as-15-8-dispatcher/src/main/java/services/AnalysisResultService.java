@@ -20,5 +20,7 @@ public interface AnalysisResultService<T> {
 	 * @return
 	 */
 	void saveResult(Result result, T analysisResult);
+
+	String getErrorText(T analysisResult);
 	
 }

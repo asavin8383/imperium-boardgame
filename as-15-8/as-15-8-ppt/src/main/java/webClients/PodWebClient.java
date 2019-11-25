@@ -59,7 +59,7 @@ public class PodWebClient {
         return Flux.fromIterable(contentIds)
                 .parallel()
                 .runOn(Schedulers.elastic())
-                .flatMap(this::getCheckUnitsByContentId)
+                .flatMap(this::getCheckUnitsByContentId, false,100)
                 .sequential();
     }
 
