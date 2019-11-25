@@ -1,25 +1,23 @@
 package services.arrangement.impl;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.Optional;
-
+import enums.ExecutionStatus;
+import exceptions.AS_15_8_PPT_Exception;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import model.task.Arrangement;
+import model.task.ClientNotification;
+import model.task.FormalTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import exceptions.AS_15_8_PPT_Exception;
-import lombok.extern.slf4j.Slf4j;
-import enums.ExecutionStatus;
-import model.task.Arrangement;
-import model.task.ArrangementView;
-import model.task.FormalTask;
 import repositories.ArrangementRepo;
-import repositories.ArrangementViewRepo;
+import repositories.ClientNotificationRepo;
 import repositories.FormalTaskRepository;
 import services.arrangement.ArrangementStatusService;
+
+import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.Optional;
 
 /**
  * Creation date: 04.06.2019
@@ -32,7 +30,7 @@ public class ArrangementStatusServiceImpl implements ArrangementStatusService {
 
     private final ArrangementRepo arrangementRepo;
     private final FormalTaskRepository formalTaskRepo;
-    private final ArrangementViewRepo arrangementViewRepo;
+    private final ClientNotificationRepo clientNotificationRepo;
 
     @Override
     @Transactional
@@ -69,12 +67,11 @@ public class ArrangementStatusServiceImpl implements ArrangementStatusService {
 
     private void saveArrangementView(Arrangement arrangement){
         if (arrangement.getStatus().equals(ExecutionStatus.ACTION_REQUIRED) || arrangement.getStatus().equals(ExecutionStatus.FINISHED)){
-            ArrangementView arrangementView = new ArrangementView();
-            arrangementView.setOperator(arrangement.getFormalTask().getOperator());
-            arrangementView.setArrangement(arrangement);
-            arrangementView.setStatus(arrangement.getStatus());
-            arrangementView.setViewed(false);
-            arrangementViewRepo.save(arrangementView);
+            ClientNotification clientNotification = new ClientNotification();
+            clientNotification.setOperator(arrangement.getFormalTask().getOperator());
+            clientNotification.setMessageText("Статус мероприятия " + arrangement.getId() + " сменился на '" + arrangement.getStatus().getDescription() + "'");
+            clientNotification.setViewed(false);
+            clientNotificationRepo.save(clientNotification);
         }
     }
 }
