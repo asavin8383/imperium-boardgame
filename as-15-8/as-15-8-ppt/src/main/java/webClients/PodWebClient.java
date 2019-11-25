@@ -62,8 +62,8 @@ public class PodWebClient {
     public Flux<CheckUnit> fetchCheckUnits(List<Long> contentIds) {
         return Flux.fromIterable(contentIds)
                 .parallel(10)
-                .runOn(Schedulers.newParallel("checkUnits", 10))
-                .flatMap(this::getCheckUnitsByContentId)
+                .runOn(Schedulers.parallel())
+                .flatMap(this::getCheckUnitsByContentId, true, 10)
                 .sequential();
     }
 
