@@ -52,12 +52,6 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Spring Cloud Discovery -->
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
-        </dependency>
-
         <!-- Spring Cloud Config -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
