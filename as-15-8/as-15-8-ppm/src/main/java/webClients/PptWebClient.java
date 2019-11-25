@@ -13,6 +13,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
+import java.util.logging.Level;
 
 /**
  * Created by san
@@ -37,6 +38,7 @@ public class PptWebClient {
                     .uri(uri)
                     .retrieve()
                     .bodyToFlux(CheckUnit.class)
+                    .log("checkUnits", Level.INFO)
                     .collectList()
                     .block();
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
