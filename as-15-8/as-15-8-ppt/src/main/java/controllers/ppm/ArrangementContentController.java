@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.ConnectableFlux;
+import reactor.core.publisher.ParallelFlux;
 import repositories.ArrangementRepo;
 import repositories.CustomErdiUnitRepository;
 import repositories.SearchQueryTrafficUnitRepository;
@@ -43,7 +44,7 @@ public class ArrangementContentController {
     private final SearchQueryTrafficUnitRepository searchQueryTrafficUnitRepository;
 
     @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Publisher<CheckUnit> getAndSendCheckUnits(@RequestParam("id") Long arrangementId) {
+    public ParallelFlux<CheckUnit> getAndSendCheckUnits(@RequestParam("id") Long arrangementId) {
 
         //TODO получать все остальные трафик-юниты тут же
         List<Long> contentIds = arrangementRepo.listContentIdsByArrangementId(arrangementId);
