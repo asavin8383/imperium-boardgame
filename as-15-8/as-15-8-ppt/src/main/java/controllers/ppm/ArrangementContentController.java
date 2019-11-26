@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.ParallelFlux;
+import reactor.core.scheduler.Schedulers;
 import repositories.ArrangementRepo;
 import repositories.CustomErdiUnitRepository;
 import repositories.SearchQueryTrafficUnitRepository;
@@ -42,14 +44,15 @@ public class ArrangementContentController {
     private final SearchQueryTrafficUnitRepository searchQueryTrafficUnitRepository;
 
     @GetMapping(produces = MediaType.APPLICATION_STREAM_JSON_VALUE)
-    public Flux<CheckUnit> getAndSendCheckUnits(@RequestParam("id") Long arrangementId) {
+    public ParallelFlux<CheckUnit> getAndSendCheckUnits(@RequestParam("id") Long arrangementId) {
 
         //TODO получать все остальные трафик-юниты тут же
         List<Long> contentIds = arrangementRepo.listContentIdsByArrangementId(arrangementId);
-        return Flux.concat(
+        return podWebClient.fetchCheckUnits(contentIds);
+        /*return Flux.concat(
                 podWebClient.fetchCheckUnits(contentIds),
                 getCustomErdiCheckUnits(arrangementId)
-        );
+        ).publishOn(Schedulers.newParallel("checkUnits", 1000));*/
     }
 
     private Flux<CheckUnit> getCustomErdiCheckUnits(Long arrangementId){
