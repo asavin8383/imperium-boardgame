@@ -146,8 +146,8 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 		NLPCategory nlpCategory = classificationService.classify(page);
 		nlpCategory = nlpCategory == null ? NLPCategory.EXCEPTION : nlpCategory;
 
-		analysisResult.setResultNLP(nlpCategory.name());
-		log.info("Результат NLP: " + nlpCategory.name());
+		analysisResult.setResultNLP(nlpCategory.getDescription());
+		log.info("Результат NLP: " + nlpCategory.getDescription());
 	}
 
 	private String clearResult(String result){

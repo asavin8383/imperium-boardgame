@@ -53,7 +53,10 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 
 	@Override
 	public List<CheckUnitType> getCheckUnitTypes() {
-    	return Collections.singletonList(CheckUnitType.URL);
+    	return Arrays.asList(
+    		CheckUnitType.URL,
+			CheckUnitType.SEARCH_PHRASE
+		);
 	}
 
 	@Override

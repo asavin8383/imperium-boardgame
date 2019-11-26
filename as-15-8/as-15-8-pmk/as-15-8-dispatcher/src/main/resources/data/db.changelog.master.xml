@@ -13,5 +13,6 @@
     <include file="data/changelog/dispatcher.0008.result_screenshot.xml"/>
     <include file="data/changelog/dispatcher.0009.different_details.xml"/>
     <include file="data/changelog/dispatcher.0010.result_check_type.xml"/>
+    <include file="data/changelog/dispatcher.0011.checkers_constraints.xml"/>
 
 </databaseChangeLog>
