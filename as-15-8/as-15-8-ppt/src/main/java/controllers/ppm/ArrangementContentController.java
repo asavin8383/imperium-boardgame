@@ -47,8 +47,11 @@ public class ArrangementContentController {
     public ParallelFlux<CheckUnit> getAndSendCheckUnits(@RequestParam("id") Long arrangementId) {
 
         //TODO получать все остальные трафик-юниты тут же
+        log.info("Запрос на получение check units мероприятия: " + arrangementId);
         List<Long> contentIds = arrangementRepo.listContentIdsByArrangementId(arrangementId);
-        return podWebClient.fetchCheckUnits(contentIds);
+        ParallelFlux<CheckUnit> formalCheckUnits = podWebClient.fetchCheckUnits(contentIds);
+        log.info("Сформирован список check units мероприятия: " + arrangementId);
+        return formalCheckUnits;
         /*return Flux.concat(
                 podWebClient.fetchCheckUnits(contentIds),
                 getCustomErdiCheckUnits(arrangementId)
