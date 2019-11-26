@@ -34,8 +34,6 @@ public class PptWebClient {
 
     private final String CHECK_UNITS_URI = "/ppt/arrangements/checkUnits";
 
-    private final Long requestTimeout = 3600000L;
-
     @Value("${gateway.url}")
     private String gatewayUrl;
 
@@ -47,7 +45,6 @@ public class PptWebClient {
             return WebClient.create(gatewayUrl)
                     .get()
                     .uri(uri)
-                    .accept(MediaType.TEXT_EVENT_STREAM)
                     .retrieve()
                     .bodyToFlux(CheckUnit.class)
                     .collectList()

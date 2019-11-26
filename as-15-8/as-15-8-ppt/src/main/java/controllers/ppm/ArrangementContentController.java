@@ -43,7 +43,7 @@ public class ArrangementContentController {
     private final PodWebClient podWebClient;
     private final SearchQueryTrafficUnitRepository searchQueryTrafficUnitRepository;
 
-    @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping
     public ParallelFlux<CheckUnit> getAndSendCheckUnits(@RequestParam("id") Long arrangementId) {
 
         //TODO получать все остальные трафик-юниты тут же
