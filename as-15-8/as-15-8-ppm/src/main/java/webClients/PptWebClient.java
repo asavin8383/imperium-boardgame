@@ -42,13 +42,15 @@ public class PptWebClient {
         try {
             log.info("Получение чек-юнитов мероприятия {} по запросу: {}", arrangementId, uri);
 
-            return WebClient.create(gatewayUrl)
+            List<CheckUnit> checkUnits = WebClient.create(gatewayUrl)
                     .get()
                     .uri(uri)
                     .retrieve()
                     .bodyToFlux(CheckUnit.class)
                     .collectList()
                     .block();
+            log.info("Check units мероприятия {} успешно сформированы", arrangementId, uri);
+            return checkUnits;
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
             throw AS_15_8_PPM_Exception.logAndGet(log, String.format("Ошибка получения чек-юнитов мероприятия %d в ППМ, код возврата %s", arrangementId, ex.getStatusCode()), ex);
         } catch (Exception ex){
