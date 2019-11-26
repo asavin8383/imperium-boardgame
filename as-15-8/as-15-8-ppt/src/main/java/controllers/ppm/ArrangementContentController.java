@@ -15,8 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.ParallelFlux;
+import reactor.core.publisher.ConnectableFlux;
 import repositories.ArrangementRepo;
 import repositories.CustomErdiUnitRepository;
 import repositories.SearchQueryTrafficUnitRepository;
@@ -43,7 +42,7 @@ public class ArrangementContentController {
     private final SearchQueryTrafficUnitRepository searchQueryTrafficUnitRepository;
 
     @GetMapping
-    public ParallelFlux<CheckUnit> getAndSendCheckUnits(@RequestParam("id") Long arrangementId) {
+    public ConnectableFlux<CheckUnit> getAndSendCheckUnits(@RequestParam("id") Long arrangementId) {
 
         //TODO получать все остальные трафик-юниты тут же
         List<Long> contentIds = arrangementRepo.listContentIdsByArrangementId(arrangementId);
@@ -123,7 +122,7 @@ public class ArrangementContentController {
                 .mapToLong(SearchQueryContentJoin::getContentId)
                 .boxed()
                 .collect(Collectors.toList());
-            List<CheckUnit> podCheckUnits = pod_webClient.fetchCheckUnits(contentIds).sequential().collectList().block();
+            List<CheckUnit> podCheckUnits = pod_webClient.fetchCheckUnits(contentIds).collectList().block();
             if(podCheckUnits != null) {
                 checkUnits.addAll(podCheckUnits);
             }
