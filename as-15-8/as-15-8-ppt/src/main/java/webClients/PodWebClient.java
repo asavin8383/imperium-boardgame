@@ -28,7 +28,7 @@ public class PodWebClient {
     private static final String GET_ERDI_URI = "/pod/erdi/single";
     private static final String GET_CHECK_UNITS_URL = "/pod/erdi/checkUnits";
 
-    private static final int fetchCheckUnitsConcurrency = 10;
+    private static final int fetchCheckUnitsConcurrency = 100;
 
     @Value("${gateway.url}")
     private String gatewayUrl;
