@@ -56,7 +56,7 @@
                 </ex-property>
             </list-property>
             <property name="odaDriverClass">org.postgresql.Driver</property>
-            <property name="odaURL">jdbc:postgresql://192.168.5.195:5432/asdb</property>
+            <property name="odaURL">jdbc:postgresql://192.168.5.195:5432/asdb_test</property>
             <property name="odaUser">as_user</property>
             <encrypted-property name="odaPassword" encryptionID="base64">YXNfdXNlcg==</encrypted-property>
         </oda-data-source>
@@ -811,6 +811,12 @@ group by nm, t1.access_tool_id
 order by t1.access_tool_id]]></xml-property>
         </oda-data-set>
     </data-sets>
+    <styles>
+        <style name="HeaderStyle" id="260">
+            <property name="fontFamily">"Times New Roman"</property>
+            <property name="fontSize">12pt</property>
+        </style>
+    </styles>
     <page-setup>
         <simple-master-page name="Simple MasterPage" id="2">
             <property name="type">a4</property>
@@ -833,7 +839,6 @@ order by t1.access_tool_id]]></xml-property>
     </page-setup>
     <body>
         <grid id="173">
-            <property name="fontFamily">"Times New Roman"</property>
             <column id="174"/>
             <row id="254">
                 <cell id="255">
@@ -941,8 +946,24 @@ order by t1.access_tool_id]]></xml-property>
             </row>
             <row id="252">
                 <cell id="253">
+                    <property name="style">HeaderStyle</property>
                     <property name="paddingTop">1mm</property>
                     <property name="paddingBottom">3mm</property>
+                    <data id="188">
+                        <property name="style">HeaderStyle</property>
+                        <property name="paddingTop">1pt</property>
+                        <property name="paddingBottom">1mm</property>
+                        <property name="dataSet">Data Set_period</property>
+                        <list-property name="boundDataColumns">
+                            <structure>
+                                <property name="name">Header1</property>
+                                <text-property name="displayName">Header1</text-property>
+                                <expression name="expression" type="javascript">dataSetRow["Header1"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                        </list-property>
+                        <property name="resultSetColumn">Header1</property>
+                    </data>
                 </cell>
             </row>
             <row id="175">
@@ -1319,6 +1340,890 @@ order by t1.access_tool_id]]></xml-property>
                                     <property name="paddingRight">2pt</property>
                                     <property name="textAlign">right</property>
                                     <data id="74">
+                                        <property name="resultSetColumn">mis_t</property>
+                                    </data>
+                                </cell>
+                            </row>
+                        </detail>
+                    </table>
+                </cell>
+            </row>
+            <row id="177">
+                <property name="fontFamily">"Times New Roman"</property>
+                <cell id="178">
+                    <property name="fontFamily">"Times New Roman"</property>
+                    <property name="paddingTop">6mm</property>
+                    <property name="paddingBottom">3mm</property>
+                    <data id="195">
+                        <property name="style">HeaderStyle</property>
+                        <property name="marginTop">0pt</property>
+                        <property name="marginBottom">0pt</property>
+                        <property name="paddingTop">1pt</property>
+                        <property name="paddingBottom">1pt</property>
+                        <property name="dataSet">Data Set_period</property>
+                        <list-property name="boundDataColumns">
+                            <structure>
+                                <property name="name">Header2</property>
+                                <text-property name="displayName">Header2</text-property>
+                                <expression name="expression" type="javascript">dataSetRow["Header2"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                        </list-property>
+                        <property name="resultSetColumn">Header2</property>
+                    </data>
+                </cell>
+            </row>
+            <row id="179">
+                <property name="fontFamily">"Times New Roman"</property>
+                <cell id="180">
+                    <table id="110">
+                        <property name="fontFamily">"Times New Roman"</property>
+                        <property name="width">100%</property>
+                        <property name="dataSet">Data Set_2</property>
+                        <list-property name="boundDataColumns">
+                            <structure>
+                                <property name="name">num</property>
+                                <text-property name="displayName">num</text-property>
+                                <expression name="expression" type="javascript">dataSetRow["num"]</expression>
+                                <property name="dataType">decimal</property>
+                            </structure>
+                            <structure>
+                                <property name="name">nm</property>
+                                <text-property name="displayName">nm</text-property>
+                                <expression name="expression" type="javascript">dataSetRow["nm"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                            <structure>
+                                <property name="name">mis_new</property>
+                                <text-property name="displayName">mis_new</text-property>
+                                <expression name="expression" type="javascript">dataSetRow["mis_new"]</expression>
+                                <property name="dataType">decimal</property>
+                            </structure>
+                            <structure>
+                                <property name="name">mis_all</property>
+                                <text-property name="displayName">mis_all</text-property>
+                                <expression name="expression" type="javascript">dataSetRow["mis_all"]</expression>
+                                <property name="dataType">decimal</property>
+                            </structure>
+                            <structure>
+                                <property name="name">mis_se</property>
+                                <text-property name="displayName">mis_se</text-property>
+                                <expression name="expression" type="javascript">dataSetRow["mis_se"]</expression>
+                                <property name="dataType">decimal</property>
+                            </structure>
+                            <structure>
+                                <property name="name">mis_s</property>
+                                <text-property name="displayName">mis_s</text-property>
+                                <expression name="expression" type="javascript">dataSetRow["mis_s"]</expression>
+                                <property name="dataType">decimal</property>
+                            </structure>
+                            <structure>
+                                <property name="name">mis_e</property>
+                                <text-property name="displayName">mis_e</text-property>
+                                <expression name="expression" type="javascript">dataSetRow["mis_e"]</expression>
+                                <property name="dataType">decimal</property>
+                            </structure>
+                            <structure>
+                                <property name="name">mis_t</property>
+                                <text-property name="displayName">mis_t</text-property>
+                                <expression name="expression" type="javascript">dataSetRow["mis_t"]</expression>
+                                <property name="dataType">decimal</property>
+                            </structure>
+                        </list-property>
+                        <column id="154">
+                            <property name="width">1cm</property>
+                        </column>
+                        <column id="155">
+                            <property name="width">5cm</property>
+                        </column>
+                        <column id="156">
+                            <property name="width">32mm</property>
+                        </column>
+                        <column id="157">
+                            <property name="width">32mm</property>
+                        </column>
+                        <column id="158">
+                            <property name="width">32mm</property>
+                        </column>
+                        <column id="159">
+                            <property name="width">32mm</property>
+                        </column>
+                        <column id="160">
+                            <property name="width">32mm</property>
+                        </column>
+                        <column id="161">
+                            <property name="width">32mm</property>
+                        </column>
+                        <header>
+                            <row id="162">
+                                <cell id="163">
+                                    <property name="colSpan">1</property>
+                                    <property name="rowSpan">2</property>
+                                    <property name="fontWeight">bold</property>
+                                    <property name="borderBottomStyle">solid</property>
+                                    <property name="borderBottomWidth">thin</property>
+                                    <property name="borderLeftStyle">solid</property>
+                                    <property name="borderLeftWidth">thin</property>
+                                    <property name="borderRightStyle">solid</property>
+                                    <property name="borderRightWidth">thin</property>
+                                    <property name="borderTopStyle">solid</property>
+                                    <property name="borderTopWidth">thin</property>
+                                    <property name="paddingTop">2pt</property>
+                                    <property name="paddingLeft">2pt</property>
+                                    <property name="paddingBottom">2pt</property>
+                                    <property name="paddingRight">2pt</property>
+                                    <property name="verticalAlign">middle</property>
+                                    <label id="113">
+                                        <text-property name="text">№</text-property>
+                                    </label>
+                                </cell>
+                                <cell id="164">
+                                    <property name="colSpan">1</property>
+                                    <property name="rowSpan">2</property>
+                                    <property name="fontWeight">bold</property>
+                                    <property name="borderBottomStyle">solid</property>
+                                    <property name="borderBottomWidth">thin</property>
+                                    <property name="borderLeftStyle">solid</property>
+                                    <property name="borderLeftWidth">thin</property>
+                                    <property name="borderRightStyle">solid</property>
+                                    <property name="borderRightWidth">thin</property>
+                                    <property name="borderTopStyle">solid</property>
+                                    <property name="borderTopWidth">thin</property>
+                                    <property name="paddingTop">2pt</property>
+                                    <property name="paddingLeft">2pt</property>
+                                    <property name="paddingBottom">2pt</property>
+                                    <property name="paddingRight">2pt</property>
+                                    <property name="verticalAlign">middle</property>
+                                    <property name="whiteSpace">pre</property>
+                                    <label id="115">
+                                        <text-property name="text">Название ПС</text-property>
+                                    </label>
+                                </cell>
+                                <cell id="165">
+                                    <property name="colSpan">1</property>
+                                    <property name="rowSpan">2</property>
+                                    <property name="fontWeight">bold</property>
+                                    <property name="borderBottomStyle">solid</property>
+                                    <property name="borderBottomWidth">thin</property>
+                                    <property name="borderLeftStyle">solid</property>
+                                    <property name="borderLeftWidth">thin</property>
+                                    <property name="borderRightStyle">solid</property>
+                                    <property name="borderRightWidth">thin</property>
+                                    <property name="borderTopStyle">solid</property>
+                                    <property name="borderTopWidth">thin</property>
+                                    <property name="paddingTop">2pt</property>
+                                    <property name="paddingLeft">2pt</property>
+                                    <property name="paddingBottom">2pt</property>
+                                    <property name="paddingRight">2pt</property>
+                                    <property name="verticalAlign">middle</property>
+                                    <property name="whiteSpace">pre</property>
+                                    <label id="117">
+                                        <text-property name="text">Поступило пору-чений в отчетный период</text-property>
+                                    </label>
+                                </cell>
+                                <cell id="166">
+                                    <property name="colSpan">5</property>
+                                    <property name="rowSpan">1</property>
+                                    <property name="fontWeight">bold</property>
+                                    <property name="borderBottomStyle">solid</property>
+                                    <property name="borderBottomWidth">thin</property>
+                                    <property name="borderLeftStyle">solid</property>
+                                    <property name="borderLeftWidth">thin</property>
+                                    <property name="borderRightStyle">solid</property>
+                                    <property name="borderRightWidth">thin</property>
+                                    <property name="borderTopStyle">solid</property>
+                                    <property name="borderTopWidth">thin</property>
+                                    <property name="paddingTop">2pt</property>
+                                    <property name="paddingLeft">2pt</property>
+                                    <property name="paddingBottom">2pt</property>
+                                    <property name="paddingRight">2pt</property>
+                                    <property name="verticalAlign">middle</property>
+                                    <property name="whiteSpace">pre</property>
+                                    <label id="171">
+                                        <text-property name="text">Находилось на исполнении поручений</text-property>
+                                    </label>
+                                </cell>
+                            </row>
+                            <row id="111">
+                                <cell id="118">
+                                    <property name="borderBottomStyle">solid</property>
+                                    <property name="borderBottomWidth">thin</property>
+                                    <property name="borderLeftStyle">solid</property>
+                                    <property name="borderLeftWidth">thin</property>
+                                    <property name="borderRightStyle">solid</property>
+                                    <property name="borderRightWidth">thin</property>
+                                    <property name="borderTopStyle">solid</property>
+                                    <property name="borderTopWidth">thin</property>
+                                    <property name="paddingTop">2pt</property>
+                                    <property name="paddingLeft">2pt</property>
+                                    <property name="paddingBottom">2pt</property>
+                                    <property name="paddingRight">2pt</property>
+                                    <property name="verticalAlign">middle</property>
+                                    <property name="whiteSpace">pre</property>
+                                    <label id="119">
+                                        <text-property name="text">Всего</text-property>
+                                    </label>
+                                </cell>
+                                <cell id="120">
+                                    <property name="borderBottomStyle">solid</property>
+                                    <property name="borderBottomWidth">thin</property>
+                                    <property name="borderLeftStyle">solid</property>
+                                    <property name="borderLeftWidth">thin</property>
+                                    <property name="borderRightStyle">solid</property>
+                                    <property name="borderRightWidth">thin</property>
+                                    <property name="borderTopStyle">solid</property>
+                                    <property name="borderTopWidth">thin</property>
+                                    <property name="paddingTop">2pt</property>
+                                    <property name="paddingLeft">2pt</property>
+                                    <property name="paddingBottom">2pt</property>
+                                    <property name="paddingRight">2pt</property>
+                                    <property name="verticalAlign">middle</property>
+                                    <property name="whiteSpace">pre</property>
+                                    <label id="121">
+                                        <text-property name="text">Исполнено поступивших в отчетном периоде</text-property>
+                                    </label>
+                                </cell>
+                                <cell id="122">
+                                    <property name="borderBottomStyle">solid</property>
+                                    <property name="borderBottomWidth">thin</property>
+                                    <property name="borderLeftStyle">solid</property>
+                                    <property name="borderLeftWidth">thin</property>
+                                    <property name="borderRightStyle">solid</property>
+                                    <property name="borderRightWidth">thin</property>
+                                    <property name="borderTopStyle">solid</property>
+                                    <property name="borderTopWidth">thin</property>
+                                    <property name="paddingTop">2pt</property>
+                                    <property name="paddingLeft">2pt</property>
+                                    <property name="paddingBottom">2pt</property>
+                                    <property name="paddingRight">2pt</property>
+                                    <property name="verticalAlign">middle</property>
+                                    <property name="whiteSpace">pre</property>
+                                    <label id="123">
+                                        <text-property name="text">Начато исполнение поступивших в отчетном периоде, но не завершено</text-property>
+                                    </label>
+                                </cell>
+                                <cell id="124">
+                                    <property name="borderBottomStyle">solid</property>
+                                    <property name="borderBottomWidth">thin</property>
+                                    <property name="borderLeftStyle">solid</property>
+                                    <property name="borderLeftWidth">thin</property>
+                                    <property name="borderRightStyle">solid</property>
+                                    <property name="borderRightWidth">thin</property>
+                                    <property name="borderTopStyle">solid</property>
+                                    <property name="borderTopWidth">thin</property>
+                                    <property name="paddingTop">2pt</property>
+                                    <property name="paddingLeft">2pt</property>
+                                    <property name="paddingBottom">2pt</property>
+                                    <property name="paddingRight">2pt</property>
+                                    <property name="verticalAlign">middle</property>
+                                    <property name="whiteSpace">pre</property>
+                                    <label id="125">
+                                        <text-property name="text">Исполнено в отчетном периоде ранее начатых</text-property>
+                                    </label>
+                                </cell>
+                                <cell id="126">
+                                    <property name="borderBottomStyle">solid</property>
+                                    <property name="borderBottomWidth">thin</property>
+                                    <property name="borderLeftStyle">solid</property>
+                                    <property name="borderLeftWidth">thin</property>
+                                    <property name="borderRightStyle">solid</property>
+                                    <property name="borderRightWidth">thin</property>
+                                    <property name="borderTopStyle">solid</property>
+                                    <property name="borderTopWidth">thin</property>
+                                    <property name="paddingTop">2pt</property>
+                                    <property name="paddingLeft">2pt</property>
+                                    <property name="paddingBottom">2pt</property>
+                                    <property name="paddingRight">2pt</property>
+                                    <property name="verticalAlign">middle</property>
+                                    <property name="whiteSpace">pre</property>
+                                    <label id="127">
+                                        <text-property name="text">Исполняется ранее начатых</text-property>
+                                    </label>
+                                </cell>
+                            </row>
+                        </header>
+                        <detail>
+                            <row id="128">
+                                <cell id="129">
+                                    <property name="borderBottomStyle">solid</property>
+                                    <property name="borderBottomWidth">thin</property>
+                                    <property name="borderLeftStyle">solid</property>
+                                    <property name="borderLeftWidth">thin</property>
+                                    <property name="borderRightStyle">solid</property>
+                                    <property name="borderRightWidth">thin</property>
+                                    <property name="borderTopStyle">solid</property>
+                                    <property name="borderTopWidth">thin</property>
+                                    <property name="paddingTop">2pt</property>
+                                    <property name="paddingLeft">2pt</property>
+                                    <property name="paddingBottom">2pt</property>
+                                    <property name="paddingRight">2pt</property>
+                                    <data id="130">
+                                        <property name="resultSetColumn">num</property>
+                                    </data>
+                                </cell>
+                                <cell id="131">
+                                    <property name="borderBottomStyle">solid</property>
+                                    <property name="borderBottomWidth">thin</property>
+                                    <property name="borderLeftStyle">solid</property>
+                                    <property name="borderLeftWidth">thin</property>
+                                    <property name="borderRightStyle">solid</property>
+                                    <property name="borderRightWidth">thin</property>
+                                    <property name="borderTopStyle">solid</property>
+                                    <property name="borderTopWidth">thin</property>
+                                    <property name="paddingTop">2pt</property>
+                                    <property name="paddingLeft">2pt</property>
+                                    <property name="paddingBottom">2pt</property>
+                                    <property name="paddingRight">2pt</property>
+                                    <data id="132">
+                                        <property name="resultSetColumn">nm</property>
+                                    </data>
+                                </cell>
+                                <cell id="133">
+                                    <property name="borderBottomStyle">solid</property>
+                                    <property name="borderBottomWidth">thin</property>
+                                    <property name="borderLeftStyle">solid</property>
+                                    <property name="borderLeftWidth">thin</property>
+                                    <property name="borderRightStyle">solid</property>
+                                    <property name="borderRightWidth">thin</property>
+                                    <property name="borderTopStyle">solid</property>
+                                    <property name="borderTopWidth">thin</property>
+                                    <property name="paddingTop">2pt</property>
+                                    <property name="paddingLeft">2pt</property>
+                                    <property name="paddingBottom">2pt</property>
+                                    <property name="paddingRight">2pt</property>
+                                    <property name="textAlign">right</property>
+                                    <data id="134">
+                                        <property name="resultSetColumn">mis_new</property>
+                                    </data>
+                                </cell>
+                                <cell id="135">
+                                    <property name="borderBottomStyle">solid</property>
+                                    <property name="borderBottomWidth">thin</property>
+                                    <property name="borderLeftStyle">solid</property>
+                                    <property name="borderLeftWidth">thin</property>
+                                    <property name="borderRightStyle">solid</property>
+                                    <property name="borderRightWidth">thin</property>
+                                    <property name="borderTopStyle">solid</property>
+                                    <property name="borderTopWidth">thin</property>
+                                    <property name="paddingTop">2pt</property>
+                                    <property name="paddingLeft">2pt</property>
+                                    <property name="paddingBottom">2pt</property>
+                                    <property name="paddingRight">2pt</property>
+                                    <property name="textAlign">right</property>
+                                    <data id="136">
+                                        <property name="resultSetColumn">mis_all</property>
+                                    </data>
+                                </cell>
+                                <cell id="137">
+                                    <property name="borderBottomStyle">solid</property>
+                                    <property name="borderBottomWidth">thin</property>
+                                    <property name="borderLeftStyle">solid</property>
+                                    <property name="borderLeftWidth">thin</property>
+                                    <property name="borderRightStyle">solid</property>
+                                    <property name="borderRightWidth">thin</property>
+                                    <property name="borderTopStyle">solid</property>
+                                    <property name="borderTopWidth">thin</property>
+                                    <property name="paddingTop">2pt</property>
+                                    <property name="paddingLeft">2pt</property>
+                                    <property name="paddingBottom">2pt</property>
+                                    <property name="paddingRight">2pt</property>
+                                    <property name="textAlign">right</property>
+                                    <data id="138">
+                                        <property name="resultSetColumn">mis_se</property>
+                                    </data>
+                                </cell>
+                                <cell id="139">
+                                    <property name="borderBottomStyle">solid</property>
+                                    <property name="borderBottomWidth">thin</property>
+                                    <property name="borderLeftStyle">solid</property>
+                                    <property name="borderLeftWidth">thin</property>
+                                    <property name="borderRightStyle">solid</property>
+                                    <property name="borderRightWidth">thin</property>
+                                    <property name="borderTopStyle">solid</property>
+                                    <property name="borderTopWidth">thin</property>
+                                    <property name="paddingTop">2pt</property>
+                                    <property name="paddingLeft">2pt</property>
+                                    <property name="paddingBottom">2pt</property>
+                                    <property name="paddingRight">2pt</property>
+                                    <property name="textAlign">right</property>
+                                    <data id="140">
+                                        <property name="resultSetColumn">mis_s</property>
+                                    </data>
+                                </cell>
+                                <cell id="141">
+                                    <property name="borderBottomStyle">solid</property>
+                                    <property name="borderBottomWidth">thin</property>
+                                    <property name="borderLeftStyle">solid</property>
+                                    <property name="borderLeftWidth">thin</property>
+                                    <property name="borderRightStyle">solid</property>
+                                    <property name="borderRightWidth">thin</property>
+                                    <property name="borderTopStyle">solid</property>
+                                    <property name="borderTopWidth">thin</property>
+                                    <property name="paddingTop">2pt</property>
+                                    <property name="paddingLeft">2pt</property>
+                                    <property name="paddingBottom">2pt</property>
+                                    <property name="paddingRight">2pt</property>
+                                    <property name="textAlign">right</property>
+                                    <data id="142">
+                                        <property name="resultSetColumn">mis_e</property>
+                                    </data>
+                                </cell>
+                                <cell id="143">
+                                    <property name="borderBottomStyle">solid</property>
+                                    <property name="borderBottomWidth">thin</property>
+                                    <property name="borderLeftStyle">solid</property>
+                                    <property name="borderLeftWidth">thin</property>
+                                    <property name="borderRightStyle">solid</property>
+                                    <property name="borderRightWidth">thin</property>
+                                    <property name="borderTopStyle">solid</property>
+                                    <property name="borderTopWidth">thin</property>
+                                    <property name="paddingTop">2pt</property>
+                                    <property name="paddingLeft">2pt</property>
+                                    <property name="paddingBottom">2pt</property>
+                                    <property name="paddingRight">2pt</property>
+                                    <property name="textAlign">right</property>
+                                    <data id="144">
+                                        <property name="resultSetColumn">mis_t</property>
+                                    </data>
+                                </cell>
+                            </row>
+                        </detail>
+                    </table>
+                </cell>
+            </row>
+            <row id="181">
+                <property name="fontFamily">"Times New Roman"</property>
+                <cell id="182">
+                    <property name="fontFamily">"Times New Roman"</property>
+                    <property name="paddingTop">6mm</property>
+                    <property name="paddingBottom">3mm</property>
+                    <data id="256">
+                        <property name="style">HeaderStyle</property>
+                        <property name="paddingTop">1pt</property>
+                        <property name="paddingBottom">1pt</property>
+                        <property name="dataSet">Data Set_period</property>
+                        <list-property name="boundDataColumns">
+                            <structure>
+                                <property name="name">Header3</property>
+                                <text-property name="displayName">Header3</text-property>
+                                <expression name="expression" type="javascript">dataSetRow["Header3"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                        </list-property>
+                        <property name="resultSetColumn">Header3</property>
+                    </data>
+                </cell>
+            </row>
+            <row id="189">
+                <property name="fontFamily">"Times New Roman"</property>
+                <cell id="190">
+                    <table id="196">
+                        <property name="fontFamily">"Times New Roman"</property>
+                        <property name="width">100%</property>
+                        <property name="dataSet">Data Set_3</property>
+                        <list-property name="boundDataColumns">
+                            <structure>
+                                <property name="name">num</property>
+                                <text-property name="displayName">num</text-property>
+                                <expression name="expression" type="javascript">dataSetRow["num"]</expression>
+                                <property name="dataType">decimal</property>
+                            </structure>
+                            <structure>
+                                <property name="name">nm</property>
+                                <text-property name="displayName">nm</text-property>
+                                <expression name="expression" type="javascript">dataSetRow["nm"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                            <structure>
+                                <property name="name">mis_new</property>
+                                <text-property name="displayName">mis_new</text-property>
+                                <expression name="expression" type="javascript">dataSetRow["mis_new"]</expression>
+                                <property name="dataType">decimal</property>
+                            </structure>
+                            <structure>
+                                <property name="name">mis_all</property>
+                                <text-property name="displayName">mis_all</text-property>
+                                <expression name="expression" type="javascript">dataSetRow["mis_all"]</expression>
+                                <property name="dataType">decimal</property>
+                            </structure>
+                            <structure>
+                                <property name="name">mis_se</property>
+                                <text-property name="displayName">mis_se</text-property>
+                                <expression name="expression" type="javascript">dataSetRow["mis_se"]</expression>
+                                <property name="dataType">decimal</property>
+                            </structure>
+                            <structure>
+                                <property name="name">mis_s</property>
+                                <text-property name="displayName">mis_s</text-property>
+                                <expression name="expression" type="javascript">dataSetRow["mis_s"]</expression>
+                                <property name="dataType">decimal</property>
+                            </structure>
+                            <structure>
+                                <property name="name">mis_e</property>
+                                <text-property name="displayName">mis_e</text-property>
+                                <expression name="expression" type="javascript">dataSetRow["mis_e"]</expression>
+                                <property name="dataType">decimal</property>
+                            </structure>
+                            <structure>
+                                <property name="name">mis_t</property>
+                                <text-property name="displayName">mis_t</text-property>
+                                <expression name="expression" type="javascript">dataSetRow["mis_t"]</expression>
+                                <property name="dataType">decimal</property>
+                            </structure>
+                        </list-property>
+                        <column id="243">
+                            <property name="width">1cm</property>
+                        </column>
+                        <column id="244">
+                            <property name="width">5cm</property>
+                        </column>
+                        <column id="245">
+                            <property name="width">32mm</property>
+                        </column>
+                        <column id="246">
+                            <property name="width">32mm</property>
+                        </column>
+                        <column id="247">
+                            <property name="width">32mm</property>
+                        </column>
+                        <column id="248">
+                            <property name="width">32mm</property>
+                        </column>
+                        <column id="249">
+                            <property name="width">32mm</property>
+                        </column>
+                        <column id="250">
+                            <property name="width">32mm</property>
+                        </column>
+                        <header>
+                            <row id="197">
+                                <cell id="198">
+                                    <property name="colSpan">1</property>
+                                    <property name="rowSpan">2</property>
+                                    <property name="fontWeight">bold</property>
+                                    <property name="borderBottomStyle">solid</property>
+                                    <property name="borderBottomWidth">thin</property>
+                                    <property name="borderLeftStyle">solid</property>
+                                    <property name="borderLeftWidth">thin</property>
+                                    <property name="borderRightStyle">solid</property>
+                                    <property name="borderRightWidth">thin</property>
+                                    <property name="borderTopStyle">solid</property>
+                                    <property name="borderTopWidth">thin</property>
+                                    <property name="paddingTop">2pt</property>
+                                    <property name="paddingLeft">2pt</property>
+                                    <property name="paddingBottom">2pt</property>
+                                    <property name="paddingRight">2pt</property>
+                                    <property name="verticalAlign">middle</property>
+                                    <label id="199">
+                                        <text-property name="text">№</text-property>
+                                    </label>
+                                </cell>
+                                <cell id="200">
+                                    <property name="colSpan">1</property>
+                                    <property name="rowSpan">2</property>
+                                    <property name="fontWeight">bold</property>
+                                    <property name="borderBottomStyle">solid</property>
+                                    <property name="borderBottomWidth">thin</property>
+                                    <property name="borderLeftStyle">solid</property>
+                                    <property name="borderLeftWidth">thin</property>
+                                    <property name="borderRightStyle">solid</property>
+                                    <property name="borderRightWidth">thin</property>
+                                    <property name="borderTopStyle">solid</property>
+                                    <property name="borderTopWidth">thin</property>
+                                    <property name="paddingTop">2pt</property>
+                                    <property name="paddingLeft">2pt</property>
+                                    <property name="paddingBottom">2pt</property>
+                                    <property name="paddingRight">2pt</property>
+                                    <property name="verticalAlign">middle</property>
+                                    <property name="whiteSpace">pre</property>
+                                    <label id="201">
+                                        <text-property name="text">Название ПС</text-property>
+                                    </label>
+                                </cell>
+                                <cell id="202">
+                                    <property name="colSpan">1</property>
+                                    <property name="rowSpan">2</property>
+                                    <property name="fontWeight">bold</property>
+                                    <property name="borderBottomStyle">solid</property>
+                                    <property name="borderBottomWidth">thin</property>
+                                    <property name="borderLeftStyle">solid</property>
+                                    <property name="borderLeftWidth">thin</property>
+                                    <property name="borderRightStyle">solid</property>
+                                    <property name="borderRightWidth">thin</property>
+                                    <property name="borderTopStyle">solid</property>
+                                    <property name="borderTopWidth">thin</property>
+                                    <property name="paddingTop">2pt</property>
+                                    <property name="paddingLeft">2pt</property>
+                                    <property name="paddingBottom">2pt</property>
+                                    <property name="paddingRight">2pt</property>
+                                    <property name="verticalAlign">middle</property>
+                                    <property name="whiteSpace">pre</property>
+                                    <label id="203">
+                                        <text-property name="text">Поступило пору-чений в отчетный период</text-property>
+                                    </label>
+                                </cell>
+                                <cell id="204">
+                                    <property name="colSpan">5</property>
+                                    <property name="rowSpan">1</property>
+                                    <property name="fontWeight">bold</property>
+                                    <property name="borderBottomStyle">solid</property>
+                                    <property name="borderBottomWidth">thin</property>
+                                    <property name="borderLeftStyle">solid</property>
+                                    <property name="borderLeftWidth">thin</property>
+                                    <property name="borderRightStyle">solid</property>
+                                    <property name="borderRightWidth">thin</property>
+                                    <property name="borderTopStyle">solid</property>
+                                    <property name="borderTopWidth">thin</property>
+                                    <property name="paddingTop">2pt</property>
+                                    <property name="paddingLeft">2pt</property>
+                                    <property name="paddingBottom">2pt</property>
+                                    <property name="paddingRight">2pt</property>
+                                    <property name="verticalAlign">middle</property>
+                                    <property name="whiteSpace">pre</property>
+                                    <label id="205">
+                                        <text-property name="text">Находилось на исполнении поручений</text-property>
+                                    </label>
+                                </cell>
+                            </row>
+                            <row id="206">
+                                <cell id="207">
+                                    <property name="borderBottomStyle">solid</property>
+                                    <property name="borderBottomWidth">thin</property>
+                                    <property name="borderLeftStyle">solid</property>
+                                    <property name="borderLeftWidth">thin</property>
+                                    <property name="borderRightStyle">solid</property>
+                                    <property name="borderRightWidth">thin</property>
+                                    <property name="borderTopStyle">solid</property>
+                                    <property name="borderTopWidth">thin</property>
+                                    <property name="paddingTop">2pt</property>
+                                    <property name="paddingLeft">2pt</property>
+                                    <property name="paddingBottom">2pt</property>
+                                    <property name="paddingRight">2pt</property>
+                                    <property name="verticalAlign">middle</property>
+                                    <property name="whiteSpace">pre</property>
+                                    <label id="208">
+                                        <text-property name="text">Всего</text-property>
+                                    </label>
+                                </cell>
+                                <cell id="209">
+                                    <property name="borderBottomStyle">solid</property>
+                                    <property name="borderBottomWidth">thin</property>
+                                    <property name="borderLeftStyle">solid</property>
+                                    <property name="borderLeftWidth">thin</property>
+                                    <property name="borderRightStyle">solid</property>
+                                    <property name="borderRightWidth">thin</property>
+                                    <property name="borderTopStyle">solid</property>
+                                    <property name="borderTopWidth">thin</property>
+                                    <property name="paddingTop">2pt</property>
+                                    <property name="paddingLeft">2pt</property>
+                                    <property name="paddingBottom">2pt</property>
+                                    <property name="paddingRight">2pt</property>
+                                    <property name="verticalAlign">middle</property>
+                                    <property name="whiteSpace">pre</property>
+                                    <label id="210">
+                                        <text-property name="text">Исполнено поступивших в отчетном периоде</text-property>
+                                    </label>
+                                </cell>
+                                <cell id="211">
+                                    <property name="borderBottomStyle">solid</property>
+                                    <property name="borderBottomWidth">thin</property>
+                                    <property name="borderLeftStyle">solid</property>
+                                    <property name="borderLeftWidth">thin</property>
+                                    <property name="borderRightStyle">solid</property>
+                                    <property name="borderRightWidth">thin</property>
+                                    <property name="borderTopStyle">solid</property>
+                                    <property name="borderTopWidth">thin</property>
+                                    <property name="paddingTop">2pt</property>
+                                    <property name="paddingLeft">2pt</property>
+                                    <property name="paddingBottom">2pt</property>
+                                    <property name="paddingRight">2pt</property>
+                                    <property name="verticalAlign">middle</property>
+                                    <property name="whiteSpace">pre</property>
+                                    <label id="212">
+                                        <text-property name="text">Начато исполнение поступивших в отчетном периоде, но не завершено</text-property>
+                                    </label>
+                                </cell>
+                                <cell id="213">
+                                    <property name="borderBottomStyle">solid</property>
+                                    <property name="borderBottomWidth">thin</property>
+                                    <property name="borderLeftStyle">solid</property>
+                                    <property name="borderLeftWidth">thin</property>
+                                    <property name="borderRightStyle">solid</property>
+                                    <property name="borderRightWidth">thin</property>
+                                    <property name="borderTopStyle">solid</property>
+                                    <property name="borderTopWidth">thin</property>
+                                    <property name="paddingTop">2pt</property>
+                                    <property name="paddingLeft">2pt</property>
+                                    <property name="paddingBottom">2pt</property>
+                                    <property name="paddingRight">2pt</property>
+                                    <property name="verticalAlign">middle</property>
+                                    <property name="whiteSpace">pre</property>
+                                    <label id="214">
+                                        <text-property name="text">Исполнено в отчетном периоде ранее начатых</text-property>
+                                    </label>
+                                </cell>
+                                <cell id="215">
+                                    <property name="borderBottomStyle">solid</property>
+                                    <property name="borderBottomWidth">thin</property>
+                                    <property name="borderLeftStyle">solid</property>
+                                    <property name="borderLeftWidth">thin</property>
+                                    <property name="borderRightStyle">solid</property>
+                                    <property name="borderRightWidth">thin</property>
+                                    <property name="borderTopStyle">solid</property>
+                                    <property name="borderTopWidth">thin</property>
+                                    <property name="paddingTop">2pt</property>
+                                    <property name="paddingLeft">2pt</property>
+                                    <property name="paddingBottom">2pt</property>
+                                    <property name="paddingRight">2pt</property>
+                                    <property name="verticalAlign">middle</property>
+                                    <property name="whiteSpace">pre</property>
+                                    <label id="216">
+                                        <text-property name="text">Исполняется ранее начатых</text-property>
+                                    </label>
+                                </cell>
+                            </row>
+                        </header>
+                        <detail>
+                            <row id="217">
+                                <cell id="218">
+                                    <property name="borderBottomStyle">solid</property>
+                                    <property name="borderBottomWidth">thin</property>
+                                    <property name="borderLeftStyle">solid</property>
+                                    <property name="borderLeftWidth">thin</property>
+                                    <property name="borderRightStyle">solid</property>
+                                    <property name="borderRightWidth">thin</property>
+                                    <property name="borderTopStyle">solid</property>
+                                    <property name="borderTopWidth">thin</property>
+                                    <property name="paddingTop">2pt</property>
+                                    <property name="paddingLeft">2pt</property>
+                                    <property name="paddingBottom">2pt</property>
+                                    <property name="paddingRight">2pt</property>
+                                    <data id="219">
+                                        <property name="resultSetColumn">num</property>
+                                    </data>
+                                </cell>
+                                <cell id="220">
+                                    <property name="borderBottomStyle">solid</property>
+                                    <property name="borderBottomWidth">thin</property>
+                                    <property name="borderLeftStyle">solid</property>
+                                    <property name="borderLeftWidth">thin</property>
+                                    <property name="borderRightStyle">solid</property>
+                                    <property name="borderRightWidth">thin</property>
+                                    <property name="borderTopStyle">solid</property>
+                                    <property name="borderTopWidth">thin</property>
+                                    <property name="paddingTop">2pt</property>
+                                    <property name="paddingLeft">2pt</property>
+                                    <property name="paddingBottom">2pt</property>
+                                    <property name="paddingRight">2pt</property>
+                                    <data id="221">
+                                        <property name="resultSetColumn">nm</property>
+                                    </data>
+                                </cell>
+                                <cell id="222">
+                                    <property name="borderBottomStyle">solid</property>
+                                    <property name="borderBottomWidth">thin</property>
+                                    <property name="borderLeftStyle">solid</property>
+                                    <property name="borderLeftWidth">thin</property>
+                                    <property name="borderRightStyle">solid</property>
+                                    <property name="borderRightWidth">thin</property>
+                                    <property name="borderTopStyle">solid</property>
+                                    <property name="borderTopWidth">thin</property>
+                                    <property name="paddingTop">2pt</property>
+                                    <property name="paddingLeft">2pt</property>
+                                    <property name="paddingBottom">2pt</property>
+                                    <property name="paddingRight">2pt</property>
+                                    <property name="textAlign">right</property>
+                                    <data id="223">
+                                        <property name="resultSetColumn">mis_new</property>
+                                    </data>
+                                </cell>
+                                <cell id="224">
+                                    <property name="borderBottomStyle">solid</property>
+                                    <property name="borderBottomWidth">thin</property>
+                                    <property name="borderLeftStyle">solid</property>
+                                    <property name="borderLeftWidth">thin</property>
+                                    <property name="borderRightStyle">solid</property>
+                                    <property name="borderRightWidth">thin</property>
+                                    <property name="borderTopStyle">solid</property>
+                                    <property name="borderTopWidth">thin</property>
+                                    <property name="paddingTop">2pt</property>
+                                    <property name="paddingLeft">2pt</property>
+                                    <property name="paddingBottom">2pt</property>
+                                    <property name="paddingRight">2pt</property>
+                                    <property name="textAlign">right</property>
+                                    <data id="225">
+                                        <property name="resultSetColumn">mis_all</property>
+                                    </data>
+                                </cell>
+                                <cell id="226">
+                                    <property name="borderBottomStyle">solid</property>
+                                    <property name="borderBottomWidth">thin</property>
+                                    <property name="borderLeftStyle">solid</property>
+                                    <property name="borderLeftWidth">thin</property>
+                                    <property name="borderRightStyle">solid</property>
+                                    <property name="borderRightWidth">thin</property>
+                                    <property name="borderTopStyle">solid</property>
+                                    <property name="borderTopWidth">thin</property>
+                                    <property name="paddingTop">2pt</property>
+                                    <property name="paddingLeft">2pt</property>
+                                    <property name="paddingBottom">2pt</property>
+                                    <property name="paddingRight">2pt</property>
+                                    <property name="textAlign">right</property>
+                                    <data id="227">
+                                        <property name="resultSetColumn">mis_se</property>
+                                    </data>
+                                </cell>
+                                <cell id="228">
+                                    <property name="borderBottomStyle">solid</property>
+                                    <property name="borderBottomWidth">thin</property>
+                                    <property name="borderLeftStyle">solid</property>
+                                    <property name="borderLeftWidth">thin</property>
+                                    <property name="borderRightStyle">solid</property>
+                                    <property name="borderRightWidth">thin</property>
+                                    <property name="borderTopStyle">solid</property>
+                                    <property name="borderTopWidth">thin</property>
+                                    <property name="paddingTop">2pt</property>
+                                    <property name="paddingLeft">2pt</property>
+                                    <property name="paddingBottom">2pt</property>
+                                    <property name="paddingRight">2pt</property>
+                                    <property name="textAlign">right</property>
+                                    <data id="229">
+                                        <property name="resultSetColumn">mis_s</property>
+                                    </data>
+                                </cell>
+                                <cell id="230">
+                                    <property name="borderBottomStyle">solid</property>
+                                    <property name="borderBottomWidth">thin</property>
+                                    <property name="borderLeftStyle">solid</property>
+                                    <property name="borderLeftWidth">thin</property>
+                                    <property name="borderRightStyle">solid</property>
+                                    <property name="borderRightWidth">thin</property>
+                                    <property name="borderTopStyle">solid</property>
+                                    <property name="borderTopWidth">thin</property>
+                                    <property name="paddingTop">2pt</property>
+                                    <property name="paddingLeft">2pt</property>
+                                    <property name="paddingBottom">2pt</property>
+                                    <property name="paddingRight">2pt</property>
+                                    <property name="textAlign">right</property>
+                                    <data id="231">
+                                        <property name="resultSetColumn">mis_e</property>
+                                    </data>
+                                </cell>
+                                <cell id="232">
+                                    <property name="borderBottomStyle">solid</property>
+                                    <property name="borderBottomWidth">thin</property>
+                                    <property name="borderLeftStyle">solid</property>
+                                    <property name="borderLeftWidth">thin</property>
+                                    <property name="borderRightStyle">solid</property>
+                                    <property name="borderRightWidth">thin</property>
+                                    <property name="borderTopStyle">solid</property>
+                                    <property name="borderTopWidth">thin</property>
+                                    <property name="paddingTop">2pt</property>
+                                    <property name="paddingLeft">2pt</property>
+                                    <property name="paddingBottom">2pt</property>
+                                    <property name="paddingRight">2pt</property>
+                                    <property name="textAlign">right</property>
+                                    <data id="233">
                                         <property name="resultSetColumn">mis_t</property>
                                     </data>
                                 </cell>
