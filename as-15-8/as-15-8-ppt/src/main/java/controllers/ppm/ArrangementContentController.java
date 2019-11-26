@@ -9,13 +9,14 @@ import lombok.extern.slf4j.Slf4j;
 import model.enums.SearchQueryPattern;
 import model.traffic.SearchQueryContentJoin;
 import model.traffic.SearchQueryTrafficUnit;
+import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Flux;
+import reactor.core.publisher.ConnectableFlux;
 import repositories.ArrangementRepo;
 import repositories.CustomErdiUnitRepository;
 import repositories.SearchQueryTrafficUnitRepository;
@@ -38,20 +39,21 @@ public class ArrangementContentController {
 
     private final ArrangementRepo arrangementRepo;
     private final CustomErdiUnitRepository customErdiUnitRepository;
-    private final PodWebClient pod_webClient;
+    private final PodWebClient podWebClient;
     private final SearchQueryTrafficUnitRepository searchQueryTrafficUnitRepository;
 
-    @GetMapping
-    public Flux<CheckUnit> getAndSendCheckUnits(@RequestParam("id") Long arrangementId) {
+    @GetMapping(produces = MediaType.APPLICATION_STREAM_JSON_VALUE)
+    public Publisher<CheckUnit> getAndSendCheckUnits(@RequestParam("id") Long arrangementId) {
 
         //TODO получать все остальные трафик-юниты тут же
         List<Long> contentIds = arrangementRepo.listContentIdsByArrangementId(arrangementId);
-        Flux<CheckUnit> checkUnitFlux = pod_webClient.fetchCheckUnits(contentIds);
-        return Flux
+       // ParallelFlux<CheckUnit> checkUnitFlux = pod_webClient.fetchCheckUnits(contentIds);
+       /* return Flux
                 .concat(checkUnitFlux,
                         Flux.fromIterable(getCustomErdiCheckUnits(arrangementId)),
                         Flux.fromIterable(getSearchPhrasesCheckUnits(arrangementId))
-                );
+                );*/
+       return podWebClient.fetchCheckUnits(contentIds);
     }
 
     private List<CheckUnit> getCustomErdiCheckUnits(Long arrangementId){
@@ -121,7 +123,7 @@ public class ArrangementContentController {
                 .mapToLong(SearchQueryContentJoin::getContentId)
                 .boxed()
                 .collect(Collectors.toList());
-            List<CheckUnit> podCheckUnits = pod_webClient.fetchCheckUnits(contentIds).collectList().block();
+            List<CheckUnit> podCheckUnits = podWebClient.fetchCheckUnits(contentIds).collectList().block();
             if(podCheckUnits != null) {
                 checkUnits.addAll(podCheckUnits);
             }

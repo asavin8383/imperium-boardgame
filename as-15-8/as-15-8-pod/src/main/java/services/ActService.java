@@ -78,7 +78,7 @@ public class ActService {
             ActCheckResultPPP achRes = new ActCheckResultPPP();
             achRes.setCheckResultId(actCheckResult.getCheckResultId());
             achRes.setCheckUnitType(actCheckResult.getCheckUnitType().name());
-            achRes.setCheckUnitValue(actCheckResult.getCheckUnitValue());
+            achRes.setCheckUnitValue(new String[]{actCheckResult.getCheckUnitValue()});
             achRes.setDate(actCheckResult.getDate());
             checkResults.add(achRes);
         }
@@ -147,7 +147,6 @@ public class ActService {
 
         ResponseStatusString responseStatus = response.getBody();
         HttpStatus httpStatus = response.getStatusCode();
-        int code = httpStatus.value();
 
         responseStatus = responseStatus != null ? responseStatus :
                 new ResponseStatusString(false, httpStatus.toString());

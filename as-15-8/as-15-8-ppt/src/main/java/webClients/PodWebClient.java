@@ -2,24 +2,24 @@ package webClients;
 
 import checkUnits.CheckUnit;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.netflix.discovery.shared.transport.decorator.EurekaHttpClientDecorator;
-import com.netflix.discovery.shared.transport.decorator.RetryableEurekaHttpClient;
 import exceptions.AS_15_8_PPT_Exception;
-import io.pivotal.spring.cloud.service.eureka.ClientFilterAdapter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.net.NioEndpoint;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
+import reactor.core.publisher.ConnectableFlux;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.ParallelFlux;
 import reactor.core.scheduler.Schedulers;
 
 import javax.annotation.PostConstruct;
+import java.time.Duration;
 import java.util.List;
+import java.util.logging.Level;
 
 @Service
 @Slf4j
@@ -27,6 +27,8 @@ public class PodWebClient {
 
     private static final String GET_ERDI_URI = "/pod/erdi/single";
     private static final String GET_CHECK_UNITS_URL = "/pod/erdi/checkUnits";
+
+    private static final int fetchCheckUnitsConcurrency = 10;
 
     @Value("${gateway.url}")
     private String gatewayUrl;
@@ -61,10 +63,11 @@ public class PodWebClient {
 
     public Flux<CheckUnit> fetchCheckUnits(List<Long> contentIds) {
         return Flux.fromIterable(contentIds)
-                .parallel(10)
+                .parallel(fetchCheckUnitsConcurrency)
                 .runOn(Schedulers.parallel())
-                .flatMap(this::getCheckUnitsByContentId, true, 10)
-                .sequential();
+                .flatMap(this::getCheckUnitsByContentId, true, fetchCheckUnitsConcurrency)
+                .sequential()
+                .delayElements(Duration.ofMillis(100));
     }
 
     private Flux<CheckUnit> getCheckUnitsByContentId(Long contentId){

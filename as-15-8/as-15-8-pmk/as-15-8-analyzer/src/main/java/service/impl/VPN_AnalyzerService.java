@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
+import rest.ResponseStatusString;
 import restapi.PODExchange;
 import service.AnalyzerService;
 import service.ClassificationService;
@@ -122,13 +123,13 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 
 	protected void checkFinalUrlForForbidden(VpnAnalysisResult analysisResult){
 		if (analysisResult.getNeedTestFinalUrl() != null && analysisResult.getNeedTestFinalUrl()){
-			boolean check = podExchange.checkUrl(analysisResult.getFinalUrl());
-			if (check){
+			ResponseStatusString check = podExchange.checkUrl(analysisResult.getFinalUrl());
+			if (check.isStatus()){
 				analysisResult.setCheckResult(FORBIDDEN_CONTENT_DETECTED);
 				analysisResult.setForbiddenFinalUrl(true);
 				String info = analysisResult.getStubScoreInfo();
 				info = info == null ? "" : info + ". ";
-				analysisResult.setStubScoreInfo(info + "Обнаружен редирект на запрещенный ресурс.");
+				analysisResult.setStubScoreInfo(info + "Обнаружен редирект на запрещенный ресурс. ЕРДИ ID:" + check.getResponse() + ".");
 			}
 			log.info("Результат проверки URL на находжение в ЕРДИ: " + check + ", URL = " + analysisResult.getPageUrlFinal());
 		}
