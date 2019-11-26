@@ -44,18 +44,17 @@ public class ArrangementContentController {
     private final SearchQueryTrafficUnitRepository searchQueryTrafficUnitRepository;
 
     @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public ParallelFlux<CheckUnit> getAndSendCheckUnits(@RequestParam("id") Long arrangementId) {
+    public Flux<CheckUnit> getAndSendCheckUnits(@RequestParam("id") Long arrangementId) {
 
         //TODO получать все остальные трафик-юниты тут же
         log.info("Запрос на получение check units мероприятия: " + arrangementId);
         List<Long> contentIds = arrangementRepo.listContentIdsByArrangementId(arrangementId);
-        ParallelFlux<CheckUnit> formalCheckUnits = podWebClient.fetchCheckUnits(contentIds);
-        log.info("Сформирован список check units мероприятия: " + arrangementId);
-        return formalCheckUnits;
-        /*return Flux.concat(
+        Flux<CheckUnit> checkUnits = Flux.concat(
                 podWebClient.fetchCheckUnits(contentIds),
                 getCustomErdiCheckUnits(arrangementId)
-        ).publishOn(Schedulers.newParallel("checkUnits", 1000));*/
+        );
+        log.info("Сформирован список check units мероприятия: " + arrangementId);
+        return checkUnits;
     }
 
     private Flux<CheckUnit> getCustomErdiCheckUnits(Long arrangementId){
