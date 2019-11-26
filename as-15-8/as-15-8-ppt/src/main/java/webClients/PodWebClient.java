@@ -28,7 +28,7 @@ public class PodWebClient {
     private static final String GET_ERDI_URI = "/pod/erdi/single";
     private static final String GET_CHECK_UNITS_URL = "/pod/erdi/checkUnits";
 
-    private static final int fetchCheckUnitsConcurrency = 10;
+    private static final int fetchCheckUnitsConcurrency = 100;
 
     @Value("${gateway.url}")
     private String gatewayUrl;
@@ -61,13 +61,11 @@ public class PodWebClient {
                 .doOnError(ex -> log.error("Ошибка при получении ЕРДИ по id: "+id, ex));
     }
 
-    public Flux<CheckUnit> fetchCheckUnits(List<Long> contentIds) {
+    public ParallelFlux<CheckUnit> fetchCheckUnits(List<Long> contentIds) {
         return Flux.fromIterable(contentIds)
                 .parallel(fetchCheckUnitsConcurrency)
                 .runOn(Schedulers.parallel())
-                .flatMap(this::getCheckUnitsByContentId, true, fetchCheckUnitsConcurrency)
-                .sequential()
-                .delayElements(Duration.ofMillis(100));
+                .flatMap(this::getCheckUnitsByContentId, true, fetchCheckUnitsConcurrency);
     }
 
     private Flux<CheckUnit> getCheckUnitsByContentId(Long contentId){

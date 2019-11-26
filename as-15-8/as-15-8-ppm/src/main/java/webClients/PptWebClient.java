@@ -47,12 +47,9 @@ public class PptWebClient {
             return WebClient.create(gatewayUrl)
                     .get()
                     .uri(uri)
-                    .accept(MediaType.APPLICATION_STREAM_JSON)
-                    .exchange()
-                    .flatMapMany(clientResponse -> {
-                        log.info("Принят ответ от ППТ: "+clientResponse.statusCode());
-                        return clientResponse.bodyToFlux(CheckUnit.class);
-                    })
+                    .accept(MediaType.TEXT_EVENT_STREAM)
+                    .retrieve()
+                    .bodyToFlux(CheckUnit.class)
                     .collectList()
                     .block();
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
