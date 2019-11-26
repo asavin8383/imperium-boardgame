@@ -67,7 +67,7 @@ public class PodWebClient {
                 .flatMap(this::getCheckUnitsByContentId, true, fetchCheckUnitsConcurrency)
                 .log("checkUnits", Level.INFO)
                 .sequential()
-                .publish(10);
+                .publish();
     }
 
     private Flux<CheckUnit> getCheckUnitsByContentId(Long contentId){

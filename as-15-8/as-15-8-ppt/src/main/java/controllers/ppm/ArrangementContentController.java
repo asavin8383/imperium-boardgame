@@ -38,7 +38,7 @@ public class ArrangementContentController {
 
     private final ArrangementRepo arrangementRepo;
     private final CustomErdiUnitRepository customErdiUnitRepository;
-    private final PodWebClient pod_webClient;
+    private final PodWebClient podWebClient;
     private final SearchQueryTrafficUnitRepository searchQueryTrafficUnitRepository;
 
     @GetMapping
@@ -52,7 +52,7 @@ public class ArrangementContentController {
                         Flux.fromIterable(getCustomErdiCheckUnits(arrangementId)),
                         Flux.fromIterable(getSearchPhrasesCheckUnits(arrangementId))
                 );*/
-       return pod_webClient.fetchCheckUnits(contentIds);
+       return podWebClient.fetchCheckUnits(contentIds);
     }
 
     private List<CheckUnit> getCustomErdiCheckUnits(Long arrangementId){
@@ -122,7 +122,7 @@ public class ArrangementContentController {
                 .mapToLong(SearchQueryContentJoin::getContentId)
                 .boxed()
                 .collect(Collectors.toList());
-            List<CheckUnit> podCheckUnits = pod_webClient.fetchCheckUnits(contentIds).collectList().block();
+            List<CheckUnit> podCheckUnits = podWebClient.fetchCheckUnits(contentIds).collectList().block();
             if(podCheckUnits != null) {
                 checkUnits.addAll(podCheckUnits);
             }
