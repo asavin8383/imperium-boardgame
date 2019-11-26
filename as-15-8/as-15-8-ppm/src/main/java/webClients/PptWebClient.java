@@ -45,6 +45,7 @@ public class PptWebClient {
             List<CheckUnit> checkUnits = WebClient.create(gatewayUrl)
                     .get()
                     .uri(uri)
+                    .accept(MediaType.TEXT_EVENT_STREAM)
                     .retrieve()
                     .bodyToFlux(CheckUnit.class)
                     .collectList()
