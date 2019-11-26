@@ -43,12 +43,4 @@ public interface ResultRepo extends JpaRepository<Result, Long> {
 	@Query(value = "select min(res.endDate) from Result res where res.arrangementId = :id")
 	LocalDateTime getMinDateByArrangementId(@Param("id") Long id);
 
-	@Query("select " +
-				"(sum(case when result in ('PLANNED', 'RUNNING') then 0 else 1 end) * 1.0 " +
-				"/ "+
-				"count(r.id)) * 100 as percent " +
-			"from Result r " +
-			"where arrangementId = :id")
-	int getCompletionPercent(@Param("id") Long id);
-
 }

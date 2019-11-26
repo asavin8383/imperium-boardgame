@@ -36,7 +36,10 @@ public class ResultsController {
 
     private final ResultRepo resultRepo;
     private final ResultScreenShotRepo resultScreenShotRepo;
+    private final PasdDetailResultRepo pasdDetailResultRepo;
+    private final PsDetailResultRepo psDetailResultRepo;
     private final NmapDetailResultRepo nmapDetailResultRepo;
+    private final ErrorDetailResultRepo errorDetailResultRepo;
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     @GetMapping
@@ -59,12 +62,6 @@ public class ResultsController {
         }
     }
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    @GetMapping("/completion")
-    public int getCompletionPercent(@RequestParam Long arrangementId){
-        return resultRepo.getCompletionPercent(arrangementId);
-    }
-
     @GetMapping(path = "/screenshot", produces = MediaType.IMAGE_PNG_VALUE)
     public @ResponseBody
     ResponseEntity<byte[]> getScreenshot(@RequestParam Long id){
@@ -85,6 +82,38 @@ public class ResultsController {
     public @ResponseBody ResponseEntity<String> getNmapLog(@RequestParam Long id){
         return nmapDetailResultRepo.findById(id)
                 .map(nmapDetailResult -> ResponseEntity.ok(nmapDetailResult.getLog()))
+                .orElse(ResponseEntity.noContent().build());
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @GetMapping(path = "/details")
+    public ResponseEntity<PasdDetailResult> getPasdDetails(@RequestParam Long id){
+        return pasdDetailResultRepo.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.noContent().build());
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @GetMapping(path = "/details/ps")
+    public ResponseEntity<PsDetailResult> getPsDetails(@RequestParam Long id) {
+        return psDetailResultRepo.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.noContent().build());
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @GetMapping(path = "/details/nmap")
+    public ResponseEntity<NmapDetailResult> getNmapDetails(@RequestParam Long id) {
+        return nmapDetailResultRepo.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.noContent().build());
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @GetMapping(path = "/details/error")
+    public ResponseEntity<ErrorDetailResult> getErrorDetails(@RequestParam Long id) {
+        return errorDetailResultRepo.findById(id)
+                .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.noContent().build());
     }
 
