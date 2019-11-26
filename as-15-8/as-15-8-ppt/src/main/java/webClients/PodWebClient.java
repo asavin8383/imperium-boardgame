@@ -10,16 +10,13 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
-import reactor.core.publisher.ConnectableFlux;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.ParallelFlux;
 import reactor.core.scheduler.Schedulers;
 
 import javax.annotation.PostConstruct;
-import java.time.Duration;
 import java.util.List;
-import java.util.logging.Level;
 
 @Service
 @Slf4j
@@ -28,7 +25,7 @@ public class PodWebClient {
     private static final String GET_ERDI_URI = "/pod/erdi/single";
     private static final String GET_CHECK_UNITS_URL = "/pod/erdi/checkUnits";
 
-    private static final int fetchCheckUnitsConcurrency = 10;
+    private static final int fetchFluxConcurrency = 50;
 
     @Value("${gateway.url}")
     private String gatewayUrl;
@@ -42,8 +39,8 @@ public class PodWebClient {
 
     public List<ObjectNode> fetchErdi(List<Long> erdiIds) {
         return Flux.fromIterable(erdiIds)
-                .parallel()
-                .runOn(Schedulers.elastic())
+                .parallel(fetchFluxConcurrency)
+                .runOn(Schedulers.parallel())
                 .flatMap(this::getErdi)
                 .sequential()
                 .collectList()
@@ -61,13 +58,11 @@ public class PodWebClient {
                 .doOnError(ex -> log.error("Ошибка при получении ЕРДИ по id: "+id, ex));
     }
 
-    public Flux<CheckUnit> fetchCheckUnits(List<Long> contentIds) {
+    public ParallelFlux<CheckUnit> fetchCheckUnits(List<Long> contentIds) {
         return Flux.fromIterable(contentIds)
-                .parallel(fetchCheckUnitsConcurrency)
+                .parallel(fetchFluxConcurrency)
                 .runOn(Schedulers.parallel())
-                .flatMap(this::getCheckUnitsByContentId, true, fetchCheckUnitsConcurrency)
-                .sequential()
-                .delayElements(Duration.ofMillis(100));
+                .flatMap(this::getCheckUnitsByContentId);
     }
 
     private Flux<CheckUnit> getCheckUnitsByContentId(Long contentId){

@@ -2,21 +2,21 @@ package repositories;
 
 import enums.Dictionary;
 import model.scheme.Subtype;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import repositories.helper.DictionaryRepository;
+import utils.Utils;
 
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Optional;
 
 @Repository
-public interface SubtypeRepository extends
-        JpaRepository<Subtype, Integer>,
-        SubtypeRepositoryCustom,
-        DictionaryRepository {
+public interface SubtypeRepository extends JpaRepository<Subtype, Integer>, DictionaryRepository {
 
     long countByEffDt(Date effDt);
 
@@ -41,4 +41,14 @@ public interface SubtypeRepository extends
     }
 
     Optional<Subtype> findByOrigIdAndEffDt(String origId, Date effDt);
+
+    @Query("select distinct s from Subtype s " +
+            "where s.effDt = :effDt " +
+            "or concat(s.id, '') like lower(concat('%',:query,'%')) " +
+            "or lower(s.origId) like lower(concat('%',:query,'%')) " +
+            "or lower(s.registryName) like lower(concat('%',:query,'%')) " +
+            "or lower(s.categoryName) like lower(concat('%',:query,'%')) " +
+            "or lower(s.violationName) like lower(concat('%',:query,'%'))"
+        )
+    Page<Subtype> findByEffDtAndQuery(@Param("effDt") Date effDt, @Param("query") String query, Pageable pageable);
 }

@@ -34,8 +34,6 @@ public class PptWebClient {
 
     private final String CHECK_UNITS_URI = "/ppt/arrangements/checkUnits";
 
-    private final Long requestTimeout = 3600000L;
-
     @Value("${gateway.url}")
     private String gatewayUrl;
 
@@ -44,17 +42,16 @@ public class PptWebClient {
         try {
             log.info("Получение чек-юнитов мероприятия {} по запросу: {}", arrangementId, uri);
 
-            return WebClient.create(gatewayUrl)
+            List<CheckUnit> checkUnits = WebClient.create(gatewayUrl)
                     .get()
                     .uri(uri)
-                    .accept(MediaType.APPLICATION_STREAM_JSON)
-                    .exchange()
-                    .flatMapMany(clientResponse -> {
-                        log.info("Принят ответ от ППТ: "+clientResponse.statusCode());
-                        return clientResponse.bodyToFlux(CheckUnit.class);
-                    })
+                    .accept(MediaType.TEXT_EVENT_STREAM)
+                    .retrieve()
+                    .bodyToFlux(CheckUnit.class)
                     .collectList()
                     .block();
+            log.info("Check units мероприятия {} успешно сформированы", arrangementId, uri);
+            return checkUnits;
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
             throw AS_15_8_PPM_Exception.logAndGet(log, String.format("Ошибка получения чек-юнитов мероприятия %d в ППМ, код возврата %s", arrangementId, ex.getStatusCode()), ex);
         } catch (Exception ex){

@@ -228,7 +228,7 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 		NLPCategory nlpCategory = classificationService.classify(page);
 		nlpCategory = nlpCategory == null ? NLPCategory.EXCEPTION : nlpCategory;
 
-		analysisResult.setResultNLP(nlpCategory.name());
+		analysisResult.setResultNLP(nlpCategory.getDescription());
 	}
 
 	private CheckUnitJobResult obtainErrorResult(AnonymizerAnalysisResult aRes) {

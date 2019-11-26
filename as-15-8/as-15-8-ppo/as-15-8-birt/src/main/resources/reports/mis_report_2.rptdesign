@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.23" id="1">
-    <property name="createdBy">Eclipse BIRT Designer Version 4.6.0.v201606072122</property>
+    <property name="createdBy">Eclipse BIRT Designer Version 4.8.0.v201806261756</property>
     <property name="units">in</property>
     <property name="iconFile">/templates/blank_report.gif</property>
     <property name="bidiLayoutOrientation">ltr</property>
@@ -1153,7 +1153,7 @@ order by t1.access_tool_id]]></xml-property>
                                     <property name="verticalAlign">middle</property>
                                     <property name="whiteSpace">pre</property>
                                     <label id="53">
-                                        <text-property name="text">Исполнено сфор-мированных в от-четном периоде</text-property>
+                                        <text-property name="text">Исполнено сформированных в отчетном периоде</text-property>
                                     </label>
                                 </cell>
                                 <cell id="54">
@@ -1183,7 +1183,7 @@ order by t1.access_tool_id]]></xml-property>
                                     <property name="verticalAlign">middle</property>
                                     <property name="whiteSpace">pre</property>
                                     <label id="57">
-                                        <text-property name="text">Исполнено в от-четном периоде ранее сформиро-ванных</text-property>
+                                        <text-property name="text">Исполнено в отчетном периоде ранее сформированных</text-property>
                                     </label>
                                 </cell>
                                 <cell id="58">
@@ -1594,7 +1594,7 @@ order by t1.access_tool_id]]></xml-property>
                                     <property name="verticalAlign">middle</property>
                                     <property name="whiteSpace">pre</property>
                                     <label id="121">
-                                        <text-property name="text">Исполнено сфор-мированных в от-четном периоде</text-property>
+                                        <text-property name="text">Исполнено сформированных в отчетном периоде</text-property>
                                     </label>
                                 </cell>
                                 <cell id="122">
@@ -1632,7 +1632,7 @@ order by t1.access_tool_id]]></xml-property>
                                     <property name="verticalAlign">middle</property>
                                     <property name="whiteSpace">pre</property>
                                     <label id="125">
-                                        <text-property name="text">Исполнено в от-четном периоде ранее сформиро-ванных</text-property>
+                                        <text-property name="text">Исполнено в отчетном периоде ранее сформированных</text-property>
                                     </label>
                                 </cell>
                                 <cell id="126">
@@ -2044,7 +2044,7 @@ order by t1.access_tool_id]]></xml-property>
                                     <property name="verticalAlign">middle</property>
                                     <property name="whiteSpace">pre</property>
                                     <label id="210">
-                                        <text-property name="text">Исполнено сфор-мированных в от-четном периоде</text-property>
+                                        <text-property name="text">Исполнено сформированных в отчетном периоде</text-property>
                                     </label>
                                 </cell>
                                 <cell id="211">
@@ -2082,7 +2082,7 @@ order by t1.access_tool_id]]></xml-property>
                                     <property name="verticalAlign">middle</property>
                                     <property name="whiteSpace">pre</property>
                                     <label id="214">
-                                        <text-property name="text">Исполнено в от-четном периоде ранее сформиро-ванных</text-property>
+                                        <text-property name="text">Исполнено в отчетном периоде ранее сформированных</text-property>
                                     </label>
                                 </cell>
                                 <cell id="215">
