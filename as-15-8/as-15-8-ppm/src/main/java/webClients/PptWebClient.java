@@ -47,7 +47,7 @@ public class PptWebClient {
             return WebClient.create(gatewayUrl)
                     .get()
                     .uri(uri)
-                    .accept(MediaType.APPLICATION_STREAM_JSON)
+                    .accept(MediaType.TEXT_EVENT_STREAM)
                     .retrieve()
                     .bodyToFlux(CheckUnit.class)
                     .collectList()
