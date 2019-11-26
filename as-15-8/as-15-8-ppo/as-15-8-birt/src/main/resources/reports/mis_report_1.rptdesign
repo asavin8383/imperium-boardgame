@@ -932,12 +932,7 @@ order by t1.access_tool_id]]></xml-property>
                             </cell>
                         </row>
                         <row id="289">
-                            <cell id="290">
-                                <text id="298">
-                                    <property name="contentType">auto</property>
-                                    <text-property name="content"><![CDATA[ ]]></text-property>
-                                </text>
-                            </cell>
+                            <cell id="290"/>
                             <cell id="291"/>
                             <cell id="292"/>
                             <cell id="293"/>
@@ -1182,7 +1177,7 @@ order by t1.access_tool_id]]></xml-property>
                                     <property name="verticalAlign">middle</property>
                                     <property name="whiteSpace">pre</property>
                                     <label id="57">
-                                        <text-property name="text">Исполнено в от-четном периоде ранее начатых</text-property>
+                                        <text-property name="text">Исполнено в отчетном периоде ранее начатых</text-property>
                                     </label>
                                 </cell>
                                 <cell id="58">
@@ -1593,7 +1588,7 @@ order by t1.access_tool_id]]></xml-property>
                                     <property name="verticalAlign">middle</property>
                                     <property name="whiteSpace">pre</property>
                                     <label id="121">
-                                        <text-property name="text">Исполнено посту-пивших в отчетном периоде</text-property>
+                                        <text-property name="text">Исполнено поступивших в отчетном периоде</text-property>
                                     </label>
                                 </cell>
                                 <cell id="122">
@@ -1631,7 +1626,7 @@ order by t1.access_tool_id]]></xml-property>
                                     <property name="verticalAlign">middle</property>
                                     <property name="whiteSpace">pre</property>
                                     <label id="125">
-                                        <text-property name="text">Исполнено в от-четном периоде ранее начатых</text-property>
+                                        <text-property name="text">Исполнено в отчетном периоде ранее начатых</text-property>
                                     </label>
                                 </cell>
                                 <cell id="126">
@@ -2043,7 +2038,7 @@ order by t1.access_tool_id]]></xml-property>
                                     <property name="verticalAlign">middle</property>
                                     <property name="whiteSpace">pre</property>
                                     <label id="210">
-                                        <text-property name="text">Исполнено посту-пивших в отчетном периоде</text-property>
+                                        <text-property name="text">Исполнено поступивших в отчетном периоде</text-property>
                                     </label>
                                 </cell>
                                 <cell id="211">
@@ -2081,7 +2076,7 @@ order by t1.access_tool_id]]></xml-property>
                                     <property name="verticalAlign">middle</property>
                                     <property name="whiteSpace">pre</property>
                                     <label id="214">
-                                        <text-property name="text">Исполнено в от-четном периоде ранее начатых</text-property>
+                                        <text-property name="text">Исполнено в отчетном периоде ранее начатых</text-property>
                                     </label>
                                 </cell>
                                 <cell id="215">
