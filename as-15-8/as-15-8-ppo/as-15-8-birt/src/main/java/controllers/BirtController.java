@@ -76,6 +76,7 @@ public class BirtController
         Map<String, String> paramMap = new HashMap<>();
         for (Map.Entry<String, String[]> entry : params.getParameterMap().entrySet()) {
             if ( !entry.getKey().equals("format") ) {
+                log.info("PARAM '" + entry.getKey() + "' = >" + entry.getValue()[0] + "<");
                 paramMap.put(entry.getKey(), entry.getValue()[0]);
             }
         }
