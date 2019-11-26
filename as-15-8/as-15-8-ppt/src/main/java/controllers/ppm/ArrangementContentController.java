@@ -42,7 +42,7 @@ public class ArrangementContentController {
     private final PodWebClient podWebClient;
     private final SearchQueryTrafficUnitRepository searchQueryTrafficUnitRepository;
 
-    @GetMapping
+    @GetMapping(produces = MediaType.APPLICATION_STREAM_JSON_VALUE)
     public Publisher<CheckUnit> getAndSendCheckUnits(@RequestParam("id") Long arrangementId) {
 
         //TODO получать все остальные трафик-юниты тут же

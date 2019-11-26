@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Service;
@@ -46,8 +47,12 @@ public class PptWebClient {
             return WebClient.create(gatewayUrl)
                     .get()
                     .uri(uri)
-                    .retrieve()
-                    .bodyToFlux(CheckUnit.class)
+                    .accept(MediaType.APPLICATION_STREAM_JSON)
+                    .exchange()
+                    .flatMapMany(clientResponse -> {
+                        log.info("Принят ответ от ППТ: "+clientResponse.statusCode());
+                        return clientResponse.bodyToFlux(CheckUnit.class);
+                    })
                     .collectList()
                     .block();
         } catch (HttpClientErrorException | HttpServerErrorException ex) {

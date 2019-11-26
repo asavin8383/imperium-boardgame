@@ -66,7 +66,7 @@ public class PodWebClient {
                 .parallel(fetchCheckUnitsConcurrency)
                 .runOn(Schedulers.parallel())
                 .flatMap(this::getCheckUnitsByContentId, true, fetchCheckUnitsConcurrency)
-                .sequential(10)
+                .sequential()
                 .delayElements(Duration.ofMillis(100));
     }
 
