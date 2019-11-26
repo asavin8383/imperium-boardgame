@@ -47,7 +47,7 @@ public class ActController {
         return new ResponseEntity<>(created ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @GetMapping(path = "/checkResult", produces = MediaType.APPLICATION_STREAM_JSON_VALUE)
+    @GetMapping(path = "/checkResult", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ActCheckResult> getActCheckResult(Long arrangementId){
         log.info("Подготовка результатов мероприятия для акта. ID мероприятия: {}", arrangementId);
         List<CheckUnitJobResult> resultFilter = Arrays.asList(CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED);
