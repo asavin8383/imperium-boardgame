@@ -48,6 +48,11 @@ public class ArrangementStatusServiceImpl implements ArrangementStatusService {
                                 formalTask.setStatus(status);
                                 if(status.equals(ExecutionStatus.FINISHED)){
                                     formalTask.setEndDate(LocalDateTime.now());
+                                } else if (status.equals(ExecutionStatus.RUNNING)){
+                                    if(formalTask.getStartDate() == null ||
+                                            (arrangement.getStartDate() != null && formalTask.getStartDate().isAfter(arrangement.getStartDate()))){
+                                        formalTask.setStartDate(arrangement.getStartDate());
+                                    }
                                 }
                                 formalTaskRepo.save(formalTask);
                                 log.info("Formal task status changed. Formal task id: " + formalTask.getId() + ", new status: " + formalTask.getStatus());

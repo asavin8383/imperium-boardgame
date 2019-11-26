@@ -2,12 +2,8 @@ package webClients;
 
 import checkUnits.CheckUnit;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.netflix.discovery.shared.transport.decorator.EurekaHttpClientDecorator;
-import com.netflix.discovery.shared.transport.decorator.RetryableEurekaHttpClient;
 import exceptions.AS_15_8_PPT_Exception;
-import io.pivotal.spring.cloud.service.eureka.ClientFilterAdapter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.net.NioEndpoint;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -29,6 +25,8 @@ public class PodWebClient {
     private static final String GET_ERDI_URI = "/pod/erdi/single";
     private static final String GET_CHECK_UNITS_URL = "/pod/erdi/checkUnits";
 
+    private static final int fetchFluxConcurrency = 50;
+
     @Value("${gateway.url}")
     private String gatewayUrl;
 
@@ -41,8 +39,8 @@ public class PodWebClient {
 
     public List<ObjectNode> fetchErdi(List<Long> erdiIds) {
         return Flux.fromIterable(erdiIds)
-                .parallel()
-                .runOn(Schedulers.elastic())
+                .parallel(fetchFluxConcurrency)
+                .runOn(Schedulers.parallel())
                 .flatMap(this::getErdi)
                 .sequential()
                 .collectList()
@@ -62,9 +60,9 @@ public class PodWebClient {
 
     public ParallelFlux<CheckUnit> fetchCheckUnits(List<Long> contentIds) {
         return Flux.fromIterable(contentIds)
-                .parallel(10)
+                .parallel(fetchFluxConcurrency)
                 .runOn(Schedulers.parallel())
-                .flatMap(this::getCheckUnitsByContentId, true, 10);
+                .flatMap(this::getCheckUnitsByContentId);
     }
 
     private Flux<CheckUnit> getCheckUnitsByContentId(Long contentId){

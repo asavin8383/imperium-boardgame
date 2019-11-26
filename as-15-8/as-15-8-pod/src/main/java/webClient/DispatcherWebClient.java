@@ -2,6 +2,7 @@ package webClient;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -37,7 +38,9 @@ public class DispatcherWebClient {
                         .fromUriString(ACT_CHECK_RESULTS_URI)
                         .queryParam("arrangementId", arrangementId)
                         .build().toString()
-                ).retrieve()
+                )
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .retrieve()
                 .bodyToFlux(ActCheckResult.class)
                 .collectList()
                 .block();
@@ -54,6 +57,7 @@ public class DispatcherWebClient {
         return webClient
                 .get()
                 .uri(uriBuilder.build().toString())
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .retrieve()
                 .bodyToFlux(String.class)
                 .collectList()

@@ -78,7 +78,7 @@ public class ActService {
             ActCheckResultPPP achRes = new ActCheckResultPPP();
             achRes.setCheckResultId(actCheckResult.getCheckResultId());
             achRes.setCheckUnitType(actCheckResult.getCheckUnitType().name());
-            achRes.setCheckUnitValue(actCheckResult.getCheckUnitValue());
+            achRes.setCheckUnitValue(new String[]{actCheckResult.getCheckUnitValue()});
             achRes.setDate(actCheckResult.getDate());
             checkResults.add(achRes);
         }
