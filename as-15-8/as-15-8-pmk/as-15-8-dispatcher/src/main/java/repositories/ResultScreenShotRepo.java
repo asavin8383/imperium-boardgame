@@ -17,8 +17,8 @@ import java.util.List;
 public interface ResultScreenShotRepo extends JpaRepository<ResultScreenShot, Long> {
 
 
-    @Query("select rs from ResultScreenShot rs " +
-            "join Result r on r.arrangementId = :arrangementId and r.result in (:result)")
+    @Query("select rs from Result r " +
+            "join ResultScreenShot rs on r.arrangementId = :arrangementId and r.result in (:result)")
     List<ResultScreenShot> findByArrangementIdAndResultIn(@Param("arrangementId") Long arrangementId, @Param("result") Collection<CheckUnitJobResult> result, Pageable pageable);
 
 }
