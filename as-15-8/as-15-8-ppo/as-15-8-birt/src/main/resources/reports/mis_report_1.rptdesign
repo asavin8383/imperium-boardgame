@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.23" id="1">
-    <property name="createdBy">Eclipse BIRT Designer Version 4.6.0.v201606072122</property>
+    <property name="createdBy">Eclipse BIRT Designer Version 4.8.0.v201806261756</property>
     <property name="units">in</property>
     <property name="iconFile">/templates/blank_report.gif</property>
     <property name="bidiLayoutOrientation">ltr</property>
@@ -9,7 +9,7 @@
         <scalar-parameter name="dt" id="107">
             <property name="valueType">static</property>
             <property name="isRequired">true</property>
-            <property name="dataType">string</property>
+            <property name="dataType">date</property>
             <property name="distinct">true</property>
             <simple-property-list name="defaultValue">
                 <value type="constant">2019-01-01</value>
@@ -24,7 +24,7 @@
         </scalar-parameter>
         <scalar-parameter name="prd_tp" id="108">
             <property name="valueType">static</property>
-            <property name="dataType">string</property>
+            <property name="dataType">integer</property>
             <property name="distinct">true</property>
             <simple-property-list name="defaultValue">
                 <value type="constant">1</value>
@@ -56,7 +56,7 @@
                 </ex-property>
             </list-property>
             <property name="odaDriverClass">org.postgresql.Driver</property>
-            <property name="odaURL">jdbc:postgresql://192.168.5.195:5432/asdb_test</property>
+            <property name="odaURL">jdbc:postgresql://192.168.5.195:5432/asdb</property>
             <property name="odaUser">as_user</property>
             <encrypted-property name="odaPassword" encryptionID="base64">YXNfdXNlcg==</encrypted-property>
         </oda-data-source>
