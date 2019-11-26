@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
+import rest.ResponseStatusString;
 
 
 /**
@@ -26,7 +27,7 @@ public class PODExchange
     @Autowired
     private OAuth2RestTemplate oAuth2RestTemplate;
 
-    public boolean checkUrl(String url) {
+    public ResponseStatusString checkUrl(String url) {
         UriComponents uriComponents =
                 UriComponentsBuilder
                         .fromHttpUrl(gatewayUrl)
@@ -36,12 +37,11 @@ public class PODExchange
 
         log.info("GET checkUrl from {}", uriComponents.toString());
 
-        RestStatus resp = oAuth2RestTemplate.getForObject(uriComponents.toString(), RestStatus.class);
-        boolean res = resp != null && resp.status;
+        ResponseStatusString resp = oAuth2RestTemplate.getForObject(uriComponents.toString(), ResponseStatusString.class);
 
-        log.info("Got checkUrl status: {}", res);
+        log.info("Got checkUrl status: {}", resp.toString());
 
-        return res;
+        return resp;
     }
 
 }

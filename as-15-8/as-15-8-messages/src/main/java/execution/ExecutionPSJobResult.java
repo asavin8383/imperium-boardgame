@@ -5,6 +5,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.util.List;
+
 @Data
 @EqualsAndHashCode(callSuper=true)
 @ToString(callSuper=true)
@@ -15,5 +17,6 @@ public class ExecutionPSJobResult extends ExecutionJobResult {
 
 	private boolean error;
 	private String errorDetails;
+	private List<String> urls;
 
 }

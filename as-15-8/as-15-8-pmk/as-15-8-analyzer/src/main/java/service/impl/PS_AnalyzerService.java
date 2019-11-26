@@ -2,10 +2,21 @@ package service.impl;
 
 import analysis.AnalysisResult;
 import analysis.PS_AnalysisJobResult;
+import checkUnits.CheckUnit;
+import checkUnits.CheckUnitType;
 import enums.CheckUnitJobResult;
 import execution.ExecutionPSJobResult;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import rest.ResponseStatusString;
+import restapi.PODExchange;
 import service.AnalyzerService;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import static enums.CheckUnitJobResult.COMPLETED;
 import static enums.CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED;
@@ -16,20 +27,62 @@ import static enums.CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED;
  *
  */
 @Service
+@Slf4j
 public class PS_AnalyzerService implements AnalyzerService<ExecutionPSJobResult> {
+
+	@Autowired
+	private PODExchange podExchange;
 
 	@Override
 	public AnalysisResult analyzeResult(ExecutionPSJobResult result) {
 		PS_AnalysisJobResult analysisResult = new PS_AnalysisJobResult();
 		analysisResult.setJobID(result.getJobID());
 		analysisResult.setCheckUnit(result.getCheckUnit());
-		analysisResult.setCheckResult(obtainResult(result));
+		analysisResult.setCheckResult(obtainResult(result, analysisResult));
 		analysisResult.setScreenshot(result.getScreenshot());
 		analysisResult.setEtalonScreenshot(result.getEtalonScreenshot());
 		return analysisResult;
 	}
 
-	private CheckUnitJobResult obtainResult(ExecutionPSJobResult result) {
-		return result.isLinkFound() ? FORBIDDEN_CONTENT_DETECTED : COMPLETED;
+	private CheckUnitJobResult obtainResult(ExecutionPSJobResult result, PS_AnalysisJobResult analysisResult) {
+		CheckUnit checkUnit = result.getCheckUnit();
+		if (checkUnit.getType() == CheckUnitType.SEARCH_PHRASE){
+			List<String> urls = result.getUrls() == null ? new ArrayList<>() : result.getUrls();
+
+			String description = "Запрос проверки по фразам: " + result.getCheckUnit().getValue() + "\n";
+			description += "Спиосок найденных URL:\n";
+			for(String url : urls){
+				description += url + "\n";
+			}
+			if (urls.size() == 0){
+				description += "<записи отсутствуют>";
+			}
+			description += "\n";
+			description += "Список запрещенных URL:\n";
+
+			Map<String, String> findUrls = new LinkedHashMap<>();
+			for(String url : urls){
+                ResponseStatusString check = podExchange.checkUrl(url);
+				if (check.isStatus()){
+					findUrls.put(url, check.getResponse());
+				}
+			}
+			for(String url : findUrls.keySet()){
+			    String erdiId = findUrls.get(url);
+				description += "ERDI: " + erdiId + ", URL: " + url + "\n";
+			}
+			if (findUrls.size() == 0){
+				description += "<записи отсутствуют>";
+			}
+			analysisResult.setDescription(description);
+
+			log.info("Результат проверки URL-ов (по фразе '{}'): кол-во найденных в ЕРДИ: {}",
+					checkUnit.getValue(), findUrls.size());
+
+			return findUrls.size() > 0 ? FORBIDDEN_CONTENT_DETECTED : COMPLETED;
+		}
+		else {
+			return result.isLinkFound() ? FORBIDDEN_CONTENT_DETECTED : COMPLETED;
+		}
 	}
 }
