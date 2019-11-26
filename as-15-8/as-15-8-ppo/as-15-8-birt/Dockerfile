@@ -1,4 +1,4 @@
-FROM openjdk:8-jdk-alpine
+FROM openjdk:8-jdk
 
 LABEL Kirill Lychagin <klychagin@ec-leasing.ru>
 
@@ -14,16 +14,16 @@ VOLUME $CONF_PATH
 
 
 #Install MS True Type, Ionicons and Font Awesome fonts
-RUN rm -rf /var/cache/apk/* && \
-    rm -rf /tmp/* && \
-    apk add --update msttcorefonts-installer && \
-    update-ms-fonts && \
-    mkdir /usr/share/fonts/ko && \
-    mkdir /usr/share/fonts/ko/TrueType && \
-    cp /usr/share/fonts/truetype/msttcorefonts/*.* /usr/share/fonts/ko/TrueType/ && \
-    rm -rf /var/cache/apk/* && \
-    rm -rf /tmp/*
+run apt-get update && apt-get install -y cabextract xfonts-utils
 
+COPY ttf-mscorefonts-installer_3.6_all.deb .
+RUN  \
+     dpkg -i ttf-mscorefonts-installer_3.6_all.deb && \
+     fc-cache -fv
+ENV LC_ALL ru_RU.UTF-8
+ENV LANG ru_RU.UTF-8
+ENV LANGUAGE ru_RU.UTF-8
+RUN apt-get install -y locales locales-all
 
 COPY /target/as-15-8-birt.jar  $APP_PATH
 
