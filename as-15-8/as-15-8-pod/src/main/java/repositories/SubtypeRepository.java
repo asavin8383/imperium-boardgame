@@ -50,5 +50,5 @@ public interface SubtypeRepository extends JpaRepository<Subtype, Integer>, Dict
             "or lower(s.categoryName) like lower(concat('%',:query,'%')) " +
             "or lower(s.violationName) like lower(concat('%',:query,'%'))"
         )
-    Page<Subtype> findByEffDtAndQuery(Date effDt, String query, Pageable pageable);
+    Page<Subtype> findByEffDtAndQuery(@Param("effDt") Date effDt, @Param("query") String query, Pageable pageable);
 }
