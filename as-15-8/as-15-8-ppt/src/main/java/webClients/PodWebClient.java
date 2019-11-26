@@ -61,13 +61,11 @@ public class PodWebClient {
                 .doOnError(ex -> log.error("Ошибка при получении ЕРДИ по id: "+id, ex));
     }
 
-    public Flux<CheckUnit> fetchCheckUnits(List<Long> contentIds) {
+    public ParallelFlux<CheckUnit> fetchCheckUnits(List<Long> contentIds) {
         return Flux.fromIterable(contentIds)
                 .parallel(fetchCheckUnitsConcurrency)
                 .runOn(Schedulers.parallel())
-                .flatMap(this::getCheckUnitsByContentId, true, fetchCheckUnitsConcurrency)
-                .sequential()
-                .delayElements(Duration.ofMillis(100));
+                .flatMap(this::getCheckUnitsByContentId, true, fetchCheckUnitsConcurrency);
     }
 
     private Flux<CheckUnit> getCheckUnitsByContentId(Long contentId){

@@ -123,7 +123,7 @@ public class ArrangementContentController {
                 .mapToLong(SearchQueryContentJoin::getContentId)
                 .boxed()
                 .collect(Collectors.toList());
-            List<CheckUnit> podCheckUnits = podWebClient.fetchCheckUnits(contentIds).collectList().block();
+            List<CheckUnit> podCheckUnits = podWebClient.fetchCheckUnits(contentIds).sequential().collectList().block();
             if(podCheckUnits != null) {
                 checkUnits.addAll(podCheckUnits);
             }
