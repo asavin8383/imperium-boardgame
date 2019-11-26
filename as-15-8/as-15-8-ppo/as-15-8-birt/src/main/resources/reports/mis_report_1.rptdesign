@@ -839,6 +839,7 @@ order by t1.access_tool_id]]></xml-property>
     </page-setup>
     <body>
         <grid id="173">
+            <property name="fontFamily">"Times New Roman"</property>
             <column id="174"/>
             <row id="254">
                 <cell id="255">
@@ -967,6 +968,7 @@ order by t1.access_tool_id]]></xml-property>
                 </cell>
             </row>
             <row id="175">
+                <property name="fontFamily">"Times New Roman"</property>
                 <cell id="176">
                     <table id="44">
                         <property name="fontFamily">"Times New Roman"</property>
@@ -1344,23 +1346,13 @@ order by t1.access_tool_id]]></xml-property>
                                 </cell>
                             </row>
                         </detail>
-                        <footer>
-                            <row id="75">
-                                <cell id="92"/>
-                                <cell id="76"/>
-                                <cell id="77"/>
-                                <cell id="78"/>
-                                <cell id="79"/>
-                                <cell id="80"/>
-                                <cell id="81"/>
-                                <cell id="82"/>
-                            </row>
-                        </footer>
                     </table>
                 </cell>
             </row>
             <row id="177">
+                <property name="fontFamily">"Times New Roman"</property>
                 <cell id="178">
+                    <property name="fontFamily">"Times New Roman"</property>
                     <property name="paddingTop">6mm</property>
                     <property name="paddingBottom">3mm</property>
                     <data id="195">
@@ -1383,6 +1375,7 @@ order by t1.access_tool_id]]></xml-property>
                 </cell>
             </row>
             <row id="179">
+                <property name="fontFamily">"Times New Roman"</property>
                 <cell id="180">
                     <table id="110">
                         <property name="fontFamily">"Times New Roman"</property>
@@ -1796,23 +1789,13 @@ order by t1.access_tool_id]]></xml-property>
                                 </cell>
                             </row>
                         </detail>
-                        <footer>
-                            <row id="145">
-                                <cell id="146"/>
-                                <cell id="147"/>
-                                <cell id="148"/>
-                                <cell id="149"/>
-                                <cell id="150"/>
-                                <cell id="151"/>
-                                <cell id="152"/>
-                                <cell id="153"/>
-                            </row>
-                        </footer>
                     </table>
                 </cell>
             </row>
             <row id="181">
+                <property name="fontFamily">"Times New Roman"</property>
                 <cell id="182">
+                    <property name="fontFamily">"Times New Roman"</property>
                     <property name="paddingTop">6mm</property>
                     <property name="paddingBottom">3mm</property>
                     <data id="256">
@@ -1833,6 +1816,7 @@ order by t1.access_tool_id]]></xml-property>
                 </cell>
             </row>
             <row id="189">
+                <property name="fontFamily">"Times New Roman"</property>
                 <cell id="190">
                     <table id="196">
                         <property name="fontFamily">"Times New Roman"</property>
@@ -2246,18 +2230,6 @@ order by t1.access_tool_id]]></xml-property>
                                 </cell>
                             </row>
                         </detail>
-                        <footer>
-                            <row id="234">
-                                <cell id="235"/>
-                                <cell id="236"/>
-                                <cell id="237"/>
-                                <cell id="238"/>
-                                <cell id="239"/>
-                                <cell id="240"/>
-                                <cell id="241"/>
-                                <cell id="242"/>
-                            </row>
-                        </footer>
                     </table>
                 </cell>
             </row>
