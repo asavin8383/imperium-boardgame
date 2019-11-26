@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import model.enums.SearchQueryPattern;
 import model.traffic.SearchQueryContentJoin;
 import model.traffic.SearchQueryTrafficUnit;
+import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -42,7 +43,7 @@ public class ArrangementContentController {
     private final SearchQueryTrafficUnitRepository searchQueryTrafficUnitRepository;
 
     @GetMapping
-    public ConnectableFlux<CheckUnit> getAndSendCheckUnits(@RequestParam("id") Long arrangementId) {
+    public Publisher<CheckUnit> getAndSendCheckUnits(@RequestParam("id") Long arrangementId) {
 
         //TODO получать все остальные трафик-юниты тут же
         List<Long> contentIds = arrangementRepo.listContentIdsByArrangementId(arrangementId);

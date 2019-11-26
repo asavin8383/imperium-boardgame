@@ -17,6 +17,7 @@ import reactor.core.publisher.ParallelFlux;
 import reactor.core.scheduler.Schedulers;
 
 import javax.annotation.PostConstruct;
+import java.time.Duration;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -60,14 +61,13 @@ public class PodWebClient {
                 .doOnError(ex -> log.error("Ошибка при получении ЕРДИ по id: "+id, ex));
     }
 
-    public ConnectableFlux<CheckUnit> fetchCheckUnits(List<Long> contentIds) {
+    public Flux<CheckUnit> fetchCheckUnits(List<Long> contentIds) {
         return Flux.fromIterable(contentIds)
                 .parallel(fetchCheckUnitsConcurrency)
                 .runOn(Schedulers.parallel())
                 .flatMap(this::getCheckUnitsByContentId, true, fetchCheckUnitsConcurrency)
-                .log("checkUnits", Level.INFO)
-                .sequential()
-                .publish();
+                .sequential(10)
+                .delayElements(Duration.ofMillis(100));
     }
 
     private Flux<CheckUnit> getCheckUnitsByContentId(Long contentId){
