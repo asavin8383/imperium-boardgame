@@ -169,10 +169,16 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         if (checkUnit.getType() == CheckUnitType.SEARCH_PHRASE){
             List<WebElement> links = resultPageType == ResultPageType.PAGINATION ?
                     getPaginatedLinks() : getContinuousLinks();
-            List<String> urls =
-                    links.stream()
-                    .map(webElement -> extractUrl(webElement))
-                    .collect(Collectors.toList());
+
+            List<String> urls = new ArrayList<>();
+            for (WebElement w : links) {
+                try {
+                    urls.add(extractUrl(w));
+                }
+                catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
             return createMessage(false, urls);
         }
 

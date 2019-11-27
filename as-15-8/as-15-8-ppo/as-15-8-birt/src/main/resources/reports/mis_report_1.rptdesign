@@ -811,12 +811,6 @@ group by nm, t1.access_tool_id
 order by t1.access_tool_id]]></xml-property>
         </oda-data-set>
     </data-sets>
-    <styles>
-        <style name="HeaderStyle" id="260">
-            <property name="fontFamily">"Times New Roman"</property>
-            <property name="fontSize">12pt</property>
-        </style>
-    </styles>
     <page-setup>
         <simple-master-page name="Simple MasterPage" id="2">
             <property name="type">a4</property>
@@ -839,6 +833,7 @@ order by t1.access_tool_id]]></xml-property>
     </page-setup>
     <body>
         <grid id="173">
+            <property name="fontFamily">"Times New Roman"</property>
             <column id="174"/>
             <row id="254">
                 <cell id="255">
@@ -946,11 +941,9 @@ order by t1.access_tool_id]]></xml-property>
             </row>
             <row id="252">
                 <cell id="253">
-                    <property name="style">HeaderStyle</property>
                     <property name="paddingTop">1mm</property>
                     <property name="paddingBottom">3mm</property>
                     <data id="188">
-                        <property name="style">HeaderStyle</property>
                         <property name="paddingTop">1pt</property>
                         <property name="paddingBottom">1mm</property>
                         <property name="dataSet">Data Set_period</property>
@@ -1355,7 +1348,6 @@ order by t1.access_tool_id]]></xml-property>
                     <property name="paddingTop">6mm</property>
                     <property name="paddingBottom">3mm</property>
                     <data id="195">
-                        <property name="style">HeaderStyle</property>
                         <property name="marginTop">0pt</property>
                         <property name="marginBottom">0pt</property>
                         <property name="paddingTop">1pt</property>
@@ -1798,7 +1790,6 @@ order by t1.access_tool_id]]></xml-property>
                     <property name="paddingTop">6mm</property>
                     <property name="paddingBottom">3mm</property>
                     <data id="256">
-                        <property name="style">HeaderStyle</property>
                         <property name="paddingTop">1pt</property>
                         <property name="paddingBottom">1pt</property>
                         <property name="dataSet">Data Set_period</property>
