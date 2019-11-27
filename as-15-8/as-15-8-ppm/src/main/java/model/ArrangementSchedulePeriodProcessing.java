@@ -8,4 +8,5 @@ import lombok.Data;
 public class ArrangementSchedulePeriodProcessing {
     private long time;
     private ScheduleCheckUnit lastCheckUnit;
+    private long lastCheckUnitProcessingTime;
 }

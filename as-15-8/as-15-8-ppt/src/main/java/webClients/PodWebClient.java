@@ -4,7 +4,6 @@ import checkUnits.CheckUnit;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import exceptions.AS_15_8_PPT_Exception;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
