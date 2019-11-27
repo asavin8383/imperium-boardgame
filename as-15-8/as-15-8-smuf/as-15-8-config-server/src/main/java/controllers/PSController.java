@@ -79,13 +79,13 @@ public class PSController
         log.debug("{} robot records already exists");
         int newCnt=0;
         for (PS ps : data) {
-            boolean exists = all.contains(ps.getId());
+            boolean exists = all.contains(ps.getOrigId());
             if (!exists) {
                 log.debug("new robot record arrived: {}", ps);
                 Robot newRobot = new Robot();
-                newRobot.setOrigId(ps.getId());
+                newRobot.setOrigId(ps.getOrigId());
                 newRobot.setOrigName(ps.getName());
-                newRobot.setName(ps.getName() + "-" + ps.getId());
+                newRobot.setName(ps.getName() + "-" + ps.getOrigId());
                 newRobot.setType(robotType);
                 robotRepository.save(newRobot);
                 newCnt++;
@@ -94,8 +94,8 @@ public class PSController
         log.info("{} new robot records inserted", newCnt);
     }
 
-    private void delete(Long id, RobotType robotType) {
-        robotRepository.deleteByOrigIdAndType(id, robotType);
+    private void delete(Long origId, RobotType robotType) {
+        robotRepository.deleteByOrigIdAndType(origId, robotType);
     }
 
 }

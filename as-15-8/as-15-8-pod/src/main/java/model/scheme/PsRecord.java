@@ -36,7 +36,6 @@ public class PsRecord implements Serializable {
     private String hostname;
 
     @ToString.Include
-    @JsonIgnore
     private Integer origId;
 
     @JsonIgnore
