@@ -39,7 +39,7 @@ public class ActService {
             ActRequest actRequest = new ActRequest();
             actRequest.setArragementId(arragementId);
             actRequest.setStartDate(minDate != null ? dateFormat.format(minDate) : "");
-            actRequest.setEndDate(maxDate != null ? dateFormat.format(maxDate) : "");
+            actRequest.setEndDate(maxDate != null ? dateFormat.format(maxDate) : actRequest.getStartDate());
 
             return webClient.sendAct(actRequest);
         } catch (Exception ex){

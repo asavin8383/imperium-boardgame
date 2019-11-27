@@ -37,10 +37,10 @@ public interface ResultRepo extends JpaRepository<Result, Long> {
 	Page<Result> findAllByArrangementAndQuery(@Param("arr_id") Long arrangementId, @Param("query")String query, Pageable pageable);
 
 
-	@Query(value = "select max(res.startDate) from Result res where res.arrangementId = :id")
+	@Query(value = "select max(res.endDate) from Result res where res.arrangementId = :id")
 	LocalDateTime getMaxDateByArrangementId(@Param("id") Long id);
 
-	@Query(value = "select min(res.endDate) from Result res where res.arrangementId = :id")
+	@Query(value = "select min(res.startDate) from Result res where res.arrangementId = :id")
 	LocalDateTime getMinDateByArrangementId(@Param("id") Long id);
 
 	@Query("select " +
