@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import exceptions.AS_15_8_PPT_Exception;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
@@ -76,6 +77,7 @@ public class PodWebClient {
             return webClient.get()
                     .uri(uri)
                     .retrieve()
+                    .onStatus(HttpStatus::isError, res -> Mono.empty())
                     .bodyToFlux(CheckUnit.class)
                     .doOnError(ex -> log.error("Ошибка при получении CheckUnit по ЕРДИ id: "+contentId, ex));
             //return Arrays.asList(oAuth2RestTemplate.getForObject(uri, CheckUnit[].class));
