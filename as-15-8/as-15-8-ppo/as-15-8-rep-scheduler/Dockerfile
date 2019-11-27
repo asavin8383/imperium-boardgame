@@ -11,6 +11,10 @@ ENV APP_PATH="/as-15-8-rep-scheduler.jar" \
 VOLUME $LOG_PATH
 VOLUME $CONF_PATH
 
+
+# timezone
+RUN apk add tzdata
+
 COPY /target/as-15-8-rep-scheduler.jar  $APP_PATH
 
 ENTRYPOINT ["java", \

@@ -9,7 +9,7 @@
         <scalar-parameter name="dt" id="107">
             <property name="valueType">static</property>
             <property name="isRequired">true</property>
-            <property name="dataType">string</property>
+            <property name="dataType">date</property>
             <property name="distinct">true</property>
             <simple-property-list name="defaultValue">
                 <value type="constant">2019-01-01</value>
@@ -24,7 +24,7 @@
         </scalar-parameter>
         <scalar-parameter name="prd_tp" id="108">
             <property name="valueType">static</property>
-            <property name="dataType">string</property>
+            <property name="dataType">integer</property>
             <property name="distinct">true</property>
             <simple-property-list name="defaultValue">
                 <value type="constant">1</value>
@@ -933,12 +933,7 @@ order by t1.access_tool_id]]></xml-property>
                             </cell>
                         </row>
                         <row id="289">
-                            <cell id="290">
-                                <text id="298">
-                                    <property name="contentType">auto</property>
-                                    <text-property name="content"><![CDATA[ ]]></text-property>
-                                </text>
-                            </cell>
+                            <cell id="290"/>
                             <cell id="291"/>
                             <cell id="292"/>
                             <cell id="293"/>
