@@ -9,20 +9,20 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface ContentViewRepository extends JpaRepository<ContentView, Long>, JpaSpecificationExecutor<ContentView> {
 
     @Query("select distinct c from ContentView c " +
-            "where (concat(c.id, '') like lower(concat('%',:query,'%')) " +
+            "where concat(c.id, '') like lower(concat('%',:query,'%')) " +
             "or lower(c.categoryName) like lower(concat('%',:query,'%')) " +
             "or lower(c.decisionOrg) like lower(concat('%',:query,'%')) " +
-            "or lower(c.infoTypeId) like lower(concat('%',:query,'%')) " +
-            "or lower(c.registryName) like lower(concat('%',:query,'%')) " +
-            "or lower(c.resourceType) like lower(concat('%',:query,'%')) " +
-            "or lower(c.resourceValue) like lower(concat('%',:query,'%')) " +
-            "or lower(c.violationName) like lower(concat('%',:query,'%'))) "
-
-    )
+            "or lower(c.infoTypeId) like lower(concat('%',:query,'%'))" +
+            "or lower(c.registryName) like lower(concat('%',:query,'%'))" +
+            "or lower(c.resourceType) like lower(concat('%',:query,'%'))" +
+            "or lower(c.resourceValue) like lower(concat('%',:query,'%'))" +
+            "or lower(c.violationName) like lower(concat('%',:query,'%'))")
     Page<ContentView> findAllByQuery(@Param("query") String query, Pageable pageable);
 
 }
