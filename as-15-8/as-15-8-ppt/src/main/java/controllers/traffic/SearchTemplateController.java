@@ -11,10 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import repositories.SearchQueryTrafficUnitRepository;
 import repositories.helpers.SearchTemplateParams;
 
@@ -25,7 +22,7 @@ import repositories.helpers.SearchTemplateParams;
 @Slf4j
 public class SearchTemplateController {
 
-    private final SearchQueryTrafficUnitRepository repository;
+    private final SearchQueryTrafficUnitRepository searchQueryTrafficUnitRepository;
 
     @GetMapping
     public Page<SearchQueryTrafficUnit> getAllTemplates(
@@ -41,7 +38,12 @@ public class SearchTemplateController {
                 SortingHelper.createSorting(sortingDirection, sortingColumn));
         SearchTemplateParams params = new SearchTemplateParams(
                 containsInTraffic, trafficId, query);
-        return repository.searchFor(SearchQueryTrafficUnit.class, params, page);
+        return searchQueryTrafficUnitRepository.searchFor(SearchQueryTrafficUnit.class, params, page);
+    }
+
+    @PostMapping
+    public SearchQueryTrafficUnit createSearchQueryTrafficUnit(@RequestBody SearchQueryTrafficUnit searchQueryTrafficUnit){
+        return searchQueryTrafficUnitRepository.save(searchQueryTrafficUnit);
     }
 
 }

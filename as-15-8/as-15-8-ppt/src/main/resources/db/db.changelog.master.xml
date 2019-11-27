@@ -39,5 +39,7 @@
     <include file="db/changelog/ppt.0012.drop_foreign_key_violation.xml"/>
     <include file="db/changelog/ppt.0013.violation_to_subtype.xml"/>
     <include file="db/changelog/ppt.0014.add_client_notifications.xml"/>
+    <include file="db/changelog/ppt.0015.templates.xml"/>
+    <include file="db/changelog/ppt.0016.templates_foreign_keys.xml"/>
 
 </databaseChangeLog>
