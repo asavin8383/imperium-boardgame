@@ -13,6 +13,7 @@ import javax.sql.DataSource;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -96,21 +97,22 @@ public class BirtFacade {
 
         setParams(params, report, task);
 
-        //noinspection unchecked
-        log.info("OdaJDBCDriverPassInConnection " + dataSource.getConnection().getMetaData().getURL());
-        task.getAppContext().put("OdaJDBCDriverPassInConnection", dataSource.getConnection());
+        try (Connection connection = dataSource.getConnection()) {
 
+            log.info("OdaJDBCDriverPassInConnection " + connection.getMetaData().getURL());
+            //noinspection unchecked
+            task.getAppContext().put("OdaJDBCDriverPassInConnection", connection);
 
-        IRenderOption options = getOptions(repType);
+            IRenderOption options = getOptions(repType);
 
-        options.setOutputStream(ostream);
-        task.setRenderOption(options);
+            options.setOutputStream(ostream);
+            task.setRenderOption(options);
 
-        //запуск отчета
-        task.run();
+            //запуск отчета
+            task.run();
 
-        task.close();
-
+            task.close();
+        }
     }
 
     private void setParams(Map<String, ?> params, IReportRunnable report, IRunAndRenderTask task) {
