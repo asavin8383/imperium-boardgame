@@ -64,8 +64,7 @@ public class PodWebClient {
         return Flux.fromIterable(contentIds)
                 .parallel(fetchFluxConcurrency)
                 .runOn(Schedulers.parallel())
-                .flatMap(this::getCheckUnitsByContentId)
-                .filter(checkUnit -> checkUnit != null && Strings.isNotEmpty(checkUnit.getValue()));
+                .flatMap(this::getCheckUnitsByContentId);
     }
 
     private Flux<CheckUnit> getCheckUnitsByContentId(Long contentId){
@@ -79,9 +78,11 @@ public class PodWebClient {
             return webClient.get()
                     .uri(uri)
                     .retrieve()
-                    .onStatus(HttpStatus::isError, res -> Mono.empty())
-                    .bodyToFlux(CheckUnit.class)
-                    .doOnError(ex -> log.error("Ошибка при получении CheckUnit по ЕРДИ id: "+contentId, ex));
+                    .onStatus(HttpStatus::isError, resp -> {
+                        log.warn("Ошибка получения чек юнитов по content_id: {}, статус: {}", contentId, resp.statusCode().toString());
+                        return Mono.empty();
+                    })
+                    .bodyToFlux(CheckUnit.class);
             //return Arrays.asList(oAuth2RestTemplate.getForObject(uri, CheckUnit[].class));
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
             throw AS_15_8_PPT_Exception.logAndGet(log, String.format("Ошибка получения чек-юнитов ЕРДИ %d в ППТ, код возврата %s", contentId, ex.getStatusCode()), ex);
