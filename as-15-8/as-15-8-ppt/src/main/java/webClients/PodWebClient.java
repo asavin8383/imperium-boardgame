@@ -4,6 +4,7 @@ import checkUnits.CheckUnit;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import exceptions.AS_15_8_PPT_Exception;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -73,13 +74,19 @@ public class PodWebClient {
                 .build().toString();
 
         try {
-            log.info("Получение чек-юнитов ЕРДИ {} по запросу: {}", contentId, uri);
+            //log.info("Получение чек-юнитов ЕРДИ {} по запросу: {}", contentId, uri);
             return webClient.get()
                     .uri(uri)
-                    .retrieve()
-                    .onStatus(HttpStatus::isError, res -> Mono.empty())
-                    .bodyToFlux(CheckUnit.class)
-                    .doOnError(ex -> log.error("Ошибка при получении CheckUnit по ЕРДИ id: "+contentId, ex));
+                    .exchange()
+                    .flatMapMany(clientResponse -> {
+                        if(clientResponse.statusCode().equals(HttpStatus.OK)){
+                            log.info("Чек юниты получены успешно, content_id: {}", contentId);
+                            return clientResponse.bodyToFlux(CheckUnit.class);
+                        } else {
+                            log.warn("Ошибка получения чек юнитов по content_id: {}, статус: {}", contentId, clientResponse.statusCode().toString());
+                            return Flux.empty();
+                        }
+                    });
             //return Arrays.asList(oAuth2RestTemplate.getForObject(uri, CheckUnit[].class));
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
             throw AS_15_8_PPT_Exception.logAndGet(log, String.format("Ошибка получения чек-юнитов ЕРДИ %d в ППТ, код возврата %s", contentId, ex.getStatusCode()), ex);
