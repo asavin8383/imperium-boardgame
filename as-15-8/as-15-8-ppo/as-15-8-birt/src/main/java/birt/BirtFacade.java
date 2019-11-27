@@ -97,6 +97,7 @@ public class BirtFacade {
         setParams(params, report, task);
 
         //noinspection unchecked
+        log.info("OdaJDBCDriverPassInConnection " + dataSource.getConnection().getMetaData().getURL());
         task.getAppContext().put("OdaJDBCDriverPassInConnection", dataSource.getConnection());
 
 
