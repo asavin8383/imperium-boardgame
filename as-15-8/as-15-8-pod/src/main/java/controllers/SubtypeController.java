@@ -22,7 +22,6 @@ import repositories.SubtypeRepository;
 import restapi.SubTypeRestClient;
 import utils.Utils;
 
-import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
 
 @RestController
@@ -45,7 +44,7 @@ public class SubtypeController {
         if (state != UploadingState.UPLOADING) {
             Pageable page = PageRequest.of(pageNumber, pageSize,
                     SortingHelper.createSorting(sortingDirection, sortingColumn));
-            return new ResponseEntity<>(subtypeRepository.findByEffDtAndQuery(Utils.getEndDate(), query, page), HttpStatus.OK);
+            return new ResponseEntity<>(subtypeRepository.findByDateAndQuery(Utils.getEndDate(), query, page), HttpStatus.OK);
         } else {
             return new ResponseEntity<>(null, HttpStatus.ACCEPTED);
         }
