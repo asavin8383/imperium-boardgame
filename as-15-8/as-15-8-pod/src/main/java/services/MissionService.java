@@ -82,7 +82,6 @@ public class MissionService {
                     catch(Exception e){
                         isError = true;
                         log.error("Ошибка сохранения поручения: " + missionEntry.toString(), e);
-                        e.printStackTrace();
                     }
                 }
             }

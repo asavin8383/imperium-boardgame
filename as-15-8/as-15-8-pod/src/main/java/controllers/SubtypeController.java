@@ -44,7 +44,11 @@ public class SubtypeController {
         if (state != UploadingState.UPLOADING) {
             Pageable page = PageRequest.of(pageNumber, pageSize,
                     SortingHelper.createSorting(sortingDirection, sortingColumn));
-            return new ResponseEntity<>(subtypeRepository.findByDateAndQuery(Utils.getEndDate(), query, page), HttpStatus.OK);
+            return new ResponseEntity<>(subtypeRepository.findByDateAndQuery(
+                    Utils.getEndDate(),
+                    query == null ? "" : query,
+                    page
+            ), HttpStatus.OK);
         } else {
             return new ResponseEntity<>(null, HttpStatus.ACCEPTED);
         }

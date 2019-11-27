@@ -52,10 +52,11 @@ public class ScheduleCreationService {
             LocalTime endTime){
 
         ScheduleCheckUnit lastCompletionCheckUnit = checkedSet.first();
+        long checkUnitProcessingTime = 0;
         long maxProcessingTime = ChronoUnit.SECONDS.between(startTime, endTime) * workersCount;
         long processingTime = 0;
         for(ScheduleCheckUnit checkUnit : checkedSet){
-            long checkUnitProcessingTime = schedulerProperties.getProcessingTime(accessTool, checkUnit.getCheckUnitType());
+            checkUnitProcessingTime = schedulerProperties.getProcessingTime(accessTool, checkUnit.getCheckUnitType());
             if((processingTime + checkUnitProcessingTime) > maxProcessingTime){
                 break;
             }
@@ -63,9 +64,10 @@ public class ScheduleCreationService {
             processingTime += checkUnitProcessingTime;
         }
         return new ArrangementSchedulePeriodProcessing(
-                workersCount == 0 ? 1 : Math.max(
-                    (int) Math.ceil((double)processingTime / workersCount), 1),
-                lastCompletionCheckUnit);
+                calculateProcessingTime(processingTime, workersCount),
+                lastCompletionCheckUnit,
+                checkUnitProcessingTime
+        );
     }
 
     private Schedule createNewSchedule(Map<Arrangement, TreeSet<ScheduleCheckUnit>> arrangementCheckUnits){
@@ -164,7 +166,7 @@ public class ScheduleCreationService {
 
                 //Проверяем, выполнится ли мероприятие раньше времени окончания периода
                 long schedulePeriodTime = ChronoUnit.SECONDS.between(schedulePeriod.getStartTime(), schedulePeriod.getEndTime());
-                if(schedulePeriodTime > schedulePeriodProcessing.getTime()){
+                if(schedulePeriodTime > (schedulePeriodProcessing.getTime() + schedulePeriodProcessing.getLastCheckUnitProcessingTime())){
                     //разбиваем период, если мероприятия в нем заканчиваются раньше
                     LocalTime breakTime = schedulePeriod.getStartTime().plusSeconds(schedulePeriodProcessing.getTime());
                     SchedulePeriod newSchedulePeriod = new SchedulePeriod(schedule, breakTime, schedulePeriod.getEndTime());
@@ -188,7 +190,13 @@ public class ScheduleCreationService {
                             nextPeriod.getSchedulePeriodArrangements().add(new SchedulePeriodArrangement(nextPeriod, arrangement));
                         }
                     } else {
-                        notFinishedArrangements.put(arrangement, nextCheckUnit);
+                        if(schedulePeriod.getEndTime()
+                                .isBefore(LocalTime.MAX
+                                    .minusSeconds(schedulePeriodProcessing.getLastCheckUnitProcessingTime())
+                                )
+                        ) {
+                            notFinishedArrangements.put(arrangement, nextCheckUnit);
+                        }
                     }
                 }
 
@@ -216,11 +224,17 @@ public class ScheduleCreationService {
                 SchedulePeriod newSchedulePeriod = new SchedulePeriod(schedule, schedulePeriod.getEndTime(), schedulePeriod.getEndTime().plusSeconds(1));
                 long processingTime = 0;
                 for (Map.Entry<Arrangement, ScheduleCheckUnit> entry : notFinishedArrangements.entrySet()) {
-                    processingTime += countArrangementProcessingTime(arrangementCheckUnits.get(entry.getKey()).tailSet(entry.getValue()), entry.getKey().getAccessTool());
+                    processingTime += calculateArrangementSchedulePeriodProcessing(
+                            arrangementCheckUnits.get(entry.getKey()).tailSet(entry.getValue()),
+                            totalWorkersCount,
+                            entry.getKey().getAccessTool(),
+                            schedulePeriod.getEndTime(),
+                            LocalTime.MAX
+                    ).getTime();
                     newSchedulePeriod.getSchedulePeriodArrangements().add(new SchedulePeriodArrangement(newSchedulePeriod, entry.getKey()));
                 }
 
-                newSchedulePeriod.setEndTime(schedulePeriod.getEndTime().plusSeconds(processingTime / totalWorkersCount + 1));
+                newSchedulePeriod.setEndTime(schedulePeriod.getEndTime().plusSeconds(processingTime));
                 schedule.getSchedulePeriods().add(newSchedulePeriod);
             }
         }
@@ -270,5 +284,9 @@ public class ScheduleCreationService {
             }
         }
         return false;
+    }
+
+    private long calculateProcessingTime(long processingTime, int workersCount){
+        return workersCount == 0 ? 1 : Math.max((int) Math.ceil((double)processingTime / workersCount), 1);
     }
 }

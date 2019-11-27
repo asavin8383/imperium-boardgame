@@ -35,8 +35,8 @@ public class TestSchedule {
         Map<Arrangement, TreeSet<ScheduleCheckUnit>> scheduleArrangements = new HashMap<>();
 
         scheduleArrangements.put(
-                createArrangement("arr1", "hola", "11:00:00","11:30:00"),
-                generateCheckUnits( 18));
+                createArrangement("arr1", "yandex", "11:00:00","11:10:00"),
+                generateCheckUnits( 2000));
 
         /*scheduleArrangements.put(
             createArrangement("arr2", AccessToolUnit.YANDEX,"09:00", "10:00"),

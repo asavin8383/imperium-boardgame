@@ -4,8 +4,6 @@ server:
   tomcat:
     max-threads: 200
 gateway.url: ${GATEWAY_URI:http://localhost:15880}
-logging:
-  config: config/logback-spring.xml
 eureka:
   client:
     fetchRegistry: false

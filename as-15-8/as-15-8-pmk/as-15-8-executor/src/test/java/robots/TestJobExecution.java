@@ -38,7 +38,7 @@ public class TestJobExecution {
 		checkUnitJob.setJobID(1L);
 		checkUnitJob.setAccessTool("kaspersky");
 		
-		checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.IP_V4, "192.168.5.12"));
+		checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.URL, "http://pikabu.ru/"));
 		//checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.IP_V6, "2606:4700:0030:0000:0000:0000:681b:b458"));
 
 		ExecutionJobResult executionJobResult = checkUnitVerificationServiceFactory
@@ -50,6 +50,10 @@ public class TestJobExecution {
 		ByteArrayInputStream bis = new ByteArrayInputStream(executionJobResult.getScreenshot());
 		BufferedImage bImage2 = ImageIO.read(bis);
 		ImageIO.write(bImage2, "png", new File("output.png") );
+
+        ByteArrayInputStream bis2 = new ByteArrayInputStream(executionJobResult.getEtalonScreenshot());
+        BufferedImage bImage3 = ImageIO.read(bis2);
+        ImageIO.write(bImage3, "png", new File("outputEtalon.png") );
 
 		System.out.println(executionJobResult.toString());
 	}
