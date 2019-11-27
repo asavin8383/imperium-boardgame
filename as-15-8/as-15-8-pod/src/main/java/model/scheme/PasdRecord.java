@@ -55,6 +55,7 @@ public class PasdRecord implements Serializable {
     private String credentials;
 
     @ToString.Include
+    @JsonIgnore
     private Integer origId;
 
     @JsonFormat(timezone = "GMT+03:00")
