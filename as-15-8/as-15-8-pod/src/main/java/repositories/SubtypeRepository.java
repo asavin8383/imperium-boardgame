@@ -40,13 +40,13 @@ public interface SubtypeRepository extends JpaRepository<Subtype, Integer>, Dict
 
     Optional<Subtype> findByOrigIdAndEffDt(String origId, Date effDt);
 
-    @Query("select distinct s from Subtype s " +
+    @Query(value = "select distinct s from Subtype s " +
             "where s.effDt = :effDt " +
-            "or concat(s.id, '') like lower(concat('%',:query,'%')) " +
+            "and (concat(s.id, '') like lower(concat('%',:query,'%')) " +
             "or lower(s.origId) like lower(concat('%',:query,'%')) " +
             "or lower(s.registryName) like lower(concat('%',:query,'%')) " +
             "or lower(s.categoryName) like lower(concat('%',:query,'%')) " +
-            "or lower(s.violationName) like lower(concat('%',:query,'%'))"
-        )
+            "or lower(s.violationName) like lower(concat('%',:query,'%')))"
+    )
     Page<Subtype> findByDateAndQuery(@Param("effDt") Date effDt, @Param("query") String query, Pageable pageable);
 }
