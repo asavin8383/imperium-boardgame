@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.openqa.selenium.*;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.interactions.Action;
@@ -19,6 +20,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.support.WebExchangeBindException;
 import robots.ChromeSettings;
+import robots.exceptions.ExecutionException;
 
 import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
@@ -120,10 +122,16 @@ public class ScriptUtils {
             ScriptUtils.waitForTab(webDriver, 2);
             switchToTab(webDriver, 2);
 
-            String base64Image = wait
+            String screenSrc = wait
                     .until(ExpectedConditions.presenceOfElementLocated(
-                            By.xpath("//img")))
-                    .getAttribute("src").split(",")[1];
+                            By.xpath("//img[@src and string-length(@src)!=0]")))
+                    .getAttribute("src");
+
+            if(Strings.isEmpty(screenSrc))
+                throw new ExecutionException("Ошибка получения скриншота: не найдено данных изображения");
+
+            String[] screenSrcSplit = screenSrc.split(",");
+            String base64Image = screenSrcSplit[screenSrcSplit.length - 1];
 
             // close screenshot tab
             webDriver.close();
