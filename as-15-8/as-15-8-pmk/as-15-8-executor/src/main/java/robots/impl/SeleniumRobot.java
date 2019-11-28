@@ -7,6 +7,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
 import enums.AccessToolParameter;
+import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebDriver;
 
@@ -24,6 +25,7 @@ import common.ExecutorProperties;
  * @author shabalinAI
  *
  */
+@Slf4j
 public abstract class SeleniumRobot implements Robot {
 
     protected WebDriver driver;
@@ -106,8 +108,12 @@ public abstract class SeleniumRobot implements Robot {
 
 	public void close(WebDriver driver) {
 		if (driver != null) {
-			driver.quit();
-			driver = null;
+			try {
+				driver.quit();
+				driver = null;
+			} catch (Exception ex){
+				log.warn("Ошибка при закрытии драйвера", ex);
+			}
 		}
 	}	
 }
