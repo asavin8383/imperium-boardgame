@@ -78,27 +78,31 @@ public class DictionaryService {
     }
 
     @Transactional
-    public void createPs(PSEntry entry){
-        if (entry.getId() != null){
-            throw new AS_15_8_POD_Exception("Запрещено изменять ПС. ID = " + entry.getId());
+    public void savePs(PSEntry entry){
+        if (entry.getId() != null && entry.getId() > 0){
+            throw new AS_15_8_POD_Exception("Запрещено изменять ПС из реестра с origId > 0. ID = " + entry.getId());
         }
 
-        entry.setId(getOrigId());
+        boolean isNew = entry.getId() == null;
+
+        if (isNew) entry.setId(getOrigId());
         entry.setDate(new Date());
 
         log.info("Create PS record {}", entry);
         psDictionaryUpdater.insertRecord(entry);
 
-        ConfigPS ps = new ConfigPS(entry.Id, entry.Name, entry.Hostname);
-        log.info("Sending PS record to config {}", ps);
+        if (isNew) {
+            ConfigPS ps = new ConfigPS(entry.Id, entry.Name, entry.Hostname);
+            log.info("Sending PS record to config {}", ps);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<List<ConfigPS>> entity = new HttpEntity<>(Arrays.asList(ps), headers);
-        restTemplate.postForObject(
-                UriComponentsBuilder.fromHttpUrl(configUrl).path("/ps").build().toString(),
-                entity,
-                ResponseEntity.class);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<List<ConfigPS>> entity = new HttpEntity<>(Arrays.asList(ps), headers);
+            restTemplate.postForObject(
+                    UriComponentsBuilder.fromHttpUrl(configUrl).path("/ps").build().toString(),
+                    entity,
+                    ResponseEntity.class);
+        }
     }
 
     @Transactional
@@ -127,13 +131,13 @@ public class DictionaryService {
 
     @Transactional
     public void deletePs(Long id){
-        log.info("Удаление ПС с ID = {}", id);
+        log.info("Удаление ПС с ORIG ID = {}", id);
         if (id == null)
             return;
 
         psDictionaryUpdater.archiveRecordByOrigId(id);
 
-        log.info("Запрос в конфиг на удаление ПС с ID = {}", id);
+        log.info("Запрос в конфиг на удаление ПС с ORIG ID = {}", id);
 
         restTemplate.delete(
                 UriComponentsBuilder.fromHttpUrl(configUrl)
