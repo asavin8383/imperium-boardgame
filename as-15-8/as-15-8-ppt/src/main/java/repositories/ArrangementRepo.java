@@ -6,11 +6,13 @@ import model.task.ExecutionStatusStatistics;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import rest.ArrangementActData;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,4 +51,9 @@ public interface ArrangementRepo extends JpaRepository<Arrangement, Long>, Arran
             "from Arrangement a " +
             "join a.formalTask f on a.id = :id")
     ArrangementActData findArrangementActData(@Param("id") Long id);
+
+    @Transactional
+    @Modifying(clearAutomatically = true)
+    @Query("update Arrangement a set a.status =:status where a.id =:id")
+    void updateStatusById(@Param("id") Long id, @Param("status") ExecutionStatus status);
 }
