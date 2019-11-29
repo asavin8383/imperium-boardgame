@@ -173,7 +173,7 @@ public class ActService {
             notifyActConfirmed(actRequest.getArrangementId());
         }
         catch(Exception ee){
-            log.error("Ошибка отпрвки уведомления в Dispatcher. ArrangementId = " + actRequest.getArrangementId());
+            log.error("Ошибка отпрвки уведомления в подсистему PPT. ArrangementId = " + actRequest.getArrangementId());
             ee.printStackTrace();
         }
 
