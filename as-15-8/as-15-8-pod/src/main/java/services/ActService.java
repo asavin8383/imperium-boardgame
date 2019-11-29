@@ -28,8 +28,11 @@ import rest.ArrangementActData;
 import rest.ResponseStatusString;
 import webClient.DispatcherWebClient;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Date;
 import java.util.List;
 
 
@@ -78,8 +81,15 @@ public class ActService {
             ActCheckResultPPP achRes = new ActCheckResultPPP();
             achRes.setCheckResultId(actCheckResult.getCheckResultId());
             achRes.setCheckUnitType(actCheckResult.getCheckUnitType().name());
-            achRes.setCheckUnitValue(new String[]{actCheckResult.getCheckUnitValue()});
+            achRes.setCheckUnitValue(actCheckResult.getCheckUnitValue());
             achRes.setDate(actCheckResult.getDate());
+
+            /*
+            if (StringUtils.isEmpty(actCheckResult.getDate())){
+                DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+                achRes.setDate(dateFormat.format(new Date()));
+            }*/
+
             checkResults.add(achRes);
         }
         aReq.setCheckResults(checkResults);

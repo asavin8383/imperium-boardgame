@@ -44,7 +44,7 @@ public class SendCheckUnitToKafka {
 	@Autowired
 	private ActService actService;
 
-	@Value("${spring.cloud.stream.bindings.jobs.destination}")
+	@Value("${spring.cloud.stream.bindings.inputJobs.destination}")
     private String topic;
 	
 	@Test
@@ -142,7 +142,7 @@ public class SendCheckUnitToKafka {
 
 		System.out.println("BEGIN -------------------------------");
 
-		actService.createAct(2L);
+		actService.createAct(255L);
 
 		System.out.println("END -------------------------------");
 

@@ -54,12 +54,12 @@ public class PsController {
 
     @PostMapping
     public void postPS(@RequestBody PSEntry entry) {
-        dictionaryService.createPs(entry);
+        dictionaryService.savePs(entry);
     }
 
     @DeleteMapping
-    public void deletePS(@RequestParam Long id) {
-        dictionaryService.deletePs(id);
+    public void deletePS(@RequestParam Long origId) {
+        dictionaryService.deletePs(origId);
     }
 
     @GetMapping(path = "/upload")

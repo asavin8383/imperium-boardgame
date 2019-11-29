@@ -1,0 +1,16 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+<changeSet id="ppt.0015" author="pvorobiev">
+    <sql>
+        alter table portal.arrangements drop constraint if exists ck_status;
+        alter table portal.arrangements add constraint ck_status check ( status in ('NEW', 'FORMED', 'SCHEDULED', 'RUNNING', 'ACTION_REQUIRED', 'FINISHED', 'ERROR', 'ACT_SENT'));
+    </sql>
+    <rollback>
+        <sql>
+            alter table portal.arrangements drop constraint if exists ck_status;
+            alter table portal.arrangements add constraint ck_status check ( status in ('NEW', 'FORMED', 'SCHEDULED', 'RUNNING', 'ACTION_REQUIRED', 'FINISHED', 'ERROR'));
+        </sql>
+    </rollback>
+</changeSet>
+</databaseChangeLog>

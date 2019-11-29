@@ -12,7 +12,7 @@ public class ActCheckResultPPP {
     private String checkUnitType;
 
     @JsonProperty("CheckUnitValue")
-    private String[] checkUnitValue;
+    private String checkUnitValue;
 
     @JsonProperty("Date")
     private String date;    // 2019-08-15T18:58:00

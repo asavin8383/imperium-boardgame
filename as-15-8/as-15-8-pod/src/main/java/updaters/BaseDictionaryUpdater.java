@@ -139,9 +139,10 @@ public abstract class BaseDictionaryUpdater<T>
         Date now = new Date();
         int rc = 0;
 
+        log.info("orig_id = {}", orig_id);
         String sql = "update " + TABLE + " set eff_dt = ? where orig_id = ? and eff_dt = '3000-01-01'";
-        log.debug(sql);
+        log.info(sql);
         rc = jdbcTemplate.update(sql, now, orig_id);
-        log.debug("{} record records archived", rc);
+        log.info("{} record records archived", rc);
     }
 }

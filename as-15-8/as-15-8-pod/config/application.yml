@@ -112,6 +112,7 @@ logging:
   level:
     root: info
     org.springframework.http: debug
+    org.springframework.jdbc: debug
 spring:
   profiles: dev_asin
   jpa:
