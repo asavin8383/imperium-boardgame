@@ -40,6 +40,10 @@ public class Schedule {
     @JsonView(Views.Brief.class)
     private String author;
 
+    @NotNull
+    @JsonView(Views.Brief.class)
+    private int maxWorkersCount;
+
     @Enumerated(EnumType.STRING)
     @NotNull
     @JsonView(Views.Brief.class)

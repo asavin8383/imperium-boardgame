@@ -50,7 +50,7 @@ public class TestSchedule {
             createArrangement("arr4", AccessToolUnit.TORGUARD,"13:10", "16:30"),
             generateCheckUnits(25000));*/
 
-        Schedule schedule = scheduleCreationService.create(scheduleArrangements);
+        Schedule schedule = scheduleCreationService.create(scheduleArrangements, 20);
 
         for(SchedulePeriod schedulePeriod : schedule.getSchedulePeriods()){
             System.out.print(formatter.format(schedulePeriod.getStartTime()) + " - " + formatter.format(schedulePeriod.getEndTime()) + ": ");
