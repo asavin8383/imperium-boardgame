@@ -20,10 +20,8 @@ import java.util.*;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class ScheduleCreationService {
 
-    @Getter
-    private int totalWorkersCount;
-
     private final SchedulerProperties schedulerProperties;
+    private int totalWorkersCount;
 
     @PostConstruct
     public void init(){
@@ -36,8 +34,8 @@ public class ScheduleCreationService {
         }
     }
 
-    public Schedule create(Map<Arrangement, TreeSet<ScheduleCheckUnit>> arrangementCheckUnits){
-        Schedule schedule = createNewSchedule(arrangementCheckUnits);
+    public Schedule create(Map<Arrangement, TreeSet<ScheduleCheckUnit>> arrangementCheckUnits, int maxWorkersCount){
+        Schedule schedule = createNewSchedule(arrangementCheckUnits, maxWorkersCount);
         calculateWorkers(schedule, arrangementCheckUnits);
         if(schedule.getSchedulePeriods().size() == 0)
             throw new AS_15_8_PPM_Exception("Ошибка формирования расписания! Не было сформировано ни одного периода!");
@@ -70,8 +68,13 @@ public class ScheduleCreationService {
         );
     }
 
-    private Schedule createNewSchedule(Map<Arrangement, TreeSet<ScheduleCheckUnit>> arrangementCheckUnits){
+    private Schedule createNewSchedule(Map<Arrangement, TreeSet<ScheduleCheckUnit>> arrangementCheckUnits, int maxWorkersCount){
         Schedule schedule = new Schedule();
+
+        if(maxWorkersCount > this.totalWorkersCount)
+            throw new AS_15_8_PPM_Exception("Ошибка создания расписания! Число исполняющих узлов для расписания запрошено больше, чем максимальное в системе " +
+                    "(" + maxWorkersCount + " > " + totalWorkersCount + ")");
+        schedule.setMaxWorkersCount(maxWorkersCount);
 
         TreeSet<LocalTime> scheduleIntervals = new TreeSet<>();
         for(Map.Entry<Arrangement, TreeSet<ScheduleCheckUnit>> arrangementEntry : arrangementCheckUnits.entrySet()){
@@ -145,9 +148,12 @@ public class ScheduleCreationService {
                 double percent = arrangementDensities.get(arrangement) / totalPeriodDensity;
                 int workersCount;
                 if(!schedulePeriodArrangementsIterator.hasNext()) {
-                    workersCount = this.totalWorkersCount - busyWorkers;
+                    workersCount = schedule.getMaxWorkersCount() - busyWorkers;
                 } else {
-                    workersCount = Math.min(Long.valueOf(Math.round(totalWorkersCount * percent)).intValue(), totalWorkersCount - 1);
+                    workersCount = Math.min(
+                            Long.valueOf(Math.round(schedule.getMaxWorkersCount() * percent)).intValue(),
+                            schedule.getMaxWorkersCount() - 1
+                    );
                     busyWorkers += workersCount;
                 }
 
@@ -226,7 +232,7 @@ public class ScheduleCreationService {
                 for (Map.Entry<Arrangement, ScheduleCheckUnit> entry : notFinishedArrangements.entrySet()) {
                     processingTime += calculateArrangementSchedulePeriodProcessing(
                             arrangementCheckUnits.get(entry.getKey()).tailSet(entry.getValue()),
-                            totalWorkersCount,
+                            schedule.getMaxWorkersCount(),
                             entry.getKey().getAccessTool(),
                             schedulePeriod.getEndTime(),
                             LocalTime.MAX
@@ -253,19 +259,20 @@ public class ScheduleCreationService {
                     arrangementCheckUnits.get(arrangement).tailSet(firstCheckUnit),
                     arrangement,
                     schedulePeriod.getStartTime(),
-                    schedulePeriod.getEndTime());
+                    schedulePeriod.getEndTime(),
+                    schedulePeriod.getSchedule().getMaxWorkersCount());
 
             arrangementDensities.put(arrangement, density);
         }
         return arrangementDensities;
     }
 
-    private double calculateDensity(Set<ScheduleCheckUnit> checkUnits, Arrangement arrangement, LocalTime startTime, LocalTime endTime){
+    private double calculateDensity(Set<ScheduleCheckUnit> checkUnits, Arrangement arrangement, LocalTime startTime, LocalTime endTime, int maxWorkersCount){
         long processingTime = countArrangementProcessingTime(checkUnits, arrangement.getAccessTool());
         long arrangementPlannedDuration = ChronoUnit.SECONDS.between(startTime, endTime);
         double workersCoeff = 1;
         if(arrangement.getMaxWorkersCount() != null)
-            workersCoeff = (double) arrangement.getMaxWorkersCount() / this.totalWorkersCount;
+            workersCoeff = (double) arrangement.getMaxWorkersCount() / maxWorkersCount;
         return (double) processingTime / arrangementPlannedDuration * workersCoeff;
     }
 
