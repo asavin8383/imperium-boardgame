@@ -9,7 +9,6 @@ import java.util.Date;
 public class PASDEntry
 {
     public Long Id;
-
     public String Name;
     public String Hostname;
     public String DomainNames;

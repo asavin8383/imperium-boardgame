@@ -107,26 +107,31 @@ public class DictionaryService {
 
     @Transactional
     public void createPasd(PASDEntry entry){
-        if (entry.getId() != null){
-            throw new AS_15_8_POD_Exception("Запрещено изменять ПАСД. ID = " + entry.getId());
+        if (entry.getId() != null && entry.getId() > 0){
+            throw new AS_15_8_POD_Exception("Запрещено изменять ПАСД из реестра с origId > 0. ID = " + entry.getId());
         }
 
-        entry.setId(getOrigId());
+        boolean isNew = entry.getId() == null;
+
+        if (isNew) entry.setId(getOrigId());
         entry.setDate(new Date());
 
         log.info("Create PASD record {}", entry);
         pasdDictionaryUpdater.insertRecord(entry);
 
-        ConfigPASD pasd = new ConfigPASD(entry.Id, entry.Name, entry.Hostname);
-        log.info("Sending PASD record to config {}", pasd);
+        if (isNew) {
+            ConfigPASD pasd = new ConfigPASD(entry.Id, entry.Name, entry.Hostname);
+            log.info("Sending PASD record to config {}", pasd);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<List<ConfigPASD>> entity = new HttpEntity<>(Arrays.asList(pasd), headers);
-        restTemplate.postForObject(
-                UriComponentsBuilder.fromHttpUrl(configUrl).path("/pasd").build().toString(),
-                entity,
-                ResponseEntity.class);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<List<ConfigPASD>> entity = new HttpEntity<>(Arrays.asList(pasd), headers);
+            restTemplate.postForObject(
+                    UriComponentsBuilder.fromHttpUrl(configUrl).path("/pasd").build().toString(),
+                    entity,
+                    ResponseEntity.class);
+        }
+
     }
 
     @Transactional
