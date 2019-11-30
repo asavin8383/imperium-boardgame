@@ -58,8 +58,8 @@ public class PasdController {
     }
 
     @DeleteMapping
-    public void deletePASD(@RequestParam Long id) {
-        dictionaryService.deletePasd(id);
+    public void deletePASD(@RequestParam Long origId) {
+        dictionaryService.deletePasd(origId);
     }
 
     @GetMapping(path = "/upload")
