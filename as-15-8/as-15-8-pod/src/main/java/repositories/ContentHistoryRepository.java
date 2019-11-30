@@ -24,9 +24,9 @@ public interface ContentHistoryRepository extends JpaRepository<ContentHistory, 
 
     @Query("select case when count(h.id) = 0 then true else false end from ContentHistory h " +
             "where " +
-                "h.id = :contentId and " +
-                "h.endDate = :endDate and " +
+                "h.content = :contentId and " +
+                "h.endDate = '3000-01-01' and " +
                 "h.startDate < :restrictionDate")
-    boolean checkExpired(@Param("contentId") Long contentId, @Param("restrictionDate") Date restrictionDate, @Param("endDate") Date endDate);
+    boolean checkExpired(@Param("contentId") Long contentId, @Param("restrictionDate") Date restrictionDate);
 
 }

@@ -83,8 +83,7 @@ public class ContentController {
     public Boolean isExpired(@RequestParam Long id) throws ParseException {
         //Добавленные менее чем за сутки не нужны
         Date restrictionDate = DateUtils.addHours(new Date(), -24);
-        Date endDate = new SimpleDateFormat("yyyy-MM-dd").parse("3000-01-01");
-        return contentHistoryRepo.checkExpired(id, restrictionDate, endDate);
+        return contentHistoryRepo.checkExpired(id, restrictionDate);
     }
 
     @GetMapping(path = "/update_erdi")
