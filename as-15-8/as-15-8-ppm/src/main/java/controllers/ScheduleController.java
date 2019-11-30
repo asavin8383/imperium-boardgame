@@ -16,17 +16,19 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import repositories.ScheduleRepo;
 import services.ArrangementService;
-import services.ScheduleCreationService;
 import services.ScheduleService;
 
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.SortedSet;
 import java.util.stream.Collectors;
 
 /**
@@ -41,7 +43,6 @@ public class ScheduleController {
 
     private final ArrangementService arrangementService;
     private final ScheduleService scheduleService;
-    private final ScheduleCreationService scheduleCreationService;
     private final ScheduleRepo scheduleRepo;
 
     @GetMapping(path = "/arrangements")
@@ -77,7 +78,7 @@ public class ScheduleController {
 
     @GetMapping(path = "/total_workers_count")
     public Integer getTotalWorkersCount(){
-        return scheduleCreationService.getTotalWorkersCount();
+        return scheduleService.getFreeWorkersCount(LocalDate.now());
     }
 
     //TODO кидать 400
@@ -88,7 +89,7 @@ public class ScheduleController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate plannedDate,
             @RequestBody List<Long> arrangementIds,
             Principal principal){
-        return saveSchedule(arrangementIds, principal.getName(), plannedDate);
+        return scheduleService.saveSchedule(arrangementIds, principal.getName(), plannedDate);
     }
 
     @PutMapping
@@ -114,13 +115,14 @@ public class ScheduleController {
 
     @PutMapping(path = "/plan")
     @JsonView(Views.Id.class)
-    public Schedule planSchedule(
-            @RequestParam("id") Schedule schedule
-    ) {
-        if(!(schedule.getStatus().equals(ScheduleStatus.NEW))){
-            throw AS_15_8_PPM_Exception.logAndGet(log, String.format("Ошибка планирования расписания! Некорректный статус расписания с ИД: %d - %s", schedule.getId(), schedule.getStatus()));
+    public ResponseEntity planSchedule(@RequestParam("id") Schedule schedule) {
+        try {
+            if (!(schedule.getStatus().equals(ScheduleStatus.NEW)))
+                throw new AS_15_8_PPM_Exception(String.format("Ошибка планирования расписания! Некорректный статус расписания с ИД: %d - %s", schedule.getId(), schedule.getStatus()));
+            return ResponseEntity.ok(scheduleService.planSchedule(schedule));
+        } catch (AS_15_8_PPM_Exception ex) {
+            return ResponseEntity.badRequest().body(ex.getMessage());
         }
-        return scheduleService.planSchedule(schedule);
     }
 
     @DeleteMapping
@@ -143,10 +145,6 @@ public class ScheduleController {
                     }
                 }));
         return briefArrangements;
-    }
-
-    private synchronized Schedule saveSchedule(List<Long> arrangementIds, String author, LocalDate plannedDate){
-        return scheduleService.saveSchedule(arrangementIds, author, plannedDate, null);
     }
 
     @Data

@@ -1,6 +1,7 @@
 package services;
 
 import arrangement.ArrangementStatusNotification;
+import common.SchedulerProperties;
 import enums.ArrangementEvents;
 import exceptions.AS_15_8_PPM_Exception;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ public class ScheduleService {
     private final ArrangementRepo arrangementRepo;
     private final ArrangementStatusUploader arrangementStatusUploader;
     private final SchedulePeriodRepo schedulePeriodRepo;
+    private final SchedulerProperties schedulerProperties;
 
     public void deleteSchedule(Schedule schedule){
         scheduleRepo.delete(schedule);
@@ -42,6 +44,10 @@ public class ScheduleService {
      */
     @Transactional
     public Schedule planSchedule(Schedule schedule){
+        int freeWorkersCount = getFreeWorkersCount(schedule.getPlannedDate());
+        if(schedule.getMaxWorkersCount() > freeWorkersCount)
+            throw new AS_15_8_PPM_Exception("Ошибка планирования расписания. Количество свободных обработчиков уменьшилось. На данный момент их максимальное количество " + freeWorkersCount + " штук");
+
         arrangementRepo.findAllBySchedule(schedule.getId())
                 .forEach(this::fillCheckUnits);
         schedule.setStatus(ScheduleStatus.PLANNED);
@@ -56,10 +62,19 @@ public class ScheduleService {
         return schedule;
     }
 
+    public synchronized Schedule saveSchedule(List<Long> arrangementIds, String author, LocalDate plannedDate){
+        return saveSchedule(arrangementIds, author, plannedDate, null);
+    }
+
     public synchronized Schedule saveSchedule(List<Long> arrangementIds, String author, LocalDate plannedDate, Schedule schedule){
         //Сначала исключим из расписания все периоды
-        if(schedule != null)
+        int maxWorkersCount;
+        if(schedule != null) {
             clearSchedulePeriods(schedule);
+            maxWorkersCount = schedule.getMaxWorkersCount();
+        } else {
+            maxWorkersCount = getFreeWorkersCount(plannedDate);
+        }
 
         List<Long> availableIds =
                 arrangementService.findAllAvailableArrangements()
@@ -76,7 +91,7 @@ public class ScheduleService {
         }
         log.info("Начало расчета расписания на дату: {}", plannedDate);
         Map<Arrangement, TreeSet<ScheduleCheckUnit>> arrangementCheckUnits = arrangementService.getArrangementCheckUnits(availableIds, plannedDate);
-        Schedule newSchedule = scheduleCreationService.create(arrangementCheckUnits);
+        Schedule newSchedule = scheduleCreationService.create(arrangementCheckUnits, maxWorkersCount);
         log.info("Расчет расписания на дату {} завершен", plannedDate);
         if(schedule != null) {
             schedule.setSchedulePeriods(newSchedule.getSchedulePeriods());
@@ -88,6 +103,10 @@ public class ScheduleService {
         schedule.setAuthor(author);
         schedule.setPlannedDate(plannedDate);
         return scheduleRepo.save(schedule);
+    }
+
+    public int getFreeWorkersCount(LocalDate plannedDate){
+        return Math.max(schedulerProperties.getTotalWorkersCount() - scheduleRepo.getBusyWorkersCount(plannedDate), 0);
     }
 
     private void fillCheckUnits(Arrangement arrangement){
@@ -120,10 +139,14 @@ public class ScheduleService {
             SchedulePeriodCheckUnit schedulePeriodCheckUnit = new SchedulePeriodCheckUnit();
             schedulePeriodCheckUnit.setSchedulePeriodArrangement(schedulePeriodArrangement);
             schedulePeriodCheckUnit.setCheckUnit(scheduleCheckUnit);
-            schedulePeriodCheckUnit.setExecutionNumber(currentExecutionNumber++);
+            schedulePeriodCheckUnit.setExecutionNumber(currentExecutionNumber);
             schedulePeriodArrangement.getSchedulePeriodCheckUnits().add(schedulePeriodCheckUnit);
             schedulePeriodCheckUnitRepo.save(schedulePeriodCheckUnit);
             log.debug("Добавлен новый CheckUinit: {}", schedulePeriodCheckUnit.getExecutionNumber());
+            if(currentExecutionNumber < schedulePeriodArrangement.getWorkersCount())
+                currentExecutionNumber++;
+            else
+                currentExecutionNumber = 1;
         }
         schedulePeriodArrangementRepo.save(schedulePeriodArrangement);
         log.debug("SPA {} заполнено", schedulePeriodArrangement.getId());

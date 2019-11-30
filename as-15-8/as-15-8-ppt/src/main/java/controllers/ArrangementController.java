@@ -146,9 +146,11 @@ public class ArrangementController {
 
         Optional<Arrangement> optionalArrangement = arrangementRepo.findById(arrangementId);
         Arrangement arrangement = optionalArrangement.orElse(null);
-        if (arrangement != null && arrangement.getStatus() == ExecutionStatus.FINISHED){
-            arrangement.setStatus(ExecutionStatus.ACT_SENT);
-            arrangementRepo.save(arrangement);
+        if (arrangement == null){
+            log.info("Arrangement с id = {} не найден!", arrangementId);
+        }
+        else if (arrangement.getStatus() == ExecutionStatus.FINISHED) {
+            arrangementRepo.updateStatusById(arrangementId, ExecutionStatus.ACT_SENT);
             log.info("Состояние у Arrangement с id = {} изменено на : {}", arrangement.getId(), ExecutionStatus.ACT_SENT);
         }
         else {
