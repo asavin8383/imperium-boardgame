@@ -28,6 +28,8 @@ public class ErdiChecker {
 
     public boolean isExpired(Long erdiId){
         try {
+            if(erdiId == null || erdiId <= 0)
+                return false;
             return Optional.ofNullable(restTemplate.getForObject(
                     UriComponentsBuilder
                             .fromHttpUrl(gatewayUrl)
