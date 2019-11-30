@@ -9,6 +9,8 @@ public enum CheckUnitJobResult {
 
 	PLANNED,
 	RUNNING,
+	EXPIRED,
+
 	COMPLETED,
 	DOUBTFUL,
 	FORBIDDEN_CONTENT_DETECTED,

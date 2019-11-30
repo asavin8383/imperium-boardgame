@@ -17,6 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import repositories.ContentHistoryRepository;
 import rest.ActRequest;
 import rest.ResponseStatusString;
 import restapi.ErdiRestClient;
@@ -25,6 +26,7 @@ import services.ContentService;
 import services.InfoService;
 
 import java.text.ParseException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -39,6 +41,7 @@ public class ContentController {
     private final ContentService contentService;
     private final ErdiRestClient erdiRestClient;
     private final InfoService infoService;
+    private final ContentHistoryRepository contentHistoryRepo;
 
     @GetMapping(path = "/erdi")
     @PreAuthorize("hasAnyRole('ROLE_OPERATOR')")
@@ -63,8 +66,7 @@ public class ContentController {
 
     @GetMapping(path = "/erdi/single")
     //@PreAuthorize("hasAnyRole('ROLE_OPERATOR')")
-    public Optional<ContentView> getContentById(
-            @RequestParam Long id) {
+    public Optional<ContentView> getContentById(@RequestParam Long id) {
         return contentService.getFormalErdiView(id);
     }
 
@@ -73,6 +75,12 @@ public class ContentController {
             @RequestParam(defaultValue = "") String url
     ) {
         return infoService.searchCheckUnit(url);
+    }
+
+    @GetMapping(path = "/erdi/expired", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
+    public Boolean isExpired(@RequestParam Long id){
+        return contentHistoryRepo.checkExpired(id, LocalDateTime.now().minusHours(24));
     }
 
     @GetMapping(path = "/update_erdi")

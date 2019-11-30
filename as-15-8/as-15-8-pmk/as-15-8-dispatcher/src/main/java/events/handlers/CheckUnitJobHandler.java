@@ -1,6 +1,7 @@
 package events.handlers;
 
 import checkUnits.CheckUnitJob;
+import enums.CheckUnitJobResult;
 import events.DispatcherChannels;
 import exceptions.AS_15_8_DispatcherException;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
+import restapi.ErdiChecker;
 import services.impl.CheckUnitPersistingService;
 
 /**
@@ -30,6 +32,8 @@ public class CheckUnitJobHandler {
 
     private final CheckUnitPersistingService checkUnitPersistingService;
 
+    private final ErdiChecker erdiChecker;
+
     /**
      * Запись заданий в результаты и передача их в executor
      * @param message сообщение из ППМ с чек-юнитом для запуска проверки
@@ -41,9 +45,15 @@ public class CheckUnitJobHandler {
                 ", partition: "+message.getHeaders().get(KafkaHeaders.RECEIVED_PARTITION_ID, Integer.class) +
                 ", offset: "+message.getHeaders().get(KafkaHeaders.OFFSET, Long.class));
         try {
-            Result result = checkUnitPersistingService.persistCheckUnitJob(message.getPayload());
-            checkUnitJob.setJobID(result.getId());
-            sendJobToExecutor(checkUnitJob, message.getHeaders().get(KafkaHeaders.RECEIVED_MESSAGE_KEY));
+            boolean isExpired = erdiChecker.isExpired(message.getPayload().getCheckUnit().getErdiId());
+            if(isExpired) {
+                checkUnitPersistingService.persistCheckUnitJob(message.getPayload(), CheckUnitJobResult.EXPIRED);
+                log.info("Проверка исключена из списка выполнения, т.к является неактуальной: " + message.getPayload().getCheckUnit().getErdiId());
+            } else {
+                Result result = checkUnitPersistingService.persistCheckUnitJob(message.getPayload(), CheckUnitJobResult.RUNNING);
+                checkUnitJob.setJobID(result.getId());
+                sendJobToExecutor(checkUnitJob, message.getHeaders().get(KafkaHeaders.RECEIVED_MESSAGE_KEY));
+            }
         } catch (Exception ex) {
             log.error("Ошибка обработки задания на проверку чек-юнита " + checkUnitJob.toString() + " диспетчером", ex);
         }
