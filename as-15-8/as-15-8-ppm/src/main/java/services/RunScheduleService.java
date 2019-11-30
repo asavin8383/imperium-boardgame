@@ -5,7 +5,6 @@ import checkUnits.CheckUnit;
 import checkUnits.CheckUnitJob;
 import enums.ArrangementEvents;
 import events.producers.CheckUnitJobProducer;
-import restapi.ArrangementStatusUploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.ScheduleCheckUnit;
@@ -17,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import repositories.*;
+import restapi.ArrangementStatusUploader;
 
 import javax.transaction.Transactional;
 import java.time.LocalDate;
@@ -62,11 +62,9 @@ public class RunScheduleService {
     private void runCheckUnit(SchedulePeriodCheckUnit schedulePeriodCheckUnit){
         log.debug("Запуск чек-юнита: {} {}", schedulePeriodCheckUnit.getId(), schedulePeriodCheckUnit.getCheckUnit().getCheckUnitValue());
         if (schedulePeriodCheckUnit.getStatus().equals(SchedulePeriodCheckUnitStatus.READY)){
-            String key = new StringBuilder()
-                    .append(schedulePeriodCheckUnit.getSchedulePeriodArrangement().getArrangement().getId())
-                    .append("_")
-                    .append(schedulePeriodCheckUnit.getExecutionNumber())
-                    .toString();
+            long keySuffix = schedulePeriodCheckUnit.getExecutionNumber() %
+                    schedulePeriodCheckUnit.getSchedulePeriodArrangement().getSchedulePeriod().getSchedule().getMaxWorkersCount();
+            String key = schedulePeriodCheckUnit.getSchedulePeriodArrangement().getArrangement().getId() + "_" + keySuffix;
             sendCheckUnitJobToDispatcher(createCheckUnitJob(scheduleCheckUnitRepo.getOne(schedulePeriodCheckUnit.getId())), key);
             log.debug("Чек-юнит отправлен на диспетчер. Ключ: {} , значение: {} {}", key, schedulePeriodCheckUnit.getId(), schedulePeriodCheckUnit.getCheckUnit().getCheckUnitValue());
         }

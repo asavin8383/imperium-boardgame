@@ -139,14 +139,10 @@ public class ScheduleService {
             SchedulePeriodCheckUnit schedulePeriodCheckUnit = new SchedulePeriodCheckUnit();
             schedulePeriodCheckUnit.setSchedulePeriodArrangement(schedulePeriodArrangement);
             schedulePeriodCheckUnit.setCheckUnit(scheduleCheckUnit);
-            schedulePeriodCheckUnit.setExecutionNumber(currentExecutionNumber);
+            schedulePeriodCheckUnit.setExecutionNumber(currentExecutionNumber++);
             schedulePeriodArrangement.getSchedulePeriodCheckUnits().add(schedulePeriodCheckUnit);
             schedulePeriodCheckUnitRepo.save(schedulePeriodCheckUnit);
             log.debug("Добавлен новый CheckUinit: {}", schedulePeriodCheckUnit.getExecutionNumber());
-            if(currentExecutionNumber < schedulePeriodArrangement.getWorkersCount())
-                currentExecutionNumber++;
-            else
-                currentExecutionNumber = 1;
         }
         schedulePeriodArrangementRepo.save(schedulePeriodArrangement);
         log.debug("SPA {} заполнено", schedulePeriodArrangement.getId());
