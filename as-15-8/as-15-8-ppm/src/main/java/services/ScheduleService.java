@@ -34,7 +34,13 @@ public class ScheduleService {
     private final SchedulerProperties schedulerProperties;
 
     public void deleteSchedule(Schedule schedule){
+        List<Arrangement> arrangements = arrangementRepo.findAllBySchedule(schedule.getId());
         scheduleRepo.delete(schedule);
+        arrangements.forEach(arrangement ->
+                arrangementStatusUploader.changeArrangementStatus(
+                        new ArrangementStatusNotification(arrangement.getId(), ArrangementEvents.SCHEDULE_ROLLBACK)
+                )
+        );
     }
 
     /**
