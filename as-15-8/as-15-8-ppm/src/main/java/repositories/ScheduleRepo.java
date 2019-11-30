@@ -17,9 +17,9 @@ public interface ScheduleRepo extends JpaRepository<Schedule, Long> {
 
     List<Schedule> findAllByPlannedDateAndStatus(LocalDate plannedDate, ScheduleStatus status);
 
-    @Query("select sum(s.maxWorkersCount) from Schedule s " +
+    @Query("select coalesce(sum(s.maxWorkersCount), 0) from Schedule s " +
             "where s.status = 'RUNNING' and " +
             "s.plannedDate = :plannedDate " +
             "group by s.id")
-    int getBusyWorkersCount(@Param("plannedDate") LocalDate plannedDate);
+    Integer getBusyWorkersCount(@Param("plannedDate") LocalDate plannedDate);
 }
