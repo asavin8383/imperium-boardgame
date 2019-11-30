@@ -74,7 +74,7 @@ public class ContentController {
     }
 
     @GetMapping(path = "/check_erdi", produces = MediaType.APPLICATION_JSON_VALUE)
-    public SearchErdiStatus checkErdi(@RequestParam(defaultValue = "") String url) {
+    public ResponseStatusString checkErdi(@RequestParam(defaultValue = "") String url) {
         return infoService.searchCheckUnit(url);
     }
 
