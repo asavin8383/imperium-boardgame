@@ -105,21 +105,21 @@ public class ArrangementController {
                 boolean isPS = accessToolUnit == AccessToolUnit.SEARCH_SYSTEM ||
                         accessToolUnit == AccessToolUnit.GOOGLE_API;
                 if (isPS) {
-                    scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit.getErdiId(), CheckUnitType.URL, checkUnit.getValue()));
+                    scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit.getContentId(), CheckUnitType.URL, checkUnit.getValue()));
                 } else {
                     for(Protocol value: Protocol.values()){
-                        scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit.getErdiId(), CheckUnitType.URL, value.getProtocol() + checkUnit.getValue()));
+                        scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit.getContentId(), CheckUnitType.URL, value.getProtocol() + checkUnit.getValue()));
                     }
                 }
                 return scheduleCheckUnits;
             }
             case DOMAIN_MASK: {
                 domainMaskUploader.getDomainMaskItems(checkUnit.getValue())
-                    .forEach(domainMaskItem -> scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit.getErdiId(), CheckUnitType.URL, domainMaskItem)));
+                    .forEach(domainMaskItem -> scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit.getContentId(), CheckUnitType.URL, domainMaskItem)));
                 return scheduleCheckUnits;
             }
             default: {
-                scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit.getErdiId(), checkUnit.getType(), checkUnit.getValue()));
+                scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit.getContentId(), checkUnit.getType(), checkUnit.getValue()));
                 return scheduleCheckUnits;
             }
         }

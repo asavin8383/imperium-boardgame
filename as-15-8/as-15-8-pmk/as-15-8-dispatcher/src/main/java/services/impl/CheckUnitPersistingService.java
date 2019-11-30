@@ -24,7 +24,7 @@ public class CheckUnitPersistingService {
     public Result persistCheckUnitJob(CheckUnitJob checkUnitJob, CheckUnitJobResult status){
         Result result = new Result();
         result.setArrangementId(checkUnitJob.getArrangementId());
-        result.setErdiId(checkUnitJob.getCheckUnit().getErdiId());
+        result.setErdiId(checkUnitJob.getCheckUnit().getContentId());
         result.setCheckUnitType(checkUnitJob.getCheckUnit().getType());
         result.setCheckUnitValue(checkUnitJob.getCheckUnit().getValue());
         result.setResult(status);
