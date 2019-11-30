@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 
@@ -26,6 +27,6 @@ public interface ContentHistoryRepository extends JpaRepository<ContentHistory, 
                 "h.id = :contentId and " +
                 "h.endDate = '3000-01-01' and " +
                 "h.startDate < :restrictionDate")
-    boolean checkExpired(@Param("contentId") Long contentId, @Param("restrictionDate") LocalDateTime restrictionDate);
+    boolean checkExpired(@Param("contentId") Long contentId, @Param("restrictionDate") Date restrictionDate);
 
 }

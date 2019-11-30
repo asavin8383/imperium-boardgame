@@ -27,6 +27,8 @@ import services.InfoService;
 
 import java.text.ParseException;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -80,7 +82,8 @@ public class ContentController {
     @GetMapping(path = "/erdi/expired", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
     public Boolean isExpired(@RequestParam Long id){
-        return contentHistoryRepo.checkExpired(id, LocalDateTime.now().minusHours(24));
+        Date restrictionDate = Date.from(LocalDateTime.now().minusHours(24).atZone(ZoneId.systemDefault()).toInstant());
+        return contentHistoryRepo.checkExpired(id, restrictionDate);
     }
 
     @GetMapping(path = "/update_erdi")
