@@ -5,7 +5,6 @@ import controllers.utils.SortingDirection;
 import controllers.utils.SortingHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import model.controller.SearchErdiStatus;
 import model.projection.ContentView;
 import model.rest.control.PodState;
 import org.apache.commons.lang.time.DateUtils;
@@ -17,17 +16,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import repositories.ContentHistoryRepository;
-import rest.ActRequest;
 import rest.ResponseStatusString;
 import restapi.ErdiRestClient;
-import services.ActService;
 import services.ContentService;
 import services.InfoService;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -80,7 +78,7 @@ public class ContentController {
 
     @GetMapping(path = "/erdi/expired", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
-    public Boolean isExpired(@RequestParam Long id) throws ParseException {
+    public Boolean isExpired(@RequestParam Long id) {
         //Добавленные менее чем за сутки не нужны
         Date restrictionDate = DateUtils.addHours(new Date(), -24);
         return contentHistoryRepo.checkExpired(id, restrictionDate);

@@ -23,8 +23,7 @@ public interface ContentHistoryRepository extends JpaRepository<ContentHistory, 
     void deleteByContentVersionId(Long contentVersionId);
 
     @Query("select case when count(h.id) = 0 then true else false end from ContentHistory h " +
-            "where " +
-                "h.content = :contentId and " +
+            "join h.content c on c.id = :contentId and " +
                 "h.endDate = '3000-01-01' and " +
                 "h.startDate < :restrictionDate")
     boolean checkExpired(@Param("contentId") Long contentId, @Param("restrictionDate") Date restrictionDate);
