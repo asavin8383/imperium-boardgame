@@ -1,10 +1,11 @@
 package model.controller;
 
-import checkUnits.CheckUnitType;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 
 @Data
+@NoArgsConstructor
 public class SearchErdiStatus {
     private boolean status;
 }

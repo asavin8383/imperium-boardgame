@@ -271,7 +271,7 @@ public class ScheduleCreationService {
         long processingTime = countArrangementProcessingTime(checkUnits, arrangement.getAccessTool());
         long arrangementPlannedDuration = ChronoUnit.SECONDS.between(startTime, endTime);
         double workersCoeff = 1;
-        if(arrangement.getMaxWorkersCount() != null)
+        if(arrangement.getMaxWorkersCount() != null && arrangement.getMaxWorkersCount() < maxWorkersCount)
             workersCoeff = (double) arrangement.getMaxWorkersCount() / maxWorkersCount;
         return (double) processingTime / arrangementPlannedDuration * workersCoeff;
     }
