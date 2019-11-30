@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import model.controller.SearchErdiStatus;
 import model.projection.ContentView;
 import model.rest.control.PodState;
+import org.apache.commons.lang.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,18 +17,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import repositories.ContentHistoryRepository;
-import rest.ActRequest;
-import rest.ResponseStatusString;
 import restapi.ErdiRestClient;
-import services.ActService;
 import services.ContentService;
 import services.InfoService;
 
 import java.text.ParseException;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -81,9 +80,10 @@ public class ContentController {
 
     @GetMapping(path = "/erdi/expired", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
-    public Boolean isExpired(@RequestParam Long id){
-        Date restrictionDate = Date.from(LocalDateTime.now().minusHours(24).atZone(ZoneId.systemDefault()).toInstant());
-        return contentHistoryRepo.checkExpired(id, restrictionDate);
+    public Boolean isExpired(@RequestParam Long id) throws ParseException {
+        Date restrictionDate = DateUtils.addHours(new Date(), -24);
+        Date endDate = new SimpleDateFormat("yyyy-MM-dd").parse("3000-01-01");
+        return contentHistoryRepo.checkExpired(id, restrictionDate, endDate);
     }
 
     @GetMapping(path = "/update_erdi")
