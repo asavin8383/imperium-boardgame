@@ -71,13 +71,6 @@ public class ContentController {
         return contentService.getFormalErdiView(id);
     }
 
-    @GetMapping(path = "/check_erdi", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseStatusString update(
-            @RequestParam(defaultValue = "") String url
-    ) {
-        return infoService.searchCheckUnit(url);
-    }
-
     @GetMapping(path = "/erdi/expired", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
     public Boolean isExpired(@RequestParam Long id) throws ParseException {
@@ -85,6 +78,11 @@ public class ContentController {
         Date restrictionDate = DateUtils.addHours(new Date(), -24);
         Date endDate = new SimpleDateFormat("yyyy-MM-dd").parse("3000-01-01");
         return contentHistoryRepo.checkExpired(id, restrictionDate, endDate);
+    }
+
+    @GetMapping(path = "/check_erdi", produces = MediaType.APPLICATION_JSON_VALUE)
+    public SearchErdiStatus update(@RequestParam(defaultValue = "") String url) {
+        return infoService.searchCheckUnit(url);
     }
 
     @GetMapping(path = "/update_erdi")
