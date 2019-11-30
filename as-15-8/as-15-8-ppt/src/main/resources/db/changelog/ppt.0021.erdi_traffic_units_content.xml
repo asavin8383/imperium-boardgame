@@ -1,0 +1,18 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+    <changeSet author="asavin" id="ppt.0021">
+
+        <dropForeignKeyConstraint baseTableName="erdi_traffic_units_content" baseTableSchemaName="portal" constraintName="FKkqjmq3i7yo6xh2n9dafdk8myg"/>
+        <addForeignKeyConstraint
+                baseTableSchemaName="portal"
+                baseTableName="erdi_traffic_units_content"
+                baseColumnNames="traffic_unit_id"
+                constraintName="FK_ERDI_TRAFFIC_UNITS"
+                referencedTableSchemaName="portal"
+                referencedTableName="erdi_traffic_units"
+                referencedColumnNames="id"
+                onUpdate="CASCADE"
+                onDelete="CASCADE"/>
+    </changeSet>
+
+</databaseChangeLog>

@@ -40,8 +40,8 @@ public interface ArrangementRepo extends JpaRepository<Arrangement, Long>, Arran
     List<ExecutionStatusStatistics> findSummaryByStatus();
 
     @Query(
-            "SELECT f.contentId from Arrangement a " +
-                    "join a.traffic t  on a.id = :id " +
+            "SELECT f.erdiId from Arrangement a " +
+                    "join Traffic t on a.trafficId = t.id and a.id = :id " +
                     "join t.erdiTrafficUnits u " +
                     "join u.formalErdiList f"
     )

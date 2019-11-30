@@ -49,8 +49,7 @@ public class FormalErdiController {
                     .findByTrafficUnit(erdiTrafficUnit, pageable);
             List<Long> contentIds = trafficUnitContents
                     .stream()
-                    .mapToLong(ErdiTrafficUnitContent::getContentId)
-                    .boxed()
+                    .map(ErdiTrafficUnitContent::getErdiId)
                     .collect(Collectors.toList());
             List<ObjectNode> erdiList = podWebClient.fetchErdi(contentIds);
             return new PageImpl<>(erdiList, pageable, trafficUnitContents.getTotalElements());

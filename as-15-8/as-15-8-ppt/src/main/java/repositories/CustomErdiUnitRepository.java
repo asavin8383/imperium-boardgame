@@ -19,7 +19,7 @@ public interface CustomErdiUnitRepository extends JpaRepository<CustomErdiUnit, 
             " join units.customErdi erdi " +
             " join erdi.erdiTrafficUnits traffic_units " +
             "join traffic_units.traffic traffic " +
-            "join traffic.arrangements a on a.id=:id"
+            "join Arrangement a on traffic.id = a.trafficId and a.id=:id"
     )
     List<CustomErdiUnit> findByArrangementId(@Param("id") Long arrangementId);
 }

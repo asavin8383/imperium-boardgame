@@ -38,7 +38,7 @@ public class ErdiTrafficUnit extends TrafficUnit implements Serializable {
     private AccessToolsCategory category;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "traffic_id", nullable = false)
+    @JoinColumn(name = "traffic_id", nullable = false, foreignKey = @ForeignKey(name = "FK_TRAFFIC"))
     @JsonIgnore
     @ToString.Include
     private Traffic traffic;

@@ -19,11 +19,11 @@ public class ContentView {
 
     //    http://192.168.5.182:8090/pages/viewpage.action?pageId=3801123
 
-    // 1 or erdiId ?
+    // erdiId
     @Id
     @ToString.Include
     @EqualsAndHashCode.Include
-    private Long id;
+    private String id;
 
     // 12
     @ToString.Include

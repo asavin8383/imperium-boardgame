@@ -1,14 +1,10 @@
 package controllers.ppm;
 
 import checkUnits.CheckUnit;
-import checkUnits.CheckUnitType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import model.enums.SearchQueryPattern;
-import model.traffic.SearchQueryContentJoin;
-import model.traffic.SearchQueryTrafficUnit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,14 +12,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.ParallelFlux;
-import reactor.core.scheduler.Schedulers;
 import repositories.ArrangementRepo;
 import repositories.CustomErdiUnitRepository;
 import repositories.SearchQueryTrafficUnitRepository;
 import webClients.PodWebClient;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -65,7 +58,7 @@ public class ArrangementContentController {
                 .collect(Collectors.toList()));
     }
 
-    private List<CheckUnit> getSearchPhrasesCheckUnits(Long arrangementId){
+    /*private List<CheckUnit> getSearchPhrasesCheckUnits(Long arrangementId){
         List<CheckUnit> checkUnits = new ArrayList<>();
         List<SearchQueryTrafficUnit> searchQueryTrafficUnits =
                 searchQueryTrafficUnitRepository
@@ -146,7 +139,7 @@ public class ArrangementContentController {
                 .replace(SearchQueryPattern.ERDI.getPattern(), join.getCheckUnit() == null ? "" : join.getCheckUnit().getValue())
                 .replace(SearchQueryPattern.EXPRESSION.getPattern(), join.getSearchPhrase() == null ? "" : join.getSearchPhrase())
         );
-    }
+    }*/
 
     @Data
     @AllArgsConstructor

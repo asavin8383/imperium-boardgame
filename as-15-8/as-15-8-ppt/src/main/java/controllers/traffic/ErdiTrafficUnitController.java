@@ -53,7 +53,7 @@ public class ErdiTrafficUnitController {
 
         if (unit.getType() == TrafficUnitType.FORMAL) {
             unit.getFormalErdiList().removeAll(
-                    erdiContentJoinRepository.findAllByTrafficUnitAndContentIdIn(unit, ids));
+                    erdiContentJoinRepository.findAllByTrafficUnitAndErdiIdIn(unit, ids));
         } else {
             // assert unit.getType() == TrafficUnitType.CUSTOM
              unit.getCustomErdiList().removeAll(customErdiRepository.findAllById(ids));

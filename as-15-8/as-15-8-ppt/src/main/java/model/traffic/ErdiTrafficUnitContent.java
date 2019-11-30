@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import javax.persistence.*;
@@ -12,6 +13,7 @@ import java.io.Serializable;
 @Entity
 @Table(schema = "portal", name = "erdi_traffic_units_content")
 @Data
+@NoArgsConstructor
 @ToString(onlyExplicitlyIncluded = true)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class ErdiTrafficUnitContent implements Serializable {
@@ -34,12 +36,10 @@ public class ErdiTrafficUnitContent implements Serializable {
     @JsonProperty("id")
     @ToString.Include
     @EqualsAndHashCode.Include
-    private Long contentId;
+    private Long erdiId;
 
-    public ErdiTrafficUnitContent() { }
-
-    public ErdiTrafficUnitContent(ErdiTrafficUnit trafficUnit, Long contentId) {
+    public ErdiTrafficUnitContent(ErdiTrafficUnit trafficUnit, Long erdiId) {
         this.trafficUnit = trafficUnit;
-        this.contentId = contentId;
+        this.erdiId = erdiId;
     }
 }

@@ -16,7 +16,7 @@ public interface SearchQueryTrafficUnitRepository extends JpaRepository<SearchQu
     @Query(
             "select stu from SearchQueryTrafficUnit stu " +
             " join stu.traffic traffic " +
-            " join traffic.arrangements a on a.id = :arrangement_id "
+            " join Arrangement a on traffic.id = a.trafficId and a.id = :arrangement_id "
     )
     List<SearchQueryTrafficUnit> findByArrangement(@Param("arrangement_id") Long arrangementId);
 }

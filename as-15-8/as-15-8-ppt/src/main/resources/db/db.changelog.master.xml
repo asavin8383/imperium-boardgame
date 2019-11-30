@@ -41,5 +41,13 @@
     <include file="db/changelog/ppt.0014.add_client_notifications.xml"/>
     <include file="db/changelog/ppt.0015.templates.xml"/>
     <include file="db/changelog/ppt.0016.templates_foreign_keys.xml"/>
+    <include file="db/changelog/ppt.0017.traffic_keys.xml"/>
+    <include file="db/changelog/ppt.0018.search_query_traffic_units_keys.xml"/>
+    <include file="db/changelog/ppt.0019.erdi_traffic_units_keys.xml"/>
+    <include file="db/changelog/ppt.0020.erdi_traffic_units_custom_erdi_keys.xml"/>
+    <include file="db/changelog/ppt.0021.erdi_traffic_units_content.xml"/>
+    <include file="db/changelog/ppt.0022.templates_foreign_keys_names.xml"/>
+    <include file="db/changelog/ppt.0023.search_query_traffic_units_search_phrases_keys.xml"/>
+    <include file="db/changelog/ppt.0024.rename_content_id_to_erdi_id.xml"/>
 
 </databaseChangeLog>

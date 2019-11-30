@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 public class CheckUnit {
 
 	/** Идентификатор ЕРДИ*/
-	private Long erdiId;
+	private Long contentId;
 
 	/** Тип проверяемой единицы */
 	private CheckUnitType type;

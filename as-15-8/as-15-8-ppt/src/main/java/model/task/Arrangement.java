@@ -10,13 +10,11 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import model.Views;
-import model.traffic.Traffic;
 import stateMachine.ArrangementStateMachine;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
@@ -100,9 +98,11 @@ public class Arrangement implements Serializable {
 	@JsonIgnore
 	private FormalTask formalTask;
 
-	@ManyToOne
-	@JoinColumn(name = "traffic_id")
-	private Traffic traffic;
+	@Column(nullable = false)
+	private Long trafficId;
+
+	@Column(nullable = false)
+	private String trafficName="";
 
 	/**Текстовый комментарий*/
 	@JsonView(Views.Brief.class)

@@ -9,12 +9,9 @@ import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import repositories.ContentCheckUnitRepository;
 import repositories.ContentViewRepository;
-import utils.ContentViewSpecifications;
 
 import java.util.List;
 import java.util.Optional;
@@ -42,11 +39,11 @@ public class ContentService {
 
     /**
      * Получение списка актуальных чек-юнитов по ИД ЕРДИ
-     * @param contentId ИД ЕРДИ
+     * @param erdiId ИД ЕРДИ
      * @return список актуальных чек-юнитов
      */
-    public List<ContentCheckUnit> getActualCheckUnits(Long contentId){
-        return contentCheckUnitRepository.findAllByContentId(contentId);
+    public List<ContentCheckUnit> getActualCheckUnits(String erdiId){
+        return contentCheckUnitRepository.findAllByErdId(erdiId);
     }
 
 }
