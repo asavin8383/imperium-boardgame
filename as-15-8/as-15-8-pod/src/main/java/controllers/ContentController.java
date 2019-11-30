@@ -17,11 +17,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import repositories.ContentHistoryRepository;
+import rest.ActRequest;
+import rest.ResponseStatusString;
 import restapi.ErdiRestClient;
+import services.ActService;
 import services.ContentService;
 import services.InfoService;
 
@@ -67,8 +68,14 @@ public class ContentController {
 
     @GetMapping(path = "/erdi/single")
     //@PreAuthorize("hasAnyRole('ROLE_OPERATOR')")
-    public Optional<ContentView> getContentById(@RequestParam Long id) {
+    public Optional<ContentView> getContentById(
+            @RequestParam Long id) {
         return contentService.getFormalErdiView(id);
+    }
+
+    @GetMapping(path = "/check_erdi", produces = MediaType.APPLICATION_JSON_VALUE)
+    public SearchErdiStatus checkErdi(@RequestParam(defaultValue = "") String url) {
+        return infoService.searchCheckUnit(url);
     }
 
     @GetMapping(path = "/erdi/expired", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -78,11 +85,6 @@ public class ContentController {
         Date restrictionDate = DateUtils.addHours(new Date(), -24);
         Date endDate = new SimpleDateFormat("yyyy-MM-dd").parse("3000-01-01");
         return contentHistoryRepo.checkExpired(id, restrictionDate, endDate);
-    }
-
-    @GetMapping(path = "/check_erdi", produces = MediaType.APPLICATION_JSON_VALUE)
-    public SearchErdiStatus update(@RequestParam(defaultValue = "") String url) {
-        return infoService.searchCheckUnit(url);
     }
 
     @GetMapping(path = "/update_erdi")
