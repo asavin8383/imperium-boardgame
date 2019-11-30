@@ -46,6 +46,7 @@ public class Arrangement implements Serializable {
 	@ToString.Include
 	@EqualsAndHashCode.Include
 	@JsonView(Views.Brief.class)
+	@Column(nullable = false)
 	private String title;
 
 	/**Статус мероприятия*/
@@ -54,6 +55,7 @@ public class Arrangement implements Serializable {
 	@ToString.Include
 	@JsonView(Views.Brief.class)
 	@Getter
+	@Column(nullable = false)
 	private ExecutionStatus status;
 
 	/**Дата создания*/

@@ -18,13 +18,14 @@ public class SearchPhraseRepositoryImpl extends JoinCriteriaHelper<SearchPhrase,
         super(em);
     }
 
+    //TODO исправить
     @Override
     protected List<Predicate> getPredicates(CriteriaQuery query, Root<SearchPhrase> root,
                                             Class<SearchPhrase> clazz, SearchPhraseParams params) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
         List<Predicate> predicates = new ArrayList<>();
 
-        if (params.isContainsInTrafficUnit()) {
+        /*if (params.isContainsInTrafficUnit()) {
             Join<SearchPhrase, SearchQueryTrafficUnit> trafficUnitJoin =
                     root.join(SearchPhrase_.trafficUnits, JoinType.LEFT);
             predicates.add(cb.equal(trafficUnitJoin.get(SearchQueryTrafficUnit_.id), params.getSearchTrafficUnitId()));
@@ -41,7 +42,7 @@ public class SearchPhraseRepositoryImpl extends JoinCriteriaHelper<SearchPhrase,
         if (params.getPhrase() != null && params.getPhrase().length() > 0) {
             predicates.add(cb.like(cb.upper(root.get("phrase")),
                     '%' + params.getPhrase().toUpperCase() + '%'));
-        }
+        }*/
 
         return predicates;
     }

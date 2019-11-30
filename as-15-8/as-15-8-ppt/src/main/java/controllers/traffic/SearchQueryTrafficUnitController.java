@@ -47,7 +47,7 @@ public class SearchQueryTrafficUnitController {
         }
     }
 
-    @PutMapping(path = "/{id}")
+    /*@PutMapping(path = "/{id}")
     public SearchQueryTrafficUnit updateTemplate(@PathVariable("id") SearchQueryTrafficUnit existing,
                                                  @RequestBody SearchQueryTrafficUnit changed) {
         existing.setQueryPattern(changed.getQueryPattern());
@@ -55,7 +55,7 @@ public class SearchQueryTrafficUnitController {
         update(existing.getCustomErdiList(), changed.getCustomErdiList());
         update(existing.getSearchPhrases(), changed.getSearchPhrases());
         return searchQueryTrafficUnitRepository.save(existing);
-    }
+    }*/
 
     private <T> void update(Set<T> existing, Set<T> changed) {
         if (changed == null){
@@ -86,7 +86,7 @@ public class SearchQueryTrafficUnitController {
         }
     }
 
-    @PutMapping(path = "/{id}/add", consumes = MediaType.APPLICATION_JSON_VALUE)
+    /*@PutMapping(path = "/{id}/add", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void addSearchPhrases(@PathVariable("id") SearchQueryTrafficUnit unit, @RequestBody List<Long> phraseIds) {
         if (unit == null)
             throw new AS_15_8_PPT_Exception("SearchQueryTrafficUnit not found");
@@ -108,6 +108,6 @@ public class SearchQueryTrafficUnitController {
         unit.getSearchPhrases().removeAll(
                 searchPhraseRepository.findAllById(phraseIds));
         searchQueryTrafficUnitRepository.save(unit);
-    }
+    }*/
 
 }

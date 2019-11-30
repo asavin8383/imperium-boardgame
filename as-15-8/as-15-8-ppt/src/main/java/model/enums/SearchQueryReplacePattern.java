@@ -8,7 +8,7 @@ import lombok.Getter;
  * Date: 22.11.2019
  */
 @AllArgsConstructor
-public enum SearchQueryPattern {
+public enum SearchQueryReplacePattern {
 
     ERDI("$ERDI"),
     EXPRESSION("$EXPRESSION");

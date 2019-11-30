@@ -9,7 +9,7 @@ import lombok.ToString;
 import javax.persistence.*;
 
 @Entity
-@Table(schema = "portal", name = "search_query_traffic_units_content")
+@Table(schema = "portal", name = "search_query_patterns_content")
 @Data
 @ToString(onlyExplicitlyIncluded = true)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -23,9 +23,9 @@ public class SearchQueryContentJoin {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "traffic_unit_id", referencedColumnName = "id")
+    @JoinColumn(name = "pattern_id", referencedColumnName = "id")
     @ToString.Include
-    private SearchQueryTrafficUnit trafficUnit;
+    private SearchQueryPattern searchQueryPattern;
 
     // для единообразия json при сохранении трафика
     @JsonProperty("id")

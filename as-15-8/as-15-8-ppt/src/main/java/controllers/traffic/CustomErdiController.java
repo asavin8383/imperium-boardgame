@@ -37,7 +37,7 @@ public class CustomErdiController {
                                                   @RequestParam(defaultValue = "10") int pageSize,
                                                   @RequestParam(required = false) String query,
                                                   @RequestParam(required = false) Long erdiTrafficUnitId,
-                                                  @RequestParam(required = false) Long searchTrafficUnitId) {
+                                                  @RequestParam(required = false) Long searchPatternId) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize,
                 SortingHelper.createSorting(sortingDirection, sortingColumn));
         if(query == null) {
@@ -45,8 +45,8 @@ public class CustomErdiController {
         }
         if(erdiTrafficUnitId != null) {
             return customErdiViewRepository.findAllByErdiTrafficUnitsContainingAndQuery(erdiTrafficUnitId, query, pageable);
-        } else if (searchTrafficUnitId != null) {
-            return customErdiViewRepository.findAllBySearchQueryTrafficUnitsContainingAndQuery(searchTrafficUnitId, query, pageable);
+        } else if (searchPatternId != null) {
+            return customErdiViewRepository.findAllBySearchQueryPatternsContainingAndQuery(searchPatternId, query, pageable);
         } else {
             return customErdiViewRepository.findAllByQuery(query, pageable);
         }

@@ -33,6 +33,7 @@ public class FormalTask implements Serializable {
 
 	/**Название*/
 	@NotNull
+	@Column(nullable = false)
 	private String title;
 
 	/**Оператор, ответственный за задание*/
@@ -42,6 +43,7 @@ public class FormalTask implements Serializable {
 	/**Статус задания*/
 	@Enumerated(EnumType.STRING)
 	@NotNull
+	@Column(nullable = false)
 	private ExecutionStatus status;
 	
 	/**Дата создания*/

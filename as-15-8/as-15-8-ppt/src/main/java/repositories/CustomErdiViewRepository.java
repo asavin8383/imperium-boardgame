@@ -26,14 +26,14 @@ public interface CustomErdiViewRepository extends
     Page<CustomErdiView> findAllByErdiTrafficUnitsContainingAndQuery(@Param("unit_id") Long erdiTrafficUnitId, @Param("query") String query, Pageable pageable);
 
     @Query("select view from CustomErdiView view " +
-            " join view.searchQueryTrafficUnits units on units.id = :unit_id " +
+            " join view.searchQueryPatterns patterns on patterns.id = :pattern_id " +
             "where concat(view.id, '') like lower(concat('%',:query,'%')) " +
             "or lower(view.name) like lower(concat('%',:query,'%')) " +
             "or lower(view.unitType) like lower(concat('%',:query,'%')) " +
             "or lower(view.unitValue) like lower(concat('%',:query,'%')) " +
             "or concat(view.subtypeId, '') like lower(concat('%',:query,'%')) "
     )
-    Page<CustomErdiView> findAllBySearchQueryTrafficUnitsContainingAndQuery(@Param("unit_id") Long searchQueryTrafficUnitId, @Param("query") String query, Pageable pageable);
+    Page<CustomErdiView> findAllBySearchQueryPatternsContainingAndQuery(@Param("pattern_id") Long searchQueryTrafficPatternId, @Param("query") String query, Pageable pageable);
 
     @Query("select view from CustomErdiView view " +
             "where concat(view.id, '') like lower(concat('%',:query,'%')) " +

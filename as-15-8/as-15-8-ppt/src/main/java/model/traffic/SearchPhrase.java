@@ -44,6 +44,6 @@ public class SearchPhrase implements Serializable {
 
     @ManyToMany(mappedBy = "searchPhrases")
     @JsonIgnore
-    private List<SearchQueryTrafficUnit> trafficUnits;
+    private List<SearchQueryPattern> searchQueryPatterns;
 
 }

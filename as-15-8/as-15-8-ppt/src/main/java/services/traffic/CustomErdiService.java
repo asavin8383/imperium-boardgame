@@ -60,7 +60,7 @@ public class CustomErdiService {
                             CustomErdiView_.erdiTrafficUnits);
         else if (searchTrafficUnitId != null)
             return containsInTrafficUnit(query, containsInTraffic, searchTrafficUnitId,
-                    CustomErdiView_.searchQueryTrafficUnits);
+                    CustomErdiView_.searchQueryPatterns);
         else if (query != null && query.trim().length() > 0)
             return (root, criteriaQuery, criteriaBuilder) ->
                     predicateContainsQuery(criteriaBuilder, root, query);

@@ -55,7 +55,7 @@ public class CustomErdiView implements Serializable {
 
     @ManyToMany(mappedBy = "customErdiList")
     @JsonIgnore
-    private List<SearchQueryTrafficUnit> searchQueryTrafficUnits;
+    private List<SearchQueryPattern> searchQueryPatterns;
 
     @ManyToMany(mappedBy = "customErdiList")
     @JsonIgnore
