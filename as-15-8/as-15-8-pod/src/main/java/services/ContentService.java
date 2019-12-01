@@ -33,7 +33,7 @@ public class ContentService {
     }
 
     @Cacheable
-    public Optional<ContentView> getFormalErdiView(Long id) {
+    public Optional<ContentView> getFormalErdiView(String id) {
         return viewRepository.findById(id);
     }
 
