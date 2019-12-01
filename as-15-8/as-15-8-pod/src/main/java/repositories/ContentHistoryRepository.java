@@ -24,7 +24,7 @@ public interface ContentHistoryRepository extends JpaRepository<ContentHistory, 
 
     @Query("select " +
                 "case when " +
-                "count(h.id) = 0 " +
+                "h.endDate <> '3000-01-01' " +
                 "then 'EXCLUDED' " +
                 "else " +
                     "case when " +
@@ -34,8 +34,7 @@ public interface ContentHistoryRepository extends JpaRepository<ContentHistory, 
                     "end " +
                 "end " +
             "from ContentHistory h " +
-            "where h.content.id = :contentId and " +
-                "h.endDate = '3000-01-01' ")
+            "where h.content.id = :contentId")
     ErdiStatus checkErdiStatus(@Param("contentId") Long contentId, @Param("restrictionDate") Date restrictionDate);
 
 }
