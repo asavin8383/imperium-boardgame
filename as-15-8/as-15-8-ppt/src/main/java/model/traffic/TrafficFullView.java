@@ -17,7 +17,7 @@ public class TrafficFullView {
 
     private ErdiTrafficUnit customErdiUnit;
 
-    private SearchQueryTrafficUnit searchPhraseUnit;
+    //private SearchQueryTrafficUnit searchPhraseUnit;
 
     private SearchQueryTrafficUnit searchTemplateUnit;
 
@@ -35,9 +35,9 @@ public class TrafficFullView {
             case CUSTOM:
                 setCustomErdiUnit((ErdiTrafficUnit) trafficUnit);
                 break;
-            case PHRASE:
+            /*case PHRASE:
                 setSearchPhraseUnit((SearchQueryTrafficUnit) trafficUnit);
-                break;
+                break;*/
             case TEMPLATE:
                 setSearchTemplateUnit((SearchQueryTrafficUnit) trafficUnit);
                 break;

@@ -4,7 +4,7 @@ public enum TrafficUnitType {
 
     CUSTOM,
     FORMAL,
-    PHRASE,
+    //PHRASE,
     TEMPLATE,
     DYNAMIC
 }
