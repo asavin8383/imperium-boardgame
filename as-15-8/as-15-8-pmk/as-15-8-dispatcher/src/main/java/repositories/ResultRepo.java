@@ -3,7 +3,9 @@ package repositories;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
+import checkUnits.CheckUnitType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -22,7 +24,18 @@ import model.Result;
 
 @Repository
 public interface ResultRepo extends JpaRepository<Result, Long> {
-	
+
+	@Query("select r from Result r " +
+			"where r.arrangementId = :arrangementId and " +
+			"r.erdiId = :erdiId and " +
+			"r.checkUnitType = :checkUnitType and " +
+			"r.checkUnitValue = :checkUnitValue")
+	Optional<Result> findExisting(
+			@Param("arrangementId") Long arrangementId,
+			@Param("erdiId") Long erdiId,
+			@Param("checkUnitType") CheckUnitType checkUnitType,
+			@Param("checkUnitValue") String checkUnitValue);
+
 	@Query("SELECT count(res) FROM Result res WHERE res.arrangementId = :id AND (res.result IS NULL OR res.result IN :results)")
 	Long countByResultNullOrResultIn(@Param("id") Long id, @Param("results") List<CheckUnitJobResult> results);
 

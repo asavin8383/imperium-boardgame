@@ -22,7 +22,13 @@ public class CheckUnitPersistingService {
     private final ResultRepo resultRepo;
 
     public Result persistCheckUnitJob(CheckUnitJob checkUnitJob, CheckUnitJobResult status){
-        Result result = new Result();
+        Result result = resultRepo.findExisting(
+                checkUnitJob.getArrangementId(),
+                checkUnitJob.getCheckUnit().getContentId(),
+                checkUnitJob.getCheckUnit().getType(),
+                checkUnitJob.getCheckUnit().getValue()
+            ).orElseGet(() -> new Result());
+
         result.setArrangementId(checkUnitJob.getArrangementId());
         result.setErdiId(checkUnitJob.getCheckUnit().getContentId());
         result.setCheckUnitType(checkUnitJob.getCheckUnit().getType());
