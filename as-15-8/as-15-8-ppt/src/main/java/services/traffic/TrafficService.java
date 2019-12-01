@@ -91,9 +91,8 @@ public class TrafficService {
                 traffic, TrafficUnitType.FORMAL, category));
         traffic.getErdiTrafficUnits().add(createErdiTrafficUnit(
                 traffic, TrafficUnitType.CUSTOM, category));
-        traffic.setSearchQueryTrafficUnits(new ArrayList<>(1));
         traffic.getSearchQueryTrafficUnits().add(createSearchTrafficUnit(
-                traffic, TrafficUnitType.PHRASE, category));
+                traffic, TrafficUnitType.TEMPLATE, category));
         return convertToFullView(trafficRepository.save(traffic));
     }
 
