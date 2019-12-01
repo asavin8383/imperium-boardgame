@@ -59,7 +59,7 @@ public class AnalysisResultsHandler {
                 StringWriter sw = new StringWriter();
                 ex.printStackTrace(new PrintWriter(sw));
 
-                Result jobResult = resultService.updateJobStatus(analysisResult.getJobID(), CheckUnitJobResult.INTERNAL_ERROR, sw.toString());
+                Result jobResult = resultService.updateJobStatus(analysisResult.getJobID(), analysisResult.getCheckUnit().getContentId(), CheckUnitJobResult.INTERNAL_ERROR, sw.toString());
                 ExecutionStatus status = resultService.checkArrangementStatus(jobResult.getArrangementId());
                 if(status == ExecutionStatus.FINISHED) {
                     log.info("Мероприятие завешено с ошибками: " + jobResult.getArrangementId());
