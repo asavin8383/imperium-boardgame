@@ -1,5 +1,6 @@
 package repositories;
 
+import enums.ErdiStatus;
 import model.scheme.ContentHistory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -21,10 +22,20 @@ public interface ContentHistoryRepository extends JpaRepository<ContentHistory, 
     @Transactional
     void deleteByContentVersionId(Long contentVersionId);
 
-    @Query("select case when count(h.id) = 0 then true else false end from ContentHistory h " +
-            "where h.content.id = :contentId and " +
-                "h.endDate = '3000-01-01' and " +
-                "h.startDate < :restrictionDate")
-    boolean checkExpired(@Param("contentId") Long contentId, @Param("restrictionDate") Date restrictionDate);
+    @Query("select " +
+                "case when " +
+                "max(h.endDate) <> '3000-01-01' " +
+                "then 'EXCLUDED' " +
+                "else " +
+                    "case when " +
+                    "max(h.startDate) < :restrictionDate " +
+                    "then 'ACTIVE' " +
+                    "else 'INACTIVE' " +
+                    "end " +
+                "end " +
+            "from ContentHistory h " +
+            "where h.content.id = :contentId " +
+            "group by h.content.id")
+    ErdiStatus checkErdiStatus(@Param("contentId") Long contentId, @Param("restrictionDate") Date restrictionDate);
 
 }

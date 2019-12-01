@@ -39,7 +39,7 @@ public class JobNotificationHandler {
                 ", partition: "+message.getHeaders().get(KafkaHeaders.RECEIVED_PARTITION_ID, Integer.class) +
                 ", offset: "+message.getHeaders().get(KafkaHeaders.OFFSET, Long.class));
         try {
-            Result job = resultService.updateJobStatus(notification.getJobID(), notification.getCheckUnitStatus(), notification.getDescription());
+            Result job = resultService.updateJobStatus(notification.getJobID(), notification.getErdiID(), notification.getCheckUnitStatus(), notification.getDescription());
             if(notification.getCheckUnitStatus() == CheckUnitJobResult.CAPTCHA_DETECTED) {
                 ArrangementStatusNotification arrNotification = new ArrangementStatusNotification(job.getArrangementId(), ArrangementEvents.PAUSE);
                 arrangementStatusProducer.sendArrangementStatusMessage(arrNotification);

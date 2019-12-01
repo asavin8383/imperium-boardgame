@@ -54,12 +54,13 @@ public class CheckUnitJobHandler {
                 log.info("Выполнение проверки остановлено: " + verificationName);
             }
             try {
-                sendCheckJobErrorNotification(message.getPayload().getJobID(), ex);
+                sendCheckJobErrorNotification(message.getPayload().getJobID(), message.getPayload().getCheckUnit().getContentId(), ex);
             } catch (Exception sendEx) {
                 log.error("Ошибка при отправке сообщения с ошибкой при выполнении задания на проверку запрещенного ресурса: "+verificationName, sendEx);
             }
             if(ex instanceof Captcha_ExecutionException) {
                 log.warn("Выполнение проверки остановлено, обнаружена капча: " + verificationName);
+                sendCheckJobErrorNotification(message.getPayload().getJobID(), message.getPayload().getCheckUnit().getContentId(), ex);
             } else if(ex instanceof ExecutionException) {
                 log.error("Выполнение проверки завершено с ошибкой: "+verificationName, ex);
             } else {
@@ -86,10 +87,11 @@ public class CheckUnitJobHandler {
         }
     }
 
-    private void sendCheckJobErrorNotification(Long jobID, Throwable cause) {
+    private void sendCheckJobErrorNotification(Long jobID, Long erdiId, Throwable cause) {
         try {
             CheckUnitStatusNotification notification = new CheckUnitStatusNotification();
             notification.setJobID(jobID);
+            notification.setErdiID(erdiId);
             if(cause instanceof Captcha_ExecutionException) {
                 notification.setCheckUnitStatus(CheckUnitJobResult.CAPTCHA_DETECTED);
             } else {

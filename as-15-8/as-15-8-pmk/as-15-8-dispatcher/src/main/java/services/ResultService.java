@@ -13,7 +13,7 @@ public interface ResultService {
 
     Result saveJobResult(AnalysisResult result);
 
-    Result updateJobStatus(Long jobID, CheckUnitJobResult status, String description);
+    Result updateJobStatus(Long jobID, Long erdiId, CheckUnitJobResult status, String description);
 
     ExecutionStatus checkArrangementStatus(Long arrangementID);
 
