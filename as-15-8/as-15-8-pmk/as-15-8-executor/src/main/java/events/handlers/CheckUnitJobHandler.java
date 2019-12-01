@@ -60,6 +60,7 @@ public class CheckUnitJobHandler {
             }
             if(ex instanceof Captcha_ExecutionException) {
                 log.warn("Выполнение проверки остановлено, обнаружена капча: " + verificationName);
+                sendCheckJobErrorNotification(message.getPayload().getJobID(), ex);
             } else if(ex instanceof ExecutionException) {
                 log.error("Выполнение проверки завершено с ошибкой: "+verificationName, ex);
             } else {
