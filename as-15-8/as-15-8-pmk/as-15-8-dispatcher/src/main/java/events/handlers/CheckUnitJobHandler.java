@@ -2,6 +2,7 @@ package events.handlers;
 
 import checkUnits.CheckUnitJob;
 import enums.CheckUnitJobResult;
+import enums.ErdiStatus;
 import events.DispatcherChannels;
 import exceptions.AS_15_8_DispatcherException;
 import lombok.RequiredArgsConstructor;
@@ -45,9 +46,9 @@ public class CheckUnitJobHandler {
                 ", partition: "+message.getHeaders().get(KafkaHeaders.RECEIVED_PARTITION_ID, Integer.class) +
                 ", offset: "+message.getHeaders().get(KafkaHeaders.OFFSET, Long.class));
         try {
-            boolean isExpired = erdiChecker.isExpired(message.getPayload().getCheckUnit().getContentId());
-            if(isExpired) {
-                checkUnitPersistingService.persistCheckUnitJob(message.getPayload(), CheckUnitJobResult.EXPIRED);
+            ErdiStatus erdiStatus = erdiChecker.checkErdiStatus(message.getPayload().getCheckUnit().getContentId());
+            if(!erdiStatus.equals(ErdiStatus.ACTIVE)) {
+                checkUnitPersistingService.persistCheckUnitJob(message.getPayload(), CheckUnitJobResult.valueOf(erdiStatus.name()));
                 log.info("Проверка исключена из списка выполнения, т.к является неактуальной: " + message.getPayload().getCheckUnit().getContentId());
             } else {
                 Result result = checkUnitPersistingService.persistCheckUnitJob(message.getPayload(), CheckUnitJobResult.RUNNING);

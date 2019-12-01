@@ -2,6 +2,7 @@ package services.impl;
 
 import analysis.AnalysisResult;
 import enums.CheckUnitJobResult;
+import enums.ErdiStatus;
 import enums.ExecutionStatus;
 import exceptions.AS_15_8_DispatcherException;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import repositories.ErrorDetailResultRepo;
 import repositories.ResultRepo;
 import repositories.ResultScreenShotRepo;
+import restapi.ErdiChecker;
 import services.AnalysisResultService;
 import services.AnalysisResultServiceFactory;
 import services.ResultService;
@@ -31,7 +33,7 @@ public class ResultServiceImpl implements ResultService {
     private final ResultRepo resultRepo;
     private final ResultScreenShotRepo resultScreenShotRepo;
     private final ErrorDetailResultRepo errorDetailResultRepo;
-
+    private final ErdiChecker erdiChecker;
 
     @Override
     @Transactional
@@ -39,7 +41,11 @@ public class ResultServiceImpl implements ResultService {
         Result result = findJobByID(analysisResult.getJobID());
         AnalysisResultService<? super AnalysisResult> service = AnalysisResultServiceFactory.getService(analysisResult.getClass());
         result.setEndDate(LocalDateTime.now());
-        result.setResult(analysisResult.getCheckResult());
+
+        if(erdiChecker.checkErdiStatus(result.getErdiId()).equals(ErdiStatus.EXCLUDED))
+            result.setResult(CheckUnitJobResult.EXCLUDED);
+        else
+            result.setResult(analysisResult.getCheckResult());
         if(analysisResult.getCheckResult().equals(CheckUnitJobResult.INTERNAL_ERROR)) {
             result.setCheckType(CheckType.ERROR);
             saveResultAsError(result, service.getErrorText(analysisResult));

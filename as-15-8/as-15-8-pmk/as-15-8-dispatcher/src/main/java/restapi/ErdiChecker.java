@@ -1,5 +1,6 @@
 package restapi;
 
+import enums.ErdiStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,27 +20,27 @@ import java.util.Optional;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class ErdiChecker {
 
-    private final String CHECK_ENDPOINT = "/pod/erdi/expired";
+    private final String CHECK_ENDPOINT = "/pod/erdi/status";
 
     private final OAuth2RestTemplate restTemplate;
 
     @Value("${gateway.url}")
     private String gatewayUrl;
 
-    public boolean isExpired(Long erdiId){
+    public ErdiStatus checkErdiStatus(Long erdiId){
         try {
             if(erdiId == null || erdiId <= 0)
-                return false;
+                return ErdiStatus.ACTIVE;
             return Optional.ofNullable(restTemplate.getForObject(
                     UriComponentsBuilder
                             .fromHttpUrl(gatewayUrl)
                             .path(CHECK_ENDPOINT)
                             .queryParam("id", erdiId)
                             .build().toString(),
-                    Boolean.class)).orElse(false);
+                    ErdiStatus.class)).orElse(ErdiStatus.ACTIVE);
         } catch (Exception ex) {
             log.error("Ошибка при проверке времени создания ЕРДИ", ex);
-            return false;
+            return ErdiStatus.ACTIVE;
         }
     }
 }

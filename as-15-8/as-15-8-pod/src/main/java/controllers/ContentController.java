@@ -3,6 +3,7 @@ package controllers;
 import checkUnits.CheckUnit;
 import controllers.utils.SortingDirection;
 import controllers.utils.SortingHelper;
+import enums.ErdiStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.projection.ContentView;
@@ -76,12 +77,12 @@ public class ContentController {
         return infoService.searchCheckUnit(url);
     }
 
-    @GetMapping(path = "/erdi/expired", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "/erdi/status", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
-    public Boolean isExpired(@RequestParam Long id) {
+    public ErdiStatus checkErdiStatus(@RequestParam Long id) {
         //Добавленные менее чем за сутки не нужны
         Date restrictionDate = DateUtils.addHours(new Date(), -24);
-        return contentHistoryRepo.checkExpired(id, restrictionDate);
+        return contentHistoryRepo.checkErdiStatus(id, restrictionDate);
     }
 
     @GetMapping(path = "/update_erdi")
