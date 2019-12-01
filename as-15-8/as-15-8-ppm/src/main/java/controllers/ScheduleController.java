@@ -97,12 +97,14 @@ public class ScheduleController {
     @Transactional
     public Schedule updateSchedule(
             @RequestParam("id") Schedule schedule,
+            @RequestParam("maxWorkerCount") int maxWorkerCount,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate plannedDate,
             @RequestBody List<Arrangement> arrangements,
             Principal principal){
         if(!(schedule.getStatus().equals(ScheduleStatus.NEW))){
             throw AS_15_8_PPM_Exception.logAndGet(log, String.format("Ошибка изменения расписания! Некорректный статус расписания с ИД: %d - %s", schedule.getId(), schedule.getStatus()));
         }
+        schedule.setMaxWorkersCount(maxWorkerCount);
 
         //Если изменились плановые значения времени, сначала нужно изменить само мероприятие
         arrangements.stream()
