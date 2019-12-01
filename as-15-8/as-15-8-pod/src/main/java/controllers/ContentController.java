@@ -68,7 +68,7 @@ public class ContentController {
     @GetMapping(path = "/erdi/single")
     //@PreAuthorize("hasAnyRole('ROLE_OPERATOR')")
     public Optional<ContentView> getContentById(
-            @RequestParam Long id) {
+            @RequestParam String id) {
         return contentService.getFormalErdiView(id);
     }
 

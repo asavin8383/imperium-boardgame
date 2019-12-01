@@ -49,5 +49,6 @@
     <include file="db/changelog/ppt.0022.templates_foreign_keys_names.xml"/>
     <include file="db/changelog/ppt.0023.search_query_traffic_units_search_phrases_keys.xml"/>
     <include file="db/changelog/ppt.0024.rename_content_id_to_erdi_id.xml"/>
+    <include file="db/changelog/ppt.0025.arrangements_cascades.xml"/>
 
 </databaseChangeLog>
