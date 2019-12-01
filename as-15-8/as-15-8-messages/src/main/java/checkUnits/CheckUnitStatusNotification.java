@@ -17,6 +17,8 @@ public class CheckUnitStatusNotification {
 
 	/** Идентифиатор задания */
 	private Long jobID;
+
+	private Long erdiID;
 	
 	/** Статус задания */
 	private CheckUnitJobResult checkUnitStatus;

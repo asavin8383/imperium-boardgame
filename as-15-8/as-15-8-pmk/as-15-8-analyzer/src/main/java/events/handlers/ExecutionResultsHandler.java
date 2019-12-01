@@ -46,7 +46,7 @@ public class ExecutionResultsHandler {
             log.info("Анализ результата проверки ПС/ПАСД выполнен успешно : " + job.getJobID() + ", " + job.getCheckUnit().getValue());
         } catch (Exception ex) {
             log.error("Ошибка при обработке задания на анализ результатов проверки ПС/ПАСД : " + job.getJobID() + ", " + job.getCheckUnit().getValue(), ex);
-            sendErrorNotification(job.getJobID(), ex);
+            sendErrorNotification(job.getJobID(), job.getCheckUnit().getContentId(), ex);
         }
     }
 
@@ -68,11 +68,11 @@ public class ExecutionResultsHandler {
         }
     }
 
-    private void sendErrorNotification(Long jobID, Throwable cause) {
+    private void sendErrorNotification(Long jobID, Long erdiId, Throwable cause) {
         try {
             StringWriter sw = new StringWriter();
             cause.printStackTrace(new PrintWriter(sw));
-            CheckUnitStatusNotification notification = new CheckUnitStatusNotification(jobID, CheckUnitJobResult.INTERNAL_ERROR, sw.toString());
+            CheckUnitStatusNotification notification = new CheckUnitStatusNotification(jobID, erdiId, CheckUnitJobResult.INTERNAL_ERROR, sw.toString());
 
             Message<CheckUnitStatusNotification> message = MessageBuilder
                     .withPayload(notification)

@@ -41,11 +41,8 @@ public class ResultServiceImpl implements ResultService {
         Result result = findJobByID(analysisResult.getJobID());
         AnalysisResultService<? super AnalysisResult> service = AnalysisResultServiceFactory.getService(analysisResult.getClass());
         result.setEndDate(LocalDateTime.now());
+        result.setResult(checkStatus(result.getErdiId(), result.getResult()));
 
-        if(erdiChecker.checkErdiStatus(result.getErdiId()).equals(ErdiStatus.EXCLUDED))
-            result.setResult(CheckUnitJobResult.EXCLUDED);
-        else
-            result.setResult(analysisResult.getCheckResult());
         if(analysisResult.getCheckResult().equals(CheckUnitJobResult.INTERNAL_ERROR)) {
             result.setCheckType(CheckType.ERROR);
             saveResultAsError(result, service.getErrorText(analysisResult));
@@ -77,9 +74,9 @@ public class ResultServiceImpl implements ResultService {
 
     @Override
     @Transactional
-    public Result updateJobStatus(Long jobID, CheckUnitJobResult status, String description) {
+    public Result updateJobStatus(Long jobID, Long erdiID, CheckUnitJobResult status, String description) {
         Result result = findJobByID(jobID);
-        result.setResult(status);
+        result.setResult(checkStatus(erdiID, status));
         result.setEndDate(LocalDateTime.now());
         if(status == CheckUnitJobResult.INTERNAL_ERROR) {
             result.setCheckType(CheckType.ERROR);
@@ -102,5 +99,12 @@ public class ResultServiceImpl implements ResultService {
         errorDetailResult.setResult(result);
         errorDetailResult.setError(exText);
         errorDetailResultRepo.save(errorDetailResult);
+    }
+
+    private CheckUnitJobResult checkStatus(Long erdiId, CheckUnitJobResult status){
+        if(erdiChecker.checkErdiStatus(erdiId).equals(ErdiStatus.EXCLUDED))
+            return CheckUnitJobResult.EXCLUDED;
+        else
+            return status;
     }
 }
