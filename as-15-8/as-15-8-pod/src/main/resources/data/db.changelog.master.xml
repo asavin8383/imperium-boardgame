@@ -26,5 +26,6 @@
     <include file="data/changelog/pod.0007.mission_attachments.xml"/>
     <include file="data/changelog/pod.0008.mission_attachments_FK.xml"/>
     <include file="data/changelog/pod.0009.mat_view_content_orig_id.xml"/>
+    <include file="data/changelog/pod.0010.mat_view_content_null_values.xml"/>
 
 </databaseChangeLog>

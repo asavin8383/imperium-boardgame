@@ -51,7 +51,7 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
         List<Predicate> predicates = new ArrayList<>();
 
         if (id != null) {
-            predicates.add(criteriaBuilder.like(criteriaBuilder.upper(fromContentView.get(ContentView_.ID)), id.toUpperCase()));
+            predicates.add(criteriaBuilder.like(criteriaBuilder.upper(fromContentView.get(ContentView_.ID)), "%" + id.toUpperCase() + "%"));
         }
 
         if (categoryNames != null && categoryNames.size() > 0) {
@@ -75,7 +75,7 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
         }
 
         if (resourceValue != null) {
-            predicates.add(criteriaBuilder.like(criteriaBuilder.upper(fromContentView.get(ContentView_.RESOURCE_VALUE)), resourceValue.toUpperCase()));
+            predicates.add(criteriaBuilder.like(criteriaBuilder.upper(fromContentView.get(ContentView_.RESOURCE_VALUE)), "%" + resourceValue.toUpperCase() + "%"));
         }
 
         if (violationNames != null && violationNames.size() > 0) {
@@ -85,14 +85,14 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
         if (query != null) {
             predicates.add(
                 criteriaBuilder.or(
-                    criteriaBuilder.like(criteriaBuilder.upper(fromContentView.get(ContentView_.ID)), query.toUpperCase()),
-                    criteriaBuilder.like(criteriaBuilder.upper(fromContentView.get(ContentView_.CATEGORY_NAME)), query.toUpperCase()),
-                    criteriaBuilder.like(criteriaBuilder.upper(fromContentView.get(ContentView_.DECISION_ORG)), query.toUpperCase()),
-                    criteriaBuilder.like(criteriaBuilder.upper(fromContentView.get(ContentView_.INFO_TYPE_ID)), query.toUpperCase()),
-                    criteriaBuilder.like(criteriaBuilder.upper(fromContentView.get(ContentView_.REGISTRY_NAME)), query.toUpperCase()),
-                    criteriaBuilder.like(criteriaBuilder.upper(fromContentView.get(ContentView_.RESOURCE_TYPE)), query.toUpperCase()),
-                    criteriaBuilder.like(criteriaBuilder.upper(fromContentView.get(ContentView_.RESOURCE_VALUE)), query.toUpperCase()),
-                    criteriaBuilder.like(criteriaBuilder.upper(fromContentView.get(ContentView_.VIOLATION_NAME)), query.toUpperCase())
+                    criteriaBuilder.like(criteriaBuilder.upper(fromContentView.get(ContentView_.ID)), "%" + query.toUpperCase()),
+                    criteriaBuilder.like(criteriaBuilder.upper(fromContentView.get(ContentView_.CATEGORY_NAME)), "%" + query.toUpperCase() + "%"),
+                    criteriaBuilder.like(criteriaBuilder.upper(fromContentView.get(ContentView_.DECISION_ORG)), "%" + query.toUpperCase() + "%"),
+                    criteriaBuilder.like(criteriaBuilder.upper(fromContentView.get(ContentView_.INFO_TYPE_ID)), "%" + query.toUpperCase() + "%"),
+                    criteriaBuilder.like(criteriaBuilder.upper(fromContentView.get(ContentView_.REGISTRY_NAME)), "%" + query.toUpperCase() + "%"),
+                    criteriaBuilder.like(criteriaBuilder.upper(fromContentView.get(ContentView_.RESOURCE_TYPE)), "%" + query.toUpperCase() + "%"),
+                    criteriaBuilder.like(criteriaBuilder.upper(fromContentView.get(ContentView_.RESOURCE_VALUE)), "%" + query.toUpperCase() + "%"),
+                    criteriaBuilder.like(criteriaBuilder.upper(fromContentView.get(ContentView_.VIOLATION_NAME)), "%" + query.toUpperCase() + "%")
 
                 )
             );
