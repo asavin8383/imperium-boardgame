@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import model.PasdDetailResult;
 import model.Result;
 import model.enums.CheckType;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import repositories.PasdDetailResultRepo;
@@ -27,7 +28,9 @@ public class VpnAnalysisResultService implements AnalysisResultService<VpnAnalys
 	@Override
 	public void saveResult(Result result, VpnAnalysisResult analysisResult) {
 
-		PasdDetailResult pasdDetailResult = new PasdDetailResult();
+		PasdDetailResult pasdDetailResult = pasdDetailResultRepo.findById(result.getId())
+				.orElseGet(() -> new PasdDetailResult());
+		BeanUtils.copyProperties(pasdDetailResult, new PasdDetailResult(), "id", "result");
 
 		pasdDetailResult.setResult(result);
 

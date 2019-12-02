@@ -3,13 +3,12 @@ package services.impl;
 import analysis.NMapAnalysisJobResult;
 import lombok.RequiredArgsConstructor;
 import model.NmapDetailResult;
-import model.PasdDetailResult;
 import model.Result;
 import model.enums.CheckType;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import repositories.NmapDetailResultRepo;
-import repositories.PasdDetailResultRepo;
 import services.AnalysisResultService;
 
 /**
@@ -31,8 +30,12 @@ public class NmapAnalysisResultService implements AnalysisResultService<NMapAnal
 
 	@Override
 	public void saveResult(Result result, NMapAnalysisJobResult analysisResult) {
-		NmapDetailResult nmapDetailResult = new NmapDetailResult();
+		NmapDetailResult nmapDetailResult = nmapDetailResultRepo.findById(result.getId())
+				.orElseGet(NmapDetailResult::new);
+		BeanUtils.copyProperties(nmapDetailResult, new NmapDetailResult(), "id", "result");
+
 		nmapDetailResult.setResult(result);
+
 		nmapDetailResult.setLog(analysisResult.getNmapLog());
 		nmapDetailResultRepo.save(nmapDetailResult);
 	}

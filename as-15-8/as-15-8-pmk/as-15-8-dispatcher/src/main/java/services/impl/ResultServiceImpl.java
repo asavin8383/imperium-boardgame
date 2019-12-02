@@ -41,7 +41,7 @@ public class ResultServiceImpl implements ResultService {
         Result result = findJobByID(analysisResult.getJobID());
         AnalysisResultService<? super AnalysisResult> service = AnalysisResultServiceFactory.getService(analysisResult.getClass());
         result.setEndDate(LocalDateTime.now());
-        result.setResult(checkStatus(result.getErdiId(), result.getResult()));
+        result.setResult(checkStatus(result.getErdiId(), analysisResult.getCheckResult()));
 
         if(analysisResult.getCheckResult().equals(CheckUnitJobResult.INTERNAL_ERROR)) {
             result.setCheckType(CheckType.ERROR);
@@ -95,8 +95,11 @@ public class ResultServiceImpl implements ResultService {
     }
 
     private void saveResultAsError(Result result, String exText) {
-        ErrorDetailResult errorDetailResult = new ErrorDetailResult();
+        ErrorDetailResult errorDetailResult = errorDetailResultRepo.findById(result.getId())
+                .orElseGet(ErrorDetailResult::new);
+
         errorDetailResult.setResult(result);
+
         errorDetailResult.setError(exText);
         errorDetailResultRepo.save(errorDetailResult);
     }
