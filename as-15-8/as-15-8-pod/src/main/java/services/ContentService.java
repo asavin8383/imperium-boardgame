@@ -25,14 +25,6 @@ public class ContentService {
     private final ContentCheckUnitRepository contentCheckUnitRepository;
 
     @Cacheable
-    public Page<ContentView> getFormalErdiView(String query, Pageable pageable) {
-        if(Strings.isNotEmpty(query))
-            return viewRepository.findAllByQuery(query, pageable);
-        else
-            return viewRepository.findAll(pageable);
-    }
-
-    @Cacheable
     public Optional<ContentView> getFormalErdiView(String id) {
         return viewRepository.findById(id);
     }

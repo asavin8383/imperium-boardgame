@@ -80,6 +80,20 @@ spring:
 
 ---
 
+spring:
+  profiles: dev_asavin
+  datasource:
+    url: jdbc:postgresql://192.168.5.211:5432/asdb_test2
+
+---
+
+spring:
+  profiles: dev_ashabalin
+  datasource:
+    url: jdbc:postgresql://192.168.5.211:5432/asdb_test
+
+---
+
 logging:
   config:
   level:
