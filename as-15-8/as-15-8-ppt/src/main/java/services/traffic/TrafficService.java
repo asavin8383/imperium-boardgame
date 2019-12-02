@@ -86,7 +86,6 @@ public class TrafficService {
 
         Traffic traffic = new Traffic();
         traffic.setName(trafficName);
-        traffic.setErdiTrafficUnits(new ArrayList<>(2));
         traffic.getErdiTrafficUnits().add(createErdiTrafficUnit(
                 traffic, TrafficUnitType.FORMAL, category));
         traffic.getErdiTrafficUnits().add(createErdiTrafficUnit(
