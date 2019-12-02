@@ -54,9 +54,16 @@ public class PodWebClient {
                         .fromUriString(GET_ERDI_URI)
                         .queryParam("id", id)
                         .build().toString())
-                .retrieve()
-                .bodyToMono(ObjectNode.class)
-                .doOnError(ex -> log.error("Ошибка при получении ЕРДИ по id: "+id, ex));
+                .exchange()
+                .flatMap(clientResponse -> {
+                    if(clientResponse.statusCode().equals(HttpStatus.OK)){
+                        log.info("ЕРДИ получен успешно, id: {}", id);
+                        return clientResponse.bodyToMono(ObjectNode.class);
+                    } else {
+                        log.warn("Ошибка при получении ЕРДИ по id {}, статус: {}", id, clientResponse.statusCode().toString());
+                        return Mono.empty();
+                    }
+                });
     }
 
     public ParallelFlux<CheckUnit> fetchCheckUnits(List<Long> contentIds) {
