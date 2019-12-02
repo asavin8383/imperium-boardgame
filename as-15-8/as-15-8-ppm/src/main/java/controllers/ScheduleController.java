@@ -94,7 +94,9 @@ public class ScheduleController {
         List<Long> arrangementIds = new ObjectMapper().convertValue(
                 scheduleData.get("arrangementIds"),
                 new TypeReference<List<Arrangement>>() {});
-        LocalDate plannedDate = LocalDate.parse(scheduleData.get("plannedDate").asText(), DateTimeFormatter.ISO_DATE);
+        LocalDate plannedDate = null;
+        if(scheduleData.has("plannedDate"))
+            plannedDate = LocalDate.parse(scheduleData.get("plannedDate").asText(), DateTimeFormatter.ISO_DATE);
 
         return scheduleService.saveSchedule(arrangementIds, principal.getName(), plannedDate);
     }
@@ -115,7 +117,9 @@ public class ScheduleController {
                 scheduleData.get("arrangements"),
                 new TypeReference<List<Arrangement>>() {});
         schedule.setMaxWorkersCount(scheduleData.get("maxWorkersCount").asInt());
-        LocalDate plannedDate = LocalDate.parse(scheduleData.get("plannedDate").asText(), DateTimeFormatter.ISO_DATE);
+        LocalDate plannedDate = null;
+        if(scheduleData.has("plannedDate"))
+            plannedDate = LocalDate.parse(scheduleData.get("plannedDate").asText(), DateTimeFormatter.ISO_DATE);
 
         arrangements.stream()
                 .filter(arrangement -> arrangement.getPlannedStartTime()!=null && arrangement.getPlannedEndTime()!=null)
