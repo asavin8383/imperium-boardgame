@@ -27,6 +27,7 @@ import repositories.ScheduleRepo;
 import services.ArrangementService;
 import services.ScheduleService;
 
+import javax.annotation.PostConstruct;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -49,6 +50,13 @@ public class ScheduleController {
     private final ArrangementService arrangementService;
     private final ScheduleService scheduleService;
     private final ScheduleRepo scheduleRepo;
+    private ObjectMapper mapper;
+
+    @PostConstruct
+    private void init(){
+        mapper = new ObjectMapper();
+        mapper.findAndRegisterModules();
+    }
 
     @GetMapping(path = "/arrangements")
     public Page<Arrangement> getArrangementsForSchedule(
@@ -91,7 +99,7 @@ public class ScheduleController {
     @JsonView(Views.Full.class)
     @ResponseStatus(HttpStatus.CREATED)
     public Schedule postSchedule(@RequestBody ObjectNode scheduleData, Principal principal){
-        List<Long> arrangementIds = new ObjectMapper().convertValue(
+        List<Long> arrangementIds = this.mapper.convertValue(
                 scheduleData.get("arrangementIds"),
                 new TypeReference<List<Long>>() {});
         LocalDate plannedDate = null;
@@ -104,16 +112,12 @@ public class ScheduleController {
     @PutMapping
     @JsonView(Views.Full.class)
     @Transactional
-    public Schedule updateSchedule(
-            @RequestParam("id") Schedule schedule,
-            @RequestBody ObjectNode scheduleData,
-            Principal principal){
+    public Schedule updateSchedule(@RequestParam("id") Schedule schedule, @RequestBody ObjectNode scheduleData, Principal principal){
         if(!(schedule.getStatus().equals(ScheduleStatus.NEW))){
             throw AS_15_8_PPM_Exception.logAndGet(log, String.format("Ошибка изменения расписания! Некорректный статус расписания с ИД: %d - %s", schedule.getId(), schedule.getStatus()));
         }
 
-        //Если изменились плановые значения времени, сначала нужно изменить само мероприятие
-        List<Arrangement> arrangements = new ObjectMapper().convertValue(
+        List<Arrangement> arrangements = this.mapper.convertValue(
                 scheduleData.get("arrangements"),
                 new TypeReference<List<Arrangement>>() {});
         schedule.setMaxWorkersCount(scheduleData.get("maxWorkersCount").asInt());
@@ -121,6 +125,7 @@ public class ScheduleController {
         if(scheduleData.has("plannedDate"))
             plannedDate = LocalDate.parse(scheduleData.get("plannedDate").asText(), DateTimeFormatter.ISO_DATE);
 
+        //Если изменились плановые значения времени, сначала нужно изменить само мероприятие
         arrangements.stream()
                 .filter(arrangement -> arrangement.getPlannedStartTime()!=null && arrangement.getPlannedEndTime()!=null)
                 .forEach(arrangementService::updateArrangementPlanInfo);
