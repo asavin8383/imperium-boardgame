@@ -1,0 +1,764 @@
+{
+	"info": {
+		"_postman_id": "16a225f4-4d5e-4e46-a9f2-31c7ca893185",
+		"name": "АС 15.8 ПОД",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Справочники",
+			"item": [
+				{
+					"name": "Получение",
+					"item": [
+						{
+							"name": "ЕРДИ",
+							"item": [
+								{
+									"name": "Получение списка ЕРДИ",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "X-AUTH-TOKEN",
+												"type": "text",
+												"value": "{{oper_token}}"
+											}
+										],
+										"url": {
+											"raw": "{{url}}/pod/erdi?",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"pod",
+												"erdi"
+											],
+											"query": [
+												{
+													"key": "sortingDirection",
+													"value": "ASC",
+													"disabled": true
+												},
+												{
+													"key": "sortingColumn",
+													"value": "id",
+													"disabled": true
+												},
+												{
+													"key": "pageNumber",
+													"value": "1",
+													"disabled": true
+												},
+												{
+													"key": "pageSize",
+													"value": "5",
+													"disabled": true
+												},
+												{
+													"key": "id",
+													"value": "75140",
+													"disabled": true
+												},
+												{
+													"key": "resourceTypes",
+													"value": "domain,url",
+													"disabled": true
+												},
+												{
+													"key": "random",
+													"value": "true",
+													"disabled": true
+												},
+												{
+													"key": "resourceValue",
+													"value": "ki555.biz",
+													"disabled": true
+												},
+												{
+													"key": "decisionOrgs",
+													"value": "ФСКН",
+													"disabled": true
+												},
+												{
+													"key": "infoTypeIds",
+													"value": "1-2",
+													"disabled": true
+												},
+												{
+													"key": "categoryNames",
+													"value": "незаконный оборот наркотиков",
+													"disabled": true
+												},
+												{
+													"key": "violationNames",
+													"value": "Интернет-казино",
+													"disabled": true
+												},
+												{
+													"key": "query",
+													"value": "сведения",
+													"disabled": true
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Типы ресурсов",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{url}}/pod/erdi/resourceTypes",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"pod",
+												"erdi",
+												"resourceTypes"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Категории",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{url}}/pod/erdi/categoryNames",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"pod",
+												"erdi",
+												"categoryNames"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Реестры",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{url}}/pod/erdi/registryNames",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"pod",
+												"erdi",
+												"registryNames"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Нарушения",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{url}}/pod/erdi/violationNames",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"pod",
+												"erdi",
+												"violationNames"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Организации, принявшие решение",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{url}}/pod/erdi/decisionOrgs",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"pod",
+												"erdi",
+												"decisionOrgs"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Идентификаторы",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{url}}/pod/erdi/infoTypeIds",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"pod",
+												"erdi",
+												"infoTypeIds"
+											]
+										}
+									},
+									"response": []
+								}
+							],
+							"protocolProfileBehavior": {},
+							"_postman_isSubFolder": true
+						},
+						{
+							"name": "Получение списка нарушений",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"type": "text",
+										"value": "{{oper_token}}",
+										"disabled": true
+									}
+								],
+								"url": {
+									"raw": "{{url}}/pod/subtype?query=продажа",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"pod",
+										"subtype"
+									],
+									"query": [
+										{
+											"key": "sortingDirection",
+											"value": "ASC",
+											"disabled": true
+										},
+										{
+											"key": "sortingColumn",
+											"value": "id",
+											"disabled": true
+										},
+										{
+											"key": "pageNumber",
+											"value": "1",
+											"disabled": true
+										},
+										{
+											"key": "pageSize",
+											"value": "5",
+											"disabled": true
+										},
+										{
+											"key": "query",
+											"value": "продажа"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Получение списка ПС",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "as-15-8",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "as-15-8",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"type": "text",
+										"value": "{{oper_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/pod/ps?query=ru",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"pod",
+										"ps"
+									],
+									"query": [
+										{
+											"key": "sortingDirection",
+											"value": "ASC",
+											"disabled": true
+										},
+										{
+											"key": "sortingColumn",
+											"value": "id",
+											"disabled": true
+										},
+										{
+											"key": "pageNumber",
+											"value": "1",
+											"disabled": true
+										},
+										{
+											"key": "pageSize",
+											"value": "5",
+											"disabled": true
+										},
+										{
+											"key": "query",
+											"value": "ru"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Получение списка ПАСД",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"type": "text",
+										"value": "{{oper_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/pod/pasd?",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"pod",
+										"pasd"
+									],
+									"query": [
+										{
+											"key": "sortingDirection",
+											"value": "ASC",
+											"disabled": true
+										},
+										{
+											"key": "sortingColumn",
+											"value": "id",
+											"disabled": true
+										},
+										{
+											"key": "pageNumber",
+											"value": "1",
+											"disabled": true
+										},
+										{
+											"key": "pageSize",
+											"value": "5",
+											"disabled": true
+										},
+										{
+											"key": "query",
+											"value": "mail",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Нарушение по оригинальному ИД",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/pod/subtype/single?origId=1-4",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"pod",
+										"subtype",
+										"single"
+									],
+									"query": [
+										{
+											"key": "origId",
+											"value": "1-4"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Обновление",
+					"item": [
+						{
+							"name": "Обновление списка ЕРДИ",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"type": "text",
+										"value": "{{oper_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/pod/update_erdi",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"pod",
+										"update_erdi"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Обновление ПАСД",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/pod/pasd/upload",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"pod",
+										"pasd",
+										"upload"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Обновление списка ПС",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/pod/ps/upload",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"pod",
+										"ps",
+										"upload"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Обновление списка нарушений",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/pod/subtype/upload",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"pod",
+										"subtype",
+										"upload"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "61f0ab93-78c5-428b-a68c-03842e2eb49c",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "84d0d0c8-c3e8-48cd-b489-41c5ca35af38",
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Список справочников",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"type": "text",
+								"value": "{{oper_token}}",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{url}}/pod/dict?",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"pod",
+								"dict"
+							],
+							"query": [
+								{
+									"key": "sortingDirection",
+									"value": "ASC",
+									"disabled": true
+								},
+								{
+									"key": "sortingColumn",
+									"value": "id",
+									"disabled": true
+								},
+								{
+									"key": "pageNumber",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "pageSize",
+									"value": "5",
+									"disabled": true
+								},
+								{
+									"key": "violationName",
+									"value": "порно",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Справочник по коду",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"type": "text",
+								"value": "{{oper_token}}",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{url_pod}}/dict/ERDI?",
+							"host": [
+								"{{url_pod}}"
+							],
+							"path": [
+								"dict",
+								"ERDI"
+							],
+							"query": [
+								{
+									"key": "sortingDirection",
+									"value": "ASC",
+									"disabled": true
+								},
+								{
+									"key": "sortingColumn",
+									"value": "id",
+									"disabled": true
+								},
+								{
+									"key": "pageNumber",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "pageSize",
+									"value": "5",
+									"disabled": true
+								},
+								{
+									"key": "violationName",
+									"value": "порно",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Поручения",
+			"item": [
+				{
+					"name": "Получение оригинала поручения",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/pod/mission/get_image?id=3",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"pod",
+								"mission",
+								"get_image"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "3"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Получение поручения",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/pod/mission/single?id=29",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"pod",
+								"mission",
+								"single"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "29"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Получение списка чек-юнитов по ЕРДИ",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/pod/erdi/checkUnits?id=660869",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"pod",
+						"erdi",
+						"checkUnits"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "660869"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "oauth2",
+		"oauth2": [
+			{
+				"key": "accessToken",
+				"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqYWNrIiwicm9sZSI6IlJPTEVfT1BFUkFUT1IiLCJtYWlsIjoiIiwidXNlcl9uYW1lIjoiamFjayIsInNjb3BlIjpbInJlYWQiLCJ3cml0ZSJdLCJleHAiOjE1NzUzNTg5MjcsInVzZXJOYW1lIjoiamFjayIsImF1dGhvcml0aWVzIjpbIlJPTEVfT1BFUkFUT1IiXSwianRpIjoiZmM1NDRmNGMtMDkyMy00NjM0LWIyMTAtODU1ZWFiMDRlMTMxIiwiY2xpZW50X2lkIjoiYXMtMTUtOCIsInNlY29uZE5hbWUiOiIifQ.Ba73mGQwFpKsARVh6u4NG9WBT_RyNnAjH1tR3rD-pE5PaCG4jTVt6WsFdo1v3Ws45mpNvtCHDQfwdtxlCWTVBcH4RT3PV2lDQsrELYHaMCSZly0DXtosQ4-36dQ09jaPHIn6PlIAJnwf6pbT_4lw6gjM0e0mMwZGf_U89PQESIe00uMfl7FhtTjxEp2XUGSEUT_b0g9TWWwYgCuQyQMobw8PG3pGQaOR8I7frr-lff5iMlgs_c5WDr9CaFCpd6tRxDqU2ggey1Fm1onlYu8oxrzyBPl3BwKL4-SxNJ1h2iuQM145ExyoJ75Cc7eKqHkdQE0_JxZyc8aRTibzPPLk7A",
+				"type": "string"
+			},
+			{
+				"key": "tokenType",
+				"value": "bearer",
+				"type": "string"
+			},
+			{
+				"key": "addTokenTo",
+				"value": "header",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "a551cce5-34e7-477d-807d-b41a39477f74",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "4f761570-510b-4f00-bf39-17220e4e25b5",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"protocolProfileBehavior": {}
+}
