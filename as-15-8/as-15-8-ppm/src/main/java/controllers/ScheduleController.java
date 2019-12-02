@@ -93,7 +93,7 @@ public class ScheduleController {
     public Schedule postSchedule(@RequestBody ObjectNode scheduleData, Principal principal){
         List<Long> arrangementIds = new ObjectMapper().convertValue(
                 scheduleData.get("arrangementIds"),
-                new TypeReference<List<Arrangement>>() {});
+                new TypeReference<List<Long>>() {});
         LocalDate plannedDate = null;
         if(scheduleData.has("plannedDate"))
             plannedDate = LocalDate.parse(scheduleData.get("plannedDate").asText(), DateTimeFormatter.ISO_DATE);
