@@ -95,8 +95,11 @@ public class ResultServiceImpl implements ResultService {
     }
 
     private void saveResultAsError(Result result, String exText) {
-        ErrorDetailResult errorDetailResult = new ErrorDetailResult();
+        ErrorDetailResult errorDetailResult = errorDetailResultRepo.findById(result.getId())
+                .orElseGet(ErrorDetailResult::new);
+
         errorDetailResult.setResult(result);
+
         errorDetailResult.setError(exText);
         errorDetailResultRepo.save(errorDetailResult);
     }

@@ -6,10 +6,10 @@ import lombok.extern.slf4j.Slf4j;
 import model.PasdDetailResult;
 import model.Result;
 import model.enums.CheckType;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import repositories.PasdDetailResultRepo;
-import repositories.ResultRepo;
 import services.AnalysisResultService;
 
 
@@ -18,8 +18,7 @@ import services.AnalysisResultService;
 @Slf4j
 public class AnonymizerAnalysisResultService implements AnalysisResultService<AnonymizerAnalysisResult> {
 
-	private final PasdDetailResultRepo detailVpnRepo;
-	private final ResultRepo resultRepo;
+	private final PasdDetailResultRepo pasdDetailResultRepo;
 
 	@Override
 	public CheckType getCheckType() {
@@ -29,7 +28,9 @@ public class AnonymizerAnalysisResultService implements AnalysisResultService<An
 	@Override
 	public void saveResult(Result result, AnonymizerAnalysisResult analysisResult) {
 
-		PasdDetailResult pasdDetailResult = new PasdDetailResult();
+		PasdDetailResult pasdDetailResult = pasdDetailResultRepo.findById(result.getId())
+				.orElseGet(PasdDetailResult::new);
+		BeanUtils.copyProperties(pasdDetailResult, new PasdDetailResult(), "id", "result");
 
 		pasdDetailResult.setResult(result);
 
@@ -54,7 +55,7 @@ public class AnonymizerAnalysisResultService implements AnalysisResultService<An
 		pasdDetailResult.setRedirectionDetected(analysisResult.getRedirectionDetected());
 		pasdDetailResult.setResultNLP(analysisResult.getResultNLP());
 
-		detailVpnRepo.save(pasdDetailResult);
+		pasdDetailResultRepo.save(pasdDetailResult);
 
 	}
 

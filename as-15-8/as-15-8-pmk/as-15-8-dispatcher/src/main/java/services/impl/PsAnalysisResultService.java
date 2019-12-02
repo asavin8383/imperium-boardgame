@@ -29,8 +29,11 @@ public class PsAnalysisResultService implements AnalysisResultService<PS_Analysi
 
 	@Override
 	public void saveResult(Result result, PS_AnalysisJobResult analysisResult) {
-		PsDetailResult psDetailResult = new PsDetailResult();
+		PsDetailResult psDetailResult = psDetailResultRepo.findById(result.getId())
+				.orElseGet(PsDetailResult::new);
+
 		psDetailResult.setResult(result);
+
 		psDetailResult.setDescription(analysisResult.getDescription());
 		psDetailResultRepo.save(psDetailResult);
 	}

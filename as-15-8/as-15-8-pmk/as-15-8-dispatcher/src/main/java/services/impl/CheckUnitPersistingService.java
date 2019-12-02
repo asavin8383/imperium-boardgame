@@ -5,7 +5,7 @@ import enums.CheckUnitJobResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Result;
-import net.logstash.logback.composite.GlobalCustomFieldsJsonProvider;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import repositories.ResultRepo;
@@ -27,7 +27,10 @@ public class CheckUnitPersistingService {
                 checkUnitJob.getCheckUnit().getContentId(),
                 checkUnitJob.getCheckUnit().getType(),
                 checkUnitJob.getCheckUnit().getValue()
-            ).orElseGet(() -> new Result());
+            ).orElseGet(Result::new);
+
+        //Зачищаем результаты
+        BeanUtils.copyProperties(result, new Result(), "id");
 
         result.setArrangementId(checkUnitJob.getArrangementId());
         result.setErdiId(checkUnitJob.getCheckUnit().getContentId());
