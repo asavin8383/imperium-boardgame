@@ -1,6 +1,10 @@
 package controllers;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import enums.SortingDirection;
 import exceptions.AS_15_8_PPM_Exception;
 import helpers.SortingHelper;
@@ -26,6 +30,7 @@ import services.ScheduleService;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
@@ -85,10 +90,12 @@ public class ScheduleController {
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @JsonView(Views.Full.class)
     @ResponseStatus(HttpStatus.CREATED)
-    public Schedule postSchedule(
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate plannedDate,
-            @RequestBody List<Long> arrangementIds,
-            Principal principal){
+    public Schedule postSchedule(@RequestBody ObjectNode scheduleData, Principal principal){
+        List<Long> arrangementIds = new ObjectMapper().convertValue(
+                scheduleData.get("arrangementIds"),
+                new TypeReference<List<Arrangement>>() {});
+        LocalDate plannedDate = LocalDate.parse(scheduleData.get("plannedDate").asText(), DateTimeFormatter.ISO_DATE);
+
         return scheduleService.saveSchedule(arrangementIds, principal.getName(), plannedDate);
     }
 
@@ -97,14 +104,19 @@ public class ScheduleController {
     @Transactional
     public Schedule updateSchedule(
             @RequestParam("id") Schedule schedule,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate plannedDate,
-            @RequestBody List<Arrangement> arrangements,
+            @RequestBody ObjectNode scheduleData,
             Principal principal){
         if(!(schedule.getStatus().equals(ScheduleStatus.NEW))){
             throw AS_15_8_PPM_Exception.logAndGet(log, String.format("Ошибка изменения расписания! Некорректный статус расписания с ИД: %d - %s", schedule.getId(), schedule.getStatus()));
         }
 
         //Если изменились плановые значения времени, сначала нужно изменить само мероприятие
+        List<Arrangement> arrangements = new ObjectMapper().convertValue(
+                scheduleData.get("arrangements"),
+                new TypeReference<List<Arrangement>>() {});
+        schedule.setMaxWorkersCount(scheduleData.get("maxWorkersCount").asInt());
+        LocalDate plannedDate = LocalDate.parse(scheduleData.get("plannedDate").asText(), DateTimeFormatter.ISO_DATE);
+
         arrangements.stream()
                 .filter(arrangement -> arrangement.getPlannedStartTime()!=null && arrangement.getPlannedEndTime()!=null)
                 .forEach(arrangementService::updateArrangementPlanInfo);
