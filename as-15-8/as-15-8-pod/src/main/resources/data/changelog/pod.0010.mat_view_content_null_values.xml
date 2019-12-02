@@ -1,0 +1,107 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+
+    <changeSet id="pod.0009" author="asavin">
+        <sql>
+            drop materialized view if exists sor.content_view;
+            create materialized view if not exists sor.content_view as
+            with help as (
+            select content.erdi_id       as erdi_id,
+            content.id                   as content_id,
+            max(addon.id)                as addon_id,
+            history.content_version_id   as content_version_id,
+            info.irtz_type               as irtz_type,
+            min(resources.id)            as resource_id
+            from sor.content content
+            join sor.content_history history
+            on content.id = history.content_id
+            and history.end_dt = to_date('30000101', 'YYYYMMDD')
+            left join sor.addon addon
+            on content.id = addon.content_id and
+            history.addon_version_id = addon.addon_version_id
+            join sor.content_info info
+            on content.id = info.content_id and
+            history.content_version_id = info.content_version_id
+            left join sor.content_resources resources
+            on content.id = resources.content_id and
+            history.content_version_id = info.content_version_id and
+            case
+            when info.blocktype = 'domain' then resources.resource_type_id = 1
+            when info.blocktype = 'ip' then resource_type_id in (2, 3, 4, 5)
+            when info.blocktype = 'domain-mask' then resources.resource_type_id = 7
+            else resources.resource_type_id = 6
+            end
+            group by content.id, history.content_version_id, info.irtz_type
+            ) select
+            help.erdi_id as id,
+            res.value as resource_value,
+            coalesce(help.irtz_type,'Не заполнено')  as resource_type,
+            coalesce(subtype.orig_id, 'Не заполнено')  as info_type_id,
+            coalesce(subtype.registry_name, 'Не заполнено') as registry_name,
+            coalesce(subtype.category_name, 'Не заполнено') as category_name,
+            coalesce(subtype.violation_name, 'Не заполнено') as violation_name,
+            coalesce(decision.org,'Не заполнено') as decision_org
+            from help
+            left join sor.content_resources res on help.resource_id = res.id
+            left join sor.resource_type restype on res.resource_type_id = restype.id
+            left join sor.addon addon on help.addon_id = addon.id
+            left join sor.subtype subtype on addon.info_type_id = subtype.orig_id and
+            subtype.eff_dt = to_date('30000101', 'YYYYMMDD')
+            join sor.decision decision on help.content_id = decision.content_id and
+            help.content_version_id = decision.content_version_id
+        </sql>
+        <rollback>
+            <sql>
+                drop materialized view if exists sor.content_view;
+                create materialized view if not exists sor.content_view as
+                with help as (
+                select content.erdi_id       as erdi_id,
+                content.id                   as content_id,
+                max(addon.id)                as addon_id,
+                history.content_version_id   as content_version_id,
+                info.irtz_type               as irtz_type,
+                min(resources.id)            as resource_id
+                from sor.content content
+                join sor.content_history history
+                on content.id = history.content_id
+                and history.end_dt = to_date('30000101', 'YYYYMMDD')
+                left join sor.addon addon
+                on content.id = addon.content_id and
+                history.addon_version_id = addon.addon_version_id
+                join sor.content_info info
+                on content.id = info.content_id and
+                history.content_version_id = info.content_version_id
+                left join sor.content_resources resources
+                on content.id = resources.content_id and
+                history.content_version_id = info.content_version_id and
+                case
+                when info.blocktype = 'domain' then resources.resource_type_id = 1
+                when info.blocktype = 'ip' then resource_type_id in (2, 3, 4, 5)
+                when info.blocktype = 'domain-mask' then resources.resource_type_id = 7
+                else resources.resource_type_id = 6
+                end
+                group by content.id, history.content_version_id, info.irtz_type
+                ) select
+                help.erdi_id as id,
+                res.value as resource_value,
+                help.irtz_type as resource_type,
+                subtype.orig_id as info_type_id,
+                subtype.registry_name as registry_name,
+                subtype.category_name as category_name,
+                subtype.violation_name as violation_name,
+                decision.org as decision_org
+                from help
+                left join sor.content_resources res on help.resource_id = res.id
+                left join sor.resource_type restype on res.resource_type_id = restype.id
+                left join sor.addon addon on help.addon_id = addon.id
+                left join sor.subtype subtype on addon.info_type_id = subtype.orig_id and
+                subtype.eff_dt = to_date('30000101', 'YYYYMMDD')
+                join sor.decision decision on help.content_id = decision.content_id and
+                help.content_version_id = decision.content_version_id
+            </sql>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>
