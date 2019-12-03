@@ -12,6 +12,7 @@ import model.task.Arrangement;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -40,10 +41,10 @@ public class Traffic implements Serializable {
     @OneToMany(mappedBy = "traffic", orphanRemoval = true,
             cascade = CascadeType.ALL)
     @JsonIgnore
-    private List<ErdiTrafficUnit> erdiTrafficUnits;
+    private List<ErdiTrafficUnit> erdiTrafficUnits = new ArrayList<>();
 
     @OneToMany(mappedBy = "traffic", orphanRemoval = true,
             cascade = CascadeType.ALL)
     @JsonIgnore
-    private List<SearchQueryTrafficUnit> searchQueryTrafficUnits;
+    private List<SearchQueryTrafficUnit> searchQueryTrafficUnits = new ArrayList<>();
 }

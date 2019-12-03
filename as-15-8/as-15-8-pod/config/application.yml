@@ -98,7 +98,19 @@ eureka.client.enabled: true
 spring:
   profiles: dev_asavin
   datasource:
-    url: jdbc:postgresql://192.168.5.195:5432/asdb_test2
+    url: jdbc:postgresql://192.168.5.211:5432/asdb_test2
+  liquibase:
+    enabled: true
+  app:
+    schedule:
+      missions: '0 0 0 * * ?'
+
+---
+
+spring:
+  profiles: dev_ashabalin
+  datasource:
+    url: jdbc:postgresql://192.168.5.211:5432/asdb_test
   liquibase:
     enabled: true
   app:

@@ -107,13 +107,6 @@ spring:
 
 ---
 
-spring:
-  profiles: dev_pvorobiev
-  datasource:
-    url: jdbc:postgresql://192.168.5.195:5432/asdb_test
-
----
-
 logging:
   config:
   level:
@@ -137,11 +130,17 @@ spring:
       bindings:
         springCloudBusInput.destination: bus_config_output_ashabalin
         springCloudBusOutput.destination: bus_config_input_ashabalin
+  datasource:
+    url: jdbc:postgresql://192.168.5.211:5432/asdb_test
 
 ---
 
 spring:
   profiles: dev_pvorobiev
+  datasource:
+    url: jdbc:postgresql://192.168.5.195:5432/asdb_test
+  liquibase:
+    enabled: true
   cloud:
     stream:
       bindings:
@@ -157,6 +156,8 @@ spring:
       bindings:
         springCloudBusInput.destination: bus_config_output_asavin
         springCloudBusOutput.destination: bus_config_input_asavin
+  datasource:
+    url: jdbc:postgresql://192.168.5.211:5432/asdb_test2
 
 ---
 

@@ -3,6 +3,8 @@ package controllers;
 import controllers.helpers.SortingHelper;
 import enums.ExecutionStatus;
 import enums.SortingDirection;
+import model.traffic.Traffic;
+import repositories.TrafficRepository;
 import restapi.ppm.ArrangementUploader;
 import exceptions.AS_15_8_PPT_Exception;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +41,7 @@ public class ArrangementController {
     private final ArrangementRepo arrangementRepo;
     private final ArrangementService arrangementService;
     private final ArrangementUploader arrangementUploader;
+    private final TrafficRepository trafficRepository;
 
     @GetMapping
     public Page<Arrangement> findList(
@@ -193,7 +196,10 @@ public class ArrangementController {
         arrangement.setPlannedEndTime(newArrangement.getPlannedEndTime());
         arrangement.setDeadlineDate(newArrangement.getDeadlineDate());
         arrangement.setTrafficId(newArrangement.getTrafficId());
-        arrangement.setTrafficName(newArrangement.getTrafficName());
+
+        Traffic traffic = trafficRepository.findById(newArrangement.getTrafficId())
+                .orElseThrow(() -> new AS_15_8_PPT_Exception("Ошибка при добавлении трафика! Трафик не найден по id: " + newArrangement.getTrafficId()));
+        arrangement.setTrafficName(traffic.getName());
         return arrangement;
     }
 

@@ -5,7 +5,7 @@ package robots.exceptions;
  * @author shabalinAI
  *
  */
-public class ExecutionException extends Exception {
+public class ExecutionException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 

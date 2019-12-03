@@ -30,6 +30,8 @@ public class ExecutorProperties {
 
     private ScreenshotProperties screenshot;
 
+    private ExecutorProps executor;
+
 
     private static EtalonProperties etalonExtProperties;
 
@@ -141,5 +143,10 @@ public class ExecutorProperties {
         private String extId;
         private String extVersion;
         private String extPopup;
+    }
+
+    @Data
+    public static class ExecutorProps{
+        private Integer timeout;
     }
 }

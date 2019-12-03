@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import repositories.ContentHistoryRepository;
+import repositories.ContentViewRepository;
 import rest.ResponseStatusString;
 import restapi.ErdiRestClient;
 import services.ContentService;
@@ -40,6 +41,7 @@ import java.util.stream.Collectors;
 public class ContentController {
 
     private final ContentService contentService;
+    private final ContentViewRepository contentViewRepository;
     private final ErdiRestClient erdiRestClient;
     private final InfoService infoService;
     private final ContentHistoryRepository contentHistoryRepo;
@@ -51,18 +53,69 @@ public class ContentController {
             @RequestParam(required = false) String sortingColumn,
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize,
-            @RequestParam(required = false) String query) {
+            @RequestParam(required = false) String id,
+            @RequestParam(required = false) List<String> categoryNames,
+            @RequestParam(required = false) List<String> decisionOrgs,
+            @RequestParam(required = false) List<String> infoTypeIds,
+            @RequestParam(required = false) List<String> registryNames,
+            @RequestParam(required = false) List<String> resourceTypes,
+            @RequestParam(required = false) String resourceValue,
+            @RequestParam(required = false) List<String> violationNames,
+            @RequestParam(required = false) String query,
+            @RequestParam(required = false) Boolean random
+    ) {
 
         if (!erdiRestClient.getIsLoading()) {
             Pageable pageable = PageRequest.of(pageNumber, pageSize,
                     SortingHelper.createSorting(sortingDirection, sortingColumn));
             Page<ContentView> pageContent =
-                    contentService.getFormalErdiView(query, pageable);
+                    contentViewRepository.findPage(
+                            id,
+                            categoryNames,
+                            decisionOrgs,
+                            infoTypeIds,
+                            registryNames,
+                            resourceTypes,
+                            resourceValue,
+                            violationNames,
+                            query,
+                            random == null ? false : random,
+                            pageable);
             return new ResponseEntity<>(pageContent, HttpStatus.OK);
         }
         else {
             return new ResponseEntity<>((Page<ContentView>) null, HttpStatus.ACCEPTED);
         }
+    }
+
+    @GetMapping(path = "/erdi/resourceTypes")
+    public List<String> getResourceTypes(){
+        return contentViewRepository.getDistinctResourceTypes();
+    }
+
+    @GetMapping(path = "/erdi/categoryNames")
+    public List<String> getCategoryNames(){
+        return contentViewRepository.getDistinctCategoryNames();
+    }
+
+    @GetMapping(path = "/erdi/registryNames")
+    public List<String> getRegistryNames(){
+        return contentViewRepository.getDistinctRegistryNames();
+    }
+
+    @GetMapping(path = "/erdi/violationNames")
+    public List<String> getViolationNames(){
+        return contentViewRepository.getDistinctViolationNames();
+    }
+
+    @GetMapping(path = "/erdi/decisionOrgs")
+    public List<String> getDecisionOrgs(){
+        return contentViewRepository.getDistinctDecisionOrgs();
+    }
+
+    @GetMapping(path = "/erdi/infoTypeIds")
+    public List<String> getInfoTypeIds(){
+        return contentViewRepository.getDistinctInfoTypeIds();
     }
 
     @GetMapping(path = "/erdi/single")
