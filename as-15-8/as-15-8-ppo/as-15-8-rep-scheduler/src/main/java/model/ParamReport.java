@@ -1,11 +1,13 @@
 package model;
 
 import lombok.Data;
+import lombok.ToString;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.sql.Timestamp;
 
 /**
  * User: asinjavin
@@ -18,7 +20,7 @@ import javax.persistence.Table;
 public class ParamReport
 {
     @Id
-    long rep_id;
+    long repId;
 
     @Column
     String msr_prd_tp;
@@ -27,12 +29,19 @@ public class ParamReport
     String msr_prd_caption;
 
     @Column
-    int rep_tp_id;
+    int repTpId;
 
     @Column
     String format;
 
     @Column
-    long ppn_dttm;
+    String mime;
+
+    @Column
+    Timestamp ppn_dttm;
+
+    @ToString.Exclude
+    @Column
+    private byte[] data;
 
 }

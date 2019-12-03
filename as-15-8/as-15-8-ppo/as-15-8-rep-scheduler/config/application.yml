@@ -99,6 +99,7 @@ logging:
     org.springframework.data: debug
     org.springframework.web: debug
     org.springframework.http: debug
+    org.hibernate.SQL: debug
 spring:
   profiles: dev_asin
   profiles.include: local_log
