@@ -4,7 +4,7 @@
         <sql>
             INSERT INTO config.global_properties
                     (key, value, configuration_id)
-            SELECT 'executor.timeout', '60', 1
+            SELECT 'executor.timeout', '61', 1
             WHERE
             NOT EXISTS (
                 SELECT id FROM config.global_properties WHERE key = 'executor.timeout'
