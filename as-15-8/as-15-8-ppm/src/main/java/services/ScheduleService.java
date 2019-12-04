@@ -14,8 +14,10 @@ import repositories.*;
 import restapi.ArrangementStatusUploader;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @Slf4j
@@ -50,7 +52,10 @@ public class ScheduleService {
      */
     @Transactional
     public Schedule planSchedule(Schedule schedule){
-        int freeWorkersCount = getFreeWorkersCount(schedule.getPlannedDate());
+        int freeWorkersCount = getFreeWorkersCount(
+                schedule.getPlannedDate(),
+                scheduleRepo.getScheduleStartTime(schedule.getId()),
+                scheduleRepo.getScheduleEndTime(schedule.getId()));
         if(schedule.getMaxWorkersCount() > freeWorkersCount)
             throw new AS_15_8_PPM_Exception("Ошибка планирования расписания. Количество свободных обработчиков уменьшилось. На данный момент их максимальное количество " + freeWorkersCount + " штук");
 
@@ -77,9 +82,6 @@ public class ScheduleService {
         int maxWorkersCount;
         if(schedule != null) {
             clearSchedulePeriods(schedule);
-            maxWorkersCount = schedule.getMaxWorkersCount();
-        } else {
-            maxWorkersCount = getFreeWorkersCount(plannedDate);
         }
 
         List<Long> availableIds =
@@ -97,6 +99,11 @@ public class ScheduleService {
         }
         log.info("Начало расчета расписания на дату: {}", plannedDate);
         Map<Arrangement, TreeSet<ScheduleCheckUnit>> arrangementCheckUnits = arrangementService.getArrangementCheckUnits(availableIds, plannedDate);
+        if(schedule != null) {
+            maxWorkersCount = schedule.getMaxWorkersCount();
+        } else {
+            maxWorkersCount = getMaxWorkersCount(arrangementCheckUnits.keySet(), plannedDate);
+        }
         Schedule newSchedule = scheduleCreationService.create(arrangementCheckUnits, maxWorkersCount);
         log.info("Расчет расписания на дату {} завершен", plannedDate);
         if(schedule != null) {
@@ -111,8 +118,21 @@ public class ScheduleService {
         return scheduleRepo.save(schedule);
     }
 
-    public int getFreeWorkersCount(LocalDate plannedDate){
-        return Math.max(schedulerProperties.getTotalWorkersCount() - scheduleRepo.getBusyWorkersCount(plannedDate), 0);
+    public int getFreeWorkersCount(LocalDate plannedDate, LocalTime startTime, LocalTime endTime){
+        return Math.max(schedulerProperties.getTotalWorkersCount() - scheduleRepo.getBusyWorkersCount(plannedDate, startTime, endTime), 0);
+    }
+
+    private int getMaxWorkersCount(Set<Arrangement> arrangements, LocalDate plannedDate){
+        Stream<Arrangement> arrangementStream = arrangements.stream();
+        LocalTime startTime = arrangementStream
+                .map(Arrangement::getPlannedStartTime)
+                .min(LocalTime::compareTo)
+                .orElse(LocalTime.now());
+        LocalTime endTime = arrangementStream
+                .map(Arrangement::getPlannedEndTime)
+                .max(LocalTime::compareTo)
+                .orElse(LocalTime.now());
+        return getFreeWorkersCount(plannedDate, startTime, endTime);
     }
 
     private void fillCheckUnits(Arrangement arrangement){

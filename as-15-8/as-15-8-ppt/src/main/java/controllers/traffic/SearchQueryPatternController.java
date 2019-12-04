@@ -6,6 +6,7 @@ import enums.SortingDirection;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Views;
+import model.traffic.CustomErdiView;
 import model.traffic.SearchPhrase;
 import model.traffic.SearchQueryPattern;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import repositories.CustomErdiViewRepository;
 import repositories.SearchPhraseRepository;
 import repositories.SearchQueryPatternRepo;
 
@@ -33,6 +35,7 @@ public class SearchQueryPatternController {
 
     private final SearchQueryPatternRepo searchQueryPatternRepo;
     private final SearchPhraseRepository searchPhraseRepository;
+    private final CustomErdiViewRepository customErdiViewRepository;
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(code = HttpStatus.CREATED)
@@ -93,7 +96,7 @@ public class SearchQueryPatternController {
 
     @GetMapping("{id}/search_phrases")
     public Page<SearchPhrase> findTemplateSearchPhrases(
-            @PathVariable SearchQueryPattern searchQueryPattern,
+            @PathVariable("id") SearchQueryPattern searchQueryPattern,
             @RequestParam(required = false) SortingDirection sortingDirection,
             @RequestParam(required = false) String sortingColumn,
             @RequestParam(defaultValue = "0") int pageNumber,
@@ -105,6 +108,18 @@ public class SearchQueryPatternController {
         PageRequest page = PageRequest.of(
                 pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
         return searchPhraseRepository.findAllBySearchQueryPatternsAndPhraseContaining(searchQueryPattern, phrase, page);
+    }
+
+    @GetMapping("{id}/custom_erdi")
+    public Page<CustomErdiView> findTemplateFormalErdi(
+            @PathVariable("id") SearchQueryPattern searchQueryPattern,
+            @RequestParam(required = false) SortingDirection sortingDirection,
+            @RequestParam(required = false) String sortingColumn,
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize){
+        PageRequest page = PageRequest.of(
+                pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
+        return customErdiViewRepository.findAllBySearchQueryPatterns(searchQueryPattern, page);
     }
 
     private <T> void update(Set<T> existing, Set<T> changed) {

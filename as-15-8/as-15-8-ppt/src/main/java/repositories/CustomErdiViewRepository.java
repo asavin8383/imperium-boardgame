@@ -1,6 +1,7 @@
 package repositories;
 
 import model.traffic.CustomErdiView;
+import model.traffic.SearchQueryPattern;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -8,6 +9,8 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 @Repository
 public interface CustomErdiViewRepository extends
@@ -25,15 +28,7 @@ public interface CustomErdiViewRepository extends
     )
     Page<CustomErdiView> findAllByErdiTrafficUnitsContainingAndQuery(@Param("unit_id") Long erdiTrafficUnitId, @Param("query") String query, Pageable pageable);
 
-    @Query("select view from CustomErdiView view " +
-            " join view.searchQueryPatterns patterns on patterns.id = :pattern_id " +
-            "where concat(view.id, '') like lower(concat('%',:query,'%')) " +
-            "or lower(view.name) like lower(concat('%',:query,'%')) " +
-            "or lower(view.unitType) like lower(concat('%',:query,'%')) " +
-            "or lower(view.unitValue) like lower(concat('%',:query,'%')) " +
-            "or concat(view.subtypeId, '') like lower(concat('%',:query,'%')) "
-    )
-    Page<CustomErdiView> findAllBySearchQueryPatternsContainingAndQuery(@Param("pattern_id") Long searchQueryTrafficPatternId, @Param("query") String query, Pageable pageable);
+    Page<CustomErdiView> findAllBySearchQueryPatterns(SearchQueryPattern searchQueryPattern, Pageable pageable);
 
     @Query("select view from CustomErdiView view " +
             "where concat(view.id, '') like lower(concat('%',:query,'%')) " +

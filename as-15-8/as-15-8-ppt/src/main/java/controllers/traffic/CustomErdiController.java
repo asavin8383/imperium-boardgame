@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import model.Views;
 import model.traffic.CustomErdi;
 import model.traffic.CustomErdiView;
+import model.traffic.SearchQueryPattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -37,7 +38,7 @@ public class CustomErdiController {
                                                   @RequestParam(defaultValue = "10") int pageSize,
                                                   @RequestParam(required = false) String query,
                                                   @RequestParam(required = false) Long erdiTrafficUnitId,
-                                                  @RequestParam(required = false) Long searchPatternId) {
+                                                  @RequestParam(required = false, name = "searchPatternId") SearchQueryPattern searchQueryPattern) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize,
                 SortingHelper.createSorting(sortingDirection, sortingColumn));
         if(query == null) {
@@ -45,8 +46,8 @@ public class CustomErdiController {
         }
         if(erdiTrafficUnitId != null) {
             return customErdiViewRepository.findAllByErdiTrafficUnitsContainingAndQuery(erdiTrafficUnitId, query, pageable);
-        } else if (searchPatternId != null) {
-            return customErdiViewRepository.findAllBySearchQueryPatternsContainingAndQuery(searchPatternId, query, pageable);
+        } else if (searchQueryPattern != null) {
+            return customErdiViewRepository.findAllBySearchQueryPatterns(searchQueryPattern, pageable);
         } else {
             return customErdiViewRepository.findAllByQuery(query, pageable);
         }

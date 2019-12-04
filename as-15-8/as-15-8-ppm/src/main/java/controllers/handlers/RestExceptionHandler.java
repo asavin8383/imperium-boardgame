@@ -1,7 +1,7 @@
 package controllers.handlers;
 
 import exceptions.AS_15_8_API_Error;
-import exceptions.AS_15_8_PPT_Exception;
+import exceptions.AS_15_8_PPM_Exception;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
@@ -21,9 +21,9 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @ControllerAdvice
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(value = {AS_15_8_PPT_Exception.class})
+    @ExceptionHandler(value = {AS_15_8_PPM_Exception.class})
     protected ResponseEntity<Object> handleAS_15_8_Exception(
-            AS_15_8_PPT_Exception ex) {
+            AS_15_8_PPM_Exception ex) {
         AS_15_8_API_Error apiError = new AS_15_8_API_Error(HttpStatus.BAD_REQUEST.toString(), ex.getMessage());
         return buildResponseEntity(apiError);
     }

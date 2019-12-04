@@ -3,7 +3,6 @@ package controllers;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import enums.SortingDirection;
 import exceptions.AS_15_8_PPM_Exception;
@@ -90,8 +89,14 @@ public class ScheduleController {
     }
 
     @GetMapping(path = "/total_workers_count")
-    public Integer getTotalWorkersCount(){
-        return scheduleService.getFreeWorkersCount(LocalDate.now());
+    public Integer getTotalWorkersCount(@RequestParam("id") Schedule schedule){
+        if(schedule==null){
+            throw new AS_15_8_PPM_Exception("Ошибка получения количества обработчиков! Расписание ещё не создано");
+        }
+        return scheduleService.getFreeWorkersCount(
+                LocalDate.now(),
+                scheduleRepo.getScheduleStartTime(schedule.getId()),
+                scheduleRepo.getScheduleEndTime(schedule.getId()));
     }
 
     //TODO кидать 400
