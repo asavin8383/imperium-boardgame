@@ -123,12 +123,11 @@ public class ScheduleService {
     }
 
     private int getMaxWorkersCount(Set<Arrangement> arrangements, LocalDate plannedDate){
-        Stream<Arrangement> arrangementStream = arrangements.stream();
-        LocalTime startTime = arrangementStream
+        LocalTime startTime = arrangements.stream()
                 .map(Arrangement::getPlannedStartTime)
                 .min(LocalTime::compareTo)
                 .orElse(LocalTime.now());
-        LocalTime endTime = arrangementStream
+        LocalTime endTime = arrangements.stream()
                 .map(Arrangement::getPlannedEndTime)
                 .max(LocalTime::compareTo)
                 .orElse(LocalTime.now());
