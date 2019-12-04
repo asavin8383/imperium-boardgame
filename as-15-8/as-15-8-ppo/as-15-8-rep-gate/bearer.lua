@@ -48,8 +48,8 @@ local res, err = httpc:request_uri(gateway_url .. "/security/oauth/check_token",
  { method = "POST", query="token=" .. token, headers={authorization ="Basic YmlydC12aWV3ZXI6MXEwcDJ3OW8="}})
 
 if res.status ~= 200 then
-    ngx.status = ngx.HTTP_UNAUTHORIZED
-    ngx.log(ngx.WARN, res.reason)
+    ngx.status = ngx.HTTP_UNAUTHOR  ngx.log(ngx.WARN, res.reason)IZED
+
     ngx.header.content_type = "application/json; charset=utf-8"
     ngx.say("{\"error\": \"" .. res.reason .. "\",\"status\":" .. res.status .. "}")
     ngx.exit(ngx.HTTP_UNAUTHORIZED)

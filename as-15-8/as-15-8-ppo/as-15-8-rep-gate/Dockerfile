@@ -14,11 +14,13 @@ RUN apk update \
  && rm -rf /var/cache/apk/*
 
 COPY *.sh /
+COPY *.lua /
 RUN chmod +x /init_eureka.sh \
     && chmod +x /run.sh \
-    && chmod +x /hearthbeat_eureka.sh
+    && chmod +x /heartbeat_eureka.sh
 
 COPY nginx.conf /nginx.conf
 COPY bearer.lua /bearer.lua
 
-ENTRYPOINT ["/run.sh"]
+#ENTRYPOINT ["/run.sh"]
+ENTRYPOINT ["/usr/local/openresty/bin/openresty", "-g", "daemon off;", "-c", "/nginx.conf"]
