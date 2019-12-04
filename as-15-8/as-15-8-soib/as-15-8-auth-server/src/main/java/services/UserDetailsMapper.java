@@ -1,6 +1,8 @@
 package services;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ldap.core.DirContextOperations;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.ldap.userdetails.LdapUserDetails;
@@ -11,7 +13,10 @@ import user.UserDetails;
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.Attributes;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Класс-mapper пользователя LDAP на пользователя БД
@@ -20,7 +25,10 @@ import java.util.Collection;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class UserDetailsMapper extends LdapUserDetailsMapper {
+
+    private final LdapGroupService ldapGroupService;
 
     @Override
     public UserDetails mapUserFromContext(
@@ -48,7 +56,13 @@ public class UserDetailsMapper extends LdapUserDetailsMapper {
         } catch(NamingException ex){
             throw new RuntimeException("Error mapping user: " + username, ex);
         }
-        return new UserDetails(username, firstName, lastName, mail, userDetails);
-    }
 
+        Collection<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+        for(GrantedAuthority authority : authorities) {
+            grantedAuthorities.add(authority);
+            grantedAuthorities.addAll(ldapGroupService.findRoleMembers(authority.getAuthority()));
+        }
+
+        return new UserDetails(username, firstName, lastName, mail, grantedAuthorities, userDetails);
+    }
 }

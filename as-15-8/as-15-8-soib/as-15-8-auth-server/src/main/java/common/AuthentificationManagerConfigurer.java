@@ -3,12 +3,8 @@ package common;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.ldap.core.ContextSource;
-import org.springframework.ldap.core.LdapTemplate;
-import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
@@ -69,14 +65,4 @@ public class AuthentificationManagerConfigurer extends WebSecurityConfigurerAdap
         return provider;
     }
 
-    @Bean
-    @ConfigurationProperties(prefix="ldap.source")
-    public LdapContextSource contextSource() {
-        return new LdapContextSource();
-    }
-
-    @Bean
-    public LdapTemplate ldapTemplate(ContextSource contextSource) {
-        return new LdapTemplate(contextSource);
-    }
 }
