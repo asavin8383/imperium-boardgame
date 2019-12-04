@@ -67,6 +67,11 @@ public class CheckUnitJobHandler {
                         .supplyAsync(() -> service.run(message.getPayload()))
                         .applyToEither(timeoutAfter(timeout, TimeUnit.SECONDS), (result) -> result)
                         .exceptionally(throwable -> {
+                            if (throwable instanceof TimeoutException){
+                                if (service.isRunning()){
+                                    service.stop();
+                                }
+                            }
                             throw new CompletionException(throwable);
                         })
                 .join();
