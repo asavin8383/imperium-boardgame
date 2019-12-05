@@ -18,6 +18,8 @@ public class UserDetails implements LdapUserDetails {
     private String lastName;
     @Getter
     private String mail;
+    @Getter
+    private Collection<? extends GrantedAuthority> authorities;
 
     private final LdapUserDetails details;
 
@@ -29,11 +31,6 @@ public class UserDetails implements LdapUserDetails {
     @Override
     public void eraseCredentials() {
         details.eraseCredentials();
-    }
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return details.getAuthorities();
     }
 
     @Override

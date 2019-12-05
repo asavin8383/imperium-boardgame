@@ -82,7 +82,10 @@ public class CheckUnitJobHandler {
 
             sendExecutionResult(executionJobResult);
         } catch (Exception ex) {
-            Throwable te = ex instanceof CompletionException ? ex.getCause() : ex;
+            Throwable te = ex;
+            while(te.getCause() != null && te instanceof CompletionException) {
+                te = te.getCause();
+            }
 
             if (te instanceof TimeoutException){
                 log.info("Проверка {}, остановлена по таймауту {} секунд",  message.getPayload().getJobID(), timeout);
