@@ -51,6 +51,8 @@ public class ScheduleService {
      */
     @Transactional
     public Schedule planSchedule(Schedule schedule){
+        if(schedule.getMaxWorkersCount() == 0)
+            throw new AS_15_8_PPM_Exception("Ошибка планирования расписания. Выбрано 0 обработчиков");
         int freeWorkersCount = getFreeWorkersCount(
                 schedule.getPlannedDate(),
                 scheduleRepo.getScheduleStartTime(schedule.getId()),
@@ -87,6 +89,8 @@ public class ScheduleService {
                             .boxed()
                             .collect(Collectors.toList());
         } else {
+            if(schedule.getMaxWorkersCount() == 0)
+                throw new AS_15_8_PPM_Exception("Ошибка расчета расписания. Выбрано 0 обработчиков");
             availableIds = arrangementIds;
         }
         if (availableIds.size() == 0){
