@@ -21,7 +21,7 @@ import java.util.Map;
 @EnableJpaRepositories("repositories")
 @EntityScan("model")
 @Configuration
-public class SpringBootTomcatApplication extends SpringBootServletInitializer
+public class SpringBootTomcatApplication
 {
     public static void main(String[] args) {
         SpringApplication.run(SpringBootTomcatApplication.class, args);
