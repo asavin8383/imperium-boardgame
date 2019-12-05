@@ -63,7 +63,7 @@ public class RunScheduleService {
         log.debug("Запуск чек-юнита: {} {}", schedulePeriodCheckUnit.getId(), schedulePeriodCheckUnit.getCheckUnit().getCheckUnitValue());
         if (schedulePeriodCheckUnit.getStatus().equals(SchedulePeriodCheckUnitStatus.READY)){
             long keySuffix = schedulePeriodCheckUnit.getExecutionNumber() %
-                    schedulePeriodCheckUnit.getSchedulePeriodArrangement().getSchedulePeriod().getSchedule().getMaxWorkersCount();
+                    schedulePeriodCheckUnit.getSchedulePeriodArrangement().getWorkersCount();
             String key = schedulePeriodCheckUnit.getSchedulePeriodArrangement().getArrangement().getId() + "_" + keySuffix;
             sendCheckUnitJobToDispatcher(createCheckUnitJob(scheduleCheckUnitRepo.getOne(schedulePeriodCheckUnit.getId())), key);
             log.debug("Чек-юнит отправлен на диспетчер. Ключ: {} , значение: {} {}", key, schedulePeriodCheckUnit.getId(), schedulePeriodCheckUnit.getCheckUnit().getCheckUnitValue());

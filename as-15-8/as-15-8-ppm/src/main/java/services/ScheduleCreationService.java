@@ -3,7 +3,6 @@ package services;
 import common.SchedulerException;
 import common.SchedulerProperties;
 import exceptions.AS_15_8_PPM_Exception;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.*;

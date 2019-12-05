@@ -1,6 +1,7 @@
 package model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 import enums.AccessToolParameter;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -14,24 +15,27 @@ import javax.persistence.*;
 @Table(schema = "config", name = "robots_properties")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(onlyExplicitlyIncluded = true)
-class RobotProperty {
+public class RobotProperty {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
     @ToString.Include
     @EqualsAndHashCode.Include
+    @JsonView(Views.Brief.class)
     private Long id;
 
     @Column(nullable = false)
     @Convert(converter = AccessToolParameterConverter.class)
     @ToString.Include
     @EqualsAndHashCode.Include
+    @JsonView(Views.Brief.class)
     private AccessToolParameter key;
 
     @Column(nullable = false)
     @ToString.Include
     @EqualsAndHashCode.Include
+    @JsonView(Views.Brief.class)
     private String value;
 
     @ManyToOne(optional=false)
