@@ -26,7 +26,7 @@ import repositories.ScheduleCheckUnitRepo;
 @RestController
 @Slf4j
 @RequestMapping(path = "/checkunits", produces = MediaType.APPLICATION_JSON_VALUE)
-@PreAuthorize("hasRole('ROLE_OPERATOR')")
+@PreAuthorize("hasRole('ROLE_FORMATION_OF_SHEDULE')")
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class CheckUnitController {
 
