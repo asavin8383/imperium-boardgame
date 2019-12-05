@@ -1,0 +1,392 @@
+{
+	"info": {
+		"_postman_id": "8a55937a-8170-4d93-9a55-d15005f5e492",
+		"name": "АС 15.8 ППМ",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Расписание",
+			"item": [
+				{
+					"name": "Создание нового расписания",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"value": "{{oper_token}}",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[1027]"
+						},
+						"url": {
+							"raw": "{{url}}/ppm/schedule?plannedDate=2019-11-21",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ppm",
+								"schedule"
+							],
+							"query": [
+								{
+									"key": "author",
+									"value": "jack",
+									"disabled": true
+								},
+								{
+									"key": "plannedDate",
+									"value": "2019-11-21"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Редактирование расписания",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"value": "{{oper_token}}",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[{\"id\":1012}, {\"id\":1013}]"
+						},
+						"url": {
+							"raw": "{{url}}/ppm/schedule?author=jack&id=26",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ppm",
+								"schedule"
+							],
+							"query": [
+								{
+									"key": "plannedDate",
+									"value": "2019-08-22",
+									"disabled": true
+								},
+								{
+									"key": "author",
+									"value": "jack"
+								},
+								{
+									"key": "id",
+									"value": "26"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Планирование расписания",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"type": "text",
+								"value": "{{oper_token}}",
+								"disabled": true
+							},
+							{
+								"key": "",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json",
+								"disabled": true
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{url}}/ppm/schedule/plan?id=42",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ppm",
+								"schedule",
+								"plan"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "42"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Удаление расписания",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"value": "{{oper_token}}",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{url}}/ppm/schedule?id=39",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ppm",
+								"schedule"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "39"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Список мероприятий для расписания",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/ppm/schedule/arrangements",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ppm",
+								"schedule",
+								"arrangements"
+							],
+							"query": [
+								{
+									"key": "plannedDate",
+									"value": "2019-11-07",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Получение диаграммы ганта по расписанию",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"value": "{{oper_token}}",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{url}}/ppm/schedule/gant?id=72",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ppm",
+								"schedule",
+								"gant"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "72"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Получение расписания по ИД",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"value": "{{oper_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/ppm/schedule?id=54",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ppm",
+								"schedule"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "54"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Получение списка расписаний",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"value": "{{oper_token}}",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{url}}/ppm/schedule/all?plannedDate=2019-11-11",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ppm",
+								"schedule",
+								"all"
+							],
+							"query": [
+								{
+									"key": "plannedDate",
+									"value": "2019-11-11"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Получение общего количества исполнителей",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/ppm/schedule/total_workers_count",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ppm",
+								"schedule",
+								"total_workers_count"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Список проверок мероприятия",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/ppm/checkunits?id=523",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"ppm",
+						"checkunits"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "523"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "oauth2",
+		"oauth2": [
+			{
+				"key": "accessToken",
+				"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqYWNrIiwicm9sZSI6IlJPTEVfT1BFUkFUT1IiLCJtYWlsIjoiIiwidXNlcl9uYW1lIjoiamFjayIsInNjb3BlIjpbInJlYWQiLCJ3cml0ZSJdLCJleHAiOjE1NzQ0MTc0MDksInVzZXJOYW1lIjoiamFjayIsImF1dGhvcml0aWVzIjpbIlJPTEVfT1BFUkFUT1IiXSwianRpIjoiNGI0OTExZDktYmY4OS00MGYwLWJkZGEtZjEwMzBmMjEzNGJkIiwiY2xpZW50X2lkIjoiYXMtMTUtOCIsInNlY29uZE5hbWUiOiIifQ.VAYc10IsdDsvUNFWqoxwTjKX1ulRvcHT6v3GGLcQAR7SnE4kb6ioEf9rbfobIQqVbxHRIzHMVgmaXZGVinNvpOrTGFoeqpgiVyRgToDL5fRcJ6Oj10p_xnwvJNVzfFHJ46jsGD1K9uM0d4_L35kgJvL2OkEbXG6fPDWktZFVbJ186Jz6WhKG8eg-vLQpPzZGJl_A0vq67oBXJ3Zm4URaIqHySHogjypgKWd27J1xi_wksfmW0qw_QACICM74ItCYdgHFm_0EUVgbHpRp2ZxsbQ9XJ0P5uu1JXq4QeQGjbVE-_BBC5eNwxFc4mEm-ZaaTJ1RcmwFYXZiFJeIhSb9RLA",
+				"type": "string"
+			},
+			{
+				"key": "tokenType",
+				"value": "bearer",
+				"type": "string"
+			},
+			{
+				"key": "addTokenTo",
+				"value": "header",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "da296985-efac-4ba7-8818-158aec46dd70",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "3870ae23-eed2-41e7-bbaa-96fee36f7429",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"protocolProfileBehavior": {}
+}

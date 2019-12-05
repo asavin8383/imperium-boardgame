@@ -1,0 +1,200 @@
+{
+	"info": {
+		"_postman_id": "f9755d56-045d-4377-b89e-a3cdf6e10195",
+		"name": "АС 15.8 ПМК",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Результаты",
+			"item": [
+				{
+					"name": "Получение результатов мероприятия",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"value": "{{oper_token}}",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{url}}/dispatcher/results?arrangementId=503",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"dispatcher",
+								"results"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "11",
+									"disabled": true
+								},
+								{
+									"key": "checkUnitValue",
+									"value": "anna",
+									"disabled": true
+								},
+								{
+									"key": "checkUnitType",
+									"value": "DOMAIN",
+									"disabled": true
+								},
+								{
+									"key": "sortingColumn",
+									"value": "result",
+									"disabled": true
+								},
+								{
+									"key": "sortingDirection",
+									"value": "DESC",
+									"disabled": true
+								},
+								{
+									"key": "checkUnitJobResults",
+									"value": "TIMEOUT_ERROR",
+									"disabled": true
+								},
+								{
+									"key": "arrangementId",
+									"value": "503"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Получение скриншота",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-AUTH-TOKEN",
+								"value": "{{oper_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/dispatcher/results/screenshot?id=60",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"dispatcher",
+								"results",
+								"screenshot"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "60"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Получение дополнительной информации",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/dispatcher/results/details?id=7",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"dispatcher",
+								"results",
+								"details"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "7"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Получение дополнительной информации по nmap",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/dispatcher/details/nmap?id=3882",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"dispatcher",
+								"details",
+								"nmap"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "3882"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		}
+	],
+	"auth": {
+		"type": "oauth2",
+		"oauth2": [
+			{
+				"key": "accessToken",
+				"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqYWNrIiwicm9sZSI6IlJPTEVfT1BFUkFUT1IiLCJtYWlsIjoiIiwidXNlcl9uYW1lIjoiamFjayIsInNjb3BlIjpbInJlYWQiLCJ3cml0ZSJdLCJleHAiOjE1NzQ4NDk5ODEsInVzZXJOYW1lIjoiamFjayIsImF1dGhvcml0aWVzIjpbIlJPTEVfT1BFUkFUT1IiXSwianRpIjoiNDMxNDBiZTQtYTYxOS00NjRhLThiNTctZTQyODdkYmMxMTUwIiwiY2xpZW50X2lkIjoiYXMtMTUtOCIsInNlY29uZE5hbWUiOiIifQ.TAV4nHltuJLe27BS9S4n_9nSOgHP51981314jR-_VaeW5pNW2j5JZrnKKQnH-Y9Q4fym54Cc1TA5W5OIcHpYry4x5lVMy-6kfsa6ZRCdfilvFiWiWNiWTLpqy0T36aROQFIl8YyjtHhHGYokP6md1qsV4B7kSZbmXHCE4mHuSkyxjYP-NZkO95a3zVGb2MoFTQcen-tyf47USIzHtWeZxkT0iMst23UnaXvN2U25NqYGp9uKItuzudnrYjVi2B1dYrKaG9INkbaAgPxilzhoyq25MOgnepE1_W693tgb-X7l8gpEatiJ3KgnCWxMxUPFxkJse2SDinYXPiAlM2WW5w",
+				"type": "string"
+			},
+			{
+				"key": "tokenType",
+				"value": "bearer",
+				"type": "string"
+			},
+			{
+				"key": "addTokenTo",
+				"value": "header",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "478a9077-7d3b-412a-803b-b1e35a7ac933",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "63a1ee76-8748-41cd-aff7-6e982b6a4577",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"protocolProfileBehavior": {}
+}

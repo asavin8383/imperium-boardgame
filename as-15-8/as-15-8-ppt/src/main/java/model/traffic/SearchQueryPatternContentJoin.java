@@ -13,23 +13,24 @@ import javax.persistence.*;
 @Data
 @ToString(onlyExplicitlyIncluded = true)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class SearchQueryContentJoin {
+public class SearchQueryPatternContentJoin {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
     @ToString.Include
-    @EqualsAndHashCode.Include
     private Long id;
 
     @ManyToOne
     @JoinColumn(name = "pattern_id", referencedColumnName = "id")
     @ToString.Include
+    @EqualsAndHashCode.Include
     private SearchQueryPattern searchQueryPattern;
 
     // для единообразия json при сохранении трафика
     @JsonProperty("id")
     @ToString.Include
+    @EqualsAndHashCode.Include
     private Long contentId;
 
 }

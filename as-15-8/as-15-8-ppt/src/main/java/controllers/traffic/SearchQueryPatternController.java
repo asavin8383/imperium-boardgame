@@ -1,26 +1,35 @@
 package controllers.traffic;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import controllers.helpers.SortingHelper;
 import enums.SortingDirection;
+import exceptions.AS_15_8_PPT_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Views;
 import model.traffic.CustomErdiView;
 import model.traffic.SearchPhrase;
 import model.traffic.SearchQueryPattern;
+import model.traffic.SearchQueryPatternContentJoin;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import repositories.CustomErdiViewRepository;
 import repositories.SearchPhraseRepository;
+import repositories.SearchQueryPatternContentJoinRepo;
 import repositories.SearchQueryPatternRepo;
+import webClients.PodWebClient;
 
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Created by san
@@ -36,12 +45,14 @@ public class SearchQueryPatternController {
     private final SearchQueryPatternRepo searchQueryPatternRepo;
     private final SearchPhraseRepository searchPhraseRepository;
     private final CustomErdiViewRepository customErdiViewRepository;
+    private final SearchQueryPatternContentJoinRepo searchQueryPatternContentJoinRepo;
+    private final PodWebClient podWebClient;
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(code = HttpStatus.CREATED)
     public SearchQueryPattern createNewSearchQueryPattern(@RequestBody SearchQueryPattern searchQueryPattern){
         if(searchQueryPattern.getFormalErdiList() != null) {
-            searchQueryPattern.getFormalErdiList().forEach(searchQueryContentJoin -> searchQueryContentJoin.setSearchQueryPattern(searchQueryPattern));
+            searchQueryPattern.getFormalErdiList().forEach(searchQueryPatternContentJoin -> searchQueryPatternContentJoin.setSearchQueryPattern(searchQueryPattern));
         }
         return searchQueryPatternRepo.save(searchQueryPattern);
     }
@@ -51,9 +62,13 @@ public class SearchQueryPatternController {
             @RequestParam("id") SearchQueryPattern existingSearchQueryPattern,
             @RequestBody SearchQueryPattern newSearchQueryPattern) {
         if (existingSearchQueryPattern == null){
+            if(newSearchQueryPattern.getFormalErdiList() != null) {
+                newSearchQueryPattern.getFormalErdiList().forEach(searchQueryPatternContentJoin -> searchQueryPatternContentJoin.setSearchQueryPattern(newSearchQueryPattern));
+            }
             return searchQueryPatternRepo.save(newSearchQueryPattern);
         } else {
             existingSearchQueryPattern.setQueryPattern(newSearchQueryPattern.getQueryPattern());
+            newSearchQueryPattern.getFormalErdiList().forEach(searchQueryContentJoin -> searchQueryContentJoin.setSearchQueryPattern(existingSearchQueryPattern));
             update(existingSearchQueryPattern.getFormalErdiList(), newSearchQueryPattern.getFormalErdiList());
             if(existingSearchQueryPattern.getFormalErdiList() != null) {
                 //Так как one-to-many, нужно явно связать с родителем
@@ -122,16 +137,33 @@ public class SearchQueryPatternController {
         return customErdiViewRepository.findAllBySearchQueryPatterns(searchQueryPattern, page);
     }
 
-    private <T> void update(Set<T> existing, Set<T> changed) {
-        if (changed == null){
-            existing.clear();
+    @GetMapping("{id}/formal_erdi")
+    public Page<ObjectNode> getFormalErdiIds(@RequestParam(required = false) SortingDirection sortingDirection,
+                                             @RequestParam(required = false) String sortingColumn,
+                                             @RequestParam(defaultValue = "0") int pageNumber,
+                                             @RequestParam(defaultValue = "10") int pageSize,
+                                             @PathVariable("id") SearchQueryPattern searchQueryPattern) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize,
+                SortingHelper.createSorting(sortingDirection, sortingColumn));
+        if (searchQueryPattern != null) {
+            Page<SearchQueryPatternContentJoin> searchQueryPatternContentJoins =
+                    searchQueryPatternContentJoinRepo
+                            .findAllBySearchQueryPattern(searchQueryPattern, pageable);
+            List<Long> contentIds = searchQueryPatternContentJoins
+                    .stream()
+                    .map(SearchQueryPatternContentJoin::getContentId)
+                    .collect(Collectors.toList());
+            List<ObjectNode> erdiList = podWebClient.fetchErdi(contentIds);
+            return new PageImpl<>(erdiList, pageable, searchQueryPatternContentJoins.getTotalElements());
         } else {
-            existing.addAll(changed);
+            throw new AS_15_8_PPT_Exception("Not supported");
+        }
+    }
 
-            for (T t : existing) {
-                if (!changed.contains(t))
-                    existing.remove(t);
-            }
+    private <T> void update(Set<T> existing, Set<T> changed) {
+        existing.clear();
+        if (changed != null){
+            existing.addAll(changed);
         }
     }
 }
