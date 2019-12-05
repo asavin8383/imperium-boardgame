@@ -26,7 +26,7 @@
 											}
 										],
 										"url": {
-											"raw": "{{url}}/pod/erdi?",
+											"raw": "{{url}}/pod/erdi?resourceTypes=url",
 											"host": [
 												"{{url}}"
 											],
@@ -57,13 +57,12 @@
 												},
 												{
 													"key": "id",
-													"value": "75140",
+													"value": "7514",
 													"disabled": true
 												},
 												{
 													"key": "resourceTypes",
-													"value": "domain,url",
-													"disabled": true
+													"value": "url"
 												},
 												{
 													"key": "random",
@@ -72,12 +71,12 @@
 												},
 												{
 													"key": "resourceValue",
-													"value": "ki555.biz",
+													"value": "ki555",
 													"disabled": true
 												},
 												{
 													"key": "decisionOrgs",
-													"value": "ФСКН",
+													"value": "ФСКН,Генпрокуратура",
 													"disabled": true
 												},
 												{
@@ -87,17 +86,17 @@
 												},
 												{
 													"key": "categoryNames",
-													"value": "незаконный оборот наркотиков",
+													"value": "незаконный оборот наркотиков,Массовые мероприятия",
 													"disabled": true
 												},
 												{
 													"key": "violationNames",
-													"value": "Интернет-казино",
+													"value": "Интернет-казино,ЕГЭ",
 													"disabled": true
 												},
 												{
 													"key": "query",
-													"value": "сведения",
+													"value": "7514",
 													"disabled": true
 												}
 											]
@@ -214,6 +213,31 @@
 												"pod",
 												"erdi",
 												"infoTypeIds"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Получение отдельного ЕРДИ",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{url}}/pod/erdi/single?id=89825",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"pod",
+												"erdi",
+												"single"
+											],
+											"query": [
+												{
+													"key": "id",
+													"value": "89825"
+												}
 											]
 										}
 									},
@@ -723,7 +747,7 @@
 		"oauth2": [
 			{
 				"key": "accessToken",
-				"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqYWNrIiwicm9sZSI6IlJPTEVfT1BFUkFUT1IiLCJtYWlsIjoiIiwidXNlcl9uYW1lIjoiamFjayIsInNjb3BlIjpbInJlYWQiLCJ3cml0ZSJdLCJleHAiOjE1NzUzNTg5MjcsInVzZXJOYW1lIjoiamFjayIsImF1dGhvcml0aWVzIjpbIlJPTEVfT1BFUkFUT1IiXSwianRpIjoiZmM1NDRmNGMtMDkyMy00NjM0LWIyMTAtODU1ZWFiMDRlMTMxIiwiY2xpZW50X2lkIjoiYXMtMTUtOCIsInNlY29uZE5hbWUiOiIifQ.Ba73mGQwFpKsARVh6u4NG9WBT_RyNnAjH1tR3rD-pE5PaCG4jTVt6WsFdo1v3Ws45mpNvtCHDQfwdtxlCWTVBcH4RT3PV2lDQsrELYHaMCSZly0DXtosQ4-36dQ09jaPHIn6PlIAJnwf6pbT_4lw6gjM0e0mMwZGf_U89PQESIe00uMfl7FhtTjxEp2XUGSEUT_b0g9TWWwYgCuQyQMobw8PG3pGQaOR8I7frr-lff5iMlgs_c5WDr9CaFCpd6tRxDqU2ggey1Fm1onlYu8oxrzyBPl3BwKL4-SxNJ1h2iuQM145ExyoJ75Cc7eKqHkdQE0_JxZyc8aRTibzPPLk7A",
+				"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqYWNrIiwicm9sZSI6IlJPTEVfT1BFUkFUT1IsUk9MRV9GT1JNQUxfVEFTSyxST0xFX01BTkFHRV9GT1JNQUxfVEFTSyxST0xFX01BTkFHRV9BUlJBTkdFTUVOVCxST0xFX1BSRVBBUkFUSU9OX1RSQUZGSUMiLCJtYWlsIjoiIiwidXNlcl9uYW1lIjoiamFjayIsInNjb3BlIjpbInJlYWQiLCJ3cml0ZSJdLCJleHAiOjE1NzU2MjQxMTIsInVzZXJOYW1lIjoiamFjayIsImF1dGhvcml0aWVzIjpbIlJPTEVfTUFOQUdFX0FSUkFOR0VNRU5UIiwiUk9MRV9PUEVSQVRPUiIsIlJPTEVfUFJFUEFSQVRJT05fVFJBRkZJQyIsIlJPTEVfRk9STUFMX1RBU0siLCJST0xFX01BTkFHRV9GT1JNQUxfVEFTSyJdLCJqdGkiOiI3MTY1YmQwMi0xYjFmLTRiYjktODcxNC0yNzdhZjA3NTFlZjEiLCJjbGllbnRfaWQiOiJhcy0xNS04Iiwic2Vjb25kTmFtZSI6IiJ9.bFdRGH-jp-lCfJMjR8a6nqeKApqtBHMDBPJSAQ2n7YfoL_19hztrBCwYNt_qzbWtuRQfXAZ61PHN18Z29yU2ieKYcqONH2xKwkkGm76m3NjOsl3pY_kPiBRFld7X8h9fY13-pivUJG-1E3btKPAEh9ZmC7HRTYX385ni2ihAlzr0moFjM4DNvF5j0LDjSb5_VsMWc53q4uyJy5fviQNI5Quo4ioIHmJHGZTXLj1b-jnEufDmnO3rGNneba0IvXDKqINYX7gcah0jNtOteiBWvQnfHmJ5Wk6uOT1pZXTqYuJONOUuW4S4_BH0nV8olSbpFdCztrYwZedRZRYBsKU7YQ",
 				"type": "string"
 			},
 			{

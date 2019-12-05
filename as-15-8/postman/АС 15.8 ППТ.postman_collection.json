@@ -953,7 +953,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{url}}/erdi/formal?sortingDirection=ASC&sortingColumn=id&erdiTrafficUnitId=31&pageNumber=4&pageSize=10",
+									"raw": "{{url}}/erdi/formal?erdiTrafficUnitId=31",
 									"host": [
 										"{{url}}"
 									],
@@ -984,11 +984,13 @@
 										},
 										{
 											"key": "sortingDirection",
-											"value": "ASC"
+											"value": "ASC",
+											"disabled": true
 										},
 										{
 											"key": "sortingColumn",
-											"value": "id"
+											"value": "id",
+											"disabled": true
 										},
 										{
 											"key": "erdiTrafficUnitId",
@@ -996,11 +998,13 @@
 										},
 										{
 											"key": "pageNumber",
-											"value": "4"
+											"value": "4",
+											"disabled": true
 										},
 										{
 											"key": "pageSize",
-											"value": "10"
+											"value": "10",
+											"disabled": true
 										}
 									]
 								}
@@ -1699,21 +1703,6 @@
 						{
 							"name": "Получение списка фраз",
 							"request": {
-								"auth": {
-									"type": "oauth2",
-									"oauth2": [
-										{
-											"key": "accessToken",
-											"value": "{{token}}",
-											"type": "string"
-										},
-										{
-											"key": "addTokenTo",
-											"value": "header",
-											"type": "string"
-										}
-									]
-								},
 								"method": "GET",
 								"header": [],
 								"url": {
@@ -1779,7 +1768,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"phrase\": \"Кряк\",\n\t\"violationId\": 1\n}",
+									"raw": "{\n\t\"phrase\": \"Тест\",\n\t\"subtypeId\": 1\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -1926,7 +1915,7 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{url}}/traffic/search_query_patterns?pattern=$ERDI",
+									"raw": "{{url}}/traffic/search_query_patterns?",
 									"host": [
 										"{{url}}"
 									],
@@ -1957,7 +1946,8 @@
 										},
 										{
 											"key": "pattern",
-											"value": "$ERDI"
+											"value": "$ERDI",
+											"disabled": true
 										},
 										{
 											"key": "containsInTraffic",
@@ -2024,7 +2014,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"queryPattern\": \"Поиск нарушений\"\n}",
+									"raw": "{\n\t\"queryPattern\": \"Новый нарушений по выражению $EXPRESSION и ЕРДИ $ERDI\",\n\t\"customErdiList\": [{\"id\": 33}, {\"id\": 34}],\n\t\"searchPhrases\": [{\"id\": 7}, {\"id\": 8}],\n\t\"formalErdiList\": [{\"id\": 89825}, {\"id\": 75140}, {\"id\": 97587}]\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -2058,7 +2048,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"queryPattern\": \"Поиск других нарушений по выражению $EXPRESSION и ЕРДИ $ERDI\",\n\t\"customErdiList\": [{\"id\": 33}, {\"id\": 34}],\n\t\"searchPhrases\": [{\"id\": 7}, {\"id\": 8}],\n\t\"formalErdiList\": [{\"id\": 247862}, {\"id\": 247863}]\n}",
+									"raw": "{\n\t\"queryPattern\": \"Поиск этих и других нарушений по выражению $EXPRESSION и ЕРДИ $ERDI\",\n\t\"customErdiList\": [{\"id\": 33}, {\"id\": 34}],\n\t\"searchPhrases\": [{\"id\": 7}, {\"id\": 8}],\n\t\"formalErdiList\": [{\"id\": 75140}, {\"id\": 89825}]\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -2066,7 +2056,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{url}}/traffic/search_query_patterns?id=3",
+									"raw": "{{url}}/traffic/search_query_patterns?id=26",
 									"host": [
 										"{{url}}"
 									],
@@ -2077,7 +2067,7 @@
 									"query": [
 										{
 											"key": "id",
-											"value": "3"
+											"value": "26"
 										}
 									]
 								}
@@ -2090,7 +2080,7 @@
 								"method": "DELETE",
 								"header": [],
 								"url": {
-									"raw": "{{url}}/traffic/search_query_patterns?id=4",
+									"raw": "{{url}}/traffic/search_query_patterns?id=6",
 									"host": [
 										"{{url}}"
 									],
@@ -2101,7 +2091,7 @@
 									"query": [
 										{
 											"key": "id",
-											"value": "4"
+											"value": "6"
 										}
 									]
 								}
@@ -2133,7 +2123,7 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{url}}/traffic/search_query_patterns/5/search_prases",
+									"raw": "{{url}}/traffic/search_query_patterns/5/search_phrases",
 									"host": [
 										"{{url}}"
 									],
@@ -2141,7 +2131,47 @@
 										"traffic",
 										"search_query_patterns",
 										"5",
-										"search_prases"
+										"search_phrases"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Получение пользовательских ЕРДИ шаблона",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/traffic/search_query_patterns/9/custom_erdi",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"traffic",
+										"search_query_patterns",
+										"9",
+										"custom_erdi"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Получение ЕРДИ шаблона",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/traffic/search_query_patterns/5/formal_erdi",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"traffic",
+										"search_query_patterns",
+										"5",
+										"formal_erdi"
 									]
 								}
 							},
@@ -2218,13 +2248,13 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{url}}/traffic/70",
+							"raw": "{{url}}/traffic/59",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"traffic",
-								"70"
+								"59"
 							]
 						}
 					},
@@ -2292,13 +2322,13 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{url}}/traffic/53",
+							"raw": "{{url}}/traffic/69",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"traffic",
-								"53"
+								"69"
 							]
 						}
 					},
@@ -3062,7 +3092,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{url}}/arrangements/upload?id=1028",
+							"raw": "{{url}}/arrangements/upload?id=1030",
 							"host": [
 								"{{url}}"
 							],
@@ -3073,7 +3103,7 @@
 							"query": [
 								{
 									"key": "id",
-									"value": "1028"
+									"value": "1030"
 								}
 							]
 						}
@@ -3086,7 +3116,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{url}}/ppt/arrangements/checkUnits?id=502",
+							"raw": "{{url}}/ppt/arrangements/checkUnits?id=1030",
 							"host": [
 								"{{url}}"
 							],
@@ -3098,7 +3128,7 @@
 							"query": [
 								{
 									"key": "id",
-									"value": "502"
+									"value": "1030"
 								}
 							]
 						}
@@ -3285,7 +3315,7 @@
 		"oauth2": [
 			{
 				"key": "accessToken",
-				"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqYWNrIiwicm9sZSI6IlJPTEVfT1BFUkFUT1IiLCJtYWlsIjoiIiwidXNlcl9uYW1lIjoiamFjayIsInNjb3BlIjpbInJlYWQiLCJ3cml0ZSJdLCJleHAiOjE1NzUxODgzNTQsInVzZXJOYW1lIjoiamFjayIsImF1dGhvcml0aWVzIjpbIlJPTEVfT1BFUkFUT1IiXSwianRpIjoiNjM0ZTUwMDMtNDIwYy00ZDJkLTgzMjctYzcxODMyNTY2NmZlIiwiY2xpZW50X2lkIjoiYXMtMTUtOCIsInNlY29uZE5hbWUiOiIifQ.VHRXTmMqjFLUOE0GJNBnJD9HPUOyaFTwmOrwg1gjrtp1O6wtjYdoC_fQvOs4r-JqQPBpWTV3wbv0Ebt-AW8n4b0GHQWMIZZw8rxArv9GUCQSTjYCoN2HREEk_MBU-OpuP8D7PBRAW9lhIAZd4kR-OmHrilVzgYGZoKPYH-alIdZ1ch0mATLfPyxZNyOEgCUbVeriE33MMBg1Z4aJeoCWMk8Sd6dVdM4OpafoS_oqWKryvY3BF68QDhX45uF92P-0Ht4Vu4B1cSmuv6EZ_zdUtoVSzEbsMA6AcJafDOJFs33kYxFewOgzoAjGQLhGCrnq0SXlcoiGUJA2TpOR-y_FTw",
+				"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqYWNrIiwicm9sZSI6IlJPTEVfT1BFUkFUT1IsUk9MRV9GT1JNQUxfVEFTSyxST0xFX01BTkFHRV9GT1JNQUxfVEFTSyxST0xFX01BTkFHRV9BUlJBTkdFTUVOVCxST0xFX1BSRVBBUkFUSU9OX1RSQUZGSUMiLCJtYWlsIjoiIiwidXNlcl9uYW1lIjoiamFjayIsInNjb3BlIjpbInJlYWQiLCJ3cml0ZSJdLCJleHAiOjE1NzU2MjQxMTIsInVzZXJOYW1lIjoiamFjayIsImF1dGhvcml0aWVzIjpbIlJPTEVfTUFOQUdFX0FSUkFOR0VNRU5UIiwiUk9MRV9PUEVSQVRPUiIsIlJPTEVfUFJFUEFSQVRJT05fVFJBRkZJQyIsIlJPTEVfRk9STUFMX1RBU0siLCJST0xFX01BTkFHRV9GT1JNQUxfVEFTSyJdLCJqdGkiOiI3MTY1YmQwMi0xYjFmLTRiYjktODcxNC0yNzdhZjA3NTFlZjEiLCJjbGllbnRfaWQiOiJhcy0xNS04Iiwic2Vjb25kTmFtZSI6IiJ9.bFdRGH-jp-lCfJMjR8a6nqeKApqtBHMDBPJSAQ2n7YfoL_19hztrBCwYNt_qzbWtuRQfXAZ61PHN18Z29yU2ieKYcqONH2xKwkkGm76m3NjOsl3pY_kPiBRFld7X8h9fY13-pivUJG-1E3btKPAEh9ZmC7HRTYX385ni2ihAlzr0moFjM4DNvF5j0LDjSb5_VsMWc53q4uyJy5fviQNI5Quo4ioIHmJHGZTXLj1b-jnEufDmnO3rGNneba0IvXDKqINYX7gcah0jNtOteiBWvQnfHmJ5Wk6uOT1pZXTqYuJONOUuW4S4_BH0nV8olSbpFdCztrYwZedRZRYBsKU7YQ",
 				"type": "string"
 			},
 			{
@@ -3324,25 +3354,25 @@
 	],
 	"variable": [
 		{
-			"id": "6c86148e-9c19-4c3c-9bde-d04a4ac98ea3",
+			"id": "4fb617b9-1934-434a-a707-705dd36c9c47",
 			"key": "url",
 			"value": "http://localhost:15800",
 			"type": "string"
 		},
 		{
-			"id": "3613220e-ae96-44ab-9f14-c8b77e8bf8f1",
+			"id": "a0ef5cfb-e9eb-46a6-be09-d79988332d8b",
 			"key": "oper_token",
 			"value": "",
 			"type": "string"
 		},
 		{
-			"id": "ce582355-5e92-440f-b02a-3eed87925afc",
+			"id": "47039b47-7201-43c9-ae2d-85cc131e4d05",
 			"key": "test_url",
 			"value": "http://192.168.5.253:15800",
 			"type": "string"
 		},
 		{
-			"id": "0ab2eb06-91f1-42a7-9a42-269bb21ede4f",
+			"id": "2579faa5-ee7b-4c45-9569-2e8cd1be6ebb",
 			"key": "admin_token",
 			"value": "",
 			"type": "string"
