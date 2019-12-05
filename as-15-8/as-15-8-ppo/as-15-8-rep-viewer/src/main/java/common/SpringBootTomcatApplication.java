@@ -1,18 +1,13 @@
 package common;
 
-import model.soap.SoapOperation;
-import org.eclipse.birt.report.servlet.BirtEngineServlet;
-import org.eclipse.birt.report.servlet.ViewerServlet;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.*;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.web.context.WebApplicationContext;
 
-import javax.servlet.Servlet;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,7 +29,7 @@ public class SpringBootTomcatApplication extends SpringBootServletInitializer
 
     @Bean
     @Scope(value = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
-    public Map<String, SoapOperation> requests() {
+    public Map<String, Map<String, String>> requests() {
         return new HashMap<>();
     }
 }

@@ -142,8 +142,13 @@
             <resource>
                 <directory>src/main/webapp/webcontent</directory>
             </resource>
+            <resource>
+                <directory>src/main/webapp</directory>
+                <includes>
+                    <include>*.rptdesign</include>
+                </includes>
+            </resource>
         </resources>
     </build>
-
 
 </project>

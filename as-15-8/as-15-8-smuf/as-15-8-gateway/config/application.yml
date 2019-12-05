@@ -61,6 +61,9 @@ zuul:
     ppo:
       path: /ppo/**
       serviceId: report_scheduler
+    viewer:
+      path: /viewer/**
+      serviceId: birt-viewer
     report_generator:
       path: /report_generator/**
       serviceId: report_generator
