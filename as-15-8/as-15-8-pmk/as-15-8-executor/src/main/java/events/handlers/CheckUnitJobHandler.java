@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import robots.exceptions.Cancel_ExecutionException;
 import robots.exceptions.Captcha_ExecutionException;
 import robots.exceptions.ExecutionException;
+import robots.exceptions.Timeout_ExecutionException;
 import service.CheckUnitVerificationService;
 import service.CheckUnitVerificationServiceFactory;
 import service.impl.RobotsServiceImpl;
@@ -48,9 +49,6 @@ public class CheckUnitJobHandler {
                 ", offset: "+message.getHeaders().get(KafkaHeaders.OFFSET, Long.class));
         String verificationName = "";
 
-        Integer timeout = executorProperties.getExecutor().getTimeout();
-        timeout = timeout != null ? timeout : DEFAULT_EXECUTOR_TIMEOUT;
-
         try {
             verificationName = "jobID = " + message.getPayload().getJobID() +
                     " accessTool = " + message.getPayload().getAccessTool() +
@@ -62,10 +60,10 @@ public class CheckUnitJobHandler {
 
             ExecutionJobResult executionJobResult;
 
-            if (service instanceof RobotsServiceImpl && timeout >= 0){
+            if (service instanceof RobotsServiceImpl && getTimeout() >= 0){
                 executionJobResult = CompletableFuture
                         .supplyAsync(() -> service.run(message.getPayload()))
-                        .applyToEither(timeoutAfter(timeout, TimeUnit.SECONDS), (result) -> result)
+                        .applyToEither(timeoutAfter(getTimeout(), TimeUnit.SECONDS), (result) -> result)
                         .exceptionally(throwable -> {
                             if (throwable instanceof TimeoutException){
                                 if (service.isRunning()){
@@ -87,20 +85,22 @@ public class CheckUnitJobHandler {
                 te = te.getCause();
             }
 
-            if (te instanceof TimeoutException){
-                log.info("Проверка {}, остановлена по таймауту {} секунд",  message.getPayload().getJobID(), timeout);
-            }
-            else if(te instanceof Cancel_ExecutionException) {
-                log.info("Выполнение проверки остановлено: " + verificationName);
-            }
             try {
                 sendCheckJobErrorNotification(message.getPayload().getJobID(), message.getPayload().getCheckUnit().getContentId(), te);
             } catch (Exception sendEx) {
                 log.error("Ошибка при отправке сообщения с ошибкой при выполнении задания на проверку запрещенного ресурса: "+verificationName, sendEx);
             }
-            if(te instanceof Captcha_ExecutionException) {
+
+            if (te instanceof Timeout_ExecutionException){
+                log.info("Проверка {}, остановлена по таймауту {} секунд",  message.getPayload().getJobID(), getTimeout());
+            }
+            else if(te instanceof Cancel_ExecutionException) {
+                log.info("Выполнение проверки остановлено: " + verificationName);
+            }
+            else if(te instanceof Captcha_ExecutionException) {
                 log.warn("Выполнение проверки остановлено, обнаружена капча: " + verificationName);
-            } else if(te instanceof ExecutionException) {
+            }
+            else if(te instanceof ExecutionException) {
                 log.error("Выполнение проверки завершено с ошибкой: "+verificationName, te);
             }
             else {
@@ -109,10 +109,16 @@ public class CheckUnitJobHandler {
         }
     }
 
+    private int getTimeout(){
+        Integer timeout = executorProperties.getExecutor().getTimeout();
+        timeout = timeout != null ? timeout : DEFAULT_EXECUTOR_TIMEOUT;
+        return timeout;
+    }
+
     public <T> CompletableFuture<T> timeoutAfter(long timeout, TimeUnit unit) {
         CompletableFuture<T> result = new CompletableFuture<T>();
         ScheduledExecutorService timeoutService = Executors.newSingleThreadScheduledExecutor();
-        timeoutService.schedule(() -> result.completeExceptionally(new TimeoutException()), timeout, unit);
+        timeoutService.schedule(() -> result.completeExceptionally(new Timeout_ExecutionException()), timeout, unit);
         return result;
     }
 
@@ -141,6 +147,10 @@ public class CheckUnitJobHandler {
             notification.setErdiID(erdiId);
             if(cause instanceof Captcha_ExecutionException) {
                 notification.setCheckUnitStatus(CheckUnitJobResult.CAPTCHA_DETECTED);
+            }
+            else if(cause instanceof Timeout_ExecutionException) {
+                notification.setCheckUnitStatus(CheckUnitJobResult.INTERNAL_ERROR);
+                notification.setDescription("Работа робота остановлена по таймауту: " + getTimeout() + " сек.");
             } else {
                 notification.setCheckUnitStatus(CheckUnitJobResult.INTERNAL_ERROR);
                 StringWriter sw = new StringWriter();
