@@ -24,13 +24,13 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value = {AS_15_8_PPT_Exception.class})
     protected ResponseEntity<Object> handleAS_15_8_Exception(
             AS_15_8_PPT_Exception ex) {
-        AS_15_8_API_Error apiError = new AS_15_8_API_Error(HttpStatus.BAD_REQUEST.toString(), ex.getMessage());
+        AS_15_8_API_Error apiError = new AS_15_8_API_Error(HttpStatus.BAD_REQUEST.name(), ex.getMessage());
         return buildResponseEntity(apiError);
     }
 
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-        AS_15_8_API_Error apiError = new AS_15_8_API_Error(HttpStatus.BAD_REQUEST.toString(), ex.getMessage());
+        AS_15_8_API_Error apiError = new AS_15_8_API_Error(HttpStatus.BAD_REQUEST.name(), ex.getMessage());
         return buildResponseEntity(apiError);
     }
 

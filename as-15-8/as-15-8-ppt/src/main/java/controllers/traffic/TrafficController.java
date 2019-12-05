@@ -19,7 +19,7 @@ import services.traffic.TrafficService;
 @RestController
 @RequestMapping(path = "/traffic",
         produces = MediaType.APPLICATION_JSON_VALUE)
-@PreAuthorize("hasAnyRole('ROLE_OPERATOR','ROLE_ADMIN')")
+@PreAuthorize("hasRole('ROLE_PREPARATION_TRAFFIC')")
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Slf4j
 public class TrafficController {

@@ -9,7 +9,7 @@ import javax.transaction.Transactional;
 import java.util.List;
 
 @Repository
-public interface RobotRepository extends JpaRepository<Robot, Long>
+public interface RobotRepository extends JpaRepository<Robot, Long>, RobotRepositoryCustom
 {
     List<Robot> findByOrigName(String name);
 

@@ -39,6 +39,12 @@ public class SearchQueryPattern implements Serializable {
     @Column(nullable = false, unique = true)
     @JsonView(Views.Brief.class)
     @ToString.Include
+    private String name;
+
+    @NotNull
+    @Column(nullable = false)
+    @JsonView(Views.Brief.class)
+    @ToString.Include
     private String queryPattern;
 
     @ManyToMany
@@ -51,7 +57,7 @@ public class SearchQueryPattern implements Serializable {
     @OneToMany(mappedBy = "searchQueryPattern",
             cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private Set<SearchQueryContentJoin> formalErdiList;
+    private Set<SearchQueryPatternContentJoin> formalErdiList;
 
     @ManyToMany
     @JoinTable(schema = "portal", name = "search_query_patterns_search_phrases",

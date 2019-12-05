@@ -32,7 +32,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping(path="/formal_tasks", produces=MediaType.APPLICATION_JSON_VALUE)
-@PreAuthorize("hasAnyRole('ROLE_OPERATOR')")
+@PreAuthorize("hasAnyRole('ROLE_FORMAL_TASK')")
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Slf4j
 public class FormalTaskController {

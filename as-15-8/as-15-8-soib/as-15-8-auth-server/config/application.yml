@@ -7,6 +7,7 @@ ldap:
   source:
     url: ldap://192.168.1.52:389/
     base: OU=AS_15_8,DC=designdiv,DC=ecleasing,DC=ru
+    roles-ou: OU=roles
     userDn: sa
     password: 12345
     pooled: true

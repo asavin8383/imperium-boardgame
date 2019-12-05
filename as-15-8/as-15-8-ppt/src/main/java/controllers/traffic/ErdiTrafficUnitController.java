@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping(path = "/traffic/unit/erdi",
         produces = MediaType.APPLICATION_JSON_VALUE)
-@PreAuthorize("hasAnyRole('ROLE_OPERATOR','ROLE_ADMIN')")
+@PreAuthorize("hasRole('ROLE_MANAGE_ARRANGEMENT')")
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Slf4j
 public class ErdiTrafficUnitController {
