@@ -11,6 +11,7 @@
 <%@ page contentType="text/html; charset=utf-8" %>
 <%@ page session="false" buffer="none" %>
 <%@ page import="org.eclipse.birt.report.resource.BirtResources" %>
+<%@ page import="org.eclipse.birt.report.utility.ParameterAccessor" %>
 
 <%-----------------------------------------------------------------------------
 	Progress page
@@ -27,7 +28,7 @@
 <HTML>
 	<HEAD>
 		<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
-		<LINK REL="stylesheet" HREF="<%= request.getContextPath( ) + "/webcontent/birt/styles/style.css" %>" TYPE="text/css">
+		<LINK REL="stylesheet" HREF="<%= ParameterAccessor.getBaseURL( ) + "/webcontent/birt/styles/style.css" %>" TYPE="text/css">
 	</HEAD>
 	<BODY STYLE="background-color: #ECE9D8;">
 		<DIV ID="progressBar" ALIGN="center">
@@ -41,7 +42,7 @@
 				</TR>
 				<TR>
 					<TD ALIGN="center">
-						<IMG SRC="<%= request.getContextPath( ) + "/webcontent/birt/images/" + (rtl?"Loading_rtl":"Loading") + ".gif" %>" ALT="Progress Bar Image"/>
+						<IMG SRC="<%= ParameterAccessor.getBaseURL( ) + "/webcontent/birt/images/" + (rtl?"Loading_rtl":"Loading") + ".gif" %>" ALT="Progress Bar Image"/>
 					</TD>
 				</TR>
 			</TABLE>
