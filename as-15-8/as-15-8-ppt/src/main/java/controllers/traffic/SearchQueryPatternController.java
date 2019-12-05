@@ -67,6 +67,7 @@ public class SearchQueryPatternController {
             }
             return searchQueryPatternRepo.save(newSearchQueryPattern);
         } else {
+            existingSearchQueryPattern.setName(newSearchQueryPattern.getName());
             existingSearchQueryPattern.setQueryPattern(newSearchQueryPattern.getQueryPattern());
             newSearchQueryPattern.getFormalErdiList().forEach(searchQueryContentJoin -> searchQueryContentJoin.setSearchQueryPattern(existingSearchQueryPattern));
             update(existingSearchQueryPattern.getFormalErdiList(), newSearchQueryPattern.getFormalErdiList());
