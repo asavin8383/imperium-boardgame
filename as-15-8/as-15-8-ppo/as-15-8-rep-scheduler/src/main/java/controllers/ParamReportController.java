@@ -1,14 +1,12 @@
 package controllers;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import controllers.ex.ReportNotCreated;
 import controllers.ex.ReportNotFound;
 import controllers.utils.SortingDirection;
 import controllers.utils.SortingHelper;
 import lombok.RequiredArgsConstructor;
-import model.ParamReport;
-import model.ParamReportStat;
-import model.Report;
-import model.ReportStatus;
+import model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -54,13 +52,13 @@ public class ParamReportController
 
     @PreAuthorize("hasAnyRole('ROLE_OPERATOR')")
     @GetMapping("table/{rep_tp_id}")
+//    @JsonView(Views.Data.class)
     public Page<ParamReport> getSearchSystemPage(@PathVariable int rep_tp_id,
                                                  @RequestParam(required = false) SortingDirection sortingDirection,
                                                  @RequestParam(required = false) String sortingColumn,
                                                  @RequestParam(defaultValue = "0") int pageNumber,
                                                  @RequestParam(defaultValue = "10") int pageSize,
-                                                 @RequestParam(defaultValue = "" +
-                                                         "") String query) {
+                                                 @RequestParam(defaultValue = "") String query) {
 
         System.out.println("ParamReportController.getSearchSystemPage");
         System.out.println("query = " + query);
@@ -71,6 +69,7 @@ public class ParamReportController
 
     @PreAuthorize("hasAnyRole('ROLE_OPERATOR')")
     @GetMapping("data/{rep_id}")
+//    @JsonView(Views.Data.class)
     ResponseEntity<byte[]> getData(@PathVariable long rep_id) {
         Optional<ParamReport> res = paramReportRepository.findByRepId(rep_id);
         if (!res.isPresent()) throw new ReportNotFound();

@@ -35,4 +35,7 @@ public class ReportType
     @Column
     private String shrt_nm;
 
+    @Column
+    private String rptdesign;
+
 }
