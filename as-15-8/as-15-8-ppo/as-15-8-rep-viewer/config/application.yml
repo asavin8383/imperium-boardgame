@@ -4,19 +4,19 @@ server:
 logging:
   config: config/logback-spring.xml
 gateway.url: ${GATEWAY_URI:http://localhost:15880}
-eureka:
-  client:
-    fetchRegistry: false
-    serviceUrl:
-      defaultZone: ${gateway.url}/eureka
-    oauth2:
-      clientId: birt-viewer
-      clientSecret: 1q0p2w9o
-      grantType: client_credentials
-      accessTokenUri: ${gateway.url}/security/oauth/token
-  instance:
-    preferIpAddress: true
-    instanceId: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port}
+#eureka:
+#  client:
+#    fetchRegistry: false
+#    serviceUrl:
+#      defaultZone: ${gateway.url}/eureka
+#    oauth2:
+#      clientId: birt-viewer
+#      clientSecret: 1q0p2w9o
+#      grantType: client_credentials
+#      accessTokenUri: ${gateway.url}/security/oauth/token
+#  instance:
+#    preferIpAddress: true
+#    instanceId: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port}
 spring:
   application.name: birt-viewer
   main.allow-bean-definition-overriding: true

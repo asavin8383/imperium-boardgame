@@ -101,6 +101,12 @@ public class DBSaverFilter implements javax.servlet.Filter
         System.out.println("reportParams " + new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(params));
         System.out.println("rep_params " + params);
 
+        String dns = params.get("dont-save");
+        if (dns != null && (dns.equalsIgnoreCase("true") || dns.equalsIgnoreCase("yes"))) {
+            System.out.println("Do not save: " + dns);
+            return;
+        }
+
         String RPD = params.get("RPD");
         String RPFD = params.get("RPFD");
         String username = params.get("username");
