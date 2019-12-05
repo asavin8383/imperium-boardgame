@@ -70,10 +70,11 @@ public abstract class SeleniumRobot implements Robot {
 		} catch (CancellationException ex) {
 			throw new Cancel_ExecutionException(ex);
 		} catch (CompletionException ex) {
-			if(ex.getCause() instanceof ExecutionException)
-				throw ex;
+			Throwable e = ex.getCause() == null ? ex : ex.getCause();
+			if(e instanceof ExecutionException)
+				throw (ExecutionException)e;
 			else
-				throw new ExecutionException("Ошибка при выполнении робота", ex);
+				throw new ExecutionException("Ошибка при выполнении робота", e);
 		} finally {
 			currentExecutionFuture = null;
 		}
