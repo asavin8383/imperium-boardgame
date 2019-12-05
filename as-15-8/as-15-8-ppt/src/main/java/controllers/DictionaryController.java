@@ -22,7 +22,7 @@ import java.util.List;
  */
 @RestController
 @Slf4j
-@PreAuthorize("hasRole('ROLE_OPERATOR')")
+@PreAuthorize("hasRole('ROLE_DICTIONARY')")
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @RequestMapping(path = "/dict", produces = MediaType.APPLICATION_JSON_VALUE)
 public class DictionaryController {

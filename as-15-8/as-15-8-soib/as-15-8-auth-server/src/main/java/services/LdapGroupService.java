@@ -2,6 +2,7 @@ package services;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.ldap.core.AttributesMapper;
 import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.ldap.core.support.LdapContextSource;
@@ -22,6 +23,8 @@ public class LdapGroupService {
 
     private final LdapTemplate ldapTemplate;
     private String base;
+    @Value("${ldap.source.roles-ou}")
+    private String rolesOU;
 
     @PostConstruct
     private void init(){
@@ -39,7 +42,7 @@ public class LdapGroupService {
                 .query()
                 .where("objectClass")
                 .is("group")
-                .and("member").is("CN="+role+",OU=roles,"+base);
+                .and("member").is("CN="+role+"," + rolesOU + "," + base);
 
         List<GrantedAuthority> curMembers = ldapTemplate.search(ldapQuery,
                 (AttributesMapper<GrantedAuthority>) attributes -> {
