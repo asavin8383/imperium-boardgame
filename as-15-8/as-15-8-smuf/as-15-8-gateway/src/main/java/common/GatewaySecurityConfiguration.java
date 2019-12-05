@@ -28,6 +28,7 @@ public class GatewaySecurityConfiguration extends ResourceServerConfigurerAdapte
                     .antMatchers(HttpMethod.GET,
                             "/pod/erdi/single/**",
                             "/pod/erdi/checkUnits/**",
+                            "/viewer/**",
                             "/arrangements/checkUnits/**",
                             "/ppt/arrangements/checkUnits/**",
                             "/dispatcher/act/checkResult/**",

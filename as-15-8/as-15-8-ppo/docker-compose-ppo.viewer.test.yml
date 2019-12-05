@@ -10,7 +10,9 @@ services:
       GATEWAY_URI: http://192.168.5.50:15880
       TZ: "Europe/Moscow"
     ports:
-      - "8078:8080"
+      - "15814:15814"
+    volumes:
+      -  ~/as-15-8-ppo/rep-viewer/config:/config
     labels:
       collect_logs_with_filebeat: "true"
       decode_log_event_to_json_object: "true"
