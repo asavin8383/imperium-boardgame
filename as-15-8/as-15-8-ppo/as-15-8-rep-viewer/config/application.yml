@@ -1,6 +1,6 @@
 subsystem: PPO
-#server:
-#  port: 15814
+server:
+  port: 15814
 spring:
   autoconfigure:
     exclude:
