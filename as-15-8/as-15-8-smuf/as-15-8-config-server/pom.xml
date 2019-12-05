@@ -74,6 +74,12 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Model generator -->
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-jpamodelgen</artifactId>
+        </dependency>
+
         <!-- Lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
