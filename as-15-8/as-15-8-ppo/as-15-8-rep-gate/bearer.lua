@@ -2,24 +2,14 @@ local http = require "resty.http"
 local httpc = http.new()
 local jwt = require "resty.jwt"
 
--- first try to find JWT token as url parameter e.g. ?token=BLAH
--- next try to find JWT token as Cookie e.g. token=BLAH
-local   token = nil
--- try to find JWT token in Authorization header Bearer string
-    local auth_header = ngx.var.http_Authorization
-    if auth_header then
-        _, _, token = string.find(auth_header, "Bearer%s+(.+)")
-    end
-
-    local token2 = ngx.var.cookie_COOKIE_BEARER
-    if token2  == nil then
+    local   token = nil
+    local token_in_COOKIE = ngx.var.cookie_COOKIE_BEARER
+    if token_in_COOKIE  == nil then
+        token = ngx.var.arg_token
         ngx.header["Set-Cookie"] = "COOKIE_BEARER=" .. token .. "; path=/; HttpOnly"
     else
-       token=token2
+       token=token_in_COOKIE
     end
-
-
-
 
 -- finally, if still no JWT token, kick out an error and exit
 if token == nil then
@@ -48,7 +38,7 @@ local res, err = httpc:request_uri(gateway_url .. "/security/oauth/check_token",
  { method = "POST", query="token=" .. token, headers={authorization ="Basic YmlydC12aWV3ZXI6MXEwcDJ3OW8="}})
 
 if res.status ~= 200 then
-    ngx.status = ngx.HTTP_UNAUTHOR  ngx.log(ngx.WARN, res.reason)IZED
+    ngx.status = ngx.HTTP_UNAUTHORIZED  ngx.log(ngx.WARN, res.reason)
 
     ngx.header.content_type = "application/json; charset=utf-8"
     ngx.say("{\"error\": \"" .. res.reason .. "\",\"status\":" .. res.status .. "}")
