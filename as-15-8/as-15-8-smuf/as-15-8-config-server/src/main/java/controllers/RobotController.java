@@ -50,9 +50,9 @@ public class RobotController {
         return robotService.get(page);
     }
 
-    @PostMapping
+    @PostMapping(path = "{id}")
     @JsonView(Views.Brief.class)
-    public ResponseEntity<Robot> findById(@RequestParam("id") Long id){
+    public ResponseEntity<Robot> findById(@PathVariable Long id){
         return robotService.findById(id)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.badRequest().build());
