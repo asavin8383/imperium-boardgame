@@ -14,7 +14,7 @@ public class ConfigurationsService {
     private final ConfigurationRepository configurationRepository;
 
     public Configuration getOrCreate(Microservice microservice){
-        return configurationRepository.findByApplication(microservice.name())
+        return configurationRepository.findByApplication(microservice)
                 .orElseGet(() ->
                         configurationRepository.save(new Configuration(microservice)));
     }
