@@ -20,7 +20,7 @@ public class RobotService {
     private final RobotRepository robotRepository;
 
     public Page<Robot> get(Pageable pageable){
-        return robotRepository.findPage(pageable);
+        return robotRepository.findAll(pageable);
     }
 
     public Optional<Robot> findById(Long id){

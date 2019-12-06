@@ -43,7 +43,7 @@ public class RobotController {
     }
 
     @PostMapping(path = "{id}")
-    @JsonView(Views.Brief.class)
+    @JsonView(Views.Full.class)
     public ResponseEntity<Robot> findById(@PathVariable Long id){
         return robotService.findById(id)
                 .map(ResponseEntity::ok)

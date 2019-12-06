@@ -40,5 +40,6 @@ public class RobotProperty {
 
     @ManyToOne(optional=false)
     @JoinColumn(foreignKey = @ForeignKey(name = "robots_properties_robots_id_fk"))
+    @JsonIgnore
     private Robot robot;
 }
