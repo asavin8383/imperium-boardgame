@@ -38,7 +38,7 @@ public class ResultsController {
     private final ResultScreenShotRepo resultScreenShotRepo;
     private final NmapDetailResultRepo nmapDetailResultRepo;
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasRole('ROLE_VIEW_RESULT')")
     @GetMapping
     public Page<Result> findList(
             @RequestParam Long arrangementId,
@@ -59,7 +59,7 @@ public class ResultsController {
         }
     }
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasRole('ROLE_VIEW_RESULT')")
     @GetMapping("/completion")
     public int getCompletionPercent(@RequestParam Long arrangementId){
         return resultRepo.getCompletionPercent(arrangementId);
@@ -88,7 +88,7 @@ public class ResultsController {
                 .orElse(ResponseEntity.noContent().build());
     }
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasRole('ROLE_VIEW_RESULT')")
     @PostMapping(path = "/user_result", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> postUserResult(@RequestParam Long id, @RequestBody Map<String, String> userResult) {
     	return resultRepo.findById(id)
