@@ -22,13 +22,11 @@ public class Robot {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonIgnore
     @JsonView(Views.Brief.class)
     private Long id;
 
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @Column(nullable = true)
     @Convert(converter = AccessToolUnitConverter.class)
     @JsonView(Views.Brief.class)
     private AccessToolUnit accessTool;
@@ -56,6 +54,7 @@ public class Robot {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
+    @JsonView(Views.Brief.class)
     private RobotStatus status = RobotStatus.OUT_OF_WORK;
 
     @ToString.Exclude
@@ -64,6 +63,7 @@ public class Robot {
     @JoinTable(schema = "config", name = "robots_configurations",
             joinColumns = @JoinColumn(name = "robot_id", foreignKey = @ForeignKey(name = "robots_robots_configurations_id_fk")),
             inverseJoinColumns = @JoinColumn(name = "configuration_id", foreignKey = @ForeignKey(name = "configurations_robots_configurations_id_fk")))
+    @JsonIgnore
     private Set<Configuration> configurations;
 
     @ToString.Exclude

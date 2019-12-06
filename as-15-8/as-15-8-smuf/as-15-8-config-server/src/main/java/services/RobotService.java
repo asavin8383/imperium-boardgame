@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import repositories.RobotRepository;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -34,6 +35,8 @@ public class RobotService {
 
         robot.setName(newRobot.getName());
         robot.setAccessTool(newRobot.getAccessTool());
+        robot.setModificationDate(LocalDateTime.now());
+        robot.setStatus(newRobot.getStatus());
 
         robot.getRobotProperties().clear();
         newRobot.getRobotProperties().forEach(prop -> {
