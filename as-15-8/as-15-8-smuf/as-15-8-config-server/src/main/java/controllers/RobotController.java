@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import model.Robot;
 import model.Views;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
@@ -31,7 +32,7 @@ public class RobotController {
 
     @PostMapping
     @JsonView(Views.Brief.class)
-    public List<Robot> getAll(@RequestParam(required = false) SortingDirection sortingDirection,
+    public Page<Robot> getAll(@RequestParam(required = false) SortingDirection sortingDirection,
                               @RequestParam(required = false) String sortingColumn,
                               @RequestParam(defaultValue = "0") int pageNumber,
                               @RequestParam(defaultValue = "10") int pageSize) {
