@@ -43,14 +43,14 @@ public class ParamReportController
      *
      * @return
      */
-    @PreAuthorize("hasAnyRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasAnyRole('ROLE_FORMATION_PARAM_REPORT')")
     @GetMapping("stat")
     public List<ParamReportStat> getStat() {
         return paramReportStatRepository.findAll();
     }
 
 
-    @PreAuthorize("hasAnyRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasAnyRole('ROLE_FORMATION_PARAM_REPORT')")
     @GetMapping("table/{rep_tp_id}")
 //    @JsonView(Views.Data.class)
     public Page<ParamReport> getSearchSystemPage(@PathVariable int rep_tp_id,
@@ -67,7 +67,7 @@ public class ParamReportController
 
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasAnyRole('ROLE_FORMATION_PARAM_REPORT')")
     @GetMapping("data/{rep_id}")
 //    @JsonView(Views.Data.class)
     ResponseEntity<byte[]> getData(@PathVariable long rep_id) {

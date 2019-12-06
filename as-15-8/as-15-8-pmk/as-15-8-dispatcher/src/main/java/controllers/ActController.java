@@ -41,7 +41,7 @@ public class ActController {
     private DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
     @GetMapping(path = "/create")
-    @PreAuthorize("hasAnyRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasAnyRole('ROLE_SEND_ACT_BY_HAND')")
     public ResponseEntity<Void> createAct(Long arrangementId){
         boolean created = actService.createAct(arrangementId);
         return new ResponseEntity<>(created ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR);

@@ -6,6 +6,7 @@ import enums.Dictionary;
 import model.projection.DictionaryView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,7 +17,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping(path = "/dict", produces = MediaType.APPLICATION_JSON_VALUE)
-//@PreAuthorize("hasAnyRole('ROLE_OPERATOR','ROLE_ADMIN')")
+@PreAuthorize("hasRole('ROLE_MANAGE_DICT')")
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Slf4j
 public class DictionaryController {
