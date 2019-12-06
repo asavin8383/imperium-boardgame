@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "f9755d56-045d-4377-b89e-a3cdf6e10195",
+		"_postman_id": "bf104fc6-53a5-4b20-adb2-957a6999a461",
 		"name": "АС 15.8 ПМК",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -149,6 +149,108 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Получение ошибки",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": ""
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Запрос из PS",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": ""
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Запрос из PASD",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": ""
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Запрос % выполнения",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": ""
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Запрос user result",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[{\"key1\":\"val1\"};{\"key1\":\"val1\"}]"
+						},
+						"url": {
+							"raw": "{{url}}/dispatcher/results/user_result?Id=1015",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"dispatcher",
+								"results",
+								"user_result"
+							],
+							"query": [
+								{
+									"key": "Id",
+									"value": "1015"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "e8ec00f3-063c-4040-9301-daa1bd5d1771",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "6aff94c2-ce5f-4031-b009-65ef7c9eac7a",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
 				}
 			],
 			"protocolProfileBehavior": {}
@@ -159,7 +261,7 @@
 		"oauth2": [
 			{
 				"key": "accessToken",
-				"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqYWNrIiwicm9sZSI6IlJPTEVfT1BFUkFUT1IiLCJtYWlsIjoiIiwidXNlcl9uYW1lIjoiamFjayIsInNjb3BlIjpbInJlYWQiLCJ3cml0ZSJdLCJleHAiOjE1NzQ4NDk5ODEsInVzZXJOYW1lIjoiamFjayIsImF1dGhvcml0aWVzIjpbIlJPTEVfT1BFUkFUT1IiXSwianRpIjoiNDMxNDBiZTQtYTYxOS00NjRhLThiNTctZTQyODdkYmMxMTUwIiwiY2xpZW50X2lkIjoiYXMtMTUtOCIsInNlY29uZE5hbWUiOiIifQ.TAV4nHltuJLe27BS9S4n_9nSOgHP51981314jR-_VaeW5pNW2j5JZrnKKQnH-Y9Q4fym54Cc1TA5W5OIcHpYry4x5lVMy-6kfsa6ZRCdfilvFiWiWNiWTLpqy0T36aROQFIl8YyjtHhHGYokP6md1qsV4B7kSZbmXHCE4mHuSkyxjYP-NZkO95a3zVGb2MoFTQcen-tyf47USIzHtWeZxkT0iMst23UnaXvN2U25NqYGp9uKItuzudnrYjVi2B1dYrKaG9INkbaAgPxilzhoyq25MOgnepE1_W693tgb-X7l8gpEatiJ3KgnCWxMxUPFxkJse2SDinYXPiAlM2WW5w",
+				"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqb2huIiwicm9sZSI6IlJPTEVfT1BFUkFUT1JfVEVTVCxST0xFX0ZPUk1BTF9UQVNLLFJPTEVfTUFOQUdFX0ZPUk1BTF9UQVNLLFJPTEVfTUFOQUdFX0FSUkFOR0VNRU5ULFJPTEVfUFJFUEFSQVRJT05fVFJBRkZJQyxST0xFX0RJQ1RJT05BUlksUk9MRV9GT1JNQVRJT05fT0ZfU0hFRFVMRSxST0xFX1ZJRVdfUkVTVUxUIiwibWFpbCI6IiIsInVzZXJfbmFtZSI6ImpvaG4iLCJzY29wZSI6WyJyZWFkIiwid3JpdGUiXSwiZXhwIjoxNTc1NzAyNzkyLCJ1c2VyTmFtZSI6ImpvaG4iLCJhdXRob3JpdGllcyI6WyJST0xFX0RJQ1RJT05BUlkiLCJST0xFX09QRVJBVE9SX1RFU1QiLCJST0xFX1BSRVBBUkFUSU9OX1RSQUZGSUMiLCJST0xFX01BTkFHRV9GT1JNQUxfVEFTSyIsIlJPTEVfTUFOQUdFX0FSUkFOR0VNRU5UIiwiUk9MRV9GT1JNQVRJT05fT0ZfU0hFRFVMRSIsIlJPTEVfVklFV19SRVNVTFQiLCJST0xFX0ZPUk1BTF9UQVNLIl0sImp0aSI6IjE4NjMyYjM1LWZiNWUtNDE0OS05YjUwLTRhMzU4ZGQ2MGRjMyIsImNsaWVudF9pZCI6ImFzLTE1LTgiLCJzZWNvbmROYW1lIjoiIn0.T1jkGkw4qlHnXy9fPfesFmk0S25yPZO9f5tvrRf6tzibdrRIcLmmgrJV28HAtyVGRogPHVYT3lF3qcM--9UNqPkUsrzJNHPRpB6nEFmXtd9eyNCvGtDWyfvlomS1Tdhs4Vvp67TJgqEVe0VN3k8euYuCWYNyu6tibcXui2JvshQ8gfG7D35jNrLt1iPv7Ew5ZWuPcJo5HF3_WSmoaodx4LsgZOHovExJoTkAKxrhqU6kMXYe6nuwYODyOI5J1zvMTjaE_SkzDvGQmINHl2HvzS3Zfji7nQZfJzsJ_K6cL7H5X49NObyeinhd839aza3XD7Z50Viqx_5v73s1JpzxaQ",
 				"type": "string"
 			},
 			{
