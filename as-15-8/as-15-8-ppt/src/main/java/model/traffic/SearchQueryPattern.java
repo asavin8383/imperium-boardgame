@@ -1,5 +1,6 @@
 package model.traffic;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -11,6 +12,7 @@ import model.Views;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -30,7 +32,7 @@ public class SearchQueryPattern implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonView(Views.Id.class)
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    //@JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @ToString.Include
     @EqualsAndHashCode.Include
     private Long id;
@@ -65,4 +67,17 @@ public class SearchQueryPattern implements Serializable {
             inverseJoinColumns = @JoinColumn(name = "search_phrase_id"))
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Set<SearchPhrase> searchPhrases;
+
+    @ManyToMany(mappedBy = "searchQueryPatterns")
+    @JsonIgnore
+    private List<SearchQueryTrafficUnit> searchQueryTrafficUnits;
+
+    @JsonView(Views.Brief.class)
+    public int getRowCount(){
+        return
+            (customErdiList == null ? 0 : customErdiList.size()) +
+            (formalErdiList == null ? 0 : formalErdiList.size()) +
+            (searchPhrases == null ? 0 : searchPhrases.size());
+
+    }
 }
