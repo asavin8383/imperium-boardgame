@@ -30,7 +30,7 @@ public class DetailsController {
     private final NmapDetailResultRepo nmapDetailResultRepo;
     private final ErrorDetailResultRepo errorDetailResultRepo;
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasRole('ROLE_VIEW_RESULT')")
     @GetMapping("/pasd")
     public ResponseEntity<PasdDetailResult> getPasdDetails(@RequestParam Long id){
         return pasdDetailResultRepo.findById(id)
@@ -38,7 +38,7 @@ public class DetailsController {
                 .orElse(ResponseEntity.noContent().build());
     }
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasRole('ROLE_VIEW_RESULT')")
     @GetMapping(path = "/ps")
     public ResponseEntity<PsDetailResult> getPsDetails(@RequestParam Long id) {
         return psDetailResultRepo.findById(id)
@@ -46,7 +46,7 @@ public class DetailsController {
                 .orElse(ResponseEntity.noContent().build());
     }
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasRole('ROLE_VIEW_RESULT')")
     @GetMapping(path = "/nmap")
     public ResponseEntity<NmapDetailResult> getNmapDetails(@RequestParam Long id) {
         return nmapDetailResultRepo.findById(id)
@@ -54,7 +54,7 @@ public class DetailsController {
                 .orElse(ResponseEntity.noContent().build());
     }
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasRole('ROLE_VIEW_RESULT')")
     @GetMapping(path = "/error")
     public ResponseEntity<ErrorDetailResult> getErrorDetails(@RequestParam Long id) {
         return errorDetailResultRepo.findById(id)

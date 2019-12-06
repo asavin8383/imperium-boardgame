@@ -1,21 +1,26 @@
 package controllers.traffic;
 
+import controllers.helpers.SortingHelper;
+import enums.SortingDirection;
 import exceptions.AS_15_8_PPT_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.enums.TrafficUnitType;
+import model.traffic.SearchQueryPattern;
 import model.traffic.SearchQueryTrafficUnit;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import repositories.SearchPhraseRepository;
+import repositories.SearchQueryPatternRepo;
 import repositories.SearchQueryTrafficUnitRepository;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @RestController
 @RequestMapping(path = "/traffic/unit/query",
@@ -26,12 +31,7 @@ import java.util.Set;
 public class SearchQueryTrafficUnitController {
 
     private final SearchQueryTrafficUnitRepository searchQueryTrafficUnitRepository;
-    private final SearchPhraseRepository searchPhraseRepository;
-
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    private SearchQueryTrafficUnit createTemplate(@RequestBody SearchQueryTrafficUnit unit) {
-        return searchQueryTrafficUnitRepository.save(unit);
-    }
+    private final SearchQueryPatternRepo searchQueryPatternRepo;
 
     @GetMapping(path = "/{id}")
     public SearchQueryTrafficUnit getTemplate(@PathVariable Long id) {
@@ -47,27 +47,15 @@ public class SearchQueryTrafficUnitController {
         }
     }
 
-    /*@PutMapping(path = "/{id}")
+    @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public SearchQueryTrafficUnit updateTemplate(@PathVariable("id") SearchQueryTrafficUnit existing,
-                                                 @RequestBody SearchQueryTrafficUnit changed) {
-        existing.setQueryPattern(changed.getQueryPattern());
-        update(existing.getFormalErdiList(), changed.getFormalErdiList());
-        update(existing.getCustomErdiList(), changed.getCustomErdiList());
-        update(existing.getSearchPhrases(), changed.getSearchPhrases());
-        return searchQueryTrafficUnitRepository.save(existing);
-    }*/
-
-    private <T> void update(Set<T> existing, Set<T> changed) {
-        if (changed == null){
-            existing.clear();
-        } else {
-            existing.addAll(changed);
-
-            for (T t : existing) {
-                if (!changed.contains(t))
-                    existing.remove(t);
-            }
+                                                 @RequestBody List<SearchQueryPattern> searchQueryPatterns) {
+        if(existing==null){
+            throw new AS_15_8_PPT_Exception("Ошибка изменения трафик-юнита шаблонов! трафик-юнит не найден в БД");
         }
+        existing.getSearchQueryPatterns().clear();
+        existing.setSearchQueryPatterns(new HashSet<>(searchQueryPatterns));
+        return searchQueryTrafficUnitRepository.save(existing);
     }
 
     @DeleteMapping(path = "/{id}")
@@ -86,28 +74,19 @@ public class SearchQueryTrafficUnitController {
         }
     }
 
-    /*@PutMapping(path = "/{id}/add", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public void addSearchPhrases(@PathVariable("id") SearchQueryTrafficUnit unit, @RequestBody List<Long> phraseIds) {
-        if (unit == null)
-            throw new AS_15_8_PPT_Exception("SearchQueryTrafficUnit not found");
-        if (unit.getType() != TrafficUnitType.PHRASE)
-            throw new AS_15_8_PPT_Exception("Cannot add phrases to SearchQueryTrafficUnit with id=" + unit.getId());
-
-        unit.getSearchPhrases().addAll(
-                searchPhraseRepository.findAllById(phraseIds));
-        searchQueryTrafficUnitRepository.save(unit);
+    @GetMapping(path = "/{id}/search_query_patterns")
+    public Page<SearchQueryPattern> getTrafficUnitPatterns(
+            @PathVariable("id") SearchQueryTrafficUnit searchQueryTrafficUnit,
+            @RequestParam(required = false) SortingDirection sortingDirection,
+            @RequestParam(required = false) String sortingColumn,
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize){
+        if (searchQueryTrafficUnit == null) {
+            throw new AS_15_8_PPT_Exception("Ошибка получения шаблонов трафик-юнита! Трафик-юнит не найден в БД");
+        }
+        PageRequest page = PageRequest.of(
+                pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
+        return searchQueryPatternRepo.findAllBySearchQueryTrafficUnits(searchQueryTrafficUnit, page);
     }
-
-    @PutMapping(path = "/{id}/remove", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public void removeCustomErdi(@PathVariable("id") SearchQueryTrafficUnit unit, @RequestBody List<Long> phraseIds) {
-        if (unit == null)
-            throw new AS_15_8_PPT_Exception("SearchQueryTrafficUnit not found");
-        if (unit.getType() != TrafficUnitType.PHRASE)
-            throw new AS_15_8_PPT_Exception("Cannot remove phrases from SearchQueryTrafficUnit with id=" + unit.getId());
-
-        unit.getSearchPhrases().removeAll(
-                searchPhraseRepository.findAllById(phraseIds));
-        searchQueryTrafficUnitRepository.save(unit);
-    }*/
 
 }

@@ -1,0 +1,156 @@
+{
+	"info": {
+		"_postman_id": "6d5bb57d-fa3b-4b6d-b75f-d9efcc33067a",
+		"name": "АС 15.8 Конфиг",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "executor",
+			"item": [
+				{
+					"name": "Получение конфигурации с сервера",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/config/executor/default/latest",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"config",
+								"executor",
+								"default",
+								"latest"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Обновление конфигурации",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJBU18xNV84X2FkbWluIiwicm9sZSI6IlJPTEVfQURNSU4iLCJtYWlsIjoiYWRtaW5AYWRtaW4uYWRtIiwidXNlcl9uYW1lIjoiQVNfMTVfOF9hZG1pbiIsInNjb3BlIjpbInJlYWQiLCJ3cml0ZSJdLCJleHAiOjE1NzM2MjgwMzAsInVzZXJOYW1lIjoiQVNfMTVfOF9hZG1pbiIsImF1dGhvcml0aWVzIjpbIlJPTEVfQURNSU4iXSwianRpIjoiYzM0NGY3OGMtMjZkNC00MDE3LWFkNjctZjA3YjRlMWE1NzdjIiwiY2xpZW50X2lkIjoiYXMtMTUtOCIsInNlY29uZE5hbWUiOiJ0ZXN0X2FkbWluIn0.eZoeL1GnlGpYdBwYzfWKysc-WjtFFoFZEAYWSMpb70Tp_Y3yPVpPbkaa0CVrOoWM-5bmcQsN2BXm3UAFHrAZmnc1VjoOS6f9RYGYBKcM8weYWyxnF5B7J-FcL2G7XHQChrepwswpEETfDqUwl7qLNfH57qMrnIb37QgmZK4W_dZj7y17sT0ZMHbTup3xEJG3O92RvyhAlbSB2qB-SmSTWO-dq1FZtB33H1P4BtH1Dprw4S3U9jtOVcifzqr3XrI8UMEmEXgSKNRy9RVTeaGSK0nqVUmFpcp6hQ3xWqNOIE1stzyopTKVxnmb0yaCP8JpdRiNHG87hFOcBuMnP5Fk3A",
+									"type": "string"
+								},
+								{
+									"key": "tokenType",
+									"value": "bearer",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/config/actuator/bus-refresh/ppm",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"config",
+								"actuator",
+								"bus-refresh",
+								"ppm"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Получение списка роботов",
+			"request": {
+				"auth": {
+					"type": "oauth2",
+					"oauth2": [
+						{
+							"key": "accessToken",
+							"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqYWNrIiwicm9sZSI6IlJPTEVfT1BFUkFUT1IiLCJtYWlsIjoiamFja0BqYWNrc29uLnJ1IiwidXNlcl9uYW1lIjoiamFjayIsInNjb3BlIjpbInJlYWQiLCJ3cml0ZSJdLCJleHAiOjE1NzM2NDYwNTQsInVzZXJOYW1lIjoiamFjayIsImF1dGhvcml0aWVzIjpbIlJPTEVfT1BFUkFUT1IiXSwianRpIjoiOWQyOGIxZmEtNmU5Ny00YTA5LThkM2ItYjQzN2MxNTQxZGYxIiwiY2xpZW50X2lkIjoiYXMtMTUtOCIsInNlY29uZE5hbWUiOiJqYWNrc29uIn0.ZXoJdbSkgGIzki8OU50uzhcUVYdmaOwEMH6AGdKNkZYoO86fbPIpF9pr6jUctIWAwZNB3Eo9GekAIeQm8mXY_IwVQNEyfprZoBI4ohyMh15bSVyu1xj5me2GJ2rBRPBJmkMLIqVDO7TgW9rK54IYZ2PneaNMbAJOLJWC2QLPi4sa6L7IewT8aQvvz8YxsIyULFfN1WUX6Q3VDy7Gbo2lHZcaHTBQ7odKWchcQgpQjaGaw-O7e5VyqX5vpQC1sgL_jJktkXN2NbRlN6MOFp2FAd5s2_YPBQMhDdCbFM49-QZVrwqjEF4hArBQ2P1CMJJ1ENA-2_rlUBs6mRvIf92EDQ",
+							"type": "string"
+						},
+						{
+							"key": "tokenType",
+							"value": "bearer",
+							"type": "string"
+						},
+						{
+							"key": "addTokenTo",
+							"value": "header",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/config/access_tools",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"config",
+						"access_tools"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "oauth2",
+		"oauth2": [
+			{
+				"key": "accessToken",
+				"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJyb2xlIjoiUk9MRV9TWVNURU0sUk9MRV9DT05GSUdfQ0xJRU5UIiwic2NvcGUiOlsicmVhZCIsIndyaXRlIl0sImV4cCI6MTU3MzYyNzg1NSwiYXV0aG9yaXRpZXMiOlsiUk9MRV9TWVNURU0iLCJST0xFX0NPTkZJR19DTElFTlQiXSwianRpIjoiYmQ5M2YyNWItNzk5Yy00NGE0LWEzNmQtZWQzMWQxZjUzZDE5IiwiY2xpZW50X2lkIjoiZXhlY3V0b3IifQ.d_jw8REowvKemEMQNMLuoF5y55bdFRuSXzJJDY69V04DbCLW0x8F7l7WxBuDcYXZod1ylU6v5h6kcL-jPFYw7LZgGkZu-KWq6DKBwJLB7Kd7XQKitg_ZyOoUjlZsSwX8Cv9PopFB7_GnJ2r7EBS_XG7GjMtsiXuRqhwKiw-cuqplk5tARjx307O2Uemy7FWNHDpqTW0sqa0HVhMM3yIWWQWo4uRG7R1U3DpFfTX1uB-mtQnFWl75hnU9lIF26XwZa1qmV3oK_s-lMXjwEXcZ9DRJlbQoEcbj3DY3ls0v18IJ01K7fLhost-G-yQSRbmWKcuMSb4dlwWXriFh6vAF7g",
+				"type": "string"
+			},
+			{
+				"key": "tokenType",
+				"value": "bearer",
+				"type": "string"
+			},
+			{
+				"key": "addTokenTo",
+				"value": "header",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "93852045-2391-4d0c-bd91-c3cf5152e89a",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "270ca6a5-b3f8-4f88-a192-2a9d75c58c06",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"protocolProfileBehavior": {}
+}

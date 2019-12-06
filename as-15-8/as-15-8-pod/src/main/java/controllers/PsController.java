@@ -76,10 +76,9 @@ public class PsController {
         try {
             psRestClient.readFromNet();
         }catch (Exception ex){
-            log.error("Ошибка загрузки справочника ПС: " + ex.getMessage());
+            log.error("Ошибка загрузки справочника ПС", ex);
         }
         state = UploadingState.ACTIVE;
-
     }
 
 }

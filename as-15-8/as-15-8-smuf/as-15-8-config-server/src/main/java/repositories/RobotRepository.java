@@ -11,6 +11,8 @@ import java.util.List;
 @Repository
 public interface RobotRepository extends JpaRepository<Robot, Long>, RobotRepositoryCustom
 {
+    List<Robot> findAllByType(RobotType type);
+
     List<Robot> findByOrigName(String name);
 
     List<Robot> findByName(String name);

@@ -1,6 +1,7 @@
 package repositories;
 
 import model.traffic.SearchQueryPattern;
+import model.traffic.SearchQueryTrafficUnit;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,4 +16,6 @@ import org.springframework.stereotype.Repository;
 public interface SearchQueryPatternRepo extends JpaRepository<SearchQueryPattern, Long> {
 
     Page<SearchQueryPattern> findAllByQueryPatternContaining(String pattern, Pageable pageable);
+
+    Page<SearchQueryPattern> findAllBySearchQueryTrafficUnits(SearchQueryTrafficUnit searchQueryTrafficUnit, Pageable pageable);
 }
