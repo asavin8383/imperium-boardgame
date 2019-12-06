@@ -12,7 +12,7 @@ import model.RobotType;
 @Data
 public class PS
 {
-    Long id;
+    Long origId;
     String name;
     String hostname;
 
