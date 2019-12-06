@@ -23,7 +23,7 @@ public class AccessToolController {
     private final RobotRepository robotRepository;
 
     @PostMapping("/access_tools")
-    @PreAuthorize("hasAnyRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasAnyRole('ROLE_MANAGE_ARRANGEMENT')")
     @JsonView(Views.AccessTool.class)
     public List<Robot> getAccessTools(){
         return robotRepository.findAll();
