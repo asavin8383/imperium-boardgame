@@ -33,7 +33,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping(path = "/arrangements", produces = MediaType.APPLICATION_JSON_VALUE)
-@PreAuthorize("hasAnyRole('ROLE_OPERATOR','ROLE_ADMIN')")
+@PreAuthorize("hasRole('ROLE_MANAGE_ARRANGEMENT')")
 @RequiredArgsConstructor(onConstructor_={@Autowired})
 @Slf4j
 public class ArrangementController {

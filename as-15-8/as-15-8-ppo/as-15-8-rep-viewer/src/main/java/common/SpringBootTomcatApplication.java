@@ -1,6 +1,6 @@
 package common;
 
-import model.soap.SoapOperation;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
@@ -21,11 +21,15 @@ import java.util.Map;
 @EnableJpaRepositories("repositories")
 @EntityScan("model")
 @Configuration
-public class SpringBootTomcatApplication extends SpringBootServletInitializer
+public class SpringBootTomcatApplication
 {
+    public static void main(String[] args) {
+        SpringApplication.run(SpringBootTomcatApplication.class, args);
+    }
+
     @Bean
     @Scope(value = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
-    public Map<String, SoapOperation> requests() {
+    public Map<String, Map<String, String>> requests() {
         return new HashMap<>();
     }
 }

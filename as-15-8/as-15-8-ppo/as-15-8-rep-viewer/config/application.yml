@@ -1,24 +1,24 @@
 subsystem: PPO
 server:
-  port: 15812
+  port: 15814
 logging:
   config: config/logback-spring.xml
 gateway.url: ${GATEWAY_URI:http://localhost:15880}
-eureka:
-  client:
-    fetchRegistry: false
-    serviceUrl:
-      defaultZone: ${gateway.url}/eureka
-    oauth2:
-      clientId: report_scheduler
-      clientSecret: 1q0p2w9o
-      grantType: client_credentials
-      accessTokenUri: ${gateway.url}/security/oauth/token
-  instance:
-    preferIpAddress: true
-    instanceId: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port}
+#eureka:
+#  client:
+#    fetchRegistry: false
+#    serviceUrl:
+#      defaultZone: ${gateway.url}/eureka
+#    oauth2:
+#      clientId: birt-viewer
+#      clientSecret: 1q0p2w9o
+#      grantType: client_credentials
+#      accessTokenUri: ${gateway.url}/security/oauth/token
+#  instance:
+#    preferIpAddress: true
+#    instanceId: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port}
 spring:
-  application.name: report_scheduler
+  application.name: birt-viewer
   main.allow-bean-definition-overriding: true
   liquibase:
     enabled: true
@@ -28,8 +28,8 @@ spring:
     validation-query: SELECT 1;
     time-between-eviction-runs-millis: 300000
     max-active: 5
-    username: as_user
-    password: as_user
+    username: ${DATABASE_USR:as_user}
+    password: ${DATABASE_PWD:as_user}
   jpa:
     properties:
       hibernate:
@@ -38,21 +38,16 @@ spring:
             non_contextual_creation: true
         format_sql: true
     databasePlatform: org.hibernate.dialect.PostgreSQL9Dialect
-app:
-  birt.url: ${gateway.url}/report_generator
-  schedule: '5 0 * * * ?'
-  sql:
-    refresh-dm: select dm.update_at()
-    # Вызывается перед запуском всех отчетов, без параметра
-    before-all:
-    # Вызывается перед запуском каждлго отчета, параметр -- rep_id из таблицы
-    before-each: select dm.update_reports_data(?)
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration
 security:
   oauth2:
     resource:
       tokenInfoUri: ${gateway.url}/security/oauth/check_token
     client:
-      clientId: report_scheduler
+      clientId: birt-viewer
       clientSecret: 1q0p2w9o
       grantType: client_credentials
       accessTokenUri: ${gateway.url}/security/oauth/token
@@ -63,7 +58,7 @@ spring:
   profiles: prod
   profiles.include: docker_log
   datasource:
-    url: jdbc:postgresql://10.97.220.144:5432/asdb
+    url: jdbc:postgresql://10.97.220.144:5432/asdb?stringtype=unspecified
   liquibase:
     enabled: true
   main:
@@ -77,7 +72,7 @@ spring:
   profiles: test
   profiles.include: docker_log
   datasource:
-    url: jdbc:postgresql://192.168.5.195:5432/asdb
+    url: jdbc:postgresql://192.168.5.195:5432/asdb?stringtype=unspecified
   liquibase:
     enabled: true
   main:
@@ -104,7 +99,7 @@ spring:
   profiles: dev_asin
   profiles.include: local_log
   datasource:
-    url: jdbc:postgresql://192.168.5.195:5432/asdb_test
+    url: ${DATABASE_URI:jdbc:postgresql://192.168.5.195:5432/asdb_test?stringtype=unspecified}
   liquibase:
     enabled: false
 app:

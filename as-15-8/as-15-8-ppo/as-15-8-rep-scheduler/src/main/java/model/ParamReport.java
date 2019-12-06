@@ -1,5 +1,6 @@
 package model;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Data;
 import lombok.ToString;
 
@@ -42,6 +43,7 @@ public class ParamReport
 
     @ToString.Exclude
     @Column
+    @JsonView(Views.Data.class)
     private byte[] data;
 
 }

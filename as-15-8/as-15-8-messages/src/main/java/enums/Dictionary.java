@@ -7,7 +7,8 @@ public enum Dictionary {
     PASD("ПАСД", "Программно-аппаратные средства доступа"),
     SUBTYPE("Типы нарушений", "Типы нарушений"),
     USER_ERDI("Пользовательские ЕРДИ", "Пользовательские записи ЕРДИ"),
-    SEARCH_PHRASES("Поисковые фразы", "Поисковые фразы");
+    SEARCH_PHRASES("Поисковые фразы", "Поисковые фразы"),
+    SEARCH_QUERY_PATTERNS("Шаблоны проверок ПС", "Шаблоны проверок ПС");
 
     private String shortName;
     private String fullName;

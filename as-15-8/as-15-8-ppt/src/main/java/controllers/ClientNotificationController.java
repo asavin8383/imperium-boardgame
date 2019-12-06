@@ -21,7 +21,7 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @RequestMapping(path = "/client_notifications", produces = MediaType.APPLICATION_JSON_VALUE)
-@PreAuthorize("hasRole('ROLE_OPERATOR')")
+@PreAuthorize("hasRole('ROLE_FORMAL_TASK')")
 public class ClientNotificationController {
 
     private final ClientNotificationRepo clientNotificationRepo;

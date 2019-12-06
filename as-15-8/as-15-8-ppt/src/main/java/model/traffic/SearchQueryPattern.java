@@ -39,6 +39,12 @@ public class SearchQueryPattern implements Serializable {
     @Column(nullable = false, unique = true)
     @JsonView(Views.Brief.class)
     @ToString.Include
+    private String name;
+
+    @NotNull
+    @Column(nullable = false)
+    @JsonView(Views.Brief.class)
+    @ToString.Include
     private String queryPattern;
 
     @ManyToMany

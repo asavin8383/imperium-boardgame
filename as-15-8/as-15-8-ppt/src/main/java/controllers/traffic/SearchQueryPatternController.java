@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 @RequestMapping(path = "/traffic/search_query_patterns", produces = MediaType.APPLICATION_JSON_VALUE)
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-@PreAuthorize("hasRole('ROLE_OPERATOR')")
+@PreAuthorize("hasRole('ROLE_PREPARATION_TRAFFIC')")
 public class SearchQueryPatternController {
 
     private final SearchQueryPatternRepo searchQueryPatternRepo;
@@ -67,6 +67,7 @@ public class SearchQueryPatternController {
             }
             return searchQueryPatternRepo.save(newSearchQueryPattern);
         } else {
+            existingSearchQueryPattern.setName(newSearchQueryPattern.getName());
             existingSearchQueryPattern.setQueryPattern(newSearchQueryPattern.getQueryPattern());
             newSearchQueryPattern.getFormalErdiList().forEach(searchQueryContentJoin -> searchQueryContentJoin.setSearchQueryPattern(existingSearchQueryPattern));
             update(existingSearchQueryPattern.getFormalErdiList(), newSearchQueryPattern.getFormalErdiList());
