@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import repositories.RobotRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -18,8 +19,8 @@ public class RobotService {
 
     private final RobotRepository robotRepository;
 
-    public Page<Robot> get(Pageable pageable){
-        return robotRepository.findAll(pageable);
+    public List<Robot> get(Pageable pageable){
+        return robotRepository.findAll();
     }
 
     public Optional<Robot> findById(Long id){

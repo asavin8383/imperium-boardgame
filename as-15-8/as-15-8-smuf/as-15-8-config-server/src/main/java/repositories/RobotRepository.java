@@ -9,8 +9,7 @@ import javax.transaction.Transactional;
 import java.util.List;
 
 @Repository
-public interface RobotRepository extends JpaRepository<Robot, Long>, RobotRepositoryCustom
-{
+public interface RobotRepository extends JpaRepository<Robot, Long> {
     List<Robot> findAllByType(RobotType type);
 
     List<Robot> findByOrigName(String name);
