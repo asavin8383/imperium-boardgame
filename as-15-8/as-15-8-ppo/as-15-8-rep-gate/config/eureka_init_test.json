@@ -1,9 +1,9 @@
 {
   "instance":{
-    "instanceId":"birt-viewer:192.168.5.50:15880",
-    "hostName":"192.168.5.50",
+    "instanceId":"birt-viewer:192.168.5.48:8079",
+    "hostName":"192.168.5.48",
     "app":"BIRT-VIEWER",
-    "ipAddr":"192.168.5.50",
+    "ipAddr":"192.168.5.48",
     "status":"UP",
     "overriddenstatus":"UNKNOWN",
     "port":{
@@ -15,9 +15,9 @@
       "@class":"com.netflix.appinfo.InstanceInfo$DefaultDataCenterInfo",
       "name":"MyOwn"
     },
-    "homePageUrl":"http://192.168.5.1234:1234/",
-    "statusPageUrl":"http://192.168.5.1234:1234/actuator/info",
-    "healthCheckUrl":"http://192.168.5.1234:1234/actuator/health",
+    "homePageUrl":"http://http://192.168.5.48:8079//",
+    "statusPageUrl":"http://192.168.5.48:8079/",
+    "healthCheckUrl":"http://192.168.5.48:8079/",
     "vipAddress":"birt-viewer",
     "secureVipAddress":"birt-viewer",
     "isCoordinatingDiscoveryServer":"false",
