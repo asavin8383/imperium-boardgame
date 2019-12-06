@@ -75,7 +75,10 @@ public class PSController
     }
 
     private void insert(@RequestBody List<PS> data, RobotType robotType) {
-        Set<Long> all = robotRepository.findAll().stream().map(Robot::getOrigId).collect(Collectors.toSet());
+        Set<Long> all = robotRepository.findAllByType(robotType)
+                .stream()
+                .map(Robot::getOrigId)
+                .collect(Collectors.toSet());
         log.debug("{} robot records already exists");
         int newCnt=0;
         for (PS ps : data) {
