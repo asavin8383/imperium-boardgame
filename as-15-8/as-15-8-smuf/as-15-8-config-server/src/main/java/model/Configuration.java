@@ -1,18 +1,17 @@
 package model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.*;
 import org.springframework.beans.factory.annotation.Value;
 
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
-@Entity
 @Data
+@NoArgsConstructor
+@RequiredArgsConstructor
+@Entity
 @Table(schema = "config", name = "configurations")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(onlyExplicitlyIncluded = true)
@@ -23,19 +22,27 @@ public class Configuration {
     @Transient
     private String defaultLabel;
 
+    @Getter
+    @Value("${spring.cloud.config.server.jdbc.default-profile}")
+    @Transient
+    private String defaultProfile;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
     @EqualsAndHashCode.Include
     private Long id;
 
+    @NonNull
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     @ToString.Include
     @EqualsAndHashCode.Include
-    private String application;
+    private Microservice application;
 
     @ToString.Include
     @EqualsAndHashCode.Include
-    private String profile;
+    private String profile = defaultProfile;
 
     @ToString.Include
     @EqualsAndHashCode.Include

@@ -10,6 +10,7 @@ import lombok.ToString;
 import model.converters.AccessToolUnitConverter;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -20,8 +21,7 @@ import java.util.Set;
 public class Robot {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "robot_generator")
-    @SequenceGenerator(name = "robot_generator", schema = "config", sequenceName = "robots_id_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
     @JsonView(Views.Brief.class)
     private Long id;
@@ -41,7 +41,7 @@ public class Robot {
     @JsonView(Views.Brief.class)
     private String origName;
 
-    @Column
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     @JsonView({Views.Brief.class, Views.AccessTool.class})
     private RobotType type;
@@ -50,18 +50,25 @@ public class Robot {
     @JsonView({Views.Brief.class, Views.AccessTool.class})
     private String name;
 
+    @Column(nullable = false)
+    @JsonView(Views.Brief.class)
+    private LocalDateTime modificationDate = LocalDateTime.now();
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private RobotStatus status = RobotStatus.OUT_OF_WORK;
+
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(schema = "config", name = "robots_configurations",
             joinColumns = @JoinColumn(name = "robot_id", foreignKey = @ForeignKey(name = "robots_robots_configurations_id_fk")),
             inverseJoinColumns = @JoinColumn(name = "configuration_id", foreignKey = @ForeignKey(name = "configurations_robots_configurations_id_fk")))
-    @JsonView(Views.Full.class)
     private Set<Configuration> configurations;
 
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @OneToMany(cascade=CascadeType.ALL, mappedBy = "robot")
-    @JsonView(Views.Brief.class)
+    @JsonView(Views.Full.class)
     private final Set<RobotProperty> robotProperties = new HashSet<>();
 }

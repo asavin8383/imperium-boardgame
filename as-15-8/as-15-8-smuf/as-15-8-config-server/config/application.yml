@@ -56,7 +56,7 @@ spring:
       server.jdbc:
         sql: SELECT key, value from config.config where application=? and profile=? and label=?
         order: 1
-        default-profile: test
+        default-profile: default
         default-label: latest
     stream:
       bindings:

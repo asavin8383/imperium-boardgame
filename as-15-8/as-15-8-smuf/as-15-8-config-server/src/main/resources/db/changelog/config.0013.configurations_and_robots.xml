@@ -1,0 +1,74 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+    <changeSet author="shabalinAI (generated)" id="1575556262753-3">
+        <addColumn schemaName="config" tableName="robots">
+            <column name="modification_date" type="timestamptz" defaultValue="2019-10-01">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1575556262753-4">
+        <addColumn schemaName="config" tableName="robots">
+            <column name="status" type="varchar(255)" defaultValue="WORK">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="1575556262753-1">
+        <addNotNullConstraint columnDataType="varchar(255)" columnName="application" schemaName="config" tableName="configurations"/>
+    </changeSet>
+    <changeSet id="1575556262753-5" author="shabalinAI (generated)">
+        <sql>
+            alter table config.robots add constraint ck_status check ( status in ('WORK','OUT_OF_WORK'));
+        </sql>
+        <rollback>
+            alter table config.robots drop constraint if exists ck_status;
+        </rollback>
+    </changeSet>
+    <changeSet id="1575556262753-6" author="shabalinAI (generated)">
+        <sql>
+            alter table config.configurations add constraint ck_application check ( application in (
+            'pod',
+            'ppt',
+            'ppm',
+            'dispatcher',
+            'executor',
+            'analyzer',
+            'report_generator',
+            'report_scheduler'));
+        </sql>
+        <rollback>
+            alter table config.configurations drop constraint if exists ck_application;
+        </rollback>
+    </changeSet>
+    <changeSet id="1575556262753-7" author="shabalinAI (generated)">
+        <dropForeignKeyConstraint baseTableName="robots_configurations" baseTableSchemaName="config" constraintName="configurations_robots_configurations_id_fk"/>
+        <addForeignKeyConstraint
+                baseTableSchemaName="config"
+                baseTableName="robots_configurations"
+                baseColumnNames="configuration_id"
+                constraintName="configurations_robots_configurations_id_fk"
+                referencedTableSchemaName="config"
+                referencedTableName="configurations"
+                referencedColumnNames="id"
+                onUpdate="CASCADE"
+                onDelete="CASCADE"
+        />
+    </changeSet>
+    <changeSet id="1575556262753-8" author="shabalinAI (generated)">
+        <dropForeignKeyConstraint baseTableName="robots_configurations" baseTableSchemaName="config" constraintName="robots_robots_configurations_id_fk"/>
+        <addForeignKeyConstraint
+                baseTableSchemaName="config"
+                baseTableName="robots_configurations"
+                baseColumnNames="robot_id"
+                constraintName="robots_robots_configurations_id_fk"
+                referencedTableSchemaName="config"
+                referencedTableName="robots"
+                referencedColumnNames="id"
+                onUpdate="CASCADE"
+                onDelete="CASCADE"
+        />
+    </changeSet>
+</databaseChangeLog>

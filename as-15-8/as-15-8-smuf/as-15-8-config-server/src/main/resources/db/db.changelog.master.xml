@@ -15,5 +15,6 @@
     <include file="db/changelog/config.0010.robots.xml" />
     <include file="db/changelog/config.0011.config_view.xml" />
     <include file="db/changelog/config.0012.param.xml" />
+    <include file="db/changelog/config.0013.configurations_and_robots.xml" />
 
 </databaseChangeLog>

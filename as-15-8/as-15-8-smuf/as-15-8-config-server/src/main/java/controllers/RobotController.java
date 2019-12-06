@@ -36,44 +36,35 @@ import java.util.stream.Collectors;
 @PreAuthorize("hasAnyRole('ROLE_OPERATOR','ROLE_ADMIN')")
 public class RobotController {
 
-    private final RobotRepository robotRepository;
     private final RobotService robotService;
 
     @PostMapping
     @JsonView(Views.Brief.class)
-    public ResponseEntity<Page<Robot>> getSearchSystemPage(@RequestParam(required = false) SortingDirection sortingDirection,
+    public Page<Robot> getAll(@RequestParam(required = false) SortingDirection sortingDirection,
                                                            @RequestParam(required = false) String sortingColumn,
                                                            @RequestParam(defaultValue = "0") int pageNumber,
-                                                           @RequestParam(defaultValue = "10") int pageSize,
-                                                           @RequestParam(required = false) String query) {
+                                                           @RequestParam(defaultValue = "10") int pageSize) {
 
         Pageable page = PageRequest.of(pageNumber, pageSize,
                 SortingHelper.createSorting(sortingDirection, sortingColumn));
-        Page<Robot> result = robotRepository.findByQuery(query, page);
-        return new ResponseEntity<>(result, HttpStatus.OK);
+        return robotService.get(page);
     }
 
-    @PostMapping("{id}")
+    @PostMapping
     @JsonView(Views.Brief.class)
-    public Robot findById(@PathVariable Long id){
-        Optional<Robot> byId = robotRepository.findById(id);
-        return byId.orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND, "Robot not found with id " + id));
+    public ResponseEntity<Robot> findById(@RequestParam("id") Long id){
+        return robotService.findById(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.badRequest().build());
     }
 
-    @PostMapping("/access_tools")
-    public List<AccessToolUnit> findById(@RequestParam(required = false) RobotType type){
-        List<AccessToolUnit> toolALL = Arrays.asList(AccessToolUnit.values());
-        List<AccessToolUnit> toolPS = Arrays.asList(AccessToolUnit.SEARCH_SYSTEM);
-        List<AccessToolUnit> toolPASD = toolALL.stream()
-                .filter(accessToolUnit -> !toolPS.contains(accessToolUnit))
-                .collect(Collectors.toList());
-
-        return type == null ? toolALL : (type == RobotType.PS ? toolPS : toolPASD);
+    @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    public void editRobot(@RequestParam("id") Robot robot, @RequestBody Robot newRobot) {
+        robotService.edit(robot, newRobot);
     }
 
-    @PutMapping(path = "/edit", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public void editRobot(@RequestBody Robot robot) {
-        robotService.editRobot(robot);
+    @DeleteMapping
+    public void deleteRobot(@RequestParam("id") Robot robot){
+        robotService.delete(robot);
     }
-
 }

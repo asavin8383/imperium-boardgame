@@ -1,16 +1,19 @@
 package controllers;
 
-import com.fasterxml.jackson.annotation.JsonView;
 import controllers.entity.PS;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import model.Microservice;
 import model.Robot;
 import model.RobotType;
-import model.Views;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import repositories.RobotRepository;
+import services.ConfigurationsService;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -22,20 +25,20 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping("/")
+@PreAuthorize("hasRole('ROLE_SYSTEM')")
 @Slf4j
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class PSController
 {
     private final RobotRepository robotRepository;
+    private final ConfigurationsService configurationsService;
 
-    @Autowired
-    public PSController(RobotRepository robotRepository) {this.robotRepository = robotRepository;}
 
     /**
      * Прием новых записей о ПС
      * @param data
      */
     @PostMapping("ps")
-    @PreAuthorize("hasRole('ROLE_SYSTEM')")
     void uploadPS(@RequestBody List<PS> data) {
         log.info("Got {} robot records POSTed, trying to insert", data.size());
         insert(data, RobotType.PS);
@@ -46,7 +49,6 @@ public class PSController
      * @param data
      */
     @PostMapping("pasd")
-    @PreAuthorize("hasRole('ROLE_SYSTEM')")
     void uploadPASD(@RequestBody List<PS> data) {
         log.info("Got {} robot records POSTed, trying to insert", data.size());
         insert(data, RobotType.PASD);
@@ -57,7 +59,6 @@ public class PSController
      * @param id
      */
     @DeleteMapping("ps")
-    @PreAuthorize("hasRole('ROLE_SYSTEM')")
     void deletePS(@RequestParam Long id) {
         log.info("Got request, trying to delete PS with id {}", id);
         delete(id, RobotType.PS);
@@ -68,7 +69,6 @@ public class PSController
      * @param id
      */
     @DeleteMapping("pasd")
-    @PreAuthorize("hasRole('ROLE_SYSTEM')")
     void deletePASD(@RequestParam Long id) {
         log.info("Got request, trying to delete PASD with id {}", id);
         delete(id, RobotType.PASD);
@@ -87,6 +87,10 @@ public class PSController
                 newRobot.setOrigName(ps.getName());
                 newRobot.setName(ps.getName() + "-" + ps.getId());
                 newRobot.setType(robotType);
+                newRobot.setConfigurations(new HashSet<>(Arrays.asList(
+                        configurationsService.getOrCreate(Microservice.executor),
+                        configurationsService.getOrCreate(Microservice.ppm)
+                )));
                 robotRepository.save(newRobot);
                 newCnt++;
             }

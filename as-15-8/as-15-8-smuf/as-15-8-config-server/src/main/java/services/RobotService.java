@@ -1,19 +1,15 @@
 package services;
 
-
-import enums.AccessToolUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Robot;
-import model.RobotProperty;
-import model.RobotType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import repositories.RobotRepository;
-import javax.persistence.EntityManager;
-import java.util.Optional;
-import java.util.Set;
 
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -22,32 +18,35 @@ public class RobotService {
 
     private final RobotRepository robotRepository;
 
-    private final EntityManager em;
+    public Page<Robot> get(Pageable pageable){
+        return robotRepository.findAll(pageable);
+    }
 
-    public void editRobot(Robot robot){
+    public Optional<Robot> findById(Long id){
+        return robotRepository.findById(id);
+    }
+
+    public void edit(Robot robot, Robot newRobot){
         log.info("Сохранение робота: {}", robot);
-        if (robot.getId() == null){
-            return;
-        }
 
-        Optional<Robot> optRobotOld = robotRepository.findById(robot.getId());
-        if (!optRobotOld.isPresent()){
-            log.info("Робот не найден в БД, id = {}", robot.getId());
-            return;
-        }
+        if(robot == null)
+            throw new IllegalArgumentException("Робот не найден по ID");
 
-        Robot robotEdit = optRobotOld.get();
+        robot.setName(newRobot.getName());
+        robot.setAccessTool(newRobot.getAccessTool());
 
-        robotEdit.setName(robot.getName());
-        robotEdit.setAccessTool(robot.getAccessTool());
-        filterAccessToolParameters(robotEdit.getType(), robotEdit.getAccessTool(), robotEdit.getRobotProperties());
+        robot.getRobotProperties().clear();
+        newRobot.getRobotProperties().forEach(prop -> {
+            prop.setRobot(robot);
+            robot.getRobotProperties().add(prop);
+        });
 
-        //robotRepository.save(robotEdit);
-        log.info("Робот успешно сохранен: {}", robotEdit);
+        robotRepository.save(robot);
+        log.info("Робот успешно сохранен: id {}, name {}", robot.getId(), robot.getName());
     }
 
-    private void filterAccessToolParameters(RobotType robotType, AccessToolUnit accessToolUnit, Set<RobotProperty> robotProperties){
-        // todo - параметры в зависимости от типа робота
+    public void delete(Robot robot){
+        if(robot.getId() < 0)
+            robotRepository.delete(robot);
     }
-
 }
