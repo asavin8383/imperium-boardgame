@@ -54,9 +54,12 @@ public class ArrangementStatusProducer {
     }
 
     private void sendToPPM(Long arrangementId){
+        HttpHeaders requestHeaders = new HttpHeaders();
+        requestHeaders.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<?> requestEntity = new HttpEntity<Object>(requestHeaders);
         log.info("Отправка сообщения с изменением статуса мероприятия {} в ППМ", arrangementId);
         try {
-            restTemplate.put(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(PPM_STATUS_ENDPOINT).buildAndExpand(arrangementId).toString(), null);
+            restTemplate.put(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(PPM_STATUS_ENDPOINT).buildAndExpand(arrangementId).toString(), requestEntity);
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
             throw AS_15_8_DispatcherException.logAndGet(log, String.format("Ошибка отправки сообщения с изменением статуса мероприятия %d в ППМ, код возврата %s", arrangementId, ex.getStatusCode()));
         }
