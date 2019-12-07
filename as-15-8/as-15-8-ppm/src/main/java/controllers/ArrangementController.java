@@ -113,16 +113,13 @@ public class ArrangementController {
     }
 
     private List<ScheduleCheckUnit> createCheckUnits(Arrangement arrangement, CheckUnit checkUnit){
+        String unitName = schedulerProperties.getAccessTools().get(arrangement.getAccessTool());
+        AccessToolUnit accessToolUnit = AccessToolUnit.fromPropertyKey(unitName);
+        boolean isPS = accessToolUnit == AccessToolUnit.SEARCH_SYSTEM ||
+            accessToolUnit == AccessToolUnit.GOOGLE_API;
         List<ScheduleCheckUnit> scheduleCheckUnits = new ArrayList<>();
         switch (checkUnit.getType()){
             case DOMAIN: {
-                String unitName = schedulerProperties.getAccessTools().get(arrangement.getAccessTool());
-                if(unitName == null) {
-                    throw AS_15_8_PPM_Exception.logAndGet(log, "Ошибка получения ПС/ПАСД по ключу: " + arrangement.getAccessTool());
-                }
-                AccessToolUnit accessToolUnit = AccessToolUnit.fromPropertyKey(unitName);
-                boolean isPS = accessToolUnit == AccessToolUnit.SEARCH_SYSTEM ||
-                        accessToolUnit == AccessToolUnit.GOOGLE_API;
                 if (isPS) {
                     scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit.getContentId(), CheckUnitType.URL, checkUnit.getValue()));
                 } else {
@@ -135,6 +132,16 @@ public class ArrangementController {
             case DOMAIN_MASK: {
                 domainMaskUploader.getDomainMaskItems(checkUnit.getValue())
                     .forEach(domainMaskItem -> scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit.getContentId(), CheckUnitType.URL, domainMaskItem)));
+                return scheduleCheckUnits;
+            }
+            case IP_V4:
+            case IP_V6:
+            case IP_V4_SUBNET:
+            case IP_V6_SUBNET:
+            {
+                if (!isPS){
+                    scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit.getContentId(), checkUnit.getType(), checkUnit.getValue()));
+                }
                 return scheduleCheckUnits;
             }
             default: {
