@@ -57,7 +57,7 @@ public class ReportController
      *
      * @return
      */
-    @PreAuthorize("hasAnyRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasAnyRole('ROLE_VIEW_REPORT')")
     @GetMapping("stat")
     public List<ReportStat> getStat() {
         return reportStatRepository.findAll();
@@ -70,7 +70,7 @@ public class ReportController
      * @param rep_tp_id
      * @return
      */
-    @PreAuthorize("hasAnyRole('ROLE_OPERATOR','ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_VIEW_REPORT','ROLE_ADMIN_REPORT')")
     @GetMapping("{rep_tp_id}")
     public ReportType getReportType(@PathVariable long rep_tp_id) {
         Optional<ReportType> res = reportTypeRepository.findById(rep_tp_id);
@@ -84,7 +84,7 @@ public class ReportController
      *
      * @return
      */
-    @PreAuthorize("hasAnyRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasAnyRole('ROLE_VIEW_REPORT')")
     @GetMapping("table/{rep_tp_id}")
     public List<RegReportsTable> getRegReportsTable(@PathVariable long rep_tp_id) {
         return regReportsTableRepository.findAllByRepTpId(rep_tp_id);
@@ -97,7 +97,7 @@ public class ReportController
      * @param rep_id
      * @return
      */
-    @PreAuthorize("hasAnyRole('ROLE_OPERATOR','ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_VIEW_REPORT','ROLE_ADMIN_REPORT')")
     @GetMapping("data/{rep_id}")
     ResponseEntity<byte[]> getData(@PathVariable long rep_id) {
         Optional<Report> res = reportRepository.findByRepId(rep_id);
@@ -119,7 +119,7 @@ public class ReportController
      *
      * @return
      */
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN_REPORT')")
     @GetMapping("admin/stat")
     List<ReportAdminStat> getReportAdminStats() {
         return reportAdminStatRepository.findAll();
@@ -131,7 +131,7 @@ public class ReportController
      *
      * @return
      */
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN_REPORT')")
     @GetMapping("admin/table/{rep_tp_id}")
     List<ReportAdminTable> getReportAdminTable(@PathVariable long rep_tp_id) {
         return reportAdminTableRepository.findByRepTpId(rep_tp_id);
@@ -143,7 +143,7 @@ public class ReportController
      *
      * @return
      */
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN_REPORT')")
     @GetMapping("admin/table")
     List<ReportAdminTable> getReportAdminTableFull() {
         return reportAdminTableRepository.findAll();
@@ -152,7 +152,7 @@ public class ReportController
     /**
      * 7. Запрос по перевыпуску отчета по rep_id
      */
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN_REPORT')")
     @PostMapping("restart/{rep_id}")
     void restart(@PathVariable long rep_id) {
         Optional<Report> report = reportRepository.findByRepId(rep_id);

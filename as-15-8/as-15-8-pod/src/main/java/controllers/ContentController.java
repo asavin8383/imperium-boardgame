@@ -47,7 +47,7 @@ public class ContentController {
     private final ContentHistoryRepository contentHistoryRepo;
 
     @GetMapping(path = "/erdi")
-    @PreAuthorize("hasAnyRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasAnyRole('ROLE_MANAGE_ERDI')")
     public ResponseEntity<Page<ContentView>> getRelevantContent(
             @RequestParam(required = false) SortingDirection sortingDirection,
             @RequestParam(required = false) String sortingColumn,
@@ -139,7 +139,7 @@ public class ContentController {
     }
 
     @GetMapping(path = "/update_erdi")
-    @PreAuthorize("hasAnyRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasAnyRole('ROLE_MANAGE_ERDI')")
     public ResponseEntity<String> update() {
         if (!erdiRestClient.getIsLoading()){
             CompletableFuture.runAsync(erdiRestClient::startUpdateErdi);
@@ -149,19 +149,19 @@ public class ContentController {
     }
 
     @GetMapping("/get_update_date")
-    @PreAuthorize("hasAnyRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasAnyRole('ROLE_MANAGE_ERDI')")
     public String getUpdateDate() {
         return erdiRestClient.getUpdateDate();
     }
 
     @GetMapping("/get_state")
-    @PreAuthorize("hasAnyRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasAnyRole('ROLE_MANAGE_ERDI')")
     public PodState getState() throws ParseException {
         return erdiRestClient.getLoadState();
     }
 
     @GetMapping("/remove_content_version_to")
-    @PreAuthorize("hasAnyRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasAnyRole('ROLE_MANAGE_ERDI')")
     public void removeLastContentVersion(@RequestParam int version) {
         erdiRestClient.removeVersionTo(version);
     }

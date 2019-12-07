@@ -25,7 +25,7 @@ import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping(path = "/ps", produces = MediaType.APPLICATION_JSON_VALUE)
-@PreAuthorize("hasAnyRole('ROLE_OPERATOR','ROLE_ADMIN')")
+@PreAuthorize("hasAnyRole('ROLE_MANAGE_PS_PASD','ROLE_ADMIN')")
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Slf4j
 public class PsController {
