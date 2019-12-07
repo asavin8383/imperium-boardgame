@@ -131,6 +131,20 @@ public class ScheduleService {
         return Math.max(schedulerProperties.getTotalWorkersCount() - scheduleRepo.getBusyWorkersCount(plannedDate, startTime, endTime), 0);
     }
 
+    public void checkAndCloseSchedule(Schedule schedule){
+        boolean needToClose = arrangementRepo.findAllBySchedule(schedule.getId())
+            .stream()
+            .map(Arrangement::isClosed)
+            .filter(closed -> closed == false)
+            .collect(Collectors.toList())
+            .size() == 0;
+        if(needToClose){
+            schedule.setStatus(ScheduleStatus.FINISHED);
+            scheduleRepo.save(schedule);
+            log.info("Статус расписания с ИД: {} сменился на 'ЗАКРЫТО'", schedule.getId());
+        }
+    }
+
     private int getMaxWorkersCount(Set<Arrangement> arrangements, LocalDate plannedDate){
         LocalTime startTime = arrangements.stream()
                 .map(Arrangement::getPlannedStartTime)

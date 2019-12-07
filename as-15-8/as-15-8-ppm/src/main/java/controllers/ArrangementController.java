@@ -19,8 +19,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import repositories.ArrangementRepo;
+import repositories.ScheduleRepo;
 import restapi.ArrangementStatusUploader;
 import restapi.pod.DomainMaskUploader;
+import services.ScheduleService;
 import webClients.PptWebClient;
 
 import javax.transaction.Transactional;
@@ -45,6 +47,8 @@ public class ArrangementController {
     private final ArrangementStatusUploader arrangementStatusUploader;
     private final SchedulerProperties schedulerProperties;
     private final DomainMaskUploader domainMaskUploader;
+    private final ScheduleRepo scheduleRepo;
+    private final ScheduleService scheduleService;
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @Transactional
@@ -76,6 +80,21 @@ public class ArrangementController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
         }
     }
+
+    @PutMapping("/{id}/close")
+    @Transactional
+    public void updateArrangementStatus(@PathVariable("id") Arrangement arrangement){
+        if (arrangement == null){
+            throw new AS_15_8_PPM_Exception("Ошибка закрытия мероприятия! Мероприятие не было найдено в БД");
+        }
+        arrangement.setClosed(true);
+        arrangementRepo.save(arrangement);
+        scheduleService.checkAndCloseSchedule(
+            scheduleRepo.findByArrangement(arrangement.getId())
+                .orElseThrow(() -> new AS_15_8_PPM_Exception("Ошибка проверки закрытия расписания! Расписание не найдено по ИД мероприятия: " + arrangement.getId()))
+        );
+    }
+
 
     private void getAndSaveArrangementCheckUnits(Arrangement arrangement){
         arrangement.getScheduleCheckUnits().addAll(

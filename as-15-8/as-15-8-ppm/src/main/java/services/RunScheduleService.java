@@ -44,19 +44,24 @@ public class RunScheduleService {
     @Scheduled(cron = "${app.schedule}")
     public void runSchedule(){
         scheduleRepo.findAllByPlannedDateAndStatus(LocalDate.now(), ScheduleStatus.PLANNED)
-            .forEach(schedule -> schedulePeriodRepo.findAllByScheduleAndSchedulePeriodStateAndAndStartTimeBefore(schedule, SchedulePeriodState.CREATED, LocalTime.now())
-                .forEach(schedulePeriod -> {
-                    schedulePeriodArrangementRepo.findAllBySchedulePeriod(schedulePeriod)
-                        .forEach(schedulePeriodArrangement ->
-                        {
-                            log.debug("Запуск на выполнение schedulePeriodArrangement с ИД {}", schedulePeriodArrangement.getId());
-                            arrangementStatusUploader.changeArrangementStatus(new ArrangementStatusNotification(schedulePeriodArrangement.getArrangement().getId(), ArrangementEvents.RUN));
-                            schedulePeriodCheckUnitRepo.findAllBySchedulePeriodArrangement(schedulePeriodArrangement)
-                                    .forEach(this::runCheckUnit);
-                        });
-                    schedulePeriod.setSchedulePeriodState(SchedulePeriodState.STARTED);
-                    schedulePeriodRepo.save(schedulePeriod);
-                }));
+            .forEach(schedule -> {
+                schedulePeriodRepo.findAllByScheduleAndSchedulePeriodStateAndAndStartTimeBefore(schedule, SchedulePeriodState.CREATED, LocalTime.now())
+                    .forEach(schedulePeriod -> {
+                        schedulePeriodArrangementRepo.findAllBySchedulePeriod(schedulePeriod)
+                            .forEach(schedulePeriodArrangement ->
+                            {
+                                log.debug("Запуск на выполнение schedulePeriodArrangement с ИД {}", schedulePeriodArrangement.getId());
+                                arrangementStatusUploader.changeArrangementStatus(new ArrangementStatusNotification(schedulePeriodArrangement.getArrangement().getId(), ArrangementEvents.RUN));
+                                schedulePeriodCheckUnitRepo.findAllBySchedulePeriodArrangement(schedulePeriodArrangement)
+                                        .forEach(this::runCheckUnit);
+                            });
+                        schedulePeriod.setSchedulePeriodState(SchedulePeriodState.STARTED);
+                        schedulePeriodRepo.save(schedulePeriod);
+                    });
+                schedule.setStatus(ScheduleStatus.RUNNING);
+                scheduleRepo.save(schedule);
+                }
+            );
     }
 
     private void runCheckUnit(SchedulePeriodCheckUnit schedulePeriodCheckUnit){

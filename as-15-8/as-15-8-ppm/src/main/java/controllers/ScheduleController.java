@@ -71,6 +71,7 @@ public class ScheduleController {
         return arrangementService.findPage(page);
     }
 
+    //TODO Разобраться с Pageable и JsonView
     @GetMapping("/all")
     @JsonView(Views.Brief.class)
     public List<Schedule> getScheduleList(
@@ -174,6 +175,7 @@ public class ScheduleController {
                 }));
         return briefArrangements;
     }
+
 
     @Data
     @EqualsAndHashCode(onlyExplicitlyIncluded = true)

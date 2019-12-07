@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface ScheduleRepo extends JpaRepository<Schedule, Long> {
 
@@ -35,4 +36,13 @@ public interface ScheduleRepo extends JpaRepository<Schedule, Long> {
             "join s.schedulePeriods p on s.id = :schedule_id"
     )
     LocalTime getScheduleEndTime(@Param("schedule_id") Long scheduleId);
+
+    @Query("select s from Schedule s " +
+        "join s.schedulePeriods sp " +
+        "join sp.schedulePeriodArrangements spa " +
+        "join spa.arrangement a on a.id = :arrangement_id"
+
+    )
+    Optional<Schedule> findByArrangement(@Param("arrangement_id") Long arrangementId);
+
 }

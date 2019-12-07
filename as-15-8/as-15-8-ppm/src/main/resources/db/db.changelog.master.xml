@@ -13,4 +13,5 @@
     <include file="db/changelog/ppm.0008.domain_mask_items_drop.xml"/>
     <include file="db/changelog/ppm.0009.drop_not_null_erdi.xml"/>
     <include file="db/changelog/ppm.0010.schedule_max_workers_count.xml"/>
+    <include file="db/changelog/ppm.0011.arrangement_closed.xml"/>
 </databaseChangeLog>
