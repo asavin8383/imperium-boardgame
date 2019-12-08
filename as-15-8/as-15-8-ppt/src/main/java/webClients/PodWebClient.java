@@ -25,7 +25,7 @@ import java.util.List;
 public class PodWebClient {
 
     private static final String GET_ERDI_URI = "/pod/erdi/single";
-    private static final String GET_SUBTYPE_URI = "/pod/subtype/single";
+    private static final String GET_SUBTYPE_URI = "/pod/subtype/single_string";
     private static final String GET_CHECK_UNITS_URL = "/pod/erdi/checkUnits";
 
     private static final int fetchFluxConcurrency = 50;
