@@ -14,7 +14,7 @@ VOLUME $CONF_PATH
 
 
 #Install MS True Type, Ionicons and Font Awesome fonts
-run apt-get update && apt-get install -y cabextract xfonts-utils
+RUN apt-get update && apt-get install -y cabextract xfonts-utils
 
 COPY ttf-mscorefonts-installer_3.6_all.deb .
 RUN  \

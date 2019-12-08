@@ -12,11 +12,11 @@
     <artifactId>as-15-8-rep-viewer</artifactId>
 
     <dependencies>
-        <!--<dependency>-->
-            <!--<groupId>ecl.minzdrav</groupId>-->
-            <!--<artifactId>ecl-birt-fonts</artifactId>-->
-            <!--<version>1.0</version>-->
-        <!--</dependency>-->
+       <dependency>-->
+            <groupId>ecl.minzdrav</groupId>
+            <artifactId>ecl-birt-fonts</artifactId>
+            <version>1.0</version>
+       </dependency>-->
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
