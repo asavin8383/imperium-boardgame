@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
  * Author: asavin
  */
 @RestController
-@PreAuthorize("hasRole('ROLE_FORMATION_OF_SHEDULE')")
+@PreAuthorize("hasRole('ROLE_FORMATION_OF_SCHEDULE')")
 @RequestMapping(path = "/schedule", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor(onConstructor_={@Autowired})
 @Slf4j

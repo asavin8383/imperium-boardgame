@@ -271,7 +271,8 @@ public class ErdiRestClient {
     }
 
     private void refreshViews(){
-        log.info("---> Обновление MATERIALIZED VIEWS");
+        log.info("---> Установка типов ИРТЗ и Обновление MATERIALIZED VIEWS");
+        jdbcTemplate.execute("select sor.set_irtz_type()");
         jdbcTemplate.execute("REFRESH MATERIALIZED VIEW sor.check_units");
         jdbcTemplate.execute("REFRESH MATERIALIZED VIEW sor.content_view");
     }
