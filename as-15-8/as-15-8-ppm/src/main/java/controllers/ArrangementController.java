@@ -19,8 +19,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import repositories.ArrangementRepo;
+import repositories.ScheduleRepo;
 import restapi.ArrangementStatusUploader;
 import restapi.pod.DomainMaskUploader;
+import services.ScheduleService;
 import webClients.PptWebClient;
 
 import javax.transaction.Transactional;
@@ -45,6 +47,8 @@ public class ArrangementController {
     private final ArrangementStatusUploader arrangementStatusUploader;
     private final SchedulerProperties schedulerProperties;
     private final DomainMaskUploader domainMaskUploader;
+    private final ScheduleRepo scheduleRepo;
+    private final ScheduleService scheduleService;
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @Transactional
@@ -77,6 +81,21 @@ public class ArrangementController {
         }
     }
 
+    @PutMapping("/{id}/close")
+    @Transactional
+    public void updateArrangementStatus(@PathVariable("id") Arrangement arrangement){
+        if (arrangement == null){
+            throw new AS_15_8_PPM_Exception("Ошибка закрытия мероприятия! Мероприятие не было найдено в БД");
+        }
+        arrangement.setClosed(true);
+        arrangementRepo.save(arrangement);
+        scheduleService.checkAndCloseSchedule(
+            scheduleRepo.findByArrangement(arrangement.getId())
+                .orElseThrow(() -> new AS_15_8_PPM_Exception("Ошибка проверки закрытия расписания! Расписание не найдено по ИД мероприятия: " + arrangement.getId()))
+        );
+    }
+
+
     private void getAndSaveArrangementCheckUnits(Arrangement arrangement){
         arrangement.getScheduleCheckUnits().addAll(
             PPTWebClient.getCheckUnitsByArrangementId(arrangement.getId())
@@ -94,16 +113,13 @@ public class ArrangementController {
     }
 
     private List<ScheduleCheckUnit> createCheckUnits(Arrangement arrangement, CheckUnit checkUnit){
+        String unitName = schedulerProperties.getAccessTools().get(arrangement.getAccessTool());
+        AccessToolUnit accessToolUnit = AccessToolUnit.fromPropertyKey(unitName);
+        boolean isPS = accessToolUnit == AccessToolUnit.SEARCH_SYSTEM ||
+            accessToolUnit == AccessToolUnit.GOOGLE_API;
         List<ScheduleCheckUnit> scheduleCheckUnits = new ArrayList<>();
         switch (checkUnit.getType()){
             case DOMAIN: {
-                String unitName = schedulerProperties.getAccessTools().get(arrangement.getAccessTool());
-                if(unitName == null) {
-                    throw AS_15_8_PPM_Exception.logAndGet(log, "Ошибка получения ПС/ПАСД по ключу: " + arrangement.getAccessTool());
-                }
-                AccessToolUnit accessToolUnit = AccessToolUnit.fromPropertyKey(unitName);
-                boolean isPS = accessToolUnit == AccessToolUnit.SEARCH_SYSTEM ||
-                        accessToolUnit == AccessToolUnit.GOOGLE_API;
                 if (isPS) {
                     scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit.getContentId(), CheckUnitType.URL, checkUnit.getValue()));
                 } else {
@@ -116,6 +132,16 @@ public class ArrangementController {
             case DOMAIN_MASK: {
                 domainMaskUploader.getDomainMaskItems(checkUnit.getValue())
                     .forEach(domainMaskItem -> scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit.getContentId(), CheckUnitType.URL, domainMaskItem)));
+                return scheduleCheckUnits;
+            }
+            case IP_V4:
+            case IP_V6:
+            case IP_V4_SUBNET:
+            case IP_V6_SUBNET:
+            {
+                if (!isPS){
+                    scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit.getContentId(), checkUnit.getType(), checkUnit.getValue()));
+                }
                 return scheduleCheckUnits;
             }
             default: {

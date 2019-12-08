@@ -24,7 +24,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class ArrangementStatusProducer {
 
-    private final String STATUS_ENDPOINT = "/ppt/arrangements/status";
+    private final String PPT_STATUS_ENDPOINT = "/ppt/arrangements/status";
+    private final String PPM_STATUS_ENDPOINT = "/ppm/arrangements/{id}/close";
 
     private final OAuth2RestTemplate restTemplate;
 
@@ -32,6 +33,12 @@ public class ArrangementStatusProducer {
     private String gatewayUrl;
 
     public void sendArrangementStatusMessage(ArrangementStatusNotification arrangementStatusNotification){
+        sendToPPT(arrangementStatusNotification);
+        sendToPPM(arrangementStatusNotification.getArrangementId());
+
+    }
+
+    private void sendToPPT(ArrangementStatusNotification arrangementStatusNotification){
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -39,10 +46,27 @@ public class ArrangementStatusProducer {
 
         log.info("Отправка сообщения с изменением статуса мероприятия {} в ППТ", arrangementStatusNotification.getArrangementId());
         try {
-            restTemplate.put(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(STATUS_ENDPOINT).build().toString(), entity);
+            restTemplate.put(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(PPT_STATUS_ENDPOINT).build().toString(), entity);
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
             throw AS_15_8_DispatcherException.logAndGet(log, String.format("Ошибка отправки сообщения с изменением статуса мероприятия %d в ППТ, код возврата %s", arrangementStatusNotification.getArrangementId(), ex.getStatusCode()));
         }
         log.info("Сообщение с изменением статуса мероприятия {} успешно отправлено в ППТ", arrangementStatusNotification.getArrangementId());
     }
+
+    private void sendToPPM(Long arrangementId){
+        HttpHeaders requestHeaders = new HttpHeaders();
+        requestHeaders.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<?> requestEntity = new HttpEntity<Object>(requestHeaders);
+        log.info("Отправка сообщения с изменением статуса мероприятия {} в ППМ", arrangementId);
+        try {
+            restTemplate.put(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(PPM_STATUS_ENDPOINT).buildAndExpand(arrangementId).toString(), requestEntity);
+        } catch (HttpClientErrorException | HttpServerErrorException ex) {
+            throw AS_15_8_DispatcherException.logAndGet(log, String.format("Ошибка отправки сообщения с изменением статуса мероприятия %d в ППМ, код возврата %s", arrangementId, ex.getStatusCode()));
+        }
+        log.info("Сообщение с изменением статуса мероприятия {} успешно отправлено в ППМ", arrangementId);
+    }
+
+
+
+
 }

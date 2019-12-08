@@ -60,6 +60,11 @@ public class Arrangement implements Serializable {
     @NotNull
     private String accessTool;
 
+    /** Статус закрытия мероприятия*/
+    @JsonView(Views.Brief.class)
+    @ToString.Include
+    private boolean closed = false;
+
     @OneToMany(cascade=CascadeType.ALL, mappedBy = "arrangement")
     @JsonIgnore
     private final List<ScheduleCheckUnit> scheduleCheckUnits = new ArrayList<>();
