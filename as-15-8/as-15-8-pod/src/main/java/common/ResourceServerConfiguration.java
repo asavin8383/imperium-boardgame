@@ -18,11 +18,11 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
                 .authorizeRequests()
                     .antMatchers(HttpMethod.GET,
                             "/erdi/single/**",
+                            "/subtype/single/**",
                             "/erdi/checkUnits/**"
                     ).permitAll()
                     .antMatchers(HttpMethod.POST,
-                        "/act/**",
-                        "/subtype/single/**"
+                        "/act/**"
                     ).permitAll()
                 .anyRequest().authenticated()
             .and()

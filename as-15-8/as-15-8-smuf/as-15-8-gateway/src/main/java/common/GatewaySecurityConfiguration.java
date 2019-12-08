@@ -27,6 +27,7 @@ public class GatewaySecurityConfiguration extends ResourceServerConfigurerAdapte
                     .permitAll()
                     .antMatchers(HttpMethod.GET,
                             "/pod/erdi/single/**",
+                            "/pod/subtype/single/**",
                             "/pod/erdi/checkUnits/**",
                             "/viewer/**",
                             "/arrangements/checkUnits/**",
@@ -37,8 +38,7 @@ public class GatewaySecurityConfiguration extends ResourceServerConfigurerAdapte
                             "/dispatcher/results/etalon_screenshot/**",
                             "/dispatcher/results/nmap_log/**").permitAll()
                     .antMatchers(HttpMethod.POST,
-                        "/pod/act/**","/viewer/**",
-                        "/pod/subtype/single/**"
+                        "/pod/act/**","/viewer/**"
                         ).permitAll()
                     .antMatchers("/**")
                     .authenticated();
