@@ -24,6 +24,7 @@ import java.util.List;
 public class PodWebClient {
 
     private static final String GET_ERDI_URI = "/pod/erdi/single";
+    private static final String GET_SUBTYPE_URI = "/pod/subtype/single";
     private static final String GET_CHECK_UNITS_URL = "/pod/erdi/checkUnits";
 
     private static final int fetchFluxConcurrency = 50;
@@ -97,6 +98,34 @@ public class PodWebClient {
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
             throw AS_15_8_PPT_Exception.logAndGet(log, String.format("Ошибка получения чек-юнитов ЕРДИ %d в ППТ, код возврата %s", contentId, ex.getStatusCode()), ex);
         }
+    }
+
+    public List<ObjectNode> fetchSubtypes(List<String> subtypeIds) {
+        return Flux.fromIterable(subtypeIds)
+            .parallel(fetchFluxConcurrency)
+            .runOn(Schedulers.parallel())
+            .flatMap(this::getSubtype)
+            .sequential()
+            .collectList()
+            .block();
+    }
+
+    private Mono<ObjectNode> getSubtype(String origId) {
+        return webClient.get()
+            .uri(UriComponentsBuilder
+                .fromUriString(GET_SUBTYPE_URI)
+                .queryParam("origId", origId)
+                .build().toString())
+            .exchange()
+            .flatMap(clientResponse -> {
+                if(clientResponse.statusCode().equals(HttpStatus.OK)){
+                    log.info("Subtype получен успешно, id: {}", origId);
+                    return clientResponse.bodyToMono(ObjectNode.class);
+                } else {
+                    log.warn("Ошибка при получении Subtype по id {}, статус: {}", origId, clientResponse.statusCode().toString());
+                    return Mono.empty();
+                }
+            });
     }
 
 }

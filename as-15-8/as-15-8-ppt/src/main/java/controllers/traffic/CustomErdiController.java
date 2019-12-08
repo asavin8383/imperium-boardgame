@@ -1,6 +1,7 @@
 package controllers.traffic;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import controllers.helpers.SortingHelper;
 import enums.SortingDirection;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import repositories.CustomErdiViewRepository;
 import services.traffic.CustomErdiService;
+import webClients.PodWebClient;
+
+import java.util.List;
 
 @RestController
 @RequestMapping(path = "/erdi/custom", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -30,6 +34,7 @@ public class CustomErdiController {
 
     private final CustomErdiService customErdiService;
     private final CustomErdiViewRepository customErdiViewRepository;
+    private final PodWebClient podWebClient;
 
     @GetMapping
     public Page<CustomErdiView> getCustomErdiRows(@RequestParam(required = false) SortingDirection sortingDirection,
@@ -78,6 +83,11 @@ public class CustomErdiController {
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
     public void deleteCustomErdi(@PathVariable Long id) {
         customErdiService.deleteCustomErdi(id);
+    }
+
+    @PostMapping(path = "/subtypes")
+    public List<ObjectNode> getSubtypesFromPod(@RequestBody List<String> subtypeIds){
+        return podWebClient.fetchSubtypes(subtypeIds);
     }
 
 }
