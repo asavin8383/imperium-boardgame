@@ -105,16 +105,19 @@ public class PodWebClient {
         return Flux.fromIterable(customErdiViewList)
             .parallel(fetchFluxConcurrency)
             .runOn(Schedulers.parallel())
-            .flatMap(customErdiView -> {
-                customErdiView.setSubtype(this.getSubtype(customErdiView.getSubtypeId()));
-                return Mono.just(customErdiView);
-            })
+            .flatMap(customErdiView ->
+                this.getSubtype(customErdiView.getSubtypeId())
+                    .map(subtype -> {
+                        customErdiView.setSubtype(subtype);
+                        return customErdiView;
+                    })
+            )
             .sequential()
             .collectList()
             .block();
     }
 
-    private String getSubtype(String origId) {
+    private Mono<String> getSubtype(String origId) {
         return webClient.get()
             .uri(UriComponentsBuilder
                 .fromUriString(GET_SUBTYPE_URI)
@@ -129,7 +132,7 @@ public class PodWebClient {
                     log.warn("Ошибка при получении Subtype по id {}, статус: {}", origId, clientResponse.statusCode().toString());
                     return Mono.empty();
                 }
-            }).block();
+            });
     }
 
 }
