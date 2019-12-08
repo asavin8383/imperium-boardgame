@@ -27,7 +27,7 @@ public class GatewaySecurityConfiguration extends ResourceServerConfigurerAdapte
                     .permitAll()
                     .antMatchers(HttpMethod.GET,
                             "/pod/erdi/single/**",
-                            "/pod/subtype/single/**",
+                            "/pod/subtype/single_string/**",
                             "/pod/erdi/checkUnits/**",
                             "/viewer/**",
                             "/arrangements/checkUnits/**",

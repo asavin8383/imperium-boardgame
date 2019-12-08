@@ -1,7 +1,6 @@
 package controllers.traffic;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import controllers.helpers.SortingHelper;
 import enums.SortingDirection;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +11,7 @@ import model.traffic.CustomErdiView;
 import model.traffic.SearchQueryPattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -22,8 +22,6 @@ import org.springframework.web.bind.annotation.*;
 import repositories.CustomErdiViewRepository;
 import services.traffic.CustomErdiService;
 import webClients.PodWebClient;
-
-import java.util.List;
 
 @RestController
 @RequestMapping(path = "/erdi/custom", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -49,13 +47,15 @@ public class CustomErdiController {
         if(query == null) {
             query = "";
         }
+        Page<CustomErdiView> customErdiViews;
         if(erdiTrafficUnitId != null) {
-            return customErdiViewRepository.findAllByErdiTrafficUnitsContainingAndQuery(erdiTrafficUnitId, query, pageable);
+            customErdiViews = customErdiViewRepository.findAllByErdiTrafficUnitsContainingAndQuery(erdiTrafficUnitId, query, pageable);
         } else if (searchQueryPattern != null) {
-            return customErdiViewRepository.findAllBySearchQueryPatterns(searchQueryPattern, pageable);
+            customErdiViews = customErdiViewRepository.findAllBySearchQueryPatterns(searchQueryPattern, pageable);
         } else {
-            return customErdiViewRepository.findAllByQuery(query, pageable);
+            customErdiViews = customErdiViewRepository.findAllByQuery(query, pageable);
         }
+        return new PageImpl<>(podWebClient.fetchSubtypes(customErdiViews.getContent()), pageable, customErdiViews.getTotalElements());
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -83,11 +83,6 @@ public class CustomErdiController {
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
     public void deleteCustomErdi(@PathVariable Long id) {
         customErdiService.deleteCustomErdi(id);
-    }
-
-    @PostMapping(path = "/subtypes")
-    public List<ObjectNode> getSubtypesFromPod(@RequestBody List<String> subtypeIds){
-        return podWebClient.fetchSubtypes(subtypeIds);
     }
 
 }

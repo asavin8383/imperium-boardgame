@@ -4,6 +4,7 @@ import checkUnits.CheckUnit;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import exceptions.AS_15_8_PPT_Exception;
 import lombok.extern.slf4j.Slf4j;
+import model.traffic.CustomErdiView;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -100,17 +101,20 @@ public class PodWebClient {
         }
     }
 
-    public List<ObjectNode> fetchSubtypes(List<String> subtypeIds) {
-        return Flux.fromIterable(subtypeIds)
+    public List<CustomErdiView> fetchSubtypes(List<CustomErdiView> customErdiViewList) {
+        return Flux.fromIterable(customErdiViewList)
             .parallel(fetchFluxConcurrency)
             .runOn(Schedulers.parallel())
-            .flatMap(this::getSubtype)
+            .flatMap(customErdiView -> {
+                customErdiView.setSubtype(this.getSubtype(customErdiView.getSubtypeId()));
+                return Mono.just(customErdiView);
+            })
             .sequential()
             .collectList()
             .block();
     }
 
-    private Mono<ObjectNode> getSubtype(String origId) {
+    private String getSubtype(String origId) {
         return webClient.get()
             .uri(UriComponentsBuilder
                 .fromUriString(GET_SUBTYPE_URI)
@@ -120,12 +124,12 @@ public class PodWebClient {
             .flatMap(clientResponse -> {
                 if(clientResponse.statusCode().equals(HttpStatus.OK)){
                     log.info("Subtype получен успешно, id: {}", origId);
-                    return clientResponse.bodyToMono(ObjectNode.class);
+                    return clientResponse.bodyToMono(String.class);
                 } else {
                     log.warn("Ошибка при получении Subtype по id {}, статус: {}", origId, clientResponse.statusCode().toString());
                     return Mono.empty();
                 }
-            });
+            }).block();
     }
 
 }
