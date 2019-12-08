@@ -543,7 +543,7 @@ row_number() OVER ()  AS num,
        --r.result, -- Статус
         coalesce(ci.blocktype,'DEFAULT') as blocktype, -- Тип блокировки
        to_char (r.end_date,'DD.MM.YYYY HH24:MI:SS') as end_date, -- Дата и время проверки
-       r.id::text as screenshot_id -- ID для формирования ссылки
+       s.result_id::text as screenshot_id -- ID для формирования ссылки
  from
 results.results r join sor.content_history ch on r.content_id=ch.content_id
 and r.start_date >=ch.st_dt and r.start_date<ch.end_dt
@@ -791,12 +791,12 @@ row_number() OVER ()  AS num,
        --r.result, -- Статус
         coalesce(ci.blocktype,'DEFAULT') as blocktype, -- Тип блокировки
        to_char (r.end_date,'DD.MM.YYYY HH24:MI:SS') as end_date, -- Дата и время проверки
-       r.id as screenshot_id -- ID для формирования ссылки
+        s.result_id as screenshot_id -- ID для формирования ссылки
  from
 results.results r join sor.content_history ch on r.content_id=ch.content_id
 and r.start_date >=ch.st_dt and r.start_date<ch.end_dt
 join sor.content_info ci on ci.content_id=r.content_id and ci.content_version_id=ch.content_version_id
-join results.result_screenshots  s on r.id = s.result_id
+left join results.result_screenshots  s on r.id = s.result_id
 where r.arrangement_id=?
 and r.result in (
 --'COMPLETED',
@@ -1038,12 +1038,12 @@ row_number() OVER ()  AS num,
        --r.result, -- Статус
         coalesce(ci.blocktype,'DEFAULT') as blocktype, -- Тип блокировки
        to_char (r.end_date,'DD.MM.YYYY HH24:MI:SS') as end_date, -- Дата и время проверки
-       r.id as screenshot_id -- ID для формирования ссылки
+       s.result_id as screenshot_id -- ID для формирования ссылки
  from
 results.results r join sor.content_history ch on r.content_id=ch.content_id
 and r.start_date >=ch.st_dt and r.start_date<ch.end_dt
 join sor.content_info ci on ci.content_id=r.content_id and ci.content_version_id=ch.content_version_id
-join results.result_screenshots  s on r.id = s.result_id
+left join results.result_screenshots  s on r.id = s.result_id
 where r.arrangement_id=?
 and r.result in (
 'COMPLETED'
