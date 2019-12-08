@@ -1955,7 +1955,7 @@ and r.result in (
                                         <list-property name="action">
                                             <structure>
                                                 <property name="linkType">hyperlink</property>
-                                                <expression name="uri" type="javascript">gateway+"/dispatcher/results/nmap_log?id="+row["screenshot_id"]</expression>
+                                                <expression name="uri" type="javascript">gateway+"/dispatcher/results/nmap_log?id="+row["log"]</expression>
                                                 <property name="targetWindow">_blank</property>
                                             </structure>
                                         </list-property>
@@ -2264,7 +2264,7 @@ and r.result in (
                                         <list-property name="action">
                                             <structure>
                                                 <property name="linkType">hyperlink</property>
-                                                <expression name="uri" type="javascript">gateway+"/dispatcher/results/nmap_log?id="+row["screenshot_id"]</expression>
+                                                <expression name="uri" type="javascript">gateway+"/dispatcher/results/nmap_log?id="+row["log"]</expression>
                                                 <property name="targetWindow">_blank</property>
                                             </structure>
                                         </list-property>
@@ -2573,7 +2573,7 @@ and r.result in (
                                         <list-property name="action">
                                             <structure>
                                                 <property name="linkType">hyperlink</property>
-                                                <expression name="uri" type="javascript">gateway+"/dispatcher/results/nmap_log?id="+row["screenshot_id"]</expression>
+                                                <expression name="uri" type="javascript">gateway+"/dispatcher/results/nmap_log?id="+row["log"]</expression>
                                                 <property name="targetWindow">_blank</property>
                                             </structure>
                                         </list-property>
