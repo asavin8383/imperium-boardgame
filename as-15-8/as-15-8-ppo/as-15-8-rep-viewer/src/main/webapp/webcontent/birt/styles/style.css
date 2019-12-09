@@ -236,12 +236,12 @@
 .birtviewer_dialog_body
 {
 	/*background-color:#dbe4ee;*/
-	border-width:1px;
-	border-style:inset;
+	/*border-width:1px;*/
+	/*border-style:inset;*/
 	width:100%;
 	height:100%;
-	font-family:arial;
-	font-size:8pt;
+	font-family: Roboto, sans-serif;
+	font-size:12pt;
 }
 
 .birtviewer_dialog_button
