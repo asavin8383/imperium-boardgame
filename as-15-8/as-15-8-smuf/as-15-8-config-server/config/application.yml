@@ -111,6 +111,8 @@ logging:
   config:
   level:
     root: info
+    org.springframework.web: debug
+    org.springframework.security: debug
 spring:
   profiles: dev_asin
   datasource:

@@ -30,7 +30,7 @@ public class RobotController {
 
     private final RobotService robotService;
 
-    @PostMapping
+    @GetMapping
     @JsonView(Views.Brief.class)
     public Page<Robot> getAll(@RequestParam(required = false) SortingDirection sortingDirection,
                               @RequestParam(required = false) String sortingColumn,
@@ -42,7 +42,7 @@ public class RobotController {
         return robotService.get(page);
     }
 
-    @PostMapping(path = "{id}")
+    @GetMapping("{id}")
     @JsonView(Views.Full.class)
     public ResponseEntity<Robot> findById(@PathVariable Long id){
         return robotService.findById(id)
