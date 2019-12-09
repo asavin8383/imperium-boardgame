@@ -30,7 +30,7 @@ public class RobotController {
 
     private final RobotService robotService;
 
-    @PostMapping
+    @GetMapping
     @JsonView(Views.Brief.class)
     public Page<Robot> getAll(@RequestParam(required = false) SortingDirection sortingDirection,
                               @RequestParam(required = false) String sortingColumn,
