@@ -3,6 +3,7 @@ package model.scheme;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Strings;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -58,5 +59,19 @@ public class Subtype implements Serializable {
 
     @ToString.Include
     private String violationName;
+
+    public String getShortName(){
+        String result = "";
+        if(!Strings.isNullOrEmpty(registryName)) {
+            result += this.registryName + "/";
+        }
+        if(!Strings.isNullOrEmpty(categoryName)) {
+            result += this.categoryName + "/";
+        }
+        if(!Strings.isNullOrEmpty(violationName)) {
+            result += this.violationName;
+        }
+        return result;
+    }
 
 }

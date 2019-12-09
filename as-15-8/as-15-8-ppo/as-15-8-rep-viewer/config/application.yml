@@ -1,6 +1,8 @@
 subsystem: PPO
 server:
   port: 15814
+  servlet:
+    context-path: /viewer
 logging:
   config: config/logback-spring.xml
 gateway.url: ${GATEWAY_URI:http://localhost:15880}

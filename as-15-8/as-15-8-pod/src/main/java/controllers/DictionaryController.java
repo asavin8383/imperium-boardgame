@@ -17,7 +17,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping(path = "/dict", produces = MediaType.APPLICATION_JSON_VALUE)
-@PreAuthorize("hasRole('ROLE_MANAGE_DICT')")
+@PreAuthorize("hasRole('ROLE_DICTIONARY')")
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Slf4j
 public class DictionaryController {

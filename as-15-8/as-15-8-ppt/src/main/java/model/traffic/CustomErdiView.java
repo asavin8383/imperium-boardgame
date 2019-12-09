@@ -8,6 +8,7 @@ import org.hibernate.annotations.Subselect;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
+import javax.persistence.Transient;
 import java.io.Serializable;
 import java.util.List;
 
@@ -52,6 +53,11 @@ public class CustomErdiView implements Serializable {
 
     @ToString.Include
     private String unitValue;
+
+    /** Имя подсистемы будем получать из ПОД по ИД*/
+    @Transient
+    @Setter
+    private String subtype;
 
     @ManyToMany(mappedBy = "customErdiList")
     @JsonIgnore
