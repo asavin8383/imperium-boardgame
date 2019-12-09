@@ -39,7 +39,7 @@ AbstractParameterDialog.prototype = Object.extend( new AbstractBaseDialog( ),
 	 */
 	initializeBase : function( id )
 	{
-		this.__initBase( id, '500px' );
+		this.__initBase( id, '700px' );
 		this.__z_index = 200;
 		
 	    this.__neh_click_radio_closure = this.__neh_click_radio.bindAsEventListener( this );

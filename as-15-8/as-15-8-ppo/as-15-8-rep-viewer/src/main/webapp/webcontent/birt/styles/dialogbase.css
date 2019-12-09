@@ -10,7 +10,7 @@
 /* Title bar background area */
 .dialogTitleBar
 {
-	height: 20px;
+	height: 25px;
 	background-color: #fff;
 	cursor: move;
 }
@@ -19,7 +19,7 @@
 {
 	padding-left: 7px;
 	padding-right: 12px;
-	padding-top: 4px;
+	padding-top: 10px;
 	padding-bottom: 2px;
 	position: relative;
 	border-top-right-radius: 15px;
@@ -29,7 +29,7 @@
 /* Title text */
 .dialogTitleText
 {
-	font-size: 12px;
+	font-size: 12pt;
 	font-weight: 700!important;
 	font-family: Roboto, sans-serif;
 	color: black;
