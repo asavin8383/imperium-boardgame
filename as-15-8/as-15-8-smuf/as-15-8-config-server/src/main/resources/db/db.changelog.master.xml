@@ -17,5 +17,6 @@
     <include file="db/changelog/config.0012.param.xml" />
     <include file="db/changelog/config.0013.param.xml" />
     <include file="db/changelog/config.0014.configurations_and_robots.xml" />
+    <include file="db/changelog/config.0015.processing_times_cascades.xml" />
 
 </databaseChangeLog>
