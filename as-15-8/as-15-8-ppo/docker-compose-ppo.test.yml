@@ -2,7 +2,7 @@ version: '3.7'
 services:
   birt:
     container_name: report_generator
-    image: harbor.ec-leasing.ru/as_15_8/as-15-8-birt:latest
+    image: harbor.ec-leasing.ru/as_15_8/as-15-8-birt
     network_mode: "host"
     restart: always
     environment:
@@ -19,7 +19,7 @@ services:
       decode_log_event_to_json_object: "true"
   rep-scheduler:
     container_name: report_scheduler
-    image: harbor.ec-leasing.ru/as_15_8/as-15-8-rep-scheduler:latest
+    image: harbor.ec-leasing.ru/as_15_8/as-15-8-rep-scheduler
     restart: always
     network_mode: "host"
     environment:
@@ -38,7 +38,7 @@ services:
     container_name: report_viewer
     build:
       context: "./as-15-8-rep-viewer"
-    image: harbor.ec-leasing.ru/as_15_8/as-15-8-rep-viewer:latest
+    image: harbor.ec-leasing.ru/as_15_8/as-15-8-rep-viewer
     restart: always
     environment:
       GATEWAY_URI: http://192.168.5.50:15880
@@ -56,7 +56,7 @@ services:
     container_name: report_gate
     build:
       context: "./as-15-8-rep-gate"
-    image: harbor.ec-leasing.ru/as_15_8/as-15-8-rep-gate:latest
+    image: harbor.ec-leasing.ru/as_15_8/as-15-8-rep-gate
     restart: always
     environment:
       GATEWAY_URI: http://192.168.5.50:15880

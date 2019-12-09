@@ -5,36 +5,34 @@
 /* Border around dialog */
 .dialogBorder
 {
-	border-style: outset;
-	border-width: 1px;
-	border-color: #CCCCCC;
-	background-color: gray;
 }
 
 /* Title bar background area */
 .dialogTitleBar
 {
-	height: 20px;
-	background-color: #4E6DA4;
-	cursor: move;	
+	height: 25px;
+	background-color: #fff;
+	cursor: move;
 }
 
 .dTitleBar
 {
 	padding-left: 7px;
-	padding-right: 7px;
-	padding-top: 2px;
+	padding-right: 12px;
+	padding-top: 10px;
 	padding-bottom: 2px;
 	position: relative;
+	border-top-right-radius: 15px;
+	border-top-left-radius: 15px;
 }
 
 /* Title text */
 .dialogTitleText
 {
-	font-size: 11px; 
-	font-weight: bold; 
-	font-family: tahoma, verdana, arial, sans-serif;
-	color: white;
+	font-size: 12pt;
+	font-weight: 700!important;
+	font-family: Roboto, sans-serif;
+	color: black;
 }
 
 .dTitleText
@@ -85,8 +83,10 @@
 /* Background of dialog below title bar */
 .dialogBackground
 {
-	background-color: #ECE9D8;
+	background-color: #fff;
 	margin-bottom: 1px;
+	border-bottom-right-radius: 15px;
+	border-bottom-left-radius: 15px;
 }
 
 .dBackground
@@ -113,8 +113,9 @@
 /* Top divider line between dialog content area and button area */
 .dBtnBarDividerTop
 {
+	background-color: rgba(0,0,0,.12);
 	height: 1px;
-	background-color: gray;
+	/*background-color: gray;*/
 	overflow: hidden;
 }
 
@@ -160,10 +161,9 @@
 	height: 24px;
 	width: 80px;
 	overflow: hidden;
-	color: black; /* Font color */ 
-	/*background-color: #9C9C9C;
-	background-repeat: repeat-x;
-	background-position: top left;*/
+	background-color: #1976d2;
+	border-width: 0px;
+
 }
 
 .dialogBtnBarButtonDisabled
@@ -230,9 +230,10 @@
 /* Text for OK and CANCEL buttons */
 .dialogBtnBarButtonText
 {	
-	font-family: tahoma, verdana, arial, sans-serif;
-	font-size: 11px;
-	font-weight: 400;
+	font-family: Roboto, sans-serif;
+	color: white;
+	font-size: 14px;
+	font-weight: 500;
 	text-align: center;
 	vertical-align: middle;
 }

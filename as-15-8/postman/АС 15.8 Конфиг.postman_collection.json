@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "6d5bb57d-fa3b-4b6d-b75f-d9efcc33067a",
+		"_postman_id": "309a4781-de6f-42b2-8305-faf4e5952679",
 		"name": "АС 15.8 Конфиг",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -54,6 +54,339 @@
 						"method": "POST",
 						"header": [],
 						"url": {
+							"raw": "{{url}}/config/actuator/bus-refresh/executor",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"config",
+								"actuator",
+								"bus-refresh",
+								"executor"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "ПС/ПАСД",
+			"item": [
+				{
+					"name": "Добавление ПC",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJyb2xlIjoiUk9MRV9TWVNURU0iLCJzY29wZSI6WyJyZWFkIiwid3JpdGUiXSwiZXhwIjoxNTc1NzA1OTMxLCJhdXRob3JpdGllcyI6WyJST0xFX1NZU1RFTSJdLCJqdGkiOiI1NTBkNmVmNi1jYTMzLTQ5MTMtODNkNS05ZTcwYmU3NDllNTQiLCJjbGllbnRfaWQiOiJwb2QifQ.aXKS43lDGZRANh7zItNpw0ftsy8yqnEc0pr7ZLbJfHzYn2EiHdeIuOCpCdSgsNamNoeJof9Gf_MIVkWxzA-Hxef_7e6DOhiCYGrXK0xLYA98sTeG4ApYYydiQFKJlw8Hsd8ydd90DLaE-nn6tT-KSER6xQRHl3veIGk7S8pV70874a35oRrLLPiyJLVeP4ow0rxjnk4LS_enc5s9u4qhM_a9vhexXBownlNJ0-mLmt6FxohCjt09gGA7yF4VndmTYWnzRHjpoPsM3gGgKNBxPbCO7KM0R276NZAcD-RQVeehmoMgOHj-pRLHArxjhrg9cP-8GR5uMaFcEvSQiKGtvg",
+									"type": "string"
+								},
+								{
+									"key": "tokenType",
+									"value": "bearer",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[{\"id\": 17, \"name\": \"Mail.RU\", \"hostname\": \"mail.ru\"}]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/config/ps",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"config",
+								"ps"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Добавление ПАСД",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJyb2xlIjoiUk9MRV9TWVNURU0iLCJzY29wZSI6WyJyZWFkIiwid3JpdGUiXSwiZXhwIjoxNTc1NzA1OTMxLCJhdXRob3JpdGllcyI6WyJST0xFX1NZU1RFTSJdLCJqdGkiOiI1NTBkNmVmNi1jYTMzLTQ5MTMtODNkNS05ZTcwYmU3NDllNTQiLCJjbGllbnRfaWQiOiJwb2QifQ.aXKS43lDGZRANh7zItNpw0ftsy8yqnEc0pr7ZLbJfHzYn2EiHdeIuOCpCdSgsNamNoeJof9Gf_MIVkWxzA-Hxef_7e6DOhiCYGrXK0xLYA98sTeG4ApYYydiQFKJlw8Hsd8ydd90DLaE-nn6tT-KSER6xQRHl3veIGk7S8pV70874a35oRrLLPiyJLVeP4ow0rxjnk4LS_enc5s9u4qhM_a9vhexXBownlNJ0-mLmt6FxohCjt09gGA7yF4VndmTYWnzRHjpoPsM3gGgKNBxPbCO7KM0R276NZAcD-RQVeehmoMgOHj-pRLHArxjhrg9cP-8GR5uMaFcEvSQiKGtvg",
+									"type": "string"
+								},
+								{
+									"key": "tokenType",
+									"value": "bearer",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[{\"id\": 17, \"name\": \"Mail.RU\", \"hostname\": \"mail.ru\"}]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/config/pasd",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"config",
+								"pasd"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Роботы",
+			"item": [
+				{
+					"name": "Получение списка роботов",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqYWNrIiwicm9sZSI6IlJPTEVfT1BFUkFUT1IsUk9MRV9GT1JNQUxfVEFTSyxST0xFX01BTkFHRV9GT1JNQUxfVEFTSyxST0xFX01BTkFHRV9BUlJBTkdFTUVOVCxST0xFX1BSRVBBUkFUSU9OX1RSQUZGSUMsUk9MRV9ESUNUSU9OQVJZLFJPTEVfRk9STUFUSU9OX09GX1NIRURVTEUsUk9MRV9WSUVXX1JFU1VMVCIsIm1haWwiOiIiLCJ1c2VyX25hbWUiOiJqYWNrIiwic2NvcGUiOlsicmVhZCIsIndyaXRlIl0sImV4cCI6MTU3NTcwNTUyNiwidXNlck5hbWUiOiJqYWNrIiwiYXV0aG9yaXRpZXMiOlsiUk9MRV9ESUNUSU9OQVJZIiwiUk9MRV9PUEVSQVRPUiIsIlJPTEVfUFJFUEFSQVRJT05fVFJBRkZJQyIsIlJPTEVfTUFOQUdFX0ZPUk1BTF9UQVNLIiwiUk9MRV9NQU5BR0VfQVJSQU5HRU1FTlQiLCJST0xFX0ZPUk1BVElPTl9PRl9TSEVEVUxFIiwiUk9MRV9WSUVXX1JFU1VMVCIsIlJPTEVfRk9STUFMX1RBU0siXSwianRpIjoiMzI5YzY0YjMtNzhmZS00NjU3LWE3MWQtNzMzMDRlYWExYWQ0IiwiY2xpZW50X2lkIjoiYXMtMTUtOCIsInNlY29uZE5hbWUiOiIifQ.YAHlAYJ-eQLuYIHOw2L3KlpK5HvE_SmMrEuljI99gsn6ksyR-sNP_M_NSqGVn2YYNH8vYay803iFG-cx3sNM0FE--KNSMYnQtFo4j_yraVNCuAgGrkasr3y7Ru160xuNgLDwi92hTyaZLX5_Gb20SwTE5Od-N8JjWhH2XVIiRzN-R7ZN2a87NwgusIwpA_rGQCDJJ-GNxsGyZGmJ5-Q24NmCbddNEex2B1uhiaUnyuUI8skwfrwoE62tDazJ8dkw-cu-rzmpi2TISvwROi6R51UqKmj9cnOx1OgYCw70oE0Dh9ybUrIBWJxYmQHTnQNYC3Eu3bVJqIcOD43bTUNemw",
+									"type": "string"
+								},
+								{
+									"key": "tokenType",
+									"value": "bearer",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/config/robots?pageNumber=0&pageSize=3",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"config",
+								"robots"
+							],
+							"query": [
+								{
+									"key": "pageNumber",
+									"value": "0"
+								},
+								{
+									"key": "pageSize",
+									"value": "3"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Получение робота",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqYWNrIiwicm9sZSI6IlJPTEVfT1BFUkFUT1IsUk9MRV9GT1JNQUxfVEFTSyxST0xFX01BTkFHRV9GT1JNQUxfVEFTSyxST0xFX01BTkFHRV9BUlJBTkdFTUVOVCxST0xFX1BSRVBBUkFUSU9OX1RSQUZGSUMsUk9MRV9ESUNUSU9OQVJZLFJPTEVfRk9STUFUSU9OX09GX1NIRURVTEUsUk9MRV9WSUVXX1JFU1VMVCIsIm1haWwiOiIiLCJ1c2VyX25hbWUiOiJqYWNrIiwic2NvcGUiOlsicmVhZCIsIndyaXRlIl0sImV4cCI6MTU3NTcwNTUyNiwidXNlck5hbWUiOiJqYWNrIiwiYXV0aG9yaXRpZXMiOlsiUk9MRV9ESUNUSU9OQVJZIiwiUk9MRV9PUEVSQVRPUiIsIlJPTEVfUFJFUEFSQVRJT05fVFJBRkZJQyIsIlJPTEVfTUFOQUdFX0ZPUk1BTF9UQVNLIiwiUk9MRV9NQU5BR0VfQVJSQU5HRU1FTlQiLCJST0xFX0ZPUk1BVElPTl9PRl9TSEVEVUxFIiwiUk9MRV9WSUVXX1JFU1VMVCIsIlJPTEVfRk9STUFMX1RBU0siXSwianRpIjoiMzI5YzY0YjMtNzhmZS00NjU3LWE3MWQtNzMzMDRlYWExYWQ0IiwiY2xpZW50X2lkIjoiYXMtMTUtOCIsInNlY29uZE5hbWUiOiIifQ.YAHlAYJ-eQLuYIHOw2L3KlpK5HvE_SmMrEuljI99gsn6ksyR-sNP_M_NSqGVn2YYNH8vYay803iFG-cx3sNM0FE--KNSMYnQtFo4j_yraVNCuAgGrkasr3y7Ru160xuNgLDwi92hTyaZLX5_Gb20SwTE5Od-N8JjWhH2XVIiRzN-R7ZN2a87NwgusIwpA_rGQCDJJ-GNxsGyZGmJ5-Q24NmCbddNEex2B1uhiaUnyuUI8skwfrwoE62tDazJ8dkw-cu-rzmpi2TISvwROi6R51UqKmj9cnOx1OgYCw70oE0Dh9ybUrIBWJxYmQHTnQNYC3Eu3bVJqIcOD43bTUNemw",
+									"type": "string"
+								},
+								{
+									"key": "tokenType",
+									"value": "bearer",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/config/robots/103",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"config",
+								"robots",
+								"103"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Обновление конфига робота",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqYWNrIiwicm9sZSI6IlJPTEVfT1BFUkFUT1IsUk9MRV9GT1JNQUxfVEFTSyxST0xFX01BTkFHRV9GT1JNQUxfVEFTSyxST0xFX01BTkFHRV9BUlJBTkdFTUVOVCxST0xFX1BSRVBBUkFUSU9OX1RSQUZGSUMsUk9MRV9ESUNUSU9OQVJZLFJPTEVfRk9STUFUSU9OX09GX1NIRURVTEUsUk9MRV9WSUVXX1JFU1VMVCIsIm1haWwiOiIiLCJ1c2VyX25hbWUiOiJqYWNrIiwic2NvcGUiOlsicmVhZCIsIndyaXRlIl0sImV4cCI6MTU3NTcwNTUyNiwidXNlck5hbWUiOiJqYWNrIiwiYXV0aG9yaXRpZXMiOlsiUk9MRV9ESUNUSU9OQVJZIiwiUk9MRV9PUEVSQVRPUiIsIlJPTEVfUFJFUEFSQVRJT05fVFJBRkZJQyIsIlJPTEVfTUFOQUdFX0ZPUk1BTF9UQVNLIiwiUk9MRV9NQU5BR0VfQVJSQU5HRU1FTlQiLCJST0xFX0ZPUk1BVElPTl9PRl9TSEVEVUxFIiwiUk9MRV9WSUVXX1JFU1VMVCIsIlJPTEVfRk9STUFMX1RBU0siXSwianRpIjoiMzI5YzY0YjMtNzhmZS00NjU3LWE3MWQtNzMzMDRlYWExYWQ0IiwiY2xpZW50X2lkIjoiYXMtMTUtOCIsInNlY29uZE5hbWUiOiIifQ.YAHlAYJ-eQLuYIHOw2L3KlpK5HvE_SmMrEuljI99gsn6ksyR-sNP_M_NSqGVn2YYNH8vYay803iFG-cx3sNM0FE--KNSMYnQtFo4j_yraVNCuAgGrkasr3y7Ru160xuNgLDwi92hTyaZLX5_Gb20SwTE5Od-N8JjWhH2XVIiRzN-R7ZN2a87NwgusIwpA_rGQCDJJ-GNxsGyZGmJ5-Q24NmCbddNEex2B1uhiaUnyuUI8skwfrwoE62tDazJ8dkw-cu-rzmpi2TISvwROi6R51UqKmj9cnOx1OgYCw70oE0Dh9ybUrIBWJxYmQHTnQNYC3Eu3bVJqIcOD43bTUNemw",
+									"type": "string"
+								},
+								{
+									"key": "tokenType",
+									"value": "bearer",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"mail_ru\",\n\t\"accessTool\": \"SEARCH_SYSTEM\",\n\t\"status\": \"WORK\",\n\t\"robotProperties\": [\n\t\t{\"key\": \"SEARCH_RESULT_LIMIT\", \"value\": 15},\n        {\"key\": \"SEARCH_SYSTEM_URL\", \"value\": \"https://mail.ru\"},\n\t\t{\"key\": \"SEARCH_SYSTEM_XPATH_INPUT_FIELD\", \"value\": \"//*[@id=\\\"q\\\"]\"},\n\t\t{\"key\": \"SEARCH_SYSTEM_XPATH_CAPTCHA\", \"value\": \"//*[@class=\\\"DesktopCaptcha-captchaForm\\\"]\"},\n\t\t{\"key\": \"SEARCH_SYSTEM_XPATH_NEXT_PAGE\", \"value\": \"//section[@id=\\\"js-bottomBar\\\"]//li[last()]/a\"},\n\t\t{\"key\": \"SEARCH_SYSTEM_XPATH_ITEM_LINK\", \"value\": \"//ul[@id=\\\"js-result\\\"]/li/div[1]/div/span/a\"},\n\t\t{\"key\": \"INPUT_DELAY\", \"value\": 0},\n\t\t{\"key\": \"SEARCH_SYSTEM_RESULT_PAGE_TYPE\", \"value\": \"pagination\"},\n\t\t{\"key\": \"BROWSER\", \"value\": \"chrome\"},\n\t\t{\"key\": \"PLATFORM\", \"value\": \"ANY\"}\t\n\t]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/config/robots?id=103",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"config",
+								"robots"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "103"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "ppm",
+			"item": [
+				{
+					"name": "Получение конфигурации с сервера",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/config/ppm/default/latest",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"config",
+								"ppm",
+								"default",
+								"latest"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Обновление конфигурации",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJBU18xNV84X2FkbWluIiwicm9sZSI6IlJPTEVfQURNSU4iLCJtYWlsIjoiYWRtaW5AYWRtaW4uYWRtIiwidXNlcl9uYW1lIjoiQVNfMTVfOF9hZG1pbiIsInNjb3BlIjpbInJlYWQiLCJ3cml0ZSJdLCJleHAiOjE1NzM2MjgwMzAsInVzZXJOYW1lIjoiQVNfMTVfOF9hZG1pbiIsImF1dGhvcml0aWVzIjpbIlJPTEVfQURNSU4iXSwianRpIjoiYzM0NGY3OGMtMjZkNC00MDE3LWFkNjctZjA3YjRlMWE1NzdjIiwiY2xpZW50X2lkIjoiYXMtMTUtOCIsInNlY29uZE5hbWUiOiJ0ZXN0X2FkbWluIn0.eZoeL1GnlGpYdBwYzfWKysc-WjtFFoFZEAYWSMpb70Tp_Y3yPVpPbkaa0CVrOoWM-5bmcQsN2BXm3UAFHrAZmnc1VjoOS6f9RYGYBKcM8weYWyxnF5B7J-FcL2G7XHQChrepwswpEETfDqUwl7qLNfH57qMrnIb37QgmZK4W_dZj7y17sT0ZMHbTup3xEJG3O92RvyhAlbSB2qB-SmSTWO-dq1FZtB33H1P4BtH1Dprw4S3U9jtOVcifzqr3XrI8UMEmEXgSKNRy9RVTeaGSK0nqVUmFpcp6hQ3xWqNOIE1stzyopTKVxnmb0yaCP8JpdRiNHG87hFOcBuMnP5Fk3A",
+									"type": "string"
+								},
+								{
+									"key": "tokenType",
+									"value": "bearer",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
 							"raw": "{{url}}/config/actuator/bus-refresh/ppm",
 							"host": [
 								"{{url}}"
@@ -72,7 +405,7 @@
 			"protocolProfileBehavior": {}
 		},
 		{
-			"name": "Получение списка роботов",
+			"name": "Получение списка рабочих роботов",
 			"request": {
 				"auth": {
 					"type": "oauth2",

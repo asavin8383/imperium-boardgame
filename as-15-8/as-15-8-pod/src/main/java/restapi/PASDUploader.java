@@ -54,4 +54,8 @@ public class PASDUploader
         log.info("{} PASD records sent successfully", all.size());
 
     }
+    
+    public void delete(){
+        
+    }
 }

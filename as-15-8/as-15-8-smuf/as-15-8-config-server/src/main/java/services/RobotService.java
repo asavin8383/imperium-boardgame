@@ -3,6 +3,7 @@ package services;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Robot;
+import model.RobotProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,7 +28,7 @@ public class RobotService {
         return robotRepository.findById(id);
     }
 
-    public void edit(Robot robot, Robot newRobot){
+    public Robot edit(Robot robot, Robot newRobot){
         log.info("Сохранение робота: {}", robot);
 
         if(robot == null)
@@ -39,13 +40,13 @@ public class RobotService {
         robot.setStatus(newRobot.getStatus());
 
         robot.getRobotProperties().clear();
-        newRobot.getRobotProperties().forEach(prop -> {
+        for(RobotProperty prop : newRobot.getRobotProperties()) {
             prop.setRobot(robot);
             robot.getRobotProperties().add(prop);
-        });
-
-        robotRepository.save(robot);
+        }
+        robot = robotRepository.save(robot);
         log.info("Робот успешно сохранен: id {}, name {}", robot.getId(), robot.getName());
+        return robot;
     }
 
     public void delete(Robot robot){

@@ -1,8 +1,8 @@
 package services;
 
+import enums.Dictionary;
 import exceptions.AS_15_8_POD_Exception;
 import lombok.extern.slf4j.Slf4j;
-import enums.Dictionary;
 import model.projection.DictionaryView;
 import model.response.PASDEntry;
 import model.response.PSEntry;
@@ -19,7 +19,6 @@ import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.UriComponentsBuilder;
-import repositories.PsRepository;
 import repositories.helper.DictionaryRepository;
 import updaters.PASDDictionaryUpdater;
 import updaters.PSDictionaryUpdater;
@@ -33,7 +32,6 @@ import java.util.stream.Collectors;
 public class DictionaryService {
 
     private Map<Dictionary, DictionaryRepository> repositoryMap;
-    private PsRepository psRepository;
     private final PSDictionaryUpdater psDictionaryUpdater;
     private final PASDDictionaryUpdater pasdDictionaryUpdater;
     private final JdbcTemplate jdbcTemplate;
@@ -44,7 +42,6 @@ public class DictionaryService {
 
     @Autowired
     public DictionaryService(List<DictionaryRepository> repositoryList,
-                             PsRepository psRepository,
                              PSDictionaryUpdater psDictionaryUpdater,
                              JdbcTemplate jdbcTemplate,
                              OAuth2RestTemplate restTemplate,
@@ -53,7 +50,6 @@ public class DictionaryService {
         for (DictionaryRepository repository : repositoryList) {
             repositoryMap.put(repository.getDictionaryType(), repository);
         }
-        this.psRepository = psRepository;
         this.psDictionaryUpdater = psDictionaryUpdater;
         this.jdbcTemplate = jdbcTemplate;
         this.restTemplate = restTemplate;
@@ -92,12 +88,12 @@ public class DictionaryService {
         psDictionaryUpdater.insertRecord(entry);
 
         if (isNew) {
-            ConfigPS ps = new ConfigPS(entry.Id, entry.Name, entry.Hostname);
+            ConfigPS ps = new ConfigPS(entry.getId(), entry.getName(), entry.getHostname());
             log.info("Sending PS record to config {}", ps);
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<List<ConfigPS>> entity = new HttpEntity<>(Arrays.asList(ps), headers);
+            HttpEntity<List<ConfigPS>> entity = new HttpEntity<>(Collections.singletonList(ps), headers);
             restTemplate.postForObject(
                     UriComponentsBuilder.fromHttpUrl(configUrl).path("/ps").build().toString(),
                     entity,
@@ -120,12 +116,12 @@ public class DictionaryService {
         pasdDictionaryUpdater.insertRecord(entry);
 
         if (isNew) {
-            ConfigPASD pasd = new ConfigPASD(entry.Id, entry.Name, entry.Hostname);
+            ConfigPASD pasd = new ConfigPASD(entry.getId(), entry.getName(), entry.getHostname());
             log.info("Sending PASD record to config {}", pasd);
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<List<ConfigPASD>> entity = new HttpEntity<>(Arrays.asList(pasd), headers);
+            HttpEntity<List<ConfigPASD>> entity = new HttpEntity<>(Collections.singletonList(pasd), headers);
             restTemplate.postForObject(
                     UriComponentsBuilder.fromHttpUrl(configUrl).path("/pasd").build().toString(),
                     entity,
@@ -167,7 +163,7 @@ public class DictionaryService {
                         .path("/pasd")
                         .queryParam("id", id.toString())
                         .build().toString()
-                );
+        );
     }
 
     private long getOrigId() {

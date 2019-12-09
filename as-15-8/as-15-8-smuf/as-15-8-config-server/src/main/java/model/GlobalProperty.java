@@ -18,8 +18,7 @@ public class GlobalProperty {
     private Long id;
 
     @Column(nullable = false)
-    @Convert(converter = AccessToolParameterConverter.class)
-    private AccessToolParameter key;
+    private String key;
 
     @Column(nullable = false)
     private String value;

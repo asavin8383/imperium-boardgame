@@ -30,13 +30,13 @@
 {
 	height:100%;
 	overflow:auto;
-	height:350px;
+	height:650px;
 }
 
 .BirtViewer_parameter_dialog_Input
 {
 	font:Verdana;
-	font-size:8pt;
+	font-size:12pt;
 	border-style:inset;
 	border-width:2px;
 	width:250px;
@@ -45,14 +45,14 @@
 .birtviewer_parameter_dialog_Select
 {
 	font:Verdana;
-	font-size:8pt;
+	font-size:12pt;
 	width:250px;
 }
 
 .birtviewer_parameter_dialog_Label
 {
 	font:Verdana;
-	font-size:8pt;
+	font-size:12pt;
 }
 
 /******************************************************************************
@@ -96,7 +96,7 @@
 	border-top-color:#cccccc;
 	border-top-style:solid;
 	border-top-width:1px;
-	font-size:8pt;
+	font-size:12pt;
 }
 
 /******************************************************************************
@@ -105,13 +105,13 @@
 .birtviewer_exportdata_dialog_single_select
 {
 	width:250px;
-	font-size:8pt;
+	font-size:12pt;
 }
 
 .birtviewer_exportdata_dialog_select
 {
 	width:180px;
-	font-size:8pt;
+	font-size:12pt;
 }
 
 .birtviewer_exportdata_dialog_button
@@ -125,7 +125,7 @@
 {
 	width:80px;
 	font:Verdana;
-	font-size:8pt;
+	font-size:12pt;
 	border-style:inset;
 	border-width:1px;	
 }
@@ -137,14 +137,14 @@
 {
 	width:120px;
 	font:Verdana;
-	font-size:8pt;
+	font-size:12pt;
 } 
  
 .birtviewer_exportreport_dialog_input
 {
 	width:120px;
 	font:Verdana;
-	font-size:8pt;
+	font-size:12pt;
 	border-style:inset;
 	border-width:1px;	
 } 
@@ -156,14 +156,14 @@
 {
 	width:150px;
 	font:Verdana;
-	font-size:8pt;
+	font-size:12pt;
 } 
 
 .birtviewer_printreport_dialog_input
 {
 	width:120px;
 	font:Verdana;
-	font-size:8pt;
+	font-size:12pt;
 	border-style:inset;
 	border-width:1px;	
 }
@@ -175,14 +175,14 @@
 {
 	width:200px;
 	font:Verdana;
-	font-size:8pt;
+	font-size:12pt;
 } 
  
 .birtviewer_printreportserver_dialog_input
 {
 	width:120px;
 	font:Verdana;
-	font-size:8pt;
+	font-size:12pt;
 	border-style:inset;
 	border-width:1px;	
 } 
@@ -191,7 +191,7 @@
 {
 	width:60px;
 	font:Verdana;
-	font-size:8pt;
+	font-size:12pt;
 	border-style:inset;
 	border-width:1px;	
 } 
@@ -208,7 +208,7 @@
 .birtviewer_progresspage
 {
 	font-family:Verdana;
-	font-size:8pt;
+	font-size:12pt;
 	cursor:default;	
 }
   
@@ -221,7 +221,7 @@
 	background-color:#dbe4ee;
 	border-width:2px;
 	border-style:outset;
-	font-size:8pt;
+	font-size:12pt;
 	cursor:default;
 }
 
@@ -236,19 +236,19 @@
 .birtviewer_dialog_body
 {
 	/*background-color:#dbe4ee;*/
-	border-width:1px;
-	border-style:inset;
+	/*border-width:1px;*/
+	/*border-style:inset;*/
 	width:100%;
 	height:100%;
-	font-family:arial;
-	font-size:8pt;
+	font-family: Roboto, sans-serif;
+	font-size:12pt;
 }
 
 .birtviewer_dialog_button
 {
 	width:100px;
 	font-family:verdana;
-	font-size:8pt;
+	font-size:12pt;
 	background-color:white;
 	border-style:outset;
 	border-width:1px;
@@ -300,7 +300,7 @@
 	height:26px;
 	background-color:#CBCB97;
 	font-family:Verdana;
-	font-size:8pt;
+	font-size:12pt;
 	border-top-width:1px;
 	border-top-style:solid;
 	border-top-color:#808080;
@@ -317,7 +317,7 @@
 	height:26px;
 	background-color:#E6E6C6;
 	font-family:Verdana;
-	font-size:8pt;
+	font-size:12pt;
 	border-left-color:#808080;
 	border-left-style:solid;
 	border-left-width:1px;
@@ -336,7 +336,7 @@
 .birtviewer_progressbar
 {
 	font-family:Verdana;
-	font-size:8pt;
+	font-size:12pt;
 	background:#FFFFFF;
 	border-width:2px;
 	border-style:solid;
@@ -361,7 +361,7 @@
 	height:100%;
 	background-color:#FFFFFF;
 	font-family:Verdana;
-	font-size:8pt;
+	font-size:12pt;
 	border-width:1px;
 	border-style:none;
 	border-color:gray;
@@ -393,6 +393,7 @@
 	border-left-color: #404040;
 	border-right-color: #D0D0D0;
 	border-bottom-color: #D0D0D0;
+	background-image: url("../images/bg.30467f61.png");
 }
 
 /******************************************************************************
