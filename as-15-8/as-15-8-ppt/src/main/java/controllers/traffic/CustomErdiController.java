@@ -11,6 +11,7 @@ import model.traffic.CustomErdiView;
 import model.traffic.SearchQueryPattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import repositories.CustomErdiViewRepository;
 import services.traffic.CustomErdiService;
+import webClients.PodWebClient;
 
 @RestController
 @RequestMapping(path = "/erdi/custom", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -30,6 +32,7 @@ public class CustomErdiController {
 
     private final CustomErdiService customErdiService;
     private final CustomErdiViewRepository customErdiViewRepository;
+    private final PodWebClient podWebClient;
 
     @GetMapping
     public Page<CustomErdiView> getCustomErdiRows(@RequestParam(required = false) SortingDirection sortingDirection,
@@ -44,13 +47,15 @@ public class CustomErdiController {
         if(query == null) {
             query = "";
         }
+        Page<CustomErdiView> customErdiViews;
         if(erdiTrafficUnitId != null) {
-            return customErdiViewRepository.findAllByErdiTrafficUnitsContainingAndQuery(erdiTrafficUnitId, query, pageable);
+            customErdiViews = customErdiViewRepository.findAllByErdiTrafficUnitsContainingAndQuery(erdiTrafficUnitId, query, pageable);
         } else if (searchQueryPattern != null) {
-            return customErdiViewRepository.findAllBySearchQueryPatterns(searchQueryPattern, pageable);
+            customErdiViews = customErdiViewRepository.findAllBySearchQueryPatterns(searchQueryPattern, pageable);
         } else {
-            return customErdiViewRepository.findAllByQuery(query, pageable);
+            customErdiViews = customErdiViewRepository.findAllByQuery(query, pageable);
         }
+        return new PageImpl<>(podWebClient.fetchSubtypes(customErdiViews.getContent()), pageable, customErdiViews.getTotalElements());
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)

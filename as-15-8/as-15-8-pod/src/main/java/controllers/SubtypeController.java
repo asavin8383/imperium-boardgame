@@ -61,6 +61,14 @@ public class SubtypeController {
                 .orElseThrow(() -> AS_15_8_POD_Exception.logAndGet(log, "Нарушение с оригинальным ИД " + origId + " не найдено в БД ПОД"));
     }
 
+    @GetMapping("/single_string")
+    public String getSubtypeAsString(@RequestParam String origId){
+        return subtypeRepository
+            .findByOrigIdAndEffDt(origId, Utils.getEndDate())
+            .map(Subtype::getShortName)
+            .orElseThrow(() -> AS_15_8_POD_Exception.logAndGet(log, "Нарушение с оригинальным ИД " + origId + " не найдено в БД ПОД"));
+    }
+
     @GetMapping(path = "/upload")
     public ResponseEntity<String> uploadSubtype(){
         if (state != UploadingState.UPLOADING){

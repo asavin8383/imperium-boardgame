@@ -25,7 +25,7 @@ public interface SearchQueryPatternRepo extends JpaRepository<SearchQueryPattern
 
     @Query(
             "select sqp from SearchQueryPattern sqp " +
-                    "join SearchQueryTrafficUnit stu " +
+                    "join sqp.searchQueryTrafficUnits stu " +
                     " join stu.traffic traffic " +
                     " join Arrangement a on traffic.id = a.trafficId and a.id = :arrangement_id "
     )
