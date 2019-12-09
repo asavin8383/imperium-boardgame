@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ConfigPS
 {
-    Long id;
-    String name;
-    String hostname;
+    private Long origId;
+    private String name;
+    private String hostname;
 }

@@ -84,7 +84,7 @@ public class PsPasdController
                 Robot newRobot = new Robot();
                 newRobot.setOrigId(ps.getOrigId());
                 newRobot.setOrigName(ps.getName());
-                newRobot.setName(ps.getName() + "-" + ps.getOrigId());
+                newRobot.setName(ps.getName() + "(" + ps.getOrigId() + ")");
                 newRobot.setType(robotType);
                 newRobot.setConfigurations(new HashSet<>(Arrays.asList(
                         configurationsService.getOrCreate(Microservice.executor),

@@ -128,7 +128,14 @@ public class ScheduleController {
         List<Arrangement> arrangements = this.mapper.convertValue(
                 scheduleData.get("arrangements"),
                 new TypeReference<List<Arrangement>>() {});
+
         schedule.setMaxWorkersCount(scheduleData.get("maxWorkersCount").asInt());
+        int freeWorkersCount = scheduleService.getFreeWorkersCount(
+                LocalDate.now(),
+                scheduleRepo.getScheduleStartTime(schedule.getId()),
+                scheduleRepo.getScheduleEndTime(schedule.getId()));
+        if(freeWorkersCount < schedule.getMaxWorkersCount())
+            throw new AS_15_8_PPM_Exception("Ошибка! Свободное количество обработчиков меньше, чем заданное для расчета ("+freeWorkersCount+" < "+schedule.getMaxWorkersCount()+")");
         LocalDate plannedDate = null;
         if(scheduleData.has("plannedDate"))
             plannedDate = LocalDate.parse(scheduleData.get("plannedDate").asText(), DateTimeFormatter.ISO_DATE);

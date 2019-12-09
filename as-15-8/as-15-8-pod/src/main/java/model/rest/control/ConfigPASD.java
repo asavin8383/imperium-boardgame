@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ConfigPASD
 {
-    Long id;
+    Long origId;
     String name;
     String hostname;
 }
