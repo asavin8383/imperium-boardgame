@@ -42,7 +42,7 @@ public class RobotController {
         return robotService.get(page);
     }
 
-    @PostMapping(path = "{id}")
+    @GetMapping("{id}")
     @JsonView(Views.Full.class)
     public ResponseEntity<Robot> findById(@PathVariable Long id){
         return robotService.findById(id)
