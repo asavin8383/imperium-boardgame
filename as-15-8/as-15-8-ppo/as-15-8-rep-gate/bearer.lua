@@ -2,13 +2,11 @@ local http = require "resty.http"
 local httpc = http.new()
 local jwt = require "resty.jwt"
 
-    local   token = nil
-    local token_in_COOKIE = ngx.var.cookie_COOKIE_BEARER
-    if token_in_COOKIE  == nil then
-        token = ngx.var.arg_token
-        ngx.header["Set-Cookie"] = "COOKIE_BEARER=" .. token .. "; path=/; HttpOnly"
+    local token = ngx.var.arg_token
+    if token  == nil then
+        token = ngx.var.cookie_COOKIE_BEARER
     else
-       token=token_in_COOKIE
+        ngx.header["Set-Cookie"] = "COOKIE_BEARER=" .. token .. "; path=/; HttpOnly"
     end
 
 -- finally, if still no JWT token, kick out an error and exit
@@ -40,7 +38,6 @@ local res, err = httpc:request_uri(gateway_url .. "/security/oauth/check_token",
 if res.status ~= 200 then
     ngx.status = ngx.HTTP_UNAUTHORIZED
     ngx.log(ngx.WARN, res.reason, res.status)
-    ngx.log(ngx.ERROR, "{\"error\": \"" .. res.reason .. "\",\"status\":" .. res.status .. "}" )
     ngx.header.content_type = "application/json; charset=utf-8"
     ngx.say("{\"error\": \"" .. res.reason .. "\",\"status\":" .. res.status .. "}")
     ngx.exit(ngx.HTTP_UNAUTHORIZED)
