@@ -51,8 +51,8 @@ public class RobotController {
     }
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public void editRobot(@RequestParam("id") Robot robot, @RequestBody Robot newRobot) {
-        robotService.edit(robot, newRobot);
+    public Robot editRobot(@RequestParam("id") Robot robot, @RequestBody Robot newRobot) {
+        return robotService.edit(robot, newRobot);
     }
 
     @DeleteMapping
