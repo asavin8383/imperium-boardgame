@@ -10,14 +10,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>as-15-8-rep-viewer</artifactId>
-
     <dependencies>
-        <dependency>
-            <groupId>org.eclipse.birt.resources</groupId>
-            <artifactId>nl_ru</artifactId>
-            <version>3.6.0</version>
-        </dependency>
-        <dependency>
+
+    <dependency>
+        <groupId>org.eclipse.birt</groupId>
+        <artifactId>report.viewer.nl_ru</artifactId>
+        <version>3.6.0</version>
+    </dependency>
+       <dependency>
             <groupId>ecl.minzdrav</groupId>
             <artifactId>ecl-birt-fonts</artifactId>
             <version>1.0</version>
@@ -132,9 +132,6 @@
             <!--<artifactId>spring-cloud-services-spring-connector</artifactId>-->
             <!--<version>2.1.4.RELEASE</version>-->
         <!--</dependency>-->
-
-
-
     </dependencies>
 
     <build>
