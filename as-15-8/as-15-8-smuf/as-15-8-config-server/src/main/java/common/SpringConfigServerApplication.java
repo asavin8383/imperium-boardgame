@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @SpringBootApplication
 @EnableConfigServer
-@ComponentScan(basePackages = {"common", "model", "controllers", "services", "repositories"})
+@ComponentScan(basePackages = {"common", "model", "controllers", "services", "repositories", "handlers"})
 @EntityScan("model")
 @EnableJpaRepositories("repositories")
 @RestController

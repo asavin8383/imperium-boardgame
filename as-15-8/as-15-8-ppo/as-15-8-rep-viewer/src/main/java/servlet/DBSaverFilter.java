@@ -24,6 +24,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -131,7 +133,12 @@ public class DBSaverFilter implements javax.servlet.Filter
         }
 
         if (RPFD != null) {
-            LocalDate start = LocalDate.parse(RPFD);
+            LocalDate start;
+            try {
+                start = LocalDate.parse(RPFD, DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+            } catch (DateTimeParseException e) {
+                start = LocalDate.parse(RPFD);
+            }
             report.setMsr_prd_st_dttm(start);
         }
 
