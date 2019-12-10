@@ -31,9 +31,9 @@ local claim_spec = {
 
 -- make sure to set and put "env JWT_SECRET;" in nginx.conf
 local gateway_url=os.getenv("GATEWAY_URI")
-
+local basic_auth=os.getenv("BASIC_AUTH")
 local res, err = httpc:request_uri(gateway_url .. "/security/oauth/check_token",
- { method = "POST", query="token=" .. token, headers={authorization ="Basic YmlydC12aWV3ZXI6MXEwcDJ3OW8="}})
+ { method = "POST", query="token=" .. token, headers={authorization ="Basic " .. basic_auth}})
 
 if res.status ~= 200 then
     ngx.status = ngx.HTTP_UNAUTHORIZED
