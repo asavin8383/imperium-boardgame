@@ -68,7 +68,7 @@ public class Robot {
 
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @OneToMany(cascade=CascadeType.ALL, mappedBy = "robot", fetch = FetchType.EAGER)
+    @OneToMany(cascade=CascadeType.ALL, orphanRemoval = true, mappedBy = "robot", fetch = FetchType.EAGER)
     @JsonView(Views.Full.class)
     private final Set<RobotProperty> robotProperties = new HashSet<>();
 }
