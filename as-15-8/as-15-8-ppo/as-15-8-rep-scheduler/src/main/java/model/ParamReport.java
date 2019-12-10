@@ -24,6 +24,9 @@ public class ParamReport
     long repId;
 
     @Column
+    String rep_nm;
+
+    @Column
     String msr_prd_tp;
 
     @Column
