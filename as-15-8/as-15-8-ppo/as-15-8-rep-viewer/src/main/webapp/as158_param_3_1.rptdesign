@@ -1512,49 +1512,6 @@ union
                     </structure>
                 </list-property>
             </structure>
-            <method name="beforeOpen"><![CDATA[if (params["IRTZ_CHCK_RSLT"].value!="ALL") {
-this.queryText=this.queryText + " and r.result='"+params["IRTZ_CHCK_RSLT"].value+"'"
-}
-
-if (params["IRTZ_TRF_W"].value!=null) {
-this.queryText=this.queryText + " and addon.visitors_cnt_world>="+params["IRTZ_TRF_W"].value
-}
-
-if (params["IRTZ_TRF_RU"].value!=null) {
-this.queryText=this.queryText + " and addon.visitors_cnt_russia>="+params["IRTZ_TRF_RU"].value
-}
-
-if (params["IRTZ_REG_TS"].value!=null) {
-this.queryText=this.queryText + " and ci.includetime::date='"+params["IRTZ_REG_TS"].value+"'"
-}
-
-if (params["IRTZ_BLOCKTYPE"].value!="ALL") {
-this.queryText=this.queryText + " and coalesce(ci.blocktype,'default')='"+params["IRTZ_BLOCKTYPE"].value+"'"
-}
-
-if (params["IRTZ_IRZTYPE"].value!="0") {
-this.queryText=this.queryText + " and addon.info_type_id='"+params["IRTZ_IRZTYPE"].value+"'"
-}
-
-if (params["IRTZ_REGTYPE"].value!="0") {
-this.queryText=this.queryText + " and  addon.orig_id='"+params["IRTZ_REGTYPE"].value+"'"
-}
-
-if (params["EVi"].value!=null) {
-this.queryText=this.queryText + " and a.id = ANY('{"+params["EVi"].value+"}'::bigint[])"
-}
-
-if (params["SSi"].value[0]!=0) {
-	queryStr="";
-	for (var index = 0; index < params["SSi"].value.length; index++) {
-		queryStr = queryStr.concat(params["SSi"].value[index] + ",")
-		}
-	queryStr = queryStr.substr(0, queryStr.length - 1);
-
-	this.queryText=this.queryText + " and at.orig_id = ANY('{"+queryStr+"}'::bigint[])";
-}
-
-this.queryText = this.queryText + " group by  at.nm order by at.nm";]]></method>
             <property name="dataSource">asdb</property>
             <list-property name="resultSet">
                 <structure>
@@ -1615,7 +1572,7 @@ and msr_prd2.eff_dttm::date=?
 order by check_unit_value,end_date desc nulls last ) last_r on r.check_unit_value=last_r.check_unit_value
 where
 msr_prd.eff_dttm::date=?
-and access_tool_tp_id=1]]></xml-property>
+and access_tool_tp_id=1 group by  at.nm order by at.nm]]></xml-property>
             <xml-property name="designerValues"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <model:DesignValues xmlns:design="http://www.eclipse.org/datatools/connectivity/oda/design" xmlns:model="http://www.eclipse.org/birt/report/model/adapter/odaModel">
   <Version>2.0</Version>
