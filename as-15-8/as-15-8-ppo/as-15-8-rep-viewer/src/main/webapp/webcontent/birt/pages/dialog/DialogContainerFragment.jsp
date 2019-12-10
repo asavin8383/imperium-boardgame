@@ -44,10 +44,10 @@
 				<tr>
 					<td>
 						<label class="birtviewer_hidden_label" for="<%= fragment.getClientId( ) %>dialogCloseBtn">
-							<%= 
+							<%=
 								BirtResources.getMessage( "birt.viewer.dialog.close" )
 							%>
-						</label>						
+						</label>
 						<div id="<%= fragment.getClientId( ) %>dialogCloseBtn" class="dialogCloseBtn dCloseBtn"/>
 					</td>
 				</tr>
