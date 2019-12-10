@@ -36,8 +36,6 @@ services:
       decode_log_event_to_json_object: "true"
   rep-viewer:
     container_name: report_viewer
-    build:
-      context: "./as-15-8-rep-viewer"
     image: dcr.ec-leasing.ru/as_15_8/as-15-8-rep-viewer:latest
     restart: always
     environment:
@@ -56,8 +54,6 @@ services:
       net:
   rep-gate:
     container_name: report_gate
-    build:
-      context: "./as-15-8-rep-gate"
     image: dcr.ec-leasing.ru/as_15_8/as-15-8-rep-gate:latest
     restart: always
     ports:
