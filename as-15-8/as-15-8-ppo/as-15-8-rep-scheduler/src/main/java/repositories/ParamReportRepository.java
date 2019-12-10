@@ -24,6 +24,7 @@ public interface ParamReportRepository extends JpaRepository<ParamReport, Long>
             "where s.repTpId = :repTpId "
             + "and ("
             + "concat(s.repId, '') like lower(concat('%',:query,'%')) "
+            + "or lower(s.rep_nm) like lower(concat('%',:query,'%')) "
             + "or lower(s.msr_prd_tp) like lower(concat('%',:query,'%')) "
             + "or lower(s.msr_prd_caption) like lower(concat('%',:query,'%')) "
             + "or lower(s.format) like lower(concat('%',:query,'%')) "
