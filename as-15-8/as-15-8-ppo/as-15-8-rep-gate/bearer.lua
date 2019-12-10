@@ -11,19 +11,7 @@ if token == nil then
     ngx.exit(ngx.HTTP_UNAUTHORIZED)
 end
 
--- validate any specific claims you need here
--- https://github.com/SkyLothar/lua-resty-jwt#jwt-validators
-local validators = require "resty.jwt-validators"
-local claim_spec = {
-    -- validators.set_system_leeway(15), -- time in seconds
-    -- exp = validators.is_not_expired(),
-    -- iat = validators.is_not_before(),
-    -- iss = validators.opt_matches("^http[s]?://yourdomain.auth0.com/$"),
-    -- sub = validators.opt_matches("^[0-9]+$"),
-    -- name = validators.equals_any_of({ "John Doe", "Mallory", "Alice", "Bob" }),
-}
 
--- make sure to set and put "env JWT_SECRET;" in nginx.conf
 local gateway_url=os.getenv("GATEWAY_URI")
 local basic_auth=os.getenv("BASIC_AUTH")
 local res, err = httpc:request_uri(gateway_url .. "/security/oauth/check_token",

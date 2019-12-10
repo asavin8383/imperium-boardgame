@@ -1,3 +1,4 @@
+ngx.log(ngx.WARN,'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
 local http = require "resty.http"
 local httpc = http.new()
 local jwt = require "resty.jwt"
@@ -10,21 +11,6 @@ local jwt = require "resty.jwt"
         ngx.exit(ngx.HTTP_UNAUTHORIZED)
     end
 
--- finally, if still no JWT token, kick out an error and exit
-
--- validate any specific claims you need here
--- https://github.com/SkyLothar/lua-resty-jwt#jwt-validators
-local validators = require "resty.jwt-validators"
-local claim_spec = {
-    -- validators.set_system_leeway(15), -- time in seconds
-    -- exp = validators.is_not_expired(),
-    -- iat = validators.is_not_before(),
-    -- iss = validators.opt_matches("^http[s]?://yourdomain.auth0.com/$"),
-    -- sub = validators.opt_matches("^[0-9]+$"),
-    -- name = validators.equals_any_of({ "John Doe", "Mallory", "Alice", "Bob" }),
-}
-
--- make sure to set and put "env JWT_SECRET;" in nginx.conf
 local gateway_url=os.getenv("GATEWAY_URI")
 local basic_auth=os.getenv("BASIC_AUTH")
 local res, err = httpc:request_uri(gateway_url .. "/security/oauth/check_token",
@@ -36,6 +22,6 @@ if res.status ~= 200 then
     ngx.header.content_type = "application/json; charset=utf-8"
     ngx.say("{\"error\": \"" .. res.reason .. "\",\"status\":" .. res.status .. "}")
     ngx.exit(ngx.HTTP_UNAUTHORIZED)
-else
-    ngx.header["Set-Cookie"] = "COOKIE_BEARER=" .. token .. "; path=/; HttpOnly"
+    else
+    ngx.header["Set-Cookie"] = "COOKIE_BEARER=".. token
 end
