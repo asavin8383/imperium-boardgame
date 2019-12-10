@@ -2,14 +2,15 @@ local http = require "resty.http"
 local httpc = http.new()
 local jwt = require "resty.jwt"
 
-    local token  = ngx.var.cookie_COOKIE_BEARER
+    local token = ngx.var.arg_token
+    if token  == nil then
+        ngx.status = ngx.HTTP_UNAUTHORIZED
+        ngx.header.content_type = "application/json; charset=utf-8"
+        ngx.say("{\"error\": \"missing JWT token or Authorization header\"}")
+        ngx.exit(ngx.HTTP_UNAUTHORIZED)
+    end
 
-if token == nil then
-    ngx.status = ngx.HTTP_UNAUTHORIZED
-    ngx.header.content_type = "application/json; charset=utf-8"
-    ngx.say("{\"error\": \"missing JWT token or Authorization header\"}")
-    ngx.exit(ngx.HTTP_UNAUTHORIZED)
-end
+-- finally, if still no JWT token, kick out an error and exit
 
 -- validate any specific claims you need here
 -- https://github.com/SkyLothar/lua-resty-jwt#jwt-validators
@@ -35,4 +36,6 @@ if res.status ~= 200 then
     ngx.header.content_type = "application/json; charset=utf-8"
     ngx.say("{\"error\": \"" .. res.reason .. "\",\"status\":" .. res.status .. "}")
     ngx.exit(ngx.HTTP_UNAUTHORIZED)
+else
+    ngx.header["Set-Cookie"] = "COOKIE_BEARER=" .. token .. "; path=/; HttpOnly"
 end
