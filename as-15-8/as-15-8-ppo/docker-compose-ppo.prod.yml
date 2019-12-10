@@ -39,6 +39,7 @@ services:
     image: dcr.ec-leasing.ru/as-15-8/as-15-8-rep-viewer:latest
     restart: always
     environment:
+      PROFILE: prod
       GATEWAY_URI: http://10.97.220.134:15880
       TZ: "Europe/Moscow"
     ports:
