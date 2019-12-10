@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "16a225f4-4d5e-4e46-a9f2-31c7ca893185",
+		"_postman_id": "1590fff2-379a-4ddf-8739-83aa3f237da6",
 		"name": "АС 15.8 ПОД",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -239,6 +239,61 @@
 													"value": "89825"
 												}
 											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Check ERDI",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": ""
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Status ERDI",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": ""
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Get update date",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": ""
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Get state",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": ""
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Remove content version to",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": ""
 										}
 									},
 									"response": []
@@ -717,6 +772,84 @@
 			"protocolProfileBehavior": {}
 		},
 		{
+			"name": "Домены",
+			"item": [
+				{
+					"name": "Получение списка всех доменов",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": ""
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Получение доменов по маске",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/pod/domain-masks/getItems?mask=mask10",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"pod",
+								"domain-masks",
+								"getItems"
+							],
+							"query": [
+								{
+									"key": "mask",
+									"value": "mask10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Удаление по id",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/pod/domain-masks/delete?id=10",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"pod",
+								"domain-masks",
+								"delete"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Изменение маски",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": ""
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
 			"name": "Получение списка чек-юнитов по ЕРДИ",
 			"request": {
 				"method": "GET",
@@ -747,7 +880,7 @@
 		"oauth2": [
 			{
 				"key": "accessToken",
-				"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqYWNrIiwicm9sZSI6IlJPTEVfT1BFUkFUT1IsUk9MRV9GT1JNQUxfVEFTSyxST0xFX01BTkFHRV9GT1JNQUxfVEFTSyxST0xFX01BTkFHRV9BUlJBTkdFTUVOVCxST0xFX1BSRVBBUkFUSU9OX1RSQUZGSUMiLCJtYWlsIjoiIiwidXNlcl9uYW1lIjoiamFjayIsInNjb3BlIjpbInJlYWQiLCJ3cml0ZSJdLCJleHAiOjE1NzU2MjQxMTIsInVzZXJOYW1lIjoiamFjayIsImF1dGhvcml0aWVzIjpbIlJPTEVfTUFOQUdFX0FSUkFOR0VNRU5UIiwiUk9MRV9PUEVSQVRPUiIsIlJPTEVfUFJFUEFSQVRJT05fVFJBRkZJQyIsIlJPTEVfRk9STUFMX1RBU0siLCJST0xFX01BTkFHRV9GT1JNQUxfVEFTSyJdLCJqdGkiOiI3MTY1YmQwMi0xYjFmLTRiYjktODcxNC0yNzdhZjA3NTFlZjEiLCJjbGllbnRfaWQiOiJhcy0xNS04Iiwic2Vjb25kTmFtZSI6IiJ9.bFdRGH-jp-lCfJMjR8a6nqeKApqtBHMDBPJSAQ2n7YfoL_19hztrBCwYNt_qzbWtuRQfXAZ61PHN18Z29yU2ieKYcqONH2xKwkkGm76m3NjOsl3pY_kPiBRFld7X8h9fY13-pivUJG-1E3btKPAEh9ZmC7HRTYX385ni2ihAlzr0moFjM4DNvF5j0LDjSb5_VsMWc53q4uyJy5fviQNI5Quo4ioIHmJHGZTXLj1b-jnEufDmnO3rGNneba0IvXDKqINYX7gcah0jNtOteiBWvQnfHmJ5Wk6uOT1pZXTqYuJONOUuW4S4_BH0nV8olSbpFdCztrYwZedRZRYBsKU7YQ",
+				"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqb2huIiwicm9sZSI6IlJPTEVfT1BFUkFUT1JfVEVTVCxST0xFX0ZPUk1BTF9UQVNLLFJPTEVfTUFOQUdFX0ZPUk1BTF9UQVNLLFJPTEVfTUFOQUdFX0FSUkFOR0VNRU5ULFJPTEVfUFJFUEFSQVRJT05fVFJBRkZJQyxST0xFX0RJQ1RJT05BUlksUk9MRV9GT1JNQVRJT05fT0ZfU0NIRURVTEUsUk9MRV9WSUVXX1JFU1VMVCxST0xFX1NFTkRfQUNUX0JZX0hBTkQsUk9MRV9NQU5BR0VfUFNfUEFTRCxST0xFX01BTkFHRV9FUkRJLFJPTEVfVklFV19SRVBPUlQsUk9MRV9GT1JNQVRJT05fUEFSQU1fUkVQT1JULFJPTEVfTUFOQUdFX0RPTUFJTlMsUk9MRV9NQU5BR0VfUE9SVFNfUFJPVE9DT0xTLFJPTEVfTUFOQUdFX1JFR0lTVFJBVElPTl9KT1VSTkFMLFJPTEVfTUFOQUdFX0ZVTkNUSU9OX01PREUsTUFOQUdFX01BTlVBTF9BUlJBTkdFTUVOVCIsIm1haWwiOiIiLCJ1c2VyX25hbWUiOiJqb2huIiwic2NvcGUiOlsicmVhZCIsIndyaXRlIl0sImV4cCI6MTU3NTk4NDEzNiwidXNlck5hbWUiOiJqb2huIiwiYXV0aG9yaXRpZXMiOlsiUk9MRV9NQU5BR0VfUE9SVFNfUFJPVE9DT0xTIiwiUk9MRV9PUEVSQVRPUl9URVNUIiwiUk9MRV9QUkVQQVJBVElPTl9UUkFGRklDIiwiUk9MRV9GT1JNQVRJT05fUEFSQU1fUkVQT1JUIiwiUk9MRV9NQU5BR0VfUFNfUEFTRCIsIlJPTEVfTUFOQUdFX1JFR0lTVFJBVElPTl9KT1VSTkFMIiwiTUFOQUdFX01BTlVBTF9BUlJBTkdFTUVOVCIsIlJPTEVfRk9STUFUSU9OX09GX1NDSEVEVUxFIiwiUk9MRV9NQU5BR0VfRVJESSIsIlJPTEVfRk9STUFMX1RBU0siLCJST0xFX0RJQ1RJT05BUlkiLCJST0xFX1ZJRVdfUkVQT1JUIiwiUk9MRV9NQU5BR0VfRlVOQ1RJT05fTU9ERSIsIlJPTEVfTUFOQUdFX0ZPUk1BTF9UQVNLIiwiUk9MRV9NQU5BR0VfQVJSQU5HRU1FTlQiLCJST0xFX1ZJRVdfUkVTVUxUIiwiUk9MRV9TRU5EX0FDVF9CWV9IQU5EIiwiUk9MRV9NQU5BR0VfRE9NQUlOUyJdLCJqdGkiOiJkNWU4Mzg2Zi1iMzk2LTRiOGYtODhlZC1iYmVhN2FlNjg2M2MiLCJjbGllbnRfaWQiOiJhcy0xNS04Iiwic2Vjb25kTmFtZSI6IiJ9.IXfYpWeHsquHQJwYSh03qQdZc9eApoqTGI51Gfe7j-VjqDutcixLr7aYeiImP29LmxjmSOgvirLwJGqjFoPsBiJ5K1pwqTkjG5kXnoFWPMVBbHHlRNJrLXl-NXXuWL4x8HUD74fyhO4PiFLygQGUZUckX9UA3OEzWtWBE3WZfb5vRDhlK-_gcmJP0rbRAvgv70t63a4k3BA3N3J9g7jEDFV13_2MYvX0maH2Q5j-7GUfZN0__-pg7yfYhwX46dfP-F2_Jf-62kjadnUFz-o8VM0YP0B90ysRJcwMifK6p4nyJ8Ri4GKupTI4EINE0fCd7370PqP_rvN7kQmOfO4d6g",
 				"type": "string"
 			},
 			{

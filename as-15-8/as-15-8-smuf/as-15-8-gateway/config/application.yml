@@ -40,6 +40,9 @@ zuul:
       path: /eureka/**
       serviceId: discovery
       stripPrefix: false
+    kibana:
+      path: /kibana/**
+      url: http://${spring.cloud.client.ip-address}:5601
     pod:
       path: /pod/**
       serviceId: pod

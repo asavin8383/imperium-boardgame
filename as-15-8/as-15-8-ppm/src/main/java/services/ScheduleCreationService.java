@@ -1,6 +1,5 @@
 package services;
 
-import common.SchedulerException;
 import common.SchedulerProperties;
 import exceptions.AS_15_8_PPM_Exception;
 import lombok.RequiredArgsConstructor;
@@ -9,7 +8,6 @@ import model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -20,18 +18,6 @@ import java.util.*;
 public class ScheduleCreationService {
 
     private final SchedulerProperties schedulerProperties;
-    private int totalWorkersCount;
-
-    @PostConstruct
-    public void init(){
-        try {
-            this.totalWorkersCount = Optional.ofNullable(
-                    schedulerProperties.getTotalWorkersCount())
-                    .orElseThrow(() -> new Exception("Параметр TOTAL_WORKERS_COUNT не задан"));
-        } catch (Exception ex){
-            throw new SchedulerException("Ошибка при получении количества ресурсов из параметров в БД", ex);
-        }
-    }
 
     public Schedule create(Map<Arrangement, TreeSet<ScheduleCheckUnit>> arrangementCheckUnits, int maxWorkersCount){
         Schedule schedule = createNewSchedule(arrangementCheckUnits, maxWorkersCount);
@@ -70,9 +56,9 @@ public class ScheduleCreationService {
     private Schedule createNewSchedule(Map<Arrangement, TreeSet<ScheduleCheckUnit>> arrangementCheckUnits, int maxWorkersCount){
         Schedule schedule = new Schedule();
 
-        if(maxWorkersCount > this.totalWorkersCount)
+        if(maxWorkersCount > this.schedulerProperties.getTotalWorkersCount())
             throw new AS_15_8_PPM_Exception("Ошибка создания расписания! Число исполняющих узлов для расписания запрошено больше, чем максимальное в системе " +
-                    "(" + maxWorkersCount + " > " + totalWorkersCount + ")");
+                    "(" + maxWorkersCount + " > " + this.schedulerProperties.getTotalWorkersCount() + ")");
         schedule.setMaxWorkersCount(maxWorkersCount);
 
         TreeSet<LocalTime> scheduleIntervals = new TreeSet<>();

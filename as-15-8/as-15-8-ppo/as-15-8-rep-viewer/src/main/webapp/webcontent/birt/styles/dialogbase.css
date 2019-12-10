@@ -57,7 +57,8 @@
 	width: 14px;
 	height: 14px;
 	background-color: gray;
-	cursor: pointer;	 
+	cursor: pointer;
+	visibility: hidden;
 }
 
 .dCloseBtn
