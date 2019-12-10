@@ -1,16 +1,15 @@
+ngx.log(ngx.WARN,'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
 local http = require "resty.http"
 local httpc = http.new()
 local jwt = require "resty.jwt"
 
-    local token  = ngx.var.cookie_COOKIE_BEARER
-
-if token == nil then
-    ngx.status = ngx.HTTP_UNAUTHORIZED
-    ngx.header.content_type = "application/json; charset=utf-8"
-    ngx.say("{\"error\": \"missing JWT token or Authorization header\"}")
-    ngx.exit(ngx.HTTP_UNAUTHORIZED)
-end
-
+    local token = ngx.var.arg_token
+    if token  == nil then
+        ngx.status = ngx.HTTP_UNAUTHORIZED
+        ngx.header.content_type = "application/json; charset=utf-8"
+        ngx.say("{\"error\": \"missing JWT token or Authorization header\"}")
+        ngx.exit(ngx.HTTP_UNAUTHORIZED)
+    end
 
 local gateway_url=os.getenv("GATEWAY_URI")
 local basic_auth=os.getenv("BASIC_AUTH")
@@ -23,4 +22,6 @@ if res.status ~= 200 then
     ngx.header.content_type = "application/json; charset=utf-8"
     ngx.say("{\"error\": \"" .. res.reason .. "\",\"status\":" .. res.status .. "}")
     ngx.exit(ngx.HTTP_UNAUTHORIZED)
+    else
+    ngx.header["Set-Cookie"] = "COOKIE_BEARER=".. token
 end

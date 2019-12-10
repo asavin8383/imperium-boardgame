@@ -51,6 +51,16 @@
                 </Pattern>
             </layout>
         </appender>
+        <appender name="rootRollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${LOGS}/root.log</file>
+            <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <Pattern>%d %p %C{1.} [%t] %m%n</Pattern>
+            </encoder>
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <fileNamePattern>${LOGS}/root-%d{yyyy-MM-dd}.log</fileNamePattern>
+                <maxHistory>5</maxHistory>
+            </rollingPolicy>
+        </appender>
 
         <logger name= "org.springframework.security" level="DEBUG" additivity="false">
             <appender-ref ref="Console"/>
@@ -62,6 +72,7 @@
 
         <root level="INFO" additivity="false">
             <appender-ref ref="Console" />
+            <appender-ref ref="rootRollingFile" />
         </root>
         <logger name="org.hibernate.SQL" level="INFO" additivity="false">
             <appender-ref ref="Console" />
