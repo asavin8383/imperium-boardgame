@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import model.SystemMode;
 import model.SystemModeUnit;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -34,7 +33,7 @@ public class SystemModeController {
     @PostMapping(path = "/set")
     @PreAuthorize("hasAnyRole('ROLE_MANAGE_FUNCTION_MODE')")
     @Transactional
-    public ResponseEntity setMode(@RequestBody SystemModeUnit mode){
+    public ResponseEntity setMode(@RequestBody SystemMode mode){
         SystemModeUnit curMode = systemModesRepository.getCurrentMode()
                 .orElseGet(() -> {
                     throw new RuntimeException("Ошибка получения текущего режима");
@@ -47,7 +46,7 @@ public class SystemModeController {
                     throw new RuntimeException("Ошибка получения текущего режима");
                 });
 
-        return systemModesRepository.findBySystemMode(mode)
+        return systemModesRepository.findBySystemMode(mode.getSystemMode())
                 .map(systemMode -> {
                     if(!systemMode.isActive()){
                         systemMode.setActive(true);
@@ -56,7 +55,7 @@ public class SystemModeController {
                     return ResponseEntity.ok("Режим успешно сменен");
                 })
         .orElseGet(() -> {
-            systemModesRepository.save(new SystemMode(mode, true));
+            systemModesRepository.save(new SystemMode(mode.getSystemMode(), true));
             return ResponseEntity.ok("Режим успешно сменен");
         });
     }
