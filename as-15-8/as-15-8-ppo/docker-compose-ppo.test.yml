@@ -41,6 +41,7 @@ services:
     image: harbor.ec-leasing.ru/as_15_8/as-15-8-rep-viewer:latest
     restart: always
     environment:
+      PROFILE: test
       GATEWAY_URI: http://192.168.5.50:15880
       TZ: "Europe/Moscow"
     ports:
@@ -50,6 +51,8 @@ services:
     labels:
       collect_logs_with_filebeat: "true"
       decode_log_event_to_json_object: "true"
+    extra_hosts:
+      - "asdb:192.168.5.195"
     networks:
       net:
   rep-gate:

@@ -45,7 +45,7 @@ gateway= System.getenv("GATEWAY_URI");
                 </ex-property>
             </list-property>
             <property name="odaDriverClass">org.postgresql.Driver</property>
-            <property name="odaURL">jdbc:postgresql://192.168.5.195:5432/asdb</property>
+            <property name="odaURL">jdbc:postgresql://asdb:5432/asdb</property>
             <property name="odaUser">as_user</property>
             <encrypted-property name="odaPassword" encryptionID="base64">YXNfdXNlcg==</encrypted-property>
         </oda-data-source>
