@@ -3,7 +3,7 @@
     "instanceId":"birt-viewer:10.97.220.135:8079",
     "hostName":"10.97.220.135",
     "app":"BIRT-VIEWER",
-    "ipAddr":"192.168.5.48",
+    "ipAddr":"10.97.220.135",
     "status":"UP",
     "overriddenstatus":"UNKNOWN",
     "port":{
