@@ -35,11 +35,12 @@ public class RobotController {
     public Page<Robot> getAll(@RequestParam(required = false) SortingDirection sortingDirection,
                               @RequestParam(required = false) String sortingColumn,
                               @RequestParam(defaultValue = "0") int pageNumber,
-                              @RequestParam(defaultValue = "10") int pageSize) {
+                              @RequestParam(defaultValue = "10") int pageSize,
+                              @RequestParam(required = false) String query) {
 
         Pageable page = PageRequest.of(pageNumber, pageSize,
                 SortingHelper.createSorting(sortingDirection, sortingColumn));
-        return robotService.get(page);
+        return robotService.getByQuery(page, query);
     }
 
     @GetMapping("{id}")
