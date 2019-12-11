@@ -131,37 +131,37 @@ public class DictionaryService {
     }
 
     @Transactional
-    public void deletePs(Long id){
-        log.info("Удаление ПС с ORIG ID = {}", id);
-        if (id == null)
+    public void deletePs(Long origId){
+        log.info("Удаление ПС с ORIG ID = {}", origId);
+        if (origId == null)
             return;
 
-        psDictionaryUpdater.archiveRecordByOrigId(id);
+        psDictionaryUpdater.archiveRecordByOrigId(origId);
 
-        log.info("Запрос в конфиг на удаление ПС с ORIG ID = {}", id);
+        log.info("Запрос в конфиг на удаление ПС с ORIG ID = {}", origId);
 
         restTemplate.delete(
                 UriComponentsBuilder.fromHttpUrl(configUrl)
                         .path("/ps")
-                        .queryParam("id", id.toString())
+                        .queryParam("id", origId.toString())
                         .build().toString()
                 );
     }
 
     @Transactional
-    public void deletePasd(Long id){
-        log.info("Удаление ПАСД с ID = {}", id);
-        if (id == null)
+    public void deletePasd(Long origId){
+        log.info("Удаление ПАСД с ID = {}", origId);
+        if (origId == null)
             return;
 
-        pasdDictionaryUpdater.archiveRecordByOrigId(id);
+        pasdDictionaryUpdater.archiveRecordByOrigId(origId);
 
-        log.info("Запрос в конфиг на удаление ПАСД с ID = {}", id);
+        log.info("Запрос в конфиг на удаление ПАСД с ID = {}", origId);
 
         restTemplate.delete(
                 UriComponentsBuilder.fromHttpUrl(configUrl)
                         .path("/pasd")
-                        .queryParam("id", id.toString())
+                        .queryParam("id", origId.toString())
                         .build().toString()
         );
     }

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface RobotRepository extends JpaRepository<Robot, Long> {
@@ -18,6 +19,5 @@ public interface RobotRepository extends JpaRepository<Robot, Long> {
 
     List<Robot> findByName(String name);
 
-    @Transactional
-    void deleteByOrigIdAndType(Long origId, RobotType type);
+    Optional<Robot> findByTypeAndOrigId(RobotType type, Long origId);
 }

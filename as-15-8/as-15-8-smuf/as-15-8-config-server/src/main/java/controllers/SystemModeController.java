@@ -27,7 +27,8 @@ public class SystemModeController {
 
     @PostMapping
     public SystemModeUnit getCurrentMode(){
-        return systemModesRepository.getCurrentMode().orElse(SystemModeUnit.NORMAL);
+        return systemModesRepository.getCurrentMode()
+                .orElseGet(() -> systemModesRepository.save(new SystemMode(SystemModeUnit.NORMAL, true)).getSystemMode());
     }
 
     @PostMapping(path = "/set")
@@ -35,9 +36,7 @@ public class SystemModeController {
     @Transactional
     public ResponseEntity setMode(@RequestBody SystemMode mode){
         SystemModeUnit curMode = systemModesRepository.getCurrentMode()
-                .orElseGet(() -> {
-                    throw new RuntimeException("Ошибка получения текущего режима");
-                });
+                .orElseGet(() -> systemModesRepository.save(new SystemMode(SystemModeUnit.NORMAL, false)).getSystemMode());
         systemModesRepository.findBySystemMode(curMode)
                 .map(systemMode -> {
                     systemMode.setActive(false);

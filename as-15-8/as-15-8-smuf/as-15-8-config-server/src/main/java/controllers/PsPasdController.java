@@ -98,7 +98,8 @@ public class PsPasdController
     }
 
     private void delete(Long id, RobotType robotType) {
-        robotRepository.deleteByOrigIdAndType(id, robotType);
+        robotRepository.findByTypeAndOrigId(robotType, id)
+                .ifPresent(robotRepository::delete);
     }
 
 }
