@@ -6,6 +6,7 @@ import enums.AccessToolParameter;
 import execution.ExecutionJobResult;
 import execution.ExecutionPSJobResult;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.util.Strings;
 import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -21,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Slf4j(topic = "robots")
 public class CommonDirectSearchRobot extends SeleniumRobot {
@@ -85,8 +85,9 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
 
 
     public CommonDirectSearchRobot(Map<AccessToolParameter, String> scriptParams) {
-
-        super(scriptParams);
+        super(scriptParams,
+                Strings.isNotEmpty(scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_PROXY)) ?
+                        scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_PROXY) : null);
         setParams(scriptParams);
     }
 
@@ -217,7 +218,7 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         return links;
     }
 
-    boolean checkContinuousSearchResult() throws ExecutionException {
+    private boolean checkContinuousSearchResult() throws ExecutionException {
         List<WebElement> links = getContinuousLinks();
         return checkPageResult(links);
     }

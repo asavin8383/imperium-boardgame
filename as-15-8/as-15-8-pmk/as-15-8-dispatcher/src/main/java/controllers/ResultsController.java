@@ -1,5 +1,6 @@
 package controllers;
 
+import checkUnits.CheckUnitType;
 import controllers.helpers.SortingHelper;
 import enums.CheckUnitJobResult;
 import enums.SortingDirection;
@@ -12,6 +13,7 @@ import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -43,19 +45,26 @@ public class ResultsController {
     public Page<Result> findList(
             @RequestParam Long arrangementId,
             @RequestParam(required = false) List<CheckUnitJobResult> checkUnitJobResults,
+            @RequestParam(required = false) List<CheckUnitType> checkUnitTypes,
             @RequestParam(required = false) String query,
             @RequestParam(required = false) SortingDirection sortingDirection,
             @RequestParam(required = false) String sortingColumn,
             @RequestParam(defaultValue = "0") int pageNumber,
-            @RequestParam(defaultValue = "10") int pageSize){
-        PageRequest page = PageRequest.of(
-                pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
+            @RequestParam(defaultValue = "10") int pageSize) {
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize,
+                SortingHelper.createSorting(sortingDirection, sortingColumn));
         if (checkUnitJobResults != null) {
-            return resultRepo.findByArrangementIdAndResultIn(arrangementId, checkUnitJobResults, page);
+            return resultRepo.findByFilter(
+                            arrangementId,
+                            checkUnitJobResults,
+                            checkUnitTypes,
+                            query,
+                            pageable);
         } else {
             return Strings.isEmpty(query) ?
-                    resultRepo.findAllByArrangementId(arrangementId, page) :
-                    resultRepo.findAllByArrangementAndQuery(arrangementId, query, page);
+                    resultRepo.findAllByArrangementId(arrangementId, pageable) :
+                    resultRepo.findAllByArrangementAndQuery(arrangementId, query, pageable);
         }
     }
 
