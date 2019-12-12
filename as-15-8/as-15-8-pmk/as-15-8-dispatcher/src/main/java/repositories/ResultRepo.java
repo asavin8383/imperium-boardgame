@@ -23,7 +23,7 @@ import model.Result;
  */
 
 @Repository
-public interface ResultRepo extends JpaRepository<Result, Long> {
+public interface ResultRepo extends JpaRepository<Result, Long>, ResultRepoAdvanced {
 
 	@Query("select r from Result r " +
 			"where r.arrangementId = :arrangementId and " +
