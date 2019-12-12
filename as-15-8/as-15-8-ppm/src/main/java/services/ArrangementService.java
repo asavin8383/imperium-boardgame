@@ -57,11 +57,10 @@ public class ArrangementService {
                     .orElseThrow(() -> new AS_15_8_PPM_Exception("Ошибка создания расписания! Мероприятие не было найдено по ID: " + arrangementId));
 
 
-            //Проверяем, что мероприятие не просрочено, добавляем 5 минут по умолчанию
+            //Проверяем, что мероприятие не просрочено
             long timeDuration = ChronoUnit.SECONDS.between(
                     LocalDateTime.of(plannedDate, arrangement.getPlannedStartTime()),
-                    LocalDateTime.now())
-                    + 300;
+                    LocalDateTime.now());
 
             LocalTime startTime = arrangement.getPlannedStartTime().plusSeconds(timeDuration);
             LocalTime endTime = arrangement.getPlannedEndTime().plusSeconds(timeDuration);
