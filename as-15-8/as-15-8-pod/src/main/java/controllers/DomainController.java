@@ -1,18 +1,18 @@
 package controllers;
 
-import controllers.enums.UploadingState;
 import controllers.utils.SortingDirection;
 import controllers.utils.SortingHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import model.scheme.DomainMaskItem;
+import model.scheme.Domain;
+import model.scheme.DomainMask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import repositories.DomainMaskItemRepo;
+import repositories.DomainRepo;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -28,44 +28,43 @@ import java.util.stream.Collectors;
 @PreAuthorize("hasRole('ROLE_MANAGE_DOMAINS')")
 @RequestMapping(path = "/domain-masks")
 
-public class DomainMaskItemController {
+public class DomainController {
 
-    private final DomainMaskItemRepo domainMaskItemRepo;
-    private UploadingState state = UploadingState.ACTIVE;
+    private final DomainRepo domainRepo;
 
     @PreAuthorize("hasRole('ROLE_SYSTEM')")
     @GetMapping
-    public Set<String> getDomainMaskItems(@RequestParam String mask){
-        return domainMaskItemRepo.findAllByDomainMask(mask)
+    public Set<Domain> getDomainsByMask(@RequestParam String domainMask){
+        return domainRepo.findAllDomainMasksLike(domainMask)
                 .stream()
-                .map(DomainMaskItem::getDomainMaskItem)
+                .flatMap(mask -> mask.getDomains().stream())
                 .collect(Collectors.toSet());
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public DomainMaskItem postDomainMask(@RequestBody DomainMaskItem domainMaskItem) {
-        return domainMaskItemRepo.save(domainMaskItem);
+    public DomainMask postDomainMask(@RequestBody DomainMask domainMask) {
+        return domainRepo.save(domainMask);
 
     }
 
     @PutMapping
-    public DomainMaskItem replaceDomainMask(@RequestBody DomainMaskItem newDomainMaskItem, @RequestParam("mask") DomainMaskItem existingDomainMaskItem){
+    public DomainMask replaceDomainMask(@RequestBody DomainMask newDomainMaskItem, @RequestParam("id") DomainMask existingDomainMaskItem){
         if (existingDomainMaskItem == null) {
-            return domainMaskItemRepo.save(newDomainMaskItem);
+            return domainRepo.save(newDomainMaskItem);
         } else {
-            return domainMaskItemRepo.save(replaceFields(newDomainMaskItem, existingDomainMaskItem));
+            return domainRepo.save(replaceFields(newDomainMaskItem, existingDomainMaskItem));
         }
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping
-    public void deleteDomainMask(@RequestParam("id") DomainMaskItem domainMaskItem) {
-        domainMaskItemRepo.delete(domainMaskItem);
+    public void deleteDomainMask(@RequestParam("id") DomainMask domainMask) {
+        domainRepo.delete(domainMask);
     }
 
     @GetMapping(path = "/all")
-    public Page<DomainMaskItem> findAllDomainMaskItems(
+    public Page<DomainMask> findAllDomainMasks(
             @RequestParam(required = false) SortingDirection sortingDirection,
             @RequestParam(required = false) String sortingColumn,
             @RequestParam(defaultValue = "0") int pageNumber,
@@ -73,14 +72,14 @@ public class DomainMaskItemController {
             @RequestParam(required = false, defaultValue = "") String domainMask) {
         PageRequest page = PageRequest.of(pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
         if (domainMask.isEmpty())
-            return domainMaskItemRepo.findPage(page);
-        else return domainMaskItemRepo.findPage(domainMask, page);
+            return domainRepo.findDomainMasksPage(page);
+        else return domainRepo.findDomainMasksPage(domainMask, page);
     }
 
-    private DomainMaskItem replaceFields(DomainMaskItem newDomain, DomainMaskItem storedDomain){
-        storedDomain.setDomainMask(newDomain.getDomainMask());
-        storedDomain.setDomainMaskItem(newDomain.getDomainMaskItem());
-        return storedDomain;
+    private DomainMask replaceFields(DomainMask newDomainMask, DomainMask storedDomainMask){
+        storedDomainMask.setDomainMask(newDomainMask.getDomainMask());
+        storedDomainMask.setDomainMask(newDomainMask.getDomainMask());
+        return storedDomainMask;
     }
 
 }

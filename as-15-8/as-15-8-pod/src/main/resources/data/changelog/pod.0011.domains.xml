@@ -1,0 +1,30 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+    
+    <changeSet author="danikanov" id="pod.0011">
+        <createTable schemaName="sor" tableName="domain_masks">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="domain_masksPK"/>
+            </column>
+            <column name="domain_mask" type="text">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable schemaName="sor" tableName="domains">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="domainsPK"/>
+            </column>
+            <column name="domain" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="domain_mask_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <dropTable schemaName="sor" tableName="domain_mask_items"/>
+        <addForeignKeyConstraint baseColumnNames="domain_mask_id" baseTableName="domains" baseTableSchemaName="sor" constraintName="FK_domain_mask_id" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="domain_masks" referencedTableSchemaName="sor" validate="true" onDelete="CASCADE" onUpdate="CASCADE"/>
+    </changeSet>
+
+</databaseChangeLog>
