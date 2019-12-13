@@ -40,9 +40,7 @@ public class VPNRobot extends SeleniumRobot {
     			ProxyUtils.getFullProxy(
 					scriptParams.get(AccessToolParameter.PROXY_TYPE),
 					scriptParams.get(AccessToolParameter.PROXY_DNS_NAME),
-					scriptParams.get(AccessToolParameter.PROXY_PORT),
-					scriptParams.get(AccessToolParameter.PROXY_USER),
-					scriptParams.get(AccessToolParameter.PROXY_PASSWORD)
+					scriptParams.get(AccessToolParameter.PROXY_PORT)
     			)
     		);
 
@@ -52,9 +50,7 @@ public class VPNRobot extends SeleniumRobot {
     	etalonProxy = ProxyUtils.getFullProxy(
                 etalonProperties.getProxy().getType(),
                 etalonProperties.getProxy().getHost(),
-                etalonProperties.getProxy().getPort(),
-                etalonProperties.getProxy().getUsername(),
-                etalonProperties.getProxy().getPassword()
+                etalonProperties.getProxy().getPort()
 			);
      	this.stubUrl = scriptParams.get(AccessToolParameter.STUB_URL);
     }

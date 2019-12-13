@@ -29,8 +29,6 @@ public enum AccessToolParameter {
     PROXY_TYPE,
     PROXY_DNS_NAME,
     PROXY_PORT,
-    PROXY_USER,
-    PROXY_PASSWORD,
     IGNORE_CAPTCHA_APPS,
 
     //extensions

@@ -119,8 +119,6 @@ public class ExecutorProperties {
             private String type;
             private String host;
             private String port;
-            private String username;
-            private String password;
         }
     }
 
