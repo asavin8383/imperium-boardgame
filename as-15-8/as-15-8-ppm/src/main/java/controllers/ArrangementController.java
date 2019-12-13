@@ -121,7 +121,7 @@ public class ArrangementController {
         switch (checkUnit.getType()){
             case DOMAIN: {
                 if (isPS) {
-                    scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit.getContentId(), CheckUnitType.URL, checkUnit.getValue()));
+                    scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit.getContentId(), CheckUnitType.DOMAIN, checkUnit.getValue()));
                 } else {
                     for(Protocol value: Protocol.values()){
                         scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit.getContentId(), CheckUnitType.URL, value.getProtocol() + checkUnit.getValue()));
