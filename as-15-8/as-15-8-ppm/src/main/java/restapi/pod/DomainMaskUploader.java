@@ -35,7 +35,7 @@ public class DomainMaskUploader {
         log.info("Отправка запроса на получение доменов по маске в ПОД: {}", domainMask);
         try {
             List<String> domains = new ArrayList<>();
-            String[] queryResult = oAuth2RestTemplate.getForObject(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(URI).queryParam("mask", domainMask).build().toString(), String[].class);
+            String[] queryResult = oAuth2RestTemplate.getForObject(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(URI).queryParam("domainMask", domainMask).build().toString(), String[].class);
             if(queryResult != null){
                 domains = Arrays.asList(queryResult);
             }
