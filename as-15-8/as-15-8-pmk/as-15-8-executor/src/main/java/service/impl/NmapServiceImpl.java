@@ -29,9 +29,7 @@ import service.CheckUnitVerificationService;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -44,13 +42,11 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
     private final ExecutorProperties executorProperties;
 
     @Override
-    public List<AccessToolUnit> getAccessToolUnits() {
-        return Arrays.asList(AccessToolUnit.VPN, AccessToolUnit.PROXY);
-    }
-
-    @Override
-    public List<CheckUnitType> getCheckUnitTypes(){
-        return Arrays.asList(CheckUnitType.IP_V4, CheckUnitType.IP_V4_SUBNET, CheckUnitType.IP_V6, CheckUnitType.IP_V6_SUBNET);
+    public Map<AccessToolUnit, List<CheckUnitType>> getSupportedTypes() {
+        return new HashMap<AccessToolUnit, List<CheckUnitType>>(){{
+            put(AccessToolUnit.PROXY, Arrays.asList(CheckUnitType.IP_V4, CheckUnitType.IP_V4_SUBNET, CheckUnitType.IP_V6, CheckUnitType.IP_V6_SUBNET));
+            put(AccessToolUnit.VPN, Arrays.asList(CheckUnitType.IP_V4, CheckUnitType.IP_V4_SUBNET, CheckUnitType.IP_V6, CheckUnitType.IP_V6_SUBNET));
+        }};
     }
 
     @Override
