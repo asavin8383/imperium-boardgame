@@ -11,7 +11,7 @@ public enum AccessToolParameter {
     //robots
     BROWSER,
     PLATFORM,
-    APPLICATION,
+    VERSION,
 
     //search-systems
     INPUT_DELAY,

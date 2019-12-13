@@ -91,7 +91,7 @@ public class HolaRobot extends SeleniumRobot {
             driver = DriverFactory.createChromeDriver(
                     ExecutorProperties.getSeleniumHubUrl(),
                     Platform.valueOf(getScriptParams().get(AccessToolParameter.PLATFORM)),
-                    getScriptParams().get(AccessToolParameter.APPLICATION),
+                    getScriptParams().get(AccessToolParameter.VERSION),
                     Collections.singletonList(extension)
             );
 
