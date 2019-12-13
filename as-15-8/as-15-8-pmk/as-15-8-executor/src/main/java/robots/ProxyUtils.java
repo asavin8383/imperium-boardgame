@@ -79,7 +79,7 @@ public class ProxyUtils {
     }
 
     public static String getFullProxy(String type, String host, String port){
-        return getFullProxy(type, host, port);
+        return getFullProxy(type, host, port, null, null);
     }
 
     @SuppressWarnings("deprecation")
