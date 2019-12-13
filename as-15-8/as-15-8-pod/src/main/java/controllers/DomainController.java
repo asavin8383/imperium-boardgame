@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import repositories.DomainMaskRepo;
 import repositories.DomainRepo;
 
 import java.util.Set;
@@ -30,37 +31,35 @@ import java.util.stream.Collectors;
 
 public class DomainController {
 
+    private final DomainMaskRepo domainMaskRepo;
     private final DomainRepo domainRepo;
 
     @PreAuthorize("hasRole('ROLE_SYSTEM')")
     @GetMapping
-    public Set<Domain> getDomainsByMask(@RequestParam String domainMask){
-        return domainRepo.findAllDomainMasksLike(domainMask)
-                .stream()
-                .flatMap(mask -> mask.getDomains().stream())
-                .collect(Collectors.toSet());
+    public Set<String> getDomainsByMask(@RequestParam String domainMask){
+        return domainRepo.getDomainsByMaskId(domainMask);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public DomainMask postDomainMask(@RequestBody DomainMask domainMask) {
-        return domainRepo.save(domainMask);
+        return domainMaskRepo.save(domainMask);
 
     }
 
     @PutMapping
     public DomainMask replaceDomainMask(@RequestBody DomainMask newDomainMaskItem, @RequestParam("id") DomainMask existingDomainMaskItem){
         if (existingDomainMaskItem == null) {
-            return domainRepo.save(newDomainMaskItem);
+            return domainMaskRepo.save(newDomainMaskItem);
         } else {
-            return domainRepo.save(replaceFields(newDomainMaskItem, existingDomainMaskItem));
+            return domainMaskRepo.save(replaceFields(newDomainMaskItem, existingDomainMaskItem));
         }
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping
     public void deleteDomainMask(@RequestParam("id") DomainMask domainMask) {
-        domainRepo.delete(domainMask);
+        domainMaskRepo.delete(domainMask);
     }
 
     @GetMapping(path = "/all")
@@ -72,8 +71,8 @@ public class DomainController {
             @RequestParam(required = false, defaultValue = "") String domainMask) {
         PageRequest page = PageRequest.of(pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
         if (domainMask.isEmpty())
-            return domainRepo.findDomainMasksPage(page);
-        else return domainRepo.findDomainMasksPage(domainMask, page);
+            return domainMaskRepo.findDomainMasksPage(page);
+        else return domainMaskRepo.findDomainMasksPage(domainMask, page);
     }
 
     private DomainMask replaceFields(DomainMask newDomainMask, DomainMask storedDomainMask){
