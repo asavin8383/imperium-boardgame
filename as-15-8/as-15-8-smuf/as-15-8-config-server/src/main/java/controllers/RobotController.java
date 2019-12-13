@@ -18,7 +18,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import services.RobotService;
 
-import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 @RestController
@@ -52,8 +53,11 @@ public class RobotController {
     }
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Robot editRobot(@RequestParam("id") Robot robot, @RequestBody Robot newRobot) {
-        return robotService.edit(robot, newRobot);
+    public ResponseEntity editRobot(@RequestParam("id") Robot robot, @RequestBody Robot newRobot) {
+        Matcher nameMatcher = Pattern.compile("^[a-z,-]+$").matcher(newRobot.getName().toLowerCase());
+        if(!nameMatcher.find())
+            return ResponseEntity.badRequest().body("Ошибка! Имя робота имеет неверный формат. Допускаются только буквы латинского алфавита и дефис");
+        return ResponseEntity.ok(robotService.edit(robot, newRobot));
     }
 
     @DeleteMapping
