@@ -120,18 +120,13 @@ public class ArrangementController {
         List<ScheduleCheckUnit> scheduleCheckUnits = new ArrayList<>();
         switch (checkUnit.getType()){
             case DOMAIN: {
-                if (isPS) {
-                    scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit.getContentId(), CheckUnitType.DOMAIN, checkUnit.getValue()));
-                } else {
-                    for(Protocol value: Protocol.values()){
-                        scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit.getContentId(), CheckUnitType.URL, value.getProtocol() + checkUnit.getValue()));
-                    }
-                }
+                addDomainToScheduleCheckUnits(isPS, scheduleCheckUnits, checkUnit.getContentId(), checkUnit.getValue(), arrangement);
                 return scheduleCheckUnits;
             }
             case DOMAIN_MASK: {
                 domainMaskUploader.getDomains(checkUnit.getValue())
-                    .forEach(domainMaskItem -> scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit.getContentId(), CheckUnitType.URL, domainMaskItem)));
+                    .forEach(domain ->
+                        addDomainToScheduleCheckUnits(isPS, scheduleCheckUnits, checkUnit.getContentId(), domain, arrangement));
                 return scheduleCheckUnits;
             }
             case IP_V4:
@@ -147,6 +142,16 @@ public class ArrangementController {
             default: {
                 scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit.getContentId(), checkUnit.getType(), checkUnit.getValue()));
                 return scheduleCheckUnits;
+            }
+        }
+    }
+
+    private void addDomainToScheduleCheckUnits(boolean isPS, List<ScheduleCheckUnit> scheduleCheckUnits, Long contentId, String checkUnitValue, Arrangement arrangement){
+        if (isPS) {
+            scheduleCheckUnits.add(createCheckUnit(arrangement, contentId, CheckUnitType.DOMAIN, checkUnitValue));
+        } else {
+            for(Protocol value: Protocol.values()){
+                scheduleCheckUnits.add(createCheckUnit(arrangement, contentId, CheckUnitType.URL, value.getProtocol() + checkUnitValue));
             }
         }
     }
