@@ -37,9 +37,7 @@ public class HolaRobot extends SeleniumRobot {
     			ProxyUtils.getFullProxy(
                         ExecutorProperties.getEtalon().getProxy().getType(),
                         ExecutorProperties.getEtalon().getProxy().getHost(),
-                        ExecutorProperties.getEtalon().getProxy().getPort(),
-                        ExecutorProperties.getEtalon().getProxy().getUsername(),
-                        ExecutorProperties.getEtalon().getProxy().getPassword()
+                        ExecutorProperties.getEtalon().getProxy().getPort()
     			)
     		);
 
