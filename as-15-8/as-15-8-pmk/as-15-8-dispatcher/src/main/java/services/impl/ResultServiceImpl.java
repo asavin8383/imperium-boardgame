@@ -78,7 +78,7 @@ public class ResultServiceImpl implements ResultService {
         Result result = findJobByID(jobID);
         result.setResult(checkStatus(erdiID, status));
         result.setEndDate(LocalDateTime.now());
-        if(status == CheckUnitJobResult.INTERNAL_ERROR) {
+        if(status == CheckUnitJobResult.INTERNAL_ERROR || status == CheckUnitJobResult.TIMEOUT_ERROR) {
             result.setCheckType(CheckType.ERROR);
             saveResultAsError(result, description);
         } else {
