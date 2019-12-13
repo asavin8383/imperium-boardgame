@@ -91,7 +91,7 @@ public abstract class SeleniumRobot implements Robot {
 	protected WebDriver createDriver(String proxy, boolean enableLog, String checkUrl) {
 		WebDriver driver = DriverFactory.createDriver(
 				ExecutorProperties.getSeleniumHubUrl(),
-				Platform.valueOf(getScriptParams().get(AccessToolParameter.PLATFORM)),
+				Platform.valueOf(getScriptParams().get(AccessToolParameter.PLATFORM).toUpperCase().trim()),
 				getScriptParams().get(AccessToolParameter.APPLICATION),
 				getScriptParams().get(AccessToolParameter.BROWSER),
 				proxy,
