@@ -12,7 +12,8 @@ import java.util.Set;
 @Repository
 public interface DomainRepo extends JpaRepository<Domain, Long> {
 
-    @Query("select d.domain from Domain d where d.domainMask=:mask_id")
-    Set<String> getDomainsByMaskId(@Param("mask_id") String maskId);
+    @Query("select d.domain from Domain d " +
+        "join d.domainMask dm on  dm.domainMask =:mask")
+    Set<String> getDomainsByMaskId(@Param("mask") String mask);
 
 }
