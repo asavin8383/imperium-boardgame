@@ -39,25 +39,17 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
     
     private boolean isRunning = false;
 
-    public List<AccessToolUnit> getAccessToolUnits() {
-    	return Arrays.asList(
-    		AccessToolUnit.SEARCH_SYSTEM,
-			AccessToolUnit.PROXY,
-			AccessToolUnit.VPN,
-			AccessToolUnit.CAMELEO_XYZ,
-			AccessToolUnit.HIDEMYASS,
-			AccessToolUnit.HOLA,
-			AccessToolUnit.GOOGLE_API
-		);
+    public Map<AccessToolUnit, List<CheckUnitType>> getSupportedTypes() {
+    	return new HashMap<AccessToolUnit, List<CheckUnitType>>(){{
+    		put(AccessToolUnit.SEARCH_SYSTEM, Arrays.asList(CheckUnitType.URL, CheckUnitType.DOMAIN, CheckUnitType.SEARCH_PHRASE));
+			put(AccessToolUnit.PROXY, Arrays.asList(CheckUnitType.URL, CheckUnitType.DOMAIN));
+			put(AccessToolUnit.VPN, Arrays.asList(CheckUnitType.URL, CheckUnitType.DOMAIN));
+			put(AccessToolUnit.CAMELEO_XYZ, Collections.singletonList(CheckUnitType.URL));
+			put(AccessToolUnit.HIDEMYASS, Collections.singletonList(CheckUnitType.URL));
+			put(AccessToolUnit.HOLA, Collections.singletonList(CheckUnitType.URL));
+			put(AccessToolUnit.GOOGLE_API, Arrays.asList(CheckUnitType.URL, CheckUnitType.DOMAIN, CheckUnitType.SEARCH_PHRASE));
+		}};
     }
-
-	@Override
-	public List<CheckUnitType> getCheckUnitTypes() {
-    	return Arrays.asList(
-    		CheckUnitType.URL,
-			CheckUnitType.SEARCH_PHRASE
-		);
-	}
 
 	@Override
 	public ExecutionJobResult run(CheckUnitJob checkUnitJob) throws ExecutionException {

@@ -39,9 +39,7 @@ public abstract class AnonymizerRobot extends SeleniumRobot {
                 ProxyUtils.getFullProxy(
                         scriptParams.get(AccessToolParameter.PROXY_TYPE),
                         scriptParams.get(AccessToolParameter.PROXY_DNS_NAME),
-                        scriptParams.get(AccessToolParameter.PROXY_PORT),
-                        scriptParams.get(AccessToolParameter.PROXY_USER),
-                        scriptParams.get(AccessToolParameter.PROXY_PASSWORD)
+                        scriptParams.get(AccessToolParameter.PROXY_PORT)
                 ));
 
         ExecutorProperties.EtalonProperties etalonProperties = ExecutorProperties.getEtalon();
@@ -50,9 +48,7 @@ public abstract class AnonymizerRobot extends SeleniumRobot {
         this.etalonProxy = ProxyUtils.getFullProxy(
                 etalonProperties.getProxy().getType(),
                 etalonProperties.getProxy().getHost(),
-                etalonProperties.getProxy().getPort(),
-                etalonProperties.getProxy().getUsername(),
-                etalonProperties.getProxy().getPassword()
+                etalonProperties.getProxy().getPort()
         );
 
         String ignoreCaptchaApps = scriptParams.get(AccessToolParameter.IGNORE_CAPTCHA_APPS);

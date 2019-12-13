@@ -149,7 +149,7 @@ public class CheckUnitJobHandler {
                 notification.setCheckUnitStatus(CheckUnitJobResult.CAPTCHA_DETECTED);
             }
             else if(cause instanceof Timeout_ExecutionException) {
-                notification.setCheckUnitStatus(CheckUnitJobResult.INTERNAL_ERROR);
+                notification.setCheckUnitStatus(CheckUnitJobResult.TIMEOUT_ERROR);
                 notification.setDescription("Работа робота остановлена по таймауту: " + getTimeout() + " сек.");
             } else {
                 notification.setCheckUnitStatus(CheckUnitJobResult.INTERNAL_ERROR);

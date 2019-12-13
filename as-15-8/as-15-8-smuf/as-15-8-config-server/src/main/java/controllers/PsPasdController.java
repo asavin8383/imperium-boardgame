@@ -81,10 +81,11 @@ public class PsPasdController
             boolean exists = all.contains(ps.getOrigId());
             if (!exists) {
                 log.debug("new robot record arrived: {}", ps);
+                String robotName = ps.getName() + "-" + ps.getOrigId().toString().replaceFirst("-+", "custom-");
                 Robot newRobot = new Robot();
                 newRobot.setOrigId(ps.getOrigId());
                 newRobot.setOrigName(ps.getName());
-                newRobot.setName(ps.getName() + "(" + ps.getOrigId() + ")");
+                newRobot.setName(robotName);
                 newRobot.setType(robotType);
                 newRobot.setConfigurations(new HashSet<>(Arrays.asList(
                         configurationsService.getOrCreate(Microservice.executor),
