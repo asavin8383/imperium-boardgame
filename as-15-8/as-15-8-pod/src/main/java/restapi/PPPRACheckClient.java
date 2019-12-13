@@ -25,7 +25,7 @@ public class PPPRACheckClient {
         String link = parseLink(baseUrl);
         ResponseEntity<String> response = restTemplate.exchange(parseLink(baseUrl), HttpMethod.OPTIONS, requestEntity, String.class);
         HttpStatus code = response.getStatusCode();
-        if (code.is1xxInformational() | code.is2xxSuccessful() | code.is3xxRedirection())
+        if (code.is1xxInformational() || code.is2xxSuccessful() || code.is3xxRedirection())
             return true;
         return false;
     }
