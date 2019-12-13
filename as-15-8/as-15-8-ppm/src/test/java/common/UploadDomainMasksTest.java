@@ -1,7 +1,6 @@
 package common;
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,6 +24,6 @@ public class UploadDomainMasksTest {
     DomainMaskUploader domainMaskUploader;
 
     public void uploadMasks(){
-        System.out.println(domainMaskUploader.getDomainMaskItems("*.loudtalks.com"));
+        System.out.println(domainMaskUploader.getDomains("*.loudtalks.com"));
     }
 }

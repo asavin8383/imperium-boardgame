@@ -31,16 +31,16 @@ public class DomainMaskUploader {
 
     private final OAuth2RestTemplate oAuth2RestTemplate;
 
-    public List<String> getDomainMaskItems(String domainMask){
+    public List<String> getDomains(String domainMask){
         log.info("Отправка запроса на получение доменов по маске в ПОД: {}", domainMask);
         try {
-            List<String> domainMaskItems = new ArrayList<>();
+            List<String> domains = new ArrayList<>();
             String[] queryResult = oAuth2RestTemplate.getForObject(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(URI).queryParam("mask", domainMask).build().toString(), String[].class);
             if(queryResult != null){
-                domainMaskItems = Arrays.asList(queryResult);
+                domains = Arrays.asList(queryResult);
             }
-            log.info("Из ПОД получено {} элементов для маски: {}", domainMaskItems.size(), domainMask);
-            return domainMaskItems;
+            log.info("Из ПОД получено {} элементов для маски: {}", domains.size(), domainMask);
+            return domains;
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
             throw AS_15_8_PPM_Exception.logAndGet(log, String.format("Ошибка отправки запроса на получение доменов по маске, код возврата %s", ex.getStatusCode()));
         }

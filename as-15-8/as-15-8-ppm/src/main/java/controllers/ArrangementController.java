@@ -130,7 +130,7 @@ public class ArrangementController {
                 return scheduleCheckUnits;
             }
             case DOMAIN_MASK: {
-                domainMaskUploader.getDomainMaskItems(checkUnit.getValue())
+                domainMaskUploader.getDomains(checkUnit.getValue())
                     .forEach(domainMaskItem -> scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit.getContentId(), CheckUnitType.URL, domainMaskItem)));
                 return scheduleCheckUnits;
             }
