@@ -29,7 +29,7 @@ public class TestJobExecution {
 		
 		CheckUnitJob checkUnitJob = new CheckUnitJob();
 		checkUnitJob.setJobID(1L);
-		checkUnitJob.setAccessTool("kaspersky");
+		checkUnitJob.setAccessTool("google");
 		
 		checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.URL, "http://kavkaz.tv"));
 		//checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.IP_V6, "2606:4700:0030:0000:0000:0000:681b:b458"));

@@ -69,6 +69,7 @@ public class DriverFactory {
 		ChromeOptions options = new ChromeOptions();
 		setLoadExtensions(options, Collections.singletonList(ChromeSettings.getScreenshotExtension()));
 		setOptimalChromeOptions(options);
+        setChromeAnonimyzerParams(options);
 
 		if (enableLog){
 			LoggingPreferences logPrefs = new LoggingPreferences();
@@ -129,6 +130,10 @@ public class DriverFactory {
 		options.addArguments("--enable-features=TemporaryUnexpireFlagsM76");
 		options.addArguments("--disable-features=OmniboxUIExperimentHideSteadyStateUrlScheme,OmniboxUIExperimentHideSteadyStateUrlTrivialSubdomains");
 	}
+
+	private static void setChromeAnonimyzerParams(ChromeOptions options){
+        options.setExperimentalOption("excludeSwitches", Collections.singletonList("enable-automation"));
+    }
 
 	/**
 	 * Метод создания параметров драйвера
