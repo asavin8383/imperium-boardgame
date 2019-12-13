@@ -19,5 +19,6 @@
     <include file="db/changelog/config.0014.configurations_and_robots.xml" />
     <include file="db/changelog/config.0015.processing_times_cascades.xml" />
     <include file="db/changelog/config.0016.system_mode.xml" />
+    <include file="db/changelog/config.0017.global_properies.xml" />
 
 </databaseChangeLog>

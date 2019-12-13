@@ -10,7 +10,7 @@ import restapi.PPPRACheckClient;
 
 @RestController
 @RequestMapping(path = "/pppracheck")
-@PreAuthorize("hasAnyRole('ROLE_VIEW_RESULT')")
+@PreAuthorize("hasAnyRole('ROLE_MANAGE_CONFIGURATIONS')")
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 
 public class PppRaCheckController {

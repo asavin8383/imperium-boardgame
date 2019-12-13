@@ -27,6 +27,10 @@ public class GlobalProperty {
     private String value;
 
     @JsonView(Views.Brief.class)
+    @Column
+    private String description;
+
+    @JsonView(Views.Brief.class)
     @ManyToOne(optional=false, fetch = FetchType.LAZY)
     @JoinColumn(foreignKey = @ForeignKey(name = "global_properties_configurations_id_fk"))
     private Configuration configuration;
