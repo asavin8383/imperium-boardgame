@@ -145,15 +145,16 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
     }
 
 
-    final ExecutionPSJobResult createMessage(boolean linkFound) {
-        return createMessage(linkFound, null);
+    final ExecutionPSJobResult createMessage(boolean linkFound, boolean captchaDetected) {
+        return createMessage(linkFound, captchaDetected, null);
     }
-    final ExecutionPSJobResult createMessage(boolean linkFound, List<String> urls) {
+    final ExecutionPSJobResult createMessage(boolean linkFound, boolean captchaDetected, List<String> urls) {
         ExecutionPSJobResult message = new ExecutionPSJobResult();
         message.setLinkFound(linkFound);
         message.setError(false);
         message.setScreenshot(ScriptUtils.getScreenshot(driver));
         message.setUrls(urls);
+        message.setCaptchaDetected(captchaDetected);
         return message;
     }
 
@@ -163,14 +164,13 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         driver.get(searchSystemUrl);
         searchFor(checkUnit.getValue());
 
-        if (captcha())
-            throw new Captcha_ExecutionException(
-                    "Обнаружена Captcha " + driver.getCurrentUrl());
+        List<WebElement> links = getLinks(resultPageType);
+
+        //TODO Отличать капчу от пустого множества ссылок
+        if (captcha() || links.size()==0)
+            return createMessage(false, true);
 
         if (checkUnit.getType() == CheckUnitType.SEARCH_PHRASE){
-            List<WebElement> links = resultPageType == ResultPageType.PAGINATION ?
-                    getPaginatedLinks() : getContinuousLinks();
-
             List<String> urls = new ArrayList<>();
             for (WebElement w : links) {
                 try {
@@ -180,14 +180,19 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
                     e.printStackTrace();
                 }
             }
-            return createMessage(false, urls);
+            return createMessage(false, false, urls);
         }
 
         equalityTest = EqualityTest.forCheckUnit(checkUnit);
 
         boolean isViolation = resultPageType == ResultPageType.PAGINATION?
                 checkPaginatedSearchResult() : checkContinuousSearchResult();
-        return createMessage(isViolation);
+        return createMessage(isViolation, false);
+    }
+
+    private List<WebElement> getLinks(ResultPageType resultPageType){
+        return resultPageType == ResultPageType.PAGINATION?
+            getPaginatedLinks() : getContinuousLinks();
     }
 
     boolean captcha() {
@@ -218,6 +223,7 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         return links;
     }
 
+
     private boolean checkContinuousSearchResult() throws ExecutionException {
         List<WebElement> links = getContinuousLinks();
         return checkPageResult(links);
@@ -243,8 +249,11 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         JavascriptExecutor jsExecutor = (JavascriptExecutor) driver;
         do {
             ScriptUtils.waitPageLoading(driver);
-            List<WebElement> listNext = new WebDriverWait(driver, SEARCH_RESULT_TIMEOUT)
-                    .until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(xpathItemLink)));
+            By linkLocator = By.xpath(xpathItemLink);
+            List<WebElement> listNext = driver.findElements(linkLocator);
+
+            /*List<WebElement> listNext = new WebDriverWait(driver, SEARCH_RESULT_TIMEOUT)
+                    .until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(xpathItemLink)));*/
 
             if(listNext != null)
                 links.addAll(listNext);

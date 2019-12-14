@@ -17,6 +17,7 @@ public class ExecutionPSJobResult extends ExecutionJobResult {
 
 	private boolean error;
 	private String errorDetails;
+	private boolean captchaDetected;
 	private List<String> urls;
 
 }

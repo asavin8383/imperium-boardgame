@@ -92,7 +92,7 @@ public abstract class SearchRobot extends SeleniumRobot {
         do {
             if (captcha())
                 throw new Captcha_ExecutionException(
-                        "Обнаружена Captcha в Yandex");
+                        "Обнаружена Captcha");
 
             if (checkPageResult(test))
                 return true;
