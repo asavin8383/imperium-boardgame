@@ -20,7 +20,8 @@ services:
       - /opt/selenoid/logs:/opt/selenoid/logs
     command: ["-container-network", "selenoid-net",
               "-conf", "/etc/selenoid/browsers.json",
-              "-log-output-dir", "/opt/selenoid/logs"]
+              "-log-output-dir", "/opt/selenoid/logs",
+              "-limit", "10"]
   ggr:
     image: dcr.ec-leasing.ru/as-15-8/selenoid/ggr:1.6.5
     depends_on:
