@@ -249,8 +249,11 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         JavascriptExecutor jsExecutor = (JavascriptExecutor) driver;
         do {
             ScriptUtils.waitPageLoading(driver);
-            List<WebElement> listNext = new WebDriverWait(driver, SEARCH_RESULT_TIMEOUT)
-                    .until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(xpathItemLink)));
+            By linkLocator = By.xpath(xpathItemLink);
+            List<WebElement> listNext = driver.findElements(linkLocator);
+
+            /*List<WebElement> listNext = new WebDriverWait(driver, SEARCH_RESULT_TIMEOUT)
+                    .until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(xpathItemLink)));*/
 
             if(listNext != null)
                 links.addAll(listNext);
