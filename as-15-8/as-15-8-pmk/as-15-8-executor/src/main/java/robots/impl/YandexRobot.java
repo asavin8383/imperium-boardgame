@@ -31,13 +31,12 @@ public class YandexRobot extends CommonDirectSearchRobot {
 
         equalityTest = EqualityTest.forCheckUnit(checkUnit);
         if (checkSuggestedLink(checkUnit.getValue(), equalityTest))
-            return createMessage(true);
+            return createMessage(true, false);
 
         if (captcha())
-            throw new Captcha_ExecutionException(
-                    "Обнаружена Captcha " + driver.getCurrentUrl());
+            return createMessage(true, true);
 
-        return createMessage(checkPaginatedSearchResult());
+        return createMessage(checkPaginatedSearchResult(), false);
     }
 
     String extractUrl(WebElement element) {
