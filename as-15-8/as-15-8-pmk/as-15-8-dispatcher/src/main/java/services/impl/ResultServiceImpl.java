@@ -66,8 +66,7 @@ public class ResultServiceImpl implements ResultService {
         Long notFinishedJobsCount = resultRepo.countByResultNullOrResultIn(arrangementID,
                 Arrays.asList(
                         CheckUnitJobResult.PLANNED,
-                        CheckUnitJobResult.RUNNING,
-                        CheckUnitJobResult.CAPTCHA_DETECTED)
+                        CheckUnitJobResult.RUNNING)
         );
         return notFinishedJobsCount > 0 ? ExecutionStatus.RUNNING : ExecutionStatus.FINISHED;
     }

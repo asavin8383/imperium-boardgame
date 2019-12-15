@@ -46,8 +46,8 @@ public class PS_AnalyzerService implements AnalyzerService<ExecutionPSJobResult>
 
 	private CheckUnitJobResult obtainResult(ExecutionPSJobResult result, PS_AnalysisJobResult analysisResult) {
 		CheckUnit checkUnit = result.getCheckUnit();
-		if (result.isCaptchaDetected()){
-			return CAPTCHA_DETECTED;
+		if (result.getCheckUnitJobResult() != null){
+			return result.getCheckUnitJobResult();
 		}
 		if (checkUnit.getType() == CheckUnitType.SEARCH_PHRASE){
 			List<String> urls = result.getUrls() == null ? new ArrayList<>() : result.getUrls();
