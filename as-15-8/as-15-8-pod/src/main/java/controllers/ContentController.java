@@ -17,9 +17,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import repositories.ContentHistoryRepository;
 import repositories.ContentViewRepository;
 import rest.ResponseStatusString;
@@ -28,9 +27,7 @@ import services.ContentService;
 import services.InfoService;
 
 import java.text.ParseException;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -85,6 +82,41 @@ public class ContentController {
         }
         else {
             return new ResponseEntity<>((Page<ContentView>) null, HttpStatus.ACCEPTED);
+        }
+    }
+
+    @GetMapping(path = "/erdi/ids", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<List<Long>> getRelevantContent(
+
+            @RequestParam(required = false) String idMask,
+            @RequestParam(required = false) List<String> categoryNames,
+            @RequestParam(required = false) List<String> decisionOrgs,
+            @RequestParam(required = false) List<String> infoTypeIds,
+            @RequestParam(required = false) List<String> registryNames,
+            @RequestParam(required = false) List<String> resourceTypes,
+            @RequestParam(required = false) String resourceValue,
+            @RequestParam(required = false) List<String> violationNames,
+            @RequestParam(required = false) Integer size
+    ) {
+
+        if (!erdiRestClient.getIsLoading()) {
+
+            List<List<Long>> listContent =
+                    contentViewRepository.findIds(
+                            idMask,
+                            categoryNames,
+                            decisionOrgs,
+                            infoTypeIds,
+                            registryNames,
+                            resourceTypes,
+                            resourceValue,
+                            violationNames,
+                            size);
+
+            return Flux.fromIterable(listContent);
+        }
+        else {
+            return Flux.empty();
         }
     }
 
