@@ -169,7 +169,16 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
     @Override
     public ExecutionJobResult execute(CheckUnit checkUnit) throws ExecutionException {
         driver.get(searchSystemUrl);
-        searchFor(checkUnit.getValue());
+
+        if (captcha())
+            return createMessage(false, CheckUnitJobResult.CAPTCHA_DETECTED);
+
+        try {
+            searchFor(checkUnit.getValue());
+        } catch(NoSuchElementException ex) {
+            log.info("ПС обнаружила робота для URL: {}", checkUnit.getValue());
+            return createMessage(false, CheckUnitJobResult.BAD_IP);
+        }
 
         List<WebElement> links = getLinks(resultPageType);
 
