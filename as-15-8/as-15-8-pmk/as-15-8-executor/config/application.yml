@@ -36,7 +36,10 @@ spring:
   main:
     banner-mode: "off"
   cloud.stream:
-    kafka. binder.brokers: 10.97.220.178:9092,10.97.220.179:9092,10.97.220.180:9092
+    kafka.binder.brokers: 10.97.220.178:9092,10.97.220.179:9092,10.97.220.180:9092
+    bindings:
+      jobs:
+        consumer.concurrency: 10
 selenium-hub-url: http://user:1q0p2w9o@10.97.220.165:4442/wd/hub
 
 ---
