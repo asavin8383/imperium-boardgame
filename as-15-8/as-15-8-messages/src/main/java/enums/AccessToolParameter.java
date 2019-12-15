@@ -23,6 +23,7 @@ public enum AccessToolParameter {
     SEARCH_SYSTEM_XPATH_NEXT_PAGE,
     SEARCH_SYSTEM_XPATH_ITEM_LINK,
     SEARCH_SYSTEM_PROXY,
+    RESULT_NOT_FOUND_REGEXP,
 
     //vpn, proxy, anonimyzers, extentions
     STUB_URL,
