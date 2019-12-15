@@ -178,15 +178,18 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
 
         //Проверяем, не вылез ли подозрительный трафик
         if(links.size() == 0) {
+            log.info("По URL {} Список ссылок пустой нужно проверить на пустой IP", checkUnit.getValue());
             if(Strings.isNotEmpty(resultNotFoundRegexp)) {
                 String content = ScriptUtils.getPageSource(driver).pageSource;
+                //log.info("Контент страницы: {}", content);
+                log.info("Регулярное выражение для проверки: {}", resultNotFoundRegexp);
                 Matcher matcher = Pattern.compile(resultNotFoundRegexp).matcher(content);
                 if(matcher.find()){
-                    //Плохой IP
-                    return createMessage(false, CheckUnitJobResult.BAD_IP);
-                } else {
                     // Ссылок не найдено
                     return createMessage(false, CheckUnitJobResult.COMPLETED);
+                } else {
+                    //Плохой IP
+                    return createMessage(false, CheckUnitJobResult.BAD_IP);
                 }
             } else {
                 //регулярку не задали, считаем плохим IP
