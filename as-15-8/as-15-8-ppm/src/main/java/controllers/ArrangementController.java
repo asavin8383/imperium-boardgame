@@ -99,10 +99,12 @@ public class ArrangementController {
     private void getAndSaveArrangementCheckUnits(Arrangement arrangement){
         arrangement.getScheduleCheckUnits().addAll(
             PPTWebClient.getCheckUnitsByArrangementId(arrangement.getId())
-                .stream()
-                .flatMap(checkUnit -> createCheckUnits(arrangement, checkUnit).stream())
+                .toStream()
+                .flatMap(checkUnits -> checkUnits.stream().flatMap(checkUnit -> createCheckUnits(arrangement, checkUnit).stream())
+                )
                 .collect(Collectors.toList())
         );
+        //toStream().flatMap(List::stream).collect(Collectors.toList());
         log.info("Получен список чек-юнитов мероприятия {} от ППТ", arrangement.getId());
         if(arrangement.getScheduleCheckUnits().size() > 0){
             arrangementRepo.save(arrangement);
