@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "459a6490-de67-4a59-92a5-f8c8c74218df",
+		"_postman_id": "da64752a-7daa-4a6a-8af4-904d2b195b85",
 		"name": "АС 15.8 ППТ",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -447,7 +447,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{url}}/formal_tasks/225",
+							"raw": "{{url}}/formal_tasks/225?",
 							"host": [
 								"{{url}}"
 							],
@@ -1114,6 +1114,45 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "Добавление ЕРДИ к чек юниту через запрос в ПОД",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/traffic/unit/erdi/247/addList?resourceTypes=domain&size=2&sortingDirection=DESC&sortingColumn=id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"traffic",
+										"unit",
+										"erdi",
+										"247",
+										"addList"
+									],
+									"query": [
+										{
+											"key": "resourceTypes",
+											"value": "domain"
+										},
+										{
+											"key": "size",
+											"value": "2"
+										},
+										{
+											"key": "sortingDirection",
+											"value": "DESC"
+										},
+										{
+											"key": "sortingColumn",
+											"value": "id"
+										}
+									]
+								}
+							},
+							"response": []
 						}
 					],
 					"protocolProfileBehavior": {},
@@ -1232,7 +1271,7 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{url}}/erdi/custom",
+									"raw": "{{url}}/erdi/custom?",
 									"host": [
 										"{{url}}"
 									],
@@ -3268,7 +3307,7 @@
 		"oauth2": [
 			{
 				"key": "accessToken",
-				"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqYWNrIiwicm9sZSI6IlJPTEVfT1BFUkFUT1IsUk9MRV9GT1JNQUxfVEFTSyxST0xFX01BTkFHRV9GT1JNQUxfVEFTSyxST0xFX01BTkFHRV9BUlJBTkdFTUVOVCxST0xFX1BSRVBBUkFUSU9OX1RSQUZGSUMiLCJtYWlsIjoiIiwidXNlcl9uYW1lIjoiamFjayIsInNjb3BlIjpbInJlYWQiLCJ3cml0ZSJdLCJleHAiOjE1NzU2MjQxMTIsInVzZXJOYW1lIjoiamFjayIsImF1dGhvcml0aWVzIjpbIlJPTEVfTUFOQUdFX0FSUkFOR0VNRU5UIiwiUk9MRV9PUEVSQVRPUiIsIlJPTEVfUFJFUEFSQVRJT05fVFJBRkZJQyIsIlJPTEVfRk9STUFMX1RBU0siLCJST0xFX01BTkFHRV9GT1JNQUxfVEFTSyJdLCJqdGkiOiI3MTY1YmQwMi0xYjFmLTRiYjktODcxNC0yNzdhZjA3NTFlZjEiLCJjbGllbnRfaWQiOiJhcy0xNS04Iiwic2Vjb25kTmFtZSI6IiJ9.bFdRGH-jp-lCfJMjR8a6nqeKApqtBHMDBPJSAQ2n7YfoL_19hztrBCwYNt_qzbWtuRQfXAZ61PHN18Z29yU2ieKYcqONH2xKwkkGm76m3NjOsl3pY_kPiBRFld7X8h9fY13-pivUJG-1E3btKPAEh9ZmC7HRTYX385ni2ihAlzr0moFjM4DNvF5j0LDjSb5_VsMWc53q4uyJy5fviQNI5Quo4ioIHmJHGZTXLj1b-jnEufDmnO3rGNneba0IvXDKqINYX7gcah0jNtOteiBWvQnfHmJ5Wk6uOT1pZXTqYuJONOUuW4S4_BH0nV8olSbpFdCztrYwZedRZRYBsKU7YQ",
+				"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqb2huIiwicm9sZSI6IlJPTEVfT1BFUkFUT1JfVEVTVCxST0xFX0ZPUk1BTF9UQVNLLFJPTEVfTUFOQUdFX0ZPUk1BTF9UQVNLLFJPTEVfTUFOQUdFX0FSUkFOR0VNRU5ULFJPTEVfUFJFUEFSQVRJT05fVFJBRkZJQyxST0xFX0RJQ1RJT05BUlksUk9MRV9GT1JNQVRJT05fT0ZfU0NIRURVTEUsUk9MRV9WSUVXX1JFU1VMVCxST0xFX1NFTkRfQUNUX0JZX0hBTkQsUk9MRV9NQU5BR0VfUFNfUEFTRCxST0xFX01BTkFHRV9FUkRJLFJPTEVfVklFV19SRVBPUlQsUk9MRV9GT1JNQVRJT05fUEFSQU1fUkVQT1JULFJPTEVfTUFOQUdFX0RPTUFJTlMsUk9MRV9NQU5BR0VfQ09ORklHVVJBVElPTlMsUk9MRV9NQU5BR0VfUkVHSVNUUkFUSU9OX0pPVVJOQUwsUk9MRV9NQU5BR0VfRlVOQ1RJT05fTU9ERSxST0xFX01BTkFHRV9NQU5VQUxfQVJSQU5HRU1FTlQiLCJtYWlsIjoiIiwidXNlcl9uYW1lIjoiam9obiIsInNjb3BlIjpbInJlYWQiLCJ3cml0ZSJdLCJleHAiOjE1NzY1NjYwNTgsInVzZXJOYW1lIjoiam9obiIsImF1dGhvcml0aWVzIjpbIlJPTEVfT1BFUkFUT1JfVEVTVCIsIlJPTEVfUFJFUEFSQVRJT05fVFJBRkZJQyIsIlJPTEVfRk9STUFUSU9OX1BBUkFNX1JFUE9SVCIsIlJPTEVfTUFOQUdFX01BTlVBTF9BUlJBTkdFTUVOVCIsIlJPTEVfTUFOQUdFX1BTX1BBU0QiLCJST0xFX01BTkFHRV9SRUdJU1RSQVRJT05fSk9VUk5BTCIsIlJPTEVfRk9STUFUSU9OX09GX1NDSEVEVUxFIiwiUk9MRV9NQU5BR0VfRVJESSIsIlJPTEVfTUFOQUdFX0NPTkZJR1VSQVRJT05TIiwiUk9MRV9GT1JNQUxfVEFTSyIsIlJPTEVfRElDVElPTkFSWSIsIlJPTEVfVklFV19SRVBPUlQiLCJST0xFX01BTkFHRV9GVU5DVElPTl9NT0RFIiwiUk9MRV9NQU5BR0VfRk9STUFMX1RBU0siLCJST0xFX01BTkFHRV9BUlJBTkdFTUVOVCIsIlJPTEVfVklFV19SRVNVTFQiLCJST0xFX1NFTkRfQUNUX0JZX0hBTkQiLCJST0xFX01BTkFHRV9ET01BSU5TIl0sImp0aSI6ImIwZmMwNDkxLWYzOWMtNDU4OC1iNWIwLWE4YzAyMWU1YjQxNyIsImNsaWVudF9pZCI6ImFzLTE1LTgiLCJzZWNvbmROYW1lIjoiIn0.Lcxn3eDTjpXX6n31aZJ_PiwNnW0pnYeIdmWVYl8Wx7hnwWG8kaOqLF_A1SaQwy26uuoeHH8bUyzWcWIqAsqmCMMSpWyX9mytSQY_6IuMt2QDlgwV3HN5rMaLWtajnqrd3WaBsJ-eG2g1GXLTwyFGNCSAhwbqu-dphzpopNS50qSo_FcOQqvrIU1J6ECS2JkUxnUUk3pGkzg_ciEqpKZdFjGVMJP2wajSTNb43FsVTI4UT0bVvXOXXzBo96jCSttWDFwJhdMCjgKnL2yjfW_oyJD2MWmndci4Vlk_hFKUNxzG7oCNsEKZs7TGcRI73GshYpeyOiqUFTPzoJ5K1uc_zQ",
 				"type": "string"
 			},
 			{
@@ -3307,25 +3346,25 @@
 	],
 	"variable": [
 		{
-			"id": "17891e27-e164-436c-8f49-24557f818d27",
+			"id": "18f5e508-c9bb-4232-bcae-407e5ce52ae3",
 			"key": "url",
 			"value": "http://localhost:15800",
 			"type": "string"
 		},
 		{
-			"id": "150a4297-6a13-4d14-a365-a7e8d7fdef30",
+			"id": "dae293b7-07fd-4973-8221-262fc23a1316",
 			"key": "oper_token",
 			"value": "",
 			"type": "string"
 		},
 		{
-			"id": "df361a72-cd01-44db-9060-4ae1c3963804",
+			"id": "74c9295c-623b-426a-9203-9c55b26dd5ed",
 			"key": "test_url",
 			"value": "http://192.168.5.253:15800",
 			"type": "string"
 		},
 		{
-			"id": "6a327776-88da-43f7-96df-c80f1b5d1a60",
+			"id": "ac0be3a9-992c-435d-bc89-a6f1897689bf",
 			"key": "admin_token",
 			"value": "",
 			"type": "string"
