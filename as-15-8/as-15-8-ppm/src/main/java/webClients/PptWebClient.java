@@ -67,15 +67,14 @@ public class PptWebClient {
                     .exchange()
                     .flatMapMany(clientResponse -> {
                         if(clientResponse.statusCode().equals(HttpStatus.OK)){
-                            //log.info("список id ЕРДИ считан успешно: {}");
+                            log.info("Check units мероприятия {} успешно сформированы", arrangementId, uri);
                            return clientResponse.bodyToFlux(CheckUnit.class);
                         } else {
-                            //log.warn("Ошибка при чтении списка id ЕРДИ {}, статус: {}", clientResponse.statusCode().toString());
+                            log.info("Ошибка получения чек-юнитов мероприятия %d в ППМ", arrangementId, uri);
                             return (Flux.empty());
                         }
                     });
 
-            log.info("Check units мероприятия {} успешно сформированы", arrangementId, uri);
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
             throw AS_15_8_PPM_Exception.logAndGet(log, String.format("Ошибка получения чек-юнитов мероприятия %d в ППМ, код возврата %s", arrangementId, ex.getStatusCode()), ex);
         } catch (Exception ex){
