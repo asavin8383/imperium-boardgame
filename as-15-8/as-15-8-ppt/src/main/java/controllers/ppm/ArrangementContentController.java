@@ -64,19 +64,19 @@ public class ArrangementContentController {
         //TODO получать все остальные трафик-юниты тут же
         log.info("Запрос на получение check units мероприятия: " + arrangementId);
         List<Long> contentIds = arrangementRepo.listContentIdsByArrangementId(arrangementId);
-        Flux<CheckUnit> checkUnits = Flux.concat(
+        Flux<List<CheckUnit>> results = Flux.concat(
                 podWebClient.fetchCheckUnits(contentIds),
-                getCustomErdiCheckUnits(arrangementId),
-                getSearchTemplateCheckUnits(arrangementId)
+                Flux.just(getCustomErdiCheckUnits(arrangementId)),
+                Flux.just(getSearchTemplateCheckUnits(arrangementId))
         );
         log.info("Сформирован список check units мероприятия: " + arrangementId);
 
-        List<CheckUnit> list = checkUnits.toStream().collect(Collectors.toList());
-        List<List<CheckUnit>> lists = packCheckUnitListToList(list);
+        //List<CheckUnit> list = checkUnits.toStream().collect(Collectors.toList());
+        //List<List<CheckUnit>> lists = packCheckUnitListToList(list);
 
-        Flux<List<CheckUnit>> result = Flux.fromIterable(lists);
+        //Flux<List<CheckUnit>> result = Flux.fromIterable(lists);
 
-        return result;
+        return results;
     }
 
     private static List<List<CheckUnit>> packCheckUnitListToList(List<CheckUnit> checkUnitList) {
@@ -90,15 +90,15 @@ public class ArrangementContentController {
         return result;
     }
 
-    private Flux<CheckUnit> getCustomErdiCheckUnits(Long arrangementId){
-        return Flux.fromIterable(customErdiUnitRepository
+    private List<CheckUnit> getCustomErdiCheckUnits(Long arrangementId){
+        return customErdiUnitRepository
                 .findByArrangementId(arrangementId)
                 .stream()
                 .map(customErdiUnit -> new CheckUnit(null, customErdiUnit.getType(), customErdiUnit.getValue()))
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList());
     }
 
-    private Flux<CheckUnit> getSearchTemplateCheckUnits(Long arrangementId){
+    private List<CheckUnit> getSearchTemplateCheckUnits(Long arrangementId){
         List<CheckUnit> checkUnits = new ArrayList<>();
         List<SearchQueryPattern> searchQueryPatterns =
                 searchQueryPatternRepo
@@ -145,7 +145,7 @@ public class ArrangementContentController {
 
         });
 
-        return Flux.fromIterable(checkUnits);
+        return checkUnits;
     }
 
     private List<CheckUnit> fillErdi(SearchQueryPattern searchQueryPattern) {
@@ -157,7 +157,11 @@ public class ArrangementContentController {
                 .mapToLong(SearchQueryPatternContentJoin::getContentId)
                 .boxed()
                 .collect(Collectors.toList());
-            List<CheckUnit> podCheckUnits = podWebClient.fetchCheckUnits(contentIds).sequential().collectList().block();
+            List<CheckUnit> podCheckUnits = podWebClient
+                    .fetchCheckUnits(contentIds)
+                    .flatMap(checkUnitList -> Flux.fromIterable(checkUnitList))
+                    .collectList()
+                    .block();
             if(podCheckUnits != null) {
                 checkUnits.addAll(podCheckUnits);
             }

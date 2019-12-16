@@ -22,7 +22,9 @@ import reactor.core.publisher.ParallelFlux;
 import reactor.core.scheduler.Schedulers;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service
@@ -111,11 +113,30 @@ public class PodWebClient {
                 });
     }
 
-    public ParallelFlux<CheckUnit> fetchCheckUnits(List<Long> contentIds) {
-        return Flux.fromIterable(contentIds)
+    public Flux<List<CheckUnit>> fetchCheckUnits(List<Long> contentIds) {
+        /*return Flux.fromIterable(contentIds)
                 .parallel(fetchFluxConcurrency)
                 .runOn(Schedulers.parallel())
-                .flatMap(this::getCheckUnitsByContentId);
+                .flatMap(this::getCheckUnitsByContentId);*/
+        List<List<Long>> ids = packListToLists(contentIds, 2000);
+        return Flux.fromIterable(ids)
+                .map(list -> Flux.fromIterable(list)
+                                    .parallel()
+                                    .runOn(Schedulers.parallel())
+                                    .flatMap(this::getCheckUnitsByContentId)
+                                    .sequential()
+                                    .collectList()
+                                    .block()
+                );
+
+    }
+
+    private static <T>List<List<T>> packListToLists(List<T> list, int subListSize) {
+        final AtomicInteger counter = new AtomicInteger();
+        List<List<T>> result = new ArrayList<>(list.stream()
+                .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / subListSize))
+                .values());
+        return result;
     }
 
     private Flux<CheckUnit> getCheckUnitsByContentId(Long contentId){
