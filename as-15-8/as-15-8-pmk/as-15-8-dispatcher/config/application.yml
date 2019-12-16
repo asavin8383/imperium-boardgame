@@ -12,6 +12,7 @@ spring:
         inputJobNotifications:
           destination: job_notifications
           group: dispatchers
+          consumer.concurrency: 24
         inputAnalysisResults:
           destination: analysis_results
           group: dispatchers
@@ -82,6 +83,10 @@ spring:
         minPartitionCount: 350
       bindings:
         inputJobs:
+          consumer.concurrency: 50
+        inputJobNotifications:
+          consumer.concurrency: 50
+        inputAnalysisResults:
           consumer.concurrency: 50
 
 ---
