@@ -180,7 +180,7 @@ public class ScheduleService {
                 schedulePeriodArrangement.getSchedulePeriod().getStartTime(),
                 schedulePeriodArrangement.getSchedulePeriod().getEndTime()
         );
-        long currentExecutionNumber = 1;
+        long currentExecutionNumber = 0;
         log.debug("Заполняется SPA {}", schedulePeriodArrangement.getId());
         SortedSet<ScheduleCheckUnit> periodCheckUnits = ((TreeSet)scheduleCheckUnits).headSet(periodProcessing.getLastCheckUnit(), true);
         for (ScheduleCheckUnit scheduleCheckUnit : periodCheckUnits){
