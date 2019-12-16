@@ -4,11 +4,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.projection.ContentView;
 import model.projection.ContentView_;
+import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.query.QueryUtils;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Flux;
 import repositories.ContentViewRepositoryAdvanced;
 import repositories.helper.CriteriaHelper;
 
@@ -19,6 +21,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by san
@@ -44,14 +47,69 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
             String query,
             boolean random,
             Pageable pageable) {
+
+        CriteriaQuery<ContentView> select = getCriteriaQuery(id,
+                categoryNames,
+                decisionOrgs,
+                infoTypeIds,
+                registryNames,
+                resourceTypes,
+                resourceValue,
+                violationNames,
+                query,
+                random,
+                pageable);
+
+        return CriteriaHelper.createPage(em, select, pageable);
+    }
+
+    @Override
+    public List<List<Long>> findIds(
+            String idMask,
+            List<String> categoryNames,
+            List<String> decisionOrgs,
+            List<String> infoTypeIds,
+            List<String> registryNames,
+            List<String> resourceTypes,
+            String resourceValue,
+            List<String> violationNames,
+            Integer maxResults) {
+
+        CriteriaQuery<ContentView> select = getCriteriaQuery(idMask,
+                categoryNames,
+                decisionOrgs,
+                infoTypeIds,
+                registryNames,
+                resourceTypes,
+                resourceValue,
+                violationNames,
+                null,
+                false,
+                null);
+
+        return  CriteriaHelper.createIds(em, select, maxResults);
+    }
+
+    private CriteriaQuery<ContentView> getCriteriaQuery(String idMask,
+                             List<String> categoryNames,
+                             List<String> decisionOrgs,
+                             List<String> infoTypeIds,
+                             List<String> registryNames,
+                             List<String> resourceTypes,
+                             String resourceValue,
+                             List<String> violationNames,
+                             String query,
+                             boolean random, Pageable pageable) {
+
         CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
-        CriteriaQuery<ContentView> select = criteriaBuilder.createQuery(ContentView.class);
-        Root<ContentView> fromContentView = select.from(ContentView.class);
+        CriteriaQuery<ContentView> cq = criteriaBuilder.createQuery(ContentView.class);
+
+        Root<ContentView> fromContentView = cq.from(ContentView.class);
 
         List<Predicate> predicates = new ArrayList<>();
 
-        if (id != null) {
-            predicates.add(criteriaBuilder.like(criteriaBuilder.upper(fromContentView.get(ContentView_.ID)), "%" + id.toUpperCase() + "%"));
+        if (idMask != null) {
+            predicates.add(criteriaBuilder.like(criteriaBuilder.upper(fromContentView.get(ContentView_.ID)), "%" + idMask.toUpperCase() + "%"));
         }
 
         if (categoryNames != null && categoryNames.size() > 0) {
@@ -84,29 +142,30 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
 
         if (query != null) {
             predicates.add(
-                criteriaBuilder.or(
-                    criteriaBuilder.like(criteriaBuilder.upper(fromContentView.get(ContentView_.ID)), "%" + query.toUpperCase()),
-                    criteriaBuilder.like(criteriaBuilder.upper(fromContentView.get(ContentView_.CATEGORY_NAME)), "%" + query.toUpperCase() + "%"),
-                    criteriaBuilder.like(criteriaBuilder.upper(fromContentView.get(ContentView_.DECISION_ORG)), "%" + query.toUpperCase() + "%"),
-                    criteriaBuilder.like(criteriaBuilder.upper(fromContentView.get(ContentView_.INFO_TYPE_ID)), "%" + query.toUpperCase() + "%"),
-                    criteriaBuilder.like(criteriaBuilder.upper(fromContentView.get(ContentView_.REGISTRY_NAME)), "%" + query.toUpperCase() + "%"),
-                    criteriaBuilder.like(criteriaBuilder.upper(fromContentView.get(ContentView_.RESOURCE_TYPE)), "%" + query.toUpperCase() + "%"),
-                    criteriaBuilder.like(criteriaBuilder.upper(fromContentView.get(ContentView_.RESOURCE_VALUE)), "%" + query.toUpperCase() + "%"),
-                    criteriaBuilder.like(criteriaBuilder.upper(fromContentView.get(ContentView_.VIOLATION_NAME)), "%" + query.toUpperCase() + "%")
-
-                )
+                    criteriaBuilder.or(
+                            criteriaBuilder.like(criteriaBuilder.upper(fromContentView.get(ContentView_.ID)), "%" + query.toUpperCase()),
+                            criteriaBuilder.like(criteriaBuilder.upper(fromContentView.get(ContentView_.CATEGORY_NAME)), "%" + query.toUpperCase() + "%"),
+                            criteriaBuilder.like(criteriaBuilder.upper(fromContentView.get(ContentView_.DECISION_ORG)), "%" + query.toUpperCase() + "%"),
+                            criteriaBuilder.like(criteriaBuilder.upper(fromContentView.get(ContentView_.INFO_TYPE_ID)), "%" + query.toUpperCase() + "%"),
+                            criteriaBuilder.like(criteriaBuilder.upper(fromContentView.get(ContentView_.REGISTRY_NAME)), "%" + query.toUpperCase() + "%"),
+                            criteriaBuilder.like(criteriaBuilder.upper(fromContentView.get(ContentView_.RESOURCE_TYPE)), "%" + query.toUpperCase() + "%"),
+                            criteriaBuilder.like(criteriaBuilder.upper(fromContentView.get(ContentView_.RESOURCE_VALUE)), "%" + query.toUpperCase() + "%"),
+                            criteriaBuilder.like(criteriaBuilder.upper(fromContentView.get(ContentView_.VIOLATION_NAME)), "%" + query.toUpperCase() + "%")
+                    )
             );
         }
 
-        select.where(predicates.toArray(new Predicate[0]));
+        cq.where(predicates.toArray(new Predicate[0]));
 
         //Берём сортировку из Pageable
-        if(!random){
-            select.orderBy(QueryUtils.toOrders(pageable.getSort(), fromContentView, criteriaBuilder));
-        } else {
-           select.orderBy(criteriaBuilder.asc(criteriaBuilder.function("random", Double.class)));
+        if(!random && pageable!= null){
+            cq.orderBy(QueryUtils.toOrders(pageable.getSort(), fromContentView, criteriaBuilder));
+        } if (!random && pageable == null)
+            return cq;
+        else {
+            cq.orderBy(criteriaBuilder.asc(criteriaBuilder.function("random", Double.class)));
         }
-
-        return CriteriaHelper.createPage(em, select, pageable);
+        return cq;
     }
+
 }
