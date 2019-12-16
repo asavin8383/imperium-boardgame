@@ -36,7 +36,9 @@ spring:
   main:
     banner-mode: "off"
   cloud.stream:
-    kafka.binder.brokers: 10.97.220.178:9092,10.97.220.179:9092,10.97.220.180:9092
+    kafka.binder:
+      brokers: 10.97.220.178:9092,10.97.220.179:9092,10.97.220.180:9092
+      minPartitionCount: 350
     bindings:
       jobs:
         consumer.concurrency: 10
