@@ -1,0 +1,15 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+    <changeSet author="asavin" id="ppm.0012">
+        <sql>
+            alter table schedule.schedule_periods drop constraint ck_state;
+            alter table schedule.schedule_periods add constraint ck_state check ( schedule_period_state in ('CREATED', 'PLANNED', 'STARTED'));
+        </sql>
+        <rollback>
+            <sql>
+                alter table schedule.schedule_periods drop constraint ck_state;
+                alter table schedule.schedule_periods add constraint ck_state check ( schedule_period_state in ('CREATED', 'STARTED'));
+            </sql>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

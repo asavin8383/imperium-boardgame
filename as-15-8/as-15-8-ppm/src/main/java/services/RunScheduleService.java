@@ -43,8 +43,8 @@ public class RunScheduleService {
 
     @Scheduled(cron = "${app.schedule}")
     public void runSchedule(){
-        scheduleRepo.findAllByPlannedDateAndStatus(LocalDate.now(), ScheduleStatus.PLANNED)
-            .forEach(schedule -> schedulePeriodRepo.findAllByScheduleAndSchedulePeriodStateAndAndStartTimeBefore(schedule, SchedulePeriodState.CREATED, LocalTime.now())
+        scheduleRepo.findAllByPlannedDate(LocalDate.now())
+            .forEach(schedule -> schedulePeriodRepo.findAllByScheduleAndSchedulePeriodStateAndAndStartTimeBefore(schedule, SchedulePeriodState.PLANNED, LocalTime.now())
                 .forEach(schedulePeriod -> {
                     schedulePeriodArrangementRepo.findAllBySchedulePeriod(schedulePeriod)
                         .forEach(schedulePeriodArrangement ->
