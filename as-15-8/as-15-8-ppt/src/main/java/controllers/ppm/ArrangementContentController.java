@@ -23,6 +23,7 @@ import webClients.PodWebClient;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -41,7 +42,7 @@ public class ArrangementContentController {
     private final PodWebClient podWebClient;
     private final SearchQueryPatternRepo searchQueryPatternRepo;
 
-    @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    /*@GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<CheckUnit> getAndSendCheckUnits(@RequestParam("id") Long arrangementId) {
 
         //TODO получать все остальные трафик-юниты тут же
@@ -53,7 +54,40 @@ public class ArrangementContentController {
                 getSearchTemplateCheckUnits(arrangementId)
         );
         log.info("Сформирован список check units мероприятия: " + arrangementId);
+
         return checkUnits;
+    }*/
+
+    @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<List<CheckUnit>> getAndSendCheckUnits(@RequestParam("id") Long arrangementId) {
+
+        //TODO получать все остальные трафик-юниты тут же
+        log.info("Запрос на получение check units мероприятия: " + arrangementId);
+        List<Long> contentIds = arrangementRepo.listContentIdsByArrangementId(arrangementId);
+        Flux<CheckUnit> checkUnits = Flux.concat(
+                podWebClient.fetchCheckUnits(contentIds),
+                getCustomErdiCheckUnits(arrangementId),
+                getSearchTemplateCheckUnits(arrangementId)
+        );
+        log.info("Сформирован список check units мероприятия: " + arrangementId);
+
+        List<CheckUnit> list = checkUnits.toStream().collect(Collectors.toList());
+        List<List<CheckUnit>> lists = packCheckUnitListToList(list);
+
+        Flux<List<CheckUnit>> result = Flux.fromIterable(lists);
+
+        return result;
+    }
+
+    private static List<List<CheckUnit>> packCheckUnitListToList(List<CheckUnit> checkUnitList) {
+        // результат работы метода сделан для flux и hystrix
+        final AtomicInteger counter = new AtomicInteger();
+        int subListSize = 1000;
+
+        List<List<CheckUnit>> result = new ArrayList<>(checkUnitList.stream()
+                .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / subListSize))
+                .values());
+        return result;
     }
 
     private Flux<CheckUnit> getCustomErdiCheckUnits(Long arrangementId){

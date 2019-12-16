@@ -74,7 +74,7 @@ public class PodWebClient {
                 });
     }
 
-    public Flux<List<Long>> getErdiIdList1(
+    public Flux<List<Long>> getErdiIdList(
              String idMask
             , List<String> categoryNames
             , List<String> decisionOrgs

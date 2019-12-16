@@ -1,7 +1,5 @@
 package controllers.traffic;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import enums.SortingDirection;
 import exceptions.AS_15_8_PPT_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +11,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 import repositories.CustomErdiRepository;
 import repositories.ErdiContentJoinRepository;
 import repositories.ErdiTrafficUnitRepository;
@@ -53,7 +50,7 @@ public class ErdiTrafficUnitController {
             @RequestParam(required = false) List<String> violationNames,
             @RequestParam(required = false) Integer size) {
 
-        Flux<List<Long>> idss = podWebClient.getErdiIdList1(idMask, categoryNames, decisionOrgs, infoTypeIds, registryNames, resourceTypes, resourceValue, violationNames, size);
+        Flux<List<Long>> idss = podWebClient.getErdiIdList(idMask, categoryNames, decisionOrgs, infoTypeIds, registryNames, resourceTypes, resourceValue, violationNames, size);
         List<Long> ids = idss.toStream().flatMap(List::stream).collect(Collectors.toList());
 
         saveErdi(unit, ids);
