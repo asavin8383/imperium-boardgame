@@ -4,6 +4,7 @@ import checkUnits.CheckUnit;
 import exceptions.AS_15_8_PPM_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.dialect.CUBRIDDialect;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -60,7 +61,7 @@ public class PptWebClient {
         try {
             log.info("Получение чек-юнитов мероприятия {} по запросу: {}", arrangementId, uri);
 
-            WebClient.create(gatewayUrl)
+            return WebClient.create(gatewayUrl)
                     .get()
                     .uri(uri)
                     .accept(MediaType.TEXT_EVENT_STREAM)
@@ -68,19 +69,18 @@ public class PptWebClient {
                     .flatMapMany(clientResponse -> {
                         if(clientResponse.statusCode().equals(HttpStatus.OK)){
                             //log.info("список id ЕРДИ считан успешно: {}");
-                           return clientResponse.bodyToFlux(CheckUnit.class);
+                            log.info("Check units мероприятия {} успешно сформированы", arrangementId, uri);
+                           return clientResponse.bodyToFlux(new ParameterizedTypeReference<List<CheckUnit>>(){});
                         } else {
                             //log.warn("Ошибка при чтении списка id ЕРДИ {}, статус: {}", clientResponse.statusCode().toString());
                             return (Flux.empty());
                         }
                     });
 
-            log.info("Check units мероприятия {} успешно сформированы", arrangementId, uri);
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
             throw AS_15_8_PPM_Exception.logAndGet(log, String.format("Ошибка получения чек-юнитов мероприятия %d в ППМ, код возврата %s", arrangementId, ex.getStatusCode()), ex);
         } catch (Exception ex){
             throw AS_15_8_PPM_Exception.logAndGet(log, String.format("Ошибка получения чек-юнитов мероприятия %d в ППМ", arrangementId), ex);
         }
-        return Flux.empty();
     }
 }
