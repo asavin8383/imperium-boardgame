@@ -68,11 +68,10 @@ public class PptWebClient {
                     .exchange()
                     .flatMapMany(clientResponse -> {
                         if(clientResponse.statusCode().equals(HttpStatus.OK)){
-                            //log.info("список id ЕРДИ считан успешно: {}");
                             log.info("Check units мероприятия {} успешно сформированы", arrangementId, uri);
-                           return clientResponse.bodyToFlux(new ParameterizedTypeReference<List<CheckUnit>>(){});
+                            return clientResponse.bodyToFlux(new ParameterizedTypeReference<List<CheckUnit>>(){});
                         } else {
-                            //log.warn("Ошибка при чтении списка id ЕРДИ {}, статус: {}", clientResponse.statusCode().toString());
+                            log.warn("Ошибка получения чек-юнитов мероприятия %d в ППМ код возврата %s", arrangementId, clientResponse.statusCode().toString());
                             return (Flux.empty());
                         }
                     });
