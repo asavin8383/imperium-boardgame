@@ -7,6 +7,7 @@ import exceptions.AS_15_8_PPM_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.*;
+import model.enums.SchedulePeriodState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,6 +63,7 @@ public class ScheduleService {
 
         arrangementRepo.findAllBySchedule(schedule.getId())
                 .forEach(this::fillCheckUnits);
+        schedule.getSchedulePeriods().forEach(schedulePeriod -> schedulePeriod.setSchedulePeriodState(SchedulePeriodState.PLANNED));
         schedule.setStatus(ScheduleStatus.PLANNED);
         scheduleRepo.save(schedule);
         log.info("Изменяем статусы всем мероприятиям из расписания с ИД: {}", schedule.getId());
