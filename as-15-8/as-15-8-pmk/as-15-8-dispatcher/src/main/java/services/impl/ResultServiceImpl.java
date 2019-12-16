@@ -52,7 +52,7 @@ public class ResultServiceImpl implements ResultService {
         }
         if((analysisResult.getScreenshot() != null && analysisResult.getScreenshot().length > 0) ||
                 (analysisResult.getEtalonScreenshot() != null && analysisResult.getEtalonScreenshot().length > 0)){
-            ResultScreenShot resultScreenShot = new ResultScreenShot();
+            ResultScreenShot resultScreenShot = resultScreenShotRepo.findById(result.getId()).orElseGet(ResultScreenShot::new);
             resultScreenShot.setResult(result);
             resultScreenShot.setScreenshot(analysisResult.getScreenshot());
             resultScreenShot.setEtalonScreenshot(analysisResult.getEtalonScreenshot());
