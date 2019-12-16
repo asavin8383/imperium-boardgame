@@ -33,7 +33,7 @@ public class PodWebClient {
             log.info("Статус отправки акта в ПОД: {}. Акт: {}", resp.statusCode().toString(), actRequest);
             return resp.statusCode().is2xxSuccessful();
         } catch(Exception ex){
-            log.error("Ошибка отправки запроса на создание акта по мероприятию "+actRequest.getArragementId(), ex);
+            log.error("Ошибка отправки запроса на создание акта по мероприятию " + actRequest.getArragementId(), ex);
             return false;
         }
     }

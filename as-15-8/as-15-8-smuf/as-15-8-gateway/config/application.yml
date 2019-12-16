@@ -1,6 +1,8 @@
 subsystem: SMUF
 server:
   port: 15880
+  tomcat:
+    max-threads: 5000
 logging:
   config: config/logback-spring.xml
 spring:
