@@ -68,16 +68,16 @@ public class RunScheduleService {
     private void runCheckUnit(SchedulePeriodCheckUnit schedulePeriodCheckUnit){
         log.debug("Запуск чек-юнита: {} {}", schedulePeriodCheckUnit.getId(), schedulePeriodCheckUnit.getCheckUnit().getCheckUnitValue());
         if (schedulePeriodCheckUnit.getStatus().equals(SchedulePeriodCheckUnitStatus.READY)){
-            long keySuffix = schedulePeriodCheckUnit.getExecutionNumber() %
-                    schedulePeriodCheckUnit.getSchedulePeriodArrangement().getWorkersCount();
+            int keySuffix = ((Long)(schedulePeriodCheckUnit.getExecutionNumber() %
+                    schedulePeriodCheckUnit.getSchedulePeriodArrangement().getWorkersCount())).intValue();
             String key = schedulePeriodCheckUnit.getSchedulePeriodArrangement().getArrangement().getId() + "_" + keySuffix;
-            sendCheckUnitJobToDispatcher(createCheckUnitJob(scheduleCheckUnitRepo.getOne(schedulePeriodCheckUnit.getId())), key);
-            log.debug("Чек-юнит отправлен на диспетчер. Ключ: {} , значение: {} {}", key, schedulePeriodCheckUnit.getId(), schedulePeriodCheckUnit.getCheckUnit().getCheckUnitValue());
+            sendCheckUnitJobToDispatcher(createCheckUnitJob(scheduleCheckUnitRepo.getOne(schedulePeriodCheckUnit.getId())), key, keySuffix);
+            log.debug("Чек-юнит отправлен на диспетчер. Ключ: {}, Раздел {}, значение: {} {}", key, keySuffix, schedulePeriodCheckUnit.getId(), schedulePeriodCheckUnit.getCheckUnit().getCheckUnitValue());
         }
     }
 
-    private void sendCheckUnitJobToDispatcher(CheckUnitJob checkUnitJob, String key){
-        checkUnitJobProducer.sendJobToDispatcher(checkUnitJob, key);
+    private void sendCheckUnitJobToDispatcher(CheckUnitJob checkUnitJob, String key, int partitionId){
+        checkUnitJobProducer.sendJobToDispatcher(checkUnitJob, key, partitionId);
     }
 
     private CheckUnitJob createCheckUnitJob(ScheduleCheckUnit scheduleCheckUnit) {

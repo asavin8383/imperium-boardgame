@@ -42,8 +42,9 @@ public class CheckUnitJobHandler {
     @StreamListener(DispatcherChannels.INPUT_JOBS)
     public void createJobItems(Message<CheckUnitJob> message){
         CheckUnitJob checkUnitJob = message.getPayload();
+        Integer partitionId = message.getHeaders().get(KafkaHeaders.RECEIVED_PARTITION_ID, Integer.class);
         log.info("\n   ---->>> Принято задание: " + checkUnitJob.toString() +
-                ", partition: "+message.getHeaders().get(KafkaHeaders.RECEIVED_PARTITION_ID, Integer.class) +
+                ", partition: "+ partitionId +
                 ", offset: "+message.getHeaders().get(KafkaHeaders.OFFSET, Long.class));
         try {
             ErdiStatus erdiStatus = erdiChecker.checkErdiStatus(message.getPayload().getCheckUnit().getContentId());
@@ -53,7 +54,7 @@ public class CheckUnitJobHandler {
             } else {
                 Result result = checkUnitPersistingService.persistCheckUnitJob(message.getPayload(), CheckUnitJobResult.RUNNING);
                 checkUnitJob.setJobID(result.getId());
-                sendJobToExecutor(checkUnitJob, message.getHeaders().get(KafkaHeaders.RECEIVED_MESSAGE_KEY));
+                sendJobToExecutor(checkUnitJob, partitionId);
             }
         } catch (Exception ex) {
             log.error("Ошибка обработки задания на проверку чек-юнита " + checkUnitJob.toString() + " диспетчером", ex);
@@ -64,11 +65,12 @@ public class CheckUnitJobHandler {
      * Метод отправки задания роботу в тему Kafka
      * @param checkUnitJob Задание на проверку чек-юнита
      */
-    private void sendJobToExecutor(CheckUnitJob checkUnitJob, Object key) {
+    private void sendJobToExecutor(CheckUnitJob checkUnitJob, Integer partitionId) {
         try {
             Message<CheckUnitJob> message = MessageBuilder
                     .withPayload(checkUnitJob)
-                    .setHeader(KafkaHeaders.MESSAGE_KEY, key)
+                    //.setHeader(KafkaHeaders.MESSAGE_KEY, key)
+                    .setHeader(KafkaHeaders.PARTITION_ID, partitionId)
                     .build();
 
             boolean send = dispatcherChannels.outputJobs().send(message);

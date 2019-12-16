@@ -34,19 +34,20 @@ public class ExecutionResultsHandler {
     @StreamListener(AnalyzerChannels.INPUT)
     public void consumeCheckUnitJob(Message<ExecutionJobResult> message){
         ExecutionJobResult job = message.getPayload();
+        Integer partitonId = message.getHeaders().get(KafkaHeaders.RECEIVED_PARTITION_ID, Integer.class);
         log.info("Принято задание на анализ: " +
                 "ID: "+job.getJobID() +
                 ", checkUnit: "+job.getCheckUnit().getValue() +
-                ", partition: "+message.getHeaders().get(KafkaHeaders.RECEIVED_PARTITION_ID, Integer.class) +
+                ", partition: " + partitonId +
                 ", offset: "+message.getHeaders().get(KafkaHeaders.OFFSET, Long.class));
         try {
             AnalyzerService<? super ExecutionJobResult> service = AnalyzerServiceFactory.getService(job.getClass());
             AnalysisResult analysisResult = service.analyzeResult(job);
-            sendAnalysisResult(analysisResult);
+            sendAnalysisResult(analysisResult, partitonId);
             log.info("Анализ результата проверки ПС/ПАСД выполнен успешно : " + job.getJobID() + ", " + job.getCheckUnit().getValue());
         } catch (Exception ex) {
             log.error("Ошибка при обработке задания на анализ результатов проверки ПС/ПАСД : " + job.getJobID() + ", " + job.getCheckUnit().getValue(), ex);
-            sendErrorNotification(job.getJobID(), job.getCheckUnit().getContentId(), ex);
+            sendErrorNotification(job.getJobID(), job.getCheckUnit().getContentId(), ex, partitonId);
         }
     }
 
@@ -54,10 +55,11 @@ public class ExecutionResultsHandler {
      * Метод отправки результата выполнения анализа в тему Kafka
      * @param analysisResult Результат выполнения анализа
      */
-    private void sendAnalysisResult(AnalysisResult analysisResult) throws RuntimeException {
+    private void sendAnalysisResult(AnalysisResult analysisResult, Integer partitonId) throws RuntimeException {
         try {
             Message<AnalysisResult> message = MessageBuilder
                     .withPayload(analysisResult)
+                    .setHeader(KafkaHeaders.PARTITION_ID, partitonId)
                     .build();
 
             boolean send = analyzerChannels.output().send(message);
@@ -68,7 +70,7 @@ public class ExecutionResultsHandler {
         }
     }
 
-    private void sendErrorNotification(Long jobID, Long erdiId, Throwable cause) {
+    private void sendErrorNotification(Long jobID, Long erdiId, Throwable cause, Integer partitonId) {
         try {
             StringWriter sw = new StringWriter();
             cause.printStackTrace(new PrintWriter(sw));
@@ -76,6 +78,7 @@ public class ExecutionResultsHandler {
 
             Message<CheckUnitStatusNotification> message = MessageBuilder
                     .withPayload(notification)
+                    .setHeader(KafkaHeaders.PARTITION_ID, partitonId)
                     .build();
 
             boolean send = analyzerChannels.notifications().send(message);
