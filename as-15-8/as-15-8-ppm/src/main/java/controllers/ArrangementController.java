@@ -95,7 +95,7 @@ public class ArrangementController {
         );
     }
 
-
+    //TODO разобраться
     private void getAndSaveArrangementCheckUnits(Arrangement arrangement){
         arrangement.getScheduleCheckUnits().addAll(
             PPTWebClient.getCheckUnitsByArrangementId(arrangement.getId())
