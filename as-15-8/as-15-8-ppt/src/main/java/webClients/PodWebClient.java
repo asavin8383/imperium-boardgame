@@ -2,7 +2,6 @@ package webClients;
 
 import checkUnits.CheckUnit;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import enums.SortingDirection;
 import exceptions.AS_15_8_PPT_Exception;
 import lombok.extern.slf4j.Slf4j;
 import model.traffic.CustomErdiView;
@@ -11,14 +10,13 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.ParallelFlux;
 import reactor.core.scheduler.Schedulers;
 
 import javax.annotation.PostConstruct;
@@ -116,10 +114,10 @@ public class PodWebClient {
     public Flux<List<CheckUnit>> fetchCheckUnits(List<Long> contentIds) {
         List<List<Long>> ids = packListToLists(contentIds, 300);
         return Flux.fromIterable(ids)
-                .map(this::fetchCheckUnitsList);
+                .map(this::getCheckUnitsByContentIds);
     }
 
-    private List<CheckUnit> fetchCheckUnitsList(List<Long> contentIds){
+   /* private List<CheckUnit> fetchCheckUnitsList(List<Long> contentIds){
         return Flux.fromIterable(contentIds)
                 .parallel(fetchFluxConcurrency)
                 .runOn(Schedulers.parallel())
@@ -127,6 +125,35 @@ public class PodWebClient {
                 .sequential()
                 .collectList()
                 .block();
+    }*/
+
+    private List<CheckUnit> getCheckUnitsByContentIds(List<Long> contentIds){
+        String uri = UriComponentsBuilder
+                .fromUriString(GET_CHECK_UNITS_URL)
+                .build().toString();
+
+        try {
+            //log.info("Получение чек-юнитов ЕРДИ {} по запросу: {}", contentId, uri);
+            return webClient
+                    .post()
+                    .uri(uri)
+                    .body(BodyInserters.fromObject(contentIds))
+                    .exchange()
+                    .flatMapMany(clientResponse -> {
+                        if(clientResponse.statusCode().equals(HttpStatus.OK)){
+                            log.info("Чек юниты получены успешно");
+                            return clientResponse.bodyToFlux(CheckUnit.class);
+                        } else {
+                            log.warn("Ошибка получения чек юнитов, статус: {}", clientResponse.statusCode().toString());
+                            return Flux.empty();
+                        }
+                    })
+                    .collectList()
+                    .block();
+            //return Arrays.asList(oAuth2RestTemplate.getForObject(uri, CheckUnit[].class));
+        } catch (HttpClientErrorException | HttpServerErrorException ex) {
+            throw AS_15_8_PPT_Exception.logAndGet(log, String.format("Ошибка получения чек-юнитов в ППТ, код возврата %s", ex.getStatusCode()), ex);
+        }
     }
 
     private Flux<CheckUnit> getCheckUnitsByContentId(Long contentId){
