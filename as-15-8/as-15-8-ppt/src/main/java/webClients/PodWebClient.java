@@ -113,16 +113,20 @@ public class PodWebClient {
                 });
     }
 
-    public Flux<Flux<CheckUnit>> fetchCheckUnits(List<Long> contentIds) {
+    public Flux<Mono<List<CheckUnit>>> fetchCheckUnits(List<Long> contentIds) {
         List<List<Long>> ids = packListToLists(contentIds, 300);
         return Flux.fromIterable(ids)
-                .map(listERDI -> Flux.fromIterable(listERDI)
-                        .parallel(fetchFluxConcurrency)
-                        .runOn(Schedulers.parallel())
-                        .flatMap(this::getCheckUnitsByContentId)
-                        .sequential()
-                ).subscribeOn(Schedulers.parallel());
+                .map(listERDI -> fetchCheckUnitsList(listERDI))
+                .subscribeOn(Schedulers.parallel());
+    }
 
+    private Mono<List<CheckUnit>> fetchCheckUnitsList(List<Long> contentIds){
+        return Flux.fromIterable(contentIds)
+                .parallel(fetchFluxConcurrency)
+                .runOn(Schedulers.parallel())
+                .flatMap(this::getCheckUnitsByContentId)
+                .sequential()
+                .collectList();
     }
 
     private Flux<CheckUnit> getCheckUnitsByContentId(Long contentId){
