@@ -28,13 +28,15 @@ public interface ContentHistoryRepository extends JpaRepository<ContentHistory, 
                 "then 'EXCLUDED' " +
                 "else " +
                     "case when " +
-                    "max(h.startDate) < :restrictionDate " +
+                    "max(i.includeTime) < :restrictionDate " +
                     "then 'ACTIVE' " +
                     "else 'INACTIVE' " +
                     "end " +
                 "end " +
             "from ContentHistory h " +
-            "where h.content.id = :contentId " +
+            "join ContentInfo i " +
+            "on h.content = i.content " +
+            "and h.content.id = :contentId " +
             "group by h.content.id")
     ErdiStatus checkErdiStatus(@Param("contentId") Long contentId, @Param("restrictionDate") Date restrictionDate);
 
