@@ -114,32 +114,17 @@ public class PodWebClient {
     }
 
     public Flux<List<CheckUnit>> fetchCheckUnits(List<Long> contentIds) {
-        /*return Flux.fromIterable(contentIds)
-                .parallel(fetchFluxConcurrency)
-                .runOn(Schedulers.parallel())
-                .flatMap(this::getCheckUnitsByContentId);*/
-        List<List<Long>> ids = packListToLists(contentIds, 100);
+        List<List<Long>> ids = packListToLists(contentIds, 300);
         return Flux.fromIterable(ids)
-                .map(list -> {
-                            List<CheckUnit> res = Flux.fromIterable(list)
-                                    .parallel(fetchFluxConcurrency)
-                                    .runOn(Schedulers.parallel())
-                                    .flatMap(this::getCheckUnitsByContentId)
-                                    .sequential()
-                                    .collectList()
-                                    .block();
-                            return res;
-                        }
-                );
+                .map(listERDI -> Flux.fromIterable(listERDI)
+                        .parallel(fetchFluxConcurrency)
+                        .runOn(Schedulers.parallel())
+                        .flatMap(this::getCheckUnitsByContentId)
+                        .sequential()
+                        .collectList()
+                        .block()
+                ).subscribeOn(Schedulers.parallel());
 
-    }
-
-    private static <T>List<List<T>> packListToLists(List<T> list, int subListSize) {
-        final AtomicInteger counter = new AtomicInteger();
-        List<List<T>> result = new ArrayList<>(list.stream()
-                .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / subListSize))
-                .values());
-        return result;
     }
 
     private Flux<CheckUnit> getCheckUnitsByContentId(Long contentId){
@@ -202,6 +187,11 @@ public class PodWebClient {
             });
     }
 
-
-
+    private static <T>List<List<T>> packListToLists(List<T> list, int subListSize) {
+        final AtomicInteger counter = new AtomicInteger();
+        List<List<T>> result = new ArrayList<>(list.stream()
+                .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / subListSize))
+                .values());
+        return result;
+    }
 }
