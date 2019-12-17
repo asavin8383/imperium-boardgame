@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "bf104fc6-53a5-4b20-adb2-957a6999a461",
+		"_postman_id": "8b0c3a41-9c2d-4fad-9cee-1b1feed8f3e7",
 		"name": "АС 15.8 ПМК",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -167,7 +167,21 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": ""
+							"raw": "{{url}}/dispatcher/details/ps?id=511",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"dispatcher",
+								"details",
+								"ps"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "511"
+								}
+							]
 						}
 					},
 					"response": []
@@ -178,7 +192,21 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": ""
+							"raw": "{{url}}/dispatcher/details/pasd?id=511",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"dispatcher",
+								"details",
+								"pasd"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "511"
+								}
+							]
 						}
 					},
 					"response": []
@@ -189,7 +217,21 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": ""
+							"raw": "{{url}}/dispatcher/results/completion?arrangementId=773",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"dispatcher",
+								"results",
+								"completion"
+							],
+							"query": [
+								{
+									"key": "arrangementId",
+									"value": "773"
+								}
+							]
 						}
 					},
 					"response": []
@@ -211,7 +253,7 @@
 							"raw": "[{\"key1\":\"val1\"};{\"key1\":\"val1\"}]"
 						},
 						"url": {
-							"raw": "{{url}}/dispatcher/results/user_result?Id=1015",
+							"raw": "{{url}}/dispatcher/results/user_result?Id=773",
 							"host": [
 								"{{url}}"
 							],
@@ -223,7 +265,7 @@
 							"query": [
 								{
 									"key": "Id",
-									"value": "1015"
+									"value": "773"
 								}
 							]
 						}
@@ -231,12 +273,51 @@
 					"response": []
 				},
 				{
-					"name": "Получение результата с фильтрацией",
+					"name": "Получение типов ресурсов мероприятия",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": ""
+							"raw": "{{url}}/dispatcher/results/check_unit_types?arrangementId=773",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"dispatcher",
+								"results",
+								"check_unit_types"
+							],
+							"query": [
+								{
+									"key": "arrangementId",
+									"value": "773"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Получение результатов мероприятия",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/dispatcher/results/results?arrangementId=773",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"dispatcher",
+								"results",
+								"results"
+							],
+							"query": [
+								{
+									"key": "arrangementId",
+									"value": "773"
+								}
+							]
 						}
 					},
 					"response": []
@@ -272,7 +353,7 @@
 		"oauth2": [
 			{
 				"key": "accessToken",
-				"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqb2huIiwicm9sZSI6IlJPTEVfT1BFUkFUT1JfVEVTVCxST0xFX0ZPUk1BTF9UQVNLLFJPTEVfTUFOQUdFX0ZPUk1BTF9UQVNLLFJPTEVfTUFOQUdFX0FSUkFOR0VNRU5ULFJPTEVfUFJFUEFSQVRJT05fVFJBRkZJQyxST0xFX0RJQ1RJT05BUlksUk9MRV9GT1JNQVRJT05fT0ZfU0NIRURVTEUsUk9MRV9WSUVXX1JFU1VMVCxST0xFX1NFTkRfQUNUX0JZX0hBTkQsUk9MRV9NQU5BR0VfUFNfUEFTRCxST0xFX01BTkFHRV9FUkRJLFJPTEVfVklFV19SRVBPUlQsUk9MRV9GT1JNQVRJT05fUEFSQU1fUkVQT1JULFJPTEVfTUFOQUdFX0RPTUFJTlMsUk9MRV9NQU5BR0VfQ09ORklHVVJBVElPTlMsUk9MRV9NQU5BR0VfUkVHSVNUUkFUSU9OX0pPVVJOQUwsUk9MRV9NQU5BR0VfRlVOQ1RJT05fTU9ERSxST0xFX01BTkFHRV9NQU5VQUxfQVJSQU5HRU1FTlQiLCJtYWlsIjoiIiwidXNlcl9uYW1lIjoiam9obiIsInNjb3BlIjpbInJlYWQiLCJ3cml0ZSJdLCJleHAiOjE1NzYyMjU2NTIsInVzZXJOYW1lIjoiam9obiIsImF1dGhvcml0aWVzIjpbIlJPTEVfT1BFUkFUT1JfVEVTVCIsIlJPTEVfUFJFUEFSQVRJT05fVFJBRkZJQyIsIlJPTEVfRk9STUFUSU9OX1BBUkFNX1JFUE9SVCIsIlJPTEVfTUFOQUdFX01BTlVBTF9BUlJBTkdFTUVOVCIsIlJPTEVfTUFOQUdFX1BTX1BBU0QiLCJST0xFX01BTkFHRV9SRUdJU1RSQVRJT05fSk9VUk5BTCIsIlJPTEVfRk9STUFUSU9OX09GX1NDSEVEVUxFIiwiUk9MRV9NQU5BR0VfRVJESSIsIlJPTEVfTUFOQUdFX0NPTkZJR1VSQVRJT05TIiwiUk9MRV9GT1JNQUxfVEFTSyIsIlJPTEVfRElDVElPTkFSWSIsIlJPTEVfVklFV19SRVBPUlQiLCJST0xFX01BTkFHRV9GVU5DVElPTl9NT0RFIiwiUk9MRV9NQU5BR0VfRk9STUFMX1RBU0siLCJST0xFX01BTkFHRV9BUlJBTkdFTUVOVCIsIlJPTEVfVklFV19SRVNVTFQiLCJST0xFX1NFTkRfQUNUX0JZX0hBTkQiLCJST0xFX01BTkFHRV9ET01BSU5TIl0sImp0aSI6IjU4ZmY1MzM1LWIzM2UtNGY4ZS1iZTVlLWNjNzExYjQwY2I0YyIsImNsaWVudF9pZCI6ImFzLTE1LTgiLCJzZWNvbmROYW1lIjoiIn0.Vz6mMjoersgYql4xnVX0ZuNyVV227i4KbrA-8pkPevhMFiXNQEZRu5bcq7OTdDDUw4klpM6Ddut2n2Ccu9TaSxxyeX2ltFMmGSB7EuZnGvBxPSBian6DPluBrFhrRrOGpSirCJiVVoEushsFOJJRyxzfpb1i1IOsksd4XFyCicnouqd7FxxE6Hwqkzq9SA7S8xm_-5Lcmy4goq-ai3p1XLMCF-BV_NcDPh8xgTVBoeA39uRh9u-pyDU2jIPER3WeN_0Ah_b_9pc5I_DmlPOHqTPmDTtUfuid7ZW1cnRQuNtPbEtNEUVzxwf7qhexwbQFawdemetevcKJNeVC_RXRqQ",
+				"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqYWNrIiwicm9sZSI6IlJPTEVfT1BFUkFUT1IsUk9MRV9GT1JNQUxfVEFTSyxST0xFX01BTkFHRV9GT1JNQUxfVEFTSyxST0xFX01BTkFHRV9BUlJBTkdFTUVOVCxST0xFX1BSRVBBUkFUSU9OX1RSQUZGSUMsUk9MRV9ESUNUSU9OQVJZLFJPTEVfRk9STUFUSU9OX09GX1NDSEVEVUxFLFJPTEVfVklFV19SRVNVTFQsUk9MRV9TRU5EX0FDVF9CWV9IQU5ELFJPTEVfTUFOQUdFX1BTX1BBU0QsUk9MRV9NQU5BR0VfRVJESSxST0xFX1ZJRVdfUkVQT1JULFJPTEVfRk9STUFUSU9OX1BBUkFNX1JFUE9SVCxST0xFX01BTkFHRV9ET01BSU5TLFJPTEVfTUFOQUdFX01BTlVBTF9BUlJBTkdFTUVOVCIsIm1haWwiOiIiLCJ1c2VyX25hbWUiOiJqYWNrIiwic2NvcGUiOlsicmVhZCIsIndyaXRlIl0sImV4cCI6MTU3NjY1NDAwNSwidXNlck5hbWUiOiJqYWNrIiwiYXV0aG9yaXRpZXMiOlsiUk9MRV9PUEVSQVRPUiIsIlJPTEVfUFJFUEFSQVRJT05fVFJBRkZJQyIsIlJPTEVfRk9STUFUSU9OX1BBUkFNX1JFUE9SVCIsIlJPTEVfTUFOQUdFX01BTlVBTF9BUlJBTkdFTUVOVCIsIlJPTEVfTUFOQUdFX1BTX1BBU0QiLCJST0xFX0ZPUk1BVElPTl9PRl9TQ0hFRFVMRSIsIlJPTEVfTUFOQUdFX0VSREkiLCJST0xFX0ZPUk1BTF9UQVNLIiwiUk9MRV9ESUNUSU9OQVJZIiwiUk9MRV9WSUVXX1JFUE9SVCIsIlJPTEVfTUFOQUdFX0ZPUk1BTF9UQVNLIiwiUk9MRV9NQU5BR0VfQVJSQU5HRU1FTlQiLCJST0xFX1ZJRVdfUkVTVUxUIiwiUk9MRV9TRU5EX0FDVF9CWV9IQU5EIiwiUk9MRV9NQU5BR0VfRE9NQUlOUyJdLCJqdGkiOiI5MzZlNzI4Ni1kNWY3LTRhNjEtYThhNy00OTkwMjNjNTg1NGEiLCJjbGllbnRfaWQiOiJhcy0xNS04Iiwic2Vjb25kTmFtZSI6IiJ9.BGgG2UMdcf5agY_5U146d-fX_9WphR0J2svG9IvWHu7g4mN8Jo9CHGmDU4P1nB5R3Ju55LPPlsYXWeBKdWWOcHtWNntIfliyuI1ayMqXYXxpUqWvnUWd7hL8wJjVitaVPSsJA2JLxDRO5zfijlqWmratd3AH3h-oawBFpyEaNqWz22zzJyD1sf9oYfpyTK52q0J9i7nulNaJNjRJxaaFBF2WpvPgVynsgQkNyEFLaArAMJFv0w6vxBdUcLX1phZXAGajXs6zmduBvkxj3RqVHHxTUlfzEhvbc-3CkQaBCd8pOkzmDrUgXCzzh2xd3MpbllzkDhbcjuivEc8uIkaoTQ",
 				"type": "string"
 			},
 			{

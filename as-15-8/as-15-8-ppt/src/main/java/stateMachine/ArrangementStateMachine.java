@@ -90,6 +90,16 @@ public class ArrangementStateMachine {
 
                     .and()
                     .withExternal()
+                    .source(ExecutionStatus.FORMED).target(ExecutionStatus.FINISHED)
+                    .event(ArrangementEvents.FINISH)
+
+                    .and()
+                    .withExternal()
+                    .source(ExecutionStatus.SCHEDULED).target(ExecutionStatus.FINISHED)
+                    .event(ArrangementEvents.FINISH)
+
+                    .and()
+                    .withExternal()
                     .source(ExecutionStatus.RUNNING).target(ExecutionStatus.FINISHED)
                     .event(ArrangementEvents.FINISH)
 
