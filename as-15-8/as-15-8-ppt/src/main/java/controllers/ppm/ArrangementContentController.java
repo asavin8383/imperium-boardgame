@@ -59,7 +59,7 @@ public class ArrangementContentController {
     }*/
 
     @GetMapping(produces = MediaType.APPLICATION_STREAM_JSON_VALUE)
-    public Flux<List<CheckUnit>> getAndSendCheckUnits(@RequestParam("id") Long arrangementId) {
+    public Flux<Flux<CheckUnit>> getAndSendCheckUnits(@RequestParam("id") Long arrangementId) {
 
         //TODO получать все остальные трафик-юниты тут же
         log.info("Запрос на получение check units мероприятия: " + arrangementId);
@@ -160,7 +160,7 @@ public class ArrangementContentController {
                 .collect(Collectors.toList());
             List<CheckUnit> podCheckUnits = podWebClient
                     .fetchCheckUnits(contentIds)
-                    .flatMap(checkUnitList -> Flux.fromIterable(checkUnitList))
+                    .flatMap(checkUnitList -> Flux.fromIterable(checkUnitList.toIterable()))
                     .collectList()
                     .block();
             if(podCheckUnits != null) {
