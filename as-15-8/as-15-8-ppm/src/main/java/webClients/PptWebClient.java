@@ -4,7 +4,6 @@ import checkUnits.CheckUnit;
 import exceptions.AS_15_8_PPM_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.dialect.CUBRIDDialect;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -18,7 +17,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Created by san
@@ -68,10 +66,10 @@ public class PptWebClient {
                     .exchange()
                     .flatMapMany(clientResponse -> {
                         if(clientResponse.statusCode().equals(HttpStatus.OK)){
-                            log.info("Check units мероприятия {} успешно сформированы", arrangementId, uri);
+                            log.info("Check units мероприятия {} успешно сформированы", arrangementId);
                             return clientResponse.bodyToFlux(new ParameterizedTypeReference<List<CheckUnit>>(){});
                         } else {
-                            log.warn("Ошибка получения чек-юнитов мероприятия %d в ППМ код возврата %s", arrangementId, clientResponse.statusCode().toString());
+                            log.warn("Ошибка получения чек-юнитов мероприятия {} в ППМ код возврата {}", arrangementId, clientResponse.statusCode().toString());
                             return (Flux.empty());
                         }
                     });

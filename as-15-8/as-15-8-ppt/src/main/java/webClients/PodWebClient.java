@@ -88,24 +88,24 @@ public class PodWebClient {
         return webClient.get()
                 .uri(UriComponentsBuilder
                         .fromUriString(PUT_ERDI_WITH_FILTERS)
-                        .queryParam("idMask", idMask == null ? null :idMask)
-                        .queryParam("categoryNames", categoryNames == null ? null : categoryNames.stream().collect(Collectors.joining(",")))
-                        .queryParam("decisionOrgs", decisionOrgs == null ? null : decisionOrgs.stream().collect(Collectors.joining(",")))
-                        .queryParam("infoTypeIds", infoTypeIds == null ? null : infoTypeIds.stream().collect(Collectors.joining(",")))
-                        .queryParam("registryNames", registryNames == null ? null : registryNames.stream().collect(Collectors.joining(",")))
-                        .queryParam("resourceTypes", resourceTypes == null ? null : resourceTypes.stream().collect(Collectors.joining(",")))
-                        .queryParam("resourceValue", resourceValue == null ? null : resourceValue)
-                        .queryParam("violationNames,", violationNames == null ? null : violationNames.stream().collect(Collectors.joining(",")))
+                        .queryParam("idMask", idMask)
+                        .queryParam("categoryNames", categoryNames == null ? null : String.join(",", categoryNames))
+                        .queryParam("decisionOrgs", decisionOrgs == null ? null : String.join(",", decisionOrgs))
+                        .queryParam("infoTypeIds", infoTypeIds == null ? null : String.join(",", infoTypeIds))
+                        .queryParam("registryNames", registryNames == null ? null : String.join(",", registryNames))
+                        .queryParam("resourceTypes", resourceTypes == null ? null : String.join(",", resourceTypes))
+                        .queryParam("resourceValue", resourceValue)
+                        .queryParam("violationNames,", violationNames == null ? null : String.join(",", violationNames))
                         .queryParam("size", size)
                         .build().toString())
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .flatMapMany(clientResponse -> {
                     if(clientResponse.statusCode().equals(HttpStatus.OK)){
-                        log.info("список id ЕРДИ считан успешно: {}");
+                        log.info("список id ЕРДИ считан успешно");
                         return clientResponse.bodyToFlux(new ParameterizedTypeReference<List<Long>>(){});
                     } else {
-                        log.warn("Ошибка при чтении списка id ЕРДИ {}, статус: {}", clientResponse.statusCode().toString());
+                        log.warn("Ошибка при чтении списка id ЕРДИ, статус: {}", clientResponse.statusCode().toString());
                         return Flux.empty();
                     }
                 });
@@ -218,9 +218,8 @@ public class PodWebClient {
 
     private static <T>List<List<T>> packListToLists(List<T> list, int subListSize) {
         final AtomicInteger counter = new AtomicInteger();
-        List<List<T>> result = new ArrayList<>(list.stream()
+        return new ArrayList<>(list.stream()
                 .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / subListSize))
                 .values());
-        return result;
     }
 }

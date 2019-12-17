@@ -19,7 +19,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
-import reactor.core.scheduler.Schedulers;
 import repositories.ArrangementRepo;
 import repositories.ScheduleRepo;
 import restapi.ArrangementStatusUploader;
@@ -102,10 +101,11 @@ public class ArrangementController {
         arrangement.getScheduleCheckUnits().addAll(
                 Objects.requireNonNull(
                         PPTWebClient.getCheckUnitsByArrangementId(arrangement.getId())
-                        .flatMap(checkUnits -> Flux.fromIterable(checkUnits)
-                            .parallel()
-                            .runOn(Schedulers.elastic())
-                            .flatMap(checkUnit -> Flux.fromIterable(createCheckUnits(arrangement, checkUnit)))
+                        .flatMap(checkUnits -> Flux.fromStream(
+                                checkUnits
+                                    .stream()
+                                    .flatMap(checkUnit -> createCheckUnits(arrangement, checkUnit).stream())
+                            )
                         )
                         .collectList()
                         .block())
