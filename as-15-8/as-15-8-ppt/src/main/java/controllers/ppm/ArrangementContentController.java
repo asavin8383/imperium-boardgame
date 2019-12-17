@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 import repositories.ArrangementRepo;
 import repositories.CustomErdiUnitRepository;
 import repositories.SearchQueryPatternRepo;
@@ -61,7 +60,7 @@ public class ArrangementContentController {
     }*/
 
     @GetMapping(produces = MediaType.APPLICATION_STREAM_JSON_VALUE)
-    public Flux<Mono<List<CheckUnit>>> getAndSendCheckUnits(@RequestParam("id") Long arrangementId) {
+    public Flux<List<CheckUnit>> getAndSendCheckUnits(@RequestParam("id") Long arrangementId) {
 
         //TODO получать все остальные трафик-юниты тут же
         log.info("Запрос на получение check units мероприятия: " + arrangementId);
@@ -162,7 +161,7 @@ public class ArrangementContentController {
                 .collect(Collectors.toList());
             List<CheckUnit> podCheckUnits = podWebClient
                     .fetchCheckUnits(contentIds)
-                    .flatMap(checkUnitList -> Flux.fromIterable(Objects.requireNonNull(checkUnitList.block())))
+                    .flatMap(checkUnitList -> Flux.fromIterable(Objects.requireNonNull(checkUnitList)))
                     .collectList()
                     .block();
             if(podCheckUnits != null) {
