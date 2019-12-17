@@ -18,7 +18,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Flux;
 import repositories.ArrangementRepo;
 import repositories.ScheduleRepo;
 import restapi.ArrangementStatusUploader;
@@ -31,6 +30,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Created by san
@@ -100,15 +100,12 @@ public class ArrangementController {
     private void getAndSaveArrangementCheckUnits(Arrangement arrangement){
         arrangement.getScheduleCheckUnits().addAll(
                 Objects.requireNonNull(
-                        PPTWebClient.getCheckUnitsByArrangementId(arrangement.getId())
-                        .flatMap(checkUnits -> Flux.fromStream(
-                                checkUnits
-                                    .stream()
-                                    .flatMap(checkUnit -> createCheckUnits(arrangement, checkUnit).stream())
-                            )
-                        )
-                        .collectList()
-                        .block())
+                        PPTWebClient
+                                .getCheckUnitsByArrangementId(arrangement.getId())
+                                .stream()
+                                .flatMap(checkUnit -> createCheckUnits(arrangement, checkUnit).stream())
+                                .collect(Collectors.toList())
+                )
         );
         log.info("Получен список чек-юнитов мероприятия {} от ППТ", arrangement.getId());
         if(arrangement.getScheduleCheckUnits().size() > 0){

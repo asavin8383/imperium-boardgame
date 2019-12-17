@@ -32,29 +32,7 @@ public class PptWebClient {
     @Value("${gateway.url}")
     private String gatewayUrl;
 
-    /*public List<CheckUnit> getCheckUnitsByArrangementId(Long arrangementId){
-        String uri = UriComponentsBuilder.fromUriString(CHECK_UNITS_URI).queryParam("id", arrangementId).build().toString();
-        try {
-            log.info("Получение чек-юнитов мероприятия {} по запросу: {}", arrangementId, uri);
-
-            List<CheckUnit> checkUnits = WebClient.create(gatewayUrl)
-                    .get()
-                    .uri(uri)
-                    .accept(MediaType.TEXT_EVENT_STREAM)
-                    .retrieve()
-                    .bodyToFlux(CheckUnit.class)
-                    .collectList()
-                    .block();
-            log.info("Check units мероприятия {} успешно сформированы", arrangementId, uri);
-            return checkUnits;
-        } catch (HttpClientErrorException | HttpServerErrorException ex) {
-            throw AS_15_8_PPM_Exception.logAndGet(log, String.format("Ошибка получения чек-юнитов мероприятия %d в ППМ, код возврата %s", arrangementId, ex.getStatusCode()), ex);
-        } catch (Exception ex){
-            throw AS_15_8_PPM_Exception.logAndGet(log, String.format("Ошибка получения чек-юнитов мероприятия %d в ППМ", arrangementId), ex);
-        }
-    }*/
-
-    public Flux<List<CheckUnit>> getCheckUnitsByArrangementId(Long arrangementId){
+    public List<CheckUnit> getCheckUnitsByArrangementId(Long arrangementId){
         String uri = UriComponentsBuilder.fromUriString(CHECK_UNITS_URI).queryParam("id", arrangementId).build().toString();
         try {
             log.info("Получение чек-юнитов мероприятия {} по запросу: {}", arrangementId, uri);
@@ -67,12 +45,15 @@ public class PptWebClient {
                     .flatMapMany(clientResponse -> {
                         if(clientResponse.statusCode().equals(HttpStatus.OK)){
                             log.info("Check units мероприятия {} успешно сформированы", arrangementId);
-                            return clientResponse.bodyToFlux(new ParameterizedTypeReference<List<CheckUnit>>(){});
+                            return clientResponse.bodyToFlux(new ParameterizedTypeReference<List<CheckUnit>>(){})
+                                    .flatMap(Flux::fromIterable);
                         } else {
                             log.warn("Ошибка получения чек-юнитов мероприятия {} в ППМ код возврата {}", arrangementId, clientResponse.statusCode().toString());
                             return (Flux.empty());
                         }
-                    });
+                    })
+                    .collectList()
+                    .block();
 
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
             throw AS_15_8_PPM_Exception.logAndGet(log, String.format("Ошибка получения чек-юнитов мероприятия %d в ППМ, код возврата %s", arrangementId, ex.getStatusCode()), ex);

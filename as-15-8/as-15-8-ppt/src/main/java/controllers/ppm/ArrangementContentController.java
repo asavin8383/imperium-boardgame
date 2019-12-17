@@ -24,7 +24,6 @@ import webClients.PodWebClient;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -49,23 +48,11 @@ public class ArrangementContentController {
         //TODO получать все остальные трафик-юниты тут же
         log.info("Запрос на получение check units мероприятия: " + arrangementId);
         List<Long> contentIds = arrangementRepo.listContentIdsByArrangementId(arrangementId);
-//        Flux<List<CheckUnit>> results = Flux.concat(
-//                podWebClient.fetchCheckUnits(contentIds),
-//                Flux.just(getCustomErdiCheckUnits(arrangementId)),
-//                Flux.just(getSearchTemplateCheckUnits(arrangementId))
-//        );
-        return podWebClient.fetchCheckUnits(contentIds);
-    }
-
-    private static List<List<CheckUnit>> packCheckUnitListToList(List<CheckUnit> checkUnitList) {
-        // результат работы метода сделан для flux и hystrix
-        final AtomicInteger counter = new AtomicInteger();
-        int subListSize = 1000;
-
-        List<List<CheckUnit>> result = new ArrayList<>(checkUnitList.stream()
-                .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / subListSize))
-                .values());
-        return result;
+        return Flux.concat(
+                podWebClient.fetchCheckUnits(contentIds),
+                Flux.just(getCustomErdiCheckUnits(arrangementId)),
+                Flux.just(getSearchTemplateCheckUnits(arrangementId))
+        );
     }
 
     private List<CheckUnit> getCustomErdiCheckUnits(Long arrangementId){
