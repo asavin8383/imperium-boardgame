@@ -7,6 +7,7 @@ import org.hibernate.annotations.Subselect;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.time.LocalDateTime;
 
 @Data
 @Setter(value = AccessLevel.PRIVATE)
@@ -24,6 +25,9 @@ public class ContentView {
     @ToString.Include
     @EqualsAndHashCode.Include
     private String id;
+
+    @ToString.Include
+    private LocalDateTime includeTime;
 
     // 12
     @ToString.Include
