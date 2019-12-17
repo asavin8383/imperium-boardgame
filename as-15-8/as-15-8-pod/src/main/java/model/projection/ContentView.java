@@ -4,6 +4,7 @@ import lombok.*;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Subselect;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -26,6 +27,7 @@ public class ContentView {
     @EqualsAndHashCode.Include
     private String id;
 
+    @Column(name = "includetime")
     @ToString.Include
     private LocalDateTime includeTime;
 
