@@ -112,7 +112,7 @@ public class PodWebClient {
     }
 
     public Flux<List<CheckUnit>> fetchCheckUnits(List<Long> contentIds) {
-        List<List<Long>> ids = packListToLists(contentIds, 300);
+        List<List<Long>> ids = packListToLists(contentIds, 1000);
         return Flux.fromIterable(ids)
                 .map(this::getCheckUnitsByContentIds);
     }
