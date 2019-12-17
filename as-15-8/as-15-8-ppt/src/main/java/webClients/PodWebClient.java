@@ -117,7 +117,7 @@ public class PodWebClient {
         List<List<Long>> ids = packListToLists(contentIds, 300);
         return Flux.fromIterable(ids)
                 .map(listERDI -> fetchCheckUnitsList(listERDI))
-                .subscribeOn(Schedulers.parallel());
+                .publishOn(Schedulers.parallel());
     }
 
     private Mono<List<CheckUnit>> fetchCheckUnitsList(List<Long> contentIds){
