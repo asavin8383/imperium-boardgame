@@ -118,15 +118,18 @@ public class PodWebClient {
                 .parallel(fetchFluxConcurrency)
                 .runOn(Schedulers.parallel())
                 .flatMap(this::getCheckUnitsByContentId);*/
-        List<List<Long>> ids = packListToLists(contentIds, 2000);
+        List<List<Long>> ids = packListToLists(contentIds, 100);
         return Flux.fromIterable(ids)
-                .map(list -> Flux.fromIterable(list)
-                                    .parallel()
+                .map(list -> {
+                            List<CheckUnit> res = Flux.fromIterable(list)
+                                    .parallel(fetchFluxConcurrency)
                                     .runOn(Schedulers.parallel())
                                     .flatMap(this::getCheckUnitsByContentId)
                                     .sequential()
                                     .collectList()
-                                    .block()
+                                    .block();
+                            return res;
+                        }
                 );
 
     }
