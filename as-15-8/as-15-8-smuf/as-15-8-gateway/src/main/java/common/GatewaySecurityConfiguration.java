@@ -40,7 +40,9 @@ public class GatewaySecurityConfiguration extends ResourceServerConfigurerAdapte
                             "/app/kibana/**",
                             "/pod/erdi/ids/**").permitAll()
                     .antMatchers(HttpMethod.POST,
-                        "/pod/act/**","/viewer/**"
+                        "/pod/act/**",
+                            "/pod/erdi/checkUnits/**",
+                            "/viewer/**"
                         ).permitAll().antMatchers(HttpMethod.OPTIONS, "/viewer/**")
                     .permitAll()
                     .antMatchers("/**")
