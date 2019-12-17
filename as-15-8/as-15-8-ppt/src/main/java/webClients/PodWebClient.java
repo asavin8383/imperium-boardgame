@@ -117,23 +117,12 @@ public class PodWebClient {
                 .map(this::getCheckUnitsByContentIds);
     }
 
-   /* private List<CheckUnit> fetchCheckUnitsList(List<Long> contentIds){
-        return Flux.fromIterable(contentIds)
-                .parallel(fetchFluxConcurrency)
-                .runOn(Schedulers.parallel())
-                .flatMap(this::getCheckUnitsByContentId)
-                .sequential()
-                .collectList()
-                .block();
-    }*/
-
     private List<CheckUnit> getCheckUnitsByContentIds(List<Long> contentIds){
         String uri = UriComponentsBuilder
                 .fromUriString(GET_CHECK_UNITS_URL)
                 .build().toString();
 
         try {
-            //log.info("Получение чек-юнитов ЕРДИ {} по запросу: {}", contentId, uri);
             return webClient
                     .post()
                     .uri(uri)
@@ -150,7 +139,6 @@ public class PodWebClient {
                     })
                     .collectList()
                     .block();
-            //return Arrays.asList(oAuth2RestTemplate.getForObject(uri, CheckUnit[].class));
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
             throw AS_15_8_PPT_Exception.logAndGet(log, String.format("Ошибка получения чек-юнитов в ППТ, код возврата %s", ex.getStatusCode()), ex);
         }

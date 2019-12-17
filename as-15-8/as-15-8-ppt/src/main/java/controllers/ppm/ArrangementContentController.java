@@ -43,23 +43,7 @@ public class ArrangementContentController {
     private final PodWebClient podWebClient;
     private final SearchQueryPatternRepo searchQueryPatternRepo;
 
-    /*@GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<CheckUnit> getAndSendCheckUnits(@RequestParam("id") Long arrangementId) {
-
-        //TODO получать все остальные трафик-юниты тут же
-        log.info("Запрос на получение check units мероприятия: " + arrangementId);
-        List<Long> contentIds = arrangementRepo.listContentIdsByArrangementId(arrangementId);
-        Flux<CheckUnit> checkUnits = Flux.concat(
-                podWebClient.fetchCheckUnits(contentIds),
-                getCustomErdiCheckUnits(arrangementId),
-                getSearchTemplateCheckUnits(arrangementId)
-        );
-        log.info("Сформирован список check units мероприятия: " + arrangementId);
-
-        return checkUnits;
-    }*/
-
-    @GetMapping(produces = MediaType.APPLICATION_STREAM_JSON_VALUE)
+    @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<List<CheckUnit>> getAndSendCheckUnits(@RequestParam("id") Long arrangementId) {
 
         //TODO получать все остальные трафик-юниты тут же
@@ -71,14 +55,6 @@ public class ArrangementContentController {
 //                Flux.just(getSearchTemplateCheckUnits(arrangementId))
 //        );
         return podWebClient.fetchCheckUnits(contentIds);
-        //log.info("Сформирован список check units мероприятия: " + arrangementId);
-
-        //List<CheckUnit> list = checkUnits.toStream().collect(Collectors.toList());
-        //List<List<CheckUnit>> lists = packCheckUnitListToList(list);
-
-        //Flux<List<CheckUnit>> result = Flux.fromIterable(lists);
-
-        //return results;
     }
 
     private static List<List<CheckUnit>> packCheckUnitListToList(List<CheckUnit> checkUnitList) {
