@@ -113,6 +113,7 @@ public class ArrangementController {
         log.info("Получен список чек-юнитов мероприятия {} от ППТ", arrangement.getId());
         if(arrangement.getScheduleCheckUnits().size() > 0){
             arrangementRepo.save(arrangement);
+            log.info("Список чек-юнитов мероприятия {} сохранен", arrangement.getId());
         } else {
             throw new IllegalStateException("Ошибка формирования мероприятия " + arrangement.getId() +
                     "  в ППМ. Трафик не содержит значений для проверки");

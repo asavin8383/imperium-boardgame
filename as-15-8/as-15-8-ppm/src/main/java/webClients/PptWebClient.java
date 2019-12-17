@@ -64,7 +64,7 @@ public class PptWebClient {
             return WebClient.create(gatewayUrl)
                     .get()
                     .uri(uri)
-                    .accept(MediaType.TEXT_EVENT_STREAM)
+                    .accept(MediaType.APPLICATION_STREAM_JSON)
                     .exchange()
                     .flatMapMany(clientResponse -> {
                         if(clientResponse.statusCode().equals(HttpStatus.OK)){

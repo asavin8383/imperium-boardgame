@@ -70,8 +70,10 @@ public class ResultsController {
 
     @PreAuthorize("hasRole('ROLE_VIEW_RESULT')")
     @GetMapping("/completion")
-    public int getCompletionPercent(@RequestParam Long arrangementId){
-        return resultRepo.getCompletionPercent(arrangementId);
+    public ResponseEntity getCompletionPercent(@RequestParam Long arrangementId){
+        return resultRepo.getCompletionPercent(arrangementId)
+                .map(percent -> ResponseEntity.ok(percent.toString()))
+                .orElseGet(() -> ResponseEntity.badRequest().body("Мероприятие не найдено: " + arrangementId));
     }
 
     @GetMapping(path = "/screenshot", produces = MediaType.IMAGE_PNG_VALUE)
