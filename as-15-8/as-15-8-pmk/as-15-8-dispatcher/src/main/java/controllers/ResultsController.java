@@ -117,5 +117,16 @@ public class ResultsController {
 				return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
     		});
     }
-    
+
+    @PreAuthorize("hasRole('ROLE_VIEW_RESULT')")
+    @GetMapping(path = "/check_unit_types")
+    public List<CheckUnitType> getCheckUnitTypes(@RequestParam Long arrangementId){
+        return resultRepo.getCheckUnitTypesByArrangementId(arrangementId);
+    }
+
+    @PreAuthorize("hasRole('ROLE_VIEW_RESULT')")
+    @GetMapping(path = "/results")
+    public List<CheckUnitJobResult> getResults(@RequestParam Long arrangementId){
+        return resultRepo.getCheckUnitJobResultsByArrangementId(arrangementId);
+    }
 }

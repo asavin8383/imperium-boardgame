@@ -64,4 +64,10 @@ public interface ResultRepo extends JpaRepository<Result, Long>, ResultRepoAdvan
 			"where arrangementId = :id")
 	int getCompletionPercent(@Param("id") Long id);
 
+	@Query("select DISTINCT(r.checkUnitType) from Result r where r.arrangementId=:arrangement_id")
+	List<CheckUnitType> getCheckUnitTypesByArrangementId(@Param("arrangement_id") Long arrangementId);
+
+	@Query("select DISTINCT(r.result) from Result r where r.arrangementId=:arrangement_id")
+	List<CheckUnitJobResult> getCheckUnitJobResultsByArrangementId(@Param("arrangement_id") Long arrangementId);
+
 }
