@@ -45,7 +45,7 @@ spring:
   cloud.stream:
     kafka.binder:
       brokers: 10.97.220.178:9092,10.97.220.179:9092,10.97.220.180:9092
-      minPartitionCount: 350
+      minPartitionCount: 250
     bindings:
       input:
         consumer.concurrency: 10
