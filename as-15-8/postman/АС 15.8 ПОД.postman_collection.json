@@ -297,6 +297,17 @@
 										}
 									},
 									"response": []
+								},
+								{
+									"name": "получение списка списков id ЕРДИ по фильтру",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": ""
+										}
+									},
+									"response": []
 								}
 							],
 							"protocolProfileBehavior": {},
@@ -780,7 +791,21 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": ""
+							"raw": "{{url}}/pod/domain-masks/all?pageSize=500",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"pod",
+								"domain-masks",
+								"all"
+							],
+							"query": [
+								{
+									"key": "pageSize",
+									"value": "500"
+								}
+							]
 						}
 					},
 					"response": []
@@ -791,19 +816,19 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{url}}/pod/domain-masks/getItems?mask=mask10",
+							"raw": "{{url}}/pod/domain-masks/?domainMask=*.marathonsportsbook.com",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"pod",
 								"domain-masks",
-								"getItems"
+								""
 							],
 							"query": [
 								{
-									"key": "mask",
-									"value": "mask10"
+									"key": "domainMask",
+									"value": "*.marathonsportsbook.com"
 								}
 							]
 						}
@@ -816,14 +841,14 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{url}}/pod/domain-masks/delete?id=10",
+							"raw": "{{url}}/pod/domain-masks/?id=10",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"pod",
 								"domain-masks",
-								"delete"
+								""
 							],
 							"query": [
 								{
@@ -849,7 +874,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\"domainMask\":\"testMaskValue\",\"domainMaskItem\":\"testItem\"}",
+							"raw": "{\n    \"domainMask\": \"testMaskValue2\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -857,18 +882,18 @@
 							}
 						},
 						"url": {
-							"raw": "{{url}}/pod/domain-masks/put?mask=5",
+							"raw": "{{url}}/pod/domain-masks/?id=5",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"pod",
 								"domain-masks",
-								"put"
+								""
 							],
 							"query": [
 								{
-									"key": "mask",
+									"key": "id",
 									"value": "5"
 								}
 							]
@@ -940,7 +965,7 @@
 		"oauth2": [
 			{
 				"key": "accessToken",
-				"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqb2huIiwicm9sZSI6IlJPTEVfT1BFUkFUT1JfVEVTVCxST0xFX0ZPUk1BTF9UQVNLLFJPTEVfTUFOQUdFX0ZPUk1BTF9UQVNLLFJPTEVfTUFOQUdFX0FSUkFOR0VNRU5ULFJPTEVfUFJFUEFSQVRJT05fVFJBRkZJQyxST0xFX0RJQ1RJT05BUlksUk9MRV9GT1JNQVRJT05fT0ZfU0NIRURVTEUsUk9MRV9WSUVXX1JFU1VMVCxST0xFX1NFTkRfQUNUX0JZX0hBTkQsUk9MRV9NQU5BR0VfUFNfUEFTRCxST0xFX01BTkFHRV9FUkRJLFJPTEVfVklFV19SRVBPUlQsUk9MRV9GT1JNQVRJT05fUEFSQU1fUkVQT1JULFJPTEVfTUFOQUdFX0RPTUFJTlMsUk9MRV9NQU5BR0VfQ09ORklHVVJBVElPTlMsUk9MRV9NQU5BR0VfUkVHSVNUUkFUSU9OX0pPVVJOQUwsUk9MRV9NQU5BR0VfRlVOQ1RJT05fTU9ERSxST0xFX01BTkFHRV9NQU5VQUxfQVJSQU5HRU1FTlQiLCJtYWlsIjoiIiwidXNlcl9uYW1lIjoiam9obiIsInNjb3BlIjpbInJlYWQiLCJ3cml0ZSJdLCJleHAiOjE1NzYzMjE1NTUsInVzZXJOYW1lIjoiam9obiIsImF1dGhvcml0aWVzIjpbIlJPTEVfT1BFUkFUT1JfVEVTVCIsIlJPTEVfUFJFUEFSQVRJT05fVFJBRkZJQyIsIlJPTEVfRk9STUFUSU9OX1BBUkFNX1JFUE9SVCIsIlJPTEVfTUFOQUdFX01BTlVBTF9BUlJBTkdFTUVOVCIsIlJPTEVfTUFOQUdFX1BTX1BBU0QiLCJST0xFX01BTkFHRV9SRUdJU1RSQVRJT05fSk9VUk5BTCIsIlJPTEVfRk9STUFUSU9OX09GX1NDSEVEVUxFIiwiUk9MRV9NQU5BR0VfRVJESSIsIlJPTEVfTUFOQUdFX0NPTkZJR1VSQVRJT05TIiwiUk9MRV9GT1JNQUxfVEFTSyIsIlJPTEVfRElDVElPTkFSWSIsIlJPTEVfVklFV19SRVBPUlQiLCJST0xFX01BTkFHRV9GVU5DVElPTl9NT0RFIiwiUk9MRV9NQU5BR0VfRk9STUFMX1RBU0siLCJST0xFX01BTkFHRV9BUlJBTkdFTUVOVCIsIlJPTEVfVklFV19SRVNVTFQiLCJST0xFX1NFTkRfQUNUX0JZX0hBTkQiLCJST0xFX01BTkFHRV9ET01BSU5TIl0sImp0aSI6IjgzODdjN2FhLWMzZjQtNDY5Ni04ZTkwLTUyMGQ3MDc2YmFkNiIsImNsaWVudF9pZCI6ImFzLTE1LTgiLCJzZWNvbmROYW1lIjoiIn0.dx_3lgrzXR-ayfCUasisChaAlpIktyr25pi7Qu9RTd4cbk3S9pL9BKKxALiHKOUwbw6G2U8_kZZSm832VSkJ9Eu8-6Gim4fFjT5T4gDYnSFiCA0eKK1lDtgPO6-K32MLiQPw3-hLOjE5PxpEYbCosiFLbAvbk5mH18-ara0iDgZpj-hFOxLkt6syHC0yCppIESRd2W8fAq9yDWUdrPrzuumVi6vQZlxfofgoNXiCHkSDwFR_EwkUa3039I0dpaFurDms6_zKZ9Fh7gUh08NY-e9G1YeSD0hYj508GI6Nz57eCidhtoxsOPNJdDKe_jRz6AScpYvPdKceYchD3413eg",
+				"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqb2huIiwicm9sZSI6IlJPTEVfT1BFUkFUT1JfVEVTVCxST0xFX0ZPUk1BTF9UQVNLLFJPTEVfTUFOQUdFX0ZPUk1BTF9UQVNLLFJPTEVfTUFOQUdFX0FSUkFOR0VNRU5ULFJPTEVfUFJFUEFSQVRJT05fVFJBRkZJQyxST0xFX0RJQ1RJT05BUlksUk9MRV9GT1JNQVRJT05fT0ZfU0NIRURVTEUsUk9MRV9WSUVXX1JFU1VMVCxST0xFX1NFTkRfQUNUX0JZX0hBTkQsUk9MRV9NQU5BR0VfUFNfUEFTRCxST0xFX01BTkFHRV9FUkRJLFJPTEVfVklFV19SRVBPUlQsUk9MRV9GT1JNQVRJT05fUEFSQU1fUkVQT1JULFJPTEVfTUFOQUdFX0RPTUFJTlMsUk9MRV9NQU5BR0VfQ09ORklHVVJBVElPTlMsUk9MRV9NQU5BR0VfUkVHSVNUUkFUSU9OX0pPVVJOQUwsUk9MRV9NQU5BR0VfRlVOQ1RJT05fTU9ERSxST0xFX01BTkFHRV9NQU5VQUxfQVJSQU5HRU1FTlQiLCJtYWlsIjoiIiwidXNlcl9uYW1lIjoiam9obiIsInNjb3BlIjpbInJlYWQiLCJ3cml0ZSJdLCJleHAiOjE1NzY0ODM5OTgsInVzZXJOYW1lIjoiam9obiIsImF1dGhvcml0aWVzIjpbIlJPTEVfT1BFUkFUT1JfVEVTVCIsIlJPTEVfUFJFUEFSQVRJT05fVFJBRkZJQyIsIlJPTEVfRk9STUFUSU9OX1BBUkFNX1JFUE9SVCIsIlJPTEVfTUFOQUdFX01BTlVBTF9BUlJBTkdFTUVOVCIsIlJPTEVfTUFOQUdFX1BTX1BBU0QiLCJST0xFX01BTkFHRV9SRUdJU1RSQVRJT05fSk9VUk5BTCIsIlJPTEVfRk9STUFUSU9OX09GX1NDSEVEVUxFIiwiUk9MRV9NQU5BR0VfRVJESSIsIlJPTEVfTUFOQUdFX0NPTkZJR1VSQVRJT05TIiwiUk9MRV9GT1JNQUxfVEFTSyIsIlJPTEVfRElDVElPTkFSWSIsIlJPTEVfVklFV19SRVBPUlQiLCJST0xFX01BTkFHRV9GVU5DVElPTl9NT0RFIiwiUk9MRV9NQU5BR0VfRk9STUFMX1RBU0siLCJST0xFX01BTkFHRV9BUlJBTkdFTUVOVCIsIlJPTEVfVklFV19SRVNVTFQiLCJST0xFX1NFTkRfQUNUX0JZX0hBTkQiLCJST0xFX01BTkFHRV9ET01BSU5TIl0sImp0aSI6IjMxZjEyNDk2LTk3MzYtNDE1MC1hYjNkLTc1NjM4NjE2ZjYzNyIsImNsaWVudF9pZCI6ImFzLTE1LTgiLCJzZWNvbmROYW1lIjoiIn0.WH52QhcUulWGT2KEFcvKvYhlr5FoZwgfA4CHd7RaSK9DMPHN-vyNBbYjPhKcsWrh18ehzyx_60yla_JTD1h_hB8fl8b3CgnvmZhIOUsXbyYgrNkLORRHEUS0Jqd_acxIRhDYHfPDoidrr9l9bHk0Gsahkh6GTdxDmxSGHvhXrcuwRQ-zbbLaX4x--Oh0dSyjvPatZ1kLdYAISzjyr8_JmV_OSu_GzQZfKvt6OwShhyad2qvWSfOihjDbN973wSxDmf6ZSG44hR8N0JYFyQyFNYS1A6RqBjTPZNt_izcQ-wzI9WsEBckxyEUVxcHQf7k5hZmsoJgsaH-3RuMXZIU3-w",
 				"type": "string"
 			},
 			{
