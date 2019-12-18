@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "8b0c3a41-9c2d-4fad-9cee-1b1feed8f3e7",
+		"_postman_id": "96c0320a-2239-4174-8351-b6658651439b",
 		"name": "АС 15.8 ПМК",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -316,6 +316,31 @@
 								{
 									"key": "arrangementId",
 									"value": "773"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Остановка мероприятия",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/dispatcher/results/stop_arrangement?id=785",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"dispatcher",
+								"results",
+								"stop_arrangement"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "785"
 								}
 							]
 						}
