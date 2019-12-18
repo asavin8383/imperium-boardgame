@@ -28,4 +28,7 @@ public class DomainMask implements Serializable {
     @JsonIgnore
     private List<Domain> domains = new ArrayList<>();
 
+    public int getDomainsNumber() {
+        return domains.size();
+    }
 }
