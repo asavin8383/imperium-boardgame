@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Arrangement;
 import model.ScheduleCheckUnit;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -119,6 +120,8 @@ public class ArrangementController {
 
     private List<ScheduleCheckUnit> createCheckUnits(Arrangement arrangement, CheckUnit checkUnit){
         String unitName = schedulerProperties.getAccessTools().get(arrangement.getAccessTool());
+        if(Strings.isEmpty(unitName))
+            throw new AS_15_8_PPM_Exception("Ошибка при получении конфигурации робота " + arrangement.getAccessTool() + ". Проверьте и обновите конфигурацию ППМ");
         AccessToolUnit accessToolUnit = AccessToolUnit.fromPropertyKey(unitName);
         boolean isPS = accessToolUnit == AccessToolUnit.SEARCH_SYSTEM ||
             accessToolUnit == AccessToolUnit.GOOGLE_API;
