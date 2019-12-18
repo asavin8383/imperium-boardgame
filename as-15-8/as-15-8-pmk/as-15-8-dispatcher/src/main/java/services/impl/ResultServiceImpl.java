@@ -1,6 +1,8 @@
 package services.impl;
 
 import analysis.AnalysisResult;
+import arrangement.ArrangementStatusNotification;
+import enums.ArrangementEvents;
 import enums.CheckUnitJobResult;
 import enums.ErdiStatus;
 import enums.ExecutionStatus;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 import repositories.ErrorDetailResultRepo;
 import repositories.ResultRepo;
 import repositories.ResultScreenShotRepo;
+import restapi.ArrangementStatusProducer;
 import restapi.ErdiChecker;
 import services.AnalysisResultService;
 import services.AnalysisResultServiceFactory;
@@ -34,7 +37,7 @@ public class ResultServiceImpl implements ResultService {
     private final ResultScreenShotRepo resultScreenShotRepo;
     private final ErrorDetailResultRepo errorDetailResultRepo;
     private final ErdiChecker erdiChecker;
-
+    private final ArrangementStatusProducer arrangementStatusProducer;
     @Override
     @Transactional
     public Result saveJobResult(AnalysisResult analysisResult) {
@@ -108,5 +111,13 @@ public class ResultServiceImpl implements ResultService {
             return CheckUnitJobResult.EXCLUDED;
         else
             return status;
+    }
+
+    public void sendNotificationsIfFinished(Long arrangementId) {
+        ExecutionStatus status = checkArrangementStatus(arrangementId);
+        if(status == ExecutionStatus.FINISHED) {
+            log.info("Мероприятие успешно завешено: " + arrangementId);
+            arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(arrangementId, ArrangementEvents.FINISH));
+        }
     }
 }

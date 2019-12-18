@@ -24,5 +24,7 @@ public enum CheckUnitJobResult {
 	PAGE_NOT_FOUND,
 	
 	INTERNAL_ERROR,
-	TIMEOUT_ERROR;
+	TIMEOUT_ERROR,
+
+	STOPPED
 }

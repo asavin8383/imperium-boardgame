@@ -44,11 +44,7 @@ public class JobNotificationHandler {
                 ArrangementStatusNotification arrNotification = new ArrangementStatusNotification(job.getArrangementId(), ArrangementEvents.PAUSE);
                 arrangementStatusProducer.sendArrangementStatusMessage(arrNotification);
             } else {
-                ExecutionStatus status = resultService.checkArrangementStatus(job.getArrangementId());
-                if(status == ExecutionStatus.FINISHED) {
-                    log.info("Мероприятие успешно завешено: " + job.getArrangementId());
-                    arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(job.getArrangementId(), ArrangementEvents.FINISH));
-                }
+                resultService.sendNotificationsIfFinished(job.getArrangementId());
             }
         } catch (Exception ex) {
             log.error("Ошибка при обработке уведомления от проверки: " + notification.getJobID() + ", " + notification.getCheckUnitStatus(), ex);
