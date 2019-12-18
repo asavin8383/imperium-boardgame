@@ -27,16 +27,6 @@
             <host name="10.97.220.223" port="4444" count="10"/>
             <host name="10.97.220.224" port="4444" count="10"/>
             <host name="10.97.220.225" port="4444" count="10"/>
-            <host name="10.97.220.226" port="4444" count="10"/>
-            <host name="10.97.220.227" port="4444" count="10"/>
-            <host name="10.97.220.228" port="4444" count="10"/>
-            <host name="10.97.220.229" port="4444" count="10"/>
-            <host name="10.97.220.230" port="4444" count="10"/>
-            <host name="10.97.220.231" port="4444" count="10"/>
-            <host name="10.97.220.232" port="4444" count="10"/>
-            <host name="10.97.220.233" port="4444" count="10"/>
-            <host name="10.97.220.234" port="4444" count="10"/>
-            <host name="10.97.220.235" port="4444" count="10"/>
         </region>
     </version>
     <version number="hola">
@@ -66,16 +56,6 @@
             <host name="10.97.220.223" port="4444" count="10"/>
             <host name="10.97.220.224" port="4444" count="10"/>
             <host name="10.97.220.225" port="4444" count="10"/>
-            <host name="10.97.220.226" port="4444" count="10"/>
-            <host name="10.97.220.227" port="4444" count="10"/>
-            <host name="10.97.220.228" port="4444" count="10"/>
-            <host name="10.97.220.229" port="4444" count="10"/>
-            <host name="10.97.220.230" port="4444" count="10"/>
-            <host name="10.97.220.231" port="4444" count="10"/>
-            <host name="10.97.220.232" port="4444" count="10"/>
-            <host name="10.97.220.233" port="4444" count="10"/>
-            <host name="10.97.220.234" port="4444" count="10"/>
-            <host name="10.97.220.235" port="4444" count="10"/>
         </region>
     </version>
 </browser>
