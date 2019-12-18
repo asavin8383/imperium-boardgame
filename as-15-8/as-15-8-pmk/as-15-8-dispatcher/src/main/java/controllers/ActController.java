@@ -39,11 +39,11 @@ public class ActController {
 
     @PreAuthorize("hasRole('ROLE_SEND_ACT_BY_HAND')")
     @PutMapping(path = "/check")
-    public ResponseEntity checkResultForAct(@RequestParam Long resultId){
+    public ResponseEntity checkResultForAct(@RequestParam Long resultId, @RequestParam boolean checked){
         return resultRepo.findById(resultId)
                 .map(result -> {
                     if(result.getResult().equals(CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED)){
-                        result.setCheckForAct(true);
+                        result.setCheckForAct(checked);
                         resultRepo.save(result);
                         return ResponseEntity.ok().build();
                     } else {
@@ -62,7 +62,7 @@ public class ActController {
     @GetMapping(path = "/checkResult", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ActCheckResult> getActCheckResult(Long arrangementId){
         log.info("Подготовка результатов мероприятия для акта. ID мероприятия: {}", arrangementId);
-        List<CheckUnitJobResult> resultFilter = Arrays.asList(CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED);
+        List<CheckUnitJobResult> resultFilter = Collections.singletonList(CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED);
         return Flux.fromIterable(
                     resultRepo.findResultsForAct(arrangementId, resultFilter))
                 .map(this::createActCheckResult);
@@ -72,7 +72,7 @@ public class ActController {
     public Flux<String> getActScreenshots(Long arrangementId,
                                           @RequestParam(defaultValue = "10") Long maxCountScreenShots) {
         log.info("Подготовка скриншотов для акта. ID мероприятия: {}", arrangementId);
-        List<CheckUnitJobResult> resultFilter = Arrays.asList(CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED);
+        List<CheckUnitJobResult> resultFilter = Collections.singletonList(CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED);
         PageRequest page = PageRequest.of(0, maxCountScreenShots.intValue());
         List<ResultScreenShot> screenShots = resultScreenShotRepo
                 .findByArrangementIdAndResultIn(arrangementId, resultFilter, page);
