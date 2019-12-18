@@ -38,7 +38,6 @@ public class ErdiTrafficUnitController {
 
     @PutMapping(path = "/{id}/addFromPod")
     public Flux<List<Long>> addErdiToUnitFromPod(
-    //public void addErdiToUnit(
             @PathVariable("id") ErdiTrafficUnit unit,
             @RequestParam(required = false) String idMask,
             @RequestParam(required = false) List<String> categoryNames,

@@ -1,8 +1,11 @@
 package events.handlers;
 
+import arrangement.ArrangementStatusNotification;
 import checkUnits.CheckUnitJob;
+import enums.ArrangementEvents;
 import enums.CheckUnitJobResult;
 import enums.ErdiStatus;
+import enums.ExecutionStatus;
 import events.DispatcherChannels;
 import exceptions.AS_15_8_DispatcherException;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +18,9 @@ import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
+import restapi.ArrangementStatusProducer;
 import restapi.ErdiChecker;
+import services.ResultService;
 import services.impl.CheckUnitPersistingService;
 
 /**
@@ -30,9 +35,9 @@ import services.impl.CheckUnitPersistingService;
 public class CheckUnitJobHandler {
 
     private final DispatcherChannels dispatcherChannels;
-
     private final CheckUnitPersistingService checkUnitPersistingService;
-
+    private final ArrangementStatusProducer arrangementStatusProducer;
+    private final ResultService resultService;
     private final ErdiChecker erdiChecker;
 
     /**
@@ -51,6 +56,11 @@ public class CheckUnitJobHandler {
             if(!erdiStatus.equals(ErdiStatus.ACTIVE)) {
                 checkUnitPersistingService.persistCheckUnitJob(message.getPayload(), CheckUnitJobResult.valueOf(erdiStatus.name()));
                 log.info("Проверка исключена из списка выполнения, т.к является неактуальной: " + message.getPayload().getCheckUnit().getContentId());
+                ExecutionStatus status = resultService.checkArrangementStatus(checkUnitJob.getArrangementId());
+                if(status == ExecutionStatus.FINISHED) {
+                    log.info("Мероприятие(или его часть) завешено " + checkUnitJob.getArrangementId());
+                    arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(checkUnitJob.getArrangementId(), ArrangementEvents.FINISH));
+                }
             } else {
                 Result result = checkUnitPersistingService.persistCheckUnitJob(message.getPayload(), CheckUnitJobResult.RUNNING);
                 checkUnitJob.setJobID(result.getId());

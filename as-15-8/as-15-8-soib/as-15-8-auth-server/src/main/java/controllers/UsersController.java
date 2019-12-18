@@ -20,7 +20,7 @@ public class UsersController {
     @GetMapping("/operator")
     @PreAuthorize("hasAnyRole('ROLE_MANAGE_FORMAL_TASK','ROLE_SYSTEM')")
     public List<String> getOperators(String role) {
-        return usersService.getUserNamesByRole("ROLE_OPERATOR");
+        return usersService.getUserNamesByRole("ROLE_FORMAL_TASK");
     }
 
 }
