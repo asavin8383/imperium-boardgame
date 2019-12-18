@@ -1,5 +1,6 @@
 package repositories;
 
+import enums.Dictionary;
 import model.scheme.Domain;
 import model.scheme.DomainMask;
 import org.springframework.data.domain.Page;
@@ -9,6 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import repositories.helper.DictionaryRepository;
 
 import java.util.List;
 import java.util.Set;
@@ -18,7 +20,12 @@ import java.util.Set;
  * Date: 13.11.2019
  */
 @Repository
-public interface DomainMaskRepo extends JpaRepository<DomainMask, Long> {
+public interface DomainMaskRepo extends JpaRepository<DomainMask, Long>, DictionaryRepository {
+
+    @Override
+    default Dictionary getDictionaryType() {
+        return Dictionary.DOMAIN_MASKS;
+    }
 
     @Query("select d from DomainMask d where d.domainMask = :domainMask ")
     List<DomainMask> findMasks(@Param("domainMask") String domainMask);

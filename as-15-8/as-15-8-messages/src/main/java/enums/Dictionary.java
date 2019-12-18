@@ -8,6 +8,7 @@ public enum Dictionary {
     SUBTYPE("Типы нарушений", "Типы нарушений"),
     USER_ERDI("Пользовательские ЕРДИ", "Пользовательские записи ЕРДИ"),
     SEARCH_PHRASES("Поисковые фразы", "Поисковые фразы"),
+    DOMAIN_MASKS("Доменные маски", "Доменные маски"),
     SEARCH_QUERY_PATTERNS("Шаблоны проверок ПС", "Шаблоны проверок ПС");
 
     private String shortName;
