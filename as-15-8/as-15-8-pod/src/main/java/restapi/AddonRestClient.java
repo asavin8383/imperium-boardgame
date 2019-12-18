@@ -91,18 +91,22 @@ public class AddonRestClient
         ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(resp));
         try {
             ZipEntry entry = zipInputStream.getNextEntry();
-            log.debug("Zip entry name = {}", entry);
-            if (ENTITY_NAME.equalsIgnoreCase(entry.getName())) {
-                XmlMapper mapper = new XmlMapper(xmlInputFactory);
+            if(entry != null){
+                log.debug("Zip entry name = {}", entry);
+                if (ENTITY_NAME.equalsIgnoreCase(entry.getName())) {
+                    XmlMapper mapper = new XmlMapper(xmlInputFactory);
 
-                XMLStreamReader sr = xmlInputFactory.createXMLStreamReader(zipInputStream);
-                sr.next(); // to point to <root>
-                sr.next(); // to point to root-element under root
+                    XMLStreamReader sr = xmlInputFactory.createXMLStreamReader(zipInputStream);
+                    sr.next(); // to point to <root>
+                    sr.next(); // to point to root-element under root
 
-                int cnt = addonUpdater.insertAllJdbc(sr, mapper, date, is_delta);
+                    int cnt = addonUpdater.insertAllJdbc(sr, mapper, date, is_delta);
 
-                log.info("{} addons processed", cnt);
+                    log.info("{} addons processed", cnt);
 
+                }
+            } else {
+                log.warn("По запросу к ППП получено содержимое без архивного файла: {}", url);
             }
         } catch (IOException | XMLStreamException e) {
             System.out.println(e);
