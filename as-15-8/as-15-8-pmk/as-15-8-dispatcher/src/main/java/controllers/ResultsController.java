@@ -134,7 +134,7 @@ public class ResultsController {
         return resultRepo.getCheckUnitJobResultsByArrangementId(arrangementId);
     }
 
-    @PreAuthorize("hasRole('ROLE_MANAGE_ARRANGEMENTS')")
+    @PreAuthorize("hasRole('ROLE_MANAGE_ARRANGEMENT')")
     @PutMapping(path = "/stop_arrangement")
     public boolean stopArrangement(@RequestParam("id") Long arrangementId){
         List<Result> results = resultRepo.findAllByArrangementId(arrangementId);
