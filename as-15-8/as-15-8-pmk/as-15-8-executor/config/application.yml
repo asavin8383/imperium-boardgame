@@ -43,6 +43,10 @@ spring:
       jobs:
         consumer.concurrency: 10
 selenium-hub-url: http://user:1q0p2w9o@10.97.220.165:4442/wd/hub
+eureka:
+  instance:
+    metadata-map:
+      expectedAmount: 25
 
 ---
 
@@ -51,6 +55,10 @@ spring:
   profiles.include: docker_log
   main:
     banner-mode: "off"
+eureka:
+  instance:
+    metadata-map:
+      expectedAmount: 6
 
 ---
 

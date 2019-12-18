@@ -63,6 +63,10 @@ registry-anonymizers:
   proxy-port: 3128
 #  username: As158
 #  password: reEO964YnhOE
+eureka:
+  instance:
+    metadata-map:
+      expectedAmount: 1
 
 ---
 
@@ -78,6 +82,10 @@ spring:
     url: jdbc:postgresql://192.168.5.195:5432/asdb
 registry-anonymizers:
   proxy-ip: ""
+eureka:
+  instance:
+    metadata-map:
+      expectedAmount: 1
 
 ---
 

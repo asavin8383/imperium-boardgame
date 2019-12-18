@@ -23,6 +23,10 @@
     "isCoordinatingDiscoveryServer":"false",
     "lastUpdatedTimestamp":"1574089299259",
     "lastDirtyTimestamp":"1574089298229",
-    "actionType":"ADDED"
+    "actionType":"ADDED",
+    "metadata": {
+      "subsystem": "PPO",
+      "expectedAmount": 1
+    }
   }
 }
