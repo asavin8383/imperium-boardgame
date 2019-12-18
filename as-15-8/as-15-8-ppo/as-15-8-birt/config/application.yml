@@ -17,6 +17,8 @@ eureka:
   instance:
     preferIpAddress: true
     instanceId: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port}
+    metadata-map:
+      subsystem: ${subsystem}
 spring:
   application.name: report_generator
   main.allow-bean-definition-overriding: true
@@ -46,6 +48,10 @@ spring:
     url: jdbc:postgresql://10.97.220.144:5432/asdb
   main:
     banner-mode: "off"
+eureka:
+  instance:
+    metadata-map:
+      expectedAmount: 1
 
 ---
 
@@ -56,6 +62,10 @@ spring:
     url: jdbc:postgresql://192.168.5.195:5432/asdb
   main:
     banner-mode: "off"
+eureka:
+  instance:
+    metadata-map:
+      expectedAmount: 1
 
 ---
 

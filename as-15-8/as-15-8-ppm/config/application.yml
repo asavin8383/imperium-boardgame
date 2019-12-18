@@ -56,6 +56,10 @@ spring:
       kafka.binder:
         brokers: 10.97.220.178:9092,10.97.220.179:9092,10.97.220.180:9092
         minPartitionCount: 250
+eureka:
+  instance:
+    metadata-map:
+      expectedAmount: 1
 
 ---
 
@@ -66,6 +70,10 @@ spring:
     banner-mode: "off"
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb
+eureka:
+  instance:
+    metadata-map:
+      expectedAmount: 1
 
 ---
 

@@ -16,6 +16,8 @@ eureka:
   instance:
     preferIpAddress: true
     instanceId: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port}
+    metadata-map:
+      subsystem: ${subsystem}
 security:
   oauth2:
     resource:

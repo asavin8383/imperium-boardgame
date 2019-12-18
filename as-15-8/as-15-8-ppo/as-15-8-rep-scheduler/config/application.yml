@@ -17,6 +17,8 @@ eureka:
   instance:
     preferIpAddress: true
     instanceId: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port}
+    metadata-map:
+      subsystem: ${subsystem}
 spring:
   application.name: report_scheduler
   main.allow-bean-definition-overriding: true
@@ -70,6 +72,10 @@ spring:
     banner-mode: "off"
 app:
   schedule: '*/10 * * * * ?'
+eureka:
+  instance:
+    metadata-map:
+      expectedAmount: 1
 
 ---
 
@@ -84,6 +90,10 @@ spring:
     banner-mode: "off"
 app:
   schedule: '*/10 * * * * ?'
+eureka:
+  instance:
+    metadata-map:
+      expectedAmount: 1
 
 ---
 
