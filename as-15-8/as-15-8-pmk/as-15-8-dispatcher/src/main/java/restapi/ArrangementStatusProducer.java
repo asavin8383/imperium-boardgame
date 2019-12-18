@@ -1,6 +1,7 @@
 package restapi;
 
 import arrangement.ArrangementStatusNotification;
+import enums.ExecutionStatus;
 import exceptions.AS_15_8_DispatcherException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +14,7 @@ import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
@@ -26,6 +28,7 @@ public class ArrangementStatusProducer {
 
     private final String PPT_STATUS_ENDPOINT = "/ppt/arrangements/status";
     private final String PPM_STATUS_ENDPOINT = "/ppm/arrangements/{id}/close";
+    private final String PPT_ARRANGEMENT_EXECUTION_STATUS = "/arrangements/execution_status";
 
     private final OAuth2RestTemplate restTemplate;
 
@@ -67,6 +70,16 @@ public class ArrangementStatusProducer {
     }
 
 
-
+    public ExecutionStatus getArrangementExcecutionStatus(Long arrangementId) {
+        HttpHeaders requestHeaders = new HttpHeaders();
+        requestHeaders.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<?> requestEntity = new HttpEntity<Object>(requestHeaders);
+        log.info("Отправка сообщения с запросом статуса мероприятия {} в ППТ", arrangementId);
+        try {
+            return restTemplate.getForObject(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(PPT_ARRANGEMENT_EXECUTION_STATUS).queryParam("id", arrangementId).build().toString(), ExecutionStatus.class);
+        } catch (HttpClientErrorException | HttpServerErrorException ex) {
+            throw AS_15_8_DispatcherException.logAndGet(log, String.format("Ошибка отправки сообщения с запросом статуса мероприятия %d в ППТ, код возврата %s", arrangementId, ex.getStatusCode()));
+        }
+    }
 
 }
