@@ -135,7 +135,7 @@ public class ResultsController {
     }
 
     @PreAuthorize("hasRole('ROLE_MANAGE_ARRANGEMENTS')")
-    @PutMapping@GetMapping(path = "/stop_arrangement")
+    @PutMapping(path = "/stop_arrangement")
     public boolean stopArrangement(@RequestParam("id") Long arrangementId){
         List<Result> results = resultRepo.findAllByArrangementId(arrangementId);
 
