@@ -20,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import repositories.*;
+import services.ResultService;
 
 import java.util.List;
 import java.util.Map;
@@ -39,6 +40,7 @@ public class ResultsController {
     private final ResultRepo resultRepo;
     private final ResultScreenShotRepo resultScreenShotRepo;
     private final NmapDetailResultRepo nmapDetailResultRepo;
+    private final ResultService resultService;
 
     @PreAuthorize("hasRole('ROLE_VIEW_RESULT')")
     @GetMapping
@@ -130,5 +132,27 @@ public class ResultsController {
     @GetMapping(path = "/results")
     public List<CheckUnitJobResult> getResults(@RequestParam Long arrangementId){
         return resultRepo.getCheckUnitJobResultsByArrangementId(arrangementId);
+    }
+
+    @PreAuthorize("hasRole('ROLE_MANAGE_ARRANGEMENTS')")
+    @PutMapping@GetMapping(path = "/stop_arrangement")
+    public boolean stopArrangement(@RequestParam("id") Long arrangementId){
+        List<Result> results = resultRepo.findAllByArrangementId(arrangementId);
+
+        long stoppedCount = results.stream()
+                .filter(this::checkIsRunningOrPlanned)
+                .peek(resultToStop -> {
+                    resultToStop.setResult(CheckUnitJobResult.STOPPED);
+                    resultRepo.save(resultToStop);
+                }).count();
+
+        if (stoppedCount > 0) {
+            resultService.sendNotificationsIfFinished(arrangementId);
+            return true;
+        } else return false;
+    }
+
+    private boolean checkIsRunningOrPlanned(Result result) {
+        return result.getResult() == CheckUnitJobResult.RUNNING || result.getResult() == CheckUnitJobResult.PLANNED;
     }
 }
