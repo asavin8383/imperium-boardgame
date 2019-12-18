@@ -131,7 +131,4 @@ public class ResultsController {
     public List<CheckUnitJobResult> getResults(@RequestParam Long arrangementId){
         return resultRepo.getCheckUnitJobResultsByArrangementId(arrangementId);
     }
-
-    /*@PreAuthorize("hasRole('ROLE_MANAGE_ARRANGEMENTS')")
-    @PutMapping*/
 }

@@ -17,5 +17,6 @@
     <include file="data/changelog/dispatcher.0012.result_checker.xml"/>
     <include file="data/changelog/dispatcher.0013.result_checker.xml"/>
     <include file="data/changelog/dispatcher.0014.result_checker.xml"/>
+    <include file="data/changelog/dispatcher.0015.check_for_act.xml"/>
 
 </databaseChangeLog>

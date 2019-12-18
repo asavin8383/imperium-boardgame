@@ -48,6 +48,8 @@ public class ResultServiceImpl implements ResultService {
             saveResultAsError(result, service.getErrorText(analysisResult));
         } else {
             result.setCheckType(service.getCheckType());
+            if(analysisResult.getCheckResult().equals(CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED))
+                result.setCheckForAct(true);
             service.saveResult(result, analysisResult);
         }
         if((analysisResult.getScreenshot() != null && analysisResult.getScreenshot().length > 0) ||

@@ -11,10 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import repositories.ResultRepo;
 import repositories.ResultScreenShotRepo;
@@ -40,6 +37,21 @@ public class ActController {
 
     private DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
+    @PreAuthorize("hasRole('ROLE_SEND_ACT_BY_HAND')")
+    @PutMapping(path = "/check")
+    public ResponseEntity checkResultForAct(@RequestParam Long resultId){
+        return resultRepo.findById(resultId)
+                .map(result -> {
+                    if(result.getResult().equals(CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED)){
+                        result.setCheckForAct(true);
+                        resultRepo.save(result);
+                        return ResponseEntity.ok().build();
+                    } else {
+                        return ResponseEntity.badRequest().body("В акт возможно отправлять только результаты с обнаруженным запрещенным контентом");
+                    }
+                }).orElseGet(() -> ResponseEntity.badRequest().body("Ошибка! Результат выполнения проверки не найден по ID: " + resultId));
+    }
+
     @GetMapping(path = "/create")
     @PreAuthorize("hasAnyRole('ROLE_SEND_ACT_BY_HAND')")
     public ResponseEntity<Void> createAct(Long arrangementId){
@@ -52,7 +64,7 @@ public class ActController {
         log.info("Подготовка результатов мероприятия для акта. ID мероприятия: {}", arrangementId);
         List<CheckUnitJobResult> resultFilter = Arrays.asList(CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED);
         return Flux.fromIterable(
-                    resultRepo.findByArrangementIdAndResultIn(arrangementId, resultFilter))
+                    resultRepo.findResultsForAct(arrangementId, resultFilter))
                 .map(this::createActCheckResult);
     }
 
