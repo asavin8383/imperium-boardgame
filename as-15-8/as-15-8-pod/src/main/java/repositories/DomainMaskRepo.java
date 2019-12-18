@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import repositories.helper.DictionaryRepository;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -20,12 +21,7 @@ import java.util.Set;
  * Date: 13.11.2019
  */
 @Repository
-public interface DomainMaskRepo extends JpaRepository<DomainMask, Long>, DictionaryRepository {
-
-    @Override
-    default Dictionary getDictionaryType() {
-        return Dictionary.DOMAIN_MASKS;
-    }
+public interface DomainMaskRepo extends JpaRepository<DomainMask, Long> {
 
     @Query("select d from DomainMask d where d.domainMask = :domainMask ")
     List<DomainMask> findMasks(@Param("domainMask") String domainMask);
