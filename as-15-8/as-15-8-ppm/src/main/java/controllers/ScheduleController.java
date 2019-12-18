@@ -151,14 +151,21 @@ public class ScheduleController {
 
     @PutMapping(path = "/plan")
     @JsonView(Views.Id.class)
-    public ResponseEntity planSchedule(@RequestParam("id") Schedule schedule, @RequestParam Integer maxWorkersCount) {
+    public ResponseEntity planSchedule(@RequestParam("id") Schedule schedule, @RequestBody ObjectNode scheduleData) {
         try {
             if (!(schedule.getStatus().equals(ScheduleStatus.NEW)))
                 throw new AS_15_8_PPM_Exception(String.format("Ошибка планирования расписания! Некорректный статус расписания с ИД: %d - %s", schedule.getId(), schedule.getStatus()));
-            if(maxWorkersCount == null)
+            if(scheduleData.has("plannedDate")) {
+                LocalDate plannedDate = LocalDate.parse(scheduleData.get("plannedDate").asText(), DateTimeFormatter.ISO_DATE);
+                schedule.setPlannedDate(plannedDate);
+            }
+            if(!scheduleData.has("maxWorkersCount")) {
                 throw new AS_15_8_PPM_Exception("Ошибка планирования расписания. Не задано количество обработчиков");
-            else if(maxWorkersCount != schedule.getMaxWorkersCount())
-                throw new AS_15_8_PPM_Exception("Ошибка планирования расписания. Количество обработчиков было изменено. Пожалуйста, пересчитайте расписание.");
+            } else {
+                int maxWorkersCount = scheduleData.get("maxWorkersCount").asInt();
+                if(maxWorkersCount != schedule.getMaxWorkersCount())
+                    throw new AS_15_8_PPM_Exception("Ошибка планирования расписания. Количество обработчиков было изменено. Пожалуйста, пересчитайте расписание.");
+            }
             return ResponseEntity.ok(scheduleService.planSchedule(schedule));
         } catch (AS_15_8_PPM_Exception ex) {
             return ResponseEntity.badRequest().body(ex.getMessage());
