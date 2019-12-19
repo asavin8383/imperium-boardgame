@@ -27,7 +27,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class ArrangementStatusProducer {
 
     private final String PPT_STATUS_ENDPOINT = "/ppt/arrangements/status";
-    private final String PPM_STATUS_ENDPOINT = "/ppm/arrangements/{id}/close";
+    //private final String PPM_STATUS_ENDPOINT = "/ppm/arrangements/{id}/close";
+    private final String PPM_STATUS_ENDPOINT = "/ppm/arrangements/close";
     private final String PPT_ARRANGEMENT_EXECUTION_STATUS = "/arrangements/execution_status";
 
     private final OAuth2RestTemplate restTemplate;
@@ -57,12 +58,11 @@ public class ArrangementStatusProducer {
     }
 
     private void sendToPPM(Long arrangementId){
-        HttpHeaders requestHeaders = new HttpHeaders();
-        requestHeaders.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<?> requestEntity = new HttpEntity<Object>(requestHeaders);
+        HttpEntity<?> requestEntity = new HttpEntity(new HttpHeaders());
         log.info("Отправка сообщения с изменением статуса мероприятия {} в ППМ", arrangementId);
         try {
-            restTemplate.put(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(PPM_STATUS_ENDPOINT).buildAndExpand(arrangementId).toString(), requestEntity);
+            restTemplate.put(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(PPM_STATUS_ENDPOINT).queryParam("id", arrangementId).build().toString(), requestEntity);
+            //restTemplate.put(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(PPM_STATUS_ENDPOINT).buildAndExpand(arrangementId).toString(), requestEntity);
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
             throw AS_15_8_DispatcherException.logAndGet(log, String.format("Ошибка отправки сообщения с изменением статуса мероприятия %d в ППМ, код возврата %s", arrangementId, ex.getStatusCode()));
         }
