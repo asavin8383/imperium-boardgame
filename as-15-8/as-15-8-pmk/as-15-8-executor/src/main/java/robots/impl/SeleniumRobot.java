@@ -31,8 +31,6 @@ public abstract class SeleniumRobot implements Robot {
     protected WebDriver driver;
 	protected String proxy;
 	protected boolean enableLog;
-	
-	private CompletableFuture<ExecutionJobResult> currentExecutionFuture;
 
 	@Getter
 	private Map<AccessToolParameter, String> scriptParams;
@@ -58,25 +56,14 @@ public abstract class SeleniumRobot implements Robot {
 	public ExecutionJobResult run(CheckUnit checkUnit) throws ExecutionException {
 		try {
 			this.driver = createDriver(proxy, enableLog, checkUnit.getValue());
-			currentExecutionFuture = CompletableFuture.supplyAsync(() -> {
-					try {
-						return execute(checkUnit);
-					} catch (ExecutionException ex) {
-						throw new CompletionException(ex);
-					}
-				});
-			ExecutionJobResult jobResult = currentExecutionFuture.join();
-			return jobResult;
+			return execute(checkUnit);
 		} catch (CancellationException ex) {
 			throw new Cancel_ExecutionException(ex);
-		} catch (CompletionException ex) {
-			Throwable e = ex.getCause() == null ? ex : ex.getCause();
-			if(e instanceof ExecutionException)
-				throw (ExecutionException)e;
+		} catch (Exception ex) {
+			if(ex instanceof ExecutionException)
+				throw (ExecutionException)ex;
 			else
-				throw new ExecutionException("Ошибка при выполнении робота", e);
-		} finally {
-			currentExecutionFuture = null;
+				throw new ExecutionException("Ошибка при выполнении робота", ex);
 		}
 	}
 	
@@ -102,8 +89,6 @@ public abstract class SeleniumRobot implements Robot {
 
 	@Override
 	public void destroy() throws IOException {
-		if(currentExecutionFuture != null && !currentExecutionFuture.isDone())
-			currentExecutionFuture.cancel(true);
 		close(driver);
 	}
 

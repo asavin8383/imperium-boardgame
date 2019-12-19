@@ -71,7 +71,7 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 				message = robot.run(checkUnitJob.getCheckUnit());
 			} catch (Exception ex) {
 				if(ex instanceof ExecutionException) {
-					if(ex instanceof Captcha_ExecutionException || ex instanceof Cancel_ExecutionException)
+					if(ex instanceof Captcha_ExecutionException)
 						needToStop = false;
 					throw (ExecutionException)ex;
 				} else
