@@ -10,7 +10,6 @@ import restapi.PPPRACheckClient;
 
 @RestController
 @RequestMapping(path = "/pppracheck")
-@PreAuthorize("hasAnyRole('ROLE_MANAGE_CONFIGURATIONS')")
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 
 public class PppRaCheckController {
@@ -18,7 +17,14 @@ public class PppRaCheckController {
     private final PPPRACheckClient ppraCheckClient;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ROLE_MANAGE_CONFIGURATIONS')")
     public boolean isRegistryAvailable() {
         return ppraCheckClient.checkRegistryIsAvailable();
+    }
+
+    @GetMapping(path = "/url")
+    @PreAuthorize("hasAnyRole('ROLE_FORMAL_TASK')")
+    public String getBaseUrl(){
+        return ppraCheckClient.getBaseUrl();
     }
 }
