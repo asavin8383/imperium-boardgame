@@ -34,10 +34,14 @@ public class DomainController {
     private final DomainMaskRepo domainMaskRepo;
     private final DomainRepo domainRepo;
 
-    @PreAuthorize("hasRole('ROLE_SYSTEM')")
     @GetMapping
     public Set<String> getDomainsByMask(@RequestParam String domainMask){
         return domainRepo.getDomainsByMaskId(domainMask);
+    }
+
+    @GetMapping
+    public DomainMask getDomainMaskById(@RequestParam Long id){
+        return domainMaskRepo.getOne(id);
     }
 
     @PostMapping
@@ -76,7 +80,6 @@ public class DomainController {
     }
 
     private DomainMask replaceFields(DomainMask newDomainMask, DomainMask storedDomainMask){
-        storedDomainMask.setDomainMask(newDomainMask.getDomainMask());
         storedDomainMask.setDomainMask(newDomainMask.getDomainMask());
         return storedDomainMask;
     }

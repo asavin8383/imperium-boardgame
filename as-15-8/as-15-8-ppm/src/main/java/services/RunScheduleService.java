@@ -68,8 +68,7 @@ public class RunScheduleService {
     private void runCheckUnit(SchedulePeriodCheckUnit schedulePeriodCheckUnit){
         log.debug("Запуск чек-юнита: {} {}", schedulePeriodCheckUnit.getId(), schedulePeriodCheckUnit.getCheckUnit().getCheckUnitValue());
         if (schedulePeriodCheckUnit.getStatus().equals(SchedulePeriodCheckUnitStatus.READY)){
-            int partitionId = ((Long)(schedulePeriodCheckUnit.getExecutionNumber() %
-                    schedulePeriodCheckUnit.getSchedulePeriodArrangement().getWorkersCount())).intValue();
+            int partitionId = schedulePeriodCheckUnit.getExecutionNumber().intValue();
             sendCheckUnitJobToDispatcher(createCheckUnitJob(scheduleCheckUnitRepo.getOne(schedulePeriodCheckUnit.getId())), partitionId);
             log.debug("Чек-юнит отправлен на диспетчер. Раздел {}, значение: {} {}", partitionId, schedulePeriodCheckUnit.getId(), schedulePeriodCheckUnit.getCheckUnit().getCheckUnitValue());
         }

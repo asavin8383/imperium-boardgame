@@ -1,24 +1,21 @@
 package robots.impl;
 
-import java.io.IOException;
-import java.util.Map;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
-
+import checkUnits.CheckUnit;
+import common.ExecutorProperties;
 import enums.AccessToolParameter;
+import execution.ExecutionJobResult;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebDriver;
-
-import checkUnits.CheckUnit;
-import execution.ExecutionJobResult;
-import lombok.Getter;
 import robots.DriverFactory;
 import robots.Robot;
 import robots.exceptions.Cancel_ExecutionException;
 import robots.exceptions.ExecutionException;
-import common.ExecutorProperties;
+
+import java.io.IOException;
+import java.util.Map;
+import java.util.concurrent.CancellationException;
 
 /**
  * Скрипт робота проверки ПС/ПАСД
