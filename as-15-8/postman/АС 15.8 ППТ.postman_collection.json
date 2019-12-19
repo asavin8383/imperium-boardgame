@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "da64752a-7daa-4a6a-8af4-904d2b195b85",
+		"_postman_id": "1fc2b740-34ac-4e26-8877-f43fb0bdc833",
 		"name": "АС 15.8 ППТ",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -918,6 +918,25 @@
 							"body": "{\n    \"content\": [\n        {\n            \"id\": 6,\n            \"title\": \"Тест\",\n            \"status\": \"PLANNED\",\n            \"creationDate\": \"2019-05-22T11:40:06.845\",\n            \"startDate\": null,\n            \"endDate\": null,\n            \"accessTool\": {\n                \"id\": 18,\n                \"name\": \"CAMELEO_XYZ\",\n                \"type\": \"ANONYMIZER\"\n            },\n            \"result\": null\n        }\n    ],\n    \"pageable\": {\n        \"sort\": {\n            \"sorted\": true,\n            \"unsorted\": false,\n            \"empty\": false\n        },\n        \"offset\": 0,\n        \"pageNumber\": 0,\n        \"pageSize\": 10,\n        \"paged\": true,\n        \"unpaged\": false\n    },\n    \"totalPages\": 1,\n    \"totalElements\": 1,\n    \"last\": true,\n    \"size\": 10,\n    \"number\": 0,\n    \"sort\": {\n        \"sorted\": true,\n        \"unsorted\": false,\n        \"empty\": false\n    },\n    \"first\": true,\n    \"numberOfElements\": 1,\n    \"empty\": false\n}"
 						}
 					]
+				},
+				{
+					"name": "Получение поручения по orig_id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/formal_tasks/get_by_orig_id/39",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"formal_tasks",
+								"get_by_orig_id",
+								"39"
+							]
+						}
+					},
+					"response": []
 				}
 			],
 			"protocolProfileBehavior": {}
@@ -3307,7 +3326,7 @@
 		"oauth2": [
 			{
 				"key": "accessToken",
-				"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqb2huIiwicm9sZSI6IlJPTEVfT1BFUkFUT1JfVEVTVCxST0xFX0ZPUk1BTF9UQVNLLFJPTEVfTUFOQUdFX0ZPUk1BTF9UQVNLLFJPTEVfTUFOQUdFX0FSUkFOR0VNRU5ULFJPTEVfUFJFUEFSQVRJT05fVFJBRkZJQyxST0xFX0RJQ1RJT05BUlksUk9MRV9GT1JNQVRJT05fT0ZfU0NIRURVTEUsUk9MRV9WSUVXX1JFU1VMVCxST0xFX1NFTkRfQUNUX0JZX0hBTkQsUk9MRV9NQU5BR0VfUFNfUEFTRCxST0xFX01BTkFHRV9FUkRJLFJPTEVfVklFV19SRVBPUlQsUk9MRV9GT1JNQVRJT05fUEFSQU1fUkVQT1JULFJPTEVfTUFOQUdFX0RPTUFJTlMsUk9MRV9NQU5BR0VfQ09ORklHVVJBVElPTlMsUk9MRV9NQU5BR0VfUkVHSVNUUkFUSU9OX0pPVVJOQUwsUk9MRV9NQU5BR0VfRlVOQ1RJT05fTU9ERSxST0xFX01BTkFHRV9NQU5VQUxfQVJSQU5HRU1FTlQiLCJtYWlsIjoiIiwidXNlcl9uYW1lIjoiam9obiIsInNjb3BlIjpbInJlYWQiLCJ3cml0ZSJdLCJleHAiOjE1NzY1NjYwNTgsInVzZXJOYW1lIjoiam9obiIsImF1dGhvcml0aWVzIjpbIlJPTEVfT1BFUkFUT1JfVEVTVCIsIlJPTEVfUFJFUEFSQVRJT05fVFJBRkZJQyIsIlJPTEVfRk9STUFUSU9OX1BBUkFNX1JFUE9SVCIsIlJPTEVfTUFOQUdFX01BTlVBTF9BUlJBTkdFTUVOVCIsIlJPTEVfTUFOQUdFX1BTX1BBU0QiLCJST0xFX01BTkFHRV9SRUdJU1RSQVRJT05fSk9VUk5BTCIsIlJPTEVfRk9STUFUSU9OX09GX1NDSEVEVUxFIiwiUk9MRV9NQU5BR0VfRVJESSIsIlJPTEVfTUFOQUdFX0NPTkZJR1VSQVRJT05TIiwiUk9MRV9GT1JNQUxfVEFTSyIsIlJPTEVfRElDVElPTkFSWSIsIlJPTEVfVklFV19SRVBPUlQiLCJST0xFX01BTkFHRV9GVU5DVElPTl9NT0RFIiwiUk9MRV9NQU5BR0VfRk9STUFMX1RBU0siLCJST0xFX01BTkFHRV9BUlJBTkdFTUVOVCIsIlJPTEVfVklFV19SRVNVTFQiLCJST0xFX1NFTkRfQUNUX0JZX0hBTkQiLCJST0xFX01BTkFHRV9ET01BSU5TIl0sImp0aSI6ImIwZmMwNDkxLWYzOWMtNDU4OC1iNWIwLWE4YzAyMWU1YjQxNyIsImNsaWVudF9pZCI6ImFzLTE1LTgiLCJzZWNvbmROYW1lIjoiIn0.Lcxn3eDTjpXX6n31aZJ_PiwNnW0pnYeIdmWVYl8Wx7hnwWG8kaOqLF_A1SaQwy26uuoeHH8bUyzWcWIqAsqmCMMSpWyX9mytSQY_6IuMt2QDlgwV3HN5rMaLWtajnqrd3WaBsJ-eG2g1GXLTwyFGNCSAhwbqu-dphzpopNS50qSo_FcOQqvrIU1J6ECS2JkUxnUUk3pGkzg_ciEqpKZdFjGVMJP2wajSTNb43FsVTI4UT0bVvXOXXzBo96jCSttWDFwJhdMCjgKnL2yjfW_oyJD2MWmndci4Vlk_hFKUNxzG7oCNsEKZs7TGcRI73GshYpeyOiqUFTPzoJ5K1uc_zQ",
+				"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqYWNrIiwicm9sZSI6IlJPTEVfT1BFUkFUT1IsUk9MRV9GT1JNQUxfVEFTSyxST0xFX01BTkFHRV9GT1JNQUxfVEFTSyxST0xFX01BTkFHRV9BUlJBTkdFTUVOVCxST0xFX1BSRVBBUkFUSU9OX1RSQUZGSUMsUk9MRV9ESUNUSU9OQVJZLFJPTEVfRk9STUFUSU9OX09GX1NDSEVEVUxFLFJPTEVfVklFV19SRVNVTFQsUk9MRV9TRU5EX0FDVF9CWV9IQU5ELFJPTEVfTUFOQUdFX1BTX1BBU0QsUk9MRV9NQU5BR0VfRVJESSxST0xFX1ZJRVdfUkVQT1JULFJPTEVfRk9STUFUSU9OX1BBUkFNX1JFUE9SVCxST0xFX01BTkFHRV9ET01BSU5TLFJPTEVfTUFOQUdFX01BTlVBTF9BUlJBTkdFTUVOVCIsIm1haWwiOiIiLCJ1c2VyX25hbWUiOiJqYWNrIiwic2NvcGUiOlsicmVhZCIsIndyaXRlIl0sImV4cCI6MTU3NjgyMzY4NiwidXNlck5hbWUiOiJqYWNrIiwiYXV0aG9yaXRpZXMiOlsiUk9MRV9PUEVSQVRPUiIsIlJPTEVfUFJFUEFSQVRJT05fVFJBRkZJQyIsIlJPTEVfRk9STUFUSU9OX1BBUkFNX1JFUE9SVCIsIlJPTEVfTUFOQUdFX01BTlVBTF9BUlJBTkdFTUVOVCIsIlJPTEVfTUFOQUdFX1BTX1BBU0QiLCJST0xFX0ZPUk1BVElPTl9PRl9TQ0hFRFVMRSIsIlJPTEVfTUFOQUdFX0VSREkiLCJST0xFX0ZPUk1BTF9UQVNLIiwiUk9MRV9ESUNUSU9OQVJZIiwiUk9MRV9WSUVXX1JFUE9SVCIsIlJPTEVfTUFOQUdFX0ZPUk1BTF9UQVNLIiwiUk9MRV9NQU5BR0VfQVJSQU5HRU1FTlQiLCJST0xFX1ZJRVdfUkVTVUxUIiwiUk9MRV9TRU5EX0FDVF9CWV9IQU5EIiwiUk9MRV9NQU5BR0VfRE9NQUlOUyJdLCJqdGkiOiJjMWIzMTI4OC1lYzkwLTRhZDUtYmY0Mi03MjE3YjM1ZGU4N2UiLCJjbGllbnRfaWQiOiJhcy0xNS04Iiwic2Vjb25kTmFtZSI6IiJ9.lEiksVcBPZ9LEoOeyJv60imz5vOJWus4QLOLnTmvc8GQN7CkjehXHR3DqHLB03N9uXtMr83WCO297Exu3CsqvDrigYLCO8jxgOD6MRuQkU82lMQzow6aNRSvj_ePj2kUE9oy9costFEZP1Ve5385eMhwGn74XeiLrZNbrNxr2bmWZ9fdKa6SW-8NqDmOJ5xXkyzfZmL0Yspa9eMeVX4tHrRfTPf_ORud7p_bla9dv3o3Hvgv-wirzJgxwiHvsbu9vZEikz_AYm_FfxdY5Oy5o6u9wESP2EppR044ckpoSAi-86rWhlxqDWMovxPvlGq4bwIlVVwgJJaPaOqKTxsSuw",
 				"type": "string"
 			},
 			{
@@ -3346,25 +3365,25 @@
 	],
 	"variable": [
 		{
-			"id": "18f5e508-c9bb-4232-bcae-407e5ce52ae3",
+			"id": "917448de-1f88-4012-963c-39842879f9e0",
 			"key": "url",
 			"value": "http://localhost:15800",
 			"type": "string"
 		},
 		{
-			"id": "dae293b7-07fd-4973-8221-262fc23a1316",
+			"id": "a0fc83ed-3193-4040-b862-072a95d0871a",
 			"key": "oper_token",
 			"value": "",
 			"type": "string"
 		},
 		{
-			"id": "74c9295c-623b-426a-9203-9c55b26dd5ed",
+			"id": "9468e3ab-211a-4d7b-8dd5-c37dca6b932a",
 			"key": "test_url",
 			"value": "http://192.168.5.253:15800",
 			"type": "string"
 		},
 		{
-			"id": "ac0be3a9-992c-435d-bc89-a6f1897689bf",
+			"id": "ffd8733b-b483-40ee-a2c8-b2dfd081fedf",
 			"key": "admin_token",
 			"value": "",
 			"type": "string"
