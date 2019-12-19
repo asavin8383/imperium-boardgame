@@ -42,7 +42,7 @@ spring:
     bindings:
       jobs:
         consumer.concurrency: 10
-selenium-hub-url: http://user:1q0p2w9o@10.97.220.165:4442/wd/hub
+selenium-hub-url: http://10.97.220.165:15800/wd/hub
 eureka:
   instance:
     metadata-map:
