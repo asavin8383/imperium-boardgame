@@ -35,4 +35,7 @@ public interface FormalTaskRepository extends JpaRepository<FormalTask, Long>, F
 
 	@Query("SELECT a.formalTask FROM Arrangement a WHERE a.id=:arrangementId")
 	FormalTask getByArrangementId(@Param("arrangementId") Long id);
+
+	@Query("SELECT a FROM FormalTask a WHERE a.missionId=:mission_id")
+	FormalTask getByMissionId(@Param("mission_id") Long id);
 }
