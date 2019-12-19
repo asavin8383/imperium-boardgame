@@ -138,21 +138,16 @@ public class ResultsController {
     @PreAuthorize("hasRole('ROLE_MANAGE_ARRANGEMENT')")
     @PutMapping(path = "/stop_arrangement")
     public boolean stopArrangement(@RequestParam("id") Long arrangementId){
+
         List<Result> results = resultRepo.findAllByArrangementId(arrangementId);
 
-         if (results.isEmpty() && resultService.getArrnagementExecutionStatus(arrangementId) == ExecutionStatus.RUNNING) {
-             resultService.sendNotificationsIfFinished(arrangementId);
-             return true;
-         }
-
-        long countToStop = results.stream()
-                .filter(this::checkIsRunningOrPlanned)
-                .peek(resultToStop -> {
-                    resultToStop.setResult(CheckUnitJobResult.STOPPED);
-                    resultRepo.save(resultToStop);
-                }).count();
-
-        if (countToStop > 0) {
+        if (resultService.getArrnagementExecutionStatus(arrangementId) == ExecutionStatus.RUNNING) {
+            results.stream()
+                    .filter(this::checkIsRunningOrPlanned)
+                    .peek(resultToStop -> {
+                        resultToStop.setResult(CheckUnitJobResult.STOPPED);
+                        resultRepo.save(resultToStop);
+                    });
             resultService.sendNotificationsIfFinished(arrangementId);
             return true;
         } else return false;

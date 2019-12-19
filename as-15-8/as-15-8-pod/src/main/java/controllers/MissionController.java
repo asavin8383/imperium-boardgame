@@ -112,4 +112,10 @@ public class MissionController {
         }
     }
 
+    @GetMapping("/mission_id")
+    public Long getMission(@RequestParam("orig_id") String orig_id){
+        Mission mission = missionRepository.findByOrigId(orig_id);
+        return mission.getId();
+    }
+
 }
