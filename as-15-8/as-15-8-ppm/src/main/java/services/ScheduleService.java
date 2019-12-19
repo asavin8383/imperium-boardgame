@@ -168,8 +168,9 @@ public class ScheduleService {
         int nextExecutionNumber = 0;
         for(SchedulePeriodArrangement schedulePeriodArrangement : schedulePeriodArrangements){
             if(!scheduleCheckUnits.isEmpty()){
+                int checkUnitsSize = scheduleCheckUnits.size();
                 scheduleCheckUnits = fillSchedulePeriodArrangement(schedulePeriodArrangement, scheduleCheckUnits, nextExecutionNumber);
-                nextExecutionNumber += scheduleCheckUnits.size();
+                nextExecutionNumber += Math.min(checkUnitsSize - scheduleCheckUnits.size(), schedulePeriodArrangement.getWorkersCount());
             }
         }
     }
