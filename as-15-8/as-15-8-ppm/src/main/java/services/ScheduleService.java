@@ -165,16 +165,19 @@ public class ScheduleService {
         log.debug("Поиск scheduleCheckUnits по мероприятию: {}", arrangement.getId());
         scheduleCheckUnits.addAll(scheduleCheckUnitRepo.findAllByArrangement(arrangement));
         log.debug("Поиск scheduleCheckUnits по мероприятию: {} завершен", arrangement.getId());
+        int nextExecutionNumber = 0;
         for(SchedulePeriodArrangement schedulePeriodArrangement : schedulePeriodArrangements){
             if(!scheduleCheckUnits.isEmpty()){
-                scheduleCheckUnits = fillSchedulePeriodArrangement(schedulePeriodArrangement, scheduleCheckUnits);
+                scheduleCheckUnits = fillSchedulePeriodArrangement(schedulePeriodArrangement, scheduleCheckUnits, nextExecutionNumber);
+                nextExecutionNumber += scheduleCheckUnits.size();
             }
         }
     }
 
     @SuppressWarnings("unchecked")
     private SortedSet<ScheduleCheckUnit> fillSchedulePeriodArrangement(SchedulePeriodArrangement schedulePeriodArrangement,
-                                                                       SortedSet<ScheduleCheckUnit> scheduleCheckUnits){
+                                                                       SortedSet<ScheduleCheckUnit> scheduleCheckUnits,
+                                                                       int startExecutionNumber){
         ArrangementSchedulePeriodProcessing periodProcessing = scheduleCreationService.calculateArrangementSchedulePeriodProcessing(
                 scheduleCheckUnits,
                 schedulePeriodArrangement.getWorkersCount(),
@@ -182,7 +185,7 @@ public class ScheduleService {
                 schedulePeriodArrangement.getSchedulePeriod().getStartTime(),
                 schedulePeriodArrangement.getSchedulePeriod().getEndTime()
         );
-        long currentExecutionNumber = 0;
+        long currentExecutionNumber = startExecutionNumber;
         log.debug("Заполняется SPA {}", schedulePeriodArrangement.getId());
         SortedSet<ScheduleCheckUnit> periodCheckUnits = ((TreeSet)scheduleCheckUnits).headSet(periodProcessing.getLastCheckUnit(), true);
         for (ScheduleCheckUnit scheduleCheckUnit : periodCheckUnits){
@@ -193,6 +196,9 @@ public class ScheduleService {
             schedulePeriodArrangement.getSchedulePeriodCheckUnits().add(schedulePeriodCheckUnit);
             schedulePeriodCheckUnitRepo.save(schedulePeriodCheckUnit);
             log.debug("Добавлен новый CheckUinit: {}", schedulePeriodCheckUnit.getExecutionNumber());
+            if((currentExecutionNumber - startExecutionNumber) >= schedulePeriodArrangement.getWorkersCount()){
+                currentExecutionNumber = startExecutionNumber;
+            }
         }
         schedulePeriodArrangementRepo.save(schedulePeriodArrangement);
         log.debug("SPA {} заполнено", schedulePeriodArrangement.getId());
