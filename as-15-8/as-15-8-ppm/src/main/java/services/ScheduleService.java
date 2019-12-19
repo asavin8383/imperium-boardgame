@@ -171,13 +171,14 @@ public class ScheduleService {
         log.debug("Поиск scheduleCheckUnits по мероприятию: {} завершен", arrangement.getId());
 
         long maxArrWorkersCount = 0;
+        long curSize = scheduleCheckUnits.size();
         for(SchedulePeriodArrangement schedulePeriodArrangement : schedulePeriodArrangements){
             if(!scheduleCheckUnits.isEmpty()){
                 scheduleCheckUnits = fillSchedulePeriodArrangement(schedulePeriodArrangement, scheduleCheckUnits, startExecutionNumber);
             }
             maxArrWorkersCount = Math.max(maxArrWorkersCount, schedulePeriodArrangement.getWorkersCount());
         }
-        return Math.min(scheduleCheckUnits.size(), maxArrWorkersCount);
+        return Math.min(curSize, maxArrWorkersCount);
     }
 
     @SuppressWarnings("unchecked")
