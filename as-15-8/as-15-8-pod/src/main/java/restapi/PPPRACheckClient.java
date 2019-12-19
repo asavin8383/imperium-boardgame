@@ -1,5 +1,6 @@
 package restapi;
 
+import lombok.Getter;
 import lombok.SneakyThrows;
 import org.apache.http.client.utils.URIBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,11 +15,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class PPPRACheckClient {
 
+    @Getter
     @Value("${spring.rest_base_url}")
     private String baseUrl;
 
     @Autowired
     OAuth2RestTemplate restTemplate;
+
     @SneakyThrows
     public boolean checkRegistryIsAvailable() {
         HttpEntity<String> requestEntity = new HttpEntity<>("");
