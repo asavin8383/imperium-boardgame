@@ -61,8 +61,12 @@ public class ScheduleService {
         if(schedule.getMaxWorkersCount() > freeWorkersCount)
             throw new AS_15_8_PPM_Exception("Ошибка планирования расписания. Количество свободных обработчиков уменьшилось. На данный момент их максимальное количество " + freeWorkersCount + " штук");
 
-        arrangementRepo.findAllBySchedule(schedule.getId())
-                .forEach(this::fillCheckUnits);
+        long nextExecutionNumber = 0;
+        List<Arrangement> arrangements = arrangementRepo.findAllBySchedule(schedule.getId());
+        for(Arrangement curArrangement : arrangements){
+            nextExecutionNumber += fillCheckUnits(curArrangement, nextExecutionNumber);
+        }
+
         schedule.getSchedulePeriods().forEach(schedulePeriod -> schedulePeriod.setSchedulePeriodState(SchedulePeriodState.PLANNED));
         schedule.setStatus(ScheduleStatus.PLANNED);
         scheduleRepo.save(schedule);
@@ -159,26 +163,27 @@ public class ScheduleService {
         return getFreeWorkersCount(plannedDate, startTime, endTime);
     }
 
-    private void fillCheckUnits(Arrangement arrangement){
+    private long fillCheckUnits(Arrangement arrangement, long startExecutionNumber){
         List<SchedulePeriodArrangement> schedulePeriodArrangements = schedulePeriodArrangementRepo.findAllByArrangement(arrangement);
         SortedSet<ScheduleCheckUnit> scheduleCheckUnits = new TreeSet<>(Comparator.comparingLong(ScheduleCheckUnit::getId));
         log.debug("Поиск scheduleCheckUnits по мероприятию: {}", arrangement.getId());
         scheduleCheckUnits.addAll(scheduleCheckUnitRepo.findAllByArrangement(arrangement));
         log.debug("Поиск scheduleCheckUnits по мероприятию: {} завершен", arrangement.getId());
-        int nextExecutionNumber = 0;
+
+        long maxArrWorkersCount = 0;
         for(SchedulePeriodArrangement schedulePeriodArrangement : schedulePeriodArrangements){
             if(!scheduleCheckUnits.isEmpty()){
-                int checkUnitsSize = scheduleCheckUnits.size();
-                scheduleCheckUnits = fillSchedulePeriodArrangement(schedulePeriodArrangement, scheduleCheckUnits, nextExecutionNumber);
-                nextExecutionNumber += Math.min(checkUnitsSize - scheduleCheckUnits.size(), schedulePeriodArrangement.getWorkersCount());
+                scheduleCheckUnits = fillSchedulePeriodArrangement(schedulePeriodArrangement, scheduleCheckUnits, startExecutionNumber);
             }
+            maxArrWorkersCount = Math.max(maxArrWorkersCount, schedulePeriodArrangement.getWorkersCount());
         }
+        return Math.min(scheduleCheckUnits.size(), maxArrWorkersCount);
     }
 
     @SuppressWarnings("unchecked")
     private SortedSet<ScheduleCheckUnit> fillSchedulePeriodArrangement(SchedulePeriodArrangement schedulePeriodArrangement,
                                                                        SortedSet<ScheduleCheckUnit> scheduleCheckUnits,
-                                                                       int startExecutionNumber){
+                                                                       long startExecutionNumber){
         ArrangementSchedulePeriodProcessing periodProcessing = scheduleCreationService.calculateArrangementSchedulePeriodProcessing(
                 scheduleCheckUnits,
                 schedulePeriodArrangement.getWorkersCount(),
