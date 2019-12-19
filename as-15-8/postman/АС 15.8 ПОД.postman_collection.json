@@ -930,7 +930,17 @@
 					"name": "Создание маски",
 					"request": {
 						"method": "POST",
-						"header": [],
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"domainMask\": \"createdFromPostmanMask\",\n    \"domains\": {\"domain\": \"postmanDomaim\"}\n}"
+						},
 						"url": {
 							"raw": "{{url}}/pod/domain-masks/",
 							"host": [
