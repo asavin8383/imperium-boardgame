@@ -3,6 +3,7 @@ package controllers;
 import checkUnits.CheckUnitType;
 import controllers.helpers.SortingHelper;
 import enums.CheckUnitJobResult;
+import enums.ExecutionStatus;
 import enums.SortingDirection;
 import exceptions.AS_15_8_DispatcherException;
 import lombok.RequiredArgsConstructor;
@@ -139,14 +140,19 @@ public class ResultsController {
     public boolean stopArrangement(@RequestParam("id") Long arrangementId){
         List<Result> results = resultRepo.findAllByArrangementId(arrangementId);
 
-        long stoppedCount = results.stream()
+         if (results.isEmpty() && resultService.getArrnagementExecutionStatus(arrangementId) == ExecutionStatus.RUNNING) {
+             resultService.sendNotificationsIfFinished(arrangementId);
+             return true;
+         }
+
+        long countToStop = results.stream()
                 .filter(this::checkIsRunningOrPlanned)
                 .peek(resultToStop -> {
                     resultToStop.setResult(CheckUnitJobResult.STOPPED);
                     resultRepo.save(resultToStop);
                 }).count();
 
-        if (stoppedCount > 0) {
+        if (countToStop > 0) {
             resultService.sendNotificationsIfFinished(arrangementId);
             return true;
         } else return false;

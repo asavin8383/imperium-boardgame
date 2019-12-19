@@ -203,4 +203,10 @@ public class ArrangementController {
         return arrangement;
     }
 
+    @PreAuthorize("hasRole('ROLE_SYSTEM')" )
+    @GetMapping("/execution_status")
+    public ExecutionStatus getExecutionStatus(@RequestParam("id") Arrangement arrangement) {
+        return arrangement.getStatus();
+    }
+
 }

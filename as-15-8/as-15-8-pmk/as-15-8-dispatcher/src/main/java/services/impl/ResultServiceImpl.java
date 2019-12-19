@@ -122,4 +122,8 @@ public class ResultServiceImpl implements ResultService {
             arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(arrangementId, ArrangementEvents.FINISH));
         }
     }
+
+    public ExecutionStatus getArrnagementExecutionStatus(Long arrangementId) {
+        return arrangementStatusProducer.getArrangementExcecutionStatus(arrangementId);
+    }
 }
