@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import repositories.*;
 import services.ResultService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -144,9 +145,10 @@ public class ResultsController {
         if (resultService.getArrnagementExecutionStatus(arrangementId) == ExecutionStatus.RUNNING) {
             results.stream()
                     .filter(this::checkIsRunningOrPlanned)
-                    .peek(resultToStop -> {
+                    .forEach(resultToStop -> {
                         resultToStop.setResult(CheckUnitJobResult.STOPPED);
                         resultRepo.save(resultToStop);
+
                     });
             resultService.sendNotificationsIfFinished(arrangementId);
             return true;

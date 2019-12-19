@@ -83,9 +83,9 @@ public class ArrangementController {
         }
     }
 
-    @PutMapping("/{id}/close")
+    @PutMapping("/close")
     @Transactional
-    public void updateArrangementStatus(@PathVariable("id") Arrangement arrangement){
+    public void updateArrangementStatus(@RequestParam("id") Arrangement arrangement){
         if (arrangement == null){
             throw new AS_15_8_PPM_Exception("Ошибка закрытия мероприятия! Мероприятие не было найдено в БД");
         }
