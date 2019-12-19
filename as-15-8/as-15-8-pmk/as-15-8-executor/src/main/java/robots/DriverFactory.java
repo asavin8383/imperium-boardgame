@@ -110,9 +110,9 @@ public class DriverFactory {
 		options.addArguments("--start-maximized");
 		options.addArguments("--ignore-certificate-errors");
 		//options.addArguments("--disable-popup-blocking");
-		//options.addArguments("--headless");
+		options.addArguments("--headless");
 		//options.addArguments("--window-size=1920,1080");
-		//options.addArguments("--no-sandbox");				// избавляет от некоторых проблем с таймаутом, рендерингом, но не безопасно!
+		options.addArguments("--no-sandbox");				// избавляет от некоторых проблем с таймаутом, рендерингом, но не безопасно!
 		options.addArguments("--dns-prefetch-disable");		// отключение предварительной выборки DNS. в теории должно ускорить работу
 		//options.addArguments("--disable-gpu");				// говорят частично решает проблему с рендерингом (скриншотом)
 		//options.addArguments("--disable-features=VizDisplayCompositor");	// у кого-то в 73 версии устранило проблему: Timed out receiving message from renderer: 10.000
