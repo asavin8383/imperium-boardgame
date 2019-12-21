@@ -7,10 +7,7 @@ import exceptions.AS_15_8_POD_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import model.rest.control.AccessToolRobot;
-import model.rest.control.AccessToolRobotType;
-import model.rest.control.ActCheckResultPPP;
-import model.rest.control.ActRequestPPP;
+import model.rest.control.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -21,6 +18,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import repositories.ContentRepository;
 import repositories.MissionRepository;
 import rest.ActCheckResult;
 import rest.ActRequest;
@@ -45,6 +43,9 @@ public class ActService {
     private final OAuth2RestTemplate restTemplate;
     private final MissionRepository missionRepository;
     private final DispatcherWebClient dispatcherWebClient;
+    private final ContentRepository contentRepository;
+
+    private DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
     @Value("${spring.rest_base_url}")
     private String baseUrl;
@@ -83,7 +84,16 @@ public class ActService {
             achRes.setCheckUnitType(actCheckResult.getCheckUnitType().name());
             achRes.setCheckUnitValue(actCheckResult.getCheckUnitValue());
             achRes.setDate(actCheckResult.getDate());
-
+            contentRepository.findActCheckResultPodInfo(actCheckResult.getContentId())
+                .map(actCheckResultPodInfo -> {
+                    achRes.setContentId(actCheckResultPodInfo.getErdiId());
+                    achRes.setIncludeTime(dateFormat.format(actCheckResultPodInfo.getIncludeTime()));
+                    return true;
+                    }
+                ).orElseGet(() -> {
+                    log.warn("Для результата проверки с ИД: {} в БД ПОД не было найдено данных об ИД ЕРДИ и дате включения в ЕРДИ", actCheckResult.getCheckResultId());
+                    return false;
+                    });
             /*
             if (StringUtils.isEmpty(actCheckResult.getDate())){
                 DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");

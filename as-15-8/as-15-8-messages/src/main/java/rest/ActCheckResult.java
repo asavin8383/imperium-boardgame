@@ -9,4 +9,5 @@ public class ActCheckResult {
     private CheckUnitType checkUnitType;
     private String checkUnitValue;
     private String date;    // 2019-08-15T18:58:00
+    private Long contentId;
 }

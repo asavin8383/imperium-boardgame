@@ -402,7 +402,7 @@ public class ErdiRestClient {
         }
         catch (Throwable e){
             log.error("Ошибка загрузки списка дельт по дате: {}", dateStr);
-            log.error(errorMessage);
+            log.error("Текст ошибки", e);
             return new ArrayList<>();
         }
 
