@@ -34,12 +34,11 @@ public class DomainController {
     private final DomainMaskRepo domainMaskRepo;
     private final DomainRepo domainRepo;
 
-    @GetMapping
+    @GetMapping(path = "/domains")
     public Set<String> getDomainsByMask(@RequestParam String domainMask){
         return domainRepo.getDomainsByMaskId(domainMask);
     }
 
-    @GetMapping
     public DomainMask getDomainMaskById(@RequestParam Long id){
         return domainMaskRepo.getOne(id);
     }

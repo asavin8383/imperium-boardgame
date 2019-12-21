@@ -21,7 +21,7 @@ public interface ContentRepository extends JpaRepository<Content, Long>, Diction
     //TODO убедиться, что includeTime не меняется от версии к версии
     @Query(
         "select new model.rest.control.ActCheckResultPodInfo(c.erdiId, ci.includeTime) from Content c " +
-            "join ContentInfo ci on c.id = ci.content.id and c.id = :content_id"
+            "join model.scheme.ContentInfo ci on c.id = ci.content.id and c.id = :content_id"
     )
     Optional<ActCheckResultPodInfo> findActCheckResultPodInfo(@Param("content_id") Long contentId);
 
