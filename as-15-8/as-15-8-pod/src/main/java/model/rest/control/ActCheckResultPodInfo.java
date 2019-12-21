@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 /**
  * Created by san
@@ -15,5 +15,5 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class ActCheckResultPodInfo {
     private String erdiId;
-    private LocalDateTime includeTime;
+    private Date includeTime;
 }
