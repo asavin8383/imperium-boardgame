@@ -48,9 +48,9 @@ public class LdapUsersService {
         return ldapTemplate.search(ldapQuery,
                 (AttributesMapper<User>) attributes -> {
                     User user = new User();
-                    Attribute name = attributes.get("name");
-                    if (name != null && name.size() > 0)
-                        user.setName(name.get().toString());
+                    Attribute login = attributes.get("sAMAccountName");
+                    if (login != null && login.size() > 0)
+                        user.setLogin(login.get().toString());
                     Attribute firstName = attributes.get("givenname");
                     if (firstName != null && firstName.size() > 0)
                         user.setFirstName(firstName.get().toString());
