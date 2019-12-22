@@ -16,4 +16,10 @@ public class ActCheckResultPPP {
 
     @JsonProperty("Date")
     private String date;    // 2019-08-15T18:58:00
+
+    @JsonProperty("ContentId")
+    private String contentId; // erdi_id из Таблицы sor.content
+
+    @JsonProperty("IncludeTime")
+    private String includeTime; // 2019-08-15T18:58:00
 }

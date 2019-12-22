@@ -87,6 +87,7 @@ public class ActController {
         checkResult.setCheckResultId(result.getId());
         checkResult.setCheckUnitType(result.getCheckUnitType());
         checkResult.setCheckUnitValue(result.getCheckUnitValue());
+        checkResult.setContentId(result.getErdiId());
 
         Date endDate = ldt2date(result.getEndDate());
         checkResult.setDate(endDate == null ? "" : dateFormat.format(endDate));
