@@ -19,7 +19,8 @@ public interface SchedulePeriodCheckUnitRepo extends JpaRepository<SchedulePerio
     List<SchedulePeriodCheckUnit> findAllBySchedulePeriodArrangement(SchedulePeriodArrangement schedulePeriodArrangement);
 
     @Query("select cu.executionNumber from SchedulePeriodCheckUnit cu " +
-            "join cu.schedulePeriodArrangement.schedulePeriod p " +
+            "join cu.schedulePeriodArrangement a " +
+            "join a.schedulePeriod p " +
             "on ((p.startTime < :startTime and p.endTime > :startTime) or " +
             "(p.startTime > :startTime and p.startTime > :endTime)) " +
             "join p.schedule s " +
