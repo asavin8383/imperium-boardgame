@@ -211,7 +211,7 @@ public class ScheduleService {
     }
 
     private TreeSet<Long> getFreeExecutionNumbers(Long scheduleId, LocalDate plannedDate){
-        List<Long> busyExecutionNumbers = scheduleRepo.getBusyExecutionNumbers(
+        List<Long> busyExecutionNumbers = schedulePeriodCheckUnitRepo.getBusyExecutionNumbers(
                 plannedDate,
                 scheduleRepo.getScheduleStartTime(scheduleId),
                 scheduleRepo.getScheduleEndTime(scheduleId));
