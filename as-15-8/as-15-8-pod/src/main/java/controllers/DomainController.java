@@ -2,10 +2,12 @@ package controllers;
 
 import controllers.utils.SortingDirection;
 import controllers.utils.SortingHelper;
+import exceptions.AS_15_8_POD_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.scheme.Domain;
 import model.scheme.DomainMask;
+import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,8 +17,8 @@ import org.springframework.web.bind.annotation.*;
 import repositories.DomainMaskRepo;
 import repositories.DomainRepo;
 
+import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Created by san
@@ -34,11 +36,13 @@ public class DomainController {
     private final DomainMaskRepo domainMaskRepo;
     private final DomainRepo domainRepo;
 
-    @GetMapping(path = "/domains")
-    public Set<String> getDomainsByMask(@RequestParam String domainMask){
+    @GetMapping(path = "/get_domains")
+    public Set<Domain> getDomainsByMask(@RequestParam String domainMask){
+    //public Set<String> getDomainsByMask(@RequestParam String domainMask){
         return domainRepo.getDomainsByMaskId(domainMask);
     }
 
+    @GetMapping(path = "/get_domain_mask")
     public DomainMask getDomainMaskById(@RequestParam Long id){
         return domainMaskRepo.getOne(id);
     }
@@ -81,6 +85,23 @@ public class DomainController {
     private DomainMask replaceFields(DomainMask newDomainMask, DomainMask storedDomainMask){
         storedDomainMask.setDomainMask(newDomainMask.getDomainMask());
         return storedDomainMask;
+    }
+
+
+    @DeleteMapping(path = "/delete_domain")
+    public void deleteDomainFromMask(@RequestParam("id") Optional<Domain> domain) {
+        domain.orElseThrow(() -> new AS_15_8_POD_Exception("Ошибка поиска домена! Такого домена не существует."));
+        domainRepo.delete(domain.get());
+    }
+
+    @PostMapping(path = "/add_domain")
+    public void addDomainToMask(@RequestParam("id") Optional<DomainMask> domainMask, @RequestBody Optional<Domain> domain) {
+        domainMask.orElseThrow(()-> new AS_15_8_POD_Exception("Такой доменной маски не существует в БД"));
+        domain.orElseThrow(()-> new AS_15_8_POD_Exception("Некорректный формат домена"));
+
+        domain.get().setDomainMask(domainMask.get());
+        domainRepo.save(domain.get());
+
     }
 
 }
