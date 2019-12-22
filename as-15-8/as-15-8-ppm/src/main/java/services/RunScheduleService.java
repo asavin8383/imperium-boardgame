@@ -47,8 +47,7 @@ public class RunScheduleService {
             .forEach(schedule -> schedulePeriodRepo.findAllByScheduleAndSchedulePeriodStateAndAndStartTimeBefore(schedule, SchedulePeriodState.PLANNED, LocalTime.now())
                 .forEach(schedulePeriod -> {
                     schedulePeriodArrangementRepo.findAllBySchedulePeriod(schedulePeriod)
-                        .forEach(schedulePeriodArrangement ->
-                        {
+                        .forEach(schedulePeriodArrangement -> {
                             log.debug("Запуск на выполнение schedulePeriodArrangement с ИД {}", schedulePeriodArrangement.getId());
                             arrangementStatusUploader.changeArrangementStatus(new ArrangementStatusNotification(schedulePeriodArrangement.getArrangement().getId(), ArrangementEvents.RUN));
                             schedulePeriodCheckUnitRepo.findAllBySchedulePeriodArrangement(schedulePeriodArrangement)

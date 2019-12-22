@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @Slf4j
@@ -61,11 +62,7 @@ public class ScheduleService {
         if(schedule.getMaxWorkersCount() > freeWorkersCount)
             throw new AS_15_8_PPM_Exception("Ошибка планирования расписания. Количество свободных обработчиков уменьшилось. На данный момент их максимальное количество " + freeWorkersCount + " штук");
 
-        long nextExecutionNumber = 0;
-        List<Arrangement> arrangements = arrangementRepo.findAllBySchedule(schedule.getId());
-        for(Arrangement curArrangement : arrangements){
-            nextExecutionNumber += fillCheckUnits(curArrangement, nextExecutionNumber);
-        }
+        fillSchedule(schedule);
 
         schedule.getSchedulePeriods().forEach(schedulePeriod -> schedulePeriod.setSchedulePeriodState(SchedulePeriodState.PLANNED));
         schedule.setStatus(ScheduleStatus.PLANNED);
@@ -139,11 +136,8 @@ public class ScheduleService {
 
     public void checkAndCloseSchedule(Schedule schedule){
         boolean needToClose = arrangementRepo.findAllBySchedule(schedule.getId())
-            .stream()
-            .map(Arrangement::isClosed)
-            .filter(closed -> closed == false)
-            .collect(Collectors.toList())
-            .size() == 0;
+                .stream()
+                .allMatch(Arrangement::isClosed);
         if(needToClose){
             schedule.setStatus(ScheduleStatus.FINISHED);
             scheduleRepo.save(schedule);
@@ -163,28 +157,76 @@ public class ScheduleService {
         return getFreeWorkersCount(plannedDate, startTime, endTime);
     }
 
-    private long fillCheckUnits(Arrangement arrangement, long startExecutionNumber){
-        List<SchedulePeriodArrangement> schedulePeriodArrangements = schedulePeriodArrangementRepo.findAllByArrangement(arrangement);
-        SortedSet<ScheduleCheckUnit> scheduleCheckUnits = new TreeSet<>(Comparator.comparingLong(ScheduleCheckUnit::getId));
-        log.debug("Поиск scheduleCheckUnits по мероприятию: {}", arrangement.getId());
-        scheduleCheckUnits.addAll(scheduleCheckUnitRepo.findAllByArrangement(arrangement));
-        log.debug("Поиск scheduleCheckUnits по мероприятию: {} завершен", arrangement.getId());
+//    private long fillCheckUnits(Arrangement arrangement, long startExecutionNumber){
+//        List<SchedulePeriodArrangement> schedulePeriodArrangements = schedulePeriodArrangementRepo.findAllByArrangement(arrangement);
+//        SortedSet<ScheduleCheckUnit> scheduleCheckUnits = new TreeSet<>(Comparator.comparingLong(ScheduleCheckUnit::getId));
+//        log.debug("Поиск scheduleCheckUnits по мероприятию: {}", arrangement.getId());
+//        scheduleCheckUnits.addAll(scheduleCheckUnitRepo.findAllByArrangement(arrangement));
+//        log.debug("Поиск scheduleCheckUnits по мероприятию: {} завершен", arrangement.getId());
+//
+//        long maxArrWorkersCount = 0;
+//        long curSize = scheduleCheckUnits.size();
+//        for(SchedulePeriodArrangement schedulePeriodArrangement : schedulePeriodArrangements){
+//            if(!scheduleCheckUnits.isEmpty()){
+//                scheduleCheckUnits = fillSchedulePeriodArrangement(schedulePeriodArrangement, scheduleCheckUnits, startExecutionNumber);
+//            }
+//            maxArrWorkersCount = Math.max(maxArrWorkersCount, schedulePeriodArrangement.getWorkersCount());
+//        }
+//        return Math.min(curSize, maxArrWorkersCount);
+//    }
 
-        long maxArrWorkersCount = 0;
-        long curSize = scheduleCheckUnits.size();
-        for(SchedulePeriodArrangement schedulePeriodArrangement : schedulePeriodArrangements){
-            if(!scheduleCheckUnits.isEmpty()){
-                scheduleCheckUnits = fillSchedulePeriodArrangement(schedulePeriodArrangement, scheduleCheckUnits, startExecutionNumber);
-            }
-            maxArrWorkersCount = Math.max(maxArrWorkersCount, schedulePeriodArrangement.getWorkersCount());
-        }
-        return Math.min(curSize, maxArrWorkersCount);
+    private void clearSchedulePeriods(Schedule schedule){
+        schedule.getSchedulePeriods().forEach(schedulePeriodRepo::delete);
+        schedule.getSchedulePeriods().clear();
     }
 
-    @SuppressWarnings("unchecked")
-    private SortedSet<ScheduleCheckUnit> fillSchedulePeriodArrangement(SchedulePeriodArrangement schedulePeriodArrangement,
-                                                                       SortedSet<ScheduleCheckUnit> scheduleCheckUnits,
-                                                                       long startExecutionNumber){
+    private void fillSchedule(Schedule schedule){
+
+        Map<Arrangement, NavigableSet<ScheduleCheckUnit>> arrangementCheckUnits = new HashMap<>();
+        List<Arrangement> arrangements = arrangementRepo.findAllBySchedule(schedule.getId());
+        for(Arrangement arrangement : arrangements) {
+            arrangementCheckUnits.put(
+                    arrangement,
+                    new TreeSet<>(scheduleCheckUnitRepo.findAllByArrangement(arrangement))
+            );
+        }
+
+        for(SchedulePeriod schedulePeriod : schedule.getSchedulePeriods()) {
+            NavigableSet<Long> freeExecutionNumbers = getFreeExecutionNumbers(schedule.getId(), schedule.getPlannedDate());
+            for(SchedulePeriodArrangement schedulePeriodArrangement : schedulePeriod.getSchedulePeriodArrangements()) {
+                TreeSet<Long> curFreeExecutionNumbers = freeExecutionNumbers
+                        .stream()
+                        .limit(schedulePeriodArrangement.getWorkersCount())
+                        .collect(Collectors.toCollection(TreeSet::new));
+                freeExecutionNumbers = freeExecutionNumbers.tailSet(curFreeExecutionNumbers.last(), false);
+
+                NavigableSet<ScheduleCheckUnit> tailCheckUnits = fillSchedulePeriodArrangement(
+                        schedulePeriodArrangement,
+                        arrangementCheckUnits.get(schedulePeriodArrangement.getArrangement()),
+                        curFreeExecutionNumbers
+                );
+                arrangementCheckUnits.put(schedulePeriodArrangement.getArrangement(), tailCheckUnits);
+            }
+        }
+    }
+
+    private TreeSet<Long> getFreeExecutionNumbers(Long scheduleId, LocalDate plannedDate){
+        List<Long> busyExecutionNumbers = scheduleRepo.getBusyExecutionNumbers(
+                plannedDate,
+                scheduleRepo.getScheduleStartTime(scheduleId),
+                scheduleRepo.getScheduleEndTime(scheduleId));
+        return Stream.iterate(0L, num -> num + 1L)
+                .limit(schedulerProperties.getTotalWorkersCount())
+                .filter(num -> !busyExecutionNumbers.contains(num))
+                .collect(Collectors.toCollection(TreeSet::new));
+    }
+
+    private NavigableSet<ScheduleCheckUnit> fillSchedulePeriodArrangement(SchedulePeriodArrangement schedulePeriodArrangement,
+                                                                       NavigableSet<ScheduleCheckUnit> scheduleCheckUnits,
+                                                                       TreeSet<Long> freeExecutionNumbers){
+        if(freeExecutionNumbers ==null || freeExecutionNumbers.size() == 0)
+            throw new AS_15_8_PPM_Exception("Ошибка при заполнении проверок периода. Не найдено свободных обработчиков");
+
         ArrangementSchedulePeriodProcessing periodProcessing = scheduleCreationService.calculateArrangementSchedulePeriodProcessing(
                 scheduleCheckUnits,
                 schedulePeriodArrangement.getWorkersCount(),
@@ -192,28 +234,24 @@ public class ScheduleService {
                 schedulePeriodArrangement.getSchedulePeriod().getStartTime(),
                 schedulePeriodArrangement.getSchedulePeriod().getEndTime()
         );
-        long currentExecutionNumber = startExecutionNumber;
+        Iterator<Long> freeExecutionNumbersIterator = freeExecutionNumbers.iterator();
         log.debug("Заполняется SPA {}", schedulePeriodArrangement.getId());
-        SortedSet<ScheduleCheckUnit> periodCheckUnits = ((TreeSet)scheduleCheckUnits).headSet(periodProcessing.getLastCheckUnit(), true);
+        SortedSet<ScheduleCheckUnit> periodCheckUnits = scheduleCheckUnits.headSet(periodProcessing.getLastCheckUnit(), true);
         for (ScheduleCheckUnit scheduleCheckUnit : periodCheckUnits){
+
+            if(!freeExecutionNumbersIterator.hasNext())
+                freeExecutionNumbersIterator = freeExecutionNumbers.iterator();
+
             SchedulePeriodCheckUnit schedulePeriodCheckUnit = new SchedulePeriodCheckUnit();
             schedulePeriodCheckUnit.setSchedulePeriodArrangement(schedulePeriodArrangement);
             schedulePeriodCheckUnit.setCheckUnit(scheduleCheckUnit);
-            schedulePeriodCheckUnit.setExecutionNumber(currentExecutionNumber++);
+            schedulePeriodCheckUnit.setExecutionNumber(freeExecutionNumbersIterator.next());
             schedulePeriodArrangement.getSchedulePeriodCheckUnits().add(schedulePeriodCheckUnit);
             schedulePeriodCheckUnitRepo.save(schedulePeriodCheckUnit);
-            log.debug("Добавлен новый CheckUinit: {}", schedulePeriodCheckUnit.getExecutionNumber());
-            if((currentExecutionNumber - startExecutionNumber) >= schedulePeriodArrangement.getWorkersCount()){
-                currentExecutionNumber = startExecutionNumber;
-            }
+            log.debug("Добавлен новый CheckUnit: {}", schedulePeriodCheckUnit.getExecutionNumber());
         }
         schedulePeriodArrangementRepo.save(schedulePeriodArrangement);
         log.debug("SPA {} заполнено", schedulePeriodArrangement.getId());
-        return ((TreeSet)scheduleCheckUnits).tailSet(periodProcessing.getLastCheckUnit(), false);
-    }
-
-    private void clearSchedulePeriods(Schedule schedule){
-        schedule.getSchedulePeriods().forEach(schedulePeriodRepo::delete);
-        schedule.getSchedulePeriods().clear();
+        return scheduleCheckUnits.tailSet(periodProcessing.getLastCheckUnit(), false);
     }
 }
