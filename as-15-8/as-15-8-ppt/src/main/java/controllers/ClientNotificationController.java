@@ -28,6 +28,9 @@ public class ClientNotificationController {
 
     @GetMapping
     public List<ClientNotification> findList(@RequestParam boolean viewed, Principal principal){
+        log.info("Попытка поиска нотификейшена ", principal);
+        log.info("clientNotification.getOperator = " + principal.getName());
+
         return clientNotificationRepo.findAllByOperatorAndViewed(principal.getName(), viewed);
     }
 

@@ -51,8 +51,12 @@ public class FormalTaskController {
 	@ResponseStatus(HttpStatus.CREATED)
 	public FormalTask postFormalTask(@RequestBody FormalTask formalTask, Principal principal) {
 		formalTask.setAuthor(principal.getName());
+		//TODO проверить
+		//formalTask.setOperator(principal.getName());
 		formalTask.setStatus(ExecutionStatus.NEW);
 		formalTask.setCreationDate(LocalDateTime.now());
+		log.info("Создание формал таска ", principal);
+		log.info("principal.getName = " + principal.getName());
 		return formalTaskRepo.save(formalTask);
 	}
 
