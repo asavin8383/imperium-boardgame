@@ -28,6 +28,16 @@ public interface ScheduleRepo extends JpaRepository<Schedule, Long> {
     )
     int getBusyWorkersCount(@Param("plannedDate") LocalDate plannedDate, @Param("startTime") LocalTime startTime, @Param("endTime") LocalTime endTime);
 
+    @Query("select cu.executionNumber from SchedulePeriodCheckUnit cu " +
+            "join cu.schedulePeriodArrangement.schedulePeriod p " +
+            "on ((p.startTime < :startTime and p.endTime > :startTime) or " +
+                "(p.startTime > :startTime and p.startTime > :endTime)) " +
+            "join p.schedule s " +
+            "on s.status in ('PLANNED', 'RUNNING') and " +
+            "s.plannedDate = :plannedDate"
+    )
+    List<Long> getBusyExecutionNumbers(@Param("plannedDate") LocalDate plannedDate, @Param("startTime") LocalTime startTime, @Param("endTime") LocalTime endTime);
+
     @Query("select min(p.startTime) from Schedule s " +
             "join s.schedulePeriods p on s.id = :schedule_id"
     )
