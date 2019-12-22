@@ -70,7 +70,7 @@ eureka:
 ---
 
 spring:
-  profiles: dev_asavin, dev_ashabalin, dev_pvorobiev, dev_jspirina
+  profiles: dev_asavin, dev_ashabalin, dev_pvorobiev, dev_anikanov
   profiles.include: local_log
   jpa:
     hibernate:
@@ -98,6 +98,13 @@ spring:
   profiles: dev_pvorobiev
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb_test
+
+---
+
+spring:
+  profiles: dev_danikanov
+  datasource:
+    url: jdbc:postgresql://192.168.5.195:5432/asdb
 
 ---
 

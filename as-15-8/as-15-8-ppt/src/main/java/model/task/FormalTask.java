@@ -61,8 +61,10 @@ public class FormalTask implements Serializable {
 	/**Признак согласования*/
 	private boolean agreed;
 	/**Приоритет*/
+	@NotNull
+	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
-	private Priority priority;
+	private Priority priority = Priority.MEDIUM;
 
 	/**Ссылка на id неформализованного задания (поручения)*/
 	private Long missionId;
