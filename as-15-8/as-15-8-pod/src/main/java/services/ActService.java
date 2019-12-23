@@ -86,6 +86,7 @@ public class ActService {
             achRes.setCheckUnitType(actCheckResult.getCheckUnitType().name());
             achRes.setCheckUnitValue(actCheckResult.getCheckUnitValue());
             achRes.setDate(actCheckResult.getDate());
+            achRes.setForbiddenContentDetected(actCheckResult.isForbiddenContentDetected());
             contentRepository.findActCheckResultPodInfo(actCheckResult.getContentId())
                 .map(actCheckResultPodInfo -> {
                     achRes.setContentId(actCheckResultPodInfo.getErdiId());
@@ -193,7 +194,7 @@ public class ActService {
     }
 
     private void notifyActConfirmed(Long arrangementId){
-        log.info("Отправка в PPT уведомления об успшном подтверждении акта в ППП Анонимайзере, arrangementId = {}" + arrangementId);
+        log.info("Отправка в PPT уведомления об успшном подтверждении акта в ППП Анонимайзере, arrangementId = {}", arrangementId);
         restTemplate.getForObject(
                 UriComponentsBuilder
                         .fromHttpUrl(gatewayUrl)

@@ -22,4 +22,7 @@ public class ActCheckResultPPP {
 
     @JsonProperty("IncludeTime")
     private String includeTime; // 2019-08-15T18:58:00
+
+    @JsonProperty("ForbiddenContentDetected")
+    private boolean forbiddenContentDetected;
 }
