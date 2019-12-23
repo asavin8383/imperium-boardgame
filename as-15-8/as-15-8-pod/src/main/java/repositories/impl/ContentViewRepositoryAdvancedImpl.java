@@ -17,6 +17,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,6 +42,8 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
 
     private CriteriaBuilder criteriaBuilder;
     private Root<ContentView> rootContentView;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
 
     @Override
     public Page<ContentView> findPage(
@@ -54,9 +57,14 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
             List<String> violationNames,
             String query,
             boolean random,
-            Pageable pageable) {
+            Pageable pageable,
+            LocalDateTime startTime,
+            LocalDateTime endTime) {
 
-        initBasicArguments(idMask, categoryNames, decisionOrgs, infoTypeIds, registryNames, resourceTypes, resourceValue, violationNames);
+        initBasicArguments(idMask, categoryNames, decisionOrgs, infoTypeIds, registryNames, resourceTypes, resourceValue,
+                violationNames,
+                startTime,
+                endTime);
 
         CriteriaQuery<ContentView> select = getCriteriaQuery(random, pageable, query);
         return CriteriaHelper.createPage(em, select, pageable);
@@ -72,15 +80,17 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
             List<String> resourceTypes,
             String resourceValue,
             List<String> violationNames,
-            Integer maxResults) {
+            Integer maxResults,
+            LocalDateTime startTime,
+            LocalDateTime endTime) {
 
-        initBasicArguments(idMask, categoryNames, decisionOrgs, infoTypeIds, registryNames, resourceTypes, resourceValue, violationNames);
+        initBasicArguments(idMask, categoryNames, decisionOrgs, infoTypeIds, registryNames, resourceTypes, resourceValue, violationNames, startTime, endTime);
 
         CriteriaQuery<ContentView> select = getCriteriaQuery();
         return  CriteriaHelper.createIds(em, select, maxResults);
     }
 
-    private void initBasicArguments(String idMask, List<String> categoryNames, List<String> decisionOrgs, List<String> infoTypeIds, List<String> registryNames, List<String> resourceTypes, String resourceValue, List<String> violationNames) {
+    private void initBasicArguments(String idMask, List<String> categoryNames, List<String> decisionOrgs, List<String> infoTypeIds, List<String> registryNames, List<String> resourceTypes, String resourceValue, List<String> violationNames,  LocalDateTime startTime,  LocalDateTime endTime) {
         this.idMask = idMask;
         this.categoryNames = categoryNames;
         this.decisionOrgs = decisionOrgs;
@@ -89,6 +99,8 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
         this.resourceTypes = resourceTypes;
         this.resourceValue = resourceValue;
         this.violationNames = violationNames;
+        this.startTime = startTime;
+        this.endTime = endTime;
     }
 
     private CriteriaQuery<ContentView> getCriteriaQuery(Boolean random, Pageable pageable, String query) {
@@ -164,6 +176,10 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
 
         if (violationNames != null && violationNames.size() > 0) {
             predicates.add(rootContentView.get(ContentView_.VIOLATION_NAME).in(violationNames));
+        }
+
+        if (startTime != null && endTime != null) {
+            predicates.add(criteriaBuilder.between(rootContentView.get(ContentView_.INCLUDE_TIME), startTime, endTime));
         }
 
         return predicates;

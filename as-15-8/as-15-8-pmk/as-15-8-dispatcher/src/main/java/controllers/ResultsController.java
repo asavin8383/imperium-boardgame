@@ -141,7 +141,7 @@ public class ResultsController {
     public boolean stopArrangement(@RequestParam("id") Long arrangementId){
 
         List<Result> results = resultRepo.findAllByArrangementId(arrangementId);
-
+        resultService.sendNotificationsIfFinished(arrangementId);
         if (resultService.getArrnagementExecutionStatus(arrangementId) == ExecutionStatus.RUNNING) {
             results.stream()
                     .filter(this::checkIsRunningOrPlanned)
