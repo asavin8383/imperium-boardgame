@@ -26,6 +26,7 @@ import services.ResultService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Creation date: 29.05.2019
@@ -158,4 +159,12 @@ public class ResultsController {
     private boolean checkIsRunningOrPlanned(Result result) {
         return result.getResult() == CheckUnitJobResult.RUNNING || result.getResult() == CheckUnitJobResult.PLANNED;
     }
+
+
+    @PreAuthorize("hasRole('ROLE_SYSTEM')")
+    @GetMapping(path = "/not_planned_not_running")
+    public Integer getFinishedResults(@RequestParam Long id){
+        return resultRepo.getNotRunningNotPlanned(id);
+    }
+
 }

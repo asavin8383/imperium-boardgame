@@ -7,21 +7,27 @@ import common.SchedulerProperties;
 import enums.AccessToolUnit;
 import enums.ArrangementEvents;
 import enums.Protocol;
+import enums.SortingDirection;
 import exceptions.AS_15_8_PPM_Exception;
+import helpers.SortingHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Arrangement;
 import model.ScheduleCheckUnit;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import repositories.ArrangementRepo;
+import repositories.ScheduleCheckUnitRepo;
 import repositories.ScheduleRepo;
 import restapi.ArrangementStatusUploader;
+import restapi.pmk.ResultsDownloader;
 import restapi.pod.DomainMaskUploader;
 import services.ScheduleService;
 import webClients.PptWebClient;
@@ -31,6 +37,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -51,6 +58,8 @@ public class ArrangementController {
     private final DomainMaskUploader domainMaskUploader;
     private final ScheduleRepo scheduleRepo;
     private final ScheduleService scheduleService;
+    private final ScheduleCheckUnitRepo scheduleCheckUnitRepo;
+    private final ResultsDownloader resultsDownloader;
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @Transactional
@@ -97,7 +106,6 @@ public class ArrangementController {
         );
     }
 
-    //TODO разобраться
     private void getAndSaveArrangementCheckUnits(Arrangement arrangement){
         arrangement.getScheduleCheckUnits().addAll(
                 Objects.requireNonNull(
@@ -171,6 +179,22 @@ public class ArrangementController {
         scheduleCheckUnit.setCheckUnitType(checkUnitType);
         scheduleCheckUnit.setCheckUnitValue(checkUnitValue);
         return scheduleCheckUnit;
+    }
+
+    @GetMapping(path = "/completion")
+    public int getArrangementCompletion(@RequestParam("id") Optional<Arrangement> arrangement){
+        arrangement.orElseThrow(() -> new AS_15_8_PPM_Exception("Ошибка поиска! Такого поручения не существует."));
+        List<ScheduleCheckUnit> checkUnits = scheduleCheckUnitRepo.findAllByArrangement(arrangement.get());
+
+        if (checkUnits == null)
+            throw new AS_15_8_PPM_Exception("Ошибка расчёта процента выполнения поручения. checkUnits null");
+
+        Integer notPlannedNotRunning = resultsDownloader.getNotPlannedNotRunningResults(arrangement.get().getId());
+        if (notPlannedNotRunning == null)
+            throw new AS_15_8_PPM_Exception("Ошибка расчёта процента выполнения поручения. Число результатов RUNNING и PLANNED null");
+
+        int percent = (notPlannedNotRunning/checkUnits.size()) * 100;
+        return percent;
     }
 
 }

@@ -24,7 +24,7 @@ import java.util.List;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class DomainMaskUploader {
 
-    private final String URI = "/pod/domain-masks";
+    private final String URI = "/pod/domain-masks/domains";
 
     @Value("${gateway.url}")
     private String gatewayUrl;

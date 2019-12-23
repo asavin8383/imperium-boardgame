@@ -48,7 +48,7 @@ eureka:
 ---
 
 spring:
-  profiles: dev_asavin, dev_ashabalin
+  profiles: dev_asavin, dev_ashabalin, dev_danikanov
   profiles.include: local_log
   main:
     banner-mode: "off"

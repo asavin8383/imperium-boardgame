@@ -36,9 +36,13 @@ public class DomainController {
     private final DomainMaskRepo domainMaskRepo;
     private final DomainRepo domainRepo;
 
-    @GetMapping(path = "/get_domains")
+    @GetMapping(path = "/domains")
+    public Set<String> getDomainsByMaskAsStrings(@RequestParam String domainMask){
+        return domainRepo.getDomainsByMaskIdAsStrings(domainMask);
+    }
+
+    @GetMapping(path = "/domains_objects")
     public Set<Domain> getDomainsByMask(@RequestParam String domainMask){
-    //public Set<String> getDomainsByMask(@RequestParam String domainMask){
         return domainRepo.getDomainsByMaskId(domainMask);
     }
 

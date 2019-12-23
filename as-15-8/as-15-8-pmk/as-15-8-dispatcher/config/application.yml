@@ -198,9 +198,9 @@ spring:
   cloud:
     stream:
       bindings:
-        inputJobs.destination: scheduled_jobs_jspirina
-        outputJobs.destination: jobs_jspirina
-        inputJobNotifications.destination: job_notifications_jspirina
-        inputAnalysisResults.destination: analysis_results_jspirina
-        springCloudBusInput.destination: bus_config_input_jspirina
-        springCloudBusOutput.destination: bus_config_output_jspirina
+        inputJobs.destination: scheduled_jobs_danikanov
+        outputJobs.destination: jobs_danikanov
+        inputJobNotifications.destination: job_notifications_danikanov
+        inputAnalysisResults.destination: analysis_results_danikanov
+        springCloudBusInput.destination: bus_config_input_danikanov
+        springCloudBusOutput.destination: bus_config_output_danikanov

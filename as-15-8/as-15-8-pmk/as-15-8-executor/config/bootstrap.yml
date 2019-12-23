@@ -47,7 +47,7 @@ spring:
 ---
 
 spring:
-  profiles: dev_jspirina
+  profiles: dev_danikanov
   cloud:
     config:
       uri: http://localhost:15802
