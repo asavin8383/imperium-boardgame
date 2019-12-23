@@ -15,7 +15,6 @@
            update dm.rep_tp set rptdesign='as158_param_3_4' where rep_tp_id=7;
        </sql>
     </changeSet>
-
 </databaseChangeLog>
 
 
