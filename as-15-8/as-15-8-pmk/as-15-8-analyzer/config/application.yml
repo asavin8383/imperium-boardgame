@@ -73,7 +73,7 @@ eureka:
 ---
 
 spring:
-  profiles: dev_ashabalin, dev_asinyavin, dev_asavin, dev_pvorobiev, dev_jspirina
+  profiles: dev_ashabalin, dev_asinyavin, dev_asavin, dev_pvorobiev, dev_danikanov
   profiles.include: local_log
   cloud.stream:
     bindings:
@@ -138,11 +138,11 @@ spring:
 ---
 
 spring:
-  profiles: dev_jspirina
+  profiles: dev_danikanov
   cloud.stream:
     bindings:
-      input.destination: exec_results_jspirina
-      output.destination: analysis_results_jspirina
-      notifications.destination: job_notifications_jspirina
-      springCloudBusInput.destination: bus_config_input_jspirina
-      springCloudBusOutput.destination: bus_config_output_jspirina
+      input.destination: exec_results_danikanov
+      output.destination: analysis_results_danikanov
+      notifications.destination: job_notifications_danikanov
+      springCloudBusInput.destination: bus_config_input_danikanov
+      springCloudBusOutput.destination: bus_config_output_danikanov
