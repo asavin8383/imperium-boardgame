@@ -114,7 +114,7 @@ eureka:
 ---
 
 spring:
-  profiles: dev_ashabalin, dev_asin, dev_asavin, dev_pvorobiev, dev_jspirina
+  profiles: dev_ashabalin, dev_asin, dev_asavin, dev_pvorobiev, dev_danikanov
   profiles.include: local_log
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb_test
@@ -192,7 +192,9 @@ spring:
 ---
 
 spring:
-  profiles: dev_jspirina
+  profiles: dev_danikanov
+  datasource:
+    url: jdbc:postgresql://192.168.5.195:5432/asdb
   cloud:
     stream:
       bindings:

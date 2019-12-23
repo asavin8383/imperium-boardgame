@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +28,11 @@ import services.ContentService;
 import services.InfoService;
 
 import java.text.ParseException;
-import java.util.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -59,7 +64,9 @@ public class ContentController {
             @RequestParam(required = false) String resourceValue,
             @RequestParam(required = false) List<String> violationNames,
             @RequestParam(required = false) String query,
-            @RequestParam(required = false) Boolean random
+            @RequestParam(required = false) Boolean random,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startTime,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endTime
     ) {
 
         if (!erdiRestClient.getIsLoading()) {
@@ -77,7 +84,9 @@ public class ContentController {
                             violationNames,
                             query,
                             random == null ? false : random,
-                            pageable);
+                            pageable,
+                            convertToLocalDateTime(startTime),
+                            convertToLocalDateTime(endTime));
             return new ResponseEntity<>(pageContent, HttpStatus.OK);
         }
         else {
@@ -96,7 +105,9 @@ public class ContentController {
             @RequestParam(required = false) List<String> resourceTypes,
             @RequestParam(required = false) String resourceValue,
             @RequestParam(required = false) List<String> violationNames,
-            @RequestParam(required = false) Integer size
+            @RequestParam(required = false) Integer size,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startTime,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endTime
     ) {
 
         if (!erdiRestClient.getIsLoading()) {
@@ -111,13 +122,21 @@ public class ContentController {
                             resourceTypes,
                             resourceValue,
                             violationNames,
-                            size);
+                            size,
+                            convertToLocalDateTime(startTime),
+                            convertToLocalDateTime(endTime));
 
             return Flux.fromIterable(listContent);
         }
         else {
             return Flux.empty();
         }
+    }
+
+    private LocalDateTime convertToLocalDateTime(LocalDate dateToConvert) {
+        if (dateToConvert != null)
+            return LocalDateTime.of(dateToConvert, LocalDateTime.MIN.toLocalTime());
+        else return null;
     }
 
     @GetMapping(path = "/erdi/resourceTypes")

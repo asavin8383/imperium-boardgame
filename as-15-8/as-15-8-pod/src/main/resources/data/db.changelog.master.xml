@@ -29,5 +29,6 @@
     <include file="data/changelog/pod.0010.mat_view_content_null_values.xml"/>
     <include file="data/changelog/pod.0011.domains.xml"/>
     <include file="data/changelog/pod.0012.content_view.xml" />
+    <include file="data/changelog/pod.0013.domains_domain_mask_id_unique.xml"/>
 
 </databaseChangeLog>
