@@ -23,12 +23,10 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import repositories.ContentRepository;
 import repositories.MissionRepository;
-import rest.ActCheckResult;
-import rest.ActRequest;
-import rest.ArrangementActData;
-import rest.ResponseStatusString;
+import rest.*;
 import webClient.DispatcherWebClient;
 
+import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -107,12 +105,12 @@ public class ActService {
         }
         aReq.setCheckResults(checkResults);
 
-        List<String> screenshotes = dispatcherWebClient.getActScreenshotesBase64(actRequest.getArragementId());
+        List<ActAttachment> attachments = dispatcherWebClient.getActAttachments(actRequest.getArragementId());
         log.info("Получены скриншоты выполнения мероприятия для акта: ID мероприятия {}, количество: {}",
                 actRequest.getArragementId(),
-                screenshotes.size());
+                attachments.size());
         try{
-            return send(aReq, screenshotes);
+            return send(aReq, attachments);
         }
         catch (Exception e){
             e.printStackTrace();
@@ -120,7 +118,7 @@ public class ActService {
         }
     }
 
-    private ResponseStatusString send(ActRequestPPP actRequest, List<String> screenShots) throws JsonProcessingException {
+    private ResponseStatusString send(ActRequestPPP actRequest, List<ActAttachment> attachments) throws JsonProcessingException {
         log.info("Отправка сформированного акта в ППП: {}", actRequest);
 
         HttpHeaders headers = new HttpHeaders();
@@ -142,20 +140,28 @@ public class ActService {
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         body.add("jsonData", jsonDataEntity);
 
-        for (int i = 0; i < screenShots.size(); i++){
-            String screen = screenShots.get(i).trim();
-            byte[] bytes = StringUtils.isEmpty(screen) ? new byte[]{} : Base64.getDecoder().decode(screen);
-            String name = "images["+i+"]";
-
+        for (ActAttachment attachment : attachments) {
             MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+            String name = attachment.getId().toString();
+
             ContentDisposition cd = ContentDisposition
-                    .builder( "form-data")
+                    .builder("form-data")
                     .name(name)
                     .build();
             map.add(HttpHeaders.CONTENT_DISPOSITION, cd.toString());
-            map.add(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_PNG_VALUE);
-            HttpEntity<byte[]> imgEntity = new HttpEntity<>(bytes, map);
-            body.add(name, imgEntity);
+
+            HttpEntity httpEntity;
+            if (attachment.getType().equals(ActAttachment.ActAttachmentType.SCREENSHOT)) {
+                byte[] bytes = StringUtils.isEmpty(attachment.getValue()) ? new byte[]{} : Base64.getDecoder().decode(attachment.getValue().trim());
+                map.add(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_PNG_VALUE);
+                httpEntity = new HttpEntity<>(bytes, map);
+            } else {
+                map.add(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN_VALUE);
+                map.add(HttpHeaders.CONTENT_ENCODING, StandardCharsets.UTF_8.displayName());
+                httpEntity = new HttpEntity<>(attachment.getValue(), map);
+                body.add(name, httpEntity);
+            }
+            body.add(name, httpEntity);
         }
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity =

@@ -6,6 +6,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
+import rest.ActAttachment;
 import rest.ActCheckResult;
 
 import javax.annotation.PostConstruct;
@@ -43,7 +44,7 @@ public class DispatcherWebClient {
                 .block();
     }
 
-    public List<String> getActScreenshotesBase64(Long arrangementId){
+    public List<ActAttachment> getActAttachments(Long arrangementId){
         UriComponentsBuilder uriBuilder = UriComponentsBuilder
                 .fromUriString(ACT_SCREENSHOTES_URI)
                 .queryParam("arrangementId", arrangementId);
@@ -53,7 +54,7 @@ public class DispatcherWebClient {
                 .uri(uriBuilder.build().toString())
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .retrieve()
-                .bodyToFlux(String.class)
+                .bodyToFlux(ActAttachment.class)
                 .collectList()
                 .block();
     }

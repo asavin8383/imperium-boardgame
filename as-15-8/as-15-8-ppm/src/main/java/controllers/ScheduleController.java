@@ -173,13 +173,18 @@ public class ScheduleController {
     }
 
     @DeleteMapping
-    public void deleteSchedule(@RequestParam("id") Schedule schedule){
+    public ResponseEntity deleteSchedule(@RequestParam("id") Schedule schedule){
+        if(schedule == null)
+            return ResponseEntity.badRequest().body("Ошибка при удалении расписания. Расписание не найдено по ID");
         scheduleService.deleteSchedule(schedule);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping(path = "/gant")
     @JsonView(Views.Full.class)
-    public List<BriefArrangement> getScheduleGant(@RequestParam("id") Schedule schedule){
+    public ResponseEntity getScheduleGant(@RequestParam("id") Schedule schedule){
+        if(schedule == null)
+            return ResponseEntity.badRequest().body("Ошибка при расчете времени расписания. Расписание не найдено по ID");
         List<BriefArrangement> briefArrangements = new ArrayList<>();
         SortedSet<SchedulePeriod> schedulePeriods = schedule.getSchedulePeriods();
         schedulePeriods.forEach(schedulePeriod -> schedulePeriod.getSchedulePeriodArrangements()
@@ -191,7 +196,7 @@ public class ScheduleController {
                         briefArrangements.add(briefArrangement);
                     }
                 }));
-        return briefArrangements;
+        return ResponseEntity.ok(briefArrangements);
     }
 
 
