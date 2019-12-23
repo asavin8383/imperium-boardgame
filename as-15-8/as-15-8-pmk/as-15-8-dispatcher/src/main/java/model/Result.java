@@ -52,6 +52,8 @@ public class Result implements Serializable {
     private LocalDateTime startDate;
     private LocalDateTime endDate;
 
+    private boolean checkForAct;
+
     @Enumerated(EnumType.STRING)
     private UserResult userResult;
 

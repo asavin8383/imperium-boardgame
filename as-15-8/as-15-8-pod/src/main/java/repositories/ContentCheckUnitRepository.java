@@ -22,4 +22,14 @@ public interface ContentCheckUnitRepository extends JpaRepository<ContentCheckUn
     )
     List<ContentCheckUnit> findAllByErdId(@Param("erdi_id") String erdiId);
 
+
+    @Query(
+            "select ccu from ContentCheckUnit ccu " +
+                    "join Content content on ccu.contentId = content.id " +
+                    "and content.erdiId in(:erdi_ids) " +
+                    "join ContentHistory history on content.id = history.content.id " +
+                    "and history.endDate = '3000-01-01'"
+    )
+    List<ContentCheckUnit> findAllByErdIds(@Param("erdi_ids") List<String> erdiIds);
+
 }

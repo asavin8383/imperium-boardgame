@@ -3,14 +3,15 @@ package robots.impl;
 import checkUnits.CheckUnit;
 import checkUnits.CheckUnitType;
 import enums.AccessToolParameter;
+import enums.CheckUnitJobResult;
 import execution.ExecutionJobResult;
 import execution.ExecutionPSJobResult;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.util.Strings;
 import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import robots.exceptions.Captcha_ExecutionException;
 import robots.exceptions.ExecutionException;
 import robots.exceptions.TimeoutScriptException;
 import robots.utils.EqualityTest;
@@ -21,7 +22,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Slf4j(topic = "robots")
 public class CommonDirectSearchRobot extends SeleniumRobot {
@@ -66,6 +68,10 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
      *  проверяемые ссылки (href) */
     private String xpathItemLink;
 
+    /** Регулярное выражение, определяющее пустой результат
+     *  выполнения поискового запроса*/
+    private String resultNotFoundRegexp;
+
     /** Тип страницы результатов
      * (с переходом по страницам или
      * кнопкой "показать больше" */
@@ -85,8 +91,9 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
 
 
     public CommonDirectSearchRobot(Map<AccessToolParameter, String> scriptParams) {
-
-        super(scriptParams);
+        super(scriptParams,
+                Strings.isNotEmpty(scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_PROXY)) ?
+                        scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_PROXY) : null);
         setParams(scriptParams);
     }
 
@@ -107,6 +114,7 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         this.xpathCaptcha = scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_XPATH_CAPTCHA);
         this.xpathNextPage = scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_XPATH_NEXT_PAGE);
         this.xpathItemLink = scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_XPATH_ITEM_LINK);
+        this.resultNotFoundRegexp = scriptParams.get(AccessToolParameter.RESULT_NOT_FOUND_REGEXP);
     }
 
 
@@ -144,15 +152,16 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
     }
 
 
-    final ExecutionPSJobResult createMessage(boolean linkFound) {
-        return createMessage(linkFound, null);
+    final ExecutionPSJobResult createMessage(boolean linkFound, CheckUnitJobResult checkUnitJobResult) {
+        return createMessage(linkFound, checkUnitJobResult, null);
     }
-    final ExecutionPSJobResult createMessage(boolean linkFound, List<String> urls) {
+    final ExecutionPSJobResult createMessage(boolean linkFound, CheckUnitJobResult checkUnitJobResult, List<String> urls) {
         ExecutionPSJobResult message = new ExecutionPSJobResult();
         message.setLinkFound(linkFound);
         message.setError(false);
         message.setScreenshot(ScriptUtils.getScreenshot(driver));
         message.setUrls(urls);
+        message.setCheckUnitJobResult(checkUnitJobResult);
         return message;
     }
 
@@ -160,16 +169,46 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
     @Override
     public ExecutionJobResult execute(CheckUnit checkUnit) throws ExecutionException {
         driver.get(searchSystemUrl);
-        searchFor(checkUnit.getValue());
 
         if (captcha())
-            throw new Captcha_ExecutionException(
-                    "Обнаружена Captcha " + driver.getCurrentUrl());
+            return createMessage(false, CheckUnitJobResult.CAPTCHA_DETECTED);
+
+        try {
+            searchFor(checkUnit.getValue());
+        } catch(NoSuchElementException ex) {
+            log.info("ПС обнаружила робота для URL: {}", checkUnit.getValue());
+            return createMessage(false, CheckUnitJobResult.BAD_IP);
+        }
+
+        List<WebElement> links = getLinks(resultPageType);
+
+        if (captcha())
+            return createMessage(false, CheckUnitJobResult.CAPTCHA_DETECTED);
+
+        //Проверяем, не вылез ли подозрительный трафик
+        if(links.size() == 0) {
+            log.info("По URL {} Список ссылок пустой нужно проверить на пустой IP", checkUnit.getValue());
+            if(Strings.isNotEmpty(resultNotFoundRegexp)) {
+                String content = ScriptUtils.getPageSource(driver).pageSource;
+                //log.info("Контент страницы: {}", content);
+                log.info("Регулярное выражение для проверки: {}", resultNotFoundRegexp);
+                Matcher matcher = Pattern.compile(resultNotFoundRegexp).matcher(content);
+                if(matcher.find()){
+                    // Ссылок не найдено
+                    return createMessage(false, CheckUnitJobResult.COMPLETED);
+                } else {
+                    //Плохой IP
+                    return createMessage(false, CheckUnitJobResult.BAD_IP);
+                }
+            } else {
+                //регулярку не задали, считаем плохим IP
+                return createMessage(false, CheckUnitJobResult.BAD_IP);
+            }
+
+
+        }
 
         if (checkUnit.getType() == CheckUnitType.SEARCH_PHRASE){
-            List<WebElement> links = resultPageType == ResultPageType.PAGINATION ?
-                    getPaginatedLinks() : getContinuousLinks();
-
             List<String> urls = new ArrayList<>();
             for (WebElement w : links) {
                 try {
@@ -179,14 +218,19 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
                     e.printStackTrace();
                 }
             }
-            return createMessage(false, urls);
+            return createMessage(false, null, urls);
         }
 
         equalityTest = EqualityTest.forCheckUnit(checkUnit);
 
         boolean isViolation = resultPageType == ResultPageType.PAGINATION?
                 checkPaginatedSearchResult() : checkContinuousSearchResult();
-        return createMessage(isViolation);
+        return createMessage(isViolation, null);
+    }
+
+    private List<WebElement> getLinks(ResultPageType resultPageType){
+        return resultPageType == ResultPageType.PAGINATION?
+            getPaginatedLinks() : getContinuousLinks();
     }
 
     boolean captcha() {
@@ -217,7 +261,8 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         return links;
     }
 
-    boolean checkContinuousSearchResult() throws ExecutionException {
+
+    private boolean checkContinuousSearchResult() throws ExecutionException {
         List<WebElement> links = getContinuousLinks();
         return checkPageResult(links);
     }
@@ -242,8 +287,11 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         JavascriptExecutor jsExecutor = (JavascriptExecutor) driver;
         do {
             ScriptUtils.waitPageLoading(driver);
-            List<WebElement> listNext = new WebDriverWait(driver, SEARCH_RESULT_TIMEOUT)
-                    .until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(xpathItemLink)));
+            By linkLocator = By.xpath(xpathItemLink);
+            List<WebElement> listNext = driver.findElements(linkLocator);
+
+            /*List<WebElement> listNext = new WebDriverWait(driver, SEARCH_RESULT_TIMEOUT)
+                    .until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(xpathItemLink)));*/
 
             if(listNext != null)
                 links.addAll(listNext);

@@ -38,4 +38,7 @@ public class ContentService {
         return contentCheckUnitRepository.findAllByErdId(erdiId);
     }
 
+    public List<ContentCheckUnit> getActualCheckUnits(List<String> erdiIds){
+        return contentCheckUnitRepository.findAllByErdIds(erdiIds);
+    }
 }

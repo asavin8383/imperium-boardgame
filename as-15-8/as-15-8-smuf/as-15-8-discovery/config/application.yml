@@ -1,14 +1,21 @@
 subsystem: SMUF
 server:
   port: 8761
+  tomcat:
+    max-threads: 5000
 logging:
   config: config/logback-spring.xml
 spring:
   application.name: discovery
 eureka:
+  server:
+    peer-node-total-connections: 5000
+    peer-node-total-connections-per-host: 5000
   instance:
     preferIpAddress: true
     instanceId: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port}
+    metadata-map:
+      subsystem: ${subsystem}
   client:
     fetch-registry: false
     oauth2:
@@ -33,6 +40,10 @@ spring:
   profiles.include: docker_log
   main:
     banner-mode: "off"
+eureka:
+  instance:
+    metadata-map:
+      expectedAmount: 1
 
 ---
 

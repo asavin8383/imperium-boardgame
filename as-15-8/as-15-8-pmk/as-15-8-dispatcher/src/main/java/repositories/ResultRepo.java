@@ -23,7 +23,7 @@ import model.Result;
  */
 
 @Repository
-public interface ResultRepo extends JpaRepository<Result, Long> {
+public interface ResultRepo extends JpaRepository<Result, Long>, ResultRepoAdvanced {
 
 	@Query("select r from Result r " +
 			"where r.arrangementId = :arrangementId and " +
@@ -40,7 +40,11 @@ public interface ResultRepo extends JpaRepository<Result, Long> {
 	Long countByResultNullOrResultIn(@Param("id") Long id, @Param("results") List<CheckUnitJobResult> results);
 
 	List<Result> findAllByArrangementId(Long id);
-	List<Result> findByArrangementIdAndResultIn(Long arrangementId, Collection<CheckUnitJobResult> results);
+
+	@Query("select r from Result r " +
+			"where r.arrangementId = :arrangementId and " +
+			"r.result in(:results)")
+	List<Result> findResultsForAct(@Param("arrangementId") Long arrangementId, @Param("results") Collection<CheckUnitJobResult> results);
 	Page<Result> findByArrangementIdAndResultIn(Long arrangementId, Collection<CheckUnitJobResult> results, Pageable pageable);
 
 	Page<Result> findAllByArrangementId(Long id, Pageable pageable);
@@ -62,6 +66,12 @@ public interface ResultRepo extends JpaRepository<Result, Long> {
 				"count(r.id)) * 100 as percent " +
 			"from Result r " +
 			"where arrangementId = :id")
-	int getCompletionPercent(@Param("id") Long id);
+	Optional<Integer> getCompletionPercent(@Param("id") Long id);
+
+	@Query("select DISTINCT(r.checkUnitType) from Result r where r.arrangementId=:arrangement_id")
+	List<CheckUnitType> getCheckUnitTypesByArrangementId(@Param("arrangement_id") Long arrangementId);
+
+	@Query("select DISTINCT(r.result) from Result r where r.arrangementId=:arrangement_id")
+	List<CheckUnitJobResult> getCheckUnitJobResultsByArrangementId(@Param("arrangement_id") Long arrangementId);
 
 }

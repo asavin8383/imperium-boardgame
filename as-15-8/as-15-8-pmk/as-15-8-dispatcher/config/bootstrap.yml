@@ -17,6 +17,8 @@ eureka:
   instance:
     preferIpAddress: true
     instanceId: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port}
+    metadata-map:
+      subsystem: ${subsystem}
 security:
   oauth2:
     resource:
@@ -28,3 +30,16 @@ security:
       accessTokenUri: ${gateway.url}/security/oauth/token
 spring:
   application.name: dispatcher
+  cloud:
+    config:
+      bus.enabled: true
+      uri: ${gateway.url}/config
+      fail-fast: true
+      profile: default
+      label: latest
+      client:
+        oauth2:
+          clientId: dispatcher
+          clientSecret: 1q0p2w9o
+          grantType: client_credentials
+          accessTokenUri: ${gateway.url}/security/oauth/token

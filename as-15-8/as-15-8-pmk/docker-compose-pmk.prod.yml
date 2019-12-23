@@ -39,6 +39,9 @@ services:
     image: dcr.ec-leasing.ru/as-15-8/as-15-8-executor:latest
     deploy:
       mode: global
+      placement:
+        constraints:
+          - node.hostname != pmk
     networks:
       - as-15-8-net
     stop_grace_period: 5m
@@ -67,6 +70,9 @@ services:
     image: dcr.ec-leasing.ru/as-15-8/as-15-8-analyzer:latest
     deploy:
       mode: global
+      placement:
+        constraints:
+          - node.hostname != pmk
     networks:
       - as-15-8-net
     environment:

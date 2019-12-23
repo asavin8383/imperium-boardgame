@@ -53,9 +53,13 @@ spring:
     url: jdbc:postgresql://10.97.220.144:5432/asdb
   cloud:
     stream:
-      kafka:
-        binder:
-          brokers: 10.97.220.178:9092,10.97.220.179:9092,10.97.220.180:9092
+      kafka.binder:
+        brokers: 10.97.220.178:9092,10.97.220.179:9092,10.97.220.180:9092
+        minPartitionCount: 250
+eureka:
+  instance:
+    metadata-map:
+      expectedAmount: 1
 
 ---
 
@@ -66,11 +70,15 @@ spring:
     banner-mode: "off"
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb
+eureka:
+  instance:
+    metadata-map:
+      expectedAmount: 1
 
 ---
 
 spring:
-  profiles: dev_asavin, dev_ashabalin, dev_pvorobiev, dev_asinjavin
+  profiles: dev_asavin, dev_ashabalin, dev_pvorobiev, dev_asinjavin, dev_danikanov
   profiles.include: local_log
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb_test
@@ -111,6 +119,21 @@ spring:
         springCloudBusOutput.destination: bus_config_output_asavin
   datasource:
     url: jdbc:postgresql://192.168.5.211:5432/asdb_test2
+  liquibase:
+    enabled: true
+
+---
+
+spring:
+  profiles: dev_danikanov
+  cloud:
+    stream:
+      bindings:
+        outputJobs.destination: scheduled_jobs_asavin
+        springCloudBusInput.destination: bus_config_input_asavin
+        springCloudBusOutput.destination: bus_config_output_asavin
+  datasource:
+    url: jdbc:postgresql://192.168.5.195:5432/asdb
   liquibase:
     enabled: true
 

@@ -1,5 +1,6 @@
 package execution;
 
+import enums.CheckUnitJobResult;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -17,6 +18,7 @@ public class ExecutionPSJobResult extends ExecutionJobResult {
 
 	private boolean error;
 	private String errorDetails;
+	private CheckUnitJobResult checkUnitJobResult;
 	private List<String> urls;
 
 }

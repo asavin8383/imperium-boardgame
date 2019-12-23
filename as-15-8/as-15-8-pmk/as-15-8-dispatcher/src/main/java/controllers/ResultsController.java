@@ -1,7 +1,9 @@
 package controllers;
 
+import checkUnits.CheckUnitType;
 import controllers.helpers.SortingHelper;
 import enums.CheckUnitJobResult;
+import enums.ExecutionStatus;
 import enums.SortingDirection;
 import exceptions.AS_15_8_DispatcherException;
 import lombok.RequiredArgsConstructor;
@@ -12,13 +14,16 @@ import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import repositories.*;
+import services.ResultService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -37,32 +42,42 @@ public class ResultsController {
     private final ResultRepo resultRepo;
     private final ResultScreenShotRepo resultScreenShotRepo;
     private final NmapDetailResultRepo nmapDetailResultRepo;
+    private final ResultService resultService;
 
     @PreAuthorize("hasRole('ROLE_VIEW_RESULT')")
     @GetMapping
     public Page<Result> findList(
             @RequestParam Long arrangementId,
             @RequestParam(required = false) List<CheckUnitJobResult> checkUnitJobResults,
+            @RequestParam(required = false) List<CheckUnitType> checkUnitTypes,
             @RequestParam(required = false) String query,
             @RequestParam(required = false) SortingDirection sortingDirection,
             @RequestParam(required = false) String sortingColumn,
             @RequestParam(defaultValue = "0") int pageNumber,
-            @RequestParam(defaultValue = "10") int pageSize){
-        PageRequest page = PageRequest.of(
-                pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
+            @RequestParam(defaultValue = "10") int pageSize) {
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize,
+                SortingHelper.createSorting(sortingDirection, sortingColumn));
         if (checkUnitJobResults != null) {
-            return resultRepo.findByArrangementIdAndResultIn(arrangementId, checkUnitJobResults, page);
+            return resultRepo.findByFilter(
+                            arrangementId,
+                            checkUnitJobResults,
+                            checkUnitTypes,
+                            query,
+                            pageable);
         } else {
             return Strings.isEmpty(query) ?
-                    resultRepo.findAllByArrangementId(arrangementId, page) :
-                    resultRepo.findAllByArrangementAndQuery(arrangementId, query, page);
+                    resultRepo.findAllByArrangementId(arrangementId, pageable) :
+                    resultRepo.findAllByArrangementAndQuery(arrangementId, query, pageable);
         }
     }
 
     @PreAuthorize("hasRole('ROLE_VIEW_RESULT')")
     @GetMapping("/completion")
-    public int getCompletionPercent(@RequestParam Long arrangementId){
-        return resultRepo.getCompletionPercent(arrangementId);
+    public ResponseEntity getCompletionPercent(@RequestParam Long arrangementId){
+        return resultRepo.getCompletionPercent(arrangementId)
+                .map(percent -> ResponseEntity.ok(percent.toString()))
+                .orElseGet(() -> ResponseEntity.badRequest().body("Мероприятие не найдено: " + arrangementId));
     }
 
     @GetMapping(path = "/screenshot", produces = MediaType.IMAGE_PNG_VALUE)
@@ -108,5 +123,39 @@ public class ResultsController {
 				return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
     		});
     }
-    
+
+    @PreAuthorize("hasRole('ROLE_VIEW_RESULT')")
+    @GetMapping(path = "/check_unit_types")
+    public List<CheckUnitType> getCheckUnitTypes(@RequestParam Long arrangementId){
+        return resultRepo.getCheckUnitTypesByArrangementId(arrangementId);
+    }
+
+    @PreAuthorize("hasRole('ROLE_VIEW_RESULT')")
+    @GetMapping(path = "/results")
+    public List<CheckUnitJobResult> getResults(@RequestParam Long arrangementId){
+        return resultRepo.getCheckUnitJobResultsByArrangementId(arrangementId);
+    }
+
+    @PreAuthorize("hasRole('ROLE_MANAGE_ARRANGEMENT')")
+    @PutMapping(path = "/stop_arrangement")
+    public boolean stopArrangement(@RequestParam("id") Long arrangementId){
+
+        List<Result> results = resultRepo.findAllByArrangementId(arrangementId);
+        resultService.sendNotificationsIfFinished(arrangementId);
+        if (resultService.getArrnagementExecutionStatus(arrangementId) == ExecutionStatus.RUNNING) {
+            results.stream()
+                    .filter(this::checkIsRunningOrPlanned)
+                    .forEach(resultToStop -> {
+                        resultToStop.setResult(CheckUnitJobResult.STOPPED);
+                        resultRepo.save(resultToStop);
+
+                    });
+            resultService.sendNotificationsIfFinished(arrangementId);
+            return true;
+        } else return false;
+    }
+
+    private boolean checkIsRunningOrPlanned(Result result) {
+        return result.getResult() == CheckUnitJobResult.RUNNING || result.getResult() == CheckUnitJobResult.PLANNED;
+    }
 }

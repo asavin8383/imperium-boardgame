@@ -1,9 +1,14 @@
 {
     "chrome": {
-        "default": "75.0",
+        "default": "basic",
         "versions": {
-            "75.0": {
+            "basic": {
                 "image": "dcr.ec-leasing.ru/as-15-8/selenoid/vnc_chrome_hola:75-1.145",
+                "port": "4444",
+                "path": "/"
+            },
+            "hola": {
+                "image": "dcr.ec-leasing.ru/as-15-8/selenoid/vnc_chrome:78",
                 "port": "4444",
                 "path": "/"
             }

@@ -47,7 +47,7 @@ public interface EqualityTest {
                 return new UrlEquality(unit.getValue());
             case IP_V6:
                 return new IPv6HostEquality(unit.getValue());
-
+            case DOMAIN:
             default:
                 return new HostEquality(unit.getValue());
         }
@@ -66,7 +66,7 @@ class HostEquality implements EqualityTest {
     public boolean equalTo(String found) throws MalformedURLException {
         URL foundUrl = EqualityTest.toUrl(found);
         return foundUrl != null &&
-                forbiddenHost.equals(foundUrl.getHost());
+                foundUrl.getHost().endsWith(forbiddenHost);
     }
 }
 

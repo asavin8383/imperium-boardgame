@@ -15,6 +15,7 @@ public enum CheckUnitJobResult {
 	COMPLETED,
 	DOUBTFUL,
 	FORBIDDEN_CONTENT_DETECTED,
+	BAD_IP,
 	CAPTCHA_DETECTED,
 	
 	DNS_ERROR,
@@ -23,5 +24,7 @@ public enum CheckUnitJobResult {
 	PAGE_NOT_FOUND,
 	
 	INTERNAL_ERROR,
-	TIMEOUT_ERROR;
+	TIMEOUT_ERROR,
+
+	STOPPED
 }

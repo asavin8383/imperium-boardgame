@@ -28,12 +28,12 @@ public class CheckUnitJobProducer {
      * Метод отправки задания диспетчеру в тему Kafka
      * @param checkUnitJob Задание на проверку чек-юнита
      */
-    public void sendJobToDispatcher(CheckUnitJob checkUnitJob, String key) {
+    public void sendJobToDispatcher(CheckUnitJob checkUnitJob, int partitionId) {
         try {
-            log.info("Отправка сообщения с заданием на проверку диспетчеру. Ключ: {}, тело: {}", key, checkUnitJob);
+            log.info("Отправка сообщения с заданием на проверку диспетчеру. Раздел: {}, тело: {}", partitionId, checkUnitJob);
             Message<CheckUnitJob> message = MessageBuilder
                     .withPayload(checkUnitJob)
-                    .setHeader(KafkaHeaders.MESSAGE_KEY, key)
+                    .setHeader(KafkaHeaders.PARTITION_ID, partitionId)
                     .build();
 
             boolean send = ppm_channels.outputJobs().send(message);

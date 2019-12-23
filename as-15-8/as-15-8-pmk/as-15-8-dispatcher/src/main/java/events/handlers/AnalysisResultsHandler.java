@@ -49,7 +49,7 @@ public class AnalysisResultsHandler {
 
             ExecutionStatus status = resultService.checkArrangementStatus(jobResult.getArrangementId());
             if(status == ExecutionStatus.FINISHED) {
-                log.info("Мероприятие успешно завешено: " + jobResult.getArrangementId());
+                log.info("Мероприятие(или его часть) успешно завешено: " + jobResult.getArrangementId());
                 arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(jobResult.getArrangementId(), ArrangementEvents.FINISH));
             }
         } catch (Exception ex) {
@@ -62,7 +62,7 @@ public class AnalysisResultsHandler {
                 Result jobResult = resultService.updateJobStatus(analysisResult.getJobID(), analysisResult.getCheckUnit().getContentId(), CheckUnitJobResult.INTERNAL_ERROR, sw.toString());
                 ExecutionStatus status = resultService.checkArrangementStatus(jobResult.getArrangementId());
                 if(status == ExecutionStatus.FINISHED) {
-                    log.info("Мероприятие завешено с ошибками: " + jobResult.getArrangementId());
+                    log.info("Мероприятие(или его часть) завешено с ошибками: " + jobResult.getArrangementId());
                     arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(jobResult.getArrangementId(), ArrangementEvents.FINISH));
                 }
             } catch(Exception newEx) {

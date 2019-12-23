@@ -13,13 +13,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import repositories.ContentHistoryRepository;
 import repositories.ContentViewRepository;
 import rest.ResponseStatusString;
@@ -28,6 +28,8 @@ import services.ContentService;
 import services.InfoService;
 
 import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -62,7 +64,9 @@ public class ContentController {
             @RequestParam(required = false) String resourceValue,
             @RequestParam(required = false) List<String> violationNames,
             @RequestParam(required = false) String query,
-            @RequestParam(required = false) Boolean random
+            @RequestParam(required = false) Boolean random,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startTime,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endTime
     ) {
 
         if (!erdiRestClient.getIsLoading()) {
@@ -80,12 +84,59 @@ public class ContentController {
                             violationNames,
                             query,
                             random == null ? false : random,
-                            pageable);
+                            pageable,
+                            convertToLocalDateTime(startTime),
+                            convertToLocalDateTime(endTime));
             return new ResponseEntity<>(pageContent, HttpStatus.OK);
         }
         else {
             return new ResponseEntity<>((Page<ContentView>) null, HttpStatus.ACCEPTED);
         }
+    }
+
+    @GetMapping(path = "/erdi/ids", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<List<Long>> getRelevantContent(
+
+            @RequestParam(required = false) String idMask,
+            @RequestParam(required = false) List<String> categoryNames,
+            @RequestParam(required = false) List<String> decisionOrgs,
+            @RequestParam(required = false) List<String> infoTypeIds,
+            @RequestParam(required = false) List<String> registryNames,
+            @RequestParam(required = false) List<String> resourceTypes,
+            @RequestParam(required = false) String resourceValue,
+            @RequestParam(required = false) List<String> violationNames,
+            @RequestParam(required = false) Integer size,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startTime,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endTime
+    ) {
+
+        if (!erdiRestClient.getIsLoading()) {
+
+            List<List<Long>> listContent =
+                    contentViewRepository.findIds(
+                            idMask,
+                            categoryNames,
+                            decisionOrgs,
+                            infoTypeIds,
+                            registryNames,
+                            resourceTypes,
+                            resourceValue,
+                            violationNames,
+                            size,
+                            convertToLocalDateTime(startTime),
+                            convertToLocalDateTime(endTime));
+
+            return Flux.fromIterable(listContent);
+        }
+        else {
+            return Flux.empty();
+        }
+    }
+
+    private LocalDateTime convertToLocalDateTime(LocalDate dateToConvert) {
+        if (dateToConvert != null)
+            return LocalDateTime.of(dateToConvert, LocalDateTime.MIN.toLocalTime());
+        else return null;
     }
 
     @GetMapping(path = "/erdi/resourceTypes")
@@ -172,6 +223,18 @@ public class ContentController {
         List<CheckUnit> checkUnits = contentService.getActualCheckUnits(erdiId).stream()
             .map(contentCheckUnit -> new CheckUnit(contentCheckUnit.getContentId(), contentCheckUnit.getCheckUnitType(), contentCheckUnit.getCheckUnitValue()))
             .collect(Collectors.toList());
+        if(checkUnits.size() > 0)
+            return ResponseEntity.ok(checkUnits);
+        else
+            return ResponseEntity.badRequest().build();
+    }
+
+    @PostMapping("/erdi/checkUnits")
+    //@PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
+    public ResponseEntity<List<CheckUnit>> getCheckUnitsByIds(@RequestBody List<String> erdiIds){
+        List<CheckUnit> checkUnits = contentService.getActualCheckUnits(erdiIds).stream()
+                .map(contentCheckUnit -> new CheckUnit(contentCheckUnit.getContentId(), contentCheckUnit.getCheckUnitType(), contentCheckUnit.getCheckUnitValue()))
+                .collect(Collectors.toList());
         if(checkUnits.size() > 0)
             return ResponseEntity.ok(checkUnits);
         else

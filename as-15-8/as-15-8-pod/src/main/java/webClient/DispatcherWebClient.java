@@ -18,9 +18,6 @@ public class DispatcherWebClient {
     @Value("${gateway.url}")
     private String gatewayUrl;
 
-    @Value("${act.screenshotes.max-count}")
-    private Long maxCountActScreenShots;
-
     private static final String ACT_CHECK_RESULTS_URI = "/dispatcher/act/checkResult";
     private static final String ACT_SCREENSHOTES_URI = "/dispatcher/act/screenshots";
 
@@ -50,9 +47,6 @@ public class DispatcherWebClient {
         UriComponentsBuilder uriBuilder = UriComponentsBuilder
                 .fromUriString(ACT_SCREENSHOTES_URI)
                 .queryParam("arrangementId", arrangementId);
-
-        if(maxCountActScreenShots != null)
-            uriBuilder.queryParam("maxCountScreenShots", maxCountActScreenShots);
 
         return webClient
                 .get()

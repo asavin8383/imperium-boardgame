@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "309a4781-de6f-42b2-8305-faf4e5952679",
+		"_postman_id": "5f95ab9c-e9d2-49e3-b15a-788df21c33e9",
 		"name": "АС 15.8 Конфиг",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -405,6 +405,85 @@
 			"protocolProfileBehavior": {}
 		},
 		{
+			"name": "Configuration",
+			"item": [
+				{
+					"name": "Запрос конфигурации",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/config/configurations",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"config",
+								"configurations"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Global properties",
+			"item": [
+				{
+					"name": "Запрос всех global property",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/config/props/global",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"config",
+								"props",
+								"global"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Обновление global property",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"key\":\"etalon.proxy.username_test\",\"value\":\"smth\"}"
+						},
+						"url": {
+							"raw": "{{url}}/config/props/global/put?id=4",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"config",
+								"props",
+								"global",
+								"put"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "4"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
 			"name": "Получение списка рабочих роботов",
 			"request": {
 				"auth": {
@@ -448,7 +527,7 @@
 		"oauth2": [
 			{
 				"key": "accessToken",
-				"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJyb2xlIjoiUk9MRV9TWVNURU0sUk9MRV9DT05GSUdfQ0xJRU5UIiwic2NvcGUiOlsicmVhZCIsIndyaXRlIl0sImV4cCI6MTU3MzYyNzg1NSwiYXV0aG9yaXRpZXMiOlsiUk9MRV9TWVNURU0iLCJST0xFX0NPTkZJR19DTElFTlQiXSwianRpIjoiYmQ5M2YyNWItNzk5Yy00NGE0LWEzNmQtZWQzMWQxZjUzZDE5IiwiY2xpZW50X2lkIjoiZXhlY3V0b3IifQ.d_jw8REowvKemEMQNMLuoF5y55bdFRuSXzJJDY69V04DbCLW0x8F7l7WxBuDcYXZod1ylU6v5h6kcL-jPFYw7LZgGkZu-KWq6DKBwJLB7Kd7XQKitg_ZyOoUjlZsSwX8Cv9PopFB7_GnJ2r7EBS_XG7GjMtsiXuRqhwKiw-cuqplk5tARjx307O2Uemy7FWNHDpqTW0sqa0HVhMM3yIWWQWo4uRG7R1U3DpFfTX1uB-mtQnFWl75hnU9lIF26XwZa1qmV3oK_s-lMXjwEXcZ9DRJlbQoEcbj3DY3ls0v18IJ01K7fLhost-G-yQSRbmWKcuMSb4dlwWXriFh6vAF7g",
+				"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqb2huIiwicm9sZSI6IlJPTEVfT1BFUkFUT1JfVEVTVCxST0xFX0ZPUk1BTF9UQVNLLFJPTEVfTUFOQUdFX0ZPUk1BTF9UQVNLLFJPTEVfTUFOQUdFX0FSUkFOR0VNRU5ULFJPTEVfUFJFUEFSQVRJT05fVFJBRkZJQyxST0xFX0RJQ1RJT05BUlksUk9MRV9GT1JNQVRJT05fT0ZfU0NIRURVTEUsUk9MRV9WSUVXX1JFU1VMVCxST0xFX1NFTkRfQUNUX0JZX0hBTkQsUk9MRV9NQU5BR0VfUFNfUEFTRCxST0xFX01BTkFHRV9FUkRJLFJPTEVfVklFV19SRVBPUlQsUk9MRV9GT1JNQVRJT05fUEFSQU1fUkVQT1JULFJPTEVfTUFOQUdFX0RPTUFJTlMsUk9MRV9NQU5BR0VfQ09ORklHVVJBVElPTlMsUk9MRV9NQU5BR0VfUkVHSVNUUkFUSU9OX0pPVVJOQUwsUk9MRV9NQU5BR0VfRlVOQ1RJT05fTU9ERSxST0xFX01BTkFHRV9NQU5VQUxfQVJSQU5HRU1FTlQiLCJtYWlsIjoiIiwidXNlcl9uYW1lIjoiam9obiIsInNjb3BlIjpbInJlYWQiLCJ3cml0ZSJdLCJleHAiOjE1NzYyMjA3MTEsInVzZXJOYW1lIjoiam9obiIsImF1dGhvcml0aWVzIjpbIlJPTEVfT1BFUkFUT1JfVEVTVCIsIlJPTEVfUFJFUEFSQVRJT05fVFJBRkZJQyIsIlJPTEVfRk9STUFUSU9OX1BBUkFNX1JFUE9SVCIsIlJPTEVfTUFOQUdFX01BTlVBTF9BUlJBTkdFTUVOVCIsIlJPTEVfTUFOQUdFX1BTX1BBU0QiLCJST0xFX01BTkFHRV9SRUdJU1RSQVRJT05fSk9VUk5BTCIsIlJPTEVfRk9STUFUSU9OX09GX1NDSEVEVUxFIiwiUk9MRV9NQU5BR0VfRVJESSIsIlJPTEVfTUFOQUdFX0NPTkZJR1VSQVRJT05TIiwiUk9MRV9GT1JNQUxfVEFTSyIsIlJPTEVfRElDVElPTkFSWSIsIlJPTEVfVklFV19SRVBPUlQiLCJST0xFX01BTkFHRV9GVU5DVElPTl9NT0RFIiwiUk9MRV9NQU5BR0VfRk9STUFMX1RBU0siLCJST0xFX01BTkFHRV9BUlJBTkdFTUVOVCIsIlJPTEVfVklFV19SRVNVTFQiLCJST0xFX1NFTkRfQUNUX0JZX0hBTkQiLCJST0xFX01BTkFHRV9ET01BSU5TIl0sImp0aSI6IjJkYjg3ZjVjLTFlM2YtNGM3YS04YmY0LTg3Nzc0NGY3N2VjOCIsImNsaWVudF9pZCI6ImFzLTE1LTgiLCJzZWNvbmROYW1lIjoiIn0.j4AH2m1eKk2KcenCAEF8tR4oSkA6-wFBnRvy7uFE41-eV5M_5Za1pdEqJPB4omySfZI06p2U0EwCtWEmwi7DJ7oK4njC5MFM4FCQ6sEUGm9CwHNxAsiAsIh9EQ_tEDH5h0i3pEEoNunUfrUEMedOMQ6x2xVk4cJpe9MwymllSFdPp1MAr8dhOOUwQF2zroTgOfdwiIpJ0JPbjouwqArjtuEFeHHd0WoWfRW2YKJOA6cOlBLoupQqOufdVaTebV72DLPo8hBEVRFG4wvyPCTqI_qPGXDLnKhfkEg6ahFsLLomdCcmaEBTEpQdgTpsQyHwTZvfFx8mYuVnn-FSdc3r0Q",
 				"type": "string"
 			},
 			{

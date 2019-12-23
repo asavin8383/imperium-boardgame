@@ -3,7 +3,6 @@ package robots;
 import common.ExecutorProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.Proxy;
 import org.openqa.selenium.WebDriver;
@@ -32,31 +31,31 @@ public class DriverFactory {
 	 * Метод создания selenium драйвера
 	 * @param hubURL URL selenium хаба
 	 * @param platformName Имя платформы
-	 * @param appName Имя приложения (ПС/ПАСД)
 	 * @param browserName Имя браузера
+	 * @param version Версия приложения (ПС/ПАСД)
 	 * @return
 	 */
-	public static WebDriver createDriver(URL hubURL, Platform platformName, String appName, String browserName) {
-		return createDriver(hubURL, platformName, appName, browserName, null, false);
+	public static WebDriver createDriver(URL hubURL, Platform platformName, String browserName, String version) {
+		return createDriver(hubURL, platformName, browserName, version, null, false);
 	}
 
 	/**
 	 * Метод создания selenium драйвера
 	 * @param hubURL URL selenium хаба
 	 * @param platformName Имя платформы
-	 * @param appName Имя приложения (ПС/ПАСД)
 	 * @param browserName Имя браузера
+	 * @param version Версия приложения (ПС/ПАСД)
 	 * @param proxy прокси
 	 * @return
 	 */
 	public static WebDriver createDriver(
 			URL hubURL,
 			Platform platformName,
-			String appName,
 			String browserName,
+			String version,
 			String proxy,
 			boolean enableLog) {
-		DesiredCapabilities cpb = buildCapability(platformName, appName, browserName);
+		DesiredCapabilities cpb = buildCapability(platformName, browserName, version);
 
 		Proxy oProxy = ProxyUtils.getSeleniumProxy(proxy);
 		if (oProxy != null) {
@@ -70,6 +69,7 @@ public class DriverFactory {
 		ChromeOptions options = new ChromeOptions();
 		setLoadExtensions(options, Collections.singletonList(ChromeSettings.getScreenshotExtension()));
 		setOptimalChromeOptions(options);
+        setChromeAnonimyzerParams(options);
 
 		if (enableLog){
 			LoggingPreferences logPrefs = new LoggingPreferences();
@@ -88,14 +88,14 @@ public class DriverFactory {
 	 * Метод создания selenium драйвера Chrome с кастомным профилем
 	 * @param hubURL URL selenium хаба
 	 * @param platformName Имя платформы
-	 * @param appName Имя приложения (ПС/ПАСД)
+	 * @param version Имя приложения (ПС/ПАСД)
 	 * @param extensions расширения
 	 * @return
 	 */
-	public static WebDriver createChromeDriver(URL hubURL, Platform platformName, String appName,
+	public static WebDriver createChromeDriver(URL hubURL, Platform platformName, String version,
 											   List<ChromeSettings.Extension> extensions) {
 		DesiredCapabilities cpb = buildCapability(
-				platformName, appName, "chrome");
+				platformName, "chrome", version);
 
         ChromeOptions options = new ChromeOptions();
 		setOptimalChromeOptions(options);
@@ -131,23 +131,26 @@ public class DriverFactory {
 		options.addArguments("--disable-features=OmniboxUIExperimentHideSteadyStateUrlScheme,OmniboxUIExperimentHideSteadyStateUrlTrivialSubdomains");
 	}
 
+	private static void setChromeAnonimyzerParams(ChromeOptions options){
+        options.setExperimentalOption("excludeSwitches", Collections.singletonList("enable-automation"));
+    }
+
 	/**
 	 * Метод создания параметров драйвера
 	 * @param platform Имя платформы
-	 * @param appName Имя приложения (ПС/ПАСД)
 	 * @param browserName Имя браузера
+	 * @param version Имя приложения (ПС/ПАСД)
 	 * @return
 	 */
-	private static DesiredCapabilities buildCapability(Platform platform, String appName, String browserName) {
+	private static DesiredCapabilities buildCapability(Platform platform, String browserName, String version) {
 		DesiredCapabilities capability = createCapabilities(browserName);
 		capability.setBrowserName(browserName);
 		if(platform != null)
 			capability.setPlatform(platform);
 		else
 			capability.setPlatform(Platform.ANY);
-		if(Strings.isNotEmpty(appName)) {
-			capability.setCapability("applicationName", appName);
-			capability.setCapability("name", appName);
+		if(Strings.isNotEmpty(version)) {
+			capability.setVersion(version);
 		}
 		capability.setCapability("enableVNC", true);
 		return capability;

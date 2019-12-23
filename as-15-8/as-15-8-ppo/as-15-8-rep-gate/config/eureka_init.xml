@@ -20,4 +20,8 @@
             <lastUpdatedTimestamp>1574089299259</lastUpdatedTimestamp>
             <lastDirtyTimestamp>1574089298229</lastDirtyTimestamp>
             <actionType>ADDED</actionType>
+            <metadata>
+                <subsystem>PPO</subsystem>
+                <expectedAmount>1</expectedAmount>
+            </metadata>
 </instance>

@@ -1,6 +1,8 @@
 subsystem: SMUF
 server:
   port: 15880
+  tomcat:
+    max-threads: 5000
 logging:
   config: config/logback-spring.xml
 spring:
@@ -18,6 +20,8 @@ eureka:
   instance:
     preferIpAddress: true
     instanceId: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port}
+    metadata-map:
+      subsystem: ${subsystem}
 security:
   basic.enabled: false
   oauth2:
@@ -85,6 +89,10 @@ spring:
   profiles.include: docker_log
   main:
     banner-mode: "off"
+eureka:
+  instance:
+    metadata-map:
+      expectedAmount: 1
 
 ---
 

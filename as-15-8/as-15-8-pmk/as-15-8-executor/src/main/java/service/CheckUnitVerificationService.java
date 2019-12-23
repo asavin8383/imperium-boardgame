@@ -8,6 +8,7 @@ import org.springframework.context.SmartLifecycle;
 import robots.exceptions.ExecutionException;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Интерфейс сервиса управления роботами
@@ -16,9 +17,7 @@ import java.util.List;
  */
 public interface CheckUnitVerificationService extends SmartLifecycle {
 
-	List<AccessToolUnit> getAccessToolUnits();
-
-	List<CheckUnitType> getCheckUnitTypes();
+	Map<AccessToolUnit, List<CheckUnitType>> getSupportedTypes();
 
 	/**
 	 * Метод запуска роботов по заданию на проверку ресурса

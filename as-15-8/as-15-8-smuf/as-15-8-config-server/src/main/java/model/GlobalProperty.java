@@ -1,6 +1,7 @@
 package model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 import enums.AccessToolParameter;
 import lombok.Data;
 import model.converters.AccessToolParameterConverter;
@@ -17,13 +18,20 @@ public class GlobalProperty {
     @JsonIgnore
     private Long id;
 
+    @JsonView(Views.Brief.class)
     @Column(nullable = false)
     private String key;
 
+    @JsonView(Views.Brief.class)
     @Column(nullable = false)
     private String value;
 
-    @ManyToOne(optional=false)
+    @JsonView(Views.Brief.class)
+    @Column
+    private String description;
+
+    @JsonView(Views.Brief.class)
+    @ManyToOne(optional=false, fetch = FetchType.LAZY)
     @JoinColumn(foreignKey = @ForeignKey(name = "global_properties_configurations_id_fk"))
     private Configuration configuration;
 }

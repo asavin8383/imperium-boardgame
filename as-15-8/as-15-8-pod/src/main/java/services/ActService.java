@@ -21,6 +21,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import repositories.ContentRepository;
 import repositories.MissionRepository;
 import rest.ActCheckResult;
 import rest.ActRequest;
@@ -32,7 +33,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.Date;
 import java.util.List;
 
 
@@ -45,6 +45,9 @@ public class ActService {
     private final OAuth2RestTemplate restTemplate;
     private final MissionRepository missionRepository;
     private final DispatcherWebClient dispatcherWebClient;
+    private final ContentRepository contentRepository;
+
+    private DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
     @Value("${spring.rest_base_url}")
     private String baseUrl;
@@ -83,7 +86,17 @@ public class ActService {
             achRes.setCheckUnitType(actCheckResult.getCheckUnitType().name());
             achRes.setCheckUnitValue(actCheckResult.getCheckUnitValue());
             achRes.setDate(actCheckResult.getDate());
-
+            achRes.setForbiddenContentDetected(actCheckResult.isForbiddenContentDetected());
+            contentRepository.findActCheckResultPodInfo(actCheckResult.getContentId())
+                .map(actCheckResultPodInfo -> {
+                    achRes.setContentId(actCheckResultPodInfo.getErdiId());
+                    achRes.setIncludeTime(dateFormat.format(actCheckResultPodInfo.getIncludeTime()));
+                    return true;
+                    }
+                ).orElseGet(() -> {
+                    log.warn("Для результата проверки с ИД: {} в БД ПОД не было найдено данных об ИД ЕРДИ и дате включения в ЕРДИ", actCheckResult.getCheckResultId());
+                    return false;
+                    });
             /*
             if (StringUtils.isEmpty(actCheckResult.getDate())){
                 DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
@@ -181,7 +194,7 @@ public class ActService {
     }
 
     private void notifyActConfirmed(Long arrangementId){
-        log.info("Отправка в PPT уведомления об успшном подтверждении акта в ППП Анонимайзере, arrangementId = {}" + arrangementId);
+        log.info("Отправка в PPT уведомления об успшном подтверждении акта в ППП Анонимайзере, arrangementId = {}", arrangementId);
         restTemplate.getForObject(
                 UriComponentsBuilder
                         .fromHttpUrl(gatewayUrl)

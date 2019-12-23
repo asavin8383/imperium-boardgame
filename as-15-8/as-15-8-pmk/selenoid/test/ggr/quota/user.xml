@@ -1,7 +1,16 @@
 <qa:browsers xmlns:qa="urn:config.gridrouter.qatools.ru">
-<browser name="chrome" defaultVersion="75.0">
-    <version number="75.0">
+<browser name="chrome" defaultVersion="basic">
+    <version number="basic">
         <region name="1">
+            <host name="192.168.5.75" port="4444" count="1"/>
+            <host name="192.168.5.62" port="4444" count="1"/>
+            <host name="192.168.5.76" port="4444" count="1"/>
+            <host name="192.168.5.77" port="4444" count="1"/>
+            <host name="192.168.5.78" port="4444" count="1"/>
+        </region>
+    </version>
+    <version number="hola">
+        <region name="2">
             <host name="192.168.5.75" port="4444" count="1"/>
             <host name="192.168.5.62" port="4444" count="1"/>
             <host name="192.168.5.76" port="4444" count="1"/>

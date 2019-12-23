@@ -297,6 +297,98 @@
 										}
 									},
 									"response": []
+								},
+								{
+									"name": "получение списка списков id ЕРДИ по фильтру",
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{url}}/pod/erdi/ids?startTime=2014-07-02&size=2&endTime=2014-07-07",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"pod",
+												"erdi",
+												"ids"
+											],
+											"query": [
+												{
+													"key": "startTime",
+													"value": "2014-07-02"
+												},
+												{
+													"key": "size",
+													"value": "2"
+												},
+												{
+													"key": "resourceTypes",
+													"value": "domain",
+													"disabled": true
+												},
+												{
+													"key": "endTime",
+													"value": "2014-07-07"
+												},
+												{
+													"key": "idMask",
+													"value": "83",
+													"disabled": true
+												},
+												{
+													"key": "categoryNames",
+													"value": "азартные игры",
+													"disabled": true
+												},
+												{
+													"key": "decisionOrgs",
+													"value": "ФСКН",
+													"disabled": true
+												},
+												{
+													"key": "infoTypeIds",
+													"value": "1-4-4",
+													"disabled": true
+												},
+												{
+													"key": "registryNames",
+													"value": "реестр ЕАИС",
+													"disabled": true
+												},
+												{
+													"key": "resourceValue",
+													"value": "prostitutki21.com",
+													"disabled": true
+												},
+												{
+													"key": "violationNames",
+													"value": "Интернет-казино",
+													"disabled": true
+												}
+											]
+										}
+									},
+									"response": []
 								}
 							],
 							"protocolProfileBehavior": {},
@@ -767,6 +859,31 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Получение id поручения по orig_id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/pod/mission/mission_id?orig_id=39",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"pod",
+								"mission",
+								"mission_id"
+							],
+							"query": [
+								{
+									"key": "orig_id",
+									"value": "39"
+								}
+							]
+						}
+					},
+					"response": []
 				}
 			],
 			"protocolProfileBehavior": {}
@@ -775,12 +892,26 @@
 			"name": "Домены",
 			"item": [
 				{
-					"name": "Получение списка всех доменов",
+					"name": "Получение списка  масок",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": ""
+							"raw": "{{url}}/pod/domain-masks/all?pageSize=500",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"pod",
+								"domain-masks",
+								"all"
+							],
+							"query": [
+								{
+									"key": "pageSize",
+									"value": "500"
+								}
+							]
 						}
 					},
 					"response": []
@@ -791,19 +922,19 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{url}}/pod/domain-masks/getItems?mask=mask10",
+							"raw": "{{url}}/pod/domain-masks/get_domains?domainMask=*.marathonsportsbook.com",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"pod",
 								"domain-masks",
-								"getItems"
+								"get_domains"
 							],
 							"query": [
 								{
-									"key": "mask",
-									"value": "mask10"
+									"key": "domainMask",
+									"value": "*.marathonsportsbook.com"
 								}
 							]
 						}
@@ -816,14 +947,14 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{url}}/pod/domain-masks/delete?id=10",
+							"raw": "{{url}}/pod/domain-masks/?id=10",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"pod",
 								"domain-masks",
-								"delete"
+								""
 							],
 							"query": [
 								{
@@ -838,10 +969,129 @@
 				{
 					"name": "Изменение маски",
 					"request": {
-						"method": "GET",
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"domainMask\": \"testMaskValue2\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/pod/domain-masks/?id=5",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"pod",
+								"domain-masks",
+								""
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "5"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Создание маски",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"domainMask\": \"createdFromPostmanMask\",\n    \"domains\": {\"domain\": \"postmanDomaim\"}\n}"
+						},
+						"url": {
+							"raw": "{{url}}/pod/domain-masks/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"pod",
+								"domain-masks",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Удаление домена у маски",
+					"request": {
+						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": ""
+							"raw": "{{url}}/pod/domain-masks/delete_domain?id=1",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"pod",
+								"domain-masks",
+								"delete_domain"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Добавление домена маске",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"domaink\": \"domainName\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/pod/domain-masks/add_domain&id",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"pod",
+								"domain-masks",
+								"add_domain&id"
+							]
 						}
 					},
 					"response": []
@@ -873,6 +1123,17 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "Пинг реестра анонимайзеров",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": ""
+				}
+			},
+			"response": []
 		}
 	],
 	"auth": {
@@ -880,7 +1141,7 @@
 		"oauth2": [
 			{
 				"key": "accessToken",
-				"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqb2huIiwicm9sZSI6IlJPTEVfT1BFUkFUT1JfVEVTVCxST0xFX0ZPUk1BTF9UQVNLLFJPTEVfTUFOQUdFX0ZPUk1BTF9UQVNLLFJPTEVfTUFOQUdFX0FSUkFOR0VNRU5ULFJPTEVfUFJFUEFSQVRJT05fVFJBRkZJQyxST0xFX0RJQ1RJT05BUlksUk9MRV9GT1JNQVRJT05fT0ZfU0NIRURVTEUsUk9MRV9WSUVXX1JFU1VMVCxST0xFX1NFTkRfQUNUX0JZX0hBTkQsUk9MRV9NQU5BR0VfUFNfUEFTRCxST0xFX01BTkFHRV9FUkRJLFJPTEVfVklFV19SRVBPUlQsUk9MRV9GT1JNQVRJT05fUEFSQU1fUkVQT1JULFJPTEVfTUFOQUdFX0RPTUFJTlMsUk9MRV9NQU5BR0VfUE9SVFNfUFJPVE9DT0xTLFJPTEVfTUFOQUdFX1JFR0lTVFJBVElPTl9KT1VSTkFMLFJPTEVfTUFOQUdFX0ZVTkNUSU9OX01PREUsTUFOQUdFX01BTlVBTF9BUlJBTkdFTUVOVCIsIm1haWwiOiIiLCJ1c2VyX25hbWUiOiJqb2huIiwic2NvcGUiOlsicmVhZCIsIndyaXRlIl0sImV4cCI6MTU3NTk4NDEzNiwidXNlck5hbWUiOiJqb2huIiwiYXV0aG9yaXRpZXMiOlsiUk9MRV9NQU5BR0VfUE9SVFNfUFJPVE9DT0xTIiwiUk9MRV9PUEVSQVRPUl9URVNUIiwiUk9MRV9QUkVQQVJBVElPTl9UUkFGRklDIiwiUk9MRV9GT1JNQVRJT05fUEFSQU1fUkVQT1JUIiwiUk9MRV9NQU5BR0VfUFNfUEFTRCIsIlJPTEVfTUFOQUdFX1JFR0lTVFJBVElPTl9KT1VSTkFMIiwiTUFOQUdFX01BTlVBTF9BUlJBTkdFTUVOVCIsIlJPTEVfRk9STUFUSU9OX09GX1NDSEVEVUxFIiwiUk9MRV9NQU5BR0VfRVJESSIsIlJPTEVfRk9STUFMX1RBU0siLCJST0xFX0RJQ1RJT05BUlkiLCJST0xFX1ZJRVdfUkVQT1JUIiwiUk9MRV9NQU5BR0VfRlVOQ1RJT05fTU9ERSIsIlJPTEVfTUFOQUdFX0ZPUk1BTF9UQVNLIiwiUk9MRV9NQU5BR0VfQVJSQU5HRU1FTlQiLCJST0xFX1ZJRVdfUkVTVUxUIiwiUk9MRV9TRU5EX0FDVF9CWV9IQU5EIiwiUk9MRV9NQU5BR0VfRE9NQUlOUyJdLCJqdGkiOiJkNWU4Mzg2Zi1iMzk2LTRiOGYtODhlZC1iYmVhN2FlNjg2M2MiLCJjbGllbnRfaWQiOiJhcy0xNS04Iiwic2Vjb25kTmFtZSI6IiJ9.IXfYpWeHsquHQJwYSh03qQdZc9eApoqTGI51Gfe7j-VjqDutcixLr7aYeiImP29LmxjmSOgvirLwJGqjFoPsBiJ5K1pwqTkjG5kXnoFWPMVBbHHlRNJrLXl-NXXuWL4x8HUD74fyhO4PiFLygQGUZUckX9UA3OEzWtWBE3WZfb5vRDhlK-_gcmJP0rbRAvgv70t63a4k3BA3N3J9g7jEDFV13_2MYvX0maH2Q5j-7GUfZN0__-pg7yfYhwX46dfP-F2_Jf-62kjadnUFz-o8VM0YP0B90ysRJcwMifK6p4nyJ8Ri4GKupTI4EINE0fCd7370PqP_rvN7kQmOfO4d6g",
+				"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqYWNrIiwicm9sZSI6IlJPTEVfT1BFUkFUT1IsUk9MRV9GT1JNQUxfVEFTSyxST0xFX01BTkFHRV9GT1JNQUxfVEFTSyxST0xFX01BTkFHRV9BUlJBTkdFTUVOVCxST0xFX1BSRVBBUkFUSU9OX1RSQUZGSUMsUk9MRV9ESUNUSU9OQVJZLFJPTEVfRk9STUFUSU9OX09GX1NDSEVEVUxFLFJPTEVfVklFV19SRVNVTFQsUk9MRV9TRU5EX0FDVF9CWV9IQU5ELFJPTEVfTUFOQUdFX1BTX1BBU0QsUk9MRV9NQU5BR0VfRVJESSxST0xFX1ZJRVdfUkVQT1JULFJPTEVfRk9STUFUSU9OX1BBUkFNX1JFUE9SVCxST0xFX01BTkFHRV9ET01BSU5TLFJPTEVfTUFOQUdFX01BTlVBTF9BUlJBTkdFTUVOVCIsIm1haWwiOiIiLCJ1c2VyX25hbWUiOiJqYWNrIiwic2NvcGUiOlsicmVhZCIsIndyaXRlIl0sImV4cCI6MTU3NzE3MTE1NiwidXNlck5hbWUiOiJqYWNrIiwiYXV0aG9yaXRpZXMiOlsiUk9MRV9PUEVSQVRPUiIsIlJPTEVfUFJFUEFSQVRJT05fVFJBRkZJQyIsIlJPTEVfRk9STUFUSU9OX1BBUkFNX1JFUE9SVCIsIlJPTEVfTUFOQUdFX01BTlVBTF9BUlJBTkdFTUVOVCIsIlJPTEVfTUFOQUdFX1BTX1BBU0QiLCJST0xFX0ZPUk1BVElPTl9PRl9TQ0hFRFVMRSIsIlJPTEVfTUFOQUdFX0VSREkiLCJST0xFX0ZPUk1BTF9UQVNLIiwiUk9MRV9ESUNUSU9OQVJZIiwiUk9MRV9WSUVXX1JFUE9SVCIsIlJPTEVfTUFOQUdFX0ZPUk1BTF9UQVNLIiwiUk9MRV9NQU5BR0VfQVJSQU5HRU1FTlQiLCJST0xFX1ZJRVdfUkVTVUxUIiwiUk9MRV9TRU5EX0FDVF9CWV9IQU5EIiwiUk9MRV9NQU5BR0VfRE9NQUlOUyJdLCJqdGkiOiJkZjk1NTAwZS0zNjgyLTQyYmQtYWI3OC1kNGQ0Mzg4YTc5OWYiLCJjbGllbnRfaWQiOiJhcy0xNS04Iiwic2Vjb25kTmFtZSI6IiJ9.IL_L8s3-nhbrau3wZcBRvfXjRMza378QEN_EExhaQ4VSHV7AZmWrLA9S8TWviE_gawgngidLjRqt8rNedwhbMeTa2EcpE2F_S-bm7wmnpWdsC4FEul6Aozir4-LS53GjrFfGifh-Yh49AR0-mAe3EhvZEKM6w8gc1HtexMtBT0cveQSCcvOhJdk4bcv2oXqhPlES0tr3C7RREascgxR2NQEkdsJvkbGM1hC8zlMtFCpgZAmR8XvB8ockcClE5NgS78kyXAk7SaqKQjsgP6tCiY3UEnuEwhJ45Jedxpd4-8y5ZX_rSN5cqWIjYHiWJVwBkgDZrETYc0xlnzLzDz3YXA",
 				"type": "string"
 			},
 			{

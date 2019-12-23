@@ -19,6 +19,7 @@ import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.UriComponentsBuilder;
+import repositories.DomainMaskRepo;
 import repositories.helper.DictionaryRepository;
 import updaters.PASDDictionaryUpdater;
 import updaters.PSDictionaryUpdater;
@@ -34,6 +35,7 @@ public class DictionaryService {
     private Map<Dictionary, DictionaryRepository> repositoryMap;
     private final PSDictionaryUpdater psDictionaryUpdater;
     private final PASDDictionaryUpdater pasdDictionaryUpdater;
+    private final DomainMaskRepo domainMaskRepo;
     private final JdbcTemplate jdbcTemplate;
     private final OAuth2RestTemplate restTemplate;
 
@@ -45,7 +47,8 @@ public class DictionaryService {
                              PSDictionaryUpdater psDictionaryUpdater,
                              JdbcTemplate jdbcTemplate,
                              OAuth2RestTemplate restTemplate,
-                             PASDDictionaryUpdater pasdDictionaryUpdater) {
+                             PASDDictionaryUpdater pasdDictionaryUpdater,
+                             DomainMaskRepo domainMaskRepo) {
         this.repositoryMap = new EnumMap<>(Dictionary.class);
         for (DictionaryRepository repository : repositoryList) {
             repositoryMap.put(repository.getDictionaryType(), repository);
@@ -54,16 +57,29 @@ public class DictionaryService {
         this.jdbcTemplate = jdbcTemplate;
         this.restTemplate = restTemplate;
         this.pasdDictionaryUpdater = pasdDictionaryUpdater;
+        this.domainMaskRepo = domainMaskRepo;
     }
 
     public List<DictionaryView> getDictionaryViewList() {
-        return repositoryMap.entrySet().stream()
+        List<DictionaryView> dictionaryViews = new ArrayList<>();
+
+        List<DictionaryView> list = repositoryMap.entrySet().stream()
                 .map(entry -> new DictionaryView(
                         entry.getKey().toString(),
                         entry.getValue().getCountByEffDt(
                                 Utils.getEndDate()),
                         entry.getKey().getShortName()))
                 .collect(Collectors.toList());
+
+        dictionaryViews.addAll(list);
+        dictionaryViews.add(
+                new DictionaryView(
+                        Dictionary.DOMAIN_MASKS.toString(),
+                        domainMaskRepo.count(),
+                        Dictionary.DOMAIN_MASKS.getShortName())
+        );
+
+        return dictionaryViews;
     }
 
     public DictionaryView getDictionaryView(Dictionary dictionary) {

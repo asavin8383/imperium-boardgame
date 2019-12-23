@@ -1,8 +1,11 @@
 package events.handlers;
 
+import arrangement.ArrangementStatusNotification;
 import checkUnits.CheckUnitJob;
+import enums.ArrangementEvents;
 import enums.CheckUnitJobResult;
 import enums.ErdiStatus;
+import enums.ExecutionStatus;
 import events.DispatcherChannels;
 import exceptions.AS_15_8_DispatcherException;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +18,9 @@ import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
+import restapi.ArrangementStatusProducer;
 import restapi.ErdiChecker;
+import services.ResultService;
 import services.impl.CheckUnitPersistingService;
 
 /**
@@ -30,9 +35,9 @@ import services.impl.CheckUnitPersistingService;
 public class CheckUnitJobHandler {
 
     private final DispatcherChannels dispatcherChannels;
-
     private final CheckUnitPersistingService checkUnitPersistingService;
-
+    private final ArrangementStatusProducer arrangementStatusProducer;
+    private final ResultService resultService;
     private final ErdiChecker erdiChecker;
 
     /**
@@ -42,18 +47,24 @@ public class CheckUnitJobHandler {
     @StreamListener(DispatcherChannels.INPUT_JOBS)
     public void createJobItems(Message<CheckUnitJob> message){
         CheckUnitJob checkUnitJob = message.getPayload();
+        Integer partitionId = message.getHeaders().get(KafkaHeaders.RECEIVED_PARTITION_ID, Integer.class);
         log.info("\n   ---->>> Принято задание: " + checkUnitJob.toString() +
-                ", partition: "+message.getHeaders().get(KafkaHeaders.RECEIVED_PARTITION_ID, Integer.class) +
+                ", partition: "+ partitionId +
                 ", offset: "+message.getHeaders().get(KafkaHeaders.OFFSET, Long.class));
         try {
             ErdiStatus erdiStatus = erdiChecker.checkErdiStatus(message.getPayload().getCheckUnit().getContentId());
             if(!erdiStatus.equals(ErdiStatus.ACTIVE)) {
                 checkUnitPersistingService.persistCheckUnitJob(message.getPayload(), CheckUnitJobResult.valueOf(erdiStatus.name()));
                 log.info("Проверка исключена из списка выполнения, т.к является неактуальной: " + message.getPayload().getCheckUnit().getContentId());
+                ExecutionStatus status = resultService.checkArrangementStatus(checkUnitJob.getArrangementId());
+                if(status == ExecutionStatus.FINISHED) {
+                    log.info("Мероприятие(или его часть) завешено " + checkUnitJob.getArrangementId());
+                    arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(checkUnitJob.getArrangementId(), ArrangementEvents.FINISH));
+                }
             } else {
                 Result result = checkUnitPersistingService.persistCheckUnitJob(message.getPayload(), CheckUnitJobResult.RUNNING);
                 checkUnitJob.setJobID(result.getId());
-                sendJobToExecutor(checkUnitJob, message.getHeaders().get(KafkaHeaders.RECEIVED_MESSAGE_KEY));
+                sendJobToExecutor(checkUnitJob, partitionId);
             }
         } catch (Exception ex) {
             log.error("Ошибка обработки задания на проверку чек-юнита " + checkUnitJob.toString() + " диспетчером", ex);
@@ -64,11 +75,12 @@ public class CheckUnitJobHandler {
      * Метод отправки задания роботу в тему Kafka
      * @param checkUnitJob Задание на проверку чек-юнита
      */
-    private void sendJobToExecutor(CheckUnitJob checkUnitJob, Object key) {
+    private void sendJobToExecutor(CheckUnitJob checkUnitJob, Integer partitionId) {
         try {
             Message<CheckUnitJob> message = MessageBuilder
                     .withPayload(checkUnitJob)
-                    .setHeader(KafkaHeaders.MESSAGE_KEY, key)
+                    //.setHeader(KafkaHeaders.MESSAGE_KEY, key)
+                    .setHeader(KafkaHeaders.PARTITION_ID, partitionId)
                     .build();
 
             boolean send = dispatcherChannels.outputJobs().send(message);

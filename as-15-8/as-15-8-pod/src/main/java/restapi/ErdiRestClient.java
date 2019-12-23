@@ -392,6 +392,7 @@ public class ErdiRestClient {
 
         ResponseEntity<RestResponseDeltaListByDate> entity;
         try {
+            log.info("Получение списка дельт: {} по дате: {}", uriComponents.toString(), dateStr);
             entity = registryAnonimyzersRestTemplate.exchange(
                     uriComponents.toString(),
                     HttpMethod.GET,
@@ -400,11 +401,9 @@ public class ErdiRestClient {
             );
         }
         catch (Throwable e){
-            errorMessage = "Ошибка загрузки списка дельт по дате: " + dateStr;
-            System.out.println(errorMessage);
-            System.out.println("Игнорируем ОШИБКУ ПОЛУЧЕНИЯ ДЕЛЬТ!");
+            log.error("Ошибка загрузки списка дельт по дате: {}", dateStr);
+            log.error("Текст ошибки", e);
             return new ArrayList<>();
-            //throw e;
         }
 
         RestResponseDeltaListByDate resp = entity.getBody();

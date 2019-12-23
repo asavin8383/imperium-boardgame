@@ -5,5 +5,5 @@ package model.enums;
  * Date: 04.11.2019
  */
 public enum SchedulePeriodState {
-    CREATED, STARTED;
+    CREATED, PLANNED, STARTED;
 }

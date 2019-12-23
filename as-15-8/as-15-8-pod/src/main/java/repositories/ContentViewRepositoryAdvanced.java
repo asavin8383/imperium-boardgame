@@ -3,7 +3,9 @@ package repositories;
 import model.projection.ContentView;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import reactor.core.publisher.Flux;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -23,6 +25,22 @@ public interface ContentViewRepositoryAdvanced {
             List<String> violationNames,
             String query,
             boolean random,
-            Pageable pageable
-   );
+            Pageable pageable,
+            LocalDateTime startTime,
+            LocalDateTime endTime
+    );
+
+    List<List<Long>> findIds(
+            String idMask,
+            List<String> categoryNames,
+            List<String> decisionOrgs,
+            List<String> infoTypeIds,
+            List<String> registryNames,
+            List<String> resourceTypes,
+            String resourceValue,
+            List<String> violationNames,
+            Integer size,
+            LocalDateTime startTime,
+            LocalDateTime endTime
+    );
 }

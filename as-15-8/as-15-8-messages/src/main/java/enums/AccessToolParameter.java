@@ -11,7 +11,7 @@ public enum AccessToolParameter {
     //robots
     BROWSER,
     PLATFORM,
-    APPLICATION,
+    VERSION,
 
     //search-systems
     INPUT_DELAY,
@@ -22,14 +22,14 @@ public enum AccessToolParameter {
     SEARCH_SYSTEM_XPATH_CAPTCHA,
     SEARCH_SYSTEM_XPATH_NEXT_PAGE,
     SEARCH_SYSTEM_XPATH_ITEM_LINK,
+    SEARCH_SYSTEM_PROXY,
+    RESULT_NOT_FOUND_REGEXP,
 
     //vpn, proxy, anonimyzers, extentions
     STUB_URL,
     PROXY_TYPE,
     PROXY_DNS_NAME,
     PROXY_PORT,
-    PROXY_USER,
-    PROXY_PASSWORD,
     IGNORE_CAPTCHA_APPS,
 
     //extensions

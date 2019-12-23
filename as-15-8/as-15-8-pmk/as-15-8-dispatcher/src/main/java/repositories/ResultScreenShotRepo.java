@@ -18,7 +18,14 @@ public interface ResultScreenShotRepo extends JpaRepository<ResultScreenShot, Lo
 
 
     @Query("select rs from ResultScreenShot rs " +
-            "join rs.result r on r.arrangementId = :arrangementId and r.result in (:result)")
+            "join rs.result r on r.arrangementId = :arrangementId and " +
+            "r.result in (:result) and " +
+            "r.checkForAct = true")
+    List<ResultScreenShot> findCheckedByArrangementIdAndResultIn(@Param("arrangementId") Long arrangementId, @Param("result") Collection<CheckUnitJobResult> result);
+
+    @Query("select rs from ResultScreenShot rs " +
+            "join rs.result r on r.arrangementId = :arrangementId and " +
+            "r.result in (:result)")
     List<ResultScreenShot> findByArrangementIdAndResultIn(@Param("arrangementId") Long arrangementId, @Param("result") Collection<CheckUnitJobResult> result, Pageable pageable);
 
 }

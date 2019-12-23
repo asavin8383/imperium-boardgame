@@ -45,6 +45,10 @@ spring:
       ddl-auto: none
   datasource:
     url: jdbc:postgresql://10.97.220.144:5432/asdb
+eureka:
+  instance:
+    metadata-map:
+      expectedAmount: 1
 
 ---
 
@@ -58,11 +62,15 @@ spring:
       ddl-auto: none
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb
+eureka:
+  instance:
+    metadata-map:
+      expectedAmount: 1
 
 ---
 
 spring:
-  profiles: dev_asavin, dev_ashabalin, dev_pvorobiev, dev_jspirina
+  profiles: dev_asavin, dev_ashabalin, dev_pvorobiev, dev_anikanov
   profiles.include: local_log
   jpa:
     hibernate:
@@ -90,6 +98,13 @@ spring:
   profiles: dev_pvorobiev
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb_test
+
+---
+
+spring:
+  profiles: dev_danikanov
+  datasource:
+    url: jdbc:postgresql://192.168.5.195:5432/asdb
 
 ---
 

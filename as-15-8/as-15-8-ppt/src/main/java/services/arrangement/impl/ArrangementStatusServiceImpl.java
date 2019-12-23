@@ -77,6 +77,9 @@ public class ArrangementStatusServiceImpl implements ArrangementStatusService {
             clientNotification.setMessageText("Статус мероприятия " + arrangement.getId() + " сменился на '" + arrangement.getStatus().getDescription() + "'");
             clientNotification.setViewed(false);
             clientNotificationRepo.save(clientNotification);
+
+            log.info("Сохранение поручения ", clientNotification);
+            log.info("clientNotification.getOperator = " + clientNotification.getOperator());
         }
     }
 }

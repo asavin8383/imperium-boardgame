@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Arrangement;
 import model.ScheduleCheckUnit;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -29,6 +30,7 @@ import javax.transaction.Transactional;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -81,9 +83,9 @@ public class ArrangementController {
         }
     }
 
-    @PutMapping("/{id}/close")
+    @PutMapping("/close")
     @Transactional
-    public void updateArrangementStatus(@PathVariable("id") Arrangement arrangement){
+    public void updateArrangementStatus(@RequestParam("id") Arrangement arrangement){
         if (arrangement == null){
             throw new AS_15_8_PPM_Exception("Ошибка закрытия мероприятия! Мероприятие не было найдено в БД");
         }
@@ -95,17 +97,21 @@ public class ArrangementController {
         );
     }
 
-
+    //TODO разобраться
     private void getAndSaveArrangementCheckUnits(Arrangement arrangement){
         arrangement.getScheduleCheckUnits().addAll(
-            PPTWebClient.getCheckUnitsByArrangementId(arrangement.getId())
-                .stream()
-                .flatMap(checkUnit -> createCheckUnits(arrangement, checkUnit).stream())
-                .collect(Collectors.toList())
+                Objects.requireNonNull(
+                        PPTWebClient
+                                .getCheckUnitsByArrangementId(arrangement.getId())
+                                .stream()
+                                .flatMap(checkUnit -> createCheckUnits(arrangement, checkUnit).stream())
+                                .collect(Collectors.toList())
+                )
         );
         log.info("Получен список чек-юнитов мероприятия {} от ППТ", arrangement.getId());
         if(arrangement.getScheduleCheckUnits().size() > 0){
             arrangementRepo.save(arrangement);
+            log.info("Список чек-юнитов мероприятия {} сохранен", arrangement.getId());
         } else {
             throw new IllegalStateException("Ошибка формирования мероприятия " + arrangement.getId() +
                     "  в ППМ. Трафик не содержит значений для проверки");
@@ -114,24 +120,21 @@ public class ArrangementController {
 
     private List<ScheduleCheckUnit> createCheckUnits(Arrangement arrangement, CheckUnit checkUnit){
         String unitName = schedulerProperties.getAccessTools().get(arrangement.getAccessTool());
+        if(Strings.isEmpty(unitName))
+            throw new AS_15_8_PPM_Exception("Ошибка при получении конфигурации робота " + arrangement.getAccessTool() + ". Проверьте и обновите конфигурацию ППМ");
         AccessToolUnit accessToolUnit = AccessToolUnit.fromPropertyKey(unitName);
         boolean isPS = accessToolUnit == AccessToolUnit.SEARCH_SYSTEM ||
             accessToolUnit == AccessToolUnit.GOOGLE_API;
         List<ScheduleCheckUnit> scheduleCheckUnits = new ArrayList<>();
         switch (checkUnit.getType()){
             case DOMAIN: {
-                if (isPS) {
-                    scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit.getContentId(), CheckUnitType.URL, checkUnit.getValue()));
-                } else {
-                    for(Protocol value: Protocol.values()){
-                        scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit.getContentId(), CheckUnitType.URL, value.getProtocol() + checkUnit.getValue()));
-                    }
-                }
+                addDomainToScheduleCheckUnits(isPS, scheduleCheckUnits, checkUnit.getContentId(), checkUnit.getValue(), arrangement);
                 return scheduleCheckUnits;
             }
             case DOMAIN_MASK: {
-                domainMaskUploader.getDomainMaskItems(checkUnit.getValue())
-                    .forEach(domainMaskItem -> scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit.getContentId(), CheckUnitType.URL, domainMaskItem)));
+                domainMaskUploader.getDomains(checkUnit.getValue())
+                    .forEach(domain ->
+                        addDomainToScheduleCheckUnits(isPS, scheduleCheckUnits, checkUnit.getContentId(), domain, arrangement));
                 return scheduleCheckUnits;
             }
             case IP_V4:
@@ -147,6 +150,16 @@ public class ArrangementController {
             default: {
                 scheduleCheckUnits.add(createCheckUnit(arrangement, checkUnit.getContentId(), checkUnit.getType(), checkUnit.getValue()));
                 return scheduleCheckUnits;
+            }
+        }
+    }
+
+    private void addDomainToScheduleCheckUnits(boolean isPS, List<ScheduleCheckUnit> scheduleCheckUnits, Long contentId, String checkUnitValue, Arrangement arrangement){
+        if (isPS) {
+            scheduleCheckUnits.add(createCheckUnit(arrangement, contentId, CheckUnitType.DOMAIN, checkUnitValue));
+        } else {
+            for(Protocol value: Protocol.values()){
+                scheduleCheckUnits.add(createCheckUnit(arrangement, contentId, CheckUnitType.URL, value.getProtocol() + checkUnitValue));
             }
         }
     }

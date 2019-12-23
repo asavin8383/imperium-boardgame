@@ -1,6 +1,7 @@
 package model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.*;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -19,8 +20,8 @@ public class Configuration {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonIgnore
     @EqualsAndHashCode.Include
+    @JsonView(Views.Brief.class)
     private Long id;
 
     @NonNull
@@ -28,6 +29,7 @@ public class Configuration {
     @Column(nullable = false)
     @ToString.Include
     @EqualsAndHashCode.Include
+    @JsonView(Views.Brief.class)
     private Microservice application;
 
     @NonNull

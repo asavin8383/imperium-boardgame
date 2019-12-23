@@ -1,5 +1,6 @@
 package robots;
 
+import org.apache.logging.log4j.util.Strings;
 import org.openqa.selenium.Proxy;
 
 import java.net.URLDecoder;
@@ -41,7 +42,7 @@ public class ProxyUtils {
         }
 
         Proxy oProxy = new Proxy();
-        oProxy.setProxyType(Proxy.ProxyType.MANUAL);
+        // oProxy.setProxyType(Proxy.ProxyType.MANUAL);
 
         ProxyType proxyType = getProxyType(proxy);
         String host = getProxyHost(proxy);
@@ -77,28 +78,44 @@ public class ProxyUtils {
         return oProxy;
     }
 
+    public static String getFullProxy(String type, String host, String port){
+        return getFullProxy(type, host, port, null, null);
+    }
+
     @SuppressWarnings("deprecation")
-	public static String getFullProxy(String type, String host, String port, String user, String pass){
+    public static String getFullProxy(String type, String host, String port, String user, String pass){
         if (host == null || host.isEmpty())
             return null;
 
         ProxyType proxyType = ProxyType.getProxyType(type, ProxyType.HTTP);
 
         port = port == null || port.isEmpty() ? "80" : port;
-        user = user == null ? "" : user;
-        pass = pass == null ? "" : pass;
 
-        String proxy = String.format("%s://%s:%s@%s:%s", proxyType.getProxyName(), URLEncoder.encode(user), URLEncoder.encode(pass), host, port);
+        String proxy;
+        if(Strings.isNotEmpty(user))
+            proxy = String.format("%s://%s:%s@%s:%s",
+                    proxyType.getProxyName(),
+                    URLEncoder.encode(user),
+                    URLEncoder.encode(pass == null ? "" : pass),
+                    host,
+                    port);
+        else
+            proxy = String.format("%s://%s:%s",
+                    proxyType.getProxyName(),
+                    host,
+                    port);
         return proxy;
     }
 
     protected static Matcher getProxyMatcher(String fullProxy){
         if (fullProxy == null || fullProxy.isEmpty())
             return null;
-        Pattern pattern = Pattern.compile("^(.*?)://(.*?):(.*?)@(.*?):(.*?)$");
-        Matcher matcher = pattern.matcher(fullProxy);
+        Matcher matcher = Pattern.compile("^(?<type>.*?)://(?<host>.*?):(?<port>.*?)$").matcher(fullProxy);
+        Matcher matcherWithAuth = Pattern.compile("^(?<type>.*?)://(?<user>.*?):(?<pass>.*?)@(?<host>.*?):(?<port>.*?)$").matcher(fullProxy);
         if (matcher.find()){
             return matcher;
+        } else if (matcherWithAuth.find()){
+            return matcherWithAuth;
         }
         return null;
     }
@@ -110,28 +127,28 @@ public class ProxyUtils {
 
     public static ProxyType getProxyType(String fullProxy){
         Matcher matcher = getProxyMatcher(fullProxy);
-        return matcher == null ? null : ProxyType.getProxyType(matcher.group(1), ProxyType.HTTP);
+        return matcher == null ? null : ProxyType.getProxyType(matcher.group("type"), ProxyType.HTTP);
     }
 
     public static String getProxyHost(String fullProxy){
         Matcher matcher = getProxyMatcher(fullProxy);
-        return matcher == null ? null : matcher.group(4);
+        return matcher == null ? null : matcher.group("host");
     }
 
     public static String getProxyPort(String fullProxy){
         Matcher matcher = getProxyMatcher(fullProxy);
-        return matcher == null ? null : matcher.group(5);
+        return matcher == null ? null : matcher.group("port");
     }
 
     @SuppressWarnings("deprecation")
-	public static String getProxyUser(String fullProxy){
+    public static String getProxyUser(String fullProxy){
         Matcher matcher = getProxyMatcher(fullProxy);
-        return matcher == null ? null : URLDecoder.decode(matcher.group(2));
+        return matcher == null ? null : URLDecoder.decode(matcher.group("user"));
     }
 
     @SuppressWarnings("deprecation")
-	public static String getProxyPass(String fullProxy){
+    public static String getProxyPass(String fullProxy){
         Matcher matcher = getProxyMatcher(fullProxy);
-        return matcher == null ? null : URLDecoder.decode(matcher.group(3));
+        return matcher == null ? null : URLDecoder.decode(matcher.group("pass"));
     }
 }

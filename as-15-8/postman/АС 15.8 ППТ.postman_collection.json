@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "459a6490-de67-4a59-92a5-f8c8c74218df",
+		"_postman_id": "1fc2b740-34ac-4e26-8877-f43fb0bdc833",
 		"name": "АС 15.8 ППТ",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -447,7 +447,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{url}}/formal_tasks/225",
+							"raw": "{{url}}/formal_tasks/225?",
 							"host": [
 								"{{url}}"
 							],
@@ -918,6 +918,25 @@
 							"body": "{\n    \"content\": [\n        {\n            \"id\": 6,\n            \"title\": \"Тест\",\n            \"status\": \"PLANNED\",\n            \"creationDate\": \"2019-05-22T11:40:06.845\",\n            \"startDate\": null,\n            \"endDate\": null,\n            \"accessTool\": {\n                \"id\": 18,\n                \"name\": \"CAMELEO_XYZ\",\n                \"type\": \"ANONYMIZER\"\n            },\n            \"result\": null\n        }\n    ],\n    \"pageable\": {\n        \"sort\": {\n            \"sorted\": true,\n            \"unsorted\": false,\n            \"empty\": false\n        },\n        \"offset\": 0,\n        \"pageNumber\": 0,\n        \"pageSize\": 10,\n        \"paged\": true,\n        \"unpaged\": false\n    },\n    \"totalPages\": 1,\n    \"totalElements\": 1,\n    \"last\": true,\n    \"size\": 10,\n    \"number\": 0,\n    \"sort\": {\n        \"sorted\": true,\n        \"unsorted\": false,\n        \"empty\": false\n    },\n    \"first\": true,\n    \"numberOfElements\": 1,\n    \"empty\": false\n}"
 						}
 					]
+				},
+				{
+					"name": "Получение поручения по orig_id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/formal_tasks/get_by_orig_id/39",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"formal_tasks",
+								"get_by_orig_id",
+								"39"
+							]
+						}
+					},
+					"response": []
 				}
 			],
 			"protocolProfileBehavior": {}
@@ -1114,6 +1133,45 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "Добавление ЕРДИ к чек юниту через запрос в ПОД",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/traffic/unit/erdi/247/addList?resourceTypes=domain&size=2&sortingDirection=DESC&sortingColumn=id",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"traffic",
+										"unit",
+										"erdi",
+										"247",
+										"addList"
+									],
+									"query": [
+										{
+											"key": "resourceTypes",
+											"value": "domain"
+										},
+										{
+											"key": "size",
+											"value": "2"
+										},
+										{
+											"key": "sortingDirection",
+											"value": "DESC"
+										},
+										{
+											"key": "sortingColumn",
+											"value": "id"
+										}
+									]
+								}
+							},
+							"response": []
 						}
 					],
 					"protocolProfileBehavior": {},
@@ -1232,7 +1290,7 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{url}}/erdi/custom",
+									"raw": "{{url}}/erdi/custom?",
 									"host": [
 										"{{url}}"
 									],
@@ -3268,7 +3326,7 @@
 		"oauth2": [
 			{
 				"key": "accessToken",
-				"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqYWNrIiwicm9sZSI6IlJPTEVfT1BFUkFUT1IsUk9MRV9GT1JNQUxfVEFTSyxST0xFX01BTkFHRV9GT1JNQUxfVEFTSyxST0xFX01BTkFHRV9BUlJBTkdFTUVOVCxST0xFX1BSRVBBUkFUSU9OX1RSQUZGSUMiLCJtYWlsIjoiIiwidXNlcl9uYW1lIjoiamFjayIsInNjb3BlIjpbInJlYWQiLCJ3cml0ZSJdLCJleHAiOjE1NzU2MjQxMTIsInVzZXJOYW1lIjoiamFjayIsImF1dGhvcml0aWVzIjpbIlJPTEVfTUFOQUdFX0FSUkFOR0VNRU5UIiwiUk9MRV9PUEVSQVRPUiIsIlJPTEVfUFJFUEFSQVRJT05fVFJBRkZJQyIsIlJPTEVfRk9STUFMX1RBU0siLCJST0xFX01BTkFHRV9GT1JNQUxfVEFTSyJdLCJqdGkiOiI3MTY1YmQwMi0xYjFmLTRiYjktODcxNC0yNzdhZjA3NTFlZjEiLCJjbGllbnRfaWQiOiJhcy0xNS04Iiwic2Vjb25kTmFtZSI6IiJ9.bFdRGH-jp-lCfJMjR8a6nqeKApqtBHMDBPJSAQ2n7YfoL_19hztrBCwYNt_qzbWtuRQfXAZ61PHN18Z29yU2ieKYcqONH2xKwkkGm76m3NjOsl3pY_kPiBRFld7X8h9fY13-pivUJG-1E3btKPAEh9ZmC7HRTYX385ni2ihAlzr0moFjM4DNvF5j0LDjSb5_VsMWc53q4uyJy5fviQNI5Quo4ioIHmJHGZTXLj1b-jnEufDmnO3rGNneba0IvXDKqINYX7gcah0jNtOteiBWvQnfHmJ5Wk6uOT1pZXTqYuJONOUuW4S4_BH0nV8olSbpFdCztrYwZedRZRYBsKU7YQ",
+				"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqYWNrIiwicm9sZSI6IlJPTEVfT1BFUkFUT1IsUk9MRV9GT1JNQUxfVEFTSyxST0xFX01BTkFHRV9GT1JNQUxfVEFTSyxST0xFX01BTkFHRV9BUlJBTkdFTUVOVCxST0xFX1BSRVBBUkFUSU9OX1RSQUZGSUMsUk9MRV9ESUNUSU9OQVJZLFJPTEVfRk9STUFUSU9OX09GX1NDSEVEVUxFLFJPTEVfVklFV19SRVNVTFQsUk9MRV9TRU5EX0FDVF9CWV9IQU5ELFJPTEVfTUFOQUdFX1BTX1BBU0QsUk9MRV9NQU5BR0VfRVJESSxST0xFX1ZJRVdfUkVQT1JULFJPTEVfRk9STUFUSU9OX1BBUkFNX1JFUE9SVCxST0xFX01BTkFHRV9ET01BSU5TLFJPTEVfTUFOQUdFX01BTlVBTF9BUlJBTkdFTUVOVCIsIm1haWwiOiIiLCJ1c2VyX25hbWUiOiJqYWNrIiwic2NvcGUiOlsicmVhZCIsIndyaXRlIl0sImV4cCI6MTU3NjgyMzY4NiwidXNlck5hbWUiOiJqYWNrIiwiYXV0aG9yaXRpZXMiOlsiUk9MRV9PUEVSQVRPUiIsIlJPTEVfUFJFUEFSQVRJT05fVFJBRkZJQyIsIlJPTEVfRk9STUFUSU9OX1BBUkFNX1JFUE9SVCIsIlJPTEVfTUFOQUdFX01BTlVBTF9BUlJBTkdFTUVOVCIsIlJPTEVfTUFOQUdFX1BTX1BBU0QiLCJST0xFX0ZPUk1BVElPTl9PRl9TQ0hFRFVMRSIsIlJPTEVfTUFOQUdFX0VSREkiLCJST0xFX0ZPUk1BTF9UQVNLIiwiUk9MRV9ESUNUSU9OQVJZIiwiUk9MRV9WSUVXX1JFUE9SVCIsIlJPTEVfTUFOQUdFX0ZPUk1BTF9UQVNLIiwiUk9MRV9NQU5BR0VfQVJSQU5HRU1FTlQiLCJST0xFX1ZJRVdfUkVTVUxUIiwiUk9MRV9TRU5EX0FDVF9CWV9IQU5EIiwiUk9MRV9NQU5BR0VfRE9NQUlOUyJdLCJqdGkiOiJjMWIzMTI4OC1lYzkwLTRhZDUtYmY0Mi03MjE3YjM1ZGU4N2UiLCJjbGllbnRfaWQiOiJhcy0xNS04Iiwic2Vjb25kTmFtZSI6IiJ9.lEiksVcBPZ9LEoOeyJv60imz5vOJWus4QLOLnTmvc8GQN7CkjehXHR3DqHLB03N9uXtMr83WCO297Exu3CsqvDrigYLCO8jxgOD6MRuQkU82lMQzow6aNRSvj_ePj2kUE9oy9costFEZP1Ve5385eMhwGn74XeiLrZNbrNxr2bmWZ9fdKa6SW-8NqDmOJ5xXkyzfZmL0Yspa9eMeVX4tHrRfTPf_ORud7p_bla9dv3o3Hvgv-wirzJgxwiHvsbu9vZEikz_AYm_FfxdY5Oy5o6u9wESP2EppR044ckpoSAi-86rWhlxqDWMovxPvlGq4bwIlVVwgJJaPaOqKTxsSuw",
 				"type": "string"
 			},
 			{
@@ -3307,25 +3365,25 @@
 	],
 	"variable": [
 		{
-			"id": "17891e27-e164-436c-8f49-24557f818d27",
+			"id": "917448de-1f88-4012-963c-39842879f9e0",
 			"key": "url",
 			"value": "http://localhost:15800",
 			"type": "string"
 		},
 		{
-			"id": "150a4297-6a13-4d14-a365-a7e8d7fdef30",
+			"id": "a0fc83ed-3193-4040-b862-072a95d0871a",
 			"key": "oper_token",
 			"value": "",
 			"type": "string"
 		},
 		{
-			"id": "df361a72-cd01-44db-9060-4ae1c3963804",
+			"id": "9468e3ab-211a-4d7b-8dd5-c37dca6b932a",
 			"key": "test_url",
 			"value": "http://192.168.5.253:15800",
 			"type": "string"
 		},
 		{
-			"id": "6a327776-88da-43f7-96df-c80f1b5d1a60",
+			"id": "ffd8733b-b483-40ee-a2c8-b2dfd081fedf",
 			"key": "admin_token",
 			"value": "",
 			"type": "string"

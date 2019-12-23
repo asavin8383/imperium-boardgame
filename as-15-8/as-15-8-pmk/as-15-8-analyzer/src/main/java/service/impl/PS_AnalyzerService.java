@@ -6,6 +6,7 @@ import checkUnits.CheckUnit;
 import checkUnits.CheckUnitType;
 import enums.CheckUnitJobResult;
 import execution.ExecutionPSJobResult;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,8 +19,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static enums.CheckUnitJobResult.COMPLETED;
-import static enums.CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED;
+import static enums.CheckUnitJobResult.*;
 
 /**
  * Сервис проверки результата работы робота, проверяющего ПС
@@ -28,10 +28,10 @@ import static enums.CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class PS_AnalyzerService implements AnalyzerService<ExecutionPSJobResult> {
 
-	@Autowired
-	private PODExchange podExchange;
+	private final PODExchange podExchange;
 
 	@Override
 	public AnalysisResult analyzeResult(ExecutionPSJobResult result) {
@@ -46,19 +46,22 @@ public class PS_AnalyzerService implements AnalyzerService<ExecutionPSJobResult>
 
 	private CheckUnitJobResult obtainResult(ExecutionPSJobResult result, PS_AnalysisJobResult analysisResult) {
 		CheckUnit checkUnit = result.getCheckUnit();
+		if (result.getCheckUnitJobResult() != null){
+			return result.getCheckUnitJobResult();
+		}
 		if (checkUnit.getType() == CheckUnitType.SEARCH_PHRASE){
 			List<String> urls = result.getUrls() == null ? new ArrayList<>() : result.getUrls();
 
-			String description = "Запрос проверки по фразам: " + result.getCheckUnit().getValue() + "\n";
-			description += "Спиосок найденных URL:\n";
+			StringBuilder description = new StringBuilder("Запрос проверки по фразам: " + result.getCheckUnit().getValue() + "\n");
+			description.append("Спиосок найденных URL:\n");
 			for(String url : urls){
-				description += url + "\n";
+				description.append(url).append("\n");
 			}
 			if (urls.size() == 0){
-				description += "<записи отсутствуют>";
+				description.append("<записи отсутствуют>");
 			}
-			description += "\n";
-			description += "Список запрещенных URL:\n";
+			description.append("\n");
+			description.append("Список запрещенных URL:\n");
 
 			Map<String, String> findUrls = new LinkedHashMap<>();
 			for(String url : urls){
@@ -69,12 +72,12 @@ public class PS_AnalyzerService implements AnalyzerService<ExecutionPSJobResult>
 			}
 			for(String url : findUrls.keySet()){
 			    String erdiId = findUrls.get(url);
-				description += "ERDI: " + erdiId + ", URL: " + url + "\n";
+				description.append("ERDI: ").append(erdiId).append(", URL: ").append(url).append("\n");
 			}
 			if (findUrls.size() == 0){
-				description += "<записи отсутствуют>";
+				description.append("<записи отсутствуют>");
 			}
-			analysisResult.setDescription(description);
+			analysisResult.setDescription(description.toString());
 
 			log.info("Результат проверки URL-ов (по фразе '{}'): кол-во найденных в ЕРДИ: {}",
 					checkUnit.getValue(), findUrls.size());

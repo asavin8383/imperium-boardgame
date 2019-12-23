@@ -53,6 +53,10 @@ ldap:
     base: OU=AS_15_8,DC=as158,DC=ru
     userDn: sa
     password: 1qaz@WSXQwerty123
+eureka:
+  instance:
+    metadata-map:
+      expectedAmount: 1
 
 ---
 
@@ -63,6 +67,10 @@ spring:
     banner-mode: "off"
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb
+eureka:
+  instance:
+    metadata-map:
+      expectedAmount: 1
 
 ---
 

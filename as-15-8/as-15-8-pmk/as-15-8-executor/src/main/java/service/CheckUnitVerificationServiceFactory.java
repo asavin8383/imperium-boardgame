@@ -1,20 +1,14 @@
 package service;
 
 import checkUnits.CheckUnitJob;
-import checkUnits.CheckUnitType;
 import common.ExecutorProperties;
 import enums.AccessToolUnit;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import robots.exceptions.ExecutionException;
 
-import javax.annotation.PostConstruct;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -28,10 +22,12 @@ public class CheckUnitVerificationServiceFactory {
         AccessToolUnit accessToolUnit = executorProperties.getAccessToolUnit(checkUnitJob.getAccessTool())
                 .orElseThrow(() ->
                         new RuntimeException("Ошибка получения сервиса для выполнения проверки. ПС/ПАСД не определен в системе: " + checkUnitJob.getAccessTool()));
+        assert services != null;
         for(CheckUnitVerificationService service : services){
-            if(service.getCheckUnitTypes().contains(checkUnitJob.getCheckUnit().getType()) &&
-                service.getAccessToolUnits().contains(accessToolUnit))
+            if(service.getSupportedTypes().containsKey(accessToolUnit)){
+                if(service.getSupportedTypes().get(accessToolUnit).contains(checkUnitJob.getCheckUnit().getType()))
                     return service;
+            }
         }
         throw new RuntimeException("Ошибка! Тип запрещенного ресурса " + checkUnitJob.getCheckUnit().getType() + " для проверки в ПС/ПАСД "+checkUnitJob.getAccessTool()+" не поддерживается");
     }

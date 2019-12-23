@@ -1,6 +1,8 @@
 package services.impl;
 
 import analysis.AnalysisResult;
+import arrangement.ArrangementStatusNotification;
+import enums.ArrangementEvents;
 import enums.CheckUnitJobResult;
 import enums.ErdiStatus;
 import enums.ExecutionStatus;
@@ -12,10 +14,12 @@ import model.Result;
 import model.ResultScreenShot;
 import model.enums.CheckType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import repositories.ErrorDetailResultRepo;
 import repositories.ResultRepo;
 import repositories.ResultScreenShotRepo;
+import restapi.ArrangementStatusProducer;
 import restapi.ErdiChecker;
 import services.AnalysisResultService;
 import services.AnalysisResultServiceFactory;
@@ -34,7 +38,7 @@ public class ResultServiceImpl implements ResultService {
     private final ResultScreenShotRepo resultScreenShotRepo;
     private final ErrorDetailResultRepo errorDetailResultRepo;
     private final ErdiChecker erdiChecker;
-
+    private final ArrangementStatusProducer arrangementStatusProducer;
     @Override
     @Transactional
     public Result saveJobResult(AnalysisResult analysisResult) {
@@ -52,7 +56,7 @@ public class ResultServiceImpl implements ResultService {
         }
         if((analysisResult.getScreenshot() != null && analysisResult.getScreenshot().length > 0) ||
                 (analysisResult.getEtalonScreenshot() != null && analysisResult.getEtalonScreenshot().length > 0)){
-            ResultScreenShot resultScreenShot = new ResultScreenShot();
+            ResultScreenShot resultScreenShot = resultScreenShotRepo.findById(result.getId()).orElseGet(ResultScreenShot::new);
             resultScreenShot.setResult(result);
             resultScreenShot.setScreenshot(analysisResult.getScreenshot());
             resultScreenShot.setEtalonScreenshot(analysisResult.getEtalonScreenshot());
@@ -66,8 +70,7 @@ public class ResultServiceImpl implements ResultService {
         Long notFinishedJobsCount = resultRepo.countByResultNullOrResultIn(arrangementID,
                 Arrays.asList(
                         CheckUnitJobResult.PLANNED,
-                        CheckUnitJobResult.RUNNING,
-                        CheckUnitJobResult.CAPTCHA_DETECTED)
+                        CheckUnitJobResult.RUNNING)
         );
         return notFinishedJobsCount > 0 ? ExecutionStatus.RUNNING : ExecutionStatus.FINISHED;
     }
@@ -78,7 +81,7 @@ public class ResultServiceImpl implements ResultService {
         Result result = findJobByID(jobID);
         result.setResult(checkStatus(erdiID, status));
         result.setEndDate(LocalDateTime.now());
-        if(status == CheckUnitJobResult.INTERNAL_ERROR) {
+        if(status == CheckUnitJobResult.INTERNAL_ERROR || status == CheckUnitJobResult.TIMEOUT_ERROR) {
             result.setCheckType(CheckType.ERROR);
             saveResultAsError(result, description);
         } else {
@@ -109,5 +112,17 @@ public class ResultServiceImpl implements ResultService {
             return CheckUnitJobResult.EXCLUDED;
         else
             return status;
+    }
+
+    public void sendNotificationsIfFinished(Long arrangementId) {
+        ExecutionStatus status = checkArrangementStatus(arrangementId);
+        if(status == ExecutionStatus.FINISHED) {
+            log.info("Мероприятие успешно завешено: " + arrangementId);
+            arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(arrangementId, ArrangementEvents.FINISH));
+        }
+    }
+
+    public ExecutionStatus getArrnagementExecutionStatus(Long arrangementId) {
+        return arrangementStatusProducer.getArrangementExcecutionStatus(arrangementId);
     }
 }

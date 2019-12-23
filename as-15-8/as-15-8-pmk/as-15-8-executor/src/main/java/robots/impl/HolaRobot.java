@@ -37,9 +37,7 @@ public class HolaRobot extends SeleniumRobot {
     			ProxyUtils.getFullProxy(
                         ExecutorProperties.getEtalon().getProxy().getType(),
                         ExecutorProperties.getEtalon().getProxy().getHost(),
-                        ExecutorProperties.getEtalon().getProxy().getPort(),
-                        ExecutorProperties.getEtalon().getProxy().getUsername(),
-                        ExecutorProperties.getEtalon().getProxy().getPassword()
+                        ExecutorProperties.getEtalon().getProxy().getPort()
     			)
     		);
 
@@ -93,7 +91,7 @@ public class HolaRobot extends SeleniumRobot {
             driver = DriverFactory.createChromeDriver(
                     ExecutorProperties.getSeleniumHubUrl(),
                     Platform.valueOf(getScriptParams().get(AccessToolParameter.PLATFORM)),
-                    getScriptParams().get(AccessToolParameter.APPLICATION),
+                    getScriptParams().get(AccessToolParameter.VERSION),
                     Collections.singletonList(extension)
             );
 

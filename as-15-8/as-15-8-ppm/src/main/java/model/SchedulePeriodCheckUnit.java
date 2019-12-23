@@ -7,7 +7,7 @@ import javax.validation.constraints.NotNull;
 
 @Data
 @Entity
-@Table(name = "schedule_period_check_units", schema = "schedule", uniqueConstraints = @UniqueConstraint(columnNames = {"schedule_period_arrangement_id", "executionNumber"}))
+@Table(name = "schedule_period_check_units", schema = "schedule")
 public class SchedulePeriodCheckUnit {
 
     @Id

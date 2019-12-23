@@ -1,11 +1,9 @@
 package execution;
 
+import checkUnits.CheckUnit;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
-
-import checkUnits.CheckUnit;
-import enums.AccessToolUnit;
 import lombok.Data;
 
 /**

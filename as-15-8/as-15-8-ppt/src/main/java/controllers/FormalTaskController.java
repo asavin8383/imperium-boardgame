@@ -45,6 +45,7 @@ public class FormalTaskController {
 	private String gatewayUrl;
 
 	private final static String SOIB_URI = "/security/user/operator";
+	private final static String POD_URI = "/pod/mission/mission_id";
 
 	@PostMapping(consumes=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseStatus(HttpStatus.CREATED)
@@ -180,6 +181,13 @@ public class FormalTaskController {
 		} catch (HttpClientErrorException | HttpServerErrorException ex) {
 			throw AS_15_8_PPT_Exception.logAndGet(log, String.format("Ошибка отправки запроса на получение списка операторов сервису аутентификации, код возврата %s", ex.getStatusCode()));
 		}
+	}
+
+	@GetMapping("/get_by_orig_id/{orig_id}")
+	public FormalTask getFromPod(@PathVariable String orig_id){
+		Long mission_id = oAuth2RestTemplate.getForObject(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(POD_URI).queryParam("orig_id", orig_id).build().toString(), Long.class);
+		FormalTask task = formalTaskRepo.getByMissionId(mission_id);
+		return task;
 	}
 
 }

@@ -7,11 +7,13 @@ import lombok.Data;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Comparator;
+import java.util.Objects;
 
 @Entity
 @Table(schema = "schedule", name = "schedule_check_units")
 @Data
-public class ScheduleCheckUnit implements Serializable {
+public class ScheduleCheckUnit implements Serializable, Comparable<ScheduleCheckUnit> {
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -31,4 +33,9 @@ public class ScheduleCheckUnit implements Serializable {
 
     @Column(nullable=false)
     private String checkUnitValue;
+
+    @Override
+    public int compareTo(ScheduleCheckUnit o) {
+        return Objects.compare(this, o, Comparator.comparing(ScheduleCheckUnit::getId));
+    }
 }

@@ -2,6 +2,7 @@ package robots.impl;
 
 import checkUnits.CheckUnit;
 import enums.AccessToolParameter;
+import enums.CheckUnitJobResult;
 import execution.ExecutionJobResult;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.*;
@@ -31,13 +32,12 @@ public class YandexRobot extends CommonDirectSearchRobot {
 
         equalityTest = EqualityTest.forCheckUnit(checkUnit);
         if (checkSuggestedLink(checkUnit.getValue(), equalityTest))
-            return createMessage(true);
+            return createMessage(true, null);
 
         if (captcha())
-            throw new Captcha_ExecutionException(
-                    "Обнаружена Captcha " + driver.getCurrentUrl());
+            return createMessage(true, CheckUnitJobResult.CAPTCHA_DETECTED);
 
-        return createMessage(checkPaginatedSearchResult());
+        return createMessage(checkPaginatedSearchResult(), null);
     }
 
     String extractUrl(WebElement element) {

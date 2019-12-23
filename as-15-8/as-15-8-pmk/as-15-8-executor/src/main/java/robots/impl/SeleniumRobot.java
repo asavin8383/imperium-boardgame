@@ -1,24 +1,21 @@
 package robots.impl;
 
-import java.io.IOException;
-import java.util.Map;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
-
+import checkUnits.CheckUnit;
+import common.ExecutorProperties;
 import enums.AccessToolParameter;
+import execution.ExecutionJobResult;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebDriver;
-
-import checkUnits.CheckUnit;
-import execution.ExecutionJobResult;
-import lombok.Getter;
 import robots.DriverFactory;
 import robots.Robot;
 import robots.exceptions.Cancel_ExecutionException;
 import robots.exceptions.ExecutionException;
-import common.ExecutorProperties;
+
+import java.io.IOException;
+import java.util.Map;
+import java.util.concurrent.CancellationException;
 
 /**
  * Скрипт робота проверки ПС/ПАСД
@@ -31,8 +28,6 @@ public abstract class SeleniumRobot implements Robot {
     protected WebDriver driver;
 	protected String proxy;
 	protected boolean enableLog;
-	
-	private CompletableFuture<ExecutionJobResult> currentExecutionFuture;
 
 	@Getter
 	private Map<AccessToolParameter, String> scriptParams;
@@ -58,25 +53,14 @@ public abstract class SeleniumRobot implements Robot {
 	public ExecutionJobResult run(CheckUnit checkUnit) throws ExecutionException {
 		try {
 			this.driver = createDriver(proxy, enableLog, checkUnit.getValue());
-			currentExecutionFuture = CompletableFuture.supplyAsync(() -> {
-					try {
-						return execute(checkUnit);
-					} catch (ExecutionException ex) {
-						throw new CompletionException(ex);
-					}
-				});
-			ExecutionJobResult jobResult = currentExecutionFuture.join();
-			return jobResult;
+			return execute(checkUnit);
 		} catch (CancellationException ex) {
 			throw new Cancel_ExecutionException(ex);
-		} catch (CompletionException ex) {
-			Throwable e = ex.getCause() == null ? ex : ex.getCause();
-			if(e instanceof ExecutionException)
-				throw (ExecutionException)e;
+		} catch (Exception ex) {
+			if(ex instanceof ExecutionException)
+				throw (ExecutionException)ex;
 			else
-				throw new ExecutionException("Ошибка при выполнении робота", e);
-		} finally {
-			currentExecutionFuture = null;
+				throw new ExecutionException("Ошибка при выполнении робота", ex);
 		}
 	}
 	
@@ -91,9 +75,9 @@ public abstract class SeleniumRobot implements Robot {
 	protected WebDriver createDriver(String proxy, boolean enableLog, String checkUrl) {
 		WebDriver driver = DriverFactory.createDriver(
 				ExecutorProperties.getSeleniumHubUrl(),
-				Platform.valueOf(getScriptParams().get(AccessToolParameter.PLATFORM)),
-				getScriptParams().get(AccessToolParameter.APPLICATION),
+				Platform.valueOf(getScriptParams().get(AccessToolParameter.PLATFORM).toUpperCase().trim()),
 				getScriptParams().get(AccessToolParameter.BROWSER),
+				getScriptParams().get(AccessToolParameter.VERSION),
 				proxy,
 				enableLog
 		);
@@ -102,8 +86,6 @@ public abstract class SeleniumRobot implements Robot {
 
 	@Override
 	public void destroy() throws IOException {
-		if(currentExecutionFuture != null && !currentExecutionFuture.isDone())
-			currentExecutionFuture.cancel(true);
 		close(driver);
 	}
 

@@ -10,16 +10,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import repositories.CustomErdiRepository;
 import repositories.ErdiContentJoinRepository;
 import repositories.ErdiTrafficUnitRepository;
+import webClients.PodWebClient;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping(path = "/traffic/unit/erdi",
-        produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(path = "/traffic/unit/erdi", produces = MediaType.APPLICATION_JSON_VALUE)
 @PreAuthorize("hasRole('ROLE_MANAGE_ARRANGEMENT')")
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Slf4j
@@ -28,9 +29,34 @@ public class ErdiTrafficUnitController {
     private final ErdiTrafficUnitRepository erdiTrafficUnitRepository;
     private final CustomErdiRepository customErdiRepository;
     private final ErdiContentJoinRepository erdiContentJoinRepository;
+    private final PodWebClient podWebClient;
 
     @PutMapping(path = "/{id}/add", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void addErdiToUnit(@PathVariable("id") ErdiTrafficUnit unit, @RequestBody List<Long> ids) {
+        saveErdi(unit, ids);
+    }
+
+    @PutMapping(path = "/{id}/addFromPod")
+    public Flux<List<Long>> addErdiToUnitFromPod(
+            @PathVariable("id") ErdiTrafficUnit unit,
+            @RequestParam(required = false) String idMask,
+            @RequestParam(required = false) List<String> categoryNames,
+            @RequestParam(required = false) List<String> decisionOrgs,
+            @RequestParam(required = false) List<String> infoTypeIds,
+            @RequestParam(required = false) List<String> registryNames,
+            @RequestParam(required = false) List<String> resourceTypes,
+            @RequestParam(required = false) String resourceValue,
+            @RequestParam(required = false) List<String> violationNames,
+            @RequestParam(required = false) Integer size) {
+
+        Flux<List<Long>> idss = podWebClient.getErdiIdList(idMask, categoryNames, decisionOrgs, infoTypeIds, registryNames, resourceTypes, resourceValue, violationNames, size);
+        List<Long> ids = idss.toStream().flatMap(List::stream).collect(Collectors.toList());
+
+        saveErdi(unit, ids);
+        return idss;
+    }
+
+    private void saveErdi(ErdiTrafficUnit unit, List<Long> ids) {
         if (unit == null)
             throw new AS_15_8_PPT_Exception("ErdiTrafficUnit not found");
 

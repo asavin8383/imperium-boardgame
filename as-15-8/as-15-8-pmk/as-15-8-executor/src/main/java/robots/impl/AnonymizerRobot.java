@@ -1,27 +1,26 @@
 package robots.impl;
 
-import static robots.utils.ScriptUtils.TIME_OUT_ERROR;
-
-import java.util.Map;
-
-import enums.AccessToolParameter;
-import org.openqa.selenium.Platform;
-import org.openqa.selenium.TimeoutException;
-import org.springframework.util.StringUtils;
-
 import checkUnits.CheckUnit;
+import common.ExecutorProperties;
+import enums.AccessToolParameter;
 import execution.ExecutionAnonymizerResult;
 import execution.ExecutionJobResult;
 import lombok.extern.slf4j.Slf4j;
+import org.openqa.selenium.Platform;
+import org.openqa.selenium.TimeoutException;
+import org.springframework.util.StringUtils;
+import robots.DriverFactory;
 import robots.ProxyUtils;
 import robots.exceptions.ExecutionException;
 import robots.exceptions.TimeoutScriptException;
-import common.ExecutorProperties;
 import robots.utils.CloudflareUtils;
-import robots.utils.ScriptUtils;
-import robots.DriverFactory;
 import robots.utils.HttpResponseHelper;
 import robots.utils.HttpResponseHelper.HttpResponseMeta;
+import robots.utils.ScriptUtils;
+
+import java.util.Map;
+
+import static robots.utils.ScriptUtils.TIME_OUT_ERROR;
 
 @Slf4j
 public abstract class AnonymizerRobot extends SeleniumRobot {
@@ -39,9 +38,7 @@ public abstract class AnonymizerRobot extends SeleniumRobot {
                 ProxyUtils.getFullProxy(
                         scriptParams.get(AccessToolParameter.PROXY_TYPE),
                         scriptParams.get(AccessToolParameter.PROXY_DNS_NAME),
-                        scriptParams.get(AccessToolParameter.PROXY_PORT),
-                        scriptParams.get(AccessToolParameter.PROXY_USER),
-                        scriptParams.get(AccessToolParameter.PROXY_PASSWORD)
+                        scriptParams.get(AccessToolParameter.PROXY_PORT)
                 ));
 
         ExecutorProperties.EtalonProperties etalonProperties = ExecutorProperties.getEtalon();
@@ -50,15 +47,13 @@ public abstract class AnonymizerRobot extends SeleniumRobot {
         this.etalonProxy = ProxyUtils.getFullProxy(
                 etalonProperties.getProxy().getType(),
                 etalonProperties.getProxy().getHost(),
-                etalonProperties.getProxy().getPort(),
-                etalonProperties.getProxy().getUsername(),
-                etalonProperties.getProxy().getPassword()
+                etalonProperties.getProxy().getPort()
         );
 
         String ignoreCaptchaApps = scriptParams.get(AccessToolParameter.IGNORE_CAPTCHA_APPS);
         ignoreCaptchaApps = ignoreCaptchaApps == null ? "" : ignoreCaptchaApps;
 
-        String appName = getScriptParams().get(AccessToolParameter.APPLICATION);
+        String appName = getScriptParams().get(AccessToolParameter.VERSION);
         appName = appName == null ? "" : appName.toLowerCase();
         ignoreCaptcha = ignoreCaptchaApps.toLowerCase().contains(appName);
 
@@ -94,8 +89,8 @@ public abstract class AnonymizerRobot extends SeleniumRobot {
             driver = DriverFactory.createDriver(
                     ExecutorProperties.getSeleniumHubUrl(),
                     Platform.valueOf(getScriptParams().get(AccessToolParameter.PLATFORM)),
-                    getScriptParams().get(AccessToolParameter.APPLICATION),
                     getScriptParams().get(AccessToolParameter.BROWSER),
+                    getScriptParams().get(AccessToolParameter.VERSION),
                     etalonProxy,
                     true);
 
