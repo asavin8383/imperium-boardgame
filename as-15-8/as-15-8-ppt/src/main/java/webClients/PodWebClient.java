@@ -20,6 +20,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import javax.annotation.PostConstruct;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -84,6 +85,9 @@ public class PodWebClient {
             , String resourceValue
             , List<String> violationNames
             , Integer size
+            , LocalDate startTime
+            , LocalDate endTime
+
     ) {
         return webClient.get()
                 .uri(UriComponentsBuilder
@@ -97,6 +101,8 @@ public class PodWebClient {
                         .queryParam("resourceValue", resourceValue)
                         .queryParam("violationNames,", violationNames == null ? null : String.join(",", violationNames))
                         .queryParam("size", size)
+                        .queryParam("startTime", startTime)
+                        .queryParam("endTime", endTime)
                         .build().toString())
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
