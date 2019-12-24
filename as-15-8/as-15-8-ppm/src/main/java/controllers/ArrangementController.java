@@ -202,7 +202,7 @@ public class ArrangementController {
     public int test1(@RequestParam("id") Optional<Arrangement> arrangement){
         List<ScheduleCheckUnit> checkUnits = scheduleCheckUnitRepo.findAllByArrangement(arrangement.get());
         if (checkUnits == null)
-            throw new AS_15_8_PPM_Exception("Ошибка расчёта процента выполнения поручения. checkUnits null");
+            throw new AS_15_8_PPM_Exception("Ошибка расчёта процента выполнения мероприятия. checkUnits null");
         return checkUnits.size();
     }
 
