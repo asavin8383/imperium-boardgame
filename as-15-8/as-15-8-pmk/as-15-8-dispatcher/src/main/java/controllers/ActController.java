@@ -3,6 +3,7 @@ package controllers;
 import enums.CheckUnitJobResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import model.NmapDetailResult;
 import model.Result;
 import model.ResultScreenShot;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +15,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
+import repositories.NmapDetailResultRepo;
 import repositories.ResultRepo;
 import repositories.ResultScreenShotRepo;
+import rest.ActAttachment;
 import rest.ActCheckResult;
 import services.ActService;
 
@@ -24,6 +27,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -38,6 +42,7 @@ public class ActController {
     private final ActService actService;
     private final ResultRepo resultRepo;
     private final ResultScreenShotRepo resultScreenShotRepo;
+    private final NmapDetailResultRepo nmapDetailResultRepo;
 
     private DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
@@ -76,20 +81,24 @@ public class ActController {
     }
 
     @GetMapping(path = "/screenshots", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<String> getActScreenshots(Long arrangementId) {
+    public Flux<ActAttachment> getActScreenshots(Long arrangementId) {
         log.info("Подготовка скриншотов для акта. ID мероприятия: {}", arrangementId);
         List<CheckUnitJobResult> resultFilter = Collections.singletonList(CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED);
         PageRequest page = PageRequest.of(0, maxCountActScreenShots.intValue());
-        List<ResultScreenShot> screenShots = resultScreenShotRepo
-                .findCheckedByArrangementIdAndResultIn(arrangementId, resultFilter);
-        if(screenShots.size() == 0){
-            screenShots = resultScreenShotRepo
-                    .findByArrangementIdAndResultIn(arrangementId, resultFilter, page);
+        List<Result> results = resultRepo.findCheckedResultsForAct(arrangementId, resultFilter);
+        if(results.size() == 0){
+            results = resultRepo.findResultsForAct(arrangementId, resultFilter, page);
         }
-
-        return Flux.fromIterable(screenShots)
-                .map(this::createActBase64Screenshot)
-                .filter(Objects::nonNull);
+        List<Long> resultIds = results.stream()
+                .mapToLong(Result::getId)
+                .boxed()
+                .collect(Collectors.toList());
+        return Flux.concat(
+                Flux.fromIterable(resultScreenShotRepo.findByResultIds(resultIds))
+                        .map(this::createActBase64Screenshot),
+                Flux.fromIterable(nmapDetailResultRepo.findByResultIds(resultIds))
+                        .map(this::createActNmapLog)
+        ).filter(Objects::nonNull);
     }
 
     private ActCheckResult createActCheckResult(Result result){
@@ -105,11 +114,23 @@ public class ActController {
         return checkResult;
     }
 
-    private String createActBase64Screenshot(ResultScreenShot resultScreenShot){
+    private ActAttachment createActBase64Screenshot(ResultScreenShot resultScreenShot){
         byte[] screen = resultScreenShot.getScreenshot();
         if (screen != null && screen.length > 0)
-            return Base64.getEncoder().encodeToString(screen);
+            return new ActAttachment(
+                    resultScreenShot.getId(),
+                    ActAttachment.ActAttachmentType.SCREENSHOT,
+                    Base64.getEncoder().encodeToString(screen)
+            );
         return null;
+    }
+
+    private ActAttachment createActNmapLog(NmapDetailResult nmapResult){
+        return new ActAttachment(
+                nmapResult.getId(),
+                ActAttachment.ActAttachmentType.NMAP_LOG,
+                nmapResult.getLog()
+        );
     }
 
     private Date ldt2date(LocalDateTime ldt){

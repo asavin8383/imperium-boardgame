@@ -45,7 +45,17 @@ public interface ResultRepo extends JpaRepository<Result, Long>, ResultRepoAdvan
 			"where r.arrangementId = :arrangementId and " +
 			"r.result in(:results)")
 	List<Result> findResultsForAct(@Param("arrangementId") Long arrangementId, @Param("results") Collection<CheckUnitJobResult> results);
-	Page<Result> findByArrangementIdAndResultIn(Long arrangementId, Collection<CheckUnitJobResult> results, Pageable pageable);
+
+	@Query("select r from Result r " +
+			"where r.arrangementId = :arrangementId and " +
+			"r.result in(:results)")
+	List<Result> findResultsForAct(@Param("arrangementId") Long arrangementId, @Param("results") Collection<CheckUnitJobResult> results, Pageable pageable);
+
+	@Query("select r from Result r " +
+			"where r.arrangementId = :arrangementId and " +
+			"r.result in(:results) and " +
+			"r.checkForAct = true")
+	List<Result> findCheckedResultsForAct(@Param("arrangementId") Long arrangementId, @Param("results") Collection<CheckUnitJobResult> results);
 
 	Page<Result> findAllByArrangementId(Long id, Pageable pageable);
 	@Query("select DISTINCT r from Result r" +

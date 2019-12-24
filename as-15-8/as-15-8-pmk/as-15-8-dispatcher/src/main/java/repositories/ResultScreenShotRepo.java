@@ -1,13 +1,10 @@
 package repositories;
 
-import enums.CheckUnitJobResult;
 import model.ResultScreenShot;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -16,16 +13,7 @@ import java.util.List;
  */
 public interface ResultScreenShotRepo extends JpaRepository<ResultScreenShot, Long> {
 
-
-    @Query("select rs from ResultScreenShot rs " +
-            "join rs.result r on r.arrangementId = :arrangementId and " +
-            "r.result in (:result) and " +
-            "r.checkForAct = true")
-    List<ResultScreenShot> findCheckedByArrangementIdAndResultIn(@Param("arrangementId") Long arrangementId, @Param("result") Collection<CheckUnitJobResult> result);
-
-    @Query("select rs from ResultScreenShot rs " +
-            "join rs.result r on r.arrangementId = :arrangementId and " +
-            "r.result in (:result)")
-    List<ResultScreenShot> findByArrangementIdAndResultIn(@Param("arrangementId") Long arrangementId, @Param("result") Collection<CheckUnitJobResult> result, Pageable pageable);
-
+    @Query("select r from ResultScreenShot r " +
+            "where r.result in :ids")
+    List<ResultScreenShot> findByResultIds(@Param("ids") List<Long> resultIds);
 }
