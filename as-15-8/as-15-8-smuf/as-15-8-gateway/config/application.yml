@@ -36,7 +36,7 @@ zuul:
   sensitiveHeaders:
   ignored-headers: Access-Control-Allow-Credentials, Access-Control-Allow-Origin
   host:
-    socket-timeout-millis: 5000
+    socket-timeout-millis: 30000
     max-per-route-connections: 5000
     max-total-connections: 5000
   routes:
