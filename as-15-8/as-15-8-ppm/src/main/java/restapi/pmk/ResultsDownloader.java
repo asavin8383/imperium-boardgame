@@ -24,13 +24,13 @@ public class ResultsDownloader {
 
     private final OAuth2RestTemplate oAuth2RestTemplate;
 
-    public Integer getNotPlannedNotRunningResults(Long arrangementId) {
+    public Long getNotPlannedNotRunningResults(Long arrangementId) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         log.debug("Отправка запроса на получение количества заверёшнных результатов в ПМК: {}", arrangementId);
         try {
-            return oAuth2RestTemplate.getForObject(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(URI).queryParam("id", arrangementId).build().toString(), Integer.class);
+            return oAuth2RestTemplate.getForObject(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(URI).queryParam("id", arrangementId).build().toString(), Long.class);
             //log.info("Запрос на получение количества заверёшнных результатов успешно отправлен в ПМК");
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
             throw AS_15_8_PPM_Exception.logAndGet(log, String.format("Ошибка отправки запроса на получение количества заверёшнных результатов в ПМК, код возврата %s", ex.getStatusCode()));
