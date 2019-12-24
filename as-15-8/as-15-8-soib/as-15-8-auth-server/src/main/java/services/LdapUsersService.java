@@ -1,7 +1,6 @@
 package services;
 
 import lombok.RequiredArgsConstructor;
-import model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ldap.core.AttributesMapper;
 import org.springframework.ldap.core.LdapTemplate;
@@ -9,6 +8,7 @@ import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.ldap.query.LdapQuery;
 import org.springframework.ldap.query.LdapQueryBuilder;
 import org.springframework.stereotype.Service;
+import users.User;
 
 import javax.naming.directory.Attribute;
 import java.util.List;

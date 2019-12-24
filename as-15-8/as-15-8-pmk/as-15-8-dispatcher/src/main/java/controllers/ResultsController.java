@@ -23,10 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import repositories.*;
 import services.ResultService;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Creation date: 29.05.2019
@@ -163,8 +160,11 @@ public class ResultsController {
 
     @PreAuthorize("hasRole('ROLE_SYSTEM')")
     @GetMapping(path = "/not_planned_not_running")
-    public Integer getFinishedResults(@RequestParam Long id){
-        return resultRepo.getNotRunningNotPlanned(id);
+    public Long getFinishedResults(@RequestParam Long id){
+        return resultRepo.countByNotResultIn(id, Arrays.asList(
+                CheckUnitJobResult.PLANNED,
+                CheckUnitJobResult.RUNNING));
+       //return resultRepo.getNotRunningNotPlanned(id);
     }
 
 }
