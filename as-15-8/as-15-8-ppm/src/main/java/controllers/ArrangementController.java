@@ -191,13 +191,13 @@ public class ArrangementController {
 
         Integer notPlannedNotRunning = resultsDownloader.getNotPlannedNotRunningResults(arrangement.get().getId());
         if (notPlannedNotRunning == null)
-            throw new AS_15_8_PPM_Exception("Ошибка расчёта процента выполнения мероприятия. Число результатов RUNNING и PLANNED null");
+            throw new AS_15_8_PPM_Exception("Ошибка расчёта процента выполнения мероприятия. Число результатов not RUNNING и PLANNED null");
 
         int percent = (notPlannedNotRunning/checkUnits.size()) * 100;
         return percent;
     }
 
-    //@PreAuthorize("hasRole('ROLE_FORMAL_TASK')")
+
     @GetMapping(path = "/test_checkUnits")
     public int test1(@RequestParam("id") Optional<Arrangement> arrangement){
         List<ScheduleCheckUnit> checkUnits = scheduleCheckUnitRepo.findAllByArrangement(arrangement.get());
@@ -210,7 +210,13 @@ public class ArrangementController {
     public int test2(@RequestParam("id") Optional<Arrangement> arrangement){
         Integer notPlannedNotRunning = resultsDownloader.getNotPlannedNotRunningResults(arrangement.get().getId());
         if (notPlannedNotRunning == null)
-            throw new AS_15_8_PPM_Exception("Ошибка расчёта процента выполнения мероприятия. Число результатов RUNNING и PLANNED null");
+            throw new AS_15_8_PPM_Exception("Ошибка расчёта процента выполнения мероприятия. Число результатов not RUNNING и PLANNED null");
         return notPlannedNotRunning;
+    }
+
+    @GetMapping(path = "/test3")
+    public int test3(@RequestParam("id") Optional<Arrangement> arrangement){
+
+        return (20/115)*100;
     }
 }
