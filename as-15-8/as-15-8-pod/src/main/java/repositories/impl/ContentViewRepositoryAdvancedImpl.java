@@ -13,10 +13,7 @@ import repositories.ContentViewRepositoryAdvanced;
 import repositories.helper.CriteriaHelper;
 
 import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -178,8 +175,11 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
             predicates.add(rootContentView.get(ContentView_.VIOLATION_NAME).in(violationNames));
         }
 
-        if (startTime != null && endTime != null) {
-            predicates.add(criteriaBuilder.between(rootContentView.get(ContentView_.INCLUDE_TIME), startTime, endTime));
+        if (startTime != null) {
+            predicates.add(criteriaBuilder.greaterThanOrEqualTo(rootContentView.get(ContentView_.INCLUDE_TIME), startTime));
+        }
+        if (endTime != null) {
+            predicates.add(criteriaBuilder.lessThanOrEqualTo(rootContentView.get(ContentView_.INCLUDE_TIME), endTime));
         }
 
         return predicates;
