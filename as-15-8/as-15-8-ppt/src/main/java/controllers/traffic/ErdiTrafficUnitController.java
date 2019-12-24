@@ -57,7 +57,7 @@ public class ErdiTrafficUnitController {
         Flux<List<Long>> idss = podWebClient.getErdiIdList(idMask, categoryNames, decisionOrgs, infoTypeIds,
                 registryNames, resourceTypes, resourceValue, violationNames, size,
                 startTime,
-                startTime);
+                endTime);
         List<Long> ids = idss.toStream().flatMap(List::stream).collect(Collectors.toList());
 
         saveErdi(unit, ids);
