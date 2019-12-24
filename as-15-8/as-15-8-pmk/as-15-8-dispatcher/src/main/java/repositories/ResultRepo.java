@@ -87,4 +87,7 @@ public interface ResultRepo extends JpaRepository<Result, Long>, ResultRepoAdvan
 
 	@Query("SELECT count(res) FROM Result res WHERE res.arrangementId = :id AND (res.result NOT IN ('PLANNED', 'RUNNING'))")
 	Integer getNotRunningNotPlanned(@Param("id") Long id);
+
+	@Query("SELECT count(res) FROM Result res WHERE res.arrangementId = :id AND (res.result NOT IN :results)")
+	Long countByNotResultIn(@Param("id") Long id, @Param("results") List<CheckUnitJobResult> results);
 }

@@ -142,7 +142,13 @@ public class ActService {
 
         for (ActAttachment attachment : attachments) {
             MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-            String name = attachment.getId().toString();
+            String name = ""; //
+            if(attachment.getType().equals(ActAttachment.ActAttachmentType.SCREENSHOT)){
+                name = "images";
+            } else {
+                name = "texts";
+            }
+            name+= "["+attachment.getId().toString()+"]";
 
             ContentDisposition cd = ContentDisposition
                     .builder("form-data")

@@ -187,13 +187,13 @@ public class ArrangementController {
         List<ScheduleCheckUnit> checkUnits = scheduleCheckUnitRepo.findAllByArrangement(arrangement.get());
 
         if (checkUnits == null)
-            throw new AS_15_8_PPM_Exception("Ошибка расчёта процента выполнения поручения. checkUnits null");
+            throw new AS_15_8_PPM_Exception("Ошибка расчёта процента выполнения мероприятия. checkUnits null");
 
-        Integer notPlannedNotRunning = resultsDownloader.getNotPlannedNotRunningResults(arrangement.get().getId());
+        Long notPlannedNotRunning = resultsDownloader.getNotPlannedNotRunningResults(arrangement.get().getId());
         if (notPlannedNotRunning == null)
-            throw new AS_15_8_PPM_Exception("Ошибка расчёта процента выполнения поручения. Число результатов RUNNING и PLANNED null");
+            throw new AS_15_8_PPM_Exception("Ошибка расчёта процента выполнения мероприятия. Число результатов not RUNNING и PLANNED null");
 
-        int percent = (notPlannedNotRunning/checkUnits.size()) * 100;
+        int percent = (int) ((notPlannedNotRunning* 100)/checkUnits.size());
         return percent;
     }
 

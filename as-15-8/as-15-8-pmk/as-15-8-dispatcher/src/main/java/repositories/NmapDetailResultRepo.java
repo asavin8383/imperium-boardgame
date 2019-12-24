@@ -14,6 +14,6 @@ import java.util.List;
 public interface NmapDetailResultRepo extends JpaRepository<NmapDetailResult, Long> {
 
     @Query("select r from NmapDetailResult r " +
-            "where r.result in :ids")
+            "where r.id in :ids")
     List<NmapDetailResult> findByResultIds(@Param("ids") List<Long> resultIds);
 }

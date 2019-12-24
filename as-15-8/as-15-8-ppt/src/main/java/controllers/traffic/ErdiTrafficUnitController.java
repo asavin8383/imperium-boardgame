@@ -7,6 +7,7 @@ import model.enums.TrafficUnitType;
 import model.traffic.ErdiTrafficUnit;
 import model.traffic.ErdiTrafficUnitContent;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +17,7 @@ import repositories.ErdiContentJoinRepository;
 import repositories.ErdiTrafficUnitRepository;
 import webClients.PodWebClient;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,9 +49,15 @@ public class ErdiTrafficUnitController {
             @RequestParam(required = false) List<String> resourceTypes,
             @RequestParam(required = false) String resourceValue,
             @RequestParam(required = false) List<String> violationNames,
-            @RequestParam(required = false) Integer size) {
+            @RequestParam(required = false) Integer size,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startTime,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endTime
+            ) {
 
-        Flux<List<Long>> idss = podWebClient.getErdiIdList(idMask, categoryNames, decisionOrgs, infoTypeIds, registryNames, resourceTypes, resourceValue, violationNames, size);
+        Flux<List<Long>> idss = podWebClient.getErdiIdList(idMask, categoryNames, decisionOrgs, infoTypeIds,
+                registryNames, resourceTypes, resourceValue, violationNames, size,
+                startTime,
+                endTime);
         List<Long> ids = idss.toStream().flatMap(List::stream).collect(Collectors.toList());
 
         saveErdi(unit, ids);

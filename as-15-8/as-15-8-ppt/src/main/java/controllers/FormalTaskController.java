@@ -23,12 +23,14 @@ import org.springframework.web.util.UriComponentsBuilder;
 import repositories.FormalTaskRepository;
 import rest.MissionData;
 import services.ClientNotificationService;
+import users.User;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(path="/formal_tasks", produces=MediaType.APPLICATION_JSON_VALUE)
@@ -142,6 +144,7 @@ public class FormalTaskController {
 	private FormalTask replaceFields(FormalTask newTask, FormalTask storedTask){
 		storedTask.setTitle(newTask.getTitle());
 		storedTask.setModificationDate(LocalDateTime.now());
+		storedTask.setDeadlineDate(newTask.getDeadlineDate());
 		storedTask.setAgreed(newTask.isAgreed());
 		storedTask.setAuthor(newTask.getAuthor());
 		storedTask.setPriority(newTask.getPriority());
@@ -172,9 +175,9 @@ public class FormalTaskController {
 		log.info("Отправка запроса на получение списка операторов сервису аутентификации");
 		try {
 			List<String> operators = new ArrayList<>();
-			String[] queryResult = oAuth2RestTemplate.getForObject(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(SOIB_URI).build().toString(), String[].class);
+			User[] queryResult = oAuth2RestTemplate.getForObject(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(SOIB_URI).build().toString(), User[].class);
 			if(queryResult != null){
-				operators = Arrays.asList(queryResult);
+				operators = Arrays.asList(queryResult).stream().map(user -> user.getLogin()).collect(Collectors.toList());
 			}
 			log.info("Получено {} операторов", operators.size());
 			return operators;

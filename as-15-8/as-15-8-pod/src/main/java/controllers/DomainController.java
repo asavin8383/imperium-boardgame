@@ -36,6 +36,7 @@ public class DomainController {
     private final DomainMaskRepo domainMaskRepo;
     private final DomainRepo domainRepo;
 
+    @PreAuthorize("hasRole('ROLE_SYSTEM')")
     @GetMapping(path = "/domains")
     public Set<String> getDomainsByMaskAsStrings(@RequestParam String domainMask){
         return domainRepo.getDomainsByMaskIdAsStrings(domainMask);
