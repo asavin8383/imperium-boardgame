@@ -14,6 +14,6 @@ import java.util.List;
 public interface ResultScreenShotRepo extends JpaRepository<ResultScreenShot, Long> {
 
     @Query("select r from ResultScreenShot r " +
-            "where r.result in :ids")
+            "where r.id in :ids")
     List<ResultScreenShot> findByResultIds(@Param("ids") List<Long> resultIds);
 }
