@@ -314,6 +314,7 @@ public class ErdiLoaderService {
 
     private ContentVersion createContentVersion(RegisterRest registerRest, DeltaIdEntry deltaIdEntry) throws ParseException {
         DateFormat dateFormat = new SimpleDateFormat(actualDateFormat);
+        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
 
         ContentVersion contentVersion = new ContentVersion();
         contentVersion.setRegUpdateTime(deltaIdEntry == null ? registerRest.updateTime : null);

@@ -15,9 +15,13 @@ import restapi.*;
 import services.ActService;
 import services.MissionService;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 @Configuration
 @RunWith(SpringRunner.class)
@@ -93,6 +97,28 @@ public class RestTest
         actRequest.setEndDate("");
 
         actService.createAct(actRequest);
+    }
+
+    @Test
+    public void testNext() throws ParseException {
+        Date date = erdiRestClient.getActualContentDate();
+        System.out.println("Date = ");
+        System.out.println(date.toString());
+
+        String format = "yyyy-MM-dd HH:mm:ss";
+        SimpleDateFormat dateFormat = new SimpleDateFormat(format);
+        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+        String dateStr = dateFormat.format(date);
+        System.out.println(dateStr);
+
+        // "yyyy-MM-dd'T'HH:mm:ss";
+        DateFormat dateFormat2 = new SimpleDateFormat(format);
+        dateFormat2.setTimeZone(TimeZone.getTimeZone("GMT"));
+        Date date2 = dateFormat2.parse(dateStr);
+        System.out.println("Date2 = ");
+        System.out.println(date2);
+        String dateStr2 = dateFormat.format(date2);
+        System.out.println(dateStr2);
     }
 
     @Test
