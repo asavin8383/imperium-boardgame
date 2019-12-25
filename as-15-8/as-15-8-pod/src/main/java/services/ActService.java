@@ -85,16 +85,18 @@ public class ActService {
             achRes.setCheckUnitValue(actCheckResult.getCheckUnitValue());
             achRes.setDate(actCheckResult.getDate());
             achRes.setForbiddenContentDetected(actCheckResult.isForbiddenContentDetected());
-            contentRepository.findActCheckResultPodInfo(actCheckResult.getContentId())
-                .map(actCheckResultPodInfo -> {
-                    achRes.setContentId(actCheckResultPodInfo.getErdiId());
-                    achRes.setIncludeTime(dateFormat.format(actCheckResultPodInfo.getIncludeTime()));
-                    return true;
-                    }
-                ).orElseGet(() -> {
+            try {
+                contentRepository.findActCheckResultPodInfo(actCheckResult.getContentId())
+                        .map(actCheckResultPodInfo -> {
+                                    achRes.setContentId(actCheckResultPodInfo.getErdiId());
+                                    achRes.setIncludeTime(dateFormat.format(actCheckResultPodInfo.getIncludeTime()));
+                                    return true;
+                                }
+                        ).orElseGet(() -> {
                     log.warn("Для результата проверки с ИД: {} в БД ПОД не было найдено данных об ИД ЕРДИ и дате включения в ЕРДИ", actCheckResult.getCheckResultId());
                     return false;
-                    });
+                });
+            } catch (Exception ex) {}
             /*
             if (StringUtils.isEmpty(actCheckResult.getDate())){
                 DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
