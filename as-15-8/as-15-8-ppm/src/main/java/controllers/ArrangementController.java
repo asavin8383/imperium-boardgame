@@ -193,7 +193,7 @@ public class ArrangementController {
         if (notPlannedNotRunning == null)
             throw new AS_15_8_PPM_Exception("Ошибка расчёта процента выполнения мероприятия. Число результатов not RUNNING и PLANNED null");
 
-        int percent = (int) ((notPlannedNotRunning* 100)/checkUnits.size());
+        int percent = (int) ((notPlannedNotRunning*100)/checkUnits.size());
         return percent;
     }
 
