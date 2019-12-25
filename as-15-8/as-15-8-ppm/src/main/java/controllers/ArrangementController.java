@@ -7,17 +7,13 @@ import common.SchedulerProperties;
 import enums.AccessToolUnit;
 import enums.ArrangementEvents;
 import enums.Protocol;
-import enums.SortingDirection;
 import exceptions.AS_15_8_PPM_Exception;
-import helpers.SortingHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Arrangement;
 import model.ScheduleCheckUnit;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -181,10 +177,11 @@ public class ArrangementController {
         return scheduleCheckUnit;
     }
 
-    @PreAuthorize("hasRole('ROLE_VIEW_RESULT')")
+    @PreAuthorize("hasAnyRole('ROLE_VIEW_RESULT','ROLE_SYSTEM')")
     @GetMapping(path = "/completion")
     public int getArrangementCompletion(@RequestParam("id") Optional<Arrangement> arrangement){
-        arrangement.orElseThrow(() -> new AS_15_8_PPM_Exception("Ошибка поиска! Такого поручения не существует."));
+
+        arrangement.orElseThrow(() -> new AS_15_8_PPM_Exception("Ошибка поиска! Такого мероприятия не существует."));
         List<ScheduleCheckUnit> checkUnits = scheduleCheckUnitRepo.findAllByArrangement(arrangement.get());
 
         if (checkUnits == null)
