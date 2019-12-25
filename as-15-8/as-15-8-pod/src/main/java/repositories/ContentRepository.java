@@ -23,6 +23,6 @@ public interface ContentRepository extends JpaRepository<Content, Long>, Diction
         "select new model.rest.control.ActCheckResultPodInfo(c.erdiId, ci.includeTime) from Content c " +
             "join model.scheme.ContentInfo ci on c.id = ci.content.id and c.id = :content_id"
     )
-    Optional<ActCheckResultPodInfo> findActCheckResultPodInfo(@Param("content_id") Long contentId);
+    List<ActCheckResultPodInfo> findActCheckResultPodInfo(@Param("content_id") Long contentId);
 
 }
