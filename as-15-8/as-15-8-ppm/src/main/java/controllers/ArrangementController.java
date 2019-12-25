@@ -181,6 +181,7 @@ public class ArrangementController {
         return scheduleCheckUnit;
     }
 
+    @PreAuthorize("hasRole('ROLE_VIEW_RESULT')")
     @GetMapping(path = "/completion")
     public int getArrangementCompletion(@RequestParam("id") Optional<Arrangement> arrangement){
         arrangement.orElseThrow(() -> new AS_15_8_PPM_Exception("Ошибка поиска! Такого поручения не существует."));
