@@ -54,7 +54,7 @@ public class ArrangementStatusProducer {
     private Optional<Integer> getCompletionFromPPM(Long arrangementId) {
         try {
             Integer completion = restTemplate.getForObject(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(PPM_COMPLETION_ENDPOINT).queryParam("id", arrangementId).build().toString(), Integer.class);
-            return new Optional<>(completion);
+            return Optional.ofNullable(completion);
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
             throw AS_15_8_DispatcherException.logAndGet(log, String.format("Ошибка получения процента выполнения мероприятия из ППМ, код возврата %s", arrangementId, ex.getStatusCode()));
         }
