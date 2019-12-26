@@ -14,8 +14,9 @@ import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.util.Optional;
 
 /**
  * Created by san
@@ -27,19 +28,33 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class ArrangementStatusProducer {
 
     private final String PPT_STATUS_ENDPOINT = "/ppt/arrangements/status";
-    //private final String PPM_STATUS_ENDPOINT = "/ppm/arrangements/{id}/close";
     private final String PPM_STATUS_ENDPOINT = "/ppm/arrangements/close";
     private final String PPT_ARRANGEMENT_EXECUTION_STATUS = "/arrangements/execution_status";
-
+    private final String PPM_COMPLETION_ENDPOINT = "/ppm/arrangements/completion";
     private final OAuth2RestTemplate restTemplate;
+    private final Integer FINISHED = 100;
 
     @Value("${gateway.url}")
     private String gatewayUrl;
 
     public void sendArrangementStatusMessage(ArrangementStatusNotification arrangementStatusNotification){
-        sendToPPT(arrangementStatusNotification);
-        sendToPPM(arrangementStatusNotification.getArrangementId());
+        Long arrId = arrangementStatusNotification.getArrangementId();
+        Optional<Integer> completion = getCompletionFromPPM(arrId);
+        if (completion.isPresent()) {
+            if (completion.get().equals(FINISHED)) {
+                sendToPPT(arrangementStatusNotification);
+                sendToPPM(arrangementStatusNotification.getArrangementId());
+            }
+        }
+    }
 
+    private Optional<Integer> getCompletionFromPPM(Long arrangementId) {
+        try {
+            Integer completion = restTemplate.getForObject(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(PPM_COMPLETION_ENDPOINT).queryParam("id", arrangementId).build().toString(), Integer.class);
+            return Optional.ofNullable(completion);
+        } catch (HttpClientErrorException | HttpServerErrorException ex) {
+            throw AS_15_8_DispatcherException.logAndGet(log, String.format("Ошибка получения процента выполнения мероприятия из ППМ, код возврата %s", arrangementId, ex.getStatusCode()));
+        }
     }
 
     private void sendToPPT(ArrangementStatusNotification arrangementStatusNotification){
@@ -62,7 +77,6 @@ public class ArrangementStatusProducer {
         log.info("Отправка сообщения с изменением статуса мероприятия {} в ППМ", arrangementId);
         try {
             restTemplate.put(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(PPM_STATUS_ENDPOINT).queryParam("id", arrangementId).build().toString(), requestEntity);
-            //restTemplate.put(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(PPM_STATUS_ENDPOINT).buildAndExpand(arrangementId).toString(), requestEntity);
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
             throw AS_15_8_DispatcherException.logAndGet(log, String.format("Ошибка отправки сообщения с изменением статуса мероприятия %d в ППМ, код возврата %s", arrangementId, ex.getStatusCode()));
         }
@@ -71,9 +85,6 @@ public class ArrangementStatusProducer {
 
 
     public ExecutionStatus getArrangementExcecutionStatus(Long arrangementId) {
-        HttpHeaders requestHeaders = new HttpHeaders();
-        requestHeaders.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<?> requestEntity = new HttpEntity<Object>(requestHeaders);
         log.info("Отправка сообщения с запросом статуса мероприятия {} в ППТ", arrangementId);
         try {
             return restTemplate.getForObject(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(PPT_ARRANGEMENT_EXECUTION_STATUS).queryParam("id", arrangementId).build().toString(), ExecutionStatus.class);

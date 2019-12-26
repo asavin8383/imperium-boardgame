@@ -1,12 +1,11 @@
 package repositories;
 
 import model.Robot;
-import model.RobotStatus;
-import model.RobotType;
+import model.enums.RobotStatus;
+import model.enums.RobotType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 

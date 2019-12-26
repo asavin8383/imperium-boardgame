@@ -166,9 +166,9 @@ public class VPNRobot extends SeleniumRobot {
 
     @Override
     public void destroy() throws IOException {
-    	if(pageGetterFuture != null && !pageGetterFuture.isDone())
+    	if(pageGetterFuture != null)
     		pageGetterFuture.cancel(true);
-    	if(etalonPageGetterFuture != null && !etalonPageGetterFuture.isDone())
+    	if(etalonPageGetterFuture != null)
     		etalonPageGetterFuture.cancel(true);
     	close(etalonDriver);
     	super.destroy();

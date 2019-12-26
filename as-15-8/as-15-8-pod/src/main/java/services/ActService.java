@@ -7,10 +7,7 @@ import exceptions.AS_15_8_POD_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import model.rest.control.AccessToolRobot;
-import model.rest.control.AccessToolRobotType;
-import model.rest.control.ActCheckResultPPP;
-import model.rest.control.ActRequestPPP;
+import model.rest.control.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -85,16 +82,14 @@ public class ActService {
             achRes.setCheckUnitValue(actCheckResult.getCheckUnitValue());
             achRes.setDate(actCheckResult.getDate());
             achRes.setForbiddenContentDetected(actCheckResult.isForbiddenContentDetected());
-            contentRepository.findActCheckResultPodInfo(actCheckResult.getContentId())
-                .map(actCheckResultPodInfo -> {
+            try {
+                List<ActCheckResultPodInfo> infos = contentRepository.findActCheckResultPodInfo(actCheckResult.getContentId());
+                if(infos.size() > 0) {
+                    ActCheckResultPodInfo actCheckResultPodInfo = infos.get(0);
                     achRes.setContentId(actCheckResultPodInfo.getErdiId());
                     achRes.setIncludeTime(dateFormat.format(actCheckResultPodInfo.getIncludeTime()));
-                    return true;
-                    }
-                ).orElseGet(() -> {
-                    log.warn("Для результата проверки с ИД: {} в БД ПОД не было найдено данных об ИД ЕРДИ и дате включения в ЕРДИ", actCheckResult.getCheckResultId());
-                    return false;
-                    });
+                }
+            } catch (Exception ex) {}
             /*
             if (StringUtils.isEmpty(actCheckResult.getDate())){
                 DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");

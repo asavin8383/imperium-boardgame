@@ -1,7 +1,7 @@
 package handlers;
 
 import lombok.RequiredArgsConstructor;
-import model.SystemModeUnit;
+import model.enums.SystemModeUnit;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.HandlerInterceptor;
 import repositories.SystemModesRepository;

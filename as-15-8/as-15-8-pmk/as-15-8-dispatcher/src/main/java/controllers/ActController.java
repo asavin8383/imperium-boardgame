@@ -89,6 +89,9 @@ public class ActController {
         if(results.size() == 0){
             results = resultRepo.findResultsForAct(arrangementId, resultFilter, page);
         }
+        if(results.size()==0){
+            return Flux.empty();
+        }
         List<Long> resultIds = results.stream()
                 .mapToLong(Result::getId)
                 .boxed()

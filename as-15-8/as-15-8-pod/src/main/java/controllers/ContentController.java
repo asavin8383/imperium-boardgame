@@ -85,8 +85,8 @@ public class ContentController {
                             query,
                             random == null ? false : random,
                             pageable,
-                            convertToLocalDateTime(startTime),
-                            convertToLocalDateTime(endTime));
+                            convertToLocalDateTimeMin(startTime),
+                            convertToLocalDateTimeMax(endTime));
             return new ResponseEntity<>(pageContent, HttpStatus.OK);
         }
         else {
@@ -123,8 +123,8 @@ public class ContentController {
                             resourceValue,
                             violationNames,
                             size,
-                            convertToLocalDateTime(startTime),
-                            convertToLocalDateTime(endTime));
+                            convertToLocalDateTimeMin(startTime),
+                            convertToLocalDateTimeMax(endTime));
 
             return Flux.fromIterable(listContent);
         }
@@ -133,9 +133,15 @@ public class ContentController {
         }
     }
 
-    private LocalDateTime convertToLocalDateTime(LocalDate dateToConvert) {
+    private LocalDateTime convertToLocalDateTimeMin(LocalDate dateToConvert) {
         if (dateToConvert != null)
             return LocalDateTime.of(dateToConvert, LocalDateTime.MIN.toLocalTime());
+        else return null;
+    }
+
+    private LocalDateTime convertToLocalDateTimeMax(LocalDate dateToConvert) {
+        if (dateToConvert != null)
+            return LocalDateTime.of(dateToConvert, LocalDateTime.MAX.toLocalTime());
         else return null;
     }
 

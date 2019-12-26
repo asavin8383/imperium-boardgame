@@ -3,6 +3,8 @@ package model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import enums.AccessToolUnit;
+import model.enums.RobotStatus;
+import model.enums.RobotType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;

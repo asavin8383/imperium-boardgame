@@ -34,7 +34,7 @@ spring:
                 ackEachRecord: true
                 configuration:
                   max.poll.records: 1
-                  max.poll.interval.ms: 3600000
+                  max.poll.interval.ms: 60000
           inputJobNotifications:
             consumer:
               consumer:
@@ -42,7 +42,7 @@ spring:
                 ackEachRecord: true
                 configuration:
                   max.poll.records: 1
-                  max.poll.interval.ms: 3600000
+                  max.poll.interval.ms: 60000
           inputAnalysisResults:
             consumer:
               consumer:
@@ -50,7 +50,7 @@ spring:
                 ackEachRecord: true
                 configuration:
                   max.poll.records: 1
-                  max.poll.interval.ms: 3600000
+                  max.poll.interval.ms: 60000
   datasource:
     test-while-idle: true
     validation-query: SELECT 1;
