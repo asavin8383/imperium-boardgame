@@ -1,7 +1,7 @@
 package repositories;
 
 import model.SystemMode;
-import model.SystemModeUnit;
+import model.enums.SystemModeUnit;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

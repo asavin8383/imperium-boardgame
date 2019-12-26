@@ -2,7 +2,7 @@ package controllers.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
-import model.RobotType;
+import model.enums.RobotType;
 
 /**
  * User: asinjavin

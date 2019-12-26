@@ -2,7 +2,7 @@ package services;
 
 import lombok.RequiredArgsConstructor;
 import model.Configuration;
-import model.Microservice;
+import model.enums.Microservice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

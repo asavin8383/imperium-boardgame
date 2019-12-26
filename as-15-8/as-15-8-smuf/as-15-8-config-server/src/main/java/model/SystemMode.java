@@ -1,6 +1,7 @@
 package model;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import model.enums.SystemModeUnit;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
