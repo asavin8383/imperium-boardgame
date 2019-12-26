@@ -1,7 +1,7 @@
 package events.handlers;
 
 import checkUnits.CheckUnitJob;
-import checkUnits.CheckUnitStatusNotification;
+import analysis.CheckUnitStatusNotification;
 import common.ExecutorProperties;
 import enums.CheckUnitJobResult;
 import events.ExecutorChannels;
@@ -44,9 +44,11 @@ public class CheckUnitJobHandler {
 
     @StreamListener(ExecutorChannels.INPUT_JOBS)
     public void consumeCheckUnitJob(Message<CheckUnitJob> message){
-        Integer partitonId = message.getHeaders().get(KafkaHeaders.RECEIVED_PARTITION_ID, Integer.class);
+        Integer partitionId = message.getHeaders().get(KafkaHeaders.RECEIVED_PARTITION_ID, Integer.class);
+        Long key = message.getHeaders().get(KafkaHeaders.RECEIVED_MESSAGE_KEY, Long.class);
         log.info("\n   ---->>> Принято задание: " + message.getPayload().toString() +
-                ", partition: " + partitonId +
+                ", key: " + key +
+                ", partition: " + partitionId +
                 ", offset: "+message.getHeaders().get(KafkaHeaders.OFFSET, Long.class));
         String verificationName = "";
 
@@ -75,7 +77,7 @@ public class CheckUnitJobHandler {
                 executionJobResult = service.run(message.getPayload());
             }
 
-            sendExecutionResult(executionJobResult, partitonId);
+            sendExecutionResult(executionJobResult, key, partitionId);
         } catch (Exception ex) {
             Throwable te = ex;
             while(te.getCause() != null && te instanceof CompletionException) {
@@ -83,7 +85,12 @@ public class CheckUnitJobHandler {
             }
 
             try {
-                sendCheckJobErrorNotification(message.getPayload().getJobID(), message.getPayload().getCheckUnit().getContentId(), te, partitonId);
+                sendCheckJobErrorNotification(
+                        message.getPayload().getJobID(),
+                        message.getPayload().getCheckUnit().getContentId(),
+                        te,
+                        key,
+                        partitionId);
             } catch (Exception sendEx) {
                 log.error("Ошибка при отправке сообщения с ошибкой при выполнении задания на проверку запрещенного ресурса: "+verificationName, sendEx);
             }
@@ -113,7 +120,7 @@ public class CheckUnitJobHandler {
     }
 
     public <T> CompletableFuture<T> timeoutAfter(long timeout, TimeUnit unit) {
-        CompletableFuture<T> result = new CompletableFuture<T>();
+        CompletableFuture<T> result = new CompletableFuture<>();
         ScheduledExecutorService timeoutService = Executors.newSingleThreadScheduledExecutor();
         timeoutService.schedule(() -> result.completeExceptionally(new Timeout_ExecutionException()), timeout, unit);
         return result;
@@ -123,11 +130,12 @@ public class CheckUnitJobHandler {
      * Метод отправки результата выполнения робота в тему Kafka
      * @param jobResult Результат выполнения робота
      */
-    private void sendExecutionResult(ExecutionJobResult jobResult, Integer partitionId) throws RuntimeException {
+    private void sendExecutionResult(ExecutionJobResult jobResult, Long key, Integer partitionId) throws RuntimeException {
         try {
             Message<ExecutionJobResult> message = MessageBuilder
                     .withPayload(jobResult)
                     .setHeader(KafkaHeaders.PARTITION_ID, partitionId)
+                    .setHeader(KafkaHeaders.MESSAGE_KEY, key)
                     .build();
 
             boolean send = executorChannels.executionResults().send(message);
@@ -138,32 +146,34 @@ public class CheckUnitJobHandler {
         }
     }
 
-    private void sendCheckJobErrorNotification(Long jobID, Long erdiId, Throwable cause, Integer partitonId) {
+    private void sendCheckJobErrorNotification(Long jobID, Long erdiId, Throwable cause, Long key, Integer partitionId) {
         try {
-            CheckUnitStatusNotification notification = new CheckUnitStatusNotification();
-            notification.setJobID(jobID);
-            notification.setErdiID(erdiId);
+            CheckUnitStatusNotification.CheckUnitStatusNotificationBuilder notificationBuilder = CheckUnitStatusNotification.builder();
+            notificationBuilder.jobID(jobID);
+            notificationBuilder.erdiID(erdiId);
             if(cause instanceof Captcha_ExecutionException) {
-                notification.setCheckUnitStatus(CheckUnitJobResult.CAPTCHA_DETECTED);
+                notificationBuilder.checkResult(CheckUnitJobResult.CAPTCHA_DETECTED);
             }
             else if(cause instanceof Timeout_ExecutionException) {
-                notification.setCheckUnitStatus(CheckUnitJobResult.TIMEOUT_ERROR);
-                notification.setDescription("Работа робота остановлена по таймауту: " + getTimeout() + " сек.");
+                notificationBuilder.checkResult(CheckUnitJobResult.TIMEOUT_ERROR);
+                notificationBuilder.description("Работа робота остановлена по таймауту: " + getTimeout() + " сек.");
             } else {
-                notification.setCheckUnitStatus(CheckUnitJobResult.INTERNAL_ERROR);
+                notificationBuilder.checkResult(CheckUnitJobResult.INTERNAL_ERROR);
                 StringWriter sw = new StringWriter();
                 cause.printStackTrace(new PrintWriter(sw));
-                notification.setDescription(sw.toString());
+                notificationBuilder.description(sw.toString());
             }
 
+            CheckUnitStatusNotification notification = notificationBuilder.build();
             Message<CheckUnitStatusNotification> message = MessageBuilder
                     .withPayload(notification)
-                    .setHeader(KafkaHeaders.PARTITION_ID, partitonId)
+                    .setHeader(KafkaHeaders.PARTITION_ID, partitionId)
+                    .setHeader(KafkaHeaders.MESSAGE_KEY, key)
                     .build();
 
             boolean send = executorChannels.notifications().send(message);
             if(send)
-                log.info("Сообщение успешно отправлено: " + notification.getJobID() + ", " + notification.getCheckUnitStatus());
+                log.info("Сообщение успешно отправлено: " + notification.getJobID() + ", " + notification.getCheckResult());
         } catch (Exception ex) {
             throw new RuntimeException("Ошибка при отправке сообщения с уведомлением об ошибке", ex);
         }
