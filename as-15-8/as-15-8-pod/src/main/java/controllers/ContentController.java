@@ -109,13 +109,13 @@ public class ContentController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startTime,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endTime,
             @RequestParam(required = false) Boolean random,
-            @RequestParam(required = false) SortingDirection sortingDirection,
-            @RequestParam(required = false) String sortingColumn
+            @RequestParam(required = false, defaultValue = "ASC") SortingDirection sortingDirection,
+            @RequestParam(required = false, defaultValue = "includetime") String sortingColumn
     ) {
 
         if (!erdiRestClient.getIsLoading()) {
 
-            Pageable pageable = PageRequest.of(1, 10,
+            Pageable pageable = PageRequest.of(0, 10,
                     SortingHelper.createSorting(sortingDirection, sortingColumn));
 
             List<List<Long>> listContent =
