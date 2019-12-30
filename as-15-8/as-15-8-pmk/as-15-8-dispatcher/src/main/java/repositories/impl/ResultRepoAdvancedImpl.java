@@ -4,7 +4,6 @@ import checkUnits.CheckUnitType;
 import enums.CheckUnitJobResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import model.Arrangement;
 import model.Arrangement_;
 import model.Result;
 import model.Result_;
