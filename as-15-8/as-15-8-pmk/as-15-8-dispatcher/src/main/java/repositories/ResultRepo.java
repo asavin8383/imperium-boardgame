@@ -64,7 +64,7 @@ public interface ResultRepo extends JpaRepository<Result, Long>, ResultRepoAdvan
 
 	Page<Result> findAllByArrangementId(Long id, Pageable pageable);
 	@Query("select DISTINCT r from Result r " +
-			"join r.arrangement " +
+			"join r.arrangement a " +
 			"on a.id = :arr_id and" +
 			" (r.checkUnitValue LIKE CONCAT('%',:query,'%') or r.checkUnitType LIKE CONCAT('%',:query,'%') or r.result LIKE CONCAT('%',:query,'%'))")
 	Page<Result> findAllByArrangementAndQuery(@Param("arr_id") Long arrangementId, @Param("query")String query, Pageable pageable);
