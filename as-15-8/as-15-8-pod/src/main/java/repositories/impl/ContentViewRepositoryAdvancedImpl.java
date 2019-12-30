@@ -13,7 +13,10 @@ import repositories.ContentViewRepositoryAdvanced;
 import repositories.helper.CriteriaHelper;
 
 import javax.persistence.EntityManager;
-import javax.persistence.criteria.*;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +44,8 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
     private Root<ContentView> rootContentView;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
+    private boolean random;
+    private Pageable pageable;
 
     @Override
     public Page<ContentView> findPage(
@@ -59,11 +64,9 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
             LocalDateTime endTime) {
 
         initBasicArguments(idMask, categoryNames, decisionOrgs, infoTypeIds, registryNames, resourceTypes, resourceValue,
-                violationNames,
-                startTime,
-                endTime);
+                violationNames, startTime, endTime, random, pageable);
 
-        CriteriaQuery<ContentView> select = getCriteriaQuery(random, pageable, query);
+        CriteriaQuery<ContentView> select = configurateCriteriaQuery(query);
         return CriteriaHelper.createPage(em, select, pageable);
     }
 
@@ -79,15 +82,20 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
             List<String> violationNames,
             Integer maxResults,
             LocalDateTime startTime,
-            LocalDateTime endTime) {
+            LocalDateTime endTime,
+            boolean random,
+            Pageable pageable) {
 
-        initBasicArguments(idMask, categoryNames, decisionOrgs, infoTypeIds, registryNames, resourceTypes, resourceValue, violationNames, startTime, endTime);
+        initBasicArguments(idMask, categoryNames, decisionOrgs, infoTypeIds, registryNames, resourceTypes, resourceValue,
+                violationNames, startTime, endTime, random, pageable);
 
-        CriteriaQuery<ContentView> select = getCriteriaQuery();
+        CriteriaQuery<ContentView> select = configurateCriteriaQuery(null);
         return  CriteriaHelper.createIds(em, select, maxResults);
     }
 
-    private void initBasicArguments(String idMask, List<String> categoryNames, List<String> decisionOrgs, List<String> infoTypeIds, List<String> registryNames, List<String> resourceTypes, String resourceValue, List<String> violationNames,  LocalDateTime startTime,  LocalDateTime endTime) {
+    private void initBasicArguments(String idMask, List<String> categoryNames, List<String> decisionOrgs, List<String> infoTypeIds,
+                                    List<String> registryNames, List<String> resourceTypes, String resourceValue, List<String> violationNames,
+                                    LocalDateTime startTime, LocalDateTime endTime, boolean random, Pageable pageable) {
         this.idMask = idMask;
         this.categoryNames = categoryNames;
         this.decisionOrgs = decisionOrgs;
@@ -98,12 +106,13 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
         this.violationNames = violationNames;
         this.startTime = startTime;
         this.endTime = endTime;
+        this.random = random;
+        this.pageable = pageable;
     }
 
-    private CriteriaQuery<ContentView> getCriteriaQuery(Boolean random, Pageable pageable, String query) {
+    private CriteriaQuery<ContentView> configurateCriteriaQuery(String query) {
 
         CriteriaQuery<ContentView> cq = createCriteriaQuery();
-
         rootContentView = cq.from(ContentView.class);
 
         List<Predicate> predicates = new ArrayList<>();
@@ -113,27 +122,18 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
 
         cq.where(predicates.toArray(new Predicate[0]));
 
-        //Берём сортировку из Pageable
+        orderByOrRandom(cq);
+        return cq;
+    }
+
+    private void orderByOrRandom(CriteriaQuery cq) {
         if(!random && pageable!= null){
             cq.orderBy(QueryUtils.toOrders(pageable.getSort(), rootContentView, criteriaBuilder));
         } else {
             cq.orderBy(criteriaBuilder.asc(criteriaBuilder.function("random", Double.class)));
         }
-        return cq;
     }
-    private CriteriaQuery<ContentView> getCriteriaQuery() {
 
-        CriteriaQuery<ContentView> cq = createCriteriaQuery();
-
-        rootContentView = cq.from(ContentView.class);
-
-        List<Predicate> predicates = new ArrayList<>();
-        createPredicatesFromMasks(predicates);
-
-        cq.where(predicates.toArray(new Predicate[0]));
-
-        return cq;
-    }
 
     private CriteriaQuery<ContentView> createCriteriaQuery() {
         criteriaBuilder = em.getCriteriaBuilder();

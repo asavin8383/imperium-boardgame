@@ -107,10 +107,16 @@ public class ContentController {
             @RequestParam(required = false) List<String> violationNames,
             @RequestParam(required = false) Integer size,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startTime,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endTime
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endTime,
+            @RequestParam(required = false) Boolean random,
+            @RequestParam(required = false) SortingDirection sortingDirection,
+            @RequestParam(required = false) String sortingColumn
     ) {
 
         if (!erdiRestClient.getIsLoading()) {
+
+            Pageable pageable = PageRequest.of(1, 10,
+                    SortingHelper.createSorting(sortingDirection, sortingColumn));
 
             List<List<Long>> listContent =
                     contentViewRepository.findIds(
@@ -124,7 +130,9 @@ public class ContentController {
                             violationNames,
                             size,
                             convertToLocalDateTimeMin(startTime),
-                            convertToLocalDateTimeMax(endTime));
+                            convertToLocalDateTimeMax(endTime),
+                            random,
+                            pageable);
 
             return Flux.fromIterable(listContent);
         }
