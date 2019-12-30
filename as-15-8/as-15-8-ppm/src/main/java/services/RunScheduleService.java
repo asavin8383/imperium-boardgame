@@ -69,16 +69,7 @@ public class RunScheduleService {
                                     log.info("Статус расписания {} сменился на 'Выполняется'", schedule.getId());
                                 }
                            }
-                            log.debug("Запуск на выполнение schedulePeriodArrangement с ИД {}", schedulePeriodArrangement.getId());
-                            arrangementStatusUploader.changeArrangementStatus(new ArrangementStatusNotification(schedulePeriodArrangement.getArrangement().getId(), ArrangementEvents.RUN));
-                            schedulePeriodCheckUnitRepo.findAllBySchedulePeriodArrangement(schedulePeriodArrangement)
-                                    .forEach(schedulePeriodCheckUnit ->
-                                            runCheckUnit(schedulePeriodCheckUnit, schedulePeriodArrangement.getArrangementId()));
-                            if(!schedule.getStatus().equals(ScheduleStatus.RUNNING)){
-                                schedule.setStatus(ScheduleStatus.RUNNING);
-                                scheduleRepo.save(schedule);
-                                log.info("Статус расписания {} сменился на 'Выполняется'", schedule.getId());
-                            }
+
                         });
                     schedulePeriod.setSchedulePeriodState(SchedulePeriodState.STARTED);
                     schedulePeriodRepo.save(schedulePeriod);

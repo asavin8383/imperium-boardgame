@@ -19,5 +19,8 @@ public interface ResultService {
 
     void sendNotificationsIfFinished(Long arrangementID);
 
-    ExecutionStatus getArrangementExecutionStatus(Long arrangementID);
+    ExecutionStatus getArrnagementExecutionStatus(Long arrangementID);
+
+    Long getArrangementsCount(Long id);
+
 }

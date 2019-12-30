@@ -23,7 +23,9 @@ import org.springframework.cloud.stream.binder.kafka.streams.InteractiveQuerySer
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import repositories.ArrangementRepo;
+import repositories.ErrorDetailResultRepo;
 import repositories.ResultRepo;
+import repositories.ResultScreenShotRepo;
 import restapi.ArrangementStatusProducer;
 import restapi.ErdiChecker;
 import services.AnalysisResultService;
@@ -38,7 +40,6 @@ import java.io.StringWriter;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @RequiredArgsConstructor(onConstructor_={@Autowired})
@@ -49,6 +50,8 @@ public class ResultServiceImpl implements ResultService {
 
     private final ArrangementRepo arrangementRepo;
     private final ResultRepo resultRepo;
+    private final ResultScreenShotRepo resultScreenShotRepo;
+    private final ErrorDetailResultRepo errorDetailResultRepo;
     private final ErdiChecker erdiChecker;
     private final ArrangementStatusProducer arrangementStatusProducer;
     private final EntityManager entityManager;
@@ -205,7 +208,32 @@ public class ResultServiceImpl implements ResultService {
         }
     }
 
-    public ExecutionStatus getArrangementExecutionStatus(Long arrangementId) {
+    public ExecutionStatus getArrnagementExecutionStatus(Long arrangementId) {
         return arrangementStatusProducer.getArrangementExcecutionStatus(arrangementId);
+    }
+
+    @Override
+    public Long getArrangementsCount(Long id) {
+
+        final ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store =
+                interactiveQueryService.getQueryableStore(
+                        ResultsHandler.RESULT_TABLE_NAME,
+                        QueryableStoreTypes.keyValueStore()
+                );
+        if(store == null)
+            throw new AS_15_8_DispatcherException("Ошибка чтения store из kafka!");
+
+        KeyValueIterator<CheckUnitKey, CheckUnitResult> resultsIterator = store.range(
+                new CheckUnitKey(id, Long.MIN_VALUE),
+                new CheckUnitKey(id, Long.MAX_VALUE)
+        );
+
+        Long count = Long.valueOf(0);
+        while(resultsIterator.hasNext()) {
+            count++;
+            resultsIterator.next();
+        }
+
+        return count;
     }
 }

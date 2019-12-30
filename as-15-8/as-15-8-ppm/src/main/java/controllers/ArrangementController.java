@@ -177,22 +177,4 @@ public class ArrangementController {
         return scheduleCheckUnit;
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_VIEW_RESULT','ROLE_SYSTEM')")
-    @GetMapping(path = "/completion")
-    public int getArrangementCompletion(@RequestParam("id") Optional<Arrangement> arrangement){
-
-        arrangement.orElseThrow(() -> new AS_15_8_PPM_Exception("Ошибка поиска! Такого мероприятия не существует."));
-        List<ScheduleCheckUnit> checkUnits = scheduleCheckUnitRepo.findAllByArrangement(arrangement.get());
-
-        if (checkUnits == null)
-            throw new AS_15_8_PPM_Exception("Ошибка расчёта процента выполнения мероприятия. checkUnits null");
-
-        Long notPlannedNotRunning = resultsDownloader.getNotPlannedNotRunningResults(arrangement.get().getId());
-        if (notPlannedNotRunning == null)
-            throw new AS_15_8_PPM_Exception("Ошибка расчёта процента выполнения мероприятия. Число результатов not RUNNING и PLANNED null");
-
-        int percent = (int) ((notPlannedNotRunning*100)/checkUnits.size());
-        return percent;
-    }
-
 }
