@@ -211,10 +211,10 @@ public class ResultServiceImpl implements ResultService {
     }
 
     @Override
-    public Long getArrangementsCount(Long id) {
+    public int getArrangementsCount(Long id) {
         ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store = getKeyValueStore();
         KeyValueIterator<CheckUnitKey, CheckUnitResult> resultsIterator = getResultsIterator(store, id);
-        Long count = countIteratorSize(resultsIterator);
+        int count = countIteratorSize(resultsIterator);
         return count;
     }
 
@@ -235,12 +235,12 @@ public class ResultServiceImpl implements ResultService {
         );
     }
 
-    private Long countIteratorSize(KeyValueIterator resultsIterator) {
-        Long count = Long.valueOf(0);
-        while(resultsIterator.hasNext()) {
-            count++;
-            resultsIterator.next();
-        }
-        return count;
+    private int countIteratorSize(KeyValueIterator resultsIterator) {
+        AtomicInteger count = new AtomicInteger();
+        resultsIterator.forEachRemaining( s-> {
+            count.getAndIncrement();
+        });
+
+        return count.get();
     }
 }
