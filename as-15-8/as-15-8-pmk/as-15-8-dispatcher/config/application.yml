@@ -3,12 +3,6 @@ spring:
   cloud:
     stream:
       bindings:
-        inputJobs:
-          destination: scheduled_jobs
-          group: dispatchers
-          consumer.concurrency: 24
-        outputJobs:
-          destination: jobs
         inputJobNotifications:
           destination: job_notifications
           group: dispatchers
@@ -28,13 +22,6 @@ spring:
           configuration:
             max.request.size: 10485760
         bindings:
-          inputJobs:
-            consumer:
-              consumer:
-                ackEachRecord: true
-                configuration:
-                  max.poll.records: 1
-                  max.poll.interval.ms: 60000
           inputJobNotifications:
             consumer:
               consumer:
@@ -88,8 +75,6 @@ spring:
         brokers: 10.97.220.178:9092,10.97.220.179:9092,10.97.220.180:9092
         minPartitionCount: 250
       bindings:
-        inputJobs:
-          consumer.concurrency: 50
         inputJobNotifications:
           consumer.concurrency: 50
         inputAnalysisResults:
@@ -130,8 +115,6 @@ spring:
   cloud:
     stream:
       bindings:
-        inputJobs.destination: scheduled_jobs_ashabalin
-        outputJobs.destination: jobs_ashabalin
         inputJobNotifications.destination: job_notifications_ashabalin
         inputAnalysisResults.destination: analysis_results_ashabalin
         springCloudBusInput.destination: bus_config_input_ashabalin
@@ -152,8 +135,6 @@ spring:
   cloud:
     stream:
       bindings:
-        inputJobs.destination: scheduled_jobs_asin
-        outputJobs.destination: jobs_asin
         inputJobNotifications.destination: job_notifications_asin
         inputAnalysisResults.destination: analysis_results_asin
         springCloudBusInput.destination: bus_config_input_asin
@@ -166,8 +147,6 @@ spring:
   cloud:
     stream:
       bindings:
-        inputJobs.destination: scheduled_jobs_asavin
-        outputJobs.destination: jobs_asavin
         inputJobNotifications.destination: job_notifications_asavin
         inputAnalysisResults.destination: analysis_results_asavin
         springCloudBusInput.destination: bus_config_input_asavin
@@ -184,8 +163,6 @@ spring:
   cloud:
     stream:
       bindings:
-        inputJobs.destination: scheduled_jobs_pvorobiev
-        outputJobs.destination: jobs_pvorobiev
         inputJobNotifications.destination: job_notifications_pvorobiev
         inputAnalysisResults.destination: analysis_results_pvorobiev
         springCloudBusInput.destination: bus_config_input_pvorobiev
@@ -200,8 +177,6 @@ spring:
   cloud:
     stream:
       bindings:
-        inputJobs.destination: scheduled_jobs_danikanov
-        outputJobs.destination: jobs_danikanov
         inputJobNotifications.destination: job_notifications_danikanov
         inputAnalysisResults.destination: analysis_results_danikanov
         springCloudBusInput.destination: bus_config_input_danikanov

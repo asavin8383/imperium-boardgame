@@ -23,9 +23,7 @@ import org.springframework.cloud.stream.binder.kafka.streams.InteractiveQuerySer
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import repositories.ArrangementRepo;
-import repositories.ErrorDetailResultRepo;
 import repositories.ResultRepo;
-import repositories.ResultScreenShotRepo;
 import restapi.ArrangementStatusProducer;
 import restapi.ErdiChecker;
 import services.AnalysisResultService;
@@ -51,8 +49,6 @@ public class ResultServiceImpl implements ResultService {
 
     private final ArrangementRepo arrangementRepo;
     private final ResultRepo resultRepo;
-    private final ResultScreenShotRepo resultScreenShotRepo;
-    private final ErrorDetailResultRepo errorDetailResultRepo;
     private final ErdiChecker erdiChecker;
     private final ArrangementStatusProducer arrangementStatusProducer;
     private final EntityManager entityManager;
@@ -76,13 +72,30 @@ public class ResultServiceImpl implements ResultService {
                     KeyValueIterator<CheckUnitKey, CheckUnitResult> resultsIterator = getArrangementIterator(store, arrangement.getId());
                     while (resultsIterator.hasNext()) {
                         CheckUnitResult checkUnitResult = resultsIterator.next().value;
-                        if (checkUnitResult instanceof AnalysisResult) {
-                            saveJobResult((AnalysisResult) checkUnitResult);
-                        } else if (checkUnitResult instanceof CheckUnitStatusNotification) {
-                            CheckUnitStatusNotification notification = (CheckUnitStatusNotification) checkUnitResult;
-                            updateJobStatus(notification.getJobID(), notification.getErdiID(), notification.getCheckResult(), notification.getDescription());
+                        try {
+                            if (checkUnitResult instanceof AnalysisResult) {
+                                saveJobResult((AnalysisResult) checkUnitResult);
+                            } else if (checkUnitResult instanceof CheckUnitStatusNotification) {
+                                CheckUnitStatusNotification notification = (CheckUnitStatusNotification) checkUnitResult;
+                                updateJobStatus(notification.getJobID(), notification.getErdiID(), notification.getCheckResult(), notification.getDescription());
+                            }
+                        } catch (Exception ex){
+                            try {
+                                log.error("Ошибка при обработке сообщения с анализом результатов проверки: " + checkUnitResult.getJobID() + ", " + checkUnitResult.getCheckUnit().getValue(), ex);
+
+                                StringWriter sw = new StringWriter();
+                                ex.printStackTrace(new PrintWriter(sw));
+
+                                Result jobResult = updateJobStatus(checkUnitResult.getJobID(), checkUnitResult.getCheckUnit().getContentId(), CheckUnitJobResult.INTERNAL_ERROR, sw.toString());
+                                log.info("Мероприятие завешено с ошибками: " + jobResult.getArrangementId());
+                                arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(jobResult.getArrangementId(), ArrangementEvents.FINISH));
+                            } catch(Exception newEx) {
+                                log.error("Ошибка при сохранении ошибочной обработки сообщения с анализом результатов проверки: " + checkUnitResult.getJobID() + ", " + checkUnitResult.getCheckUnit().getValue(), newEx);
+                            }
                         }
                     }
+                    log.info("Мероприятие успешно завешено: " + arrangement.getId());
+                    arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(arrangement.getId(), ArrangementEvents.FINISH));
                 }
             }
         } catch (Exception ex){
