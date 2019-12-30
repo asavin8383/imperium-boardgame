@@ -44,7 +44,7 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
     private Root<ContentView> rootContentView;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-    private boolean random;
+    private Boolean random;
     private Pageable pageable;
 
     @Override
@@ -58,7 +58,7 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
             String resourceValue,
             List<String> violationNames,
             String query,
-            boolean random,
+            Boolean random,
             Pageable pageable,
             LocalDateTime startTime,
             LocalDateTime endTime) {
@@ -83,7 +83,7 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
             Integer maxResults,
             LocalDateTime startTime,
             LocalDateTime endTime,
-            boolean random,
+            Boolean random,
             Pageable pageable) {
 
         initBasicArguments(idMask, categoryNames, decisionOrgs, infoTypeIds, registryNames, resourceTypes, resourceValue,
@@ -95,7 +95,7 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
 
     private void initBasicArguments(String idMask, List<String> categoryNames, List<String> decisionOrgs, List<String> infoTypeIds,
                                     List<String> registryNames, List<String> resourceTypes, String resourceValue, List<String> violationNames,
-                                    LocalDateTime startTime, LocalDateTime endTime, boolean random, Pageable pageable) {
+                                    LocalDateTime startTime, LocalDateTime endTime, Boolean random, Pageable pageable) {
         this.idMask = idMask;
         this.categoryNames = categoryNames;
         this.decisionOrgs = decisionOrgs;
@@ -127,7 +127,7 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
     }
 
     private void orderByOrRandom(CriteriaQuery cq) {
-        if(!random && pageable!= null){
+        if(random != null && pageable!= null && !random){
             cq.orderBy(QueryUtils.toOrders(pageable.getSort(), rootContentView, criteriaBuilder));
         } else {
             cq.orderBy(criteriaBuilder.asc(criteriaBuilder.function("random", Double.class)));

@@ -23,7 +23,7 @@ public interface ContentViewRepositoryAdvanced {
             String resourceValue,
             List<String> violationNames,
             String query,
-            boolean random,
+            Boolean random,
             Pageable pageable,
             LocalDateTime startTime,
             LocalDateTime endTime
@@ -41,7 +41,7 @@ public interface ContentViewRepositoryAdvanced {
             Integer size,
             LocalDateTime startTime,
             LocalDateTime endTime,
-            boolean random,
+            Boolean random,
             Pageable pageable
 
     );
