@@ -2,6 +2,7 @@ package webClients;
 
 import checkUnits.CheckUnit;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import enums.SortingDirection;
 import exceptions.AS_15_8_PPT_Exception;
 import lombok.extern.slf4j.Slf4j;
 import model.traffic.CustomErdiView;
@@ -76,17 +77,20 @@ public class PodWebClient {
     }
 
     public Flux<List<Long>> getErdiIdList(
-             String idMask
-            , List<String> categoryNames
-            , List<String> decisionOrgs
-            , List<String> infoTypeIds
-            , List<String> registryNames
-            , List<String> resourceTypes
-            , String resourceValue
-            , List<String> violationNames
-            , Integer size
-            , LocalDate startTime
-            , LocalDate endTime
+             String idMask,
+             List<String> categoryNames,
+             List<String> decisionOrgs,
+             List<String> infoTypeIds,
+             List<String> registryNames,
+             List<String> resourceTypes,
+             String resourceValue,
+             List<String> violationNames,
+             Integer size,
+             LocalDate startTime,
+             LocalDate endTime,
+             boolean random,
+             SortingDirection sortingDirection,
+             String sortingColumn
 
     ) {
         return webClient.get()
@@ -103,6 +107,9 @@ public class PodWebClient {
                         .queryParam("size", size)
                         .queryParam("startTime", startTime)
                         .queryParam("endTime", endTime)
+                        .queryParam("random", random)
+                        .queryParam("sortingDirection", sortingDirection)
+                        .queryParam("sortingColumn", sortingColumn)
                         .build().toString())
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()

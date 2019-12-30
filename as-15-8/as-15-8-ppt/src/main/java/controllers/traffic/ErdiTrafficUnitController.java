@@ -1,5 +1,6 @@
 package controllers.traffic;
 
+import enums.SortingDirection;
 import exceptions.AS_15_8_PPT_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,13 +52,15 @@ public class ErdiTrafficUnitController {
             @RequestParam(required = false) List<String> violationNames,
             @RequestParam(required = false) Integer size,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startTime,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endTime
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endTime,
+            @RequestParam(required = false) Boolean random,
+            @RequestParam(required = false) SortingDirection sortingDirection,
+            @RequestParam(required = false) String sortingColumn
             ) {
 
         Flux<List<Long>> idss = podWebClient.getErdiIdList(idMask, categoryNames, decisionOrgs, infoTypeIds,
                 registryNames, resourceTypes, resourceValue, violationNames, size,
-                startTime,
-                endTime);
+                startTime, endTime, random, sortingDirection, sortingColumn);
         List<Long> ids = idss.toStream().flatMap(List::stream).collect(Collectors.toList());
 
         saveErdi(unit, ids);
