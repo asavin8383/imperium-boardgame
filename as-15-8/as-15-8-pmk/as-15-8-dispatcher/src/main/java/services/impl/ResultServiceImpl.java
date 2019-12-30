@@ -241,7 +241,7 @@ public class ResultServiceImpl implements ResultService {
         return store;
     }
 
-    private KeyValueIterator<CheckUnitKey, CheckUnitResult> getResultsIterator(ReadOnlyKeyValueStore store, Long id) {
+    private KeyValueIterator getResultsIterator(ReadOnlyKeyValueStore store, Long id) {
         return store.range(
                 new CheckUnitKey(id, Long.MIN_VALUE),
                 new CheckUnitKey(id, Long.MAX_VALUE)
