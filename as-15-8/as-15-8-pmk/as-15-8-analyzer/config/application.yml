@@ -1,12 +1,15 @@
 spring:
   main.allow-bean-definition-overriding: true
+  kafka.consumer.properties.spring.json.trusted.packages: checkUnits
   cloud:
     stream:
       bindings:
         input:
           destination: exec_results
           group: analyzers
-          consumer.concurrency: 4
+          consumer:
+            concurrency: 4
+            useNativeDecoding: true
         output.destination: analysis_results
         notifications.destination: job_notifications
         springCloudBusInput:
@@ -26,6 +29,7 @@ spring:
               ackEachRecord: true
               configuration:
                 key.deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+
                 max.poll.records: 1
                 max.poll.interval.ms: 120000
           output:

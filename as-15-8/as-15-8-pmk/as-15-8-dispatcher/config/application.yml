@@ -1,16 +1,21 @@
 spring:
   main.allow-bean-definition-overriding: true
+  kafka.consumer.properties.spring.json.trusted.packages: checkUnits
   cloud:
     stream:
       bindings:
         inputJobNotifications:
           destination: job_notifications
           group: dispatchers
-          consumer.concurrency: 24
+          consumer:
+            concurrency: 24
+            useNativeDecoding: true
         inputAnalysisResults:
           destination: analysis_results
           group: dispatchers
-          consumer.concurrency: 24
+          consumer:
+            concurrency: 24
+            useNativeDecoding: true
         springCloudBusInput:
           destination: bus_config_input
           group: dispatcher:${spring.cloud.client.ip-address}
