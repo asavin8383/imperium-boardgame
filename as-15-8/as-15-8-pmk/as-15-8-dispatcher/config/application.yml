@@ -20,31 +20,24 @@ spring:
           destination: bus_config_input
           group: dispatcher:${spring.cloud.client.ip-address}
         springCloudBusOutput.destination: bus_config_output
-      kafka:
+      kafka.streams:
         binder:
           brokers: 192.168.5.12:9094,192.168.5.33:9094,192.168.5.184:9094
           minPartitionCount: 24
           configuration:
             max.request.size: 10485760
+            max.poll.records: 100
         bindings:
           inputJobNotifications:
             consumer:
-              consumer:
-                autoCommitOffset: false
-                ackEachRecord: true
-                configuration:
-                  key.deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-                  max.poll.records: 1
-                  max.poll.interval.ms: 60000
+              application-id: dispatcher
+              configuration:
+                key.deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
           inputAnalysisResults:
             consumer:
-              consumer:
-                autoCommitOffset: false
-                ackEachRecord: true
-                configuration:
-                  key.deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-                  max.poll.records: 1
-                  max.poll.interval.ms: 60000
+              application-id: dispatcher
+              configuration:
+                key.deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
   datasource:
     test-while-idle: true
     validation-query: SELECT 1;
@@ -60,7 +53,7 @@ spring:
       hibernate:
         jdbc:
           lob.non_contextual_creation: true
-          jdbc.batch_size: 1000
+          batch_size: 100
           order_inserts: true
         format_sql: true
     databasePlatform: org.hibernate.dialect.PostgreSQL9Dialect
