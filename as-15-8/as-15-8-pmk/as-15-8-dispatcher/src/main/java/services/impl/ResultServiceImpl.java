@@ -40,6 +40,7 @@ import java.io.StringWriter;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @RequiredArgsConstructor(onConstructor_={@Autowired})
@@ -93,10 +94,7 @@ public class ResultServiceImpl implements ResultService {
             ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store,
             Long arrangementId
     ){
-        return store.range(
-                new CheckUnitKey(arrangementId, Long.MIN_VALUE),
-                new CheckUnitKey(arrangementId, Long.MAX_VALUE)
-        );
+        return getResultsIterator(store, arrangementId);
     }
 
     @Override
@@ -214,26 +212,35 @@ public class ResultServiceImpl implements ResultService {
 
     @Override
     public Long getArrangementsCount(Long id) {
+        ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store = getKeyValueStore();
+        KeyValueIterator<CheckUnitKey, CheckUnitResult> resultsIterator = getResultsIterator(store, id);
+        Long count = countIteratorSize(resultsIterator);
+        return count;
+    }
 
-        final ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store =
-                interactiveQueryService.getQueryableStore(
-                        ResultsHandler.RESULT_TABLE_NAME,
-                        QueryableStoreTypes.keyValueStore()
-                );
+    private ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> getKeyValueStore() {
+        ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store = interactiveQueryService.getQueryableStore(
+                ResultsHandler.RESULT_TABLE_NAME,
+                QueryableStoreTypes.keyValueStore()
+        );
         if(store == null)
             throw new AS_15_8_DispatcherException("Ошибка чтения store из kafka!");
+        return store;
+    }
 
-        KeyValueIterator<CheckUnitKey, CheckUnitResult> resultsIterator = store.range(
+    private KeyValueIterator<CheckUnitKey, CheckUnitResult> getResultsIterator(ReadOnlyKeyValueStore store, Long id) {
+        return store.range(
                 new CheckUnitKey(id, Long.MIN_VALUE),
                 new CheckUnitKey(id, Long.MAX_VALUE)
         );
+    }
 
+    private Long countIteratorSize(KeyValueIterator resultsIterator) {
         Long count = Long.valueOf(0);
         while(resultsIterator.hasNext()) {
             count++;
             resultsIterator.next();
         }
-
         return count;
     }
 }
