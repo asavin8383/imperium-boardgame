@@ -28,6 +28,7 @@ spring:
                 autoCommitOffset: false
                 ackEachRecord: true
                 configuration:
+                  key.deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
                   max.poll.records: 1
                   max.poll.interval.ms: 60000
           inputAnalysisResults:
@@ -36,6 +37,7 @@ spring:
                 autoCommitOffset: false
                 ackEachRecord: true
                 configuration:
+                  key.deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
                   max.poll.records: 1
                   max.poll.interval.ms: 60000
   datasource:
