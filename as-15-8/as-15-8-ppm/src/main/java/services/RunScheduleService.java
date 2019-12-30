@@ -1,20 +1,23 @@
 package services;
 
 import arrangement.ArrangementStatusNotification;
+import arrangement.ArrangementToExecution;
 import checkUnits.CheckUnit;
 import checkUnits.CheckUnitJob;
 import enums.ArrangementEvents;
 import events.producers.CheckUnitJobProducer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import model.ScheduleCheckUnit;
-import model.SchedulePeriodCheckUnit;
-import model.SchedulePeriodCheckUnitStatus;
-import model.ScheduleStatus;
+import model.*;
 import model.enums.SchedulePeriodState;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.UriComponentsBuilder;
 import repositories.*;
 import restapi.ArrangementStatusUploader;
 
@@ -40,6 +43,11 @@ public class RunScheduleService {
     private final ScheduleCheckUnitRepo scheduleCheckUnitRepo;
     private final ArrangementStatusUploader arrangementStatusUploader;
 
+    private final OAuth2RestTemplate restTemplate;
+    private final String DISPATCHER_POST_ARR_ENDPOINT = "/dispatcher/arrangement";
+
+    @Value("${gateway.url}")
+    private String gatewayUrl;
 
     @Scheduled(cron = "${app.schedule}")
     public void runSchedule(){
@@ -48,20 +56,34 @@ public class RunScheduleService {
                 .forEach(schedulePeriod -> {
                     schedulePeriodArrangementRepo.findAllBySchedulePeriod(schedulePeriod)
                         .forEach(schedulePeriodArrangement -> {
-                            log.debug("Запуск на выполнение schedulePeriodArrangement с ИД {}", schedulePeriodArrangement.getId());
-                            arrangementStatusUploader.changeArrangementStatus(new ArrangementStatusNotification(schedulePeriodArrangement.getArrangement().getId(), ArrangementEvents.RUN));
-                            schedulePeriodCheckUnitRepo.findAllBySchedulePeriodArrangement(schedulePeriodArrangement)
-                                    .forEach(this::runCheckUnit);
-                            if(!schedule.getStatus().equals(ScheduleStatus.RUNNING)){
-                                schedule.setStatus(ScheduleStatus.RUNNING);
-                                scheduleRepo.save(schedule);
-                                log.info("Статус расписания {} сменился на 'Выполняется'", schedule.getId());
-                            }
+                            if(sendArrangementToDispatcher(schedulePeriodArrangement)) {
+                                log.debug("Запуск на выполнение schedulePeriodArrangement с ИД {}", schedulePeriodArrangement.getId());
+                                arrangementStatusUploader.changeArrangementStatus(new ArrangementStatusNotification(schedulePeriodArrangement.getArrangement().getId(), ArrangementEvents.RUN));
+                                schedulePeriodCheckUnitRepo.findAllBySchedulePeriodArrangement(schedulePeriodArrangement)
+                                        .forEach(this::runCheckUnit);
+                                if (!schedule.getStatus().equals(ScheduleStatus.RUNNING)) {
+                                    schedule.setStatus(ScheduleStatus.RUNNING);
+                                    scheduleRepo.save(schedule);
+                                    log.info("Статус расписания {} сменился на 'Выполняется'", schedule.getId());
+                                }
+                           }
                         });
                     schedulePeriod.setSchedulePeriodState(SchedulePeriodState.STARTED);
                     schedulePeriodRepo.save(schedulePeriod);
                 })
             );
+    }
+
+    private Boolean sendArrangementToDispatcher(SchedulePeriodArrangement schedulePeriodArrangement) {
+        String url = UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(DISPATCHER_POST_ARR_ENDPOINT).build().toString();
+        int checkUnits = schedulePeriodArrangement.getArrangement().getScheduleCheckUnits().size();
+        ArrangementToExecution arrangement = new ArrangementToExecution();
+        arrangement.setCheckUnitsCount((long) checkUnits);
+        arrangement.setId(schedulePeriodArrangement.getArrangementId());
+
+        ResponseEntity<String> response = restTemplate.postForEntity(url, arrangement, String.class);
+        if(response.getStatusCode() == HttpStatus.OK) return true;
+        else return false;
     }
 
     private void runCheckUnit(SchedulePeriodCheckUnit schedulePeriodCheckUnit){
