@@ -40,6 +40,7 @@ import java.io.StringWriter;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.StreamSupport;
 
 @Service
 @RequiredArgsConstructor(onConstructor_={@Autowired})
@@ -192,5 +193,30 @@ public class ResultServiceImpl implements ResultService {
 
     public ExecutionStatus getArrnagementExecutionStatus(Long arrangementId) {
         return arrangementStatusProducer.getArrangementExcecutionStatus(arrangementId);
+    }
+
+    @Override
+    public Long getArrangementsCount(Long id) {
+
+        final ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store =
+                interactiveQueryService.getQueryableStore(
+                        ResultsHandler.RESULT_TABLE_NAME,
+                        QueryableStoreTypes.keyValueStore()
+                );
+        if(store == null)
+            throw new AS_15_8_DispatcherException("Ошибка чтения store из kafka!");
+
+        KeyValueIterator<CheckUnitKey, CheckUnitResult> resultsIterator = store.range(
+                new CheckUnitKey(id, Long.MIN_VALUE),
+                new CheckUnitKey(id, Long.MAX_VALUE)
+        );
+
+        Long count = Long.valueOf(0);
+        while(resultsIterator.hasNext()) {
+            count++;
+            resultsIterator.next();
+        }
+
+        return count;
     }
 }

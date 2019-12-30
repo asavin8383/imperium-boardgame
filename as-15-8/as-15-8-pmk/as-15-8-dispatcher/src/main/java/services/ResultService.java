@@ -20,4 +20,6 @@ public interface ResultService {
     void sendNotificationsIfFinished(Long arrangementID);
 
     ExecutionStatus getArrnagementExecutionStatus(Long arrangementID);
+
+    Long getArrangementsCount(Long id);
 }
