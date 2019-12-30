@@ -5,7 +5,6 @@ import enums.CheckUnitJobResult;
 import lombok.Data;
 import model.enums.CheckType;
 import model.enums.UserResult;
-import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -29,8 +28,9 @@ public class Result implements Serializable {
     @Column(name="id", nullable=false, updatable=false)
     private Long id;
 
-    @Column(name = "arrangement_id", nullable = false)
-    private Long arrangementId;
+    @ManyToOne(optional = false)
+    @JoinColumn(name="arrangement_id", foreignKey = @ForeignKey(name = "FK_arrangements"))
+    private Arrangement arrangement;
 
     @Column(name = "content_id", nullable = false)
     private Long erdiId;
