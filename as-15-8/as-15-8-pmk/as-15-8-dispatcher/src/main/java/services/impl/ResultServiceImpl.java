@@ -206,7 +206,7 @@ public class ResultServiceImpl implements ResultService {
         }
     }
 
-    public ExecutionStatus getArrnagementExecutionStatus(Long arrangementId) {
+    public ExecutionStatus getArrangementExecutionStatus(Long arrangementId) {
         return arrangementStatusProducer.getArrangementExcecutionStatus(arrangementId);
     }
 
