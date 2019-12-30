@@ -21,6 +21,6 @@ public interface ResultService {
 
     ExecutionStatus getArrangementExecutionStatus(Long arrangementID);
 
-    Long getArrangementsCount(Long id);
+    int getArrangementsCount(Long id);
 
 }

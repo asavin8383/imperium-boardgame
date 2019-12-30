@@ -52,9 +52,8 @@ public class ArrangementController {
         if (checkUnits == null)
             throw new AS_15_8_DispatcherException("Ошибка расчёта процента выполнения мероприятия. checkUnits is null");
 
-        Long arrangementsCount = resultService.getArrangementsCount(arrangement.get().getId());
-        if (arrangementsCount == null)
-            throw new AS_15_8_DispatcherException("Ошибка расчёта процента выполнения мероприятия. общее число мероприятий null");
+       int arrangementsCount = resultService.getArrangementsCount(arrangement.get().getId());
+
 
         int percent = (int) ((arrangementsCount * 100)/checkUnits);
         return percent;
