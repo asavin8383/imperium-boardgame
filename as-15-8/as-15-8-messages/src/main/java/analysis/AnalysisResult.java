@@ -12,16 +12,7 @@ import lombok.Data;
 
 @Data
 @JsonTypeInfo(include= JsonTypeInfo.As.WRAPPER_OBJECT, use= JsonTypeInfo.Id.CLASS)
-public abstract class AnalysisResult {
-	
-    /** Идентификатор задания */
-    private Long jobID;
-
-    /** Единица ЕРДИ для проверки */
-    private CheckUnit checkUnit;
-
-    /** Результат проверки **/
-    private CheckUnitJobResult checkResult;
+public abstract class AnalysisResult extends CheckUnitResult {
 
     /**Скриншот полученной при проверке страницы*/
     private byte[] screenshot;

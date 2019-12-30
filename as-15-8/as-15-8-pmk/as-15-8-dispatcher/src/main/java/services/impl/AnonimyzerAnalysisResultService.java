@@ -3,22 +3,19 @@ package services.impl;
 import analysis.AnonymizerAnalysisResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import model.DetailResult;
 import model.PasdDetailResult;
 import model.Result;
 import model.enums.CheckType;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import repositories.PasdDetailResultRepo;
 import services.AnalysisResultService;
 
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Slf4j
-public class AnonymizerAnalysisResultService implements AnalysisResultService<AnonymizerAnalysisResult> {
-
-	private final PasdDetailResultRepo pasdDetailResultRepo;
+public class AnonimyzerAnalysisResultService implements AnalysisResultService<AnonymizerAnalysisResult> {
 
 	@Override
 	public CheckType getCheckType() {
@@ -26,11 +23,9 @@ public class AnonymizerAnalysisResultService implements AnalysisResultService<An
 	}
 
 	@Override
-	public void saveResult(Result result, AnonymizerAnalysisResult analysisResult) {
+	public DetailResult createDetails(Result result, AnonymizerAnalysisResult analysisResult) {
 
-		PasdDetailResult pasdDetailResult = pasdDetailResultRepo.findById(result.getId())
-				.orElseGet(PasdDetailResult::new);
-		BeanUtils.copyProperties(pasdDetailResult, new PasdDetailResult(), "id", "result");
+		PasdDetailResult pasdDetailResult = new PasdDetailResult();
 
 		pasdDetailResult.setResult(result);
 
@@ -55,8 +50,7 @@ public class AnonymizerAnalysisResultService implements AnalysisResultService<An
 		pasdDetailResult.setRedirectionDetected(analysisResult.getRedirectionDetected());
 		pasdDetailResult.setResultNLP(analysisResult.getResultNLP());
 
-		pasdDetailResultRepo.save(pasdDetailResult);
-
+		return pasdDetailResult;
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package events.producers;
 
 import checkUnits.CheckUnitJob;
+import checkUnits.CheckUnitKey;
 import events.PPM_Channels;
 import exceptions.AS_15_8_PPM_Exception;
 import lombok.RequiredArgsConstructor;
@@ -28,12 +29,13 @@ public class CheckUnitJobProducer {
      * Метод отправки задания диспетчеру в тему Kafka
      * @param checkUnitJob Задание на проверку чек-юнита
      */
-    public void sendJobToDispatcher(CheckUnitJob checkUnitJob, int partitionId) {
+    public void sendJobToDispatcher(CheckUnitJob checkUnitJob, CheckUnitKey key, int partitionId) {
         try {
             log.info("Отправка сообщения с заданием на проверку диспетчеру. Раздел: {}, тело: {}", partitionId, checkUnitJob);
             Message<CheckUnitJob> message = MessageBuilder
                     .withPayload(checkUnitJob)
                     .setHeader(KafkaHeaders.PARTITION_ID, partitionId)
+                    .setHeader(KafkaHeaders.MESSAGE_KEY, key)
                     .build();
 
             boolean send = ppm_channels.outputJobs().send(message);

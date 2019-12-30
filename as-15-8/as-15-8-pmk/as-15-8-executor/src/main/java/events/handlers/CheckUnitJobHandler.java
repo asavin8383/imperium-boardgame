@@ -2,6 +2,7 @@ package events.handlers;
 
 import checkUnits.CheckUnitJob;
 import analysis.CheckUnitStatusNotification;
+import checkUnits.CheckUnitKey;
 import common.ExecutorProperties;
 import enums.CheckUnitJobResult;
 import events.ExecutorChannels;
@@ -45,7 +46,7 @@ public class CheckUnitJobHandler {
     @StreamListener(ExecutorChannels.INPUT_JOBS)
     public void consumeCheckUnitJob(Message<CheckUnitJob> message){
         Integer partitionId = message.getHeaders().get(KafkaHeaders.RECEIVED_PARTITION_ID, Integer.class);
-        Long key = message.getHeaders().get(KafkaHeaders.RECEIVED_MESSAGE_KEY, Long.class);
+        CheckUnitKey key = message.getHeaders().get(KafkaHeaders.RECEIVED_MESSAGE_KEY, CheckUnitKey.class);
         log.info("\n   ---->>> Принято задание: " + message.getPayload().toString() +
                 ", key: " + key +
                 ", partition: " + partitionId +
@@ -130,7 +131,7 @@ public class CheckUnitJobHandler {
      * Метод отправки результата выполнения робота в тему Kafka
      * @param jobResult Результат выполнения робота
      */
-    private void sendExecutionResult(ExecutionJobResult jobResult, Long key, Integer partitionId) throws RuntimeException {
+    private void sendExecutionResult(ExecutionJobResult jobResult, CheckUnitKey key, Integer partitionId) throws RuntimeException {
         try {
             Message<ExecutionJobResult> message = MessageBuilder
                     .withPayload(jobResult)
@@ -146,7 +147,7 @@ public class CheckUnitJobHandler {
         }
     }
 
-    private void sendCheckJobErrorNotification(Long jobID, Long erdiId, Throwable cause, Long key, Integer partitionId) {
+    private void sendCheckJobErrorNotification(Long jobID, Long erdiId, Throwable cause, CheckUnitKey key, Integer partitionId) {
         try {
             CheckUnitStatusNotification.CheckUnitStatusNotificationBuilder notificationBuilder = CheckUnitStatusNotification.builder();
             notificationBuilder.jobID(jobID);

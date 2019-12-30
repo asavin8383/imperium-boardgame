@@ -1,21 +1,28 @@
 package services.impl;
 
 import analysis.AnalysisResult;
+import analysis.CheckUnitResult;
+import analysis.CheckUnitStatusNotification;
 import arrangement.ArrangementStatusNotification;
+import checkUnits.CheckUnitKey;
 import enums.ArrangementEvents;
 import enums.CheckUnitJobResult;
 import enums.ErdiStatus;
 import enums.ExecutionStatus;
+import events.handlers.ResultsHandler;
 import exceptions.AS_15_8_DispatcherException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import model.ErrorDetailResult;
-import model.Result;
-import model.ResultScreenShot;
+import model.*;
 import model.enums.CheckType;
+import org.apache.kafka.streams.state.KeyValueIterator;
+import org.apache.kafka.streams.state.QueryableStoreTypes;
+import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.stream.binder.kafka.streams.InteractiveQueryService;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import repositories.ArrangementRepo;
 import repositories.ErrorDetailResultRepo;
 import repositories.ResultRepo;
 import repositories.ResultScreenShotRepo;
@@ -25,44 +32,105 @@ import services.AnalysisResultService;
 import services.AnalysisResultServiceFactory;
 import services.ResultService;
 
+import javax.persistence.EntityExistsException;
+import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor(onConstructor_={@Autowired})
 @Slf4j
 public class ResultServiceImpl implements ResultService {
 
+    private final InteractiveQueryService interactiveQueryService;
+
+    private final ArrangementRepo arrangementRepo;
     private final ResultRepo resultRepo;
     private final ResultScreenShotRepo resultScreenShotRepo;
     private final ErrorDetailResultRepo errorDetailResultRepo;
     private final ErdiChecker erdiChecker;
     private final ArrangementStatusProducer arrangementStatusProducer;
+    private final EntityManager entityManager;
+
+    @Scheduled(cron = "${results.save.schedule}")
+    public void saveResults(){
+        try{
+            final ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store =
+                    interactiveQueryService.getQueryableStore(
+                            ResultsHandler.RESULT_TABLE_NAME,
+                            QueryableStoreTypes.keyValueStore()
+                    );
+            if(store == null)
+                return;
+            List<Arrangement> runningArrangements = arrangementRepo.findRunning();
+            for(Arrangement arrangement : runningArrangements){
+                KeyValueIterator<CheckUnitKey, CheckUnitResult> resultsIterator = store.range(
+                        new CheckUnitKey(arrangement.getId(), Long.MIN_VALUE),
+                        new CheckUnitKey(arrangement.getId(), Long.MAX_VALUE)
+                );
+                while(resultsIterator.hasNext()){
+                    CheckUnitResult checkUnitResult = resultsIterator.next().value;
+                    if(checkUnitResult instanceof AnalysisResult) {
+                        saveJobResult((AnalysisResult) checkUnitResult);
+                    } else if(checkUnitResult instanceof CheckUnitStatusNotification) {
+                        CheckUnitStatusNotification notification = (CheckUnitStatusNotification) checkUnitResult;
+                        updateJobStatus(notification.getJobID(), notification.getErdiID(), notification.getCheckResult(), notification.getDescription());
+                    }
+                }
+            }
+        } catch (Exception ex){
+            log.error("Ошибка при сохранении результатов мероприятия", ex);
+        }
+    }
+
     @Override
     @Transactional
     public Result saveJobResult(AnalysisResult analysisResult) {
-        Result result = findJobByID(analysisResult.getJobID());
-        AnalysisResultService<? super AnalysisResult> service = AnalysisResultServiceFactory.getService(analysisResult.getClass());
-        result.setEndDate(LocalDateTime.now());
-        result.setResult(checkStatus(result.getErdiId(), analysisResult.getCheckResult()));
+        try{
+            Result result = findJobByID(analysisResult.getJobID());
+            AnalysisResultService<? super AnalysisResult> service = AnalysisResultServiceFactory.getService(analysisResult.getClass());
+            result.setEndDate(LocalDateTime.now());
+            result.setResult(checkStatus(result.getErdiId(), analysisResult.getCheckResult()));
 
-        if(analysisResult.getCheckResult().equals(CheckUnitJobResult.INTERNAL_ERROR)) {
-            result.setCheckType(CheckType.ERROR);
-            saveResultAsError(result, service.getErrorText(analysisResult));
-        } else {
-            result.setCheckType(service.getCheckType());
-            service.saveResult(result, analysisResult);
+            if(analysisResult.getCheckResult().equals(CheckUnitJobResult.INTERNAL_ERROR)) {
+                result.setCheckType(CheckType.ERROR);
+                saveResultAsError(result, service.getErrorText(analysisResult));
+            } else {
+                result.setCheckType(service.getCheckType());
+                DetailResult detailResult = service.createDetails(result, analysisResult);
+                try {
+                    entityManager.persist(detailResult);
+                } catch (EntityExistsException ex){
+                    entityManager.merge(detailResult);
+                }
+            }
+            if((analysisResult.getScreenshot() != null && analysisResult.getScreenshot().length > 0) ||
+                    (analysisResult.getEtalonScreenshot() != null && analysisResult.getEtalonScreenshot().length > 0)){
+                ResultScreenShot resultScreenShot = resultScreenShotRepo.findById(result.getId()).orElseGet(ResultScreenShot::new);
+                resultScreenShot.setResult(result);
+                resultScreenShot.setScreenshot(analysisResult.getScreenshot());
+                resultScreenShot.setEtalonScreenshot(analysisResult.getEtalonScreenshot());
+               // resultScreenShotRepo.save(resultScreenShot);
+                entityManager.persist(resultScreenShot);
+            }
+            return result;
+        } catch (Exception ex) {
+            try {
+                log.error("Ошибка при обработке сообщения с анализом результатов проверки: " + analysisResult.getJobID() + ", " + analysisResult.getCheckUnit().getValue(), ex);
+
+                StringWriter sw = new StringWriter();
+                ex.printStackTrace(new PrintWriter(sw));
+
+                updateJobStatus(analysisResult.getJobID(), analysisResult.getCheckUnit().getContentId(), CheckUnitJobResult.INTERNAL_ERROR, sw.toString());
+            } catch(Exception newEx) {
+                log.error("Ошибка при сохранении ошибочной обработки сообщения с анализом результатов проверки: " + analysisResult.getJobID() + ", " + analysisResult.getCheckUnit().getValue(), newEx);
+            }
         }
-        if((analysisResult.getScreenshot() != null && analysisResult.getScreenshot().length > 0) ||
-                (analysisResult.getEtalonScreenshot() != null && analysisResult.getEtalonScreenshot().length > 0)){
-            ResultScreenShot resultScreenShot = resultScreenShotRepo.findById(result.getId()).orElseGet(ResultScreenShot::new);
-            resultScreenShot.setResult(result);
-            resultScreenShot.setScreenshot(analysisResult.getScreenshot());
-            resultScreenShot.setEtalonScreenshot(analysisResult.getEtalonScreenshot());
-            resultScreenShotRepo.save(resultScreenShot);
-        }
-        return result;
+        return null;
     }
 
     @Override

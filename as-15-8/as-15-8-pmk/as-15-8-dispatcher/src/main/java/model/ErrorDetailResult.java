@@ -1,24 +1,16 @@
 package model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 
 @Entity
 @Table(schema = "results", name = "error_detail_results")
 @Data
-public class ErrorDetailResult {
-
-    private static final long serialVersionUID = 1L;
-
-    @Id
-    private Long id;
-
-    @OneToOne(optional = false, fetch = FetchType.LAZY)
-    @MapsId
-    @JsonIgnore
-    private Result result;
+@EqualsAndHashCode(callSuper = true)
+public class ErrorDetailResult extends DetailResult{
 
     private String error;
 }

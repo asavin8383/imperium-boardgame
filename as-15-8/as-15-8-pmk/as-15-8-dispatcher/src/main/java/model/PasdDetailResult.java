@@ -1,10 +1,11 @@
 package model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
-import javax.persistence.*;
-import java.io.Serializable;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 
 /**
  * Результаты выполнения мероприятия
@@ -13,17 +14,8 @@ import java.io.Serializable;
 @Entity
 @Table(schema = "results", name = "pasd_detail_results")
 @Data
-public class PasdDetailResult implements Serializable  {
-
-    private static final long serialVersionUID = 1L;
-
-    @Id
-    private Long id;
-
-    @OneToOne(optional = false, fetch = FetchType.LAZY)
-    @MapsId
-    @JsonIgnore
-    private Result result;
+@EqualsAndHashCode(callSuper = true)
+public class PasdDetailResult extends DetailResult {
 
     @Column(name="response_error_code")
     private String responseErrorCode;

@@ -1,10 +1,9 @@
 package events.handlers;
 
 import arrangement.ArrangementStatusNotification;
-import checkUnits.CheckUnitStatusNotification;
+import analysis.CheckUnitStatusNotification;
 import enums.ArrangementEvents;
 import enums.CheckUnitJobResult;
-import enums.ExecutionStatus;
 import events.DispatcherChannels;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,15 +38,15 @@ public class JobNotificationHandler {
                 ", partition: "+message.getHeaders().get(KafkaHeaders.RECEIVED_PARTITION_ID, Integer.class) +
                 ", offset: "+message.getHeaders().get(KafkaHeaders.OFFSET, Long.class));
         try {
-            Result job = resultService.updateJobStatus(notification.getJobID(), notification.getErdiID(), notification.getCheckUnitStatus(), notification.getDescription());
-            if(notification.getCheckUnitStatus() == CheckUnitJobResult.CAPTCHA_DETECTED) {
+            Result job = resultService.updateJobStatus(notification.getJobID(), notification.getErdiID(), notification.getCheckResult(), notification.getDescription());
+            if(notification.getCheckResult() == CheckUnitJobResult.CAPTCHA_DETECTED) {
                 ArrangementStatusNotification arrNotification = new ArrangementStatusNotification(job.getArrangementId(), ArrangementEvents.PAUSE);
                 arrangementStatusProducer.sendArrangementStatusMessage(arrNotification);
             } else {
                 resultService.sendNotificationsIfFinished(job.getArrangementId());
             }
         } catch (Exception ex) {
-            log.error("Ошибка при обработке уведомления от проверки: " + notification.getJobID() + ", " + notification.getCheckUnitStatus(), ex);
+            log.error("Ошибка при обработке уведомления от проверки: " + notification.getJobID() + ", " + notification.getCheckResult(), ex);
         }
     }
 }

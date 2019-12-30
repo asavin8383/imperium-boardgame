@@ -4,7 +4,7 @@ spring:
     stream:
       bindings:
         outputJobs:
-          destination: scheduled_jobs
+          destination: jobs
         springCloudBusInput:
           destination: bus_config_input
           group: ppm

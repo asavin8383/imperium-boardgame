@@ -2,13 +2,12 @@ package services.impl;
 
 import analysis.NMapAnalysisJobResult;
 import lombok.RequiredArgsConstructor;
+import model.DetailResult;
 import model.NmapDetailResult;
 import model.Result;
 import model.enums.CheckType;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import repositories.NmapDetailResultRepo;
 import services.AnalysisResultService;
 
 /**
@@ -21,23 +20,19 @@ import services.AnalysisResultService;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class NmapAnalysisResultService implements AnalysisResultService<NMapAnalysisJobResult> {
 
-	private final NmapDetailResultRepo nmapDetailResultRepo;
-
 	@Override
 	public CheckType getCheckType() {
 		return CheckType.NMAP;
 	}
 
 	@Override
-	public void saveResult(Result result, NMapAnalysisJobResult analysisResult) {
-		NmapDetailResult nmapDetailResult = nmapDetailResultRepo.findById(result.getId())
-				.orElseGet(NmapDetailResult::new);
-		BeanUtils.copyProperties(nmapDetailResult, new NmapDetailResult(), "id", "result");
+	public DetailResult createDetails(Result result, NMapAnalysisJobResult analysisResult) {
+		NmapDetailResult nmapDetailResult = new NmapDetailResult();
 
 		nmapDetailResult.setResult(result);
 
 		nmapDetailResult.setLog(analysisResult.getNmapLog());
-		nmapDetailResultRepo.save(nmapDetailResult);
+		return nmapDetailResult;
 	}
 
 	@Override

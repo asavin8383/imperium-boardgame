@@ -65,11 +65,13 @@ spring:
     properties:
       hibernate:
         jdbc:
-          lob:
-            non_contextual_creation: true
+          lob.non_contextual_creation: true
+          jdbc.batch_size: 1000
+          order_inserts: true
         format_sql: true
     databasePlatform: org.hibernate.dialect.PostgreSQL9Dialect
   jackson.serialization.FAIL_ON_EMPTY_BEANS: false
+results.save.schedule: '0 0 0 * * ?'
 
 ---
 
