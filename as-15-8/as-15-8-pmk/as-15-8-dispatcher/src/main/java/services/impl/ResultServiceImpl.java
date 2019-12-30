@@ -40,6 +40,7 @@ import java.io.StringWriter;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @RequiredArgsConstructor(onConstructor_={@Autowired})
@@ -208,7 +209,7 @@ public class ResultServiceImpl implements ResultService {
         }
     }
 
-    public ExecutionStatus getArrnagementExecutionStatus(Long arrangementId) {
+    public ExecutionStatus getArrangementExecutionStatus(Long arrangementId) {
         return arrangementStatusProducer.getArrangementExcecutionStatus(arrangementId);
     }
 
