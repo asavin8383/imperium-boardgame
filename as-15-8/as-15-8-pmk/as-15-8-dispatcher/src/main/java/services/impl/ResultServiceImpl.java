@@ -23,9 +23,7 @@ import org.springframework.cloud.stream.binder.kafka.streams.InteractiveQuerySer
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import repositories.ArrangementRepo;
-import repositories.ErrorDetailResultRepo;
 import repositories.ResultRepo;
-import repositories.ResultScreenShotRepo;
 import restapi.ArrangementStatusProducer;
 import restapi.ErdiChecker;
 import services.AnalysisResultService;
@@ -40,6 +38,7 @@ import java.io.StringWriter;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @RequiredArgsConstructor(onConstructor_={@Autowired})
@@ -50,8 +49,6 @@ public class ResultServiceImpl implements ResultService {
 
     private final ArrangementRepo arrangementRepo;
     private final ResultRepo resultRepo;
-    private final ResultScreenShotRepo resultScreenShotRepo;
-    private final ErrorDetailResultRepo errorDetailResultRepo;
     private final ErdiChecker erdiChecker;
     private final ArrangementStatusProducer arrangementStatusProducer;
     private final EntityManager entityManager;
@@ -68,23 +65,35 @@ public class ResultServiceImpl implements ResultService {
                 return;
             List<Arrangement> runningArrangements = arrangementRepo.findRunning();
             for(Arrangement arrangement : runningArrangements){
-                KeyValueIterator<CheckUnitKey, CheckUnitResult> resultsIterator = store.range(
-                        new CheckUnitKey(arrangement.getId(), Long.MIN_VALUE),
-                        new CheckUnitKey(arrangement.getId(), Long.MAX_VALUE)
-                );
-                while(resultsIterator.hasNext()){
-                    CheckUnitResult checkUnitResult = resultsIterator.next().value;
-                    if(checkUnitResult instanceof AnalysisResult) {
-                        saveJobResult((AnalysisResult) checkUnitResult);
-                    } else if(checkUnitResult instanceof CheckUnitStatusNotification) {
-                        CheckUnitStatusNotification notification = (CheckUnitStatusNotification) checkUnitResult;
-                        updateJobStatus(notification.getJobID(), notification.getErdiID(), notification.getCheckResult(), notification.getDescription());
+                AtomicInteger count = new AtomicInteger();
+                getArrangementIterator(store, arrangement.getId()).forEachRemaining(obj -> count.getAndIncrement());
+
+                if(arrangement.getCheckUnitsCount() <= count.longValue()) {
+                    KeyValueIterator<CheckUnitKey, CheckUnitResult> resultsIterator = getArrangementIterator(store, arrangement.getId());
+                    while (resultsIterator.hasNext()) {
+                        CheckUnitResult checkUnitResult = resultsIterator.next().value;
+                        if (checkUnitResult instanceof AnalysisResult) {
+                            saveJobResult((AnalysisResult) checkUnitResult);
+                        } else if (checkUnitResult instanceof CheckUnitStatusNotification) {
+                            CheckUnitStatusNotification notification = (CheckUnitStatusNotification) checkUnitResult;
+                            updateJobStatus(notification.getJobID(), notification.getErdiID(), notification.getCheckResult(), notification.getDescription());
+                        }
                     }
                 }
             }
         } catch (Exception ex){
             log.error("Ошибка при сохранении результатов мероприятия", ex);
         }
+    }
+
+    private KeyValueIterator<CheckUnitKey, CheckUnitResult> getArrangementIterator(
+            ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store,
+            Long arrangementId
+    ){
+        return store.range(
+                new CheckUnitKey(arrangementId, Long.MIN_VALUE),
+                new CheckUnitKey(arrangementId, Long.MAX_VALUE)
+        );
     }
 
     @Override
@@ -110,12 +119,15 @@ public class ResultServiceImpl implements ResultService {
             }
             if((analysisResult.getScreenshot() != null && analysisResult.getScreenshot().length > 0) ||
                     (analysisResult.getEtalonScreenshot() != null && analysisResult.getEtalonScreenshot().length > 0)){
-                ResultScreenShot resultScreenShot = resultScreenShotRepo.findById(result.getId()).orElseGet(ResultScreenShot::new);
+                ResultScreenShot resultScreenShot = new ResultScreenShot();
                 resultScreenShot.setResult(result);
                 resultScreenShot.setScreenshot(analysisResult.getScreenshot());
                 resultScreenShot.setEtalonScreenshot(analysisResult.getEtalonScreenshot());
-               // resultScreenShotRepo.save(resultScreenShot);
-                entityManager.persist(resultScreenShot);
+                try {
+                    entityManager.persist(resultScreenShot);
+                } catch (EntityExistsException ex){
+                    entityManager.merge(resultScreenShot);
+                }
             }
             return result;
         } catch (Exception ex) {
@@ -166,13 +178,16 @@ public class ResultServiceImpl implements ResultService {
     }
 
     private void saveResultAsError(Result result, String exText) {
-        ErrorDetailResult errorDetailResult = errorDetailResultRepo.findById(result.getId())
-                .orElseGet(ErrorDetailResult::new);
+        ErrorDetailResult errorDetailResult = new ErrorDetailResult();
 
         errorDetailResult.setResult(result);
 
         errorDetailResult.setError(exText);
-        errorDetailResultRepo.save(errorDetailResult);
+        try{
+            entityManager.persist(errorDetailResult);
+        } catch (EntityExistsException ex){
+            entityManager.merge(errorDetailResult);
+        }
     }
 
     private CheckUnitJobResult checkStatus(Long erdiId, CheckUnitJobResult status){
@@ -190,7 +205,7 @@ public class ResultServiceImpl implements ResultService {
         }
     }
 
-    public ExecutionStatus getArrnagementExecutionStatus(Long arrangementId) {
+    public ExecutionStatus getArrangementExecutionStatus(Long arrangementId) {
         return arrangementStatusProducer.getArrangementExcecutionStatus(arrangementId);
     }
 }

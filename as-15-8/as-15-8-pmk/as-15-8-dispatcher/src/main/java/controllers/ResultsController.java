@@ -140,7 +140,7 @@ public class ResultsController {
 
         List<Result> results = resultRepo.findAllByArrangementId(arrangementId);
         resultService.sendNotificationsIfFinished(arrangementId);
-        if (resultService.getArrnagementExecutionStatus(arrangementId) == ExecutionStatus.RUNNING) {
+        if (resultService.getArrangementExecutionStatus(arrangementId) == ExecutionStatus.RUNNING) {
             results.stream()
                     .filter(this::checkIsRunningOrPlanned)
                     .forEach(resultToStop -> {
