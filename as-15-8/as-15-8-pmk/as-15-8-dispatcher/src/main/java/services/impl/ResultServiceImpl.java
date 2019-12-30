@@ -87,8 +87,8 @@ public class ResultServiceImpl implements ResultService {
                                 ex.printStackTrace(new PrintWriter(sw));
 
                                 Result jobResult = updateJobStatus(checkUnitResult.getJobID(), checkUnitResult.getCheckUnit().getContentId(), CheckUnitJobResult.INTERNAL_ERROR, sw.toString());
-                                log.info("Мероприятие завешено с ошибками: " + jobResult.getArrangementId());
-                                arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(jobResult.getArrangementId(), ArrangementEvents.FINISH));
+                                log.info("Мероприятие завешено с ошибками: " + jobResult.getArrangement().getId());
+                                arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(jobResult.getArrangement().getId(), ArrangementEvents.FINISH));
                             } catch(Exception newEx) {
                                 log.error("Ошибка при сохранении ошибочной обработки сообщения с анализом результатов проверки: " + checkUnitResult.getJobID() + ", " + checkUnitResult.getCheckUnit().getValue(), newEx);
                             }

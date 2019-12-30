@@ -20,4 +20,5 @@
     <include file="data/changelog/dispatcher.0015.result_checker.xml"/>
     <include file="data/changelog/dispatcher.0016.check_for_act.xml"/>
     <include file="data/changelog/dispatcher.0017.arrangement_add.xml"/>
+    <include file="data/changelog/dispatcher.0018.arrangements_fk.xml"/>
 </databaseChangeLog>

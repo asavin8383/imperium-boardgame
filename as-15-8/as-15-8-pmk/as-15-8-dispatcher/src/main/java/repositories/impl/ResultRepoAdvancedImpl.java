@@ -4,6 +4,7 @@ import checkUnits.CheckUnitType;
 import enums.CheckUnitJobResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import model.Arrangement_;
 import model.Result;
 import model.Result_;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +45,7 @@ public class ResultRepoAdvancedImpl implements ResultRepoAdvanced {
         List<Predicate> predicates = new ArrayList<>();
 
         if (arrangementId != null) {
-            predicates.add(criteriaBuilder.like(criteriaBuilder.upper(root.get(Result_.ARRANGEMENT_ID).as(String.class)), "%" + arrangementId + "%"));
+            predicates.add(criteriaBuilder.like(criteriaBuilder.upper(root.get(Result_.ARRANGEMENT).get(Arrangement_.ID).as(String.class)), "%" + arrangementId + "%"));
         }
 
         if (checkUnitJobResultNames != null && checkUnitJobResultNames.size() > 0) {
@@ -58,7 +59,7 @@ public class ResultRepoAdvancedImpl implements ResultRepoAdvanced {
         if (query != null) {
             predicates.add(
                 criteriaBuilder.or(
-                        criteriaBuilder.like(criteriaBuilder.upper(root.get(Result_.ARRANGEMENT_ID)), "%" + query.toUpperCase()),
+                        criteriaBuilder.like(criteriaBuilder.upper(root.get(Result_.ARRANGEMENT).get(Arrangement_.ID)), "%" + query.toUpperCase()),
                         criteriaBuilder.like(criteriaBuilder.upper(root.get(Result_.CHECK_UNIT_TYPE)), "%" + query.toUpperCase() + "%"),
                         criteriaBuilder.like(criteriaBuilder.upper(root.get(Result_.RESULT)), "%" + query.toUpperCase() + "%")
                 )
