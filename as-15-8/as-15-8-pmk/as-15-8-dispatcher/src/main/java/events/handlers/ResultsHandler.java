@@ -11,6 +11,7 @@ import org.apache.kafka.streams.kstream.Materialized;
 import org.apache.kafka.streams.state.KeyValueStore;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.Input;
+import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
@@ -24,6 +25,7 @@ public class ResultsHandler {
 
     public static final String RESULT_TABLE_NAME = "results_table";
 
+    @StreamListener
     public void processResults(
             @Input(DispatcherChannels.INPUT_ANALYSIS_RESULTS) KStream<CheckUnitKey, Message<CheckUnitResult>> analysisResultsStream,
             @Input(DispatcherChannels.INPUT_JOB_NOTIFICATIONS) KStream<CheckUnitKey, Message<CheckUnitResult>> notificationsStream
