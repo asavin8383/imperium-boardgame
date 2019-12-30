@@ -35,7 +35,6 @@ public class CriteriaHelper {
     }
 
     public static List<List<Long>> createIds(EntityManager em, CriteriaQuery<ContentView> select, Integer maxResults) {
-    //public static List<List<Long>> createIds(EntityManager em, CriteriaQuery<ContentView> select) {
         TypedQuery<ContentView> query = em.createQuery(select);
 
         if (maxResults != null)

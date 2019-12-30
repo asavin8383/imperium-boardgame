@@ -3,7 +3,6 @@ package repositories;
 import model.projection.ContentView;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import reactor.core.publisher.Flux;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -41,6 +40,9 @@ public interface ContentViewRepositoryAdvanced {
             List<String> violationNames,
             Integer size,
             LocalDateTime startTime,
-            LocalDateTime endTime
+            LocalDateTime endTime,
+            boolean random,
+            Pageable pageable
+
     );
 }
