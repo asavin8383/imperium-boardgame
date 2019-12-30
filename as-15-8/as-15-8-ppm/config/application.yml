@@ -19,7 +19,7 @@ spring:
         bindings:
           outputJobs:
             producer.configuration:
-              key.serializer: org.apache.kafka.common.serialization.StringSerializer
+              key.serializer: org.springframework.kafka.support.serializer.JsonSerializer
   liquibase:
     enabled: true
     change-log: classpath:db/db.changelog.master.xml

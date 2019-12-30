@@ -11,16 +11,8 @@ import org.springframework.messaging.SubscribableChannel;
  */
 public interface DispatcherChannels {
 
-    String INPUT_JOBS = "inputJobs";
-    String OUTPUT_JOBS = "outputJobs";
     String INPUT_ANALYSIS_RESULTS = "inputAnalysisResults";
     String INPUT_JOB_NOTIFICATIONS = "inputJobNotifications";
-
-    @Input(INPUT_JOBS)
-    SubscribableChannel inputJobs();
-
-    @Output(OUTPUT_JOBS)
-    MessageChannel outputJobs();
 
     @Input(INPUT_ANALYSIS_RESULTS)
     SubscribableChannel inputAnalysisResults();
