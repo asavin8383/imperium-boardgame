@@ -209,4 +209,18 @@ public class ArrangementController {
         return arrangement.getStatus();
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_SYSTEM', 'ROLE_MANAGE_ARRANGEMENT')" )
+    @GetMapping(path = "/act_available")
+    public Boolean isActAvailable(@RequestParam("id") Optional<Arrangement> arrangement){
+        arrangement.orElseThrow(()-> new AS_15_8_PPT_Exception("Arrangement не найден"));
+        return arrangement.get().getIsActAvailable();
+    }
+
+    @PreAuthorize("hasRole('ROLE_SYSTEM')" )
+    @GetMapping(path = "/act_sent_status")
+    public void changeActStatus(@RequestParam("id") Optional<Arrangement> arrangement){
+        arrangement.orElseThrow(()-> new AS_15_8_PPT_Exception("Arrangement не найден"));
+        arrangement.get().setStatus(ExecutionStatus.ACT_SENT);
+        arrangementRepo.save(arrangement.get());
+    }
 }
