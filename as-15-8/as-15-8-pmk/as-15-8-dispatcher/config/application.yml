@@ -6,7 +6,7 @@ spring:
         inputJobNotifications:
           destination: job_notifications
         inputAnalysisResults:
-          destination: analysis_results
+          destination: analysis_results1
       kafka:
         streams:
           binder:
