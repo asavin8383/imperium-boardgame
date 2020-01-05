@@ -88,7 +88,7 @@ public class PodWebClient {
              Integer size,
              LocalDate startTime,
              LocalDate endTime,
-             boolean random,
+             Boolean random,
              SortingDirection sortingDirection,
              String sortingColumn
 
