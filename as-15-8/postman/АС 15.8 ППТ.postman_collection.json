@@ -1137,10 +1137,30 @@
 						{
 							"name": "Добавление ЕРДИ к чек юниту через запрос в ПОД",
 							"request": {
+								"auth": {
+									"type": "oauth2",
+									"oauth2": [
+										{
+											"key": "accessToken",
+											"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqYWNrIiwicm9sZSI6IlJPTEVfT1BFUkFUT1IsUk9MRV9GT1JNQUxfVEFTSyxST0xFX01BTkFHRV9GT1JNQUxfVEFTSyxST0xFX01BTkFHRV9BUlJBTkdFTUVOVCxST0xFX1BSRVBBUkFUSU9OX1RSQUZGSUMsUk9MRV9ESUNUSU9OQVJZLFJPTEVfRk9STUFUSU9OX09GX1NDSEVEVUxFLFJPTEVfVklFV19SRVNVTFQsUk9MRV9TRU5EX0FDVF9CWV9IQU5ELFJPTEVfTUFOQUdFX1BTX1BBU0QsUk9MRV9NQU5BR0VfRVJESSxST0xFX1ZJRVdfUkVQT1JULFJPTEVfRk9STUFUSU9OX1BBUkFNX1JFUE9SVCxST0xFX01BTkFHRV9ET01BSU5TLFJPTEVfTUFOQUdFX01BTlVBTF9BUlJBTkdFTUVOVCIsIm1haWwiOiIiLCJ1c2VyX25hbWUiOiJqYWNrIiwic2NvcGUiOlsicmVhZCIsIndyaXRlIl0sImV4cCI6MTU3Nzc5OTY4NCwidXNlck5hbWUiOiJqYWNrIiwiYXV0aG9yaXRpZXMiOlsiUk9MRV9PUEVSQVRPUiIsIlJPTEVfUFJFUEFSQVRJT05fVFJBRkZJQyIsIlJPTEVfRk9STUFUSU9OX1BBUkFNX1JFUE9SVCIsIlJPTEVfTUFOQUdFX01BTlVBTF9BUlJBTkdFTUVOVCIsIlJPTEVfTUFOQUdFX1BTX1BBU0QiLCJST0xFX0ZPUk1BVElPTl9PRl9TQ0hFRFVMRSIsIlJPTEVfTUFOQUdFX0VSREkiLCJST0xFX0ZPUk1BTF9UQVNLIiwiUk9MRV9ESUNUSU9OQVJZIiwiUk9MRV9WSUVXX1JFUE9SVCIsIlJPTEVfTUFOQUdFX0ZPUk1BTF9UQVNLIiwiUk9MRV9NQU5BR0VfQVJSQU5HRU1FTlQiLCJST0xFX1ZJRVdfUkVTVUxUIiwiUk9MRV9TRU5EX0FDVF9CWV9IQU5EIiwiUk9MRV9NQU5BR0VfRE9NQUlOUyJdLCJqdGkiOiJiMmMxOWRlNS05ZmI3LTRjNDgtODA2Yi0yYTc0MzYxMDUwYzMiLCJjbGllbnRfaWQiOiJhcy0xNS04Iiwic2Vjb25kTmFtZSI6IiJ9.m9PWmkM-R6qVTx1yiw0ba1EXYn-P0FGZMbE3GxB0Q7gkFM2I4GynrFjfsStl252vQvPizGUyMyTwlMlbFrHfRLAiMV5WONuxjvkApB4oxDgtRLyZ6x6uCaercM8GyyOXWjFtCYcaDPSzI38-1MPzFM8QL385so3QUDOAhMKjKuE6cmhdCSMtTaXLfJ1LZwimB9e-tFpJ20-2c6i_8OueYUl5hah6cei5UXS6GJJGHYC9UaRhSkVTdgcZ_gx3NTPGcB5U-TWPi4wpRChTBMNZpxyXGg1do-oFmOxJLCoeTJyyddwNDp_gvufSxVb7zUbqk3qwnggnpxJ5-1QrORFd0w",
+											"type": "string"
+										},
+										{
+											"key": "tokenType",
+											"value": "bearer",
+											"type": "string"
+										},
+										{
+											"key": "addTokenTo",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
 								"method": "PUT",
 								"header": [],
 								"url": {
-									"raw": "{{url}}/traffic/unit/erdi/247/addList?resourceTypes=domain&size=2&sortingDirection=DESC&sortingColumn=id",
+									"raw": "{{url}}/traffic/unit/erdi/321/addFromPod?size=10&sortingDirection=DESC&startTime=2014-07-02&endTime=2014-07-02&random=true",
 									"host": [
 										"{{url}}"
 									],
@@ -1148,17 +1168,18 @@
 										"traffic",
 										"unit",
 										"erdi",
-										"247",
-										"addList"
+										"321",
+										"addFromPod"
 									],
 									"query": [
 										{
 											"key": "resourceTypes",
-											"value": "domain"
+											"value": "domain",
+											"disabled": true
 										},
 										{
 											"key": "size",
-											"value": "2"
+											"value": "10"
 										},
 										{
 											"key": "sortingDirection",
@@ -1166,7 +1187,25 @@
 										},
 										{
 											"key": "sortingColumn",
-											"value": "id"
+											"value": "id",
+											"disabled": true
+										},
+										{
+											"key": "startTime",
+											"value": "2014-07-02"
+										},
+										{
+											"key": "categoryName",
+											"value": "Экстремизм",
+											"disabled": true
+										},
+										{
+											"key": "endTime",
+											"value": "2014-07-02"
+										},
+										{
+											"key": "random",
+											"value": "true"
 										}
 									]
 								}
@@ -3326,7 +3365,7 @@
 		"oauth2": [
 			{
 				"key": "accessToken",
-				"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqYWNrIiwicm9sZSI6IlJPTEVfT1BFUkFUT1IsUk9MRV9GT1JNQUxfVEFTSyxST0xFX01BTkFHRV9GT1JNQUxfVEFTSyxST0xFX01BTkFHRV9BUlJBTkdFTUVOVCxST0xFX1BSRVBBUkFUSU9OX1RSQUZGSUMsUk9MRV9ESUNUSU9OQVJZLFJPTEVfRk9STUFUSU9OX09GX1NDSEVEVUxFLFJPTEVfVklFV19SRVNVTFQsUk9MRV9TRU5EX0FDVF9CWV9IQU5ELFJPTEVfTUFOQUdFX1BTX1BBU0QsUk9MRV9NQU5BR0VfRVJESSxST0xFX1ZJRVdfUkVQT1JULFJPTEVfRk9STUFUSU9OX1BBUkFNX1JFUE9SVCxST0xFX01BTkFHRV9ET01BSU5TLFJPTEVfTUFOQUdFX01BTlVBTF9BUlJBTkdFTUVOVCIsIm1haWwiOiIiLCJ1c2VyX25hbWUiOiJqYWNrIiwic2NvcGUiOlsicmVhZCIsIndyaXRlIl0sImV4cCI6MTU3NjgyMzY4NiwidXNlck5hbWUiOiJqYWNrIiwiYXV0aG9yaXRpZXMiOlsiUk9MRV9PUEVSQVRPUiIsIlJPTEVfUFJFUEFSQVRJT05fVFJBRkZJQyIsIlJPTEVfRk9STUFUSU9OX1BBUkFNX1JFUE9SVCIsIlJPTEVfTUFOQUdFX01BTlVBTF9BUlJBTkdFTUVOVCIsIlJPTEVfTUFOQUdFX1BTX1BBU0QiLCJST0xFX0ZPUk1BVElPTl9PRl9TQ0hFRFVMRSIsIlJPTEVfTUFOQUdFX0VSREkiLCJST0xFX0ZPUk1BTF9UQVNLIiwiUk9MRV9ESUNUSU9OQVJZIiwiUk9MRV9WSUVXX1JFUE9SVCIsIlJPTEVfTUFOQUdFX0ZPUk1BTF9UQVNLIiwiUk9MRV9NQU5BR0VfQVJSQU5HRU1FTlQiLCJST0xFX1ZJRVdfUkVTVUxUIiwiUk9MRV9TRU5EX0FDVF9CWV9IQU5EIiwiUk9MRV9NQU5BR0VfRE9NQUlOUyJdLCJqdGkiOiJjMWIzMTI4OC1lYzkwLTRhZDUtYmY0Mi03MjE3YjM1ZGU4N2UiLCJjbGllbnRfaWQiOiJhcy0xNS04Iiwic2Vjb25kTmFtZSI6IiJ9.lEiksVcBPZ9LEoOeyJv60imz5vOJWus4QLOLnTmvc8GQN7CkjehXHR3DqHLB03N9uXtMr83WCO297Exu3CsqvDrigYLCO8jxgOD6MRuQkU82lMQzow6aNRSvj_ePj2kUE9oy9costFEZP1Ve5385eMhwGn74XeiLrZNbrNxr2bmWZ9fdKa6SW-8NqDmOJ5xXkyzfZmL0Yspa9eMeVX4tHrRfTPf_ORud7p_bla9dv3o3Hvgv-wirzJgxwiHvsbu9vZEikz_AYm_FfxdY5Oy5o6u9wESP2EppR044ckpoSAi-86rWhlxqDWMovxPvlGq4bwIlVVwgJJaPaOqKTxsSuw",
+				"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJyb2xlIjoiUk9MRV9TWVNURU0sUk9MRV9DT05GSUdfQ0xJRU5UIiwic2NvcGUiOlsicmVhZCIsIndyaXRlIl0sImV4cCI6MTU3NzE5MTgzOSwiYXV0aG9yaXRpZXMiOlsiUk9MRV9TWVNURU0iLCJST0xFX0NPTkZJR19DTElFTlQiXSwianRpIjoiN2JkOTRlZDAtNDQyYi00OWY5LWFhMTQtN2RmNGI4ZmZjNDk1IiwiY2xpZW50X2lkIjoicHBtIn0.WWpmlXkPpIkw0Qa4AK2AQxNs6exC7BkS0MNvyrpSPobTSOSrPSrGJtuetdS_YJ1N4pler98yIw7X28UJwPNjfl3GZeDNzexTgO_L2r99VVWUZy4PUW1TD2ilUed1pywys5dIx9bQtPhTbcJLdiZ9vk6TJbd2COqpzUAjabb9dZyKiWne4S0wE5Dvo6c3SupCzZ3jJStow0qfVpgpIxu_rLoFEAy_bbi-qvTWqyC4LZOclcLOiokwzbMHsUpecC1FFrgHDvxnTJr-iAh46JH00xkkMtsaE4sHiRts-MTCcBrg5A-7067KevG23aAI18nHja57tqYO79CW8tCmZxszYA",
 				"type": "string"
 			},
 			{
@@ -3365,25 +3404,25 @@
 	],
 	"variable": [
 		{
-			"id": "917448de-1f88-4012-963c-39842879f9e0",
+			"id": "62329fb8-f46d-4385-88c1-cdb0d5039de6",
 			"key": "url",
 			"value": "http://localhost:15800",
 			"type": "string"
 		},
 		{
-			"id": "a0fc83ed-3193-4040-b862-072a95d0871a",
+			"id": "ae2e1abe-f0c5-40c9-96d1-0c9ce39b73b8",
 			"key": "oper_token",
 			"value": "",
 			"type": "string"
 		},
 		{
-			"id": "9468e3ab-211a-4d7b-8dd5-c37dca6b932a",
+			"id": "b98f3aa2-191f-4fc1-b32a-601a2c621310",
 			"key": "test_url",
 			"value": "http://192.168.5.253:15800",
 			"type": "string"
 		},
 		{
-			"id": "ffd8733b-b483-40ee-a2c8-b2dfd081fedf",
+			"id": "cec891f0-5c6e-44ff-8106-04ba5f2cfc01",
 			"key": "admin_token",
 			"value": "",
 			"type": "string"

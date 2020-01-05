@@ -122,6 +122,17 @@ public class ArrangementStateMachine {
                     .withExternal()
                     .source(ExecutionStatus.RUNNING).target(ExecutionStatus.ERROR)
                     .event(ArrangementEvents.FAIL)
+
+                    .and()
+                    .withExternal()
+                    .source(ExecutionStatus.FINISHED).target(ExecutionStatus.ACT_SENT)
+                    .event(ArrangementEvents.SEND_ACT)
+
+                    .and()
+                    .withExternal()
+                    .source(ExecutionStatus.ACT_SENT).target(ExecutionStatus.ACT_SENT)
+                    .event(ArrangementEvents.SEND_ACT)
+
             ;
         } catch (Exception ex) {
             throw new AS_15_8_PPT_Exception("Ошибка создания конечного автомата!", ex);

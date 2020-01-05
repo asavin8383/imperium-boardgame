@@ -18,6 +18,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import reactor.core.publisher.Flux;
 import repositories.ContentRepository;
 import repositories.MissionRepository;
 import rest.*;
@@ -29,6 +30,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -70,7 +72,9 @@ public class ActService {
         aReq.setStartDate(actRequest.getStartDate());
         aReq.setEndDate(actRequest.getEndDate());
 
-        List<ActCheckResult> actCheckResults = dispatcherWebClient.getActCheckResults(actRequest.getArragementId());
+        Flux<List<ActCheckResult>> actCheckResultsFlux = dispatcherWebClient.getActCheckResults(actRequest.getArragementId());
+        List<ActCheckResult> actCheckResults = actCheckResultsFlux.toStream().flatMap(List::stream).collect(Collectors.toList());
+
         log.info("Получены результаты выполнения мероприятия для акта: ID мероприятия {}, количество: {}",
                 actRequest.getArragementId(),
                 actCheckResults.size());
@@ -100,7 +104,9 @@ public class ActService {
         }
         aReq.setCheckResults(checkResults);
 
-        List<ActAttachment> attachments = dispatcherWebClient.getActAttachments(actRequest.getArragementId());
+        Flux<List<ActAttachment>> attachmentsFlux = dispatcherWebClient.getActAttachments(actRequest.getArragementId());
+        List<ActAttachment> attachments = attachmentsFlux.toStream().flatMap(List::stream).collect(Collectors.toList());
+
         log.info("Получены скриншоты выполнения мероприятия для акта: ID мероприятия {}, количество: {}",
                 actRequest.getArragementId(),
                 attachments.size());

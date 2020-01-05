@@ -2,10 +2,13 @@ package webClient;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
+import reactor.core.publisher.Flux;
 import rest.ActAttachment;
 import rest.ActCheckResult;
 
@@ -29,7 +32,7 @@ public class DispatcherWebClient {
         webClient = WebClient.create(gatewayUrl);
     }
 
-    public List<ActCheckResult> getActCheckResults(Long arrangementId){
+    public Flux<List<ActCheckResult>> getActCheckResults(Long arrangementId){
         return webClient
                 .get()
                 .uri(UriComponentsBuilder
@@ -38,13 +41,19 @@ public class DispatcherWebClient {
                         .build().toString()
                 )
                 .accept(MediaType.TEXT_EVENT_STREAM)
-                .retrieve()
-                .bodyToFlux(ActCheckResult.class)
-                .collectList()
-                .block();
+                .exchange()
+                .flatMapMany(clientResponse -> {
+                    if(clientResponse.statusCode().equals(HttpStatus.OK)){
+                        log.info("Считывание actCheckResult успешно");
+                        return clientResponse.bodyToFlux(new ParameterizedTypeReference<List<ActCheckResult>>(){});
+                    } else {
+                        log.warn("Считывание actCheckResult не успешно, статус: {}", clientResponse.statusCode().toString());
+                        return Flux.empty();
+                    }
+                });
     }
 
-    public List<ActAttachment> getActAttachments(Long arrangementId){
+    public Flux<List<ActAttachment>> getActAttachments(Long arrangementId){
         UriComponentsBuilder uriBuilder = UriComponentsBuilder
                 .fromUriString(ACT_SCREENSHOTES_URI)
                 .queryParam("arrangementId", arrangementId);
@@ -53,10 +62,15 @@ public class DispatcherWebClient {
                 .get()
                 .uri(uriBuilder.build().toString())
                 .accept(MediaType.TEXT_EVENT_STREAM)
-                .retrieve()
-                .bodyToFlux(ActAttachment.class)
-                .collectList()
-                .block();
+                .exchange()
+                .flatMapMany(clientResponse -> {
+                    if(clientResponse.statusCode().equals(HttpStatus.OK)){
+                        log.info("Считывание скриншотов прошло успешно");
+                        return clientResponse.bodyToFlux(new ParameterizedTypeReference<List<ActAttachment>>(){});
+                    } else {
+                        log.warn("Считывание скриншотов не успешно, статус: {}", clientResponse.statusCode().toString());
+                        return Flux.empty();
+                    }
+                });
     }
-
 }

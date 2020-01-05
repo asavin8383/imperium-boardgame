@@ -115,6 +115,9 @@ public class Arrangement implements Serializable {
     @Transient
     private ArrangementStateMachine stateMachine;
 
+	@Column
+	private Boolean isActAvailable;
+
 	public Arrangement() {
 		this.creationDate = LocalDateTime.now();
 		this.status = ExecutionStatus.NEW;

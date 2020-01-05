@@ -304,6 +304,26 @@
 										"disableBodyPruning": true
 									},
 									"request": {
+										"auth": {
+											"type": "oauth2",
+											"oauth2": [
+												{
+													"key": "accessToken",
+													"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqYWNrIiwicm9sZSI6IlJPTEVfT1BFUkFUT1IsUk9MRV9GT1JNQUxfVEFTSyxST0xFX01BTkFHRV9GT1JNQUxfVEFTSyxST0xFX01BTkFHRV9BUlJBTkdFTUVOVCxST0xFX1BSRVBBUkFUSU9OX1RSQUZGSUMsUk9MRV9ESUNUSU9OQVJZLFJPTEVfRk9STUFUSU9OX09GX1NDSEVEVUxFLFJPTEVfVklFV19SRVNVTFQsUk9MRV9TRU5EX0FDVF9CWV9IQU5ELFJPTEVfTUFOQUdFX1BTX1BBU0QsUk9MRV9NQU5BR0VfRVJESSxST0xFX1ZJRVdfUkVQT1JULFJPTEVfRk9STUFUSU9OX1BBUkFNX1JFUE9SVCxST0xFX01BTkFHRV9ET01BSU5TLFJPTEVfTUFOQUdFX01BTlVBTF9BUlJBTkdFTUVOVCIsIm1haWwiOiIiLCJ1c2VyX25hbWUiOiJqYWNrIiwic2NvcGUiOlsicmVhZCIsIndyaXRlIl0sImV4cCI6MTU3Nzc5ODI2MSwidXNlck5hbWUiOiJqYWNrIiwiYXV0aG9yaXRpZXMiOlsiUk9MRV9PUEVSQVRPUiIsIlJPTEVfUFJFUEFSQVRJT05fVFJBRkZJQyIsIlJPTEVfRk9STUFUSU9OX1BBUkFNX1JFUE9SVCIsIlJPTEVfTUFOQUdFX01BTlVBTF9BUlJBTkdFTUVOVCIsIlJPTEVfTUFOQUdFX1BTX1BBU0QiLCJST0xFX0ZPUk1BVElPTl9PRl9TQ0hFRFVMRSIsIlJPTEVfTUFOQUdFX0VSREkiLCJST0xFX0ZPUk1BTF9UQVNLIiwiUk9MRV9ESUNUSU9OQVJZIiwiUk9MRV9WSUVXX1JFUE9SVCIsIlJPTEVfTUFOQUdFX0ZPUk1BTF9UQVNLIiwiUk9MRV9NQU5BR0VfQVJSQU5HRU1FTlQiLCJST0xFX1ZJRVdfUkVTVUxUIiwiUk9MRV9TRU5EX0FDVF9CWV9IQU5EIiwiUk9MRV9NQU5BR0VfRE9NQUlOUyJdLCJqdGkiOiI5NTIxMTkzOS02ODI2LTRiYTMtODAxZi1iMjcyY2VmOWEwNTMiLCJjbGllbnRfaWQiOiJhcy0xNS04Iiwic2Vjb25kTmFtZSI6IiJ9.OgJptZlAPdiBD-G5tfH7iQv3ESNUjq7JG--wyaBtmdCp2h3bmYrd9f-27KaDMDAL7DvonFhnwN8DwXzBT-XC8PwT4HPwCsiv7TbyYEywjB4XODrOG5hTVs5bfWwOldd1c26vWe89gnwTq4XujmHaKsxu6QV3IUy3bH5TRzG6Jb-6BDbh16IObb29fxolbDqI7DRyuNAm3snmX1DszQjqaE0imo0Qcm4GlWyNRuS2La4CgnmRvm38jOGkKtGsEG5_UWmBTL2Z8oZSrfRm-4q6etOYnWRbg6Kowu1Vaz1Yb58wAav8W9sOCc0dJn3oSDUcOdR6CtZbE0yrwveXU_bO6g",
+													"type": "string"
+												},
+												{
+													"key": "tokenType",
+													"value": "bearer",
+													"type": "string"
+												},
+												{
+													"key": "addTokenTo",
+													"value": "header",
+													"type": "string"
+												}
+											]
+										},
 										"method": "GET",
 										"header": [
 											{
@@ -323,7 +343,7 @@
 											}
 										},
 										"url": {
-											"raw": "{{url}}/pod/erdi/ids?startTime=2014-07-02&size=2&endTime=2014-07-07",
+											"raw": "{{url}}/pod/erdi/ids?startTime=2014-07-02&size=10&endTime=2014-07-02&random=true",
 											"host": [
 												"{{url}}"
 											],
@@ -339,7 +359,7 @@
 												},
 												{
 													"key": "size",
-													"value": "2"
+													"value": "10"
 												},
 												{
 													"key": "resourceTypes",
@@ -348,7 +368,8 @@
 												},
 												{
 													"key": "endTime",
-													"value": "2014-07-07"
+													"value": "2014-07-02",
+													"description": "2014-09-26"
 												},
 												{
 													"key": "idMask",
@@ -383,6 +404,20 @@
 												{
 													"key": "violationNames",
 													"value": "Интернет-казино",
+													"disabled": true
+												},
+												{
+													"key": "random",
+													"value": "true"
+												},
+												{
+													"key": "sortingDirection",
+													"value": "DESC",
+													"disabled": true
+												},
+												{
+													"key": "sortingColumn",
+													"value": "id",
 													"disabled": true
 												}
 											]
