@@ -20,6 +20,7 @@ import repositories.ResultRepo;
 import repositories.ResultScreenShotRepo;
 import rest.ActAttachment;
 import rest.ActCheckResult;
+import restapi.ArrangementStatusProducer;
 import services.ActService;
 
 import java.text.DateFormat;
@@ -27,7 +28,9 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 @RestController
@@ -43,6 +46,7 @@ public class ActController {
     private final ResultRepo resultRepo;
     private final ResultScreenShotRepo resultScreenShotRepo;
     private final NmapDetailResultRepo nmapDetailResultRepo;
+    private final ArrangementStatusProducer arrangementStatusProducer;
 
     private DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
@@ -66,42 +70,57 @@ public class ActController {
     @PreAuthorize("hasAnyRole('ROLE_SEND_ACT_BY_HAND')")
     public ResponseEntity<Void> createAct(Long arrangementId){
         boolean created = actService.createAct(arrangementId);
+        arrangementStatusProducer.changeArrangemetStatusToActSentPPT(arrangementId);
         return new ResponseEntity<>(created ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @GetMapping(path = "/checkResult", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ActCheckResult> getActCheckResult(Long arrangementId){
+    public Flux<List<ActCheckResult>> getActCheckResult(Long arrangementId){
         log.info("Подготовка результатов мероприятия для акта. ID мероприятия: {}", arrangementId);
         List<CheckUnitJobResult> resultFilter = Arrays.asList(
                 CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED,
                 CheckUnitJobResult.COMPLETED);
-        return Flux.fromIterable(
-                    resultRepo.findResultsForAct(arrangementId, resultFilter))
-                .map(this::createActCheckResult);
+        List<ActCheckResult> result = resultRepo.findResultsForAct(arrangementId, resultFilter).stream()
+                .map(this::createActCheckResult).collect(Collectors.toList());
+        return Flux.fromIterable(packListToLists(result, 1000));
+    }
+
+    private <T>List<List<T>> packListToLists(List<T> list, int subListSize) {
+        final AtomicInteger counter = new AtomicInteger();
+        return new ArrayList<>(list.stream()
+                .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / subListSize))
+                .values());
     }
 
     @GetMapping(path = "/screenshots", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ActAttachment> getActScreenshots(Long arrangementId) {
+    public Flux<List<ActAttachment>> getActScreenshots(Long arrangementId) {
         log.info("Подготовка скриншотов для акта. ID мероприятия: {}", arrangementId);
         List<CheckUnitJobResult> resultFilter = Collections.singletonList(CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED);
         PageRequest page = PageRequest.of(0, maxCountActScreenShots.intValue());
         List<Result> results = resultRepo.findCheckedResultsForAct(arrangementId, resultFilter);
-        if(results.size() == 0){
+        if(results.size() == 0) {
             results = resultRepo.findResultsForAct(arrangementId, resultFilter, page);
         }
-        if(results.size()==0){
+
+        if(results.size() == 0) {
             return Flux.empty();
         }
+
         List<Long> resultIds = results.stream()
                 .mapToLong(Result::getId)
                 .boxed()
                 .collect(Collectors.toList());
-        return Flux.concat(
-                Flux.fromIterable(resultScreenShotRepo.findByResultIds(resultIds))
-                        .map(this::createActBase64Screenshot),
-                Flux.fromIterable(nmapDetailResultRepo.findByResultIds(resultIds))
-                        .map(this::createActNmapLog)
-        ).filter(Objects::nonNull);
+
+        List<ActAttachment> result = resultScreenShotRepo.findByResultIds(resultIds)
+                .stream()
+                .map(this::createActBase64Screenshot).collect(Collectors.toList());
+
+        List<ActAttachment> nmap = nmapDetailResultRepo.findByResultIds(resultIds)
+                .stream()
+                .map(this::createActNmapLog).collect(Collectors.toList());
+
+       result.addAll(nmap);
+       return Flux.fromIterable(packListToLists(result, 1000));
     }
 
     private ActCheckResult createActCheckResult(Result result){
