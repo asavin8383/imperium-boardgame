@@ -15,19 +15,20 @@ spring:
         binder:
           brokers: 192.168.5.12:9094,192.168.5.33:9094,192.168.5.184:9094
           minPartitionCount: 24
-        streams.binder:
-          brokers: 192.168.5.12:9094,192.168.5.33:9094,192.168.5.184:9094
-          minPartitionCount: 24
-          configuration:
-            commit.interval.ms: 1000
-            max.request.size: 10485760
-            max.partition.fetch.bytes: 10485760
-            max.poll.records: 100
-        bindings:
-          inputJobNotifications:
-            consumer.application-id: dispatcher
-          inputAnalysisResults:
-            consumer.application-id: dispatcher
+        streams:
+          binder:
+            brokers: 192.168.5.12:9094,192.168.5.33:9094,192.168.5.184:9094
+            minPartitionCount: 24
+            configuration:
+              commit.interval.ms: 1000
+              max.request.size: 10485760
+              max.partition.fetch.bytes: 10485760
+              max.poll.records: 100
+          bindings:
+            inputJobNotifications:
+              consumer.application-id: dispatchers
+            inputAnalysisResults:
+              consumer.application-id: dispatchers
   datasource:
     test-while-idle: true
     validation-query: SELECT 1;
@@ -66,8 +67,8 @@ spring:
           brokers: 10.97.220.178:9092,10.97.220.179:9092,10.97.220.180:9092
           minPartitionCount: 250
         streams.binder:
-            brokers: 10.97.220.178:9092,10.97.220.179:9092,10.97.220.180:9092
-            minPartitionCount: 250
+          brokers: 10.97.220.178:9092,10.97.220.179:9092,10.97.220.180:9092
+          minPartitionCount: 250
 eureka:
   instance:
     metadata-map:
