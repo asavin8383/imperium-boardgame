@@ -45,7 +45,6 @@ spring:
     databasePlatform: org.hibernate.dialect.PostgreSQL9Dialect
   jackson.serialization.FAIL_ON_EMPTY_BEANS: false
 results.save.schedule: '0 0 0 * * ?'
-act.screenshotes.max-count: 10
 
 ---
 
