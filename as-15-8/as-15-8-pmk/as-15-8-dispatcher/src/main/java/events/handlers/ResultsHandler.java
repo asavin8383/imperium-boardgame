@@ -27,17 +27,17 @@ public class ResultsHandler {
 
     @StreamListener
     public void processResults(
-            @Input(DispatcherChannels.INPUT_ANALYSIS_RESULTS) KStream<CheckUnitKey, Message<CheckUnitResult>> analysisResultsStream,
-            @Input(DispatcherChannels.INPUT_JOB_NOTIFICATIONS) KStream<CheckUnitKey, Message<CheckUnitResult>> notificationsStream
+            @Input(DispatcherChannels.INPUT_ANALYSIS_RESULTS) KStream<CheckUnitKey, CheckUnitResult> analysisResultsStream/*,
+            @Input(DispatcherChannels.INPUT_JOB_NOTIFICATIONS) KStream<CheckUnitKey, Message<CheckUnitResult>> notificationsStream*/
     ){
-        analysisResultsStream.mapValues(message -> {
+        analysisResultsStream/*.mapValues(message -> {
             CheckUnitResult result = message.getPayload();
             log.info("\n   ---->>> Принято сообщение с анализом результатов проверки: " +
                     result.getJobID() + ", " + result.getCheckUnit().getValue() + ", результат: " + result.getCheckResult() +
                     ". partition: " + message.getHeaders().get(KafkaHeaders.RECEIVED_PARTITION_ID, Integer.class) +
                     ", offset: " + message.getHeaders().get(KafkaHeaders.OFFSET, Long.class));
             return result;
-        }).merge(notificationsStream
+        })*//*.merge(notificationsStream
             .mapValues(message -> {
                     CheckUnitResult result = message.getPayload();
                     log.info("\n   ---->>> Принято сообщение с уведомлением от проверки: " +
@@ -46,7 +46,7 @@ public class ResultsHandler {
                             ", offset: "+message.getHeaders().get(KafkaHeaders.OFFSET, Long.class));
                     return result;
             })
-        ).groupByKey()
+        )*/.groupByKey()
         .reduce((oldMessage, newMessage) -> newMessage,
                 Materialized.<CheckUnitKey, CheckUnitResult, KeyValueStore<Bytes, byte[]>>
                     as(RESULT_TABLE_NAME)

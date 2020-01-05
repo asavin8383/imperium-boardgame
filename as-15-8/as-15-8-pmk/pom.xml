@@ -62,17 +62,7 @@
 			<artifactId>spring-cloud-starter-config</artifactId>
 		</dependency>
 
-		<!-- Spring Cloud Bus -->
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-bus-kafka</artifactId>
-		</dependency>
-
 		<!-- Spring Cloud Stream -->
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-stream</artifactId>
-		</dependency>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-stream-kafka</artifactId>

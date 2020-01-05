@@ -16,6 +16,12 @@
 		    <artifactId>spring-boot-starter-test</artifactId>
 		</dependency>
 
+		<!-- Spring Cloud Bus -->
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-bus-kafka</artifactId>
+		</dependency>
+
 		<!-- Selenium -->
 		<dependency>
 		    <groupId>org.seleniumhq.selenium</groupId>
