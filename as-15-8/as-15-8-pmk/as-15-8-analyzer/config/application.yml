@@ -18,7 +18,7 @@ spring:
         springCloudBusOutput.destination: bus_config_output
       kafka:
         binder:
-          brokers: 172.16.6.122:9092,172.16.6.123:9092,172.16.6.124:9092
+          brokers: 192.168.5.12:9094,192.168.5.33:9094,192.168.5.184:9094
           minPartitionCount: 24
           configuration:
             max.request.size: 10485760

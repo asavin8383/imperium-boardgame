@@ -1,16 +1,19 @@
 spring:
   main.allow-bean-definition-overriding: true
+  kafka.consumer.properties.spring.json.trusted.packages: checkUnits
   cloud:
     stream:
       bindings:
         inputJobNotifications:
           destination: job_notifications
+          consumer.useNativeDecoding: true
         inputAnalysisResults:
-          destination: analysis_results1
+          destination: analysis_results
+          consumer.useNativeDecoding: true
       kafka:
         streams:
           binder:
-            brokers: 172.16.6.122:9092,172.16.6.123:9092,172.16.6.124:9092
+            brokers: 192.168.5.12:9094,192.168.5.33:9094,192.168.5.184:9094
             minPartitionCount: 24
             configuration:
               commit.interval.ms: 1000
@@ -20,10 +23,14 @@ spring:
               consumer:
                 application-id: dispatcher
                 resetOffsets: true
+                configuration:
+                  key.deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
             inputAnalysisResults:
               consumer:
                 application-id: dispatcher
                 resetOffsets: true
+                configuration:
+                  key.deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
   datasource:
     test-while-idle: true
     validation-query: SELECT 1;
