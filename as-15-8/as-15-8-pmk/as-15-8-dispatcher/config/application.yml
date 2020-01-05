@@ -26,9 +26,13 @@ spring:
               max.poll.records: 100
           bindings:
             inputJobNotifications:
-              consumer.application-id: dispatchers
+              consumer:
+                application-id: dispatchers
+                resetOffsets: true
             inputAnalysisResults:
-              consumer.application-id: dispatchers
+              consumer:
+                application-id: dispatchers
+                resetOffsets: true
   datasource:
     test-while-idle: true
     validation-query: SELECT 1;
