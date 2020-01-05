@@ -27,7 +27,7 @@ public class ResultsHandler {
 
     @StreamListener
     public void processResults(
-            @Input(DispatcherChannels.INPUT_ANALYSIS_RESULTS) KStream<CheckUnitKey, CheckUnitResult> analysisResultsStream/*,
+            @Input(DispatcherChannels.INPUT_ANALYSIS_RESULTS) KStream<String, CheckUnitResult> analysisResultsStream/*,
             @Input(DispatcherChannels.INPUT_JOB_NOTIFICATIONS) KStream<CheckUnitKey, Message<CheckUnitResult>> notificationsStream*/
     ){
         analysisResultsStream/*.mapValues(message -> {
@@ -48,9 +48,9 @@ public class ResultsHandler {
             })
         )*/.groupByKey()
         .reduce((oldMessage, newMessage) -> newMessage,
-                Materialized.<CheckUnitKey, CheckUnitResult, KeyValueStore<Bytes, byte[]>>
+                Materialized.<String, CheckUnitResult, KeyValueStore<Bytes, byte[]>>
                     as(RESULT_TABLE_NAME)
-                    .withKeySerde(Serdes.serdeFrom(new JsonSerializer<>(), new JsonDeserializer<>()))
+                    .withKeySerde(Serdes.String())
                     .withValueSerde(Serdes.serdeFrom(new JsonSerializer<>(), new JsonDeserializer<>()))
         );
     }

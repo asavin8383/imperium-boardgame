@@ -16,6 +16,7 @@ spring:
             brokers: 192.168.5.12:9094,192.168.5.33:9094,192.168.5.184:9094
             minPartitionCount: 24
             configuration:
+              default.key.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
               commit.interval.ms: 1000
               max.poll.records: 100
           bindings:
@@ -23,14 +24,10 @@ spring:
               consumer:
                 application-id: dispatcher
                 resetOffsets: true
-                configuration:
-                  key.deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
             inputAnalysisResults:
               consumer:
                 application-id: dispatcher
                 resetOffsets: true
-                configuration:
-                  key.deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
   datasource:
     test-while-idle: true
     validation-query: SELECT 1;
