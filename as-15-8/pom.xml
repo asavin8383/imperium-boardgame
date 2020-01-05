@@ -14,7 +14,7 @@
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<spring.boot.version>2.1.9.RELEASE</spring.boot.version>
-		<spring.cloud.version>Greenwich.RELEASE</spring.cloud.version>
+		<spring.cloud.version>Greenwich.SR3</spring.cloud.version>
 		<kafka.version>2.3.0</kafka.version>
 		<logstash-logback-encoder.version>6.2</logstash-logback-encoder.version>
 		<liquibase-maven-plugin.version>3.8.0</liquibase-maven-plugin.version>
