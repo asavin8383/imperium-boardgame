@@ -7,6 +7,8 @@ spring:
           destination: job_notifications
         inputAnalysisResults:
           destination: analysis_results
+        results_table:
+          destination: results_table
         springCloudBusInput:
           destination: bus_config_input
           group: dispatcher:${spring.cloud.client.ip-address}

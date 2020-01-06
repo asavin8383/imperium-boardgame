@@ -9,6 +9,7 @@ import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.Materialized;
 import org.apache.kafka.streams.state.KeyValueStore;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.Input;
 import org.springframework.cloud.stream.annotation.StreamListener;
@@ -23,33 +24,28 @@ import org.springframework.stereotype.Service;
 @EnableBinding(DispatcherChannels.class)
 public class ResultsHandler {
 
-    public static final String RESULT_TABLE_NAME = "results_table";
+    @Value("${spring.cloud.stream.bindings.results_table.destination}")
+    private String resultsTableName;
 
     @StreamListener
     public void processResults(
-            @Input(DispatcherChannels.INPUT_ANALYSIS_RESULTS) KStream<CheckUnitKey, Message<CheckUnitResult>> analysisResultsStream,
-            @Input(DispatcherChannels.INPUT_JOB_NOTIFICATIONS) KStream<CheckUnitKey, Message<CheckUnitResult>> notificationsStream
+            @Input(DispatcherChannels.INPUT_ANALYSIS_RESULTS) KStream<CheckUnitKey, CheckUnitResult> analysisResultsStream,
+            @Input(DispatcherChannels.INPUT_JOB_NOTIFICATIONS) KStream<CheckUnitKey, CheckUnitResult> notificationsStream
     ){
-        analysisResultsStream.mapValues(message -> {
-            CheckUnitResult result = message.getPayload();
+        analysisResultsStream.peek((key, result) -> {
             log.info("\n   ---->>> Принято сообщение с анализом результатов проверки: " +
-                    result.getJobID() + ", " + result.getCheckUnit().getValue() + ", результат: " + result.getCheckResult() +
-                    ". partition: " + message.getHeaders().get(KafkaHeaders.RECEIVED_PARTITION_ID, Integer.class) +
-                    ", offset: " + message.getHeaders().get(KafkaHeaders.OFFSET, Long.class));
-            return result;
+                    "мероприятие: " + key.getArrangementId() + ", " +
+                    result.getJobID() + ", " + result.getCheckUnit().getValue() + ", результат: " + result.getCheckResult());
         }).merge(notificationsStream
-            .mapValues(message -> {
-                    CheckUnitResult result = message.getPayload();
+            .peek((key, result) -> {
                     log.info("\n   ---->>> Принято сообщение с уведомлением от проверки: " +
-                            result.getJobID() + ", " + result.getCheckUnit().getValue() + ", результат: " + result.getCheckResult() +
-                            ", partition: "+message.getHeaders().get(KafkaHeaders.RECEIVED_PARTITION_ID, Integer.class) +
-                            ", offset: "+message.getHeaders().get(KafkaHeaders.OFFSET, Long.class));
-                    return result;
+                            "мероприятие: " + key.getArrangementId() + ", " +
+                            result.getJobID() + ", " + result.getCheckUnit().getValue() + ", результат: " + result.getCheckResult());
             })
         ).groupByKey()
         .reduce((oldMessage, newMessage) -> newMessage,
                 Materialized.<CheckUnitKey, CheckUnitResult, KeyValueStore<Bytes, byte[]>>
-                    as(RESULT_TABLE_NAME)
+                    as(resultsTableName)
                     .withKeySerde(Serdes.serdeFrom(new JsonSerializer<>(), new JsonDeserializer<>()))
                     .withValueSerde(Serdes.serdeFrom(new JsonSerializer<>(), new JsonDeserializer<>()))
         );
