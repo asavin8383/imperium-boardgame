@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public abstract class CheckUnitResult {
+public class CheckUnitResult {
 
     /** Идентифиатор задания */
     private Long jobID;
