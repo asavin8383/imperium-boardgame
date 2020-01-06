@@ -9,7 +9,6 @@ import enums.ArrangementEvents;
 import enums.CheckUnitJobResult;
 import enums.ErdiStatus;
 import enums.ExecutionStatus;
-import events.handlers.ResultsHandler;
 import exceptions.AS_15_8_DispatcherException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +18,7 @@ import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.binder.kafka.streams.InteractiveQueryService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -45,6 +45,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 public class ResultServiceImpl implements ResultService {
 
+    @Value("${spring.cloud.stream.bindings.results_table.destination}")
+    private String resultsTableName;
+
     private final InteractiveQueryService interactiveQueryService;
 
     private final ArrangementRepo arrangementRepo;
@@ -58,7 +61,7 @@ public class ResultServiceImpl implements ResultService {
         try{
             final ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store =
                     interactiveQueryService.getQueryableStore(
-                            ResultsHandler.RESULT_TABLE_NAME,
+                            resultsTableName,
                             QueryableStoreTypes.keyValueStore()
                     );
             if(store == null)
@@ -233,7 +236,7 @@ public class ResultServiceImpl implements ResultService {
 
     private ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> getKeyValueStore() {
         ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store = interactiveQueryService.getQueryableStore(
-                ResultsHandler.RESULT_TABLE_NAME,
+                resultsTableName,
                 QueryableStoreTypes.keyValueStore()
         );
         if(store == null)
