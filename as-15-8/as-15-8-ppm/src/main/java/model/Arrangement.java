@@ -14,8 +14,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
-/**Мероприятие в рамках формализованного задания
- * У мероприятия составной ключ - ID + version*/
+/**Мероприятие в рамках формализованного задания*/
 
 @Entity
 @Table(schema="schedule", name="arrangements")

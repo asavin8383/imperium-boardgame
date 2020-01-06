@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import model.enums.ScheduleStatus;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;

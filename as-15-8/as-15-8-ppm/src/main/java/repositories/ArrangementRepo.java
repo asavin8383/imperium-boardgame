@@ -32,7 +32,7 @@ public interface ArrangementRepo extends JpaRepository<Arrangement, Long> {
 
     @Query("select DISTINCT a " +
             "from Arrangement a " +
-            "left join a.schedulePeriodArrangements spa " +
-            "where spa.id is null")
+            "left join a.scheduleCheckUnits scu " +
+            "where scu.status = 'NEW'")
     List<Arrangement> findAllAvailableArrangements();
 }

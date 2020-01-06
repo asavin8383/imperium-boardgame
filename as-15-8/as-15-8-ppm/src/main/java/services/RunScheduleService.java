@@ -10,7 +10,10 @@ import events.producers.CheckUnitJobProducer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.*;
+import model.enums.ScheduleCheckUnitStatus;
+import model.enums.SchedulePeriodCheckUnitStatus;
 import model.enums.SchedulePeriodState;
+import model.enums.ScheduleStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -25,6 +28,8 @@ import restapi.ArrangementStatusUploader;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by san
@@ -57,12 +62,17 @@ public class RunScheduleService {
                 .forEach(schedulePeriod -> {
                     schedulePeriodArrangementRepo.findAllBySchedulePeriod(schedulePeriod)
                         .forEach(schedulePeriodArrangement -> {
-                            if(sendArrangementToDispatcher(schedulePeriodArrangement)) {
+                            if(sendArrangementToDispatcher(schedule.getId(), schedulePeriodArrangement)) {
                                 log.debug("Запуск на выполнение schedulePeriodArrangement с ИД {}", schedulePeriodArrangement.getId());
                                 arrangementStatusUploader.changeArrangementStatus(new ArrangementStatusNotification(schedulePeriodArrangement.getArrangement().getId(), ArrangementEvents.RUN));
-                                schedulePeriodCheckUnitRepo.findAllBySchedulePeriodArrangement(schedulePeriodArrangement)
-                                        .forEach(schedulePeriodCheckUnit ->
-                                                runCheckUnit(schedulePeriodCheckUnit, schedulePeriodArrangement.getArrangementId()));
+                                List<SchedulePeriodCheckUnit> schedulePeriodCheckUnits = schedulePeriodCheckUnitRepo.findAllBySchedulePeriodArrangement(schedulePeriodArrangement);
+                                schedulePeriodCheckUnits.forEach(schedulePeriodCheckUnit ->
+                                                runCheckUnit(schedulePeriodCheckUnit, schedule.getId(), schedulePeriodArrangement.getArrangementId()));
+                                scheduleCheckUnitRepo.changeStatus(
+                                    schedulePeriodCheckUnits.stream().mapToLong(SchedulePeriodCheckUnit::getId).boxed().collect(Collectors.toList()),
+                                    ScheduleCheckUnitStatus.SCHEDULED,
+                                    ScheduleCheckUnitStatus.RUNNING
+                                );
                                 if (!schedule.getStatus().equals(ScheduleStatus.RUNNING)) {
                                     schedule.setStatus(ScheduleStatus.RUNNING);
                                     scheduleRepo.save(schedule);
@@ -77,22 +87,22 @@ public class RunScheduleService {
             );
     }
 
-    private Boolean sendArrangementToDispatcher(SchedulePeriodArrangement schedulePeriodArrangement) {
+    private Boolean sendArrangementToDispatcher(Long scheduleId, SchedulePeriodArrangement schedulePeriodArrangement) {
         String url = UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(DISPATCHER_POST_ARR_ENDPOINT).build().toString();
         int checkUnits = schedulePeriodArrangement.getArrangement().getScheduleCheckUnits().size();
         ArrangementToExecution arrangement = new ArrangementToExecution();
-        arrangement.setCheckUnitsCount((long) checkUnits);
+        arrangement.setCheckUnitsCount(schedulePeriodCheckUnitRepo.getSchedulePeriodCheckUnitCount(scheduleId, schedulePeriodArrangement.getArrangementId()));
         arrangement.setId(schedulePeriodArrangement.getArrangementId());
 
         ResponseEntity<String> response = restTemplate.postForEntity(url, arrangement, String.class);
         return response.getStatusCode() == HttpStatus.OK;
     }
 
-    private void runCheckUnit(SchedulePeriodCheckUnit schedulePeriodCheckUnit, Long arrangementId){
+    private void runCheckUnit(SchedulePeriodCheckUnit schedulePeriodCheckUnit, Long scheduleId, Long arrangementId){
         log.debug("Запуск чек-юнита: {} {}", schedulePeriodCheckUnit.getId(), schedulePeriodCheckUnit.getCheckUnit().getCheckUnitValue());
         if (schedulePeriodCheckUnit.getStatus().equals(SchedulePeriodCheckUnitStatus.READY)){
             int partitionId = schedulePeriodCheckUnit.getExecutionNumber().intValue();
-            CheckUnitKey key = new CheckUnitKey(arrangementId, schedulePeriodCheckUnit.getId());
+            CheckUnitKey key = new CheckUnitKey(scheduleId, arrangementId, schedulePeriodCheckUnit.getId());
             sendCheckUnitJobToDispatcher(
                     createCheckUnitJob(scheduleCheckUnitRepo.getOne(schedulePeriodCheckUnit.getId())),
                     key,
