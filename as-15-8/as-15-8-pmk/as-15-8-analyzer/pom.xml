@@ -10,6 +10,12 @@
 	
 	<dependencies>
 
+		<!-- Spring Cloud Bus -->
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-bus-kafka</artifactId>
+		</dependency>
+
 		<!-- Apache OpenNLP -->
 		<dependency>
 			<groupId>org.apache.opennlp</groupId>
