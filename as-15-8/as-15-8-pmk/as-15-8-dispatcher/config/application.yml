@@ -12,6 +12,9 @@ spring:
           group: dispatcher:${spring.cloud.client.ip-address}
         springCloudBusOutput.destination: bus_config_output
       kafka:
+        binder:
+          brokers: 192.168.5.12:9094,192.168.5.33:9094,192.168.5.184:9094
+          minPartitionCount: 24
         streams:
           binder:
             brokers: 192.168.5.12:9094,192.168.5.33:9094,192.168.5.184:9094
