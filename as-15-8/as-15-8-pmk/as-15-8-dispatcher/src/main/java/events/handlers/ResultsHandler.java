@@ -3,7 +3,6 @@ package events.handlers;
 import analysis.CheckUnitResult;
 import checkUnits.CheckUnitKey;
 import events.DispatcherChannels;
-import events.serdes.SerdesFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.kstream.KStream;
@@ -13,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.Input;
 import org.springframework.cloud.stream.annotation.StreamListener;
+import org.springframework.kafka.support.serializer.JsonSerde;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -41,8 +41,8 @@ public class ResultsHandler {
         .reduce((oldMessage, newMessage) -> newMessage,
                 Materialized.<CheckUnitKey, CheckUnitResult, KeyValueStore<Bytes, byte[]>>
                     as(resultsTableName)
-                    .withKeySerde(SerdesFactory.createSerde(CheckUnitKey.class))
-                    .withValueSerde(SerdesFactory.createSerde(CheckUnitResult.class))
+                    .withKeySerde(new JsonSerde<>())
+                    .withValueSerde(new JsonSerde<>())
         );
     }
 }
