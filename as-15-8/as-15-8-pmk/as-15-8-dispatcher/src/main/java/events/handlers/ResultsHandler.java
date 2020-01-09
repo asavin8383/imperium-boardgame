@@ -32,7 +32,7 @@ public class ResultsHandler {
         resultsStream.peek((key, result) ->
                 log.info("\n   ---->>> Принято сообщение с анализом результатов проверки: " +
                     "мероприятие: " + key.getArrangementId() + ", " +
-                    result.getJobID() + ", " + result.getCheckUnit().getValue() + ", результат: " + result.getCheckResult()))
+                    key.getJobId() + ", " + result.getCheckUnit().getValue() + ", результат: " + result.getCheckResult()))
         .groupByKey(Grouped.with(keySerde, valueSerde))
         .reduce((oldMessage, newMessage) -> newMessage,
                 Materialized.<CheckUnitKey, CheckUnitResult, KeyValueStore<Bytes, byte[]>>

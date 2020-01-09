@@ -13,11 +13,6 @@ import lombok.NoArgsConstructor;
 @JsonTypeInfo(include= JsonTypeInfo.As.WRAPPER_OBJECT, use= JsonTypeInfo.Id.CLASS)
 public class CheckUnitResult {
 
-    /** Идентифиатор задания */
-    private Long jobID;
-
-    private Long erdiID;
-
     /** Статус задания */
     private CheckUnitJobResult checkResult;
 
