@@ -37,7 +37,7 @@ public class ExecutionResultsHandler {
         Integer partitionId = message.getHeaders().get(KafkaHeaders.RECEIVED_PARTITION_ID, Integer.class);
         CheckUnitKey key = message.getHeaders().get(KafkaHeaders.RECEIVED_MESSAGE_KEY, CheckUnitKey.class);
         log.info("Принято задание на анализ: " +
-                "ID: " + job.getJobID() +
+                "ID: " + key.getJobId() +
                 ", checkUnit: " + job.getCheckUnit().getValue() +
                 ", key: " + key +
                 ", partition: " + partitionId +
@@ -46,10 +46,10 @@ public class ExecutionResultsHandler {
             AnalyzerService<? super ExecutionJobResult> service = AnalyzerServiceFactory.getService(job.getClass());
             AnalysisResult analysisResult = service.analyzeResult(job);
             sendAnalysisResult(analysisResult, key, partitionId);
-            log.info("Анализ результата проверки ПС/ПАСД выполнен успешно : " + job.getJobID() + ", " + job.getCheckUnit().getValue());
+            log.info("Анализ результата проверки ПС/ПАСД выполнен успешно : " + key.getJobId() + ", " + job.getCheckUnit().getValue());
         } catch (Exception ex) {
-            log.error("Ошибка при обработке задания на анализ результатов проверки ПС/ПАСД : " + job.getJobID() + ", " + job.getCheckUnit().getValue(), ex);
-            sendErrorNotification(job.getJobID(), job.getCheckUnit().getContentId(), ex, key, partitionId);
+            log.error("Ошибка при обработке задания на анализ результатов проверки ПС/ПАСД : " + key.getJobId() + ", " + job.getCheckUnit().getValue(), ex);
+            sendErrorNotification(ex, key, partitionId);
         }
     }
 
@@ -67,20 +67,18 @@ public class ExecutionResultsHandler {
 
             boolean send = analyzerChannels.output().send(message);
             if(send)
-                log.info("Сообщение успешно отправлено: " + analysisResult.getJobID() + ", " + analysisResult.getCheckUnit().getValue());
+                log.info("Сообщение успешно отправлено: " + key.getJobId() + ", " + analysisResult.getCheckUnit().getValue());
         } catch (Exception ex) {
             throw new RuntimeException("Ошибка при отправке сообщения с результатами анализа", ex);
         }
     }
 
-    private void sendErrorNotification(Long jobID, Long erdiId, Throwable cause, CheckUnitKey key, Integer partitionId) {
+    private void sendErrorNotification(Throwable cause, CheckUnitKey key, Integer partitionId) {
         try {
             StringWriter sw = new StringWriter();
             cause.printStackTrace(new PrintWriter(sw));
             CheckUnitStatusNotification notification = CheckUnitStatusNotification
                     .builder()
-                    .jobID(jobID)
-                    .erdiID(erdiId)
                     .checkResult(CheckUnitJobResult.INTERNAL_ERROR)
                     .description(sw.toString())
                     .build();
@@ -93,7 +91,7 @@ public class ExecutionResultsHandler {
 
             boolean send = analyzerChannels.output().send(message);
             if(send)
-                log.info("Сообщение успешно отправлено: " + notification.getJobID() + ", " + notification.getCheckResult());
+                log.info("Сообщение успешно отправлено: " + key.getJobId() + ", " + notification.getCheckResult());
         } catch (Exception ex) {
             throw new RuntimeException("Ошибка при отправке сообщения с уведомлением об ошибке", ex);
         }
