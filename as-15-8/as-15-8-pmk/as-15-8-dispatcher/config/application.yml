@@ -6,12 +6,8 @@ spring:
       bindings:
         inputJobNotifications:
           destination: job_notifications
-          consumer:
-            useNativeDecoding: true
         inputAnalysisResults:
           destination: analysis_results
-          consumer:
-            useNativeDecoding: true
         results_table:
           destination: results_table
         springCloudBusInput:
@@ -36,9 +32,13 @@ spring:
               max.poll.records: 100
           bindings:
             inputJobNotifications:
-              consumer.application-id: dispatchers
+              consumer:
+                application-id: dispatchers
+                useNativeDecoding: true
             inputAnalysisResults:
-              consumer.application-id: dispatchers
+              consumer:
+                application-id: dispatchers
+                useNativeDecoding: true
   datasource:
     test-while-idle: true
     validation-query: SELECT 1;
