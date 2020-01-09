@@ -5,7 +5,7 @@ spring:
     stream:
       bindings:
         inputResults:
-          destination: analysis_results
+          destination: results
           contentType: application/json
           nativeDecoding: true
         results_table:
