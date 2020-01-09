@@ -27,6 +27,8 @@ public class ArrangementService {
 
     public Arrangement saveArrangement(Arrangement arrangement, FormalTask formalTask){
         arrangement.setFormalTask(formalTask);
+        if (formalTask.getMissionId() != null)
+            arrangement.setIsActAvailable(true);
         return arrangementRepo.save(arrangement);
     }
 
