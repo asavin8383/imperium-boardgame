@@ -1,6 +1,6 @@
 spring:
   main.allow-bean-definition-overriding: true
-  kafka.consumer.properties.spring.json.trusted.packages: *
+  kafka.consumer.properties.spring.json.trusted.packages: checkUnits
   cloud:
     stream:
       bindings:
@@ -10,8 +10,7 @@ spring:
           consumer:
             concurrency: 4
             useNativeDecoding: true
-        output.destination: analysis_results
-        notifications.destination: job_notifications
+        output.destination: results
         springCloudBusInput:
           destination: bus_config_input
           group: analyzer:${spring.cloud.client.ip-address}
@@ -36,9 +35,6 @@ spring:
               configuration:
                 max.request.size: 10485760
                 key.serializer: org.springframework.kafka.support.serializer.JsonSerializer
-          notifications:
-            producer.configuration:
-              key.serializer: org.springframework.kafka.support.serializer.JsonSerializer
 gateway.url: ${GATEWAY_URI:http://localhost:15880}
 source_path_vpn: /logs/content.txt
 source_path_anonym: /logs/content.txt
@@ -101,8 +97,7 @@ spring:
   cloud.stream:
     bindings:
       input.destination: exec_results_ashabalin
-      output.destination: analysis_results_ashabalin
-      notifications.destination: job_notifications_ashabalin
+      output.destination: results_ashabalin
       springCloudBusInput.destination: bus_config_input_ashabalin
       springCloudBusOutput.destination: bus_config_output_ashabalin
 
@@ -114,8 +109,7 @@ spring:
   cloud.stream:
     bindings:
       input.destination: exec_results_asinyavin
-      output.destination: analysis_results_asinyavin
-      notifications.destination: job_notifications_asinyavin
+      output.destination: results_asinyavin
       springCloudBusInput.destination: bus_config_input_asinyavin
       springCloudBusOutput.destination: bus_config_output_asinyavin
 
@@ -126,8 +120,7 @@ spring:
   cloud.stream:
     bindings:
       input.destination: exec_results_asavin
-      output.destination: analysis_results_asavin
-      notifications.destination: job_notifications_asavin
+      output.destination: results_asavin
       springCloudBusInput.destination: bus_config_input_asavin
       springCloudBusOutput.destination: bus_config_output_asavin
 
@@ -138,8 +131,7 @@ spring:
   cloud.stream:
     bindings:
       input. destination: exec_results_pvorobiev
-      output.destination: analysis_results_pvorobiev
-      notifications.destination: job_notifications_pvorobiev
+      output.destination: results_pvorobiev
       springCloudBusInput.destination: bus_config_input_pvorobiev
       springCloudBusOutput.destination: bus_config_output_pvorobiev
 
@@ -150,7 +142,6 @@ spring:
   cloud.stream:
     bindings:
       input.destination: exec_results_danikanov
-      output.destination: analysis_results_danikanov
-      notifications.destination: job_notifications_danikanov
+      output.destination: results_danikanov
       springCloudBusInput.destination: bus_config_input_danikanov
       springCloudBusOutput.destination: bus_config_output_danikanov

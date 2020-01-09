@@ -91,7 +91,7 @@ public class ExecutionResultsHandler {
                     .setHeader(KafkaHeaders.MESSAGE_KEY, key)
                     .build();
 
-            boolean send = analyzerChannels.notifications().send(message);
+            boolean send = analyzerChannels.output().send(message);
             if(send)
                 log.info("Сообщение успешно отправлено: " + notification.getJobID() + ", " + notification.getCheckResult());
         } catch (Exception ex) {
