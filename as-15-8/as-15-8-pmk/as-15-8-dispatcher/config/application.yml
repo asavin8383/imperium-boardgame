@@ -1,6 +1,6 @@
 spring:
   main.allow-bean-definition-overriding: true
-  kafka.consumer.properties.spring.json.trusted.packages: checkUnits
+  kafka.consumer.properties.spring.json.trusted.packages: *
   cloud:
     stream:
       bindings:
@@ -27,6 +27,9 @@ spring:
             brokers: 192.168.5.12:9094,192.168.5.33:9094,192.168.5.184:9094
             minPartitionCount: 24
             configuration:
+              deafult:
+                key.serde: org.springframework.kafka.support.serializer.JsonSerde
+                value.serde: org.springframework.kafka.support.serializer.JsonSerde
               commit.interval.ms: 1000
               max.request.size: 10485760
               max.partition.fetch.bytes: 10485760
@@ -35,13 +38,11 @@ spring:
             inputJobNotifications:
               consumer:
                 application-id: dispatchers
-                keySerde: org.springframework.kafka.support.serializer.JsonSerde
-                valueSerde: org.springframework.kafka.support.serializer.JsonSerde
+                useNativeDecoding: true
             inputAnalysisResults:
               consumer:
                 application-id: dispatchers
-                keySerde: org.springframework.kafka.support.serializer.JsonSerde
-                valueSerde: org.springframework.kafka.support.serializer.JsonSerde
+                useNativeDecoding: true
   datasource:
     test-while-idle: true
     validation-query: SELECT 1;

@@ -1,6 +1,6 @@
 spring:
   main.allow-bean-definition-overriding: true
-  kafka.consumer.properties.spring.json.trusted.packages: checkUnits
+  kafka.consumer.properties.spring.json.trusted.packages: *
   cloud:
     stream:
       bindings:
