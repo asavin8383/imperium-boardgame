@@ -4,7 +4,6 @@ import analysis.CheckUnitResult;
 import checkUnits.CheckUnitKey;
 import events.DispatcherChannels;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.kstream.Grouped;
 import org.apache.kafka.streams.kstream.KStream;
@@ -26,10 +25,10 @@ public class ResultsHandler {
 
     @StreamListener(DispatcherChannels.INPUT_RESULTS)
     public void processResults(KStream<CheckUnitKey, CheckUnitResult> resultsStream){
-        resultsStream.peek((key, result) ->
+        resultsStream/*.peek((key, result) ->
                 log.info("\n   ---->>> Принято сообщение с анализом результатов проверки: " +
                     "мероприятие: " + key.getArrangementId() + ", " +
-                    result.getJobID() + ", " + result.getCheckUnit().getValue() + ", результат: " + result.getCheckResult()))
+                    result.getJobID() + ", " + result.getCheckUnit().getValue() + ", результат: " + result.getCheckResult()))*/
         .groupByKey(Grouped.with(new JsonSerde<>(), new JsonSerde<>()))
         .reduce((oldMessage, newMessage) -> newMessage,
                 Materialized.<CheckUnitKey, CheckUnitResult, KeyValueStore<Bytes, byte[]>>
