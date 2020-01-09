@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import repositories.RobotRepository;
 import repositories.RobotSLARepository;
 
 import java.util.List;
@@ -23,7 +22,6 @@ import java.util.Optional;
 public class RobotSLAController {
 
     private final RobotSLARepository robotSLARepo;
-    private final RobotRepository robotRepo;
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public void editRobotSla(@RequestParam("id") Optional<RobotSLA> robotSLA, @RequestBody RobotSLA newRobotSLA) {
