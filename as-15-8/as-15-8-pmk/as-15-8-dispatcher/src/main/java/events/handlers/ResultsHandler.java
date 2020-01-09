@@ -10,7 +10,6 @@ import org.apache.kafka.streams.kstream.Materialized;
 import org.apache.kafka.streams.state.KeyValueStore;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.annotation.EnableBinding;
-import org.springframework.cloud.stream.annotation.Input;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.kafka.support.serializer.JsonSerde;
 import org.springframework.stereotype.Service;
@@ -23,21 +22,13 @@ public class ResultsHandler {
     @Value("${spring.cloud.stream.bindings.results_table.destination}")
     private String resultsTableName;
 
-    @StreamListener
-    public void processResults(
-            @Input(DispatcherChannels.INPUT_ANALYSIS_RESULTS) KStream<CheckUnitKey, CheckUnitResult> analysisResultsStream,
-            @Input(DispatcherChannels.INPUT_JOB_NOTIFICATIONS) KStream<CheckUnitKey, CheckUnitResult> notificationsStream
-    ){
-        analysisResultsStream.peek((key, result) ->
+    @StreamListener(DispatcherChannels.INPUT_RESULTS)
+    public void processResults(KStream<CheckUnitKey, CheckUnitResult> resultsStream){
+        resultsStream.peek((key, result) ->
                 log.info("\n   ---->>> Принято сообщение с анализом результатов проверки: " +
                     "мероприятие: " + key.getArrangementId() + ", " +
                     result.getJobID() + ", " + result.getCheckUnit().getValue() + ", результат: " + result.getCheckResult()))
-        .merge(notificationsStream
-            .peek((key, result) ->
-                    log.info("\n   ---->>> Принято сообщение с уведомлением от проверки: " +
-                        "мероприятие: " + key.getArrangementId() + ", " +
-                        result.getJobID() + ", " + result.getCheckUnit().getValue() + ", результат: " + result.getCheckResult()))
-        ).groupByKey()
+        .groupByKey()
         .reduce((oldMessage, newMessage) -> newMessage,
                 Materialized.<CheckUnitKey, CheckUnitResult, KeyValueStore<Bytes, byte[]>>
                     as(resultsTableName)

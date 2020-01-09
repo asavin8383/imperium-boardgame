@@ -172,7 +172,7 @@ public class CheckUnitJobHandler {
                     .setHeader(KafkaHeaders.MESSAGE_KEY, key)
                     .build();
 
-            boolean send = executorChannels.notifications().send(message);
+            boolean send = executorChannels.results().send(message);
             if(send)
                 log.info("Сообщение успешно отправлено: " + notification.getJobID() + ", " + notification.getCheckResult());
         } catch (Exception ex) {

@@ -9,14 +9,10 @@ public interface AnalyzerChannels {
 
     String INPUT = "input";
     String OUTPUT= "output";
-    String OUTPUT_NOTIFICATIONS = "notifications";
 
     @Input(INPUT)
     SubscribableChannel input();
 
     @Output(OUTPUT)
     MessageChannel output();
-
-    @Output(OUTPUT_NOTIFICATIONS)
-    MessageChannel notifications();
 }

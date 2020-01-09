@@ -9,7 +9,7 @@ public interface ExecutorChannels {
 
     String INPUT_JOBS = "jobs";
     String OUTPUT_EXECUTION_RESULTS = "executionResults";
-    String OUTPUT_NOTIFICATIONS = "notifications";
+    String OUTPUT_RESULTS = "results";
 
     @Input(INPUT_JOBS)
     SubscribableChannel jobs();
@@ -17,6 +17,6 @@ public interface ExecutorChannels {
     @Output(OUTPUT_EXECUTION_RESULTS)
     MessageChannel executionResults();
 
-    @Output(OUTPUT_NOTIFICATIONS)
-    MessageChannel notifications();
+    @Output(OUTPUT_RESULTS)
+    MessageChannel results();
 }

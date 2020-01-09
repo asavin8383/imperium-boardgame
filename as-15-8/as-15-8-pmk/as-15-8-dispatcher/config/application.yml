@@ -1,14 +1,10 @@
 spring:
   main.allow-bean-definition-overriding: true
-  kafka.consumer.properties.spring.json.trusted.packages: *
+  kafka.consumer.properties.spring.json.trusted.packages: checkUnits
   cloud:
     stream:
       bindings:
-        inputJobNotifications:
-          destination: job_notifications
-          contentType: application/json
-          nativeDecoding: true
-        inputAnalysisResults:
+        inputResults:
           destination: analysis_results
           contentType: application/json
           nativeDecoding: true
@@ -35,11 +31,7 @@ spring:
               max.partition.fetch.bytes: 10485760
               max.poll.records: 100
           bindings:
-            inputJobNotifications:
-              consumer:
-                application-id: dispatchers
-                useNativeDecoding: true
-            inputAnalysisResults:
+            inputResults:
               consumer:
                 application-id: dispatchers
                 useNativeDecoding: true
@@ -119,8 +111,7 @@ spring:
   cloud:
     stream:
       bindings:
-        inputJobNotifications.destination: job_notifications_ashabalin
-        inputAnalysisResults.destination: analysis_results_ashabalin
+        inputResults.destination: results_ashabalin
         springCloudBusInput.destination: bus_config_input_ashabalin
         springCloudBusOutput.destination: bus_config_output_ashabalin
   datasource:
@@ -139,8 +130,7 @@ spring:
   cloud:
     stream:
       bindings:
-        inputJobNotifications.destination: job_notifications_asin
-        inputAnalysisResults.destination: analysis_results_asin
+        inputResults.destination: results_asin
         springCloudBusInput.destination: bus_config_input_asin
         springCloudBusOutput.destination: bus_config_output_asin
 
@@ -151,8 +141,7 @@ spring:
   cloud:
     stream:
       bindings:
-        inputJobNotifications.destination: job_notifications_asavin
-        inputAnalysisResults.destination: analysis_results_asavin
+        inputResults.destination: results_asavin
         springCloudBusInput.destination: bus_config_input_asavin
         springCloudBusOutput.destination: bus_config_output_asavin
   datasource:
@@ -167,8 +156,7 @@ spring:
   cloud:
     stream:
       bindings:
-        inputJobNotifications.destination: job_notifications_pvorobiev
-        inputAnalysisResults.destination: analysis_results_pvorobiev
+        inputResults.destination: results_pvorobiev
         springCloudBusInput.destination: bus_config_input_pvorobiev
         springCloudBusOutput.destination: bus_config_output_pvorobiev
 
@@ -181,7 +169,6 @@ spring:
   cloud:
     stream:
       bindings:
-        inputJobNotifications.destination: job_notifications_danikanov
-        inputAnalysisResults.destination: analysis_results_danikanov
+        inputResults.destination: results_danikanov
         springCloudBusInput.destination: bus_config_input_danikanov
         springCloudBusOutput.destination: bus_config_output_danikanov
