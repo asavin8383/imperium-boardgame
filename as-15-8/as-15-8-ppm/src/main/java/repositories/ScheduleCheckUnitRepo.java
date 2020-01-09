@@ -1,5 +1,6 @@
 package repositories;
 
+import checkUnits.CheckUnit;
 import model.Arrangement;
 import model.ScheduleCheckUnit;
 import model.SchedulePeriodCheckUnit;
@@ -33,8 +34,8 @@ public interface ScheduleCheckUnitRepo extends JpaRepository<ScheduleCheckUnit, 
 
     @Modifying
     @Query("update ScheduleCheckUnit scu set scu.status = :new_status " +
-        "where scu.arrangement = :ar and scu.checkUnitValue in (:check_units) and scu.status = :current_status")
-    void changeStatus(@Param("ar") Arrangement arrangement, @Param("check_units") List<String> checkUnitValues, @Param("current_status") ScheduleCheckUnitStatus currentStatus, @Param("new_status")ScheduleCheckUnitStatus newStatus);
+        "where scu.arrangement = :ar and scu in (:check_units)")
+    void changeStatus(@Param("ar") Arrangement arrangement, @Param("check_units") List<CheckUnit> checkUnits, @Param("new_status")ScheduleCheckUnitStatus newStatus);
 
     @Modifying
     @Query("update ScheduleCheckUnit scu set scu.status = :new_status " +

@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Arrangement;
 import model.ScheduleCheckUnit;
+import model.enums.ScheduleCheckUnitStatus;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,11 +20,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import repositories.ArrangementRepo;
 import repositories.ScheduleCheckUnitRepo;
 import repositories.ScheduleRepo;
 import restapi.ArrangementStatusUploader;
-import restapi.pmk.ResultsDownloader;
 import restapi.pod.DomainMaskUploader;
 import services.ScheduleService;
 import webClients.PptWebClient;
@@ -33,7 +34,6 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -55,7 +55,6 @@ public class ArrangementController {
     private final ScheduleRepo scheduleRepo;
     private final ScheduleService scheduleService;
     private final ScheduleCheckUnitRepo scheduleCheckUnitRepo;
-    private final ResultsDownloader resultsDownloader;
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @Transactional
@@ -101,6 +100,32 @@ public class ArrangementController {
                 .orElseThrow(() -> new AS_15_8_PPM_Exception("Ошибка проверки закрытия расписания! Расписание не найдено по ИД мероприятия: " + arrangement.getId()))
         );
     }
+
+    /**
+     * Обновление статусов чек-юнитов для возможности повторного запуска мероприятия
+     * @param arrangement мероприятие, которое требуется запустить повторно
+     * @param checkUnits список чек-юнитов, которым требуется обновить статус
+     * @return Ответ от сервиса
+     */
+    @PutMapping("/refresh")
+    public ResponseEntity refreshArrangement(@RequestParam("id") Arrangement arrangement, @RequestBody Flux<List<CheckUnit>> checkUnits){
+        if (arrangement == null){
+            return ResponseEntity.noContent().build();
+        }
+        //Меняем статус для чек-юнитов, остановленных на диспетчере
+        scheduleCheckUnitRepo.changeStatus(
+            arrangement,
+            checkUnits.toStream().flatMap(List::stream).collect(Collectors.toList()),
+            ScheduleCheckUnitStatus.NEW);
+        //Меняем статус для чек-юнитов, которые ещё не запускались на момент остановки мероприятия
+        scheduleCheckUnitRepo.changeStatus(
+            arrangement,
+            ScheduleCheckUnitStatus.SCHEDULED,
+            ScheduleCheckUnitStatus.NEW
+        );
+        return ResponseEntity.ok().build();
+    }
+
 
     private void getAndSaveArrangementCheckUnits(Arrangement arrangement){
         arrangement.getScheduleCheckUnits().addAll(
