@@ -6,8 +6,12 @@ spring:
       bindings:
         inputJobNotifications:
           destination: job_notifications
+          contentType: application/json
+          nativeDecoding: true
         inputAnalysisResults:
           destination: analysis_results
+          contentType: application/json
+          nativeDecoding: true
         results_table:
           destination: results_table
         springCloudBusInput:
@@ -23,9 +27,6 @@ spring:
             brokers: 192.168.5.12:9094,192.168.5.33:9094,192.168.5.184:9094
             minPartitionCount: 24
             configuration:
-              default:
-                key.serde: org.springframework.kafka.support.serializer.JsonSerde
-                value.serde: org.springframework.kafka.support.serializer.JsonSerde
               commit.interval.ms: 1000
               max.request.size: 10485760
               max.partition.fetch.bytes: 10485760
@@ -34,11 +35,13 @@ spring:
             inputJobNotifications:
               consumer:
                 application-id: dispatchers
-                useNativeDecoding: true
+                keySerde: org.springframework.kafka.support.serializer.JsonSerde
+                valueSerde: org.springframework.kafka.support.serializer.JsonSerde
             inputAnalysisResults:
               consumer:
                 application-id: dispatchers
-                useNativeDecoding: true
+                keySerde: org.springframework.kafka.support.serializer.JsonSerde
+                valueSerde: org.springframework.kafka.support.serializer.JsonSerde
   datasource:
     test-while-idle: true
     validation-query: SELECT 1;
