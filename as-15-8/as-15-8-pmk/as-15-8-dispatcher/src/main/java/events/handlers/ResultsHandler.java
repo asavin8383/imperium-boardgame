@@ -5,7 +5,10 @@ import checkUnits.CheckUnitKey;
 import events.DispatcherChannels;
 import events.serdes.SerdesFactory;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.utils.Bytes;
+import org.apache.kafka.streams.kstream.Consumed;
+import org.apache.kafka.streams.kstream.Grouped;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.Materialized;
 import org.apache.kafka.streams.state.KeyValueStore;
@@ -24,16 +27,20 @@ public class ResultsHandler {
 
     @StreamListener(DispatcherChannels.INPUT_RESULTS)
     public void processResults(KStream<CheckUnitKey, CheckUnitResult> resultsStream){
-        resultsStream.peek((key, result) ->
+        Serde<CheckUnitKey> keySerde = SerdesFactory.createSerde(CheckUnitKey.class);
+        Serde<CheckUnitResult> valueSerde = SerdesFactory.createSerde(CheckUnitResult.class);
+
+        resultsStream
+           /* .peek((key, result) ->
                 log.info("\n   ---->>> Принято сообщение с анализом результатов проверки: " +
                     "мероприятие: " + key.getArrangementId() + ", " +
-                    result.getJobID() + ", " + result.getCheckUnit().getValue() + ", результат: " + result.getCheckResult()))
-        .groupByKey()
-        .reduce((oldMessage, newMessage) -> newMessage,
-                Materialized.<CheckUnitKey, CheckUnitResult, KeyValueStore<Bytes, byte[]>>
-                    as(resultsTableName)
-                    .withKeySerde(SerdesFactory.createSerde(CheckUnitKey.class))
-                    .withValueSerde(SerdesFactory.createSerde(CheckUnitResult.class))
-        );
+                    key.getJobId() + ", " + result.getCheckUnit().getValue() + ", результат: " + result.getCheckResult()))*/
+            .groupByKey(Grouped.with(keySerde, valueSerde))
+            .reduce((oldMessage, newMessage) -> newMessage,
+                    Materialized.<CheckUnitKey, CheckUnitResult, KeyValueStore<Bytes, byte[]>>
+                        as(resultsTableName)
+                        .withKeySerde(keySerde)
+                        .withValueSerde(valueSerde)
+            );
     }
 }

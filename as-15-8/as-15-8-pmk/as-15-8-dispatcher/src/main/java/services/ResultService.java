@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface ResultService {
 
-    Result saveJobResult(AnalysisResult result);
+    Result saveJobResult(Long jobID, AnalysisResult result);
 
     Result updateJobStatus(Long jobID, Long erdiId, CheckUnitJobResult status, String description);
 

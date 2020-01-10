@@ -5,13 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import common.AnalysisException;
 import enums.CheckUnitJobResult;
 import execution.ExecutionAnonymizerResult;
-import execution.ExecutionVpnJobResult;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import model.KeyWord;
 import model.NLPCategory;
 import org.jsoup.Jsoup;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ResourceLoader;
@@ -51,12 +49,17 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 	@Getter
 	private List<KeyWord> keyWords = new ArrayList<>();
 
-	@Autowired
-	private ResourceLoader resourceLoader;
+	private final ResourceLoader resourceLoader;
 
-	@Autowired
-	@Qualifier("openNLPClassificator")
-	private ClassificationService classificationService;
+	private final ClassificationService classificationService;
+
+	public AnonymizerAnalyzerService(
+			ResourceLoader resourceLoader,
+			@Qualifier("openNLPClassificator") ClassificationService classificationService) {
+
+		this.resourceLoader = resourceLoader;
+		this.classificationService = classificationService;
+	}
 
 	@PostConstruct
 	public void initAnalyzer() {
@@ -73,8 +76,6 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 	@Override
 	public AnalysisResult analyzeResult(ExecutionAnonymizerResult executionResult) throws AnalysisException {
 		AnonymizerAnalysisResult analysisResult = new AnonymizerAnalysisResult();
-		analysisResult.setJobID(executionResult.getJobID());
-
 		obtainResult(analysisResult, executionResult);
 		obtainResultNLP(analysisResult, executionResult);
 		saveSources(analysisResult, executionResult);
@@ -82,7 +83,7 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 		return analysisResult;
 	}
 
-	protected void saveSources(AnonymizerAnalysisResult analysisResult, ExecutionAnonymizerResult result){
+	private void saveSources(AnonymizerAnalysisResult analysisResult, ExecutionAnonymizerResult result){
 
 		CheckUnitJobResult checkUnitJobResult = analysisResult.getCheckResult();
 
@@ -116,7 +117,7 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 	}
 
 
-	protected AnalysisResult obtainResult(AnonymizerAnalysisResult analysisResult, ExecutionAnonymizerResult executionResult) throws AnalysisException {
+	private void obtainResult(AnonymizerAnalysisResult analysisResult, ExecutionAnonymizerResult executionResult) throws AnalysisException {
 		analysisResult.setCheckUnit(executionResult.getCheckUnit());
 
 		analysisResult.setHttpStatus(executionResult.getHttpStatus());
@@ -143,7 +144,7 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 		if (analysisResult.hasError()) {
 			analysisResult.setCheckResult(
 					obtainErrorResult(analysisResult));
-			return analysisResult;
+			return;
 		}
 
 		boolean wasRedirect = false;
@@ -155,7 +156,7 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 		if (analysisResult.getPageSize() < EMPTY_PAGE_SIZE) {
 			analysisResult.setCheckResult(DOUBTFUL);	// todo - так сказали делать
 			appendInfo(analysisResult, "Пустая страница: размер <" + EMPTY_PAGE_SIZE + " байт.");
-			return analysisResult;
+			return;
 		}
 
 		// todo check that hidemyass final url equals to initial or contains in erdi
@@ -169,7 +170,7 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
                 CheckUnitJobResult errorResult = obtainErrorEtalon(analysisResult);
                 if (errorResult != null){
                     analysisResult.setCheckResult(errorResult);
-                    return analysisResult;
+                    return;
                 }
             }
 
@@ -183,7 +184,7 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
                     if (analysisResult.getSimilarityPercent() > similarityThreshold) {
                         analysisResult.setCheckResult(FORBIDDEN_CONTENT_DETECTED);
                         appendInfo(analysisResult, "Порог сходства текста >= " + similarityThreshold + "%.");
-                        return analysisResult;
+                        return;
                     }
 
                 } catch (IOException e) {
@@ -199,7 +200,7 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 		try {
 			if (isStub(analysisResult, executionResult)) {
 				analysisResult.setCheckResult(DOUBTFUL);	// todo - так сказали делать
-				return analysisResult;
+				return;
 			}
 		} catch (IOException e) {
 			String msg = "Ошибка при проверке заглушки";
@@ -214,15 +215,14 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 			appendInfo(analysisResult, contentDetails.toString());
 			if (isForbidden){
 				analysisResult.setCheckResult(FORBIDDEN_CONTENT_DETECTED);
-				return analysisResult;
+				return;
 			}
 		}
 
 		analysisResult.setCheckResult(DOUBTFUL);
-		return analysisResult;
 	}
 
-	protected void obtainResultNLP(AnonymizerAnalysisResult analysisResult, ExecutionAnonymizerResult result){
+	private void obtainResultNLP(AnonymizerAnalysisResult analysisResult, ExecutionAnonymizerResult result){
 		String page = clearResult(result.getPageContent());
 
 		NLPCategory nlpCategory = classificationService.classify(page);
@@ -259,7 +259,6 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 			return true;
 
 		String content = executionResult.getPageContent();
-		String checkValue = executionResult.getCheckUnit().getValue();
 
 		analysisResult.setLinkCount(AnalysisUtils.getLinkCounts(content));
 		analysisResult.setKeyWordsCount(AnalysisUtils.getCountKeyWords(content, keyWords));

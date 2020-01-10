@@ -2,7 +2,6 @@ package service.impl;
 
 import analysis.AnalysisResult;
 import analysis.NMapAnalysisJobResult;
-import checkUnits.CheckUnitJob;
 import enums.CheckUnitJobResult;
 import execution.NmapExecutionResult;
 import org.springframework.stereotype.Service;
@@ -22,7 +21,6 @@ public class NMap_AnalyzerService implements AnalyzerService<NmapExecutionResult
 	@Override
 	public AnalysisResult analyzeResult(NmapExecutionResult result) {
 		NMapAnalysisJobResult analysisResult = new NMapAnalysisJobResult();
-		analysisResult.setJobID(result.getJobID());
 		analysisResult.setCheckUnit(result.getCheckUnit());
 		analysisResult.setCheckResult(obtainResult(result));
 		analysisResult.setNmapLog(result.getNmapLog());
@@ -32,8 +30,7 @@ public class NMap_AnalyzerService implements AnalyzerService<NmapExecutionResult
 	private CheckUnitJobResult obtainResult(NmapExecutionResult result) {
 		long availableHostsCount = result
 				.getAvailableHosts()
-				.stream()
-				.count();
+				.size();
 		return availableHostsCount > 0 ? FORBIDDEN_CONTENT_DETECTED : COMPLETED;
 	}
 }

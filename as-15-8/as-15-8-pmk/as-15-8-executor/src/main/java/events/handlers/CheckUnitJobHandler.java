@@ -86,12 +86,7 @@ public class CheckUnitJobHandler {
             }
 
             try {
-                sendCheckJobErrorNotification(
-                        message.getPayload().getJobID(),
-                        message.getPayload().getCheckUnit().getContentId(),
-                        te,
-                        key,
-                        partitionId);
+                sendCheckJobErrorNotification(te, key, partitionId);
             } catch (Exception sendEx) {
                 log.error("Ошибка при отправке сообщения с ошибкой при выполнении задания на проверку запрещенного ресурса: "+verificationName, sendEx);
             }
@@ -141,17 +136,15 @@ public class CheckUnitJobHandler {
 
             boolean send = executorChannels.executionResults().send(message);
             if(send)
-                log.info("Сообщение успешно отправлено: " + jobResult.getJobID() + ", " + jobResult.getCheckUnit().getValue());
+                log.info("Сообщение успешно отправлено: " + key.getJobId() + ", " + jobResult.getCheckUnit().getValue());
         } catch (Exception ex) {
             throw new RuntimeException("Ошибка при отправке сообщения с результатами работы робота", ex);
         }
     }
 
-    private void sendCheckJobErrorNotification(Long jobID, Long erdiId, Throwable cause, CheckUnitKey key, Integer partitionId) {
+    private void sendCheckJobErrorNotification(Throwable cause, CheckUnitKey key, Integer partitionId) {
         try {
             CheckUnitStatusNotification.CheckUnitStatusNotificationBuilder notificationBuilder = CheckUnitStatusNotification.builder();
-            notificationBuilder.jobID(jobID);
-            notificationBuilder.erdiID(erdiId);
             if(cause instanceof Captcha_ExecutionException) {
                 notificationBuilder.checkResult(CheckUnitJobResult.CAPTCHA_DETECTED);
             }
@@ -174,7 +167,7 @@ public class CheckUnitJobHandler {
 
             boolean send = executorChannels.results().send(message);
             if(send)
-                log.info("Сообщение успешно отправлено: " + notification.getJobID() + ", " + notification.getCheckResult());
+                log.info("Сообщение успешно отправлено: " + key.getJobId() + ", " + notification.getCheckResult());
         } catch (Exception ex) {
             throw new RuntimeException("Ошибка при отправке сообщения с уведомлением об ошибке", ex);
         }

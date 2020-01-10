@@ -14,9 +14,6 @@ import lombok.Data;
 @Data
 @JsonTypeInfo(include=As.WRAPPER_OBJECT, use=Id.CLASS)
 public abstract class ExecutionJobResult {
-
-	/** Идентификатор задания */
-	private Long jobID;
 	
 	/** ПС/ПАСД */
 	private String accessTool;

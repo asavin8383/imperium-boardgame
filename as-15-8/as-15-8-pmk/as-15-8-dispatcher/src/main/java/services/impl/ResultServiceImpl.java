@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.*;
 import model.enums.CheckType;
+import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
@@ -74,26 +75,36 @@ public class ResultServiceImpl implements ResultService {
                 if(arrangement.getCheckUnitsCount() <= count.longValue()) {
                     KeyValueIterator<CheckUnitKey, CheckUnitResult> resultsIterator = getArrangementIterator(store, arrangement.getId());
                     while (resultsIterator.hasNext()) {
-                        CheckUnitResult checkUnitResult = resultsIterator.next().value;
+                        KeyValue<CheckUnitKey, CheckUnitResult> result = resultsIterator.next();
+                        CheckUnitKey resultKey = result.key;
+                        CheckUnitResult checkUnitResult = result.value;
                         try {
                             if (checkUnitResult instanceof AnalysisResult) {
-                                saveJobResult((AnalysisResult) checkUnitResult);
+                                saveJobResult(resultKey.getJobId(), (AnalysisResult) checkUnitResult);
                             } else if (checkUnitResult instanceof CheckUnitStatusNotification) {
                                 CheckUnitStatusNotification notification = (CheckUnitStatusNotification) checkUnitResult;
-                                updateJobStatus(notification.getJobID(), notification.getErdiID(), notification.getCheckResult(), notification.getDescription());
+                                updateJobStatus(
+                                        resultKey.getJobId(),
+                                        notification.getCheckUnit().getContentId(),
+                                        notification.getCheckResult(),
+                                        notification.getDescription());
                             }
                         } catch (Exception ex){
                             try {
-                                log.error("Ошибка при обработке сообщения с анализом результатов проверки: " + checkUnitResult.getJobID() + ", " + checkUnitResult.getCheckUnit().getValue(), ex);
+                                log.error("Ошибка при обработке сообщения с анализом результатов проверки: " + resultKey.getJobId() + ", " + checkUnitResult.getCheckUnit().getValue(), ex);
 
                                 StringWriter sw = new StringWriter();
                                 ex.printStackTrace(new PrintWriter(sw));
 
-                                Result jobResult = updateJobStatus(checkUnitResult.getJobID(), checkUnitResult.getCheckUnit().getContentId(), CheckUnitJobResult.INTERNAL_ERROR, sw.toString());
+                                Result jobResult = updateJobStatus(
+                                        resultKey.getJobId(),
+                                        checkUnitResult.getCheckUnit().getContentId(),
+                                        CheckUnitJobResult.INTERNAL_ERROR,
+                                        sw.toString());
                                 log.info("Мероприятие завешено с ошибками: " + jobResult.getArrangement().getId());
                                 arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(jobResult.getArrangement().getId(), ArrangementEvents.FINISH));
                             } catch(Exception newEx) {
-                                log.error("Ошибка при сохранении ошибочной обработки сообщения с анализом результатов проверки: " + checkUnitResult.getJobID() + ", " + checkUnitResult.getCheckUnit().getValue(), newEx);
+                                log.error("Ошибка при сохранении ошибочной обработки сообщения с анализом результатов проверки: " + resultKey.getJobId() + ", " + checkUnitResult.getCheckUnit().getValue(), newEx);
                             }
                         }
                     }
@@ -115,9 +126,9 @@ public class ResultServiceImpl implements ResultService {
 
     @Override
     @Transactional
-    public Result saveJobResult(AnalysisResult analysisResult) {
+    public Result saveJobResult(Long jobID, AnalysisResult analysisResult) {
         try{
-            Result result = findJobByID(analysisResult.getJobID());
+            Result result = findJobByID(jobID);
             AnalysisResultService<? super AnalysisResult> service = AnalysisResultServiceFactory.getService(analysisResult.getClass());
             result.setEndDate(LocalDateTime.now());
             result.setResult(checkStatus(result.getErdiId(), analysisResult.getCheckResult()));
@@ -149,14 +160,14 @@ public class ResultServiceImpl implements ResultService {
             return result;
         } catch (Exception ex) {
             try {
-                log.error("Ошибка при обработке сообщения с анализом результатов проверки: " + analysisResult.getJobID() + ", " + analysisResult.getCheckUnit().getValue(), ex);
+                log.error("Ошибка при обработке сообщения с анализом результатов проверки: " + jobID + ", " + analysisResult.getCheckUnit().getValue(), ex);
 
                 StringWriter sw = new StringWriter();
                 ex.printStackTrace(new PrintWriter(sw));
 
-                updateJobStatus(analysisResult.getJobID(), analysisResult.getCheckUnit().getContentId(), CheckUnitJobResult.INTERNAL_ERROR, sw.toString());
+                updateJobStatus(jobID, analysisResult.getCheckUnit().getContentId(), CheckUnitJobResult.INTERNAL_ERROR, sw.toString());
             } catch(Exception newEx) {
-                log.error("Ошибка при сохранении ошибочной обработки сообщения с анализом результатов проверки: " + analysisResult.getJobID() + ", " + analysisResult.getCheckUnit().getValue(), newEx);
+                log.error("Ошибка при сохранении ошибочной обработки сообщения с анализом результатов проверки: " + jobID + ", " + analysisResult.getCheckUnit().getValue(), newEx);
             }
         }
         return null;
@@ -174,9 +185,9 @@ public class ResultServiceImpl implements ResultService {
 
     @Override
     @Transactional
-    public Result updateJobStatus(Long jobID, Long erdiID, CheckUnitJobResult status, String description) {
+    public Result updateJobStatus(Long jobID, Long contentId, CheckUnitJobResult status, String description) {
         Result result = findJobByID(jobID);
-        result.setResult(checkStatus(erdiID, status));
+        result.setResult(checkStatus(contentId, status));
         result.setEndDate(LocalDateTime.now());
         if(status == CheckUnitJobResult.INTERNAL_ERROR || status == CheckUnitJobResult.TIMEOUT_ERROR) {
             result.setCheckType(CheckType.ERROR);
@@ -207,8 +218,8 @@ public class ResultServiceImpl implements ResultService {
         }
     }
 
-    private CheckUnitJobResult checkStatus(Long erdiId, CheckUnitJobResult status){
-        if(erdiChecker.checkErdiStatus(erdiId).equals(ErdiStatus.EXCLUDED))
+    private CheckUnitJobResult checkStatus(Long contentId, CheckUnitJobResult status){
+        if(erdiChecker.checkErdiStatus(contentId).equals(ErdiStatus.EXCLUDED))
             return CheckUnitJobResult.EXCLUDED;
         else
             return status;
@@ -230,8 +241,7 @@ public class ResultServiceImpl implements ResultService {
     public int getArrangementsCount(Long id) {
         ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store = getKeyValueStore();
         KeyValueIterator<CheckUnitKey, CheckUnitResult> resultsIterator = getResultsIterator(store, id);
-        int count = countIteratorSize(resultsIterator);
-        return count;
+        return countIteratorSize(resultsIterator);
     }
 
     private ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> getKeyValueStore() {
@@ -244,18 +254,16 @@ public class ResultServiceImpl implements ResultService {
         return store;
     }
 
-    private KeyValueIterator getResultsIterator(ReadOnlyKeyValueStore store, Long id) {
+    private KeyValueIterator<CheckUnitKey, CheckUnitResult> getResultsIterator(ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store, Long id) {
         return store.range(
                 new CheckUnitKey(id, Long.MIN_VALUE),
                 new CheckUnitKey(id, Long.MAX_VALUE)
         );
     }
 
-    private int countIteratorSize(KeyValueIterator resultsIterator) {
+    private int countIteratorSize(KeyValueIterator<CheckUnitKey, CheckUnitResult> resultsIterator) {
         AtomicInteger count = new AtomicInteger();
-        resultsIterator.forEachRemaining( s-> {
-            count.getAndIncrement();
-        });
+        resultsIterator.forEachRemaining( s-> count.getAndIncrement());
 
         return count.get();
     }

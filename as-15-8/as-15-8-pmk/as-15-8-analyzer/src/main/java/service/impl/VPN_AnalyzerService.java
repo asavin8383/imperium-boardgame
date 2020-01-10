@@ -11,7 +11,6 @@ import model.KeyWord;
 import model.NLPCategory;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ResourceLoader;
@@ -43,8 +42,8 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 @Slf4j
 public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResult> {
 
-	public static final String keyWordsSource = "classpath:key_words.json";
-	public static final int similarityThreshold = 85;
+	private static final String keyWordsSource = "classpath:key_words.json";
+	private static final int similarityThreshold = 85;
 
 	@Value("${source_path_vpn}")
 	public String sourcePath;
@@ -52,15 +51,21 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 	@Getter
 	private List<KeyWord> keyWords = new ArrayList<>();
 
-	@Autowired
-	private ResourceLoader resourceLoader;
+	private final ResourceLoader resourceLoader;
 
-	@Autowired
-	private PODExchange podExchange;
+	private final PODExchange podExchange;
 
-	@Autowired
-	@Qualifier("openNLPClassificator")
-	private ClassificationService classificationService;
+	private final ClassificationService classificationService;
+
+	public VPN_AnalyzerService(
+			ResourceLoader resourceLoader,
+			PODExchange podExchange,
+			@Qualifier("openNLPClassificator") ClassificationService classificationService) {
+
+		this.resourceLoader = resourceLoader;
+		this.podExchange = podExchange;
+		this.classificationService = classificationService;
+	}
 
 	@PostConstruct
 	public void initAnalyzer() {
@@ -77,7 +82,6 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 	@Override
 	public AnalysisResult analyzeResult(ExecutionVpnJobResult result) throws AnalysisException {
 		VpnAnalysisResult analysisResult = new VpnAnalysisResult();
-		analysisResult.setJobID(result.getJobID());
 		analysisResult.setCheckUnit(result.getCheckUnit());
 		analysisResult.setScreenshot(result.getScreenshot());
 		analysisResult.setEtalonScreenshot(result.getEtalonScreenshot());
@@ -85,7 +89,7 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 		try {
 			prepareResult(analysisResult, result);
 		} catch (Exception e) {
-			throw new AnalysisException(String.format("Ошибка во время анализа ПАСД (jobID=%d)", result.getJobID()), e);
+			throw new AnalysisException("Ошибка во время анализа ПАСД", e);
 		}
 
 		CheckUnitJobResult checkUnitJobResult = obtainResult(analysisResult, result);
@@ -96,7 +100,7 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 		return analysisResult;
 	}
 
-	protected void saveSources(VpnAnalysisResult analysisResult, ExecutionVpnJobResult result, CheckUnitJobResult checkUnitJobResult){
+	private void saveSources(VpnAnalysisResult analysisResult, ExecutionVpnJobResult result, CheckUnitJobResult checkUnitJobResult){
 		if (
 			!analysisResult.hasError() &&
 			(checkUnitJobResult == DOUBTFUL || checkUnitJobResult == COMPLETED) &&
@@ -121,7 +125,7 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 		}
 	}
 
-	protected void checkFinalUrlForForbidden(VpnAnalysisResult analysisResult){
+	private void checkFinalUrlForForbidden(VpnAnalysisResult analysisResult){
 		if (analysisResult.getNeedTestFinalUrl() != null && analysisResult.getNeedTestFinalUrl()){
 			ResponseStatusString check = podExchange.checkUrl(analysisResult.getFinalUrl());
 			if (check.isStatus()){
@@ -135,7 +139,7 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 		}
 	}
 
-	protected void obtainResultNLP(VpnAnalysisResult analysisResult, ExecutionVpnJobResult result){
+	private void obtainResultNLP(VpnAnalysisResult analysisResult, ExecutionVpnJobResult result){
 	    if (StringUtils.isEmpty(analysisResult.getPageUrlFinal())){
             log.info("NLP не запущен, URL пустой!");
 	        return;
@@ -201,7 +205,7 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 	}
 
 
-	protected CheckUnitJobResult obtainResult(VpnAnalysisResult aRes, ExecutionVpnJobResult jobRes) {
+	private CheckUnitJobResult obtainResult(VpnAnalysisResult aRes, ExecutionVpnJobResult jobRes) {
 		boolean wasRedirect = aRes.getRedirectionDetected() != null && aRes.getRedirectionDetected();
 
         if (aRes.hasError()) {

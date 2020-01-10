@@ -17,8 +17,8 @@ public class CheckUnitStatusNotification extends CheckUnitResult {
 	private String description;
 
 	@Builder
-	public CheckUnitStatusNotification(Long jobID, Long erdiID, CheckUnitJobResult checkResult, CheckUnit checkUnit, String description){
-		super(jobID, erdiID, checkResult, checkUnit);
+	public CheckUnitStatusNotification(CheckUnitJobResult checkResult, CheckUnit checkUnit, String description){
+		super(checkResult, checkUnit);
 		this.description = description;
 	}
 }
