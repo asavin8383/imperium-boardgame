@@ -55,7 +55,6 @@ public class ArrangementController {
        int arrangementsCount = resultService.getArrangementsCount(arrangement.get().getId());
 
 
-        int percent = (int) ((arrangementsCount * 100)/checkUnits);
-        return percent;
+        return (int) ((arrangementsCount * 100)/checkUnits);
     }
 }

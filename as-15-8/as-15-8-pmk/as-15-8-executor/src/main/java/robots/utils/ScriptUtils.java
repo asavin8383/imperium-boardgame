@@ -1,35 +1,21 @@
 package robots.utils;
 
 import checkUnits.CheckUnit;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import common.ExecutorProperties;
-import enums.AccessToolParameter;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.openqa.selenium.*;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.interactions.Action;
-import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.springframework.util.StringUtils;
-import org.springframework.web.bind.support.WebExchangeBindException;
 import robots.ChromeSettings;
 import robots.exceptions.ExecutionException;
 
 import javax.annotation.Nullable;
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.*;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
@@ -51,8 +37,8 @@ public class ScriptUtils {
         public String errorCodeChrome;
     }
 
-    public static Integer WAIT_TIMEOUT = 30000;
-    public static Integer WAIT_DRIVER_DEFAULT = 3;
+    private static Integer WAIT_TIMEOUT = 30000;
+    private static Integer WAIT_DRIVER_DEFAULT = 3;
 
 
     public static void waitDriver(WebDriver driver){
@@ -64,7 +50,7 @@ public class ScriptUtils {
             WebDriverWait wait = new WebDriverWait(driver, seconds);
             wait.until(webDriver -> false);
         }
-        catch (TimeoutException te){}
+        catch (TimeoutException ignored){}
     }
 
     public static void waitPageLoading(WebDriver driver) {
@@ -78,7 +64,7 @@ public class ScriptUtils {
                         .executeScript("return document.readyState").equals("complete"));
     }
 
-    public static String getErrorCode(WebDriver driver){
+    private static String getErrorCode(WebDriver driver){
         try{
             WebElement errorElement = driver.findElement(By.cssSelector("#main-message #error-information-popup-container .error-code"));
             return errorElement.getText();
@@ -172,13 +158,13 @@ public class ScriptUtils {
         return value;
     }
 
-    public static void waitForTab(WebDriver webDriver, int tabIndex) { // one-based tab index
+    private static void waitForTab(WebDriver webDriver, int tabIndex) { // one-based tab index
         new WebDriverWait(webDriver, WAIT_TIMEOUT)
                 .until(driver -> driver != null &&
                         driver.getWindowHandles().size() > tabIndex - 1);
     }
 
-    public static void switchToTab(WebDriver webDriver, int tabIndex) { // one-based tab index
+    private static void switchToTab(WebDriver webDriver, int tabIndex) { // one-based tab index
         ArrayList<String> handles = new ArrayList<>(webDriver.getWindowHandles());
         webDriver.switchTo().window(handles.get(tabIndex - 1));
     }
@@ -207,8 +193,7 @@ public class ScriptUtils {
 
     @Nullable
     public static WebElement getElementBy(By by, WebDriver driver) {
-        WebElement element = ScriptUtils.findElementIfExists(by, driver);
-        return element;
+        return ScriptUtils.findElementIfExists(by, driver);
     }
 
     public static String getTextOrDefault(WebElement element, String defaultValue) {

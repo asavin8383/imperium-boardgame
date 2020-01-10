@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.binder.kafka.streams.InteractiveQueryService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import repositories.ArrangementRepo;
 import repositories.ResultRepo;
 import restapi.ArrangementStatusProducer;
@@ -31,12 +32,9 @@ import services.AnalysisResultService;
 import services.AnalysisResultServiceFactory;
 import services.ResultService;
 
-import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
-import javax.transaction.Transactional;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -44,6 +42,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service
 @RequiredArgsConstructor(onConstructor_={@Autowired})
 @Slf4j
+@Transactional
 public class ResultServiceImpl implements ResultService {
 
     @Value("${spring.cloud.stream.bindings.results_table.destination}")
@@ -72,7 +71,7 @@ public class ResultServiceImpl implements ResultService {
                 AtomicInteger count = new AtomicInteger();
                 getArrangementIterator(store, arrangement.getId()).forEachRemaining(obj -> count.getAndIncrement());
 
-                if(arrangement.getCheckUnitsCount() <= count.longValue()) {
+                if(arrangement.getCheckUnitsCount() == count.longValue()) {
                     KeyValueIterator<CheckUnitKey, CheckUnitResult> resultsIterator = getArrangementIterator(store, arrangement.getId());
                     while (resultsIterator.hasNext()) {
                         KeyValue<CheckUnitKey, CheckUnitResult> result = resultsIterator.next();
@@ -80,12 +79,16 @@ public class ResultServiceImpl implements ResultService {
                         CheckUnitResult checkUnitResult = result.value;
                         try {
                             if (checkUnitResult instanceof AnalysisResult) {
-                                saveJobResult(resultKey.getJobId(), (AnalysisResult) checkUnitResult);
+                                saveJobResult(
+                                        arrangement,
+                                        resultKey.getJobId(),
+                                        (AnalysisResult) checkUnitResult);
                             } else if (checkUnitResult instanceof CheckUnitStatusNotification) {
                                 CheckUnitStatusNotification notification = (CheckUnitStatusNotification) checkUnitResult;
                                 updateJobStatus(
+                                        arrangement,
                                         resultKey.getJobId(),
-                                        notification.getCheckUnit().getContentId(),
+                                        notification,
                                         notification.getCheckResult(),
                                         notification.getDescription());
                             }
@@ -97,8 +100,9 @@ public class ResultServiceImpl implements ResultService {
                                 ex.printStackTrace(new PrintWriter(sw));
 
                                 Result jobResult = updateJobStatus(
+                                        arrangement,
                                         resultKey.getJobId(),
-                                        checkUnitResult.getCheckUnit().getContentId(),
+                                        checkUnitResult,
                                         CheckUnitJobResult.INTERNAL_ERROR,
                                         sw.toString());
                                 log.info("Мероприятие завешено с ошибками: " + jobResult.getArrangement().getId());
@@ -126,12 +130,19 @@ public class ResultServiceImpl implements ResultService {
 
     @Override
     @Transactional
-    public Result saveJobResult(Long jobID, AnalysisResult analysisResult) {
+    public Result saveJobResult(Arrangement arrangement, Long jobId, AnalysisResult analysisResult) {
         try{
-            Result result = findJobByID(jobID);
+            Result result = new Result();
             AnalysisResultService<? super AnalysisResult> service = AnalysisResultServiceFactory.getService(analysisResult.getClass());
-            result.setEndDate(LocalDateTime.now());
+            result.setArrangement(arrangement);
+            result.setJobId(jobId);
+            result.setErdiId(analysisResult.getCheckUnit().getContentId());
             result.setResult(checkStatus(result.getErdiId(), analysisResult.getCheckResult()));
+            result.setCheckUnitType(analysisResult.getCheckUnit().getType());
+            result.setCheckUnitValue(analysisResult.getCheckUnit().getValue());
+
+            result.setStartDate(analysisResult.getStartTime());
+            result.setEndDate(analysisResult.getEndTime());
 
             if(analysisResult.getCheckResult().equals(CheckUnitJobResult.INTERNAL_ERROR)) {
                 result.setCheckType(CheckType.ERROR);
@@ -141,7 +152,7 @@ public class ResultServiceImpl implements ResultService {
                 DetailResult detailResult = service.createDetails(result, analysisResult);
                 try {
                     entityManager.persist(detailResult);
-                } catch (EntityExistsException ex){
+                } catch (Exception ex){
                     entityManager.merge(detailResult);
                 }
             }
@@ -153,21 +164,26 @@ public class ResultServiceImpl implements ResultService {
                 resultScreenShot.setEtalonScreenshot(analysisResult.getEtalonScreenshot());
                 try {
                     entityManager.persist(resultScreenShot);
-                } catch (EntityExistsException ex){
+                } catch (Exception ex){
                     entityManager.merge(resultScreenShot);
                 }
             }
             return result;
         } catch (Exception ex) {
             try {
-                log.error("Ошибка при обработке сообщения с анализом результатов проверки: " + jobID + ", " + analysisResult.getCheckUnit().getValue(), ex);
+                log.error("Ошибка при обработке сообщения с анализом результатов проверки: " + jobId + ", " + analysisResult.getCheckUnit().getValue(), ex);
 
                 StringWriter sw = new StringWriter();
                 ex.printStackTrace(new PrintWriter(sw));
 
-                updateJobStatus(jobID, analysisResult.getCheckUnit().getContentId(), CheckUnitJobResult.INTERNAL_ERROR, sw.toString());
+                updateJobStatus(
+                        arrangement,
+                        jobId,
+                        analysisResult,
+                        CheckUnitJobResult.INTERNAL_ERROR,
+                        sw.toString());
             } catch(Exception newEx) {
-                log.error("Ошибка при сохранении ошибочной обработки сообщения с анализом результатов проверки: " + jobID + ", " + analysisResult.getCheckUnit().getValue(), newEx);
+                log.error("Ошибка при сохранении ошибочной обработки сообщения с анализом результатов проверки: " + jobId + ", " + analysisResult.getCheckUnit().getValue(), newEx);
             }
         }
         return null;
@@ -185,24 +201,29 @@ public class ResultServiceImpl implements ResultService {
 
     @Override
     @Transactional
-    public Result updateJobStatus(Long jobID, Long contentId, CheckUnitJobResult status, String description) {
-        Result result = findJobByID(jobID);
-        result.setResult(checkStatus(contentId, status));
-        result.setEndDate(LocalDateTime.now());
+    public Result updateJobStatus(Arrangement arrangement, Long jobId, CheckUnitResult checkUnitResult, CheckUnitJobResult status, String description) {
+        Result result = new Result();
+        result.setArrangement(arrangement);
+        result.setJobId(jobId);
+        result.setErdiId(checkUnitResult.getCheckUnit().getContentId());
+        result.setResult(checkStatus(checkUnitResult.getCheckUnit().getContentId(), status));
+        result.setCheckUnitType(checkUnitResult.getCheckUnit().getType());
+        result.setCheckUnitValue(checkUnitResult.getCheckUnit().getValue());
+
+        result.setStartDate(checkUnitResult.getStartTime());
+        result.setEndDate(checkUnitResult.getEndTime());
+
         if(status == CheckUnitJobResult.INTERNAL_ERROR || status == CheckUnitJobResult.TIMEOUT_ERROR) {
             result.setCheckType(CheckType.ERROR);
             saveResultAsError(result, description);
         } else {
-            resultRepo.save(result);
+            try{
+                entityManager.persist(result);
+            } catch (Exception ex){
+                entityManager.merge(result);
+            }
         }
         return result;
-    }
-
-    private Result findJobByID(Long jobID) {
-        return resultRepo.findById(jobID)
-                .orElseThrow(() ->
-                        new AS_15_8_DispatcherException("Ошибка! Задание не найдено! ID: " + jobID)
-                );
     }
 
     private void saveResultAsError(Result result, String exText) {
@@ -213,7 +234,7 @@ public class ResultServiceImpl implements ResultService {
         errorDetailResult.setError(exText);
         try{
             entityManager.persist(errorDetailResult);
-        } catch (EntityExistsException ex){
+        } catch (Exception ex){
             entityManager.merge(errorDetailResult);
         }
     }
