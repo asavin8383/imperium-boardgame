@@ -11,6 +11,6 @@ import java.util.List;
 
 public interface FormalTaskRepositoryAdvanced {
 
-	Page<FormalTask> findPage(Long id, String operator, Pageable pageable);
+	Page<FormalTask> findPage(Long id, String operator, String fgisId, Pageable pageable);
 
 }

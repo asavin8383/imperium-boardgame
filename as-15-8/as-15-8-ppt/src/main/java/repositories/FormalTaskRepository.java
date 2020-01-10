@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface FormalTaskRepository extends JpaRepository<FormalTask, Long>, FormalTaskRepositoryAdvanced {
@@ -38,4 +39,6 @@ public interface FormalTaskRepository extends JpaRepository<FormalTask, Long>, F
 
 	@Query("SELECT a FROM FormalTask a WHERE a.missionId=:mission_id")
 	FormalTask getByMissionId(@Param("mission_id") Long id);
+
+	FormalTask findByFgisId(String fgisId);
 }
