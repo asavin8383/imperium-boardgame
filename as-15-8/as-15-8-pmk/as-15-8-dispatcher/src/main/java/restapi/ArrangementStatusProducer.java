@@ -6,6 +6,7 @@ import exceptions.AS_15_8_DispatcherException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Arrangement;
+import model.enums.ArrangementStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -18,8 +19,6 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.util.UriComponentsBuilder;
 import repositories.ArrangementRepo;
 import services.ActService;
-
-import java.util.Optional;
 
 /**
  * Created by san
@@ -35,34 +34,26 @@ public class ArrangementStatusProducer {
     private final String PPT_ARRANGEMENT_EXECUTION_STATUS = "/arrangements/execution_status";
     private final String PPT_IS_ACT_AVAILABLE = "/arrangements/act_available";
     private final String PPT_ACT_SENT_STATUS = "/arrangements/act_sent_status";
-    private final String PPM_COMPLETION_ENDPOINT = "/ppm/arrangements/completion";
     private final OAuth2RestTemplate restTemplate;
-    private final Integer FINISHED = 100;
     private final ActService actService;
+    private final ArrangementRepo arrangementRepo;
 
     @Value("${gateway.url}")
     private String gatewayUrl;
 
     public void sendArrangementStatusMessage(ArrangementStatusNotification arrangementStatusNotification){
-        Long arrId = arrangementStatusNotification.getArrangementId();
-        Optional<Integer> completion = getCompletionFromPPM(arrId);
-        if (completion.isPresent()) {
-            if (completion.get().equals(FINISHED)) {
-                Long arrangementId = arrangementStatusNotification.getArrangementId();
-                sendToPPT(arrangementStatusNotification);
-                sendToPPM(arrangementId);
-                sendAct(arrangementId);
-            }
-        }
+        Long arrangementId = arrangementStatusNotification.getArrangementId();
+        //sendToPPT(arrangementStatusNotification);
+        //sendToPPM(arrangementId);
+        finishArrangement(arrangementId);
+        //sendAct(arrangementId);
     }
 
-    private Optional<Integer> getCompletionFromPPM(Long arrangementId) {
-        try {
-            Integer completion = restTemplate.getForObject(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(PPM_COMPLETION_ENDPOINT).queryParam("id", arrangementId).build().toString(), Integer.class);
-            return Optional.ofNullable(completion);
-        } catch (HttpClientErrorException | HttpServerErrorException ex) {
-            throw AS_15_8_DispatcherException.logAndGet(log, String.format("Ошибка получения процента выполнения мероприятия из ППМ, код возврата %s", arrangementId, ex.getStatusCode()));
-        }
+    private void finishArrangement(Long arrangementId){
+        Arrangement arr = arrangementRepo.findById(arrangementId)
+                .orElseThrow(() -> new AS_15_8_DispatcherException("Ошибка при закрытии мероприятия. Мероприятие не найдено по ID: " + arrangementId));
+        arr.setStatus(ArrangementStatus.FINISHED);
+        arrangementRepo.save(arr);
     }
 
     private void sendToPPT(ArrangementStatusNotification arrangementStatusNotification){

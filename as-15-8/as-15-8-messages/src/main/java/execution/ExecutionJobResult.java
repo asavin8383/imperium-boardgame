@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 /**
  * Результат выполнения задания на проверку запрещенного ресурса
  * @author shabalinAI
@@ -26,4 +28,7 @@ public abstract class ExecutionJobResult {
 
 	/**Эталонноый скриншот, полученной при проверке страницы с выделенного прокси*/
 	private byte[] etalonScreenshot;
+
+	/** Время запуска */
+	private LocalDateTime startTime;
 }
