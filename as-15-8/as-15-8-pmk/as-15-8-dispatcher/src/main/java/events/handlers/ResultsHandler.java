@@ -31,11 +31,12 @@ public class ResultsHandler {
                 log.info("\n   ---->>> Принято сообщение с анализом результатов проверки: " +
                     "мероприятие: " + key.getArrangementId() + ", " +
                     key.getJobId() + ", " + result.getCheckUnit().getValue() + ", результат: " + result.getCheckResult()))
+            .mapValues(result -> {
+                result.setEndTime(LocalDateTime.now());
+                return result;
+            })
             .groupByKey()
-            .reduce((oldMessage, newMessage) -> {
-                        newMessage.setEndTime(LocalDateTime.now());
-                        return newMessage;
-                    },
+            .reduce((oldMessage, newMessage) -> newMessage,
                     Materialized.<CheckUnitKey, CheckUnitResult, KeyValueStore<Bytes, byte[]>>
                         as(resultsTableName)
                         .withKeySerde(new JsonSerde<>(CheckUnitKey.class))
