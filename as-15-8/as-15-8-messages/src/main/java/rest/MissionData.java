@@ -12,4 +12,5 @@ import lombok.ToString;
 public class MissionData {
     private Long id;
     private String name;
+    private String origId;
 }

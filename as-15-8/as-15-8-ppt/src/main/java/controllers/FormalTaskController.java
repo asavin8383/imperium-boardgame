@@ -137,8 +137,8 @@ public class FormalTaskController {
 	@PostMapping(path = "/create_with_mission")
 	public void postFormalTask(@RequestBody MissionData missionData, Principal principal) {
 		log.info("Запрос создания FormalTask по поручению: {}", missionData);
-		if (missionData.getId() == null || missionData.getName() == null)
-			throw new AS_15_8_PPT_Exception("Не заданы все требуемые поля: id, name");
+		if (missionData.getId() == null || missionData.getName() == null || missionData.getOrigId() == null)
+			throw new AS_15_8_PPT_Exception("Не заданы все требуемые поля: id, name, origId");
 
 		createFormalTaskByMission(missionData, principal.getName());
 		//Сохранение уведомления в БД
@@ -175,6 +175,7 @@ public class FormalTaskController {
 		formalTask.setAgreed(true);
 		formalTask.setStatus(ExecutionStatus.NEW);
 		formalTask.setOperator(operator);
+		formalTask.setFgisId(missionData.getOrigId());
 		FormalTask res = formalTaskRepo.save(formalTask);
 
 		log.info("Создан FormalTask: {}", res);
