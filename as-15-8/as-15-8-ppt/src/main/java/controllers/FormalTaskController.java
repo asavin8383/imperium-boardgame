@@ -76,6 +76,15 @@ public class FormalTaskController {
 		return task;
 	}
 
+	@GetMapping("{task}/automatic_act_send")
+	public Boolean isAutomaticActSendAvailable(@PathVariable FormalTask task){
+		if (task == null)
+			throw new AS_15_8_PPT_Exception("Formal task not found: " + task);
+		if (task.getMissionId() != null)
+			return true;
+		else return false;
+	}
+
 	@PutMapping
 	public FormalTask replaceFormalTask(@RequestBody FormalTask newFormalTask, @RequestParam("id") FormalTask existingTask){
 		if (existingTask == null) {
