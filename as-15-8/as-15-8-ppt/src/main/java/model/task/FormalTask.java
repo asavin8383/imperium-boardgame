@@ -69,6 +69,9 @@ public class FormalTask implements Serializable {
 	/**Ссылка на id неформализованного задания (поручения)*/
 	private Long missionId;
 
+	/**Ссылка на внешний id поручения*/
+	private String fgisId;
+
 	/**Список мероприятий по заданию*/
 	@OneToMany(cascade=CascadeType.ALL,mappedBy="formalTask")
 	@JsonIgnore

@@ -5,7 +5,6 @@ import checkUnits.CheckUnitKey;
 import events.DispatcherChannels;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.utils.Bytes;
-import org.apache.kafka.streams.kstream.Grouped;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.Materialized;
 import org.apache.kafka.streams.state.KeyValueStore;
@@ -14,6 +13,8 @@ import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.kafka.support.serializer.JsonSerde;
 import org.springframework.stereotype.Service;
+
+import java.util.Date;
 
 @Service
 @Slf4j
@@ -30,6 +31,10 @@ public class ResultsHandler {
                 log.info("\n   ---->>> Принято сообщение с анализом результатов проверки: " +
                     "мероприятие: " + key.getArrangementId() + ", " +
                     key.getJobId() + ", " + result.getCheckUnit().getValue() + ", результат: " + result.getCheckResult()))
+            .mapValues(result -> {
+                result.setEndTime(new Date());
+                return result;
+            })
             .groupByKey()
             .reduce((oldMessage, newMessage) -> newMessage,
                     Materialized.<CheckUnitKey, CheckUnitResult, KeyValueStore<Bytes, byte[]>>

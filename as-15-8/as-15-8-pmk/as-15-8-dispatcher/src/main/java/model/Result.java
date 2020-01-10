@@ -35,6 +35,9 @@ public class Result implements Serializable {
     @Column(name = "content_id", nullable = false)
     private Long erdiId;
 
+    @Column(nullable = false)
+    private Long jobId;
+
     @Enumerated(EnumType.STRING)
     private CheckType checkType;
 
