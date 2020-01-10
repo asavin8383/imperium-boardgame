@@ -13,7 +13,7 @@ import javax.persistence.*;
 
 @Entity
 @Data
-@Table(schema = "config", name = "robots_sla")
+@Table(schema = "config", name = "robots_sla", uniqueConstraints = @UniqueConstraint(columnNames = {"robot_id", "slaType", "slaPeriod"}))
 @NoArgsConstructor
 @RequiredArgsConstructor
 public class RobotSLA {
