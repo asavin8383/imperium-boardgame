@@ -59,7 +59,7 @@ spring:
         format_sql: true
     databasePlatform: org.hibernate.dialect.PostgreSQL9Dialect
   jackson.serialization.FAIL_ON_EMPTY_BEANS: false
-results.save.schedule: '0 0 0 * * ?'
+results.save.schedule: '0 */1 * * * ?'
 
 ---
 
