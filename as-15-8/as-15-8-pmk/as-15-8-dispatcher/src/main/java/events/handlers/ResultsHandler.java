@@ -14,7 +14,7 @@ import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.kafka.support.serializer.JsonSerde;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 @Service
 @Slf4j
@@ -32,7 +32,7 @@ public class ResultsHandler {
                     "мероприятие: " + key.getArrangementId() + ", " +
                     key.getJobId() + ", " + result.getCheckUnit().getValue() + ", результат: " + result.getCheckResult()))
             .mapValues(result -> {
-                result.setEndTime(LocalDateTime.now());
+                result.setEndTime(new Date());
                 return result;
             })
             .groupByKey()

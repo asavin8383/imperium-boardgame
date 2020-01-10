@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 /**
  * Результат выполнения задания на проверку запрещенного ресурса
@@ -30,5 +31,5 @@ public abstract class ExecutionJobResult {
 	private byte[] etalonScreenshot;
 
 	/** Время запуска */
-	private LocalDateTime startTime;
+	private Date startTime;
 }

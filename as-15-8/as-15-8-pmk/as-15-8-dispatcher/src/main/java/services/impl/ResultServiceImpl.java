@@ -35,6 +35,8 @@ import services.ResultService;
 import javax.persistence.EntityManager;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -141,8 +143,8 @@ public class ResultServiceImpl implements ResultService {
             result.setCheckUnitType(analysisResult.getCheckUnit().getType());
             result.setCheckUnitValue(analysisResult.getCheckUnit().getValue());
 
-            result.setStartDate(analysisResult.getStartTime());
-            result.setEndDate(analysisResult.getEndTime());
+            result.setStartDate(LocalDateTime.ofInstant(analysisResult.getStartTime().toInstant(), ZoneId.systemDefault()));
+            result.setEndDate(LocalDateTime.ofInstant(analysisResult.getEndTime().toInstant(), ZoneId.systemDefault()));
 
             if(analysisResult.getCheckResult().equals(CheckUnitJobResult.INTERNAL_ERROR)) {
                 result.setCheckType(CheckType.ERROR);
@@ -210,8 +212,8 @@ public class ResultServiceImpl implements ResultService {
         result.setCheckUnitType(checkUnitResult.getCheckUnit().getType());
         result.setCheckUnitValue(checkUnitResult.getCheckUnit().getValue());
 
-        result.setStartDate(checkUnitResult.getStartTime());
-        result.setEndDate(checkUnitResult.getEndTime());
+        result.setStartDate(LocalDateTime.ofInstant(checkUnitResult.getStartTime().toInstant(), ZoneId.systemDefault()));
+        result.setEndDate(LocalDateTime.ofInstant(checkUnitResult.getEndTime().toInstant(), ZoneId.systemDefault()));
 
         if(status == CheckUnitJobResult.INTERNAL_ERROR || status == CheckUnitJobResult.TIMEOUT_ERROR) {
             result.setCheckType(CheckType.ERROR);

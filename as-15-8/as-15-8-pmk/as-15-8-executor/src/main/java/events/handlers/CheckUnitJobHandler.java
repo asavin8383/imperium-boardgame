@@ -1,8 +1,8 @@
 package events.handlers;
 
+import analysis.CheckUnitStatusNotification;
 import checkUnits.CheckUnit;
 import checkUnits.CheckUnitJob;
-import analysis.CheckUnitStatusNotification;
 import checkUnits.CheckUnitKey;
 import common.ExecutorProperties;
 import enums.CheckUnitJobResult;
@@ -27,7 +27,7 @@ import service.impl.RobotsServiceImpl;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.concurrent.*;
 
 @Service
@@ -54,7 +54,7 @@ public class CheckUnitJobHandler {
                 ", partition: " + partitionId +
                 ", offset: "+message.getHeaders().get(KafkaHeaders.OFFSET, Long.class));
         String verificationName = "";
-        LocalDateTime startTime = LocalDateTime.now();
+        Date startTime = new Date();
 
         try {
             CheckUnitJob job = message.getPayload();
@@ -130,7 +130,7 @@ public class CheckUnitJobHandler {
      * Метод отправки результата выполнения робота в тему Kafka
      * @param jobResult Результат выполнения робота
      */
-    private void sendExecutionResult(ExecutionJobResult jobResult, CheckUnitKey key, Integer partitionId, LocalDateTime startTime) throws RuntimeException {
+    private void sendExecutionResult(ExecutionJobResult jobResult, CheckUnitKey key, Integer partitionId, Date startTime) throws RuntimeException {
         try {
             jobResult.setStartTime(startTime);
             Message<ExecutionJobResult> message = MessageBuilder
@@ -147,7 +147,7 @@ public class CheckUnitJobHandler {
         }
     }
 
-    private void sendCheckJobErrorNotification(Throwable cause, CheckUnitKey key, CheckUnit checkUnit, Integer partitionId, LocalDateTime startTime) {
+    private void sendCheckJobErrorNotification(Throwable cause, CheckUnitKey key, CheckUnit checkUnit, Integer partitionId, Date startTime) {
         try {
             CheckUnitStatusNotification.CheckUnitStatusNotificationBuilder notificationBuilder = CheckUnitStatusNotification.builder();
             notificationBuilder
