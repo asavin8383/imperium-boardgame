@@ -30,7 +30,6 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 
 @RestController
@@ -107,7 +106,7 @@ public class ActController {
         }
 
         List<Long> resultIds = results.stream()
-                .mapToLong(Result::getId)
+                .mapToLong(Result::getJobId)
                 .boxed()
                 .collect(Collectors.toList());
 
@@ -125,7 +124,7 @@ public class ActController {
 
     private ActCheckResult createActCheckResult(Result result){
         ActCheckResult checkResult = new ActCheckResult();
-        checkResult.setCheckResultId(result.getId());
+        checkResult.setCheckResultId(result.getJobId());
         checkResult.setCheckUnitType(result.getCheckUnitType());
         checkResult.setCheckUnitValue(result.getCheckUnitValue());
         checkResult.setContentId(result.getErdiId());
@@ -140,7 +139,7 @@ public class ActController {
         byte[] screen = resultScreenShot.getScreenshot();
         if (screen != null && screen.length > 0)
             return new ActAttachment(
-                    resultScreenShot.getId(),
+                    resultScreenShot.getJobId(),
                     ActAttachment.ActAttachmentType.SCREENSHOT,
                     Base64.getEncoder().encodeToString(screen)
             );
@@ -149,7 +148,7 @@ public class ActController {
 
     private ActAttachment createActNmapLog(NmapDetailResult nmapResult){
         return new ActAttachment(
-                nmapResult.getId(),
+                nmapResult.getJobId(),
                 ActAttachment.ActAttachmentType.NMAP_LOG,
                 nmapResult.getLog()
         );

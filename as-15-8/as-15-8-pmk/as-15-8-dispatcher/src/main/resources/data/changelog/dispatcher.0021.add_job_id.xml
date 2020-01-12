@@ -1,0 +1,24 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+    <changeSet author="ashabalin" id="0021.1">
+        <sql>
+            delete from results.results where asdb.results.results.content_id is null;
+        </sql>
+    </changeSet>
+    <changeSet author="ashabalin" id="0021.2">
+        <sql>
+            update results.results r set job_id = (
+                select max(id)
+                from schedule.schedule_check_units scu
+                where (
+                    r.arrangement_id = scu.arrangement_id and
+                    r.check_unit_type = scu.check_unit_type and
+                    r.check_unit_value = scu.check_unit_value and
+                    r.content_id = cast(scu.erdi_id as bigint)
+                )
+            );
+        </sql>
+    </changeSet>
+</databaseChangeLog>

@@ -21,10 +21,11 @@ public class ResultScreenShot implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    private Long id;
+    private Long jobId;
 
     @OneToOne(optional = false)
     @MapsId
+    @Column(name = "job_id")
     private Result result;
 
     @Lob

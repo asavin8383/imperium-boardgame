@@ -43,10 +43,10 @@ public class ArrangementStatusProducer {
 
     public void sendArrangementStatusMessage(ArrangementStatusNotification arrangementStatusNotification){
         Long arrangementId = arrangementStatusNotification.getArrangementId();
-        //sendToPPT(arrangementStatusNotification);
-        //sendToPPM(arrangementId);
+        sendToPPT(arrangementStatusNotification);
+        sendToPPM(arrangementId);
         finishArrangement(arrangementId);
-        //sendAct(arrangementId);
+        sendAct(arrangementId);
     }
 
     private void finishArrangement(Long arrangementId){
