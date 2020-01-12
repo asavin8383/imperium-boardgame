@@ -9,7 +9,7 @@
     </changeSet>
     <changeSet author="ashabalin" id="0021.2">
         <sql>
-            update results.results r set job_id = (
+            update results.results r set job_id = coalesce((
                 select max(id)
                 from schedule.schedule_check_units scu
                 where (
@@ -17,8 +17,9 @@
                     r.check_unit_type = scu.check_unit_type and
                     r.check_unit_value = scu.check_unit_value and
                     r.content_id = cast(scu.erdi_id as bigint)
-                )
+                )), 0
             );
+            delete from results.results where job_id = 0;
         </sql>
     </changeSet>
 </databaseChangeLog>
