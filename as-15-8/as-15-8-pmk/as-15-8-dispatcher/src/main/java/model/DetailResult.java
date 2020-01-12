@@ -15,9 +15,9 @@ public abstract class DetailResult implements Serializable {
     @Id
     private Long jobId;
 
-    @OneToOne(optional = false, fetch = FetchType.LAZY)
     @MapsId
-    @Column(name = "job_id")
+    @OneToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "job_id")
     @JsonIgnore
     private Result result;
 }

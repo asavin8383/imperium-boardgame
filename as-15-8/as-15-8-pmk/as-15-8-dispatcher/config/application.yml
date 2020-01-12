@@ -120,6 +120,9 @@ spring:
         springCloudBusOutput.destination: bus_config_output_ashabalin
   datasource:
     url: jdbc:postgresql://192.168.5.211:5432/asdb_test
+  liquibase:
+    enabled: true
+    change-log: classpath:/data/db.changelog.master.xml
 
 ---
 

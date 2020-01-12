@@ -4,7 +4,7 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
     <changeSet author="ashabalin" id="0021.1">
         <sql>
-            delete from results.results where asdb.results.results.content_id is null;
+            delete from results.results where content_id is null;
         </sql>
     </changeSet>
     <changeSet author="ashabalin" id="0021.2">

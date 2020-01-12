@@ -23,9 +23,9 @@ public class ResultScreenShot implements Serializable {
     @Id
     private Long jobId;
 
-    @OneToOne(optional = false)
     @MapsId
-    @Column(name = "job_id")
+    @OneToOne(optional = false)
+    @JoinColumn(name = "job_id")
     private Result result;
 
     @Lob
