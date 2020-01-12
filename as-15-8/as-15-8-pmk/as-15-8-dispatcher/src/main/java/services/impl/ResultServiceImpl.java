@@ -148,9 +148,11 @@ public class ResultServiceImpl implements ResultService {
 
             if(analysisResult.getCheckResult().equals(CheckUnitJobResult.INTERNAL_ERROR)) {
                 result.setCheckType(CheckType.ERROR);
+                saveResult(result);
                 saveResultAsError(result, service.getErrorText(analysisResult));
             } else {
                 result.setCheckType(service.getCheckType());
+                saveResult(result);
                 DetailResult detailResult = service.createDetails(result, analysisResult);
                 try {
                     entityManager.persist(detailResult);
@@ -201,6 +203,14 @@ public class ResultServiceImpl implements ResultService {
         return notFinishedJobsCount > 0 ? ExecutionStatus.RUNNING : ExecutionStatus.FINISHED;
     }
 
+    private void saveResult(Result result){
+        try {
+            entityManager.persist(result);
+        } catch (Exception ex){
+            entityManager.merge(result);
+        }
+    }
+
     @Override
     @Transactional
     public Result updateJobStatus(Arrangement arrangement, Long jobId, CheckUnitResult checkUnitResult, CheckUnitJobResult status, String description) {
@@ -217,13 +227,10 @@ public class ResultServiceImpl implements ResultService {
 
         if(status == CheckUnitJobResult.INTERNAL_ERROR || status == CheckUnitJobResult.TIMEOUT_ERROR) {
             result.setCheckType(CheckType.ERROR);
+            saveResult(result);
             saveResultAsError(result, description);
         } else {
-            try{
-                entityManager.persist(result);
-            } catch (Exception ex){
-                entityManager.merge(result);
-            }
+            saveResult(result);
         }
         return result;
     }
