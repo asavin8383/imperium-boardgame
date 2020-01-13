@@ -4,6 +4,7 @@ import analysis.AnalysisResult;
 import analysis.CheckUnitResult;
 import checkUnits.CheckUnitType;
 import enums.CheckUnitJobResult;
+import enums.SortingDirection;
 import model.Arrangement;
 import model.Result;
 import org.springframework.data.domain.Page;
@@ -17,11 +18,13 @@ public interface ResultService {
 
     Result updateJobStatus(Arrangement arrangement, Long jobId, CheckUnitResult checkUnitResult, CheckUnitJobResult status, String description);
 
-    Page<CheckUnitResult> getArrangementResults(
+    Page<Result> getArrangementResults(
             Long arrangementId,
             List<CheckUnitJobResult> checkUnitJobResults,
             List<CheckUnitType> checkUnitTypes,
             String query,
+            SortingDirection sortingDirection,
+            String sortingColumn,
             Pageable pageable);
 
     long getResultsCount(Long arrangementId);

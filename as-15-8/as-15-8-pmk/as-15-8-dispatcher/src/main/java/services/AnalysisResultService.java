@@ -19,11 +19,11 @@ public interface AnalysisResultService<T> {
 
 	/**
 	 * Метод обработки результатов анализа проверок запрещенных ресурсов
-	 * @param analysisResult Результат анализа проверок запрещенных ресурсов
+	 * @param checkUnitResult Результат анализа проверок запрещенных ресурсов
 	 * @return
 	 */
-	DetailResult createDetails(Result result, T analysisResult);
+	DetailResult createDetails(Result result, T checkUnitResult);
 
-	String getErrorText(T analysisResult);
+	String getErrorText(T checkUnitResult);
 	
 }

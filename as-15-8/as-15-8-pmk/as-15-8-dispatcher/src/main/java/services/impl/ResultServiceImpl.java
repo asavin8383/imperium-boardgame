@@ -9,11 +9,14 @@ import checkUnits.CheckUnitType;
 import enums.ArrangementEvents;
 import enums.CheckUnitJobResult;
 import enums.ErdiStatus;
+import enums.SortingDirection;
 import exceptions.AS_15_8_DispatcherException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import model.*;
-import model.enums.CheckType;
+import model.Arrangement;
+import model.DetailResult;
+import model.Result;
+import model.ResultScreenShot;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
@@ -41,6 +44,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Spliterator;
 import java.util.Spliterators;
@@ -135,28 +139,12 @@ public class ResultServiceImpl implements ResultService {
     @Transactional
     public void saveJobResult(Arrangement arrangement, Long jobId, AnalysisResult analysisResult) {
         try{
-            Result result = new Result();
-            AnalysisResultService<? super AnalysisResult> service = AnalysisResultServiceFactory.getService(analysisResult.getClass());
-            result.setArrangement(arrangement);
-            result.setJobId(jobId);
-            result.setErdiId(analysisResult.getCheckUnit().getContentId());
-            result.setResult(checkErdiStatus(result.getErdiId(), analysisResult.getCheckResult()));
-            result.setCheckUnitType(analysisResult.getCheckUnit().getType());
-            result.setCheckUnitValue(analysisResult.getCheckUnit().getValue());
+            AnalysisResultService<? super CheckUnitResult> service = AnalysisResultServiceFactory.getService(analysisResult.getClass());
+            Result result = createResult(jobId, analysisResult, service);
+            save(result);
+            DetailResult detailResult = service.createDetails(result, analysisResult);
+            save(detailResult);
 
-            result.setStartDate(LocalDateTime.ofInstant(analysisResult.getStartTime().toInstant(), ZoneId.systemDefault()));
-            result.setEndDate(LocalDateTime.ofInstant(analysisResult.getEndTime().toInstant(), ZoneId.systemDefault()));
-
-            if(analysisResult.getCheckResult().equals(CheckUnitJobResult.INTERNAL_ERROR)) {
-                result.setCheckType(CheckType.ERROR);
-                save(result);
-                saveResultAsError(result, service.getErrorText(analysisResult));
-            } else {
-                result.setCheckType(service.getCheckType());
-                save(result);
-                DetailResult detailResult = service.createDetails(result, analysisResult);
-                save(detailResult);
-            }
             if((analysisResult.getScreenshot() != null && analysisResult.getScreenshot().length > 0) ||
                     (analysisResult.getEtalonScreenshot() != null && analysisResult.getEtalonScreenshot().length > 0)){
                 ResultScreenShot resultScreenShot = new ResultScreenShot();
@@ -187,32 +175,15 @@ public class ResultServiceImpl implements ResultService {
     @Override
     @Transactional
     public Result updateJobStatus(Arrangement arrangement, Long jobId, CheckUnitResult checkUnitResult, CheckUnitJobResult status, String description) {
-        Result result = new Result();
-        result.setArrangement(arrangement);
-        result.setJobId(jobId);
-        result.setErdiId(checkUnitResult.getCheckUnit().getContentId());
-        result.setResult(checkErdiStatus(checkUnitResult.getCheckUnit().getContentId(), status));
-        result.setCheckUnitType(checkUnitResult.getCheckUnit().getType());
-        result.setCheckUnitValue(checkUnitResult.getCheckUnit().getValue());
-
-        result.setStartDate(LocalDateTime.ofInstant(checkUnitResult.getStartTime().toInstant(), ZoneId.systemDefault()));
-        result.setEndDate(LocalDateTime.ofInstant(checkUnitResult.getEndTime().toInstant(), ZoneId.systemDefault()));
+        AnalysisResultService<? super CheckUnitResult> service = AnalysisResultServiceFactory.getService(checkUnitResult.getClass());
+        Result result = createResult(jobId, checkUnitResult, service);
+        save(result);
 
         if(status == CheckUnitJobResult.INTERNAL_ERROR || status == CheckUnitJobResult.TIMEOUT_ERROR) {
-            result.setCheckType(CheckType.ERROR);
-            save(result);
-            saveResultAsError(result, description);
-        } else {
-            save(result);
+            DetailResult detailResult = service.createDetails(result, checkUnitResult);
+            save(detailResult);
         }
         return result;
-    }
-
-    private void saveResultAsError(Result result, String exText) {
-        ErrorDetailResult errorDetailResult = new ErrorDetailResult();
-        errorDetailResult.setResult(result);
-        errorDetailResult.setError(exText);
-        save(errorDetailResult);
     }
 
     private CheckUnitJobResult checkErdiStatus(Long contentId, CheckUnitJobResult status){
@@ -223,35 +194,31 @@ public class ResultServiceImpl implements ResultService {
     }
 
     @Override
-    public Page<CheckUnitResult> getArrangementResults(
+    public Page<Result> getArrangementResults(
             Long arrangementId,
             List<CheckUnitJobResult> checkUnitJobResults,
             List<CheckUnitType> checkUnitTypes,
             String query,
+            SortingDirection sortingDirection,
+            String sortingColumn,
             Pageable pageable) {
+
+        Comparator<KeyValue<CheckUnitKey, CheckUnitResult>> checkUnitResultComparator = createResultsComparator(sortingColumn);
+        if(sortingDirection.equals(SortingDirection.DESC))
+            checkUnitResultComparator = checkUnitResultComparator.reversed();
+
         ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store = getResultsKeyValueStore();
         KeyValueIterator<CheckUnitKey, CheckUnitResult> resultsIterator = getArrangementResultsIterator(store, arrangementId);
-        List<CheckUnitResult> results = StreamSupport
-                .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), true)
-                .filter(kv -> {
-                    boolean notFiltered = true;
-                    if(checkUnitJobResults != null && checkUnitJobResults.size() > 0 &&
-                            !checkUnitJobResults.contains(kv.value.getCheckResult())
-                    )
-                        notFiltered = false;
-                    if(checkUnitTypes != null && checkUnitTypes.size() > 0 &&
-                            !checkUnitTypes.contains(kv.value.getCheckUnit().getType())
-                    )
-                        notFiltered = false;
-                    if(Strings.isNotEmpty(query) &&
-                            !kv.value.getCheckResult().name().toLowerCase().contains(query.toLowerCase()) &&
-                            !kv.value.getCheckUnit().getType().name().toLowerCase().contains(query.toLowerCase()) &&
-                            !kv.value.getCheckUnit().getValue().toLowerCase().contains(query.toLowerCase())
-                    )
-                        notFiltered = false;
-                    return notFiltered;
+        List<Result> results = StreamSupport
+                .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), false)
+                .filter(kv -> filterResults(kv.value, checkUnitJobResults, checkUnitTypes, query))
+                .sorted(checkUnitResultComparator)
+                .skip(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .map(kv -> {
+                    AnalysisResultService<? super CheckUnitResult> service = AnalysisResultServiceFactory.getService(kv.value.getClass());
+                    return createResult(kv.key.getJobId(), kv.value, service);
                 })
-                .map(kv -> kv.value)
                 .collect(Collectors.toList());
         return new PageImpl<>(results, pageable, results.size());
     }
@@ -302,6 +269,59 @@ public class ResultServiceImpl implements ResultService {
             entityManager.persist(entity);
         } catch (Exception ex){
             entityManager.merge(entity);
+        }
+    }
+
+    private Result createResult(Long jobId, CheckUnitResult checkUnitResult, AnalysisResultService<? super CheckUnitResult> service){
+        Result result = new Result();
+        result.setJobId(jobId);
+        result.setErdiId(checkUnitResult.getCheckUnit().getContentId());
+        result.setResult(checkErdiStatus(result.getErdiId(), checkUnitResult.getCheckResult()));
+        result.setCheckUnitType(checkUnitResult.getCheckUnit().getType());
+        result.setCheckUnitValue(checkUnitResult.getCheckUnit().getValue());
+
+        result.setStartDate(LocalDateTime.ofInstant(checkUnitResult.getStartTime().toInstant(), ZoneId.systemDefault()));
+        result.setEndDate(LocalDateTime.ofInstant(checkUnitResult.getEndTime().toInstant(), ZoneId.systemDefault()));
+        result.setCheckType(service.getCheckType());
+        return result;
+    }
+
+    private boolean filterResults(
+            CheckUnitResult checkUnitResult,
+            List<CheckUnitJobResult> checkUnitJobResults,
+            List<CheckUnitType> checkUnitTypes,
+            String query) {
+
+        boolean notFiltered = true;
+        if(checkUnitJobResults != null && checkUnitJobResults.size() > 0 &&
+                !checkUnitJobResults.contains(checkUnitResult.getCheckResult())
+        )
+            notFiltered = false;
+        if(checkUnitTypes != null && checkUnitTypes.size() > 0 &&
+                !checkUnitTypes.contains(checkUnitResult.getCheckUnit().getType())
+        )
+            notFiltered = false;
+        if(Strings.isNotEmpty(query) &&
+                !checkUnitResult.getCheckResult().name().toLowerCase().contains(query.toLowerCase()) &&
+                !checkUnitResult.getCheckUnit().getType().name().toLowerCase().contains(query.toLowerCase()) &&
+                !checkUnitResult.getCheckUnit().getValue().toLowerCase().contains(query.toLowerCase())
+        )
+            notFiltered = false;
+        return notFiltered;
+    }
+
+    private Comparator<KeyValue<CheckUnitKey, CheckUnitResult>> createResultsComparator(String columnName) {
+        switch (columnName){
+            case "checkUnitType":
+                return Comparator.comparing((KeyValue<CheckUnitKey, CheckUnitResult> kv) -> kv.value.getCheckUnit().getType());
+            case "checkUnitValue":
+                return Comparator.comparing((KeyValue<CheckUnitKey, CheckUnitResult> kv) -> kv.value.getCheckUnit().getValue());
+            case "result":
+                return Comparator.comparing((KeyValue<CheckUnitKey, CheckUnitResult> kv) -> kv.value.getCheckResult());
+            case "startDate":
+                return Comparator.comparing((KeyValue<CheckUnitKey, CheckUnitResult> kv) -> kv.value.getStartTime());
+            default:
+                return Comparator.comparing((KeyValue<CheckUnitKey, CheckUnitResult> kv) -> kv.value.getEndTime());
         }
     }
 }

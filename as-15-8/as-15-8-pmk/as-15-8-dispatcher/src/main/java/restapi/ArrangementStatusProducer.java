@@ -43,6 +43,7 @@ public class ArrangementStatusProducer {
 
     public void sendArrangementStatusMessage(ArrangementStatusNotification arrangementStatusNotification){
         Long arrangementId = arrangementStatusNotification.getArrangementId();
+        //TODO Переделать смену статуса с параллельного на последовательный
         sendToPPT(arrangementStatusNotification);
         sendToPPM(arrangementId);
         finishArrangement(arrangementId);

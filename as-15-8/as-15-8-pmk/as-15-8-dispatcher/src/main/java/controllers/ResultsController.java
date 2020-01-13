@@ -6,27 +6,20 @@ import analysis.NMapAnalysisJobResult;
 import checkUnits.CheckUnitType;
 import controllers.helpers.SortingHelper;
 import enums.CheckUnitJobResult;
-import enums.ExecutionStatus;
 import enums.SortingDirection;
-import exceptions.AS_15_8_DispatcherException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import model.*;
-import model.enums.UserResult;
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import repositories.*;
 import services.ResultService;
 
-import java.util.*;
+import java.util.List;
 
 /**
  * Creation date: 29.05.2019
@@ -61,6 +54,8 @@ public class ResultsController {
                 checkUnitJobResults,
                 checkUnitTypes,
                 query,
+                sortingDirection,
+                sortingColumn,
                 pageable);
     }
 
