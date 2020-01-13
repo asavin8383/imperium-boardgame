@@ -9,6 +9,7 @@ import enums.CheckUnitJobResult;
 import enums.SortingDirection;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import model.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -37,7 +38,7 @@ public class ResultsController {
 
     @PreAuthorize("hasRole('ROLE_VIEW_RESULT')")
     @GetMapping
-    public Page<CheckUnitResult> findList(
+    public Page<Result> findList(
             @RequestParam Long arrangementId,
             @RequestParam(required = false) List<CheckUnitJobResult> checkUnitJobResults,
             @RequestParam(required = false) List<CheckUnitType> checkUnitTypes,
