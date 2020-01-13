@@ -17,17 +17,4 @@ public interface ResultService {
     void saveJobResult(Arrangement arrangement, Long jobId, AnalysisResult result);
 
     Result updateJobStatus(Arrangement arrangement, Long jobId, CheckUnitResult checkUnitResult, CheckUnitJobResult status, String description);
-
-    Page<Result> getArrangementResults(
-            Long arrangementId,
-            List<CheckUnitJobResult> checkUnitJobResults,
-            List<CheckUnitType> checkUnitTypes,
-            String query,
-            SortingDirection sortingDirection,
-            String sortingColumn,
-            Pageable pageable);
-
-    long getResultsCount(Long arrangementId);
-
-    CheckUnitResult getArrangementResult(Long arrangementId, Long resultId);
 }

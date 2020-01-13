@@ -18,7 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import services.ResultService;
+import services.ResultsKafkaService;
 
 import java.util.List;
 
@@ -34,7 +34,7 @@ import java.util.List;
 @Slf4j
 public class ResultsController {
 
-    private final ResultService resultService;
+    private final ResultsKafkaService resultService;
 
     @PreAuthorize("hasRole('ROLE_VIEW_RESULT')")
     @GetMapping

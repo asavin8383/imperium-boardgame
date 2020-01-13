@@ -5,12 +5,8 @@ import analysis.CheckUnitResult;
 import analysis.CheckUnitStatusNotification;
 import arrangement.ArrangementStatusNotification;
 import checkUnits.CheckUnitKey;
-import checkUnits.CheckUnitType;
 import enums.ArrangementEvents;
 import enums.CheckUnitJobResult;
-import enums.ErdiStatus;
-import enums.SortingDirection;
-import exceptions.AS_15_8_DispatcherException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Arrangement;
@@ -19,15 +15,8 @@ import model.Result;
 import model.ResultScreenShot;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.state.KeyValueIterator;
-import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.stream.binder.kafka.streams.InteractiveQueryService;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,19 +27,13 @@ import restapi.ErdiChecker;
 import services.AnalysisResultService;
 import services.AnalysisResultServiceFactory;
 import services.ResultService;
+import services.ResultsKafkaService;
 
 import javax.persistence.EntityManager;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Spliterator;
-import java.util.Spliterators;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Service
 @RequiredArgsConstructor(onConstructor_={@Autowired})
@@ -58,10 +41,7 @@ import java.util.stream.StreamSupport;
 @Transactional
 public class ResultServiceImpl implements ResultService {
 
-    @Value("${spring.cloud.stream.bindings.results_table.destination}")
-    private String resultsTableName;
-
-    private final InteractiveQueryService interactiveQueryService;
+    private final ResultsKafkaService resultsKafkaService;
 
     private final ArrangementRepo arrangementRepo;
     private final ResultRepo resultRepo;
@@ -72,20 +52,19 @@ public class ResultServiceImpl implements ResultService {
     @Scheduled(cron = "${results.save.schedule}")
     public void saveResults(){
         try{
-            final ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store =
-                    interactiveQueryService.getQueryableStore(
-                            resultsTableName,
-                            QueryableStoreTypes.keyValueStore()
-                    );
-            if(store == null)
+            ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store;
+            try {
+                store = resultsKafkaService.getResultsKeyValueStore();
+            } catch (Exception ex) {
                 return;
+            }
             List<Arrangement> runningArrangements = arrangementRepo.findRunning();
             for(Arrangement arrangement : runningArrangements){
                 AtomicInteger count = new AtomicInteger();
-                getArrangementResultsIterator(store, arrangement.getId()).forEachRemaining(obj -> count.getAndIncrement());
+                resultsKafkaService.getArrangementResultsIterator(store, arrangement.getId()).forEachRemaining(obj -> count.getAndIncrement());
 
                 if(arrangement.getCheckUnitsCount() == count.longValue()) {
-                    KeyValueIterator<CheckUnitKey, CheckUnitResult> resultsIterator = getArrangementResultsIterator(store, arrangement.getId());
+                    KeyValueIterator<CheckUnitKey, CheckUnitResult> resultsIterator = resultsKafkaService.getArrangementResultsIterator(store, arrangement.getId());
                     while (resultsIterator.hasNext()) {
                         KeyValue<CheckUnitKey, CheckUnitResult> result = resultsIterator.next();
                         CheckUnitKey resultKey = result.key;
@@ -140,7 +119,8 @@ public class ResultServiceImpl implements ResultService {
     public void saveJobResult(Arrangement arrangement, Long jobId, AnalysisResult analysisResult) {
         try{
             AnalysisResultService<? super CheckUnitResult> service = AnalysisResultServiceFactory.getService(analysisResult.getClass());
-            Result result = createResult(jobId, analysisResult, service);
+            Result result = resultsKafkaService.createResult(jobId, analysisResult, service);
+            result.setArrangement(arrangement);
             save(result);
             DetailResult detailResult = service.createDetails(result, analysisResult);
             save(detailResult);
@@ -176,7 +156,8 @@ public class ResultServiceImpl implements ResultService {
     @Transactional
     public Result updateJobStatus(Arrangement arrangement, Long jobId, CheckUnitResult checkUnitResult, CheckUnitJobResult status, String description) {
         AnalysisResultService<? super CheckUnitResult> service = AnalysisResultServiceFactory.getService(checkUnitResult.getClass());
-        Result result = createResult(jobId, checkUnitResult, service);
+        Result result = resultsKafkaService.createResult(jobId, checkUnitResult, service);
+        result.setArrangement(arrangement);
         save(result);
 
         if(status == CheckUnitJobResult.INTERNAL_ERROR || status == CheckUnitJobResult.TIMEOUT_ERROR) {
@@ -184,84 +165,6 @@ public class ResultServiceImpl implements ResultService {
             save(detailResult);
         }
         return result;
-    }
-
-    private CheckUnitJobResult checkErdiStatus(Long contentId, CheckUnitJobResult status){
-        if(erdiChecker.checkErdiStatus(contentId).equals(ErdiStatus.EXCLUDED))
-            return CheckUnitJobResult.EXCLUDED;
-        else
-            return status;
-    }
-
-    @Override
-    public Page<Result> getArrangementResults(
-            Long arrangementId,
-            List<CheckUnitJobResult> checkUnitJobResults,
-            List<CheckUnitType> checkUnitTypes,
-            String query,
-            SortingDirection sortingDirection,
-            String sortingColumn,
-            Pageable pageable) {
-
-        Comparator<KeyValue<CheckUnitKey, CheckUnitResult>> checkUnitResultComparator = createResultsComparator(sortingColumn);
-        if(sortingDirection.equals(SortingDirection.DESC))
-            checkUnitResultComparator = checkUnitResultComparator.reversed();
-
-        ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store = getResultsKeyValueStore();
-        KeyValueIterator<CheckUnitKey, CheckUnitResult> resultsIterator = getArrangementResultsIterator(store, arrangementId);
-        List<Result> results = StreamSupport
-                .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), false)
-                .filter(kv -> filterResults(kv.value, checkUnitJobResults, checkUnitTypes, query))
-                .sorted(checkUnitResultComparator)
-                .skip(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .map(kv -> {
-                    AnalysisResultService<? super CheckUnitResult> service = AnalysisResultServiceFactory.getService(kv.value.getClass());
-                    return createResult(kv.key.getJobId(), kv.value, service);
-                })
-                .collect(Collectors.toList());
-        return new PageImpl<>(results, pageable, results.size());
-    }
-
-    @Override
-    public CheckUnitResult getArrangementResult(Long arrangementId, Long resultId) {
-        ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store = getResultsKeyValueStore();
-        return getArrangementResult(store, arrangementId, resultId);
-    }
-
-    @Override
-    public long getResultsCount(Long arrangementId) {
-        ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store = getResultsKeyValueStore();
-        return store.approximateNumEntries();
-        /*KeyValueIterator<CheckUnitKey, CheckUnitResult> resultsIterator = getArrangementResultsIterator(store, arrangementId);
-        return countIteratorSize(resultsIterator);*/
-    }
-
-    private KeyValueIterator<CheckUnitKey, CheckUnitResult> getArrangementResultsIterator(ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store, Long arrangementId) {
-        return store.range(
-                new CheckUnitKey(arrangementId, Long.MIN_VALUE),
-                new CheckUnitKey(arrangementId, Long.MAX_VALUE)
-        );
-    }
-
-    private CheckUnitResult getArrangementResult(ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store, Long arrangementId, Long jobId) {
-        return store.get(new CheckUnitKey(arrangementId, Long.MIN_VALUE));
-    }
-
-    private int countIteratorSize(KeyValueIterator<CheckUnitKey, CheckUnitResult> resultsIterator) {
-        AtomicInteger count = new AtomicInteger();
-        resultsIterator.forEachRemaining( s-> count.getAndIncrement());
-        return count.get();
-    }
-
-    private ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> getResultsKeyValueStore() {
-        ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store = interactiveQueryService.getQueryableStore(
-                resultsTableName,
-                QueryableStoreTypes.keyValueStore()
-        );
-        if(store == null)
-            throw new AS_15_8_DispatcherException("Ошибка чтения store из kafka!");
-        return store;
     }
 
     private void save(Object entity){
@@ -272,56 +175,4 @@ public class ResultServiceImpl implements ResultService {
         }
     }
 
-    private Result createResult(Long jobId, CheckUnitResult checkUnitResult, AnalysisResultService<? super CheckUnitResult> service){
-        Result result = new Result();
-        result.setJobId(jobId);
-        result.setErdiId(checkUnitResult.getCheckUnit().getContentId());
-        result.setResult(checkErdiStatus(result.getErdiId(), checkUnitResult.getCheckResult()));
-        result.setCheckUnitType(checkUnitResult.getCheckUnit().getType());
-        result.setCheckUnitValue(checkUnitResult.getCheckUnit().getValue());
-
-        result.setStartDate(LocalDateTime.ofInstant(checkUnitResult.getStartTime().toInstant(), ZoneId.systemDefault()));
-        result.setEndDate(LocalDateTime.ofInstant(checkUnitResult.getEndTime().toInstant(), ZoneId.systemDefault()));
-        result.setCheckType(service.getCheckType());
-        return result;
-    }
-
-    private boolean filterResults(
-            CheckUnitResult checkUnitResult,
-            List<CheckUnitJobResult> checkUnitJobResults,
-            List<CheckUnitType> checkUnitTypes,
-            String query) {
-
-        boolean notFiltered = true;
-        if(checkUnitJobResults != null && checkUnitJobResults.size() > 0 &&
-                !checkUnitJobResults.contains(checkUnitResult.getCheckResult())
-        )
-            notFiltered = false;
-        if(checkUnitTypes != null && checkUnitTypes.size() > 0 &&
-                !checkUnitTypes.contains(checkUnitResult.getCheckUnit().getType())
-        )
-            notFiltered = false;
-        if(Strings.isNotEmpty(query) &&
-                !checkUnitResult.getCheckResult().name().toLowerCase().contains(query.toLowerCase()) &&
-                !checkUnitResult.getCheckUnit().getType().name().toLowerCase().contains(query.toLowerCase()) &&
-                !checkUnitResult.getCheckUnit().getValue().toLowerCase().contains(query.toLowerCase())
-        )
-            notFiltered = false;
-        return notFiltered;
-    }
-
-    private Comparator<KeyValue<CheckUnitKey, CheckUnitResult>> createResultsComparator(String columnName) {
-        switch (columnName){
-            case "checkUnitType":
-                return Comparator.comparing((KeyValue<CheckUnitKey, CheckUnitResult> kv) -> kv.value.getCheckUnit().getType());
-            case "checkUnitValue":
-                return Comparator.comparing((KeyValue<CheckUnitKey, CheckUnitResult> kv) -> kv.value.getCheckUnit().getValue());
-            case "result":
-                return Comparator.comparing((KeyValue<CheckUnitKey, CheckUnitResult> kv) -> kv.value.getCheckResult());
-            case "startDate":
-                return Comparator.comparing((KeyValue<CheckUnitKey, CheckUnitResult> kv) -> kv.value.getStartTime());
-            default:
-                return Comparator.comparing((KeyValue<CheckUnitKey, CheckUnitResult> kv) -> kv.value.getEndTime());
-        }
-    }
 }
