@@ -20,10 +20,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import repositories.ArrangementRepo;
-import repositories.ScheduleCheckUnitRepo;
 import repositories.ScheduleRepo;
 import restapi.ArrangementStatusUploader;
-import restapi.pmk.ResultsDownloader;
 import restapi.pod.DomainMaskUploader;
 import services.ScheduleService;
 import webClients.PptWebClient;
@@ -33,7 +31,6 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -54,8 +51,6 @@ public class ArrangementController {
     private final DomainMaskUploader domainMaskUploader;
     private final ScheduleRepo scheduleRepo;
     private final ScheduleService scheduleService;
-    private final ScheduleCheckUnitRepo scheduleCheckUnitRepo;
-    private final ResultsDownloader resultsDownloader;
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @Transactional

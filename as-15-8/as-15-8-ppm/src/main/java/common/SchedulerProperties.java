@@ -23,6 +23,7 @@ public class SchedulerProperties {
 
     private Map<String, Map<CheckMethod, Long>> processingTimes = new HashMap<>();
     private Map<String, Map<String, Map<String, String>>> robotsSla = new HashMap<>();
+    private Map<String, String> robotsTraffic = new HashMap<>();
 
     public long getProcessingTime(String accessTool, CheckUnitType checkUnitType){
         if(processingTimes.containsKey(accessTool)){
@@ -48,6 +49,17 @@ public class SchedulerProperties {
         } catch (Exception  e) {
             if (!(e instanceof NullPointerException))
                 log.warn("Ошибка извлечения конфига robots_sla", e);
+            return Optional.empty();
+        }
+    }
+
+    public Optional<Long> getRobotTrafficPerCheckUnit(String accessTool){
+        try {
+            String traffic = robotsTraffic.get(accessTool);
+            return Optional.of(Long.valueOf(traffic));
+        } catch (Exception e) {
+            if (!(e instanceof NullPointerException))
+                log.warn("Ошибка извлечения конфига processing_time.traffic per_check_unit", e);
             return Optional.empty();
         }
     }

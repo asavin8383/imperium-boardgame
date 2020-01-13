@@ -35,4 +35,9 @@ public interface ArrangementRepo extends JpaRepository<Arrangement, Long> {
             "left join a.schedulePeriodArrangements spa " +
             "where spa.id is null")
     List<Arrangement> findAllAvailableArrangements();
+
+    @Query("select a " +
+            "from Arrangement a " +
+            "where a.accessTool = :accessTool")
+    List<Arrangement> findAllByAccessTool(@Param("accessTool") String accessTool);
 }

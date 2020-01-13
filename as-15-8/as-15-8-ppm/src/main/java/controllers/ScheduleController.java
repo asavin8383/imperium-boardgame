@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import common.SchedulerProperties;
 import enums.SortingDirection;
 import exceptions.AS_15_8_PPM_Exception;
 import helpers.SortingHelper;
@@ -23,18 +24,21 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import repositories.ArrangementRepo;
 import repositories.ScheduleRepo;
+import robots.SlaPeriod;
+import robots.SlaType;
 import services.ArrangementService;
 import services.ScheduleService;
 
 import javax.annotation.PostConstruct;
+import javax.validation.constraints.NotNull;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.SortedSet;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 /**
@@ -52,6 +56,8 @@ public class ScheduleController {
     private final ScheduleService scheduleService;
     private final ScheduleRepo scheduleRepo;
     private ObjectMapper mapper;
+    private final SchedulerProperties schedulerProperties;
+    private final ArrangementRepo arrangementRepo;
 
     @PostConstruct
     private void init(){
@@ -158,6 +164,7 @@ public class ScheduleController {
             if(scheduleData.has("plannedDate")) {
                 LocalDate plannedDate = LocalDate.parse(scheduleData.get("plannedDate").asText(), DateTimeFormatter.ISO_DATE);
                 schedule.setPlannedDate(plannedDate);
+                analyzeRobotTrafficLimits(schedule);
             }
             if(!scheduleData.has("maxWorkersCount")) {
                 throw new AS_15_8_PPM_Exception("Ошибка планирования расписания. Не задано количество обработчиков");
@@ -215,4 +222,98 @@ public class ScheduleController {
         private LocalTime plannedEndTime;
     }
 
+    private String analyzeRobotTrafficLimits(Schedule schedule) {
+        try {
+            String description = "";
+            getAccessToolArrangementsMap(schedule).entrySet().stream().forEach(entry -> {
+                @NotNull String accessTool = entry.getKey();
+                List<Arrangement> arrangements = entry.getValue();
+
+                if (isRealTrafficGreaterThanSlaConfig(arrangements, schedule, SlaPeriod.DAY))
+                    description.concat("Превышение трафика за день для " + accessTool + ";  ");
+                if (isRealTrafficGreaterThanSlaConfig(arrangements, schedule, SlaPeriod.MONTH))
+                    description.concat("Превышение трафика за месяц для " + accessTool + ";  ");
+            });
+            writeDescriptionToDb(schedule, description);
+            return description;
+        } catch (Exception e) {
+            log.warn("Ошибка расчёта превышения трафика согласно SLA " + e);
+        }
+        return null;
+    }
+
+    private Map<@NotNull String, List<Arrangement>> getAccessToolArrangementsMap(Schedule schedule) {
+        List<Arrangement> arrangementsOfSchedule = arrangementRepo.findAllBySchedule(schedule.getId());
+        return arrangementsOfSchedule.stream()
+                .collect(Collectors.groupingBy(Arrangement::getAccessTool));
+    }
+
+    private boolean isRealTrafficGreaterThanSlaConfig (List<Arrangement> arrangements, Schedule schedule, SlaPeriod slaPeriod) {
+        String accessTool = getAccessTool(arrangements);
+        Long realTraffic = calculateRealTraffic(arrangements, schedule, slaPeriod);
+        Optional<Long> trafficInSlaPeriod = getTrafficInPeriodFromSla(accessTool, slaPeriod);
+        if (!trafficInSlaPeriod.isPresent()) {
+            log.warn("Ошибка расчёта превышения трафика согласно SLA trafficInSlaPeriod is null");
+            return false;
+        }
+
+        if (realTraffic > trafficInSlaPeriod.get())
+            return true;
+        else return false;
+    }
+
+    private Optional<Long> getTrafficInPeriodFromSla(String accessTool, SlaPeriod slaPeriod) {
+        Optional<Long> trafficInPeriod = Optional.empty();
+        switch (slaPeriod) {
+            case DAY:
+                trafficInPeriod = schedulerProperties.getRobotSlaCheckUnitsPerDay(SlaType.TRAFFIC, accessTool);
+                break;
+            case MONTH:
+                trafficInPeriod = schedulerProperties.getRobotSlaCheckUnitsPerMonth(SlaType.TRAFFIC, accessTool);
+                break;
+        }
+        return trafficInPeriod;
+    }
+
+    private Long calculateRealTraffic(List<Arrangement> arrangements, Schedule schedule, SlaPeriod slaPeriod) {
+        String accessTool = getAccessTool(arrangements);
+
+        Optional<Long> trafficPerCheckUnit = schedulerProperties.getRobotTrafficPerCheckUnit(accessTool);
+        Long checkUnits = getCheckUnitsInPeriod(arrangements, schedule, slaPeriod);
+        Long realTraffic = checkUnits * trafficPerCheckUnit.get();
+        return realTraffic;
+    }
+
+    private String getAccessTool(List<Arrangement> arrangements) {
+        return arrangements.get(0).getAccessTool();
+    }
+
+    private Long getCheckUnitsInPeriod(List<Arrangement> arrangements, Schedule schedule, SlaPeriod slaPeriod) {
+        AtomicLong result = new AtomicLong();
+        arrangements.stream().forEach(arrangement -> {
+            switch (slaPeriod) {
+                case DAY:
+                    if (schedule.getPlannedDate().getDayOfMonth() == LocalDate.now().getDayOfMonth())
+                        result.getAndIncrement();
+                    break;
+                case MONTH:
+                    if (schedule.getPlannedDate().getMonth() == LocalDate.now().getMonth())
+                        result.getAndIncrement();
+                    break;
+            }
+        });
+        return result.get();
+    }
+
+    private void writeDescriptionToDb(Schedule schedule, String description) {
+        /*if (!description.isEmpty()) {
+            schedule.setDescription(description);
+            scheduleRepo.save(schedule);
+        }*/
+    }
+
+    @GetMapping(path = "/test")
+    public String test(@RequestParam("id") Schedule schedule){
+       return analyzeRobotTrafficLimits(schedule);
+    }
 }

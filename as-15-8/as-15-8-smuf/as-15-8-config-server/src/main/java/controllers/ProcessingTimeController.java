@@ -31,6 +31,7 @@ public class ProcessingTimeController {
 
         processingTime.get().setProcessing_time(newProcessingTime.getProcessing_time());
         processingTime.get().setCheck_method(newProcessingTime.getCheck_method());
+        processingTime.get().setTraffic_per_check_unit(newProcessingTime.getTraffic_per_check_unit());
 
         ptRepo.save(processingTime.get());
     }
