@@ -5,10 +5,10 @@ import analysis.CheckUnitResult;
 import analysis.CheckUnitStatusNotification;
 import arrangement.ArrangementStatusNotification;
 import checkUnits.CheckUnitKey;
+import checkUnits.CheckUnitType;
 import enums.ArrangementEvents;
 import enums.CheckUnitJobResult;
 import enums.ErdiStatus;
-import enums.ExecutionStatus;
 import exceptions.AS_15_8_DispatcherException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,9 +18,13 @@ import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.binder.kafka.streams.InteractiveQueryService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,9 +41,12 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 @RequiredArgsConstructor(onConstructor_={@Autowired})
@@ -71,10 +78,10 @@ public class ResultServiceImpl implements ResultService {
             List<Arrangement> runningArrangements = arrangementRepo.findRunning();
             for(Arrangement arrangement : runningArrangements){
                 AtomicInteger count = new AtomicInteger();
-                getArrangementIterator(store, arrangement.getId()).forEachRemaining(obj -> count.getAndIncrement());
+                getArrangementResultsIterator(store, arrangement.getId()).forEachRemaining(obj -> count.getAndIncrement());
 
                 if(arrangement.getCheckUnitsCount() == count.longValue()) {
-                    KeyValueIterator<CheckUnitKey, CheckUnitResult> resultsIterator = getArrangementIterator(store, arrangement.getId());
+                    KeyValueIterator<CheckUnitKey, CheckUnitResult> resultsIterator = getArrangementResultsIterator(store, arrangement.getId());
                     while (resultsIterator.hasNext()) {
                         KeyValue<CheckUnitKey, CheckUnitResult> result = resultsIterator.next();
                         CheckUnitKey resultKey = result.key;
@@ -124,23 +131,16 @@ public class ResultServiceImpl implements ResultService {
         }
     }
 
-    private KeyValueIterator<CheckUnitKey, CheckUnitResult> getArrangementIterator(
-            ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store,
-            Long arrangementId
-    ){
-        return getResultsIterator(store, arrangementId);
-    }
-
     @Override
     @Transactional
-    public Result saveJobResult(Arrangement arrangement, Long jobId, AnalysisResult analysisResult) {
+    public void saveJobResult(Arrangement arrangement, Long jobId, AnalysisResult analysisResult) {
         try{
             Result result = new Result();
             AnalysisResultService<? super AnalysisResult> service = AnalysisResultServiceFactory.getService(analysisResult.getClass());
             result.setArrangement(arrangement);
             result.setJobId(jobId);
             result.setErdiId(analysisResult.getCheckUnit().getContentId());
-            result.setResult(checkStatus(result.getErdiId(), analysisResult.getCheckResult()));
+            result.setResult(checkErdiStatus(result.getErdiId(), analysisResult.getCheckResult()));
             result.setCheckUnitType(analysisResult.getCheckUnit().getType());
             result.setCheckUnitValue(analysisResult.getCheckUnit().getValue());
 
@@ -149,17 +149,13 @@ public class ResultServiceImpl implements ResultService {
 
             if(analysisResult.getCheckResult().equals(CheckUnitJobResult.INTERNAL_ERROR)) {
                 result.setCheckType(CheckType.ERROR);
-                saveResult(result);
+                save(result);
                 saveResultAsError(result, service.getErrorText(analysisResult));
             } else {
                 result.setCheckType(service.getCheckType());
-                saveResult(result);
+                save(result);
                 DetailResult detailResult = service.createDetails(result, analysisResult);
-                try {
-                    entityManager.persist(detailResult);
-                } catch (Exception ex){
-                    entityManager.merge(detailResult);
-                }
+                save(detailResult);
             }
             if((analysisResult.getScreenshot() != null && analysisResult.getScreenshot().length > 0) ||
                     (analysisResult.getEtalonScreenshot() != null && analysisResult.getEtalonScreenshot().length > 0)){
@@ -167,13 +163,8 @@ public class ResultServiceImpl implements ResultService {
                 resultScreenShot.setResult(result);
                 resultScreenShot.setScreenshot(analysisResult.getScreenshot());
                 resultScreenShot.setEtalonScreenshot(analysisResult.getEtalonScreenshot());
-                try {
-                    entityManager.persist(resultScreenShot);
-                } catch (Exception ex){
-                    entityManager.merge(resultScreenShot);
-                }
+                save(resultScreenShot);
             }
-            return result;
         } catch (Exception ex) {
             try {
                 log.error("Ошибка при обработке сообщения с анализом результатов проверки: " + jobId + ", " + analysisResult.getCheckUnit().getValue(), ex);
@@ -191,25 +182,6 @@ public class ResultServiceImpl implements ResultService {
                 log.error("Ошибка при сохранении ошибочной обработки сообщения с анализом результатов проверки: " + jobId + ", " + analysisResult.getCheckUnit().getValue(), newEx);
             }
         }
-        return null;
-    }
-
-    @Override
-    public ExecutionStatus checkArrangementStatus(Long arrangementID) {
-        Long notFinishedJobsCount = resultRepo.countByResultNullOrResultIn(arrangementID,
-                Arrays.asList(
-                        CheckUnitJobResult.PLANNED,
-                        CheckUnitJobResult.RUNNING)
-        );
-        return notFinishedJobsCount > 0 ? ExecutionStatus.RUNNING : ExecutionStatus.FINISHED;
-    }
-
-    private void saveResult(Result result){
-        try {
-            entityManager.persist(result);
-        } catch (Exception ex){
-            entityManager.merge(result);
-        }
     }
 
     @Override
@@ -219,7 +191,7 @@ public class ResultServiceImpl implements ResultService {
         result.setArrangement(arrangement);
         result.setJobId(jobId);
         result.setErdiId(checkUnitResult.getCheckUnit().getContentId());
-        result.setResult(checkStatus(checkUnitResult.getCheckUnit().getContentId(), status));
+        result.setResult(checkErdiStatus(checkUnitResult.getCheckUnit().getContentId(), status));
         result.setCheckUnitType(checkUnitResult.getCheckUnit().getType());
         result.setCheckUnitValue(checkUnitResult.getCheckUnit().getValue());
 
@@ -228,54 +200,94 @@ public class ResultServiceImpl implements ResultService {
 
         if(status == CheckUnitJobResult.INTERNAL_ERROR || status == CheckUnitJobResult.TIMEOUT_ERROR) {
             result.setCheckType(CheckType.ERROR);
-            saveResult(result);
+            save(result);
             saveResultAsError(result, description);
         } else {
-            saveResult(result);
+            save(result);
         }
         return result;
     }
 
     private void saveResultAsError(Result result, String exText) {
         ErrorDetailResult errorDetailResult = new ErrorDetailResult();
-
         errorDetailResult.setResult(result);
-
         errorDetailResult.setError(exText);
-        try{
-            entityManager.persist(errorDetailResult);
-        } catch (Exception ex){
-            entityManager.merge(errorDetailResult);
-        }
+        save(errorDetailResult);
     }
 
-    private CheckUnitJobResult checkStatus(Long contentId, CheckUnitJobResult status){
+    private CheckUnitJobResult checkErdiStatus(Long contentId, CheckUnitJobResult status){
         if(erdiChecker.checkErdiStatus(contentId).equals(ErdiStatus.EXCLUDED))
             return CheckUnitJobResult.EXCLUDED;
         else
             return status;
     }
 
-    public void sendNotificationsIfFinished(Long arrangementId) {
-        ExecutionStatus status = checkArrangementStatus(arrangementId);
-        if(status == ExecutionStatus.FINISHED) {
-            log.info("Мероприятие успешно завешено: " + arrangementId);
-            arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(arrangementId, ArrangementEvents.FINISH));
-        }
-    }
-
-    public ExecutionStatus getArrangementExecutionStatus(Long arrangementId) {
-        return arrangementStatusProducer.getArrangementExcecutionStatus(arrangementId);
+    @Override
+    public Page<CheckUnitResult> getArrangementResults(
+            Long arrangementId,
+            List<CheckUnitJobResult> checkUnitJobResults,
+            List<CheckUnitType> checkUnitTypes,
+            String query,
+            Pageable pageable) {
+        ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store = getResultsKeyValueStore();
+        KeyValueIterator<CheckUnitKey, CheckUnitResult> resultsIterator = getArrangementResultsIterator(store, arrangementId);
+        List<CheckUnitResult> results = StreamSupport
+                .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), true)
+                .filter(kv -> {
+                    boolean notFiltered = true;
+                    if(checkUnitJobResults != null && checkUnitJobResults.size() > 0 &&
+                            !checkUnitJobResults.contains(kv.value.getCheckResult())
+                    )
+                        notFiltered = false;
+                    if(checkUnitTypes != null && checkUnitTypes.size() > 0 &&
+                            !checkUnitTypes.contains(kv.value.getCheckUnit().getType())
+                    )
+                        notFiltered = false;
+                    if(Strings.isNotEmpty(query) &&
+                            !kv.value.getCheckResult().name().toLowerCase().contains(query.toLowerCase()) &&
+                            !kv.value.getCheckUnit().getType().name().toLowerCase().contains(query.toLowerCase()) &&
+                            !kv.value.getCheckUnit().getValue().toLowerCase().contains(query.toLowerCase())
+                    )
+                        notFiltered = false;
+                    return notFiltered;
+                })
+                .map(kv -> kv.value)
+                .collect(Collectors.toList());
+        return new PageImpl<>(results, pageable, results.size());
     }
 
     @Override
-    public int getArrangementsCount(Long id) {
-        ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store = getKeyValueStore();
-        KeyValueIterator<CheckUnitKey, CheckUnitResult> resultsIterator = getResultsIterator(store, id);
-        return countIteratorSize(resultsIterator);
+    public CheckUnitResult getArrangementResult(Long arrangementId, Long resultId) {
+        ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store = getResultsKeyValueStore();
+        return getArrangementResult(store, arrangementId, resultId);
     }
 
-    private ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> getKeyValueStore() {
+    @Override
+    public long getResultsCount(Long arrangementId) {
+        ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store = getResultsKeyValueStore();
+        return store.approximateNumEntries();
+        /*KeyValueIterator<CheckUnitKey, CheckUnitResult> resultsIterator = getArrangementResultsIterator(store, arrangementId);
+        return countIteratorSize(resultsIterator);*/
+    }
+
+    private KeyValueIterator<CheckUnitKey, CheckUnitResult> getArrangementResultsIterator(ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store, Long arrangementId) {
+        return store.range(
+                new CheckUnitKey(arrangementId, Long.MIN_VALUE),
+                new CheckUnitKey(arrangementId, Long.MAX_VALUE)
+        );
+    }
+
+    private CheckUnitResult getArrangementResult(ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store, Long arrangementId, Long jobId) {
+        return store.get(new CheckUnitKey(arrangementId, Long.MIN_VALUE));
+    }
+
+    private int countIteratorSize(KeyValueIterator<CheckUnitKey, CheckUnitResult> resultsIterator) {
+        AtomicInteger count = new AtomicInteger();
+        resultsIterator.forEachRemaining( s-> count.getAndIncrement());
+        return count.get();
+    }
+
+    private ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> getResultsKeyValueStore() {
         ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store = interactiveQueryService.getQueryableStore(
                 resultsTableName,
                 QueryableStoreTypes.keyValueStore()
@@ -285,17 +297,11 @@ public class ResultServiceImpl implements ResultService {
         return store;
     }
 
-    private KeyValueIterator<CheckUnitKey, CheckUnitResult> getResultsIterator(ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store, Long id) {
-        return store.range(
-                new CheckUnitKey(id, Long.MIN_VALUE),
-                new CheckUnitKey(id, Long.MAX_VALUE)
-        );
-    }
-
-    private int countIteratorSize(KeyValueIterator<CheckUnitKey, CheckUnitResult> resultsIterator) {
-        AtomicInteger count = new AtomicInteger();
-        resultsIterator.forEachRemaining( s-> count.getAndIncrement());
-
-        return count.get();
+    private void save(Object entity){
+        try {
+            entityManager.persist(entity);
+        } catch (Exception ex){
+            entityManager.merge(entity);
+        }
     }
 }

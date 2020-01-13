@@ -20,10 +20,10 @@ import repositories.PasdDetailResultRepo;
 import repositories.PsDetailResultRepo;
 
 @RestController
-@RequestMapping(path = "/details", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(path = "/results/protocol/details", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Slf4j
-public class DetailsController {
+public class ProtocolDetailsController {
 
     private final PasdDetailResultRepo pasdDetailResultRepo;
     private final PsDetailResultRepo psDetailResultRepo;
