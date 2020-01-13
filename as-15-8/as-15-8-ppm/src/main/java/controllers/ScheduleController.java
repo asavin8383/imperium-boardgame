@@ -223,6 +223,8 @@ public class ScheduleController {
     }
 
     private String analyzeRobotTrafficLimits(Schedule schedule) {
+        String ROBOT_SLA = "ROBOT_SLA";
+        log.info("Анализ расхода трафика роботом " + ROBOT_SLA);
         try {
             String description = "";
             getAccessToolArrangementsMap(schedule).entrySet().stream().forEach(entry -> {
@@ -237,7 +239,7 @@ public class ScheduleController {
             writeDescriptionToDb(schedule, description);
             return description;
         } catch (Exception e) {
-            log.warn("Ошибка расчёта превышения трафика согласно SLA " + e);
+            log.warn("Ошибка расчёта превышения трафика согласно SLA " + ROBOT_SLA + e);
         }
         return null;
     }
@@ -306,10 +308,11 @@ public class ScheduleController {
     }
 
     private void writeDescriptionToDb(Schedule schedule, String description) {
-        /*if (!description.isEmpty()) {
-            schedule.setDescription(description);
-            scheduleRepo.save(schedule);
-        }*/
+        if (!description.isEmpty()) {
+            log.warn(description + " " + "ROBOT_SLA");
+            /*schedule.setDescription(description);
+            scheduleRepo.save(schedule);*/
+        }
     }
 
     @GetMapping(path = "/test")
