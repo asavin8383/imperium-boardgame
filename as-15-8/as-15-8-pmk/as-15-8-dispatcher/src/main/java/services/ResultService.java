@@ -116,7 +116,6 @@ public class ResultService {
             Result result = resultRepo.findById(jobId).orElse(new Result());
             result.setArrangement(arrangement);
             resultsKafkaService.fillResult(result, jobId, analysisResult, service);
-            log.info("Результат подготовлен к сохранению: " + jobId + ", мероприятие: " + arrangement.getId());
             resultRepo.save(result);
             DetailResult detailResult = service.create(result, analysisResult);
             service.save(detailResult);

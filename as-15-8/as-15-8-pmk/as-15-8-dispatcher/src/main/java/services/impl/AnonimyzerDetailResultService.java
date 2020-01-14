@@ -29,7 +29,7 @@ public class AnonimyzerDetailResultService implements DetailResultService<Anonym
 	@Override
 	public DetailResult create(Result result, AnonymizerAnalysisResult analysisResult) {
 
-		PasdDetailResult pasdDetailResult = new PasdDetailResult();
+		PasdDetailResult pasdDetailResult = pasdDetailResultRepo.findById(result.getJobId()).orElse(new PasdDetailResult());
 
 		pasdDetailResult.setResult(result);
 

@@ -31,7 +31,7 @@ public class NmapDetailResultService implements DetailResultService<NMapAnalysis
 
 	@Override
 	public DetailResult create(Result result, NMapAnalysisJobResult analysisResult) {
-		NmapDetailResult nmapDetailResult = new NmapDetailResult();
+		NmapDetailResult nmapDetailResult = nmapDetailResultRepo.findById(result.getJobId()).orElse(new NmapDetailResult());
 
 		nmapDetailResult.setResult(result);
 
