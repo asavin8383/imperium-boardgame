@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import enums.CheckUnitJobResult;
 import lombok.*;
 
-import java.time.LocalDateTime;
 import java.util.Date;
 
 @Data

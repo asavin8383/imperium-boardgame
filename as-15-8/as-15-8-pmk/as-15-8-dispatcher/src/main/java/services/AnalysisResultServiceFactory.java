@@ -1,23 +1,19 @@
 package services;
 
 
+import analysis.CheckUnitResult;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.PostConstruct;
 import java.lang.reflect.ParameterizedType;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import analysis.AnalysisResult;
-
 /**
  * Фабрика сервисов анализа результатов проверки ПС/ПАСД
  * @author shabalinAI
- * @param <T>
- * @param <T>
  *
  */
 @Service
@@ -25,10 +21,10 @@ public class AnalysisResultServiceFactory {
 
 	/** Список сервисов */
 	@Autowired
-	private List<AnalysisResultService<? extends AnalysisResult>> services;
+	private List<AnalysisResultService<? extends CheckUnitResult>> services;
 	
 	/** Кэш сервисов */
-	private static final Map<Class<? extends AnalysisResult>, AnalysisResultService<? super AnalysisResult>> servicesCache = new HashMap<>();
+	private static final Map<Class<? extends CheckUnitResult>, AnalysisResultService<? super CheckUnitResult>> servicesCache = new HashMap<>();
 	
 	/**
 	 * Метод создания кэша сервисов 
@@ -38,8 +34,8 @@ public class AnalysisResultServiceFactory {
 	public void initServicesCache() {
 		services.forEach(service -> 
 			servicesCache.put(
-				(Class<? extends AnalysisResult>) ((ParameterizedType)service.getClass().getGenericInterfaces()[0]).getActualTypeArguments()[0],
-				(AnalysisResultService<? super AnalysisResult>) service)
+				(Class<? extends CheckUnitResult>) ((ParameterizedType)service.getClass().getGenericInterfaces()[0]).getActualTypeArguments()[0],
+				(AnalysisResultService<? super CheckUnitResult>) service)
 		);
 	}
 	
@@ -48,8 +44,8 @@ public class AnalysisResultServiceFactory {
 	 * @param serviceType Тип сервиса
 	 * @return
 	 */
-	public static AnalysisResultService<? super AnalysisResult> getService(Class<? extends AnalysisResult> serviceType) {
-		AnalysisResultService<? super AnalysisResult> service = servicesCache.get(serviceType);
+	public static AnalysisResultService<? super CheckUnitResult> getService(Class<? extends CheckUnitResult> serviceType) {
+		AnalysisResultService<? super CheckUnitResult> service = servicesCache.get(serviceType);
 		if(service == null) {
 			throw new IllegalArgumentException("Error creating analysis result service! Service for " + serviceType + " is not supported");
 		}
