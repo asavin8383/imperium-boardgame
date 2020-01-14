@@ -4,7 +4,6 @@ import analysis.CheckUnitResult;
 import checkUnits.CheckUnitKey;
 import checkUnits.CheckUnitType;
 import enums.CheckUnitJobResult;
-import enums.ErdiStatus;
 import enums.SortingDirection;
 import exceptions.AS_15_8_DispatcherException;
 import lombok.RequiredArgsConstructor;
@@ -105,8 +104,7 @@ public class ResultsKafkaService {
         Result result = new Result();
         result.setJobId(jobId);
         result.setErdiId(checkUnitResult.getCheckUnit().getContentId());
-        //TODO Перенести в стрим
-       // result.setResult(checkErdiStatus(result.getErdiId(), checkUnitResult.getCheckResult()));
+        result.setResult(checkUnitResult.getCheckResult());
         result.setCheckUnitType(checkUnitResult.getCheckUnit().getType());
         result.setCheckUnitValue(checkUnitResult.getCheckUnit().getValue());
 
@@ -164,11 +162,4 @@ public class ResultsKafkaService {
                 return Comparator.comparing((KeyValue<CheckUnitKey, CheckUnitResult> kv) -> kv.value.getEndTime());
         }
     }
-
-    /*private CheckUnitJobResult checkErdiStatus(Long contentId, CheckUnitJobResult status){
-        if(erdiChecker.checkErdiStatus(contentId).equals(ErdiStatus.EXCLUDED))
-            return CheckUnitJobResult.EXCLUDED;
-        else
-            return status;
-    }*/
 }

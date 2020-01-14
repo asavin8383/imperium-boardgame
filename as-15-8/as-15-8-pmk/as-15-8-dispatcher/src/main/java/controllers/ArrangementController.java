@@ -14,6 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import repositories.ArrangementRepo;
 import services.ResultService;
+import services.ResultsKafkaService;
 
 import java.util.Optional;
 
@@ -26,6 +27,7 @@ public class ArrangementController {
 
     private final ArrangementRepo arrangementRepo;
     private final ResultService resultService;
+    private final ResultsKafkaService resultsKafkaService;
 
     @PostMapping
     public ResponseEntity<?> postUserResultFromPPM(@RequestBody Optional<ArrangementToExecution> arrangementToExecution) {
@@ -51,7 +53,7 @@ public class ArrangementController {
         if (checkUnits == null)
             throw new AS_15_8_DispatcherException("Ошибка расчёта процента выполнения мероприятия. checkUnits is null");
 
-        long arrangementsCount = resultService.getResultsCount(arrangement.get().getId());
+        long arrangementsCount = resultsKafkaService.getResultsCount(arrangement.get().getId());
         return arrangementsCount * 100 / checkUnits;
     }
 }

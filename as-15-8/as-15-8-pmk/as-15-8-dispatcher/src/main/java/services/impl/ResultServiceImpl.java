@@ -23,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 import repositories.ArrangementRepo;
 import repositories.ResultRepo;
 import restapi.ArrangementStatusProducer;
-import restapi.ErdiChecker;
 import services.AnalysisResultService;
 import services.AnalysisResultServiceFactory;
 import services.ResultService;
@@ -36,7 +35,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
-@RequiredArgsConstructor(onConstructor_={@Autowired})
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Slf4j
 @Transactional
 public class ResultServiceImpl implements ResultService {
@@ -45,7 +44,6 @@ public class ResultServiceImpl implements ResultService {
 
     private final ArrangementRepo arrangementRepo;
     private final ResultRepo resultRepo;
-    private final ErdiChecker erdiChecker;
     private final ArrangementStatusProducer arrangementStatusProducer;
     private final EntityManager entityManager;
 
@@ -105,8 +103,9 @@ public class ResultServiceImpl implements ResultService {
                             }
                         }
                     }
-                    log.info("Мероприятие успешно завешено: " + arrangement.getId());
+                    log.info("Мероприятие успешно сохранено в БД: " + arrangement.getId());
                     arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(arrangement.getId(), ArrangementEvents.FINISH));
+                    log.info("Мероприятие успешно завершено: " + arrangement.getId());
                 }
             }
         } catch (Exception ex){
@@ -121,6 +120,7 @@ public class ResultServiceImpl implements ResultService {
             AnalysisResultService<? super CheckUnitResult> service = AnalysisResultServiceFactory.getService(analysisResult.getClass());
             Result result = resultsKafkaService.createResult(jobId, analysisResult, service);
             result.setArrangement(arrangement);
+            log.info("Результат подготовлен к сохранению: " + jobId + ", мероприятие: " + arrangement.getId());
             save(result);
             DetailResult detailResult = service.createDetails(result, analysisResult);
             save(detailResult);
