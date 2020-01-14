@@ -56,6 +56,7 @@ spring:
           lob.non_contextual_creation: true
           batch_size: 100
           order_inserts: true
+          order_updates: true
         format_sql: true
     databasePlatform: org.hibernate.dialect.PostgreSQL9Dialect
   jackson.serialization.FAIL_ON_EMPTY_BEANS: false
