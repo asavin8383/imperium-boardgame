@@ -113,7 +113,7 @@ public class ResultService {
     void saveJobResult(Arrangement arrangement, Long jobId, AnalysisResult analysisResult) {
         try{
             DetailResultService<? super CheckUnitResult> service = AnalysisResultServiceFactory.getService(analysisResult.getClass());
-            Result result = resultRepo.findById(jobId).orElse(new Result());
+            Result result = resultRepo.findById(jobId).orElseGet(Result::new);
             result.setArrangement(arrangement);
             resultsKafkaService.fillResult(result, jobId, analysisResult, service);
             resultRepo.save(result);
@@ -122,7 +122,7 @@ public class ResultService {
 
             if((analysisResult.getScreenshot() != null && analysisResult.getScreenshot().length > 0) ||
                     (analysisResult.getEtalonScreenshot() != null && analysisResult.getEtalonScreenshot().length > 0)){
-                ResultScreenShot resultScreenShot = new ResultScreenShot();
+                ResultScreenShot resultScreenShot = resultScreenShotRepo.findById(jobId).orElseGet(ResultScreenShot::new);
                 resultScreenShot.setResult(result);
                 resultScreenShot.setScreenshot(analysisResult.getScreenshot());
                 resultScreenShot.setEtalonScreenshot(analysisResult.getEtalonScreenshot());
@@ -138,7 +138,7 @@ public class ResultService {
     Result saveJobStatus(Arrangement arrangement, Long jobId, CheckUnitResult checkUnitResult, CheckUnitJobResult status, String description) {
         try {
             DetailResultService<? super CheckUnitResult> service = AnalysisResultServiceFactory.getService(checkUnitResult.getClass());
-            Result result = resultRepo.findById(jobId).orElse(new Result());
+            Result result = resultRepo.findById(jobId).orElseGet(Result::new);
             result.setArrangement(arrangement);
             resultsKafkaService.fillResult(result, jobId, checkUnitResult, service);
             resultRepo.save(result);
