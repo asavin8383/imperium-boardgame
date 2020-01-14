@@ -36,7 +36,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Slf4j
-@Transactional
 public class ResultService {
 
     private final ResultsKafkaService resultsKafkaService;
