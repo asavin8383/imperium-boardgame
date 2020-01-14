@@ -20,6 +20,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 import repositories.ArrangementRepo;
 import services.ActService;
 
+import java.util.Optional;
+
 /**
  * Created by san
  * Date: 02.11.2019
@@ -32,7 +34,7 @@ public class ArrangementStatusProducer {
     private final String PPT_STATUS_ENDPOINT = "/ppt/arrangements/status";
     private final String PPM_STATUS_ENDPOINT = "/ppm/arrangements/close";
     private final String PPT_ARRANGEMENT_EXECUTION_STATUS = "/arrangements/execution_status";
-    private final String PPT_IS_ACT_AVAILABLE = "/arrangements/act_available";
+    private final String PPT_IS_ACT_AVAILABLE_FOR_AUTOMATIC_SEND = "/arrangements/act_available_for_automatic_send";
     private final String PPT_ACT_SENT_STATUS = "/arrangements/act_sent_status";
     private final OAuth2RestTemplate restTemplate;
     private final ActService actService;
@@ -102,9 +104,12 @@ public class ArrangementStatusProducer {
 
     private boolean isActAvailableFromPPT(Long arrangementId) {
         try {
-            return restTemplate.getForObject(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(PPT_IS_ACT_AVAILABLE).queryParam("id", arrangementId).build().toString(), Boolean.class);
-        } catch (HttpClientErrorException | HttpServerErrorException ex) {
-            throw AS_15_8_DispatcherException.logAndGet(log, String.format("Ошибка отправки сообщения с запросом статуса доступности отправки акта мероприятию %d в ППТ, код возврата %s", arrangementId, ex.getStatusCode()));
+            Optional<Boolean> result = restTemplate.getForObject(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(PPT_IS_ACT_AVAILABLE_FOR_AUTOMATIC_SEND).queryParam("id", arrangementId).build().toString(), Optional.class);
+            if (result.isPresent())
+                return result.get();
+            else return false;
+        } catch (Exception ex) {
+            throw AS_15_8_DispatcherException.logAndGet(log, String.format("Ошибка отправки сообщения с запросом статуса доступности отправки акта мероприятию %d в ППТ", arrangementId));
         }
     }
 
