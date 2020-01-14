@@ -113,53 +113,44 @@ public class ResultService {
     void saveJobResult(Arrangement arrangement, Long jobId, AnalysisResult analysisResult) {
         try{
             DetailResultService<? super CheckUnitResult> service = AnalysisResultServiceFactory.getService(analysisResult.getClass());
-            Result result = resultRepo.findById(jobId).orElse(new Result());
+            Result result = resultRepo.findById(jobId).orElseGet(Result::new);
             result.setArrangement(arrangement);
             resultsKafkaService.fillResult(result, jobId, analysisResult, service);
-            log.info("Результат подготовлен к сохранению: " + jobId + ", мероприятие: " + arrangement.getId());
             resultRepo.save(result);
             DetailResult detailResult = service.create(result, analysisResult);
             service.save(detailResult);
 
             if((analysisResult.getScreenshot() != null && analysisResult.getScreenshot().length > 0) ||
                     (analysisResult.getEtalonScreenshot() != null && analysisResult.getEtalonScreenshot().length > 0)){
-                ResultScreenShot resultScreenShot = new ResultScreenShot();
+                ResultScreenShot resultScreenShot = resultScreenShotRepo.findById(jobId).orElseGet(ResultScreenShot::new);
                 resultScreenShot.setResult(result);
                 resultScreenShot.setScreenshot(analysisResult.getScreenshot());
                 resultScreenShot.setEtalonScreenshot(analysisResult.getEtalonScreenshot());
                 resultScreenShotRepo.save(resultScreenShot);
             }
         } catch (Exception ex) {
-            try {
-                log.error("Ошибка при обработке сообщения с анализом результатов проверки: " + jobId + ", " + analysisResult.getCheckUnit().getValue(), ex);
-
-                StringWriter sw = new StringWriter();
-                ex.printStackTrace(new PrintWriter(sw));
-
-                saveJobStatus(
-                        arrangement,
-                        jobId,
-                        analysisResult,
-                        CheckUnitJobResult.INTERNAL_ERROR,
-                        sw.toString());
-            } catch(Exception newEx) {
-                log.error("Ошибка при сохранении ошибочной обработки сообщения с анализом результатов проверки: " + jobId + ", " + analysisResult.getCheckUnit().getValue(), newEx);
-            }
+            log.error("Ошибка при сохранении результата проверки: " + jobId + ", " + analysisResult.getCheckUnit().getValue(), ex);
+            throw ex;
         }
     }
 
     @Transactional
     Result saveJobStatus(Arrangement arrangement, Long jobId, CheckUnitResult checkUnitResult, CheckUnitJobResult status, String description) {
-        DetailResultService<? super CheckUnitResult> service = AnalysisResultServiceFactory.getService(checkUnitResult.getClass());
-        Result result = resultRepo.findById(jobId).orElse(new Result());
-        result.setArrangement(arrangement);
-        resultsKafkaService.fillResult(result, jobId, checkUnitResult, service);
-        resultRepo.save(result);
+        try {
+            DetailResultService<? super CheckUnitResult> service = AnalysisResultServiceFactory.getService(checkUnitResult.getClass());
+            Result result = resultRepo.findById(jobId).orElseGet(Result::new);
+            result.setArrangement(arrangement);
+            resultsKafkaService.fillResult(result, jobId, checkUnitResult, service);
+            resultRepo.save(result);
 
-        if(status == CheckUnitJobResult.INTERNAL_ERROR || status == CheckUnitJobResult.TIMEOUT_ERROR) {
-            DetailResult detailResult = service.create(result, checkUnitResult);
-            service.save(detailResult);
+            if (status == CheckUnitJobResult.INTERNAL_ERROR || status == CheckUnitJobResult.TIMEOUT_ERROR) {
+                DetailResult detailResult = service.create(result, checkUnitResult);
+                service.save(detailResult);
+            }
+            return result;
+        } catch (Exception ex) {
+            log.error("Ошибка при сохранении статуса результата проверки: " + jobId + ", " + checkUnitResult.getCheckUnit().getValue(), ex);
+            throw ex;
         }
-        return result;
     }
 }
