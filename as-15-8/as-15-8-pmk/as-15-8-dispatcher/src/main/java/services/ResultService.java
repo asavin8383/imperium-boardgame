@@ -27,6 +27,7 @@ import repositories.ArrangementRepo;
 import repositories.ResultRepo;
 import restapi.ArrangementStatusProducer;
 
+import javax.persistence.EntityManager;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
@@ -43,7 +44,7 @@ public class ResultService {
     private final ArrangementRepo arrangementRepo;
     private final ResultRepo resultRepo;
     private final ArrangementStatusProducer arrangementStatusProducer;
-    private final SessionFactory sessionFactory;
+    private final EntityManager entityManager;
 
     @Scheduled(cron = "${results.save.schedule}")
     public void saveResults() {
@@ -56,7 +57,7 @@ public class ResultService {
             }
             List<Arrangement> runningArrangements = arrangementRepo.findRunning();
 
-            try(Session session = sessionFactory.openSession()) {
+            try(Session session = entityManager.unwrap(Session.class)) {
                 Transaction tx = session.beginTransaction();
 
                 for (Arrangement arrangement : runningArrangements) {
