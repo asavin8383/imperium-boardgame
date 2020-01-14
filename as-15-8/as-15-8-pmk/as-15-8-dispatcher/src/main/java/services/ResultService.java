@@ -59,6 +59,7 @@ public class ResultService {
 
                 if (arrangement.getCheckUnitsCount() == count.longValue()) {
                     KeyValueIterator<CheckUnitKey, CheckUnitResult> resultsIterator = resultsKafkaService.getArrangementResultsIterator(store, arrangement.getId());
+                    boolean isSaved = true;
                     while (resultsIterator.hasNext()) {
                         KeyValue<CheckUnitKey, CheckUnitResult> result = resultsIterator.next();
                         CheckUnitKey resultKey = result.key;
@@ -91,17 +92,21 @@ public class ResultService {
                                         checkUnitResult,
                                         CheckUnitJobResult.INTERNAL_ERROR,
                                         sw.toString());
-                                log.info("Мероприятие завешено с ошибками: " + jobResult.getArrangement().getId());
-                                arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(jobResult.getArrangement().getId(), ArrangementEvents.FINISH));
                             } catch (Exception newEx) {
                                 log.error("Ошибка при сохранении ошибочной обработки сообщения с анализом результатов проверки: " + resultKey.getJobId() + ", " + checkUnitResult.getCheckUnit().getValue(), newEx);
-                                throw newEx;
+                                isSaved = false;
+                                break;
                             }
                         }
                     }
-                    log.info("Мероприятие успешно сохранено в БД: " + arrangement.getId());
-                    arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(arrangement.getId(), ArrangementEvents.FINISH));
-                    log.info("Мероприятие успешно завершено: " + arrangement.getId());
+                    if(isSaved) {
+                        log.info("Мероприятие успешно сохранено в БД: " + arrangement.getId());
+                        arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(arrangement.getId(), ArrangementEvents.FINISH));
+                        log.info("Мероприятие успешно завершено: " + arrangement.getId());
+                    } else {
+                        log.info("Ошибка сохранения мероприятия: " + arrangement.getId());
+                        break;
+                    }
                 }
             }
         } catch (Exception ex){
