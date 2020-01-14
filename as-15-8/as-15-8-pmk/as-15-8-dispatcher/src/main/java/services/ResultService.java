@@ -81,7 +81,7 @@ public class ResultService {
                             }
                         } catch (Exception ex) {
                             try {
-                                log.error("Ошибка при обработке сообщения с анализом результатов проверки: " + resultKey.getJobId() + ", " + checkUnitResult.getCheckUnit().getValue(), ex);
+                                log.error("Ошибка при сохранении результата проверки: " + resultKey.getJobId() + ", " + checkUnitResult.getCheckUnit().getValue(), ex);
 
                                 StringWriter sw = new StringWriter();
                                 ex.printStackTrace(new PrintWriter(sw));
@@ -134,7 +134,6 @@ public class ResultService {
                 resultScreenShotRepo.save(resultScreenShot);
             }
         } catch (Exception ex) {
-            log.error("Ошибка при сохранении результата проверки: " + jobId + ", " + analysisResult.getCheckUnit().getValue(), ex);
             throw ex;
         }
     }
