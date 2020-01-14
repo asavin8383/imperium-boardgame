@@ -19,7 +19,6 @@ import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import repositories.ArrangementRepo;
 import repositories.ResultRepo;
 import repositories.ResultScreenShotRepo;
@@ -114,7 +113,6 @@ public class ResultService {
         }
     }
 
-    @Transactional
     void saveJobResult(Arrangement arrangement, Long jobId, AnalysisResult analysisResult) {
         try{
             DetailResultService<? super CheckUnitResult> service = AnalysisResultServiceFactory.getService(analysisResult.getClass());
@@ -138,7 +136,6 @@ public class ResultService {
         }
     }
 
-    @Transactional
     Result saveJobStatus(Arrangement arrangement, Long jobId, CheckUnitResult checkUnitResult, CheckUnitJobResult status, String description) {
         try {
             DetailResultService<? super CheckUnitResult> service = AnalysisResultServiceFactory.getService(checkUnitResult.getClass());
