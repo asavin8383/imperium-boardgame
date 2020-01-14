@@ -17,8 +17,6 @@ import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -46,6 +44,7 @@ public class ResultService {
     private final EntityManager entityManager;
 
     @Scheduled(cron = "${results.save.schedule}")
+    @Transactional
     public void saveResults() {
         try{
             ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store;
@@ -57,8 +56,6 @@ public class ResultService {
             List<Arrangement> runningArrangements = arrangementRepo.findRunning();
 
             try(Session session = entityManager.unwrap(Session.class)) {
-                Transaction tx = session.beginTransaction();
-
                 for (Arrangement arrangement : runningArrangements) {
                     AtomicInteger count = new AtomicInteger();
                     resultsKafkaService.getArrangementResultsIterator(store, arrangement.getId()).forEachRemaining(obj -> count.getAndIncrement());
@@ -113,14 +110,13 @@ public class ResultService {
                         log.info("Мероприятие успешно завершено: " + arrangement.getId());
                     }
                 }
-                tx.commit();
             }
         } catch (Exception ex){
             log.error("Ошибка при сохранении результатов мероприятия", ex);
         }
     }
 
-    public void saveJobResult(Session session, Arrangement arrangement, Long jobId, AnalysisResult analysisResult) {
+    private void saveJobResult(Session session, Arrangement arrangement, Long jobId, AnalysisResult analysisResult) {
         try{
             AnalysisResultService<? super CheckUnitResult> service = AnalysisResultServiceFactory.getService(analysisResult.getClass());
             Result result = resultsKafkaService.createResult(jobId, analysisResult, service);
@@ -158,7 +154,7 @@ public class ResultService {
         }
     }
 
-    public Result saveJobStatus(Session session, Arrangement arrangement, Long jobId, CheckUnitResult checkUnitResult, CheckUnitJobResult status, String description) {
+    private Result saveJobStatus(Session session, Arrangement arrangement, Long jobId, CheckUnitResult checkUnitResult, CheckUnitJobResult status, String description) {
         AnalysisResultService<? super CheckUnitResult> service = AnalysisResultServiceFactory.getService(checkUnitResult.getClass());
         Result result = resultsKafkaService.createResult(jobId, checkUnitResult, service);
         result.setArrangement(arrangement);
