@@ -21,10 +21,10 @@ public class AnalysisResultServiceFactory {
 
 	/** Список сервисов */
 	@Autowired
-	private List<AnalysisResultService<? extends CheckUnitResult>> services;
+	private List<DetailResultService<? extends CheckUnitResult>> services;
 	
 	/** Кэш сервисов */
-	private static final Map<Class<? extends CheckUnitResult>, AnalysisResultService<? super CheckUnitResult>> servicesCache = new HashMap<>();
+	private static final Map<Class<? extends CheckUnitResult>, DetailResultService<? super CheckUnitResult>> servicesCache = new HashMap<>();
 	
 	/**
 	 * Метод создания кэша сервисов 
@@ -35,7 +35,7 @@ public class AnalysisResultServiceFactory {
 		services.forEach(service -> 
 			servicesCache.put(
 				(Class<? extends CheckUnitResult>) ((ParameterizedType)service.getClass().getGenericInterfaces()[0]).getActualTypeArguments()[0],
-				(AnalysisResultService<? super CheckUnitResult>) service)
+				(DetailResultService<? super CheckUnitResult>) service)
 		);
 	}
 	
@@ -44,8 +44,8 @@ public class AnalysisResultServiceFactory {
 	 * @param serviceType Тип сервиса
 	 * @return
 	 */
-	public static AnalysisResultService<? super CheckUnitResult> getService(Class<? extends CheckUnitResult> serviceType) {
-		AnalysisResultService<? super CheckUnitResult> service = servicesCache.get(serviceType);
+	public static DetailResultService<? super CheckUnitResult> getService(Class<? extends CheckUnitResult> serviceType) {
+		DetailResultService<? super CheckUnitResult> service = servicesCache.get(serviceType);
 		if(service == null) {
 			throw new IllegalArgumentException("Error creating analysis result service! Service for " + serviceType + " is not supported");
 		}

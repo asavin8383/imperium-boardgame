@@ -1,6 +1,7 @@
 package services.impl;
 
 import analysis.NMapAnalysisJobResult;
+import exceptions.AS_15_8_DispatcherException;
 import lombok.RequiredArgsConstructor;
 import model.DetailResult;
 import model.NmapDetailResult;
@@ -8,7 +9,8 @@ import model.Result;
 import model.enums.CheckType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import services.AnalysisResultService;
+import repositories.NmapDetailResultRepo;
+import services.DetailResultService;
 
 /**
  * Класс для работы с результатами анализа проверок запрещенных ресурсов в ПС
@@ -18,7 +20,9 @@ import services.AnalysisResultService;
  */
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class NmapAnalysisResultService implements AnalysisResultService<NMapAnalysisJobResult> {
+public class NmapDetailResultService implements DetailResultService<NMapAnalysisJobResult> {
+
+	private final NmapDetailResultRepo nmapDetailResultRepo;
 
 	@Override
 	public CheckType getCheckType() {
@@ -26,13 +30,20 @@ public class NmapAnalysisResultService implements AnalysisResultService<NMapAnal
 	}
 
 	@Override
-	public DetailResult createDetails(Result result, NMapAnalysisJobResult analysisResult) {
+	public DetailResult create(Result result, NMapAnalysisJobResult analysisResult) {
 		NmapDetailResult nmapDetailResult = new NmapDetailResult();
 
 		nmapDetailResult.setResult(result);
 
 		nmapDetailResult.setLog(analysisResult.getNmapLog());
 		return nmapDetailResult;
+	}
+
+	@Override
+	public void save(DetailResult detailResult) {
+		if(!(detailResult instanceof NmapDetailResult))
+			throw new AS_15_8_DispatcherException("Ошибка при сохранении детального результата типа " + detailResult.getClass().getSimpleName());
+		nmapDetailResultRepo.save((NmapDetailResult) detailResult);
 	}
 
 	@Override

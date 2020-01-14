@@ -64,8 +64,10 @@ public class ResultsKafkaService {
                 .skip(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .map(kv -> {
-                    AnalysisResultService<? super CheckUnitResult> service = AnalysisResultServiceFactory.getService(kv.value.getClass());
-                    return createResult(kv.key.getJobId(), kv.value, service);
+                    DetailResultService<? super CheckUnitResult> service = AnalysisResultServiceFactory.getService(kv.value.getClass());
+                    Result result = new Result();
+                    fillResult(result, kv.key.getJobId(), kv.value, service);
+                    return result;
                 })
                 .collect(Collectors.toList());
         return new PageImpl<>(results, pageable, results.size());
@@ -83,14 +85,14 @@ public class ResultsKafkaService {
         return countIteratorSize(resultsIterator);*/
     }
 
-    public  KeyValueIterator<CheckUnitKey, CheckUnitResult> getArrangementResultsIterator(ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store, Long arrangementId) {
+    KeyValueIterator<CheckUnitKey, CheckUnitResult> getArrangementResultsIterator(ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store, Long arrangementId) {
         return store.range(
                 new CheckUnitKey(arrangementId, Long.MIN_VALUE),
                 new CheckUnitKey(arrangementId, Long.MAX_VALUE)
         );
     }
 
-    public ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> getResultsKeyValueStore() {
+    ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> getResultsKeyValueStore() {
         ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store = interactiveQueryService.getQueryableStore(
                 resultsTableName,
                 QueryableStoreTypes.keyValueStore()
@@ -100,8 +102,7 @@ public class ResultsKafkaService {
         return store;
     }
 
-    public Result createResult(Long jobId, CheckUnitResult checkUnitResult, AnalysisResultService<? super CheckUnitResult> service){
-        Result result = new Result();
+    void fillResult(Result result, Long jobId, CheckUnitResult checkUnitResult, DetailResultService<? super CheckUnitResult> service){
         result.setJobId(jobId);
         result.setErdiId(checkUnitResult.getCheckUnit().getContentId());
         result.setResult(checkUnitResult.getCheckResult());
@@ -111,7 +112,6 @@ public class ResultsKafkaService {
         result.setStartDate(LocalDateTime.ofInstant(checkUnitResult.getStartTime().toInstant(), ZoneId.systemDefault()));
         result.setEndDate(LocalDateTime.ofInstant(checkUnitResult.getEndTime().toInstant(), ZoneId.systemDefault()));
         result.setCheckType(service.getCheckType());
-        return result;
     }
 
     private CheckUnitResult getArrangementResult(ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store, Long arrangementId, Long jobId) {
