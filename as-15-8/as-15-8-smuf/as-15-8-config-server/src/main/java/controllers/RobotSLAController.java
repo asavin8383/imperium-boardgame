@@ -52,4 +52,9 @@ public class RobotSLAController {
         robotSLA.orElseThrow(() -> new AS_15_8_Config_Exception("Невозможно найти robotSLA"));
         robotSLARepo.delete(robotSLA.get());
     }
+
+    @PostMapping("/all")
+    public List<RobotSLA> getRobotsSla() {
+        return robotSLARepo.findAll();
+    }
 }

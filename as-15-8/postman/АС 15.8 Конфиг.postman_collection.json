@@ -837,7 +837,7 @@
 							"oauth2": [
 								{
 									"key": "accessToken",
-									"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJBU18xNV84X2FkbWluIiwicm9sZSI6IlJPTEVfQURNSU4sUk9MRV9BRE1JTl9SRVBPUlQsUk9MRV9NQU5BR0VfQ09ORklHVVJBVElPTlMsUk9MRV9NQU5BR0VfUkVHSVNUUkFUSU9OX0pPVVJOQUwsUk9MRV9NQU5BR0VfRlVOQ1RJT05fTU9ERSIsIm1haWwiOiIiLCJ1c2VyX25hbWUiOiJBU18xNV84X2FkbWluIiwic2NvcGUiOlsicmVhZCIsIndyaXRlIl0sImV4cCI6MTU3ODM5MTU3MywidXNlck5hbWUiOiJBU18xNV84X2FkbWluIiwiYXV0aG9yaXRpZXMiOlsiUk9MRV9NQU5BR0VfUkVHSVNUUkFUSU9OX0pPVVJOQUwiLCJST0xFX0FETUlOIiwiUk9MRV9BRE1JTl9SRVBPUlQiLCJST0xFX01BTkFHRV9GVU5DVElPTl9NT0RFIiwiUk9MRV9NQU5BR0VfQ09ORklHVVJBVElPTlMiXSwianRpIjoiZjQ0MGZkYjgtZWQ3NC00NTZkLWJiMzMtOTZkMDlkYWYwNzk3IiwiY2xpZW50X2lkIjoiYXMtMTUtOCIsInNlY29uZE5hbWUiOiIifQ.mwkUXAzAJntlmoMzFqlz_kTBG_uOrKEAJ691jfwUYndCnmFtcDgI2rdIIx7yg5qGSd5EGYeSoT1FrnRApnCiFG5aceCSkxkFehY86uPGEp2Tp0LeabrauPiLSiKxkkf49TWkFmTODNIhyOy_ZLLocVG9hSH91FxPlwO_WLzfBES_7LI_JL-7I02xMMyhXZdxIZII4dbnuKk-xu6M9SK1bg4kQXVKezqT0sBjUb3Lt9jQJ67zhYH7wi9NFnLZ9W8Vr0JcPoPbtXREAQwgnkZctSFpcORILcaTMYXjvwABHPBG8WC-rDLth1h0TUYVqShgUPzt2z9u0s7Ha586Kes1TA",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJBU18xNV84X2FkbWluIiwicm9sZSI6IlJPTEVfQURNSU4sUk9MRV9BRE1JTl9SRVBPUlQsUk9MRV9NQU5BR0VfQ09ORklHVVJBVElPTlMsUk9MRV9NQU5BR0VfUkVHSVNUUkFUSU9OX0pPVVJOQUwsUk9MRV9NQU5BR0VfRlVOQ1RJT05fTU9ERSIsIm1haWwiOiIiLCJ1c2VyX25hbWUiOiJBU18xNV84X2FkbWluIiwic2NvcGUiOlsicmVhZCIsIndyaXRlIl0sImV4cCI6MTU3ODY0MTEzMywidXNlck5hbWUiOiJBU18xNV84X2FkbWluIiwiYXV0aG9yaXRpZXMiOlsiUk9MRV9NQU5BR0VfUkVHSVNUUkFUSU9OX0pPVVJOQUwiLCJST0xFX0FETUlOIiwiUk9MRV9BRE1JTl9SRVBPUlQiLCJST0xFX01BTkFHRV9GVU5DVElPTl9NT0RFIiwiUk9MRV9NQU5BR0VfQ09ORklHVVJBVElPTlMiXSwianRpIjoiYTZmNzdjM2QtMTI2MC00OWJlLWJlZjItMmFjMWVkNzhkY2YyIiwiY2xpZW50X2lkIjoiYXMtMTUtOCIsInNlY29uZE5hbWUiOiIifQ.Bbd85SoSunFH4cdetYUG_8_buqPyScguhONxsp7QTPpExhQ7CQ3pd1aINtE9IJ8YBOPz9NY8dFJpNbf-QXtQ8DWBb8iz0Es5QteMGf5Ta4XE21eMKGDRKqf8Tk0l__TJLEbhn14gwCRlCwfZGenosbzuR4yDohTc6PH71uTysHzwf0vggwLHyl0Tp-NWA2lHdZxRMSInryttd1z8OzQKIjKNvYoNvH5-eNbeIndhlcqN75e0A0Qaousd1ZJQ-ADWsSaecmdcBbQFNcshuDlz7BiRuzELjUoooDo6UdYCAlwVRsMGUpiQoXFogP4L73fhOnYgeFoF_Y7hNhl_ryABIA",
 									"type": "string"
 								},
 								{
@@ -863,7 +863,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"slaType\": \"ERDI_NUMBER\",\n    \"slaPeriod\": \"DAY\",\n    \"checkUnitValue\": \"2\"\n}",
+							"raw": "{\n    \"slaType\": \"TRAFFIC\",\n    \"slaPeriod\": \"DAY\",\n    \"checkUnitValue\": \"2000000\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -871,7 +871,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{url}}/config/robots_sla?id=2",
+							"raw": "{{url}}/config/robots_sla?id=7",
 							"host": [
 								"{{url}}"
 							],
@@ -882,8 +882,47 @@
 							"query": [
 								{
 									"key": "id",
-									"value": "2"
+									"value": "7"
 								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Запрос всех Robot SLA",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJBU18xNV84X2FkbWluIiwicm9sZSI6IlJPTEVfQURNSU4sUk9MRV9BRE1JTl9SRVBPUlQsUk9MRV9NQU5BR0VfQ09ORklHVVJBVElPTlMsUk9MRV9NQU5BR0VfUkVHSVNUUkFUSU9OX0pPVVJOQUwsUk9MRV9NQU5BR0VfRlVOQ1RJT05fTU9ERSIsIm1haWwiOiIiLCJ1c2VyX25hbWUiOiJhc18xNV84X2FkbWluIiwic2NvcGUiOlsicmVhZCIsIndyaXRlIl0sImV4cCI6MTU3OTA5MTA4MywidXNlck5hbWUiOiJhc18xNV84X2FkbWluIiwiYXV0aG9yaXRpZXMiOlsiUk9MRV9NQU5BR0VfUkVHSVNUUkFUSU9OX0pPVVJOQUwiLCJST0xFX0FETUlOIiwiUk9MRV9BRE1JTl9SRVBPUlQiLCJST0xFX01BTkFHRV9GVU5DVElPTl9NT0RFIiwiUk9MRV9NQU5BR0VfQ09ORklHVVJBVElPTlMiXSwianRpIjoiNjE5YTQ5MTgtNWU1Yi00NDA3LWE4NDItOWNiMzRhYjhiZDRiIiwiY2xpZW50X2lkIjoiYXMtMTUtOCIsInNlY29uZE5hbWUiOiIifQ.BvhKcIMtv1Grqqhp3qjMV7Ct0z-JzB8EKLJScC6Tr_7XPmjqM4njoiVOzPTurNGSOEdx5rKHW0GEHCQUzxPEp1hIR7PZP-ikVAViyel5sYQrXtq921XIUn_u7pvevPmSNipe4oHuxJgs3z3LywEikS4hdQXrQLJWt8nJ8vmt6r_WEAfPSh42Dd0UnjldoTcK_SLW0WCYW64gETJhKAZZ1YsBE8rUfEUyf5luhLDXucuEM26m-COktihPbIIaO3L-PkkYys0dDpExUkIzeU383Bu83z_kABmj6VlZwJQr9oaZMlgclqyl-Xu2FDdtfMLfsI63oO4NKMTpOfly_u8k5Q",
+									"type": "string"
+								},
+								{
+									"key": "tokenType",
+									"value": "bearer",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/config/robots_sla/all",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"config",
+								"robots_sla",
+								"all"
 							]
 						}
 					},
