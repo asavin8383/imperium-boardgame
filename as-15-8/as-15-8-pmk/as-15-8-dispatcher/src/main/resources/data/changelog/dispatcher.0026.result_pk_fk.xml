@@ -1,0 +1,89 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+    <changeSet author="shabalinAI (generated)" id="0026.1">
+        <dropDefaultValue columnDataType="bigint" columnName="id" schemaName="results" tableName="results"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="0026.2">
+        <dropDefaultValue columnDataType="bigint" columnName="result_id" schemaName="results" tableName="error_detail_results"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="0026.3">
+        <dropDefaultValue columnDataType="bigint" columnName="result_id" schemaName="results" tableName="nmap_detail_results"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="0026.4">
+        <dropDefaultValue columnDataType="bigint" columnName="result_id" schemaName="results" tableName="pasd_detail_results"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="0026.5">
+        <dropDefaultValue columnDataType="bigint" columnName="result_id" schemaName="results" tableName="ps_detail_results"/>
+    </changeSet>
+    <changeSet author="shabalinAI (generated)" id="0026.6">
+        <dropDefaultValue columnDataType="bigint" columnName="result_id" schemaName="results" tableName="result_screenshots"/>
+    </changeSet>
+
+    <changeSet author="ashabalin" id="0026.7">
+        <dropForeignKeyConstraint baseTableName="result_screenshots" baseTableSchemaName="results" constraintName="FK_RESULTS_JOB_ID" />
+        <addForeignKeyConstraint
+                baseTableSchemaName="results"
+                baseTableName="result_screenshots"
+                baseColumnNames="result_id"
+                constraintName="FK_RESULTS"
+                referencedTableSchemaName="results"
+                referencedTableName="results"
+                referencedColumnNames="id"
+                onUpdate="CASCADE"
+                onDelete="CASCADE"/>
+    </changeSet>
+    <changeSet author="ashabalin" id="0026.8">
+        <dropForeignKeyConstraint baseTableName="error_detail_results" baseTableSchemaName="results" constraintName="FK_RESULTS_JOB_ID" />
+        <addForeignKeyConstraint
+                baseTableSchemaName="results"
+                baseTableName="error_detail_results"
+                baseColumnNames="result_id"
+                constraintName="FK_RESULTS"
+                referencedTableSchemaName="results"
+                referencedTableName="results"
+                referencedColumnNames="id"
+                onUpdate="CASCADE"
+                onDelete="CASCADE"/>
+    </changeSet>
+    <changeSet author="ashabalin" id="0026.9">
+        <dropForeignKeyConstraint baseTableName="nmap_detail_results" baseTableSchemaName="results" constraintName="FK_RESULTS_JOB_ID" />
+        <addForeignKeyConstraint
+                baseTableSchemaName="results"
+                baseTableName="nmap_detail_results"
+                baseColumnNames="result_id"
+                constraintName="FK_RESULTS"
+                referencedTableSchemaName="results"
+                referencedTableName="results"
+                referencedColumnNames="id"
+                onUpdate="CASCADE"
+                onDelete="CASCADE"/>
+    </changeSet>
+    <changeSet author="ashabalin" id="0026.10">
+        <dropForeignKeyConstraint baseTableName="pasd_detail_results" baseTableSchemaName="results" constraintName="FK_RESULTS_JOB_ID" />
+        <addForeignKeyConstraint
+                baseTableSchemaName="results"
+                baseTableName="pasd_detail_results"
+                baseColumnNames="result_id"
+                constraintName="FK_RESULTS"
+                referencedTableSchemaName="results"
+                referencedTableName="results"
+                referencedColumnNames="id"
+                onUpdate="CASCADE"
+                onDelete="CASCADE"/>
+    </changeSet>
+    <changeSet author="ashabalin" id="0026.11">
+        <dropForeignKeyConstraint baseTableName="ps_detail_results" baseTableSchemaName="results" constraintName="FK_RESULTS_JOB_ID" />
+        <addForeignKeyConstraint
+                baseTableSchemaName="results"
+                baseTableName="ps_detail_results"
+                baseColumnNames="result_id"
+                constraintName="FK_RESULTS"
+                referencedTableSchemaName="results"
+                referencedTableName="results"
+                referencedColumnNames="id"
+                onUpdate="CASCADE"
+                onDelete="CASCADE"/>
+    </changeSet>
+</databaseChangeLog>

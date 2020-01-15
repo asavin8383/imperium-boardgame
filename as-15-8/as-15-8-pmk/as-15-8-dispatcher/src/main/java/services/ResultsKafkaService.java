@@ -103,7 +103,7 @@ public class ResultsKafkaService {
     }
 
     void fillResult(Result result, Long jobId, CheckUnitResult checkUnitResult, DetailResultService<? super CheckUnitResult> service){
-        result.setJobId(jobId);
+        result.setId(jobId);
         result.setErdiId(checkUnitResult.getCheckUnit().getContentId());
         result.setResult(checkUnitResult.getCheckResult());
         result.setCheckUnitType(checkUnitResult.getCheckUnit().getType());

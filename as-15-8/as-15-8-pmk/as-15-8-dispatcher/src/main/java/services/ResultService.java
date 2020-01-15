@@ -134,9 +134,9 @@ public class ResultService {
             resultScreenShot.setResult(result);
             resultScreenShot.setScreenshot(analysisResult.getScreenshot());
             resultScreenShot.setEtalonScreenshot(analysisResult.getEtalonScreenshot());
-            log.info("Сохранение скриншота: " + resultScreenShot.getJobId());
+            log.info("Сохранение скриншота: " + resultScreenShot.getId());
             resultScreenShotRepo.save(resultScreenShot);
-            log.info("Скриншот сохранен: " + resultScreenShot.getJobId());
+            log.info("Скриншот сохранен: " + resultScreenShot.getId());
         }
     }
 

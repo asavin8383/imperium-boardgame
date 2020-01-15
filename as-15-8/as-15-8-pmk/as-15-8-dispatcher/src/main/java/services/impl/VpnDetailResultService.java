@@ -29,7 +29,7 @@ public class VpnDetailResultService implements DetailResultService<VpnAnalysisRe
 	@Override
 	public DetailResult create(Result result, VpnAnalysisResult analysisResult) {
 
-		PasdDetailResult pasdDetailResult = pasdDetailResultRepo.findById(result.getJobId()).orElseGet(PasdDetailResult::new);
+		PasdDetailResult pasdDetailResult = pasdDetailResultRepo.findById(result.getId()).orElseGet(PasdDetailResult::new);
 
 		pasdDetailResult.setResult(result);
 

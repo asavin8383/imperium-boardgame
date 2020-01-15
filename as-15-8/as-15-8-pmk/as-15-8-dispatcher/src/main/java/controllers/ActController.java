@@ -106,7 +106,7 @@ public class ActController {
         }
 
         List<Long> resultIds = results.stream()
-                .mapToLong(Result::getJobId)
+                .mapToLong(Result::getId)
                 .boxed()
                 .collect(Collectors.toList());
 
@@ -124,7 +124,7 @@ public class ActController {
 
     private ActCheckResult createActCheckResult(Result result){
         ActCheckResult checkResult = new ActCheckResult();
-        checkResult.setCheckResultId(result.getJobId());
+        checkResult.setCheckResultId(result.getId());
         checkResult.setCheckUnitType(result.getCheckUnitType());
         checkResult.setCheckUnitValue(result.getCheckUnitValue());
         checkResult.setContentId(result.getErdiId());
@@ -139,7 +139,7 @@ public class ActController {
         byte[] screen = resultScreenShot.getScreenshot();
         if (screen != null && screen.length > 0)
             return new ActAttachment(
-                    resultScreenShot.getJobId(),
+                    resultScreenShot.getId(),
                     ActAttachment.ActAttachmentType.SCREENSHOT,
                     Base64.getEncoder().encodeToString(screen)
             );
@@ -148,7 +148,7 @@ public class ActController {
 
     private ActAttachment createActNmapLog(NmapDetailResult nmapResult){
         return new ActAttachment(
-                nmapResult.getJobId(),
+                nmapResult.getId(),
                 ActAttachment.ActAttachmentType.NMAP_LOG,
                 nmapResult.getLog()
         );

@@ -25,13 +25,13 @@ public class Result implements Serializable {
 
     @Id
     @Column(nullable=false, updatable=false)
-    private Long jobId;
+    private Long id;
 
     @ManyToOne(optional = false)
     @JoinColumn(name="arrangement_id", foreignKey = @ForeignKey(name = "FK_arrangements"))
     private Arrangement arrangement;
 
-    @Column(name = "content_id", nullable = false)
+    @Column(name = "content_id")
     private Long erdiId;
 
     @Enumerated(EnumType.STRING)

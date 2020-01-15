@@ -13,12 +13,10 @@ public abstract class DetailResult implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @Column(name = "job_id", insertable = false, updatable = false)
-    private Long jobId;
+    private Long id;
 
     @MapsId
     @OneToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "job_id")
     @JsonIgnore
     private Result result;
 }
