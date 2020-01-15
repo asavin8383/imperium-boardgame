@@ -33,10 +33,11 @@ public class TrafficController {
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(required = false) String query,
-            @RequestParam(required = false) AccessToolType accessToolType) {
+            @RequestParam(required = false) AccessToolType accessToolType,
+            @RequestParam(required = false) String name) {
 
         return trafficService.getBriefTrafficList(sortingDirection, sortingColumn,
-                pageNumber, pageSize, query, accessToolType);
+                pageNumber, pageSize, query, accessToolType, name);
     }
 
     @Transactional

@@ -41,7 +41,8 @@ public class TrafficService {
                                                       String sortingColumn,
                                                       int pageNumber, int pageSize,
                                                       String query,
-                                                      AccessToolType accessToolType) {
+                                                      AccessToolType accessToolType,
+                                                      String filteredName) {
 
         PageRequest pageable = PageRequest.of(pageNumber, pageSize,
                 SortingHelper.createSorting(sortingDirection, sortingColumn));
@@ -54,11 +55,14 @@ public class TrafficService {
             long searchTemplatesCount = trafficRepository.countSearchTemplatesByTrafficId(traffic.getId());
             long dynamicCount = 0; //trafficRepository.countDynamicByTrafficId(traffic.getId());
             long staticCount = formalErdiCount + customErdiCount + searchPhrasesCount + searchTemplatesCount;
-
             view.setCount(staticCount + dynamicCount);
             view.setType(getTrafficType(staticCount, dynamicCount));
             return view;
         }).collect(Collectors.toList());
+
+        if (filteredName != null && !filteredName.isEmpty())
+           views = views.stream().filter(r -> r.getName().toUpperCase().contains(filteredName.toUpperCase())).collect(Collectors.toList());
+
         return new PageImpl<>(views, pageable, traffics.getTotalElements());
     }
 
