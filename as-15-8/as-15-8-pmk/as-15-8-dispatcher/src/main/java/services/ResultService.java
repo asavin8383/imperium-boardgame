@@ -57,6 +57,7 @@ public class ResultService {
                 resultsKafkaService.getArrangementResultsIterator(store, arrangement.getId()).forEachRemaining(obj -> count.getAndIncrement());
 
                 if (arrangement.getCheckUnitsCount() == count.longValue()) {
+                    log.info("Начато сохранение мероприятия: " + arrangement.getId());
                     KeyValueIterator<CheckUnitKey, CheckUnitResult> resultsIterator = resultsKafkaService.getArrangementResultsIterator(store, arrangement.getId());
                     boolean isSaved = true;
                     while (resultsIterator.hasNext()) {
@@ -118,6 +119,7 @@ public class ResultService {
     private void saveJobResult(Arrangement arrangement, Long jobId, AnalysisResult analysisResult) {
         DetailResultService<? super CheckUnitResult> service = AnalysisResultServiceFactory.getService(analysisResult.getClass());
         Result result = resultRepo.findById(jobId).orElseGet(Result::new);
+        log.info("Результат создан: " + result.toString());
         result.setArrangement(arrangement);
         resultsKafkaService.fillResult(result, jobId, analysisResult, service);
         resultRepo.save(result);
