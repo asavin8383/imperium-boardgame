@@ -79,5 +79,43 @@ public class Result implements Serializable {
             fetch = FetchType.LAZY
     )
     @JsonIgnore
-    private DetailResult detailResult;
+    private PsDetailResult psDetailResult;
+
+    @OneToOne(
+            mappedBy = "result",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
+    @JsonIgnore
+    private PasdDetailResult pasdDetailResult;
+
+    @OneToOne(
+            mappedBy = "result",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
+    @JsonIgnore
+    private NmapDetailResult nmapDetailResult;
+
+    @OneToOne(
+            mappedBy = "result",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
+    @JsonIgnore
+    private ErrorDetailResult errorDetailResult;
+
+    public void setDetailResult(DetailResult detailResult){
+        if(detailResult instanceof PsDetailResult)
+            this.psDetailResult = (PsDetailResult) detailResult;
+        else if(detailResult instanceof PasdDetailResult)
+            this.pasdDetailResult = (PasdDetailResult) detailResult;
+        else if(detailResult instanceof NmapDetailResult)
+            this.nmapDetailResult = (NmapDetailResult) detailResult;
+        else if(detailResult instanceof ErrorDetailResult)
+            this.errorDetailResult = (ErrorDetailResult) detailResult;
+    }
 }
