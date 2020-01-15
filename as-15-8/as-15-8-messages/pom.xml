@@ -10,11 +10,15 @@
 	</parent>
 
 	<dependencies>
+
+		<!-- Lombok -->
 		<dependency>
 	    	<groupId>org.projectlombok</groupId>
 	    	<artifactId>lombok</artifactId>
 	    	<version>1.18.8</version>
 		</dependency>
+
+		<!-- Jackson -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>

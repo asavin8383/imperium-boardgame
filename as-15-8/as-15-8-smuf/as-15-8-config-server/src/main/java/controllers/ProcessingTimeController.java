@@ -31,12 +31,13 @@ public class ProcessingTimeController {
 
         processingTime.get().setProcessing_time(newProcessingTime.getProcessing_time());
         processingTime.get().setCheck_method(newProcessingTime.getCheck_method());
+        processingTime.get().setTraffic_per_check_unit(newProcessingTime.getTraffic_per_check_unit());
 
         ptRepo.save(processingTime.get());
     }
 
     @PostMapping("/add")
-    public void putProcessingTime(@RequestParam("id") Long robotId, @RequestBody ProcessingTime processingTime){
+    public void putProcessingTime(@RequestParam("id") Long robotId, @RequestBody ProcessingTime processingTime) {
         robotRepo.findById(robotId).orElseThrow(() -> new AS_15_8_Config_Exception("Невозможно найти робота с таким id: " + robotId));
         Robot robot = robotRepo.findById(robotId).get();
 
@@ -47,7 +48,7 @@ public class ProcessingTimeController {
     }
 
     @PostMapping
-    public List<ProcessingTime> getProcessingTimes(@RequestParam("id") Long robotId){
+    public List<ProcessingTime> getProcessingTimes(@RequestParam("id") Long robotId) {
         ptRepo.findAllByRobotId(robotId).orElseThrow(() -> new AS_15_8_Config_Exception("Невозможно найти робота с таким id: " + robotId));
         return ptRepo.findAllByRobotId(robotId).get();
     }
@@ -56,5 +57,10 @@ public class ProcessingTimeController {
     public void deleteProcessingTime(@RequestParam("id") Optional<ProcessingTime> processingTime){
         processingTime.orElseThrow(() -> new AS_15_8_Config_Exception("Невозможно найти processingTime"));
         ptRepo.delete(processingTime.get());
+    }
+
+    @PostMapping("/all")
+    public List<ProcessingTime> getAllProcessingTimes() {
+        return ptRepo.findAll();
     }
 }

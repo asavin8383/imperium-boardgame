@@ -22,4 +22,9 @@
     <include file="data/changelog/dispatcher.0017.arrangement_add.xml"/>
     <include file="data/changelog/dispatcher.0018.arrangements_fk.xml"/>
     <include file="data/changelog/dispatcher.0019.result_job_id.xml"/>
+    <include file="data/changelog/dispatcher.0020.cascades.xml"/>
+    <include file="data/changelog/dispatcher.0021.add_job_id.xml"/>
+    <include file="data/changelog/dispatcher.0022.create_job_id_in details.xml"/>
+    <include file="data/changelog/dispatcher.0023.detail_results_foreign_keys.xml"/>
+    <include file="data/changelog/dispatcher.0024.drop_result_id_and_primary_key_job_id.xml"/>
 </databaseChangeLog>

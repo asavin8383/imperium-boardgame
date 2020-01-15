@@ -24,9 +24,8 @@ public class Result implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
-    @Column(name="id", nullable=false, updatable=false)
-    private Long id;
+    @Column(nullable=false, updatable=false)
+    private Long jobId;
 
     @ManyToOne(optional = false)
     @JoinColumn(name="arrangement_id", foreignKey = @ForeignKey(name = "FK_arrangements"))
@@ -34,9 +33,6 @@ public class Result implements Serializable {
 
     @Column(name = "content_id", nullable = false)
     private Long erdiId;
-
-    @Column(nullable = false)
-    private Long jobId;
 
     @Enumerated(EnumType.STRING)
     private CheckType checkType;

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import enums.CheckUnitJobResult;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 @Data
 @NoArgsConstructor
@@ -24,8 +24,8 @@ public class CheckUnitResult {
 
     /** Время запуска */
     @NonNull
-    private LocalDateTime startTime;
+    private Date startTime;
 
     /** Время завершения */
-    private LocalDateTime endTime;
+    private Date endTime;
 }

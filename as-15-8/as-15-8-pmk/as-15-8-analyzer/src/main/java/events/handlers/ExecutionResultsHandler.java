@@ -22,7 +22,7 @@ import service.AnalyzerServiceFactory;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.time.LocalDateTime;
+import java.util.Date;
 
 @Service
 @DependsOn({"analyzerServiceFactory"})
@@ -60,7 +60,7 @@ public class ExecutionResultsHandler {
      * Метод отправки результата выполнения анализа в тему Kafka
      * @param analysisResult Результат выполнения анализа
      */
-    private void sendAnalysisResult(AnalysisResult analysisResult, LocalDateTime startTime, CheckUnitKey key, Integer partitionId) throws RuntimeException {
+    private void sendAnalysisResult(AnalysisResult analysisResult, Date startTime, CheckUnitKey key, Integer partitionId) throws RuntimeException {
         try {
             analysisResult.setStartTime(startTime);
             Message<AnalysisResult> message = MessageBuilder
@@ -77,7 +77,7 @@ public class ExecutionResultsHandler {
         }
     }
 
-    private void sendErrorNotification(Throwable cause, CheckUnitKey key, CheckUnit checkUnit, LocalDateTime startTime, Integer partitionId) {
+    private void sendErrorNotification(Throwable cause, CheckUnitKey key, CheckUnit checkUnit, Date startTime, Integer partitionId) {
         try {
             StringWriter sw = new StringWriter();
             cause.printStackTrace(new PrintWriter(sw));

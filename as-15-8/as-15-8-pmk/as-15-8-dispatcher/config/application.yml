@@ -54,8 +54,6 @@ spring:
       hibernate:
         jdbc:
           lob.non_contextual_creation: true
-          batch_size: 100
-          order_inserts: true
         format_sql: true
     databasePlatform: org.hibernate.dialect.PostgreSQL9Dialect
   jackson.serialization.FAIL_ON_EMPTY_BEANS: false
@@ -120,6 +118,9 @@ spring:
         springCloudBusOutput.destination: bus_config_output_ashabalin
   datasource:
     url: jdbc:postgresql://192.168.5.211:5432/asdb_test
+  liquibase:
+    enabled: true
+    change-log: classpath:/data/db.changelog.master.xml
 
 ---
 

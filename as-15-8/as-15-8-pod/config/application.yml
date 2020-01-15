@@ -25,7 +25,7 @@ spring:
   app:
     schedule:
       missions: '0 0 0 * * ?'
-#      missions: '0 */1 * * * ?'
+      erdi: '*/30 * * * * ?'
     jwt:
       secret: Gk-Xun_Yrkd0zigpysWS
       ttl: 86400
@@ -48,8 +48,8 @@ spring:
   profiles.include: docker_log
   app:
     schedule:
-#      missions: '0 0 0 * * ?'
       missions: '0 */1 * * * ?'
+      erdi: '* * * * * ?'
   main:
     banner-mode: "off"
   jpa:

@@ -33,6 +33,9 @@ public class ProcessingTime {
     @Column
     private Long processing_time;
 
+    @Column
+    private Long traffic_per_check_unit;
+
     @ManyToOne(optional = false)
     @JoinColumn(foreignKey = @ForeignKey(name = "robots_processing_time_id_FK"))
     @JsonIgnore

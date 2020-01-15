@@ -1,11 +1,8 @@
 package services;
 
-import enums.CheckUnitJobResult;
 import model.DetailResult;
 import model.Result;
 import model.enums.CheckType;
-
-import javax.persistence.EntityManager;
 
 /**
  * Сервис для работы с результатами анализа проверок запрещенных ресурсов
@@ -13,17 +10,19 @@ import javax.persistence.EntityManager;
  * @param <T>
  *
  */
-public interface AnalysisResultService<T> {
+public interface DetailResultService<T> {
 
 	CheckType getCheckType();
 
 	/**
 	 * Метод обработки результатов анализа проверок запрещенных ресурсов
-	 * @param analysisResult Результат анализа проверок запрещенных ресурсов
+	 * @param checkUnitResult Результат анализа проверок запрещенных ресурсов
 	 * @return
 	 */
-	DetailResult createDetails(Result result, T analysisResult);
+	DetailResult create(Result result, T checkUnitResult);
 
-	String getErrorText(T analysisResult);
+	void save(DetailResult detailResult);
+
+	String getErrorText(T checkUnitResult);
 	
 }

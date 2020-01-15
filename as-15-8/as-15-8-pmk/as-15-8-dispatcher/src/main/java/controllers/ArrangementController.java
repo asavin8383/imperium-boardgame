@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import repositories.ArrangementRepo;
 import services.ResultService;
+import services.ResultsKafkaService;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,10 +30,11 @@ public class ArrangementController {
 
     private final ArrangementRepo arrangementRepo;
     private final ResultService resultService;
+    private final ResultsKafkaService resultsKafkaService;
 
     @PostMapping
     public ResponseEntity<?> postUserResultFromPPM(@RequestBody Optional<ArrangementToExecution> arrangementToExecution) {
-        arrangementToExecution.orElseThrow(()-> new AS_15_8_DispatcherException("Arrangemnt полученный из ППМ is null"));
+        arrangementToExecution.orElseThrow(()-> new AS_15_8_DispatcherException("Arrangement полученный из ППМ is null"));
         try {
             Arrangement arrangement = new Arrangement();
             arrangement.setId(arrangementToExecution.get().getId());
@@ -47,18 +49,15 @@ public class ArrangementController {
 
     @PreAuthorize("hasAnyRole('ROLE_VIEW_RESULT','ROLE_SYSTEM')")
     @GetMapping(path = "/completion")
-    public int getArrangementCompletion(@RequestParam("id") Optional<Arrangement> arrangement){
-
+    public long getArrangementCompletion(@RequestParam("id") Optional<Arrangement> arrangement){
         arrangement.orElseThrow(() -> new AS_15_8_DispatcherException("Ошибка поиска! Такого мероприятия не существует."));
         Long checkUnits = arrangement.get().getCheckUnitsCount();
 
         if (checkUnits == null)
             throw new AS_15_8_DispatcherException("Ошибка расчёта процента выполнения мероприятия. checkUnits is null");
 
-       int arrangementsCount = resultService.getArrangementsCount(arrangement.get().getId());
-
-
-        return (int) ((arrangementsCount * 100)/checkUnits);
+        long arrangementsCount = resultsKafkaService.getResultsCount(arrangement.get().getId());
+        return arrangementsCount * 100 / checkUnits;
     }
 
     /*@GetMapping(path = "/checkUnits", produces = MediaType.TEXT_EVENT_STREAM_VALUE)

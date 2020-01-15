@@ -210,10 +210,10 @@ public class ArrangementController {
     }
 
     @PreAuthorize("hasAnyRole('ROLE_SYSTEM', 'ROLE_MANAGE_ARRANGEMENT')" )
-    @GetMapping(path = "/act_available")
-    public Boolean isActAvailable(@RequestParam("id") Optional<Arrangement> arrangement){
+    @GetMapping(path = "/act_available_for_automatic_send")
+    public Optional<Boolean> isActAvailable(@RequestParam("id") Optional<Arrangement> arrangement){
         arrangement.orElseThrow(()-> new AS_15_8_PPT_Exception("Arrangement не найден"));
-        return arrangement.get().getIsActAvailable();
+        return Optional.ofNullable(arrangement.get().getIsActAvailable());
     }
 
     @PreAuthorize("hasRole('ROLE_SYSTEM')" )

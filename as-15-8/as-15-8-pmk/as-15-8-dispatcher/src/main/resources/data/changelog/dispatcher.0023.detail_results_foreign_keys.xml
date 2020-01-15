@@ -1,0 +1,65 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+    <changeSet author="ashabalin" id="0023.1">
+        <addForeignKeyConstraint
+                baseTableSchemaName="results"
+                baseTableName="result_screenshots"
+                baseColumnNames="job_id"
+                constraintName="FK_RESULTS_JOB_ID"
+                referencedTableSchemaName="results"
+                referencedTableName="results"
+                referencedColumnNames="job_id"
+                onUpdate="CASCADE"
+                onDelete="CASCADE"/>
+    </changeSet>
+    <changeSet author="ashabalin" id="0023.2">
+        <addForeignKeyConstraint
+                baseTableSchemaName="results"
+                baseTableName="error_detail_results"
+                baseColumnNames="job_id"
+                constraintName="FK_RESULTS_JOB_ID"
+                referencedTableSchemaName="results"
+                referencedTableName="results"
+                referencedColumnNames="job_id"
+                onUpdate="CASCADE"
+                onDelete="CASCADE"/>
+    </changeSet>
+    <changeSet author="ashabalin" id="0023.3">
+        <addForeignKeyConstraint
+                baseTableSchemaName="results"
+                baseTableName="nmap_detail_results"
+                baseColumnNames="job_id"
+                constraintName="FK_RESULTS_JOB_ID"
+                referencedTableSchemaName="results"
+                referencedTableName="results"
+                referencedColumnNames="job_id"
+                onUpdate="CASCADE"
+                onDelete="CASCADE"/>
+    </changeSet>
+    <changeSet author="ashabalin" id="0023.4">
+        <addForeignKeyConstraint
+                baseTableSchemaName="results"
+                baseTableName="pasd_detail_results"
+                baseColumnNames="job_id"
+                constraintName="FK_RESULTS_JOB_ID"
+                referencedTableSchemaName="results"
+                referencedTableName="results"
+                referencedColumnNames="job_id"
+                onUpdate="CASCADE"
+                onDelete="CASCADE"/>
+    </changeSet>
+    <changeSet author="ashabalin" id="0023.5">
+        <addForeignKeyConstraint
+                baseTableSchemaName="results"
+                baseTableName="ps_detail_results"
+                baseColumnNames="job_id"
+                constraintName="FK_RESULTS_JOB_ID"
+                referencedTableSchemaName="results"
+                referencedTableName="results"
+                referencedColumnNames="job_id"
+                onUpdate="CASCADE"
+                onDelete="CASCADE"/>
+    </changeSet>
+</databaseChangeLog>

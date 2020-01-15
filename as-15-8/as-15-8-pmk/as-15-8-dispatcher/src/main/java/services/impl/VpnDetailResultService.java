@@ -1,6 +1,7 @@
 package services.impl;
 
 import analysis.VpnAnalysisResult;
+import exceptions.AS_15_8_DispatcherException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.DetailResult;
@@ -9,13 +10,16 @@ import model.Result;
 import model.enums.CheckType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import services.AnalysisResultService;
+import repositories.PasdDetailResultRepo;
+import services.DetailResultService;
 
 
 @Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class VpnAnalysisResultService implements AnalysisResultService<VpnAnalysisResult> {
+public class VpnDetailResultService implements DetailResultService<VpnAnalysisResult> {
+
+	private final PasdDetailResultRepo pasdDetailResultRepo;
 
 	@Override
 	public CheckType getCheckType() {
@@ -23,9 +27,9 @@ public class VpnAnalysisResultService implements AnalysisResultService<VpnAnalys
 	}
 
 	@Override
-	public DetailResult createDetails(Result result, VpnAnalysisResult analysisResult) {
+	public DetailResult create(Result result, VpnAnalysisResult analysisResult) {
 
-		PasdDetailResult pasdDetailResult = new PasdDetailResult();
+		PasdDetailResult pasdDetailResult = pasdDetailResultRepo.findById(result.getJobId()).orElseGet(PasdDetailResult::new);
 
 		pasdDetailResult.setResult(result);
 
@@ -52,6 +56,13 @@ public class VpnAnalysisResultService implements AnalysisResultService<VpnAnalys
 		pasdDetailResult.setForbiddenFinalUrl(analysisResult.getForbiddenFinalUrl());
 
 		return pasdDetailResult;
+	}
+
+	@Override
+	public void save(DetailResult detailResult) {
+		if(!(detailResult instanceof PasdDetailResult))
+			throw new AS_15_8_DispatcherException("Ошибка при сохранении детального результата типа " + detailResult.getClass().getSimpleName());
+		pasdDetailResultRepo.save((PasdDetailResult) detailResult);
 	}
 
 	@Override

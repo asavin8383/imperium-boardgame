@@ -6,8 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import model.enums.SlaPeriod;
-import model.enums.SlaType;
+import robots.SlaPeriod;
+import robots.SlaType;
 
 import javax.persistence.*;
 

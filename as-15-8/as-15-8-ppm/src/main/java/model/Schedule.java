@@ -51,6 +51,10 @@ public class Schedule {
     @ToString.Include
     private ScheduleStatus status;
 
+    @JsonView(Views.Brief.class)
+    @ToString.Include
+    private String description;
+
     @OneToMany(cascade=CascadeType.ALL, mappedBy = "schedule", fetch = FetchType.EAGER)
     @JsonView(Views.Full.class)
     @OrderBy("startTime")

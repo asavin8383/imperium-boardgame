@@ -1,6 +1,7 @@
 package services.impl;
 
 import analysis.AnonymizerAnalysisResult;
+import exceptions.AS_15_8_DispatcherException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.DetailResult;
@@ -9,13 +10,16 @@ import model.Result;
 import model.enums.CheckType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import services.AnalysisResultService;
+import repositories.PasdDetailResultRepo;
+import services.DetailResultService;
 
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Slf4j
-public class AnonimyzerAnalysisResultService implements AnalysisResultService<AnonymizerAnalysisResult> {
+public class AnonimyzerDetailResultService implements DetailResultService<AnonymizerAnalysisResult> {
+
+	private final PasdDetailResultRepo pasdDetailResultRepo;
 
 	@Override
 	public CheckType getCheckType() {
@@ -23,9 +27,9 @@ public class AnonimyzerAnalysisResultService implements AnalysisResultService<An
 	}
 
 	@Override
-	public DetailResult createDetails(Result result, AnonymizerAnalysisResult analysisResult) {
+	public DetailResult create(Result result, AnonymizerAnalysisResult analysisResult) {
 
-		PasdDetailResult pasdDetailResult = new PasdDetailResult();
+		PasdDetailResult pasdDetailResult = pasdDetailResultRepo.findById(result.getJobId()).orElseGet(PasdDetailResult::new);
 
 		pasdDetailResult.setResult(result);
 
@@ -51,6 +55,13 @@ public class AnonimyzerAnalysisResultService implements AnalysisResultService<An
 		pasdDetailResult.setResultNLP(analysisResult.getResultNLP());
 
 		return pasdDetailResult;
+	}
+
+	@Override
+	public void save(DetailResult detailResult) {
+		if(!(detailResult instanceof PasdDetailResult))
+			throw new AS_15_8_DispatcherException("Ошибка при сохранении детального результата типа " + detailResult.getClass().getSimpleName());
+		pasdDetailResultRepo.save((PasdDetailResult) detailResult);
 	}
 
 	@Override

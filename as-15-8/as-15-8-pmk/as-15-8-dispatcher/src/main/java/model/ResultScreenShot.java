@@ -1,8 +1,6 @@
 package model;
 
-import enums.CheckUnitJobResult;
 import lombok.Data;
-import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
@@ -21,10 +19,12 @@ public class ResultScreenShot implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    private Long id;
+    @Column(name = "job_id", insertable = false, updatable = false)
+    private Long jobId;
 
-    @OneToOne(optional = false)
     @MapsId
+    @OneToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "job_id")
     private Result result;
 
     @Lob

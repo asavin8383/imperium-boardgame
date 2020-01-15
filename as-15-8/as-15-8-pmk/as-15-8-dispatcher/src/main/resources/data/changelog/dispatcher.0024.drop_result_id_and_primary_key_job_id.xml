@@ -1,0 +1,34 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+    <changeSet author="ashabalin" id="0024.1">
+        <dropForeignKeyConstraint baseTableName="result_screenshots" baseTableSchemaName="results" constraintName="FK_RESULTS"/>
+        <dropColumn tableName="result_screenshots" schemaName="results" columnName="result_id" />
+        <addPrimaryKey tableName="result_screenshots" schemaName="results" columnNames="job_id" />
+    </changeSet>
+    <changeSet author="ashabalin" id="0024.2">
+        <dropForeignKeyConstraint baseTableName="error_detail_results" baseTableSchemaName="results" constraintName="FK_RESULTS"/>
+        <dropColumn tableName="error_detail_results" schemaName="results" columnName="result_id" />
+        <addPrimaryKey tableName="error_detail_results" schemaName="results" columnNames="job_id" />
+    </changeSet>
+    <changeSet author="ashabalin" id="0024.3">
+        <dropForeignKeyConstraint baseTableName="nmap_detail_results" baseTableSchemaName="results" constraintName="FK_RESULTS"/>
+        <dropColumn tableName="nmap_detail_results" schemaName="results" columnName="result_id" />
+        <addPrimaryKey tableName="nmap_detail_results" schemaName="results" columnNames="job_id" />
+    </changeSet>
+    <changeSet author="ashabalin" id="0024.4">
+        <dropForeignKeyConstraint baseTableName="pasd_detail_results" baseTableSchemaName="results" constraintName="FK_RESULTS"/>
+        <dropColumn tableName="pasd_detail_results" schemaName="results" columnName="result_id" />
+        <addPrimaryKey tableName="pasd_detail_results" schemaName="results" columnNames="job_id" />
+    </changeSet>
+    <changeSet author="ashabalin" id="0024.5">
+        <dropForeignKeyConstraint baseTableName="ps_detail_results" baseTableSchemaName="results" constraintName="FK_RESULTS"/>
+        <dropColumn tableName="ps_detail_results" schemaName="results" columnName="result_id" />
+        <addPrimaryKey tableName="ps_detail_results" schemaName="results" columnNames="job_id" />
+    </changeSet>
+    <changeSet author="ashabalin" id="0024.6">
+        <dropColumn tableName="results" schemaName="results" columnName="id" />
+        <addPrimaryKey tableName="results" schemaName="results" columnNames="job_id" />
+    </changeSet>
+</databaseChangeLog>
