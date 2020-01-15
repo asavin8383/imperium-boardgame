@@ -2404,10 +2404,30 @@
 				{
 					"name": "Получение списка трафиков",
 					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqYWNrIiwicm9sZSI6IlJPTEVfT1BFUkFUT1IsUk9MRV9GT1JNQUxfVEFTSyxST0xFX01BTkFHRV9GT1JNQUxfVEFTSyxST0xFX01BTkFHRV9BUlJBTkdFTUVOVCxST0xFX1BSRVBBUkFUSU9OX1RSQUZGSUMsUk9MRV9ESUNUSU9OQVJZLFJPTEVfRk9STUFUSU9OX09GX1NDSEVEVUxFLFJPTEVfVklFV19SRVNVTFQsUk9MRV9TRU5EX0FDVF9CWV9IQU5ELFJPTEVfTUFOQUdFX1BTX1BBU0QsUk9MRV9NQU5BR0VfRVJESSxST0xFX1ZJRVdfUkVQT1JULFJPTEVfRk9STUFUSU9OX1BBUkFNX1JFUE9SVCxST0xFX01BTkFHRV9ET01BSU5TLFJPTEVfTUFOQUdFX01BTlVBTF9BUlJBTkdFTUVOVCIsIm1haWwiOiIiLCJ1c2VyX25hbWUiOiJqYWNrIiwic2NvcGUiOlsicmVhZCIsIndyaXRlIl0sImV4cCI6MTU3OTA4NDEyMywidXNlck5hbWUiOiJqYWNrIiwiYXV0aG9yaXRpZXMiOlsiUk9MRV9PUEVSQVRPUiIsIlJPTEVfUFJFUEFSQVRJT05fVFJBRkZJQyIsIlJPTEVfRk9STUFUSU9OX1BBUkFNX1JFUE9SVCIsIlJPTEVfTUFOQUdFX01BTlVBTF9BUlJBTkdFTUVOVCIsIlJPTEVfTUFOQUdFX1BTX1BBU0QiLCJST0xFX0ZPUk1BVElPTl9PRl9TQ0hFRFVMRSIsIlJPTEVfTUFOQUdFX0VSREkiLCJST0xFX0ZPUk1BTF9UQVNLIiwiUk9MRV9ESUNUSU9OQVJZIiwiUk9MRV9WSUVXX1JFUE9SVCIsIlJPTEVfTUFOQUdFX0ZPUk1BTF9UQVNLIiwiUk9MRV9NQU5BR0VfQVJSQU5HRU1FTlQiLCJST0xFX1ZJRVdfUkVTVUxUIiwiUk9MRV9TRU5EX0FDVF9CWV9IQU5EIiwiUk9MRV9NQU5BR0VfRE9NQUlOUyJdLCJqdGkiOiIzZDBmNzA2Yi1iMmZkLTRkZTYtOGNkZS05NTcxOGZiNGE1YmIiLCJjbGllbnRfaWQiOiJhcy0xNS04Iiwic2Vjb25kTmFtZSI6IiJ9.N8yvJck-2FRa2uBG0zVo-0e8YbGurDVX-lenL5COePOfC6sDTKVQMnr-WCM8jw48yGDQFWFvYaULzxPyAVDhUQebRfcJM5IMs9D6VtDzuToGx_W00Ny4SU3ntJhXUZamMDjZ6RnJDXnNe9zzn6H2bCEm0YMOlXq-qaqtAq2itIBEkVhm4_lx4fgYJoAQi84X4lgsGOOiNroYobskv1iFPfq32qLcwXWjrVgGjpNgepfErYMLTfThGN7292o4kMdZtv3DMTYZiGmelQeyguQMgM2laSKf1iHEZqQ0jeq_L3CqGUTHKYxauWLBJCFPG0lfkwgjf02RhLdMQcNIf-7F2g",
+									"type": "string"
+								},
+								{
+									"key": "tokenType",
+									"value": "bearer",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{url}}/traffic?",
+							"raw": "{{url}}/traffic?pageSize=50&name=traffic",
 							"host": [
 								"{{url}}"
 							],
@@ -2437,8 +2457,11 @@
 								},
 								{
 									"key": "pageSize",
-									"value": "5",
-									"disabled": true
+									"value": "50"
+								},
+								{
+									"key": "name",
+									"value": "traffic"
 								}
 							]
 						}
@@ -3443,25 +3466,25 @@
 	],
 	"variable": [
 		{
-			"id": "a923ac68-4b5c-46fa-a63c-30812864856f",
+			"id": "fd608c87-f97d-4a1a-8286-1e843dc53937",
 			"key": "url",
 			"value": "http://localhost:15800",
 			"type": "string"
 		},
 		{
-			"id": "d1072301-5d38-40f8-babe-a9bc8a97b0eb",
+			"id": "71eeaf7e-268f-4342-a03a-375ca3283e77",
 			"key": "oper_token",
 			"value": "",
 			"type": "string"
 		},
 		{
-			"id": "cdbd9f70-166f-4fc0-90a2-fd568c5fa54b",
+			"id": "12e9f04f-66db-4c0e-bba4-2710db91df67",
 			"key": "test_url",
 			"value": "http://192.168.5.253:15800",
 			"type": "string"
 		},
 		{
-			"id": "3cb364b9-a3f7-45b8-af3d-fcb7380733b7",
+			"id": "83eb7ee9-5bcf-45aa-b757-3b71fd7e0345",
 			"key": "admin_token",
 			"value": "",
 			"type": "string"
