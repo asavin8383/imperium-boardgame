@@ -122,7 +122,7 @@ public class ResultService {
         log.info("Результат создан: " + result.toString());
         result.setArrangement(arrangement);
         resultsKafkaService.fillResult(result, jobId, analysisResult, service);
-        resultRepo.save(result);
+        result = resultRepo.save(result);
         log.info("Результат сохранен: " + result.toString());
         DetailResult detailResult = service.create(result, analysisResult);
         service.save(detailResult);
@@ -145,7 +145,7 @@ public class ResultService {
         Result result = resultRepo.findById(jobId).orElseGet(Result::new);
         result.setArrangement(arrangement);
         resultsKafkaService.fillResult(result, jobId, checkUnitResult, service);
-        resultRepo.save(result);
+        result = resultRepo.save(result);
 
         if (status == CheckUnitJobResult.INTERNAL_ERROR || status == CheckUnitJobResult.TIMEOUT_ERROR) {
             DetailResult detailResult = service.create(result, checkUnitResult);
