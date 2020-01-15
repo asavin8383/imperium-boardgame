@@ -1,6 +1,7 @@
 package model;
 
 import checkUnits.CheckUnitType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import enums.CheckUnitJobResult;
 import lombok.Data;
 import model.enums.CheckType;
@@ -68,6 +69,7 @@ public class Result implements Serializable {
             orphanRemoval = true,
             fetch = FetchType.LAZY
     )
+    @JsonIgnore
     private ResultScreenShot resultScreenShot;
 
     @OneToOne(
@@ -76,5 +78,6 @@ public class Result implements Serializable {
             orphanRemoval = true,
             fetch = FetchType.LAZY
     )
+    @JsonIgnore
     private DetailResult detailResult;
 }
