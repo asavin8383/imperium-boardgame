@@ -60,7 +60,7 @@ public class TrafficService {
             return view;
         }).collect(Collectors.toList());
 
-        if (!filteredName.isEmpty())
+        if (filteredName != null && !filteredName.isEmpty())
            views = views.stream().filter(r -> r.getName().toUpperCase().contains(filteredName.toUpperCase())).collect(Collectors.toList());
 
         return new PageImpl<>(views, pageable, traffics.getTotalElements());
