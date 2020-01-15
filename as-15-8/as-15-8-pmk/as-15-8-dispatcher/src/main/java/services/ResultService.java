@@ -48,6 +48,7 @@ public class ResultService {
                 long count = resultsKafkaService.getResultsCount(arrangement.getId());
                 if(count == 0)
                     break;
+                log.info("У мероприятия " + arrangement.getId() + " найдено " + count + " завершенных проверок");
 
                 if (arrangement.getCheckUnitsCount() == count) {
                     log.info("Начато сохранение мероприятия: " + arrangement.getId());
