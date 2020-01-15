@@ -25,7 +25,6 @@ import restapi.ArrangementStatusProducer;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -41,17 +40,16 @@ public class ResultService {
 
     @Scheduled(cron = "${results.save.schedule}")
     public void saveResults() {
+        log.info("Запуск сохранения результатов проверок звершенных мероприятий");
         try{
             List<Arrangement> runningArrangements = arrangementRepo.findRunning();
 
             for (Arrangement arrangement : runningArrangements) {
-                AtomicInteger count = new AtomicInteger();
-                resultsKafkaService.getArrangementResultsIterator(arrangement.getId())
-                        .ifPresent(iter -> iter.forEachRemaining(obj -> count.getAndIncrement()));
-                if(count.longValue() == 0)
+                long count = resultsKafkaService.getResultsCount(arrangement.getId());
+                if(count == 0)
                     break;
 
-                if (arrangement.getCheckUnitsCount() == count.longValue()) {
+                if (arrangement.getCheckUnitsCount() == count) {
                     log.info("Начато сохранение мероприятия: " + arrangement.getId());
                     resultsKafkaService.getArrangementResultsIterator(arrangement.getId())
                         .ifPresent(resultsIterator -> {

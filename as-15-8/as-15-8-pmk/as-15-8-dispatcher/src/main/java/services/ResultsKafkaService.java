@@ -84,8 +84,11 @@ public class ResultsKafkaService {
     }
 
     public long getResultsCount(Long arrangementId) {
-        return getResultsKeyValueStore().
+        /*return getResultsKeyValueStore().
                 map(ReadOnlyKeyValueStore::approximateNumEntries)
+                .orElse(0L);*/
+        return getArrangementResultsIterator(arrangementId)
+                .map(this::countIteratorSize)
                 .orElse(0L);
         /*KeyValueIterator<CheckUnitKey, CheckUnitResult> resultsIterator = getArrangementResultsIterator(store, arrangementId);
         return countIteratorSize(resultsIterator);*/
@@ -118,7 +121,7 @@ public class ResultsKafkaService {
         result.setCheckType(service.getCheckType());
     }
 
-    private int countIteratorSize(KeyValueIterator<CheckUnitKey, CheckUnitResult> resultsIterator) {
+    private long countIteratorSize(KeyValueIterator<CheckUnitKey, CheckUnitResult> resultsIterator) {
         AtomicInteger count = new AtomicInteger();
         resultsIterator.forEachRemaining( s-> count.getAndIncrement());
         return count.get();
