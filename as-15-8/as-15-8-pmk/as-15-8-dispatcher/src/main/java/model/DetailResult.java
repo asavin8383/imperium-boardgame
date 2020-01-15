@@ -13,6 +13,7 @@ public abstract class DetailResult implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
+    @Column(name = "job_id", insertable = false, updatable = false)
     private Long jobId;
 
     @MapsId
