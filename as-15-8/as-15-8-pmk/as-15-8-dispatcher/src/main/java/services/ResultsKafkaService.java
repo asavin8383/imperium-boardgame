@@ -149,6 +149,8 @@ public class ResultsKafkaService {
     @SuppressWarnings("unchecked")
     private Comparator<KeyValue<CheckUnitKey, CheckUnitResult>> createResultsComparator(String columnName) {
         try {
+            if(Strings.isEmpty(columnName))
+                return Comparator.comparing((KeyValue<CheckUnitKey, CheckUnitResult> kv) -> kv.value.getEndTime());
             String methodName = "get" +
                     columnName.substring(0, 1).toUpperCase() +
                     columnName.substring(1);
