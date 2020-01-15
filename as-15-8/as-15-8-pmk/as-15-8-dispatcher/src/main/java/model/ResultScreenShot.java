@@ -19,6 +19,7 @@ public class ResultScreenShot implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
+    @Column(insertable = false, updatable = false)
     private Long id;
 
     @MapsId
