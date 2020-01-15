@@ -1,6 +1,7 @@
 package model;
 
 import checkUnits.CheckUnitType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import enums.CheckUnitJobResult;
 import lombok.Data;
 import model.enums.CheckType;
@@ -25,13 +26,13 @@ public class Result implements Serializable {
 
     @Id
     @Column(nullable=false, updatable=false)
-    private Long jobId;
+    private Long id;
 
     @ManyToOne(optional = false)
     @JoinColumn(name="arrangement_id", foreignKey = @ForeignKey(name = "FK_arrangements"))
     private Arrangement arrangement;
 
-    @Column(name = "content_id", nullable = false)
+    @Column(name = "content_id")
     private Long erdiId;
 
     @Enumerated(EnumType.STRING)
@@ -60,5 +61,61 @@ public class Result implements Serializable {
 
     public Result() {
         this.startDate = LocalDateTime.now();
+    }
+
+    @OneToOne(
+            mappedBy = "result",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
+    @JsonIgnore
+    private ResultScreenShot resultScreenShot;
+
+    @OneToOne(
+            mappedBy = "result",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
+    @JsonIgnore
+    private PsDetailResult psDetailResult;
+
+    @OneToOne(
+            mappedBy = "result",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
+    @JsonIgnore
+    private PasdDetailResult pasdDetailResult;
+
+    @OneToOne(
+            mappedBy = "result",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
+    @JsonIgnore
+    private NmapDetailResult nmapDetailResult;
+
+    @OneToOne(
+            mappedBy = "result",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
+    @JsonIgnore
+    private ErrorDetailResult errorDetailResult;
+
+    public void setDetailResult(DetailResult detailResult){
+        if(detailResult instanceof PsDetailResult)
+            this.psDetailResult = (PsDetailResult) detailResult;
+        else if(detailResult instanceof PasdDetailResult)
+            this.pasdDetailResult = (PasdDetailResult) detailResult;
+        else if(detailResult instanceof NmapDetailResult)
+            this.nmapDetailResult = (NmapDetailResult) detailResult;
+        else if(detailResult instanceof ErrorDetailResult)
+            this.errorDetailResult = (ErrorDetailResult) detailResult;
     }
 }

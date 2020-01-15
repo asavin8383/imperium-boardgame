@@ -19,12 +19,11 @@ public class ResultScreenShot implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @Column(name = "job_id", insertable = false, updatable = false)
-    private Long jobId;
+    @Column(insertable = false, updatable = false)
+    private Long id;
 
     @MapsId
     @OneToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "job_id")
     private Result result;
 
     @Lob

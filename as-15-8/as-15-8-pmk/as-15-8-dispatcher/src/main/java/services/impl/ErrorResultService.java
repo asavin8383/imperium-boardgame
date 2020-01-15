@@ -31,7 +31,7 @@ public class ErrorResultService implements DetailResultService<CheckUnitStatusNo
 
 	@Override
 	public DetailResult create(Result result, CheckUnitStatusNotification checkUnitResult) {
-		ErrorDetailResult errorDetailResult = errorDetailResultRepo.findById(result.getJobId()).orElseGet(ErrorDetailResult::new);
+		ErrorDetailResult errorDetailResult = errorDetailResultRepo.findById(result.getId()).orElseGet(ErrorDetailResult::new);
 
 		errorDetailResult.setResult(result);
 

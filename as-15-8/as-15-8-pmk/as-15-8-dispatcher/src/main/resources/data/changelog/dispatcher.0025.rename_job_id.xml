@@ -1,0 +1,23 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+    <changeSet author="ashabalin" id="0024.1">
+        <renameColumn tableName="results" schemaName="results" oldColumnName="job_id" newColumnName="id" />
+    </changeSet>
+    <changeSet author="ashabalin" id="0024.2">
+        <renameColumn tableName="error_detail_results" schemaName="results" oldColumnName="job_id" newColumnName="result_id" />
+    </changeSet>
+    <changeSet author="ashabalin" id="0024.3">
+        <renameColumn tableName="nmap_detail_results" schemaName="results" oldColumnName="job_id" newColumnName="result_id" />
+    </changeSet>
+    <changeSet author="ashabalin" id="0024.4">
+        <renameColumn tableName="pasd_detail_results" schemaName="results" oldColumnName="job_id" newColumnName="result_id" />
+    </changeSet>
+    <changeSet author="ashabalin" id="0024.5">
+        <renameColumn tableName="ps_detail_results" schemaName="results" oldColumnName="job_id" newColumnName="result_id" />
+    </changeSet>
+    <changeSet author="ashabalin" id="0024.6">
+        <renameColumn tableName="result_screenshots" schemaName="results" oldColumnName="job_id" newColumnName="result_id" />
+    </changeSet>
+</databaseChangeLog>

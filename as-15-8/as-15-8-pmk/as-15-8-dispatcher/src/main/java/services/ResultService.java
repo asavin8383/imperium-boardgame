@@ -122,10 +122,11 @@ public class ResultService {
         log.info("Результат создан: " + result.toString());
         result.setArrangement(arrangement);
         resultsKafkaService.fillResult(result, jobId, analysisResult, service);
-        resultRepo.save(result);
+        //result = resultRepo.save(result);
         log.info("Результат сохранен: " + result.toString());
         DetailResult detailResult = service.create(result, analysisResult);
-        service.save(detailResult);
+        result.setDetailResult(detailResult);
+        //service.save(detailResult);
         log.info("Детальный результат сохранен: " + detailResult.toString());
 
         if((analysisResult.getScreenshot() != null && analysisResult.getScreenshot().length > 0) ||
@@ -134,10 +135,12 @@ public class ResultService {
             resultScreenShot.setResult(result);
             resultScreenShot.setScreenshot(analysisResult.getScreenshot());
             resultScreenShot.setEtalonScreenshot(analysisResult.getEtalonScreenshot());
-            log.info("Сохранение скриншота: " + resultScreenShot.getJobId());
-            resultScreenShotRepo.save(resultScreenShot);
-            log.info("Скриншот сохранен: " + resultScreenShot.getJobId());
+            log.info("Сохранение скриншота: " + resultScreenShot.getId());
+            //resultScreenShotRepo.save(resultScreenShot);
+            result.setResultScreenShot(resultScreenShot);
+            log.info("Скриншот сохранен: " + resultScreenShot.getId());
         }
+        resultRepo.save(result);
     }
 
     private void saveJobStatus(Arrangement arrangement, Long jobId, CheckUnitResult checkUnitResult, CheckUnitJobResult status, String description) {
@@ -145,11 +148,13 @@ public class ResultService {
         Result result = resultRepo.findById(jobId).orElseGet(Result::new);
         result.setArrangement(arrangement);
         resultsKafkaService.fillResult(result, jobId, checkUnitResult, service);
-        resultRepo.save(result);
+        //result = resultRepo.save(result);
 
         if (status == CheckUnitJobResult.INTERNAL_ERROR || status == CheckUnitJobResult.TIMEOUT_ERROR) {
             DetailResult detailResult = service.create(result, checkUnitResult);
-            service.save(detailResult);
+            result.setDetailResult(detailResult);
+            //service.save(detailResult);
         }
+        resultRepo.save(result);
     }
 }

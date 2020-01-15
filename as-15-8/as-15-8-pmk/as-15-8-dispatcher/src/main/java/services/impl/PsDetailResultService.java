@@ -31,7 +31,7 @@ public class PsDetailResultService implements DetailResultService<PS_AnalysisJob
 
 	@Override
 	public DetailResult create(Result result, PS_AnalysisJobResult analysisResult) {
-		PsDetailResult psDetailResult = psDetailResultRepo.findById(result.getJobId()).orElseGet(PsDetailResult::new);
+		PsDetailResult psDetailResult = psDetailResultRepo.findById(result.getId()).orElseGet(PsDetailResult::new);
 
 		psDetailResult.setResult(result);
 
