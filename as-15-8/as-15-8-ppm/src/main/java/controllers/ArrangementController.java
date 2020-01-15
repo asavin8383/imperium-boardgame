@@ -14,11 +14,14 @@ import model.Arrangement;
 import model.ScheduleCheckUnit;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.util.UriComponentsBuilder;
 import repositories.ArrangementRepo;
 import repositories.ScheduleRepo;
 import restapi.ArrangementStatusUploader;
@@ -51,6 +54,11 @@ public class ArrangementController {
     private final DomainMaskUploader domainMaskUploader;
     private final ScheduleRepo scheduleRepo;
     private final ScheduleService scheduleService;
+    private final OAuth2RestTemplate restTemplate;
+
+    @Value("${gateway.url}")
+    private String gatewayUrl;
+    private final String PPT_STATUS_ENDPOINT = "/ppt/arrangements/status";
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @Transactional
@@ -83,18 +91,25 @@ public class ArrangementController {
         }
     }
 
-    @PutMapping("/close")
+    @PutMapping(value = "/close", consumes = MediaType.APPLICATION_JSON_VALUE)
     @Transactional
-    public void updateArrangementStatus(@RequestParam("id") Arrangement arrangement){
+    public void updateArrangementStatus(@RequestParam("id") Arrangement arrangement, @RequestBody ArrangementStatusNotification notification){
         if (arrangement == null){
             throw new AS_15_8_PPM_Exception("Ошибка закрытия мероприятия! Мероприятие не было найдено в БД");
         }
-        arrangement.setClosed(true);
-        arrangementRepo.save(arrangement);
-        scheduleService.checkAndCloseSchedule(
-            scheduleRepo.findByArrangement(arrangement.getId())
-                .orElseThrow(() -> new AS_15_8_PPM_Exception("Ошибка проверки закрытия расписания! Расписание не найдено по ИД мероприятия: " + arrangement.getId()))
-        );
+
+        if (notification == null){
+            throw new AS_15_8_PPM_Exception("Ошибка закрытия мероприятия! ArrangementStatusNotification is null");
+        }
+
+        if (sendToPPT(notification)) {
+            arrangement.setClosed(true);
+            arrangementRepo.save(arrangement);
+            scheduleService.checkAndCloseSchedule(
+                    scheduleRepo.findByArrangement(arrangement.getId())
+                            .orElseThrow(() -> new AS_15_8_PPM_Exception("Ошибка проверки закрытия расписания! Расписание не найдено по ИД мероприятия: " + arrangement.getId()))
+            );
+        }
     }
 
     private void getAndSaveArrangementCheckUnits(Arrangement arrangement){
@@ -170,6 +185,24 @@ public class ArrangementController {
         scheduleCheckUnit.setCheckUnitType(checkUnitType);
         scheduleCheckUnit.setCheckUnitValue(checkUnitValue);
         return scheduleCheckUnit;
+    }
+
+    private boolean sendToPPT(ArrangementStatusNotification arrangementStatusNotification){
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<ArrangementStatusNotification> entity = new HttpEntity<>(arrangementStatusNotification, headers);
+
+        log.info("Отправка сообщения с изменением статуса мероприятия {} в ППТ", arrangementStatusNotification.getArrangementId());
+        try {
+            restTemplate.put(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(PPT_STATUS_ENDPOINT).build().toString(), entity);
+        } catch (HttpClientErrorException | HttpServerErrorException ex) {
+            //throw AS_15_8_PPM_Exception.logAndGet(log, String.format("Ошибка отправки сообщения с изменением статуса мероприятия %d в ППТ, код возврата %s", arrangementStatusNotification.getArrangementId(), ex.getStatusCode()));
+            log.info("Ошибка отправки сообщения с изменением статуса мероприятия %d в ППТ, код возврата %s", arrangementStatusNotification.getArrangementId(), ex.getStatusCode());
+            return false;
+        }
+        log.info("Сообщение с изменением статуса мероприятия {} успешно отправлено в ППТ", arrangementStatusNotification.getArrangementId());
+        return true;
     }
 
 }
