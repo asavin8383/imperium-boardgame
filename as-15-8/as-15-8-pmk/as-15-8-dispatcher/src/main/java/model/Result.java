@@ -61,4 +61,20 @@ public class Result implements Serializable {
     public Result() {
         this.startDate = LocalDateTime.now();
     }
+
+    @OneToOne(
+            mappedBy = "result",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
+    private ResultScreenShot resultScreenShot;
+
+    @OneToOne(
+            mappedBy = "result",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
+    private DetailResult detailResult;
 }
