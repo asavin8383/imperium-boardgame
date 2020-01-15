@@ -4,6 +4,8 @@ import checkUnits.CheckUnit;
 import enums.CheckUnitJobResult;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 /**
  * Сообщение об изменении статуса проверки запрещенного ресурса
  * @author shabalinAI
@@ -17,8 +19,8 @@ public class CheckUnitStatusNotification extends CheckUnitResult {
 	private String description;
 
 	@Builder
-	public CheckUnitStatusNotification(Long jobID, Long erdiID, CheckUnitJobResult checkResult, CheckUnit checkUnit, String description){
-		super(jobID, erdiID, checkResult, checkUnit);
+	public CheckUnitStatusNotification(CheckUnitJobResult checkResult, CheckUnit checkUnit, LocalDateTime startTime, String description){
+		super(checkResult, checkUnit, startTime);
 		this.description = description;
 	}
 }

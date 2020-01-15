@@ -1,5 +1,6 @@
 package events.handlers;
 
+import checkUnits.CheckUnit;
 import checkUnits.CheckUnitJob;
 import analysis.CheckUnitStatusNotification;
 import checkUnits.CheckUnitKey;
@@ -26,6 +27,7 @@ import service.impl.RobotsServiceImpl;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.time.LocalDateTime;
 import java.util.concurrent.*;
 
 @Service
@@ -52,21 +54,23 @@ public class CheckUnitJobHandler {
                 ", partition: " + partitionId +
                 ", offset: "+message.getHeaders().get(KafkaHeaders.OFFSET, Long.class));
         String verificationName = "";
+        LocalDateTime startTime = LocalDateTime.now();
 
         try {
-            verificationName = "jobID = " + message.getPayload().getJobID() +
-                    " accessTool = " + message.getPayload().getAccessTool() +
-                    " checkUnit = " + message.getPayload().getCheckUnit().getValue();
+            CheckUnitJob job = message.getPayload();
+            verificationName = "jobID = " + job.getJobID() +
+                    " accessTool = " + job.getAccessTool() +
+                    " checkUnit = " + job.getCheckUnit().getValue();
 
             CheckUnitVerificationService service =
                     checkUnitVerificationServiceFactory
-                            .getService(message.getPayload());
+                            .getService(job);
 
             ExecutionJobResult executionJobResult;
 
             if (service instanceof RobotsServiceImpl && getTimeout() >= 0){
                 executionJobResult = CompletableFuture
-                        .supplyAsync(() -> service.run(message.getPayload()))
+                        .supplyAsync(() -> service.run(job))
                         .applyToEither(timeoutAfter(getTimeout(), TimeUnit.SECONDS), (result) -> result)
                         .exceptionally(throwable -> {
                             service.stop();
@@ -75,10 +79,10 @@ public class CheckUnitJobHandler {
                 .join();
             }
             else {
-                executionJobResult = service.run(message.getPayload());
+                executionJobResult = service.run(job);
             }
 
-            sendExecutionResult(executionJobResult, key, partitionId);
+            sendExecutionResult(executionJobResult, key, partitionId, startTime);
         } catch (Exception ex) {
             Throwable te = ex;
             while(te.getCause() != null && te instanceof CompletionException) {
@@ -86,12 +90,7 @@ public class CheckUnitJobHandler {
             }
 
             try {
-                sendCheckJobErrorNotification(
-                        message.getPayload().getJobID(),
-                        message.getPayload().getCheckUnit().getContentId(),
-                        te,
-                        key,
-                        partitionId);
+                sendCheckJobErrorNotification(te, key, message.getPayload().getCheckUnit(), partitionId, startTime);
             } catch (Exception sendEx) {
                 log.error("Ошибка при отправке сообщения с ошибкой при выполнении задания на проверку запрещенного ресурса: "+verificationName, sendEx);
             }
@@ -131,8 +130,9 @@ public class CheckUnitJobHandler {
      * Метод отправки результата выполнения робота в тему Kafka
      * @param jobResult Результат выполнения робота
      */
-    private void sendExecutionResult(ExecutionJobResult jobResult, CheckUnitKey key, Integer partitionId) throws RuntimeException {
+    private void sendExecutionResult(ExecutionJobResult jobResult, CheckUnitKey key, Integer partitionId, LocalDateTime startTime) throws RuntimeException {
         try {
+            jobResult.setStartTime(startTime);
             Message<ExecutionJobResult> message = MessageBuilder
                     .withPayload(jobResult)
                     .setHeader(KafkaHeaders.PARTITION_ID, partitionId)
@@ -141,17 +141,18 @@ public class CheckUnitJobHandler {
 
             boolean send = executorChannels.executionResults().send(message);
             if(send)
-                log.info("Сообщение успешно отправлено: " + jobResult.getJobID() + ", " + jobResult.getCheckUnit().getValue());
+                log.info("Сообщение успешно отправлено: " + key.getJobId() + ", " + jobResult.getCheckUnit().getValue());
         } catch (Exception ex) {
             throw new RuntimeException("Ошибка при отправке сообщения с результатами работы робота", ex);
         }
     }
 
-    private void sendCheckJobErrorNotification(Long jobID, Long erdiId, Throwable cause, CheckUnitKey key, Integer partitionId) {
+    private void sendCheckJobErrorNotification(Throwable cause, CheckUnitKey key, CheckUnit checkUnit, Integer partitionId, LocalDateTime startTime) {
         try {
             CheckUnitStatusNotification.CheckUnitStatusNotificationBuilder notificationBuilder = CheckUnitStatusNotification.builder();
-            notificationBuilder.jobID(jobID);
-            notificationBuilder.erdiID(erdiId);
+            notificationBuilder
+                    .checkUnit(checkUnit)
+                    .startTime(startTime);
             if(cause instanceof Captcha_ExecutionException) {
                 notificationBuilder.checkResult(CheckUnitJobResult.CAPTCHA_DETECTED);
             }
@@ -172,9 +173,9 @@ public class CheckUnitJobHandler {
                     .setHeader(KafkaHeaders.MESSAGE_KEY, key)
                     .build();
 
-            boolean send = executorChannels.notifications().send(message);
+            boolean send = executorChannels.results().send(message);
             if(send)
-                log.info("Сообщение успешно отправлено: " + notification.getJobID() + ", " + notification.getCheckResult());
+                log.info("Сообщение успешно отправлено: " + key.getJobId() + ", " + notification.getCheckResult());
         } catch (Exception ex) {
             throw new RuntimeException("Ошибка при отправке сообщения с уведомлением об ошибке", ex);
         }

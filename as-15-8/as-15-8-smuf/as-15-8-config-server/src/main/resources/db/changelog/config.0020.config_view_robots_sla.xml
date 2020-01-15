@@ -1,0 +1,108 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+    <changeSet author="danikanov" id="0020">
+        <sql>
+            create or replace view config.config as
+            WITH robots_properties AS (
+            SELECT ((((('robots.'::text || (robots.access_tool)::text) || '.'::text) || (robots.name)::text) ||
+            '.'::text) || (robot_props.key)::text) AS key,
+            robot_props.value,
+            robots_configurations.configuration_id
+            FROM (((config.robots robots
+            JOIN config.robots_properties robot_props ON ((robots.id = robot_props.robot_id)))
+            JOIN config.robots_configurations ON ((robots.id = robots_configurations.robot_id)))
+            JOIN config.configurations ON (((robots_configurations.configuration_id = configurations.id) AND
+            ((configurations.application)::text = 'executor'::text))))
+            UNION
+            SELECT ('access-tools.'::text || (robots.name)::text) AS key,
+            robots.access_tool                             AS value,
+            robots_configurations.configuration_id
+            FROM ((config.robots robots
+            JOIN config.robots_configurations ON ((robots.id = robots_configurations.robot_id)))
+            JOIN config.configurations ON (((robots_configurations.configuration_id = configurations.id) AND
+            ((configurations.application)::text = 'ppm'::text))))
+            UNION
+            SELECT ((('processing-times.'::text || (robots.name)::text) || '.'::text) || times.check_method) AS key,
+            (times.processing_time)::text                                                             AS value,
+            robots_configurations.configuration_id
+            FROM (((config.robots robots
+            JOIN config.robots_configurations ON ((robots.id = robots_configurations.robot_id)))
+            JOIN config.configurations ON (((robots_configurations.configuration_id = configurations.id) AND
+            ((configurations.application)::text = 'ppm'::text))))
+            JOIN config.processing_times times ON ((robots.id = times.robot_id)))
+
+            UNION
+            SELECT ((('robots-sla.'::text || LOWER(sla.sla_type) || '.'::text || (robots.name)::text) || '.'::text) || LOWER(sla.sla_period)) AS key,
+            (sla.check_unit_value)::text                                                             AS value,
+            robots_configurations.configuration_id
+            FROM config.robots robots
+            JOIN config.robots_configurations ON (robots.id = robots_configurations.robot_id)
+            JOIN config.configurations ON (robots_configurations.configuration_id = configurations.id AND
+            configurations.application::text = 'ppm'::text)
+            JOIN config.robots_sla sla ON robots.id = sla.robot_id
+            )
+            SELECT conf.application,
+            conf.profile,
+            conf.label,
+            g_props.key,
+            g_props.value
+            FROM (config.configurations conf
+            JOIN config.global_properties g_props ON ((conf.id = g_props.configuration_id)))
+            UNION
+            SELECT conf.application,
+            conf.profile,
+            conf.label,
+            robots_properties.key,
+            robots_properties.value
+            FROM (config.configurations conf
+            JOIN robots_properties ON ((conf.id = robots_properties.configuration_id)));
+        </sql>
+        <rollback>
+            create or replace view config.config as
+            with robots_properties as(
+            select
+            'robots.' || robots.access_tool || '.' || robots.name || '.' || robot_props.key "key",
+            robot_props.value "value",
+            robots_configurations.configuration_id configuration_id
+            from config.robots robots
+            join config.robots_properties robot_props on robots.id = robot_props.robot_id
+            join config.robots_configurations on robots.id = robots_configurations.robot_id
+            join config.configurations on robots_configurations.configuration_id = configurations.id and configurations.application = 'executor'
+            union
+            select
+            'access-tools.' || robots.name "key",
+            robots.access_tool "value",
+            robots_configurations.configuration_id configuration_id
+            from config.robots robots
+            join config.robots_configurations on robots.id = robots_configurations.robot_id
+            join config.configurations on robots_configurations.configuration_id = configurations.id and configurations.application = 'ppm'
+            union
+            select
+            'processing-times.' ||  robots.name || '.' || times.check_method "key",
+            cast(times.processing_time as text) "value",
+            robots_configurations.configuration_id configuration_id
+            from config.robots robots
+            join config.robots_configurations on robots.id = robots_configurations.robot_id
+            join config.configurations on robots_configurations.configuration_id = configurations.id and configurations.application = 'ppm'
+            join config.processing_times times on robots.id = times.robot_id
+            )
+            select
+            conf.application application,
+            conf.profile profile,
+            conf.label "label",
+            g_props.key "key",
+            g_props.value "value"
+            from config.configurations conf
+            join config.global_properties g_props on conf.id = g_props.configuration_id
+            union
+            select
+            conf.application application,
+            conf.profile profile,
+            conf.label "label",
+            robots_properties.key "key",
+            robots_properties.value "value"
+            from config.configurations conf
+            join robots_properties on conf.id = robots_properties.configuration_id
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

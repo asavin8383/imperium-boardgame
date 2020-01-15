@@ -937,6 +937,45 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Получение доступности автоматической отправки акта",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqYWNrIiwicm9sZSI6IlJPTEVfT1BFUkFUT1IsUk9MRV9GT1JNQUxfVEFTSyxST0xFX01BTkFHRV9GT1JNQUxfVEFTSyxST0xFX01BTkFHRV9BUlJBTkdFTUVOVCxST0xFX1BSRVBBUkFUSU9OX1RSQUZGSUMsUk9MRV9ESUNUSU9OQVJZLFJPTEVfRk9STUFUSU9OX09GX1NDSEVEVUxFLFJPTEVfVklFV19SRVNVTFQsUk9MRV9TRU5EX0FDVF9CWV9IQU5ELFJPTEVfTUFOQUdFX1BTX1BBU0QsUk9MRV9NQU5BR0VfRVJESSxST0xFX1ZJRVdfUkVQT1JULFJPTEVfRk9STUFUSU9OX1BBUkFNX1JFUE9SVCxST0xFX01BTkFHRV9ET01BSU5TLFJPTEVfTUFOQUdFX01BTlVBTF9BUlJBTkdFTUVOVCIsIm1haWwiOiIiLCJ1c2VyX25hbWUiOiJqYWNrIiwic2NvcGUiOlsicmVhZCIsIndyaXRlIl0sImV4cCI6MTU3ODY2MjA1NywidXNlck5hbWUiOiJqYWNrIiwiYXV0aG9yaXRpZXMiOlsiUk9MRV9PUEVSQVRPUiIsIlJPTEVfUFJFUEFSQVRJT05fVFJBRkZJQyIsIlJPTEVfRk9STUFUSU9OX1BBUkFNX1JFUE9SVCIsIlJPTEVfTUFOQUdFX01BTlVBTF9BUlJBTkdFTUVOVCIsIlJPTEVfTUFOQUdFX1BTX1BBU0QiLCJST0xFX0ZPUk1BVElPTl9PRl9TQ0hFRFVMRSIsIlJPTEVfTUFOQUdFX0VSREkiLCJST0xFX0ZPUk1BTF9UQVNLIiwiUk9MRV9ESUNUSU9OQVJZIiwiUk9MRV9WSUVXX1JFUE9SVCIsIlJPTEVfTUFOQUdFX0ZPUk1BTF9UQVNLIiwiUk9MRV9NQU5BR0VfQVJSQU5HRU1FTlQiLCJST0xFX1ZJRVdfUkVTVUxUIiwiUk9MRV9TRU5EX0FDVF9CWV9IQU5EIiwiUk9MRV9NQU5BR0VfRE9NQUlOUyJdLCJqdGkiOiJiYjQ4YTBlZS0zOTRhLTRhZmQtOWRlMS04Y2I2N2I1MjQyZTQiLCJjbGllbnRfaWQiOiJhcy0xNS04Iiwic2Vjb25kTmFtZSI6IiJ9.oBEEjkBw0OblwPQ-p2arr6mvjQsg69R2hn7u87pjPL-nzJ9FqhxrvOIt5Bz9klS4f3-OGujIxLw7Q70L_ke5TcYWpsc1yRKap0MrhFMd2qHacHWZbyIGKEQ8QD4RlWTw8vqqlRk3aIwfbt1vbh4yXH5m48knmhtVAWzOu1-7NLRS7SQ7PJOtvC_eUpX6M5Luj33Q3a4SxVqzOks019i3acF9J25mhlZdPC_AtP-mrypq_SNACUtV9h3ePcVwq0UGz4Sthm8bCV90c6TU_yNo7P5NOXjCw8zGZ4XG8NHITKmS-NIZF_VrcpyGrwQlyYNnOu-P8dFXipmcQPW13ARFpg",
+									"type": "string"
+								},
+								{
+									"key": "tokenType",
+									"value": "bearer",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/formal_tasks/304/automatic_act_send",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"formal_tasks",
+								"304",
+								"automatic_act_send"
+							]
+						}
+					},
+					"response": []
 				}
 			],
 			"protocolProfileBehavior": {}
@@ -3404,25 +3443,25 @@
 	],
 	"variable": [
 		{
-			"id": "62329fb8-f46d-4385-88c1-cdb0d5039de6",
+			"id": "a923ac68-4b5c-46fa-a63c-30812864856f",
 			"key": "url",
 			"value": "http://localhost:15800",
 			"type": "string"
 		},
 		{
-			"id": "ae2e1abe-f0c5-40c9-96d1-0c9ce39b73b8",
+			"id": "d1072301-5d38-40f8-babe-a9bc8a97b0eb",
 			"key": "oper_token",
 			"value": "",
 			"type": "string"
 		},
 		{
-			"id": "b98f3aa2-191f-4fc1-b32a-601a2c621310",
+			"id": "cdbd9f70-166f-4fc0-90a2-fd568c5fa54b",
 			"key": "test_url",
 			"value": "http://192.168.5.253:15800",
 			"type": "string"
 		},
 		{
-			"id": "cec891f0-5c6e-44ff-8106-04ba5f2cfc01",
+			"id": "3cb364b9-a3f7-45b8-af3d-fcb7380733b7",
 			"key": "admin_token",
 			"value": "",
 			"type": "string"

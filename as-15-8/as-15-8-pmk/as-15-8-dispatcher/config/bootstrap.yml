@@ -1,7 +1,7 @@
 subsystem: PMK
 server:
   port: 11300
-gateway.url: ${GATEWAY_URI:http://localhost:15880}
+gateway.url: ${GATEWAY_URI:http://192.168.5.50:15880}
 logging:
   config: config/logback-spring.xml
 eureka:

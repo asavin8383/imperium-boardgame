@@ -1,6 +1,5 @@
 package checkUnits;
 
-import enums.AccessToolUnit;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

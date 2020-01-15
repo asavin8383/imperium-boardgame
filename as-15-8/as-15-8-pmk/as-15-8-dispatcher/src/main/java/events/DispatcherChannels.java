@@ -9,13 +9,9 @@ import org.springframework.cloud.stream.annotation.Input;
  */
 public interface DispatcherChannels {
 
-    String INPUT_ANALYSIS_RESULTS = "inputAnalysisResults";
-    String INPUT_JOB_NOTIFICATIONS = "inputJobNotifications";
+    String INPUT_RESULTS = "inputResults";
 
-    @Input(INPUT_ANALYSIS_RESULTS)
-    KStream<?, ?> analysisResults();
-
-    @Input(INPUT_JOB_NOTIFICATIONS)
-    KStream<?, ?> jobNotifications();
+    @Input(INPUT_RESULTS)
+    KStream<?, ?> results();
 
 }

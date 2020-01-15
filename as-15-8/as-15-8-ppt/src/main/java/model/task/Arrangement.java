@@ -131,6 +131,22 @@ public class Arrangement implements Serializable {
 		}
 	}
 
+	public String getFgisId() {
+		if (this.formalTask == null) {
+			return null;
+		} else {
+			return this.formalTask.getFgisId();
+		}
+	}
+
+	public String getOperator() {
+		if (this.formalTask == null) {
+			return null;
+		} else {
+			return this.formalTask.getOperator();
+		}
+	}
+
 	public void sendEvent(ArrangementEvents event, LocalDateTime eventDate){
 		this.stateMachine = new ArrangementStateMachine(this.status);
 		if(this.stateMachine.sendEvent(event)){

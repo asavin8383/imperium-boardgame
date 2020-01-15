@@ -91,7 +91,6 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
                 NMapRun nmapRun = parseNmapResult(outputFile);
 
                 NmapExecutionResult nmapExecutionResult = new NmapExecutionResult();
-                nmapExecutionResult.setJobID(checkUnitJob.getJobID());
                 nmapExecutionResult.setCheckUnit(checkUnitJob.getCheckUnit());
                 nmapExecutionResult.setAccessTool(checkUnitJob.getAccessTool());
                 nmapExecutionResult.setNmapLog(results.getOutput());

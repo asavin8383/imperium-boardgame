@@ -36,7 +36,6 @@ public class PS_AnalyzerService implements AnalyzerService<ExecutionPSJobResult>
 	@Override
 	public AnalysisResult analyzeResult(ExecutionPSJobResult result) {
 		PS_AnalysisJobResult analysisResult = new PS_AnalysisJobResult();
-		analysisResult.setJobID(result.getJobID());
 		analysisResult.setCheckUnit(result.getCheckUnit());
 		analysisResult.setCheckResult(obtainResult(result, analysisResult));
 		analysisResult.setScreenshot(result.getScreenshot());

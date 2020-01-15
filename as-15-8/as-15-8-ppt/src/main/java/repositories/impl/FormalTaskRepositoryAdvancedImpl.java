@@ -31,7 +31,7 @@ public class FormalTaskRepositoryAdvancedImpl implements FormalTaskRepositoryAdv
 	}
 
 	@Override
-	public Page<FormalTask> findPage(Long id, String operator, Pageable pageable) {
+	public Page<FormalTask> findPage(Long id, String operator, String fgisId, Pageable pageable) {
 		CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
 		CriteriaQuery<FormalTask> select = criteriaBuilder.createQuery(FormalTask.class);
 		Root<FormalTask> fromFormalTask = select.from(FormalTask.class);
@@ -42,8 +42,11 @@ public class FormalTaskRepositoryAdvancedImpl implements FormalTaskRepositoryAdv
 	        predicates.add(criteriaBuilder.equal(fromFormalTask.get("id"), id));
 	    }
 	    if (operator != null) {
-	    	predicates.add(criteriaBuilder.equal(fromFormalTask.get("operator"), operator));
+	    	predicates.add(criteriaBuilder.like(criteriaBuilder.upper(fromFormalTask.get(FormalTask_.OPERATOR)), "%" + operator.toUpperCase() + "%"));
 	    }
+	    if (fgisId != null) {
+	    	predicates.add(criteriaBuilder.like(criteriaBuilder.upper(fromFormalTask.get(FormalTask_.FGIS_ID)), "%" + fgisId.toUpperCase() + "%"));
+		}
 	    select.where(predicates.toArray(new Predicate[0]));
 	    
 	    select.orderBy(QueryUtils.toOrders(pageable.getSort(), fromFormalTask, criteriaBuilder));

@@ -124,7 +124,7 @@ public class MissionService {
     }
 
     private void sendMissionDataToPPT(Mission mission){
-        MissionData missionData = new MissionData(mission.getId(), "Поручение " + mission.getDocNum());
+        MissionData missionData = new MissionData(mission.getId(), "Поручение " + mission.getDocNum(), mission.getOrigId());
         log.info("Отправка поручения в PPT: " + missionData);
 
         HttpHeaders headers = new HttpHeaders();

@@ -86,7 +86,6 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 				}
 			}
 			robots.remove(robot);
-			message.setJobID(checkUnitJob.getJobID());
 			message.setCheckUnit(checkUnitJob.getCheckUnit());
 	        message.setAccessTool(checkUnitJob.getAccessTool());
 

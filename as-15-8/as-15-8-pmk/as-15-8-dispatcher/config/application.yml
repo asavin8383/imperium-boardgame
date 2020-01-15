@@ -1,33 +1,44 @@
 spring:
   main.allow-bean-definition-overriding: true
-  kafka.consumer.properties.spring.json.trusted.packages: checkUnits
+  kafka.streams.properties.spring.json:
+    trusted.packages: checkUnits
   cloud:
     stream:
       bindings:
-        inputJobNotifications:
-          destination: job_notifications
-          consumer.useNativeDecoding: true
-        inputAnalysisResults:
-          destination: analysis_results
-          consumer.useNativeDecoding: true
+        inputResults:
+          destination: results
+          contentType: application/json
+          nativeDecoding: true
+        results_table:
+          destination: results_table
+        springCloudBusInput:
+          destination: bus_config_input
+          group: dispatcher:${spring.cloud.client.ip-address}
+        springCloudBusOutput.destination: bus_config_output
       kafka:
+        binder:
+          brokers: 192.168.5.12:9094,192.168.5.33:9094,192.168.5.184:9094
+          minPartitionCount: 24
         streams:
           binder:
             brokers: 192.168.5.12:9094,192.168.5.33:9094,192.168.5.184:9094
             minPartitionCount: 24
             configuration:
-              default.key.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
+              default:
+                key.serde: org.springframework.kafka.support.serializer.JsonSerde
+                value.serde: org.springframework.kafka.support.serializer.JsonSerde
+              spring.json:
+                key.default.type: checkUnits.CheckUnitKey
+                value.default.type: analysis.CheckUnitResult
               commit.interval.ms: 1000
+              max.request.size: 10485760
+              max.partition.fetch.bytes: 10485760
               max.poll.records: 100
           bindings:
-            inputJobNotifications:
+            inputResults:
               consumer:
-                application-id: dispatcher
-                resetOffsets: true
-            inputAnalysisResults:
-              consumer:
-                application-id: dispatcher
-                resetOffsets: true
+                application-id: dispatchers
+                useNativeDecoding: true
   datasource:
     test-while-idle: true
     validation-query: SELECT 1;
@@ -48,7 +59,7 @@ spring:
         format_sql: true
     databasePlatform: org.hibernate.dialect.PostgreSQL9Dialect
   jackson.serialization.FAIL_ON_EMPTY_BEANS: false
-results.save.schedule: '0 0 0 * * ?'
+results.save.schedule: '0 */1 * * * ?'
 
 ---
 
@@ -104,8 +115,7 @@ spring:
   cloud:
     stream:
       bindings:
-        inputJobNotifications.destination: job_notifications_ashabalin
-        inputAnalysisResults.destination: analysis_results_ashabalin
+        inputResults.destination: results_ashabalin
         springCloudBusInput.destination: bus_config_input_ashabalin
         springCloudBusOutput.destination: bus_config_output_ashabalin
   datasource:
@@ -124,8 +134,7 @@ spring:
   cloud:
     stream:
       bindings:
-        inputJobNotifications.destination: job_notifications_asin
-        inputAnalysisResults.destination: analysis_results_asin
+        inputResults.destination: results_asin
         springCloudBusInput.destination: bus_config_input_asin
         springCloudBusOutput.destination: bus_config_output_asin
 
@@ -136,8 +145,7 @@ spring:
   cloud:
     stream:
       bindings:
-        inputJobNotifications.destination: job_notifications_asavin
-        inputAnalysisResults.destination: analysis_results_asavin
+        inputResults.destination: results_asavin
         springCloudBusInput.destination: bus_config_input_asavin
         springCloudBusOutput.destination: bus_config_output_asavin
   datasource:
@@ -152,8 +160,7 @@ spring:
   cloud:
     stream:
       bindings:
-        inputJobNotifications.destination: job_notifications_pvorobiev
-        inputAnalysisResults.destination: analysis_results_pvorobiev
+        inputResults.destination: results_pvorobiev
         springCloudBusInput.destination: bus_config_input_pvorobiev
         springCloudBusOutput.destination: bus_config_output_pvorobiev
 
@@ -166,7 +173,6 @@ spring:
   cloud:
     stream:
       bindings:
-        inputJobNotifications.destination: job_notifications_danikanov
-        inputAnalysisResults.destination: analysis_results_danikanov
+        inputResults.destination: results_danikanov
         springCloudBusInput.destination: bus_config_input_danikanov
         springCloudBusOutput.destination: bus_config_output_danikanov

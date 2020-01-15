@@ -19,6 +19,9 @@
     <include file="db/changelog/config.0014.configurations_and_robots.xml" />
     <include file="db/changelog/config.0015.processing_times_cascades.xml" />
     <include file="db/changelog/config.0016.system_mode.xml" />
-    <include file="db/changelog/config.0017.global_properies.xml" />
-
+    <include file="db/changelog/config.0017.global_properies.xml"/>
+    <include file="db/changelog/config.0018.robot_sla.xml"/>
+    <include file="db/changelog/config.0019.robot_sla_processing_times_fix.xml"/>
+    <include file="db/changelog/config.0020.config_view_robots_sla.xml"/>
+    <include file="db/changelog/config.0021.robot_sla_unique_constraint.xml"/>
 </databaseChangeLog>

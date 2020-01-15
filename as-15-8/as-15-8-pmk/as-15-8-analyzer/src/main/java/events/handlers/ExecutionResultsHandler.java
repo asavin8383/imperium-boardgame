@@ -2,6 +2,7 @@ package events.handlers;
 
 import analysis.AnalysisResult;
 import analysis.CheckUnitStatusNotification;
+import checkUnits.CheckUnit;
 import checkUnits.CheckUnitKey;
 import enums.CheckUnitJobResult;
 import events.AnalyzerChannels;
@@ -21,6 +22,7 @@ import service.AnalyzerServiceFactory;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.time.LocalDateTime;
 
 @Service
 @DependsOn({"analyzerServiceFactory"})
@@ -36,8 +38,9 @@ public class ExecutionResultsHandler {
         ExecutionJobResult job = message.getPayload();
         Integer partitionId = message.getHeaders().get(KafkaHeaders.RECEIVED_PARTITION_ID, Integer.class);
         CheckUnitKey key = message.getHeaders().get(KafkaHeaders.RECEIVED_MESSAGE_KEY, CheckUnitKey.class);
+        assert key != null;
         log.info("Принято задание на анализ: " +
-                "ID: " + job.getJobID() +
+                "ID: " + key.getJobId() +
                 ", checkUnit: " + job.getCheckUnit().getValue() +
                 ", key: " + key +
                 ", partition: " + partitionId +
@@ -45,11 +48,11 @@ public class ExecutionResultsHandler {
         try {
             AnalyzerService<? super ExecutionJobResult> service = AnalyzerServiceFactory.getService(job.getClass());
             AnalysisResult analysisResult = service.analyzeResult(job);
-            sendAnalysisResult(analysisResult, key, partitionId);
-            log.info("Анализ результата проверки ПС/ПАСД выполнен успешно : " + job.getJobID() + ", " + job.getCheckUnit().getValue());
+            sendAnalysisResult(analysisResult, job.getStartTime(), key, partitionId);
+            log.info("Анализ результата проверки ПС/ПАСД выполнен успешно : " + key.getJobId() + ", " + job.getCheckUnit().getValue());
         } catch (Exception ex) {
-            log.error("Ошибка при обработке задания на анализ результатов проверки ПС/ПАСД : " + job.getJobID() + ", " + job.getCheckUnit().getValue(), ex);
-            sendErrorNotification(job.getJobID(), job.getCheckUnit().getContentId(), ex, key, partitionId);
+            log.error("Ошибка при обработке задания на анализ результатов проверки ПС/ПАСД : " + key.getJobId() + ", " + job.getCheckUnit().getValue(), ex);
+            sendErrorNotification(ex, key, job.getCheckUnit(), job.getStartTime(), partitionId);
         }
     }
 
@@ -57,8 +60,9 @@ public class ExecutionResultsHandler {
      * Метод отправки результата выполнения анализа в тему Kafka
      * @param analysisResult Результат выполнения анализа
      */
-    private void sendAnalysisResult(AnalysisResult analysisResult, CheckUnitKey key, Integer partitionId) throws RuntimeException {
+    private void sendAnalysisResult(AnalysisResult analysisResult, LocalDateTime startTime, CheckUnitKey key, Integer partitionId) throws RuntimeException {
         try {
+            analysisResult.setStartTime(startTime);
             Message<AnalysisResult> message = MessageBuilder
                     .withPayload(analysisResult)
                     .setHeader(KafkaHeaders.PARTITION_ID, partitionId)
@@ -67,21 +71,21 @@ public class ExecutionResultsHandler {
 
             boolean send = analyzerChannels.output().send(message);
             if(send)
-                log.info("Сообщение успешно отправлено: " + analysisResult.getJobID() + ", " + analysisResult.getCheckUnit().getValue());
+                log.info("Сообщение успешно отправлено: " + key.getJobId() + ", " + analysisResult.getCheckUnit().getValue());
         } catch (Exception ex) {
             throw new RuntimeException("Ошибка при отправке сообщения с результатами анализа", ex);
         }
     }
 
-    private void sendErrorNotification(Long jobID, Long erdiId, Throwable cause, CheckUnitKey key, Integer partitionId) {
+    private void sendErrorNotification(Throwable cause, CheckUnitKey key, CheckUnit checkUnit, LocalDateTime startTime, Integer partitionId) {
         try {
             StringWriter sw = new StringWriter();
             cause.printStackTrace(new PrintWriter(sw));
             CheckUnitStatusNotification notification = CheckUnitStatusNotification
                     .builder()
-                    .jobID(jobID)
-                    .erdiID(erdiId)
+                    .checkUnit(checkUnit)
                     .checkResult(CheckUnitJobResult.INTERNAL_ERROR)
+                    .startTime(startTime)
                     .description(sw.toString())
                     .build();
 
@@ -91,9 +95,9 @@ public class ExecutionResultsHandler {
                     .setHeader(KafkaHeaders.MESSAGE_KEY, key)
                     .build();
 
-            boolean send = analyzerChannels.notifications().send(message);
+            boolean send = analyzerChannels.output().send(message);
             if(send)
-                log.info("Сообщение успешно отправлено: " + notification.getJobID() + ", " + notification.getCheckResult());
+                log.info("Сообщение успешно отправлено: " + key.getJobId() + ", " + notification.getCheckResult());
         } catch (Exception ex) {
             throw new RuntimeException("Ошибка при отправке сообщения с уведомлением об ошибке", ex);
         }

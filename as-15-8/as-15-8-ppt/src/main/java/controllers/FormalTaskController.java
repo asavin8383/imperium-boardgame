@@ -47,7 +47,6 @@ public class FormalTaskController {
 	private String gatewayUrl;
 
 	private final static String SOIB_URI = "/security/user/operator";
-	private final static String POD_URI = "/pod/mission/mission_id";
 
 	@PostMapping(consumes=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseStatus(HttpStatus.CREATED)
@@ -62,18 +61,28 @@ public class FormalTaskController {
 	public Page<FormalTask> findList(
 			@RequestParam(required = false) Long taskId,
 			@RequestParam(required = false) String operator,
+			@RequestParam(required = false) String fgisId,
 			@RequestParam(required = false) SortingDirection sortingDirection,
 			@RequestParam(required = false) String sortingColumn,
 			@RequestParam(defaultValue = "0") int pageNumber,
 			@RequestParam(defaultValue = "10") int pageSize){
 		PageRequest page = PageRequest.of(
 				pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
-		return formalTaskRepo.findPage(taskId, operator, page);
+		return formalTaskRepo.findPage(taskId, operator, fgisId, page);
 	}
 
 	@GetMapping("{task}")
 	public FormalTask findById(@PathVariable FormalTask task){
 		return task;
+	}
+
+	@GetMapping("{task}/automatic_act_send")
+	public Boolean isAutomaticActSendAvailable(@PathVariable FormalTask task){
+		if (task == null)
+			throw new AS_15_8_PPT_Exception("Formal task not found: " + task);
+		if (task.getMissionId() != null)
+			return true;
+		else return false;
 	}
 
 	@PutMapping
@@ -128,8 +137,8 @@ public class FormalTaskController {
 	@PostMapping(path = "/create_with_mission")
 	public void postFormalTask(@RequestBody MissionData missionData, Principal principal) {
 		log.info("Запрос создания FormalTask по поручению: {}", missionData);
-		if (missionData.getId() == null || missionData.getName() == null)
-			throw new AS_15_8_PPT_Exception("Не заданы все требуемые поля: id, name");
+		if (missionData.getId() == null || missionData.getName() == null || missionData.getOrigId() == null)
+			throw new AS_15_8_PPT_Exception("Не заданы все требуемые поля: id, name, origId");
 
 		createFormalTaskByMission(missionData, principal.getName());
 		//Сохранение уведомления в БД
@@ -166,6 +175,7 @@ public class FormalTaskController {
 		formalTask.setAgreed(true);
 		formalTask.setStatus(ExecutionStatus.NEW);
 		formalTask.setOperator(operator);
+		formalTask.setFgisId(missionData.getOrigId());
 		FormalTask res = formalTaskRepo.save(formalTask);
 
 		log.info("Создан FormalTask: {}", res);
@@ -186,11 +196,9 @@ public class FormalTaskController {
 		}
 	}
 
-	@GetMapping("/get_by_orig_id/{orig_id}")
-	public FormalTask getFromPod(@PathVariable String orig_id){
-		Long mission_id = oAuth2RestTemplate.getForObject(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(POD_URI).queryParam("orig_id", orig_id).build().toString(), Long.class);
-		FormalTask task = formalTaskRepo.getByMissionId(mission_id);
-		return task;
+	@GetMapping("/get_by_orig_id/{fgis_id}")
+	public FormalTask getByFgisId(@PathVariable String fgis_id){
+		return formalTaskRepo.findByFgisId(fgis_id);
 	}
 
 }

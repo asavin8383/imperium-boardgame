@@ -84,9 +84,9 @@ public class IntegrationTests {
 					.readValue(stringResult, ExecutionJobResult.class);
 			System.out.println(executionJobResult);
 			assertTrue(true);
-		} else if(!messageCollector.forChannel(executorChannels.notifications()).isEmpty()) {
+		} else if(!messageCollector.forChannel(executorChannels.results()).isEmpty()) {
 			String stringResult = Objects.requireNonNull(messageCollector
-					.forChannel(executorChannels.notifications())
+					.forChannel(executorChannels.results())
 					.poll())
 					.getPayload()
 					.toString();
