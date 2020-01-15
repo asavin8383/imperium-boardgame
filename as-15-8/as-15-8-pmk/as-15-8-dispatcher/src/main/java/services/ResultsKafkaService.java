@@ -13,7 +13,6 @@ import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.apache.logging.log4j.util.Strings;
-import org.apache.logging.log4j.util.Supplier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.binder.kafka.streams.InteractiveQueryService;
@@ -27,8 +26,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 @Service
@@ -41,6 +40,8 @@ public class ResultsKafkaService {
 
     private final InteractiveQueryService interactiveQueryService;
 
+    private ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store;
+
     public Page<Result> getArrangementResults(
             Long arrangementId,
             List<CheckUnitJobResult> checkUnitJobResults,
@@ -51,18 +52,17 @@ public class ResultsKafkaService {
             Pageable pageable) {
 
         log.info("Запрос результатов мероприятия: " + arrangementId);
+        final Predicate<KeyValue<CheckUnitKey, CheckUnitResult>> filter = kv -> filterResults(kv.value, checkUnitJobResults, checkUnitTypes, query);
+        final long count = getResultsCount(arrangementId, filter);
         return getArrangementResultsIterator(arrangementId)
                 .map(resultsIterator ->  {
                     log.info("Результаты получены из хранилища: " + arrangementId);
-                    Comparator<KeyValue<CheckUnitKey, CheckUnitResult>> checkUnitResultComparator = createResultsComparator(sortingColumn);
+                    /*Comparator<KeyValue<CheckUnitKey, CheckUnitResult>> checkUnitResultComparator = createResultsComparator(sortingColumn);
                     if(sortingDirection != null && sortingDirection.equals(SortingDirection.DESC))
-                        checkUnitResultComparator = checkUnitResultComparator.reversed();
-                    Supplier<Stream<KeyValue<CheckUnitKey, CheckUnitResult>>> streamSupplier = () -> StreamSupport
+                        checkUnitResultComparator = checkUnitResultComparator.reversed();*/
+                    List<Result> results = StreamSupport
                             .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), false)
-                            .filter(kv -> filterResults(kv.value, checkUnitJobResults, checkUnitTypes, query));
-                    long count = streamSupplier.get().count();
-                    List<Result> results = streamSupplier
-                            .get()
+                            .filter(filter)
                             //.sorted(checkUnitResultComparator)
                             .skip(pageable.getOffset())
                             .limit(pageable.getPageSize())
@@ -94,6 +94,15 @@ public class ResultsKafkaService {
         return countIteratorSize(resultsIterator);*/
     }
 
+    private long getResultsCount(Long arrangementId, Predicate<KeyValue<CheckUnitKey, CheckUnitResult>> filter){
+        return getArrangementResultsIterator(arrangementId)
+                .map(resultsIterator -> StreamSupport
+                        .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), false)
+                        .filter(filter)
+                        .count())
+                .orElse(0L);
+    }
+
     Optional<KeyValueIterator<CheckUnitKey, CheckUnitResult>> getArrangementResultsIterator(Long arrangementId) {
         return getResultsKeyValueStore().map(store -> store.range(
                 new CheckUnitKey(arrangementId, Long.MIN_VALUE),
@@ -102,10 +111,11 @@ public class ResultsKafkaService {
     }
 
     private Optional<ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult>> getResultsKeyValueStore() {
-        return Optional.ofNullable(interactiveQueryService.getQueryableStore(
+        return Optional.ofNullable(store == null ?
+            interactiveQueryService.getQueryableStore(
                 resultsTableName,
                 QueryableStoreTypes.keyValueStore()
-        ));
+        ) : store);
     }
 
     void fillResult(Result result, Long jobId, CheckUnitResult checkUnitResult, DetailResultService<? super CheckUnitResult> service){
