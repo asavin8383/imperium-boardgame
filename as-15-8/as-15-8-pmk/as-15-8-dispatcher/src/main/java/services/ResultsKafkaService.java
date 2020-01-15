@@ -71,7 +71,7 @@ public class ResultsKafkaService {
                 .orElseGet(() -> new PageImpl<>(new ArrayList<>(), pageable, 0));
     }
 
-    private Optional<CheckUnitResult> getArrangementResult(Long arrangementId, Long jobId) {
+    public Optional<CheckUnitResult> getArrangementResult(Long arrangementId, Long jobId) {
         return getResultsKeyValueStore()
                 .map(store -> store.get(new CheckUnitKey(arrangementId, Long.MIN_VALUE)));
     }
