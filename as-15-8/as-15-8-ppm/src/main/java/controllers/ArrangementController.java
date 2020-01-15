@@ -20,14 +20,13 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Flux;
 import repositories.ArrangementRepo;
 import repositories.ScheduleCheckUnitRepo;
 import repositories.ScheduleRepo;
 import restapi.ArrangementStatusUploader;
 import restapi.pod.DomainMaskUploader;
 import services.ScheduleService;
-import webClients.PptWebClient;
+import webClients.PPT_DispatcherWebClient;
 
 import javax.transaction.Transactional;
 import java.time.LocalTime;
@@ -48,7 +47,7 @@ import java.util.stream.Collectors;
 public class ArrangementController {
 
     private final ArrangementRepo arrangementRepo;
-    private final PptWebClient PPTWebClient;
+    private final PPT_DispatcherWebClient PPT_DispatcherWebClient;
     private final ArrangementStatusUploader arrangementStatusUploader;
     private final SchedulerProperties schedulerProperties;
     private final DomainMaskUploader domainMaskUploader;
@@ -104,18 +103,17 @@ public class ArrangementController {
     /**
      * Обновление статусов чек-юнитов для возможности повторного запуска мероприятия
      * @param arrangement мероприятие, которое требуется запустить повторно
-     * @param checkUnits список чек-юнитов, которым требуется обновить статус
      * @return Ответ от сервиса
      */
     @PutMapping("/refresh")
-    public ResponseEntity refreshArrangement(@RequestParam("id") Arrangement arrangement, @RequestBody Flux<List<CheckUnit>> checkUnits){
+    public ResponseEntity refreshArrangement(@RequestParam("id") Arrangement arrangement){
         if (arrangement == null){
             return ResponseEntity.noContent().build();
         }
         //Меняем статус для чек-юнитов, остановленных на диспетчере
         scheduleCheckUnitRepo.changeStatus(
             arrangement,
-            checkUnits.toStream().flatMap(List::stream).collect(Collectors.toList()),
+            PPT_DispatcherWebClient.getFromDispatcher(arrangement.getId()),
             ScheduleCheckUnitStatus.NEW);
         //Меняем статус для чек-юнитов, которые ещё не запускались на момент остановки мероприятия
         scheduleCheckUnitRepo.changeStatus(
@@ -130,8 +128,8 @@ public class ArrangementController {
     private void getAndSaveArrangementCheckUnits(Arrangement arrangement){
         arrangement.getScheduleCheckUnits().addAll(
                 Objects.requireNonNull(
-                        PPTWebClient
-                                .getCheckUnitsByArrangementId(arrangement.getId())
+                        PPT_DispatcherWebClient
+                                .getFromPPT(arrangement.getId())
                                 .stream()
                                 .flatMap(checkUnit -> createCheckUnits(arrangement, checkUnit).stream())
                                 .collect(Collectors.toList())
