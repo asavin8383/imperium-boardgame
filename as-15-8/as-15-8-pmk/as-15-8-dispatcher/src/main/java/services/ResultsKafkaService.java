@@ -27,6 +27,7 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 @Service
@@ -48,15 +49,19 @@ public class ResultsKafkaService {
             String sortingColumn,
             Pageable pageable) {
 
+        log.info("Запрос результатов мероприятия: " + arrangementId);
         return getArrangementResultsIterator(arrangementId)
                 .map(resultsIterator ->  {
+                    log.info("Результаты получены из хранилища: " + arrangementId);
                     Comparator<KeyValue<CheckUnitKey, CheckUnitResult>> checkUnitResultComparator = createResultsComparator(sortingColumn);
                     if(sortingDirection.equals(SortingDirection.DESC))
                         checkUnitResultComparator = checkUnitResultComparator.reversed();
-                    List<Result> results = StreamSupport
+                    Stream<KeyValue<CheckUnitKey, CheckUnitResult>> stream = StreamSupport
                             .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), false)
                             .filter(kv -> filterResults(kv.value, checkUnitJobResults, checkUnitTypes, query))
-                            .sorted(checkUnitResultComparator)
+                            .sorted(checkUnitResultComparator);
+                    long count = stream.count();
+                    List<Result> results = stream
                             .skip(pageable.getOffset())
                             .limit(pageable.getPageSize())
                             .map(kv -> {
@@ -66,7 +71,7 @@ public class ResultsKafkaService {
                                 return result;
                             })
                             .collect(Collectors.toList());
-                    return new PageImpl<>(results, pageable, results.size());
+                    return new PageImpl<>(results, pageable, count);
                 })
                 .orElseGet(() -> new PageImpl<>(new ArrayList<>(), pageable, 0));
     }
