@@ -13,6 +13,7 @@ import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.apache.logging.log4j.util.Strings;
+import org.apache.logging.log4j.util.Supplier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.binder.kafka.streams.InteractiveQueryService;
@@ -54,14 +55,15 @@ public class ResultsKafkaService {
                 .map(resultsIterator ->  {
                     log.info("Результаты получены из хранилища: " + arrangementId);
                     Comparator<KeyValue<CheckUnitKey, CheckUnitResult>> checkUnitResultComparator = createResultsComparator(sortingColumn);
-                    if(sortingDirection.equals(SortingDirection.DESC))
+                    if(sortingDirection != null && sortingDirection.equals(SortingDirection.DESC))
                         checkUnitResultComparator = checkUnitResultComparator.reversed();
-                    Stream<KeyValue<CheckUnitKey, CheckUnitResult>> stream = StreamSupport
+                    Supplier<Stream<KeyValue<CheckUnitKey, CheckUnitResult>>> streamSupplier = () -> StreamSupport
                             .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), false)
-                            .filter(kv -> filterResults(kv.value, checkUnitJobResults, checkUnitTypes, query))
-                            .sorted(checkUnitResultComparator);
-                    long count = stream.count();
-                    List<Result> results = stream
+                            .filter(kv -> filterResults(kv.value, checkUnitJobResults, checkUnitTypes, query));
+                    long count = streamSupplier.get().count();
+                    List<Result> results = streamSupplier
+                            .get()
+                            //.sorted(checkUnitResultComparator)
                             .skip(pageable.getOffset())
                             .limit(pageable.getPageSize())
                             .map(kv -> {
@@ -78,7 +80,7 @@ public class ResultsKafkaService {
 
     public Optional<CheckUnitResult> getArrangementResult(Long arrangementId, Long jobId) {
         return getResultsKeyValueStore()
-                .map(store -> store.get(new CheckUnitKey(arrangementId, Long.MIN_VALUE)));
+                .map(store -> store.get(new CheckUnitKey(arrangementId, jobId)));
     }
 
     public long getResultsCount(Long arrangementId) {
