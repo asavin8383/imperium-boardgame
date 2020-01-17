@@ -1,16 +1,14 @@
 package robots.utils;
 
+import checkUnits.CheckUnit;
+import lombok.SneakyThrows;
+import org.springframework.util.StringUtils;
+
+import javax.annotation.Nullable;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-
-import javax.annotation.Nullable;
-
-import org.springframework.util.StringUtils;
-
-import checkUnits.CheckUnit;
-import lombok.SneakyThrows;
 
 public interface EqualityTest {
 
@@ -65,8 +63,7 @@ class HostEquality implements EqualityTest {
     @Override
     public boolean equalTo(String found) throws MalformedURLException {
         URL foundUrl = EqualityTest.toUrl(found);
-        return foundUrl != null &&
-                foundUrl.getHost().endsWith(forbiddenHost);
+        return foundUrl != null && foundUrl.getHost().equalsIgnoreCase(forbiddenHost);
     }
 }
 
