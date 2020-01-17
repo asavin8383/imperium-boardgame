@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface GlobalPropertiesRepository extends JpaRepository<GlobalProperty, Long> {
 
+    public String getGlobalPropertyByKey(String key);
 }

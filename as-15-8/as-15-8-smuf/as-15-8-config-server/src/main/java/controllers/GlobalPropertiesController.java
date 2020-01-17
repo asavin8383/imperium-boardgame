@@ -1,10 +1,12 @@
 package controllers;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import exceptions.AS_15_8_Config_Exception;
 import lombok.RequiredArgsConstructor;
 import model.GlobalProperty;
 import model.Views;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import repositories.GlobalPropertiesRepository;
@@ -19,6 +21,9 @@ import java.util.List;
 public class GlobalPropertiesController {
 
     private final GlobalPropertiesRepository globalPropertiesRepo;
+    @Value("${user.activity.timeout.config.key}")
+    private String userActivityTimeoutConfigKey;
+
 
     @PostMapping
     @JsonView(Views.Brief.class)
@@ -43,4 +48,15 @@ public class GlobalPropertiesController {
             throw new IllegalArgumentException("Список входных параметров null");
         }
     }
+
+    @GetMapping(value = "activity_timeout")
+    public Long getActivityTimeOut() {
+        String timeout = globalPropertiesRepo.getGlobalPropertyByKey(userActivityTimeoutConfigKey);
+        try {
+            return Long.valueOf(timeout);
+        } catch (Exception e) {
+            throw new AS_15_8_Config_Exception("Ошибка извлечения activity_timeout из global_properties " + e);
+        }
+    }
+
 }
