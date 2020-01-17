@@ -98,7 +98,7 @@ spring:
   main:
     banner-mode: "off"
   datasource:
-    url: jdbc:postgresql://192.168.5.195:5432/asdb
+    url: jdbc:postgresql://192.168.5.211:5432/asdb
 eureka:
   instance:
     metadata-map:
