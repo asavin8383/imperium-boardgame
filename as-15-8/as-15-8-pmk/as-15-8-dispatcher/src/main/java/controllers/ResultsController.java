@@ -64,6 +64,7 @@ public class ResultsController {
     ResponseEntity getScreenshot(@RequestParam Long arrangementId, @RequestParam Long id){
         return resultService.getArrangementResult(arrangementId, id)
             .map(checkUnitResult -> {
+                log.info("Скриншот найден: " + checkUnitResult.getClass().getSimpleName());
                 if(checkUnitResult instanceof AnalysisResult)
                     return ResponseEntity.ok(((AnalysisResult)checkUnitResult).getScreenshot());
                 else

@@ -25,7 +25,6 @@ import restapi.ArrangementStatusProducer;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -41,17 +40,17 @@ public class ResultService {
 
     @Scheduled(cron = "${results.save.schedule}")
     public void saveResults() {
+        log.info("Запуск сохранения результатов проверок звершенных мероприятий");
         try{
             List<Arrangement> runningArrangements = arrangementRepo.findRunning();
 
             for (Arrangement arrangement : runningArrangements) {
-                AtomicInteger count = new AtomicInteger();
-                resultsKafkaService.getArrangementResultsIterator(arrangement.getId())
-                        .ifPresent(iter -> iter.forEachRemaining(obj -> count.getAndIncrement()));
-                if(count.longValue() == 0)
+                long count = resultsKafkaService.getResultsCount(arrangement.getId());
+                if(count == 0)
                     break;
+                log.info("У мероприятия " + arrangement.getId() + " найдено " + count + " завершенных проверок");
 
-                if (arrangement.getCheckUnitsCount() == count.longValue()) {
+                if (arrangement.getCheckUnitsCount() == count) {
                     log.info("Начато сохранение мероприятия: " + arrangement.getId());
                     resultsKafkaService.getArrangementResultsIterator(arrangement.getId())
                         .ifPresent(resultsIterator -> {
@@ -115,15 +114,10 @@ public class ResultService {
     private void saveJobResult(Arrangement arrangement, Long jobId, AnalysisResult analysisResult) {
         DetailResultService<? super CheckUnitResult> service = AnalysisResultServiceFactory.getService(analysisResult.getClass());
         Result result = resultRepo.findById(jobId).orElseGet(Result::new);
-        log.info("Результат создан: " + result.toString());
         result.setArrangement(arrangement);
         resultsKafkaService.fillResult(result, jobId, analysisResult, service);
-        //result = resultRepo.save(result);
-        log.info("Результат сохранен: " + result.toString());
         DetailResult detailResult = service.create(result, analysisResult);
         result.setDetailResult(detailResult);
-        //service.save(detailResult);
-        log.info("Детальный результат сохранен: " + detailResult.toString());
 
         if((analysisResult.getScreenshot() != null && analysisResult.getScreenshot().length > 0) ||
                 (analysisResult.getEtalonScreenshot() != null && analysisResult.getEtalonScreenshot().length > 0)){
@@ -131,10 +125,7 @@ public class ResultService {
             resultScreenShot.setResult(result);
             resultScreenShot.setScreenshot(analysisResult.getScreenshot());
             resultScreenShot.setEtalonScreenshot(analysisResult.getEtalonScreenshot());
-            log.info("Сохранение скриншота: " + resultScreenShot.getId());
-            //resultScreenShotRepo.save(resultScreenShot);
             result.setResultScreenShot(resultScreenShot);
-            log.info("Скриншот сохранен: " + resultScreenShot.getId());
         }
         resultRepo.save(result);
     }
@@ -144,12 +135,10 @@ public class ResultService {
         Result result = resultRepo.findById(jobId).orElseGet(Result::new);
         result.setArrangement(arrangement);
         resultsKafkaService.fillResult(result, jobId, checkUnitResult, service);
-        //result = resultRepo.save(result);
 
         if (status == CheckUnitJobResult.INTERNAL_ERROR || status == CheckUnitJobResult.TIMEOUT_ERROR) {
             DetailResult detailResult = service.create(result, checkUnitResult);
             result.setDetailResult(detailResult);
-            //service.save(detailResult);
         }
         resultRepo.save(result);
     }
