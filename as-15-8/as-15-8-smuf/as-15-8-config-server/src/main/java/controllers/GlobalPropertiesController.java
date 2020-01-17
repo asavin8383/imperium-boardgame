@@ -49,7 +49,7 @@ public class GlobalPropertiesController {
         }
     }
 
-    @GetMapping(value = "activity_timeout")
+    @PostMapping(value = "activity_timeout")
     public Long getActivityTimeOut() {
         String timeout = globalPropertiesRepo.getGlobalPropertyByKey(userActivityTimeoutConfigKey);
         try {
