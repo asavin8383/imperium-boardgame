@@ -24,7 +24,6 @@ public class GlobalPropertiesController {
     @Value("${user.activity.timeout.config.key}")
     private String userActivityTimeoutConfigKey;
 
-
     @PostMapping
     @JsonView(Views.Brief.class)
     public List<GlobalProperty> getGlobalProperties() {
@@ -51,7 +50,7 @@ public class GlobalPropertiesController {
 
     @PostMapping(value = "activity_timeout")
     public Long getActivityTimeOut() {
-        String timeout = globalPropertiesRepo.getGlobalPropertyByKey(userActivityTimeoutConfigKey);
+       String timeout = globalPropertiesRepo.getGlobalPropertyByKey(userActivityTimeoutConfigKey);
         try {
             return Long.valueOf(timeout);
         } catch (Exception e) {
