@@ -2,6 +2,7 @@ package robots.utils;
 
 import checkUnits.CheckUnit;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Nullable;
@@ -52,6 +53,7 @@ public interface EqualityTest {
     }
 }
 
+@Slf4j
 class HostEquality implements EqualityTest {
 
     private String forbiddenHost;
@@ -63,7 +65,11 @@ class HostEquality implements EqualityTest {
     @Override
     public boolean equalTo(String found) throws MalformedURLException {
         URL foundUrl = EqualityTest.toUrl(found);
-        return foundUrl != null && foundUrl.getHost().equalsIgnoreCase(forbiddenHost);
+        if(foundUrl == null){
+            return false;
+        }
+        log.debug("Проверяется на равенство запрещённый ресурс: {} с полученным хостом: {}", forbiddenHost, foundUrl.getHost());
+        return foundUrl.getHost().equalsIgnoreCase(forbiddenHost);
     }
 }
 
