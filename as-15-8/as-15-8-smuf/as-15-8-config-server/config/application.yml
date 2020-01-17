@@ -71,6 +71,7 @@ spring:
         brokers: 192.168.5.12:9094,192.168.5.33:9094,192.168.5.184:9094
         minPartitionCount: 24
 management.endpoints.web.exposure.include: bus-refresh
+user.activity.timeout.config.key: user.activity.timeout
 
 ---
 
