@@ -14,8 +14,6 @@ import model.DetailResult;
 import model.Result;
 import model.ResultScreenShot;
 import org.apache.kafka.streams.KeyValue;
-import org.apache.kafka.streams.state.KeyValueIterator;
-import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -27,7 +25,6 @@ import restapi.ArrangementStatusProducer;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -43,72 +40,70 @@ public class ResultService {
 
     @Scheduled(cron = "${results.save.schedule}")
     public void saveResults() {
+        log.info("Запуск сохранения результатов проверок звершенных мероприятий");
         try{
-            ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store;
-            try {
-                store = resultsKafkaService.getResultsKeyValueStore();
-            } catch (Exception ex) {
-                return;
-            }
             List<Arrangement> runningArrangements = arrangementRepo.findRunning();
 
             for (Arrangement arrangement : runningArrangements) {
-                AtomicInteger count = new AtomicInteger();
-                resultsKafkaService.getArrangementResultsIterator(store, arrangement.getId()).forEachRemaining(obj -> count.getAndIncrement());
+                long count = resultsKafkaService.getResultsCount(arrangement.getId());
+                if(count == 0)
+                    break;
+                log.info("У мероприятия " + arrangement.getId() + " найдено " + count + " завершенных проверок");
 
-                if (arrangement.getCheckUnitsCount() == count.longValue()) {
+                if (arrangement.getCheckUnitsCount() == count) {
                     log.info("Начато сохранение мероприятия: " + arrangement.getId());
-                    KeyValueIterator<CheckUnitKey, CheckUnitResult> resultsIterator = resultsKafkaService.getArrangementResultsIterator(store, arrangement.getId());
-                    boolean isSaved = true;
-                    while (resultsIterator.hasNext()) {
-                        KeyValue<CheckUnitKey, CheckUnitResult> result = resultsIterator.next();
-                        CheckUnitKey resultKey = result.key;
-                        CheckUnitResult checkUnitResult = result.value;
-                        try {
-                            if (checkUnitResult instanceof AnalysisResult) {
-                                saveJobResult(
-                                        arrangement,
-                                        resultKey.getJobId(),
-                                        (AnalysisResult) checkUnitResult);
-                            } else if (checkUnitResult instanceof CheckUnitStatusNotification) {
-                                CheckUnitStatusNotification notification = (CheckUnitStatusNotification) checkUnitResult;
-                                saveJobStatus(
-                                        arrangement,
-                                        resultKey.getJobId(),
-                                        notification,
-                                        notification.getCheckResult(),
-                                        notification.getDescription());
-                            }
-                        } catch (Exception ex) {
-                            try {
-                                log.error("Ошибка при сохранении результата проверки: " + resultKey.getJobId() + ", " + checkUnitResult.getCheckUnit().getValue(), ex);
+                    resultsKafkaService.getArrangementResultsIterator(arrangement.getId())
+                        .ifPresent(resultsIterator -> {
+                            boolean isSaved = true;
+                            while (resultsIterator.hasNext()) {
+                                KeyValue<CheckUnitKey, CheckUnitResult> result = resultsIterator.next();
+                                CheckUnitKey resultKey = result.key;
+                                CheckUnitResult checkUnitResult = result.value;
+                                try {
+                                    if (checkUnitResult instanceof AnalysisResult) {
+                                        saveJobResult(
+                                                arrangement,
+                                                resultKey.getJobId(),
+                                                (AnalysisResult) checkUnitResult);
+                                    } else if (checkUnitResult instanceof CheckUnitStatusNotification) {
+                                        CheckUnitStatusNotification notification = (CheckUnitStatusNotification) checkUnitResult;
+                                        saveJobStatus(
+                                                arrangement,
+                                                resultKey.getJobId(),
+                                                notification,
+                                                notification.getCheckResult(),
+                                                notification.getDescription());
+                                    }
+                                } catch (Exception ex) {
+                                    try {
+                                        log.error("Ошибка при сохранении результата проверки: " + resultKey.getJobId() + ", " + checkUnitResult.getCheckUnit().getValue(), ex);
 
-                                StringWriter sw = new StringWriter();
-                                ex.printStackTrace(new PrintWriter(sw));
+                                        StringWriter sw = new StringWriter();
+                                        ex.printStackTrace(new PrintWriter(sw));
 
-                                log.info("Сохраняем ошибку: " + resultKey.getJobId());
-                                saveJobStatus(
-                                        arrangement,
-                                        resultKey.getJobId(),
-                                        checkUnitResult,
-                                        CheckUnitJobResult.INTERNAL_ERROR,
-                                        sw.toString());
-                                log.info("Ошибка сохранена: " + resultKey.getJobId());
-                            } catch (Exception newEx) {
-                                log.error("Ошибка при сохранении ошибочной обработки сообщения с анализом результатов проверки: " + resultKey.getJobId() + ", " + checkUnitResult.getCheckUnit().getValue(), newEx);
-                                isSaved = false;
-                                break;
+                                        log.info("Сохраняем ошибку: " + resultKey.getJobId());
+                                        saveJobStatus(
+                                                arrangement,
+                                                resultKey.getJobId(),
+                                                checkUnitResult,
+                                                CheckUnitJobResult.INTERNAL_ERROR,
+                                                sw.toString());
+                                        log.info("Ошибка сохранена: " + resultKey.getJobId());
+                                    } catch (Exception newEx) {
+                                        log.error("Ошибка при сохранении ошибочной обработки сообщения с анализом результатов проверки: " + resultKey.getJobId() + ", " + checkUnitResult.getCheckUnit().getValue(), newEx);
+                                        isSaved = false;
+                                        break;
+                                    }
+                                }
                             }
-                        }
-                    }
-                    if(isSaved) {
-                        log.info("Мероприятие успешно сохранено в БД: " + arrangement.getId());
-                        arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(arrangement.getId(), ArrangementEvents.FINISH));
-                        log.info("Мероприятие успешно завершено: " + arrangement.getId());
-                    } else {
-                        log.info("Ошибка сохранения мероприятия: " + arrangement.getId());
-                        break;
-                    }
+                            if (isSaved) {
+                                log.info("Мероприятие успешно сохранено в БД: " + arrangement.getId());
+                                arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(arrangement.getId(), ArrangementEvents.FINISH));
+                                log.info("Мероприятие успешно завершено: " + arrangement.getId());
+                            } else {
+                                log.info("Ошибка сохранения мероприятия: " + arrangement.getId());
+                            }
+                        });
                 }
             }
         } catch (Exception ex){
@@ -119,15 +114,10 @@ public class ResultService {
     private void saveJobResult(Arrangement arrangement, Long jobId, AnalysisResult analysisResult) {
         DetailResultService<? super CheckUnitResult> service = AnalysisResultServiceFactory.getService(analysisResult.getClass());
         Result result = resultRepo.findById(jobId).orElseGet(Result::new);
-        log.info("Результат создан: " + result.toString());
         result.setArrangement(arrangement);
         resultsKafkaService.fillResult(result, jobId, analysisResult, service);
-        //result = resultRepo.save(result);
-        log.info("Результат сохранен: " + result.toString());
         DetailResult detailResult = service.create(result, analysisResult);
         result.setDetailResult(detailResult);
-        //service.save(detailResult);
-        log.info("Детальный результат сохранен: " + detailResult.toString());
 
         if((analysisResult.getScreenshot() != null && analysisResult.getScreenshot().length > 0) ||
                 (analysisResult.getEtalonScreenshot() != null && analysisResult.getEtalonScreenshot().length > 0)){
@@ -135,10 +125,7 @@ public class ResultService {
             resultScreenShot.setResult(result);
             resultScreenShot.setScreenshot(analysisResult.getScreenshot());
             resultScreenShot.setEtalonScreenshot(analysisResult.getEtalonScreenshot());
-            log.info("Сохранение скриншота: " + resultScreenShot.getId());
-            //resultScreenShotRepo.save(resultScreenShot);
             result.setResultScreenShot(resultScreenShot);
-            log.info("Скриншот сохранен: " + resultScreenShot.getId());
         }
         resultRepo.save(result);
     }
@@ -148,12 +135,10 @@ public class ResultService {
         Result result = resultRepo.findById(jobId).orElseGet(Result::new);
         result.setArrangement(arrangement);
         resultsKafkaService.fillResult(result, jobId, checkUnitResult, service);
-        //result = resultRepo.save(result);
 
         if (status == CheckUnitJobResult.INTERNAL_ERROR || status == CheckUnitJobResult.TIMEOUT_ERROR) {
             DetailResult detailResult = service.create(result, checkUnitResult);
             result.setDetailResult(detailResult);
-            //service.save(detailResult);
         }
         resultRepo.save(result);
     }

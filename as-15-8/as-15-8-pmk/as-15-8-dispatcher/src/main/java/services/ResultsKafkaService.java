@@ -5,7 +5,6 @@ import checkUnits.CheckUnitKey;
 import checkUnits.CheckUnitType;
 import enums.CheckUnitJobResult;
 import enums.SortingDirection;
-import exceptions.AS_15_8_DispatcherException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Result;
@@ -22,13 +21,12 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Spliterator;
-import java.util.Spliterators;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -42,6 +40,8 @@ public class ResultsKafkaService {
 
     private final InteractiveQueryService interactiveQueryService;
 
+    private ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store;
+
     public Page<Result> getArrangementResults(
             Long arrangementId,
             List<CheckUnitJobResult> checkUnitJobResults,
@@ -51,55 +51,71 @@ public class ResultsKafkaService {
             String sortingColumn,
             Pageable pageable) {
 
-        Comparator<KeyValue<CheckUnitKey, CheckUnitResult>> checkUnitResultComparator = createResultsComparator(sortingColumn);
-        if(sortingDirection.equals(SortingDirection.DESC))
-            checkUnitResultComparator = checkUnitResultComparator.reversed();
-
-        ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store = getResultsKeyValueStore();
-        KeyValueIterator<CheckUnitKey, CheckUnitResult> resultsIterator = getArrangementResultsIterator(store, arrangementId);
-        List<Result> results = StreamSupport
-                .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), false)
-                .filter(kv -> filterResults(kv.value, checkUnitJobResults, checkUnitTypes, query))
-                .sorted(checkUnitResultComparator)
-                .skip(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .map(kv -> {
-                    DetailResultService<? super CheckUnitResult> service = AnalysisResultServiceFactory.getService(kv.value.getClass());
-                    Result result = new Result();
-                    fillResult(result, kv.key.getJobId(), kv.value, service);
-                    return result;
+        log.info("Запрос результатов мероприятия: " + arrangementId);
+        final Predicate<KeyValue<CheckUnitKey, CheckUnitResult>> filter = kv -> filterResults(kv.value, checkUnitJobResults, checkUnitTypes, query);
+        final long count = getResultsCount(arrangementId, filter);
+        return getArrangementResultsIterator(arrangementId)
+                .map(resultsIterator ->  {
+                    log.info("Результаты получены из хранилища: " + arrangementId);
+                    /*Comparator<KeyValue<CheckUnitKey, CheckUnitResult>> checkUnitResultComparator = createResultsComparator(sortingColumn);
+                    if(sortingDirection != null && sortingDirection.equals(SortingDirection.DESC))
+                        checkUnitResultComparator = checkUnitResultComparator.reversed();*/
+                    List<Result> results = StreamSupport
+                            .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), false)
+                            .filter(filter)
+                            //.sorted(checkUnitResultComparator)
+                            .skip(pageable.getOffset())
+                            .limit(pageable.getPageSize())
+                            .map(kv -> {
+                                DetailResultService<? super CheckUnitResult> service = AnalysisResultServiceFactory.getService(kv.value.getClass());
+                                Result result = new Result();
+                                fillResult(result, kv.key.getJobId(), kv.value, service);
+                                return result;
+                            })
+                            .collect(Collectors.toList());
+                    return new PageImpl<>(results, pageable, count);
                 })
-                .collect(Collectors.toList());
-        return new PageImpl<>(results, pageable, results.size());
+                .orElseGet(() -> new PageImpl<>(new ArrayList<>(), pageable, 0));
     }
 
-    public CheckUnitResult getArrangementResult(Long arrangementId, Long resultId) {
-        ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store = getResultsKeyValueStore();
-        return getArrangementResult(store, arrangementId, resultId);
+    public Optional<CheckUnitResult> getArrangementResult(Long arrangementId, Long jobId) {
+        return getResultsKeyValueStore()
+                .map(store -> store.get(new CheckUnitKey(arrangementId, jobId)));
     }
 
     public long getResultsCount(Long arrangementId) {
-        ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store = getResultsKeyValueStore();
-        return store.approximateNumEntries();
+        /*return getResultsKeyValueStore().
+                map(ReadOnlyKeyValueStore::approximateNumEntries)
+                .orElse(0L);*/
+        return getArrangementResultsIterator(arrangementId)
+                .map(this::countIteratorSize)
+                .orElse(0L);
         /*KeyValueIterator<CheckUnitKey, CheckUnitResult> resultsIterator = getArrangementResultsIterator(store, arrangementId);
         return countIteratorSize(resultsIterator);*/
     }
 
-    KeyValueIterator<CheckUnitKey, CheckUnitResult> getArrangementResultsIterator(ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store, Long arrangementId) {
-        return store.range(
+    private long getResultsCount(Long arrangementId, Predicate<KeyValue<CheckUnitKey, CheckUnitResult>> filter){
+        return getArrangementResultsIterator(arrangementId)
+                .map(resultsIterator -> StreamSupport
+                        .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), false)
+                        .filter(filter)
+                        .count())
+                .orElse(0L);
+    }
+
+    Optional<KeyValueIterator<CheckUnitKey, CheckUnitResult>> getArrangementResultsIterator(Long arrangementId) {
+        return getResultsKeyValueStore().map(store -> store.range(
                 new CheckUnitKey(arrangementId, Long.MIN_VALUE),
-                new CheckUnitKey(arrangementId, Long.MAX_VALUE)
+                new CheckUnitKey(arrangementId, Long.MAX_VALUE))
         );
     }
 
-    ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> getResultsKeyValueStore() {
-        ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store = interactiveQueryService.getQueryableStore(
+    private Optional<ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult>> getResultsKeyValueStore() {
+        return Optional.ofNullable(store == null ?
+            interactiveQueryService.getQueryableStore(
                 resultsTableName,
                 QueryableStoreTypes.keyValueStore()
-        );
-        if(store == null)
-            throw new AS_15_8_DispatcherException("Ошибка чтения store из kafka!");
-        return store;
+        ) : store);
     }
 
     void fillResult(Result result, Long jobId, CheckUnitResult checkUnitResult, DetailResultService<? super CheckUnitResult> service){
@@ -115,11 +131,7 @@ public class ResultsKafkaService {
         result.setCheckType(service.getCheckType());
     }
 
-    private CheckUnitResult getArrangementResult(ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store, Long arrangementId, Long jobId) {
-        return store.get(new CheckUnitKey(arrangementId, Long.MIN_VALUE));
-    }
-
-    private int countIteratorSize(KeyValueIterator<CheckUnitKey, CheckUnitResult> resultsIterator) {
+    private long countIteratorSize(KeyValueIterator<CheckUnitKey, CheckUnitResult> resultsIterator) {
         AtomicInteger count = new AtomicInteger();
         resultsIterator.forEachRemaining( s-> count.getAndIncrement());
         return count.get();
@@ -149,18 +161,30 @@ public class ResultsKafkaService {
         return notFiltered;
     }
 
+    @SuppressWarnings("unchecked")
     private Comparator<KeyValue<CheckUnitKey, CheckUnitResult>> createResultsComparator(String columnName) {
-        switch (columnName){
-            case "checkUnitType":
-                return Comparator.comparing((KeyValue<CheckUnitKey, CheckUnitResult> kv) -> kv.value.getCheckUnit().getType());
-            case "checkUnitValue":
-                return Comparator.comparing((KeyValue<CheckUnitKey, CheckUnitResult> kv) -> kv.value.getCheckUnit().getValue());
-            case "result":
-                return Comparator.comparing((KeyValue<CheckUnitKey, CheckUnitResult> kv) -> kv.value.getCheckResult());
-            case "startDate":
-                return Comparator.comparing((KeyValue<CheckUnitKey, CheckUnitResult> kv) -> kv.value.getStartTime());
-            default:
+        try {
+            if(Strings.isEmpty(columnName))
                 return Comparator.comparing((KeyValue<CheckUnitKey, CheckUnitResult> kv) -> kv.value.getEndTime());
+            String methodName = "get" +
+                    columnName.substring(0, 1).toUpperCase() +
+                    columnName.substring(1);
+            Method method = Result.class.getMethod(methodName);
+            return (o1, o2) -> {
+                try {
+                    Object val1 = method.invoke(o1.value);
+                    Object val2 = method.invoke(o2.value);
+                    if(val1 instanceof Comparable && val2 instanceof Comparable)
+                        return ((Comparable)val1).compareTo(val2);
+                    else
+                        return 0;
+                } catch (Exception ex){
+                    return 0;
+                }
+            };
+        } catch (Exception ex) {
+            log.warn("Ошибка при создании компаратора для сортировки результатов проверок", ex);
+            return Comparator.comparing((KeyValue<CheckUnitKey, CheckUnitResult> kv) -> kv.value.getEndTime());
         }
     }
 }

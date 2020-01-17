@@ -36,9 +36,6 @@
             <appender-ref ref="jsonConsoleAppender" />
             <appender-ref ref="rootRollingFile" />
         </root>
-        <logger name="org.hibernate.SQL" level="DEBUG" additivity="false">
-            <appender-ref ref="rootRollingFile" />
-        </logger>
     </springProfile>
 
     <springProfile name="local_log">
