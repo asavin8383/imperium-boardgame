@@ -332,6 +332,7 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         while (it.hasNext() && counter++ < searchResultLimit) {
             WebElement link = it.next();
             String url = extractUrl(link);
+            log.debug("Проверяется ссылка: {}", url);
             // System.out.println(counter + ". " + url);
             try {
                 if (equalityTest.equalTo(url)) {
