@@ -6,7 +6,6 @@ import exceptions.AS_15_8_DispatcherException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Arrangement;
-import model.Views;
 import model.enums.ArrangementStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -66,7 +65,6 @@ public class ArrangementStatusProducer {
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         MappingJacksonValue jacksonValue = new MappingJacksonValue(arrangementStatusNotification);
-        jacksonValue.setSerializationView(Views.Brief.class);
         HttpEntity<MappingJacksonValue> entity = new HttpEntity<>(jacksonValue, headers);
 
         log.info("Отправка сообщения с изменением статуса мероприятия {} в ППМ", arrangementId);
@@ -93,7 +91,7 @@ public class ArrangementStatusProducer {
     private void sendAct(Long arrangementId) {
         if (isActAvailableFromPPT(arrangementId)) {
             actService.createAct(arrangementId);
-            changeArrangemetStatusToActSentPPT(arrangementId);
+            changeArrangementStatusToActSentPPT(arrangementId);
         }
     }
 
@@ -108,7 +106,7 @@ public class ArrangementStatusProducer {
         }
     }
 
-    public void changeArrangemetStatusToActSentPPT(Long arrangementId) {
+    public void changeArrangementStatusToActSentPPT(Long arrangementId) {
         try {
             restTemplate.getForObject(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(PPT_ACT_SENT_STATUS).queryParam("id", arrangementId).build().toString(), Boolean.class);
         } catch (HttpClientErrorException | HttpServerErrorException ex) {

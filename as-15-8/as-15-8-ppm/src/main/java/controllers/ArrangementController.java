@@ -16,6 +16,7 @@ import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.web.bind.annotation.*;
@@ -188,10 +189,12 @@ public class ArrangementController {
     }
 
     private boolean sendToPPT(ArrangementStatusNotification arrangementStatusNotification){
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        HttpEntity<ArrangementStatusNotification> entity = new HttpEntity<>(arrangementStatusNotification, headers);
+        MappingJacksonValue jacksonValue = new MappingJacksonValue(arrangementStatusNotification);
+        HttpEntity<MappingJacksonValue> entity = new HttpEntity<>(jacksonValue, headers);
 
         log.info("Отправка сообщения с изменением статуса мероприятия {} в ППТ", arrangementStatusNotification.getArrangementId());
         try {

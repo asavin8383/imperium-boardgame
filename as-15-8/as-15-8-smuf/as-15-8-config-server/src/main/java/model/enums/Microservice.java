@@ -8,5 +8,6 @@ public enum Microservice {
     executor,
     analyzer,
     report_generator,
-    report_scheduler
+    report_scheduler,
+    config_server
 }

@@ -1,5 +1,7 @@
 package controllers;
 
+import arrangement.ArrangementStatusNotification;
+import enums.ArrangementEvents;
 import enums.CheckUnitJobResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -69,7 +71,7 @@ public class ActController {
     @PreAuthorize("hasAnyRole('ROLE_SEND_ACT_BY_HAND')")
     public ResponseEntity<Void> createAct(Long arrangementId){
         boolean created = actService.createAct(arrangementId);
-        arrangementStatusProducer.changeArrangemetStatusToActSentPPT(arrangementId);
+        arrangementStatusProducer.changeArrangementStatusToActSentPPT(arrangementId);
         return new ResponseEntity<>(created ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -158,5 +160,10 @@ public class ActController {
         if (ldt == null)
             return null;
         return Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant());
+    }
+    @GetMapping(path = "/testAct")
+    @PreAuthorize("hasAnyRole('ROLE_SEND_ACT_BY_HAND')")
+    public void test(Long arrangementId){
+        arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(arrangementId, ArrangementEvents.FINISH));
     }
 }

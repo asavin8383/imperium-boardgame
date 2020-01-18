@@ -10,7 +10,6 @@ import model.Views;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.util.Set;
 
 @Entity
 @Table(schema = "portal", name = "custom_erdi_units")

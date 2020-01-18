@@ -2,7 +2,6 @@ package model;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.*;
-import model.Views;
 import model.enums.SchedulePeriodState;
 
 import javax.persistence.*;
