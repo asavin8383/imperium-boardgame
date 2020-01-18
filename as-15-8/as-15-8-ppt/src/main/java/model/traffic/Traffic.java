@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import model.Views;
-import model.task.Arrangement;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
