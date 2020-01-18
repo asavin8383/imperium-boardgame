@@ -26,4 +26,5 @@
     <include file="db/changelog/config.0021.robot_sla_unique_constraint.xml"/>
     <include file="db/changelog/config.0022.processing_time_traffic_per_check_unit.xml"/>
     <include file="db/changelog/config.0023.config_view_robots_traffic.xml"/>
+    <include file="db/changelog/config.0024.config_server_ck_application_config_server.xml"/>
 </databaseChangeLog>

@@ -5,6 +5,7 @@ import checkUnits.CheckUnitJob;
 import checkUnits.CheckUnitType;
 import common.ApplicationConfiguration;
 import execution.ExecutionJobResult;
+import execution.ExecutionPSJobResult;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,8 +31,8 @@ public class TestJobExecution {
 		CheckUnitJob checkUnitJob = new CheckUnitJob();
 		checkUnitJob.setJobID(1L);
 		checkUnitJob.setAccessTool("google");
-		
-		checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.URL, "http://kavkaz.tv"));
+
+		checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.DOMAIN, "www.kasparov.ru"));
 		//checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.IP_V6, "2606:4700:0030:0000:0000:0000:681b:b458"));
 
 		ExecutionJobResult executionJobResult = checkUnitVerificationServiceFactory
@@ -48,7 +49,7 @@ public class TestJobExecution {
 //        BufferedImage bImage3 = ImageIO.read(bis2);
 //        ImageIO.write(bImage3, "png", new File("outputEtalon.png") );
 
-		System.out.println(executionJobResult.toString());
+		System.out.println(((ExecutionPSJobResult)executionJobResult).getCheckUnitJobResult());
 	}
 	
 }

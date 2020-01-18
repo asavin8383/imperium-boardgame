@@ -9,6 +9,7 @@ import execution.ExecutionPSJobResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.openqa.selenium.*;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -18,10 +19,7 @@ import robots.utils.EqualityTest;
 import robots.utils.ScriptUtils;
 
 import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -84,11 +82,6 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
 
     /** Кол-во проверенных ссылок */
     protected Integer counter = 0;
-
-
-    /** список юрлов */
-    List<String> urls = new ArrayList<>();
-
 
     public CommonDirectSearchRobot(Map<AccessToolParameter, String> scriptParams) {
         super(scriptParams,
@@ -180,37 +173,18 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
             return createMessage(false, CheckUnitJobResult.BAD_IP);
         }
 
-        List<WebElement> links = getLinks(resultPageType);
-
         if (captcha())
             return createMessage(false, CheckUnitJobResult.CAPTCHA_DETECTED);
 
         //Проверяем, не вылез ли подозрительный трафик
-        if(links.size() == 0) {
-            log.info("По URL {} Список ссылок пустой нужно проверить на пустой IP", checkUnit.getValue());
-            if(Strings.isNotEmpty(resultNotFoundRegexp)) {
-                String content = ScriptUtils.getPageSource(driver).pageSource;
-                //log.info("Контент страницы: {}", content);
-                log.info("Регулярное выражение для проверки: {}", resultNotFoundRegexp);
-                Matcher matcher = Pattern.compile(resultNotFoundRegexp).matcher(content);
-                if(matcher.find()){
-                    // Ссылок не найдено
-                    return createMessage(false, CheckUnitJobResult.COMPLETED);
-                } else {
-                    //Плохой IP
-                    return createMessage(false, CheckUnitJobResult.BAD_IP);
-                }
-            } else {
-                //регулярку не задали, считаем плохим IP
-                return createMessage(false, CheckUnitJobResult.BAD_IP);
-            }
-
-
+        Optional<ExecutionJobResult> optExecutionJobResult = checkNoLinks(checkUnit);
+        if(optExecutionJobResult.isPresent()){
+            return optExecutionJobResult.get();
         }
 
         if (checkUnit.getType() == CheckUnitType.SEARCH_PHRASE){
             List<String> urls = new ArrayList<>();
-            for (WebElement w : links) {
+            for (WebElement w : getLinks(resultPageType)) {
                 try {
                     urls.add(extractUrl(w));
                 }
@@ -223,10 +197,48 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
 
         equalityTest = EqualityTest.forCheckUnit(checkUnit);
 
-        boolean isViolation = resultPageType == ResultPageType.PAGINATION?
-                checkPaginatedSearchResult() : checkContinuousSearchResult();
+        boolean isViolation;
+        if (resultPageType == ResultPageType.PAGINATION) {
+            isViolation = checkPaginatedSearchResult();
+        } else if (resultPageType == ResultPageType.CONTINUOUS){
+            isViolation = checkContinuousSearchResult();
+        } else {
+            throw new ExecutionException("Ошибка проверки ПС! Недопустимый тип страницы: " + resultPageType);
+        }
         return createMessage(isViolation, null);
     }
+
+    private boolean linksFound(){
+        ScriptUtils.waitPageLoading(driver);
+        By linkLocator = By.xpath(xpathItemLink);
+        List<WebElement> listNext = driver.findElements(linkLocator);
+        return (listNext != null && listNext.size() > 0);
+    }
+
+    private Optional<ExecutionJobResult> checkNoLinks(CheckUnit checkUnit){
+        //Проверяем, не вылез ли подозрительный трафик
+        if(!linksFound()) {
+            log.debug("По URL {} Список ссылок пустой нужно проверить на пустой IP", checkUnit.getValue());
+            if(Strings.isNotEmpty(resultNotFoundRegexp)) {
+                String content = ScriptUtils.getPageSource(driver).pageSource;
+                //log.info("Контент страницы: {}", content);
+                log.debug("Регулярное выражение для проверки: {}", resultNotFoundRegexp);
+                Matcher matcher = Pattern.compile(resultNotFoundRegexp).matcher(content);
+                if(matcher.find()){
+                    // Ссылок не найдено
+                    return Optional.of(createMessage(false, CheckUnitJobResult.COMPLETED));
+                } else {
+                    //Плохой IP
+                    return Optional.of(createMessage(false, CheckUnitJobResult.BAD_IP));
+                }
+            } else {
+                //регулярку не задали, считаем плохим IP
+                return Optional.of(createMessage(false, CheckUnitJobResult.BAD_IP));
+            }
+        }
+        return Optional.empty();
+    }
+
 
     private List<WebElement> getLinks(ResultPageType resultPageType){
         return resultPageType == ResultPageType.PAGINATION?
@@ -261,6 +273,24 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         return links;
     }
 
+    List<WebElement> getPaginatedLinks() throws ExecutionException {
+        List<WebElement> links = new ArrayList<>();
+        //JavascriptExecutor jsExecutor = (JavascriptExecutor) driver;
+        do {
+            ScriptUtils.waitPageLoading(driver);
+            By linkLocator = By.xpath(xpathItemLink);
+            List<WebElement> listNext = driver.findElements(linkLocator);
+
+            if(listNext != null)
+                links.addAll(listNext);
+
+            // for yahoo before clicking next page element
+            //ScriptUtils.scrollToBottom(jsExecutor);
+
+        }
+        while (links.size() < searchResultLimit && nextPage());
+        return links;
+    }
 
     private boolean checkContinuousSearchResult() throws ExecutionException {
         List<WebElement> links = getContinuousLinks();
@@ -268,47 +298,24 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
     }
 
     boolean checkPaginatedSearchResult() throws ExecutionException {
-        JavascriptExecutor jsExecutor = (JavascriptExecutor) driver;
+        //JavascriptExecutor jsExecutor = (JavascriptExecutor) driver;
         do {
             ScriptUtils.waitPageLoading(driver);
             if (checkPageResult())
                 return true;
 
             // for yahoo before clicking next page element
-            ScriptUtils.scrollToBottom(jsExecutor);
+            //ScriptUtils.scrollToBottom(jsExecutor);
 
         } while (counter < searchResultLimit && nextPage());
 
         return false;
     }
 
-    List<WebElement> getPaginatedLinks() throws ExecutionException {
-        List<WebElement> links = new ArrayList<>();
-        JavascriptExecutor jsExecutor = (JavascriptExecutor) driver;
-        do {
-            ScriptUtils.waitPageLoading(driver);
-            By linkLocator = By.xpath(xpathItemLink);
-            List<WebElement> listNext = driver.findElements(linkLocator);
-
-            /*List<WebElement> listNext = new WebDriverWait(driver, SEARCH_RESULT_TIMEOUT)
-                    .until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(xpathItemLink)));*/
-
-            if(listNext != null)
-                links.addAll(listNext);
-
-            // for yahoo before clicking next page element
-            ScriptUtils.scrollToBottom(jsExecutor);
-
-        }
-        while (links.size() < searchResultLimit && nextPage());
-        return links;
-    }
 
     String extractUrl(WebElement element) {
         return element.getAttribute("href");
     }
-
-
 
     private void searchFor(String value) {
         WebElement inputField = driver.findElement(
@@ -332,6 +339,7 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         while (it.hasNext() && counter++ < searchResultLimit) {
             WebElement link = it.next();
             String url = extractUrl(link);
+            log.debug("Проверяется ссылка: {}", url);
             // System.out.println(counter + ". " + url);
             try {
                 if (equalityTest.equalTo(url)) {

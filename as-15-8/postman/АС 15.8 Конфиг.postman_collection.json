@@ -479,6 +479,46 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Запрос таймаута для сессии",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJBU18xNV84X2FkbWluIiwicm9sZSI6IlJPTEVfQURNSU4sUk9MRV9BRE1JTl9SRVBPUlQsUk9MRV9NQU5BR0VfQ09ORklHVVJBVElPTlMsUk9MRV9NQU5BR0VfUkVHSVNUUkFUSU9OX0pPVVJOQUwsUk9MRV9NQU5BR0VfRlVOQ1RJT05fTU9ERSIsIm1haWwiOiIiLCJ1c2VyX25hbWUiOiJBU18xNV84X0FETUlOIiwic2NvcGUiOlsicmVhZCIsIndyaXRlIl0sImV4cCI6MTU3OTM1OTI0MywidXNlck5hbWUiOiJBU18xNV84X0FETUlOIiwiYXV0aG9yaXRpZXMiOlsiUk9MRV9NQU5BR0VfUkVHSVNUUkFUSU9OX0pPVVJOQUwiLCJST0xFX0FETUlOIiwiUk9MRV9BRE1JTl9SRVBPUlQiLCJST0xFX01BTkFHRV9GVU5DVElPTl9NT0RFIiwiUk9MRV9NQU5BR0VfQ09ORklHVVJBVElPTlMiXSwianRpIjoiODZiMzJiNzYtMjBkZC00ZmI4LWI2NWEtNGJjMGJkYmVmMWNjIiwiY2xpZW50X2lkIjoiYXMtMTUtOCIsInNlY29uZE5hbWUiOiIifQ.m7A5PBbDF4WfB5UejzCqvLSbeEW5kdHD2gSQ__1k3JejgnRhn0sEHL-_Ig5s7ofvSTmvpt3xbowiLAEUnec34REBP6lGT_jvtjGKKz7xU8JZs0jFtyK8CSO2yBBoWZst42sHvI1y_DPfbd2QXi84BO6sv60vOU0EQXx-4UOE8hx33ZYgKs6aRgozyGyTs39h7Tw0cmVEc4QpwusgeTUU6wkZuOVuuTur9PS0S13fLEyBk1Lw_0K3wjpXmU8kWFNijJ-3POVQRYsLmGQNlKFv9l6Ojvp74qDZ4niOBioeSnzFYDraA2WdX0A8IQiClr_yXtZfi30P8ZiDTn4mIOKCSw",
+									"type": "string"
+								},
+								{
+									"key": "tokenType",
+									"value": "bearer",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/config/props/global/activity_timeout",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"config",
+								"props",
+								"global",
+								"activity_timeout"
+							]
+						}
+					},
+					"response": []
 				}
 			],
 			"protocolProfileBehavior": {}
@@ -837,7 +877,7 @@
 							"oauth2": [
 								{
 									"key": "accessToken",
-									"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJBU18xNV84X2FkbWluIiwicm9sZSI6IlJPTEVfQURNSU4sUk9MRV9BRE1JTl9SRVBPUlQsUk9MRV9NQU5BR0VfQ09ORklHVVJBVElPTlMsUk9MRV9NQU5BR0VfUkVHSVNUUkFUSU9OX0pPVVJOQUwsUk9MRV9NQU5BR0VfRlVOQ1RJT05fTU9ERSIsIm1haWwiOiIiLCJ1c2VyX25hbWUiOiJBU18xNV84X2FkbWluIiwic2NvcGUiOlsicmVhZCIsIndyaXRlIl0sImV4cCI6MTU3ODY0MTEzMywidXNlck5hbWUiOiJBU18xNV84X2FkbWluIiwiYXV0aG9yaXRpZXMiOlsiUk9MRV9NQU5BR0VfUkVHSVNUUkFUSU9OX0pPVVJOQUwiLCJST0xFX0FETUlOIiwiUk9MRV9BRE1JTl9SRVBPUlQiLCJST0xFX01BTkFHRV9GVU5DVElPTl9NT0RFIiwiUk9MRV9NQU5BR0VfQ09ORklHVVJBVElPTlMiXSwianRpIjoiYTZmNzdjM2QtMTI2MC00OWJlLWJlZjItMmFjMWVkNzhkY2YyIiwiY2xpZW50X2lkIjoiYXMtMTUtOCIsInNlY29uZE5hbWUiOiIifQ.Bbd85SoSunFH4cdetYUG_8_buqPyScguhONxsp7QTPpExhQ7CQ3pd1aINtE9IJ8YBOPz9NY8dFJpNbf-QXtQ8DWBb8iz0Es5QteMGf5Ta4XE21eMKGDRKqf8Tk0l__TJLEbhn14gwCRlCwfZGenosbzuR4yDohTc6PH71uTysHzwf0vggwLHyl0Tp-NWA2lHdZxRMSInryttd1z8OzQKIjKNvYoNvH5-eNbeIndhlcqN75e0A0Qaousd1ZJQ-ADWsSaecmdcBbQFNcshuDlz7BiRuzELjUoooDo6UdYCAlwVRsMGUpiQoXFogP4L73fhOnYgeFoF_Y7hNhl_ryABIA",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJBU18xNV84X2FkbWluIiwicm9sZSI6IlJPTEVfQURNSU4sUk9MRV9BRE1JTl9SRVBPUlQsUk9MRV9NQU5BR0VfQ09ORklHVVJBVElPTlMsUk9MRV9NQU5BR0VfUkVHSVNUUkFUSU9OX0pPVVJOQUwsUk9MRV9NQU5BR0VfRlVOQ1RJT05fTU9ERSIsIm1haWwiOiIiLCJ1c2VyX25hbWUiOiJBU18xNV84X0FETUlOIiwic2NvcGUiOlsicmVhZCIsIndyaXRlIl0sImV4cCI6MTU3OTA4NDU2MSwidXNlck5hbWUiOiJBU18xNV84X0FETUlOIiwiYXV0aG9yaXRpZXMiOlsiUk9MRV9NQU5BR0VfUkVHSVNUUkFUSU9OX0pPVVJOQUwiLCJST0xFX0FETUlOIiwiUk9MRV9BRE1JTl9SRVBPUlQiLCJST0xFX01BTkFHRV9GVU5DVElPTl9NT0RFIiwiUk9MRV9NQU5BR0VfQ09ORklHVVJBVElPTlMiXSwianRpIjoiYjdhOTQ0YjEtNjEzMS00YjMyLWJkNTYtYjM4ODBlM2ZhN2QzIiwiY2xpZW50X2lkIjoiYXMtMTUtOCIsInNlY29uZE5hbWUiOiIifQ.hcBHVAZaRo6vT_yDqkJDCnE6RvMkPrl7g0NLgmowqpzxFepriVAvUeGWp7Gjwn4tKwPcLg3WEZIvPdHz48So5egtQ-7tatOBBOlrHBa98tABlRcHBut-p8nJZb5gmEP5e6XBgNlJd2iL80h_6Zho8pmEY9rDHu2x2wkm5jcxhJtJ8dIwLLwxXIWO5QGq_npto42o_sslTdACfqR0UKMAIqIQr0WTqvNNXMd3ZKlj92O50-UFToinuURR-sgdM7GFTx_3D1PN1pEQh0k5zh9uz5rlcowQJD9TipQgcLC-BDH3-Ga1KJjxTlDsSUFrN4dowtdzpMcWgL1OFXuKnL5KqA",
 									"type": "string"
 								},
 								{
@@ -871,7 +911,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{url}}/config/robots_sla?id=7",
+							"raw": "{{url}}/config/robots_sla?id=1",
 							"host": [
 								"{{url}}"
 							],
@@ -882,7 +922,7 @@
 							"query": [
 								{
 									"key": "id",
-									"value": "7"
+									"value": "1"
 								}
 							]
 						}
