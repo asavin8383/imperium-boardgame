@@ -64,7 +64,7 @@ public class ResultsKafkaService {
                     if(sortingDirection != null && sortingDirection.equals(SortingDirection.DESC))
                         checkUnitResultComparator = checkUnitResultComparator.reversed();*/
                     List<Result> results = StreamSupport
-                            .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), true)
+                            .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), false)
                             .filter(filter)
                             //.sorted(checkUnitResultComparator)
                             .skip(pageable.getOffset())
