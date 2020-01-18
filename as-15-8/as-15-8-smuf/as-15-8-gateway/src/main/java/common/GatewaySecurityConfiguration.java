@@ -42,8 +42,7 @@ public class GatewaySecurityConfiguration extends ResourceServerConfigurerAdapte
                     .antMatchers(HttpMethod.POST,
                         "/pod/act/**",
                             "/pod/erdi/checkUnits/**",
-                            "/viewer/**",
-                            "/config/props/global/activity_timeout"
+                            "/viewer/**"
                         ).permitAll().antMatchers(HttpMethod.OPTIONS, "/viewer/**")
                     .permitAll()
                     .antMatchers("/**")

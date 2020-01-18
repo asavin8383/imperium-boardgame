@@ -15,7 +15,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-@PreAuthorize("hasRole('ROLE_MANAGE_CONFIGURATIONS')")
+
 @RequestMapping(path = "/props/global")
 
 public class GlobalPropertiesController {
@@ -24,12 +24,14 @@ public class GlobalPropertiesController {
     @Value("${user.activity.timeout.config.key}")
     private String userActivityTimeoutConfigKey;
 
+    @PreAuthorize("hasRole('ROLE_MANAGE_CONFIGURATIONS')")
     @PostMapping
     @JsonView(Views.Brief.class)
     public List<GlobalProperty> getGlobalProperties() {
         return globalPropertiesRepo.findAll();
     }
 
+    @PreAuthorize("hasRole('ROLE_MANAGE_CONFIGURATIONS')")
     @PutMapping
     public List<GlobalProperty> putGlobalProperties(@RequestBody List<GlobalProperty> newGlobalPropertyList) {
         List<GlobalProperty> newProperites = checkConfiguration(newGlobalPropertyList);
