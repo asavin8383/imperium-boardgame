@@ -1,7 +1,7 @@
 package service.impl;
 
 import analysis.AnalysisResult;
-import analysis.PS_AnalysisJobResult;
+import analysis.PsAnalysisJobResult;
 import checkUnits.CheckUnit;
 import checkUnits.CheckUnitType;
 import enums.CheckUnitJobResult;
@@ -35,7 +35,7 @@ public class PS_AnalyzerService implements AnalyzerService<ExecutionPSJobResult>
 
 	@Override
 	public AnalysisResult analyzeResult(ExecutionPSJobResult result) {
-		PS_AnalysisJobResult analysisResult = new PS_AnalysisJobResult();
+		PsAnalysisJobResult analysisResult = new PsAnalysisJobResult();
 		analysisResult.setCheckUnit(result.getCheckUnit());
 		analysisResult.setCheckResult(obtainResult(result, analysisResult));
 		analysisResult.setScreenshot(result.getScreenshot());
@@ -43,7 +43,7 @@ public class PS_AnalyzerService implements AnalyzerService<ExecutionPSJobResult>
 		return analysisResult;
 	}
 
-	private CheckUnitJobResult obtainResult(ExecutionPSJobResult result, PS_AnalysisJobResult analysisResult) {
+	private CheckUnitJobResult obtainResult(ExecutionPSJobResult result, PsAnalysisJobResult analysisResult) {
 		CheckUnit checkUnit = result.getCheckUnit();
 		if (result.getCheckUnitJobResult() != null){
 			return result.getCheckUnitJobResult();

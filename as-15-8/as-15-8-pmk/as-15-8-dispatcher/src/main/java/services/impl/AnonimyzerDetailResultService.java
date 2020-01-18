@@ -1,10 +1,8 @@
 package services.impl;
 
 import analysis.AnonymizerAnalysisResult;
-import exceptions.AS_15_8_DispatcherException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import model.DetailResult;
 import model.PasdDetailResult;
 import model.Result;
 import model.enums.CheckType;
@@ -17,7 +15,7 @@ import services.DetailResultService;
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Slf4j
-public class AnonimyzerDetailResultService implements DetailResultService<AnonymizerAnalysisResult> {
+public class AnonimyzerDetailResultService implements DetailResultService<AnonymizerAnalysisResult, PasdDetailResult> {
 
 	private final PasdDetailResultRepo pasdDetailResultRepo;
 
@@ -27,12 +25,21 @@ public class AnonimyzerDetailResultService implements DetailResultService<Anonym
 	}
 
 	@Override
-	public DetailResult create(Result result, AnonymizerAnalysisResult analysisResult) {
+	public PasdDetailResult create(AnonymizerAnalysisResult analysisResult){
+		PasdDetailResult pasdDetailResult = new PasdDetailResult();
+		fill(pasdDetailResult, analysisResult);
+		return pasdDetailResult;
+	}
 
+	@Override
+	public PasdDetailResult getOrCreate(Result result, AnonymizerAnalysisResult analysisResult) {
 		PasdDetailResult pasdDetailResult = pasdDetailResultRepo.findById(result.getId()).orElseGet(PasdDetailResult::new);
-
 		pasdDetailResult.setResult(result);
+		fill(pasdDetailResult, analysisResult);
+		return pasdDetailResult;
+	}
 
+	private void fill(PasdDetailResult pasdDetailResult, AnonymizerAnalysisResult analysisResult) {
 		pasdDetailResult.setHttpStatus(analysisResult.getHttpStatus());
 		pasdDetailResult.setHttpStatusEtalon(analysisResult.getHttpStatusEtalon());
 		pasdDetailResult.setHttpHeaders(analysisResult.getHttpHeaders());
@@ -53,15 +60,11 @@ public class AnonimyzerDetailResultService implements DetailResultService<Anonym
 		pasdDetailResult.setResponseError(analysisResult.getErrorCode() != null);
 		pasdDetailResult.setRedirectionDetected(analysisResult.getRedirectionDetected());
 		pasdDetailResult.setResultNLP(analysisResult.getResultNLP());
-
-		return pasdDetailResult;
 	}
 
 	@Override
-	public void save(DetailResult detailResult) {
-		if(!(detailResult instanceof PasdDetailResult))
-			throw new AS_15_8_DispatcherException("Ошибка при сохранении детального результата типа " + detailResult.getClass().getSimpleName());
-		pasdDetailResultRepo.save((PasdDetailResult) detailResult);
+	public void save(PasdDetailResult detailResult) {
+		pasdDetailResultRepo.save(detailResult);
 	}
 
 	@Override

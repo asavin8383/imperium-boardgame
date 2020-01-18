@@ -2,6 +2,8 @@ package services;
 
 
 import analysis.CheckUnitResult;
+import lombok.RequiredArgsConstructor;
+import model.DetailResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,15 +19,15 @@ import java.util.Map;
  *
  */
 @Service
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class AnalysisResultServiceFactory {
 
 	/** Список сервисов */
-	@Autowired
-	private List<DetailResultService<? extends CheckUnitResult>> services;
+	private final List<DetailResultService<? extends CheckUnitResult, ? extends DetailResult>> services;
 	
 	/** Кэш сервисов */
-	private static final Map<Class<? extends CheckUnitResult>, DetailResultService<? super CheckUnitResult>> servicesCache = new HashMap<>();
-	
+	private static final Map<Class<? extends CheckUnitResult>, DetailResultService<? super CheckUnitResult, ? extends DetailResult>> servicesCache = new HashMap<>();
+
 	/**
 	 * Метод создания кэша сервисов 
 	 */
@@ -35,17 +37,16 @@ public class AnalysisResultServiceFactory {
 		services.forEach(service -> 
 			servicesCache.put(
 				(Class<? extends CheckUnitResult>) ((ParameterizedType)service.getClass().getGenericInterfaces()[0]).getActualTypeArguments()[0],
-				(DetailResultService<? super CheckUnitResult>) service)
+				(DetailResultService<? super CheckUnitResult, ? extends DetailResult>) service)
 		);
 	}
 	
 	/**
 	 * Метод получения сервиса
 	 * @param serviceType Тип сервиса
-	 * @return
 	 */
-	public static DetailResultService<? super CheckUnitResult> getService(Class<? extends CheckUnitResult> serviceType) {
-		DetailResultService<? super CheckUnitResult> service = servicesCache.get(serviceType);
+	public static DetailResultService<? super CheckUnitResult, ? extends DetailResult> getService(Class<? extends CheckUnitResult> serviceType) {
+		DetailResultService<? super CheckUnitResult, ? extends DetailResult> service = servicesCache.get(serviceType);
 		if(service == null) {
 			throw new IllegalArgumentException("Error creating analysis result service! Service for " + serviceType + " is not supported");
 		}

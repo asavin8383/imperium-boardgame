@@ -43,12 +43,12 @@ public class ResultService {
         log.info("Запуск сохранения результатов проверок звершенных мероприятий");
         try{
             List<Arrangement> runningArrangements = arrangementRepo.findRunning();
-
+            log.info("Найдено " + runningArrangements.size() + " запущенных мероприятий");
             for (Arrangement arrangement : runningArrangements) {
                 long count = resultsKafkaService.getResultsCount(arrangement.getId());
+                log.info("У мероприятия " + arrangement.getId() + " найдено " + count + " завершенных проверок");
                 if(count == 0)
                     break;
-                log.info("У мероприятия " + arrangement.getId() + " найдено " + count + " завершенных проверок");
 
                 if (arrangement.getCheckUnitsCount() == count) {
                     log.info("Начато сохранение мероприятия: " + arrangement.getId());
@@ -112,11 +112,11 @@ public class ResultService {
     }
 
     private void saveJobResult(Arrangement arrangement, Long jobId, AnalysisResult analysisResult) {
-        DetailResultService<? super CheckUnitResult> service = AnalysisResultServiceFactory.getService(analysisResult.getClass());
+        DetailResultService<? super CheckUnitResult, ? extends DetailResult> service = AnalysisResultServiceFactory.getService(analysisResult.getClass());
         Result result = resultRepo.findById(jobId).orElseGet(Result::new);
         result.setArrangement(arrangement);
         resultsKafkaService.fillResult(result, jobId, analysisResult, service);
-        DetailResult detailResult = service.create(result, analysisResult);
+        DetailResult detailResult = service.getOrCreate(result, analysisResult);
         result.setDetailResult(detailResult);
 
         if((analysisResult.getScreenshot() != null && analysisResult.getScreenshot().length > 0) ||
@@ -131,13 +131,13 @@ public class ResultService {
     }
 
     private void saveJobStatus(Arrangement arrangement, Long jobId, CheckUnitResult checkUnitResult, CheckUnitJobResult status, String description) {
-        DetailResultService<? super CheckUnitResult> service = AnalysisResultServiceFactory.getService(checkUnitResult.getClass());
+        DetailResultService<? super CheckUnitResult, ? extends DetailResult> service = AnalysisResultServiceFactory.getService(checkUnitResult.getClass());
         Result result = resultRepo.findById(jobId).orElseGet(Result::new);
         result.setArrangement(arrangement);
         resultsKafkaService.fillResult(result, jobId, checkUnitResult, service);
 
         if (status == CheckUnitJobResult.INTERNAL_ERROR || status == CheckUnitJobResult.TIMEOUT_ERROR) {
-            DetailResult detailResult = service.create(result, checkUnitResult);
+            DetailResult detailResult = service.getOrCreate(result, checkUnitResult);
             result.setDetailResult(detailResult);
         }
         resultRepo.save(result);

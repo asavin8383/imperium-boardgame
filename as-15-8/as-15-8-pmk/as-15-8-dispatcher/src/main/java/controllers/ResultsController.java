@@ -1,14 +1,18 @@
 package controllers;
 
 import analysis.AnalysisResult;
+import analysis.CheckUnitResult;
 import analysis.NMapAnalysisJobResult;
 import checkUnits.CheckUnitType;
+import com.fasterxml.jackson.annotation.JsonView;
 import controllers.helpers.SortingHelper;
 import enums.CheckUnitJobResult;
 import enums.SortingDirection;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import model.DetailResult;
 import model.Result;
+import model.Views;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,6 +21,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import services.AnalysisResultServiceFactory;
+import services.DetailResultService;
 import services.ResultsKafkaService;
 
 import java.util.List;
@@ -37,6 +43,7 @@ public class ResultsController {
 
     @PreAuthorize("hasRole('ROLE_VIEW_RESULT')")
     @GetMapping
+    @JsonView(Views.Brief.class)
     public Page<Result> findList(
             @RequestParam Long arrangementId,
             @RequestParam(required = false) List<CheckUnitJobResult> checkUnitJobResults,
@@ -95,4 +102,13 @@ public class ResultsController {
                 }).orElseGet(() -> ResponseEntity.noContent().build());
     }
 
+    @PreAuthorize("hasRole('ROLE_VIEW_RESULT')")
+    @GetMapping("/details")
+    public ResponseEntity<? extends DetailResult> getPasdDetails(@RequestParam Long arrangementId, @RequestParam Long id){
+        return resultService.getArrangementResult(arrangementId, id)
+                .map(checkUnitResult -> {
+                    DetailResultService<? super CheckUnitResult, ? extends DetailResult> service = AnalysisResultServiceFactory.getService(checkUnitResult.getClass());
+                    return ResponseEntity.ok(service.create(checkUnitResult));
+                }).orElseGet(() -> ResponseEntity.noContent().build());
+    }
 }

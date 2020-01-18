@@ -1,9 +1,7 @@
 package services.impl;
 
 import analysis.CheckUnitStatusNotification;
-import exceptions.AS_15_8_DispatcherException;
 import lombok.RequiredArgsConstructor;
-import model.DetailResult;
 import model.ErrorDetailResult;
 import model.Result;
 import model.enums.CheckType;
@@ -20,7 +18,7 @@ import services.DetailResultService;
  */
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class ErrorResultService implements DetailResultService<CheckUnitStatusNotification> {
+public class ErrorResultService implements DetailResultService<CheckUnitStatusNotification, ErrorDetailResult> {
 
 	private final ErrorDetailResultRepo errorDetailResultRepo;
 
@@ -30,20 +28,27 @@ public class ErrorResultService implements DetailResultService<CheckUnitStatusNo
 	}
 
 	@Override
-	public DetailResult create(Result result, CheckUnitStatusNotification checkUnitResult) {
-		ErrorDetailResult errorDetailResult = errorDetailResultRepo.findById(result.getId()).orElseGet(ErrorDetailResult::new);
-
-		errorDetailResult.setResult(result);
-
-		errorDetailResult.setError(checkUnitResult.getDescription());
+	public ErrorDetailResult create(CheckUnitStatusNotification checkUnitStatusNotification){
+		ErrorDetailResult errorDetailResult = new ErrorDetailResult();
+		fill(errorDetailResult, checkUnitStatusNotification);
 		return errorDetailResult;
 	}
 
 	@Override
-	public void save(DetailResult detailResult) {
-		if(!(detailResult instanceof ErrorDetailResult))
-			throw new AS_15_8_DispatcherException("Ошибка при сохранении детального результата типа " + detailResult.getClass().getSimpleName());
-		errorDetailResultRepo.save((ErrorDetailResult) detailResult);
+	public ErrorDetailResult getOrCreate(Result result, CheckUnitStatusNotification checkUnitStatusNotification){
+		ErrorDetailResult errorDetailResult = errorDetailResultRepo.findById(result.getId()).orElseGet(ErrorDetailResult::new);
+		errorDetailResult.setResult(result);
+		fill(errorDetailResult, checkUnitStatusNotification);
+		return errorDetailResult;
+	}
+
+	private void fill(ErrorDetailResult detailResult, CheckUnitStatusNotification checkUnitResult) {
+		detailResult.setError(checkUnitResult.getDescription());
+	}
+
+	@Override
+	public void save(ErrorDetailResult detailResult) {
+		errorDetailResultRepo.save(detailResult);
 	}
 
     @Override
