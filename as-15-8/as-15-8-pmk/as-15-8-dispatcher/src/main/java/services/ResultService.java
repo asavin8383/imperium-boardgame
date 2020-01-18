@@ -40,7 +40,7 @@ public class ResultService {
 
     @Scheduled(cron = "${results.save.schedule}")
     public void saveResults() {
-        log.info("Запуск сохранения результатов проверок звершенных мероприятий");
+        log.info("Запуск сохранения результатов проверок завершенных мероприятий");
         try{
             List<Arrangement> runningArrangements = arrangementRepo.findRunning();
             log.info("Найдено " + runningArrangements.size() + " запущенных мероприятий");
@@ -48,7 +48,7 @@ public class ResultService {
                 long count = resultsKafkaService.getResultsCount(arrangement.getId());
                 log.info("У мероприятия " + arrangement.getId() + " найдено " + count + " завершенных проверок");
                 if(count == 0)
-                    break;
+                    continue;
 
                 if (arrangement.getCheckUnitsCount() == count) {
                     log.info("Начато сохранение мероприятия: " + arrangement.getId());
