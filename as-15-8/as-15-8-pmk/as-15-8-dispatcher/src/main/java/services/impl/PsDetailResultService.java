@@ -1,9 +1,7 @@
 package services.impl;
 
-import analysis.PS_AnalysisJobResult;
-import exceptions.AS_15_8_DispatcherException;
+import analysis.PsAnalysisJobResult;
 import lombok.RequiredArgsConstructor;
-import model.DetailResult;
 import model.PsDetailResult;
 import model.Result;
 import model.enums.CheckType;
@@ -20,7 +18,7 @@ import services.DetailResultService;
  */
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class PsDetailResultService implements DetailResultService<PS_AnalysisJobResult> {
+public class PsDetailResultService implements DetailResultService<PsAnalysisJobResult, PsDetailResult> {
 
 	private final PsDetailResultRepo psDetailResultRepo;
 
@@ -30,24 +28,31 @@ public class PsDetailResultService implements DetailResultService<PS_AnalysisJob
 	}
 
 	@Override
-	public DetailResult create(Result result, PS_AnalysisJobResult analysisResult) {
-		PsDetailResult psDetailResult = psDetailResultRepo.findById(result.getId()).orElseGet(PsDetailResult::new);
-
-		psDetailResult.setResult(result);
-
-		psDetailResult.setDescription(analysisResult.getDescription());
+	public PsDetailResult create(PsAnalysisJobResult psAnalysisResult) {
+		PsDetailResult psDetailResult = new PsDetailResult();
+		fill(psDetailResult, psAnalysisResult);
 		return psDetailResult;
 	}
 
 	@Override
-	public void save(DetailResult detailResult) {
-		if(!(detailResult instanceof PsDetailResult))
-			throw new AS_15_8_DispatcherException("Ошибка при сохранении детального результата типа " + detailResult.getClass().getSimpleName());
-		psDetailResultRepo.save((PsDetailResult) detailResult);
+	public PsDetailResult getOrCreate(Result result, PsAnalysisJobResult psAnalysisResult){
+		PsDetailResult psDetailResult = psDetailResultRepo.findById(result.getId()).orElseGet(PsDetailResult::new);
+		psDetailResult.setResult(result);
+		fill(psDetailResult, psAnalysisResult);
+		return psDetailResult;
+	}
+
+	private void fill(PsDetailResult psDetailResult, PsAnalysisJobResult analysisResult) {
+		psDetailResult.setDescription(analysisResult.getDescription());
+	}
+
+	@Override
+	public void save(PsDetailResult psDetailResult) {
+		psDetailResultRepo.save(psDetailResult);
 	}
 
     @Override
-    public String getErrorText(PS_AnalysisJobResult analysisResult) {
+    public String getErrorText(PsAnalysisJobResult analysisResult) {
         return analysisResult.getDescription();
     }
 }

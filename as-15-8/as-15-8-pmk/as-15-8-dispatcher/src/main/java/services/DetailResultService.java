@@ -1,6 +1,5 @@
 package services;
 
-import model.DetailResult;
 import model.Result;
 import model.enums.CheckType;
 
@@ -10,18 +9,15 @@ import model.enums.CheckType;
  * @param <T>
  *
  */
-public interface DetailResultService<T> {
+public interface DetailResultService<T, R> {
 
 	CheckType getCheckType();
 
-	/**
-	 * Метод обработки результатов анализа проверок запрещенных ресурсов
-	 * @param checkUnitResult Результат анализа проверок запрещенных ресурсов
-	 * @return
-	 */
-	DetailResult create(Result result, T checkUnitResult);
+	R create(T analysisResult);
 
-	void save(DetailResult detailResult);
+	R getOrCreate(Result result, T analysisResult);
+
+	void save(R detailResult);
 
 	String getErrorText(T checkUnitResult);
 	

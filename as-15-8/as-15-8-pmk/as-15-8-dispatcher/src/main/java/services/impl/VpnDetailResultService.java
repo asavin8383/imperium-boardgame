@@ -1,10 +1,8 @@
 package services.impl;
 
 import analysis.VpnAnalysisResult;
-import exceptions.AS_15_8_DispatcherException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import model.DetailResult;
 import model.PasdDetailResult;
 import model.Result;
 import model.enums.CheckType;
@@ -17,7 +15,7 @@ import services.DetailResultService;
 @Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class VpnDetailResultService implements DetailResultService<VpnAnalysisResult> {
+public class VpnDetailResultService implements DetailResultService<VpnAnalysisResult, PasdDetailResult> {
 
 	private final PasdDetailResultRepo pasdDetailResultRepo;
 
@@ -27,12 +25,21 @@ public class VpnDetailResultService implements DetailResultService<VpnAnalysisRe
 	}
 
 	@Override
-	public DetailResult create(Result result, VpnAnalysisResult analysisResult) {
+	public PasdDetailResult create(VpnAnalysisResult vpnAnalysisResult) {
+		PasdDetailResult pasdDetailResult = new PasdDetailResult();
+		fill(pasdDetailResult, vpnAnalysisResult);
+		return pasdDetailResult;
+	}
 
+	@Override
+	public PasdDetailResult getOrCreate(Result result, VpnAnalysisResult vpnAnalysisResult) {
 		PasdDetailResult pasdDetailResult = pasdDetailResultRepo.findById(result.getId()).orElseGet(PasdDetailResult::new);
-
 		pasdDetailResult.setResult(result);
+		fill(pasdDetailResult, vpnAnalysisResult);
+		return pasdDetailResult;
+	}
 
+	private void fill(PasdDetailResult pasdDetailResult, VpnAnalysisResult analysisResult) {
 		pasdDetailResult.setHttpStatus(analysisResult.getHttpStatus());
 		pasdDetailResult.setHttpStatusEtalon(analysisResult.getHttpStatusEtalon());
 		pasdDetailResult.setHttpHeaders(analysisResult.getHttpHeaders());
@@ -54,15 +61,11 @@ public class VpnDetailResultService implements DetailResultService<VpnAnalysisRe
 		pasdDetailResult.setRedirectionDetected(analysisResult.getRedirectionDetected());
 		pasdDetailResult.setResultNLP(analysisResult.getResultNLP());
 		pasdDetailResult.setForbiddenFinalUrl(analysisResult.getForbiddenFinalUrl());
-
-		return pasdDetailResult;
 	}
 
 	@Override
-	public void save(DetailResult detailResult) {
-		if(!(detailResult instanceof PasdDetailResult))
-			throw new AS_15_8_DispatcherException("Ошибка при сохранении детального результата типа " + detailResult.getClass().getSimpleName());
-		pasdDetailResultRepo.save((PasdDetailResult) detailResult);
+	public void save(PasdDetailResult pasdDetailResult) {
+		pasdDetailResultRepo.save(pasdDetailResult);
 	}
 
 	@Override

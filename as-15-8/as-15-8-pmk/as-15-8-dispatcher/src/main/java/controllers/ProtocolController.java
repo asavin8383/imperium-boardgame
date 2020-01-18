@@ -1,6 +1,7 @@
 package controllers;
 
 import checkUnits.CheckUnitType;
+import com.fasterxml.jackson.annotation.JsonView;
 import controllers.helpers.SortingHelper;
 import enums.CheckUnitJobResult;
 import enums.SortingDirection;
@@ -8,6 +9,7 @@ import exceptions.AS_15_8_DispatcherException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Result;
+import model.Views;
 import model.enums.UserResult;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +42,7 @@ public class ProtocolController {
 
     @PreAuthorize("hasRole('ROLE_VIEW_RESULT')")
     @GetMapping
+    @JsonView(Views.Full.class)
     public Page<Result> findList(
             @RequestParam Long arrangementId,
             @RequestParam(required = false) List<CheckUnitJobResult> checkUnitJobResults,

@@ -103,7 +103,7 @@ spring:
   cloud:
     stream:
       bindings:
-        outputJobs.destination: scheduled_jobs_asin
+        outputJobs.destination: jobs_asin
         springCloudBusInput.destination: bus_config_input_asin
         springCloudBusOutput.destination: bus_config_output_asin
 
@@ -114,7 +114,7 @@ spring:
   cloud:
     stream:
       bindings:
-        outputJobs.destination: scheduled_jobs_asavin
+        outputJobs.destination: jobs_asavin
         springCloudBusInput.destination: bus_config_input_asavin
         springCloudBusOutput.destination: bus_config_output_asavin
   datasource:
@@ -129,7 +129,7 @@ spring:
   cloud:
     stream:
       bindings:
-        outputJobs.destination: scheduled_jobs_danikanov
+        outputJobs.destination: jobs_danikanov
         springCloudBusInput.destination: bus_config_input_danikanov
         springCloudBusOutput.destination: bus_config_output_danikanov
   datasource:
@@ -144,7 +144,7 @@ spring:
   cloud:
     stream:
       bindings:
-        outputJobs.destination: scheduled_jobs_ashabalin
+        outputJobs.destination: jobs_ashabalin
         springCloudBusInput.destination: bus_config_input_ashabalin
         springCloudBusOutput.destination: bus_config_output_ashabalin
   datasource:
@@ -160,17 +160,6 @@ spring:
   cloud:
     stream:
       bindings:
-        outputJobs.destination: scheduled_jobs_pvorobiev
+        outputJobs.destination: jobs_pvorobiev
         springCloudBusInput.destination: bus_config_input_pvorobiev
         springCloudBusOutput.destination: bus_config_output_pvorobiev
-
----
-
-spring:
-  profiles: dev_asinjavin
-  cloud:
-    stream:
-      bindings:
-        outputJobs.destination: scheduled_jobs_asinjavin
-        springCloudBusInput.destination: bus_config_input_asinjavin
-        springCloudBusOutput.destination: bus_config_output_asinjavin
