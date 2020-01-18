@@ -2,6 +2,7 @@ package arrangement;
 
 import enums.ArrangementEvents;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
 import java.time.LocalDateTime;
@@ -13,7 +14,7 @@ import java.time.LocalDateTime;
  */
 
 @Data
-
+@NoArgsConstructor
 public class ArrangementStatusNotification {
 
     /**Идентификатор мероприятия*/
