@@ -59,13 +59,13 @@ public class ResultsKafkaService {
         return getArrangementResultsIterator(arrangementId)
                 .map(resultsIterator ->  {
                     log.info("Результаты получены из хранилища: " + arrangementId);
-                    /*Comparator<KeyValue<CheckUnitKey, CheckUnitResult>> checkUnitResultComparator = createResultsComparator(sortingColumn);
+                    Comparator<KeyValue<CheckUnitKey, CheckUnitResult>> checkUnitResultComparator = createResultsComparator(sortingColumn);
                     if(sortingDirection != null && sortingDirection.equals(SortingDirection.DESC))
-                        checkUnitResultComparator = checkUnitResultComparator.reversed();*/
+                        checkUnitResultComparator = checkUnitResultComparator.reversed();
                     List<Result> results = StreamSupport
                             .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), false)
                             .filter(filter)
-                            //.sorted(checkUnitResultComparator)
+                            .sorted(checkUnitResultComparator)
                             .skip(pageable.getOffset())
                             .limit(pageable.getPageSize())
                             .map(kv -> {
