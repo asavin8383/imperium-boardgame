@@ -31,4 +31,8 @@ public class ArrangementStatusNotification {
     /**Дата события*/
     private LocalDateTime eventDate = LocalDateTime.now();
 
+    public ArrangementStatusNotification(Long arrangementId, ArrangementEvents event) {
+        this.arrangementId = arrangementId;
+        this.event = event;
+    }
 }
