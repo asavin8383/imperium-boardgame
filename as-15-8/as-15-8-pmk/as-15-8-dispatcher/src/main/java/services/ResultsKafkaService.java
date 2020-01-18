@@ -7,6 +7,7 @@ import enums.CheckUnitJobResult;
 import enums.SortingDirection;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import model.DetailResult;
 import model.Result;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.state.KeyValueIterator;
@@ -61,13 +62,13 @@ public class ResultsKafkaService {
                     if(sortingDirection != null && sortingDirection.equals(SortingDirection.DESC))
                         checkUnitResultComparator = checkUnitResultComparator.reversed();*/
                     List<Result> results = StreamSupport
-                            .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), false)
+                            .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), true)
                             .filter(filter)
                             //.sorted(checkUnitResultComparator)
                             .skip(pageable.getOffset())
                             .limit(pageable.getPageSize())
                             .map(kv -> {
-                                DetailResultService<? super CheckUnitResult> service = AnalysisResultServiceFactory.getService(kv.value.getClass());
+                                DetailResultService<? super CheckUnitResult, ? extends DetailResult> service = AnalysisResultServiceFactory.getService(kv.value.getClass());
                                 Result result = new Result();
                                 fillResult(result, kv.key.getJobId(), kv.value, service);
                                 return result;
@@ -118,7 +119,7 @@ public class ResultsKafkaService {
         ) : store);
     }
 
-    void fillResult(Result result, Long jobId, CheckUnitResult checkUnitResult, DetailResultService<? super CheckUnitResult> service){
+    void fillResult(Result result, Long jobId, CheckUnitResult checkUnitResult, DetailResultService<? super CheckUnitResult, ? extends DetailResult> service){
         if(result.getId() == null)
             result.setId(jobId);
         result.setErdiId(checkUnitResult.getCheckUnit().getContentId());

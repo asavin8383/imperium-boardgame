@@ -3,6 +3,7 @@ services:
   elasticsearch:
     container_name: elasticsearch
     image: dcr.ec-leasing.ru/as-15-8/elk/elasticsearch:7.2.0
+    restart: always
     ports:
       - "9200:9200"
     environment:
@@ -12,7 +13,7 @@ services:
   logstash:
     container_name: logstash
     image: dcr.ec-leasing.ru/as-15-8/elk/logstash:7.2.0
-    restart: on-failure
+    restart: always
     depends_on:
       - elasticsearch
     ports:
@@ -23,7 +24,7 @@ services:
   kibana:
     container_name: kibana
     image: dcr.ec-leasing.ru/as-15-8/elk/kibana:7.2.0
-    restart: on-failure
+    restart: always
     depends_on:
       - elasticsearch
     ports:

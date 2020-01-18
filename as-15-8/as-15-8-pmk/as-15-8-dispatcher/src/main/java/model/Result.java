@@ -2,6 +2,7 @@ package model;
 
 import checkUnits.CheckUnitType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 import enums.CheckUnitJobResult;
 import lombok.Data;
 import model.enums.CheckType;
@@ -26,37 +27,50 @@ public class Result implements Serializable {
 
     @Id
     @Column(nullable=false, updatable=false)
+    @JsonView(Views.Id.class)
     private Long id;
 
     @ManyToOne(optional = false)
     @JoinColumn(name="arrangement_id", foreignKey = @ForeignKey(name = "FK_arrangements"))
+    @JsonView(Views.Full.class)
     private Arrangement arrangement;
 
     @Column(name = "content_id")
+    @JsonView(Views.Brief.class)
     private Long erdiId;
 
     @Enumerated(EnumType.STRING)
+    @JsonView(Views.Brief.class)
     private CheckType checkType;
 
     @Enumerated(EnumType.STRING)
     @Column(name="check_unit_type", nullable=false)
+    @JsonView(Views.Brief.class)
     private CheckUnitType checkUnitType;
 
     @Column(name="check_unit_value", nullable=false)
+    @JsonView(Views.Brief.class)
     private String checkUnitValue;
 
     @Enumerated(EnumType.STRING)
     @Column(name="result", nullable=false)
+    @JsonView(Views.Brief.class)
     private CheckUnitJobResult result;
 
+    @JsonView(Views.Brief.class)
     private LocalDateTime startDate;
+
+    @JsonView(Views.Brief.class)
     private LocalDateTime endDate;
 
+    @JsonView(Views.Brief.class)
     private boolean checkForAct;
 
     @Enumerated(EnumType.STRING)
+    @JsonView(Views.Full.class)
     private UserResult userResult;
 
+    @JsonView(Views.Full.class)
     private String userDescription;
 
     public Result() {

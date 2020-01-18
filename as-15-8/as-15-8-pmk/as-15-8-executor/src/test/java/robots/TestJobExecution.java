@@ -32,7 +32,7 @@ public class TestJobExecution {
 		checkUnitJob.setJobID(1L);
 		checkUnitJob.setAccessTool("google");
 
-		checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.DOMAIN, "telegram.org"));
+		checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.DOMAIN, "www.kasparov.ru"));
 		//checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.IP_V6, "2606:4700:0030:0000:0000:0000:681b:b458"));
 
 		ExecutionJobResult executionJobResult = checkUnitVerificationServiceFactory

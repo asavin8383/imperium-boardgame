@@ -1,9 +1,7 @@
 package services.impl;
 
 import analysis.NMapAnalysisJobResult;
-import exceptions.AS_15_8_DispatcherException;
 import lombok.RequiredArgsConstructor;
-import model.DetailResult;
 import model.NmapDetailResult;
 import model.Result;
 import model.enums.CheckType;
@@ -20,7 +18,7 @@ import services.DetailResultService;
  */
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class NmapDetailResultService implements DetailResultService<NMapAnalysisJobResult> {
+public class NmapDetailResultService implements DetailResultService<NMapAnalysisJobResult, NmapDetailResult> {
 
 	private final NmapDetailResultRepo nmapDetailResultRepo;
 
@@ -30,20 +28,27 @@ public class NmapDetailResultService implements DetailResultService<NMapAnalysis
 	}
 
 	@Override
-	public DetailResult create(Result result, NMapAnalysisJobResult analysisResult) {
-		NmapDetailResult nmapDetailResult = nmapDetailResultRepo.findById(result.getId()).orElseGet(NmapDetailResult::new);
-
-		nmapDetailResult.setResult(result);
-
-		nmapDetailResult.setLog(analysisResult.getNmapLog());
+	public NmapDetailResult create(NMapAnalysisJobResult nmapAnalysisResult) {
+		NmapDetailResult nmapDetailResult = new NmapDetailResult();
+		fill(nmapDetailResult, nmapAnalysisResult);
 		return nmapDetailResult;
 	}
 
 	@Override
-	public void save(DetailResult detailResult) {
-		if(!(detailResult instanceof NmapDetailResult))
-			throw new AS_15_8_DispatcherException("Ошибка при сохранении детального результата типа " + detailResult.getClass().getSimpleName());
-		nmapDetailResultRepo.save((NmapDetailResult) detailResult);
+	public NmapDetailResult getOrCreate(Result result, NMapAnalysisJobResult nmapAnalysisResult) {
+		NmapDetailResult nmapDetailResult = nmapDetailResultRepo.findById(result.getId()).orElseGet(NmapDetailResult::new);
+		nmapDetailResult.setResult(result);
+		fill(nmapDetailResult, nmapAnalysisResult);
+		return nmapDetailResult;
+	}
+
+	private void fill(NmapDetailResult nmapDetailResult, NMapAnalysisJobResult nmapAnalysisResult) {
+		nmapDetailResult.setLog(nmapAnalysisResult.getNmapLog());
+	}
+
+	@Override
+	public void save(NmapDetailResult nmapDetailResult) {
+		nmapDetailResultRepo.save(nmapDetailResult);
 	}
 
 	@Override
