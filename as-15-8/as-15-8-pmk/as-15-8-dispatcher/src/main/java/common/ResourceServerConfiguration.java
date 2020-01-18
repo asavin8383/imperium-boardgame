@@ -21,7 +21,10 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
                         "/act/screenshots/**",
                         "/results/screenshot/**",
                         "/results/etalon_screenshot/**",
-                        "/results/nmap_log/**")
+                        "/results/nmap_log/**",
+                        "/results/protocol/screenshot/**",
+                        "/results/protocol/etalon_screenshot/**",
+                        "/results/protocol/nmap_log/**")
                 .permitAll()
                 .anyRequest().authenticated()
             .and()
