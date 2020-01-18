@@ -14,6 +14,7 @@ import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.apache.logging.log4j.util.Strings;
+import org.aspectj.bridge.IMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.binder.kafka.streams.InteractiveQueryService;
@@ -27,6 +28,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -93,6 +95,31 @@ public class ResultsKafkaService {
                 .orElse(0L);
         /*KeyValueIterator<CheckUnitKey, CheckUnitResult> resultsIterator = getArrangementResultsIterator(store, arrangementId);
         return countIteratorSize(resultsIterator);*/
+    }
+
+    public List<CheckUnitType> getDictinctCheckUnitTypes(Long arrangementId){
+        return getDistinctResultValues(
+            arrangementId,
+            (KeyValue<CheckUnitKey, CheckUnitResult> message) -> message.value.getCheckUnit().getType()
+        );
+    }
+
+    public List<CheckUnitJobResult> getDictinctCheckUnitResults(Long arrangementId){
+        return getDistinctResultValues(
+            arrangementId,
+            (KeyValue<CheckUnitKey, CheckUnitResult> message) -> message.value.getCheckResult()
+        );
+    }
+
+    private <T> List<T> getDistinctResultValues(Long arrangementId, Function<KeyValue<CheckUnitKey, CheckUnitResult>, T> function){
+        return getArrangementResultsIterator(arrangementId)
+            .map(resultsIterator -> StreamSupport
+                .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), false)
+                .map(function)
+                .distinct()
+                .collect(Collectors.toList())
+            )
+            .orElse(new ArrayList<>());
     }
 
     private long getResultsCount(Long arrangementId, Predicate<KeyValue<CheckUnitKey, CheckUnitResult>> filter){
