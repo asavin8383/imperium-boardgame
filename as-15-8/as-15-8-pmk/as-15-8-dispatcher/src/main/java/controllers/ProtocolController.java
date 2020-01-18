@@ -110,20 +110,6 @@ public class ProtocolController {
                 });
     }
 
-    //TODO Перенести в ППМ
-    @PreAuthorize("hasRole('ROLE_VIEW_RESULT')")
-    @GetMapping(path = "/check_unit_types")
-    public List<CheckUnitType> getCheckUnitTypes(@RequestParam Long arrangementId){
-        return resultRepo.getCheckUnitTypesByArrangementId(arrangementId);
-    }
-
-    //TODO Перенести в ППМ
-    @PreAuthorize("hasRole('ROLE_VIEW_RESULT')")
-    @GetMapping(path = "/results")
-    public List<CheckUnitJobResult> getResults(@RequestParam Long arrangementId){
-        return resultRepo.getCheckUnitJobResultsByArrangementId(arrangementId);
-    }
-
     //TODO Остановка будет реализована по другому
     @PreAuthorize("hasRole('ROLE_MANAGE_ARRANGEMENT')")
     @PutMapping(path = "/stop_arrangement")

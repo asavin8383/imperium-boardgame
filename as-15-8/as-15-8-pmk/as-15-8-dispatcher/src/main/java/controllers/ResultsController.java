@@ -95,4 +95,13 @@ public class ResultsController {
                 }).orElseGet(() -> ResponseEntity.noContent().build());
     }
 
+    @GetMapping(path = "/check_unit_types")
+    public List<CheckUnitType> getCheckUnitTypes(@RequestParam Long arrangementId){
+        return resultService.getDictinctCheckUnitTypes(arrangementId);
+    }
+
+    @GetMapping(path = "/results")
+    public List<CheckUnitJobResult> getResults(@RequestParam Long arrangementId){
+        return resultService.getDictinctCheckUnitResults(arrangementId);
+    }
 }
