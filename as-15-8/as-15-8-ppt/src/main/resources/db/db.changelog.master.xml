@@ -54,4 +54,5 @@
     <include file="db/changelog/ppt.0027.priority_not_null_fix.xml"/>
     <include file="db/changelog/ppt.0028.arrangement_is_Act_Available.xml"/>
     <include file="db/changelog/ppt.0029.formal_task_fgis_id.xml"/>
+    <include file="db/changelog/ppt.0029.arrangement_ck_status.xml"/>
 </databaseChangeLog>
