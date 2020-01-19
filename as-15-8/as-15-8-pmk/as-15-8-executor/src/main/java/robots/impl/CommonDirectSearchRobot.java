@@ -70,6 +70,11 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
      *  выполнения поискового запроса*/
     private String resultNotFoundRegexp;
 
+    /**
+     * Ссылка на возвращение к исходному тексту после правки правописания
+     */
+    private String checkSpellingLink;
+
     /** Тип страницы результатов
      * (с переходом по страницам или
      * кнопкой "показать больше" */
@@ -108,6 +113,7 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         this.xpathNextPage = scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_XPATH_NEXT_PAGE);
         this.xpathItemLink = scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_XPATH_ITEM_LINK);
         this.resultNotFoundRegexp = scriptParams.get(AccessToolParameter.RESULT_NOT_FOUND_REGEXP);
+        this.checkSpellingLink = scriptParams.get(AccessToolParameter.CHECK_SPELLING_LINK);
     }
 
 
@@ -175,6 +181,19 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
 
         if (captcha())
             return createMessage(false, CheckUnitJobResult.CAPTCHA_DETECTED);
+
+        //Проверим, не исправилось ли правописание. Если исправилось, возвращаем назад
+        if(Strings.isNotEmpty(this.checkSpellingLink)){
+            WebElement next = ScriptUtils.findElementIfExists(
+                By.xpath(this.checkSpellingLink), driver);
+            try {
+                if (next != null) {
+                    next.click();
+                }
+            } catch (TimeoutException e) {
+                throw new TimeoutScriptException(e);
+            }
+        }
 
         //Проверяем, не вылез ли подозрительный трафик
         Optional<ExecutionJobResult> optExecutionJobResult = checkNoLinks(checkUnit);

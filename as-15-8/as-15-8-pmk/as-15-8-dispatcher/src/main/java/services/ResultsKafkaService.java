@@ -53,27 +53,25 @@ public class ResultsKafkaService {
             String sortingColumn,
             Pageable pageable) {
 
-        log.info("Запрос результатов мероприятия: " + arrangementId);
         final Predicate<KeyValue<CheckUnitKey, CheckUnitResult>> filter = kv -> filterResults(kv.value, checkUnitJobResults, checkUnitTypes, query);
         final long count = getResultsCount(arrangementId, filter);
         return getArrangementResultsIterator(arrangementId)
                 .map(resultsIterator ->  {
-                    log.info("Результаты получены из хранилища: " + arrangementId);
-                    /*Comparator<KeyValue<CheckUnitKey, CheckUnitResult>> checkUnitResultComparator = createResultsComparator(sortingColumn);
+                    Comparator<Result> checkUnitResultComparator = createResultsComparator(sortingColumn);
                     if(sortingDirection != null && sortingDirection.equals(SortingDirection.DESC))
-                        checkUnitResultComparator = checkUnitResultComparator.reversed();*/
+                        checkUnitResultComparator = checkUnitResultComparator.reversed();
                     List<Result> results = StreamSupport
                             .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), false)
                             .filter(filter)
-                            //.sorted(checkUnitResultComparator)
-                            .skip(pageable.getOffset())
-                            .limit(pageable.getPageSize())
                             .map(kv -> {
                                 DetailResultService<? super CheckUnitResult, ? extends DetailResult> service = AnalysisResultServiceFactory.getService(kv.value.getClass());
                                 Result result = new Result();
                                 fillResult(result, kv.key.getJobId(), kv.value, service);
                                 return result;
                             })
+                            .sorted(checkUnitResultComparator)
+                            .skip(pageable.getOffset())
+                            .limit(pageable.getPageSize())
                             .collect(Collectors.toList());
                     return new PageImpl<>(results, pageable, count);
                 })
@@ -188,16 +186,22 @@ public class ResultsKafkaService {
         return notFiltered;
     }
 
-    @SuppressWarnings("unchecked")
-    private Comparator<KeyValue<CheckUnitKey, CheckUnitResult>> createResultsComparator(String columnName) {
+    private Comparator<Result> createResultsComparator(String columnName) {
         try {
             if(Strings.isEmpty(columnName))
-                return Comparator.comparing((KeyValue<CheckUnitKey, CheckUnitResult> kv) -> kv.value.getEndTime());
+                return Comparator.comparing(Result::getResult);
             String methodName = "get" +
                     columnName.substring(0, 1).toUpperCase() +
                     columnName.substring(1);
             Method method = Result.class.getMethod(methodName);
-            return (o1, o2) -> {
+            return Comparator.comparing((Result result) -> {
+                try {
+                    return method.invoke(result).toString();
+                } catch (Exception ex) {
+                    return result.getResult().name();
+                }
+            });
+            /*return (o1, o2) -> {
                 try {
                     Object val1 = method.invoke(o1.value);
                     Object val2 = method.invoke(o2.value);
@@ -208,10 +212,10 @@ public class ResultsKafkaService {
                 } catch (Exception ex){
                     return 0;
                 }
-            };
+            };*/
         } catch (Exception ex) {
             log.warn("Ошибка при создании компаратора для сортировки результатов проверок", ex);
-            return Comparator.comparing((KeyValue<CheckUnitKey, CheckUnitResult> kv) -> kv.value.getEndTime());
+            return Comparator.comparing(Result::getResult);
         }
     }
 }
