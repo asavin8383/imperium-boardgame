@@ -39,6 +39,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 /**
@@ -222,26 +223,24 @@ public class ScheduleController {
         private LocalTime plannedEndTime;
     }
 
-    private String analyzeRobotTrafficLimits(Schedule schedule) {
-        String ROBOT_SLA = "ROBOT_SLA";
-        log.info("Анализ расхода трафика роботом " + ROBOT_SLA);
+    private void analyzeRobotTrafficLimits(Schedule schedule) {
         try {
-            String description = "";
-            getAccessToolArrangementsMap(schedule).entrySet().stream().forEach(entry -> {
+            AtomicReference<String> description = new AtomicReference<>("");
+            Map<@NotNull String, List<Arrangement>> accessToolArrangementsMap = getAccessToolArrangementsMap(schedule);
+            accessToolArrangementsMap.entrySet().stream().forEach(entry -> {
                 @NotNull String accessTool = entry.getKey();
+                log.info("Анализ расхода трафика роботом " + accessTool);
                 List<Arrangement> arrangements = entry.getValue();
 
                 if (isRealTrafficGreaterThanSlaConfig(arrangements, schedule, SlaPeriod.DAY))
-                    description.concat("Превышение трафика за день для " + accessTool + ";  ");
+                    description.set("Превышение трафика за день для " + accessTool + ";  ");
                 if (isRealTrafficGreaterThanSlaConfig(arrangements, schedule, SlaPeriod.MONTH))
-                    description.concat("Превышение трафика за месяц для " + accessTool + ";  ");
+                    description.set("Превышение трафика за месяц для " + accessTool + ";  ");
             });
-            writeDescriptionToDb(schedule, description);
-            return description;
+            writeDescriptionToDb(schedule, description.get());
         } catch (Exception e) {
-            log.warn("Ошибка расчёта превышения трафика согласно SLA " + ROBOT_SLA + e);
+            log.warn("Ошибка расчёта превышения трафика согласно SLA " + e);
         }
-        return null;
     }
 
     private Map<@NotNull String, List<Arrangement>> getAccessToolArrangementsMap(Schedule schedule) {
@@ -255,7 +254,6 @@ public class ScheduleController {
         Long realTraffic = calculateRealTraffic(arrangements, schedule, slaPeriod);
         Optional<Long> trafficInSlaPeriod = getTrafficInPeriodFromSla(accessTool, slaPeriod);
         if (!trafficInSlaPeriod.isPresent()) {
-            log.warn("Ошибка расчёта превышения трафика согласно SLA trafficInSlaPeriod is null");
             return false;
         }
 
@@ -309,14 +307,8 @@ public class ScheduleController {
 
     private void writeDescriptionToDb(Schedule schedule, String description) {
         if (!description.isEmpty()) {
-            log.warn(description + " " + "ROBOT_SLA");
-            /*schedule.setDescription(description);
-            scheduleRepo.save(schedule);*/
+            schedule.setDescription(description);
+            scheduleRepo.save(schedule);
         }
-    }
-
-    @GetMapping(path = "/test")
-    public String test(@RequestParam("id") Schedule schedule){
-       return analyzeRobotTrafficLimits(schedule);
     }
 }

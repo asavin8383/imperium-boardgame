@@ -15,8 +15,8 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
     public void configure(final HttpSecurity http) throws Exception {
         http
             .authorizeRequests()
-                .antMatchers(HttpMethod.POST, "actuator/bus-refresh/**").hasRole("ADMIN")
-                .antMatchers("/robots/**").hasRole("ADMIN")
+                .antMatchers(HttpMethod.POST, "/actuator/bus-refresh/**").hasRole("MANAGE_CONFIGURATIONS")
+                .antMatchers("/robots/**").hasRole("MANAGE_CONFIGURATIONS")
                 .antMatchers(HttpMethod.GET, "/**").hasRole("CONFIG_CLIENT")
             .anyRequest().authenticated()
         .and().httpBasic().disable().csrf().disable();

@@ -161,9 +161,5 @@ public class ActController {
             return null;
         return Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant());
     }
-    @GetMapping(path = "/testAct")
-    @PreAuthorize("hasAnyRole('ROLE_SEND_ACT_BY_HAND')")
-    public void test(Long arrangementId){
-        arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(arrangementId, ArrangementEvents.FINISH));
-    }
+
 }
