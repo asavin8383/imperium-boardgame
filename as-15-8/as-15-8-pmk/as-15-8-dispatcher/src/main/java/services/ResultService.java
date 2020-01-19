@@ -43,6 +43,10 @@ public class ResultService {
     public void saveResults() {
         try{
             List<Arrangement> runningArrangements = arrangementRepo.findRunning();
+            runningArrangements.forEach(arrangement -> {
+                arrangement.setStatus(ArrangementStatus.UPLOADING);
+                arrangementRepo.save(arrangement);
+            });
             for (Arrangement arrangement : runningArrangements) {
                 long count = resultsKafkaService.getResultsCount(arrangement.getId());
                 if(count == 0)
@@ -51,8 +55,6 @@ public class ResultService {
                 if (arrangement.getCheckUnitsCount() == count) {
                     log.info("Начато сохранение мероприятия: " + arrangement.getId());
                     try {
-                        arrangement.setStatus(ArrangementStatus.UPLOADING);
-                        arrangementRepo.save(arrangement);
                         resultsKafkaService.getArrangementResultsIterator(arrangement.getId())
                                 .ifPresent(resultsIterator -> {
                                     boolean isSaved = true;
