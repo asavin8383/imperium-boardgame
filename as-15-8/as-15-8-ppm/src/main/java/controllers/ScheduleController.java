@@ -311,8 +311,4 @@ public class ScheduleController {
             scheduleRepo.save(schedule);
         }
     }
-    @GetMapping(path = "/test")
-    public void test(@RequestParam("id") Schedule schedule){
-         analyzeRobotTrafficLimits(schedule);
-    }
 }
