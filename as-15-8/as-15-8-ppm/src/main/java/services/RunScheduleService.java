@@ -59,6 +59,8 @@ public class RunScheduleService {
                         .forEach(schedulePeriodArrangement -> {
                             if(sendArrangementToDispatcher(schedulePeriodArrangement)) {
                                 log.debug("Запуск на выполнение schedulePeriodArrangement с ИД {}", schedulePeriodArrangement.getId());
+
+                                //Статус отправляется каждый раз, когда запускается новый период!!!!!!!!!!
                                 arrangementStatusUploader.changeArrangementStatus(new ArrangementStatusNotification(schedulePeriodArrangement.getArrangement().getId(), ArrangementEvents.RUN));
                                 schedulePeriodCheckUnitRepo.findAllBySchedulePeriodArrangement(schedulePeriodArrangement)
                                         .forEach(schedulePeriodCheckUnit ->

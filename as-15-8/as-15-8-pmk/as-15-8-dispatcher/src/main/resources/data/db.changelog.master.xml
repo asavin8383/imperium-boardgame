@@ -30,4 +30,5 @@
     <include file="data/changelog/dispatcher.0025.rename_job_id.xml"/>
     <include file="data/changelog/dispatcher.0026.result_pk_fk.xml"/>
     <include file="data/changelog/dispatcher.0027.result_pk_fk2.xml"/>
+    <include file="data/changelog/dispatcher.0028.arrangements_ck.xml"/>
 </databaseChangeLog>
