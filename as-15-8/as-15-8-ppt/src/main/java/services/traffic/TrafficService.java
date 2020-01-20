@@ -44,6 +44,9 @@ public class TrafficService {
                                                       AccessToolType accessToolType,
                                                       String filteredName) {
 
+        if (filteredName != null && !filteredName.isEmpty())
+            query = filteredName;
+
         PageRequest pageable = PageRequest.of(pageNumber, pageSize,
                 SortingHelper.createSorting(sortingDirection, sortingColumn));
         Page<Traffic> traffics = trafficRepository.findAll(createTrafficSpecification(query, accessToolType), pageable);
@@ -62,6 +65,7 @@ public class TrafficService {
 
         if (filteredName != null && !filteredName.isEmpty())
            views = views.stream().filter(r -> r.getName().toUpperCase().contains(filteredName.toUpperCase())).collect(Collectors.toList());
+
 
         return new PageImpl<>(views, pageable, traffics.getTotalElements());
     }
@@ -186,7 +190,8 @@ public class TrafficService {
     private Specification<Traffic> createTrafficSpecification(String query, AccessToolType type) {
         return (Specification<Traffic>) (root, criteriaQuery, criteriaBuilder) -> {
             Predicate predicate = StringUtils.isEmpty(query) ? null :
-                    criteriaBuilder.like(root.get(Traffic_.name), "%" + query + "%");
+                    criteriaBuilder.like(criteriaBuilder.upper(root.get(Traffic_.name)), "%" + query.toUpperCase() + "%");
+
             if (type == AccessToolType.PASD) {
                 Subquery<Long> unitSubQuery = criteriaQuery.subquery(Long.class);
                 Root<SearchQueryTrafficUnit> unitRoot = unitSubQuery.from(SearchQueryTrafficUnit.class);
