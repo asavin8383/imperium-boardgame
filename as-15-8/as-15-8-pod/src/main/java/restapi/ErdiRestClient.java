@@ -2,6 +2,7 @@ package restapi;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import exceptions.AS_15_8_POD_Exception;
 import exceptions.ExceptionErdiLoad;
 import exceptions.ExceptionErdiParser;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +43,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
@@ -60,6 +62,9 @@ public class ErdiRestClient {
     private final SubTypeRestClient subTypeRestClient;
     private final AddonRestClient addonRestClient;
     private final JdbcTemplate jdbcTemplate;
+
+    private static final String ENTITY_DELTA_NAME = "dump_delta.xml";
+    private static final String ENTITY_FULL_NAME = "dump.xml";
 
     private static final String urlRest = "";
     private static final String tempDir = "temp_dir";
@@ -131,15 +136,26 @@ public class ErdiRestClient {
 
         try{
             log.info("====== Начало обновления справочников");
-            loadFullERDI();
-            loadAllDeltaERDI();
-            loadSybTypes();
-            loadAddons();
-            refreshViews(true);
+            boolean wasLoadedFullERDI =
+                    loadFullERDI();
+            int countLoadedDeltaERDI =
+                    loadAllDeltaERDI();
+            boolean wereChanges =
+                    loadSybTypes();
+            boolean wasLoadedFullAddons =
+                    loadFullAddons();
+            int countLoadedAddons =
+                    loadAllDeltaAddons();
+
+            boolean needUpdateViews =
+                    wasLoadedFullERDI || countLoadedDeltaERDI > 0 ||
+                    wereChanges ||
+                    wasLoadedFullAddons || countLoadedAddons > 0;
+            refreshViews(needUpdateViews);
             log.info("====== Конец обновления справочников");
         }
         catch(Exception ex){
-            log.error("Ошибка обновлении справочников", ex);
+            log.error("Ошибка обновлении справочников!", ex);
             throw new CompletionException(ex);
         }
         finally {
@@ -196,12 +212,18 @@ public class ErdiRestClient {
         return isError ? errorMessage : "";
     }
 
-    public void loadSybTypes() {
+    public boolean loadSybTypes() {
         log.info("Загрузка картотеки Справочник нарушений");
-        subTypeRestClient.readFromNet();
+        return subTypeRestClient.readFromNetDiff();
     }
 
-    public void loadFullERDI() throws IOException, ExceptionErdiParser {
+    /**
+     *
+     * @return true - загрузка полного справочника ЕРДИ прошла. false - загрузка не требуется.
+     * @throws IOException
+     * @throws ExceptionErdiParser
+     */
+    public boolean loadFullERDI() throws IOException, ExceptionErdiParser {
         isError = false;
         errorMessage = "";
 
@@ -215,7 +237,7 @@ public class ErdiRestClient {
             boolean isFullErdi = (fullContentVersion != null);
 
             if (isFullErdi){
-                return;
+                return false;
             }
 
             log.info("---> Запуск загрузки полного справочника ЕРДИ");
@@ -236,6 +258,8 @@ public class ErdiRestClient {
 
             //path = Paths.get(tempDir, "mytest.zip");
             erdiToDB(path, null);
+
+            return true;
         }
         catch (Exception e){
             errorMessage = "Ошибка загрузки полного справочника ЕРДИ";
@@ -253,7 +277,11 @@ public class ErdiRestClient {
         }
     }
 
-    public void loadAddons() {
+    /**
+     * @return true - загрузка полного српвочника аддонов прошла. false - не прошла
+     *
+     */
+    public boolean loadFullAddons() {
         AddonVersion fullAddonVersion = addonVersionRepository.getTopByRegUpdateTimeNotNullOrderByIdDesc();
         boolean isFullAddons = fullAddonVersion != null;
 
@@ -262,6 +290,10 @@ public class ErdiRestClient {
             addonRestClient.readFullFromNet();
         }
 
+        return !isFullAddons;
+    }
+
+    public int loadAllDeltaAddons() {
         System.out.println("Загрузка дельт аддонов");
         List<DeltaAddonEntry> list = addonRestClient.readDeltaList();
         if (list.size() > 0) {
@@ -271,10 +303,11 @@ public class ErdiRestClient {
                         deltaAddonEntry.getActualDate());
             }
         }
+        return list.size();
     }
 
-    private void refreshViews(boolean lazyLoad){
-        if (lazyLoad && lastTimeUpdateViews != null &&
+    private void refreshViews(boolean forceRefresh){
+        if (!forceRefresh && lastTimeUpdateViews != null &&
                 lastTimeUpdateViews.getTime() + DELAY_UPDATE_VIEWS_MS > (new Date()).getTime()){
             return;
         }
@@ -325,11 +358,17 @@ public class ErdiRestClient {
         System.out.println("----> delta ERDI was write to file: " + path.toString());
     }
 
-    public void loadAllDeltaERDI() throws ExceptionErdiParser {
+    /**
+     *
+     * @return Результат - кол-во успешно загруженных дельт
+     * @throws ExceptionErdiParser
+     */
+    public int loadAllDeltaERDI() throws ExceptionErdiParser {
         isError = false;
         errorMessage = "";
 
         int count = 0;
+        DeltaIdEntry curDeltaIdEntry = null;
         try{
             List<DeltaIdEntry> deltaList = getLastDumpDeltaListByDate();
             count = deltaList.size();
@@ -341,20 +380,22 @@ public class ErdiRestClient {
                 log.info("---> Запуск загрузки дельт ЕРДИ");
 
                 for(DeltaIdEntry deltaIdEntry : deltaList){
+                    curDeltaIdEntry = deltaIdEntry;
                     loadDeltaERDI(deltaIdEntry);
-                    if (isError)
-                        throw new ExceptionErdiParser("Error load delta");
                 }
             }
         }
         catch (Exception e){
-            errorMessage = StringUtils.isEmpty(errorMessage) ? "Ошибка загрузки дельта ЕРДИ" : errorMessage;
+            errorMessage = StringUtils.isEmpty(errorMessage)
+                    ? "Ошибка загрузки дельты ЕРДИ" + (curDeltaIdEntry == null ? "" : curDeltaIdEntry.toString())
+                    : errorMessage;
             isError = true;
-            throw new ExceptionErdiParser(e);
+            throw new ExceptionErdiParser(errorMessage, e);
         }
         finally {
             stateDetails = isError ? errorMessage : "Загрузка дельт (" + count + ") ЕРДИ прошла успешно";
         }
+        return count;
     }
 
     public Date getActualContentDate(){
@@ -473,9 +514,12 @@ public class ErdiRestClient {
     }
 
 
-    private void erdiToDB(Path path, DeltaIdEntry deltaIdEntry) throws IOException, ExceptionErdiParser {
+    private void erdiToDB(Path path, DeltaIdEntry deltaIdEntry) throws AS_15_8_POD_Exception {
         log.info("Попытка парсинга {}, file: {}", deltaIdEntry != null ? "Delta ERDI" : "Full ERDI", path.toAbsolutePath().toString());
 
+        AtomicReference<ExceptionErdiLoad> exception = new AtomicReference<>(null);
+
+        String entryName = (deltaIdEntry != null ? ENTITY_DELTA_NAME : ENTITY_FULL_NAME);
         ZipFile zipFile = null;
 
         try{
@@ -484,8 +528,6 @@ public class ErdiRestClient {
 
             while(entries.hasMoreElements()){
                 ZipEntry entry = entries.nextElement();
-
-                String entryName = (deltaIdEntry != null ? "dump_delta.xml" : "dump.xml");
 
                 if (entry.getName().equals(entryName)){
                     InputStream stream = zipFile.getInputStream(entry);
@@ -506,13 +548,18 @@ public class ErdiRestClient {
                                 erdiLoaderService.fillContents(deltaIdEntry, register, allContents);
                             } catch (ExceptionErdiLoad exceptionErdiLoad) {
                                 exceptionErdiLoad.printStackTrace();
-                                isError = true;
+                                exception.set(exceptionErdiLoad);
                             }
                             return false;
                         }
                         return true;
                     });
+                    break;  // завершаем цикл
                 }
+            }
+
+            if (exception.get() != null){
+                throw exception.get();
             }
         }
         catch (ZipException ze){
@@ -521,8 +568,13 @@ public class ErdiRestClient {
                 /* ignore exception */
             }
             else{
-                throw ze;
+                isError = true;
+                throw new AS_15_8_POD_Exception("Ошибка во время разбора файла полного ЕРДИ", ze);
             }
+        }
+        catch (Exception e) {
+            isError = true;
+            throw new AS_15_8_POD_Exception("Ошибка во время разбора файла полного ЕРДИ", e);
         }
         finally {
             try {
