@@ -47,7 +47,7 @@ public class Robot {
     private RobotType type;
 
     @Column
-    @JsonView({Views.Brief.class, Views.AccessTool.class})
+    @JsonView({Views.Brief.class, Views.AccessTool.class, Views.Sla.class})
     private String name;
 
     @Column(nullable = false)

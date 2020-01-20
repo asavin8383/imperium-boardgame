@@ -1,6 +1,5 @@
 package model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,25 +19,28 @@ public class RobotSLA {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonView(Views.Brief.class)
+    @JsonView(Views.Sla.class)
     private Long id;
 
     @NonNull
     @Enumerated(EnumType.STRING)
+    @JsonView(Views.Sla.class)
     @Column(nullable = false)
     private SlaType slaType;
 
     @NonNull
     @Enumerated(EnumType.STRING)
+    @JsonView(Views.Sla.class)
     @Column(nullable = false)
     private SlaPeriod slaPeriod;
 
     @NonNull
     @Column(nullable = false)
+    @JsonView(Views.Sla.class)
     private Long checkUnitValue;
 
     @ManyToOne(optional = false)
-    @JsonIgnore
+    @JsonView(Views.Sla.class)
     @JoinColumn(foreignKey = @ForeignKey(name = "robots_sla_robots_id_fk"))
     private Robot robot;
 }

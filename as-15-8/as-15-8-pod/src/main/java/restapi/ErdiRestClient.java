@@ -72,6 +72,9 @@ public class ErdiRestClient {
     private String errorMessage = "";
     private String stateDetails = "";
 
+    private Date lastTimeUpdateViews = null;
+    private static final long DELAY_UPDATE_VIEWS_MS = 60*60*1000;
+
 
     public boolean getIsLoading(){
         return isLoading;
@@ -132,7 +135,7 @@ public class ErdiRestClient {
             loadAllDeltaERDI();
             loadSybTypes();
             loadAddons();
-            refreshViews();
+            refreshViews(true);
             log.info("====== Конец обновления справочников");
         }
         catch(Exception ex){
@@ -270,7 +273,13 @@ public class ErdiRestClient {
         }
     }
 
-    private void refreshViews(){
+    private void refreshViews(boolean lazyLoad){
+        if (lazyLoad && lastTimeUpdateViews != null &&
+                lastTimeUpdateViews.getTime() + DELAY_UPDATE_VIEWS_MS > (new Date()).getTime()){
+            return;
+        }
+        lastTimeUpdateViews = new Date();
+
         log.info("---> Установка типов ИРТЗ и Обновление MATERIALIZED VIEWS");
         jdbcTemplate.execute("select sor.set_irtz_type()");
         jdbcTemplate.execute("REFRESH MATERIALIZED VIEW sor.check_units");
