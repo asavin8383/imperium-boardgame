@@ -9,4 +9,5 @@ public final class Views {
     public interface AccessTool{}
     public interface Brief extends Id {}
     public interface Full extends Brief {}
+    public interface Sla {}
 }

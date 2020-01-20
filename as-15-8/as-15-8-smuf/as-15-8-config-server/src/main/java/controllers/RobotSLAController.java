@@ -1,10 +1,12 @@
 package controllers;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import exceptions.AS_15_8_Config_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Robot;
 import model.RobotSLA;
+import model.Views;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -54,6 +56,7 @@ public class RobotSLAController {
     }
 
     @PostMapping("/all")
+    @JsonView(Views.Sla.class)
     public List<RobotSLA> getRobotsSla() {
         return robotSLARepo.findAll();
     }
