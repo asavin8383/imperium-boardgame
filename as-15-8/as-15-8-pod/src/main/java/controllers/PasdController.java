@@ -41,15 +41,15 @@ public class PasdController {
                                         @RequestParam(defaultValue = "0") int pageNumber,
                                         @RequestParam(defaultValue = "10") int pageSize,
                                         @RequestParam(required = false) String query) {
-        if (state != UploadingState.UPLOADING) {
-            Pageable page = PageRequest.of(pageNumber, pageSize,
-                    SortingHelper.createSorting(sortingDirection, sortingColumn));
-            Page<PasdRecord> result = pasdRepository.findByEffDtAndQuery(
-                    Utils.getEndDate(), query, page);
-            return new ResponseEntity<>(result, HttpStatus.OK);
-        } else {
+        //if (state != UploadingState.UPLOADING) {
+        Pageable page = PageRequest.of(pageNumber, pageSize,
+                SortingHelper.createSorting(sortingDirection, sortingColumn));
+        Page<PasdRecord> result = pasdRepository.findByEffDtAndQuery(
+                Utils.getEndDate(), query, page);
+        return new ResponseEntity<>(result, HttpStatus.OK);
+       /* } else {
             return new ResponseEntity<>((Page<PasdRecord>) null, HttpStatus.ACCEPTED);
-        }
+        }*/
     }
 
     @PostMapping

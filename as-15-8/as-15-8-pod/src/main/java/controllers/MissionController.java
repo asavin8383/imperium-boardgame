@@ -46,14 +46,14 @@ public class MissionController {
                                                              @RequestParam(defaultValue = "10") int pageSize,
                                                              @RequestParam(required = false) String query)
     {
-        if (state != UploadingState.UPLOADING) {
-            Pageable page = PageRequest.of(pageNumber, pageSize,
-                    SortingHelper.createSorting(sortingDirection, sortingColumn));
-            Page<Mission> result = missionRepository.findByQuery(query, page);
-            return new ResponseEntity<>(result, HttpStatus.OK);
-        } else {
+       // if (state != UploadingState.UPLOADING) {
+        Pageable page = PageRequest.of(pageNumber, pageSize,
+                SortingHelper.createSorting(sortingDirection, sortingColumn));
+        Page<Mission> result = missionRepository.findByQuery(query, page);
+        return new ResponseEntity<>(result, HttpStatus.OK);
+        /*} else {
             return new ResponseEntity<>((Page<Mission>) null, HttpStatus.ACCEPTED);
-        }
+        }*/
     }
 
     @GetMapping("/single")
