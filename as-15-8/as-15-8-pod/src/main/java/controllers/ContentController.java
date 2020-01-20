@@ -69,29 +69,29 @@ public class ContentController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endTime
     ) {
 
-        if (!erdiRestClient.getIsLoading()) {
-            Pageable pageable = PageRequest.of(pageNumber, pageSize,
-                    SortingHelper.createSorting(sortingDirection, sortingColumn));
-            Page<ContentView> pageContent =
-                    contentViewRepository.findPage(
-                            id,
-                            categoryNames,
-                            decisionOrgs,
-                            infoTypeIds,
-                            registryNames,
-                            resourceTypes,
-                            resourceValue,
-                            violationNames,
-                            query,
-                            random == null ? false : random,
-                            pageable,
-                            convertToLocalDateTimeMin(startTime),
-                            convertToLocalDateTimeMax(endTime));
-            return new ResponseEntity<>(pageContent, HttpStatus.OK);
-        }
+        //if (!erdiRestClient.getIsLoading()) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize,
+                SortingHelper.createSorting(sortingDirection, sortingColumn));
+        Page<ContentView> pageContent =
+                contentViewRepository.findPage(
+                        id,
+                        categoryNames,
+                        decisionOrgs,
+                        infoTypeIds,
+                        registryNames,
+                        resourceTypes,
+                        resourceValue,
+                        violationNames,
+                        query,
+                        random == null ? false : random,
+                        pageable,
+                        convertToLocalDateTimeMin(startTime),
+                        convertToLocalDateTimeMax(endTime));
+        return new ResponseEntity<>(pageContent, HttpStatus.OK);
+       /* }
         else {
             return new ResponseEntity<>((Page<ContentView>) null, HttpStatus.ACCEPTED);
-        }
+        }*/
     }
 
     @GetMapping(path = "/erdi/ids", produces = MediaType.TEXT_EVENT_STREAM_VALUE)

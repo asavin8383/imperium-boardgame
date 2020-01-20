@@ -41,17 +41,17 @@ public class SubtypeController {
                                           @RequestParam(defaultValue = "0") int pageNumber,
                                           @RequestParam(defaultValue = "10") int pageSize,
                                           @RequestParam(required = false) String query) {
-        if (state != UploadingState.UPLOADING) {
-            Pageable page = PageRequest.of(pageNumber, pageSize,
-                    SortingHelper.createSorting(sortingDirection, sortingColumn));
-            return new ResponseEntity<>(subtypeRepository.findByDateAndQuery(
-                    Utils.getEndDate(),
-                    query == null ? "" : query,
-                    page
-            ), HttpStatus.OK);
-        } else {
+        //if (state != UploadingState.UPLOADING) {
+        Pageable page = PageRequest.of(pageNumber, pageSize,
+                SortingHelper.createSorting(sortingDirection, sortingColumn));
+        return new ResponseEntity<>(subtypeRepository.findByDateAndQuery(
+                Utils.getEndDate(),
+                query == null ? "" : query,
+                page
+        ), HttpStatus.OK);
+       /* } else {
             return new ResponseEntity<>(null, HttpStatus.ACCEPTED);
-        }
+        }*/
     }
 
     @GetMapping("/single")
