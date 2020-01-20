@@ -47,13 +47,15 @@ public class ArrangementController {
     @PreAuthorize("hasAnyRole('ROLE_VIEW_RESULT','ROLE_SYSTEM')")
     @GetMapping(path = "/completion")
     public long getArrangementCompletion(@RequestParam("id") Optional<Arrangement> arrangement){
-        arrangement.orElseThrow(() -> new AS_15_8_DispatcherException("Ошибка поиска! Такого мероприятия не существует."));
-        Long checkUnits = arrangement.get().getCheckUnitsCount();
+        return arrangement
+        .map(arr -> {
+            Long checkUnits = arrangement.get().getCheckUnitsCount();
 
-        if (checkUnits == null)
-            throw new AS_15_8_DispatcherException("Ошибка расчёта процента выполнения мероприятия. checkUnits is null");
+            if (checkUnits == null)
+                throw new AS_15_8_DispatcherException("Ошибка расчёта процента выполнения мероприятия. checkUnits is null");
 
-        long arrangementsCount = resultsKafkaService.getResultsCount(arrangement.get().getId());
-        return arrangementsCount * 100 / checkUnits;
+            long arrangementsCount = resultsKafkaService.getResultsCount(arrangement.get().getId());
+            return arrangementsCount * 100 / checkUnits;
+        }).orElse(0L);
     }
 }
