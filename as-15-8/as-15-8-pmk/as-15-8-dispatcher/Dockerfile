@@ -18,6 +18,6 @@ ENTRYPOINT ["java", \
          "-jar", \
          "-Dapplication.logpath=${LOG_PATH}", \
          "-Dspring.profiles.active=${PROFILE}", \
-         "-Xms512M", \
-         "-Xmx1024M", \
+         "-Xms4G", \
+         "-Xmx23G", \
          "/as-15-8-dispatcher.jar"]
