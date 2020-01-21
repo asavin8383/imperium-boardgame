@@ -40,7 +40,7 @@ public class ErdiTrafficUnitController {
     }
 
     @PutMapping(path = "/{id}/addFromPod")
-    public Flux<List<Long>> addErdiToUnitFromPod(
+    public List<Long> addErdiToUnitFromPod(
             @PathVariable("id") ErdiTrafficUnit unit,
             @RequestParam(required = false) String idMask,
             @RequestParam(required = false) List<String> categoryNames,
@@ -55,16 +55,21 @@ public class ErdiTrafficUnitController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endTime,
             @RequestParam(required = false) Boolean random,
             @RequestParam(required = false) SortingDirection sortingDirection,
-            @RequestParam(required = false) String sortingColumn
+            @RequestParam(required = false) String sortingColumn,
+            @RequestParam(required = false) Long visitorsCntRussiaMin,
+            @RequestParam(required = false) Long visitorsCntRussiaMax,
+            @RequestParam(required = false) Long visitorsCntWorldMin,
+            @RequestParam(required = false) Long visitorsCntWorldMax
             ) {
 
         Flux<List<Long>> idss = podWebClient.getErdiIdList(idMask, categoryNames, decisionOrgs, infoTypeIds,
                 registryNames, resourceTypes, resourceValue, violationNames, size,
-                startTime, endTime, random, sortingDirection, sortingColumn);
-        List<Long> ids = idss.toStream().flatMap(List::stream).collect(Collectors.toList());
+                startTime, endTime, random, sortingDirection, sortingColumn, visitorsCntRussiaMin, visitorsCntRussiaMax,
+                visitorsCntWorldMin, visitorsCntWorldMax);
 
+        List<Long> ids = idss.flatMap(Flux::fromIterable).collectList().block();
         saveErdi(unit, ids);
-        return idss;
+        return ids;
     }
 
     private void saveErdi(ErdiTrafficUnit unit, List<Long> ids) {

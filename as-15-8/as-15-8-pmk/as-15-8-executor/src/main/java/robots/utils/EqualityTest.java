@@ -68,7 +68,7 @@ class HostEquality implements EqualityTest {
         if(foundUrl == null){
             return false;
         }
-        log.info("Проверяется на равенство запрещённый ресурс: {} с полученным хостом: {}", forbiddenHost, foundUrl.getHost());
+        log.debug("Проверяется на равенство запрещённый ресурс: {} с полученным хостом: {}", forbiddenHost, foundUrl.getHost());
         return foundUrl.getHost().equalsIgnoreCase(forbiddenHost);
     }
 }

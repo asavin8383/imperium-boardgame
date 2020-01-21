@@ -46,7 +46,7 @@ public class ResultService {
                 .stream()
                 .filter(arrangement -> {
                     long count = resultsKafkaService.getResultsCount(arrangement.getId());
-                    if (count != 0 && arrangement.getCheckUnitsCount() == count) {
+                    if (count != 0 && arrangement.getCheckUnitsCount() >= count) {
                         arrangement.setStatus(ArrangementStatus.UPLOADING);
                         arrangementRepo.save(arrangement);
                         return true;

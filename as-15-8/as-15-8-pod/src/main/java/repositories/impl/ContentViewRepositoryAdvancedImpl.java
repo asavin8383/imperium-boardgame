@@ -46,6 +46,10 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
     private LocalDateTime endTime;
     private Boolean random;
     private Pageable pageable;
+    private Long visitorsCntRussiaMin;
+    private Long visitorsCntRussiaMax;
+    private Long visitorsCntWorldMin;
+    private Long visitorsCntWorldMax;
 
     @Override
     public Page<ContentView> findPage(
@@ -61,10 +65,15 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
             Boolean random,
             Pageable pageable,
             LocalDateTime startTime,
-            LocalDateTime endTime) {
+            LocalDateTime endTime,
+            Long visitorsCntRussiaMin,
+            Long visitorsCntRussiaMax,
+            Long visitorsCntWorldMin,
+            Long visitorsCntWorldMax) {
 
         initBasicArguments(idMask, categoryNames, decisionOrgs, infoTypeIds, registryNames, resourceTypes, resourceValue,
-                violationNames, startTime, endTime, random, pageable);
+                violationNames, startTime, endTime, random, pageable, visitorsCntRussiaMin, visitorsCntRussiaMax,
+                visitorsCntWorldMin, visitorsCntWorldMax);
 
         CriteriaQuery<ContentView> select = configurateCriteriaQuery(query);
         return CriteriaHelper.createPage(em, select, pageable);
@@ -84,10 +93,15 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
             LocalDateTime startTime,
             LocalDateTime endTime,
             Boolean random,
-            Pageable pageable) {
+            Pageable pageable,
+            Long visitorsCntRussiaMin,
+            Long visitorsCntRussiaMax,
+            Long visitorsCntWorldMin,
+            Long visitorsCntWorldMax) {
 
         initBasicArguments(idMask, categoryNames, decisionOrgs, infoTypeIds, registryNames, resourceTypes, resourceValue,
-                violationNames, startTime, endTime, random, pageable);
+                violationNames, startTime, endTime, random, pageable, visitorsCntRussiaMin, visitorsCntRussiaMax,
+                visitorsCntWorldMin, visitorsCntWorldMax);
 
         CriteriaQuery<ContentView> select = configurateCriteriaQuery(null);
         return  CriteriaHelper.createIds(em, select, maxResults);
@@ -95,7 +109,8 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
 
     private void initBasicArguments(String idMask, List<String> categoryNames, List<String> decisionOrgs, List<String> infoTypeIds,
                                     List<String> registryNames, List<String> resourceTypes, String resourceValue, List<String> violationNames,
-                                    LocalDateTime startTime, LocalDateTime endTime, Boolean random, Pageable pageable) {
+                                    LocalDateTime startTime, LocalDateTime endTime, Boolean random, Pageable pageable,
+                                    Long visitorsCntRussiaMin, Long visitorsCntRussiaMax, Long visitorsCntWorldMin, Long visitorsCntWorldMax) {
         this.idMask = idMask;
         this.categoryNames = categoryNames;
         this.decisionOrgs = decisionOrgs;
@@ -108,6 +123,10 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
         this.endTime = endTime;
         this.random = random;
         this.pageable = pageable;
+        this.visitorsCntRussiaMin =  visitorsCntRussiaMin;
+        this.visitorsCntRussiaMax =  visitorsCntRussiaMax;
+        this.visitorsCntWorldMin = visitorsCntWorldMin;
+        this.visitorsCntWorldMax = visitorsCntWorldMax;
     }
 
     private CriteriaQuery<ContentView> configurateCriteriaQuery(String query) {
@@ -178,8 +197,25 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
         if (startTime != null) {
             predicates.add(criteriaBuilder.greaterThanOrEqualTo(rootContentView.get(ContentView_.INCLUDE_TIME), startTime));
         }
+
         if (endTime != null) {
             predicates.add(criteriaBuilder.lessThanOrEqualTo(rootContentView.get(ContentView_.INCLUDE_TIME), endTime));
+        }
+
+        if (visitorsCntRussiaMin != null) {
+            predicates.add(criteriaBuilder.greaterThanOrEqualTo(rootContentView.get(ContentView_.VISITORS_CNT_RUSSIA), visitorsCntRussiaMin));
+        }
+
+        if (visitorsCntRussiaMax != null) {
+            predicates.add(criteriaBuilder.lessThanOrEqualTo(rootContentView.get(ContentView_.VISITORS_CNT_RUSSIA), visitorsCntRussiaMax));
+        }
+
+        if (visitorsCntWorldMin != null) {
+            predicates.add(criteriaBuilder.greaterThanOrEqualTo(rootContentView.get(ContentView_.VISITORS_CNT_WORLD), visitorsCntWorldMin));
+        }
+
+        if (visitorsCntWorldMax != null) {
+            predicates.add(criteriaBuilder.lessThanOrEqualTo(rootContentView.get(ContentView_.VISITORS_CNT_WORLD), visitorsCntWorldMax));
         }
 
         return predicates;

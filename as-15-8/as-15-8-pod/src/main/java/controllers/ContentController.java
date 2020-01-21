@@ -66,10 +66,13 @@ public class ContentController {
             @RequestParam(required = false) String query,
             @RequestParam(required = false) Boolean random,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startTime,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endTime
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endTime,
+            @RequestParam(required = false) Long visitorsCntRussiaMin,
+            @RequestParam(required = false) Long visitorsCntRussiaMax,
+            @RequestParam(required = false) Long visitorsCntWorldMin,
+            @RequestParam(required = false) Long visitorsCntWorldMax
     ) {
 
-        //if (!erdiRestClient.getIsLoading()) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize,
                 SortingHelper.createSorting(sortingDirection, sortingColumn));
         Page<ContentView> pageContent =
@@ -86,16 +89,16 @@ public class ContentController {
                         random == null ? false : random,
                         pageable,
                         convertToLocalDateTimeMin(startTime),
-                        convertToLocalDateTimeMax(endTime));
+                        convertToLocalDateTimeMax(endTime),
+                        visitorsCntRussiaMin,
+                        visitorsCntRussiaMax,
+                        visitorsCntWorldMin,
+                        visitorsCntWorldMax);
         return new ResponseEntity<>(pageContent, HttpStatus.OK);
-       /* }
-        else {
-            return new ResponseEntity<>((Page<ContentView>) null, HttpStatus.ACCEPTED);
-        }*/
     }
-
+    //@PreAuthorize("hasAnyRole('ROLE_MANAGE_ERDI')")
     @GetMapping(path = "/erdi/ids", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<List<Long>> getRelevantContent(
+    public Flux<List<Long>> getRelevantContentIds(
 
             @RequestParam(required = false) String idMask,
             @RequestParam(required = false) List<String> categoryNames,
@@ -110,7 +113,11 @@ public class ContentController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endTime,
             @RequestParam(required = false) Boolean random,
             @RequestParam(required = false, defaultValue = "ASC") SortingDirection sortingDirection,
-            @RequestParam(required = false, defaultValue = "includetime") String sortingColumn
+            @RequestParam(required = false, defaultValue = "includetime") String sortingColumn,
+            @RequestParam(required = false) Long visitorsCntRussiaMin,
+            @RequestParam(required = false) Long visitorsCntRussiaMax,
+            @RequestParam(required = false) Long visitorsCntWorldMin,
+            @RequestParam(required = false) Long visitorsCntWorldMax
     ) {
 
         if (!erdiRestClient.getIsLoading()) {
@@ -132,7 +139,11 @@ public class ContentController {
                             convertToLocalDateTimeMin(startTime),
                             convertToLocalDateTimeMax(endTime),
                             random,
-                            pageable);
+                            pageable,
+                            visitorsCntRussiaMin,
+                            visitorsCntRussiaMax,
+                            visitorsCntWorldMin,
+                            visitorsCntWorldMax);
 
             return Flux.fromIterable(listContent);
         }

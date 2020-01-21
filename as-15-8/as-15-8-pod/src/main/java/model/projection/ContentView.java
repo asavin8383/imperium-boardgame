@@ -56,6 +56,9 @@ public class ContentView {
     // 18
     private String violationName;
 
+    private Long visitorsCntRussia;
+
+    private Long visitorsCntWorld;
     // 2
     // @Value("#{target.contentInfo.includetime}")
 //    @JsonFormat(timezone = "GMT+03:00")
@@ -94,10 +97,5 @@ public class ContentView {
     // @Value("#{target.decision.number}")
 //    private String decisionNumber;
 
-    // 14 addon
-//    private Long visitorsCntRussia;
-
-    // 15 addon
-//    private Long visitorsCntWorld;
 
 }

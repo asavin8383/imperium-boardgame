@@ -26,7 +26,11 @@ public interface ContentViewRepositoryAdvanced {
             Boolean random,
             Pageable pageable,
             LocalDateTime startTime,
-            LocalDateTime endTime
+            LocalDateTime endTime,
+            Long visitorsCntRussiaMin,
+            Long visitorsCntRussiaMax,
+            Long visitorsCntWorldMin,
+            Long visitorsCntWorldMax
     );
 
     List<List<Long>> findIds(
@@ -42,7 +46,11 @@ public interface ContentViewRepositoryAdvanced {
             LocalDateTime startTime,
             LocalDateTime endTime,
             Boolean random,
-            Pageable pageable
+            Pageable pageable,
+            Long visitorsCntRussiaMin,
+            Long visitorsCntRussiaMax,
+            Long visitorsCntWorldMin,
+            Long visitorsCntWorldMax
 
     );
 }
