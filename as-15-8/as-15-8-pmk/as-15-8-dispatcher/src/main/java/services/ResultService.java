@@ -14,6 +14,7 @@ import model.*;
 import model.enums.ArrangementStatus;
 import org.apache.kafka.streams.KeyValue;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import repositories.ArrangementRepo;
 import repositories.ResultRepo;
@@ -36,23 +37,38 @@ public class ResultService {
     private final ResultScreenShotRepo resultScreenShotRepo;
     private final ArrangementStatusProducer arrangementStatusProducer;
 
-    public boolean isArrangementFinished(Long arrangementId) {
-        Arrangement arrangement = arrangementRepo
-                .findById(arrangementId)
-                .orElseThrow((() -> new AS_15_8_DispatcherException("Ошибка! Мероприятие для выгрузки не найдено в БД по id: " + arrangementId)));
-        if(!arrangement.getStatus().equals(ArrangementStatus.RUNNING))
-            return false;
-        long count = resultsKafkaService.getResultsCount(arrangementId);
-        return count != 0 && arrangement.getCheckUnitsCount() <= count;
+    @Scheduled(cron = "${results.save.schedule}")
+    public void saveCompletionArrangements() {
+        try{
+            arrangementRepo
+                    .findRunning()
+                    .stream()
+                    .filter(arrangement -> {
+                        long count = resultsKafkaService.getResultsCount(arrangement.getId());
+                        if (count != 0 && arrangement.getCheckUnitsCount() <= count) {
+                            arrangement.setStatus(ArrangementStatus.UPLOADING);
+                            arrangementRepo.save(arrangement);
+                            return true;
+                        }
+                        return false;
+                    })
+                    .forEach(this::saveArrangementResults);
+        } catch (Exception ex){
+            log.error("Ошибка при сохранении результатов мероприятий", ex);
+        }
     }
 
-    public void saveArrangementResults(Long arrangementId) {
+    public void saveArrangementResults(Long arrangementId){
         Arrangement arrangement = arrangementRepo
                 .findById(arrangementId)
                 .orElseThrow((() -> new AS_15_8_DispatcherException("Ошибка! Мероприятие для выгрузки не найдено в БД по id: " + arrangementId)));
-        log.info("Начато сохранение мероприятия: " + arrangement.getId());
         arrangement.setStatus(ArrangementStatus.UPLOADING);
         arrangementRepo.save(arrangement);
+        saveArrangementResults(arrangement);
+    }
+
+    private void saveArrangementResults(Arrangement arrangement) {
+        log.info("Начато сохранение мероприятия: " + arrangement.getId());
         try {
             resultsKafkaService.getArrangementResultsIterator(arrangement.getId())
                 .ifPresent(resultsIterator -> {

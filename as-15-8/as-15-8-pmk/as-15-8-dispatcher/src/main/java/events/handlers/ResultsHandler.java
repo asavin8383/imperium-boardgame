@@ -83,10 +83,6 @@ public class ResultsHandler {
                     ((AnalysisResult)result).setScreenshot(null);
                     ((AnalysisResult)result).setEtalonScreenshot(null);
                 }
-
-                if(resultService.isArrangementFinished(key.getArrangementId()))
-                    resultService.saveArrangementResults(key.getArrangementId());
-
                 return result;
             })
             .groupByKey()
