@@ -29,7 +29,6 @@ public class TestJobExecution {
 	public void test() throws ExecutionException, IOException {
 		
 		CheckUnitJob checkUnitJob = new CheckUnitJob();
-		checkUnitJob.setJobID(1L);
 		checkUnitJob.setAccessTool("google");
 
 		checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.DOMAIN, "club-vullcan.com"));
@@ -37,7 +36,7 @@ public class TestJobExecution {
 
 		ExecutionJobResult executionJobResult = checkUnitVerificationServiceFactory
 				.getService(checkUnitJob)
-				.run(checkUnitJob);
+				.run(1L, checkUnitJob);
 
 //		Files.write(Paths.get("output.jpg"), executionJobResult.getScreenshot(),
 //			StandardOpenOption.CREATE, StandardOpenOption.APPEND);
