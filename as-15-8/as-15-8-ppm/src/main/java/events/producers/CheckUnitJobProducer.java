@@ -40,7 +40,7 @@ public class CheckUnitJobProducer {
 
             boolean send = ppm_channels.outputJobs().send(message);
             if(send)
-                log.info("Сообщение успешно отправлено: " + checkUnitJob.getArrangementId() + ", " + checkUnitJob.getCheckUnit().getValue());
+                log.info("Сообщение успешно отправлено: " + key.getArrangementId() + ", " + checkUnitJob.getCheckUnit().getValue());
         } catch (Exception ex) {
             throw new AS_15_8_PPM_Exception("Ошибка при отправке задания диспетчеру", ex);
         }

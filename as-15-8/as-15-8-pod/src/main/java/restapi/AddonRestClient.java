@@ -1,6 +1,7 @@
 package restapi;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import exceptions.AS_15_8_POD_Exception;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import model.response.DeltaAddonEntry;
@@ -43,7 +44,7 @@ public class AddonRestClient
     @Value("${spring.rest_base_url}")
     private String baseUrl;
 
-    private static final String ENTITY_NAME= "dumpAddons.xml";
+    private static final String ENTITY_NAME = "dumpAddons.xml";
 
     private XMLInputFactory xmlInputFactory;
 
@@ -103,13 +104,13 @@ public class AddonRestClient
                     int cnt = addonUpdater.insertAllJdbc(sr, mapper, date, is_delta);
 
                     log.info("{} addons processed", cnt);
-
                 }
             } else {
                 log.warn("По запросу к ППП получено содержимое без архивного файла: {}", url);
             }
         } catch (IOException | XMLStreamException e) {
             System.out.println(e);
+            throw new AS_15_8_POD_Exception("Ошибка при разборе дельты аддона", e);
         }
     }
 

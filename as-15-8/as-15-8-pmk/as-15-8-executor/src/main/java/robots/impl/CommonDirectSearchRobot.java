@@ -184,11 +184,11 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
 
         //Проверим, не исправилось ли правописание. Если исправилось, возвращаем назад
         if(Strings.isNotEmpty(this.checkSpellingLink)){
-            WebElement next = ScriptUtils.findElementIfExists(
+            WebElement spellingLink = ScriptUtils.findElementIfExists(
                 By.xpath(this.checkSpellingLink), driver);
             try {
-                if (next != null) {
-                    next.click();
+                if (spellingLink != null) {
+                    spellingLink.click();
                 }
             } catch (TimeoutException e) {
                 throw new TimeoutScriptException(e);
@@ -294,7 +294,6 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
 
     List<WebElement> getPaginatedLinks() throws ExecutionException {
         List<WebElement> links = new ArrayList<>();
-        //JavascriptExecutor jsExecutor = (JavascriptExecutor) driver;
         do {
             ScriptUtils.waitPageLoading(driver);
             By linkLocator = By.xpath(xpathItemLink);
@@ -302,9 +301,6 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
 
             if(listNext != null)
                 links.addAll(listNext);
-
-            // for yahoo before clicking next page element
-            //ScriptUtils.scrollToBottom(jsExecutor);
 
         }
         while (links.size() < searchResultLimit && nextPage());
@@ -317,15 +313,10 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
     }
 
     boolean checkPaginatedSearchResult() throws ExecutionException {
-        //JavascriptExecutor jsExecutor = (JavascriptExecutor) driver;
         do {
             ScriptUtils.waitPageLoading(driver);
             if (checkPageResult())
                 return true;
-
-            // for yahoo before clicking next page element
-            //ScriptUtils.scrollToBottom(jsExecutor);
-
         } while (counter < searchResultLimit && nextPage());
 
         return false;
@@ -379,6 +370,10 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
     }
 
     private boolean nextPage() throws TimeoutScriptException {
+        //Переходим в низ страницы
+        JavascriptExecutor jsExecutor = (JavascriptExecutor) driver;
+        ScriptUtils.scrollToBottom(jsExecutor);
+        //Жмём на кнопку next
         WebElement next = ScriptUtils.findElementIfExists(
                 By.xpath(xpathNextPage), driver);
         try {

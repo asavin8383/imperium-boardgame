@@ -5,17 +5,17 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import model.response.RestResponseSubTypeList;
 import model.rest.SubType;
+import model.scheme.Subtype;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+import repositories.SubtypeRepository;
 import updaters.SubTypeDictionaryUpdater;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * User: asinjavin
@@ -32,9 +32,51 @@ public class SubTypeRestClient
     @Autowired
     RestTemplate registryAnonimyzersRestTemplate;
 
+    @Autowired
+    SubtypeRepository subtypeRepository;
+
     @Value("${spring.rest_base_url}")
     private String baseUrl;
 
+
+    /**
+     * @return Результат true, в случае, если после загрузки есть изменения в БД. false - изменений нет.
+     */
+    public boolean readFromNetDiff() {
+        List<Subtype> list1 = subtypeRepository.findAll();
+        readFromNet();
+        List<Subtype> list2 = subtypeRepository.findAll();
+
+        return !compareSubtypeLists(list1, list2);
+    }
+
+    private boolean compareSubtypeLists(List<Subtype> list1, List<Subtype> list2){
+        if (list1.size() != list2.size())
+            return false;
+
+        Map<String, Subtype> map1 = list1.stream().collect(Collectors.toMap(Subtype::getOrigId, subtype -> subtype));
+        Map<String, Subtype> map2 = list2.stream().collect(Collectors.toMap(Subtype::getOrigId, subtype -> subtype));
+
+        boolean equals = true;
+        for(String k1 : map1.keySet()){
+            Subtype s1 = map1.get(k1);
+            Subtype s2 = map2.get(k1);
+
+            if (s2 == null ||
+                    !compareStrings(s1.getRegistryName(), s2.getRegistryName()) ||
+                    !compareStrings(s1.getCategoryName(), s2.getCategoryName()) ||
+                    !compareStrings(s1.getViolationName(), s2.getViolationName())
+            ){
+                equals = false;
+                break;
+            }
+        }
+        return equals;
+    }
+
+    private boolean compareStrings(String str1, String str2){
+        return (str1 == null && str2 == null) || (str1 != null && str1.equals(str2));
+    }
 
     public void readFromNet() {
         String base = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
