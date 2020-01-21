@@ -10,12 +10,13 @@ gateway= System.getenv("GATEWAY_URI");
     <property name="imageDPI">96</property>
     <parameters>
         <scalar-parameter name="P_Arragement_Id" id="6">
+            <property name="hidden">true</property>
             <property name="valueType">static</property>
             <property name="isRequired">true</property>
             <property name="dataType">decimal</property>
             <property name="distinct">true</property>
             <simple-property-list name="defaultValue">
-                <value type="constant">622</value>
+                <value type="constant">898</value>
             </simple-property-list>
             <list-property name="selectionList"/>
             <property name="paramType">simple</property>
@@ -221,7 +222,7 @@ where name=(select access_tool from portal.arrangements
                     <property name="nativeDataType">12</property>
                 </structure>
             </list-property>
-            <xml-property name="queryText"><![CDATA[select coalesce (mission_id::text,t1.id::text||'*') as MissionId from portal.formal_tasks t1,
+            <xml-property name="queryText"><![CDATA[select coalesce (fgis_id::text,t1.id::text||'*') as MissionId from portal.formal_tasks t1,
     portal.arrangements t2
     where t2.id = ? and t1.id = t2.formal_task_id ]]></xml-property>
             <xml-property name="designerValues"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
@@ -439,6 +440,12 @@ completion_date-start_date as duration
                     <text-property name="heading">check_unit_value</text-property>
                 </structure>
                 <structure>
+                    <property name="columnName">check_for_act</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">check_for_act</text-property>
+                    <text-property name="heading">check_for_act</text-property>
+                </structure>
+                <structure>
                     <property name="columnName">blocktype</property>
                     <property name="analysis">dimension</property>
                     <text-property name="displayName">blocktype</text-property>
@@ -489,21 +496,26 @@ completion_date-start_date as duration
                     </structure>
                     <structure>
                         <property name="position">3</property>
-                        <property name="name">blocktype</property>
+                        <property name="name">check_for_act</property>
                         <property name="dataType">string</property>
                     </structure>
                     <structure>
                         <property name="position">4</property>
-                        <property name="name">end_date</property>
+                        <property name="name">blocktype</property>
                         <property name="dataType">string</property>
                     </structure>
                     <structure>
                         <property name="position">5</property>
-                        <property name="name">screenshot_id</property>
+                        <property name="name">end_date</property>
                         <property name="dataType">string</property>
                     </structure>
                     <structure>
                         <property name="position">6</property>
+                        <property name="name">screenshot_id</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">7</property>
                         <property name="name">log</property>
                         <property name="dataType">string</property>
                     </structure>
@@ -527,27 +539,34 @@ completion_date-start_date as duration
                 </structure>
                 <structure>
                     <property name="position">3</property>
+                    <property name="name">check_for_act</property>
+                    <property name="nativeName">check_for_act</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">4</property>
                     <property name="name">blocktype</property>
                     <property name="nativeName">blocktype</property>
                     <property name="dataType">string</property>
                     <property name="nativeDataType">12</property>
                 </structure>
                 <structure>
-                    <property name="position">4</property>
+                    <property name="position">5</property>
                     <property name="name">end_date</property>
                     <property name="nativeName">end_date</property>
                     <property name="dataType">string</property>
                     <property name="nativeDataType">12</property>
                 </structure>
                 <structure>
-                    <property name="position">5</property>
+                    <property name="position">6</property>
                     <property name="name">screenshot_id</property>
                     <property name="nativeName">screenshot_id</property>
                     <property name="dataType">string</property>
                     <property name="nativeDataType">12</property>
                 </structure>
                 <structure>
-                    <property name="position">6</property>
+                    <property name="position">7</property>
                     <property name="name">log</property>
                     <property name="nativeName">log</property>
                     <property name="dataType">string</property>
@@ -557,6 +576,7 @@ completion_date-start_date as duration
             <xml-property name="queryText"><![CDATA[select
 row_number() OVER ()  AS num,
  r.check_unit_value, --ИРТЗ
+ case when r.check_for_act then 'Да' else '' end check_for_act,
        --r.result, -- Статус
         coalesce(ci.blocktype,'DEFAULT') as blocktype, -- Тип блокировки
        to_char (r.end_date,'DD.MM.YYYY HH24:MI:SS') as end_date, -- Дата и время проверки
@@ -705,6 +725,12 @@ and r.result in (
                     <text-property name="heading">check_unit_value</text-property>
                 </structure>
                 <structure>
+                    <property name="columnName">check_for_act</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">check_for_act</text-property>
+                    <text-property name="heading">check_for_act</text-property>
+                </structure>
+                <structure>
                     <property name="columnName">blocktype</property>
                     <property name="analysis">dimension</property>
                     <text-property name="displayName">blocktype</text-property>
@@ -755,21 +781,26 @@ and r.result in (
                     </structure>
                     <structure>
                         <property name="position">3</property>
-                        <property name="name">blocktype</property>
+                        <property name="name">check_for_act</property>
                         <property name="dataType">string</property>
                     </structure>
                     <structure>
                         <property name="position">4</property>
-                        <property name="name">end_date</property>
+                        <property name="name">blocktype</property>
                         <property name="dataType">string</property>
                     </structure>
                     <structure>
                         <property name="position">5</property>
-                        <property name="name">screenshot_id</property>
+                        <property name="name">end_date</property>
                         <property name="dataType">string</property>
                     </structure>
                     <structure>
                         <property name="position">6</property>
+                        <property name="name">screenshot_id</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">7</property>
                         <property name="name">log</property>
                         <property name="dataType">string</property>
                     </structure>
@@ -793,27 +824,34 @@ and r.result in (
                 </structure>
                 <structure>
                     <property name="position">3</property>
+                    <property name="name">check_for_act</property>
+                    <property name="nativeName">check_for_act</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">4</property>
                     <property name="name">blocktype</property>
                     <property name="nativeName">blocktype</property>
                     <property name="dataType">string</property>
                     <property name="nativeDataType">12</property>
                 </structure>
                 <structure>
-                    <property name="position">4</property>
+                    <property name="position">5</property>
                     <property name="name">end_date</property>
                     <property name="nativeName">end_date</property>
                     <property name="dataType">string</property>
                     <property name="nativeDataType">12</property>
                 </structure>
                 <structure>
-                    <property name="position">5</property>
+                    <property name="position">6</property>
                     <property name="name">screenshot_id</property>
                     <property name="nativeName">screenshot_id</property>
                     <property name="dataType">string</property>
                     <property name="nativeDataType">12</property>
                 </structure>
                 <structure>
-                    <property name="position">6</property>
+                    <property name="position">7</property>
                     <property name="name">log</property>
                     <property name="nativeName">log</property>
                     <property name="dataType">string</property>
@@ -824,6 +862,7 @@ and r.result in (
 row_number() OVER ()  AS num,
  r.check_unit_value, --ИРТЗ
        --r.result, -- Статус
+       case when r.check_for_act then 'Да' else '' end check_for_act,
         coalesce(ci.blocktype,'DEFAULT') as blocktype, -- Тип блокировки
        to_char (r.end_date,'DD.MM.YYYY HH24:MI:SS') as end_date, -- Дата и время проверки
        s.result_id::text as screenshot_id, -- ID для формирования ссылки
@@ -1713,6 +1752,12 @@ and r.result in (
                                 <expression name="expression" type="javascript">dataSetRow["log"]</expression>
                                 <property name="dataType">string</property>
                             </structure>
+                            <structure>
+                                <property name="name">check_for_act</property>
+                                <text-property name="displayName">check_for_act</text-property>
+                                <expression name="expression" type="javascript">dataSetRow["check_for_act"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
                         </list-property>
                         <property name="pageBreakInterval">1000000</property>
                         <column id="144">
@@ -1734,9 +1779,14 @@ and r.result in (
                             <property name="textAlign">center</property>
                             <property name="width">4cm</property>
                         </column>
+                        <column id="313">
+                            <property name="textAlign">center</property>
+                            <property name="width">2cm</property>
+                        </column>
                         <header>
                             <row id="116">
                                 <property name="fontWeight">bold</property>
+                                <property name="verticalAlign">middle</property>
                                 <cell id="117">
                                     <property name="borderBottomColor">#000000</property>
                                     <property name="borderBottomStyle">solid</property>
@@ -1839,6 +1889,23 @@ and r.result in (
                                         <text-property name="text">Ссылка на технический протокол</text-property>
                                     </label>
                                 </cell>
+                                <cell id="311">
+                                    <property name="borderBottomColor">#000000</property>
+                                    <property name="borderBottomStyle">solid</property>
+                                    <property name="borderBottomWidth">thin</property>
+                                    <property name="borderLeftColor">#000000</property>
+                                    <property name="borderLeftStyle">solid</property>
+                                    <property name="borderLeftWidth">thin</property>
+                                    <property name="borderRightColor">#000000</property>
+                                    <property name="borderRightStyle">solid</property>
+                                    <property name="borderRightWidth">thin</property>
+                                    <property name="borderTopColor">#000000</property>
+                                    <property name="borderTopStyle">solid</property>
+                                    <property name="borderTopWidth">thin</property>
+                                    <label id="314">
+                                        <text-property name="text">Включено в акт?</text-property>
+                                    </label>
+                                </cell>
                             </row>
                         </header>
                         <detail>
@@ -1930,7 +1997,7 @@ and r.result in (
                                         <list-property name="action">
                                             <structure>
                                                 <property name="linkType">hyperlink</property>
-                                                <expression name="uri" type="javascript">gateway+"/dispatcher/results/screenshot?id="+row["screenshot_id"]</expression>
+                                                <expression name="uri" type="javascript">gateway+"/dispatcher/results/screenshot?id="+row["screenshot_id"]+"&amp;arrangementId="+params["P_Arragement_Id"].value</expression>
                                                 <property name="targetWindow">_blank</property>
                                             </structure>
                                         </list-property>
@@ -1955,10 +2022,28 @@ and r.result in (
                                         <list-property name="action">
                                             <structure>
                                                 <property name="linkType">hyperlink</property>
-                                                <expression name="uri" type="javascript">gateway+"/dispatcher/results/nmap_log?id="+row["log"]</expression>
+                                                <expression name="uri" type="javascript">gateway+"/dispatcher/results/protocol/nmap_log?id="+row["log"]</expression>
                                                 <property name="targetWindow">_blank</property>
                                             </structure>
                                         </list-property>
+                                    </data>
+                                </cell>
+                                <cell id="312">
+                                    <property name="borderBottomColor">#000000</property>
+                                    <property name="borderBottomStyle">solid</property>
+                                    <property name="borderBottomWidth">thin</property>
+                                    <property name="borderLeftColor">#000000</property>
+                                    <property name="borderLeftStyle">solid</property>
+                                    <property name="borderLeftWidth">thin</property>
+                                    <property name="borderRightColor">#000000</property>
+                                    <property name="borderRightStyle">solid</property>
+                                    <property name="borderRightWidth">thin</property>
+                                    <property name="borderTopColor">#000000</property>
+                                    <property name="borderTopStyle">solid</property>
+                                    <property name="borderTopWidth">thin</property>
+                                    <property name="textAlign">center</property>
+                                    <data id="315">
+                                        <property name="resultSetColumn">check_for_act</property>
                                     </data>
                                 </cell>
                             </row>
@@ -2021,6 +2106,12 @@ and r.result in (
                                 <expression name="expression" type="javascript">dataSetRow["log"]</expression>
                                 <property name="dataType">string</property>
                             </structure>
+                            <structure>
+                                <property name="name">check_for_act</property>
+                                <text-property name="displayName">check_for_act</text-property>
+                                <expression name="expression" type="javascript">dataSetRow["check_for_act"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
                         </list-property>
                         <property name="pageBreakInterval">1000000</property>
                         <column id="271">
@@ -2043,9 +2134,14 @@ and r.result in (
                             <property name="textAlign">center</property>
                             <property name="width">4cm</property>
                         </column>
+                        <column id="318">
+                            <property name="textAlign">center</property>
+                            <property name="width">2cm</property>
+                        </column>
                         <header>
                             <row id="245">
                                 <property name="fontWeight">bold</property>
+                                <property name="verticalAlign">middle</property>
                                 <cell id="246">
                                     <property name="borderBottomColor">#000000</property>
                                     <property name="borderBottomStyle">solid</property>
@@ -2148,6 +2244,23 @@ and r.result in (
                                         <text-property name="text">Ссылка на технический протокол</text-property>
                                     </label>
                                 </cell>
+                                <cell id="316">
+                                    <property name="borderBottomColor">#000000</property>
+                                    <property name="borderBottomStyle">solid</property>
+                                    <property name="borderBottomWidth">thin</property>
+                                    <property name="borderLeftColor">#000000</property>
+                                    <property name="borderLeftStyle">solid</property>
+                                    <property name="borderLeftWidth">thin</property>
+                                    <property name="borderRightColor">#000000</property>
+                                    <property name="borderRightStyle">solid</property>
+                                    <property name="borderRightWidth">thin</property>
+                                    <property name="borderTopColor">#000000</property>
+                                    <property name="borderTopStyle">solid</property>
+                                    <property name="borderTopWidth">thin</property>
+                                    <label id="319">
+                                        <text-property name="text">Включено в акт?</text-property>
+                                    </label>
+                                </cell>
                             </row>
                         </header>
                         <detail>
@@ -2239,7 +2352,7 @@ and r.result in (
                                         <list-property name="action">
                                             <structure>
                                                 <property name="linkType">hyperlink</property>
-                                                <expression name="uri" type="javascript">gateway+"/dispatcher/results/screenshot?id="+row["screenshot_id"]</expression>
+                                                <expression name="uri" type="javascript">gateway+"/dispatcher/results/screenshot?id="+row["screenshot_id"]+"&amp;arrangementId="+params["P_Arragement_Id"].value</expression>
                                                 <property name="targetWindow">_blank</property>
                                             </structure>
                                         </list-property>
@@ -2264,10 +2377,28 @@ and r.result in (
                                         <list-property name="action">
                                             <structure>
                                                 <property name="linkType">hyperlink</property>
-                                                <expression name="uri" type="javascript">gateway+"/dispatcher/results/nmap_log?id="+row["log"]</expression>
+                                                <expression name="uri" type="javascript">gateway+"/dispatcher/results/protocol/nmap_log?id="+row["log"]</expression>
                                                 <property name="targetWindow">_blank</property>
                                             </structure>
                                         </list-property>
+                                    </data>
+                                </cell>
+                                <cell id="317">
+                                    <property name="borderBottomColor">#000000</property>
+                                    <property name="borderBottomStyle">solid</property>
+                                    <property name="borderBottomWidth">thin</property>
+                                    <property name="borderLeftColor">#000000</property>
+                                    <property name="borderLeftStyle">solid</property>
+                                    <property name="borderLeftWidth">thin</property>
+                                    <property name="borderRightColor">#000000</property>
+                                    <property name="borderRightStyle">solid</property>
+                                    <property name="borderRightWidth">thin</property>
+                                    <property name="borderTopColor">#000000</property>
+                                    <property name="borderTopStyle">solid</property>
+                                    <property name="borderTopWidth">thin</property>
+                                    <property name="textAlign">center</property>
+                                    <data id="320">
+                                        <property name="resultSetColumn">check_for_act</property>
                                     </data>
                                 </cell>
                             </row>
@@ -2548,7 +2679,7 @@ and r.result in (
                                         <list-property name="action">
                                             <structure>
                                                 <property name="linkType">hyperlink</property>
-                                                <expression name="uri" type="javascript">gateway+"/dispatcher/results/screenshot?id="+row["screenshot_id"]</expression>
+                                                <expression name="uri" type="javascript">gateway+"/dispatcher/results/screenshot?id="+row["screenshot_id"]+"&amp;arrangementId="+params["P_Arragement_Id"].value</expression>
                                                 <property name="targetWindow">_blank</property>
                                             </structure>
                                         </list-property>
@@ -2573,7 +2704,7 @@ and r.result in (
                                         <list-property name="action">
                                             <structure>
                                                 <property name="linkType">hyperlink</property>
-                                                <expression name="uri" type="javascript">gateway+"/dispatcher/results/nmap_log?id="+row["log"]</expression>
+                                                <expression name="uri" type="javascript">gateway+"/dispatcher/results/protocol/nmap_log?id="+row["log"]</expression>
                                                 <property name="targetWindow">_blank</property>
                                             </structure>
                                         </list-property>
