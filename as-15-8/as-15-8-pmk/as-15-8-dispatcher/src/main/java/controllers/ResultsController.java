@@ -1,6 +1,5 @@
 package controllers;
 
-import analysis.AnalysisResult;
 import analysis.CheckUnitResult;
 import analysis.NMapAnalysisJobResult;
 import checkUnits.CheckUnitType;
@@ -69,25 +68,17 @@ public class ResultsController {
     @GetMapping(path = "/screenshot", produces = MediaType.IMAGE_PNG_VALUE)
     public @ResponseBody
     ResponseEntity getScreenshot(@RequestParam Long arrangementId, @RequestParam Long id){
-        return resultService.getArrangementResult(arrangementId, id)
-            .map(checkUnitResult -> {
-                if(checkUnitResult instanceof AnalysisResult)
-                    return ResponseEntity.ok(((AnalysisResult)checkUnitResult).getScreenshot());
-                else
-                    return ResponseEntity.noContent().build();
-            }).orElseGet(() -> ResponseEntity.noContent().build());
+        return resultService.getScreenshot(arrangementId, id)
+            .map(screen -> ResponseEntity.ok(screen.getScreenshot()))
+            .orElseGet(() -> ResponseEntity.noContent().build());
     }
 
     @GetMapping(path = "/etalon_screenshot", produces = MediaType.IMAGE_PNG_VALUE)
     public @ResponseBody
     ResponseEntity getEtalonScreenshot(@RequestParam Long arrangementId, @RequestParam Long id){
-        return resultService.getArrangementResult(arrangementId, id)
-                .map(checkUnitResult -> {
-                    if(checkUnitResult instanceof AnalysisResult)
-                        return ResponseEntity.ok(((AnalysisResult)checkUnitResult).getEtalonScreenshot());
-                    else
-                        return ResponseEntity.noContent().build();
-                }).orElseGet(() -> ResponseEntity.noContent().build());
+        return resultService.getScreenshot(arrangementId, id)
+                .map(screen -> ResponseEntity.ok(screen.getEtalonScreenshot()))
+                .orElseGet(() -> ResponseEntity.noContent().build());
     }
 
     @GetMapping(path = "/nmap_log", produces = MediaType.TEXT_PLAIN_VALUE)

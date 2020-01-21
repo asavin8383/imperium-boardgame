@@ -4,7 +4,6 @@ import checkUnits.CheckUnit;
 import checkUnits.CheckUnitJob;
 import checkUnits.CheckUnitType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import enums.AccessToolUnit;
 import execution.ExecutionJobResult;
 import lombok.RequiredArgsConstructor;
 import org.junit.Test;

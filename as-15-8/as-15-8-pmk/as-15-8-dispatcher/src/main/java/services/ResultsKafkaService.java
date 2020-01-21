@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.DetailResult;
 import model.Result;
+import model.Screenshots;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
@@ -26,7 +27,6 @@ import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -40,9 +40,17 @@ public class ResultsKafkaService {
     @Value("${spring.cloud.stream.bindings.results_table.destination}")
     private String resultsTableName;
 
+    @Value("${spring.cloud.stream.bindings.screenshots_table.destination}")
+    private String screenshotsTableName;
+
+    @Value("${spring.cloud.stream.bindings.results_count_table.destination}")
+    private String resultsCountTableName;
+
     private final InteractiveQueryService interactiveQueryService;
 
-    private ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> store;
+    private ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> resultsStore;
+    private ReadOnlyKeyValueStore<Long, Long> resultsCountStore;
+    private ReadOnlyKeyValueStore<CheckUnitKey, Screenshots> screenshotsStore;
 
     public Page<Result> getArrangementResults(
             Long arrangementId,
@@ -83,15 +91,15 @@ public class ResultsKafkaService {
                 .map(store -> store.get(new CheckUnitKey(arrangementId, jobId)));
     }
 
+    public Optional<Screenshots> getScreenshot(Long arrangementId, Long jobId) {
+        return getScreenshotsKeyValueStore()
+                .map(store -> store.get(new CheckUnitKey(arrangementId, jobId)));
+    }
+
     public long getResultsCount(Long arrangementId) {
-        /*return getResultsKeyValueStore().
-                map(ReadOnlyKeyValueStore::approximateNumEntries)
-                .orElse(0L);*/
-        return getArrangementResultsIterator(arrangementId)
-                .map(this::countIteratorSize)
+        return getResultsCountKeyValueStore()
+                .map(store -> store.get(arrangementId))
                 .orElse(0L);
-        /*KeyValueIterator<CheckUnitKey, CheckUnitResult> resultsIterator = getArrangementResultsIterator(store, arrangementId);
-        return countIteratorSize(resultsIterator);*/
     }
 
     public List<CheckUnitType> getDictinctCheckUnitTypes(Long arrangementId){
@@ -135,14 +143,6 @@ public class ResultsKafkaService {
         );
     }
 
-    private Optional<ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult>> getResultsKeyValueStore() {
-        return Optional.ofNullable(store == null ?
-            interactiveQueryService.getQueryableStore(
-                resultsTableName,
-                QueryableStoreTypes.keyValueStore()
-        ) : store);
-    }
-
     void fillResult(Result result, Long jobId, CheckUnitResult checkUnitResult, DetailResultService<? super CheckUnitResult, ? extends DetailResult> service){
         if(result.getId() == null)
             result.setId(jobId);
@@ -154,12 +154,6 @@ public class ResultsKafkaService {
         result.setStartDate(LocalDateTime.ofInstant(checkUnitResult.getStartTime().toInstant(), ZoneId.systemDefault()));
         result.setEndDate(LocalDateTime.ofInstant(checkUnitResult.getEndTime().toInstant(), ZoneId.systemDefault()));
         result.setCheckType(service.getCheckType());
-    }
-
-    private long countIteratorSize(KeyValueIterator<CheckUnitKey, CheckUnitResult> resultsIterator) {
-        AtomicInteger count = new AtomicInteger();
-        resultsIterator.forEachRemaining( s-> count.getAndIncrement());
-        return count.get();
     }
 
     private boolean filterResults(
@@ -217,5 +211,29 @@ public class ResultsKafkaService {
             log.warn("Ошибка при создании компаратора для сортировки результатов проверок", ex);
             return Comparator.comparing(Result::getResult);
         }
+    }
+
+    private Optional<ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult>> getResultsKeyValueStore() {
+        return Optional.ofNullable(resultsStore == null ?
+                interactiveQueryService.getQueryableStore(
+                        resultsTableName,
+                        QueryableStoreTypes.keyValueStore()
+                ) : resultsStore);
+    }
+
+    private Optional<ReadOnlyKeyValueStore<Long, Long>> getResultsCountKeyValueStore() {
+        return Optional.ofNullable(resultsCountStore == null ?
+                interactiveQueryService.getQueryableStore(
+                        resultsCountTableName,
+                        QueryableStoreTypes.keyValueStore()
+                ) : resultsCountStore);
+    }
+
+    private Optional<ReadOnlyKeyValueStore<CheckUnitKey, Screenshots>> getScreenshotsKeyValueStore() {
+        return Optional.ofNullable(screenshotsStore == null ?
+                interactiveQueryService.getQueryableStore(
+                        screenshotsTableName,
+                        QueryableStoreTypes.keyValueStore()
+                ) : screenshotsStore);
     }
 }

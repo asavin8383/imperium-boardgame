@@ -15,8 +15,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import robots.exceptions.ExecutionException;
 import service.CheckUnitVerificationServiceFactory;
 
-import java.io.IOException;
-
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {ApplicationConfiguration.class})
 @PropertySource("file:config/application.yml")
@@ -26,7 +24,7 @@ public class TestJobExecution {
 	private CheckUnitVerificationServiceFactory checkUnitVerificationServiceFactory;
 
 	@Test
-	public void test() throws ExecutionException, IOException {
+	public void test() throws ExecutionException {
 		
 		CheckUnitJob checkUnitJob = new CheckUnitJob();
 		checkUnitJob.setAccessTool("google");
