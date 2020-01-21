@@ -51,18 +51,14 @@ public class ResultsHandler {
             .mapValues(result -> {
                 result.setEndTime(new Date());
                 result.setCheckResult(checkErdiStatus(result.getCheckUnit().getContentId(), result.getCheckResult()));
+                if(result instanceof AnalysisResult){
+                    ((AnalysisResult)result).setScreenshot(null);
+                    ((AnalysisResult)result).setEtalonScreenshot(null);
+                }
                 return result;
             })
             .groupByKey()
-            .reduce((oldMessage, newMessage) -> {
-                    if(newMessage instanceof AnalysisResult){
-                        AnalysisResult analysisResult = (AnalysisResult) newMessage;
-                        analysisResult.setScreenshot(null);
-                        analysisResult.setEtalonScreenshot(null);
-                        return analysisResult;
-                    }
-                    return newMessage;
-                },
+            .reduce((oldMessage, newMessage) -> newMessage,
                 Materialized.<CheckUnitKey, CheckUnitResult, KeyValueStore<Bytes, byte[]>>
                     as(resultsTableName)
                     .withKeySerde(new JsonSerde<>(CheckUnitKey.class))
