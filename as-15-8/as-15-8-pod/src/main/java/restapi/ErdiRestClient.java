@@ -1,7 +1,6 @@
 package restapi;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import exceptions.AS_15_8_POD_Exception;
 import exceptions.ExceptionErdiLoad;
 import exceptions.ExceptionErdiParser;
@@ -60,6 +59,7 @@ public class ErdiRestClient {
     private final ContentVersionRepository contentVersionRepository;
     private final AddonVersionRepository addonVersionRepository;
     private final SubTypeRestClient subTypeRestClient;
+    private final RestClientUtils restClientUtils;
     private final AddonRestClient addonRestClient;
     private final JdbcTemplate jdbcTemplate;
 
@@ -136,21 +136,18 @@ public class ErdiRestClient {
 
         try{
             log.info("====== Начало обновления справочников");
-            boolean wasLoadedFullERDI =
-                    loadFullERDI();
-            int countLoadedDeltaERDI =
-                    loadAllDeltaERDI();
-            boolean wereChanges =
-                    loadSybTypes();
-            boolean wasLoadedFullAddons =
-                    loadFullAddons();
-            int countLoadedAddons =
-                    loadAllDeltaAddons();
+            boolean wasLoadedFullERDI = loadFullERDI();
+            boolean wasLoadedFullAddons = loadFullAddons();
+
+            boolean wereChanges = loadSybTypes();
+
+            int countLoadedDeltaERDI = loadAllDeltaERDI();
+            int countLoadedAddons = loadAllDeltaAddons();
 
             boolean needUpdateViews =
-                    wasLoadedFullERDI || countLoadedDeltaERDI > 0 ||
+                    wasLoadedFullERDI || wasLoadedFullAddons ||
                     wereChanges ||
-                    wasLoadedFullAddons || countLoadedAddons > 0;
+                    countLoadedDeltaERDI > 0 || countLoadedAddons > 0;
             refreshViews(needUpdateViews);
             log.info("====== Конец обновления справочников");
         }
@@ -370,7 +367,7 @@ public class ErdiRestClient {
         int count = 0;
         DeltaIdEntry curDeltaIdEntry = null;
         try{
-            List<DeltaIdEntry> deltaList = getLastDumpDeltaListByDate();
+            List<DeltaIdEntry> deltaList = getActualErdiDeltaEntries();
             count = deltaList.size();
 
             log.info("Получен список дельт: размер=" + count);
@@ -405,14 +402,14 @@ public class ErdiRestClient {
         return actualDate;
     }
 
-    public List<DeltaIdEntry> getLastDumpDeltaListByDate() throws ParseException {
+    public List<DeltaIdEntry> getActualErdiDeltaEntries() {
         Date dateUpdate = getActualContentDate();
         System.out.println("dateUpdate = " + dateUpdate);
 
         if (dateUpdate == null){
             return new ArrayList<>();
         }
-        return getDumpDeltaListByDate(dateUpdate);
+        return restClientUtils.getDumpDeltaListByDate(dateUpdate);
     }
 
     @Transactional
@@ -428,55 +425,7 @@ public class ErdiRestClient {
         return "Парамет " + name + "=" + value + " успешно обновлен";
     }
 
-    public List<DeltaIdEntry> getDumpDeltaListByDate(Date date) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-        String dateStr = dateFormat.format(date);
 
-        UriComponents uriComponents =
-                UriComponentsBuilder.fromUriString("{baseUrl}/getDumpDeltaListByDate/{dateStr}/")
-                        .build()
-                        .expand(baseUrl, dateStr);
-
-        System.out.println(uriComponents.toString());
-
-        ResponseEntity<RestResponseDeltaListByDate> entity;
-        try {
-            log.info("Получение списка дельт: {} по дате: {}", uriComponents.toString(), dateStr);
-            entity = registryAnonimyzersRestTemplate.exchange(
-                    uriComponents.toString(),
-                    HttpMethod.GET,
-                    null,
-                    RestResponseDeltaListByDate.class
-            );
-        }
-        catch (Throwable e){
-            log.error("Ошибка загрузки списка дельт по дате: {}", dateStr);
-            log.error("Текст ошибки", e);
-            return new ArrayList<>();
-        }
-
-        RestResponseDeltaListByDate resp = entity.getBody();
-        SimpleDateFormat deltaDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-
-        List<DeltaIdEntry> list = resp.response;
-        list = list.stream()
-                .filter(deltaIdEntry -> {
-                    try {
-                        Date deltaDate = deltaDateFormat.parse(deltaIdEntry.actualDate);
-                        if (deltaDate.before(date))
-                            return false;
-                    }
-                    catch (ParseException e) {
-                        e.printStackTrace();
-                        return false;
-                    }
-                    return deltaIdEntry.isEmpty.equals("0");
-                })
-                .collect(Collectors.toList());
-
-        return list;
-    }
 
     public void loadDeltaERDI(DeltaIdEntry deltaIdEntry) throws IOException, ExceptionErdiParser {
         stateDetails = "Загрузка дельты ЕРДИ: " + deltaIdEntry.deltaId;
@@ -563,7 +512,7 @@ public class ErdiRestClient {
             }
         }
         catch (ZipException ze){
-            if (checkDeltaErdiNotFound(path)){
+            if (restClientUtils.checkDeltaErdiNotFound(path)){
                 System.out.println("Проферка файла ЕРДИ: пустой контент! Корректная ситуация.");
                 /* ignore exception */
             }
@@ -584,24 +533,6 @@ public class ErdiRestClient {
             catch (Exception ee){}
         }
     }
-
-    private boolean checkDeltaErdiNotFound(Path path){
-        File f = path.toFile();
-        if (f.length() >= 2048)
-            return false;
-
-        try {
-            String content = new String(Files.readAllBytes(path));
-            ObjectMapper mapper = new ObjectMapper();
-            RestResponseStatusString restResponse = mapper.readValue(content, RestResponseStatusString.class);
-            return !StringUtils.isEmpty(restResponse.response) && restResponse.response.equalsIgnoreCase("Not found");
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
 
 }
 
