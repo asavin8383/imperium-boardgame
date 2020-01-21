@@ -140,8 +140,8 @@ public class ResultService {
 
         Optional<Screenshots> screenshotsOpt = resultsKafkaService.getScreenshot(arrangement.getId(), jobId);
         screenshotsOpt.ifPresent(screenshots -> {
-            if((analysisResult.getScreenshot() != null && analysisResult.getScreenshot().length > 0) ||
-                    (analysisResult.getEtalonScreenshot() != null && analysisResult.getEtalonScreenshot().length > 0)){
+            if((screenshots.getScreenshot() != null && screenshots.getScreenshot().length > 0) ||
+                    (screenshots.getEtalonScreenshot() != null && screenshots.getEtalonScreenshot().length > 0)){
                 ResultScreenShot resultScreenShot = resultScreenShotRepo.findById(jobId).orElseGet(ResultScreenShot::new);
                 resultScreenShot.setResult(result);
                 resultScreenShot.setScreenshot(screenshots.getScreenshot());
