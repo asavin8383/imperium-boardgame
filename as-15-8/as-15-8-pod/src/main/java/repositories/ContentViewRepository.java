@@ -32,4 +32,5 @@ public interface ContentViewRepository extends JpaRepository<ContentView, String
     @Query("select DISTINCT(c.violationName) from ContentView c")
     List<String> getDistinctViolationNames();
 
+
 }

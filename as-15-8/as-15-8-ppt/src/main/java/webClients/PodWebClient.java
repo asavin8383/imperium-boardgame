@@ -90,7 +90,11 @@ public class PodWebClient {
              LocalDate endTime,
              Boolean random,
              SortingDirection sortingDirection,
-             String sortingColumn
+             String sortingColumn,
+             Long visitorsCntRussiaMin,
+             Long visitorsCntRussiaMax,
+             Long visitorsCntWorldMin,
+             Long visitorsCntWorldMax
 
     ) {
         return webClient.get()
@@ -104,12 +108,17 @@ public class PodWebClient {
                         .queryParam("resourceTypes", resourceTypes == null ? null : String.join(",", resourceTypes))
                         .queryParam("resourceValue", resourceValue)
                         .queryParam("violationNames,", violationNames == null ? null : String.join(",", violationNames))
+
                         .queryParam("size", size)
                         .queryParam("startTime", startTime)
                         .queryParam("endTime", endTime)
                         .queryParam("random", random)
                         .queryParam("sortingDirection", sortingDirection)
                         .queryParam("sortingColumn", sortingColumn)
+                        .queryParam("visitorsCntRussiaMin", visitorsCntRussiaMin)
+                        .queryParam("visitorsCntRussiaMax", visitorsCntRussiaMax)
+                        .queryParam("visitorsCntWorldMin", visitorsCntWorldMin)
+                        .queryParam("visitorsCntWorldMax", visitorsCntWorldMax)
                         .build().toString())
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
