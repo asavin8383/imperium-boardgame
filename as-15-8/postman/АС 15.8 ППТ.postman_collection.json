@@ -1181,7 +1181,7 @@
 									"oauth2": [
 										{
 											"key": "accessToken",
-											"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqYWNrIiwicm9sZSI6IlJPTEVfT1BFUkFUT1IsUk9MRV9GT1JNQUxfVEFTSyxST0xFX01BTkFHRV9GT1JNQUxfVEFTSyxST0xFX01BTkFHRV9BUlJBTkdFTUVOVCxST0xFX1BSRVBBUkFUSU9OX1RSQUZGSUMsUk9MRV9ESUNUSU9OQVJZLFJPTEVfRk9STUFUSU9OX09GX1NDSEVEVUxFLFJPTEVfVklFV19SRVNVTFQsUk9MRV9TRU5EX0FDVF9CWV9IQU5ELFJPTEVfTUFOQUdFX1BTX1BBU0QsUk9MRV9NQU5BR0VfRVJESSxST0xFX1ZJRVdfUkVQT1JULFJPTEVfRk9STUFUSU9OX1BBUkFNX1JFUE9SVCxST0xFX01BTkFHRV9ET01BSU5TLFJPTEVfTUFOQUdFX01BTlVBTF9BUlJBTkdFTUVOVCIsIm1haWwiOiIiLCJ1c2VyX25hbWUiOiJqYWNrIiwic2NvcGUiOlsicmVhZCIsIndyaXRlIl0sImV4cCI6MTU3Nzc5OTY4NCwidXNlck5hbWUiOiJqYWNrIiwiYXV0aG9yaXRpZXMiOlsiUk9MRV9PUEVSQVRPUiIsIlJPTEVfUFJFUEFSQVRJT05fVFJBRkZJQyIsIlJPTEVfRk9STUFUSU9OX1BBUkFNX1JFUE9SVCIsIlJPTEVfTUFOQUdFX01BTlVBTF9BUlJBTkdFTUVOVCIsIlJPTEVfTUFOQUdFX1BTX1BBU0QiLCJST0xFX0ZPUk1BVElPTl9PRl9TQ0hFRFVMRSIsIlJPTEVfTUFOQUdFX0VSREkiLCJST0xFX0ZPUk1BTF9UQVNLIiwiUk9MRV9ESUNUSU9OQVJZIiwiUk9MRV9WSUVXX1JFUE9SVCIsIlJPTEVfTUFOQUdFX0ZPUk1BTF9UQVNLIiwiUk9MRV9NQU5BR0VfQVJSQU5HRU1FTlQiLCJST0xFX1ZJRVdfUkVTVUxUIiwiUk9MRV9TRU5EX0FDVF9CWV9IQU5EIiwiUk9MRV9NQU5BR0VfRE9NQUlOUyJdLCJqdGkiOiJiMmMxOWRlNS05ZmI3LTRjNDgtODA2Yi0yYTc0MzYxMDUwYzMiLCJjbGllbnRfaWQiOiJhcy0xNS04Iiwic2Vjb25kTmFtZSI6IiJ9.m9PWmkM-R6qVTx1yiw0ba1EXYn-P0FGZMbE3GxB0Q7gkFM2I4GynrFjfsStl252vQvPizGUyMyTwlMlbFrHfRLAiMV5WONuxjvkApB4oxDgtRLyZ6x6uCaercM8GyyOXWjFtCYcaDPSzI38-1MPzFM8QL385so3QUDOAhMKjKuE6cmhdCSMtTaXLfJ1LZwimB9e-tFpJ20-2c6i_8OueYUl5hah6cei5UXS6GJJGHYC9UaRhSkVTdgcZ_gx3NTPGcB5U-TWPi4wpRChTBMNZpxyXGg1do-oFmOxJLCoeTJyyddwNDp_gvufSxVb7zUbqk3qwnggnpxJ5-1QrORFd0w",
+											"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqYWNrIiwicm9sZSI6IlJPTEVfT1BFUkFUT1IsUk9MRV9GT1JNQUxfVEFTSyxST0xFX01BTkFHRV9GT1JNQUxfVEFTSyxST0xFX01BTkFHRV9BUlJBTkdFTUVOVCxST0xFX1BSRVBBUkFUSU9OX1RSQUZGSUMsUk9MRV9ESUNUSU9OQVJZLFJPTEVfRk9STUFUSU9OX09GX1NDSEVEVUxFLFJPTEVfVklFV19SRVNVTFQsUk9MRV9TRU5EX0FDVF9CWV9IQU5ELFJPTEVfTUFOQUdFX1BTX1BBU0QsUk9MRV9NQU5BR0VfRVJESSxST0xFX1ZJRVdfUkVQT1JULFJPTEVfRk9STUFUSU9OX1BBUkFNX1JFUE9SVCxST0xFX01BTkFHRV9ET01BSU5TLFJPTEVfTUFOQUdFX01BTlVBTF9BUlJBTkdFTUVOVCIsIm1haWwiOiIiLCJ1c2VyX25hbWUiOiJqYWNrIiwic2NvcGUiOlsicmVhZCIsIndyaXRlIl0sImV4cCI6MTU3OTY3NjM5MCwidXNlck5hbWUiOiJqYWNrIiwiYXV0aG9yaXRpZXMiOlsiUk9MRV9PUEVSQVRPUiIsIlJPTEVfUFJFUEFSQVRJT05fVFJBRkZJQyIsIlJPTEVfRk9STUFUSU9OX1BBUkFNX1JFUE9SVCIsIlJPTEVfTUFOQUdFX01BTlVBTF9BUlJBTkdFTUVOVCIsIlJPTEVfTUFOQUdFX1BTX1BBU0QiLCJST0xFX0ZPUk1BVElPTl9PRl9TQ0hFRFVMRSIsIlJPTEVfTUFOQUdFX0VSREkiLCJST0xFX0ZPUk1BTF9UQVNLIiwiUk9MRV9ESUNUSU9OQVJZIiwiUk9MRV9WSUVXX1JFUE9SVCIsIlJPTEVfTUFOQUdFX0ZPUk1BTF9UQVNLIiwiUk9MRV9NQU5BR0VfQVJSQU5HRU1FTlQiLCJST0xFX1ZJRVdfUkVTVUxUIiwiUk9MRV9TRU5EX0FDVF9CWV9IQU5EIiwiUk9MRV9NQU5BR0VfRE9NQUlOUyJdLCJqdGkiOiI2OWYxNDM3Ni03ZDI0LTQ1N2QtODIxNC0yMzRkZGJkZTVjYjAiLCJjbGllbnRfaWQiOiJhcy0xNS04Iiwic2Vjb25kTmFtZSI6IiJ9.jF48YMjmGfh6tV-xlKrFdMcJMLIeza84xGHPRx_qbpdldJLpr5FDL52iIqICZAFqrarjcz5wwSY9Syvyrf8A02FmTxdHCLOOBRlADVvaL50naGv9klMnzEg5ftNY7y11Z2sS7fUUsFwgdyTXcMm5EO7Lgxglibi1cAD8Lluj3HTAEIdmaf1da4RH3hh2KqwyFgGforp_U3cvJ8OXpebMpf_wZN6HaGFz4bVdg1hWmPhZ--OrooSciyQLdicmDTCbncVn4CzSfRwfzGNgwmyeYInZyTob_W-4eIkuJ60_Nj5eNzsKdK_PO79XDOM0iKbrgefVmCyKK3TOvB28AEJiNw",
 											"type": "string"
 										},
 										{
@@ -1199,7 +1199,7 @@
 								"method": "PUT",
 								"header": [],
 								"url": {
-									"raw": "{{url}}/traffic/unit/erdi/321/addFromPod?size=10&sortingDirection=DESC&startTime=2014-07-02&endTime=2014-07-02&random=true",
+									"raw": "{{url}}/traffic/unit/erdi/135/addFromPod?",
 									"host": [
 										"{{url}}"
 									],
@@ -1207,7 +1207,7 @@
 										"traffic",
 										"unit",
 										"erdi",
-										"321",
+										"135",
 										"addFromPod"
 									],
 									"query": [
@@ -1218,11 +1218,13 @@
 										},
 										{
 											"key": "size",
-											"value": "10"
+											"value": "2",
+											"disabled": true
 										},
 										{
 											"key": "sortingDirection",
-											"value": "DESC"
+											"value": "DESC",
+											"disabled": true
 										},
 										{
 											"key": "sortingColumn",
@@ -1231,7 +1233,8 @@
 										},
 										{
 											"key": "startTime",
-											"value": "2014-07-02"
+											"value": "2014-07-02",
+											"disabled": true
 										},
 										{
 											"key": "categoryName",
@@ -1240,11 +1243,33 @@
 										},
 										{
 											"key": "endTime",
-											"value": "2014-07-02"
+											"value": "2014-07-02",
+											"disabled": true
 										},
 										{
 											"key": "random",
-											"value": "true"
+											"value": "true",
+											"disabled": true
+										},
+										{
+											"key": "visitorsCntRussiaMin",
+											"value": "992500",
+											"disabled": true
+										},
+										{
+											"key": "visitorsCntRussiaMax",
+											"value": "993000",
+											"disabled": true
+										},
+										{
+											"key": "visitorsCntWorldMin",
+											"value": "2800000",
+											"disabled": true
+										},
+										{
+											"key": "visitorsCntWorldMax",
+											"value": "2800000",
+											"disabled": true
 										}
 									]
 								}
@@ -3466,25 +3491,25 @@
 	],
 	"variable": [
 		{
-			"id": "fd608c87-f97d-4a1a-8286-1e843dc53937",
+			"id": "93af8be0-29ac-4ef4-8b8c-922ee7906e0b",
 			"key": "url",
 			"value": "http://localhost:15800",
 			"type": "string"
 		},
 		{
-			"id": "71eeaf7e-268f-4342-a03a-375ca3283e77",
+			"id": "d4e76b73-14e7-4e37-993f-aad8ce84bec8",
 			"key": "oper_token",
 			"value": "",
 			"type": "string"
 		},
 		{
-			"id": "12e9f04f-66db-4c0e-bba4-2710db91df67",
+			"id": "94915a50-4460-49c0-9fa0-542258bb2c57",
 			"key": "test_url",
 			"value": "http://192.168.5.253:15800",
 			"type": "string"
 		},
 		{
-			"id": "83eb7ee9-5bcf-45aa-b757-3b71fd7e0345",
+			"id": "2a4e00ed-a93e-4a60-ae4d-e419d2157bbf",
 			"key": "admin_token",
 			"value": "",
 			"type": "string"
