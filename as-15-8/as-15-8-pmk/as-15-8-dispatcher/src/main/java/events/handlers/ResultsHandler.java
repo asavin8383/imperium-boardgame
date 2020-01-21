@@ -44,28 +44,6 @@ public class ResultsHandler {
     @StreamListener(DispatcherChannels.INPUT_RESULTS)
     public void processResults(KStream<CheckUnitKey, CheckUnitResult> resultsStream){
         resultsStream
-           .peek((key, result) ->
-                log.info("\n   ---->>> Принято сообщение с анализом результатов проверки: " +
-                    "мероприятие: " + key.getArrangementId() + ", " +
-                    key.getJobId() + ", " + result.getCheckUnit().getValue() + ", результат: " + result.getCheckResult()))
-            .mapValues(result -> {
-                result.setEndTime(new Date());
-                result.setCheckResult(checkErdiStatus(result.getCheckUnit().getContentId(), result.getCheckResult()));
-                if(result instanceof AnalysisResult){
-                    ((AnalysisResult)result).setScreenshot(null);
-                    ((AnalysisResult)result).setEtalonScreenshot(null);
-                }
-                return result;
-            })
-            .groupByKey()
-            .reduce((oldMessage, newMessage) -> newMessage,
-                Materialized.<CheckUnitKey, CheckUnitResult, KeyValueStore<Bytes, byte[]>>
-                    as(resultsTableName)
-                    .withKeySerde(new JsonSerde<>(CheckUnitKey.class))
-                    .withValueSerde(new JsonSerde<>(CheckUnitResult.class))
-            );
-
-        resultsStream
             .filter((checkUnitKey, checkUnitResult) -> checkUnitResult instanceof AnalysisResult)
             .mapValues(checkUnitResult ->
                 new Screenshots(
@@ -89,6 +67,28 @@ public class ResultsHandler {
                         as(resultsCountTableName)
                         .withKeySerde(Serdes.Long())
                         .withValueSerde(Serdes.Long())
+            );
+
+        resultsStream
+            .peek((key, result) ->
+                    log.info("\n   ---->>> Принято сообщение с анализом результатов проверки: " +
+                            "мероприятие: " + key.getArrangementId() + ", " +
+                            key.getJobId() + ", " + result.getCheckUnit().getValue() + ", результат: " + result.getCheckResult()))
+            .mapValues(result -> {
+                result.setEndTime(new Date());
+                result.setCheckResult(checkErdiStatus(result.getCheckUnit().getContentId(), result.getCheckResult()));
+                if(result instanceof AnalysisResult){
+                    ((AnalysisResult)result).setScreenshot(null);
+                    ((AnalysisResult)result).setEtalonScreenshot(null);
+                }
+                return result;
+            })
+            .groupByKey()
+            .reduce((oldMessage, newMessage) -> newMessage,
+                    Materialized.<CheckUnitKey, CheckUnitResult, KeyValueStore<Bytes, byte[]>>
+                            as(resultsTableName)
+                            .withKeySerde(new JsonSerde<>(CheckUnitKey.class))
+                            .withValueSerde(new JsonSerde<>(CheckUnitResult.class))
             );
     }
 
