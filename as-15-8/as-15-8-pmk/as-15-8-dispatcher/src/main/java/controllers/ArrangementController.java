@@ -29,6 +29,12 @@ public class ArrangementController {
     private final ResultService resultService;
     private final ResultsKafkaService resultsKafkaService;
 
+    @PostMapping("/save")
+    @PreAuthorize("hasAnyRole('ROLE_VIEW_RESULT')")
+    public void saveResults(@RequestParam Long arrangementId) {
+        resultService.saveArrangementResults(arrangementId);
+    }
+
     @PostMapping
     public ResponseEntity<?> postUserResultFromPPM(@RequestBody Optional<ArrangementToExecution> arrangementToExecution) {
         arrangementToExecution.orElseThrow(()-> new AS_15_8_DispatcherException("Arrangement полученный из ППМ is null"));

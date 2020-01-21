@@ -21,6 +21,7 @@ import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.kafka.support.serializer.JsonSerde;
 import org.springframework.stereotype.Service;
 import restapi.ErdiChecker;
+import services.ResultService;
 
 import java.util.Date;
 
@@ -40,6 +41,7 @@ public class ResultsHandler {
     private String resultsCountTableName;
 
     private final ErdiChecker erdiChecker;
+    private final ResultService resultService;
 
     @StreamListener(DispatcherChannels.INPUT_RESULTS)
     public void processResults(KStream<CheckUnitKey, CheckUnitResult> resultsStream){
@@ -74,13 +76,17 @@ public class ResultsHandler {
                     log.info("\n   ---->>> Принято сообщение с анализом результатов проверки: " +
                             "мероприятие: " + key.getArrangementId() + ", " +
                             key.getJobId() + ", " + result.getCheckUnit().getValue() + ", результат: " + result.getCheckResult()))
-            .mapValues(result -> {
+            .mapValues((key, result) -> {
                 result.setEndTime(new Date());
                 result.setCheckResult(checkErdiStatus(result.getCheckUnit().getContentId(), result.getCheckResult()));
                 if(result instanceof AnalysisResult){
                     ((AnalysisResult)result).setScreenshot(null);
                     ((AnalysisResult)result).setEtalonScreenshot(null);
                 }
+
+                if(resultService.isArrangementFinished(key.getArrangementId()))
+                    resultService.saveArrangementResults(key.getArrangementId());
+
                 return result;
             })
             .groupByKey()
@@ -97,5 +103,9 @@ public class ResultsHandler {
             return CheckUnitJobResult.EXCLUDED;
         else
             return status;
+    }
+
+    private void saveArrangementIfFinished(Long arrangementId) {
+
     }
 }
