@@ -30,5 +30,6 @@
     <include file="data/changelog/pod.0011.domains.xml"/>
     <include file="data/changelog/pod.0012.content_view.xml" />
     <include file="data/changelog/pod.0013.domains_domain_mask_id_unique.xml"/>
+    <include file="data/changelog/pod.0014.content_view_visitors.xml"/>
 
 </databaseChangeLog>
