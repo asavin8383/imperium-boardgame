@@ -110,7 +110,6 @@ public class RunScheduleService {
 
     private CheckUnitJob createCheckUnitJob(ScheduleCheckUnit scheduleCheckUnit) {
         CheckUnitJob checkUnitJob = new CheckUnitJob();
-        checkUnitJob.setArrangementId(scheduleCheckUnit.getArrangement().getId());
         checkUnitJob.setAccessTool(scheduleCheckUnit.getArrangement().getAccessTool());
         checkUnitJob.setCheckUnit(new CheckUnit(scheduleCheckUnit.getErdiId(), scheduleCheckUnit.getCheckUnitType(), scheduleCheckUnit.getCheckUnitValue()));
         return checkUnitJob;

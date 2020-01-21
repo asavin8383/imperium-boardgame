@@ -49,6 +49,10 @@ public class CheckUnitJobHandler {
     public void consumeCheckUnitJob(Message<CheckUnitJob> message){
         Integer partitionId = message.getHeaders().get(KafkaHeaders.RECEIVED_PARTITION_ID, Integer.class);
         CheckUnitKey key = message.getHeaders().get(KafkaHeaders.RECEIVED_MESSAGE_KEY, CheckUnitKey.class);
+        if(key == null){
+            log.error("Ошибка! Пустой ключ у сообщения: " + message.getPayload().toString());
+            return;
+        }
         log.info("\n   ---->>> Принято задание: " + message.getPayload().toString() +
                 ", key: " + key +
                 ", partition: " + partitionId +
@@ -58,7 +62,7 @@ public class CheckUnitJobHandler {
 
         try {
             CheckUnitJob job = message.getPayload();
-            verificationName = "jobID = " + job.getJobID() +
+            verificationName = "jobID = " + key.getJobId() +
                     " accessTool = " + job.getAccessTool() +
                     " checkUnit = " + job.getCheckUnit().getValue();
 
@@ -70,7 +74,7 @@ public class CheckUnitJobHandler {
 
             if (service instanceof RobotsServiceImpl && getTimeout() >= 0){
                 executionJobResult = CompletableFuture
-                        .supplyAsync(() -> service.run(job))
+                        .supplyAsync(() -> service.run(key.getJobId(), job))
                         .applyToEither(timeoutAfter(getTimeout(), TimeUnit.SECONDS), (result) -> result)
                         .exceptionally(throwable -> {
                             service.stop();
@@ -79,7 +83,7 @@ public class CheckUnitJobHandler {
                 .join();
             }
             else {
-                executionJobResult = service.run(job);
+                executionJobResult = service.run(key.getJobId(), job);
             }
 
             sendExecutionResult(executionJobResult, key, partitionId, startTime);
@@ -96,7 +100,7 @@ public class CheckUnitJobHandler {
             }
 
             if (te instanceof Timeout_ExecutionException){
-                log.info("Проверка {}, остановлена по таймауту {} секунд",  message.getPayload().getJobID(), getTimeout());
+                log.info("Проверка {}, остановлена по таймауту {} секунд",  key.getJobId(), getTimeout());
             }
             else if(te instanceof Cancel_ExecutionException) {
                 log.info("Выполнение проверки остановлено: " + verificationName);
@@ -108,7 +112,7 @@ public class CheckUnitJobHandler {
                 log.error("Выполнение проверки завершено с ошибкой: "+verificationName, te);
             }
             else {
-                log.error("Ошибка при выполнении задания на проверку запрещенного ресурса: "+message.getPayload().getJobID(), te);
+                log.error("Ошибка при выполнении задания на проверку запрещенного ресурса: " + key.getJobId(), te);
             }
         }
     }

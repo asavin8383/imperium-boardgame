@@ -12,12 +12,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CheckUnitJob {
 
-	/** Идентификатор задания */
-	private Long jobID;
-
-	/** Идентификатор мероприятия*/
-	private Long arrangementId;
-
 	/** ПС/ПАСД */
 	private String accessTool;
 	

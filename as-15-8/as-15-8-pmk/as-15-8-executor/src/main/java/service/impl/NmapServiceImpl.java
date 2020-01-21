@@ -50,11 +50,11 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
     }
 
     @Override
-    public ExecutionJobResult run(CheckUnitJob checkUnitJob) throws ExecutionException {
+    public ExecutionJobResult run(Long jobId, CheckUnitJob checkUnitJob) throws ExecutionException {
         try {
             checkJob(checkUnitJob);
             ExecutorProperties.NmapProperties nmapProperties = executorProperties.getNmap();
-            String verificationName = "jobID = " + checkUnitJob.getJobID() +
+            String verificationName = "jobID = " + jobId +
                     " accessTool = " + checkUnitJob.getAccessTool() +
                     " checkUnit = " + checkUnitJob.getCheckUnit().getValue();
            /* if(!this.isRunning)
@@ -62,7 +62,7 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
             log.info("Запуск проверки nmap: " + verificationName);
 
             ProxychainsConfigurator proxychainsConfigurator = null;
-            Path outputFile = Files.createTempFile("job_" + checkUnitJob.getJobID() + "_output", ".xml");
+            Path outputFile = Files.createTempFile("job_" + jobId + "_output", ".xml");
             try {
                 if(nmapProperties.getUseProxy())
                     proxychainsConfigurator = createProxychainsConfigurator(checkUnitJob.getAccessTool());
@@ -84,9 +84,9 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
 
                 ExecutionResults results = baseScan.executeScan();
 
-                log.info("Job: " + checkUnitJob.getJobID() + ". Nmap запущен командой: " + results.getExecutedCommand());
-                log.info("Job: " + checkUnitJob.getJobID() + ". Ответ nmap: " + results.getOutput());
-                log.info("Job: " + checkUnitJob.getJobID() + ". Результат nmap: " + new String(Files.readAllBytes(outputFile)));
+                log.info("Job: " + jobId + ". Nmap запущен командой: " + results.getExecutedCommand());
+                log.info("Job: " + jobId + ". Ответ nmap: " + results.getOutput());
+                log.info("Job: " + jobId + ". Результат nmap: " + new String(Files.readAllBytes(outputFile)));
 
                 NMapRun nmapRun = parseNmapResult(outputFile);
 
@@ -118,13 +118,13 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
                     proxychainsConfigurator.close();
                 if(outputFile != null && outputFile.toFile().exists())
                     if(!outputFile.toFile().delete())
-                        log.warn("Ошибка удаления файла с результатом работы nmap. Job: "+checkUnitJob.getJobID());
+                        log.warn("Ошибка удаления файла с результатом работы nmap. Job: " + jobId);
             }
         } catch (Exception ex){
             if(ex instanceof ExecutionException)
                 throw (ExecutionException) ex;
             else
-                throw new ExecutionException("Job: " + checkUnitJob.getJobID() + ". Ошибка при проверке запрещенных ресуросов в nmap", ex);
+                throw new ExecutionException("Job: " + jobId + ". Ошибка при проверке запрещенных ресуросов в nmap", ex);
         }
     }
 

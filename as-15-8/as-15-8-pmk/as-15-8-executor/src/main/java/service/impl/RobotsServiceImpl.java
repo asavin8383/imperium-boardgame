@@ -12,7 +12,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.kafka.listener.AbstractMessageListenerContainer;
 import org.springframework.stereotype.Service;
 import robots.Robot;
-import robots.exceptions.Cancel_ExecutionException;
 import robots.exceptions.Captcha_ExecutionException;
 import robots.exceptions.ExecutionException;
 import robots.factory.RobotsFactory;
@@ -52,9 +51,9 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
     }
 
 	@Override
-	public ExecutionJobResult run(CheckUnitJob checkUnitJob) throws ExecutionException {
+	public ExecutionJobResult run(Long jobId, CheckUnitJob checkUnitJob) throws ExecutionException {
 		try {
-			String robotName = "jobID = " + checkUnitJob.getJobID() +
+			String robotName = "jobID = " + jobId +
                     " accessTool = " + checkUnitJob.getAccessTool() +
                     " checkUnit = " + checkUnitJob.getCheckUnit().getValue();
 			/*if(!this.isRunning)
