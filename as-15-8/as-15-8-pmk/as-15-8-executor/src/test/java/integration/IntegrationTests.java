@@ -38,7 +38,6 @@ public class IntegrationTests {
 	public void testPSRobot() throws IOException {
 
 		CheckUnitJob checkUnitJob = new CheckUnitJob();
-		checkUnitJob.setJobID(1L);
 		checkUnitJob.setAccessTool("GOOGLE");
 
 		checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.URL, "https://www.google.ru"));
@@ -56,7 +55,6 @@ public class IntegrationTests {
 
 		CheckUnitJob checkUnitJob = new CheckUnitJob();
 		checkUnitJob.setAccessTool("vpn");
-		checkUnitJob.setJobID(1L);
 		checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.IP_V4, "192.167.1.1"));
 
 		Message<CheckUnitJob> message = MessageBuilder

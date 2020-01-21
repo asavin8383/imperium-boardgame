@@ -4,7 +4,6 @@ import checkUnits.CheckUnit;
 import checkUnits.CheckUnitJob;
 import checkUnits.CheckUnitType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import enums.AccessToolUnit;
 import execution.ExecutionJobResult;
 import lombok.RequiredArgsConstructor;
 import org.junit.Test;
@@ -28,13 +27,12 @@ public class TestNMap {
     public void testNMap() {
         CheckUnitJob checkUnitJob = new CheckUnitJob();
         checkUnitJob.setAccessTool("vpn");
-        checkUnitJob.setJobID(1L);
         checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.IP_V4, "174.138.5.46"));
 
         try {
             ExecutionJobResult executionJobResult = checkUnitVerificationServiceFactory
                     .getService(checkUnitJob)
-                    .run(checkUnitJob);
+                    .run(1L, checkUnitJob);
 
             ObjectMapper mapper = new ObjectMapper();
             System.out.println(mapper.writeValueAsString(executionJobResult));

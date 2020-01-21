@@ -45,7 +45,6 @@ public class SendJobsToKafka {
 
         for(long i = 10000; i<10001; i++) {
             CheckUnitJob checkUnitJob = new CheckUnitJob();
-            checkUnitJob.setJobID(1L);
             checkUnitJob.setAccessTool("kaspersky");
 
             checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.IP_V4, "174.138.5.46"));
@@ -65,7 +64,6 @@ public class SendJobsToKafka {
 
         for(long i = 10000; i<10001; i++) {
             CheckUnitJob checkUnitJob = new CheckUnitJob();
-            checkUnitJob.setJobID(1L);
             checkUnitJob.setAccessTool("kaspersky");
 
             checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.IP_V4_SUBNET, "174.138.0.0/17"));

@@ -34,14 +34,13 @@ public class TestHolaJobExecution {
 	public void test() throws ExecutionException, IOException {
 
 		CheckUnitJob checkUnitJob = new CheckUnitJob();
-		checkUnitJob.setJobID(1L);
 		checkUnitJob.setAccessTool("hola");
 
 		checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.URL, "myip.ru"));
 
 		ExecutionJobResult executionJobResult = checkUnitVerificationServiceFactory
 				.getService(checkUnitJob)
-				.run(checkUnitJob);
+				.run(1L, checkUnitJob);
 
 		ByteArrayInputStream bis = new ByteArrayInputStream(executionJobResult.getScreenshot());
 		BufferedImage bImage2 = ImageIO.read(bis);

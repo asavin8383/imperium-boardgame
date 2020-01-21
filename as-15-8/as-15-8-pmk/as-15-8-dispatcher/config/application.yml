@@ -11,6 +11,10 @@ spring:
           nativeDecoding: true
         results_table:
           destination: results_table
+        screenshots_table:
+          destination: screenshots_table
+        results_count_table:
+          destination: results_count_table
         springCloudBusInput:
           destination: bus_config_input
           group: dispatcher:${spring.cloud.client.ip-address}

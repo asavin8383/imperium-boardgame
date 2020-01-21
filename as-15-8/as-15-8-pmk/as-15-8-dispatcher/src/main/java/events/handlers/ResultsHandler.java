@@ -1,5 +1,6 @@
 package events.handlers;
 
+import analysis.AnalysisResult;
 import analysis.CheckUnitResult;
 import checkUnits.CheckUnitKey;
 import enums.CheckUnitJobResult;
@@ -7,6 +8,8 @@ import enums.ErdiStatus;
 import events.DispatcherChannels;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import model.Screenshots;
+import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.Materialized;
@@ -30,6 +33,12 @@ public class ResultsHandler {
     @Value("${spring.cloud.stream.bindings.results_table.destination}")
     private String resultsTableName;
 
+    @Value("${spring.cloud.stream.bindings.screenshots_table.destination}")
+    private String screenshotsTableName;
+
+    @Value("${spring.cloud.stream.bindings.results_count_table.destination}")
+    private String resultsCountTableName;
+
     private final ErdiChecker erdiChecker;
 
     @StreamListener(DispatcherChannels.INPUT_RESULTS)
@@ -45,11 +54,45 @@ public class ResultsHandler {
                 return result;
             })
             .groupByKey()
-            .reduce((oldMessage, newMessage) -> newMessage,
-                    Materialized.<CheckUnitKey, CheckUnitResult, KeyValueStore<Bytes, byte[]>>
-                        as(resultsTableName)
+            .reduce((oldMessage, newMessage) -> {
+                    if(newMessage instanceof AnalysisResult){
+                        AnalysisResult analysisResult = (AnalysisResult) newMessage;
+                        analysisResult.setScreenshot(null);
+                        analysisResult.setEtalonScreenshot(null);
+                        return analysisResult;
+                    }
+                    return newMessage;
+                },
+                Materialized.<CheckUnitKey, CheckUnitResult, KeyValueStore<Bytes, byte[]>>
+                    as(resultsTableName)
+                    .withKeySerde(new JsonSerde<>(CheckUnitKey.class))
+                    .withValueSerde(new JsonSerde<>(CheckUnitResult.class))
+            );
+
+        resultsStream
+            .filter((checkUnitKey, checkUnitResult) -> checkUnitResult instanceof AnalysisResult)
+            .mapValues(checkUnitResult ->
+                new Screenshots(
+                    ((AnalysisResult) checkUnitResult).getScreenshot(),
+                    ((AnalysisResult) checkUnitResult).getEtalonScreenshot()
+                )
+            )
+            .groupByKey()
+            .reduce(
+                (oldScreen, newScreen) -> newScreen,
+                Materialized.<CheckUnitKey, Screenshots, KeyValueStore<Bytes, byte[]>>
+                        as(screenshotsTableName)
                         .withKeySerde(new JsonSerde<>(CheckUnitKey.class))
-                        .withValueSerde(new JsonSerde<>(CheckUnitResult.class))
+                        .withValueSerde(new JsonSerde<>(Screenshots.class))
+            );
+
+        resultsStream
+            .groupBy((checkUnitKey, checkUnitResult) -> checkUnitKey.getArrangementId())
+            .count(
+                Materialized.<Long, Long, KeyValueStore<Bytes, byte[]>>
+                        as(resultsCountTableName)
+                        .withKeySerde(Serdes.Long())
+                        .withValueSerde(Serdes.Long())
             );
     }
 

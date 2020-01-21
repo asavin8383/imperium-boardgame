@@ -15,8 +15,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import robots.exceptions.ExecutionException;
 import service.CheckUnitVerificationServiceFactory;
 
-import java.io.IOException;
-
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {ApplicationConfiguration.class})
 @PropertySource("file:config/application.yml")
@@ -26,10 +24,9 @@ public class TestJobExecution {
 	private CheckUnitVerificationServiceFactory checkUnitVerificationServiceFactory;
 
 	@Test
-	public void test() throws ExecutionException, IOException {
+	public void test() throws ExecutionException {
 		
 		CheckUnitJob checkUnitJob = new CheckUnitJob();
-		checkUnitJob.setJobID(1L);
 		checkUnitJob.setAccessTool("google");
 
 		checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.DOMAIN, "club-vullcan.com"));
@@ -37,7 +34,7 @@ public class TestJobExecution {
 
 		ExecutionJobResult executionJobResult = checkUnitVerificationServiceFactory
 				.getService(checkUnitJob)
-				.run(checkUnitJob);
+				.run(1L, checkUnitJob);
 
 //		Files.write(Paths.get("output.jpg"), executionJobResult.getScreenshot(),
 //			StandardOpenOption.CREATE, StandardOpenOption.APPEND);
