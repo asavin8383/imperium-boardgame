@@ -7,12 +7,10 @@ import arrangement.ArrangementStatusNotification;
 import checkUnits.CheckUnitKey;
 import enums.ArrangementEvents;
 import enums.CheckUnitJobResult;
+import exceptions.AS_15_8_DispatcherException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import model.Arrangement;
-import model.DetailResult;
-import model.Result;
-import model.ResultScreenShot;
+import model.*;
 import model.enums.ArrangementStatus;
 import org.apache.kafka.streams.KeyValue;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +23,7 @@ import restapi.ArrangementStatusProducer;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -42,21 +41,30 @@ public class ResultService {
     public void saveCompletionArrangements() {
         try{
             arrangementRepo
-                .findRunning()
-                .stream()
-                .filter(arrangement -> {
-                    long count = resultsKafkaService.getResultsCount(arrangement.getId());
-                    if (count != 0 && arrangement.getCheckUnitsCount() >= count) {
-                        arrangement.setStatus(ArrangementStatus.UPLOADING);
-                        arrangementRepo.save(arrangement);
-                        return true;
-                    }
-                    return false;
-                })
-                .forEach(this::saveArrangementResults);
+                    .findRunning()
+                    .stream()
+                    .filter(arrangement -> {
+                        long count = resultsKafkaService.getResultsCount(arrangement.getId());
+                        if (count != 0 && arrangement.getCheckUnitsCount() <= count) {
+                            arrangement.setStatus(ArrangementStatus.UPLOADING);
+                            arrangementRepo.save(arrangement);
+                            return true;
+                        }
+                        return false;
+                    })
+                    .forEach(this::saveArrangementResults);
         } catch (Exception ex){
             log.error("Ошибка при сохранении результатов мероприятий", ex);
         }
+    }
+
+    public void saveArrangementResults(Long arrangementId){
+        Arrangement arrangement = arrangementRepo
+                .findById(arrangementId)
+                .orElseThrow((() -> new AS_15_8_DispatcherException("Ошибка! Мероприятие для выгрузки не найдено в БД по id: " + arrangementId)));
+        arrangement.setStatus(ArrangementStatus.UPLOADING);
+        arrangementRepo.save(arrangement);
+        saveArrangementResults(arrangement);
     }
 
     private void saveArrangementResults(Arrangement arrangement) {
@@ -130,14 +138,17 @@ public class ResultService {
         DetailResult detailResult = service.getOrCreate(result, analysisResult);
         result.setDetailResult(detailResult);
 
-        if((analysisResult.getScreenshot() != null && analysisResult.getScreenshot().length > 0) ||
-                (analysisResult.getEtalonScreenshot() != null && analysisResult.getEtalonScreenshot().length > 0)){
-            ResultScreenShot resultScreenShot = resultScreenShotRepo.findById(jobId).orElseGet(ResultScreenShot::new);
-            resultScreenShot.setResult(result);
-            resultScreenShot.setScreenshot(analysisResult.getScreenshot());
-            resultScreenShot.setEtalonScreenshot(analysisResult.getEtalonScreenshot());
-            result.setResultScreenShot(resultScreenShot);
-        }
+        Optional<Screenshots> screenshotsOpt = resultsKafkaService.getScreenshot(arrangement.getId(), jobId);
+        screenshotsOpt.ifPresent(screenshots -> {
+            if((screenshots.getScreenshot() != null && screenshots.getScreenshot().length > 0) ||
+                    (screenshots.getEtalonScreenshot() != null && screenshots.getEtalonScreenshot().length > 0)){
+                ResultScreenShot resultScreenShot = resultScreenShotRepo.findById(jobId).orElseGet(ResultScreenShot::new);
+                resultScreenShot.setResult(result);
+                resultScreenShot.setScreenshot(screenshots.getScreenshot());
+                resultScreenShot.setEtalonScreenshot(screenshots.getEtalonScreenshot());
+                result.setResultScreenShot(resultScreenShot);
+            }
+        });
         resultRepo.save(result);
     }
 

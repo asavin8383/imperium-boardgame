@@ -17,6 +17,7 @@ import services.ResultService;
 import services.ResultsKafkaService;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @PreAuthorize("hasRole('ROLE_SYSTEM')")
@@ -28,6 +29,12 @@ public class ArrangementController {
     private final ArrangementRepo arrangementRepo;
     private final ResultService resultService;
     private final ResultsKafkaService resultsKafkaService;
+
+    @PostMapping("/save")
+    @PreAuthorize("hasAnyRole('ROLE_VIEW_RESULT')")
+    public void saveResults(@RequestParam Long arrangementId) {
+        CompletableFuture.runAsync(() -> resultService.saveArrangementResults(arrangementId));
+    }
 
     @PostMapping
     public ResponseEntity<?> postUserResultFromPPM(@RequestBody Optional<ArrangementToExecution> arrangementToExecution) {

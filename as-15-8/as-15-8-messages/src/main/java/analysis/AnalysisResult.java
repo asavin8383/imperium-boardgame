@@ -1,9 +1,7 @@
 package analysis;
 
-import checkUnits.CheckUnit;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import enums.CheckUnitJobResult;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * Результат анализа результатов выполнения задания на проверку запрещенного ресурса
@@ -11,6 +9,7 @@ import lombok.Data;
  */
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 public abstract class AnalysisResult extends CheckUnitResult {
 
     /**Скриншот полученной при проверке страницы*/

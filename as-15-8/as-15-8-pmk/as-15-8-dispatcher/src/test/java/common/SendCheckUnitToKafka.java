@@ -104,7 +104,6 @@ public class SendCheckUnitToKafka {
 		jdbcTemplate.queryForList(sql)
 				.forEach(result -> {
 					CheckUnitJob checkUnitJob = new CheckUnitJob();
-					//checkUnitJob.setJobID(1L);
 					checkUnitJob.setAccessTool("express");
 
 					checkUnitJob.setCheckUnit(new CheckUnit(
