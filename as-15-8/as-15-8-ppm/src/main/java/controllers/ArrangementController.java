@@ -110,6 +110,7 @@ public class ArrangementController {
         if (arrangement == null){
             return ResponseEntity.noContent().build();
         }
+        //TODO Наоборот!!!
         //Меняем статус для чек-юнитов, остановленных на диспетчере
         scheduleCheckUnitRepo.changeStatus(
             arrangement,
