@@ -20,7 +20,6 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 @RestController
-@PreAuthorize("hasRole('ROLE_SYSTEM')")
 @RequestMapping(path = "/arrangement", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Slf4j
@@ -37,6 +36,7 @@ public class ArrangementController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ROLE_SYSTEM')")
     public ResponseEntity<?> postUserResultFromPPM(@RequestBody Optional<ArrangementToExecution> arrangementToExecution) {
         arrangementToExecution.orElseThrow(()-> new AS_15_8_DispatcherException("Arrangement полученный из ППМ is null"));
         try {
@@ -51,7 +51,7 @@ public class ArrangementController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_VIEW_RESULT','ROLE_SYSTEM')")
+    @PreAuthorize("hasAnyRole('ROLE_VIEW_RESULT')")
     @GetMapping(path = "/completion")
     public long getArrangementCompletion(@RequestParam("id") Optional<Arrangement> arrangement){
         return arrangement
