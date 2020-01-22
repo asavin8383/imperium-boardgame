@@ -4,8 +4,10 @@ import checkUnits.CheckUnitType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Data;
+import model.enums.ScheduleCheckUnitStatus;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Objects;
@@ -33,6 +35,14 @@ public class ScheduleCheckUnit implements Serializable, Comparable<ScheduleCheck
 
     @Column(nullable=false)
     private String checkUnitValue;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable=false)
+    private ScheduleCheckUnitStatus status;
+
+    public ScheduleCheckUnit(){
+        this.status = ScheduleCheckUnitStatus.NEW;
+    }
 
     @Override
     public int compareTo(ScheduleCheckUnit o) {
