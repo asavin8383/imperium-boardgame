@@ -71,7 +71,7 @@ public class RestTest
     @Test
     public void testDeltaAddonsList(){
         List<DeltaAddonEntry> list = addonRestClient.readDeltaList();
-        log.debug("DeltaAddonEntry list = " + list);
+        log.info("DeltaAddonEntry list = " + list);
     }
 
     @Test
