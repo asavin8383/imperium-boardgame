@@ -62,7 +62,7 @@ public class JobsService {
         }
     }
 
-    @Scheduled(cron = "0 0 0 ? * * *")
+    @Scheduled(cron = "0 0 0 * * ?")
     void clearStoppedJobs() {
         stoppedJobs.clear();
     }
