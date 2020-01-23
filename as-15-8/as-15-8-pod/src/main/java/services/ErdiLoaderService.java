@@ -46,6 +46,9 @@ public class ErdiLoaderService {
 
     private static final String actualDateFormat = "yyyy-MM-dd'T'HH:mm:ss";
 
+    // todo- удалить
+    private static List<Date> timeLabels = new ArrayList<>();
+
 
     @Transactional
     public boolean fillContents(DeltaIdEntry deltaIdEntry, RegisterRest registerRest, List<ContentRest> contentRests) throws ExceptionErdiLoad {
@@ -102,18 +105,22 @@ public class ErdiLoaderService {
                 Map<ContentFull, Content> mapChangeContents = new LinkedHashMap<>();
                 Map<ContentDelete, Content> mapDeleteContents = new LinkedHashMap<>();
 
+//                timeLabels.clear();
+//                timeLabels.add(new Date());
                 filterContents(listContentRest, newFullContents, mapChangeContents, mapDeleteContents);
-
-                //System.out.println("----- newFullContents = " + newFullContents.size());
-                //System.out.println(newFullContents);
-                //System.out.println("----- mapChangeContents = " + mapChangeContents.size());
-                //System.out.println(mapChangeContents);
-                //System.out.println("----- mapDeleteContents = " + mapDeleteContents.size());
-                //System.out.println(mapDeleteContents);
+//                timeLabels.add(new Date());
 
                 addContents(newFullContents, mapChangeContents, contentVersion);
+//                timeLabels.add(new Date());
                 changeContents(mapChangeContents, contentVersion, null);
+//                timeLabels.add(new Date());
                 deleteContents(mapDeleteContents, contentVersion, registerRest);
+//                timeLabels.add(new Date());
+
+//                List<String> res = new ArrayList<>();
+//                for (int i=1; i<timeLabels.size(); i++)
+//                    res.add(i+": " + (timeLabels.get(i).getTime() - timeLabels.get(i-1).getTime()) + " ms");
+//                log.info(res.toString());
             }
         }
         catch (Exception e){
@@ -313,14 +320,11 @@ public class ErdiLoaderService {
     }
 
     private ContentVersion createContentVersion(RegisterRest registerRest, DeltaIdEntry deltaIdEntry) throws ParseException {
-        DateFormat dateFormat = new SimpleDateFormat(actualDateFormat);
-        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-
         ContentVersion contentVersion = new ContentVersion();
         contentVersion.setRegUpdateTime(deltaIdEntry == null ? registerRest.updateTime : null);
-        contentVersion.setDeltaUpdateTime(deltaIdEntry == null ? null : dateFormat.parse(deltaIdEntry.actualDate));
+        contentVersion.setDeltaUpdateTime(deltaIdEntry == null ? null : deltaIdEntry.actualDate);
         contentVersion.setPpnDate(new Date());          // проставляется автоматом
-        contentVersion.setDeltaId(deltaIdEntry == null ? null : Long.valueOf(deltaIdEntry.deltaId));
+        contentVersion.setDeltaId(deltaIdEntry == null ? null : deltaIdEntry.deltaId);
 
         return contentVersion;
     }

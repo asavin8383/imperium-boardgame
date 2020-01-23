@@ -76,7 +76,7 @@ public class RestTest
 
     @Test
     public void testAddons(){
-        addonRestClient.readFullFromNet();
+        addonRestClient.readFullFromNet(new Date());
     }
 
     @Test
@@ -86,6 +86,8 @@ public class RestTest
 
     @Test
     public void runUpdateContent(){
+        //boolean res = subTypeRestClient.readFromNetDiff();
+        //log.info("res = {}", res);
         erdiRestClient.startUpdateErdi();
     }
 

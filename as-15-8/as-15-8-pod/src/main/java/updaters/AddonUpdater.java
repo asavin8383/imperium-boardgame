@@ -88,9 +88,9 @@ public class AddonUpdater
         addonVersion.setPpnDate(new Date());
         addonVersion.setDeltaId(deltaId);
         if (deltaId != null)
-            addonVersion.setDeltaUpdateTime(new Date());
+            addonVersion.setDeltaUpdateTime(date);
         else
-            addonVersion.setRegUpdateTime(new Date());
+            addonVersion.setRegUpdateTime(date);
         addonVersionRepository.save(addonVersion);
         addonVersionRepository.flush();
 
