@@ -5,6 +5,7 @@ import checkUnits.CheckUnitKey;
 import execution.ExecutionJobResult;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
@@ -28,6 +29,7 @@ import java.util.concurrent.*;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
+@Slf4j
 public class JobsService {
 
     @Value("${gateway.url}")
@@ -44,21 +46,26 @@ public class JobsService {
 
     @PostConstruct
     private void fillStoppedArrangements() {
-        UriComponents uriComponents =
-                UriComponentsBuilder
-                        .fromHttpUrl(gatewayUrl)
-                        .path("/dispatcher/arrangement/stopped")
-                        .build();
+        try {
+            UriComponents uriComponents =
+                    UriComponentsBuilder
+                            .fromHttpUrl(gatewayUrl)
+                            .path("/dispatcher/arrangement/stopped")
+                            .build();
 
-        Map<Long, Set<Long>> actualStoppedJobs = oAuth2RestTemplate
-            .exchange(uriComponents.toString(),
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<Map<Long, Set<Long>>>() {})
-            .getBody();
-        if(actualStoppedJobs != null && actualStoppedJobs.size() > 0) {
-            stoppedJobs.clear();
-            stoppedJobs.putAll(actualStoppedJobs);
+            Map<Long, Set<Long>> actualStoppedJobs = oAuth2RestTemplate
+                    .exchange(uriComponents.toString(),
+                            HttpMethod.GET,
+                            null,
+                            new ParameterizedTypeReference<Map<Long, Set<Long>>>() {
+                            })
+                    .getBody();
+            if (actualStoppedJobs != null && actualStoppedJobs.size() > 0) {
+                stoppedJobs.clear();
+                stoppedJobs.putAll(actualStoppedJobs);
+            }
+        } catch (Exception ex) {
+            throw new RuntimeException("Ошибка при получении списка остановленных заданий из диспетчера", ex);
         }
     }
 
