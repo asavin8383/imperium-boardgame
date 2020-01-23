@@ -14,8 +14,8 @@ import java.util.List;
 public interface ArrangementRepo extends JpaRepository<Arrangement, Long> {
 
     @Query("select a from Arrangement a " +
-            "where a.status = 'RUNNING'")
-    List<Arrangement> findRunning();
+            "where a.status = 'RUNNING' or a.status = 'STOPPED'")
+    List<Arrangement> findReadyToUpload();
 
     @Query("select a from Arrangement a " +
             "where a.creationDate = :date and " +
