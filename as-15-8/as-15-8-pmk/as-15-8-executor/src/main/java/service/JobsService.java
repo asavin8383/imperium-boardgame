@@ -63,7 +63,7 @@ public class JobsService {
     }
 
     @Scheduled(cron = "0 0 0 ? * * *")
-    private void clearStoppedJobs() {
+    void clearStoppedJobs() {
         stoppedJobs.clear();
     }
 

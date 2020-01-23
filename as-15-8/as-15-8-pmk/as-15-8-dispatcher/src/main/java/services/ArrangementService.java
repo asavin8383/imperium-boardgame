@@ -45,7 +45,7 @@ public class ArrangementService {
     }
 
     @Scheduled(cron = "0 0 0 ? * * *")
-    private void clearStoppedArrangements() {
+    void clearStoppedArrangements() {
         stoppedArrangements.clear();
     }
 
