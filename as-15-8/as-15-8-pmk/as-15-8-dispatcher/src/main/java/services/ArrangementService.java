@@ -30,6 +30,7 @@ public class ArrangementService {
 
     private final ApplicationContext context;
     private final ArrangementRepo arrangementRepo;
+    private final ResultsKafkaService resultsKafkaService;
 
     @PostConstruct
     private void fillStoppedArrangements() {
@@ -77,6 +78,8 @@ public class ArrangementService {
                 .findById(arrangementId)
                 .orElseThrow(() -> new AS_15_8_DispatcherException("Ошибка остановки мероприятия. Мероприятие не найдено в БД по id: " + arrangementId));
         arrangement.setStatus(ArrangementStatus.STOPPED);
+        arrangement.setCheckUnitsCount(resultsKafkaService.getResultsCount(arrangementId));
+        arrangementRepo.save(arrangement);
 
         if(stoppedArrangements.containsKey(arrangementId))
             stoppedArrangements.get(arrangementId).add(version);
