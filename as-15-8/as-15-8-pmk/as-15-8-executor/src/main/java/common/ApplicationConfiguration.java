@@ -3,7 +3,9 @@ package common;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.bus.jackson.RemoteApplicationEventScan;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * Конфигурация модуля запуска проверок мероприятий
@@ -11,8 +13,10 @@ import org.springframework.context.annotation.ComponentScan;
  *
  */
 @SpringBootApplication
-@ComponentScan(basePackages={"common", "events", "robots.factory", "service"})
+@EnableScheduling
 @EnableConfigurationProperties(ExecutorProperties.class)
+@ComponentScan(basePackages={"common", "events", "robots.factory", "service"})
+@RemoteApplicationEventScan({"remoteEvents"})
 public class ApplicationConfiguration{
 	
 	public static void main(String[] args) {

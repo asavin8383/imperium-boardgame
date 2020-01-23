@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import model.enums.ArrangementStatus;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Data
@@ -14,6 +15,12 @@ public class Arrangement {
 
     @Id
     private Long id;
+
+    @Column(nullable = false)
+    private Long version;
+
+    @Column(nullable = false)
+    private LocalDateTime creationDate;
 
     @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)

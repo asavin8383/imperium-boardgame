@@ -41,7 +41,7 @@ public class ResultService {
     public void saveCompletionArrangements() {
         try{
             arrangementRepo
-                    .findRunning()
+                    .findReadyToUpload()
                     .stream()
                     .filter(arrangement -> {
                         long count = resultsKafkaService.getResultsCount(arrangement.getId());
