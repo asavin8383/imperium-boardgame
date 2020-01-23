@@ -33,4 +33,7 @@ public class AddonVersion implements Serializable {
 	@JsonIgnore
 	private List<Addon> addons;
 
+	@Column(nullable=true, name = "delta_id")
+	private Long deltaId;
+
 }

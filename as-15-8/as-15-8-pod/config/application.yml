@@ -25,7 +25,7 @@ spring:
   app:
     schedule:
       missions: '0 0 0 * * ?'
-      erdi: '*/30 * * * * ?'
+      erdi: '0 */30 * * * ?'
     jwt:
       secret: Gk-Xun_Yrkd0zigpysWS
       ttl: 86400
@@ -48,8 +48,8 @@ spring:
   profiles.include: docker_log
   app:
     schedule:
-      missions: '0 */1 * * * ?'
-      erdi: '* * * * * ?'
+      missions: '0 * * * * ?'
+      erdi: '0 * * * * ?'
   main:
     banner-mode: "off"
   jpa:
@@ -130,7 +130,9 @@ spring:
 spring:
   profiles: dev_pvorobiev
   datasource:
-    url: jdbc:postgresql://192.168.5.195:5432/asdb_test
+    url: jdbc:postgresql://192.168.5.195:5432/asdb_test2
+  liquibase:
+    enabled: true
 registry-anonymizers:
   proxy-ip: ""
 

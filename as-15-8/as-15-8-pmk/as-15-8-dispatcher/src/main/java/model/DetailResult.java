@@ -14,6 +14,7 @@ public abstract class DetailResult implements Serializable {
 
     @Id
     @Column(insertable = false, updatable = false)
+    @JsonIgnore
     private Long id;
 
     @MapsId

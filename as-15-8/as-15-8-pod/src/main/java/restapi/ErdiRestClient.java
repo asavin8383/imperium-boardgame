@@ -1,7 +1,6 @@
 package restapi;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import exceptions.AS_15_8_POD_Exception;
 import exceptions.ExceptionErdiLoad;
 import exceptions.ExceptionErdiParser;
@@ -30,7 +29,6 @@ import repositories.ContentVersionRepository;
 import repositories.impl.ParameterRepositoryExtend;
 import services.ErdiLoaderService;
 
-import javax.transaction.Transactional;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -60,6 +58,7 @@ public class ErdiRestClient {
     private final ContentVersionRepository contentVersionRepository;
     private final AddonVersionRepository addonVersionRepository;
     private final SubTypeRestClient subTypeRestClient;
+    private final RestClientUtils restClientUtils;
     private final AddonRestClient addonRestClient;
     private final JdbcTemplate jdbcTemplate;
 
@@ -88,7 +87,7 @@ public class ErdiRestClient {
     public String getUpdateDate() {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
         //DateFormat dateFormat = new SimpleDateFormat("HH:mm dd.MM.yyyy");
-        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+        //dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
         Date dateUpdate = getActualContentDate();
         return dateUpdate == null ? "" : dateFormat.format(dateUpdate);
     }
@@ -101,7 +100,7 @@ public class ErdiRestClient {
         RestResponseDumpDate resp = entity.getBody();
         Date dateDumpDate = (resp == null ? null : resp.getDumpDate());
         DateFormat dateFormat1 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-        dateFormat1.setTimeZone(TimeZone.getTimeZone("GMT"));
+        //dateFormat1.setTimeZone(TimeZone.getTimeZone("GMT"));
 
         ContentVersion lastContentVersion = contentVersionRepository.findTopByIdNotNullOrderByIdDesc();
         AddonVersion lastAddonVersion = addonVersionRepository.findTopByIdNotNullOrderByIdDesc();
@@ -136,22 +135,21 @@ public class ErdiRestClient {
 
         try{
             log.info("====== Начало обновления справочников");
-            boolean wasLoadedFullERDI =
-                    loadFullERDI();
-            int countLoadedDeltaERDI =
-                    loadAllDeltaERDI();
-            boolean wereChanges =
-                    loadSybTypes();
-            boolean wasLoadedFullAddons =
-                    loadFullAddons();
-            int countLoadedAddons =
-                    loadAllDeltaAddons();
+
+            boolean wereSybTypeChanges = loadSybTypes();
+
+            boolean wasLoadedFullERDI = loadFullERDI();
+            boolean wasLoadedFullAddons = loadFullAddons();
+
+            int countLoadedDeltaERDI = loadAllDeltaERDI();
+            int countLoadedAddons = loadAllDeltaAddons();
 
             boolean needUpdateViews =
-                    wasLoadedFullERDI || countLoadedDeltaERDI > 0 ||
-                    wereChanges ||
-                    wasLoadedFullAddons || countLoadedAddons > 0;
+                    wereSybTypeChanges ||
+                    wasLoadedFullERDI || wasLoadedFullAddons ||
+                    countLoadedDeltaERDI > 0 || countLoadedAddons > 0;
             refreshViews(needUpdateViews);
+
             log.info("====== Конец обновления справочников");
         }
         catch(Exception ex){
@@ -227,7 +225,7 @@ public class ErdiRestClient {
         isError = false;
         errorMessage = "";
 
-        boolean deleteTempFile = false;
+        boolean deleteTempFile = true;
 
         DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd__hh_mm_ss");
         Path path = Paths.get(tempDir, String.format("full_erdi_%s.zip", dateFormat.format(new Date())));
@@ -286,8 +284,12 @@ public class ErdiRestClient {
         boolean isFullAddons = fullAddonVersion != null;
 
         if (!isFullAddons){
+            ContentVersion fullContentVersion = contentVersionRepository.getTopByRegUpdateTimeNotNullOrderByIdDesc();
+            if (fullContentVersion == null)
+                throw new AS_15_8_POD_Exception("Ошибка при загрузке полного справочника аддонов. Не найдена запись загрузки полного ЕРДИ!");
+
             System.out.println("Загрузка полного справочнка аддонов");
-            addonRestClient.readFullFromNet();
+            addonRestClient.readFullFromNet(fullContentVersion.getRegUpdateTime()); // date - дата полной загрузки ЕРДИ
         }
 
         return !isFullAddons;
@@ -370,7 +372,7 @@ public class ErdiRestClient {
         int count = 0;
         DeltaIdEntry curDeltaIdEntry = null;
         try{
-            List<DeltaIdEntry> deltaList = getLastDumpDeltaListByDate();
+            List<DeltaIdEntry> deltaList = getActualErdiDeltaEntries();
             count = deltaList.size();
 
             log.info("Получен список дельт: размер=" + count);
@@ -379,7 +381,9 @@ public class ErdiRestClient {
             if (count > 0){
                 log.info("---> Запуск загрузки дельт ЕРДИ");
 
+                int i=0;
                 for(DeltaIdEntry deltaIdEntry : deltaList){
+                    log.info("--> загрузка дельты id={}, {}/{}", deltaIdEntry.deltaId, ++i, count);
                     curDeltaIdEntry = deltaIdEntry;
                     loadDeltaERDI(deltaIdEntry);
                 }
@@ -387,7 +391,7 @@ public class ErdiRestClient {
         }
         catch (Exception e){
             errorMessage = StringUtils.isEmpty(errorMessage)
-                    ? "Ошибка загрузки дельты ЕРДИ" + (curDeltaIdEntry == null ? "" : curDeltaIdEntry.toString())
+                    ? "Ошибка загрузки дельты ЕРДИ " + (curDeltaIdEntry == null ? "" : curDeltaIdEntry.toString())
                     : errorMessage;
             isError = true;
             throw new ExceptionErdiParser(errorMessage, e);
@@ -405,83 +409,21 @@ public class ErdiRestClient {
         return actualDate;
     }
 
-    public List<DeltaIdEntry> getLastDumpDeltaListByDate() throws ParseException {
+    public List<DeltaIdEntry> getActualErdiDeltaEntries() {
         Date dateUpdate = getActualContentDate();
         System.out.println("dateUpdate = " + dateUpdate);
 
         if (dateUpdate == null){
             return new ArrayList<>();
         }
-        return getDumpDeltaListByDate(dateUpdate);
+        return restClientUtils.getDumpDeltaListByDate(dateUpdate);
     }
 
-    @Transactional
-    public String setParameter(String name, String value) {
-        try{
-            parameterRepository.setParameterValue(name, value);
-        }
-        catch(Exception e){
-            e.printStackTrace();
-            return "НЕ удалось обновить параметр! Ошибка: " + e.getMessage();
-        }
-
-        return "Парамет " + name + "=" + value + " успешно обновлен";
-    }
-
-    public List<DeltaIdEntry> getDumpDeltaListByDate(Date date) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-        String dateStr = dateFormat.format(date);
-
-        UriComponents uriComponents =
-                UriComponentsBuilder.fromUriString("{baseUrl}/getDumpDeltaListByDate/{dateStr}/")
-                        .build()
-                        .expand(baseUrl, dateStr);
-
-        System.out.println(uriComponents.toString());
-
-        ResponseEntity<RestResponseDeltaListByDate> entity;
-        try {
-            log.info("Получение списка дельт: {} по дате: {}", uriComponents.toString(), dateStr);
-            entity = registryAnonimyzersRestTemplate.exchange(
-                    uriComponents.toString(),
-                    HttpMethod.GET,
-                    null,
-                    RestResponseDeltaListByDate.class
-            );
-        }
-        catch (Throwable e){
-            log.error("Ошибка загрузки списка дельт по дате: {}", dateStr);
-            log.error("Текст ошибки", e);
-            return new ArrayList<>();
-        }
-
-        RestResponseDeltaListByDate resp = entity.getBody();
-        SimpleDateFormat deltaDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-
-        List<DeltaIdEntry> list = resp.response;
-        list = list.stream()
-                .filter(deltaIdEntry -> {
-                    try {
-                        Date deltaDate = deltaDateFormat.parse(deltaIdEntry.actualDate);
-                        if (deltaDate.before(date))
-                            return false;
-                    }
-                    catch (ParseException e) {
-                        e.printStackTrace();
-                        return false;
-                    }
-                    return deltaIdEntry.isEmpty.equals("0");
-                })
-                .collect(Collectors.toList());
-
-        return list;
-    }
 
     public void loadDeltaERDI(DeltaIdEntry deltaIdEntry) throws IOException, ExceptionErdiParser {
         stateDetails = "Загрузка дельты ЕРДИ: " + deltaIdEntry.deltaId;
 
-        boolean deleteTempFile = false;
+        boolean deleteTempFile = true;
 
         DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd__hh_mm_ss");
         Path path = Paths.get(tempDir, String.format("erdi_delta_%s_%s.zip", deltaIdEntry.deltaId, dateFormat.format(new Date())));
@@ -533,6 +475,8 @@ public class ErdiRestClient {
                     InputStream stream = zipFile.getInputStream(entry);
                     ErdiFullParser parser = new ErdiFullParser();
 
+                    //parser.setMaxContentSize(40000);  // todo - закомментировать
+
                     List<ContentRest> allContents = new ArrayList<>();
                     log.info("Начат парсинг " + entryName + "...");
                     stateDetails = "Парсинг ЕРДИ";
@@ -563,7 +507,7 @@ public class ErdiRestClient {
             }
         }
         catch (ZipException ze){
-            if (checkDeltaErdiNotFound(path)){
+            if (restClientUtils.checkDeltaErdiNotFound(path)){
                 System.out.println("Проферка файла ЕРДИ: пустой контент! Корректная ситуация.");
                 /* ignore exception */
             }
@@ -584,24 +528,6 @@ public class ErdiRestClient {
             catch (Exception ee){}
         }
     }
-
-    private boolean checkDeltaErdiNotFound(Path path){
-        File f = path.toFile();
-        if (f.length() >= 2048)
-            return false;
-
-        try {
-            String content = new String(Files.readAllBytes(path));
-            ObjectMapper mapper = new ObjectMapper();
-            RestResponseStatusString restResponse = mapper.readValue(content, RestResponseStatusString.class);
-            return !StringUtils.isEmpty(restResponse.response) && restResponse.response.equalsIgnoreCase("Not found");
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
 
 }
 

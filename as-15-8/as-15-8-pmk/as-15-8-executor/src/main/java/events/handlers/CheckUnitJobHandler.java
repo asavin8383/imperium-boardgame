@@ -4,7 +4,6 @@ import analysis.CheckUnitStatusNotification;
 import checkUnits.CheckUnit;
 import checkUnits.CheckUnitJob;
 import checkUnits.CheckUnitKey;
-import common.ExecutorProperties;
 import enums.CheckUnitJobResult;
 import events.ExecutorChannels;
 import execution.ExecutionJobResult;
@@ -21,14 +20,15 @@ import robots.exceptions.Cancel_ExecutionException;
 import robots.exceptions.Captcha_ExecutionException;
 import robots.exceptions.ExecutionException;
 import robots.exceptions.Timeout_ExecutionException;
-import service.CheckUnitVerificationService;
-import service.CheckUnitVerificationServiceFactory;
-import service.impl.RobotsServiceImpl;
+import service.JobsService;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Date;
-import java.util.concurrent.*;
+import java.util.TimeZone;
+import java.util.concurrent.CompletionException;
 
 @Service
 @EnableBinding(ExecutorChannels.class)
@@ -37,97 +37,87 @@ import java.util.concurrent.*;
 public class CheckUnitJobHandler {
 
     private final ExecutorChannels executorChannels;
-
-    private final CheckUnitVerificationServiceFactory checkUnitVerificationServiceFactory;
-
-    private final ExecutorProperties executorProperties;
-
-    private static final int DEFAULT_EXECUTOR_TIMEOUT = 60;
+    private final JobsService jobsService;
 
 
     @StreamListener(ExecutorChannels.INPUT_JOBS)
     public void consumeCheckUnitJob(Message<CheckUnitJob> message){
         Integer partitionId = message.getHeaders().get(KafkaHeaders.RECEIVED_PARTITION_ID, Integer.class);
         CheckUnitKey key = message.getHeaders().get(KafkaHeaders.RECEIVED_MESSAGE_KEY, CheckUnitKey.class);
-        if(key == null){
+        LocalDateTime originalTime = getOriginalTime(message);
+        if(key == null) {
             log.error("Ошибка! Пустой ключ у сообщения: " + message.getPayload().toString());
             return;
         }
         log.info("\n   ---->>> Принято задание: " + message.getPayload().toString() +
                 ", key: " + key +
                 ", partition: " + partitionId +
-                ", offset: "+message.getHeaders().get(KafkaHeaders.OFFSET, Long.class));
+                ", offset: " + message.getHeaders().get(KafkaHeaders.OFFSET, Long.class) +
+                ", time: " + originalTime.toString());
+
+        if(!jobsService.isJobActual(key.getArrangementId(), key.getVersion(), originalTime))
+            return;
+
         String verificationName = "";
         Date startTime = new Date();
-
         try {
             CheckUnitJob job = message.getPayload();
+
             verificationName = "jobID = " + key.getJobId() +
                     " accessTool = " + job.getAccessTool() +
                     " checkUnit = " + job.getCheckUnit().getValue();
-
-            CheckUnitVerificationService service =
-                    checkUnitVerificationServiceFactory
-                            .getService(job);
-
-            ExecutionJobResult executionJobResult;
-
-            if (service instanceof RobotsServiceImpl && getTimeout() >= 0){
-                executionJobResult = CompletableFuture
-                        .supplyAsync(() -> service.run(key.getJobId(), job))
-                        .applyToEither(timeoutAfter(getTimeout(), TimeUnit.SECONDS), (result) -> result)
-                        .exceptionally(throwable -> {
-                            service.stop();
-                            throw new CompletionException(throwable);
-                        })
-                .join();
-            }
-            else {
-                executionJobResult = service.run(key.getJobId(), job);
-            }
-
+            ExecutionJobResult executionJobResult = jobsService.executeJob(key, job);
             sendExecutionResult(executionJobResult, key, partitionId, startTime);
         } catch (Exception ex) {
-            Throwable te = ex;
-            while(te.getCause() != null && te instanceof CompletionException) {
-                te = te.getCause();
-            }
-
-            try {
-                sendCheckJobErrorNotification(te, key, message.getPayload().getCheckUnit(), partitionId, startTime);
-            } catch (Exception sendEx) {
-                log.error("Ошибка при отправке сообщения с ошибкой при выполнении задания на проверку запрещенного ресурса: "+verificationName, sendEx);
-            }
-
-            if (te instanceof Timeout_ExecutionException){
-                log.info("Проверка {}, остановлена по таймауту {} секунд",  key.getJobId(), getTimeout());
-            }
-            else if(te instanceof Cancel_ExecutionException) {
-                log.info("Выполнение проверки остановлено: " + verificationName);
-            }
-            else if(te instanceof Captcha_ExecutionException) {
-                log.warn("Выполнение проверки остановлено, обнаружена капча: " + verificationName);
-            }
-            else if(te instanceof ExecutionException) {
-                log.error("Выполнение проверки завершено с ошибкой: "+verificationName, te);
-            }
-            else {
-                log.error("Ошибка при выполнении задания на проверку запрещенного ресурса: " + key.getJobId(), te);
-            }
+            processError(ex, key, message.getPayload(), verificationName, partitionId, startTime);
         }
     }
 
-    private int getTimeout(){
-        Integer timeout = executorProperties.getExecutor().getTimeout();
-        timeout = timeout != null ? timeout : DEFAULT_EXECUTOR_TIMEOUT;
-        return timeout;
+    private LocalDateTime getOriginalTime(Message message){
+        if(message.getHeaders().getTimestamp() != null) {
+            return LocalDateTime
+                    .ofInstant(Instant.ofEpochMilli(
+                            message.getHeaders().getTimestamp()),
+                            TimeZone.getDefault().toZoneId()
+                    );
+        } else {
+            return LocalDateTime.now();
+        }
     }
 
-    public <T> CompletableFuture<T> timeoutAfter(long timeout, TimeUnit unit) {
-        CompletableFuture<T> result = new CompletableFuture<>();
-        ScheduledExecutorService timeoutService = Executors.newSingleThreadScheduledExecutor();
-        timeoutService.schedule(() -> result.completeExceptionally(new Timeout_ExecutionException()), timeout, unit);
-        return result;
+    private void processError(
+            Exception ex,
+            CheckUnitKey key,
+            CheckUnitJob job,
+            String verificationName,
+            Integer partitionId,
+            Date startTime) {
+        Throwable te = ex;
+        while(te.getCause() != null && te instanceof CompletionException) {
+            te = te.getCause();
+        }
+
+        try {
+            sendCheckJobErrorNotification(te, key, job.getCheckUnit(), partitionId, startTime);
+        } catch (Exception sendEx) {
+            log.error("Ошибка при отправке сообщения с ошибкой при выполнении задания на проверку запрещенного ресурса: "+verificationName, sendEx);
+        }
+
+        if (te instanceof Timeout_ExecutionException){
+            log.info("Проверка {}, остановлена по таймауту {} секунд",  key.getJobId(), jobsService.getJobTimeout());
+        }
+        else if(te instanceof Cancel_ExecutionException) {
+            log.info("Выполнение проверки остановлено: " + verificationName);
+        }
+        else if(te instanceof Captcha_ExecutionException) {
+            log.warn("Выполнение проверки остановлено, обнаружена капча: " + verificationName);
+        }
+        else if(te instanceof ExecutionException) {
+            log.error("Выполнение проверки завершено с ошибкой: "+verificationName, te);
+        }
+        else {
+            log.error("Ошибка при выполнении задания на проверку запрещенного ресурса: " + key.getJobId(), te);
+        }
     }
 
     /**
@@ -162,7 +152,7 @@ public class CheckUnitJobHandler {
             }
             else if(cause instanceof Timeout_ExecutionException) {
                 notificationBuilder.checkResult(CheckUnitJobResult.TIMEOUT_ERROR);
-                notificationBuilder.description("Работа робота остановлена по таймауту: " + getTimeout() + " сек.");
+                notificationBuilder.description("Работа робота остановлена по таймауту: " + jobsService.getJobTimeout() + " сек.");
             } else {
                 notificationBuilder.checkResult(CheckUnitJobResult.INTERNAL_ERROR);
                 StringWriter sw = new StringWriter();

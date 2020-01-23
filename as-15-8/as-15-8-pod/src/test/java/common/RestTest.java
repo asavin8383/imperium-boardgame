@@ -71,12 +71,12 @@ public class RestTest
     @Test
     public void testDeltaAddonsList(){
         List<DeltaAddonEntry> list = addonRestClient.readDeltaList();
-        log.debug("DeltaAddonEntry list = " + list);
+        log.info("DeltaAddonEntry list = " + list);
     }
 
     @Test
     public void testAddons(){
-        addonRestClient.readFullFromNet();
+        addonRestClient.readFullFromNet(new Date());
     }
 
     @Test
@@ -86,6 +86,8 @@ public class RestTest
 
     @Test
     public void runUpdateContent(){
+        //boolean res = subTypeRestClient.readFromNetDiff();
+        //log.info("res = {}", res);
         erdiRestClient.startUpdateErdi();
     }
 

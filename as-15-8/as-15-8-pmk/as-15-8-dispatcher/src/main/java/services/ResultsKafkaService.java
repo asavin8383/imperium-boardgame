@@ -154,6 +154,9 @@ public class ResultsKafkaService {
         result.setStartDate(LocalDateTime.ofInstant(checkUnitResult.getStartTime().toInstant(), ZoneId.systemDefault()));
         result.setEndDate(LocalDateTime.ofInstant(checkUnitResult.getEndTime().toInstant(), ZoneId.systemDefault()));
         result.setCheckType(service.getCheckType());
+
+        if(checkUnitResult.getCheckResult().equals(CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED))
+            result.setCheckForAct(true);
     }
 
     private boolean filterResults(

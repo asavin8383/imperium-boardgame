@@ -55,4 +55,5 @@
     <include file="db/changelog/ppt.0028.arrangement_is_Act_Available.xml"/>
     <include file="db/changelog/ppt.0029.formal_task_fgis_id.xml"/>
     <include file="db/changelog/ppt.0029.arrangement_ck_status.xml"/>
+    <include file="db/changelog/ppt.0030.traffic_actual_check_units_count.xml"/>
 </databaseChangeLog>

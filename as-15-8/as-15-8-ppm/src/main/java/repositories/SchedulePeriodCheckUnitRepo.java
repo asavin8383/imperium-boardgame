@@ -28,4 +28,12 @@ public interface SchedulePeriodCheckUnitRepo extends JpaRepository<SchedulePerio
             "s.plannedDate = :plannedDate"
     )
     List<Long> getBusyExecutionNumbers(@Param("plannedDate") LocalDate plannedDate, @Param("startTime") LocalTime startTime, @Param("endTime") LocalTime endTime);
+
+    @Query("select COUNT(spcu) from SchedulePeriodCheckUnit spcu " +
+        "join spcu.schedulePeriodArrangement spa " +
+        "join spa.arrangement a on a.id = :arrangement_id " +
+        "join spa.schedulePeriod p " +
+        "join p.schedule s on s.id = :schedule_id"
+    )
+    Long getSchedulePeriodCheckUnitCount(@Param("schedule_id") Long scheduleId, @Param("arrangement_id") Long arrangementId);
 }

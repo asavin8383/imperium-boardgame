@@ -13,9 +13,6 @@ public interface ContentVersionRepository extends JpaRepository<ContentVersion, 
 
     ContentVersion findTopByIdNotNullOrderByIdDesc();
 
-    @Query(value = "SELECT regUpdateTime FROM ContentVersion WHERE lower(name) = lower(?1)")
-    Date getParameterValue(String name);
-
     ContentVersion getTopByRegUpdateTimeNotNullOrderByIdDesc();
 
     @Transactional

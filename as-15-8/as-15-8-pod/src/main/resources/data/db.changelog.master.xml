@@ -31,5 +31,7 @@
     <include file="data/changelog/pod.0012.content_view.xml" />
     <include file="data/changelog/pod.0013.domains_domain_mask_id_unique.xml"/>
     <include file="data/changelog/pod.0014.content_view_visitors.xml"/>
-
+    <include file="data/changelog/pod.0015.addon_delta_id.xml"/>
+    <include file="data/changelog/pod.0016.content_view_content_id.xml"/>
+    <include file="data/changelog/pod.0017.column_type.xml"/>
 </databaseChangeLog>
