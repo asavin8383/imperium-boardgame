@@ -17,7 +17,7 @@ public class Arrangement {
     private Long id;
 
     @Column(nullable = false)
-    private Long version = 0L;
+    private Long version;
 
     @Column(nullable = false)
     private LocalDateTime creationDate;

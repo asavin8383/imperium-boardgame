@@ -66,7 +66,7 @@ public class ArrangementService {
                     });
         }
         arrangement.setCreationDate(LocalDateTime.now());
-        arrangement.setVersion(arrangementToExecution.getVersion());
+        arrangement.setVersion(Optional.ofNullable(arrangementToExecution.getVersion()).orElse(0L));
         arrangement.setStatus(ArrangementStatus.RUNNING);
         arrangementRepo.save(arrangement);
     }
