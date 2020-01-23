@@ -1,7 +1,5 @@
 package controllers;
 
-import arrangement.ArrangementStatusNotification;
-import enums.ArrangementEvents;
 import enums.CheckUnitJobResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

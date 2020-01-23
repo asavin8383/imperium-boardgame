@@ -21,6 +21,7 @@ import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.kafka.support.serializer.JsonSerde;
 import org.springframework.stereotype.Service;
 import restapi.ErdiChecker;
+import services.ArrangementService;
 import services.ResultService;
 
 import java.util.Date;
@@ -42,11 +43,15 @@ public class ResultsHandler {
 
     private final ErdiChecker erdiChecker;
     private final ResultService resultService;
+    private final ArrangementService arrangementService;
 
     @StreamListener(DispatcherChannels.INPUT_RESULTS)
     public void processResults(KStream<CheckUnitKey, CheckUnitResult> resultsStream){
         resultsStream
-            .filter((checkUnitKey, checkUnitResult) -> checkUnitResult instanceof AnalysisResult)
+            .filter((checkUnitKey, checkUnitResult) ->
+                arrangementService.isArrangementRunning(checkUnitKey.getArrangementId(), checkUnitKey.getVersion()))
+            .filter((checkUnitKey, checkUnitResult) ->
+                checkUnitResult instanceof AnalysisResult)
             .mapValues(checkUnitResult ->
                 new Screenshots(
                     ((AnalysisResult) checkUnitResult).getScreenshot(),
@@ -63,6 +68,8 @@ public class ResultsHandler {
             );
 
         resultsStream
+            .filter((checkUnitKey, checkUnitResult) ->
+                arrangementService.isArrangementRunning(checkUnitKey.getArrangementId(), checkUnitKey.getVersion()))
             .groupBy((checkUnitKey, checkUnitResult) -> checkUnitKey.getArrangementId())
             .count(
                 Materialized.<Long, Long, KeyValueStore<Bytes, byte[]>>
@@ -72,6 +79,8 @@ public class ResultsHandler {
             );
 
         resultsStream
+            .filter((checkUnitKey, checkUnitResult) ->
+                arrangementService.isArrangementRunning(checkUnitKey.getArrangementId(), checkUnitKey.getVersion()))
             .peek((key, result) ->
                     log.info("\n   ---->>> Принято сообщение с анализом результатов проверки: " +
                             "мероприятие: " + key.getArrangementId() + ", " +
@@ -99,9 +108,5 @@ public class ResultsHandler {
             return CheckUnitJobResult.EXCLUDED;
         else
             return status;
-    }
-
-    private void saveArrangementIfFinished(Long arrangementId) {
-
     }
 }

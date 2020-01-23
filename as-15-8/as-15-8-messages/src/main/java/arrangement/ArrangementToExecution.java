@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 public class ArrangementToExecution {
 
     private Long id;
-
+    private Long version;
     private Long checkUnitsCount;
 
 }

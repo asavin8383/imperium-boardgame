@@ -1,15 +1,22 @@
 package checkUnits;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.*;
 
 @Data
 @NoArgsConstructor
+@RequiredArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CheckUnitKey implements Comparable<CheckUnitKey> {
+
+    @NonNull
     private Long arrangementId;
+
+    @NonNull
     private Long jobId;
+
+    private Long version = 0L;
 
     @Override
     public int compareTo(CheckUnitKey o) {
