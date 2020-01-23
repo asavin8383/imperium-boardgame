@@ -1,6 +1,7 @@
 package model;
 
 import lombok.Data;
+import model.enums.SchedulePeriodCheckUnitStatus;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;

@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Arrangement;
 import model.ScheduleCheckUnit;
+import model.enums.ScheduleCheckUnitStatus;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,11 +25,12 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.util.UriComponentsBuilder;
 import repositories.ArrangementRepo;
+import repositories.ScheduleCheckUnitRepo;
 import repositories.ScheduleRepo;
 import restapi.ArrangementStatusUploader;
 import restapi.pod.DomainMaskUploader;
 import services.ScheduleService;
-import webClients.PptWebClient;
+import webClients.PPT_DispatcherWebClient;
 
 import javax.transaction.Transactional;
 import java.time.LocalTime;
@@ -49,7 +51,7 @@ import java.util.stream.Collectors;
 public class ArrangementController {
 
     private final ArrangementRepo arrangementRepo;
-    private final PptWebClient PPTWebClient;
+    private final PPT_DispatcherWebClient PPT_DispatcherWebClient;
     private final ArrangementStatusUploader arrangementStatusUploader;
     private final SchedulerProperties schedulerProperties;
     private final DomainMaskUploader domainMaskUploader;
@@ -60,6 +62,7 @@ public class ArrangementController {
     @Value("${gateway.url}")
     private String gatewayUrl;
     private final String PPT_STATUS_ENDPOINT = "/ppt/arrangements/status";
+    private final ScheduleCheckUnitRepo scheduleCheckUnitRepo;
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @Transactional
@@ -113,11 +116,37 @@ public class ArrangementController {
         }
     }
 
+    /**
+     * Обновление статусов чек-юнитов для возможности повторного запуска мероприятия
+     * @param arrangement мероприятие, которое требуется запустить повторно
+     * @return Ответ от сервиса
+     */
+    @PutMapping("/refresh")
+    public ResponseEntity refreshArrangement(@RequestParam("id") Arrangement arrangement){
+        if (arrangement == null){
+            return ResponseEntity.noContent().build();
+        }
+        //TODO Наоборот!!!
+        //Меняем статус для чек-юнитов, остановленных на диспетчере
+        scheduleCheckUnitRepo.changeStatus(
+            arrangement,
+            PPT_DispatcherWebClient.getFromDispatcher(arrangement.getId()),
+            ScheduleCheckUnitStatus.NEW);
+        //Меняем статус для чек-юнитов, которые ещё не запускались на момент остановки мероприятия
+        scheduleCheckUnitRepo.changeStatus(
+            arrangement,
+            ScheduleCheckUnitStatus.SCHEDULED,
+            ScheduleCheckUnitStatus.NEW
+        );
+        return ResponseEntity.ok().build();
+    }
+
+
     private void getAndSaveArrangementCheckUnits(Arrangement arrangement){
         arrangement.getScheduleCheckUnits().addAll(
                 Objects.requireNonNull(
-                        PPTWebClient
-                                .getCheckUnitsByArrangementId(arrangement.getId())
+                        PPT_DispatcherWebClient
+                                .getFromPPT(arrangement.getId())
                                 .stream()
                                 .flatMap(checkUnit -> createCheckUnits(arrangement, checkUnit).stream())
                                 .collect(Collectors.toList())
