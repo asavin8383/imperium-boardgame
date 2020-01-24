@@ -20,6 +20,8 @@ public interface ScheduleCheckUnitRepo extends JpaRepository<ScheduleCheckUnit, 
 
     List<ScheduleCheckUnit> findAllByArrangement(Arrangement arrangement);
 
+    List<ScheduleCheckUnit> findAllByArrangementAndFinished(Arrangement arrangement, boolean finished);
+
     Page<ScheduleCheckUnit> findAllByArrangement(Arrangement arrangement, Pageable pageable);
 
     @Query("select DISTINCT scu from ScheduleCheckUnit scu" +
@@ -28,17 +30,9 @@ public interface ScheduleCheckUnitRepo extends JpaRepository<ScheduleCheckUnit, 
     Page<ScheduleCheckUnit> findAllByArrangement(@Param("ar") Arrangement arrangement, @Param("query")String query, Pageable pageable);
 
     @Modifying
-    @Query("update ScheduleCheckUnit scu set scu.status = :new_status " +
-        "where scu.arrangement = :ar and scu.status = :current_status")
-    void changeStatus(@Param("ar") Arrangement arrangement, @Param("current_status") ScheduleCheckUnitStatus currentStatus, @Param("new_status")ScheduleCheckUnitStatus newStatus);
-
-    @Modifying
-    @Query("update ScheduleCheckUnit scu set scu.status = :new_status " +
-        "where scu.arrangement = :ar and scu in (:check_units)")
-    void changeStatus(@Param("ar") Arrangement arrangement, @Param("check_units") List<CheckUnit> checkUnits, @Param("new_status")ScheduleCheckUnitStatus newStatus);
-
-    @Modifying
-    @Query("update ScheduleCheckUnit scu set scu.status = :new_status " +
-        "where scu.id in (:schedule_period_check_units) and scu.status = :current_status")
-    void changeStatus(@Param("schedule_period_check_units") List<Long> schedulePeriodCheckUnits, @Param("current_status") ScheduleCheckUnitStatus currentStatus, @Param("new_status")ScheduleCheckUnitStatus newStatus);
+    @Query("update ScheduleCheckUnit scu set scu.finished = :finished " +
+        "where scu.arrangement = :arrangement and scu.id in (:schedule_check_units)")
+    void changeFinished(@Param("arrangement") Arrangement arrangement,
+                        @Param("schedule_check_units") List<Long> scheduleCheckUnits,
+                        @Param("finished")boolean finished);
 }

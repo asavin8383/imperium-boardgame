@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface TrafficRepository extends JpaRepository<Traffic, Long>, JpaSpecificationExecutor<Traffic> {
 
@@ -18,6 +20,13 @@ public interface TrafficRepository extends JpaRepository<Traffic, Long>, JpaSpec
                 "on jointable.traffic_unit_id = units.id " +
             "where units.traffic_id = :trafficId", nativeQuery = true)
     long countContentErdiByTrafficId(@Param("trafficId") long trafficId);
+
+    @Query(value = "select jointable.erdi_id " +
+            "from portal.erdi_traffic_units_content jointable " +
+            "join portal.erdi_traffic_units units " +
+            "on jointable.traffic_unit_id = units.id " +
+            "where units.traffic_id = :trafficId", nativeQuery = true)
+    List<Long> allContentErdiByTrafficId(@Param("trafficId") long trafficId);
 
     @Query(value = "select count(*) " +
             "from portal.erdi_traffic_units_custom_erdi jointable " +

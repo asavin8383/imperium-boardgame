@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import model.enums.ArrangementStatus;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -60,10 +61,9 @@ public class Arrangement implements Serializable {
     @NotNull
     private String accessTool;
 
-    /** Статус закрытия мероприятия*/
-    @JsonView(Views.Brief.class)
-    @ToString.Include
-    private boolean closed = false;
+    @Column(nullable = false, columnDefinition = "text default 'NEW'")
+    @Enumerated(EnumType.STRING)
+    private ArrangementStatus status = ArrangementStatus.NEW;
 
     @OneToMany(cascade=CascadeType.ALL, mappedBy = "arrangement")
     @JsonIgnore

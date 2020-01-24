@@ -36,13 +36,8 @@ public class ScheduleCheckUnit implements Serializable, Comparable<ScheduleCheck
     @Column(nullable=false)
     private String checkUnitValue;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable=false)
-    private ScheduleCheckUnitStatus status;
-
-    public ScheduleCheckUnit(){
-        this.status = ScheduleCheckUnitStatus.NEW;
-    }
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private boolean finished = false;
 
     @Override
     public int compareTo(ScheduleCheckUnit o) {

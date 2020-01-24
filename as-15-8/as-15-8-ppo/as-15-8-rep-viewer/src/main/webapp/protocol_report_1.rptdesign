@@ -458,6 +458,12 @@ completion_date-start_date as duration
                     <text-property name="heading">end_date</text-property>
                 </structure>
                 <structure>
+                    <property name="columnName">erdi_id</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">erdi_id</text-property>
+                    <text-property name="heading">erdi_id</text-property>
+                </structure>
+                <structure>
                     <property name="columnName">screenshot_id</property>
                     <property name="analysis">measure</property>
                     <text-property name="displayName">screenshot_id</text-property>
@@ -505,6 +511,11 @@ completion_date-start_date as duration
                     </structure>
                     <structure>
                         <property name="position">6</property>
+                        <property name="name">erdi_id</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">7</property>
                         <property name="name">screenshot_id</property>
                         <property name="dataType">string</property>
                     </structure>
@@ -549,6 +560,13 @@ completion_date-start_date as duration
                 </structure>
                 <structure>
                     <property name="position">6</property>
+                    <property name="name">erdi_id</property>
+                    <property name="nativeName">erdi_id</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">7</property>
                     <property name="name">screenshot_id</property>
                     <property name="nativeName">screenshot_id</property>
                     <property name="dataType">string</property>
@@ -562,11 +580,13 @@ case when r.check_for_act then 'Да' else '' end check_for_act,
        --r.result, -- Статус
         coalesce(ci.blocktype,'DEFAULT') as blocktype, -- Тип блокировки
        to_char (r.end_date,'DD.MM.YYYY HH24:MI:SS') as end_date, -- Дата и время проверки
+              content.erdi_id as erdi_id,
        s.result_id::text as screenshot_id -- ID для формирования ссылки
  from
 results.results r join sor.content_history ch on r.content_id=ch.content_id
 and r.start_date >=ch.st_dt and r.start_date<ch.end_dt
 join sor.content_info ci on ci.content_id=r.content_id and ci.content_version_id=ch.content_version_id
+join sor.content on ch.content_id = content.id
 left outer join results.result_screenshots  s on r.id = s.result_id
 where r.arrangement_id=?
 and r.result in (
@@ -725,6 +745,12 @@ and r.result in (
                     <text-property name="heading">end_date</text-property>
                 </structure>
                 <structure>
+                    <property name="columnName">erdi_id</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">erdi_id</text-property>
+                    <text-property name="heading">erdi_id</text-property>
+                </structure>
+                <structure>
                     <property name="columnName">screenshot_id</property>
                     <property name="analysis">measure</property>
                     <text-property name="displayName">screenshot_id</text-property>
@@ -772,6 +798,11 @@ and r.result in (
                     </structure>
                     <structure>
                         <property name="position">6</property>
+                        <property name="name">erdi_id</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">7</property>
                         <property name="name">screenshot_id</property>
                         <property name="dataType">decimal</property>
                     </structure>
@@ -816,6 +847,13 @@ and r.result in (
                 </structure>
                 <structure>
                     <property name="position">6</property>
+                    <property name="name">erdi_id</property>
+                    <property name="nativeName">erdi_id</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">7</property>
                     <property name="name">screenshot_id</property>
                     <property name="nativeName">screenshot_id</property>
                     <property name="dataType">decimal</property>
@@ -829,11 +867,14 @@ case when r.check_for_act then 'Да' else '' end check_for_act,
        --r.result, -- Статус
         coalesce(ci.blocktype,'DEFAULT') as blocktype, -- Тип блокировки
        to_char (r.end_date,'DD.MM.YYYY HH24:MI:SS') as end_date, -- Дата и время проверки
+              content.erdi_id as erdi_id,
+       
         s.result_id as screenshot_id -- ID для формирования ссылки
  from
 results.results r join sor.content_history ch on r.content_id=ch.content_id
 and r.start_date >=ch.st_dt and r.start_date<ch.end_dt
 join sor.content_info ci on ci.content_id=r.content_id and ci.content_version_id=ch.content_version_id
+join sor.content on ch.content_id = content.id
 left join results.result_screenshots  s on r.id = s.result_id
 where r.arrangement_id=?
 and r.result in (
@@ -985,6 +1026,12 @@ and r.result in (
                     <text-property name="heading">end_date</text-property>
                 </structure>
                 <structure>
+                    <property name="columnName">erdi_id</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">erdi_id</text-property>
+                    <text-property name="heading">erdi_id</text-property>
+                </structure>
+                <structure>
                     <property name="columnName">screenshot_id</property>
                     <property name="analysis">measure</property>
                     <text-property name="displayName">screenshot_id</text-property>
@@ -1027,6 +1074,11 @@ and r.result in (
                     </structure>
                     <structure>
                         <property name="position">5</property>
+                        <property name="name">erdi_id</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">6</property>
                         <property name="name">screenshot_id</property>
                         <property name="dataType">decimal</property>
                     </structure>
@@ -1064,6 +1116,13 @@ and r.result in (
                 </structure>
                 <structure>
                     <property name="position">5</property>
+                    <property name="name">erdi_id</property>
+                    <property name="nativeName">erdi_id</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">6</property>
                     <property name="name">screenshot_id</property>
                     <property name="nativeName">screenshot_id</property>
                     <property name="dataType">decimal</property>
@@ -1076,11 +1135,14 @@ row_number() OVER ()  AS num,
        --r.result, -- Статус
         coalesce(ci.blocktype,'DEFAULT') as blocktype, -- Тип блокировки
        to_char (r.end_date,'DD.MM.YYYY HH24:MI:SS') as end_date, -- Дата и время проверки
+              content.erdi_id as erdi_id,
+       
        s.result_id as screenshot_id -- ID для формирования ссылки
  from
 results.results r join sor.content_history ch on r.content_id=ch.content_id
 and r.start_date >=ch.st_dt and r.start_date<ch.end_dt
 join sor.content_info ci on ci.content_id=r.content_id and ci.content_version_id=ch.content_version_id
+join sor.content on ch.content_id = content.id
 left join results.result_screenshots  s on r.id = s.result_id
 where r.arrangement_id=?
 and r.result in (
@@ -1695,6 +1757,12 @@ and r.result in (
                                 <expression name="expression" type="javascript">dataSetRow["check_for_act"]</expression>
                                 <property name="dataType">string</property>
                             </structure>
+                            <structure>
+                                <property name="name">erdi_id</property>
+                                <text-property name="displayName">erdi_id</text-property>
+                                <expression name="expression" type="javascript">dataSetRow["erdi_id"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
                         </list-property>
                         <property name="pageBreakInterval">1000000</property>
                         <column id="144">
@@ -1909,9 +1977,15 @@ and r.result in (
                                     <property name="borderTopStyle">solid</property>
                                     <property name="borderTopWidth">thin</property>
                                     <property name="textAlign">left</property>
-                                    <data id="137">
+                                    <data id="247">
                                         <property name="textAlign">center</property>
-                                        <property name="resultSetColumn">screenshot_id</property>
+                                        <list-property name="visibility">
+                                            <structure>
+                                                <property name="format">all</property>
+                                                <expression name="valueExpr" type="javascript">row["screenshot_id"] == null</expression>
+                                            </structure>
+                                        </list-property>
+                                        <property name="resultSetColumn">erdi_id</property>
                                         <list-property name="action">
                                             <structure>
                                                 <property name="linkType">hyperlink</property>
@@ -1997,6 +2071,12 @@ and r.result in (
                                 <property name="name">check_for_act</property>
                                 <text-property name="displayName">check_for_act</text-property>
                                 <expression name="expression" type="javascript">dataSetRow["check_for_act"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                            <structure>
+                                <property name="name">erdi_id</property>
+                                <text-property name="displayName">erdi_id</text-property>
+                                <expression name="expression" type="javascript">dataSetRow["erdi_id"]</expression>
                                 <property name="dataType">string</property>
                             </structure>
                         </list-property>
@@ -2212,8 +2292,14 @@ and r.result in (
                                     <property name="borderTopColor">#000000</property>
                                     <property name="borderTopStyle">solid</property>
                                     <property name="borderTopWidth">thin</property>
-                                    <data id="172">
-                                        <property name="resultSetColumn">screenshot_id</property>
+                                    <data id="251">
+                                        <list-property name="visibility">
+                                            <structure>
+                                                <property name="format">all</property>
+                                                <expression name="valueExpr" type="javascript">row["screenshot_id"] == null</expression>
+                                            </structure>
+                                        </list-property>
+                                        <property name="resultSetColumn">erdi_id</property>
                                         <list-property name="action">
                                             <structure>
                                                 <property name="linkType">hyperlink</property>
@@ -2292,6 +2378,12 @@ and r.result in (
                                 <text-property name="displayName">screenshot_id</text-property>
                                 <expression name="expression" type="javascript">dataSetRow["screenshot_id"]</expression>
                                 <property name="dataType">decimal</property>
+                            </structure>
+                            <structure>
+                                <property name="name">erdi_id</property>
+                                <text-property name="displayName">erdi_id</text-property>
+                                <expression name="expression" type="javascript">dataSetRow["erdi_id"]</expression>
+                                <property name="dataType">string</property>
                             </structure>
                         </list-property>
                         <property name="pageBreakInterval">1000000</property>
@@ -2484,8 +2576,14 @@ and r.result in (
                                     <property name="borderTopColor">#000000</property>
                                     <property name="borderTopStyle">solid</property>
                                     <property name="borderTopWidth">thin</property>
-                                    <data id="202">
-                                        <property name="resultSetColumn">screenshot_id</property>
+                                    <data id="252">
+                                        <list-property name="visibility">
+                                            <structure>
+                                                <property name="format">all</property>
+                                                <expression name="valueExpr" type="javascript">row["screenshot_id"] == null</expression>
+                                            </structure>
+                                        </list-property>
+                                        <property name="resultSetColumn">erdi_id</property>
                                         <list-property name="action">
                                             <structure>
                                                 <property name="linkType">hyperlink</property>

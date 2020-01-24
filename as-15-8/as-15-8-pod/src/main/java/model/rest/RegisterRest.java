@@ -22,7 +22,7 @@ public class RegisterRest {
     public String tns;
 
     public RegisterRest(String updateTime, String updateTimeUrgently, String formatVersion, String reg, String tns) {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");  // тайм зону не учитываем!!!
 
         try {
             this.updateTime = updateTime == null ? null : dateFormat.parse(updateTime);

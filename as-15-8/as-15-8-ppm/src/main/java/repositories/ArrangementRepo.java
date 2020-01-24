@@ -26,14 +26,12 @@ public interface ArrangementRepo extends JpaRepository<Arrangement, Long> {
 
     @Query("select DISTINCT a " +
             "from Arrangement a " +
-            "left join a.schedulePeriodArrangements spa " +
-            "where spa.id is null")
+            "where a.status in ('NEW', 'STOPPED')")
     Page<Arrangement> findAllAvailableArrangements(Pageable pageable);
 
     @Query("select DISTINCT a " +
-            "from Arrangement a " +
-            "left join a.scheduleCheckUnits scu " +
-            "where scu.status = 'NEW'")
+        "from Arrangement a " +
+        "where a.status in ('NEW', 'STOPPED')")
     List<Arrangement> findAllAvailableArrangements();
 
     @Query("select a " +

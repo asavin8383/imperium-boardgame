@@ -7,7 +7,7 @@ import exceptions.AS_15_8_PPM_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.*;
-import model.enums.ScheduleCheckUnitStatus;
+import model.enums.ArrangementStatus;
 import model.enums.SchedulePeriodState;
 import model.enums.ScheduleStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,13 +43,8 @@ public class ScheduleService {
         List<Arrangement> arrangements = arrangementRepo.findAllBySchedule(schedule.getId());
         log.info("Удаляем расписание с ИД: {}", schedule.getId());
         scheduleRepo.delete(schedule);
-        arrangements.forEach(arrangement -> {
-                arrangementStatusUploader.changeArrangementStatus(
-                    new ArrangementStatusNotification(arrangement.getId(), ArrangementEvents.SCHEDULE_ROLLBACK));
-                log.info("Изменяем чек-юниты мероприятия с ИД: {} и статусом SCHEDULED", arrangement.getId());
-                scheduleCheckUnitRepo.changeStatus(arrangement, ScheduleCheckUnitStatus.SCHEDULED, ScheduleCheckUnitStatus.NEW);
-                log.info("Статусы чек-юнитов мероприятия с ИД: {} изменены на NEW", arrangement.getId());
-            }
+        arrangements.forEach(arrangement -> arrangementStatusUploader.changeArrangementStatus(
+            new ArrangementStatusNotification(arrangement.getId(), ArrangementEvents.SCHEDULE_ROLLBACK))
         );
     }
 
@@ -76,13 +71,8 @@ public class ScheduleService {
         scheduleRepo.save(schedule);
         log.info("Изменяем статусы всем мероприятиям из расписания с ИД: {}", schedule.getId());
         arrangementRepo.findAllBySchedule(schedule.getId()).forEach(
-            arrangement -> {
-                    arrangementStatusUploader.changeArrangementStatus(
-                        new ArrangementStatusNotification(arrangement.getId(), ArrangementEvents.SCHEDULE));
-                    log.info("Изменяем чек-юниты мероприятия с ИД: {} и статусом NEW", arrangement.getId());
-                    scheduleCheckUnitRepo.changeStatus(arrangement, ScheduleCheckUnitStatus.NEW, ScheduleCheckUnitStatus.SCHEDULED);
-                    log.info("Статусы чек-юнитов мероприятия с ИД: {} изменены на SCHEDULED", arrangement.getId());
-            }
+            arrangement -> arrangementStatusUploader.changeArrangementStatus(
+                new ArrangementStatusNotification(arrangement.getId(), ArrangementEvents.SCHEDULE))
         );
         log.info("Cтатусы всех мероприятий из расписания с ИД: {} сохранены, расписание запланировано", schedule.getId());
         return schedule;
@@ -148,7 +138,7 @@ public class ScheduleService {
     public void checkAndCloseSchedule(Schedule schedule){
         boolean needToClose = arrangementRepo.findAllBySchedule(schedule.getId())
                 .stream()
-                .allMatch(Arrangement::isClosed);
+                .allMatch(arrangement -> arrangement.getStatus() == ArrangementStatus.FINISHED || arrangement.getStatus() == ArrangementStatus.STOPPED);
         if(needToClose){
             schedule.setStatus(ScheduleStatus.FINISHED);
             scheduleRepo.save(schedule);
@@ -198,7 +188,7 @@ public class ScheduleService {
         for(Arrangement arrangement : arrangements) {
             arrangementCheckUnits.put(
                     arrangement,
-                    new TreeSet<>(scheduleCheckUnitRepo.findAllByArrangement(arrangement))
+                    new TreeSet<>(scheduleCheckUnitRepo.findAllByArrangementAndFinished(arrangement, false))
             );
         }
 

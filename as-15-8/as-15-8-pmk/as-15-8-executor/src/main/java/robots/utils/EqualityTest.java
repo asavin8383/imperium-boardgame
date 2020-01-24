@@ -34,7 +34,7 @@ public interface EqualityTest {
 
     static EqualityTest forCheckUnit(CheckUnit unit) {
         switch (unit.getType()) {
-
+            //TODO Маски доменов нужно доработать
             case DOMAIN_MASK:
             case IP_V4_SUBNET:
             case IP_V6_SUBNET:

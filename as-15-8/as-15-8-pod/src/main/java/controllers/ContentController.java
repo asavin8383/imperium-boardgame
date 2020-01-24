@@ -20,7 +20,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
+import repositories.ContentCheckUnitRepository;
 import repositories.ContentHistoryRepository;
+import repositories.ContentRepository;
 import repositories.ContentViewRepository;
 import rest.ResponseStatusString;
 import restapi.ErdiRestClient;
@@ -47,6 +49,8 @@ public class ContentController {
     private final ErdiRestClient erdiRestClient;
     private final InfoService infoService;
     private final ContentHistoryRepository contentHistoryRepo;
+    private final ContentRepository contentRepository;
+    private final ContentCheckUnitRepository contentCheckUnitRepository;
 
     @GetMapping(path = "/erdi")
     @PreAuthorize("hasAnyRole('ROLE_MANAGE_ERDI')")
@@ -96,7 +100,7 @@ public class ContentController {
                         visitorsCntWorldMax);
         return new ResponseEntity<>(pageContent, HttpStatus.OK);
     }
-    //@PreAuthorize("hasAnyRole('ROLE_MANAGE_ERDI')")
+
     @GetMapping(path = "/erdi/ids", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<List<Long>> getRelevantContentIds(
 
@@ -243,7 +247,6 @@ public class ContentController {
     }
 
     @GetMapping("/erdi/checkUnits")
-    //@PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
     public ResponseEntity<List<CheckUnit>> getCheckUnits(@RequestParam("id") String erdiId){
         List<CheckUnit> checkUnits = contentService.getActualCheckUnits(erdiId).stream()
             .map(contentCheckUnit -> new CheckUnit(contentCheckUnit.getContentId(), contentCheckUnit.getCheckUnitType(), contentCheckUnit.getCheckUnitValue()))
@@ -255,7 +258,6 @@ public class ContentController {
     }
 
     @PostMapping("/erdi/checkUnits")
-    //@PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
     public ResponseEntity<List<CheckUnit>> getCheckUnitsByIds(@RequestBody List<String> erdiIds){
         List<CheckUnit> checkUnits = contentService.getActualCheckUnits(erdiIds).stream()
                 .map(contentCheckUnit -> new CheckUnit(contentCheckUnit.getContentId(), contentCheckUnit.getCheckUnitType(), contentCheckUnit.getCheckUnitValue()))
@@ -264,6 +266,16 @@ public class ContentController {
             return ResponseEntity.ok(checkUnits);
         else
             return ResponseEntity.badRequest().build();
+    }
+
+    @PostMapping(path = "/erdi/check_units_count")
+    public Long getCheckUnitsCount(@RequestBody List<Long> erdiIds) {
+        List<String> erdiIdsInString = converErdiIdsToString(erdiIds);
+        return Long.valueOf(contentCheckUnitRepository.findAllByErdIds(erdiIdsInString).size());
+    }
+
+    private List<String> converErdiIdsToString(List<Long> erdiIds) {
+        return erdiIds.stream().map(erdiId -> erdiId.toString()).collect(Collectors.toList());
     }
 
 }

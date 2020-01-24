@@ -5,7 +5,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import enums.SortingDirection;
 import exceptions.AS_15_8_PPT_Exception;
 import lombok.extern.slf4j.Slf4j;
+import model.enums.TrafficType;
 import model.traffic.CustomErdiView;
+import model.traffic.Traffic;
+import model.traffic.TrafficBriefView;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
@@ -35,6 +38,7 @@ public class PodWebClient {
     private static final String GET_SUBTYPE_URI = "/pod/subtype/single_string";
     private static final String GET_CHECK_UNITS_URL = "/pod/erdi/checkUnits";
     private static final String PUT_ERDI_WITH_FILTERS = "/pod/erdi/ids";
+    private static final String GET_ERDI_CHECK_UNITS_COUNT = "pod/erdi/check_units_count";
 
     private static final int fetchFluxConcurrency = 50;
 
@@ -231,5 +235,70 @@ public class PodWebClient {
         return new ArrayList<>(list.stream()
                 .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / subListSize))
                 .values());
+    }
+
+    private Mono<Long> getErdiIdsCheckUnitCount(List<Long> erdiIds) {
+        if(erdiIds == null || erdiIds.size()==0)
+            return Mono.just(0L);
+        return webClient.post()
+            .uri(createUri(GET_ERDI_CHECK_UNITS_COUNT))
+            .body(BodyInserters.fromObject(erdiIds))
+            .exchange()
+            .flatMap(clientResponse -> {
+                if(clientResponse.statusCode().equals(HttpStatus.OK)){
+                    return clientResponse.bodyToMono(Long.class);
+                } else {
+                    return Mono.just(0L);
+                }
+            });
+    }
+
+    private String createUri(String endPoint) {
+        return UriComponentsBuilder.fromUriString(endPoint).build().toString();
+    }
+
+    public Mono<TrafficBriefView> fetchErdiIdsCheckUnitCount(Traffic traffic, List<Long> erdiIds) {
+        if(erdiIds == null || erdiIds.size() == 0)
+            return Mono.just(createTrafficBriefView(traffic, 0L));
+        List<List<Long>> ids = packListToLists(erdiIds, 5000);
+        return Flux.fromIterable(ids)
+                .parallel(fetchFluxConcurrency)
+                .runOn(Schedulers.parallel())
+                .flatMap(this::getErdiIdsCheckUnitCount)
+                .map(staticCount -> createTrafficBriefView(traffic, staticCount))
+                .reduce((acc, current) -> {
+                    acc.setCount(acc.getCount()+current.getCount());
+                    return acc;
+                });
+    }
+
+    public Long calculateActualCheckUnitCount(Traffic traffic, List<Long> erdiIds) {
+        if(erdiIds == null || erdiIds.size() == 0)
+            return 0L;
+        List<List<Long>> ids = packListToLists(erdiIds, 5000);
+
+        return Flux.fromIterable(ids)
+                .parallel(fetchFluxConcurrency)
+                .runOn(Schedulers.parallel())
+                .flatMap(this::getErdiIdsCheckUnitCount)
+                .reduce(Long::sum)
+                .block();
+    }
+
+    private TrafficBriefView createTrafficBriefView(Traffic traffic, Long staticCount) {
+        TrafficBriefView view = new TrafficBriefView(traffic.getId(), traffic.getName());
+        long dynamicCount = 0;
+        view.setCount(staticCount + dynamicCount);
+        view.setType(getTrafficType(staticCount, dynamicCount));
+        return view;
+    }
+
+    private TrafficType getTrafficType(long staticCount, long dynamicCount) {
+        if (staticCount == 0 && dynamicCount > 0)
+            return TrafficType.DYNAMIC;
+        else if (staticCount > 0 && dynamicCount == 0)
+            return TrafficType.STATIC;
+        else
+            return TrafficType.MIXED;
     }
 }

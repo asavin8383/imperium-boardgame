@@ -25,24 +25,15 @@ import java.util.List;
 @Service
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class PPT_DispatcherWebClient {
+public class PPT_WebClient {
 
     private final String PPT_CHECK_UNITS_URI = "/ppt/arrangements/checkUnits";
-    private final String DISPATCHER_CHECK_UNITS_URI = "/dispatcher/arrangement/checkUnits";
 
     @Value("${gateway.url}")
     private String gatewayUrl;
 
     public List<CheckUnit> getFromPPT(Long arrangementId){
-        return getCheckUnitsByArrangementId(arrangementId, PPT_CHECK_UNITS_URI);
-    }
-
-    public List<CheckUnit> getFromDispatcher(Long arrangementId){
-        return getCheckUnitsByArrangementId(arrangementId, DISPATCHER_CHECK_UNITS_URI);
-    }
-
-    private List<CheckUnit> getCheckUnitsByArrangementId(Long arrangementId, String uriString){
-        String uri = UriComponentsBuilder.fromUriString(uriString).queryParam("id", arrangementId).build().toString();
+        String uri = UriComponentsBuilder.fromUriString(PPT_CHECK_UNITS_URI).queryParam("id", arrangementId).build().toString();
         try {
             log.info("Получение чек-юнитов мероприятия {} по запросу: {}", arrangementId, uri);
 

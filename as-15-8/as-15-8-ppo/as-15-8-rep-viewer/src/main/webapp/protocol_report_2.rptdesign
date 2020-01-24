@@ -458,6 +458,12 @@ completion_date-start_date as duration
                     <text-property name="heading">end_date</text-property>
                 </structure>
                 <structure>
+                    <property name="columnName">erdi_id</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">erdi_id</text-property>
+                    <text-property name="heading">erdi_id</text-property>
+                </structure>
+                <structure>
                     <property name="columnName">screenshot_id</property>
                     <property name="analysis">measure</property>
                     <text-property name="displayName">screenshot_id</text-property>
@@ -511,11 +517,16 @@ completion_date-start_date as duration
                     </structure>
                     <structure>
                         <property name="position">6</property>
-                        <property name="name">screenshot_id</property>
+                        <property name="name">erdi_id</property>
                         <property name="dataType">string</property>
                     </structure>
                     <structure>
                         <property name="position">7</property>
+                        <property name="name">screenshot_id</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">8</property>
                         <property name="name">log</property>
                         <property name="dataType">string</property>
                     </structure>
@@ -560,13 +571,20 @@ completion_date-start_date as duration
                 </structure>
                 <structure>
                     <property name="position">6</property>
+                    <property name="name">erdi_id</property>
+                    <property name="nativeName">erdi_id</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">7</property>
                     <property name="name">screenshot_id</property>
                     <property name="nativeName">screenshot_id</property>
                     <property name="dataType">string</property>
                     <property name="nativeDataType">12</property>
                 </structure>
                 <structure>
-                    <property name="position">7</property>
+                    <property name="position">8</property>
                     <property name="name">log</property>
                     <property name="nativeName">log</property>
                     <property name="dataType">string</property>
@@ -580,12 +598,14 @@ row_number() OVER ()  AS num,
        --r.result, -- Статус
         coalesce(ci.blocktype,'DEFAULT') as blocktype, -- Тип блокировки
        to_char (r.end_date,'DD.MM.YYYY HH24:MI:SS') as end_date, -- Дата и время проверки
-       s.result_id::text as screenshot_id, -- ID для формирования ссылки
+              content.erdi_id as erdi_id,
+              s.result_id::text as screenshot_id, -- ID для формирования ссылки
        nmap.result_id::text as log
  from
 results.results r join sor.content_history ch on r.content_id=ch.content_id
 and r.start_date >=ch.st_dt and r.start_date<ch.end_dt
 join sor.content_info ci on ci.content_id=r.content_id and ci.content_version_id=ch.content_version_id
+join sor.content on ch.content_id = content.id
 left outer join results.result_screenshots  s on r.id = s.result_id
 left outer join results.nmap_detail_results nmap on r.id = nmap.result_id
 where r.arrangement_id=?
@@ -749,6 +769,12 @@ and r.result in (
                     <text-property name="heading">screenshot_id</text-property>
                 </structure>
                 <structure>
+                    <property name="columnName">erdi_id</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">erdi_id</text-property>
+                    <text-property name="heading">erdi_id</text-property>
+                </structure>
+                <structure>
                     <property name="columnName">log</property>
                     <property name="analysis">dimension</property>
                     <text-property name="displayName">log</text-property>
@@ -801,6 +827,11 @@ and r.result in (
                     </structure>
                     <structure>
                         <property name="position">7</property>
+                        <property name="name">erdi_id</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">8</property>
                         <property name="name">log</property>
                         <property name="dataType">string</property>
                     </structure>
@@ -852,6 +883,13 @@ and r.result in (
                 </structure>
                 <structure>
                     <property name="position">7</property>
+                    <property name="name">erdi_id</property>
+                    <property name="nativeName">erdi_id</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">8</property>
                     <property name="name">log</property>
                     <property name="nativeName">log</property>
                     <property name="dataType">string</property>
@@ -866,11 +904,13 @@ row_number() OVER ()  AS num,
         coalesce(ci.blocktype,'DEFAULT') as blocktype, -- Тип блокировки
        to_char (r.end_date,'DD.MM.YYYY HH24:MI:SS') as end_date, -- Дата и время проверки
        s.result_id::text as screenshot_id, -- ID для формирования ссылки
+              content.erdi_id as erdi_id,
        nmap.result_id::text as log
  from
 results.results r join sor.content_history ch on r.content_id=ch.content_id
 and r.start_date >=ch.st_dt and r.start_date<ch.end_dt
 join sor.content_info ci on ci.content_id=r.content_id and ci.content_version_id=ch.content_version_id
+join sor.content on ch.content_id = content.id
 left outer join results.result_screenshots  s on r.id = s.result_id
 left outer join results.nmap_detail_results nmap on r.id = nmap.result_id
 where r.arrangement_id=?
@@ -1029,6 +1069,12 @@ and r.result in (
                     <text-property name="heading">screenshot_id</text-property>
                 </structure>
                 <structure>
+                    <property name="columnName">erdi_id</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">erdi_id</text-property>
+                    <text-property name="heading">erdi_id</text-property>
+                </structure>
+                <structure>
                     <property name="columnName">log</property>
                     <property name="analysis">dimension</property>
                     <text-property name="displayName">log</text-property>
@@ -1076,6 +1122,11 @@ and r.result in (
                     </structure>
                     <structure>
                         <property name="position">6</property>
+                        <property name="name">erdi_id</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">7</property>
                         <property name="name">log</property>
                         <property name="dataType">string</property>
                     </structure>
@@ -1120,6 +1171,13 @@ and r.result in (
                 </structure>
                 <structure>
                     <property name="position">6</property>
+                    <property name="name">erdi_id</property>
+                    <property name="nativeName">erdi_id</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">7</property>
                     <property name="name">log</property>
                     <property name="nativeName">log</property>
                     <property name="dataType">string</property>
@@ -1133,11 +1191,13 @@ row_number() OVER ()  AS num,
         coalesce(ci.blocktype,'DEFAULT') as blocktype, -- Тип блокировки
        to_char (r.end_date,'DD.MM.YYYY HH24:MI:SS') as end_date, -- Дата и время проверки
        s.result_id::text as screenshot_id, -- ID для формирования ссылки
-       nmap.result_id::text as log
+              content.erdi_id as erdi_id,
+              nmap.result_id::text as log
  from
 results.results r join sor.content_history ch on r.content_id=ch.content_id
 and r.start_date >=ch.st_dt and r.start_date<ch.end_dt
 join sor.content_info ci on ci.content_id=r.content_id and ci.content_version_id=ch.content_version_id
+join sor.content on ch.content_id = content.id
 left outer join results.result_screenshots  s on r.id = s.result_id
 left outer join results.nmap_detail_results nmap on r.id = nmap.result_id
 where r.arrangement_id=?
@@ -1758,6 +1818,12 @@ and r.result in (
                                 <expression name="expression" type="javascript">dataSetRow["check_for_act"]</expression>
                                 <property name="dataType">string</property>
                             </structure>
+                            <structure>
+                                <property name="name">erdi_id</property>
+                                <text-property name="displayName">erdi_id</text-property>
+                                <expression name="expression" type="javascript">dataSetRow["erdi_id"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
                         </list-property>
                         <property name="pageBreakInterval">1000000</property>
                         <column id="144">
@@ -1992,8 +2058,14 @@ and r.result in (
                                     <property name="borderTopStyle">solid</property>
                                     <property name="borderTopWidth">thin</property>
                                     <property name="textAlign">center</property>
-                                    <data id="137">
-                                        <property name="resultSetColumn">screenshot_id</property>
+                                    <data id="324">
+                                        <list-property name="visibility">
+                                            <structure>
+                                                <property name="format">all</property>
+                                                <expression name="valueExpr" type="javascript">row["screenshot_id"] == null</expression>
+                                            </structure>
+                                        </list-property>
+                                        <property name="resultSetColumn">erdi_id</property>
                                         <list-property name="action">
                                             <structure>
                                                 <property name="linkType">hyperlink</property>
@@ -2017,8 +2089,14 @@ and r.result in (
                                     <property name="borderTopStyle">solid</property>
                                     <property name="borderTopWidth">thin</property>
                                     <property name="textAlign">center</property>
-                                    <data id="243">
-                                        <property name="resultSetColumn">log</property>
+                                    <data id="321">
+                                        <list-property name="visibility">
+                                            <structure>
+                                                <property name="format">all</property>
+                                                <expression name="valueExpr" type="javascript">row["log"] == null</expression>
+                                            </structure>
+                                        </list-property>
+                                        <property name="resultSetColumn">erdi_id</property>
                                         <list-property name="action">
                                             <structure>
                                                 <property name="linkType">hyperlink</property>
@@ -2110,6 +2188,12 @@ and r.result in (
                                 <property name="name">check_for_act</property>
                                 <text-property name="displayName">check_for_act</text-property>
                                 <expression name="expression" type="javascript">dataSetRow["check_for_act"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                            <structure>
+                                <property name="name">erdi_id</property>
+                                <text-property name="displayName">erdi_id</text-property>
+                                <expression name="expression" type="javascript">dataSetRow["erdi_id"]</expression>
                                 <property name="dataType">string</property>
                             </structure>
                         </list-property>
@@ -2347,8 +2431,14 @@ and r.result in (
                                     <property name="borderTopStyle">solid</property>
                                     <property name="borderTopWidth">thin</property>
                                     <property name="textAlign">center</property>
-                                    <data id="268">
-                                        <property name="resultSetColumn">screenshot_id</property>
+                                    <data id="325">
+                                        <list-property name="visibility">
+                                            <structure>
+                                                <property name="format">all</property>
+                                                <expression name="valueExpr" type="javascript">row["screenshot_id"] == null</expression>
+                                            </structure>
+                                        </list-property>
+                                        <property name="resultSetColumn">erdi_id</property>
                                         <list-property name="action">
                                             <structure>
                                                 <property name="linkType">hyperlink</property>
@@ -2372,8 +2462,14 @@ and r.result in (
                                     <property name="borderTopStyle">solid</property>
                                     <property name="borderTopWidth">thin</property>
                                     <property name="textAlign">center</property>
-                                    <data id="270">
-                                        <property name="resultSetColumn">log</property>
+                                    <data id="322">
+                                        <list-property name="visibility">
+                                            <structure>
+                                                <property name="format">all</property>
+                                                <expression name="valueExpr" type="javascript">row["log"] == null</expression>
+                                            </structure>
+                                        </list-property>
+                                        <property name="resultSetColumn">erdi_id</property>
                                         <list-property name="action">
                                             <structure>
                                                 <property name="linkType">hyperlink</property>
@@ -2459,6 +2555,12 @@ and r.result in (
                                 <property name="name">log</property>
                                 <text-property name="displayName">log</text-property>
                                 <expression name="expression" type="javascript">dataSetRow["log"]</expression>
+                                <property name="dataType">string</property>
+                            </structure>
+                            <structure>
+                                <property name="name">erdi_id</property>
+                                <text-property name="displayName">erdi_id</text-property>
+                                <expression name="expression" type="javascript">dataSetRow["erdi_id"]</expression>
                                 <property name="dataType">string</property>
                             </structure>
                         </list-property>
@@ -2674,8 +2776,14 @@ and r.result in (
                                     <property name="borderTopStyle">solid</property>
                                     <property name="borderTopWidth">thin</property>
                                     <property name="textAlign">center</property>
-                                    <data id="301">
-                                        <property name="resultSetColumn">screenshot_id</property>
+                                    <data id="326">
+                                        <list-property name="visibility">
+                                            <structure>
+                                                <property name="format">all</property>
+                                                <expression name="valueExpr" type="javascript">row["screenshot_id"] == null</expression>
+                                            </structure>
+                                        </list-property>
+                                        <property name="resultSetColumn">erdi_id</property>
                                         <list-property name="action">
                                             <structure>
                                                 <property name="linkType">hyperlink</property>
@@ -2699,7 +2807,13 @@ and r.result in (
                                     <property name="borderTopStyle">solid</property>
                                     <property name="borderTopWidth">thin</property>
                                     <property name="textAlign">center</property>
-                                    <data id="303">
+                                    <data id="323">
+                                        <list-property name="visibility">
+                                            <structure>
+                                                <property name="format">all</property>
+                                                <expression name="valueExpr" type="javascript">row["log"] == null</expression>
+                                            </structure>
+                                        </list-property>
                                         <property name="resultSetColumn">log</property>
                                         <list-property name="action">
                                             <structure>
