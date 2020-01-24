@@ -272,7 +272,7 @@ public class PodWebClient {
                 });
     }
 
-    public Long calculateActualCheckUnitCount(Traffic traffic, List<Long> erdiIds) {
+    public Long calculateActualCheckUnitCount(List<Long> erdiIds) {
         if(erdiIds == null || erdiIds.size() == 0)
             return 0L;
         List<List<Long>> ids = packListToLists(erdiIds, 5000);

@@ -41,13 +41,24 @@ public class TrafficController {
                 pageNumber, pageSize, query, accessToolType, name);
     }
 
-    @GetMapping(path = "/actualize_check_units")
-    public ResponseEntity getBriefTrafficListByCheckUnits(@RequestParam("id") Traffic traffic) {
+    @PutMapping(path = "/actual_check_units")
+    public ResponseEntity calculateActualCheckUnits(@RequestParam("id") Traffic traffic) {
         try {
-            Long res = trafficService.actualizeTrafficCheckUnitsCount(traffic);
+            Long res = trafficService.actualizeTrafficCheckUnitsCount(traffic.getId());
             return ResponseEntity.ok().body(res);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Ошибка при подсчёте актуального числа чек юнитов для трафика");
+        }
+
+    }
+
+    @PutMapping(path = "/actual_check_units_all")
+    public ResponseEntity calculateActualCheckUnitsForAllTraffic() {
+        try {
+            trafficService.actualizeCheckUnitsCountForAllTraffic();
+            return ResponseEntity.ok().body("Чек юниты для всех трафиков актуализаированы");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Ошибка при подсчёте актуального числа чек юнитов для всех трафиков");
         }
 
     }
@@ -62,14 +73,18 @@ public class TrafficController {
     @PostMapping
     @ResponseStatus(code = HttpStatus.CREATED)
     public TrafficFullView createTraffic() {
-        return trafficService.createTraffic();
+        TrafficFullView trafficFullView  = trafficService.createTraffic();
+        trafficService.actualizeTrafficCheckUnitsCount(trafficFullView.getId());
+        return trafficFullView;
     }
 
     @Transactional
     @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public TrafficFullView updateTraffic(@RequestBody TrafficFullView fullView,
                                          @PathVariable("id") Traffic traffic) {
-        return trafficService.updateTraffic(fullView, traffic);
+        TrafficFullView trafficFullView = trafficService.updateTraffic(fullView, traffic);
+        trafficService.actualizeTrafficCheckUnitsCount(traffic.getId());
+        return trafficFullView;
     }
 
     @DeleteMapping(path = "/{id}")
