@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -38,6 +39,17 @@ public class TrafficController {
 
         return trafficService.getBriefTrafficList(sortingDirection, sortingColumn,
                 pageNumber, pageSize, query, accessToolType, name);
+    }
+
+    @GetMapping(path = "/actualize_check_units")
+    public ResponseEntity getBriefTrafficListByCheckUnits(@RequestParam("id") Traffic traffic) {
+        try {
+            Long res = trafficService.actualizeTrafficCheckUnitsCount(traffic);
+            return ResponseEntity.ok().body(res);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Ошибка при подсчёте актуального числа чек юнитов для трафика");
+        }
+
     }
 
     @Transactional

@@ -20,12 +20,14 @@ import org.springframework.transaction.annotation.Transactional;
 import repositories.AccessToolsCategoriesRepo;
 import repositories.TrafficRepository;
 import utils.TrafficUnitUtils;
+import webClients.PodWebClient;
 
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -36,6 +38,7 @@ public class TrafficService {
 
     private final TrafficRepository trafficRepository;
     private final AccessToolsCategoriesRepo accessToolsCategoriesRepo;
+    private final PodWebClient podWebClient;
 
     public Page<TrafficBriefView> getBriefTrafficList(SortingDirection sortingDirection,
                                                       String sortingColumn,
@@ -49,25 +52,51 @@ public class TrafficService {
 
         PageRequest pageable = PageRequest.of(pageNumber, pageSize,
                 SortingHelper.createSorting(sortingDirection, sortingColumn));
+
         Page<Traffic> traffics = trafficRepository.findAll(createTrafficSpecification(query, accessToolType), pageable);
-        List<TrafficBriefView> views = traffics.getContent().parallelStream().map(traffic -> {
-            TrafficBriefView view = new TrafficBriefView(traffic.getId(), traffic.getName());
-            long formalErdiCount = trafficRepository.countContentErdiByTrafficId(traffic.getId());
-            long customErdiCount = trafficRepository.countCustomErdiByTrafficId(traffic.getId());
-            long searchPhrasesCount = trafficRepository.countSearchPhrasesByTrafficId(traffic.getId());
-            long searchTemplatesCount = trafficRepository.countSearchTemplatesByTrafficId(traffic.getId());
-            long dynamicCount = 0; //trafficRepository.countDynamicByTrafficId(traffic.getId());
-            long staticCount = formalErdiCount + customErdiCount + searchPhrasesCount + searchTemplatesCount;
-            view.setCount(staticCount + dynamicCount);
-            view.setType(getTrafficType(staticCount, dynamicCount));
-            return view;
-        }).collect(Collectors.toList());
-
-        if (filteredName != null && !filteredName.isEmpty())
-           views = views.stream().filter(r -> r.getName().toUpperCase().contains(filteredName.toUpperCase())).collect(Collectors.toList());
-
+        List<TrafficBriefView> views = traffics.getContent().parallelStream().map(traffic ->
+                createTrafficBriefView(traffic)).collect(Collectors.toList());
 
         return new PageImpl<>(views, pageable, traffics.getTotalElements());
+    }
+
+    private TrafficBriefView createTrafficBriefView(Traffic traffic) {
+        TrafficBriefView view = new TrafficBriefView(traffic.getId(), traffic.getName());
+        long formalErdiCount = traffic.getActualCheckUnitsCount();
+        long customErdiCount = trafficRepository.countCustomErdiByTrafficId(traffic.getId());
+        long dynamicCount = 0;
+        long staticCount = formalErdiCount + customErdiCount;
+        view.setCount(staticCount + dynamicCount);
+        view.setType(getTrafficType(staticCount, dynamicCount));
+        return view;
+    }
+
+    public Long actualizeTrafficCheckUnitsCount(Traffic traffic) {
+        Long actualCheckUnitsCount = getActualTrafficCheckUnitCount(traffic);
+        traffic.setActualCheckUnitsCount(actualCheckUnitsCount);
+        trafficRepository.save(traffic);
+        return actualCheckUnitsCount;
+    }
+
+    private Long getActualTrafficCheckUnitCount(Traffic traffic) {
+        try {
+            List<Long> erdiIds = trafficRepository.allContentErdiByTrafficId(traffic.getId());
+            Long actualCheckUnitsCount = podWebClient.calculateActualCheckUnitCount(traffic, erdiIds);
+            return actualCheckUnitsCount;
+        } catch (Exception e) {
+            return 0L;
+        }
+    }
+
+    private Map<Traffic, List<Long>> createTrafficErdiIdsKV(Page<Traffic> traffics) {
+        Map<Traffic, List<Long>> mapTraffics =
+                traffics.getContent()
+                        .stream()
+                        .collect(Collectors.toMap(
+                                traffic -> traffic,
+                                traffic -> trafficRepository.allContentErdiByTrafficId(traffic.getId())
+                        ));
+        return mapTraffics;
     }
 
     private TrafficType getTrafficType(long staticCount, long dynamicCount) {
@@ -99,6 +128,8 @@ public class TrafficService {
                 traffic, TrafficUnitType.CUSTOM, category));
         traffic.getSearchQueryTrafficUnits().add(createSearchTrafficUnit(
                 traffic, TrafficUnitType.TEMPLATE, category));
+
+        traffic.setActualCheckUnitsCount(getActualTrafficCheckUnitCount(traffic));
         return convertToFullView(trafficRepository.save(traffic));
     }
 
@@ -115,6 +146,8 @@ public class TrafficService {
         }
 
         syncAssociation(oldTraffic);
+
+        oldTraffic.setActualCheckUnitsCount(getActualTrafficCheckUnitCount(oldTraffic));
         return convertToFullView(trafficRepository.save(oldTraffic));
     }
 
