@@ -2934,7 +2934,7 @@
 					]
 				},
 				{
-					"name": "Получение списка мероприятий по списку статусов",
+					"name": "Получение списка мероприятий по списку статусов, fgisId, оперратору",
 					"request": {
 						"method": "GET",
 						"header": [
@@ -2946,7 +2946,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{url}}/arrangements/statuses?statuses=NEW,FORMED",
+							"raw": "{{url}}/arrangements/statuses?statuses=FORMED,NEW,FINISHED,ACT_SENT,ERROR,RUNNING,SCHEDULED&operator=james&fgisId=146",
 							"host": [
 								"{{url}}"
 							],
@@ -2967,7 +2967,15 @@
 								},
 								{
 									"key": "statuses",
-									"value": "NEW,FORMED"
+									"value": "FORMED,NEW,FINISHED,ACT_SENT,ERROR,RUNNING,SCHEDULED"
+								},
+								{
+									"key": "operator",
+									"value": "james"
+								},
+								{
+									"key": "fgisId",
+									"value": "146"
 								}
 							]
 						}
@@ -3555,25 +3563,25 @@
 	],
 	"variable": [
 		{
-			"id": "acd3e548-e982-4758-8d1e-390dac61f48a",
+			"id": "0a0a0237-cfe9-4988-81e0-86eca3b30acf",
 			"key": "url",
 			"value": "http://localhost:15800",
 			"type": "string"
 		},
 		{
-			"id": "34a32b0e-bf75-4c5b-b290-b47cce9c2b1a",
+			"id": "a0edccb2-1b79-4983-b0e9-4c2c4bd5b036",
 			"key": "oper_token",
 			"value": "",
 			"type": "string"
 		},
 		{
-			"id": "584f04c6-41d1-4dd0-a336-2962b93ab3ea",
+			"id": "77f0f75f-a240-4230-bb7e-0391c1f6ad17",
 			"key": "test_url",
 			"value": "http://192.168.5.253:15800",
 			"type": "string"
 		},
 		{
-			"id": "a88ea485-8ce5-4ca8-86e1-3e5664d7c8e0",
+			"id": "1a8049af-1945-40fe-aefb-abae6ff19418",
 			"key": "admin_token",
 			"value": "",
 			"type": "string"
