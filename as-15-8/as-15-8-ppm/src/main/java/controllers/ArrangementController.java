@@ -142,7 +142,12 @@ public class ArrangementController {
                 log.error(errorDescription);
                 return ResponseEntity.badRequest().body(errorDescription);
             }
-
+            log.info("Отправляем сигнал на закрытие мероприятия {} из расписания {} диспетчеру", arrangement.getId(), schedules.get(0).getId());
+            if (!sendStopSignalToDispatcher(arrangement.getId(), schedules.get(0).getId())){
+                log.error("Ошибка остановки мероприятия {} из расписания {}", arrangement.getId(), schedules.get(0).getId());
+                return ResponseEntity.badRequest().body(String.format("Ошибка остановки мероприятия %d из расписания %d", arrangement.getId(), schedules.get(0).getId()));
+            }
+            log.info("Мероприятие {} из расписания {} остановлено, закрываем schedulePeriodArrangements", arrangement.getId(), schedules.get(0).getId());
             //Закрываем schedulePeriodArrangement у текущего расписания для данного мероприятия
             schedulePeriodArrangementRepo.findAllByScheduleAndArrangement(schedules.get(0).getId(), arrangement.getId())
                 .forEach(schedulePeriodArrangement -> {
@@ -150,6 +155,7 @@ public class ArrangementController {
                     schedulePeriodArrangementRepo.save(schedulePeriodArrangement);
                 });
             //Меняем статус мероприятию
+            log.info("Меняем статус мероприятию {} из расписания {} на STOPPED", arrangement.getId(), schedules.get(0).getId());
             arrangement.setStatus(ArrangementStatus.STOPPED);
             arrangementRepo.save(arrangement);
             return ResponseEntity.ok().build();
