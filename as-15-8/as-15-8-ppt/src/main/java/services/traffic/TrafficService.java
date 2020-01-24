@@ -17,6 +17,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
 import repositories.AccessToolsCategoriesRepo;
 import repositories.TrafficRepository;
 import utils.TrafficUnitUtils;
@@ -28,6 +30,7 @@ import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -71,31 +74,47 @@ public class TrafficService {
         return view;
     }
 
-    public Long actualizeTrafficCheckUnitsCount(Traffic traffic) {
-        Long actualCheckUnitsCount = getActualTrafficCheckUnitCount(traffic);
-        traffic.setActualCheckUnitsCount(actualCheckUnitsCount);
-        trafficRepository.save(traffic);
+    public Long actualizeTrafficCheckUnitsCount(Long trafficId) {
+        Optional<Traffic> traffic = trafficRepository.findById(trafficId);
+        traffic.orElseThrow(() ->
+                new AS_15_8_PPT_Exception("Ошибка при актуализации количества чек юнитов для трафика, трафик с такми id не найден: "+ trafficId));
+
+        Long actualCheckUnitsCount = getActualTrafficCheckUnitCount(trafficId);
+        traffic.get().setActualCheckUnitsCount(actualCheckUnitsCount);
+        trafficRepository.save(traffic.get());
         return actualCheckUnitsCount;
     }
 
-    private Long getActualTrafficCheckUnitCount(Traffic traffic) {
+    private Long getActualTrafficCheckUnitCount(Long trafficId) {
         try {
-            List<Long> erdiIds = trafficRepository.allContentErdiByTrafficId(traffic.getId());
-            Long actualCheckUnitsCount = podWebClient.calculateActualCheckUnitCount(traffic, erdiIds);
+            List<Long> erdiIds = trafficRepository.allContentErdiByTrafficId(trafficId);
+            Long actualCheckUnitsCount = podWebClient.calculateActualCheckUnitCount(erdiIds);
             return actualCheckUnitsCount;
         } catch (Exception e) {
             return 0L;
         }
     }
 
-    private Map<Traffic, List<Long>> createTrafficErdiIdsKV(Page<Traffic> traffics) {
-        Map<Traffic, List<Long>> mapTraffics =
-                traffics.getContent()
-                        .stream()
-                        .collect(Collectors.toMap(
-                                traffic -> traffic,
-                                traffic -> trafficRepository.allContentErdiByTrafficId(traffic.getId())
-                        ));
+    public void actualizeCheckUnitsCountForAllTraffic() {
+        List<Traffic> traffics = trafficRepository.findAll();
+
+        Map<Traffic, List<Long>> mapTraffics = createTrafficErdiIdsKV(traffics);
+
+        List<TrafficBriefView> views = Flux.fromIterable(mapTraffics.entrySet())
+                .parallel(50)
+                .runOn(Schedulers.parallel())
+                .flatMap(trafficEntry -> podWebClient.fetchErdiIdsCheckUnitCount(trafficEntry.getKey(), trafficEntry.getValue()))
+                .sequential()
+                .collectList()
+                .block();
+    }
+
+    private Map<Traffic, List<Long>> createTrafficErdiIdsKV(List<Traffic> traffics) {
+        Map<Traffic, List<Long>> mapTraffics = traffics.stream()
+                .collect(Collectors.toMap(
+                        traffic -> traffic,
+                        traffic -> trafficRepository.allContentErdiByTrafficId(traffic.getId())
+                ));
         return mapTraffics;
     }
 
@@ -129,7 +148,6 @@ public class TrafficService {
         traffic.getSearchQueryTrafficUnits().add(createSearchTrafficUnit(
                 traffic, TrafficUnitType.TEMPLATE, category));
 
-        traffic.setActualCheckUnitsCount(getActualTrafficCheckUnitCount(traffic));
         return convertToFullView(trafficRepository.save(traffic));
     }
 
@@ -147,7 +165,6 @@ public class TrafficService {
 
         syncAssociation(oldTraffic);
 
-        oldTraffic.setActualCheckUnitsCount(getActualTrafficCheckUnitCount(oldTraffic));
         return convertToFullView(trafficRepository.save(oldTraffic));
     }
 
