@@ -5,12 +5,15 @@ import exceptions.AS_15_8_PPM_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.*;
+import model.enums.ArrangementStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import repositories.ArrangementRepo;
 
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -18,13 +21,24 @@ import java.util.*;
 public class ScheduleCreationService {
 
     private final SchedulerProperties schedulerProperties;
+    private final ArrangementRepo arrangementRepo;
 
     public Schedule create(Map<Arrangement, TreeSet<ScheduleCheckUnit>> arrangementCheckUnits, int maxWorkersCount){
         Schedule schedule = createNewSchedule(arrangementCheckUnits, maxWorkersCount);
         calculateWorkers(schedule, arrangementCheckUnits);
         if(schedule.getSchedulePeriods().size() == 0)
             throw new AS_15_8_PPM_Exception("Ошибка формирования расписания! Не было сформировано ни одного периода!");
+        //Меняем статус, чтобы мероприятия пропали из списка допустимых
+        updateStatus(arrangementCheckUnits.keySet(), ArrangementStatus.SCHEDULED);
         return schedule;
+    }
+
+    private void updateStatus(Collection<Arrangement> arrangements, ArrangementStatus status){
+        log.info("Меняем статусы мероприятиям: {} на {}", arrangements.stream().map(arrangement -> arrangement.getId().toString()).collect(Collectors.joining(",")), status);
+        arrangements.forEach(arrangement -> {
+            arrangement.setStatus(status);
+            arrangementRepo.save(arrangement);
+        });
     }
 
     ArrangementSchedulePeriodProcessing calculateArrangementSchedulePeriodProcessing(

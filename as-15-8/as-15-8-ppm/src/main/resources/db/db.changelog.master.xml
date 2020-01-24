@@ -19,5 +19,6 @@
     <include file="db/changelog/ppm.0014.schedule_period_check_unit_status.xml"/>
     <include file="db/changelog/ppm.0015.stop_arrangements.xml"/>
     <include file="db/changelog/ppm.0016.update_arrangements.xml"/>
+    <include file="db/changelog/ppm.0017.arrangements.SCHEDULED.xml"/>
     <include file="db/changelog/ppm.0043.description.xml"/>
 </databaseChangeLog>

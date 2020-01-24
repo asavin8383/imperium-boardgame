@@ -43,8 +43,13 @@ public class ScheduleService {
         List<Arrangement> arrangements = arrangementRepo.findAllBySchedule(schedule.getId());
         log.info("Удаляем расписание с ИД: {}", schedule.getId());
         scheduleRepo.delete(schedule);
-        arrangements.forEach(arrangement -> arrangementStatusUploader.changeArrangementStatus(
-            new ArrangementStatusNotification(arrangement.getId(), ArrangementEvents.SCHEDULE_ROLLBACK))
+        log.info("Меняем статусы мероприятиям: {} на NEW", arrangements.stream().map(arrangement -> arrangement.getId().toString()).collect(Collectors.joining(",")));
+        arrangements.forEach(arrangement -> {
+            arrangement.setStatus(ArrangementStatus.NEW);
+            arrangementRepo.save(arrangement);
+            arrangementStatusUploader.changeArrangementStatus(
+                    new ArrangementStatusNotification(arrangement.getId(), ArrangementEvents.SCHEDULE_ROLLBACK));
+            }
         );
     }
 
