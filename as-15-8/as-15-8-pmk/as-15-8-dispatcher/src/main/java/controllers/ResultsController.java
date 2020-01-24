@@ -20,6 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import services.AnalysisResultServiceFactory;
 import services.DetailResultService;
 import services.ResultsKafkaService;
@@ -63,6 +64,13 @@ public class ResultsController {
                 sortingDirection,
                 sortingColumn,
                 pageable);
+    }
+
+    @PreAuthorize("hasRole('ROLE_SYSTEM')")
+    @GetMapping(value = "/ids", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<Long> getListJobIds(@RequestParam Long arrangementId) {
+        return Flux.fromIterable(resultService
+            .getArrangementResultIds(arrangementId));
     }
 
     @GetMapping(path = "/screenshot", produces = MediaType.IMAGE_PNG_VALUE)

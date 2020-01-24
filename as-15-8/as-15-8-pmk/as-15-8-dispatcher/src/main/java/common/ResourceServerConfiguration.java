@@ -19,6 +19,7 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
                 .antMatchers(HttpMethod.GET,
                         "/act/checkResult/**",
                         "/act/screenshots/**",
+                        "/results/ids/**",
                         "/results/screenshot/**",
                         "/results/etalon_screenshot/**",
                         "/results/nmap_log/**",

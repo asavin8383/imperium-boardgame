@@ -1,6 +1,7 @@
 package restapi;
 
 import arrangement.ArrangementStatusNotification;
+import enums.ArrangementEvents;
 import enums.ExecutionStatus;
 import exceptions.AS_15_8_DispatcherException;
 import lombok.RequiredArgsConstructor;
@@ -9,8 +10,10 @@ import model.Arrangement;
 import model.enums.ArrangementStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
@@ -20,6 +23,7 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.util.UriComponentsBuilder;
 import repositories.ArrangementRepo;
 import services.ActService;
+import services.ArrangementService;
 
 import java.util.Optional;
 
@@ -39,28 +43,35 @@ public class ArrangementStatusProducer {
     private final OAuth2RestTemplate restTemplate;
     private final ActService actService;
     private final ArrangementRepo arrangementRepo;
+    private final ArrangementService arrangementService;
 
     @Value("${gateway.url}")
     private String gatewayUrl;
 
-    public void sendArrangementStatusMessage(ArrangementStatusNotification arrangementStatusNotificationForPPT){
-        Long arrangementId = arrangementStatusNotificationForPPT.getArrangementId();
-        //TODO Переделать смену статуса с параллельного на последовательный.
-        //TODO Переделано. Проверить.
-        if (sendToPPM(arrangementId, arrangementStatusNotificationForPPT)) {
-            finishArrangement(arrangementId);
+    public void sendArrangementStatusMessage(Long arrangementId, Long version, ArrangementStatus status) {
+        boolean isStopped = !arrangementService.isArrangementRunning(arrangementId, version);
+
+        ArrangementStatusNotification notification = new ArrangementStatusNotification(
+                arrangementId,
+                isStopped ? ArrangementEvents.STOP : ArrangementEvents.FINISH
+        );
+        if (sendToPPM(arrangementId, notification)) {
+            finishArrangement(arrangementId, version, isStopped);
             sendAct(arrangementId);
         }
     }
 
-    private void finishArrangement(Long arrangementId){
+    private void finishArrangement(Long arrangementId, Long version, boolean isStopped){
         Arrangement arr = arrangementRepo.findById(arrangementId)
                 .orElseThrow(() -> new AS_15_8_DispatcherException("Ошибка при закрытии мероприятия. Мероприятие не найдено по ID: " + arrangementId));
-        arr.setStatus(ArrangementStatus.FINISHED);
+        if(!isStopped)
+            arr.setStatus(ArrangementStatus.FINISHED);
+        else
+            arr.setStatus(ArrangementStatus.STOPPED);
         arrangementRepo.save(arr);
     }
 
-    public Boolean sendToPPM(Long arrangementId, ArrangementStatusNotification arrangementStatusNotification){
+    private Boolean sendToPPM(Long arrangementId, ArrangementStatusNotification arrangementStatusNotification){
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -71,7 +82,7 @@ public class ArrangementStatusProducer {
         try {
             restTemplate.put(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(PPM_STATUS_ENDPOINT).queryParam("id", arrangementId).build().toString(), entity);
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
-            log.info("Ошибка отправки сообщения с изменением статуса мероприятия %d в ППМ, код возврата %s", arrangementId, ex.getStatusCode());
+            log.info("Ошибка отправки сообщения с изменением статуса мероприятия " + arrangementId + " в ППМ, код возврата " + ex.getStatusCode());
             return false;
         }
         log.info("Сообщение с изменением статуса мероприятия {} успешно отправлено в ППМ", arrangementId);
@@ -97,10 +108,20 @@ public class ArrangementStatusProducer {
 
     private boolean isActAvailableFromPPT(Long arrangementId) {
         try {
-            Optional<Boolean> result = restTemplate.getForObject(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(PPT_IS_ACT_AVAILABLE_FOR_AUTOMATIC_SEND).queryParam("id", arrangementId).build().toString(), Optional.class);
-            if (result.isPresent())
-                return result.get();
-            else return false;
+            String uri = UriComponentsBuilder
+                    .fromHttpUrl(gatewayUrl)
+                    .path(PPT_IS_ACT_AVAILABLE_FOR_AUTOMATIC_SEND)
+                    .queryParam("id", arrangementId)
+                    .build()
+                    .toString();
+            Optional<Boolean> result = restTemplate.exchange(
+                    uri,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<Optional<Boolean>>(){}
+            ).getBody();
+            //FIXME Как то много опшеналов...
+            return Optional.ofNullable(result).map(res -> res.orElse(false)).orElse(false);
         } catch (Exception ex) {
             throw AS_15_8_DispatcherException.logAndGet(log, String.format("Ошибка отправки сообщения с запросом статуса доступности отправки акта мероприятию %d в ППТ", arrangementId));
         }

@@ -71,14 +71,14 @@ public class ArrangementStatusServiceImpl implements ArrangementStatusService {
     }
 
     private void saveArrangementView(Arrangement arrangement){
-        if (arrangement.getStatus().equals(ExecutionStatus.ACTION_REQUIRED) || arrangement.getStatus().equals(ExecutionStatus.FINISHED)){
+        if (arrangement.getStatus().equals(ExecutionStatus.FINISHED)){
             ClientNotification clientNotification = new ClientNotification();
             clientNotification.setOperator(arrangement.getFormalTask().getOperator());
             clientNotification.setMessageText("Статус мероприятия " + arrangement.getId() + " сменился на '" + arrangement.getStatus().getDescription() + "'");
             clientNotification.setViewed(false);
             clientNotificationRepo.save(clientNotification);
 
-            log.info("Сохранение поручения ", clientNotification);
+            log.info("Сохранение поручения " + clientNotification);
             log.info("clientNotification.getOperator = " + clientNotification.getOperator());
         }
     }

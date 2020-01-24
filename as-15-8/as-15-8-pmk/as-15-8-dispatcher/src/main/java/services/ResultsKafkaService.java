@@ -86,14 +86,35 @@ public class ResultsKafkaService {
                 .orElseGet(() -> new PageImpl<>(new ArrayList<>(), pageable, 0));
     }
 
+    public List<Long> getArrangementResultIds(Long arrangementId) {
+        return getArrangementResultsIterator(arrangementId)
+                .map(resultsIterator -> StreamSupport
+                    .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), false)
+                    .map(kv -> kv.key.getJobId())
+                    .collect(Collectors.toList()))
+                .orElseGet(ArrayList::new);
+    }
+
     public Optional<CheckUnitResult> getArrangementResult(Long arrangementId, Long jobId) {
         return getResultsKeyValueStore()
-                .map(store -> store.get(new CheckUnitKey(arrangementId, jobId)));
+            .flatMap(store -> getLastIteratorValue(
+                store.range(
+                    new CheckUnitKey(arrangementId, jobId, Long.MIN_VALUE),
+                    new CheckUnitKey(arrangementId, jobId, Long.MAX_VALUE)
+                )
+            )
+            .map(kv -> kv.value));
     }
 
     public Optional<Screenshots> getScreenshot(Long arrangementId, Long jobId) {
         return getScreenshotsKeyValueStore()
-                .map(store -> store.get(new CheckUnitKey(arrangementId, jobId)));
+            .flatMap(store -> getLastIteratorValue(
+                store.range(
+                    new CheckUnitKey(arrangementId, jobId, Long.MIN_VALUE),
+                    new CheckUnitKey(arrangementId, jobId, Long.MAX_VALUE)
+                )
+            )
+            .map(kv -> kv.value));
     }
 
     public long getResultsCount(Long arrangementId) {
@@ -138,8 +159,8 @@ public class ResultsKafkaService {
 
     Optional<KeyValueIterator<CheckUnitKey, CheckUnitResult>> getArrangementResultsIterator(Long arrangementId) {
         return getResultsKeyValueStore().map(store -> store.range(
-                new CheckUnitKey(arrangementId, Long.MIN_VALUE),
-                new CheckUnitKey(arrangementId, Long.MAX_VALUE))
+                new CheckUnitKey(arrangementId, Long.MIN_VALUE, Long.MIN_VALUE),
+                new CheckUnitKey(arrangementId, Long.MAX_VALUE, Long.MAX_VALUE))
         );
     }
 
@@ -238,5 +259,11 @@ public class ResultsKafkaService {
                         screenshotsTableName,
                         QueryableStoreTypes.keyValueStore()
                 ) : screenshotsStore);
+    }
+
+    private <K, V> Optional<KeyValue<K, V>> getLastIteratorValue(KeyValueIterator<K, V> resultsIterator){
+        return StreamSupport
+            .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), false)
+            .reduce((first, second) -> second);
     }
 }

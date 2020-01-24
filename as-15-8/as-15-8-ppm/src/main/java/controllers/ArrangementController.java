@@ -114,7 +114,10 @@ public class ArrangementController {
         }
 
         if (sendToPPT(notification)) {
-            arrangement.setStatus(ArrangementStatus.FINISHED);
+            if(notification.getEvent().equals(ArrangementEvents.STOP))
+                arrangement.setStatus(ArrangementStatus.STOPPED);
+            else
+                arrangement.setStatus(ArrangementStatus.FINISHED);
             arrangementRepo.save(arrangement);
             //Проверка, не нужно ли закрыть расписание
             scheduleRepo
