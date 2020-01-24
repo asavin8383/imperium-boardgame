@@ -11,8 +11,10 @@ import exceptions.AS_15_8_PPM_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Arrangement;
+import model.Schedule;
 import model.ScheduleCheckUnit;
-import model.enums.ScheduleCheckUnitStatus;
+import model.enums.ArrangementStatus;
+import model.enums.ScheduleStatus;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,11 +28,13 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.util.UriComponentsBuilder;
 import repositories.ArrangementRepo;
 import repositories.ScheduleCheckUnitRepo;
+import repositories.SchedulePeriodArrangementRepo;
 import repositories.ScheduleRepo;
 import restapi.ArrangementStatusUploader;
 import restapi.pod.DomainMaskUploader;
 import services.ScheduleService;
-import webClients.PPT_DispatcherWebClient;
+import webClients.DispatcherWebClient;
+import webClients.PPT_WebClient;
 
 import javax.transaction.Transactional;
 import java.time.LocalTime;
@@ -51,17 +55,20 @@ import java.util.stream.Collectors;
 public class ArrangementController {
 
     private final ArrangementRepo arrangementRepo;
-    private final PPT_DispatcherWebClient PPT_DispatcherWebClient;
+    private final PPT_WebClient pptWebClient;
+    private final DispatcherWebClient dispatcherWebClient;
     private final ArrangementStatusUploader arrangementStatusUploader;
     private final SchedulerProperties schedulerProperties;
     private final DomainMaskUploader domainMaskUploader;
     private final ScheduleRepo scheduleRepo;
     private final ScheduleService scheduleService;
     private final OAuth2RestTemplate restTemplate;
+    private final SchedulePeriodArrangementRepo schedulePeriodArrangementRepo;
 
     @Value("${gateway.url}")
     private String gatewayUrl;
     private final String PPT_STATUS_ENDPOINT = "/ppt/arrangements/status";
+    private final String DISPATCHER_STOP_ENDPOINT = "/dispatcher/stop";
     private final ScheduleCheckUnitRepo scheduleCheckUnitRepo;
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -107,12 +114,41 @@ public class ArrangementController {
         }
 
         if (sendToPPT(notification)) {
-            arrangement.setClosed(true);
+            arrangement.setStatus(ArrangementStatus.FINISHED);
             arrangementRepo.save(arrangement);
-            scheduleService.checkAndCloseSchedule(
-                    scheduleRepo.findByArrangement(arrangement.getId())
-                            .orElseThrow(() -> new AS_15_8_PPM_Exception("Ошибка проверки закрытия расписания! Расписание не найдено по ИД мероприятия: " + arrangement.getId()))
-            );
+            //Проверка, не нужно ли закрыть расписание
+            scheduleRepo
+                .findByArrangement(arrangement.getId())
+                .forEach(scheduleService::checkAndCloseSchedule);
+        }
+    }
+
+    @PutMapping(value = "/stop")
+    @Transactional
+    public ResponseEntity stopArrangement(@RequestParam("id") Arrangement arrangement){
+        if (arrangement == null){
+            return ResponseEntity.noContent().build();
+        }
+        if(arrangement.getStatus()!=ArrangementStatus.RUNNING){
+            return ResponseEntity.badRequest().body("Мероприятие с ID: " + arrangement.getId() + " имеет недопустимый статус для остановки: " + arrangement.getStatus());
+        } else {
+            List<Schedule> schedules = scheduleRepo.findByStatusAndArrangement(ScheduleStatus.RUNNING, arrangement.getId());
+            if(schedules.size() != 1){
+                String errorDescription = String.format("Ошибка остановки мероприятия! Ошибка получения запущенного расписания с мероприятием %d, список расписаний либо пуст либо содержит более 1 элемента: %s", arrangement.getId(), schedules.toString());
+                log.error(errorDescription);
+                return ResponseEntity.badRequest().body(errorDescription);
+            }
+
+            //Закрываем schedulePeriodArrangement у текущего расписания для данного мероприятия
+            schedulePeriodArrangementRepo.findAllByScheduleAndArrangement(schedules.get(0).getId(), arrangement.getId())
+                .forEach(schedulePeriodArrangement -> {
+                    schedulePeriodArrangement.setStopped(true);
+                    schedulePeriodArrangementRepo.save(schedulePeriodArrangement);
+                });
+            //Меняем статус мероприятию
+            arrangement.setStatus(ArrangementStatus.STOPPED);
+            arrangementRepo.save(arrangement);
+            return ResponseEntity.ok().build();
         }
     }
 
@@ -126,26 +162,41 @@ public class ArrangementController {
         if (arrangement == null){
             return ResponseEntity.noContent().build();
         }
-        //TODO Наоборот!!!
-        //Меняем статус для чек-юнитов, остановленных на диспетчере
-        scheduleCheckUnitRepo.changeStatus(
+        //Меняем статус для чек-юнитов, завершенных на диспетчере
+        scheduleCheckUnitRepo.changeFinished(
             arrangement,
-            PPT_DispatcherWebClient.getFromDispatcher(arrangement.getId()),
-            ScheduleCheckUnitStatus.NEW);
-        //Меняем статус для чек-юнитов, которые ещё не запускались на момент остановки мероприятия
-        scheduleCheckUnitRepo.changeStatus(
-            arrangement,
-            ScheduleCheckUnitStatus.SCHEDULED,
-            ScheduleCheckUnitStatus.NEW
+            dispatcherWebClient.getJobIdsFromDispatcher(arrangement.getId()),
+            true
         );
         return ResponseEntity.ok().build();
     }
 
+    private boolean sendStopSignalToDispatcher(Long arrangementId, Long scheduleId){
+
+        log.info("Отправка сообщения на остановку мероприятия {} из расписания {} диспетчеру", arrangementId, scheduleId);
+        try {
+            restTemplate.exchange(
+                UriComponentsBuilder
+                    .fromHttpUrl(gatewayUrl)
+                    .path(DISPATCHER_STOP_ENDPOINT)
+                    .queryParam("arrangementId", arrangementId)
+                    .queryParam("version", scheduleId)
+                    .build().toString(),
+                HttpMethod.POST,
+                null,
+                Void.class);
+        } catch (HttpClientErrorException | HttpServerErrorException ex) {
+            log.error("Ошибка отправки сообщения на остановку мероприятия {} из расписания {} диспетчеру", arrangementId, scheduleId);
+            return false;
+        }
+        log.info("Сообщение на остановку мероприятия {} из расписания {} успешно отправлено диспетчеру", arrangementId, scheduleId);
+        return true;
+    }
 
     private void getAndSaveArrangementCheckUnits(Arrangement arrangement){
         arrangement.getScheduleCheckUnits().addAll(
                 Objects.requireNonNull(
-                        PPT_DispatcherWebClient
+                        pptWebClient
                                 .getFromPPT(arrangement.getId())
                                 .stream()
                                 .flatMap(checkUnit -> createCheckUnits(arrangement, checkUnit).stream())
@@ -230,7 +281,7 @@ public class ArrangementController {
             restTemplate.put(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(PPT_STATUS_ENDPOINT).build().toString(), entity);
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
             //throw AS_15_8_PPM_Exception.logAndGet(log, String.format("Ошибка отправки сообщения с изменением статуса мероприятия %d в ППТ, код возврата %s", arrangementStatusNotification.getArrangementId(), ex.getStatusCode()));
-            log.info("Ошибка отправки сообщения с изменением статуса мероприятия %d в ППТ, код возврата %s", arrangementStatusNotification.getArrangementId(), ex.getStatusCode());
+            log.info("Ошибка отправки сообщения с изменением статуса мероприятия {} в ППТ, код возврата {}", arrangementStatusNotification.getArrangementId(), ex.getStatusCode());
             return false;
         }
         log.info("Сообщение с изменением статуса мероприятия {} успешно отправлено в ППТ", arrangementStatusNotification.getArrangementId());

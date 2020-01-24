@@ -17,5 +17,6 @@
     <include file="db/changelog/ppm.0012.schedule_periods_state.xml"/>
     <include file="db/changelog/ppm.0013.drop_execution_number_unic.xml"/>
     <include file="db/changelog/ppm.0014.schedule_period_check_unit_status.xml"/>
+    <include file="db/changelog/ppm.0015.stop_arrangements.xml"/>
     <include file="db/changelog/ppm.0043.description.xml"/>
 </databaseChangeLog>

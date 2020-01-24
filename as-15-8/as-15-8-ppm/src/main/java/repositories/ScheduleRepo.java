@@ -42,6 +42,15 @@ public interface ScheduleRepo extends JpaRepository<Schedule, Long> {
         "join spa.arrangement a on a.id = :arrangement_id"
 
     )
-    Optional<Schedule> findByArrangement(@Param("arrangement_id") Long arrangementId);
+    List<Schedule> findByArrangement(@Param("arrangement_id") Long arrangementId);
+
+    @Query("select s from Schedule s " +
+        "join s.schedulePeriods sp " +
+        "join sp.schedulePeriodArrangements spa " +
+        "join spa.arrangement a on a.id = :arrangement_id " +
+        "where s.status = :status"
+
+    )
+    List<Schedule> findByStatusAndArrangement(@Param("status") ScheduleStatus status, @Param("arrangement_id") Long arrangementId);
 
 }
