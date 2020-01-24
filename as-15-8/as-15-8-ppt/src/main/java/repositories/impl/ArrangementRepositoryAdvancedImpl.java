@@ -79,8 +79,19 @@ public class ArrangementRepositoryAdvancedImpl implements ArrangementRepositoryA
         CriteriaQuery<Arrangement> select = criteriaBuilder.createQuery(Arrangement.class);
         Root<Arrangement> fromArrangement = select.from(Arrangement.class);
 
-        List<Predicate> predicates = new ArrayList<>();
+        List<Predicate> predicates = createPredicates(statuses, operator, fgisId, criteriaBuilder, fromArrangement);
 
+        select.where(predicates.toArray(new Predicate[0]));
+
+        select.orderBy(QueryUtils.toOrders(pageable.getSort(), fromArrangement, criteriaBuilder));
+
+        return CriteriaHelper.createPage(em, select, pageable);
+
+    }
+
+    private List<Predicate> createPredicates(List<ExecutionStatus> statuses, String operator, String fgisId,
+                                  CriteriaBuilder criteriaBuilder,  Root<Arrangement> fromArrangement) {
+        List<Predicate> predicates = new ArrayList<>();
         if (statuses != null && statuses.size()>0) {
             predicates.add(fromArrangement.get(Arrangement_.STATUS).in(statuses));
         }
@@ -92,12 +103,7 @@ public class ArrangementRepositoryAdvancedImpl implements ArrangementRepositoryA
         if (fgisId != null) {
             predicates.add(criteriaBuilder.equal(fromArrangement.get(Arrangement_.FORMAL_TASK).get(FormalTask_.FGIS_ID), fgisId));
         }
-        select.where(predicates.toArray(new Predicate[0]));
-
-        select.orderBy(QueryUtils.toOrders(pageable.getSort(), fromArrangement, criteriaBuilder));
-
-        return CriteriaHelper.createPage(em, select, pageable);
-
+        return predicates;
     }
 
 }
