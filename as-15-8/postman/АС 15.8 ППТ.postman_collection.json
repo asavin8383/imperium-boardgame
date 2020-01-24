@@ -2635,6 +2635,70 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Актуализировать количество еденичных проверок",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqYWNrIiwicm9sZSI6IlJPTEVfT1BFUkFUT1IsUk9MRV9GT1JNQUxfVEFTSyxST0xFX01BTkFHRV9GT1JNQUxfVEFTSyxST0xFX01BTkFHRV9BUlJBTkdFTUVOVCxST0xFX1BSRVBBUkFUSU9OX1RSQUZGSUMsUk9MRV9ESUNUSU9OQVJZLFJPTEVfRk9STUFUSU9OX09GX1NDSEVEVUxFLFJPTEVfVklFV19SRVNVTFQsUk9MRV9TRU5EX0FDVF9CWV9IQU5ELFJPTEVfTUFOQUdFX1BTX1BBU0QsUk9MRV9NQU5BR0VfRVJESSxST0xFX1ZJRVdfUkVQT1JULFJPTEVfRk9STUFUSU9OX1BBUkFNX1JFUE9SVCxST0xFX01BTkFHRV9ET01BSU5TLFJPTEVfTUFOQUdFX01BTlVBTF9BUlJBTkdFTUVOVCIsIm1haWwiOiIiLCJ1c2VyX25hbWUiOiJqYWNrIiwic2NvcGUiOlsicmVhZCIsIndyaXRlIl0sImV4cCI6MTU3OTkzMzY2NywidXNlck5hbWUiOiJqYWNrIiwiYXV0aG9yaXRpZXMiOlsiUk9MRV9PUEVSQVRPUiIsIlJPTEVfUFJFUEFSQVRJT05fVFJBRkZJQyIsIlJPTEVfRk9STUFUSU9OX1BBUkFNX1JFUE9SVCIsIlJPTEVfTUFOQUdFX01BTlVBTF9BUlJBTkdFTUVOVCIsIlJPTEVfTUFOQUdFX1BTX1BBU0QiLCJST0xFX0ZPUk1BVElPTl9PRl9TQ0hFRFVMRSIsIlJPTEVfTUFOQUdFX0VSREkiLCJST0xFX0ZPUk1BTF9UQVNLIiwiUk9MRV9ESUNUSU9OQVJZIiwiUk9MRV9WSUVXX1JFUE9SVCIsIlJPTEVfTUFOQUdFX0ZPUk1BTF9UQVNLIiwiUk9MRV9NQU5BR0VfQVJSQU5HRU1FTlQiLCJST0xFX1ZJRVdfUkVTVUxUIiwiUk9MRV9TRU5EX0FDVF9CWV9IQU5EIiwiUk9MRV9NQU5BR0VfRE9NQUlOUyJdLCJqdGkiOiJlNDExZDg5OC04MWExLTQyYmItYWYxMC03MjhlMTdlMzhjN2UiLCJjbGllbnRfaWQiOiJhcy0xNS04Iiwic2Vjb25kTmFtZSI6IiJ9.AYnT10aLCKxJi4DkxRcZYT1kEvfM_mlvPd8gItnIFLXR5qA9IN8glhfYcaNnpRKZkjjWpStqqvFLF8_CR_E8LY7tM8Gyk6je1orySlwdNYK9aE1_CW_th9rATjsUQrJRNcDhGMsVb29C-rQHaCw0IyzCESfmHOvwJXJzcaQREynCvJFAuxbzvuTfew_yE3lrARuNL0OeBMl5skooW2v1IRxnfVPQ5NqLpDpb4s3lpbMBKXaolMs2IWzNePrhdi4m1YPDDAiLBkoz8YM8Lzgo5Qi_zgeNdpdYyTQGY8Dxmi0gEVNnhg4flMIzrXcBY8Tlg-EktQPaOFKp95UiXouAhQ",
+									"type": "string"
+								},
+								{
+									"key": "tokenType",
+									"value": "bearer",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/ppt/traffic/actual_check_units?id=185",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ppt",
+								"traffic",
+								"actual_check_units"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "185"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Актуализировать количество единичных проверок для всех трафиков",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/ppt/traffic/actual_check_units_all",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ppt",
+								"traffic",
+								"actual_check_units_all"
+							]
+						}
+					},
+					"response": []
 				}
 			],
 			"protocolProfileBehavior": {}
@@ -3491,25 +3555,25 @@
 	],
 	"variable": [
 		{
-			"id": "93af8be0-29ac-4ef4-8b8c-922ee7906e0b",
+			"id": "acd3e548-e982-4758-8d1e-390dac61f48a",
 			"key": "url",
 			"value": "http://localhost:15800",
 			"type": "string"
 		},
 		{
-			"id": "d4e76b73-14e7-4e37-993f-aad8ce84bec8",
+			"id": "34a32b0e-bf75-4c5b-b290-b47cce9c2b1a",
 			"key": "oper_token",
 			"value": "",
 			"type": "string"
 		},
 		{
-			"id": "94915a50-4460-49c0-9fa0-542258bb2c57",
+			"id": "584f04c6-41d1-4dd0-a336-2962b93ab3ea",
 			"key": "test_url",
 			"value": "http://192.168.5.253:15800",
 			"type": "string"
 		},
 		{
-			"id": "2a4e00ed-a93e-4a60-ae4d-e419d2157bbf",
+			"id": "a88ea485-8ce5-4ca8-86e1-3e5664d7c8e0",
 			"key": "admin_token",
 			"value": "",
 			"type": "string"
