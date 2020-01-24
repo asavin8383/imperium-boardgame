@@ -14,6 +14,6 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ActCheckResultPodInfo {
-    private String erdiId;
+    private Long erdiId;
     private Date includeTime;
 }

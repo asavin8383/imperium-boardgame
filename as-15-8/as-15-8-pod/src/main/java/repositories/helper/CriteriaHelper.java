@@ -49,7 +49,7 @@ public class CriteriaHelper {
     }
 
     private static List<Long> getIdList(List<ContentView> models) {
-        return models.stream().map(x -> Long.parseLong(x.getId())).collect(Collectors.toList());
+        return models.stream().map(x -> x.getId()).collect(Collectors.toList());
     }
 
     private static List<List<Long>> packIdListToList(List<Long> idList) {

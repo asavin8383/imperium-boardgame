@@ -16,7 +16,7 @@ import java.util.Optional;
 @Repository
 public interface ContentRepository extends JpaRepository<Content, Long>, DictionaryRepository {
 
-    List<Content> findByErdiIdIn(List<String> ids);
+    List<Content> findByErdiIdIn(List<Long> ids);
 
     //TODO убедиться, что includeTime не меняется от версии к версии
     @Query(

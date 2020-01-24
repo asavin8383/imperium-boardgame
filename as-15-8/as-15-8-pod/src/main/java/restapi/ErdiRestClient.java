@@ -375,8 +375,8 @@ public class ErdiRestClient {
             List<DeltaIdEntry> deltaList = getActualErdiDeltaEntries();
             count = deltaList.size();
 
-            log.info("Получен список дельт: размер=" + count);
-            log.info(deltaList.toString());
+            log.info("Получен список дельт. Размер = {}", count);
+            log.info("Список дельт: {}", deltaList.stream().map(d -> d.deltaId).collect(Collectors.toList()).toString());
 
             if (count > 0){
                 log.info("---> Запуск загрузки дельт ЕРДИ");
@@ -411,8 +411,6 @@ public class ErdiRestClient {
 
     public List<DeltaIdEntry> getActualErdiDeltaEntries() {
         Date dateUpdate = getActualContentDate();
-        System.out.println("dateUpdate = " + dateUpdate);
-
         if (dateUpdate == null){
             return new ArrayList<>();
         }
@@ -482,8 +480,10 @@ public class ErdiRestClient {
                     stateDetails = "Парсинг ЕРДИ";
 
                     parser.parse(stream, (register, contents) -> {
+                        if (allContents.size() > 0)
+                            log.info("разобрано записей: {} ... ", allContents.size());
+
                         allContents.addAll(contents);
-                        log.info("parsing count... " + allContents.size());
                         stateDetails = "Парсинг ЕРДИ (" + allContents.size() + ")";
 
                         if (contents.size() == 0){

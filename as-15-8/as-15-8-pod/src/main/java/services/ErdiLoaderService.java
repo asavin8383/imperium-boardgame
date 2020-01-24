@@ -44,17 +44,15 @@ public class ErdiLoaderService {
     private final ContentDelRepository contentDelRepository;
     private final ParameterRepositoryExtend parameterRepository;
 
-    private static final String actualDateFormat = "yyyy-MM-dd'T'HH:mm:ss";
-
     // todo- удалить
     private static List<Date> timeLabels = new ArrayList<>();
 
 
     @Transactional
     public boolean fillContents(DeltaIdEntry deltaIdEntry, RegisterRest registerRest, List<ContentRest> contentRests) throws ExceptionErdiLoad {
-        log.info("=== START FILL ERDI ===");
-        System.out.printf("size = %d, delta = %s", contentRests.size(), (deltaIdEntry == null ? null : deltaIdEntry.toString()));
-        System.out.println(registerRest);
+        log.info("===== START FILL ERDI =====");
+        log.info("Content size = {}", contentRests.size());
+        log.info("Delta = {}", contentRests.size(), (deltaIdEntry == null ? "<Full ERDI>" : deltaIdEntry.toString()));
 
         try {
             if (deltaIdEntry != null){
@@ -71,8 +69,6 @@ public class ErdiLoaderService {
 
             ContentVersion newContentVersion = createContentVersion(registerRest, deltaIdEntry);
             ContentVersion contentVersion = contentVersionRepository.save(newContentVersion);
-            System.out.println(registerRest);
-            System.out.println(contentVersion);
 
             AddonVersion addonVersion = addonVersionRepository.findTopByIdNotNullOrderByIdDesc();
             if (addonVersion == null){
@@ -81,8 +77,8 @@ public class ErdiLoaderService {
                 addonVersionRepository.save(addonVersion);
             }
 
-            System.out.println("Content version: " + newContentVersion.getId());
-            System.out.println("Addon version: " + addonVersion.getId());
+            log.info("ContentVersion = {}", contentVersion);
+            log.info("AddonVersion = {}", addonVersion);
 
             Register register = createRegister(registerRest);
             registerRepository.save(register);
@@ -127,7 +123,7 @@ public class ErdiLoaderService {
             throw new ExceptionErdiLoad(e);
         }
 
-        log.info("=== FINISH FILL ERDI ===");
+        log.info("===== FINISH FILL ERDI =====");
         return true;
     }
 
@@ -179,20 +175,20 @@ public class ErdiLoaderService {
         mapChangeContents.clear();
         mapDeleteContents.clear();
 
-        List<String> ids_full = contents.stream()
+        List<Long> ids_full = contents.stream()
                 .filter(content -> content instanceof ContentFull)
-                .map(content -> ""+content.id)
+                .map(content -> content.id)
                 .collect(Collectors.toList());
 
         if (ids_full.size() > 0) {
             List<Content> list = contentRepository.findByErdiIdIn(ids_full);
-            Map<String, Content> mapContents = new HashMap<>();
+            Map<Long, Content> mapContents = new HashMap<>();
 
             for (Content cnt : list)
                 mapContents.put(cnt.getErdiId(), cnt);
 
             for (ContentRest contentRest : contents) {
-                Content content = mapContents.get(""+contentRest.id);
+                Content content = mapContents.get(contentRest.id);
                 if (contentRest instanceof ContentFull) {
                     if (content == null){
                         newFullContents.add((ContentFull) contentRest);
@@ -204,20 +200,20 @@ public class ErdiLoaderService {
             }
         }
 
-        List<String> ids_del = contents.stream()
+        List<Long> ids_del = contents.stream()
                 .filter(content -> content instanceof ContentDelete)
-                .map(content -> ""+content.id)
+                .map(content -> content.id)
                 .collect(Collectors.toList());
 
         if (ids_del.size() > 0) {
             List<Content> list = contentRepository.findByErdiIdIn(ids_del);
-            Map<String, Content> mapContents = new HashMap<>();
+            Map<Long, Content> mapContents = new HashMap<>();
 
             for (Content cnt : list)
                 mapContents.put(cnt.getErdiId(), cnt);
 
             for (ContentRest contentRest : contents) {
-                Content content = mapContents.get(""+contentRest.id);
+                Content content = mapContents.get(contentRest.id);
                 if (contentRest instanceof ContentDelete && content != null) {
                     mapDeleteContents.put((ContentDelete) contentRest, content);
                 }
@@ -232,13 +228,13 @@ public class ErdiLoaderService {
         List<Content> newContents = new ArrayList<>();
         List<Decision> newDecision = new ArrayList<>();
 
-        Map<String, ContentFull> mapFullContent = new HashMap<>();
+        Map<Long, ContentFull> mapFullContent = new HashMap<>();
         for (ContentFull fc : fullContents){
             Content cnt = new Content();
-            cnt.setErdiId("" + fc.id);
+            cnt.setErdiId(fc.id);
             cnt.setContentVersion(contentVersion);
             newContents.add(cnt);
-            mapFullContent.put(""+fc.id, fc);
+            mapFullContent.put(fc.id, fc);
         }
         //log.info("Start add content... size = " + fullContents.size());
         List<Content> savedContents = contentRepository.saveAll(newContents);

@@ -90,7 +90,7 @@ public class ActService {
                 List<ActCheckResultPodInfo> infos = contentRepository.findActCheckResultPodInfo(actCheckResult.getContentId());
                 if(infos.size() > 0) {
                     ActCheckResultPodInfo actCheckResultPodInfo = infos.get(0);
-                    achRes.setContentId(actCheckResultPodInfo.getErdiId());
+                    achRes.setContentId(""+actCheckResultPodInfo.getErdiId());
                     achRes.setIncludeTime(dateFormat.format(actCheckResultPodInfo.getIncludeTime()));
                 }
             } catch (Exception ex) {}

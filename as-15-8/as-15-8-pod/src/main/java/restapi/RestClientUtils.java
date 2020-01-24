@@ -79,7 +79,6 @@ public class RestClientUtils {
      */
     public List<DeltaIdEntry> getDumpDeltaListByDate(Date date) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-        //dateFormat.setTimeZone(TimeZone.getTimeZone("GMT+3"));
         String dateStr = dateFormat.format(date);
 
         UriComponents uriComponents =
@@ -87,11 +86,9 @@ public class RestClientUtils {
                         .build()
                         .expand(baseUrl, dateStr);
 
-        System.out.println(uriComponents.toString());
-
         RestResponseDeltaListByDate resp = null;
         try {
-            log.info("Получение списка дельт: {} по дате: {}", uriComponents.toString(), dateStr);
+            log.info("Получение списка дельт по дате = {}. URL = {}", dateStr, uriComponents.toString());
             String entityString = registryAnonimyzersRestTemplate
                     .getForObject(uriComponents.toString(), String.class);
 
