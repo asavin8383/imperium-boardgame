@@ -127,6 +127,7 @@ public class ArrangementController {
     }
 
     @PutMapping(value = "/stop")
+    @PreAuthorize("hasRole('ROLE_MANAGE_ARRANGEMENT')")
     @Transactional
     public ResponseEntity stopArrangement(@RequestParam("id") Arrangement arrangement){
         if (arrangement == null){
@@ -160,6 +161,7 @@ public class ArrangementController {
      * @param arrangement мероприятие, которое требуется запустить повторно
      * @return Ответ от сервиса
      */
+    @PreAuthorize("hasRole('ROLE_MANAGE_ARRANGEMENT')")
     @PutMapping("/refresh")
     public ResponseEntity refreshArrangement(@RequestParam("id") Arrangement arrangement){
         if (arrangement == null){
