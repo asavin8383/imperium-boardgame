@@ -72,4 +72,5 @@ public class ArrangementRepositoryAdvancedImpl implements ArrangementRepositoryA
 
         return CriteriaHelper.createPage(em, select, pageable);
     }
+
 }

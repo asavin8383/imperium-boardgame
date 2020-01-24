@@ -85,7 +85,9 @@ public class ArrangementController {
             @RequestParam(required = false) SortingDirection sortingDirection,
             @RequestParam(required = false) String sortingColumn,
             @RequestParam(defaultValue = "0") int pageNumber,
-            @RequestParam(defaultValue = "10") int pageSize){
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(required = false) String fgisId,
+            @RequestParam(required = false) String operator){
         PageRequest page = PageRequest.of(
                 pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
         return arrangementRepo.findAllByStatusIn(statuses, page);
