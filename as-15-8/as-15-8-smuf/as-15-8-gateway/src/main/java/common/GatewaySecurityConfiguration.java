@@ -1,6 +1,5 @@
 package common;
 
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -45,6 +44,7 @@ public class GatewaySecurityConfiguration extends ResourceServerConfigurerAdapte
                     .antMatchers(HttpMethod.POST,
                         "/pod/act/**",
                             "/pod/erdi/checkUnits/**",
+                            "/pod/erdi/check_units_count/**",
                             "/viewer/**"
                         ).permitAll().antMatchers(HttpMethod.OPTIONS, "/viewer/**")
                     .permitAll()
