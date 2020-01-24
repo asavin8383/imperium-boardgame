@@ -4,6 +4,9 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
     <changeSet author="ashabalin" id="0031.1">
         <sql>
+            update portal.arrangement set status = 'FINISHED' where status = 'ACTION_REQUIRED';
+        </sql>
+        <sql>
             alter table portal.arrangements drop constraint if exists ck_status;
         </sql>
         <sql>
