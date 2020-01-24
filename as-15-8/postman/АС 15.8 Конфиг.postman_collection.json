@@ -519,6 +519,26 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Запрос ссылки на кибану",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/config/props/global/activity_timeout",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"config",
+								"props",
+								"global",
+								"activity_timeout"
+							]
+						}
+					},
+					"response": []
 				}
 			],
 			"protocolProfileBehavior": {}

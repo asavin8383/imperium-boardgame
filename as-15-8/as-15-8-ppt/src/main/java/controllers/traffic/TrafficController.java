@@ -60,7 +60,6 @@ public class TrafficController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Ошибка при подсчёте актуального числа чек юнитов для всех трафиков");
         }
-
     }
 
     @Transactional

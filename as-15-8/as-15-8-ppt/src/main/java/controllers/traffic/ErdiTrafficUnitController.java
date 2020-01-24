@@ -16,6 +16,7 @@ import reactor.core.publisher.Flux;
 import repositories.CustomErdiRepository;
 import repositories.ErdiContentJoinRepository;
 import repositories.ErdiTrafficUnitRepository;
+import services.traffic.TrafficService;
 import webClients.PodWebClient;
 
 import java.time.LocalDate;
@@ -33,6 +34,7 @@ public class ErdiTrafficUnitController {
     private final CustomErdiRepository customErdiRepository;
     private final ErdiContentJoinRepository erdiContentJoinRepository;
     private final PodWebClient podWebClient;
+    private final TrafficService trafficService;
 
     @PutMapping(path = "/{id}/add", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void addErdiToUnit(@PathVariable("id") ErdiTrafficUnit unit, @RequestBody List<Long> ids) {
@@ -69,6 +71,7 @@ public class ErdiTrafficUnitController {
 
         List<Long> ids = idss.flatMap(Flux::fromIterable).collectList().block();
         saveErdi(unit, ids);
+        trafficService.actualizeTrafficCheckUnitsCount(unit.getTraffic().getId());
         return ids;
     }
 
@@ -86,6 +89,7 @@ public class ErdiTrafficUnitController {
             unit.getCustomErdiList().addAll(customErdiRepository.findAllById(ids));
         }
         erdiTrafficUnitRepository.save(unit);
+        trafficService.actualizeTrafficCheckUnitsCount(unit.getTraffic().getId());
     }
 
     @PutMapping(path = "/{id}/remove", consumes = MediaType.APPLICATION_JSON_VALUE)
