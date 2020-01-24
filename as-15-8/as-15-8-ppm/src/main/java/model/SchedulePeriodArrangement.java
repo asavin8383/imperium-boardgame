@@ -38,6 +38,9 @@ public class SchedulePeriodArrangement {
     @JsonView(Views.Brief.class)
     private Integer workersCount;
 
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private boolean stopped = false;
+
     @JsonView(Views.Brief.class)
     public Long getArrangementId(){
         return this.arrangement == null ? null : this.arrangement.getId();

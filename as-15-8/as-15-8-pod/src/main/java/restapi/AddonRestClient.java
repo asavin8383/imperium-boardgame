@@ -66,21 +66,13 @@ public class AddonRestClient
 
     @SneakyThrows
     public List<DeltaAddonEntry> readDeltaList() {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-
         List<DeltaIdEntry> erdiDeltaList = getActualAddonDeltaEntries();
         List<DeltaAddonEntry> addonDeltaList = erdiDeltaList.stream()
                 .map(deltaIdEntry -> {
-                    try{
-                        return new DeltaAddonEntry(
-                                Long.valueOf(deltaIdEntry.deltaId),
-                                dateFormat.parse(deltaIdEntry.actualDate),
-                                false);
-                    }
-                    catch(ParseException pe){
-                        throw new AS_15_8_POD_Exception("Ошибка при получении списка дельт аддонов", pe);
-                    }
+                    return new DeltaAddonEntry(
+                            deltaIdEntry.deltaId,
+                            deltaIdEntry.actualDate,
+                            false);
                 })
                 .collect(Collectors.toList());
 
@@ -88,16 +80,16 @@ public class AddonRestClient
         return addonDeltaList;
     }
 
-    public void readFullFromNet() {
+    public void readFullFromNet(Date regDate) {
         String base = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
         String url = base + "getFullERDIaddons/";
-        processZIP(url, new Date(), null);
+        processZIP(url, regDate, null);
     }
 
-    public void readDeltaFromNet(long id, Date date) {
+    public void readDeltaFromNet(long id, Date deltaDate) {
         String base = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
         String url = base + "getDumpDeltaAddonsByDeltaId/"+id+"/";
-        processZIP(url, date, id);
+        processZIP(url, deltaDate, id);
     }
 
     /**
@@ -148,7 +140,7 @@ public class AddonRestClient
     private List<DeltaIdEntry> getActualAddonDeltaEntries() {
         Date dateUpdate = getActualAddonDate();
         if (dateUpdate == null){
-            log.error("Ошбка! При получении списка дельт аддонов не была найдена запись с версией аддона");
+            log.error("Ошибка! При получении списка дельт аддонов не была найдена запись с версией аддона");
             return new ArrayList<>();
         }
 

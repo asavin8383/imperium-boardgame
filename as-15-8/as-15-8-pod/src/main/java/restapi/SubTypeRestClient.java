@@ -51,6 +51,13 @@ public class SubTypeRestClient
     }
 
     private boolean compareSubtypeLists(List<Subtype> list1, List<Subtype> list2){
+        list1 = list1.stream()
+                .filter(subtype -> subtype.getEffDt().after((new GregorianCalendar(2999, Calendar.JANUARY, 0)).getTime()))
+                .collect(Collectors.toList());
+        list2 = list2.stream()
+                .filter(subtype -> subtype.getEffDt().after((new GregorianCalendar(2999, Calendar.JANUARY, 0)).getTime()))
+                .collect(Collectors.toList());
+
         if (list1.size() != list2.size())
             return false;
 
@@ -122,7 +129,7 @@ public class SubTypeRestClient
             }
         }
 
-        System.out.println("subTypeEntries = " + subTypeEntries);
+        //System.out.println("subTypeEntries = " + subTypeEntries);
 
         log.info("Got PS records: {}", subTypeEntries.toString());
 

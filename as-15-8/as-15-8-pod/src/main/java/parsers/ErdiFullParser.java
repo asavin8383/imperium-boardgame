@@ -13,8 +13,6 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.io.InputStream;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
@@ -23,12 +21,9 @@ import java.util.function.BiFunction;
 public class ErdiFullParser {
 
     private int flushSize = 10000;
+    private long maxContentSize = -1;
 
     public ErdiFullParser(){}
-
-    public ErdiFullParser(int flushSize){
-        this.flushSize = flushSize;
-    }
 
     public void parse(InputStream is, BiFunction<RegisterRest, List<ContentRest>, Boolean> action) throws ExceptionErdiParser {
         XMLInputFactory inputFactory = XMLInputFactory.newInstance();
@@ -50,6 +45,22 @@ public class ErdiFullParser {
         }
     }
 
+    public int getFlushSize() {
+        return flushSize;
+    }
+
+    public void setFlushSize(int flushSize) {
+        this.flushSize = flushSize;
+    }
+
+    public long getMaxContentSize() {
+        return maxContentSize;
+    }
+
+    public void setMaxContentSize(long maxContentSize) {
+        this.maxContentSize = maxContentSize;
+    }
+
     private void readDocument(XMLStreamReader reader,
                               BiFunction<RegisterRest, List<ContentRest>, Boolean> action) throws XMLStreamException, JAXBException {
         while (reader.hasNext()) {
@@ -69,8 +80,6 @@ public class ErdiFullParser {
     private void readRegister(XMLStreamReader reader,
                               BiFunction<RegisterRest, List<ContentRest>, Boolean> action) throws XMLStreamException, JAXBException {
 
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
-
         RegisterRest register = new RegisterRest(
                 reader.getAttributeValue(null, "updateTime"),
                 reader.getAttributeValue(null, "updateTimeUrgently"),
@@ -89,7 +98,8 @@ public class ErdiFullParser {
         List<ContentRest> contents = new ArrayList<>();
         Boolean needNext = true;
 
-        while (needNext && reader.hasNext()) {
+        long contentCounter = 0;
+        while (needNext && reader.hasNext() && (maxContentSize < 0 || contentCounter < maxContentSize)) {
             int eType = reader.getEventType();
             if (eType == XMLStreamReader.START_ELEMENT) {
                 String elementName = reader.getLocalName();
@@ -97,12 +107,14 @@ public class ErdiFullParser {
                     if (elementName.equals("content")) {
                         ContentFull content = readContentFull(reader);
                         contents.add(content);
+                        contentCounter++;
                         needNext = flush(false, register, contents, action);
                         continue;
                     }
                     else if (elementName.equals("delete")) {
                         ContentDelete content = readContentDelete(reader);
                         contents.add(content);
+                        contentCounter++;
                         needNext = flush(false, register, contents, action);
                         continue;
                     }

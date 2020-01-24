@@ -70,7 +70,7 @@ public class ArrangementService {
             }
 
             TreeSet<ScheduleCheckUnit> arrangementResults = new TreeSet<>(Comparator.comparingLong(ScheduleCheckUnit::getId));
-            arrangementResults.addAll(scheduleCheckUnitRepo.findAllByArrangement(arrangement));
+            arrangementResults.addAll(scheduleCheckUnitRepo.findAllByArrangementAndFinished(arrangement, false));
             arrangementCheckUnits.put(arrangement, arrangementResults);
         });
         return arrangementCheckUnits;

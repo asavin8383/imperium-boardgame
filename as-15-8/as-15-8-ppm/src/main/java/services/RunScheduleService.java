@@ -9,8 +9,9 @@ import enums.ArrangementEvents;
 import events.producers.CheckUnitJobProducer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import model.*;
-import model.enums.ScheduleCheckUnitStatus;
+import model.ScheduleCheckUnit;
+import model.SchedulePeriodArrangement;
+import model.SchedulePeriodCheckUnit;
 import model.enums.SchedulePeriodCheckUnitStatus;
 import model.enums.SchedulePeriodState;
 import model.enums.ScheduleStatus;
@@ -29,7 +30,6 @@ import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Created by san
@@ -62,7 +62,8 @@ public class RunScheduleService {
                 .forEach(schedulePeriod -> {
                     schedulePeriodArrangementRepo.findAllBySchedulePeriod(schedulePeriod)
                         .forEach(schedulePeriodArrangement -> {
-                            if(sendArrangementToDispatcher(schedule.getId(), schedulePeriodArrangement)) {
+                            //Остановленные не запускаем
+                            if(!schedulePeriodArrangement.isStopped() && sendArrangementToDispatcher(schedule.getId(), schedulePeriodArrangement)) {
                                 log.debug("Запуск на выполнение schedulePeriodArrangement с ИД {}", schedulePeriodArrangement.getId());
 
                                 //Статус отправляется каждый раз, когда запускается новый период!!!!!!!!!!
@@ -70,11 +71,6 @@ public class RunScheduleService {
                                 List<SchedulePeriodCheckUnit> schedulePeriodCheckUnits = schedulePeriodCheckUnitRepo.findAllBySchedulePeriodArrangement(schedulePeriodArrangement);
                                 schedulePeriodCheckUnits.forEach(schedulePeriodCheckUnit ->
                                                 runCheckUnit(schedulePeriodCheckUnit, schedule.getId(), schedulePeriodArrangement.getArrangementId()));
-                                scheduleCheckUnitRepo.changeStatus(
-                                    schedulePeriodCheckUnits.stream().mapToLong(SchedulePeriodCheckUnit::getId).boxed().collect(Collectors.toList()),
-                                    ScheduleCheckUnitStatus.SCHEDULED,
-                                    ScheduleCheckUnitStatus.RUNNING
-                                );
                                 if (!schedule.getStatus().equals(ScheduleStatus.RUNNING)) {
                                     schedule.setStatus(ScheduleStatus.RUNNING);
                                     scheduleRepo.save(schedule);
@@ -91,7 +87,6 @@ public class RunScheduleService {
 
     private Boolean sendArrangementToDispatcher(Long scheduleId, SchedulePeriodArrangement schedulePeriodArrangement) {
         String url = UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(DISPATCHER_POST_ARR_ENDPOINT).build().toString();
-        int checkUnits = schedulePeriodArrangement.getArrangement().getScheduleCheckUnits().size();
         ArrangementToExecution arrangement = new ArrangementToExecution();
         arrangement.setCheckUnitsCount(schedulePeriodCheckUnitRepo.getSchedulePeriodCheckUnitCount(scheduleId, schedulePeriodArrangement.getArrangementId()));
         arrangement.setId(schedulePeriodArrangement.getArrangementId());

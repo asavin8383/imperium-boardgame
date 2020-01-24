@@ -74,9 +74,12 @@ public class RestClientUtils {
         }
     }
 
+    /**
+     * Загрузка списка дельт ЕРДИ по дате. Парамтер data
+     */
     public List<DeltaIdEntry> getDumpDeltaListByDate(Date date) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT+3"));
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        //dateFormat.setTimeZone(TimeZone.getTimeZone("GMT+3"));
         String dateStr = dateFormat.format(date);
 
         UriComponents uriComponents =
@@ -106,27 +109,12 @@ public class RestClientUtils {
             throw (e instanceof AS_15_8_POD_Exception ?
                     (AS_15_8_POD_Exception)e :
                     new AS_15_8_POD_Exception("Ошибка загрузки списка дельт по дате " + dateStr, e));
-            //return new ArrayList<>();
         }
-
-        SimpleDateFormat deltaDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
         List<DeltaIdEntry> list = resp.response;
         list = list.stream()
-                .filter(deltaIdEntry -> {
-                    try {
-                        Date deltaDate = deltaDateFormat.parse(deltaIdEntry.actualDate);
-                        if (deltaDate.before(date))
-                            return false;
-                    }
-                    catch (ParseException e) {
-                        e.printStackTrace();
-                        return false;
-                    }
-                    return deltaIdEntry.isEmpty.equals("0");
-                })
+                .filter(deltaIdEntry -> !deltaIdEntry.isEmpty)
                 .collect(Collectors.toList());
-
         return list;
     }
 
