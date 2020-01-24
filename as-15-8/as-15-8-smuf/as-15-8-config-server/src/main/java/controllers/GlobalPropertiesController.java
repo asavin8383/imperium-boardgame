@@ -7,6 +7,7 @@ import model.GlobalProperty;
 import model.Views;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import repositories.GlobalPropertiesRepository;
@@ -23,6 +24,9 @@ public class GlobalPropertiesController {
     private final GlobalPropertiesRepository globalPropertiesRepo;
     @Value("${user.activity.timeout.config.key}")
     private String userActivityTimeoutConfigKey;
+
+    @Value("${kibana.link.key}")
+    private String kibanaLinkKey;
 
     @PreAuthorize("hasRole('ROLE_MANAGE_CONFIGURATIONS')")
     @PostMapping
@@ -60,4 +64,13 @@ public class GlobalPropertiesController {
         }
     }
 
+    @PostMapping(value = "kibana_link")
+    public ResponseEntity getKibanaLink() {
+        try {
+            String kibanaLink = globalPropertiesRepo.getGlobalPropertyByKey(kibanaLinkKey);
+            return ResponseEntity.ok().body(kibanaLink);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Ошибка извлечения kibana link из global_properties");
+        }
+    }
 }
