@@ -99,7 +99,7 @@ public class RunScheduleService {
         log.debug("Запуск чек-юнита: {} {}", schedulePeriodCheckUnit.getId(), schedulePeriodCheckUnit.getCheckUnit().getCheckUnitValue());
         if (schedulePeriodCheckUnit.getStatus().equals(SchedulePeriodCheckUnitStatus.READY)){
             int partitionId = schedulePeriodCheckUnit.getExecutionNumber().intValue();
-            CheckUnitKey key = new CheckUnitKey(scheduleId, arrangementId, schedulePeriodCheckUnit.getId());
+            CheckUnitKey key = new CheckUnitKey(arrangementId, schedulePeriodCheckUnit.getId(), scheduleId);
             sendCheckUnitJobToDispatcher(
                     createCheckUnitJob(scheduleCheckUnitRepo.getOne(schedulePeriodCheckUnit.getId())),
                     key,
