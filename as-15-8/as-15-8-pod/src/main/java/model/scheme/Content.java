@@ -19,7 +19,7 @@ public class Content {
     private Long id;
 
     @Column(nullable=false, name = "erdi_id")
-    private String erdiId;
+    private Long erdiId;
 
     @ManyToOne
     @JoinColumn(name = "init_content_version_id", referencedColumnName = "id")

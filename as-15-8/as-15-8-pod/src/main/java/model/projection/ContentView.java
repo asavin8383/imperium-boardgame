@@ -25,7 +25,7 @@ public class ContentView {
     @Id
     @ToString.Include
     @EqualsAndHashCode.Include
-    private String id;
+    private Long id;
 
     @Column(name = "includetime")
     @ToString.Include
