@@ -33,6 +33,7 @@ public class GatewaySecurityConfiguration extends ResourceServerConfigurerAdapte
                             "/ppt/arrangements/checkUnits/**",
                             "/dispatcher/act/checkResult/**",
                             "/dispatcher/act/screenshots/**",
+                            "/dispatcher/results/ids/**",
                             "/dispatcher/results/screenshot/**",
                             "/dispatcher/results/etalon_screenshot/**",
                             "/dispatcher/results/nmap_log/**",

@@ -8,16 +8,19 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ArrangementRepo extends JpaRepository<Arrangement, Long> {
 
     @Query("select a from Arrangement a " +
-            "where a.status = 'RUNNING' or a.status = 'STOPPED'")
+            "where a.status = 'RUNNING' or a.status = 'STOPPING'")
     List<Arrangement> findReadyToUpload();
 
     @Query("select a from Arrangement a " +
             "where a.creationDate = :date and " +
-            "a.status = 'STOPPED'")
+            "a.status = 'STOPPED' or a.status = 'STOPPING'")
     List<Arrangement> findStopped(@Param("date") LocalDateTime date);
+
+    Optional<Arrangement> findByIdAndVersion(Long id, Long version);
 }

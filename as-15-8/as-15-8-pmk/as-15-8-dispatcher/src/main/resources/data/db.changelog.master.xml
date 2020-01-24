@@ -33,4 +33,5 @@
     <include file="data/changelog/dispatcher.0028.arrangements_ck.xml"/>
     <include file="data/changelog/dispatcher.0029.arrangements_version_and_stopped_status.xml"/>
     <include file="data/changelog/dispatcher.0030.arrangements_creation_date.xml"/>
+    <include file="data/changelog/dispatcher.0031.arrangements_stopping_status.xml"/>
 </databaseChangeLog>

@@ -6,5 +6,5 @@ package enums;
  * Author: asavin
  */
 public enum ArrangementEvents {
-    FILL, SCHEDULE, SCHEDULE_ROLLBACK, RUN, PAUSE, RESTORE, FINISH, FAIL, SEND_ACT
+    FILL, SCHEDULE, SCHEDULE_ROLLBACK, RUN, RESTORE, FINISH, STOP, FAIL, SEND_ACT
 }

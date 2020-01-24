@@ -3,9 +3,7 @@ package services;
 import analysis.AnalysisResult;
 import analysis.CheckUnitResult;
 import analysis.CheckUnitStatusNotification;
-import arrangement.ArrangementStatusNotification;
 import checkUnits.CheckUnitKey;
-import enums.ArrangementEvents;
 import enums.CheckUnitJobResult;
 import exceptions.AS_15_8_DispatcherException;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +34,7 @@ public class ResultService {
     private final ResultRepo resultRepo;
     private final ResultScreenShotRepo resultScreenShotRepo;
     private final ArrangementStatusProducer arrangementStatusProducer;
+    private final ArrangementService arrangementService;
 
     @Scheduled(cron = "${results.save.schedule}")
     public void saveCompletionArrangements() {
@@ -69,6 +68,7 @@ public class ResultService {
 
     private void saveArrangementResults(Arrangement arrangement) {
         log.info("Начато сохранение мероприятия: " + arrangement.getId());
+        boolean isStopped = !arrangementService.isArrangementRunning(arrangement.getId(), arrangement.getVersion());
         try {
             resultsKafkaService.getArrangementResultsIterator(arrangement.getId())
                 .ifPresent(resultsIterator -> {
@@ -79,7 +79,10 @@ public class ResultService {
                     }
                     if (isSaved) {
                         log.info("Мероприятие успешно сохранено в БД: " + arrangement.getId());
-                        arrangementStatusProducer.sendArrangementStatusMessage(new ArrangementStatusNotification(arrangement.getId(), ArrangementEvents.FINISH));
+                        arrangementStatusProducer.sendArrangementStatusMessage(
+                                arrangement.getId(),
+                                arrangement.getVersion(),
+                                isStopped ? ArrangementStatus.STOPPED : ArrangementStatus.FINISHED);
                         log.info("Мероприятие успешно завершено: " + arrangement.getId());
                     } else {
                         log.info("Ошибка сохранения мероприятия: " + arrangement.getId());
@@ -87,7 +90,7 @@ public class ResultService {
                 });
         } catch (Exception ex){
             log.error("Ошибка при созранении результатов проверок мероприятия " + arrangement.getId(), ex);
-            arrangement.setStatus(ArrangementStatus.RUNNING);
+            arrangement.setStatus(isStopped ? ArrangementStatus.STOPPING : ArrangementStatus.RUNNING);
             arrangementRepo.save(arrangement);
         }
     }

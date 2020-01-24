@@ -9,7 +9,7 @@ public enum ExecutionStatus {
 	NEW(1, "Новое"),
 	FORMED(2, "Готово к включению в расписание"),
 	SCHEDULED(3, "Запланировано"),
-	ACTION_REQUIRED(4, "Требуется действие пользователя"),
+	STOPPED(4, "Остановлено"),
 	FINISHED(5, "Выполнено"),
 	ACT_SENT(6, "Отправлен акт"),
 	CLOSED(7, "Закрыто"),

@@ -3,6 +3,7 @@ package repositories.impl;
 import enums.ExecutionStatus;
 import model.task.Arrangement;
 import model.task.Arrangement_;
+import model.task.FormalTask;
 import model.task.FormalTask_;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -64,7 +65,6 @@ public class ArrangementRepositoryAdvancedImpl implements ArrangementRepositoryA
         CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
         CriteriaQuery<Arrangement> select = criteriaBuilder.createQuery(Arrangement.class);
         Root<Arrangement> fromArrangement = select.from(Arrangement.class);
-
         select.where(criteriaBuilder.equal(fromArrangement.get(Arrangement_.STATUS), status));
 
         //Берём сортировку из Pageable
@@ -72,4 +72,38 @@ public class ArrangementRepositoryAdvancedImpl implements ArrangementRepositoryA
 
         return CriteriaHelper.createPage(em, select, pageable);
     }
+
+    @Override
+    public Page<Arrangement> findPageFiltered(List<ExecutionStatus> statuses, String operator, String fgisId, Pageable pageable) {
+        CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
+        CriteriaQuery<Arrangement> select = criteriaBuilder.createQuery(Arrangement.class);
+        Root<Arrangement> fromArrangement = select.from(Arrangement.class);
+
+        List<Predicate> predicates = createPredicates(statuses, operator, fgisId, criteriaBuilder, fromArrangement);
+
+        select.where(predicates.toArray(new Predicate[0]));
+
+        select.orderBy(QueryUtils.toOrders(pageable.getSort(), fromArrangement, criteriaBuilder));
+
+        return CriteriaHelper.createPage(em, select, pageable);
+
+    }
+
+    private List<Predicate> createPredicates(List<ExecutionStatus> statuses, String operator, String fgisId,
+                                  CriteriaBuilder criteriaBuilder,  Root<Arrangement> fromArrangement) {
+        List<Predicate> predicates = new ArrayList<>();
+        if (statuses != null && statuses.size()>0) {
+            predicates.add(fromArrangement.get(Arrangement_.STATUS).in(statuses));
+        }
+
+        if (operator != null) {
+            predicates.add(criteriaBuilder.like(criteriaBuilder.upper(fromArrangement.get(Arrangement_.FORMAL_TASK).get(FormalTask_.OPERATOR)), "%" + operator.toUpperCase() + "%"));
+        }
+
+        if (fgisId != null) {
+            predicates.add(criteriaBuilder.equal(fromArrangement.get(Arrangement_.FORMAL_TASK).get(FormalTask_.FGIS_ID), fgisId));
+        }
+        return predicates;
+    }
+
 }

@@ -88,7 +88,7 @@ public class RestTest
     public void runUpdateContent(){
         //boolean res = subTypeRestClient.readFromNetDiff();
         //log.info("res = {}", res);
-        erdiRestClient.startUpdateErdi();
+        //erdiRestClient.startUpdateErdi();
     }
 
     @Test

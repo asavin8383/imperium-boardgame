@@ -72,6 +72,7 @@ spring:
         minPartitionCount: 24
 management.endpoints.web.exposure.include: bus-refresh
 user.activity.timeout.config.key: user.activity.timeout
+kibana.link.key: kibana.link
 
 ---
 
