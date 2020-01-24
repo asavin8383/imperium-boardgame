@@ -90,7 +90,8 @@ public class ArrangementController {
             @RequestParam(required = false) String operator){
         PageRequest page = PageRequest.of(
                 pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
-        return arrangementRepo.findAllByStatusIn(statuses, page);
+        //return arrangementRepo.findAllByStatusIn(statuses, page);
+        return arrangementRepo.findPageFiltered(statuses, operator, fgisId, page);
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
