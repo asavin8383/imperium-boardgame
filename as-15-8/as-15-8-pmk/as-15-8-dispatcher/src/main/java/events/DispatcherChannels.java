@@ -2,6 +2,7 @@ package events;
 
 import org.apache.kafka.streams.kstream.KStream;
 import org.springframework.cloud.stream.annotation.Input;
+import org.springframework.cloud.stream.annotation.Output;
 import org.springframework.messaging.MessageChannel;
 
 /**
@@ -16,6 +17,6 @@ public interface DispatcherChannels {
     @Input(INPUT_RESULTS)
     KStream<?, ?> results();
 
-    @Input(ARRANGEMENT_EVENT)
+    @Output(ARRANGEMENT_EVENT)
     MessageChannel arrangementEvent();
 }
