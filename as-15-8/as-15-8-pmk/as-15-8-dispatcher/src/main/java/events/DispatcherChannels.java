@@ -11,7 +11,7 @@ import org.springframework.messaging.SubscribableChannel;
 public interface DispatcherChannels {
 
     String INPUT_RESULTS = "inputResults";
-    String OUTPUT_STOP_ARRANGEMENT_EVENT = "springCloudBusInput";
+    String OUTPUT_STOP_ARRANGEMENT_EVENT = "outputStopArrangementEvents";
 
     @Input(INPUT_RESULTS)
     KStream<?, ?> results();

@@ -15,6 +15,8 @@ spring:
           destination: screenshots_table
         results_count_table:
           destination: results_count_table
+        outputStopArrangementEvents:
+          destination: bus_config_input
         springCloudBusInput:
           destination: bus_config_input
           group: dispatcher:${spring.cloud.client.ip-address}
