@@ -9,9 +9,11 @@ import enums.ArrangementEvents;
 import events.producers.CheckUnitJobProducer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import model.Arrangement;
 import model.ScheduleCheckUnit;
 import model.SchedulePeriodArrangement;
 import model.SchedulePeriodCheckUnit;
+import model.enums.ArrangementStatus;
 import model.enums.SchedulePeriodCheckUnitStatus;
 import model.enums.SchedulePeriodState;
 import model.enums.ScheduleStatus;
@@ -48,6 +50,7 @@ public class RunScheduleService {
     private final CheckUnitJobProducer checkUnitJobProducer;
     private final ScheduleCheckUnitRepo scheduleCheckUnitRepo;
     private final ArrangementStatusUploader arrangementStatusUploader;
+    private final ArrangementRepo arrangementRepo;
 
     private final OAuth2RestTemplate restTemplate;
     private final String DISPATCHER_POST_ARR_ENDPOINT = "/dispatcher/arrangement";
@@ -66,8 +69,12 @@ public class RunScheduleService {
                             if(!schedulePeriodArrangement.isStopped() && sendArrangementToDispatcher(schedule.getId(), schedulePeriodArrangement)) {
                                 log.debug("Запуск на выполнение schedulePeriodArrangement с ИД {}", schedulePeriodArrangement.getId());
 
-                                //Статус отправляется каждый раз, когда запускается новый период!!!!!!!!!!
-                                arrangementStatusUploader.changeArrangementStatus(new ArrangementStatusNotification(schedulePeriodArrangement.getArrangement().getId(), ArrangementEvents.RUN));
+                                Arrangement arrangement = schedulePeriodArrangement.getArrangement();
+                                if(arrangement.getStatus()== ArrangementStatus.SCHEDULED){
+                                    arrangement.setStatus(ArrangementStatus.RUNNING);
+                                    arrangementRepo.save(arrangement);
+                                    arrangementStatusUploader.changeArrangementStatus(new ArrangementStatusNotification(arrangement.getId(), ArrangementEvents.RUN));
+                                }
                                 List<SchedulePeriodCheckUnit> schedulePeriodCheckUnits = schedulePeriodCheckUnitRepo.findAllBySchedulePeriodArrangement(schedulePeriodArrangement);
                                 schedulePeriodCheckUnits.forEach(schedulePeriodCheckUnit ->
                                                 runCheckUnit(schedulePeriodCheckUnit, schedule.getId(), schedulePeriodArrangement.getArrangementId()));
