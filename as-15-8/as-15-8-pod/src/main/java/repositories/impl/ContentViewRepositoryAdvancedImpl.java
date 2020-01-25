@@ -163,7 +163,7 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
     private List<Predicate> createPredicatesFromMasks(List<Predicate> predicates) {
 
         if (idMask != null) {
-            predicates.add(criteriaBuilder.like(criteriaBuilder.upper(rootContentView.get(ContentView_.ID)), "%" + idMask.toUpperCase() + "%"));
+            predicates.add(criteriaBuilder.like(criteriaBuilder.upper(rootContentView.get(ContentView_.ID).as(String.class)), "%" + idMask.toUpperCase() + "%"));
         }
 
         if (categoryNames != null && categoryNames.size() > 0) {
@@ -225,7 +225,7 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
         if (query != null) {
             predicates.add(
                     criteriaBuilder.or(
-                            criteriaBuilder.like(criteriaBuilder.upper(rootContentView.get(ContentView_.ID)), "%" + query.toUpperCase()),
+                            criteriaBuilder.like(criteriaBuilder.upper(rootContentView.get(ContentView_.ID).as(String.class)), "%" + query.toUpperCase()),
                             criteriaBuilder.like(criteriaBuilder.upper(rootContentView.get(ContentView_.CATEGORY_NAME)), "%" + query.toUpperCase() + "%"),
                             criteriaBuilder.like(criteriaBuilder.upper(rootContentView.get(ContentView_.DECISION_ORG)), "%" + query.toUpperCase() + "%"),
                             criteriaBuilder.like(criteriaBuilder.upper(rootContentView.get(ContentView_.INFO_TYPE_ID)), "%" + query.toUpperCase() + "%"),
