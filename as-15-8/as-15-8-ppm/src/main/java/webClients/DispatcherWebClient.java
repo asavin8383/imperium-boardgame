@@ -26,7 +26,7 @@ import java.util.List;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class DispatcherWebClient {
 
-    private final String DISPATCHER_URI = "/dispatcher/arrangements/jobIds";
+    private final String DISPATCHER_URI = "/dispatcher/results/ids";
 
     @Value("${gateway.url}")
     private String gatewayUrl;
