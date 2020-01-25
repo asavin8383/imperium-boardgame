@@ -58,7 +58,7 @@ public class AddonUpdater
 
         // Собираем массив аддонов для вставки
         int cnt = 0;
-        int nf = 0;
+        List<String> notFound = new ArrayList<>();
         List<AddonEntry> addonEntries = new ArrayList<>();
         while (sr.hasNext()) {
 
@@ -68,8 +68,7 @@ public class AddonUpdater
 
                 long erdi_id = addonEntry.getId();
                 if (!erdiToContentId.containsKey(erdi_id)) {
-                    nf++;
-                    log.warn("{}: ERDI {} was not found! ", cnt, erdi_id );
+                    notFound.add(erdi_id + "(" + cnt + ")");
                     continue;
                 }
                 addonEntries.add(addonEntry);
@@ -81,8 +80,9 @@ public class AddonUpdater
             }
         }
 
-        log.info("{} ERDIs was not found", nf);
-
+        if (notFound.size() > 0)
+            log.info("{} ERDIs in addon {} was not found: \n{}",
+                    notFound.size(), deltaId == null ? "<FULL>" : deltaId, notFound.toString());
 
         AddonVersion addonVersion = new AddonVersion();
         addonVersion.setPpnDate(new Date());

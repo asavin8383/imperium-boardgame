@@ -299,8 +299,9 @@ public class ErdiRestClient {
         System.out.println("Загрузка дельт аддонов");
         List<DeltaAddonEntry> list = addonRestClient.readDeltaList();
         if (list.size() > 0) {
+            int i=0;
             for (DeltaAddonEntry deltaAddonEntry : list){
-                System.out.println("Загрузка дельты аддона: " + deltaAddonEntry.toString());
+                log.info("Загрузка дельты аддона {}/{}:", ++i, list.size(), deltaAddonEntry.toString());
                 addonRestClient.readDeltaFromNet(deltaAddonEntry.getDeltaId(),
                         deltaAddonEntry.getActualDate());
             }

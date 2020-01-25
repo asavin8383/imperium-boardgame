@@ -2,6 +2,7 @@ package model.scheme;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -12,6 +13,7 @@ import java.util.List;
 @Entity
 @Table(schema="sor", name="addon_version")
 @Data
+@ToString
 public class AddonVersion implements Serializable {
 
 	@Id
@@ -31,6 +33,7 @@ public class AddonVersion implements Serializable {
 
 	@OneToMany(mappedBy = "addonVersion")
 	@JsonIgnore
+	@ToString.Exclude
 	private List<Addon> addons;
 
 	@Column(nullable=true, name = "delta_id")

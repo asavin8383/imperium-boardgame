@@ -52,7 +52,7 @@ public class ErdiLoaderService {
     public boolean fillContents(DeltaIdEntry deltaIdEntry, RegisterRest registerRest, List<ContentRest> contentRests) throws ExceptionErdiLoad {
         log.info("===== START FILL ERDI =====");
         log.info("Content size = {}", contentRests.size());
-        log.info("Delta = {}", contentRests.size(), (deltaIdEntry == null ? "<Full ERDI>" : deltaIdEntry.toString()));
+        log.info("Delta = {}", (deltaIdEntry == null ? "<Full ERDI>" : deltaIdEntry.toString()));
 
         try {
             if (deltaIdEntry != null){
