@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import model.Arrangement;
 import model.enums.ArrangementStatus;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +27,6 @@ public class ArrangementService {
     @Getter
     private Map<Long, Set<Long>> stoppedArrangements = new ConcurrentHashMap<>();
 
-    private final ApplicationContext context;
     private final ArrangementRepo arrangementRepo;
     private final ResultsKafkaService resultsKafkaService;
     private final ArrangementStopEventProducer arrangementStopEventProducer;
