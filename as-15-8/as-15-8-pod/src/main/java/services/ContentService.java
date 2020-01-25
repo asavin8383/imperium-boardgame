@@ -3,12 +3,9 @@ package services;
 import lombok.RequiredArgsConstructor;
 import model.actualViews.ContentCheckUnit;
 import model.projection.ContentView;
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import repositories.ContentCheckUnitRepository;
 import repositories.ContentViewRepository;
@@ -25,7 +22,7 @@ public class ContentService {
     private final ContentCheckUnitRepository contentCheckUnitRepository;
 
     @Cacheable
-    public Optional<ContentView> getFormalErdiView(String id) {
+    public Optional<ContentView> getFormalErdiView(Long id) {
         return viewRepository.findById(id);
     }
 
