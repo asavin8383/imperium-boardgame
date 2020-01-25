@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import model.Arrangement;
 import model.enums.ArrangementStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,9 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class ArrangementService {
+
+    @Value("${stop.arrangements.destination.service}")
+    private String stopArrangementsDestinationService;
 
     @Getter
     private Map<Long, Set<Long>> stoppedArrangements = new ConcurrentHashMap<>();
@@ -85,7 +89,7 @@ public class ArrangementService {
         else
             stoppedArrangements.put(arrangementId, new HashSet<>(Collections.singletonList(version)));
 
-        final ArrangementStopEvent event = new ArrangementStopEvent(this, context.getId(), arrangementId, version);
+        final ArrangementStopEvent event = new ArrangementStopEvent(this, context.getId(), stopArrangementsDestinationService, arrangementId, version);
         context.publishEvent(event);
     }
 
