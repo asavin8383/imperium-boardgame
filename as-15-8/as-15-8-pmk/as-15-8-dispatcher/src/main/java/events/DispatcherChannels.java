@@ -11,11 +11,11 @@ import org.springframework.messaging.SubscribableChannel;
 public interface DispatcherChannels {
 
     String INPUT_RESULTS = "inputResults";
-    String OUTPUT_STOP_ARRANGEMENT_EVENT = "outputStopArrangementEvents";
+    String ARRANGEMENT_EVENT = "arrangementEvents";
 
     @Input(INPUT_RESULTS)
     KStream<?, ?> results();
 
-    @Input(OUTPUT_STOP_ARRANGEMENT_EVENT)
-    SubscribableChannel outputStopArrangementEvent();
+    @Input(ARRANGEMENT_EVENT)
+    SubscribableChannel arrangementEvent();
 }

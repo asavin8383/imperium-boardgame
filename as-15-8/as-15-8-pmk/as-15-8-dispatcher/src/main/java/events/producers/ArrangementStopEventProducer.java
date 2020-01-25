@@ -26,7 +26,7 @@ public class ArrangementStopEventProducer {
                     .withPayload(event)
                     .build();
 
-            boolean send = dispatcherChannels.outputStopArrangementEvent().send(message);
+            boolean send = dispatcherChannels.arrangementEvent().send(message);
             if(send)
                 log.info("Сообщение успешно отправлено: " + event.toString());
         } catch (Exception ex) {
