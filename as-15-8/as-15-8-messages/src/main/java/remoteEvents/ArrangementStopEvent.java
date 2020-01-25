@@ -1,17 +1,15 @@
 package remoteEvents;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class ArrangementStopEvent {
 
     private Long arrangementId;
     private Long version;
 
-    public ArrangementStopEvent(Long arrangementId, Long version) {
-        this.arrangementId = arrangementId;
-        this.version = version;
-    }
 }

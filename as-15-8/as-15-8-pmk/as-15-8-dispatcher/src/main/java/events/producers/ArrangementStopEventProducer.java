@@ -1,10 +1,10 @@
 package events.producers;
 
+import events.DispatcherChannels;
 import exceptions.AS_15_8_DispatcherException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.bus.SpringCloudBusClient;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
@@ -14,10 +14,10 @@ import remoteEvents.ArrangementStopEvent;
 @Service
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-@EnableBinding({SpringCloudBusClient.class})
+@EnableBinding({DispatcherChannels.class})
 public class ArrangementStopEventProducer {
 
-    private final SpringCloudBusClient springCloudBusClient;
+    private final DispatcherChannels dispatcherChannels;
 
     public void send(ArrangementStopEvent event) {
         try {
@@ -26,7 +26,7 @@ public class ArrangementStopEventProducer {
                     .withPayload(event)
                     .build();
 
-            boolean send = springCloudBusClient.springCloudBusInput().send(message);
+            boolean send = dispatcherChannels.outputStopArrangementEvent().send(message);
             if(send)
                 log.info("Сообщение успешно отправлено: " + event.toString());
         } catch (Exception ex) {
