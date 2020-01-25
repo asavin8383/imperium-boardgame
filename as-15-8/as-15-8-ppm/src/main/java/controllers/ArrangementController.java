@@ -68,7 +68,7 @@ public class ArrangementController {
     @Value("${gateway.url}")
     private String gatewayUrl;
     private final String PPT_STATUS_ENDPOINT = "/ppt/arrangements/status";
-    private final String DISPATCHER_STOP_ENDPOINT = "/dispatcher/stop";
+    private final String DISPATCHER_STOP_ENDPOINT = "/dispatcher/arrangement/stop";
     private final ScheduleCheckUnitRepo scheduleCheckUnitRepo;
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
