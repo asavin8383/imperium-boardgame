@@ -49,14 +49,15 @@ public class CheckUnitJobHandler {
             log.error("Ошибка! Пустой ключ у сообщения: " + message.getPayload().toString());
             return;
         }
+
+        if(!jobsService.isJobActual(key.getArrangementId(), key.getVersion(), originalTime))
+            return;
+
         log.info("\n   ---->>> Принято задание: " + message.getPayload().toString() +
                 ", key: " + key +
                 ", partition: " + partitionId +
                 ", offset: " + message.getHeaders().get(KafkaHeaders.OFFSET, Long.class) +
                 ", time: " + originalTime.toString());
-
-        if(!jobsService.isJobActual(key.getArrangementId(), key.getVersion(), originalTime))
-            return;
 
         String verificationName = "";
         Date startTime = new Date();

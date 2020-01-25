@@ -31,7 +31,7 @@ security:
 spring:
   application:
     name: dispatcher
-    index: ${random.uuid}
+    index: ${spring.application.name}:${spring.cloud.client.ip-address}:${random.uuid}
   cloud:
     config:
       bus.enabled: true

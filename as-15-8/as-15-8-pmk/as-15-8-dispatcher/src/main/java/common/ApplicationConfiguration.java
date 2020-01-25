@@ -22,6 +22,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 @EnableScheduling
 @ComponentScan(basePackages={"common", "controllers", "services", "repositories", "events", "webClients", "restapi"})
+@RemoteApplicationEventScan({"remoteEvents"})
 @EntityScan("model")
 @EnableJpaRepositories("repositories")
 public class ApplicationConfiguration{
