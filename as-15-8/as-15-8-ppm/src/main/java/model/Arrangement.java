@@ -1,6 +1,7 @@
 package model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -63,6 +64,7 @@ public class Arrangement implements Serializable {
 
     @Column(nullable = false, columnDefinition = "text default 'NEW'")
     @Enumerated(EnumType.STRING)
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private ArrangementStatus status = ArrangementStatus.NEW;
 
     @OneToMany(cascade=CascadeType.ALL, mappedBy = "arrangement")
