@@ -26,13 +26,13 @@ import java.util.List;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class DispatcherWebClient {
 
-    private final String DISPATCHER_URI = "/dispatcher/arrangements/jobIds";
+    private final String DISPATCHER_URI = "/dispatcher/results/ids";
 
     @Value("${gateway.url}")
     private String gatewayUrl;
 
     public List<Long> getJobIdsFromDispatcher(Long arrangementId){
-        String uri = UriComponentsBuilder.fromUriString(DISPATCHER_URI).queryParam("id", arrangementId).build().toString();
+        String uri = UriComponentsBuilder.fromUriString(DISPATCHER_URI).queryParam("arrangementId", arrangementId).build().toString();
         try {
             log.info("Получение списка jobId завершенных проверок мероприятия {} по запросу: {}", arrangementId, uri);
 
