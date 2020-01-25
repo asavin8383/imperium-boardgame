@@ -53,7 +53,7 @@ public class RunScheduleService {
     private final ArrangementRepo arrangementRepo;
 
     private final OAuth2RestTemplate restTemplate;
-    private final String DISPATCHER_POST_ARR_ENDPOINT = "/dispatcher/arrangement";
+    private final String DISPATCHER_POST_ARR_ENDPOINT = "/dispatcher/arrangements";
 
     @Value("${gateway.url}")
     private String gatewayUrl;

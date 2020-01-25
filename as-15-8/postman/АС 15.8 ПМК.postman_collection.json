@@ -597,7 +597,7 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "{{url}}/dispatcher/arrangement/save?arrangementId=913",
+							"raw": "{{url}}/dispatcher/arrangements/save?arrangementId=913",
 							"host": [
 								"{{url}}"
 							],
@@ -622,7 +622,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{url}}/dispatcher/arrangement/completion?id=889",
+							"raw": "{{url}}/dispatcher/arrangements/completion?id=889",
 							"host": [
 								"{{url}}"
 							],
