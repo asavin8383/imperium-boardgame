@@ -5,5 +5,5 @@ package model.enums;
  * Date: 23.01.2020
  */
 public enum ArrangementStatus {
-    NEW, SCHEDULED, RUNNING, STOPPED, FINISHED;
+    NEW, SCHEDULED, RUNNING, STOPPING, STOPPED, FINISHED;
 }

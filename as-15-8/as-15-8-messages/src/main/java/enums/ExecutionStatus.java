@@ -9,11 +9,12 @@ public enum ExecutionStatus {
 	NEW(1, "Новое"),
 	FORMED(2, "Готово к включению в расписание"),
 	SCHEDULED(3, "Запланировано"),
-	STOPPED(4, "Остановлено"),
-	FINISHED(5, "Выполнено"),
-	ACT_SENT(6, "Отправлен акт"),
-	CLOSED(7, "Закрыто"),
-	ERROR(8, "Ошибка");
+	STOPPING(4, "Останавливается"),
+	STOPPED(5, "Остановлено"),
+	FINISHED(6, "Выполнено"),
+	ACT_SENT(7, "Отправлен акт"),
+	CLOSED(8, "Закрыто"),
+	ERROR(9, "Ошибка");
 
 	@Getter
 	private int priority;
