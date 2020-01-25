@@ -198,6 +198,7 @@ public class ArrangementController {
                 Void.class);
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
             log.error("Ошибка отправки сообщения на остановку мероприятия {} из расписания {} диспетчеру", arrangementId, scheduleId);
+            log.error("Информация об ошибке", ex);
             return false;
         }
         log.info("Сообщение на остановку мероприятия {} из расписания {} успешно отправлено диспетчеру", arrangementId, scheduleId);
