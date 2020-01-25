@@ -13,6 +13,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import remoteEvents.ArrangementStopEvent;
 
 /**
  * Конфигурация модуля запуска проверок мероприятий
@@ -22,7 +23,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 @EnableScheduling
 @ComponentScan(basePackages={"common", "controllers", "services", "repositories", "events", "webClients", "restapi"})
-@RemoteApplicationEventScan({"remoteEvents"})
+@RemoteApplicationEventScan(basePackageClasses = {ArrangementStopEvent.class})
 @EntityScan("model")
 @EnableJpaRepositories("repositories")
 public class ApplicationConfiguration{
