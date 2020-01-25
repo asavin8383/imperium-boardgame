@@ -2,7 +2,7 @@ package events;
 
 import org.apache.kafka.streams.kstream.KStream;
 import org.springframework.cloud.stream.annotation.Input;
-import org.springframework.messaging.SubscribableChannel;
+import org.springframework.messaging.MessageChannel;
 
 /**
  * Creation date: 06.08.2019
@@ -17,5 +17,5 @@ public interface DispatcherChannels {
     KStream<?, ?> results();
 
     @Input(ARRANGEMENT_EVENT)
-    SubscribableChannel arrangementEvent();
+    MessageChannel arrangementEvent();
 }
