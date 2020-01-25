@@ -157,9 +157,14 @@ public class ArrangementController {
                     schedulePeriodArrangementRepo.save(schedulePeriodArrangement);
                 });
             //Меняем статус мероприятию
-            log.info("Меняем статус мероприятию {} из расписания {} на STOPPED", arrangement.getId(), schedules.get(0).getId());
-            arrangement.setStatus(ArrangementStatus.STOPPED);
+            log.info("Меняем статус мероприятию {} из расписания {} на STOPPING", arrangement.getId(), schedules.get(0).getId());
+            arrangement.setStatus(ArrangementStatus.STOPPING);
             arrangementRepo.save(arrangement);
+            log.info("Отправляем в ППТ запрос смены статуса мероприятию {} из расписания {} на STOPPING", arrangement.getId(), schedules.get(0).getId());
+            sendToPPT(new ArrangementStatusNotification(
+                arrangement.getId(),
+                ArrangementEvents.PREPARE_TO_STOP
+            ));
             return ResponseEntity.ok().build();
         }
     }

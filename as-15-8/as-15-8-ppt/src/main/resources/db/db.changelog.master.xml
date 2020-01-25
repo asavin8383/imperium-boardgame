@@ -58,4 +58,5 @@
     <include file="db/changelog/ppt.0030.traffic_actual_check_units_count.xml"/>
     <include file="db/changelog/ppt.0031.arrangement_ck_status.xml"/>
     <include file="db/changelog/ppt.0032.arrangement_rm_action_required.xml"/>
+    <include file="db/changelog/ppt.0033.arrangements.STOPPING.xml"/>
 </databaseChangeLog>

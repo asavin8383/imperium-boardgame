@@ -20,5 +20,6 @@
     <include file="db/changelog/ppm.0015.stop_arrangements.xml"/>
     <include file="db/changelog/ppm.0016.update_arrangements.xml"/>
     <include file="db/changelog/ppm.0017.arrangements.SCHEDULED.xml"/>
+    <include file="db/changelog/ppm.0018.arrangements.STOPPING.xml"/>
     <include file="db/changelog/ppm.0043.description.xml"/>
 </databaseChangeLog>
