@@ -32,8 +32,8 @@ import repositories.SchedulePeriodArrangementRepo;
 import repositories.ScheduleRepo;
 import restapi.ArrangementStatusUploader;
 import restapi.pod.DomainMaskUploader;
+import services.ArrangementService;
 import services.ScheduleService;
-import webClients.DispatcherWebClient;
 import webClients.PPT_WebClient;
 
 import javax.transaction.Transactional;
@@ -55,8 +55,8 @@ import java.util.stream.Collectors;
 public class ArrangementController {
 
     private final ArrangementRepo arrangementRepo;
+    private final ArrangementService arrangementService;
     private final PPT_WebClient pptWebClient;
-    private final DispatcherWebClient dispatcherWebClient;
     private final ArrangementStatusUploader arrangementStatusUploader;
     private final SchedulerProperties schedulerProperties;
     private final DomainMaskUploader domainMaskUploader;
@@ -114,8 +114,10 @@ public class ArrangementController {
         }
 
         if (sendToPPT(notification)) {
-            if(notification.getEvent().equals(ArrangementEvents.STOP))
+            if(notification.getEvent().equals(ArrangementEvents.STOP)){
+                arrangementService.refreshStoppedArrangement(arrangement);
                 arrangement.setStatus(ArrangementStatus.STOPPED);
+            }
             else
                 arrangement.setStatus(ArrangementStatus.FINISHED);
             arrangementRepo.save(arrangement);
@@ -173,12 +175,7 @@ public class ArrangementController {
         if (arrangement == null){
             return ResponseEntity.noContent().build();
         }
-        //Меняем статус для чек-юнитов, завершенных на диспетчере
-        scheduleCheckUnitRepo.changeFinished(
-            arrangement,
-            dispatcherWebClient.getJobIdsFromDispatcher(arrangement.getId()),
-            true
-        );
+        arrangementService.refreshStoppedArrangement(arrangement);
         return ResponseEntity.ok().build();
     }
 

@@ -11,6 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import repositories.ArrangementRepo;
 import repositories.ScheduleCheckUnitRepo;
+import webClients.DispatcherWebClient;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -29,6 +30,7 @@ public class ArrangementService {
 
     private final ArrangementRepo arrangementRepo;
     private final ScheduleCheckUnitRepo scheduleCheckUnitRepo;
+    private final DispatcherWebClient dispatcherWebClient;
 
     public void updateArrangementPlanInfo(Arrangement arrangement){
         if(arrangement.getPlannedStartTime()==null || arrangement.getPlannedEndTime() == null){
@@ -74,5 +76,14 @@ public class ArrangementService {
             arrangementCheckUnits.put(arrangement, arrangementResults);
         });
         return arrangementCheckUnits;
+    }
+
+    public void refreshStoppedArrangement(Arrangement arrangement){
+        //Меняем статус для чек-юнитов, завершенных на диспетчере
+        scheduleCheckUnitRepo.changeFinished(
+            arrangement,
+            dispatcherWebClient.getJobIdsFromDispatcher(arrangement.getId()),
+            true
+        );
     }
 }
