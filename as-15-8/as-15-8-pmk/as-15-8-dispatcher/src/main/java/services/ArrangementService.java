@@ -1,14 +1,13 @@
 package services;
 
 import arrangement.ArrangementToExecution;
+import events.producers.ArrangementStopEventProducer;
 import exceptions.AS_15_8_DispatcherException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import model.Arrangement;
 import model.enums.ArrangementStatus;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,15 +24,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class ArrangementService {
 
-    @Value("${stop.arrangements.destination.service}")
-    private String stopArrangementsDestinationService;
-
     @Getter
     private Map<Long, Set<Long>> stoppedArrangements = new ConcurrentHashMap<>();
 
-    private final ApplicationContext context;
     private final ArrangementRepo arrangementRepo;
     private final ResultsKafkaService resultsKafkaService;
+    private final ArrangementStopEventProducer arrangementStopEventProducer;
 
     @PostConstruct
     private void fillStoppedArrangements() {
@@ -89,8 +85,8 @@ public class ArrangementService {
         else
             stoppedArrangements.put(arrangementId, new HashSet<>(Collections.singletonList(version)));
 
-        final ArrangementStopEvent event = new ArrangementStopEvent(this, context.getId(), stopArrangementsDestinationService, arrangementId, version);
-        context.publishEvent(event);
+        final ArrangementStopEvent event = new ArrangementStopEvent(arrangementId, version);
+        arrangementStopEventProducer.send(event);
     }
 
     public synchronized boolean isArrangementRunning(Long arrangementId, Long version) {

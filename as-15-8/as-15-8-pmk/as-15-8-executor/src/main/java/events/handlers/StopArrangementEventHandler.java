@@ -1,20 +1,25 @@
 package events.handlers;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
-import org.springframework.stereotype.Component;
+import org.springframework.cloud.bus.SpringCloudBusClient;
+import org.springframework.cloud.stream.annotation.EnableBinding;
+import org.springframework.cloud.stream.annotation.StreamListener;
+import org.springframework.stereotype.Service;
 import remoteEvents.ArrangementStopEvent;
 import service.JobsService;
 
-@Component
+@Service
+@EnableBinding({SpringCloudBusClient.class})
+@Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class StopArrangementEventHandler implements ApplicationListener<ArrangementStopEvent> {
+public class StopArrangementEventHandler {
 
     private final JobsService jobsService;
 
-    @Override
-    public void onApplicationEvent(ArrangementStopEvent event) {
+    @StreamListener(SpringCloudBusClient.INPUT)
+    public void consumeCheckUnitJob(ArrangementStopEvent event) {
         jobsService.stop(event.getArrangementId(), event.getVersion());
     }
 }
