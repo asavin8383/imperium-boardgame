@@ -9,10 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import repositories.ArrangementRepo;
 import repositories.ScheduleCheckUnitRepo;
 import webClients.DispatcherWebClient;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -78,6 +78,7 @@ public class ArrangementService {
         return arrangementCheckUnits;
     }
 
+    @Transactional
     public void refreshStoppedArrangement(Arrangement arrangement){
         //Меняем статус для чек-юнитов, завершенных на диспетчере
         scheduleCheckUnitRepo.changeFinished(
