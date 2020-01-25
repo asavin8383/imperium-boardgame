@@ -1,20 +1,16 @@
 package remoteEvents;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.springframework.cloud.bus.event.RemoteApplicationEvent;
 
 @Data
-@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
-public class ArrangementStopEvent extends RemoteApplicationEvent {
+public class ArrangementStopEvent {
 
     private Long arrangementId;
     private Long version;
 
-    public ArrangementStopEvent(Object source, String originService, String destinationService, Long arrangementId, Long version) {
-        super(source, originService, destinationService);
+    public ArrangementStopEvent(Long arrangementId, Long version) {
         this.arrangementId = arrangementId;
         this.version = version;
     }
