@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -39,12 +38,12 @@ public class DispatcherWebClient {
             return WebClient.create(gatewayUrl)
                 .get()
                 .uri(uri)
-                .accept(MediaType.TEXT_EVENT_STREAM)
+                .accept(MediaType.APPLICATION_STREAM_JSON)
                 .exchange()
                 .flatMapMany(clientResponse -> {
                     if(clientResponse.statusCode().equals(HttpStatus.OK)){
                         log.info("Список jobId завершенных проверок мероприятия {} успешно сформирован", arrangementId);
-                        return clientResponse.bodyToFlux(new ParameterizedTypeReference<Long>(){});
+                        return clientResponse.bodyToFlux(Long.class);
                     } else {
                         log.warn("Ошибка получения списка jobId завершенных проверок мероприятия {} в ППМ код возврата {}", arrangementId, clientResponse.statusCode().toString());
                         return (Flux.empty());
