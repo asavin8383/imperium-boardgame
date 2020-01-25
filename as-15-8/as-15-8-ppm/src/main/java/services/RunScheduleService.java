@@ -97,6 +97,7 @@ public class RunScheduleService {
         ArrangementToExecution arrangement = new ArrangementToExecution();
         arrangement.setCheckUnitsCount(schedulePeriodCheckUnitRepo.getSchedulePeriodCheckUnitCount(scheduleId, schedulePeriodArrangement.getArrangementId()));
         arrangement.setId(schedulePeriodArrangement.getArrangementId());
+        arrangement.setVersion(scheduleId);
 
         ResponseEntity<String> response = restTemplate.postForEntity(url, arrangement, String.class);
         return response.getStatusCode() == HttpStatus.OK;
