@@ -20,7 +20,7 @@ public interface ContentCheckUnitRepository extends JpaRepository<ContentCheckUn
             "join ContentHistory history on content.id = history.content.id " +
             "and history.endDate = '3000-01-01'"
     )
-    List<ContentCheckUnit> findAllByErdId(@Param("erdi_id") String erdiId);
+    List<ContentCheckUnit> findAllByErdId(@Param("erdi_id") Long erdiId);
 
 
     @Query(
@@ -30,6 +30,6 @@ public interface ContentCheckUnitRepository extends JpaRepository<ContentCheckUn
                     "join ContentHistory history on content.id = history.content.id " +
                     "and history.endDate = '3000-01-01'"
     )
-    List<ContentCheckUnit> findAllByErdIds(@Param("erdi_ids") List<String> erdiIds);
+    List<ContentCheckUnit> findAllByErdIds(@Param("erdi_ids") List<Long> erdiIds);
 
 }

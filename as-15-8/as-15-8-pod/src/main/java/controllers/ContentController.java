@@ -247,7 +247,7 @@ public class ContentController {
     }
 
     @GetMapping("/erdi/checkUnits")
-    public ResponseEntity<List<CheckUnit>> getCheckUnits(@RequestParam("id") String erdiId){
+    public ResponseEntity<List<CheckUnit>> getCheckUnits(@RequestParam("id") Long erdiId){
         List<CheckUnit> checkUnits = contentService.getActualCheckUnits(erdiId).stream()
             .map(contentCheckUnit -> new CheckUnit(contentCheckUnit.getContentId(), contentCheckUnit.getCheckUnitType(), contentCheckUnit.getCheckUnitValue()))
             .collect(Collectors.toList());
@@ -258,7 +258,7 @@ public class ContentController {
     }
 
     @PostMapping("/erdi/checkUnits")
-    public ResponseEntity<List<CheckUnit>> getCheckUnitsByIds(@RequestBody List<String> erdiIds){
+    public ResponseEntity<List<CheckUnit>> getCheckUnitsByIds(@RequestBody List<Long> erdiIds){
         List<CheckUnit> checkUnits = contentService.getActualCheckUnits(erdiIds).stream()
                 .map(contentCheckUnit -> new CheckUnit(contentCheckUnit.getContentId(), contentCheckUnit.getCheckUnitType(), contentCheckUnit.getCheckUnitValue()))
                 .collect(Collectors.toList());
@@ -270,12 +270,6 @@ public class ContentController {
 
     @PostMapping(path = "/erdi/check_units_count")
     public Long getCheckUnitsCount(@RequestBody List<Long> erdiIds) {
-        List<String> erdiIdsInString = converErdiIdsToString(erdiIds);
-        return Long.valueOf(contentCheckUnitRepository.findAllByErdIds(erdiIdsInString).size());
+        return Long.valueOf(contentCheckUnitRepository.findAllByErdIds(erdiIds).size());
     }
-
-    private List<String> converErdiIdsToString(List<Long> erdiIds) {
-        return erdiIds.stream().map(erdiId -> erdiId.toString()).collect(Collectors.toList());
-    }
-
 }

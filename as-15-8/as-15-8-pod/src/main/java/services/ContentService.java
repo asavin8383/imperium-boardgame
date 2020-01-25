@@ -34,11 +34,11 @@ public class ContentService {
      * @param erdiId ИД ЕРДИ
      * @return список актуальных чек-юнитов
      */
-    public List<ContentCheckUnit> getActualCheckUnits(String erdiId){
+    public List<ContentCheckUnit> getActualCheckUnits(Long erdiId){
         return contentCheckUnitRepository.findAllByErdId(erdiId);
     }
 
-    public List<ContentCheckUnit> getActualCheckUnits(List<String> erdiIds){
+    public List<ContentCheckUnit> getActualCheckUnits(List<Long> erdiIds){
         return contentCheckUnitRepository.findAllByErdIds(erdiIds);
     }
 }
