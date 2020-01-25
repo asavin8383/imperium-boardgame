@@ -50,7 +50,7 @@ public class JobsService {
             UriComponents uriComponents =
                     UriComponentsBuilder
                             .fromHttpUrl(gatewayUrl)
-                            .path("/dispatcher/arrangement/stopped")
+                            .path("/dispatcher/arrangements/stopped")
                             .build();
 
             Map<Long, Set<Long>> actualStoppedJobs = oAuth2RestTemplate
