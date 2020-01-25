@@ -66,8 +66,7 @@ public class ResultsController {
                 pageable);
     }
 
-    @PreAuthorize("hasRole('ROLE_SYSTEM')")
-    @GetMapping(value = "/ids", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "/ids", produces = MediaType.APPLICATION_STREAM_JSON_VALUE)
     public Flux<Long> getListJobIds(@RequestParam Long arrangementId) {
         return Flux.fromIterable(resultService
             .getArrangementResultIds(arrangementId));

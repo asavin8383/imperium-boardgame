@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.event.EventListener;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -16,7 +15,6 @@ import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
-import remoteEvents.ArrangementStopEvent;
 import robots.exceptions.Timeout_ExecutionException;
 import service.impl.RobotsServiceImpl;
 
@@ -74,14 +72,6 @@ public class JobsService {
         stoppedJobs.clear();
     }
 
-    @EventListener
-    public void onApplicationEvent(ArrangementStopEvent event) {
-        if(stoppedJobs.containsKey(event.getArrangementId()))
-            stoppedJobs.get(event.getArrangementId()).add(event.getVersion());
-        else
-            stoppedJobs.put(event.getArrangementId(), new HashSet<>(Collections.singletonList(event.getVersion())));
-    }
-
     public ExecutionJobResult executeJob(CheckUnitKey key, CheckUnitJob job) {
 
         CheckUnitVerificationService service =
@@ -119,5 +109,12 @@ public class JobsService {
         return Optional.ofNullable(stoppedJobs.get(arrangementId))
                 .map(stArr -> !stArr.contains(version))
                 .orElse(true);
+    }
+
+    public void stop(Long arrangementId, Long version) {
+        if(stoppedJobs.containsKey(arrangementId))
+            stoppedJobs.get(arrangementId).add(version);
+        else
+            stoppedJobs.put(arrangementId, new HashSet<>(Collections.singletonList(version)));
     }
 }

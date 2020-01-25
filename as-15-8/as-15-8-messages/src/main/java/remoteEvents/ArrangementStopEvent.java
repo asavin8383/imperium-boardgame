@@ -13,8 +13,8 @@ public class ArrangementStopEvent extends RemoteApplicationEvent {
     private Long arrangementId;
     private Long version;
 
-    public ArrangementStopEvent(Object source, String originService, Long arrangementId, Long version) {
-        super(source, originService);
+    public ArrangementStopEvent(Object source, String originService, String destinationService, Long arrangementId, Long version) {
+        super(source, originService, destinationService);
         this.arrangementId = arrangementId;
         this.version = version;
     }

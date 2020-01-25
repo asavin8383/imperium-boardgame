@@ -16,7 +16,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 @EnableConfigurationProperties(ExecutorProperties.class)
 @ComponentScan(basePackages={"common", "events", "robots.factory", "service"})
-@RemoteApplicationEventScan({"remoteEvents"})
 public class ApplicationConfiguration{
 	
 	public static void main(String[] args) {
