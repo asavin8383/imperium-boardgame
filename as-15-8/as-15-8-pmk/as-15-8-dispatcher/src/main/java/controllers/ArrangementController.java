@@ -22,7 +22,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 @RestController
-@RequestMapping(path = "/arrangement", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(path = "/arrangements", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Slf4j
 public class ArrangementController {
