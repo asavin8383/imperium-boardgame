@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import repositories.*;
 import restapi.ArrangementStatusUploader;
+import restapi.ppt.PptRestApi;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -37,6 +38,7 @@ public class ScheduleService {
     private final ArrangementStatusUploader arrangementStatusUploader;
     private final SchedulePeriodRepo schedulePeriodRepo;
     private final SchedulerProperties schedulerProperties;
+    private final PptRestApi pptRestApi;
 
     @Transactional
     public void deleteSchedule(Schedule schedule){
@@ -45,7 +47,7 @@ public class ScheduleService {
         scheduleRepo.delete(schedule);
         log.info("Меняем статусы мероприятиям: {} на NEW", arrangements.stream().map(arrangement -> arrangement.getId().toString()).collect(Collectors.joining(",")));
         arrangements.forEach(arrangement -> {
-            arrangement.setStatus(ArrangementStatus.NEW);
+            arrangement.setStatus(pptRestApi.fetchActualStatus(arrangement.getId()));
             arrangementRepo.save(arrangement);
             arrangementStatusUploader.changeArrangementStatus(
                     new ArrangementStatusNotification(arrangement.getId(), ArrangementEvents.SCHEDULE_ROLLBACK));

@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import repositories.ArrangementRepo;
 import repositories.ScheduleCheckUnitRepo;
 import webClients.DispatcherWebClient;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -48,11 +49,11 @@ public class ArrangementService {
         return arrangementRepo.findAllAvailableArrangements(page);
     }
 
-    public List<Arrangement> findAllAvailableArrangements(){
+    List<Arrangement> findAllAvailableArrangements(){
         return arrangementRepo.findAllAvailableArrangements();
     }
 
-    public Map<Arrangement, TreeSet<ScheduleCheckUnit>> getArrangementCheckUnits(List<Long> arrangementIds, LocalDate plannedDate){
+    Map<Arrangement, TreeSet<ScheduleCheckUnit>> getArrangementCheckUnits(List<Long> arrangementIds, LocalDate plannedDate){
         Map<Arrangement, TreeSet<ScheduleCheckUnit>> arrangementCheckUnits = new HashMap<>();
         arrangementIds.forEach(arrangementId -> {
             Arrangement arrangement = arrangementRepo.findById(arrangementId)

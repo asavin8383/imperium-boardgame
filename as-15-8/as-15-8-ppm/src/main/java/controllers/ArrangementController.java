@@ -81,6 +81,7 @@ public class ArrangementController {
                 arrangementRepo.delete(arrangement);
                 log.info("Мероприятие {} удалено при замене", arrangement.getId());
             }
+            newArrangement.setStatus(ArrangementStatus.NEW);
             if (newArrangement.getPlannedStartTime() == null) {
                 newArrangement.setPlannedStartTime(LocalTime.of(9, 0));
             }
