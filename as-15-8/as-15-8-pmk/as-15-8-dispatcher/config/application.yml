@@ -25,6 +25,7 @@ spring:
         binder:
           brokers: 192.168.5.12:9094,192.168.5.33:9094,192.168.5.184:9094
           minPartitionCount: 24
+          replicationFactor: 3
         streams:
           binder:
             brokers: 192.168.5.12:9094,192.168.5.33:9094,192.168.5.184:9094
@@ -42,6 +43,7 @@ spring:
               max.partition.fetch.bytes: 10485760
               max.poll.records: 100
               max.poll.interval.ms: 600000
+              replication.factor: 3
           bindings:
             inputResults:
               consumer:

@@ -33,7 +33,7 @@ spring:
     name: dispatcher
   cloud:
     config:
-      bus.enabled: true
+      bus.enabled: false
       uri: ${gateway.url}/config
       fail-fast: true
       profile: default
