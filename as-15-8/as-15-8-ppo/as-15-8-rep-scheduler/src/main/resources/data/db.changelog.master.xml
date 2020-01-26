@@ -21,4 +21,5 @@
     <include file="data/changelog/reports.0016.param_reports.xml"/>
     <include file="data/changelog/reports.0017.fixs.xml"/>
     <include file="data/changelog/reports.0018.params.xml"/>
+    <include file="data/changelog/reports.0019.sor_performance.xml"/>
 </databaseChangeLog>
