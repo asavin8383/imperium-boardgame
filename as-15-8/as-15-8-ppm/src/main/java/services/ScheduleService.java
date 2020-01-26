@@ -248,7 +248,10 @@ public class ScheduleService {
             if(!freeExecutionNumbersIterator.hasNext())
                 freeExecutionNumbersIterator = freeExecutionNumbers.iterator();
 
-            SchedulePeriodCheckUnit schedulePeriodCheckUnit = new SchedulePeriodCheckUnit();
+            SchedulePeriodCheckUnit schedulePeriodCheckUnit =
+                    schedulePeriodCheckUnitRepo
+                        .findById(scheduleCheckUnit.getId())
+                        .orElseGet(SchedulePeriodCheckUnit::new);
             schedulePeriodCheckUnit.setSchedulePeriodArrangement(schedulePeriodArrangement);
             schedulePeriodCheckUnit.setCheckUnit(scheduleCheckUnit);
             schedulePeriodCheckUnit.setExecutionNumber(freeExecutionNumbersIterator.next());
