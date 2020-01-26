@@ -73,7 +73,7 @@ source_path_anonym:
 eureka:
   instance:
     metadata-map:
-      expectedAmount: 6
+      expectedAmount: 5
 
 ---
 
