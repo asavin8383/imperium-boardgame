@@ -7,6 +7,11 @@
     create index content_resources_resource_type_id_idx on sor.content_resources (resource_type_id);
     create index content_info_id_version_idx on sor.content_info(content_id,content_version_id);
     create index content_resources_id_version_idx on sor.content_resources(content_id,content_version_id);
+        create index  decision_id_version on sor.decision(content_id,content_version_id);
+create index  content_history_hist_end on sor.content_history(content_id,end_dt);
+create index  content_history_end on sor.content_history(end_dt);
+create index  content_history_id_version on sor.content_history(content_id,content_version_id);
+create index  content_history_id_addon_version on sor.content_history(content_id,addon_version_id);
        </sql>
     <rollback>
         <sql>
@@ -14,11 +19,16 @@
             drop index sor.content_resources_resource_type_id_idx;
             drop index sor.content_info_id_version_idx;
             drop index sor.content_resources_id_version_idx;
+            drop index sor.decision_id_version;
+            drop index sor.content_history_hist_end;
+            drop index sor.content_history_end;
+            drop index sor.content_history_id_version;
+            drop index sor.content_history_id_addon_version;
         </sql>
     </rollback>
     </changeSet>
     <changeSet id="0019.2" author="klychagin">
-       <sqlFile encoding="UTF-8" splitStatements="false" path="data/sql/function_sor_set_irtz_type.sql"/>
+       <sqlFile encoding="UTF-8" splitStatements="false" path="data/sql/sor_set_irtz_type_2.sql"/>
         <rollback/>
     </changeSet>
 </databaseChangeLog>
