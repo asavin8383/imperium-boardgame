@@ -36,7 +36,7 @@ public class PptRestApi {
                             .toString(),
                         String.class);
             try {
-                return ArrangementStatus.valueOf(statusString);
+                return ArrangementStatus.valueOf(statusString != null ? statusString.replaceAll("[^\\w+]", "") : "NEW");
             } catch (Exception ex){
                 throw new AS_15_8_PPM_Exception("Ошибка при получении актуального статуса мероприятия из ППТ. Статус не поддерживается: " + statusString);
             }
