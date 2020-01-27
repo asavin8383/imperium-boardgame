@@ -13,6 +13,10 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.TimeZone;
+
 /**
  * Created by san
  * Date: 05.11.2019
@@ -36,6 +40,7 @@ public class CheckUnitJobProducer {
                     .withPayload(checkUnitJob)
                     .setHeader(KafkaHeaders.PARTITION_ID, partitionId)
                     .setHeader(KafkaHeaders.MESSAGE_KEY, key)
+                    .setHeader(KafkaHeaders.TIMESTAMP, LocalDateTime.now().atZone(TimeZone.getDefault().toZoneId()).toInstant().toEpochMilli())
                     .build();
 
             boolean send = ppm_channels.outputJobs().send(message);
