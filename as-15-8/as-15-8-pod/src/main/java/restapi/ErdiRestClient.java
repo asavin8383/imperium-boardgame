@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.response.*;
 import model.rest.ContentRest;
-import model.rest.control.PodState;
 import model.scheme.AddonVersion;
 import model.scheme.ContentVersion;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,42 +92,6 @@ public class ErdiRestClient {
         return dateUpdate == null ? "" : dateFormat.format(dateUpdate);
     }
 
-    public PodState getLoadState() throws ParseException {
-        ResponseEntity<RestResponseDumpDate> entity = registryAnonimyzersRestTemplate.exchange(
-                baseUrl + "/getLastDumpDate/",
-                HttpMethod.GET, null, RestResponseDumpDate.class);
-
-        RestResponseDumpDate resp = entity.getBody();
-        Date dateDumpDate = (resp == null ? null : resp.getDumpDate());
-        DateFormat dateFormat1 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-        //dateFormat1.setTimeZone(TimeZone.getTimeZone("GMT"));
-
-        ContentVersion lastContentVersion = contentVersionRepository.findTopByIdNotNullOrderByIdDesc();
-        AddonVersion lastAddonVersion = addonVersionRepository.findTopByIdNotNullOrderByIdDesc();
-
-        Date dateUpdate = getActualContentDate();
-        String strDateUpdate = dateUpdate == null ? "" : dateFormat1.format(dateUpdate);
-
-        DateFormat dateFormat2 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-        String actualServerDumpDate = (dateDumpDate == null ? "" : dateFormat2.format(dateDumpDate));
-
-        String state = getState();
-        String errorMessage = getErrorMessage();
-        String stateDetails = getStateDetails();
-
-        List<ContentVersion> allContents = contentVersionRepository
-                .findAll(Sort.by(Sort.Order.asc("id")));
-        List<Long> allContentsInt = allContents.stream()
-                .map(contentVersion -> contentVersion.getId())
-                .collect(Collectors.toList());
-
-        PodState podState = new PodState(strDateUpdate, actualServerDumpDate, state, errorMessage, stateDetails,
-                lastContentVersion == null ? null : lastContentVersion.getId(),
-                lastAddonVersion == null ? null : lastAddonVersion.getId(),
-                allContentsInt);
-        return podState;
-    }
-
     public void startUpdateErdi(){
         if (!isLoading.compareAndSet(false, true))
             return;
@@ -193,13 +156,6 @@ public class ErdiRestClient {
         finally {
             stateDetails = isError ? errorMessage : "Удаление версии контента " + id + " прошло успешно!";
         }
-    }
-
-    public String getState(){
-        if (isLoading)
-            return "PROCESS";
-
-        return (isError ? "ERROR" : "");
     }
 
     public String getStateDetails(){
