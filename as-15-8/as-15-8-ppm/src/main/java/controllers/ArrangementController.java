@@ -1,6 +1,7 @@
 package controllers;
 
 import arrangement.ArrangementStatusNotification;
+import arrangement.ArrangementToPPM;
 import checkUnits.CheckUnit;
 import checkUnits.CheckUnitType;
 import common.SchedulerProperties;
@@ -73,7 +74,8 @@ public class ArrangementController {
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @Transactional
-    public ResponseEntity<String> updateArrangement(@RequestBody Arrangement newArrangement, @RequestParam("id") Arrangement arrangement) {
+    public ResponseEntity<String> updateArrangement(@RequestBody ArrangementToPPM arrToPPM, @RequestParam("id") Arrangement arrangement) {
+        Arrangement newArrangement = convertArrangement(arrToPPM);
         try {
             log.info("Получено мероприятие {} для включения в расписание", newArrangement.getId());
             if (arrangement != null) {
@@ -101,6 +103,18 @@ public class ArrangementController {
             log.error("Ошибка при формировании мероприятия", ex);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
         }
+    }
+
+    private Arrangement convertArrangement(ArrangementToPPM arrToPPM) {
+        Arrangement arrangement = new Arrangement();
+        arrangement.setId(arrToPPM.getId());
+        arrangement.setTitle(arrToPPM.getTitle());
+        arrangement.setCreationDate(arrToPPM.getCreationDate());
+        arrangement.setPlannedStartTime(arrToPPM.getPlannedStartTime());
+        arrangement.setPlannedEndTime(arrToPPM.getPlannedEndTime());
+        arrangement.setMaxWorkersCount(arrToPPM.getMaxWorkersCount());
+        arrangement.setAccessTool(arrToPPM.getAccessTool());
+        return arrangement;
     }
 
     @PutMapping(value = "/close", consumes = MediaType.APPLICATION_JSON_VALUE)
