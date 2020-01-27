@@ -5,6 +5,7 @@ import events.producers.ArrangementStopEventProducer;
 import exceptions.AS_15_8_DispatcherException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import model.Arrangement;
 import model.enums.ArrangementStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,14 +23,16 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
+@Slf4j
 public class ArrangementService {
 
     @Getter
     private Map<Long, Set<Long>> stoppedArrangements = new ConcurrentHashMap<>();
 
     private final ArrangementRepo arrangementRepo;
-    private final ResultsKafkaService resultsKafkaService;
     private final ArrangementStopEventProducer arrangementStopEventProducer;
+    private final ResultsKafkaService resultsKafkaService;
+    private final ActService actService;
 
     @PostConstruct
     private void fillStoppedArrangements() {
@@ -77,7 +80,6 @@ public class ArrangementService {
                 .findByIdAndVersion(arrangementId, version)
                 .orElseThrow(() -> new AS_15_8_DispatcherException("Ошибка остановки мероприятия. Мероприятие не найдено в БД по id " + arrangementId + " и версии " + version));
         arrangement.setStatus(ArrangementStatus.STOPPING);
-        arrangement.setCheckUnitsCount(resultsKafkaService.getResultsCount(arrangementId));
         arrangementRepo.save(arrangement);
 
         if(stoppedArrangements.containsKey(arrangementId))
@@ -93,5 +95,25 @@ public class ArrangementService {
         return Optional.ofNullable(stoppedArrangements.get(arrangementId))
                 .map(stArr -> !stArr.contains(version))
                 .orElse(true);
+    }
+
+    public boolean finishArrangement(Long arrangementId, Long version, boolean isStopped, boolean isActAvailable) {
+        try {
+            Arrangement arr = arrangementRepo.findById(arrangementId)
+                    .orElseThrow(() -> new AS_15_8_DispatcherException("Ошибка при закрытии мероприятия. Мероприятие не найдено по ID: " + arrangementId));
+            if (!isStopped)
+                arr.setStatus(ArrangementStatus.FINISHED);
+            else
+                arr.setStatus(ArrangementStatus.STOPPED);
+            arr.setCheckUnitsCount(resultsKafkaService.getResultsCount(arrangementId));
+            arrangementRepo.save(arr);
+            if (!isStopped && isActAvailable) {
+                actService.createAct(arrangementId);
+            }
+            return true;
+        } catch (Exception ex) {
+            log.error("Ошибка при завершении мероприятия", ex);
+            return false;
+        }
     }
 }
