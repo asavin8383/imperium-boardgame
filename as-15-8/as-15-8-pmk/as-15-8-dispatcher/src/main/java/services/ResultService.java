@@ -43,6 +43,8 @@ public class ResultService {
                     .findReadyToUpload()
                     .stream()
                     .filter(arrangement -> {
+                        if(arrangement.getStatus().equals(ArrangementStatus.STOPPING))
+                            return true;
                         long count = resultsKafkaService.getResultsCount(arrangement.getId());
                         if (count != 0 && arrangement.getCheckUnitsCount() <= count) {
                             arrangement.setStatus(ArrangementStatus.UPLOADING);
