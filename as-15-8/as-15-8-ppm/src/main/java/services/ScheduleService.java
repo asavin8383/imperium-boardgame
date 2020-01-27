@@ -65,6 +65,9 @@ public class ScheduleService {
      */
     @Transactional
     public Schedule planSchedule(Schedule schedule){
+        if(schedule.getStatus()==ScheduleStatus.RUNNING || schedule.getStatus()==ScheduleStatus.FINISHED){
+            throw new AS_15_8_PPM_Exception("Ошибка планирования расписания! Расписание имеет недопустимый статус: " + schedule.getStatus());
+        }
         if(schedule.getMaxWorkersCount() == 0)
             throw new AS_15_8_PPM_Exception("Ошибка планирования расписания. Выбрано 0 обработчиков");
         int freeWorkersCount = getFreeWorkersCount(
