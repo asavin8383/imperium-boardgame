@@ -9,7 +9,7 @@ spring:
           destination: jobs
           group: executors
           consumer:
-            concurrency: 4
+            concurrency: 6
             useNativeDecoding: true
         executionResults.destination: exec_results
         results.destination: results
@@ -23,7 +23,7 @@ spring:
       kafka:
         binder:
           brokers: 192.168.5.12:9094,192.168.5.33:9094,192.168.5.184:9094
-          minPartitionCount: 24
+          minPartitionCount: 30
           replicationFactor: 3
           configuration:
             max.request.size: 10485760

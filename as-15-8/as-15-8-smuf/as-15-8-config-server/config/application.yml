@@ -69,7 +69,7 @@ spring:
           destination: bus_config_input
       kafka.binder:
         brokers: 192.168.5.12:9094,192.168.5.33:9094,192.168.5.184:9094
-        minPartitionCount: 24
+        minPartitionCount: 30
 management.endpoints.web.exposure.include: bus-refresh
 user.activity.timeout.config.key: user.activity.timeout
 kibana.link.key: kibana.link
