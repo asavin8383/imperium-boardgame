@@ -36,20 +36,18 @@ public interface ScheduleRepo extends JpaRepository<Schedule, Long> {
     )
     LocalTime getScheduleEndTime(@Param("schedule_id") Long scheduleId);
 
-    @Query("select s from Schedule s " +
+    @Query("select DISTINCT s from Schedule s " +
         "join s.schedulePeriods sp " +
         "join sp.schedulePeriodArrangements spa " +
         "join spa.arrangement a on a.id = :arrangement_id"
-
     )
     List<Schedule> findByArrangement(@Param("arrangement_id") Long arrangementId);
 
-    @Query("select s from Schedule s " +
+    @Query("select DISTINCT s from Schedule s " +
         "join s.schedulePeriods sp " +
         "join sp.schedulePeriodArrangements spa " +
         "join spa.arrangement a on a.id = :arrangement_id " +
         "where s.status = :status"
-
     )
     List<Schedule> findByStatusAndArrangement(@Param("status") ScheduleStatus status, @Param("arrangement_id") Long arrangementId);
 
