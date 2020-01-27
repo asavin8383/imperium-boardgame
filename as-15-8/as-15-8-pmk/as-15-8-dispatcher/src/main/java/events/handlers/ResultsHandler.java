@@ -83,8 +83,8 @@ public class ResultsHandler {
                 arrangementService.isArrangementRunning(checkUnitKey.getArrangementId(), checkUnitKey.getVersion()))
             .peek((key, result) ->
                     log.info("\n   ---->>> Принято сообщение с анализом результатов проверки: " +
-                            "мероприятие: " + key.getArrangementId() + ", " +
-                            key.getJobId() + ", " + result.getCheckUnit().getValue() + ", результат: " + result.getCheckResult()))
+                            "мероприятие: " + key.getArrangementId() + ", " + key.getJobId() + ", " + key.getVersion() + ", " +
+                            result.getCheckUnit().getValue() + ", результат: " + result.getCheckResult()))
             .mapValues((key, result) -> {
                 result.setEndTime(new Date());
                 result.setCheckResult(checkErdiStatus(result.getCheckUnit().getContentId(), result.getCheckResult()));
