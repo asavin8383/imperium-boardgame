@@ -31,7 +31,7 @@ public class RobotSLAController {
     public ResponseEntity editRobotSla(@RequestParam("id") Optional<RobotSLA> robotSLA, @RequestBody RobotSLA newRobotSLA) {
         robotSLA.orElseThrow(() -> new AS_15_8_Config_Exception("Невозможно найти такое SLA"));
 
-        if (robotNotPASDType(newRobotSLA.getRobot()))
+        if (robotNotPASDType(robotSLA.get().getRobot()))
             return ResponseEntity.badRequest().body("Недопустимая операция! Только робот ПАСД может иметь настройки SLA");
 
         robotSLA.get().setSlaPeriod(newRobotSLA.getSlaPeriod());
