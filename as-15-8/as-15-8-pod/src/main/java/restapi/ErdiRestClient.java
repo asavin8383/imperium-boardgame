@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.response.*;
 import model.rest.ContentRest;
-import model.rest.control.PodState;
 import model.scheme.AddonVersion;
 import model.scheme.ContentVersion;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +40,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -72,7 +72,7 @@ public class ErdiRestClient {
     private String baseUrl;
 
     private boolean isError = false;
-    private boolean isLoading = false;
+    private AtomicBoolean isLoading = new AtomicBoolean(false);
     private String errorMessage = "";
     private String stateDetails = "";
 
@@ -81,7 +81,7 @@ public class ErdiRestClient {
 
 
     public boolean getIsLoading(){
-        return isLoading;
+        return isLoading.get();
     }
 
     public String getUpdateDate() {
@@ -92,46 +92,9 @@ public class ErdiRestClient {
         return dateUpdate == null ? "" : dateFormat.format(dateUpdate);
     }
 
-    public PodState getLoadState() throws ParseException {
-        ResponseEntity<RestResponseDumpDate> entity = registryAnonimyzersRestTemplate.exchange(
-                baseUrl + "/getLastDumpDate/",
-                HttpMethod.GET, null, RestResponseDumpDate.class);
-
-        RestResponseDumpDate resp = entity.getBody();
-        Date dateDumpDate = (resp == null ? null : resp.getDumpDate());
-        DateFormat dateFormat1 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-        //dateFormat1.setTimeZone(TimeZone.getTimeZone("GMT"));
-
-        ContentVersion lastContentVersion = contentVersionRepository.findTopByIdNotNullOrderByIdDesc();
-        AddonVersion lastAddonVersion = addonVersionRepository.findTopByIdNotNullOrderByIdDesc();
-
-        Date dateUpdate = getActualContentDate();
-        String strDateUpdate = dateUpdate == null ? "" : dateFormat1.format(dateUpdate);
-
-        DateFormat dateFormat2 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-        String actualServerDumpDate = (dateDumpDate == null ? "" : dateFormat2.format(dateDumpDate));
-
-        String state = getState();
-        String errorMessage = getErrorMessage();
-        String stateDetails = getStateDetails();
-
-        List<ContentVersion> allContents = contentVersionRepository
-                .findAll(Sort.by(Sort.Order.asc("id")));
-        List<Long> allContentsInt = allContents.stream()
-                .map(contentVersion -> contentVersion.getId())
-                .collect(Collectors.toList());
-
-        PodState podState = new PodState(strDateUpdate, actualServerDumpDate, state, errorMessage, stateDetails,
-                lastContentVersion == null ? null : lastContentVersion.getId(),
-                lastAddonVersion == null ? null : lastAddonVersion.getId(),
-                allContentsInt);
-        return podState;
-    }
-
     public void startUpdateErdi(){
-        if (isLoading)
+        if (!isLoading.compareAndSet(false, true))
             return;
-        isLoading = true;
 
         try{
             log.info("====== Начало обновления справочников");
@@ -157,7 +120,7 @@ public class ErdiRestClient {
             throw new CompletionException(ex);
         }
         finally {
-            isLoading = false;
+            isLoading.set(false);
         }
     }
 
@@ -193,13 +156,6 @@ public class ErdiRestClient {
         finally {
             stateDetails = isError ? errorMessage : "Удаление версии контента " + id + " прошло успешно!";
         }
-    }
-
-    public String getState(){
-        if (isLoading)
-            return "PROCESS";
-
-        return (isError ? "ERROR" : "");
     }
 
     public String getStateDetails(){

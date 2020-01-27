@@ -10,11 +10,15 @@ public class CheckUnitTypeValueConverter {
         if (resourceType == null)
             return null;
 
-        // todo - доделать! домен маска тоже нужнна!
+        // см класс ResourceTypeConverter - для преобразования ID в CheckUnitType
+
         // todo - доделать! ip_v6 - маска!
 
         if (resourceType instanceof TypeDomain){
             return CheckUnitType.DOMAIN;
+        }
+        else if (resourceType instanceof TypeDomainMask){
+            return CheckUnitType.DOMAIN_MASK;
         }
         else if (resourceType instanceof TypeIp){
             return CheckUnitType.IP_V4;

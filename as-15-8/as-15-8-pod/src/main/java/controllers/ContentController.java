@@ -7,7 +7,6 @@ import enums.ErdiStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.projection.ContentView;
-import model.rest.control.PodState;
 import org.apache.commons.lang.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -232,12 +231,6 @@ public class ContentController {
     @PreAuthorize("hasAnyRole('ROLE_MANAGE_ERDI')")
     public String getUpdateDate() {
         return erdiRestClient.getUpdateDate();
-    }
-
-    @GetMapping("/get_state")
-    @PreAuthorize("hasAnyRole('ROLE_MANAGE_ERDI')")
-    public PodState getState() throws ParseException {
-        return erdiRestClient.getLoadState();
     }
 
     @GetMapping("/remove_content_version_to")
