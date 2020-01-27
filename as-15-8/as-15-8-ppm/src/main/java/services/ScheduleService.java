@@ -42,6 +42,9 @@ public class ScheduleService {
 
     @Transactional
     public void deleteSchedule(Schedule schedule){
+        if(schedule.getStatus()==ScheduleStatus.RUNNING||schedule.getStatus()==ScheduleStatus.FINISHED){
+            throw new AS_15_8_PPM_Exception("Ошибка удаления расписания! В статусе " + schedule.getStatus() + " расписания удалять нельзя");
+        }
         List<Arrangement> arrangements = arrangementRepo.findAllBySchedule(schedule.getId());
         log.info("Удаляем расписание с ИД: {}", schedule.getId());
         scheduleRepo.delete(schedule);

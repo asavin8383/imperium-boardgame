@@ -16,7 +16,9 @@ import remoteEvents.ArrangementStopEvent;
 import repositories.ArrangementRepo;
 
 import javax.annotation.PostConstruct;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -38,7 +40,7 @@ public class ArrangementService {
     private void fillStoppedArrangements() {
         stoppedArrangements.putAll(
             arrangementRepo
-                .findStopped(LocalDateTime.now())
+                .findStopped(LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT))
                 .stream()
                 .collect(Collectors.toMap(
                         Arrangement::getId,
