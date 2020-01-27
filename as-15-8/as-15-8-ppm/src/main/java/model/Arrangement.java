@@ -64,7 +64,6 @@ public class Arrangement implements Serializable {
 
     @Column(nullable = false, columnDefinition = "text default 'NEW'")
     @Enumerated(EnumType.STRING)
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private ArrangementStatus status;
 
     @OneToMany(cascade=CascadeType.ALL, mappedBy = "arrangement")

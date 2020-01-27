@@ -1,9 +1,9 @@
 package restapi.ppm;
 
+import arrangement.ArrangementToPPM;
 import exceptions.AS_15_8_PPT_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import model.Views;
 import model.task.Arrangement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,12 +34,9 @@ public class ArrangementUploader {
     private final OAuth2RestTemplate oAuth2RestTemplate;
 
     public void updateArrangement(Arrangement arrangement){
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
+        ArrangementToPPM arrToPPM = convertToArrangementPPM(arrangement);
 
-        MappingJacksonValue jacksonValue = new MappingJacksonValue(arrangement);
-        jacksonValue.setSerializationView(Views.Brief.class);
-        HttpEntity<MappingJacksonValue> entity = new HttpEntity<>(jacksonValue, headers);
+        HttpEntity<MappingJacksonValue> entity = createHttpEntity(arrToPPM);
 
         //TODO сделать POJO для межсервисного обмена. В случае 400 ошибки - смотреть тело
         log.info("Отправка мероприятия в ППМ: {}", arrangement.getId());
@@ -49,5 +46,27 @@ public class ArrangementUploader {
              throw AS_15_8_PPT_Exception.logAndGet(log, String.format("Ошибка отправки мероприятия %d в ППМ, код возврата %s", arrangement.getId(), ex.getStatusCode()), ex);
         }
         log.info("Мероприятие {} успешно отправлено в ППМ", arrangement.getId());
+    }
+
+    private ArrangementToPPM convertToArrangementPPM(Arrangement arrangement) {
+        ArrangementToPPM arrangementToPPM = new ArrangementToPPM();
+        arrangementToPPM.setId(arrangement.getId());
+        arrangementToPPM.setTitle(arrangement.getTitle());
+        arrangementToPPM.setCreationDate(arrangement.getCreationDate());
+        arrangementToPPM.setPlannedStartTime(arrangement.getPlannedStartTime());
+        arrangementToPPM.setPlannedEndTime(arrangement.getPlannedEndTime());
+        arrangementToPPM.setMaxWorkersCount(arrangement.getMaxWorkersCount());
+        arrangementToPPM.setAccessTool(arrangement.getAccessTool());
+        return arrangementToPPM;
+    }
+
+    private HttpEntity createHttpEntity(ArrangementToPPM arrangementToPPM) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        MappingJacksonValue jacksonValue = new MappingJacksonValue(arrangementToPPM);
+        HttpEntity<MappingJacksonValue> entity = new HttpEntity<>(jacksonValue, headers);
+
+        return entity;
     }
 }

@@ -33,7 +33,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestController
 @RequestMapping(path = "arrangements/checkUnits", produces = MediaType.APPLICATION_JSON_VALUE)
-//@PreAuthorize("hasRole('ROLE_SYSTEM')")
 @RequiredArgsConstructor(onConstructor_={@Autowired})
 public class ArrangementContentController {
 
