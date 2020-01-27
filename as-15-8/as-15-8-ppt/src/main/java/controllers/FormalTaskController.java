@@ -65,10 +65,11 @@ public class FormalTaskController {
 			@RequestParam(required = false) SortingDirection sortingDirection,
 			@RequestParam(required = false) String sortingColumn,
 			@RequestParam(defaultValue = "0") int pageNumber,
-			@RequestParam(defaultValue = "10") int pageSize){
+			@RequestParam(defaultValue = "10") int pageSize,
+			@RequestParam(required = false) List<ExecutionStatus> statuses){
 		PageRequest page = PageRequest.of(
 				pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
-		return formalTaskRepo.findPage(taskId, operator, fgisId, page);
+		return formalTaskRepo.findPage(statuses, taskId, operator, fgisId, page);
 	}
 
 	@GetMapping("{task}")

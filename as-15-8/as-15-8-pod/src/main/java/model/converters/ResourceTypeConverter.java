@@ -1,60 +1,58 @@
 package model.converters;
 
 import checkUnits.CheckUnitType;
+import exceptions.AS_15_8_POD_Exception;
+
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
+import java.util.HashMap;
+import java.util.Map;
 
 
 // todo - переделать! выглядить ужасно!
 
 @Converter(autoApply = true)
 public class ResourceTypeConverter implements AttributeConverter<CheckUnitType, Integer> {
-    @Override
-    public Integer convertToDatabaseColumn(CheckUnitType checkUnitType) {
-        if (checkUnitType == null)
-            return 1;
 
-        switch (checkUnitType){
-            case URL:
-                return 6;
-            case DOMAIN:
-                return 1;
-            case DOMAIN_MASK:
-                return 1;       // nope
-            case IP_V4:
-                return 2;
-            case IP_V6:
-                return 3;
-            case IP_V4_SUBNET:
-                return 4;
-            case IP_V6_SUBNET:
-                return 5;
-        }
-        return 1;
+    private static Map<CheckUnitType, Integer> map = new HashMap<>();
+    static {
+        map.put(CheckUnitType.DOMAIN,       1);
+        map.put(CheckUnitType.IP_V4,        2);
+        map.put(CheckUnitType.IP_V6,        3);
+        map.put(CheckUnitType.IP_V4_SUBNET, 4);
+        map.put(CheckUnitType.IP_V6_SUBNET, 5);
+        map.put(CheckUnitType.URL,          6);
+        map.put(CheckUnitType.DOMAIN_MASK,  7);
     }
 
     @Override
-    public CheckUnitType convertToEntityAttribute(Integer checkUnitType) {
+    public Integer convertToDatabaseColumn(CheckUnitType checkUnitType) {
         if (checkUnitType == null)
-            return CheckUnitType.DOMAIN;
+            checkUnitType = CheckUnitType.URL;
 
-        switch (checkUnitType){
-            case 0:
-                return CheckUnitType.URL;
-            case 1:
-                return CheckUnitType.DOMAIN;
-            case 2:
-                return CheckUnitType.IP_V4;
-            case 3:
-                return CheckUnitType.IP_V6;
-            case 4:
-                return CheckUnitType.IP_V4_SUBNET;
-            case 5:
-                return CheckUnitType.IP_V6_SUBNET;
-            case 6:
-                return CheckUnitType.URL;
+        Integer result = map.get(checkUnitType);
+        if (result == null)
+            throw new AS_15_8_POD_Exception("Невозможно определить checkUnitTypeId по checkUnitType = " + checkUnitType.name());
+
+        return map.get(checkUnitType);
+    }
+
+    @Override
+    public CheckUnitType convertToEntityAttribute(Integer checkUnitTypeId) {
+        if (checkUnitTypeId == null)
+            checkUnitTypeId = map.get(CheckUnitType.URL);
+
+        CheckUnitType result = null;
+        for(CheckUnitType checkUnitType : map.keySet()){
+            Integer id = map.get(checkUnitType);
+            if (id.equals(checkUnitTypeId)){
+                result = checkUnitType;
+            }
         }
 
-        return CheckUnitType.DOMAIN;
+        if (result == null)
+            throw new AS_15_8_POD_Exception("Невозможно определить checkUnitType по checkUnitTypeId = " + checkUnitTypeId);
+
+        return result;
     }
 }

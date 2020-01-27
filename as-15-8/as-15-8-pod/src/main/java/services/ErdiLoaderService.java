@@ -351,16 +351,14 @@ public class ErdiLoaderService {
 
     private List<ContentResource> createContentResources(Content content, ContentVersion contentVersion, ContentFull contentFull){
         List<ContentResource> list = new ArrayList<>();
-        if (contentFull.types != null){
-            for(ResourceType resourceType : contentFull.types){
-                ContentResource contentResource = new ContentResource();
-                contentResource.setContent(content);
-                contentResource.setValue(resourceType.value);
-                contentResource.setTs(contentFull.ts);
-                contentResource.setCheckUnitType(CheckUnitTypeValueConverter.convertToType(resourceType));
-                contentResource.setContentVersion(contentVersion);
-                list.add(contentResource);
-            }
+        for(ResourceType resourceType : contentFull.getTypes()){
+            ContentResource contentResource = new ContentResource();
+            contentResource.setContent(content);
+            contentResource.setValue(resourceType.value);
+            contentResource.setTs(contentFull.ts);
+            contentResource.setCheckUnitType(CheckUnitTypeValueConverter.convertToType(resourceType));
+            contentResource.setContentVersion(contentVersion);
+            list.add(contentResource);
         }
         return list;
     }
