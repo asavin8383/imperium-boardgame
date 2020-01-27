@@ -6,8 +6,10 @@ import parsers.DateTimeZoneSimpleAdapter;
 
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @XmlRootElement(name="content")
@@ -45,6 +47,28 @@ public class ContentFull extends ContentRest {
             @XmlElement(name = "ipSubnet", type = TypeIpSubnet.class),
             @XmlElement(name = "ipv6Subnet", type = TypeIp6Subnet.class)
     })
-    public List<ResourceType> types;
+    private List<ResourceType> types;
+    private boolean wasFilteredTypes = false;
+
+    public List<ResourceType> getTypes(){
+        if (types == null)
+            types = new ArrayList<>();
+
+        if (!wasFilteredTypes){
+            wasFilteredTypes = true;
+
+            types = types.stream().map(resourceType -> {
+                // создаем доменную маску
+                if (resourceType instanceof TypeDomain){
+                    String value = resourceType.value == null ? "" : resourceType.value;
+                    if (value.contains("*")){
+                        return new TypeDomainMask(resourceType.value, resourceType.ts);
+                    }
+                }
+                return resourceType;
+            }).collect(Collectors.toList());
+        }
+        return types;
+    }
 
 }
