@@ -32,7 +32,7 @@ public class Result implements Serializable {
 
     @ManyToOne(optional = false)
     @JoinColumn(name="arrangement_id", foreignKey = @ForeignKey(name = "FK_arrangements"))
-    @JsonView(Views.Full.class)
+    @JsonIgnore
     private Arrangement arrangement;
 
     @Column(name = "content_id")

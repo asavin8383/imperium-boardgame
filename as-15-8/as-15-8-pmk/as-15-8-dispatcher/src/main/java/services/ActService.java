@@ -28,22 +28,22 @@ public class ActService {
     private final ResultRepo arrangementResultRepo;
 
 
-    public boolean createAct(Long arragementId){
-        log.info("Подготовка данных для акта. ID мероприятия: {}", arragementId);
+    public boolean createAct(Long arrangementId){
+        log.info("Подготовка данных для акта. ID мероприятия: {}", arrangementId);
         try {
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
-            Date minDate = ldt2date(arrangementResultRepo.getMinDateByArrangementId(arragementId));
-            Date maxDate = ldt2date(arrangementResultRepo.getMaxDateByArrangementId(arragementId));
+            Date minDate = ldt2date(arrangementResultRepo.getMinDateByArrangementId(arrangementId));
+            Date maxDate = ldt2date(arrangementResultRepo.getMaxDateByArrangementId(arrangementId));
 
             ActRequest actRequest = new ActRequest();
-            actRequest.setArragementId(arragementId);
+            actRequest.setArragementId(arrangementId);
             actRequest.setStartDate(minDate != null ? dateFormat.format(minDate) : "");
             actRequest.setEndDate(maxDate != null ? dateFormat.format(maxDate) : actRequest.getStartDate());
 
             return webClient.sendAct(actRequest);
         } catch (Exception ex){
-            log.error("Ошибка при формировании данных для акта по мероприятию: "+arragementId);
+            log.error("Ошибка при формировании данных для акта по мероприятию: "+arrangementId);
             return false;
         }
     }

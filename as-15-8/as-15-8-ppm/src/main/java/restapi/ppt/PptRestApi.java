@@ -1,5 +1,6 @@
 package restapi.ppt;
 
+import enums.ExecutionStatus;
 import exceptions.AS_15_8_PPM_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,22 +26,37 @@ public class PptRestApi {
     private final OAuth2RestTemplate oAuth2RestTemplate;
 
     public ArrangementStatus fetchActualStatus(Long arrangementId) {
-        log.debug("Отправка запроса на получение статуса мероприятия из ППТ: {}", arrangementId);
         try {
-            String statusString = oAuth2RestTemplate
+            log.debug("Отправка запроса на получение статуса мероприятия из ППТ: {}", arrangementId);
+            ExecutionStatus execStatus = oAuth2RestTemplate
                     .getForObject(UriComponentsBuilder
                             .fromHttpUrl(gatewayUrl)
                             .path(URI)
                             .queryParam("id", arrangementId)
                             .build()
                             .toString(),
-                        String.class);
-            try {
-                return ArrangementStatus.valueOf(statusString != null ? statusString.replaceAll("[^\\w+]", "") : "NEW");
-            } catch (Exception ex){
-                throw new AS_15_8_PPM_Exception("Ошибка при получении актуального статуса мероприятия из ППТ. Статус не поддерживается: " + statusString);
+                        ExecutionStatus.class);
+            if(execStatus == null)
+                return ArrangementStatus.NEW;
+            switch (execStatus){
+                case SCHEDULED:
+                    return ArrangementStatus.SCHEDULED;
+                case RUNNING:
+                    return ArrangementStatus.RUNNING;
+                case STOPPING:
+                    return ArrangementStatus.STOPPING;
+                case STOPPED:
+                    return ArrangementStatus.STOPPED;
+                case FINISHED:
+                case ERROR:
+                case ACT_SENT:
+                case CLOSED:
+                    return ArrangementStatus.FINISHED;
+                case NEW:
+                case FORMED:
+                default:
+                    return ArrangementStatus.NEW;
             }
-
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
             throw new AS_15_8_PPM_Exception(String.format("Ошибка отправки запроса на получение статуса мероприятия из ППТ, код возврата %s", ex.getStatusCode()));
         }

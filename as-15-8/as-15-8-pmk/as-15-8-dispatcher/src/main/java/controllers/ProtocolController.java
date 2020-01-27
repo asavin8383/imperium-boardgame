@@ -113,27 +113,6 @@ public class ProtocolController {
                 });
     }
 
-    //TODO Остановка будет реализована по другому
-    @PreAuthorize("hasRole('ROLE_MANAGE_ARRANGEMENT')")
-    @PutMapping(path = "/stop_arrangement")
-    public boolean stopArrangement(@RequestParam("id") Long arrangementId){
-
-       /* List<Result> results = resultRepo.findAllByArrangementId(arrangementId);
-        resultService.sendNotificationsIfFinished(arrangementId);
-        if (resultService.getArrangementExecutionStatus(arrangementId) == ExecutionStatus.RUNNING) {
-            results.stream()
-                    .filter(this::checkIsRunningOrPlanned)
-                    .forEach(resultToStop -> {
-                        resultToStop.setResult(CheckUnitJobResult.STOPPED);
-                        resultRepo.save(resultToStop);
-
-                    });
-            resultService.sendNotificationsIfFinished(arrangementId);
-            return true;
-        } else return false;*/
-       return false;
-    }
-
     private boolean checkIsRunningOrPlanned(Result result) {
         return result.getResult() == CheckUnitJobResult.RUNNING || result.getResult() == CheckUnitJobResult.PLANNED;
     }
