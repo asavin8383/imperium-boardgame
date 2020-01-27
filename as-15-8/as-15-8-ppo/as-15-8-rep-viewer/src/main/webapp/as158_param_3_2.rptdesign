@@ -2024,11 +2024,6 @@ where msr_prd.eff_dttm::date = ?
                         <property name="display">inline</property>
                         <text-property name="text">Отчет сформирован </text-property>
                     </label>
-                    <label id="871">
-                        <property name="fontFamily">"Times New Roman"</property>
-                        <property name="display">inline</property>
-                        <text-property name="text">Отчет сформирован </text-property>
-                    </label>
                     <data id="867">
                         <property name="fontFamily">"Times New Roman"</property>
                         <structure name="dateTimeFormat">
