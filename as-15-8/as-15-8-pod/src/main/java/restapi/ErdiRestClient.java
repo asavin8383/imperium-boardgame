@@ -41,6 +41,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -72,7 +73,7 @@ public class ErdiRestClient {
     private String baseUrl;
 
     private boolean isError = false;
-    private boolean isLoading = false;
+    private AtomicBoolean isLoading = new AtomicBoolean(false);
     private String errorMessage = "";
     private String stateDetails = "";
 
@@ -81,7 +82,7 @@ public class ErdiRestClient {
 
 
     public boolean getIsLoading(){
-        return isLoading;
+        return isLoading.get();
     }
 
     public String getUpdateDate() {
@@ -129,9 +130,8 @@ public class ErdiRestClient {
     }
 
     public void startUpdateErdi(){
-        if (isLoading)
+        if (!isLoading.compareAndSet(false, true))
             return;
-        isLoading = true;
 
         try{
             log.info("====== Начало обновления справочников");
@@ -157,7 +157,7 @@ public class ErdiRestClient {
             throw new CompletionException(ex);
         }
         finally {
-            isLoading = false;
+            isLoading.set(false);
         }
     }
 
