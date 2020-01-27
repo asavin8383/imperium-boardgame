@@ -18,8 +18,8 @@ public interface ArrangementRepo extends JpaRepository<Arrangement, Long> {
     List<Arrangement> findReadyToUpload();
 
     @Query("select a from Arrangement a " +
-            "where a.creationDate = :date and " +
-            "a.status = 'STOPPED' or a.status = 'STOPPING'")
+            "where a.creationDate > :date and " +
+            "(a.status = 'STOPPED' or a.status = 'STOPPING')")
     List<Arrangement> findStopped(@Param("date") LocalDateTime date);
 
     Optional<Arrangement> findByIdAndVersion(Long id, Long version);
