@@ -80,15 +80,16 @@ public class CheckUnitJobHandler {
         }
     }
 
-    private LocalDateTime getOriginalTime(Message message){
-        if(message.getHeaders().getTimestamp() != null) {
+    private LocalDateTime getOriginalTime(Message message) {
+        Long timestamp = message.getHeaders().get(KafkaHeaders.RECEIVED_TIMESTAMP, Long.class);
+        if(timestamp != null) {
             return LocalDateTime
                     .ofInstant(Instant.ofEpochMilli(
-                            message.getHeaders().getTimestamp()),
+                            timestamp),
                             TimeZone.getDefault().toZoneId()
                     );
         } else {
-            return LocalDateTime.now();
+            return LocalDateTime.MIN;
         }
     }
 
