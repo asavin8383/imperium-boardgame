@@ -227,7 +227,7 @@ public class ScheduleController {
         private LocalTime plannedEndTime;
     }
 
-    private void analyzeRobotTrafficLimits(Schedule schedule) {
+    private String analyzeRobotTrafficLimits(Schedule schedule) {
         try {
             AtomicReference<String> description = new AtomicReference<>("");
             Map<@NotNull String, List<Arrangement>> accessToolArrangementsMap = getAccessToolArrangementsMap(schedule);
@@ -237,13 +237,15 @@ public class ScheduleController {
                 List<Arrangement> arrangements = entry.getValue();
 
                 if (isRealTrafficGreaterThanSlaConfig(arrangements, schedule, SlaPeriod.DAY))
-                    description.set("Превышение трафика за день для " + accessTool + ";  ");
+                    description.set(description + "Превышение трафика за день для " + accessTool + ";  ");
                 if (isRealTrafficGreaterThanSlaConfig(arrangements, schedule, SlaPeriod.MONTH))
-                    description.set("Превышение трафика за месяц для " + accessTool + ";  ");
+                    description.set(description + "Превышение трафика за месяц для " + accessTool + ";  ");
             });
             writeDescriptionToDb(schedule, description.get());
+            return description.get();
         } catch (Exception e) {
             log.warn("Ошибка расчёта превышения трафика согласно SLA " + e);
+            return "";
         }
     }
 
@@ -295,16 +297,18 @@ public class ScheduleController {
     private Long getCheckUnitsInPeriod(List<Arrangement> arrangements, Schedule schedule, SlaPeriod slaPeriod) {
         AtomicLong result = new AtomicLong();
         arrangements.stream().forEach(arrangement -> {
-            switch (slaPeriod) {
-                case DAY:
-                    if (schedule.getPlannedDate().getDayOfMonth() == LocalDate.now().getDayOfMonth())
-                        result.getAndIncrement();
-                    break;
-                case MONTH:
-                    if (schedule.getPlannedDate().getMonth() == LocalDate.now().getMonth())
-                        result.getAndIncrement();
-                    break;
-            }
+            arrangement.getScheduleCheckUnits().stream().forEach(ck -> {
+                switch (slaPeriod) {
+                    case DAY:
+                        if (schedule.getPlannedDate().getDayOfMonth() == LocalDate.now().getDayOfMonth())
+                            result.getAndIncrement();
+                        break;
+                    case MONTH:
+                        if (schedule.getPlannedDate().getMonth() == LocalDate.now().getMonth())
+                            result.getAndIncrement();
+                        break;
+                }
+            });
         });
         return result.get();
     }
@@ -315,4 +319,5 @@ public class ScheduleController {
             scheduleRepo.save(schedule);
         }
     }
+
 }
