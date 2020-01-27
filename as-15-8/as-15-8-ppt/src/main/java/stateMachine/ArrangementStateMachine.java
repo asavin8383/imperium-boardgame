@@ -45,11 +45,6 @@ public class ArrangementStateMachine {
 
                     .and()
                     .withExternal()
-                    .source(ExecutionStatus.NEW).target(ExecutionStatus.ERROR)
-                    .event(ArrangementEvents.FAIL)
-
-                    .and()
-                    .withExternal()
                     .source(ExecutionStatus.FORMED).target(ExecutionStatus.SCHEDULED)
                     .event(ArrangementEvents.SCHEDULE)
 
@@ -112,26 +107,6 @@ public class ArrangementStateMachine {
                     .withExternal()
                     .source(ExecutionStatus.STOPPED).target(ExecutionStatus.FINISHED)
                     .event(ArrangementEvents.FINISH)
-
-                    .and()
-                    .withExternal()
-                    .source(ExecutionStatus.FORMED).target(ExecutionStatus.ERROR)
-                    .event(ArrangementEvents.FAIL)
-
-                    .and()
-                    .withExternal()
-                    .source(ExecutionStatus.SCHEDULED).target(ExecutionStatus.ERROR)
-                    .event(ArrangementEvents.FAIL)
-
-                    .and()
-                    .withExternal()
-                    .source(ExecutionStatus.STOPPED).target(ExecutionStatus.ERROR)
-                    .event(ArrangementEvents.FAIL)
-
-                    .and()
-                    .withExternal()
-                    .source(ExecutionStatus.RUNNING).target(ExecutionStatus.ERROR)
-                    .event(ArrangementEvents.FAIL)
 
                     .and()
                     .withExternal()
