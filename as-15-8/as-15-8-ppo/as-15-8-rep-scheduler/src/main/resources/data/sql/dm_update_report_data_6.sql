@@ -233,5 +233,5 @@ BEGIN
 END;
 $$;
 
-alter function update_reports_data(bigint) owner to as_user;
+
 
