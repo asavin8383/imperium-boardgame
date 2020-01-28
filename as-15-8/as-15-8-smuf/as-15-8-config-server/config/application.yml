@@ -22,7 +22,9 @@ eureka:
 security:
   oauth2:
     resource:
-      tokenInfoUri: ${gateway.url}/security/oauth/check_token
+      #tokenInfoUri: ${gateway.url}/security/oauth/check_token
+      jwk:
+        key-set-uri: ${gateway.url}/security/.well-known/jwks.json
     client:
       clientId: config-server
       clientSecret: 1q0p2w9o

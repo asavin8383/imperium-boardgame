@@ -33,7 +33,8 @@ spring:
 security:
   oauth2:
     resource:
-      tokenInfoUri: ${gateway.url}/security/oauth/check_token
+      jwk:
+        keySetUri: ${gateway.url}/security/.well-known/jwks.json
     client:
       clientId: pod
       clientSecret: 1q0p2w9o

@@ -22,7 +22,7 @@ public class GatewaySecurityConfiguration extends ResourceServerConfigurerAdapte
                 .httpBasic().disable()
                 .csrf().disable()
                 .authorizeRequests()
-                    .antMatchers("/security/oauth/**", "/eureka/**")
+                    .antMatchers("/security/oauth/**", "/eureka/**", "/security/.well-known/jwks.json")
                     .permitAll()
                     .antMatchers(HttpMethod.GET,
                             "/pod/erdi/single/**",
