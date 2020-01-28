@@ -317,4 +317,12 @@ public class ArrangementController {
         return true;
     }
 
+    @PreAuthorize("hasRole('ROLE_MANAGE_ARRANGEMENT')")
+    @GetMapping()
+    public ResponseEntity getArrangement(@RequestParam("id") Arrangement arrangement){
+        if (arrangement == null){
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok().body(arrangement);
+    }
 }
