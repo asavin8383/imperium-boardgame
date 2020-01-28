@@ -12,7 +12,7 @@
             <property name="dataType">date</property>
             <property name="distinct">true</property>
             <simple-property-list name="defaultValue">
-                <value type="constant">2019-01-01</value>
+                <value type="constant">2019-12-22</value>
             </simple-property-list>
             <list-property name="selectionList"/>
             <property name="paramType">simple</property>
@@ -56,7 +56,7 @@
                 </ex-property>
             </list-property>
             <property name="odaDriverClass">org.postgresql.Driver</property>
-            <property name="odaURL">jdbc:postgresql://192.168.5.195:5432/asdb_test</property>
+            <property name="odaURL">jdbc:postgresql://192.168.5.195:5432/asdb</property>
             <property name="odaUser">as_user</property>
             <encrypted-property name="odaPassword" encryptionID="base64">YXNfdXNlcg==</encrypted-property>
         </oda-data-source>

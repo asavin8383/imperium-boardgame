@@ -5310,22 +5310,6 @@ where msr_prd.eff_dttm::date = ?
                         <column id="571">
                             <property name="textAlign">center</property>
                         </column>
-                        <header>
-                            <row id="572">
-                                <property name="verticalAlign">middle</property>
-                                <cell id="573">
-                                    <property name="colSpan">5</property>
-                                    <property name="rowSpan">1</property>
-                                    <text-data id="567">
-                                        <property name="fontFamily">"Times New Roman"</property>
-                                        <property name="fontSize">12pt</property>
-                                        <property name="textAlign">left</property>
-                                        <expression name="valueExpr">'3.'+row["group_nm"]+' Показатели исполнения ПС '+row["access_tool_name"]+' обязанности по исключению из поисковой выдачи сведений об ИРТЗ в разрезе – тип записи реестра – за отчётный период: '+row["caption"]</expression>
-                                        <property name="contentType">html</property>
-                                    </text-data>
-                                </cell>
-                            </row>
-                        </header>
                         <group id="549">
                             <property name="groupName">at_group</property>
                             <expression name="keyExpr" type="javascript">'3.'+row["group_nm"]+' Показатели исполнения ПС '+row["access_tool_name"]+' обязанности по исключению из поисковой выдачи сведений об ИРТЗ в разрезе – тип записи реестра – за от-чётный период: '+row["caption"]</expression>
@@ -5338,6 +5322,23 @@ where msr_prd.eff_dttm::date = ?
                                 </structure>
                             </list-property>
                             <header>
+                                <row id="882">
+                                    <property name="verticalAlign">middle</property>
+                                    <cell id="883">
+                                        <property name="colSpan">5</property>
+                                        <property name="rowSpan">1</property>
+                                        <property name="borderBottomStyle">solid</property>
+                                        <property name="borderBottomWidth">thin</property>
+                                        <property name="textAlign">center</property>
+                                        <text-data id="567">
+                                            <property name="fontFamily">"Times New Roman"</property>
+                                            <property name="fontSize">12pt</property>
+                                            <property name="textAlign">left</property>
+                                            <expression name="valueExpr">'3.'+row["group_nm"]+' Показатели исполнения ПС '+row["access_tool_name"]+' обязанности по исключению из поисковой выдачи сведений об ИРТЗ в разрезе – тип записи реестра – за отчётный период: '+row["caption"]</expression>
+                                            <property name="contentType">html</property>
+                                        </text-data>
+                                    </cell>
+                                </row>
                                 <row id="550">
                                     <property name="verticalAlign">middle</property>
                                     <cell id="553">
@@ -6534,6 +6535,10 @@ where msr_prd.eff_dttm::date = ?
                                     <property name="borderTopWidth">thin</property>
                                     <data id="632">
                                         <property name="fontFamily">"Times New Roman"</property>
+                                        <structure name="numberFormat">
+                                            <property name="category">Fixed</property>
+                                            <property name="pattern">###0.00{RoundingMode=HALF_UP}</property>
+                                        </structure>
                                         <property name="resultSetColumn">IRTZ_SS_F</property>
                                     </data>
                                 </cell>
@@ -7649,11 +7654,6 @@ where msr_prd.eff_dttm::date = ?
                 <cell id="695">
                     <property name="paddingTop">1cm</property>
                     <label id="866">
-                        <property name="fontFamily">"Times New Roman"</property>
-                        <property name="display">inline</property>
-                        <text-property name="text">Отчет сформирован </text-property>
-                    </label>
-                    <label id="871">
                         <property name="fontFamily">"Times New Roman"</property>
                         <property name="display">inline</property>
                         <text-property name="text">Отчет сформирован </text-property>

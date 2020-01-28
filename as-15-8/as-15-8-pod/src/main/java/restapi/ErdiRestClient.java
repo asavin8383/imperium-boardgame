@@ -76,8 +76,8 @@ public class ErdiRestClient {
     private String errorMessage = "";
     private String stateDetails = "";
 
-    private Date lastTimeUpdateViews = null;
-    private static final long DELAY_UPDATE_VIEWS_MS = 60*60*1000;
+    private Date lastTimeUpdateViews = new Date();
+    private static final long DELAY_UPDATE_VIEWS_MS = 4*60*60*1000;
 
 
     public boolean getIsLoading(){
