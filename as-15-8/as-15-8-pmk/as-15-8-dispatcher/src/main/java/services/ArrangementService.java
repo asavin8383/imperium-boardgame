@@ -58,11 +58,15 @@ public class ArrangementService {
         Arrangement arrangement = arrangementRepo
                 .findById(arrangementToExecution.getId())
                 .orElseGet(Arrangement::new);
-        if(arrangement.getId() == null) {
+        if (arrangement.getId() == null)
             arrangement.setId(arrangementToExecution.getId());
-            arrangement.setCheckUnitsCount(arrangementToExecution.getCheckUnitsCount());
-        } else {
-            arrangement.setCheckUnitsCount(arrangement.getCheckUnitsCount() + arrangementToExecution.getCheckUnitsCount());
+        arrangement.setCheckUnitsCount(arrangementToExecution.getCheckUnitsCount());
+        arrangement.setCreationDate(LocalDateTime.now());
+        arrangement.setVersion(Optional.ofNullable(arrangementToExecution.getVersion()).orElse(0L));
+        arrangement.setStatus(ArrangementStatus.RUNNING);
+        arrangementRepo.save(arrangement);
+
+        if(arrangement.getId() != null && arrangement.getStatus().equals(ArrangementStatus.STOPPED)) {
             Optional.ofNullable(stoppedArrangements.get(arrangementToExecution.getId()))
                     .ifPresent(stoppedArr -> {
                         stoppedArr.remove(arrangementToExecution.getVersion());
@@ -70,10 +74,6 @@ public class ArrangementService {
                             stoppedArrangements.remove(arrangementToExecution.getId());
                     });
         }
-        arrangement.setCreationDate(LocalDateTime.now());
-        arrangement.setVersion(Optional.ofNullable(arrangementToExecution.getVersion()).orElse(0L));
-        arrangement.setStatus(ArrangementStatus.RUNNING);
-        arrangementRepo.save(arrangement);
     }
 
     @Transactional
@@ -99,15 +99,16 @@ public class ArrangementService {
                 .orElse(true);
     }
 
-    public boolean finishArrangement(Long arrangementId, Long version, boolean isStopped, boolean isActAvailable) {
+    public boolean finishArrangement(Long arrangementId, boolean isStopped, boolean isActAvailable) {
         try {
             Arrangement arr = arrangementRepo.findById(arrangementId)
                     .orElseThrow(() -> new AS_15_8_DispatcherException("Ошибка при закрытии мероприятия. Мероприятие не найдено по ID: " + arrangementId));
             if (!isStopped)
                 arr.setStatus(ArrangementStatus.FINISHED);
-            else
+            else{
                 arr.setStatus(ArrangementStatus.STOPPED);
-            arr.setCheckUnitsCount(resultsKafkaService.getResultsCount(arrangementId));
+                arr.setCheckUnitsCount(resultsKafkaService.getResultsCount(arrangementId));
+            }
             arrangementRepo.save(arr);
             if (!isStopped && isActAvailable) {
                 actService.createAct(arrangementId);
