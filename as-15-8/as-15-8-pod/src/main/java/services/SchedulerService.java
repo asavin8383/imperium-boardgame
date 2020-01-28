@@ -3,6 +3,7 @@ package services;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import restapi.ErdiRestClient;
@@ -17,6 +18,7 @@ public class SchedulerService {
     private final ErdiRestClient erdiRestClient;
 
     @Scheduled(cron = "${spring.app.schedule.missions}")
+    @Async
     public void runMissionLoad() {
         boolean isLoading = missionService.getIsLoading();
         log.info("[Scheduler] Запуск обновления списка поручений из ППП Анонимайзера" +
@@ -26,6 +28,7 @@ public class SchedulerService {
     }
 
     @Scheduled(cron = "${spring.app.schedule.erdi}")
+    @Async
     public void runErdiUpdate() {
         boolean isLoading = erdiRestClient.getIsLoading();
         log.info("[Scheduler] Запуск обновления справочников ЕРДИ " + (isLoading ? "[пропущено, обновление еще не завершилось]" : ""));
