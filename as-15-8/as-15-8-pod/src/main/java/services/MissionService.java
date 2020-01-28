@@ -48,7 +48,7 @@ public class MissionService {
     private final MissionRepository missionRepository;
     private final MissionAttachmentRepo missionAttachmentRepo;
 
-    private AtomicBoolean stateLoading = new AtomicBoolean(false);
+    private AtomicBoolean isLoading = new AtomicBoolean(false);
 
     @Value("${spring.rest_base_url}")
     private String baseUrl;
@@ -63,7 +63,7 @@ public class MissionService {
 
     @SneakyThrows
     public void fillMissionsWithConfirm(boolean confirm) {
-        if (!stateLoading.compareAndSet(false, true)) {
+        if (!isLoading.compareAndSet(false, true)) {
             log.info("Загрузка поручений уже проводится в данный момент.");
             return;
         }
@@ -91,8 +91,12 @@ public class MissionService {
             throw new AS_15_8_POD_Exception("Ошибка загрузки поручений!", e);
         }
         finally{
-            stateLoading.set(false);
+            isLoading.set(false);
         }
+    }
+
+    public boolean getIsLoading() {
+        return isLoading.get();
     }
 
     @Transactional

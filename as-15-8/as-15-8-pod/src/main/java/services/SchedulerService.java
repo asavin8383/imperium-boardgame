@@ -18,8 +18,11 @@ public class SchedulerService {
 
     @Scheduled(cron = "${spring.app.schedule.missions}")
     public void runMissionLoad() {
-        log.info("[Scheduler] Запуск получения списка поручений из ППП Анонимайзера");
-        missionService.fillMissions();
+        boolean isLoading = missionService.getIsLoading();
+        log.info("[Scheduler] Запуск обновления списка поручений из ППП Анонимайзера" +
+                (isLoading ? "[пропущено, обновление еще не завершилось]" : ""));
+        if (!isLoading)
+            missionService.fillMissions();
     }
 
     @Scheduled(cron = "${spring.app.schedule.erdi}")
