@@ -7,6 +7,7 @@ import enums.ErdiStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.projection.ContentView;
+import model.rest.control.UpdateErdiState;
 import org.apache.commons.lang.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -233,10 +234,13 @@ public class ContentController {
         return erdiRestClient.getUpdateDate();
     }
 
-    @GetMapping("/remove_content_version_to")
+    @GetMapping("/state_update_erdi")
     @PreAuthorize("hasAnyRole('ROLE_MANAGE_ERDI')")
-    public void removeLastContentVersion(@RequestParam int version) {
-        erdiRestClient.removeVersionTo(version);
+    public UpdateErdiState getState() {
+        return new UpdateErdiState(
+                erdiRestClient.getIsLoading(),
+                erdiRestClient.getStateDetails(),
+                erdiRestClient.getErrorMessage());
     }
 
     @GetMapping("/erdi/checkUnits")
