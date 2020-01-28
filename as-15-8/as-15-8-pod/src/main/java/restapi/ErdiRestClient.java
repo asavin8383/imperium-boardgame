@@ -443,8 +443,8 @@ public class ErdiRestClient {
                         allContents.addAll(contents);
 
                         String details = deltaIdEntry == null ?
-                                "Разбора полного справочника ЕРДИ. ":
-                                "Разбора дельты ЕРДИ id=" + deltaIdEntry.deltaId + ". ";
+                                "Разбор полного справочника ЕРДИ. ":
+                                "Разбор дельты ЕРДИ id=" + deltaIdEntry.deltaId + ". ";
                         details += "Записей: " + allContents.size() + " ...";
                         log.info(details);
 
