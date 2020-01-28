@@ -83,8 +83,7 @@ public class ResultService {
                         log.info("Мероприятие успешно сохранено в БД: " + arrangement.getId());
                         arrangementStatusProducer.sendArrangementStatusMessage(
                                 arrangement.getId(),
-                                arrangement.getVersion(),
-                                isStopped ? ArrangementStatus.STOPPED : ArrangementStatus.FINISHED);
+                                arrangement.getVersion());
                         log.info("Мероприятие успешно завершено: " + arrangement.getId());
                     } else {
                         log.info("Ошибка сохранения мероприятия: " + arrangement.getId());
@@ -99,20 +98,7 @@ public class ResultService {
 
     private boolean saveArrangementResult(CheckUnitKey checkUnitKey, CheckUnitResult checkUnitResult, Arrangement arrangement) {
         try {
-            if (checkUnitResult instanceof AnalysisResult) {
-                saveJobResult(
-                        arrangement,
-                        checkUnitKey.getJobId(),
-                        (AnalysisResult) checkUnitResult);
-            } else if (checkUnitResult instanceof CheckUnitStatusNotification) {
-                CheckUnitStatusNotification notification = (CheckUnitStatusNotification) checkUnitResult;
-                saveJobStatus(
-                        arrangement,
-                        checkUnitKey.getJobId(),
-                        notification,
-                        notification.getCheckResult(),
-                        notification.getDescription());
-            }
+            saveJobResult(arrangement, checkUnitKey.getJobId(), checkUnitResult);
         } catch (Exception ex) {
             try {
                 log.error("Ошибка при сохранении результата проверки: " + checkUnitKey.getJobId() + ", " + checkUnitResult.getCheckUnit().getValue(), ex);
@@ -120,12 +106,14 @@ public class ResultService {
                 StringWriter sw = new StringWriter();
                 ex.printStackTrace(new PrintWriter(sw));
 
-                saveJobStatus(
-                        arrangement,
-                        checkUnitKey.getJobId(),
-                        checkUnitResult,
-                        CheckUnitJobResult.INTERNAL_ERROR,
-                        sw.toString());
+                CheckUnitStatusNotification notification = new CheckUnitStatusNotification();
+                notification.setCheckResult(CheckUnitJobResult.INTERNAL_ERROR);
+                notification.setCheckUnit(checkUnitResult.getCheckUnit());
+                notification.setStartTime(checkUnitResult.getStartTime());
+                notification.setEndTime(checkUnitResult.getEndTime());
+                notification.setDescription(sw.toString());
+
+                saveJobResult(arrangement, checkUnitKey.getJobId(), notification);
                 log.info("Ошибка сохранена: " + checkUnitKey.getJobId());
             } catch (Exception newEx) {
                 log.error("Ошибка при сохранении ошибочной обработки сообщения с анализом результатов проверки: " + checkUnitKey.getJobId() + ", " + checkUnitResult.getCheckUnit().getValue(), newEx);
@@ -135,37 +123,26 @@ public class ResultService {
         return true;
     }
 
-    private void saveJobResult(Arrangement arrangement, Long jobId, AnalysisResult analysisResult) {
-        DetailResultService<? super CheckUnitResult, ? extends DetailResult> service = AnalysisResultServiceFactory.getService(analysisResult.getClass());
-        Result result = resultRepo.findById(jobId).orElseGet(Result::new);
-        result.setArrangement(arrangement);
-        resultsKafkaService.fillResult(result, jobId, analysisResult, service);
-        DetailResult detailResult = service.getOrCreate(result, analysisResult);
-        result.setDetailResult(detailResult);
-
-        Optional<Screenshots> screenshotsOpt = resultsKafkaService.getScreenshot(arrangement.getId(), jobId);
-        screenshotsOpt.ifPresent(screenshots -> {
-            if((screenshots.getScreenshot() != null && screenshots.getScreenshot().length > 0) ||
-                    (screenshots.getEtalonScreenshot() != null && screenshots.getEtalonScreenshot().length > 0)){
-                ResultScreenShot resultScreenShot = resultScreenShotRepo.findById(jobId).orElseGet(ResultScreenShot::new);
-                resultScreenShot.setResult(result);
-                resultScreenShot.setScreenshot(screenshots.getScreenshot());
-                resultScreenShot.setEtalonScreenshot(screenshots.getEtalonScreenshot());
-                result.setResultScreenShot(resultScreenShot);
-            }
-        });
-        resultRepo.save(result);
-    }
-
-    private void saveJobStatus(Arrangement arrangement, Long jobId, CheckUnitResult checkUnitResult, CheckUnitJobResult status, String description) {
+    private void saveJobResult(Arrangement arrangement, Long jobId, CheckUnitResult checkUnitResult) {
         DetailResultService<? super CheckUnitResult, ? extends DetailResult> service = AnalysisResultServiceFactory.getService(checkUnitResult.getClass());
         Result result = resultRepo.findById(jobId).orElseGet(Result::new);
         result.setArrangement(arrangement);
         resultsKafkaService.fillResult(result, jobId, checkUnitResult, service);
+        DetailResult detailResult = service.getOrCreate(result, checkUnitResult);
+        result.setDetailResult(detailResult);
 
-        if (status == CheckUnitJobResult.INTERNAL_ERROR || status == CheckUnitJobResult.TIMEOUT_ERROR) {
-            DetailResult detailResult = service.getOrCreate(result, checkUnitResult);
-            result.setDetailResult(detailResult);
+        if(checkUnitResult instanceof AnalysisResult) {
+            Optional<Screenshots> screenshotsOpt = resultsKafkaService.getScreenshot(arrangement.getId(), jobId);
+            screenshotsOpt.ifPresent(screenshots -> {
+                if ((screenshots.getScreenshot() != null && screenshots.getScreenshot().length > 0) ||
+                    (screenshots.getEtalonScreenshot() != null && screenshots.getEtalonScreenshot().length > 0)) {
+                    ResultScreenShot resultScreenShot = resultScreenShotRepo.findById(jobId).orElseGet(ResultScreenShot::new);
+                    resultScreenShot.setResult(result);
+                    resultScreenShot.setScreenshot(screenshots.getScreenshot());
+                    resultScreenShot.setEtalonScreenshot(screenshots.getEtalonScreenshot());
+                    result.setResultScreenShot(resultScreenShot);
+                }
+            });
         }
         resultRepo.save(result);
     }

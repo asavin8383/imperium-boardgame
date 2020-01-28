@@ -2,11 +2,9 @@ package restapi;
 
 import arrangement.ArrangementStatusNotification;
 import enums.ArrangementEvents;
-import enums.ExecutionStatus;
 import exceptions.AS_15_8_DispatcherException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import model.enums.ArrangementStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -34,7 +32,7 @@ import java.util.Optional;
 public class ArrangementStatusProducer {
 
     private final String PPM_STATUS_ENDPOINT = "/ppm/arrangements/close";
-    private final String PPT_ARRANGEMENT_EXECUTION_STATUS = "/arrangements/execution_status";
+    //private final String PPT_ARRANGEMENT_EXECUTION_STATUS = "/arrangements/execution_status";
     private final String PPT_IS_ACT_AVAILABLE_FOR_AUTOMATIC_SEND = "/arrangements/act_available_for_automatic_send";
     private final String PPT_ACT_SENT_STATUS = "/arrangements/act_sent_status";
     private final OAuth2RestTemplate restTemplate;
@@ -43,7 +41,7 @@ public class ArrangementStatusProducer {
     @Value("${gateway.url}")
     private String gatewayUrl;
 
-    public void sendArrangementStatusMessage(Long arrangementId, Long version, ArrangementStatus status) {
+    public void sendArrangementStatusMessage(Long arrangementId, Long version) {
         boolean isStopped = !arrangementService.isArrangementRunning(arrangementId, version);
         boolean isActAvailable = isActAvailableFromPPT(arrangementId);
 
@@ -52,7 +50,7 @@ public class ArrangementStatusProducer {
                 isStopped ? ArrangementEvents.STOP : ArrangementEvents.FINISH
         );
         if (sendToPPM(arrangementId, notification)) {
-            boolean isFinished = arrangementService.finishArrangement(arrangementId, version, isStopped, isActAvailable);
+            boolean isFinished = arrangementService.finishArrangement(arrangementId, isStopped, isActAvailable);
             if(!isStopped && isFinished && isActAvailable)
                 changeArrangementStatusToActSentPPT(arrangementId);
         }
@@ -77,14 +75,14 @@ public class ArrangementStatusProducer {
     }
 
 
-    public ExecutionStatus getArrangementExcecutionStatus(Long arrangementId) {
+    /*public ExecutionStatus getArrangementExcecutionStatus(Long arrangementId) {
         log.info("Отправка сообщения с запросом статуса мероприятия {} в ППТ", arrangementId);
         try {
             return restTemplate.getForObject(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(PPT_ARRANGEMENT_EXECUTION_STATUS).queryParam("id", arrangementId).build().toString(), ExecutionStatus.class);
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
             throw AS_15_8_DispatcherException.logAndGet(log, String.format("Ошибка отправки сообщения с запросом статуса мероприятия %d в ППТ, код возврата %s", arrangementId, ex.getStatusCode()));
         }
-    }
+    }*/
 
     private boolean isActAvailableFromPPT(Long arrangementId) {
         try {
