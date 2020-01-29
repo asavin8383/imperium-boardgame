@@ -86,8 +86,9 @@ public class ResultsHandler {
                 log.info("\n   ---->>> Принято сообщение с анализом результатов проверки: " +
                         "мероприятие: " + key.getArrangementId() + ", " + key.getJobId() + ", " + key.getVersion() + ", " +
                         result.getCheckUnit().getValue() + ", результат: " + result.getCheckResult());
-                if(arrangementService.getMaxCheckUnitsCount(key.getArrangementId()) <=
-                    resultsKafkaService.getResultsCount(key.getArrangementId())) {
+                Long maxCheckUnitsCount = arrangementService.getMaxCheckUnitsCount(key.getArrangementId());
+                long curCheckUnitsCount = resultsKafkaService.getResultsCount(key.getArrangementId());
+                if( maxCheckUnitsCount != null && maxCheckUnitsCount <= curCheckUnitsCount ) {
                     arrangementService.stopExecution(key.getArrangementId(), key.getVersion());
                 }
             })
