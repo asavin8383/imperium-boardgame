@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "1590fff2-379a-4ddf-8739-83aa3f237da6",
+		"_postman_id": "1bf53902-2aa2-445d-a817-4d4fad2cbbc4",
 		"name": "АС 15.8 ПОД",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -773,6 +773,58 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "Получение статуса обновления ЕРДИ и справочника нарушений",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-AUTH-TOKEN",
+										"type": "text",
+										"value": "{{oper_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/pod/state_update_erdi",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"pod",
+										"state_update_erdi"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Получение статуса обновления ЕРДИ и справочника нарушений",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "X-AUTH-TOKEN",
+												"type": "text",
+												"value": "{{oper_token}}"
+											}
+										],
+										"url": {
+											"raw": "{{url}}/pod/state_update_erdi",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"pod",
+												"state_update_erdi"
+											]
+										}
+									},
+									"_postman_previewlanguage": null,
+									"header": null,
+									"cookie": [],
+									"body": "{\n\t\"isLoading\": true,\n\t\"details\": \"Загрузка дельты ЕРДИ id=123456\",\n\t\"error\": \"\"\n}"
+								}
+							]
 						}
 					],
 					"event": [
