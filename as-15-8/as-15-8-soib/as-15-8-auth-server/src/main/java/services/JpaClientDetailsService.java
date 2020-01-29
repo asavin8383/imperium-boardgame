@@ -1,5 +1,6 @@
 package services;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,9 +15,8 @@ import org.springframework.stereotype.Service;
 import repositories.ClientsRepository;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 @Slf4j
 @Service
@@ -41,7 +41,10 @@ public class JpaClientDetailsService implements ClientDetailsService {
             base.setAccessTokenValiditySeconds(client.getAccessTokenValiditySeconds());
             base.setRefreshTokenValiditySeconds(client.getRefreshTokenValiditySeconds());
             if(Strings.isNotEmpty(client.getAdditionalInformation()))
-                base.setAdditionalInformation(new ObjectMapper().readValue(client.getAdditionalInformation(), Map.class));
+                base.setAdditionalInformation(new ObjectMapper().readValue(
+                        client.getAdditionalInformation(),
+                        new TypeReference<HashMap<String, Object>>() {}
+                    ));
             if(Strings.isNotEmpty(client.getScopes()))
                 base.setAutoApproveScopes(new HashSet<>(Arrays.asList(client.getScopes().split(","))));
             return base;
