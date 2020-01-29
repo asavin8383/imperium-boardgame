@@ -8,10 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.stereotype.Service;
@@ -29,12 +26,13 @@ import java.util.Optional;
 @Service
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class ArrangementStatusProducer {
+public class ArrangementRestApi {
 
     private final String PPM_STATUS_ENDPOINT = "/ppm/arrangements/close";
     //private final String PPT_ARRANGEMENT_EXECUTION_STATUS = "/arrangements/execution_status";
     private final String PPT_IS_ACT_AVAILABLE_FOR_AUTOMATIC_SEND = "/arrangements/act_available_for_automatic_send";
     private final String PPT_ACT_SENT_STATUS = "/arrangements/act_sent_status";
+    private final String PPT_ARRANGEMENT_INTERRUPT_VIOLATION_NUMBER = "/arrangements/interrupt_violation_number";
     private final OAuth2RestTemplate restTemplate;
     private final ArrangementService arrangementService;
 
@@ -86,14 +84,8 @@ public class ArrangementStatusProducer {
 
     private boolean isActAvailableFromPPT(Long arrangementId) {
         try {
-            String uri = UriComponentsBuilder
-                    .fromHttpUrl(gatewayUrl)
-                    .path(PPT_IS_ACT_AVAILABLE_FOR_AUTOMATIC_SEND)
-                    .queryParam("id", arrangementId)
-                    .build()
-                    .toString();
             Optional<Boolean> result = restTemplate.exchange(
-                    uri,
+                    createUri(arrangementId, PPT_IS_ACT_AVAILABLE_FOR_AUTOMATIC_SEND),
                     HttpMethod.GET,
                     null,
                     new ParameterizedTypeReference<Optional<Boolean>>(){}
@@ -111,5 +103,32 @@ public class ArrangementStatusProducer {
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
             throw AS_15_8_DispatcherException.logAndGet(log, String.format("Ошибка отправки сообщения с изменение статуса ACT_SENT %d в ППТ, код возврата %s", arrangementId, ex.getStatusCode()));
         }
+    }
+
+    public ResponseEntity getInterruptViolationNumberFromPPT(Long arrangementId) {
+        try {
+            ResponseEntity<Long> result = restTemplate.getForEntity(
+                    createUri(arrangementId, PPT_ARRANGEMENT_INTERRUPT_VIOLATION_NUMBER),
+                    Long.class
+            );
+
+            if (result.getBody() != null) {
+                return ResponseEntity.ok().body(result.getBody());
+            } else return ResponseEntity.noContent().build();
+
+        } catch (HttpClientErrorException | HttpServerErrorException ex) {
+            String response = "Ошибка запроса предельного числа проверок для прерывания мероприятия " + arrangementId + " из ППТ, код возврата " + ex.getStatusCode();
+            log.warn(response);
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
+    private String createUri(Long arrangementId, String path) {
+        return UriComponentsBuilder
+                .fromHttpUrl(gatewayUrl)
+                .path(path)
+                .queryParam("id", arrangementId)
+                .build()
+                .toString();
     }
 }

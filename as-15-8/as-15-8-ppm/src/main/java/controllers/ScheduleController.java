@@ -237,9 +237,9 @@ public class ScheduleController {
                 List<Arrangement> arrangements = entry.getValue();
 
                 if (isRealTrafficGreaterThanSlaConfig(arrangements, schedule, SlaPeriod.DAY))
-                    description.set(description + "Превышение трафика за день для " + accessTool + ";  ");
+                    description.set(description + "Превышение трафика за день для " + accessTool + ";");
                 if (isRealTrafficGreaterThanSlaConfig(arrangements, schedule, SlaPeriod.MONTH))
-                    description.set(description + "Превышение трафика за месяц для " + accessTool + ";  ");
+                    description.set(description + "Превышение трафика за месяц для " + accessTool + ";");
             });
             writeDescriptionToDb(schedule, description.get());
             return description.get();
@@ -320,4 +320,12 @@ public class ScheduleController {
         }
     }
 
+    @GetMapping(path = "/test")
+    @JsonView(Views.Full.class)
+    public String testTrafficSla(@RequestParam("id") Schedule schedule){
+        if (schedule != null) {
+            return analyzeRobotTrafficLimits(schedule);
+        }
+        return "нет превышения";
+    }
 }

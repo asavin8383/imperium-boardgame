@@ -199,6 +199,7 @@ public class ArrangementController {
         arrangement.setDeadlineDate(newArrangement.getDeadlineDate());
         arrangement.setTrafficId(newArrangement.getTrafficId());
         arrangement.setIsActAvailable(newArrangement.getIsActAvailable());
+        arrangement.setInterruptViolationNumber(newArrangement.getInterruptViolationNumber());
         Traffic traffic = trafficRepository.findById(newArrangement.getTrafficId())
                 .orElseThrow(() -> new AS_15_8_PPT_Exception("Ошибка при добавлении трафика! Трафик не найден по id: " + newArrangement.getTrafficId()));
         arrangement.setTrafficName(traffic.getName());
@@ -224,5 +225,12 @@ public class ArrangementController {
         arrangement.orElseThrow(()-> new AS_15_8_PPT_Exception("Arrangement не найден"));
         arrangement.get().setStatus(ExecutionStatus.ACT_SENT);
         arrangementRepo.save(arrangement.get());
+    }
+
+    @PreAuthorize("hasRole('ROLE_SYSTEM')" )
+    @GetMapping(path = "/interrupt_violation_number")
+    public Long changeActStatus(@RequestParam("id") Arrangement arrangement){
+        Optional.ofNullable(arrangement).orElseThrow(()-> new AS_15_8_PPT_Exception("Arrangement не найден"));
+        return arrangement.getInterruptViolationNumber();
     }
 }

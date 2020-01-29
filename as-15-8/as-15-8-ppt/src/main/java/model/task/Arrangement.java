@@ -118,6 +118,11 @@ public class Arrangement implements Serializable {
 	@Column
 	private Boolean isActAvailable;
 
+	/**Количечтво проверок, после которых следует остановить мероприятие*/
+	@JsonView(Views.Brief.class)
+	@Column
+	private Long interruptViolationNumber;
+
 	public Arrangement() {
 		this.creationDate = LocalDateTime.now();
 		this.status = ExecutionStatus.NEW;

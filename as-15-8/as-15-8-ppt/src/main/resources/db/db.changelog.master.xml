@@ -59,4 +59,5 @@
     <include file="db/changelog/ppt.0031.arrangement_ck_status.xml"/>
     <include file="db/changelog/ppt.0032.arrangement_rm_action_required.xml"/>
     <include file="db/changelog/ppt.0033.arrangements.STOPPING.xml"/>
+    <include file="db/changelog/ppt.0034.arrangement_violation_number.xml"/>
 </databaseChangeLog>

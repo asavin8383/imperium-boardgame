@@ -20,7 +20,7 @@ import repositories.ResultRepo;
 import repositories.ResultScreenShotRepo;
 import rest.ActAttachment;
 import rest.ActCheckResult;
-import restapi.ArrangementStatusProducer;
+import restapi.ArrangementRestApi;
 import services.ActService;
 
 import java.text.DateFormat;
@@ -45,7 +45,7 @@ public class ActController {
     private final ResultRepo resultRepo;
     private final ResultScreenShotRepo resultScreenShotRepo;
     private final NmapDetailResultRepo nmapDetailResultRepo;
-    private final ArrangementStatusProducer arrangementStatusProducer;
+    private final ArrangementRestApi arrangementRestApi;
 
     private DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
@@ -69,7 +69,7 @@ public class ActController {
     @PreAuthorize("hasAnyRole('ROLE_SEND_ACT_BY_HAND')")
     public ResponseEntity<Void> createAct(Long arrangementId){
         boolean created = actService.createAct(arrangementId);
-        arrangementStatusProducer.changeArrangementStatusToActSentPPT(arrangementId);
+        arrangementRestApi.changeArrangementStatusToActSentPPT(arrangementId);
         return new ResponseEntity<>(created ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR);
     }
 

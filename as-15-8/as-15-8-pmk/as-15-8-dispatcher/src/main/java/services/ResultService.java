@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 import repositories.ArrangementRepo;
 import repositories.ResultRepo;
 import repositories.ResultScreenShotRepo;
-import restapi.ArrangementStatusProducer;
+import restapi.ArrangementRestApi;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -33,7 +33,7 @@ public class ResultService {
     private final ArrangementRepo arrangementRepo;
     private final ResultRepo resultRepo;
     private final ResultScreenShotRepo resultScreenShotRepo;
-    private final ArrangementStatusProducer arrangementStatusProducer;
+    private final ArrangementRestApi arrangementRestApi;
     private final ArrangementService arrangementService;
 
     @Scheduled(cron = "${results.save.schedule}")
@@ -81,7 +81,7 @@ public class ResultService {
                     }
                     if (isSaved) {
                         log.info("Мероприятие успешно сохранено в БД: " + arrangement.getId());
-                        arrangementStatusProducer.sendArrangementStatusMessage(
+                        arrangementRestApi.sendArrangementStatusMessage(
                                 arrangement.getId(),
                                 arrangement.getVersion());
                         log.info("Мероприятие успешно завершено: " + arrangement.getId());
