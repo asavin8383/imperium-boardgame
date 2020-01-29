@@ -119,8 +119,10 @@ public class ResultsKafkaService {
 
     public long getResultsCount(Long arrangementId) {
         return getResultsCountKeyValueStore()
-                .map(store -> store.get(arrangementId))
-                .orElse(0L);
+                .map(store ->
+                        Optional.ofNullable(store.get(arrangementId))
+                        .orElse(0L)
+                ).orElse(0L);
     }
 
     public List<CheckUnitType> getDictinctCheckUnitTypes(Long arrangementId){
