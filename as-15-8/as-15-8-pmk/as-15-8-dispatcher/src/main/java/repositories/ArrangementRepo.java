@@ -23,4 +23,7 @@ public interface ArrangementRepo extends JpaRepository<Arrangement, Long> {
     List<Arrangement> findStopped(@Param("date") LocalDateTime date);
 
     Optional<Arrangement> findByIdAndVersion(Long id, Long version);
+
+    @Query("select a.maxCheckUnitsCount from Arrangement a where a.id = :arrangementId")
+    Optional<Long> findMaxCheckUnitsCount(@Param("arrangementId") Long arrangementId);
 }

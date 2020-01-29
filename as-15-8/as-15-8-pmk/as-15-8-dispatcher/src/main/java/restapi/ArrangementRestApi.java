@@ -105,7 +105,7 @@ public class ArrangementRestApi {
         }
     }
 
-    public ResponseEntity getInterruptViolationNumberFromPPT(Long arrangementId) {
+    public Long getInterruptViolationNumberFromPPT(Long arrangementId) {
         try {
             ResponseEntity<Long> result = restTemplate.getForEntity(
                     createUri(arrangementId, PPT_ARRANGEMENT_INTERRUPT_VIOLATION_NUMBER),
@@ -113,13 +113,12 @@ public class ArrangementRestApi {
             );
 
             if (result.getBody() != null) {
-                return ResponseEntity.ok().body(result.getBody());
-            } else return ResponseEntity.noContent().build();
+                return result.getBody();
+            } else return null;
 
-        } catch (HttpClientErrorException | HttpServerErrorException ex) {
-            String response = "Ошибка запроса предельного числа проверок для прерывания мероприятия " + arrangementId + " из ППТ, код возврата " + ex.getStatusCode();
-            log.warn(response);
-            return ResponseEntity.badRequest().body(response);
+        } catch (Exception ex) {
+            log.error("Ошибка запроса предельного числа проверок для прерывания мероприятия " + arrangementId + " из ППТ", ex);
+            return null;
         }
     }
 

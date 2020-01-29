@@ -9,11 +9,14 @@ import lombok.extern.slf4j.Slf4j;
 import model.Arrangement;
 import model.enums.ArrangementStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import remoteEvents.ArrangementStopEvent;
 import repositories.ArrangementRepo;
+import restapi.ArrangementRestApi;
 
 import javax.annotation.PostConstruct;
 import java.time.LocalDate;
@@ -35,6 +38,7 @@ public class ArrangementService {
     private final ArrangementStopEventProducer arrangementStopEventProducer;
     private final ResultsKafkaService resultsKafkaService;
     private final ActService actService;
+    private final ArrangementRestApi arrangementRestApi;
 
     @PostConstruct
     private void fillStoppedArrangements() {
@@ -51,8 +55,12 @@ public class ArrangementService {
 
     @Scheduled(cron = "0 0 0 * * ?")
     void clearStoppedArrangements() {
+        evictCaches();
         stoppedArrangements.clear();
     }
+
+    @CacheEvict(value = "maxCheckUnitsCount", allEntries = true)
+    public void evictCaches() {}
 
     public void createOrRestart(ArrangementToExecution arrangementToExecution) {
         Arrangement arrangement = arrangementRepo
@@ -64,6 +72,7 @@ public class ArrangementService {
         arrangement.setCreationDate(LocalDateTime.now());
         arrangement.setVersion(Optional.ofNullable(arrangementToExecution.getVersion()).orElse(0L));
         arrangement.setStatus(ArrangementStatus.RUNNING);
+        arrangement.setMaxCheckUnitsCount(arrangementRestApi.getInterruptViolationNumberFromPPT(arrangementToExecution.getId()));
         arrangementRepo.save(arrangement);
 
         if(arrangement.getId() != null && arrangement.getStatus().equals(ArrangementStatus.STOPPED)) {
@@ -120,5 +129,8 @@ public class ArrangementService {
         }
     }
 
-
+    @Cacheable(value = "maxCheckUnitsCount")
+    public Long getMaxCheckUnitsCount(Long arrangementId) {
+        return arrangementRepo.findMaxCheckUnitsCount(arrangementId).orElse(null);
+    }
 }
