@@ -33,4 +33,9 @@ public class SearchQueryPatternContentJoin {
     @EqualsAndHashCode.Include
     private Long contentId;
 
+    public SearchQueryPatternContentJoin(SearchQueryPattern searchQueryPattern, Long contentId) {
+        this.searchQueryPattern = searchQueryPattern;
+        this.contentId = contentId;
+    }
+
 }

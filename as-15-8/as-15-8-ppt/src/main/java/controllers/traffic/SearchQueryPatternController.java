@@ -161,6 +161,24 @@ public class SearchQueryPatternController {
         }
     }
 
+    @PutMapping(path = "/{id}/formal_erdi", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public void addErdiToUnit(@PathVariable("id") SearchQueryPattern existing, @RequestBody List<Long> ids) {
+        if(existing==null){
+            throw new AS_15_8_PPT_Exception("Ошибка изменения шаблона! Шаблон не найден в БД");
+        }
+        saveErdi(existing, ids);
+    }
+
+    private void saveErdi(SearchQueryPattern searchQueryPattern, List<Long> ids) {
+
+        List<SearchQueryPatternContentJoin> records = ids.stream()
+            .map(id -> new SearchQueryPatternContentJoin(searchQueryPattern, id))
+            .collect(Collectors.toList());
+        searchQueryPattern.getFormalErdiList().addAll(records);
+
+        searchQueryPatternRepo.save(searchQueryPattern);
+    }
+
     private <T> void update(Set<T> existing, Set<T> changed) {
         existing.clear();
         if (changed != null){
