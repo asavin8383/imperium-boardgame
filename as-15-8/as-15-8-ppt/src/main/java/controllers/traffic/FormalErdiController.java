@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import repositories.ErdiContentJoinRepository;
 import webClients.PodWebClient;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,19 +44,45 @@ public class FormalErdiController {
                                              @RequestParam("erdiTrafficUnitId") ErdiTrafficUnit erdiTrafficUnit) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize,
                 SortingHelper.createSorting(sortingDirection, sortingColumn));
+
+        Comparator<ObjectNode> comparator = createResultsComparator(sortingColumn);
+        if(sortingDirection != null && sortingDirection.equals(SortingDirection.DESC))
+            comparator = comparator.reversed();
+
         if (erdiTrafficUnit != null) {
             Page<ErdiTrafficUnitContent> trafficUnitContents =
                     erdiContentJoinRepository
-                    .findByTrafficUnit(erdiTrafficUnit, pageable);
+                    .findByTrafficUnit(erdiTrafficUnit, PageRequest.of(pageNumber, pageSize));
             List<Long> contentIds = trafficUnitContents
                     .stream()
                     .map(ErdiTrafficUnitContent::getErdiId)
                     .collect(Collectors.toList());
-            List<ObjectNode> erdiList = podWebClient.fetchErdi(contentIds);
+            List<ObjectNode> erdiList = podWebClient
+                    .fetchErdi(contentIds)
+                    .stream()
+                    .sorted(comparator)
+                    .collect(Collectors.toList());
+
             return new PageImpl<>(erdiList, pageable, trafficUnitContents.getTotalElements());
         } else {
             throw new AS_15_8_PPT_Exception("Not supported");
         }
     }
 
+    private Comparator<ObjectNode> createResultsComparator(String columnName) {
+        return (o1, o2) -> {
+                try {
+                    Object val1 = o1.get(columnName);
+                    Object val2 = o2.get(columnName);
+                    if(val1 instanceof Comparable && val2 instanceof Comparable) {
+                        @SuppressWarnings("unchecked")
+                        int res = ((Comparable)val1).compareTo(val2);
+                        return res;
+                    } else
+                        return 0;
+                } catch (Exception ex){
+                    return 0;
+                }
+            };
+    }
 }
