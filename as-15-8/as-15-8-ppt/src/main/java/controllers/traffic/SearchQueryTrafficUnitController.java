@@ -6,6 +6,7 @@ import exceptions.AS_15_8_PPT_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.enums.TrafficUnitType;
+import model.traffic.ErdiTrafficUnit;
 import model.traffic.SearchQueryPattern;
 import model.traffic.SearchQueryTrafficUnit;
 import org.springframework.beans.factory.annotation.Autowired;
