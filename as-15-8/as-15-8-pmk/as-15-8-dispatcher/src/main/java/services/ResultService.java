@@ -45,8 +45,7 @@ public class ResultService {
                     .filter(arrangement -> {
                         if(arrangement.getStatus().equals(ArrangementStatus.STOPPING))
                             return true;
-                        long count = resultsKafkaService.getResultsCount(arrangement.getId());
-                        if (count != 0 && arrangement.getCheckUnitsCount() <= count) {
+                        if(isArrangementFinished(arrangement)) {
                             arrangement.setStatus(ArrangementStatus.UPLOADING);
                             arrangementRepo.save(arrangement);
                             return true;
@@ -81,13 +80,15 @@ public class ResultService {
                     }
                     if (isSaved) {
                         log.info("Мероприятие успешно сохранено в БД: " + arrangement.getId());
-                        if (arrangementRestApi.sendStatusNotificationToPPM(arrangement.getId(), isStopped)) {
-                            boolean isActAvailable = arrangementRestApi.isActAvailableFromPPT(arrangement.getId());
-                            boolean isFinished = arrangementService.finishArrangement(arrangement.getId(), isStopped, isActAvailable);
-                            if(!isStopped && isFinished && isActAvailable)
-                                arrangementRestApi.changeArrangementStatusToActSentPPT(arrangement.getId());
+                        if(isArrangementFinished(arrangement)) {
+                            if (arrangementRestApi.sendStatusNotificationToPPM(arrangement.getId(), isStopped)) {
+                                boolean isActAvailable = arrangementRestApi.isActAvailableFromPPT(arrangement.getId());
+                                boolean isFinished = arrangementService.finishArrangement(arrangement.getId(), isStopped, isActAvailable);
+                                if (!isStopped && isFinished && isActAvailable)
+                                    arrangementRestApi.changeArrangementStatusToActSentPPT(arrangement.getId());
+                                log.info("Мероприятие успешно завершено: " + arrangement.getId());
+                            }
                         }
-                        log.info("Мероприятие успешно завершено: " + arrangement.getId());
                     } else {
                         log.info("Ошибка сохранения мероприятия: " + arrangement.getId());
                     }
@@ -148,5 +149,10 @@ public class ResultService {
             });
         }
         resultRepo.save(result);
+    }
+
+    private boolean isArrangementFinished(Arrangement arrangement) {
+        long count = resultsKafkaService.getResultsCount(arrangement.getId());
+        return count != 0 && arrangement.getCheckUnitsCount() <= count;
     }
 }

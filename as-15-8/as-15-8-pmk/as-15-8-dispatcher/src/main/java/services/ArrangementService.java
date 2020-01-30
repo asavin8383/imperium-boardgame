@@ -87,14 +87,16 @@ public class ArrangementService {
 
     @Transactional
     public void stopExecution(Long arrangementId, Long version) {
+        Arrangement arrangement = arrangementRepo
+                .findByIdAndVersion(arrangementId, version)
+                .orElseThrow(() -> new AS_15_8_DispatcherException("Ошибка остановки мероприятия. Мероприятие не найдено в БД по id " + arrangementId + " и версии " + version));
+        if(resultsKafkaService.getResultsCount(arrangementId) >= arrangement.getCheckUnitsCount())
+            throw new AS_15_8_DispatcherException("Ошибка остановки мероприятия. Мероприятие уже выполнено: " + arrangementId + ", " + version);
         if(stoppedArrangements.containsKey(arrangementId))
             stoppedArrangements.get(arrangementId).add(version);
         else
             stoppedArrangements.put(arrangementId, new HashSet<>(Collections.singletonList(version)));
 
-        Arrangement arrangement = arrangementRepo
-                .findByIdAndVersion(arrangementId, version)
-                .orElseThrow(() -> new AS_15_8_DispatcherException("Ошибка остановки мероприятия. Мероприятие не найдено в БД по id " + arrangementId + " и версии " + version));
         arrangement.setStatus(ArrangementStatus.STOPPING);
         arrangementRepo.save(arrangement);
 
