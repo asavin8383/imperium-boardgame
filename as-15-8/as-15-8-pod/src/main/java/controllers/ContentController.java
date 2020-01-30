@@ -22,14 +22,12 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import repositories.ContentCheckUnitRepository;
 import repositories.ContentHistoryRepository;
-import repositories.ContentRepository;
 import repositories.ContentViewRepository;
 import rest.ResponseStatusString;
 import restapi.ErdiRestClient;
 import services.ContentService;
 import services.InfoService;
 
-import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -49,7 +47,6 @@ public class ContentController {
     private final ErdiRestClient erdiRestClient;
     private final InfoService infoService;
     private final ContentHistoryRepository contentHistoryRepo;
-    private final ContentRepository contentRepository;
     private final ContentCheckUnitRepository contentCheckUnitRepository;
 
     @GetMapping(path = "/erdi")
@@ -267,6 +264,6 @@ public class ContentController {
 
     @PostMapping(path = "/erdi/check_units_count")
     public Long getCheckUnitsCount(@RequestBody List<Long> erdiIds) {
-        return Long.valueOf(contentCheckUnitRepository.findAllByErdIds(erdiIds).size());
+        return (long) contentCheckUnitRepository.findAllByErdIds(erdiIds).size();
     }
 }

@@ -36,4 +36,5 @@
     <include file="data/changelog/pod.0017.column_type.xml"/>
     <include file="data/changelog/pod.0018.erdi_id_type.xml"/>
     <include file="data/changelog/pod.0019.sor_performance.xml"/>
+    <include file="data/changelog/pod.0020.content_view_left_join_decision.xml"/>
 </databaseChangeLog>
