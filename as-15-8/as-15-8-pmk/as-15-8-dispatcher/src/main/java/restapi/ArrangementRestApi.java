@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.util.UriComponentsBuilder;
-import services.ArrangementService;
 
 import java.util.Optional;
 
@@ -34,31 +33,20 @@ public class ArrangementRestApi {
     private final String PPT_ACT_SENT_STATUS = "/arrangements/act_sent_status";
     private final String PPT_ARRANGEMENT_INTERRUPT_VIOLATION_NUMBER = "/arrangements/interrupt_violation_number";
     private final OAuth2RestTemplate restTemplate;
-    private final ArrangementService arrangementService;
 
     @Value("${gateway.url}")
     private String gatewayUrl;
 
-    public void sendArrangementStatusMessage(Long arrangementId, Long version) {
-        boolean isStopped = !arrangementService.isArrangementRunning(arrangementId, version);
-        boolean isActAvailable = isActAvailableFromPPT(arrangementId);
-
+    public boolean sendStatusNotificationToPPM(Long arrangementId, boolean isStopped){
         ArrangementStatusNotification notification = new ArrangementStatusNotification(
                 arrangementId,
                 isStopped ? ArrangementEvents.STOP : ArrangementEvents.FINISH
         );
-        if (sendToPPM(arrangementId, notification)) {
-            boolean isFinished = arrangementService.finishArrangement(arrangementId, isStopped, isActAvailable);
-            if(!isStopped && isFinished && isActAvailable)
-                changeArrangementStatusToActSentPPT(arrangementId);
-        }
-    }
 
-    private Boolean sendToPPM(Long arrangementId, ArrangementStatusNotification arrangementStatusNotification){
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        MappingJacksonValue jacksonValue = new MappingJacksonValue(arrangementStatusNotification);
+        MappingJacksonValue jacksonValue = new MappingJacksonValue(notification);
         HttpEntity<MappingJacksonValue> entity = new HttpEntity<>(jacksonValue, headers);
 
         log.info("Отправка сообщения с изменением статуса мероприятия {} в ППМ", arrangementId);
@@ -82,7 +70,7 @@ public class ArrangementRestApi {
         }
     }*/
 
-    private boolean isActAvailableFromPPT(Long arrangementId) {
+    public boolean isActAvailableFromPPT(Long arrangementId) {
         try {
             Optional<Boolean> result = restTemplate.exchange(
                     createUri(arrangementId, PPT_IS_ACT_AVAILABLE_FOR_AUTOMATIC_SEND),
@@ -105,7 +93,7 @@ public class ArrangementRestApi {
         }
     }
 
-    public ResponseEntity getInterruptViolationNumberFromPPT(Long arrangementId) {
+    public Long getInterruptViolationNumberFromPPT(Long arrangementId) {
         try {
             ResponseEntity<Long> result = restTemplate.getForEntity(
                     createUri(arrangementId, PPT_ARRANGEMENT_INTERRUPT_VIOLATION_NUMBER),
@@ -113,13 +101,12 @@ public class ArrangementRestApi {
             );
 
             if (result.getBody() != null) {
-                return ResponseEntity.ok().body(result.getBody());
-            } else return ResponseEntity.noContent().build();
+                return result.getBody();
+            } else return null;
 
-        } catch (HttpClientErrorException | HttpServerErrorException ex) {
-            String response = "Ошибка запроса предельного числа проверок для прерывания мероприятия " + arrangementId + " из ППТ, код возврата " + ex.getStatusCode();
-            log.warn(response);
-            return ResponseEntity.badRequest().body(response);
+        } catch (Exception ex) {
+            log.error("Ошибка запроса предельного числа проверок для прерывания мероприятия " + arrangementId + " из ППТ", ex);
+            return null;
         }
     }
 

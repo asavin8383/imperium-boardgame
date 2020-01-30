@@ -81,9 +81,12 @@ public class ResultService {
                     }
                     if (isSaved) {
                         log.info("Мероприятие успешно сохранено в БД: " + arrangement.getId());
-                        arrangementRestApi.sendArrangementStatusMessage(
-                                arrangement.getId(),
-                                arrangement.getVersion());
+                        if (arrangementRestApi.sendStatusNotificationToPPM(arrangement.getId(), isStopped)) {
+                            boolean isActAvailable = arrangementRestApi.isActAvailableFromPPT(arrangement.getId());
+                            boolean isFinished = arrangementService.finishArrangement(arrangement.getId(), isStopped, isActAvailable);
+                            if(!isStopped && isFinished && isActAvailable)
+                                arrangementRestApi.changeArrangementStatusToActSentPPT(arrangement.getId());
+                        }
                         log.info("Мероприятие успешно завершено: " + arrangement.getId());
                     } else {
                         log.info("Ошибка сохранения мероприятия: " + arrangement.getId());

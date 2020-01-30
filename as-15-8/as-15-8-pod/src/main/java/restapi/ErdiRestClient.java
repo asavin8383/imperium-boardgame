@@ -215,8 +215,6 @@ public class ErdiRestClient {
     }
 
     public void loadDeltaERDI(DeltaIdEntry deltaIdEntry) throws IOException, ExceptionErdiParser {
-        stateDetails = "Загрузка дельты ЕРДИ id=" + deltaIdEntry.deltaId;
-
         boolean deleteTempFile = true;
 
         DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd__hh_mm_ss");

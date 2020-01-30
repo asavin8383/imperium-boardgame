@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import restapi.ErdiChecker;
 import services.ArrangementService;
 import services.ResultService;
+import services.ResultsKafkaService;
 
 import java.util.Date;
 
@@ -42,7 +43,7 @@ public class ResultsHandler {
     private String resultsCountTableName;
 
     private final ErdiChecker erdiChecker;
-    private final ResultService resultService;
+    private final ResultsKafkaService resultsKafkaService;
     private final ArrangementService arrangementService;
 
     @StreamListener(DispatcherChannels.INPUT_RESULTS)
@@ -81,17 +82,23 @@ public class ResultsHandler {
         resultsStream
             .filter((checkUnitKey, checkUnitResult) ->
                 arrangementService.isArrangementRunning(checkUnitKey.getArrangementId(), checkUnitKey.getVersion()))
-            .peek((key, result) ->
-                    log.info("\n   ---->>> Принято сообщение с анализом результатов проверки: " +
-                            "мероприятие: " + key.getArrangementId() + ", " + key.getJobId() + ", " + key.getVersion() + ", " +
-                            result.getCheckUnit().getValue() + ", результат: " + result.getCheckResult()))
+            .peek((key, result) -> {
+                log.info("\n   ---->>> Принято сообщение с анализом результатов проверки: " +
+                        "мероприятие: " + key.getArrangementId() + ", " + key.getJobId() + ", " + key.getVersion() + ", " +
+                        result.getCheckUnit().getValue() + ", результат: " + result.getCheckResult());
+                Long maxCheckUnitsCount = arrangementService.getMaxCheckUnitsCount(key.getArrangementId());
+                long curCheckUnitsCount = resultsKafkaService.getResultsCount(key.getArrangementId());
+                if( maxCheckUnitsCount != null && maxCheckUnitsCount <= curCheckUnitsCount ) {
+                    arrangementService.stopExecution(key.getArrangementId(), key.getVersion());
+                }
+            })
             .mapValues((key, result) -> {
-                result.setEndTime(new Date());
                 result.setCheckResult(checkErdiStatus(result.getCheckUnit().getContentId(), result.getCheckResult()));
                 if(result instanceof AnalysisResult){
                     ((AnalysisResult)result).setScreenshot(null);
                     ((AnalysisResult)result).setEtalonScreenshot(null);
                 }
+                result.setEndTime(new Date());
                 return result;
             })
             .groupByKey()
