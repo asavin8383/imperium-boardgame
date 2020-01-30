@@ -60,7 +60,7 @@ public class ArrangementController {
                 throw new AS_15_8_DispatcherException("Ошибка расчёта процента выполнения мероприятия. checkUnits is null");
 
             long arrangementsCount = resultsKafkaService.getResultsCount(arrangement.getId());
-            return arrangementsCount * 100 / checkUnits;
+            return Math.min(arrangementsCount * 100 / checkUnits, 100);
         }).orElse(0L);
     }
 
