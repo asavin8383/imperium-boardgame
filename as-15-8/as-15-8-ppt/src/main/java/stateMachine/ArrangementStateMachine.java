@@ -70,6 +70,11 @@ public class ArrangementStateMachine {
 
                     .and()
                     .withExternal()
+                    .source(ExecutionStatus.RUNNING).target(ExecutionStatus.STOPPED)
+                    .event(ArrangementEvents.STOP)
+
+                    .and()
+                    .withExternal()
                     .source(ExecutionStatus.STOPPING).target(ExecutionStatus.STOPPED)
                     .event(ArrangementEvents.STOP)
 
