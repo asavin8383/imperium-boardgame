@@ -43,6 +43,13 @@ public interface ScheduleRepo extends JpaRepository<Schedule, Long> {
     )
     List<Schedule> findByArrangement(@Param("arrangement_id") Long arrangementId);
 
+    @Query("select DISTINCT max(s.id) from Schedule s " +
+            "join s.schedulePeriods sp " +
+            "join sp.schedulePeriodArrangements spa " +
+            "join spa.arrangement a on a.id = :arrangement_id"
+    )
+    Long findMaxScheduleIdByArrangement(@Param("arrangement_id") Long arrangementId);
+
     @Query("select DISTINCT s from Schedule s " +
         "join s.schedulePeriods sp " +
         "join sp.schedulePeriodArrangements spa " +
