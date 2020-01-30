@@ -85,9 +85,7 @@ public class TrafficService {
     private Long calculateErdiCount(Traffic traffic) {
         long formalErdiCount = trafficRepository.countContentErdiByTrafficId(traffic.getId());
         long customErdiCount = trafficRepository.countCustomErdiByTrafficId(traffic.getId());
-        long searchPhrasesCount = trafficRepository.countSearchPhrasesByTrafficId(traffic.getId());
-        long searchTemplatesCount = trafficRepository.countSearchTemplatesByTrafficId(traffic.getId());
-        long staticCount = formalErdiCount + customErdiCount + searchPhrasesCount + searchTemplatesCount;
+        long staticCount = formalErdiCount + customErdiCount;
         return staticCount;
     }
 
