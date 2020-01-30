@@ -30,6 +30,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 @Service
@@ -63,12 +64,59 @@ public class ResultsKafkaService {
 
         final Predicate<KeyValue<CheckUnitKey, CheckUnitResult>> filter = kv -> filterResults(kv.value, checkUnitJobResults, checkUnitTypes, query);
         final long count = getResultsCount(arrangementId, filter);
+        List<Result> results = getArrangementResults(
+                arrangementId,
+                filter,
+                sortingDirection,
+                sortingColumn)
+            .skip(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .collect(Collectors.toList());
+        return new PageImpl<>(results, pageable, count);
+    }
+
+    private List<Result> getArrangementResults(
+            Long arrangementId,
+            List<CheckUnitJobResult> checkUnitJobResults,
+            List<CheckUnitType> checkUnitTypes,
+            String query,
+            SortingDirection sortingDirection,
+            String sortingColumn) {
+
+        final Predicate<KeyValue<CheckUnitKey, CheckUnitResult>> filter = kv -> filterResults(kv.value, checkUnitJobResults, checkUnitTypes, query);
+        return getArrangementResults(arrangementId, filter, sortingDirection, sortingColumn)
+                .collect(Collectors.toList());
+    }
+
+    public long getArrangementForbiddenContentResultsCount(
+            Long arrangementId) {
+
+        final Predicate<KeyValue<CheckUnitKey, CheckUnitResult>> filter = kv ->
+                filterResults(
+                        kv.value,
+                        Collections.singletonList(CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED),
+                        null,
+                        null);
+        return getArrangementResults(arrangementId, filter, null, null)
+                .count();
+    }
+
+    private Stream<Result> getArrangementResults(
+            Long arrangementId,
+            Predicate<KeyValue<CheckUnitKey, CheckUnitResult>> filter,
+            SortingDirection sortingDirection,
+            String sortingColumn) {
+
         return getArrangementResultsIterator(arrangementId)
                 .map(resultsIterator ->  {
-                    Comparator<Result> checkUnitResultComparator = createResultsComparator(sortingColumn);
-                    if(sortingDirection != null && sortingDirection.equals(SortingDirection.DESC))
-                        checkUnitResultComparator = checkUnitResultComparator.reversed();
-                    List<Result> results = StreamSupport
+                    Comparator<Result> checkUnitResultComparator = null;
+                    if(Strings.isNotEmpty(sortingColumn)) {
+                        checkUnitResultComparator = createResultsComparator(sortingColumn);
+                        if (sortingDirection != null && sortingDirection.equals(SortingDirection.DESC))
+                            checkUnitResultComparator = checkUnitResultComparator.reversed();
+                    }
+
+                    Stream<Result> resultsStream = StreamSupport
                             .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), false)
                             .filter(filter)
                             .map(kv -> {
@@ -76,14 +124,13 @@ public class ResultsKafkaService {
                                 Result result = new Result();
                                 fillResult(result, kv.key.getJobId(), kv.value, service);
                                 return result;
-                            })
-                            .sorted(checkUnitResultComparator)
-                            .skip(pageable.getOffset())
-                            .limit(pageable.getPageSize())
-                            .collect(Collectors.toList());
-                    return new PageImpl<>(results, pageable, count);
+                            });
+                    if(checkUnitResultComparator != null)
+                        resultsStream = resultsStream.sorted(checkUnitResultComparator);
+
+                    return resultsStream;
                 })
-                .orElseGet(() -> new PageImpl<>(new ArrayList<>(), pageable, 0));
+                .orElseGet(Stream::empty);
     }
 
     public List<Long> getArrangementResultIds(Long arrangementId) {

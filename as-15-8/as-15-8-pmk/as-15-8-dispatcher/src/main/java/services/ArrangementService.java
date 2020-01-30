@@ -87,16 +87,16 @@ public class ArrangementService {
 
     @Transactional
     public void stopExecution(Long arrangementId, Long version) {
+        if(stoppedArrangements.containsKey(arrangementId))
+            stoppedArrangements.get(arrangementId).add(version);
+        else
+            stoppedArrangements.put(arrangementId, new HashSet<>(Collections.singletonList(version)));
+
         Arrangement arrangement = arrangementRepo
                 .findByIdAndVersion(arrangementId, version)
                 .orElseThrow(() -> new AS_15_8_DispatcherException("Ошибка остановки мероприятия. Мероприятие не найдено в БД по id " + arrangementId + " и версии " + version));
         arrangement.setStatus(ArrangementStatus.STOPPING);
         arrangementRepo.save(arrangement);
-
-        if(stoppedArrangements.containsKey(arrangementId))
-            stoppedArrangements.get(arrangementId).add(version);
-        else
-            stoppedArrangements.put(arrangementId, new HashSet<>(Collections.singletonList(version)));
 
         final ArrangementStopEvent event = new ArrangementStopEvent(arrangementId, version);
         arrangementStopEventProducer.send(event);
@@ -108,7 +108,7 @@ public class ArrangementService {
                 .orElse(true);
     }
 
-    public boolean finishArrangement(Long arrangementId, boolean isStopped, boolean isActAvailable) {
+    boolean finishArrangement(Long arrangementId, boolean isStopped, boolean isActAvailable) {
         try {
             Arrangement arr = arrangementRepo.findById(arrangementId)
                     .orElseThrow(() -> new AS_15_8_DispatcherException("Ошибка при закрытии мероприятия. Мероприятие не найдено по ID: " + arrangementId));
