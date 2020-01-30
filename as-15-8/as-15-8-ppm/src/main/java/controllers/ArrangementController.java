@@ -17,6 +17,7 @@ import model.ScheduleCheckUnit;
 import model.enums.ArrangementStatus;
 import model.enums.ScheduleStatus;
 import org.apache.logging.log4j.util.Strings;
+import org.hibernate.query.criteria.internal.expression.function.AggregationFunction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -40,6 +41,7 @@ import webClients.PPT_WebClient;
 import javax.transaction.Transactional;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -324,5 +326,15 @@ public class ArrangementController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.ok().body(arrangement);
+    }
+
+    @PreAuthorize("hasRole('ROLE_MANAGE_ARRANGEMENT')")
+    @GetMapping("/schedule_id")
+    public ResponseEntity getSchedule(@RequestParam("id") Arrangement arrangement){
+        if (arrangement == null){
+            return ResponseEntity.noContent().build();
+        }
+        Long scheduleId = scheduleRepo.findMaxScheduleIdByArrangement(arrangement.getId());
+        return ResponseEntity.ok().body(scheduleId);
     }
 }
