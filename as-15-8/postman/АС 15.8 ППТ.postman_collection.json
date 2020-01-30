@@ -978,7 +978,7 @@
 					"response": []
 				},
 				{
-					"name": "Запрос формализованных заданий с поручениями, у которых статус STOPPED и FORMED",
+					"name": "Запрос поручений с мероприятиями у которых статус STOPPED и FORMED",
 					"request": {
 						"auth": {
 							"type": "oauth2",
@@ -3620,25 +3620,25 @@
 	],
 	"variable": [
 		{
-			"id": "0563012f-bc95-4ca3-a94e-58ac7ef17b1b",
+			"id": "b0ddc476-c704-446f-ad8e-91d993c731a2",
 			"key": "url",
 			"value": "http://localhost:15800",
 			"type": "string"
 		},
 		{
-			"id": "633cf237-df5b-4bd3-b6cd-c4296a351f39",
+			"id": "8f124469-9ec3-44f7-a281-cbf65f6480e2",
 			"key": "oper_token",
 			"value": "",
 			"type": "string"
 		},
 		{
-			"id": "5311238b-1761-435a-9b09-d01cefbc2ac5",
+			"id": "76001985-e413-4c7e-b705-f5b34dec06d3",
 			"key": "test_url",
 			"value": "http://192.168.5.253:15800",
 			"type": "string"
 		},
 		{
-			"id": "a7c2a068-7db9-45dd-88b9-de5b4ae02668",
+			"id": "9fb4fa79-0590-4daf-992c-5196ee9be623",
 			"key": "admin_token",
 			"value": "",
 			"type": "string"
