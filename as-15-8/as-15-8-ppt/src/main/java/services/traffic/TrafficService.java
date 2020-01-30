@@ -42,6 +42,7 @@ public class TrafficService {
     private final TrafficRepository trafficRepository;
     private final AccessToolsCategoriesRepo accessToolsCategoriesRepo;
     private final PodWebClient podWebClient;
+    private static long dynamicCount = 0;
 
     public Page<TrafficBriefView> getBriefTrafficList(SortingDirection sortingDirection,
                                                       String sortingColumn,
@@ -65,13 +66,27 @@ public class TrafficService {
 
     private TrafficBriefView createTrafficBriefView(Traffic traffic) {
         TrafficBriefView view = new TrafficBriefView(traffic.getId(), traffic.getName());
+
+        view.setActualCheckUnitsCount(calculateActualCheckUnitsCount(traffic));
+        view.setErdiCount(calculateErdiCount(traffic));
+
+        view.setType(TrafficType.MIXED);
+
+        return view;
+    }
+
+    private Long calculateActualCheckUnitsCount(Traffic traffic) {
         long formalErdiCount = traffic.getActualCheckUnitsCount();
         long customErdiCount = trafficRepository.countCustomErdiByTrafficId(traffic.getId());
-        long dynamicCount = 0;
         long staticCount = formalErdiCount + customErdiCount;
-        view.setCount(staticCount + dynamicCount);
-        view.setType(getTrafficType(staticCount, dynamicCount));
-        return view;
+        return staticCount + dynamicCount;
+    }
+
+    private Long calculateErdiCount(Traffic traffic) {
+        long formalErdiCount = trafficRepository.countContentErdiByTrafficId(traffic.getId());
+        long customErdiCount = trafficRepository.countCustomErdiByTrafficId(traffic.getId());
+        long staticCount = formalErdiCount + customErdiCount;
+        return staticCount;
     }
 
     public Long actualizeTrafficCheckUnitsCount(Long trafficId) {
@@ -103,7 +118,7 @@ public class TrafficService {
         List<TrafficBriefView> views = Flux.fromIterable(mapTraffics.entrySet())
                 .parallel(50)
                 .runOn(Schedulers.parallel())
-                .flatMap(trafficEntry -> podWebClient.fetchErdiIdsCheckUnitCount(trafficEntry.getKey(), trafficEntry.getValue()))
+                .flatMap(trafficEntry -> podWebClient.fetchActualCheckUnitCount(trafficEntry.getKey(), trafficEntry.getValue()))
                 .sequential()
                 .collectList()
                 .block();

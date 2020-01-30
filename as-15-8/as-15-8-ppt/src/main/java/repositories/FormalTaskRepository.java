@@ -27,10 +27,8 @@ public interface FormalTaskRepository extends JpaRepository<FormalTask, Long>, F
 			"    f.status")
 	List<ExecutionStatusStatistics> findSummaryByStatus();
 
-
 	@Query("SELECT COUNT(f) FROM FormalTask f WHERE f.missionId=:missionId")
 	Long countByMissionId(@Param("missionId") Long missionId);
-
 
 	@Query("SELECT a.formalTask FROM Arrangement a WHERE a.id=:arrangementId")
 	FormalTask getByArrangementId(@Param("arrangementId") Long id);

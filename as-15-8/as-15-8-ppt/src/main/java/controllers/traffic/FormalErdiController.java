@@ -44,25 +44,15 @@ public class FormalErdiController {
                                              @RequestParam("erdiTrafficUnitId") ErdiTrafficUnit erdiTrafficUnit) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize,
                 SortingHelper.createSorting(sortingDirection, sortingColumn));
-
-        Comparator<ObjectNode> comparator = createResultsComparator(sortingColumn);
-        if(sortingDirection != null && sortingDirection.equals(SortingDirection.DESC))
-            comparator = comparator.reversed();
-
         if (erdiTrafficUnit != null) {
             Page<ErdiTrafficUnitContent> trafficUnitContents =
                     erdiContentJoinRepository
-                    .findByTrafficUnit(erdiTrafficUnit, PageRequest.of(pageNumber, pageSize));
+                            .findByTrafficUnit(erdiTrafficUnit, pageable);
             List<Long> contentIds = trafficUnitContents
                     .stream()
                     .map(ErdiTrafficUnitContent::getErdiId)
                     .collect(Collectors.toList());
-            List<ObjectNode> erdiList = podWebClient
-                    .fetchErdi(contentIds)
-                    .stream()
-                    .sorted(comparator)
-                    .collect(Collectors.toList());
-
+            List<ObjectNode> erdiList = podWebClient.fetchErdi(contentIds);
             return new PageImpl<>(erdiList, pageable, trafficUnitContents.getTotalElements());
         } else {
             throw new AS_15_8_PPT_Exception("Not supported");
