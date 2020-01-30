@@ -257,7 +257,7 @@ public class PodWebClient {
         return UriComponentsBuilder.fromUriString(endPoint).build().toString();
     }
 
-    public Mono<TrafficBriefView> fetchErdiIdsCheckUnitCount(Traffic traffic, List<Long> erdiIds) {
+    public Mono<TrafficBriefView> fetchActualCheckUnitCount(Traffic traffic, List<Long> erdiIds) {
         if(erdiIds == null || erdiIds.size() == 0)
             return Mono.just(createTrafficBriefView(traffic, 0L));
         List<List<Long>> ids = packListToLists(erdiIds, 5000);
@@ -267,7 +267,8 @@ public class PodWebClient {
                 .flatMap(this::getErdiIdsCheckUnitCount)
                 .map(staticCount -> createTrafficBriefView(traffic, staticCount))
                 .reduce((acc, current) -> {
-                    acc.setCount(acc.getCount()+current.getCount());
+                    acc.setActualCheckUnitsCount(acc.getActualCheckUnitsCount()+current.getActualCheckUnitsCount());
+                    //acc.setCount(acc.getCount()+current.getCount());
                     return acc;
                 });
     }
@@ -288,7 +289,8 @@ public class PodWebClient {
     private TrafficBriefView createTrafficBriefView(Traffic traffic, Long staticCount) {
         TrafficBriefView view = new TrafficBriefView(traffic.getId(), traffic.getName());
         long dynamicCount = 0;
-        view.setCount(staticCount + dynamicCount);
+        //view.setCount(staticCount + dynamicCount);
+        view.setActualCheckUnitsCount(staticCount + dynamicCount);
         view.setType(getTrafficType(staticCount, dynamicCount));
         return view;
     }
