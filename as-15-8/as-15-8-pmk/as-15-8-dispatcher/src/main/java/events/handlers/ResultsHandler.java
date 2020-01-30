@@ -22,7 +22,6 @@ import org.springframework.kafka.support.serializer.JsonSerde;
 import org.springframework.stereotype.Service;
 import restapi.ErdiChecker;
 import services.ArrangementService;
-import services.ResultService;
 import services.ResultsKafkaService;
 
 import java.util.Date;
@@ -87,7 +86,7 @@ public class ResultsHandler {
                         "мероприятие: " + key.getArrangementId() + ", " + key.getJobId() + ", " + key.getVersion() + ", " +
                         result.getCheckUnit().getValue() + ", результат: " + result.getCheckResult());
                 Long maxCheckUnitsCount = arrangementService.getMaxCheckUnitsCount(key.getArrangementId());
-                long curCheckUnitsCount = resultsKafkaService.getResultsCount(key.getArrangementId());
+                long curCheckUnitsCount = resultsKafkaService.getArrangementForbiddenContentResultsCount(key.getArrangementId());
                 if( maxCheckUnitsCount != null && maxCheckUnitsCount <= curCheckUnitsCount ) {
                     arrangementService.stopExecution(key.getArrangementId(), key.getVersion());
                 }
