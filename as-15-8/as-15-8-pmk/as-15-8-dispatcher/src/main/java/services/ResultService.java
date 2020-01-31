@@ -43,9 +43,7 @@ public class ResultService {
                     .findReadyToUpload()
                     .stream()
                     .filter(arrangement -> {
-                        if(arrangement.getStatus().equals(ArrangementStatus.STOPPING))
-                            return true;
-                        if(isArrangementFinished(arrangement)) {
+                        if(arrangement.getStatus().equals(ArrangementStatus.STOPPING) || isArrangementFinished(arrangement)) {
                             arrangement.setStatus(ArrangementStatus.UPLOADING);
                             arrangementRepo.save(arrangement);
                             return true;
