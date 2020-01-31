@@ -1,10 +1,16 @@
 package common;
 
+import com.fasterxml.jackson.core.Version;
+import com.fasterxml.jackson.databind.Module;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import model.serializers.PageSerializer;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
@@ -20,4 +26,10 @@ public class SchedulerApplicationConfiguration {
         SpringApplication.run(SchedulerApplicationConfiguration.class, args);
     }
 
+    @Bean
+    public Module jacksonPageWithJsonViewModule() {
+        SimpleModule module = new SimpleModule("jackson-page-with-jsonview", Version.unknownVersion());
+        module.addSerializer(PageImpl.class, new PageSerializer());
+        return module;
+    }
 }
