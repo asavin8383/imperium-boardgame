@@ -21,6 +21,7 @@ import model.enums.ScheduleStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -94,6 +95,25 @@ public class ScheduleController {
 //        PageRequest page = PageRequest.of(
 //                pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
         return scheduleRepo.findAllByPlannedDate(plannedDate == null ? LocalDate.now() : plannedDate);
+    }
+
+    @GetMapping("/all_filtered")
+    @JsonView(Views.Brief.class)
+    public Page<Schedule> getScheduleList(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate plannedDate,
+            @RequestParam(required = false) SortingDirection sortingDirection,
+            @RequestParam(required = false) String sortingColumn,
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(required = false) String query) {
+
+        Pageable page = PageRequest.of(
+                pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
+
+        if (query != null)
+            return scheduleRepo.findAllByPlannedDateAndArrangement(plannedDate == null ? LocalDate.now() : plannedDate, query, page);
+
+        return scheduleRepo.findAllByPlannedDate(plannedDate == null ? LocalDate.now() : plannedDate, page);
     }
 
     @GetMapping
