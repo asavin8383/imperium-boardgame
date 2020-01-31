@@ -74,6 +74,7 @@ public class FormalTask implements Serializable {
 	private Long missionId;
 
 	/**Ссылка на внешний id поручения*/
+	@JsonView(Views.FormalTaskWithArrangement.class)
 	private String fgisId;
 
 	/**Список мероприятий по заданию*/
