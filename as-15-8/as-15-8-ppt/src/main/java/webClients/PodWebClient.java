@@ -111,7 +111,7 @@ public class PodWebClient {
                         .queryParam("registryNames", registryNames == null ? null : String.join(",", registryNames))
                         .queryParam("resourceTypes", resourceTypes == null ? null : String.join(",", resourceTypes))
                         .queryParam("resourceValue", resourceValue)
-                        .queryParam("violationNames,", violationNames == null ? null : String.join(",", violationNames))
+                        .queryParam("violationNames", violationNames == null ? null : String.join(",", violationNames))
 
                         .queryParam("size", size)
                         .queryParam("startTime", startTime)
