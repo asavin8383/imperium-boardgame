@@ -1,35 +1,16 @@
 version: '3.7'
 services:
-  nginx:
-    image: nginx:stable
-    depends_on:
-      - selenoid
-      - ggr
-    deploy:
-      placement:
-        constraints:
-          - node.hostname == selenoid-01
-      mode: replicated
-      replicas: 1
-    networks:
-      - selenoid-net
-    ports:
-      - target: 15800
-        published: 15800
-        protocol: tcp
-        mode: host
-    volumes:
-      - "/opt/selenoid/nginx/conf/nginx.conf:/etc/nginx/nginx.conf"
-      - "/opt/selenoid/nginx/logs:/var/log/nginx"
   selenoid:
     image: dcr.ec-leasing.ru/as-15-8/selenoid/selenoid-hub:1.9.2
     deploy:
       mode: global
+      placement:
+        constraints:
+          - node.role != manager
     networks:
       - selenoid-net
     ports:
       - target: 4444
-        published: 4444
         protocol: tcp
         mode: host
     hostname: "{{.Node.Hostname}}"
@@ -39,9 +20,29 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /opt/selenoid/logs:/opt/selenoid/logs
-    command: ["-container-network", "selenoid-net",
-              "-conf", "/etc/selenoid/browsers.json",
-              "-log-output-dir", "/opt/selenoid/logs", "-limit", "10"]
+    command: ["-conf", "/etc/selenoid/browsers.json",
+              "-log-output-dir", "/opt/selenoid/logs",
+              "-limit", "6"]
+  nginx:
+    image: nginx:stable
+    depends_on:
+      - selenoid
+      - ggr
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == selenoid-control-01
+      mode: replicated
+      replicas: 1
+    networks:
+      - selenoid-net
+    ports:
+      - target: 15800
+        protocol: tcp
+        mode: host
+    volumes:
+      - "/opt/selenoid/nginx/conf/nginx.conf:/etc/nginx/nginx.conf"
+      - "/opt/selenoid/nginx/logs:/var/log/nginx"
   ggr:
     image: dcr.ec-leasing.ru/as-15-8/selenoid/ggr:1.6.5
     depends_on:
@@ -49,13 +50,13 @@ services:
     deploy:
       placement:
         constraints:
-          - node.labels.ggr == true
-      mode: global
+          - node.role == manager
+      mode: replicated
+      replicas: 3
     networks:
       - selenoid-net
     ports:
-      - target: 4444
-        published: 4442
+      - target: 4445
         protocol: tcp
         mode: host
     configs:
@@ -65,7 +66,7 @@ services:
         target: /etc/grid-router/users.htpasswd
     volumes:
       - "/opt/selenoid/ggr:/etc/grid-router"
-    command: ["-quotaDir", "/etc/grid-router/quota"]
+    command: ["-quotaDir", "/etc/grid-router/quota", "-listen", ":4445"]
   ggr-ui:
     image: dcr.ec-leasing.ru/as-15-8/selenoid/ggr-ui:1.1.2
     depends_on:
@@ -74,14 +75,13 @@ services:
     deploy:
       placement:
         constraints:
-          - node.hostname == selenoid-01
+          - node.hostname == selenoid-control-01
       mode: replicated
       replicas: 1
     networks:
       - selenoid-net
     ports:
       - target: 8888
-        published: 8888
         protocol: tcp
         mode: host
     volumes:
@@ -95,22 +95,22 @@ services:
     deploy:
       placement:
         constraints:
-          - node.hostname == selenoid-01
+          - node.hostname == selenoid-control-01
       mode: replicated
       replicas: 1
     networks:
       - selenoid-net
     ports:
       - target: 8080
-        published: 8080
         protocol: tcp
         mode: host
-    command: ["--status-uri", "http://10.97.220.165:8888",
-              "--webdriver-uri", "http://10.97.220.165:15800"]
+    command: ["--status-uri", "http://10.97.220.226:8888",
+              "--webdriver-uri", "http://10.97.220.226:15800"]
 
 networks:
   selenoid-net:
-     external: true
+    name: "host"
+    external: true
 
 configs:
   selenoid_browsers:
