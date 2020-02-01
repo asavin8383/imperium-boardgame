@@ -2,6 +2,7 @@ package model.traffic;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -53,13 +54,13 @@ public class SearchQueryPattern implements Serializable {
             joinColumns = @JoinColumn(name = "pattern_id"),
             inverseJoinColumns = @JoinColumn(name = "custom_erdi_id"))
     @JsonIgnore
-    //@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Set<CustomErdi> customErdiList;
 
     @OneToMany(mappedBy = "searchQueryPattern",
             cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
-    //@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Set<SearchQueryPatternContentJoin> formalErdiList;
 
     @ManyToMany
@@ -67,7 +68,7 @@ public class SearchQueryPattern implements Serializable {
             joinColumns = @JoinColumn(name = "pattern_id"),
             inverseJoinColumns = @JoinColumn(name = "search_phrase_id"))
     @JsonIgnore
-    //@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Set<SearchPhrase> searchPhrases;
 
     @ManyToMany(mappedBy = "searchQueryPatterns")
