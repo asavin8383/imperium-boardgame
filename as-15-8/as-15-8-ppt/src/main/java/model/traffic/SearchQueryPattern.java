@@ -75,12 +75,12 @@ public class SearchQueryPattern implements Serializable {
     @JsonIgnore
     private List<SearchQueryTrafficUnit> searchQueryTrafficUnits;
 
-    /*@JsonView(Views.Brief.class)
+    /*@JsonView(Views.Brief.class)*/
     public int getRowCount(){
         return
             (customErdiList == null ? 0 : customErdiList.size()) +
             (formalErdiList == null ? 0 : formalErdiList.size()) +
             (searchPhrases == null ? 0 : searchPhrases.size());
 
-    }*/
+    }
 }
