@@ -2,14 +2,11 @@ package model.traffic;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import model.Views;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -55,27 +52,26 @@ public class SearchQueryPattern implements Serializable {
     @JoinTable(schema = "portal", name = "search_query_patterns_custom_erdi",
             joinColumns = @JoinColumn(name = "pattern_id"),
             inverseJoinColumns = @JoinColumn(name = "custom_erdi_id"))
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @Fetch(value = FetchMode.SELECT)
+    @JsonIgnore
+    //@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Set<CustomErdi> customErdiList;
 
     @OneToMany(mappedBy = "searchQueryPattern",
             cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @Fetch(value = FetchMode.SELECT)
+    @JsonIgnore
+    //@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Set<SearchQueryPatternContentJoin> formalErdiList;
 
     @ManyToMany
     @JoinTable(schema = "portal", name = "search_query_patterns_search_phrases",
             joinColumns = @JoinColumn(name = "pattern_id"),
             inverseJoinColumns = @JoinColumn(name = "search_phrase_id"))
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @Fetch(value = FetchMode.SELECT)
+    @JsonIgnore
+    //@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Set<SearchPhrase> searchPhrases;
 
     @ManyToMany(mappedBy = "searchQueryPatterns")
     @JsonIgnore
-    @Fetch(value = FetchMode.SELECT)
     private List<SearchQueryTrafficUnit> searchQueryTrafficUnits;
 
     @JsonView(Views.Brief.class)
