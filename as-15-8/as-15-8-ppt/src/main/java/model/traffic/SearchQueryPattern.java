@@ -8,6 +8,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import model.Views;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -53,13 +55,12 @@ public class SearchQueryPattern implements Serializable {
     @JoinTable(schema = "portal", name = "search_query_patterns_custom_erdi",
             joinColumns = @JoinColumn(name = "pattern_id"),
             inverseJoinColumns = @JoinColumn(name = "custom_erdi_id"))
-    @JsonIgnore
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @LazyCollection(LazyCollectionOption.EXTRA)
     private Set<CustomErdi> customErdiList;
 
     @OneToMany(mappedBy = "searchQueryPattern",
             cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Set<SearchQueryPatternContentJoin> formalErdiList;
 
@@ -67,7 +68,6 @@ public class SearchQueryPattern implements Serializable {
     @JoinTable(schema = "portal", name = "search_query_patterns_search_phrases",
             joinColumns = @JoinColumn(name = "pattern_id"),
             inverseJoinColumns = @JoinColumn(name = "search_phrase_id"))
-    @JsonIgnore
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Set<SearchPhrase> searchPhrases;
 
