@@ -62,6 +62,7 @@ public class SearchQueryPattern implements Serializable {
     @OneToMany(mappedBy = "searchQueryPattern",
             cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @LazyCollection(LazyCollectionOption.EXTRA)
     private Set<SearchQueryPatternContentJoin> formalErdiList;
 
     @ManyToMany
@@ -69,6 +70,7 @@ public class SearchQueryPattern implements Serializable {
             joinColumns = @JoinColumn(name = "pattern_id"),
             inverseJoinColumns = @JoinColumn(name = "search_phrase_id"))
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @LazyCollection(LazyCollectionOption.EXTRA)
     private Set<SearchPhrase> searchPhrases;
 
     @ManyToMany(mappedBy = "searchQueryPatterns")
@@ -78,9 +80,9 @@ public class SearchQueryPattern implements Serializable {
     @JsonView(Views.Brief.class)
     public int getRowCount(){
         return
-            (customErdiList == null ? 0 : customErdiList.size())/* +
+            (customErdiList == null ? 0 : customErdiList.size()) +
             (formalErdiList == null ? 0 : formalErdiList.size()) +
-            (searchPhrases == null ? 0 : searchPhrases.size())*/;
+            (searchPhrases == null ? 0 : searchPhrases.size());
 
     }
 }
