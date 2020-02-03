@@ -1,29 +1,24 @@
 package repositories.helper;
 
 //import org.apache.poi.ss.formula.functions.T;
+
 import model.projection.ContentView;
-import org.apache.poi.ss.formula.functions.T;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import reactor.core.publisher.Flux;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Creation date: 22.05.2019
  * Author: asavin
  */
 public class CriteriaHelper {
-
-    private static int subListSize = 1000;
 
     public static <T> PageImpl<T> createPage(EntityManager em, CriteriaQuery<T> select, Pageable pageable) {
         TypedQuery<T> query = em.createQuery(select);
@@ -34,7 +29,7 @@ public class CriteriaHelper {
         return new PageImpl<>(models, pageable, total);
     }
 
-    public static List<List<Long>> createIds(EntityManager em, CriteriaQuery<ContentView> select, Integer maxResults) {
+    public static List<Long> createIds(EntityManager em, CriteriaQuery<ContentView> select, Integer maxResults) {
         TypedQuery<ContentView> query = em.createQuery(select);
 
         if (maxResults != null)
@@ -42,24 +37,11 @@ public class CriteriaHelper {
 
         List<ContentView> models = query.getResultList();
 
-        List<Long> idList = getIdList(models);
-        List<List<Long>> result = packIdListToList(idList);
-
-        return result;
+        return getIdList(models);
     }
 
     private static List<Long> getIdList(List<ContentView> models) {
-        return models.stream().map(x -> x.getId()).collect(Collectors.toList());
-    }
-
-    private static List<List<Long>> packIdListToList(List<Long> idList) {
-        // результат работы метода сделан для flux и hystrix
-        final AtomicInteger counter = new AtomicInteger();
-
-        List<List<Long>> result = new ArrayList<>(idList.stream()
-                .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / subListSize))
-                .values());
-        return result;
+        return models.stream().map(ContentView::getId).collect(Collectors.toList());
     }
 
     private static <T>Long countRowsCount(EntityManager em, CriteriaQuery<T> select) {

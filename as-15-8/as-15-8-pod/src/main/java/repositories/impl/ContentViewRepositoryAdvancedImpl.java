@@ -80,7 +80,7 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
     }
 
     @Override
-    public List<List<Long>> findIds(
+    public List<Long> findIds(
             String idMask,
             List<String> categoryNames,
             List<String> decisionOrgs,
@@ -147,6 +147,8 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
 
     private void orderByOrRandom(CriteriaQuery cq) {
         if(random != null && pageable!= null && !random){
+            cq.orderBy(QueryUtils.toOrders(pageable.getSort(), rootContentView, criteriaBuilder));
+        } else if (pageable!= null) {
             cq.orderBy(QueryUtils.toOrders(pageable.getSort(), rootContentView, criteriaBuilder));
         } else {
             cq.orderBy(criteriaBuilder.asc(criteriaBuilder.function("random", Double.class)));

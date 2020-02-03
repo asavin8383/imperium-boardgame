@@ -28,7 +28,6 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 
@@ -81,14 +80,7 @@ public class ActController {
                 CheckUnitJobResult.COMPLETED);
         List<ActCheckResult> result = resultRepo.findResultsForAct(arrangementId, resultFilter).stream()
                 .map(this::createActCheckResult).collect(Collectors.toList());
-        return Flux.fromIterable(packListToLists(result, 1000));
-    }
-
-    private <T>List<List<T>> packListToLists(List<T> list, int subListSize) {
-        final AtomicInteger counter = new AtomicInteger();
-        return new ArrayList<>(list.stream()
-                .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / subListSize))
-                .values());
+        return Flux.fromIterable(result).buffer(1000);
     }
 
     @GetMapping(path = "/screenshots", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
@@ -119,7 +111,7 @@ public class ActController {
                 .map(this::createActNmapLog).collect(Collectors.toList());
 
        result.addAll(nmap);
-       return Flux.fromIterable(packListToLists(result, 1000));
+       return Flux.fromIterable(result).buffer(1000);
     }
 
     private ActCheckResult createActCheckResult(Result result){
