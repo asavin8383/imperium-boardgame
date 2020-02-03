@@ -86,15 +86,15 @@ public class ScheduleController {
     //TODO Разобраться с Pageable и JsonView
     @GetMapping("/all")
     @JsonView(Views.Brief.class)
-    public List<Schedule> getScheduleList(
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate plannedDate/*,
+    public Page<Schedule> getScheduleList(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate plannedDate,
             @RequestParam(required = false) SortingDirection sortingDirection,
             @RequestParam(required = false) String sortingColumn,
             @RequestParam(defaultValue = "0") int pageNumber,
-            @RequestParam(defaultValue = "10") int pageSize*/){
-//        PageRequest page = PageRequest.of(
-//                pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
-        return scheduleRepo.findAllByPlannedDate(plannedDate == null ? LocalDate.now() : plannedDate);
+            @RequestParam(defaultValue = "10") int pageSize){
+        PageRequest page = PageRequest.of(
+                pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
+        return scheduleRepo.findAllByPlannedDate(plannedDate == null ? LocalDate.now() : plannedDate, page);
     }
 
     @GetMapping("/all_filtered")
