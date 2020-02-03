@@ -78,7 +78,7 @@ public class ResultService {
                     }
                     if (isSaved) {
                         log.info("Мероприятие успешно сохранено в БД: " + arrangement.getId());
-                        if(isArrangementFinished(arrangement) || arrangement.getStatus().equals(ArrangementStatus.STOPPING)) {
+                        if(isArrangementFinished(arrangement) || isStopped) {
                             if (arrangementRestApi.sendStatusNotificationToPPM(arrangement.getId(), isStopped)) {
                                 boolean isActAvailable = arrangementRestApi.isActAvailableFromPPT(arrangement.getId());
                                 boolean isFinished = arrangementService.finishArrangement(arrangement.getId(), isStopped, isActAvailable);
