@@ -18,6 +18,7 @@ import model.Schedule;
 import model.SchedulePeriod;
 import model.Views;
 import model.enums.ScheduleStatus;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -109,7 +110,7 @@ public class ScheduleController {
         Pageable page = PageRequest.of(
                 pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
 
-        if (query != null)
+        if (Strings.isNotEmpty(query))
             return scheduleRepo.findAllByPlannedDateAndArrangement(plannedDate == null ? LocalDate.now() : plannedDate, query, page);
 
         return scheduleRepo.findAllByPlannedDate(plannedDate == null ? LocalDate.now() : plannedDate, page);
