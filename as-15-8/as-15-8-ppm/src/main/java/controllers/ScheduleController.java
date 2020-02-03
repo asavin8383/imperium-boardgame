@@ -83,7 +83,6 @@ public class ScheduleController {
         return arrangementService.findPage(page);
     }
 
-    //TODO Разобраться с Pageable и JsonView
     @GetMapping("/all")
     @JsonView(Views.Brief.class)
     public Page<Schedule> getScheduleList(
