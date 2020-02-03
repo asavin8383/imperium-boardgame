@@ -333,7 +333,9 @@ public class ArrangementController {
             return ResponseEntity.noContent().build();
         }
         Long scheduleId = scheduleRepo.findMaxScheduleIdByArrangement(arrangement.getId());
-        return ResponseEntity.ok().body(scheduleId);
+        if (scheduleId != null)
+            return ResponseEntity.ok().body(scheduleId);
+        else return ResponseEntity.noContent().build();
     }
 
 }
