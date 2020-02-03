@@ -80,7 +80,7 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
     }
 
     @Override
-    public List<List<Long>> findIds(
+    public List<Long> findIds(
             String idMask,
             List<String> categoryNames,
             List<String> decisionOrgs,

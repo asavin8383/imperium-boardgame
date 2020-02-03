@@ -1,21 +1,20 @@
 package repositories.helper;
 
 //import org.apache.poi.ss.formula.functions.T;
+
 import model.projection.ContentView;
-import org.apache.poi.ss.formula.functions.T;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import reactor.core.publisher.Flux;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Creation date: 22.05.2019
@@ -34,7 +33,7 @@ public class CriteriaHelper {
         return new PageImpl<>(models, pageable, total);
     }
 
-    public static List<List<Long>> createIds(EntityManager em, CriteriaQuery<ContentView> select, Integer maxResults) {
+    public static List<Long> createIds(EntityManager em, CriteriaQuery<ContentView> select, Integer maxResults) {
         TypedQuery<ContentView> query = em.createQuery(select);
 
         if (maxResults != null)
@@ -42,10 +41,7 @@ public class CriteriaHelper {
 
         List<ContentView> models = query.getResultList();
 
-        List<Long> idList = getIdList(models);
-        List<List<Long>> result = packIdListToList(idList);
-
-        return result;
+        return getIdList(models);
     }
 
     private static List<Long> getIdList(List<ContentView> models) {

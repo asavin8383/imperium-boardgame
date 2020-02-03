@@ -127,7 +127,7 @@ public class ContentController {
             Pageable pageable = PageRequest.of(pageNumber, size,
                     SortingHelper.createSorting(sortingDirection, sortingColumn));
 
-            List<List<Long>> listContent =
+            List<Long> listContent =
                     contentViewRepository.findIds(
                             idMask,
                             categoryNames,
@@ -147,7 +147,7 @@ public class ContentController {
                             visitorsCntWorldMin,
                             visitorsCntWorldMax);
 
-            return Flux.fromIterable(listContent);
+            return Flux.fromIterable(listContent).buffer(1000);
         }
         else {
             return Flux.empty();
