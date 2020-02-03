@@ -118,12 +118,13 @@ public class ContentController {
             @RequestParam(required = false) Long visitorsCntRussiaMin,
             @RequestParam(required = false) Long visitorsCntRussiaMax,
             @RequestParam(required = false) Long visitorsCntWorldMin,
-            @RequestParam(required = false) Long visitorsCntWorldMax
+            @RequestParam(required = false) Long visitorsCntWorldMax,
+            @RequestParam(defaultValue = "0") int pageNumber
     ) {
 
         if (!erdiRestClient.getIsLoading()) {
 
-            Pageable pageable = PageRequest.of(0, 10,
+            Pageable pageable = PageRequest.of(pageNumber, size,
                     SortingHelper.createSorting(sortingDirection, sortingColumn));
 
             List<List<Long>> listContent =
