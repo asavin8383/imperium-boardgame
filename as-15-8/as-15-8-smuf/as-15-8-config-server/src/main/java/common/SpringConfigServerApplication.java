@@ -12,9 +12,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.web.bind.annotation.RestController;
 
 @SpringBootApplication
+@EnableAsync
 @EnableConfigServer
 @ComponentScan(basePackages = {"common", "model", "controllers", "services", "repositories", "handlers"})
 @EntityScan("model")
@@ -31,4 +33,5 @@ public class SpringConfigServerApplication {
         module.addSerializer(PageImpl.class, new PageSerializer());
         return module;
     }
+
 }

@@ -8,11 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import repositories.SystemModesRepository;
+import services.SystemModeService;
 
 import javax.transaction.Transactional;
 
@@ -24,6 +22,7 @@ import javax.transaction.Transactional;
 public class SystemModeController {
 
     private final SystemModesRepository systemModesRepository;
+    private final SystemModeService systemModeService;
 
     @PostMapping
     public SystemModeUnit getCurrentMode(){
@@ -37,6 +36,7 @@ public class SystemModeController {
     public ResponseEntity setMode(@RequestBody SystemMode mode){
         SystemModeUnit curMode = systemModesRepository.getCurrentMode()
                 .orElseGet(() -> systemModesRepository.save(new SystemMode(SystemModeUnit.NORMAL, false)).getSystemMode());
+
         systemModesRepository.findBySystemMode(curMode)
                 .map(systemMode -> {
                     systemMode.setActive(false);
@@ -57,6 +57,16 @@ public class SystemModeController {
             systemModesRepository.save(new SystemMode(mode.getSystemMode(), true));
             return ResponseEntity.ok("Режим успешно сменен");
         });
+    }
+
+    @PutMapping(path = "/service_mode_plan")
+    @PreAuthorize("hasAnyRole('ROLE_MANAGE_FUNCTION_MODE')")
+    public ResponseEntity setPlannedDate(@RequestBody SystemMode mode){
+        if(mode.getSystemMode() == SystemModeUnit.SERVICE && mode.getPlannedDateTime()!= null) {
+            systemModeService.planServiceModeChange(mode);
+            return ResponseEntity.ok("Смена сервисного режима запданирована на " + mode.getPlannedDateTime());
+        }
+        return ResponseEntity.badRequest().body("Смена режима на Сервисный не запланирована");
     }
 
 }

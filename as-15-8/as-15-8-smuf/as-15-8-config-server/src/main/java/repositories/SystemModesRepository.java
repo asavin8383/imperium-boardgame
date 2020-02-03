@@ -5,6 +5,7 @@ import model.enums.SystemModeUnit;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 public interface SystemModesRepository  extends JpaRepository<SystemMode, Long> {
@@ -13,4 +14,5 @@ public interface SystemModesRepository  extends JpaRepository<SystemMode, Long> 
     Optional<SystemModeUnit> getCurrentMode();
 
     Optional<SystemMode> findBySystemMode(SystemModeUnit systemMode);
+
 }
