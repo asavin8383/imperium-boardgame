@@ -1,5 +1,7 @@
 package repositories;
 
+import model.traffic.ErdiTrafficUnit;
+import model.traffic.ErdiTrafficUnitContent;
 import model.traffic.SearchQueryPattern;
 import model.traffic.SearchQueryTrafficUnit;
 import org.springframework.data.domain.Page;
@@ -30,4 +32,5 @@ public interface SearchQueryPatternRepo extends JpaRepository<SearchQueryPattern
                     " join Arrangement a on traffic.id = a.trafficId and a.id = :arrangement_id "
     )
     List<SearchQueryPattern> findAllByArrangement(@Param("arrangement_id") Long ArrangementId);
+
 }

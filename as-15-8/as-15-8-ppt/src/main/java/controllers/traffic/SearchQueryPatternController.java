@@ -17,16 +17,19 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import repositories.CustomErdiViewRepository;
 import repositories.SearchPhraseRepository;
 import repositories.SearchQueryPatternContentJoinRepo;
 import repositories.SearchQueryPatternRepo;
 import webClients.PodWebClient;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -162,11 +165,57 @@ public class SearchQueryPatternController {
     }
 
     @PutMapping(path = "/{id}/formal_erdi", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public void addErdiToUnit(@PathVariable("id") SearchQueryPattern existing, @RequestBody List<Long> ids) {
-        if(existing==null){
+    public void addErdiToPattern(@PathVariable("id") SearchQueryPattern pattern, @RequestBody List<Long> ids) {
+        if(pattern==null){
             throw new AS_15_8_PPT_Exception("Ошибка изменения шаблона! Шаблон не найден в БД");
         }
-        saveErdi(existing, ids);
+        saveErdi(pattern, ids);
+    }
+
+    @PutMapping(path = "/{id}/formal_erdi/remove", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public void removeErdiFromPattern(@PathVariable("id") SearchQueryPattern pattern, @RequestBody List<Long> ids) {
+        if(pattern==null){
+            throw new AS_15_8_PPT_Exception("Ошибка изменения шаблона! Шаблон не найден в БД");
+        }
+        pattern.getFormalErdiList().removeAll(
+            searchQueryPatternContentJoinRepo.findAllBySearchQueryPatternAndContentIdContaining(pattern, ids));
+
+        searchQueryPatternRepo.save(pattern);
+    }
+
+    @PutMapping(path = "/{id}/formal_erdi/addFromPod")
+    public List<Long> addErdiToPatternFromPod(
+        @PathVariable("id") SearchQueryPattern pattern,
+        @RequestParam(required = false) String idMask,
+        @RequestParam(required = false) List<String> categoryNames,
+        @RequestParam(required = false) List<String> decisionOrgs,
+        @RequestParam(required = false) List<String> infoTypeIds,
+        @RequestParam(required = false) List<String> registryNames,
+        @RequestParam(required = false) List<String> resourceTypes,
+        @RequestParam(required = false) String resourceValue,
+        @RequestParam(required = false) List<String> violationNames,
+        @RequestParam(required = false) Integer size,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startTime,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endTime,
+        @RequestParam(required = false) Boolean random,
+        @RequestParam(required = false) SortingDirection sortingDirection,
+        @RequestParam(required = false) String sortingColumn,
+        @RequestParam(required = false) Long visitorsCntRussiaMin,
+        @RequestParam(required = false) Long visitorsCntRussiaMax,
+        @RequestParam(required = false) Long visitorsCntWorldMin,
+        @RequestParam(required = false) Long visitorsCntWorldMax
+    ) {
+
+        Flux<List<Long>> idss = podWebClient.getErdiIdList(idMask, categoryNames, decisionOrgs, infoTypeIds,
+            registryNames, resourceTypes, resourceValue, violationNames, size,
+            startTime, endTime, random, sortingDirection, sortingColumn, visitorsCntRussiaMin, visitorsCntRussiaMax,
+            visitorsCntWorldMin, visitorsCntWorldMax);
+
+        List<Long> ids = idss.flatMap(Flux::fromIterable).collectList().block();
+        if (ids != null) {
+            saveErdi(pattern, ids);
+        }
+        return ids;
     }
 
     private void saveErdi(SearchQueryPattern searchQueryPattern, List<Long> ids) {
