@@ -50,10 +50,10 @@ public class ScheduleService {
         scheduleRepo.delete(schedule);
         log.info("Меняем статусы мероприятиям: {} на NEW", arrangements.stream().map(arrangement -> arrangement.getId().toString()).collect(Collectors.joining(",")));
         arrangements.forEach(arrangement -> {
-            arrangement.setStatus(pptRestApi.fetchActualStatus(arrangement.getId()));
-            arrangementRepo.save(arrangement);
             arrangementStatusUploader.changeArrangementStatus(
                     new ArrangementStatusNotification(arrangement.getId(), ArrangementEvents.SCHEDULE_ROLLBACK));
+            arrangement.setStatus(pptRestApi.fetchActualStatus(arrangement.getId()));
+            arrangementRepo.save(arrangement);
             }
         );
     }
