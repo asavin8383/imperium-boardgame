@@ -25,8 +25,8 @@ services:
         mode: host
     volumes:
       - ~/as-15-8-pmk/dispatcher/logs:/log
-      - ~/as-15-8-pmk/dispatcher/kafka-streams:/var/lib/kafka-streams:ro
-      - ~/as-15-8-pmk/dispatcher/kafka-streams/tmp:/tmp/kafka-streams:ro
+      - ~/as-15-8-pmk/dispatcher/kafka-streams:/var/lib/kafka-streams:rw
+      - ~/as-15-8-pmk/dispatcher/kafka-streams/tmp:/tmp/kafka-streams:rw
     configs:
       - source: dispatcher-bootstrap
         target: /config/bootstrap.yml
