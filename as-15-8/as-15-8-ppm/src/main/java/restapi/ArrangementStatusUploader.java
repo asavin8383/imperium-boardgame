@@ -35,20 +35,17 @@ public class ArrangementStatusUploader {
     private final OAuth2RestTemplate oAuth2RestTemplate;
 
     public void changeArrangementStatus(ArrangementStatusNotification arrangementStatusNotification){
-        CompletableFuture.runAsync(() -> {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
 
-            HttpEntity<ArrangementStatusNotification> entity = new HttpEntity<>(arrangementStatusNotification, headers);
+        HttpEntity<ArrangementStatusNotification> entity = new HttpEntity<>(arrangementStatusNotification, headers);
 
-            log.info("Отправка запроса на изменения статуса мероприятия в ППТ: {}", arrangementStatusNotification.toString());
-            try {
-                oAuth2RestTemplate.put(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(URI).build().toString(), entity);
-            } catch (HttpClientErrorException | HttpServerErrorException ex) {
-                throw AS_15_8_PPM_Exception.logAndGet(log, String.format("Ошибка отправки запроса на изменение статуса мероприятия в ППТ, код возврата %s", ex.getStatusCode()));
-            }
-            log.info("Запрос на изменение статуса мероприятия успешно отправлен в ППТ");
-
-        }).exceptionally(throwable -> {throw new CompletionException(throwable);});
+        log.info("Отправка запроса на изменения статуса мероприятия в ППТ: {}", arrangementStatusNotification.toString());
+        try {
+            oAuth2RestTemplate.put(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(URI).build().toString(), entity);
+        } catch (HttpClientErrorException | HttpServerErrorException ex) {
+            throw AS_15_8_PPM_Exception.logAndGet(log, String.format("Ошибка отправки запроса на изменение статуса мероприятия в ППТ, код возврата %s", ex.getStatusCode()));
+        }
+        log.info("Запрос на изменение статуса мероприятия успешно отправлен в ППТ");
     }
 }
