@@ -1,4 +1,4 @@
-selenium-hub-url: http://user:1q0p2w9o@192.168.5.75:4442/wd/hub
+selenium-hub-url: http://user:1q0p2w9o@192.168.5.75:4445/wd/hub
 spring:
   main.allow-bean-definition-overriding: true
   kafka.consumer.properties.spring.json.trusted.packages: checkUnits
