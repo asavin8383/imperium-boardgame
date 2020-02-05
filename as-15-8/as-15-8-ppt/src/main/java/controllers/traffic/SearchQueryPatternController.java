@@ -8,10 +8,7 @@ import exceptions.AS_15_8_PPT_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Views;
-import model.traffic.CustomErdiView;
-import model.traffic.SearchPhrase;
-import model.traffic.SearchQueryPattern;
-import model.traffic.SearchQueryPatternContentJoin;
+import model.traffic.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -113,34 +110,6 @@ public class SearchQueryPatternController {
         return searchQueryPatternRepo.findAllByQueryPatternContaining(pattern, page);
     }
 
-    @GetMapping("{id}/search_phrases")
-    public Page<SearchPhrase> findTemplateSearchPhrases(
-            @PathVariable("id") SearchQueryPattern searchQueryPattern,
-            @RequestParam(required = false) SortingDirection sortingDirection,
-            @RequestParam(required = false) String sortingColumn,
-            @RequestParam(defaultValue = "0") int pageNumber,
-            @RequestParam(defaultValue = "10") int pageSize,
-            @RequestParam(required = false) String phrase){
-        if (phrase == null) {
-            phrase = "";
-        }
-        PageRequest page = PageRequest.of(
-                pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
-        return searchPhraseRepository.findAllBySearchQueryPatternsAndPhraseContaining(searchQueryPattern, phrase, page);
-    }
-
-    @GetMapping("{id}/custom_erdi")
-    public Page<CustomErdiView> findTemplateFormalErdi(
-            @PathVariable("id") SearchQueryPattern searchQueryPattern,
-            @RequestParam(required = false) SortingDirection sortingDirection,
-            @RequestParam(required = false) String sortingColumn,
-            @RequestParam(defaultValue = "0") int pageNumber,
-            @RequestParam(defaultValue = "10") int pageSize){
-        PageRequest page = PageRequest.of(
-                pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
-        return customErdiViewRepository.findAllBySearchQueryPatterns(searchQueryPattern, page);
-    }
-
     @GetMapping("{id}/formal_erdi")
     public Page<ObjectNode> getFormalErdiIds(@RequestParam(required = false) SortingDirection sortingDirection,
                                              @RequestParam(required = false) String sortingColumn,
@@ -216,6 +185,98 @@ public class SearchQueryPatternController {
             saveErdi(pattern, ids);
         }
         return ids;
+    }
+
+    @GetMapping("{id}/custom_erdi")
+    public Page<CustomErdiView> findCustomErdi(
+        @PathVariable("id") SearchQueryPattern searchQueryPattern,
+        @RequestParam(required = false) SortingDirection sortingDirection,
+        @RequestParam(required = false) String sortingColumn,
+        @RequestParam(defaultValue = "0") int pageNumber,
+        @RequestParam(defaultValue = "10") int pageSize){
+        PageRequest page = PageRequest.of(
+            pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
+        return customErdiViewRepository.findAllBySearchQueryPatterns(searchQueryPattern, page);
+    }
+
+    @PutMapping(path = "/{id}/custom_erdi", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public void addCustomErdiToPattern(@PathVariable("id") SearchQueryPattern pattern, @RequestBody List<CustomErdi> customErdiList) {
+        if(pattern==null){
+            throw new AS_15_8_PPT_Exception("Ошибка добавления пользовательских ЕРДИ шаблону! Шаблон не найден в БД");
+        }
+        if(customErdiList==null){
+            throw new AS_15_8_PPT_Exception("Ошибка добавления пользовательских ЕРДИ шаблону! Список пользовательских ЕРДИ пуст");
+        }
+        log.info("Добавляем список пользовательских ЕРДИ {} в шаблон {}",
+            customErdiList.stream().map(customErdi -> customErdi.getId().toString()).collect(Collectors.joining(",")),
+            pattern.getId()
+            );
+        pattern.getCustomErdiList().addAll(customErdiList);
+        searchQueryPatternRepo.save(pattern);
+    }
+
+    @PutMapping(path = "/{id}/custom_erdi/remove", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public void removeCustomErdiFromPattern(@PathVariable("id") SearchQueryPattern pattern, @RequestBody List<CustomErdi> customErdiList) {
+        if(pattern==null){
+            throw new AS_15_8_PPT_Exception("Ошибка удаления пользовательских ЕРДИ из шаблона! Шаблон не найден в БД");
+        }
+        if(customErdiList==null){
+            throw new AS_15_8_PPT_Exception("Ошибка удаления пользовательских ЕРДИ из шаблона! Список пользовательских ЕРДИ пуст");
+        }
+        log.info("Удаляем список пользовательских ЕРДИ {} из шаблона {}",
+            customErdiList.stream().map(customErdi -> customErdi.getId().toString()).collect(Collectors.joining(",")),
+            pattern.getId()
+            );
+        pattern.getCustomErdiList().removeAll(customErdiList);
+        searchQueryPatternRepo.save(pattern);
+    }
+
+    @GetMapping("{id}/search_phrases")
+    public Page<SearchPhrase> findTemplateSearchPhrases(
+        @PathVariable("id") SearchQueryPattern searchQueryPattern,
+        @RequestParam(required = false) SortingDirection sortingDirection,
+        @RequestParam(required = false) String sortingColumn,
+        @RequestParam(defaultValue = "0") int pageNumber,
+        @RequestParam(defaultValue = "10") int pageSize,
+        @RequestParam(required = false) String phrase){
+        if (phrase == null) {
+            phrase = "";
+        }
+        PageRequest page = PageRequest.of(
+            pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
+        return searchPhraseRepository.findAllBySearchQueryPatternsAndPhraseContaining(searchQueryPattern, phrase, page);
+    }
+
+    @PutMapping(path = "/{id}/search_phrases", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public void addSearchPhrasesToPattern(@PathVariable("id") SearchQueryPattern pattern, @RequestBody List<SearchPhrase> searchPhrases) {
+        if(pattern==null){
+            throw new AS_15_8_PPT_Exception("Ошибка добавления поисковых фраз шаблону! Шаблон не найден в БД");
+        }
+        if(searchPhrases==null){
+            throw new AS_15_8_PPT_Exception("Ошибка добавления поисковых фраз шаблону! Список поисковых фраз пуст");
+        }
+        log.info("Добавляем поисковые фразы {} в шаблон {}",
+            searchPhrases.stream().map(SearchPhrase::getPhrase).collect(Collectors.joining(",")),
+            pattern.getId()
+            );
+        pattern.getSearchPhrases().addAll(searchPhrases);
+        searchQueryPatternRepo.save(pattern);
+    }
+
+    @PutMapping(path = "/{id}/search_phrases/remove", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public void removeSearchPhrasesFromPattern(@PathVariable("id") SearchQueryPattern pattern, @RequestBody List<SearchPhrase> searchPhrases) {
+        if(pattern==null){
+            throw new AS_15_8_PPT_Exception("Ошибка удаления пользовательских ЕРДИ из шаблона! Шаблон не найден в БД");
+        }
+        if(searchPhrases==null){
+            throw new AS_15_8_PPT_Exception("Ошибка удаления поисковых фраз из шаблона! Список поисковых фраз пуст");
+        }
+        log.info("Удаляем поисковых фраз {} из шаблона {}",
+            searchPhrases.stream().map(customErdi -> customErdi.getId().toString()).collect(Collectors.joining(",")),
+            pattern.getId()
+            );
+        pattern.getSearchPhrases().removeAll(searchPhrases);
+        searchQueryPatternRepo.save(pattern);
     }
 
     private void saveErdi(SearchQueryPattern searchQueryPattern, List<Long> ids) {
