@@ -6,10 +6,11 @@ import enums.AccessToolParameter;
 import enums.CheckUnitJobResult;
 import execution.ExecutionJobResult;
 import execution.ExecutionPSJobResult;
+import io.micrometer.core.instrument.util.IOUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
-import org.openqa.selenium.*;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -18,7 +19,10 @@ import robots.exceptions.TimeoutScriptException;
 import robots.utils.EqualityTest;
 import robots.utils.ScriptUtils;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -70,6 +74,12 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
      *  выполнения поискового запроса*/
     private String resultNotFoundRegexp;
 
+    /** CSS класс всплывающей подсказки ПС */
+    private String hintCSSClassName;
+
+    /** CSS класс ссылки на сайт во всплывающей подсказке ПС */
+    private String hintLinkCSSClassName;
+
     /**
      * Ссылка на возвращение к исходному тексту после правки правописания
      */
@@ -114,6 +124,8 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         this.xpathItemLink = scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_XPATH_ITEM_LINK);
         this.resultNotFoundRegexp = scriptParams.get(AccessToolParameter.RESULT_NOT_FOUND_REGEXP);
         this.checkSpellingLink = scriptParams.get(AccessToolParameter.CHECK_SPELLING_LINK);
+        this.hintCSSClassName = scriptParams.get(AccessToolParameter.HINT_CLASS_NAME);
+        this.hintLinkCSSClassName = scriptParams.get(AccessToolParameter.HINT_LINK_CLASS_NAME);
     }
 
 
@@ -168,16 +180,20 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
     @Override
     public ExecutionJobResult execute(CheckUnit checkUnit) throws ExecutionException {
         driver.get(searchSystemUrl);
+        equalityTest = EqualityTest.forCheckUnit(checkUnit);
 
         if (captcha())
             return createMessage(false, CheckUnitJobResult.CAPTCHA_DETECTED);
 
         try {
-            searchFor(checkUnit.getValue());
+            driver.findElement(By.xpath(xpathInputField));
         } catch(NoSuchElementException ex) {
             log.info("ПС обнаружила робота для URL: {}", checkUnit.getValue());
             return createMessage(false, CheckUnitJobResult.BAD_IP);
         }
+
+        if(checkHintAndSearch(checkUnit.getValue()))
+            return createMessage(true, CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED);
 
         if (captcha())
             return createMessage(false, CheckUnitJobResult.CAPTCHA_DETECTED);
@@ -202,19 +218,18 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         }
 
         if (checkUnit.getType() == CheckUnitType.SEARCH_PHRASE){
-            List<String> urls = new ArrayList<>();
+            List<String> hintLinks = new ArrayList<>();
             for (WebElement w : getLinks(resultPageType)) {
                 try {
-                    urls.add(extractUrl(w));
+                    hintLinks.add(extractUrl(w));
                 }
                 catch (Exception e){
                     e.printStackTrace();
                 }
             }
-            return createMessage(false, null, urls);
+            return createMessage(false, null, hintLinks);
         }
 
-        equalityTest = EqualityTest.forCheckUnit(checkUnit);
 
         boolean isViolation;
         if (resultPageType == ResultPageType.PAGINATION) {
@@ -327,11 +342,50 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         return element.getAttribute("href");
     }
 
-    private void searchFor(String value) {
-        WebElement inputField = driver.findElement(
-                By.xpath(xpathInputField));
-        ScriptUtils.type(inputField, inputDelay, value);
-        inputField.sendKeys(Keys.ENTER);
+    private boolean checkHintAndSearch(String value) {
+        try {
+            observeHintLinks();
+
+            WebElement inputField = driver.findElement(
+                    By.xpath(xpathInputField));
+            ScriptUtils.type(inputField, inputDelay, value);
+
+            List<String> links = getHintLinks();
+            for(String link : links) {
+                try {
+                    if(equalityTest.equalTo(link)){
+                        return true;
+                    }
+                } catch (Exception ex) {
+                    log.error("Ошибка сверки результатов", ex);
+                }
+            }
+
+            inputField.sendKeys(Keys.ENTER);
+            return false;
+        } catch (Exception ex){
+            throw new ExecutionException("Ошибка при поиске в поисковой системе", ex);
+        }
+    }
+
+    private void observeHintLinks() {
+        try(InputStream inputStream = ScriptUtils.class.getClassLoader().getResourceAsStream("observeHintLinks.js")) {
+            JavascriptExecutor js = (JavascriptExecutor) driver;
+            String script = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+            js.executeScript(script, this.hintCSSClassName, this.hintLinkCSSClassName);
+        } catch(IOException ex){
+            throw new RuntimeException("Ошибка! Скрипт отслеживания подсказки ПС не найден в ресурсах сервиса", ex);
+        }
+    }
+
+    private List<String> getHintLinks() {
+        try(InputStream inputStream = ScriptUtils.class.getClassLoader().getResourceAsStream("getHintLinks.js")) {
+            JavascriptExecutor js = (JavascriptExecutor) driver;
+            String script = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+            return Arrays.asList(js.executeScript(script).toString().split(", "));
+        } catch(IOException ex){
+            throw new RuntimeException("Ошибка! Скрипт получения ссылок из подсказки ПС не найден в ресурсах сервиса", ex);
+        }
     }
 
     private boolean checkPageResult() {
