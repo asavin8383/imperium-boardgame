@@ -85,13 +85,7 @@ public class ResultsHandler {
                 log.info("\n   ---->>> Принято сообщение с анализом результатов проверки: " +
                         "мероприятие: " + key.getArrangementId() + ", " + key.getJobId() + ", " + key.getVersion() + ", " +
                         result.getCheckUnit().getValue() + ", результат: " + result.getCheckResult());
-                Long maxCheckUnitsCount = arrangementService.getMaxCheckUnitsCount(key.getArrangementId());
-                if(maxCheckUnitsCount != null) {
-                    long curCheckUnitsCount = resultsKafkaService.getArrangementForbiddenContentResultsCount(key.getArrangementId());
-                    if(maxCheckUnitsCount <= curCheckUnitsCount) {
-                        arrangementService.stopExecution(key.getArrangementId(), key.getVersion());
-                    }
-                }
+                stopIfForbiddenResultsLimited(key.getArrangementId(), key.getVersion());
             })
             .mapValues((key, result) -> {
                 result.setCheckResult(checkErdiStatus(result.getCheckUnit().getContentId(), result.getCheckResult()));
@@ -116,5 +110,19 @@ public class ResultsHandler {
             return CheckUnitJobResult.EXCLUDED;
         else
             return status;
+    }
+
+    private void stopIfForbiddenResultsLimited(Long arrangementId, Long version){
+        try {
+            Long maxCheckUnitsCount = arrangementService.getMaxCheckUnitsCount(arrangementId);
+            if (maxCheckUnitsCount != null) {
+                long curCheckUnitsCount = resultsKafkaService.getArrangementForbiddenContentResultsCount(arrangementId);
+                if (maxCheckUnitsCount <= curCheckUnitsCount) {
+                    arrangementService.stopExecution(arrangementId, version);
+                }
+            }
+        } catch (Exception ex) {
+            log.error("Ошибка остановки мероприятия по превышению лимита нарушений", ex);
+        }
     }
 }
