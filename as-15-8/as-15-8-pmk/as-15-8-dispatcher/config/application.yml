@@ -47,6 +47,8 @@ spring:
           bindings:
             inputResults:
               consumer:
+                resetOffsets: true
+                startOffset: latest
                 application-id: dispatchers
                 useNativeDecoding: true
   datasource:
