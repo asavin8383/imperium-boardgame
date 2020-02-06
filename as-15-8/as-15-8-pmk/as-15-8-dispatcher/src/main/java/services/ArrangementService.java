@@ -96,6 +96,7 @@ public class ArrangementService {
         }
         if(resultsKafkaService.getResultsCount(arrangementId) >= arrangement.getCheckUnitsCount()) {
             log.warn("Ошибка остановки мероприятия. Мероприятие уже выполнено: " + arrangementId + ", " + version);
+            return;
         }
         if(stoppedArrangements.containsKey(arrangementId))
             stoppedArrangements.get(arrangementId).add(version);
