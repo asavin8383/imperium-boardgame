@@ -10,5 +10,5 @@ import org.springframework.data.domain.Pageable;
  */
 public interface SearchQueryPatternRepoAdvanced {
 
-    Page<SearchQueryPattern> findPage(Long id, String pattern, Pageable pageable);
+    Page<SearchQueryPattern> findPage(String query, Pageable pageable);
 }

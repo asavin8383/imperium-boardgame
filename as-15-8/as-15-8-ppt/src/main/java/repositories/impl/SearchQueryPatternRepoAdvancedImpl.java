@@ -30,18 +30,21 @@ public class SearchQueryPatternRepoAdvancedImpl implements SearchQueryPatternRep
     private final EntityManager em;
 
     @Override
-    public Page<SearchQueryPattern> findPage(Long id, String pattern, Pageable pageable) {
+    public Page<SearchQueryPattern> findPage(String query, Pageable pageable) {
         CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
         CriteriaQuery<SearchQueryPattern> select = criteriaBuilder.createQuery(SearchQueryPattern.class);
         Root<SearchQueryPattern> fromSearchQueryPattern = select.from(SearchQueryPattern.class);
 
         List<Predicate> predicates = new ArrayList<>();
 
-        if (id != null) {
-            predicates.add(criteriaBuilder.like(criteriaBuilder.upper(fromSearchQueryPattern.get(SearchQueryPattern_.ID).as(String.class)), "%" + id.toString() + "%"));
-        }
-        if (pattern != null) {
-            predicates.add(criteriaBuilder.like(criteriaBuilder.upper(fromSearchQueryPattern.get(SearchQueryPattern_.QUERY_PATTERN)), "%" + pattern.toUpperCase() + "%"));
+
+        if (query != null) {
+            predicates.add(
+                criteriaBuilder.or(
+                    criteriaBuilder.like(criteriaBuilder.upper(fromSearchQueryPattern.get(SearchQueryPattern_.ID).as(String.class)), "%" + query.toUpperCase() + "%"),
+                    criteriaBuilder.like(criteriaBuilder.upper(fromSearchQueryPattern.get(SearchQueryPattern_.NAME)), "%" + query.toUpperCase() + "%"),
+                    criteriaBuilder.like(criteriaBuilder.upper(fromSearchQueryPattern.get(SearchQueryPattern_.QUERY_PATTERN)), "%" + query.toUpperCase() + "%"))
+            );
         }
 
         select.where(predicates.toArray(new Predicate[0]));
