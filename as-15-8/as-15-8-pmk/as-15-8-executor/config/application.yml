@@ -35,6 +35,7 @@ spring:
                 key.deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
                 max.poll.records: 1
                 max.poll.interval.ms: 300000
+                auto.offset.reset: latest
           executionResults:
             producer.configuration:
               key.serializer: org.springframework.kafka.support.serializer.JsonSerializer
