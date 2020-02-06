@@ -30,6 +30,7 @@ spring:
           binder:
             brokers: 192.168.5.12:9094,192.168.5.33:9094,192.168.5.184:9094
             minPartitionCount: 30
+            startOffset: latest
             configuration:
               default:
                 key.serde: org.springframework.kafka.support.serializer.JsonSerde
@@ -37,8 +38,7 @@ spring:
               spring.json:
                 key.default.type: checkUnits.CheckUnitKey
                 value.default.type: analysis.CheckUnitResult
-              windowstore.changelog.additional.retention.ms: -1
-              commit.interval.ms: 1000
+              processing.guarantee: exactly_once
               max.request.size: 10485760
               max.partition.fetch.bytes: 10485760
               max.poll.records: 100
@@ -49,8 +49,6 @@ spring:
               consumer:
                 application-id: dispatchers
                 useNativeDecoding: true
-                configuration:
-                  auto.offset.reset: latest
   datasource:
     test-while-idle: true
     validation-query: SELECT 1;
