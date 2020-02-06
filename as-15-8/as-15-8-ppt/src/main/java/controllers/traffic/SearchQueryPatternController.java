@@ -93,12 +93,9 @@ public class SearchQueryPatternController {
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(required = false) String query
     ) {
-        if (query == null) {
-            query = "";
-        }
         PageRequest page = PageRequest.of(
                 pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
-        return searchQueryPatternRepo.findAllByQueryPatternContaining(query, page);
+        return searchQueryPatternRepo.findPage(query, page);
     }
 
     @GetMapping("{id}/formal_erdi")

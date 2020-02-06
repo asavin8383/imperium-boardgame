@@ -17,7 +17,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import repositories.SearchPhraseRepository;
-import repositories.helpers.SearchPhraseParams;
 
 @RestController
 @RequestMapping(path = "/phrases", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -34,15 +33,11 @@ public class SearchPhraseController {
             @RequestParam(required = false) String sortingColumn,
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize,
-            @RequestParam(required = false) String query,
-            @RequestParam(defaultValue = "false") boolean containsInTraffic,
-            @RequestParam(required = false) Long searchTrafficUnitId) {
+            @RequestParam(required = false) String query) {
 
         Pageable page = PageRequest.of(pageNumber, pageSize,
                 SortingHelper.createSorting(sortingDirection, sortingColumn));
-        SearchPhraseParams params = new SearchPhraseParams(
-                containsInTraffic, searchTrafficUnitId, query);
-        return phraseRepository.searchFor(SearchPhrase.class, params, page);
+        return phraseRepository.findAllByPhraseContaining(query, page);
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
