@@ -19,9 +19,8 @@ import java.util.List;
  * Date: 26.11.2019
  */
 @Repository
-public interface SearchQueryPatternRepo extends JpaRepository<SearchQueryPattern, Long> {
+public interface SearchQueryPatternRepo extends JpaRepository<SearchQueryPattern, Long>, SearchQueryPatternRepoAdvanced {
 
-    Page<SearchQueryPattern> findAllByQueryPatternContaining(String pattern, Pageable pageable);
 
     Page<SearchQueryPattern> findAllBySearchQueryTrafficUnits(SearchQueryTrafficUnit searchQueryTrafficUnit, Pageable pageable);
 
