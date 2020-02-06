@@ -37,7 +37,7 @@ public class SearchPhraseController {
 
         Pageable page = PageRequest.of(pageNumber, pageSize,
                 SortingHelper.createSorting(sortingDirection, sortingColumn));
-        return phraseRepository.findAllByPhraseContaining(query, page);
+        return phraseRepository.findAllByPhraseContaining(query == null ? "" : query, page);
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
