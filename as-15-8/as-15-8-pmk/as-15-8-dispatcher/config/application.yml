@@ -49,6 +49,8 @@ spring:
               consumer:
                 application-id: dispatchers
                 useNativeDecoding: true
+                configuration:
+                  auto.offset.reset: latest
   datasource:
     test-while-idle: true
     validation-query: SELECT 1;
