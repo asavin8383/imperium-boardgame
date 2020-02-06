@@ -28,7 +28,6 @@ import webClients.PodWebClient;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -69,14 +68,6 @@ public class SearchQueryPatternController {
         } else {
             existingSearchQueryPattern.setName(newSearchQueryPattern.getName());
             existingSearchQueryPattern.setQueryPattern(newSearchQueryPattern.getQueryPattern());
-            /*newSearchQueryPattern.getFormalErdiList().forEach(searchQueryContentJoin -> searchQueryContentJoin.setSearchQueryPattern(existingSearchQueryPattern));
-            update(existingSearchQueryPattern.getFormalErdiList(), newSearchQueryPattern.getFormalErdiList());
-            if(existingSearchQueryPattern.getFormalErdiList() != null) {
-                //Так как one-to-many, нужно явно связать с родителем
-                existingSearchQueryPattern.getFormalErdiList().forEach(searchQueryContentJoin -> searchQueryContentJoin.setSearchQueryPattern(existingSearchQueryPattern));
-            }
-            update(existingSearchQueryPattern.getCustomErdiList(), newSearchQueryPattern.getCustomErdiList());
-            update(existingSearchQueryPattern.getSearchPhrases(), newSearchQueryPattern.getSearchPhrases());*/
             return searchQueryPatternRepo.save(existingSearchQueryPattern);
         }
     }
@@ -100,14 +91,14 @@ public class SearchQueryPatternController {
             @RequestParam(required = false) String sortingColumn,
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize,
-            @RequestParam(required = false) String pattern
+            @RequestParam(required = false) String query
     ) {
-        if (pattern == null) {
-            pattern = "";
+        if (query == null) {
+            query = "";
         }
         PageRequest page = PageRequest.of(
                 pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
-        return searchQueryPatternRepo.findAllByQueryPatternContaining(pattern, page);
+        return searchQueryPatternRepo.findAllByQueryPatternContaining(query, page);
     }
 
     @GetMapping("{id}/formal_erdi")
@@ -289,10 +280,4 @@ public class SearchQueryPatternController {
         searchQueryPatternRepo.save(searchQueryPattern);
     }
 
-    private <T> void update(Set<T> existing, Set<T> changed) {
-        existing.clear();
-        if (changed != null){
-            existing.addAll(changed);
-        }
-    }
 }
