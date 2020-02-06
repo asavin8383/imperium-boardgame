@@ -147,7 +147,7 @@ public class SearchQueryPatternController {
             throw new AS_15_8_PPT_Exception("Ошибка изменения шаблона! Шаблон не найден в БД");
         }
         pattern.getFormalErdiList().removeAll(
-            searchQueryPatternContentJoinRepo.findAllBySearchQueryPatternAndContentIdContaining(pattern, ids));
+            searchQueryPatternContentJoinRepo.findAllBySearchQueryPatternAndContentIdIn(pattern, ids));
 
         searchQueryPatternRepo.save(pattern);
     }
