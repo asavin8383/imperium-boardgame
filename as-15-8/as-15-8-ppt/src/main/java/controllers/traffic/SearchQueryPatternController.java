@@ -69,14 +69,14 @@ public class SearchQueryPatternController {
         } else {
             existingSearchQueryPattern.setName(newSearchQueryPattern.getName());
             existingSearchQueryPattern.setQueryPattern(newSearchQueryPattern.getQueryPattern());
-            newSearchQueryPattern.getFormalErdiList().forEach(searchQueryContentJoin -> searchQueryContentJoin.setSearchQueryPattern(existingSearchQueryPattern));
+            /*newSearchQueryPattern.getFormalErdiList().forEach(searchQueryContentJoin -> searchQueryContentJoin.setSearchQueryPattern(existingSearchQueryPattern));
             update(existingSearchQueryPattern.getFormalErdiList(), newSearchQueryPattern.getFormalErdiList());
             if(existingSearchQueryPattern.getFormalErdiList() != null) {
                 //Так как one-to-many, нужно явно связать с родителем
                 existingSearchQueryPattern.getFormalErdiList().forEach(searchQueryContentJoin -> searchQueryContentJoin.setSearchQueryPattern(existingSearchQueryPattern));
             }
             update(existingSearchQueryPattern.getCustomErdiList(), newSearchQueryPattern.getCustomErdiList());
-            update(existingSearchQueryPattern.getSearchPhrases(), newSearchQueryPattern.getSearchPhrases());
+            update(existingSearchQueryPattern.getSearchPhrases(), newSearchQueryPattern.getSearchPhrases());*/
             return searchQueryPatternRepo.save(existingSearchQueryPattern);
         }
     }
