@@ -18,5 +18,5 @@ public interface SearchQueryPatternContentJoinRepo extends JpaRepository<SearchQ
 
     Page<SearchQueryPatternContentJoin> findAllBySearchQueryPattern(SearchQueryPattern searchQueryPattern, Pageable pageable);
 
-    List<SearchQueryPatternContentJoin> findAllBySearchQueryPatternAndContentIdContaining(SearchQueryPattern searchQueryPattern, List<Long> ids);
+    List<SearchQueryPatternContentJoin> findAllBySearchQueryPatternAndContentIdIn(SearchQueryPattern searchQueryPattern, List<Long> ids);
 }
