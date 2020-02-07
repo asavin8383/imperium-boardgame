@@ -24,8 +24,8 @@ import org.springframework.web.bind.annotation.*;
 import repositories.NmapDetailResultRepo;
 import repositories.ResultRepo;
 import repositories.ResultScreenShotRepo;
-import services.ResultService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -38,7 +38,6 @@ public class ProtocolController {
     private final ResultRepo resultRepo;
     private final ResultScreenShotRepo resultScreenShotRepo;
     private final NmapDetailResultRepo nmapDetailResultRepo;
-    private final ResultService resultService;
 
     @PreAuthorize("hasRole('ROLE_VIEW_RESULT')")
     @GetMapping
@@ -46,7 +45,6 @@ public class ProtocolController {
     public Page<Result> findList(
             @RequestParam Long arrangementId,
             @RequestParam(required = false) List<CheckUnitJobResult> checkUnitJobResults,
-            @RequestParam(required = false) List<UserResult> userResults,
             @RequestParam(required = false) List<CheckUnitType> checkUnitTypes,
             @RequestParam(required = false) String query,
             @RequestParam(required = false) SortingDirection sortingDirection,
@@ -57,6 +55,12 @@ public class ProtocolController {
         Pageable pageable = PageRequest.of(pageNumber, pageSize,
                 SortingHelper.createSorting(sortingDirection, sortingColumn));
         if (checkUnitJobResults != null) {
+            List<UserResult> userResults = new ArrayList<>();
+            checkUnitJobResults.forEach(checkUnitJobResult -> {
+                if (UserResult.contains(checkUnitJobResult.name())){
+                    userResults.add(UserResult.valueOf(checkUnitJobResult.name()));
+                }
+            });
             return resultRepo.findByFilter(
                     arrangementId,
                     checkUnitJobResults,
@@ -115,7 +119,4 @@ public class ProtocolController {
                 });
     }
 
-    private boolean checkIsRunningOrPlanned(Result result) {
-        return result.getResult() == CheckUnitJobResult.RUNNING || result.getResult() == CheckUnitJobResult.PLANNED;
-    }
 }
