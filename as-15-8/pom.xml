@@ -23,6 +23,7 @@
 
 	<modules>
 		<module>as-15-8-messages</module>
+		<module>as-15-8-system-mode</module>
 		<module>as-15-8-ppt</module>
 		<module>as-15-8-ppo</module>
 		<module>as-15-8-ppm</module>
@@ -82,15 +83,15 @@
 
 	<dependencies>
 		<!-- Logs -->
-		<dependency>
-			<groupId>net.logstash.logback</groupId>
-			<artifactId>logstash-logback-encoder</artifactId>
-			<version>${logstash-logback-encoder.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-sleuth</artifactId>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>net.logstash.logback</groupId>-->
+<!--			<artifactId>logstash-logback-encoder</artifactId>-->
+<!--			<version>${logstash-logback-encoder.version}</version>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>org.springframework.cloud</groupId>-->
+<!--			<artifactId>spring-cloud-starter-sleuth</artifactId>-->
+<!--		</dependency>-->
 
 		<!-- Lombok -->
 		<dependency>

@@ -54,5 +54,6 @@ public class DictionaryController {
                         Dictionary.SEARCH_QUERY_PATTERNS.getShortName())
         );
         return dictionaryViews;
+
     }
 }

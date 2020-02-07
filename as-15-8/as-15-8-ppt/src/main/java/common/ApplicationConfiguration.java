@@ -36,4 +36,5 @@ public class ApplicationConfiguration {
 		module.addSerializer(PageImpl.class, new PageSerializer());
 		return module;
 	}
+
 }

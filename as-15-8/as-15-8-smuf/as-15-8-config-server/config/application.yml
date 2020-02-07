@@ -2,11 +2,14 @@ subsystem: SMUF
 server:
   port: 15802
 gateway.url: ${GATEWAY_URI:http://localhost:15880}
+system.mode.autoconfig:
+  url: http://localhost:15802/mode
+debug: true
 logging:
   config: config/logback-spring.xml
 eureka:
   client:
-    fetchRegistry: false
+    fetchRegistry: true
     serviceUrl:
       defaultZone: ${gateway.url}/eureka
     oauth2:
@@ -180,7 +183,7 @@ spring:
 spring:
   profiles: dev_danikanov
   datasource:
-    url: jdbc:postgresql://192.168.5.195:5432/asdb
+    url: jdbc:postgresql://192.168.5.211:5432/asdb
   cloud:
     stream:
       bindings:
