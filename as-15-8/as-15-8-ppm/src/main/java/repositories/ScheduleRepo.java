@@ -23,7 +23,7 @@ public interface ScheduleRepo extends JpaRepository<Schedule, Long>, ScheduleRep
     //TODO Сделать одним запросом
     @Query("select coalesce(sum(s.maxWorkersCount), 0) from Schedule s " +
             "join s.schedulePeriods p on " +
-            "((p.startTime < :startTime and p.endTime > :startTime) or (p.startTime > :startTime and p.startTime > :endTime)) " +
+            "(p.startTime <= :endTime and p.endTime >= :startTime) " +
             "and s.status in ('PLANNED', 'RUNNING') and " +
             "s.plannedDate = :plannedDate"
     )
