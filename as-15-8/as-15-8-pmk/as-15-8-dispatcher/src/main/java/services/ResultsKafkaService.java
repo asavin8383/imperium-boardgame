@@ -268,18 +268,6 @@ public class ResultsKafkaService {
                     return result.getResult().name();
                 }
             });
-            /*return (o1, o2) -> {
-                try {
-                    Object val1 = method.invoke(o1.value);
-                    Object val2 = method.invoke(o2.value);
-                    if(val1 instanceof Comparable && val2 instanceof Comparable)
-                        return ((Comparable)val1).compareTo(val2);
-                    else
-                        return 0;
-                } catch (Exception ex){
-                    return 0;
-                }
-            };*/
         } catch (Exception ex) {
             log.warn("Ошибка при создании компаратора для сортировки результатов проверок", ex);
             return Comparator.comparing(Result::getResult);
