@@ -64,9 +64,17 @@ public class SystemModeService {
     private Runnable changeMode(SystemMode mode) {
         return () -> {
             mode.setActive(true);
+            setAllSystemModesDisabled();
             systemModesRepository.save(mode);
             notifyAllApplications(mode.getSystemMode());
         };
+    }
+
+    private void setAllSystemModesDisabled() {
+        systemModesRepository.findALL().get().forEach(systemMode -> {
+            systemMode.setActive(false);
+            systemModesRepository.save(systemMode);
+        });
     }
 
     private Date asDate(LocalDateTime localDateTime) {
