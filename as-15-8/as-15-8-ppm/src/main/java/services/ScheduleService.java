@@ -75,7 +75,7 @@ public class ScheduleService {
                 scheduleRepo.getScheduleStartTime(schedule.getId()),
                 scheduleRepo.getScheduleEndTime(schedule.getId()));
         if(schedule.getMaxWorkersCount() > freeWorkersCount)
-            throw new AS_15_8_PPM_Exception("Ошибка планирования расписания. Количество свободных обработчиков уменьшилось. На данный момент их максимальное количество " + freeWorkersCount + " штук");
+            throw new AS_15_8_PPM_Exception("Ошибка планирования расписания. В системе не осталось требуемого количества свободных обработчиков. На данный момент их максимальное количество " + freeWorkersCount + " штук");
 
         fillSchedule(schedule);
 
@@ -127,9 +127,9 @@ public class ScheduleService {
         } else {
             maxWorkersCount = getMaxWorkersCount(arrangementCheckUnits.keySet(), plannedDate);
         }
-        if(maxWorkersCount <= 0){
+       /* if(maxWorkersCount <= 0){
             throw new AS_15_8_PPM_Exception("Ошибка при создании расписания! В данный момент в системе не осталось свободных обработчиков!");
-        }
+        }*/
         Schedule newSchedule = scheduleCreationService.create(arrangementCheckUnits, maxWorkersCount);
         log.info("Расчет расписания на дату {} завершен", plannedDate);
         if(schedule != null) {

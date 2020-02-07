@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.kafka.core.CleanupConfig;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
@@ -36,5 +37,10 @@ public class ApplicationConfiguration{
 		SimpleModule module = new SimpleModule("jackson-page-with-jsonview", Version.unknownVersion());
 		module.addSerializer(PageImpl.class, new PageSerializer());
 		return module;
+	}
+
+	@Bean
+	public CleanupConfig cleanupConfig(){
+		return new CleanupConfig(false, false);
 	}
 }
