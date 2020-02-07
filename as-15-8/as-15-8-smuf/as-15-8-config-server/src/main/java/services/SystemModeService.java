@@ -42,7 +42,8 @@ public class SystemModeService {
     public ResponseEntity planServiceModeChange(String plannedDateTime) {
 
         LocalDateTime scheduleTime = parseLdt(plannedDateTime);
-        SystemMode mode = new SystemMode(SystemModeUnit.SERVICE, false);
+
+        SystemMode mode = systemModesRepository.findBySystemMode(SystemModeUnit.SERVICE).orElseGet(() -> new SystemMode(SystemModeUnit.SERVICE, false));
         mode.setPlannedDateTime(scheduleTime);
 
         if(mode.getPlannedDateTime()!= null && mode.getPlannedDateTime().isAfter(LocalDateTime.now())) {
