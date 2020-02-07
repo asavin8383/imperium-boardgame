@@ -33,7 +33,7 @@ public interface ContentViewRepositoryAdvanced {
             Long visitorsCntWorldMax
     );
 
-    List<List<Long>> findIds(
+    List<Long> findIds(
             String idMask,
             List<String> categoryNames,
             List<String> decisionOrgs,

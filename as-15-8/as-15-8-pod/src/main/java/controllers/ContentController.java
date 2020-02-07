@@ -49,6 +49,8 @@ public class ContentController {
     private final ContentHistoryRepository contentHistoryRepo;
     private final ContentCheckUnitRepository contentCheckUnitRepository;
 
+    private static int BUFFER_SIZE = 1000;
+
     @GetMapping(path = "/erdi")
     @PreAuthorize("hasAnyRole('ROLE_MANAGE_ERDI')")
     public ResponseEntity<Page<ContentView>> getRelevantContent(
@@ -127,7 +129,7 @@ public class ContentController {
             Pageable pageable = PageRequest.of(pageNumber, size,
                     SortingHelper.createSorting(sortingDirection, sortingColumn));
 
-            List<List<Long>> listContent =
+            List<Long> listContent =
                     contentViewRepository.findIds(
                             idMask,
                             categoryNames,
@@ -147,7 +149,7 @@ public class ContentController {
                             visitorsCntWorldMin,
                             visitorsCntWorldMax);
 
-            return Flux.fromIterable(listContent);
+            return Flux.fromIterable(listContent).buffer(BUFFER_SIZE);
         }
         else {
             return Flux.empty();

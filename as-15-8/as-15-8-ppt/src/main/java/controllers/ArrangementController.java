@@ -173,7 +173,7 @@ public class ArrangementController {
         FormalTask formalTask = arrangement.getFormalTask();
 
         Set<ExecutionStatus> states =
-                new HashSet<>(Arrays.asList(ExecutionStatus.FINISHED, ExecutionStatus.ACT_SENT));
+                new HashSet<>(Arrays.asList(ExecutionStatus.STOPPED,ExecutionStatus.FINISHED, ExecutionStatus.ACT_SENT));
         Boolean res =
                 formalTask.getMissionId() != null && states.contains(arrangement.getStatus());
         return res;

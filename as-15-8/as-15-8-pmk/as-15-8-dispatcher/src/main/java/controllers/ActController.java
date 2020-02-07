@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import model.NmapDetailResult;
 import model.Result;
 import model.ResultScreenShot;
+import model.enums.UserResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
@@ -28,7 +29,6 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 
@@ -54,7 +54,7 @@ public class ActController {
     public ResponseEntity checkResultForAct(@RequestParam Long resultId, @RequestParam boolean checked){
         return resultRepo.findById(resultId)
                 .map(result -> {
-                    if(result.getResult().equals(CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED)) {
+                    if(checkForAct(result)) {
 
                         result.setCheckForAct(checked);
                         resultRepo.save(result);
@@ -63,6 +63,19 @@ public class ActController {
                         return ResponseEntity.badRequest().body("В акт возможно отправлять скриншоты только с обнаруженным запрещенным контентом");
                     }
                 }).orElseGet(() -> ResponseEntity.badRequest().body("Ошибка! Результат выполнения проверки не найден по ID: " + resultId));
+    }
+
+    @PreAuthorize("hasRole('ROLE_SEND_ACT_BY_HAND')")
+    @PutMapping(path = "/check_all")
+    public void checkResultsForAct(@RequestParam Long arrangementId, @RequestParam boolean checked){
+        List<CheckUnitJobResult> resultFilter = Collections.singletonList(CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED);
+        List<UserResult> userResultFilter = Collections.singletonList(UserResult.FORBIDDEN_CONTENT_DETECTED);
+        resultRepo.findResultsForAct(arrangementId, resultFilter, userResultFilter)
+            .forEach(result -> {
+                result.setCheckForAct(checked);
+                resultRepo.save(result);
+
+            });
     }
 
     @GetMapping(path = "/create")
@@ -79,26 +92,23 @@ public class ActController {
         List<CheckUnitJobResult> resultFilter = Arrays.asList(
                 CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED,
                 CheckUnitJobResult.COMPLETED);
-        List<ActCheckResult> result = resultRepo.findResultsForAct(arrangementId, resultFilter).stream()
+        List<UserResult> userResultFilter = Arrays.asList(
+            UserResult.FORBIDDEN_CONTENT_DETECTED,
+            UserResult.COMPLETED);
+        List<ActCheckResult> result = resultRepo.findResultsForAct(arrangementId, resultFilter, userResultFilter).stream()
                 .map(this::createActCheckResult).collect(Collectors.toList());
-        return Flux.fromIterable(packListToLists(result, 1000));
-    }
-
-    private <T>List<List<T>> packListToLists(List<T> list, int subListSize) {
-        final AtomicInteger counter = new AtomicInteger();
-        return new ArrayList<>(list.stream()
-                .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / subListSize))
-                .values());
+        return Flux.fromIterable(result).buffer(1000);
     }
 
     @GetMapping(path = "/screenshots", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<List<ActAttachment>> getActScreenshots(Long arrangementId) {
         log.info("Подготовка скриншотов для акта. ID мероприятия: {}", arrangementId);
         List<CheckUnitJobResult> resultFilter = Collections.singletonList(CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED);
+        List<UserResult> userResultFilter = Collections.singletonList(UserResult.FORBIDDEN_CONTENT_DETECTED);
         PageRequest page = PageRequest.of(0, maxCountActScreenShots.intValue());
         List<Result> results = resultRepo.findCheckedResultsForAct(arrangementId, resultFilter);
         if(results.size() == 0) {
-            results = resultRepo.findResultsForAct(arrangementId, resultFilter, page);
+            results = resultRepo.findResultsForAct(arrangementId, resultFilter, userResultFilter, page);
         }
 
         if(results.size() == 0) {
@@ -119,7 +129,7 @@ public class ActController {
                 .map(this::createActNmapLog).collect(Collectors.toList());
 
        result.addAll(nmap);
-       return Flux.fromIterable(packListToLists(result, 1000));
+       return Flux.fromIterable(result).buffer(1000);
     }
 
     private ActCheckResult createActCheckResult(Result result){
@@ -128,7 +138,9 @@ public class ActController {
         checkResult.setCheckUnitType(result.getCheckUnitType());
         checkResult.setCheckUnitValue(result.getCheckUnitValue());
         checkResult.setContentId(result.getErdiId());
-        checkResult.setForbiddenContentDetected(result.getResult().equals(CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED));
+        checkResult.setForbiddenContentDetected(
+            result.getResult().equals(CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED)&&result.getUserResult()==null||
+            result.getUserResult().equals(UserResult.FORBIDDEN_CONTENT_DETECTED));
 
         Date endDate = ldt2date(result.getEndDate());
         checkResult.setDate(endDate == null ? "" : dateFormat.format(endDate));
@@ -158,6 +170,13 @@ public class ActController {
         if (ldt == null)
             return null;
         return Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant());
+    }
+
+    private boolean checkForAct(Result result){
+        //Отправляем в акт обнаруженную запрещёнку или установленные пользователем
+        return result.getUserResult()==null&&result.getResult().equals(CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED)||
+            result.getUserResult().equals(UserResult.FORBIDDEN_CONTENT_DETECTED);
+
     }
 
 }

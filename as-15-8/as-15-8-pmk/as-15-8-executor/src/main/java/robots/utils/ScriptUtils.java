@@ -80,24 +80,6 @@ public class ScriptUtils {
         return new PageResult(pageContent, errorCode);
     }
 
-    /*public static byte[] getScreenshot(WebDriver driver)  {
-        try {
-            String currentTab = driver.getWindowHandle();
-            ArrayList<String> tabs = new ArrayList<>(driver.getWindowHandles());
-            waitForTab(driver, tabs.indexOf(currentTab));
-            try(InputStream inputStream = ScriptUtils.class.getClassLoader().getResourceAsStream("takeScreenshot.js")){
-                String script = IOUtils.toString(inputStream, Charset.forName("UTF-8"));
-                JavascriptExecutor js = (JavascriptExecutor) driver;
-                String scriptAnswer = js.executeAsyncScript(script).toString();
-                if(scriptAnswer.startsWith("Error"))
-                    throw new RuntimeException("Ошибка в скрипте получения скриншота: "+scriptAnswer);
-                return Base64.getDecoder().decode(scriptAnswer);
-            }
-        } catch(Exception ex){
-            throw new RuntimeException("Ошибка получения скриншота", ex);
-        }
-    }*/
-
     public static byte[] getScreenshot(WebDriver webDriver)  {
         try{
             switchToTab(webDriver, 2);

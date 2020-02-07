@@ -18,6 +18,7 @@ import model.Schedule;
 import model.SchedulePeriod;
 import model.Views;
 import model.enums.ScheduleStatus;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -83,18 +84,17 @@ public class ScheduleController {
         return arrangementService.findPage(page);
     }
 
-    //TODO Разобраться с Pageable и JsonView
     @GetMapping("/all")
     @JsonView(Views.Brief.class)
-    public List<Schedule> getScheduleList(
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate plannedDate/*,
+    public Page<Schedule> getScheduleList(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate plannedDate,
             @RequestParam(required = false) SortingDirection sortingDirection,
             @RequestParam(required = false) String sortingColumn,
             @RequestParam(defaultValue = "0") int pageNumber,
-            @RequestParam(defaultValue = "10") int pageSize*/){
-//        PageRequest page = PageRequest.of(
-//                pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
-        return scheduleRepo.findAllByPlannedDate(plannedDate == null ? LocalDate.now() : plannedDate);
+            @RequestParam(defaultValue = "10") int pageSize){
+        PageRequest page = PageRequest.of(
+                pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
+        return scheduleRepo.findAllByPlannedDate(plannedDate == null ? LocalDate.now() : plannedDate, page);
     }
 
     @GetMapping("/all_filtered")
@@ -110,7 +110,7 @@ public class ScheduleController {
         Pageable page = PageRequest.of(
                 pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
 
-        if (query != null)
+        if (Strings.isNotEmpty(query))
             return scheduleRepo.findAllByPlannedDateAndArrangement(plannedDate == null ? LocalDate.now() : plannedDate, query, page);
 
         return scheduleRepo.findAllByPlannedDate(plannedDate == null ? LocalDate.now() : plannedDate, page);

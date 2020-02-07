@@ -1,4 +1,4 @@
-selenium-hub-url: http://user:1q0p2w9o@192.168.5.75:4442/wd/hub
+selenium-hub-url: http://user:1q0p2w9o@192.168.5.75:4445/wd/hub
 spring:
   main.allow-bean-definition-overriding: true
   kafka.consumer.properties.spring.json.trusted.packages: checkUnits
@@ -35,6 +35,7 @@ spring:
                 key.deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
                 max.poll.records: 1
                 max.poll.interval.ms: 300000
+                auto.offset.reset: latest
           executionResults:
             producer.configuration:
               key.serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -56,7 +57,7 @@ spring:
     bindings:
       jobs:
         consumer.concurrency: 10
-selenium-hub-url: http://10.97.220.165:15800/wd/hub
+selenium-hub-url: http://10.97.220.226:15800/wd/hub
 eureka:
   instance:
     metadata-map:

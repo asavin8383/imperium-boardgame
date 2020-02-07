@@ -8,11 +8,10 @@ services:
       - selenoid-net
     ports:
       - target: 4444
-        published: 4444
         protocol: tcp
         mode: host
     hostname: "{{.Node.Hostname}}"
-    environment:doc
+    environment:
       TZ: "Europe/Moscow"
     configs:
       - source: selenoid_browsers
@@ -20,9 +19,9 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /opt/selenoid/logs:/opt/selenoid/logs
-    command: ["-container-network", "selenoid-net",
-              "-conf", "/etc/selenoid/browsers.json",
-              "-log-output-dir", "/opt/selenoid/logs"]
+    command: ["-conf", "/etc/selenoid/browsers.json",
+              "-log-output-dir", "/opt/selenoid/logs",
+              "-limit", "6"]
   ggr:
     image: dcr.ec-leasing.ru/as-15-8/selenoid/ggr:1.6.5
     depends_on:
@@ -36,15 +35,14 @@ services:
     networks:
       - selenoid-net
     ports:
-      - target: 4444
-        published: 4442
+      - target: 4445
         protocol: tcp
         mode: host
     environment:
       TZ: "Europe/Moscow"
     volumes:
       - "/opt/selenoid/ggr:/etc/grid-router"
-    command: ["-quotaDir", "/etc/grid-router/quota"]
+    command: ["-quotaDir", "/etc/grid-router/quota", "-listen", ":4445"]
   ggr-ui:
     image: dcr.ec-leasing.ru/as-15-8/selenoid/ggr-ui:1.1.2
     depends_on:
@@ -60,7 +58,6 @@ services:
       - selenoid-net
     ports:
       - target: 8888
-        published: 8888
         protocol: tcp
         mode: host
     environment:
@@ -89,11 +86,12 @@ services:
     environment:
       TZ: "Europe/Moscow"
     command: ["--status-uri", "http://192.168.5.75:8888",
-              "--webdriver-uri", "http://user:1q0p2w9o@192.168.5.75:4442"]
+              "--webdriver-uri", "http://user:1q0p2w9o@192.168.5.75:4445"]
 
 networks:
   selenoid-net:
-     external: true
+    name: "host"
+    external: true
 
 configs:
   selenoid_browsers:

@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import model.Arrangement_;
 import model.Result;
 import model.Result_;
+import model.enums.UserResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,6 +36,7 @@ public class ResultRepoAdvancedImpl implements ResultRepoAdvanced {
             Long arrangementId,
             List<CheckUnitJobResult> checkUnitJobResultNames,
             List<CheckUnitType> typeNames,
+            List<UserResult> userResults,
             String query,
             Pageable pageable) {
 
@@ -48,9 +50,24 @@ public class ResultRepoAdvancedImpl implements ResultRepoAdvanced {
             predicates.add(criteriaBuilder.like(criteriaBuilder.upper(root.get(Result_.ARRANGEMENT).get(Arrangement_.ID).as(String.class)), "%" + arrangementId + "%"));
         }
 
+        //Если пользовательский результат не заполнен - берём результат проверки
         if (checkUnitJobResultNames != null && checkUnitJobResultNames.size() > 0) {
-            predicates.add(root.get(Result_.RESULT).in(checkUnitJobResultNames));
+            Predicate resultPredicate = criteriaBuilder.and(
+                root.get(Result_.RESULT).in(checkUnitJobResultNames),
+                root.get(Result_.USER_RESULT).isNull()
+            );
+
+            //Если пользовательский результат заполнен - ориентируемся на него
+            if (userResults != null && userResults.size() > 0) {
+                resultPredicate = criteriaBuilder.or(
+                    resultPredicate,
+                    root.get(Result_.USER_RESULT).in(userResults)
+                );
+            }
+
+            predicates.add(resultPredicate);
         }
+
 
         if (typeNames != null && typeNames.size() > 0) {
             predicates.add(root.get(Result_.CHECK_UNIT_TYPE).in(typeNames));

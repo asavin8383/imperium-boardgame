@@ -115,6 +115,11 @@ public class ArrangementStateMachine {
 
                     .and()
                     .withExternal()
+                    .source(ExecutionStatus.STOPPED).target(ExecutionStatus.ACT_SENT)
+                    .event(ArrangementEvents.SEND_ACT)
+
+                    .and()
+                    .withExternal()
                     .source(ExecutionStatus.FINISHED).target(ExecutionStatus.ACT_SENT)
                     .event(ArrangementEvents.SEND_ACT)
 
