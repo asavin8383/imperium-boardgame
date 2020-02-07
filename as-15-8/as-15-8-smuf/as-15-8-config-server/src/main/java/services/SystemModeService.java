@@ -22,6 +22,7 @@ import repositories.SystemModesRepository;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -38,16 +39,25 @@ public class SystemModeService {
     private final RestTemplate restTemplate;
 
     @Async
-    public ResponseEntity planServiceModeChange(SystemMode mode) {
+    public ResponseEntity planServiceModeChange(String plannedDateTime) {
 
-        if(mode.getSystemMode() == SystemModeUnit.SERVICE && mode.getPlannedDateTime()!= null) {
-            mode.setActive(false);
+        LocalDateTime scheduleTime = parseLdt(plannedDateTime);
+        SystemMode mode = new SystemMode(SystemModeUnit.SERVICE, false);
+        mode.setPlannedDateTime(scheduleTime);
+
+        if(mode.getPlannedDateTime()!= null && mode.getPlannedDateTime().isAfter(LocalDateTime.now())) {
             systemModesRepository.save(mode);
             scheduler.schedule(changeMode(mode), asDate(mode.getPlannedDateTime()));
             return ResponseEntity.ok("Смена сервисного режима запланирована на " + mode.getPlannedDateTime());
         }
-        return ResponseEntity.badRequest().body("Смена режима на Сервисный запланирована не успешно!");
+        return ResponseEntity.badRequest().body("Смена режима работы на Сервисный не запланирована!");
 
+    }
+
+    private LocalDateTime parseLdt(String ldt) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        LocalDateTime dateTime = LocalDateTime.parse(ldt, formatter);
+        return dateTime;
     }
 
     private Runnable changeMode(SystemMode mode) {
