@@ -124,7 +124,7 @@ public class ArrangementService {
                 arr.setStatus(ArrangementStatus.FINISHED);
             else{
                 arr.setStatus(ArrangementStatus.STOPPED);
-                arr.setCheckUnitsCount(resultsKafkaService.getResultsCount(arrangementId));
+                //arr.setCheckUnitsCount(resultsKafkaService.getResultsCount(arrangementId));
             }
             arrangementRepo.save(arr);
             if (!isStopped && isActAvailable) {
