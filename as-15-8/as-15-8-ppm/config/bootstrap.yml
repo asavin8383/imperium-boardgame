@@ -2,6 +2,8 @@ subsystem: PPM
 server:
   port: 15803
 gateway.url: ${GATEWAY_URI:http://localhost:15880}
+system.mode.autoconfig:
+  url: ${gateway.url}/config/mode
 logging:
   config: config/logback-spring.xml
 eureka:

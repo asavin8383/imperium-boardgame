@@ -103,6 +103,18 @@
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.ecls.as-15-8</groupId>
+            <artifactId>as-15-8-system-mode</artifactId>
+            <version>1.0</version>
+        </dependency>
+
     </dependencies>
 
 </project>

@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import model.enums.SystemModeUnit;
+import enums.SystemModeUnit;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;

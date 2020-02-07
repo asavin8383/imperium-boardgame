@@ -7,6 +7,7 @@ import model.serializers.PageSerializer;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.config.server.EnableConfigServer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 @ComponentScan(basePackages = {"common", "model", "controllers", "services", "repositories", "handlers"})
 @EntityScan("model")
 @EnableJpaRepositories("repositories")
+@EnableDiscoveryClient
 @RestController
 public class SpringConfigServerApplication {
     public static void main(String[] args) {
