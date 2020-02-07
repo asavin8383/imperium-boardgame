@@ -13,6 +13,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RestControllerEndpoint(id = "system-mode")
 public class SystemModeEndpointRest {
 
+    private final CurrentSystemMode currentSystemMode;
+
+    public SystemModeEndpointRest(CurrentSystemMode currentSystemMode) {
+        this.currentSystemMode = currentSystemMode;
+    }
+
     @GetMapping
     public String getSystemMode() {
         return "from rest";
@@ -21,7 +27,7 @@ public class SystemModeEndpointRest {
     @PostMapping
     public ResponseEntity<SystemModeUnit> postSystemMode(@RequestBody SystemModeUnit systemModeUnit) {
         if (systemModeUnit != null) {
-            CurrentSystemMode.setSystemModeUnit(systemModeUnit);
+            currentSystemMode.setSystemModeUnit(systemModeUnit);
             return ResponseEntity.ok(systemModeUnit);
         } else return ResponseEntity.badRequest().body(null);
     }

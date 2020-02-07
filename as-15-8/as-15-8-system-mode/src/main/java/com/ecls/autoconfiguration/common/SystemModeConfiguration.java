@@ -54,11 +54,12 @@ public class SystemModeConfiguration {
         return registrationBean;
     }
 
+
     @Bean
     @ConditionalOnEnabledEndpoint
     public SystemModeEndpointRest systemModeEndpointRest() {
-        SystemModeEndpointRest enpoint = new SystemModeEndpointRest();
-        return enpoint;
+        SystemModeEndpointRest endpoint = new SystemModeEndpointRest(currentSystemMode());
+        return endpoint;
     }
 
     @Bean
