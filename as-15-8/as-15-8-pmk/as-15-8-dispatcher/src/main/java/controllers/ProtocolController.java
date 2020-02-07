@@ -46,6 +46,7 @@ public class ProtocolController {
     public Page<Result> findList(
             @RequestParam Long arrangementId,
             @RequestParam(required = false) List<CheckUnitJobResult> checkUnitJobResults,
+            @RequestParam(required = false) List<UserResult> userResults,
             @RequestParam(required = false) List<CheckUnitType> checkUnitTypes,
             @RequestParam(required = false) String query,
             @RequestParam(required = false) SortingDirection sortingDirection,
@@ -60,6 +61,7 @@ public class ProtocolController {
                     arrangementId,
                     checkUnitJobResults,
                     checkUnitTypes,
+                    userResults,
                     query,
                     pageable);
         } else {

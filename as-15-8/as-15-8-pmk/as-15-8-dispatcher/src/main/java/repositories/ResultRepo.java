@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 import checkUnits.CheckUnitType;
+import model.enums.UserResult;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -46,14 +47,14 @@ public interface ResultRepo extends JpaRepository<Result, Long>, ResultRepoAdvan
 	@Query("select r from Result r " +
 			"join r.arrangement a " +
 			"on a.id = :arrangementId and " +
-			"r.result in(:results)")
-	List<Result> findResultsForAct(@Param("arrangementId") Long arrangementId, @Param("results") Collection<CheckUnitJobResult> results);
+			"(r.result in(:results) and r.userResult is null or r.userResult in (:userResults))")
+	List<Result> findResultsForAct(@Param("arrangementId") Long arrangementId, @Param("results") Collection<CheckUnitJobResult> results, @Param("userResults") Collection<UserResult> userResults);
 
 	@Query("select r from Result r " +
 			"join r.arrangement a " +
 			"on a.id = :arrangementId and " +
-			"r.result in(:results)")
-	List<Result> findResultsForAct(@Param("arrangementId") Long arrangementId, @Param("results") Collection<CheckUnitJobResult> results, Pageable pageable);
+			"(r.result in(:results) and r.userResult is null or r.userResult in (:userResults))")
+	List<Result> findResultsForAct(@Param("arrangementId") Long arrangementId, @Param("results") Collection<CheckUnitJobResult> results, @Param("userResults") Collection<UserResult> userResults, Pageable pageable);
 
 	@Query("select r from Result r " +
 			"join r.arrangement a " +
