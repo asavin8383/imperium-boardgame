@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RestControllerEndpoint(id = "system-mode")
 public class SystemModeEndpointRest {
 
-    private final CurrentSystemMode currentSystemMode;
+    private CurrentSystemMode currentSystemMode;
 
     public SystemModeEndpointRest(CurrentSystemMode currentSystemMode) {
         this.currentSystemMode = currentSystemMode;
