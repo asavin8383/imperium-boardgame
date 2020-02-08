@@ -1,7 +1,6 @@
 package controllers;
 
 import enums.SystemModeUnit;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.SystemMode;
@@ -9,11 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import repositories.SystemModesRepository;
 import services.SystemModeService;
-
-import javax.transaction.Transactional;
 
 @RestController
 @Slf4j
@@ -43,6 +41,7 @@ public class SystemModeController {
         return systemModeService.changeSystemMode(mode).getSystemMode();
     }
 
+    @Transactional
     @PutMapping(path = "/service_mode_plan")
     @PreAuthorize("hasAnyRole('ROLE_MANAGE_FUNCTION_MODE')")
     public ResponseEntity planServiceModeChanging(@RequestParam String plannedDateTime) {

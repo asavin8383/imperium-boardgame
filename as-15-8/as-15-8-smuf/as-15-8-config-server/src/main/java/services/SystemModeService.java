@@ -41,10 +41,7 @@ public class SystemModeService {
     @Async
     public ResponseEntity planServiceModeChange(String plannedDateTime) {
 
-        LocalDateTime scheduleTime = parseLdt(plannedDateTime);
-
-        SystemMode mode = systemModesRepository.findBySystemMode(SystemModeUnit.SERVICE).orElseGet(() -> new SystemMode(SystemModeUnit.SERVICE, false));
-        mode.setPlannedDateTime(scheduleTime);
+        SystemMode mode = getOrCreateSystemMode(plannedDateTime);
 
         if(mode.getPlannedDateTime()!= null && mode.getPlannedDateTime().isAfter(LocalDateTime.now())) {
             systemModesRepository.save(mode);
@@ -53,6 +50,14 @@ public class SystemModeService {
         } else
             return ResponseEntity.badRequest().body("Смена режима работы на Сервисный не запланирована!");
 
+    }
+
+    private SystemMode getOrCreateSystemMode(String plannedDateTime) {
+        LocalDateTime scheduleTime = parseLdt(plannedDateTime);
+        SystemMode mode = systemModesRepository.findBySystemMode(SystemModeUnit.SERVICE)
+                .orElseGet(() -> new SystemMode(SystemModeUnit.SERVICE, false));
+        mode.setPlannedDateTime(scheduleTime);
+        return mode;
     }
 
     private LocalDateTime parseLdt(String ldt) {
@@ -64,17 +69,10 @@ public class SystemModeService {
     private Runnable changeMode(SystemMode mode) {
         return () -> {
             mode.setActive(true);
-            setAllSystemModesDisabled();
+            systemModesRepository.setAllSysemModesEnabled(false);
             systemModesRepository.save(mode);
             notifyAllApplications(mode.getSystemMode());
         };
-    }
-
-    private void setAllSystemModesDisabled() {
-        systemModesRepository.findALL().get().forEach(systemMode -> {
-            systemMode.setActive(false);
-            systemModesRepository.save(systemMode);
-        });
     }
 
     private Date ldtToDate(LocalDateTime localDateTime) {
@@ -87,24 +85,23 @@ public class SystemModeService {
     }
 
     public void notifyAllApplications(SystemModeUnit systemModeUnit) {
-        List<ServiceInstance> instances = getAllUris();
-
+        List<ServiceInstance> instances = getAllApplicationInstances();
         instances.forEach(instance ->
-                postCurrentSystemMode(instance.getUri(), systemModeUnit, instance));
+                postSystemModeUnit(instance.getUri(), systemModeUnit, instance));
     }
 
-    private SystemModeUnit postCurrentSystemMode(URI uri, SystemModeUnit systemModeUnit, ServiceInstance instance) {
+    private SystemModeUnit postSystemModeUnit(URI uri, SystemModeUnit systemModeUnit, ServiceInstance instance) {
         try {
             ResponseEntity response = restTemplate.postForEntity(createUri(uri),
                                                                  createEntity(systemModeUnit),
                                                                  SystemModeUnit.class);
             if (response.getStatusCode().is2xxSuccessful()) {
                 SystemModeUnit result = (SystemModeUnit) response.getBody();
-                log.warn("========================= ++++++++ Обновление автоконфигурации для uri " + instance.getInstanceId() + " успешно, ответ :" + result);
+                log.info("Обновление автоконфигурации System_Mode для uri " + instance.getInstanceId() + " успешно, ответ :" + result);
                 return result;
             }
         } catch (Exception ex) {
-            log.warn("============================= Обновление автоконфигурации для uri " + instance.getInstanceId() + " неуспешно, ошибка:" + ex);
+            log.warn("Обновление автоконфигурации System_Mode для uri " + instance.getInstanceId() + " не успешно, ошибка:" + ex);
         }
         return null;
     }
@@ -124,7 +121,7 @@ public class SystemModeService {
         return entity;
     }
 
-    private List<ServiceInstance> getAllUris() {
+    private List<ServiceInstance> getAllApplicationInstances() {
         List<String> services = discoveryClient.getServices();
 
         List<ServiceInstance> instances = new ArrayList<ServiceInstance>();
