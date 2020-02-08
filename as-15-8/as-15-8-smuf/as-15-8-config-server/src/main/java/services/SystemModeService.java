@@ -48,10 +48,10 @@ public class SystemModeService {
 
         if(mode.getPlannedDateTime()!= null && mode.getPlannedDateTime().isAfter(LocalDateTime.now())) {
             systemModesRepository.save(mode);
-            scheduler.schedule(changeMode(mode), asDate(mode.getPlannedDateTime()));
+            scheduler.schedule(changeMode(mode), ldtToDate(mode.getPlannedDateTime()));
             return ResponseEntity.ok("Смена сервисного режима запланирована на " + mode.getPlannedDateTime());
-        }
-        return ResponseEntity.badRequest().body("Смена режима работы на Сервисный не запланирована!");
+        } else
+            return ResponseEntity.badRequest().body("Смена режима работы на Сервисный не запланирована!");
 
     }
 
@@ -77,7 +77,7 @@ public class SystemModeService {
         });
     }
 
-    private Date asDate(LocalDateTime localDateTime) {
+    private Date ldtToDate(LocalDateTime localDateTime) {
         return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
     }
 

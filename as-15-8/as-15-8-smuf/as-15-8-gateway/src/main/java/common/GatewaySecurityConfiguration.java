@@ -48,7 +48,8 @@ public class GatewaySecurityConfiguration extends ResourceServerConfigurerAdapte
                             "/pod/erdi/checkUnits/**",
                             "/pod/erdi/check_units_count/**",
                             "/viewer/**",
-                            "/config/mode/**"
+                            "/config/mode/**",
+                            "/config/mode/current**"
                     ).permitAll()
                     .antMatchers(HttpMethod.OPTIONS, "/viewer/**")
                     .permitAll()
