@@ -6,6 +6,8 @@ import analysis.CheckUnitStatusNotification;
 import checkUnits.CheckUnitKey;
 import enums.CheckUnitJobResult;
 import exceptions.AS_15_8_DispatcherException;
+import imprint.HeaderObject;
+import imprint.ImageProcessor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.*;
@@ -19,8 +21,10 @@ import repositories.ResultRepo;
 import repositories.ResultScreenShotRepo;
 import restapi.ArrangementRestApi;
 
+import javax.annotation.PostConstruct;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -35,6 +39,15 @@ public class ResultService {
     private final ResultScreenShotRepo resultScreenShotRepo;
     private final ArrangementRestApi arrangementRestApi;
     private final ArrangementService arrangementService;
+    //Объекты для создания штампа на скриншоте
+    private final ImageProcessor imageProcessor = new ImageProcessor();
+    private final HeaderObject headerObject = new HeaderObject();
+
+    @PostConstruct
+    private void initImageProcessor() throws Exception {
+        //Загружаем шрифт
+        imageProcessor.loadFontFromFile(Objects.requireNonNull(getClass().getClassLoader().getResource("fonts/arial.ttf")).getPath());
+    }
 
     @Scheduled(cron = "${results.save.schedule}")
     public void saveCompletionArrangements() {
@@ -140,13 +153,24 @@ public class ResultService {
                     (screenshots.getEtalonScreenshot() != null && screenshots.getEtalonScreenshot().length > 0)) {
                     ResultScreenShot resultScreenShot = resultScreenShotRepo.findById(jobId).orElseGet(ResultScreenShot::new);
                     resultScreenShot.setResult(result);
-                    resultScreenShot.setScreenshot(screenshots.getScreenshot());
+                    //Устанавливаем штамп на скриншот
+                    resultScreenShot.setScreenshot(imprintScreenshot(checkUnitResult, screenshots.getScreenshot()));
                     resultScreenShot.setEtalonScreenshot(screenshots.getEtalonScreenshot());
                     result.setResultScreenShot(resultScreenShot);
                 }
             });
         }
         resultRepo.save(result);
+    }
+
+    private byte[] imprintScreenshot(CheckUnitResult checkUnitResult, byte[] screenShot){
+        headerObject.setLabel1(checkUnitResult.getCheckUnit().getValue());
+        try {
+            return imageProcessor.processImage(screenShot, headerObject);
+        } catch (Exception ex) {
+            log.error("Ошибка установки штампа на скриншот: " + checkUnitResult.getCheckUnit().getValue() , ex);
+            return screenShot;
+        }
     }
 
     private boolean isArrangementFinished(Arrangement arrangement) {
