@@ -148,6 +148,10 @@ public class ScheduleService {
         return Math.max(schedulerProperties.getTotalWorkersCount() - scheduleRepo.getBusyWorkersCount(plannedDate, startTime, endTime), 0);
     }
 
+    public int getTotalWorkersCount(){
+        return schedulerProperties.getTotalWorkersCount();
+    }
+
     public void checkAndCloseSchedule(Schedule schedule){
         boolean needToClose = arrangementRepo.findAllBySchedule(schedule.getId())
                 .stream()

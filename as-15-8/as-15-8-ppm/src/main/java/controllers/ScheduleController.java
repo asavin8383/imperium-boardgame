@@ -126,13 +126,14 @@ public class ScheduleController {
 
     @GetMapping(path = "/total_workers_count")
     public Integer getTotalWorkersCount(@RequestParam("id") Schedule schedule){
-        if(schedule==null){
+        /*if(schedule==null){
             throw new AS_15_8_PPM_Exception("Ошибка получения количества обработчиков! Расписание ещё не создано");
         }
         return scheduleService.getFreeWorkersCount(
                 LocalDate.now(),
                 scheduleRepo.getScheduleStartTime(schedule.getId()),
-                scheduleRepo.getScheduleEndTime(schedule.getId()));
+                scheduleRepo.getScheduleEndTime(schedule.getId()));*/
+        return scheduleService.getTotalWorkersCount();
     }
 
     //TODO кидать 400
@@ -234,7 +235,7 @@ public class ScheduleController {
     }
 
     @GetMapping(path = "/all_periods_workers_count")
-    public List<String[]> getAllPeriodsWorkersCount(@RequestParam("date") LocalDate date) {
+    public List<String[]> getAllPeriodsWorkersCount(@RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         return schedulePeriodRepo.findAllPeriodsWorkersCount(date);
     }
 
