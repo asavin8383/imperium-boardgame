@@ -41,7 +41,6 @@ public class SystemModeController {
         return systemModeService.changeSystemMode(mode).getSystemMode();
     }
 
-    @Transactional
     @PutMapping(path = "/service_mode_plan")
     @PreAuthorize("hasAnyRole('ROLE_MANAGE_FUNCTION_MODE')")
     public ResponseEntity planServiceModeChanging(@RequestParam String plannedDateTime) {
