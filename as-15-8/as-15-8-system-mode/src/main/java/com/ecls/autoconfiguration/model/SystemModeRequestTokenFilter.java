@@ -20,7 +20,7 @@ public class SystemModeRequestTokenFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
-        if(((HttpServletRequest)request).getRequestURI().equals("/mode")) {
+        if(((HttpServletRequest)request).getRequestURI().equals("/mode") || ((HttpServletRequest)request).getRequestURI().equals("/mode/current")) {
              filterChain.doFilter(request, response);
              return;
         }
