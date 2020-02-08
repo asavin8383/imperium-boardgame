@@ -17,7 +17,6 @@ import model.ScheduleCheckUnit;
 import model.enums.ArrangementStatus;
 import model.enums.ScheduleStatus;
 import org.apache.logging.log4j.util.Strings;
-import org.hibernate.query.criteria.internal.expression.function.AggregationFunction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -41,7 +40,6 @@ import webClients.PPT_WebClient;
 import javax.transaction.Transactional;
 import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -339,4 +337,5 @@ public class ArrangementController {
             return ResponseEntity.ok().body(scheduleId);
         else return ResponseEntity.noContent().build();
     }
+
 }

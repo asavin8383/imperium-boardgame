@@ -1,13 +1,11 @@
 package model;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import model.enums.SystemModeUnit;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
+import enums.SystemModeUnit;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Data
@@ -29,4 +27,7 @@ public class SystemMode {
     @NonNull
     @Column(nullable = false)
     private boolean active;
+
+    @Column
+    private LocalDateTime plannedDateTime;
 }

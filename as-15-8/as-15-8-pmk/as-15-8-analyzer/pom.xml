@@ -53,6 +53,12 @@
 			<version>1.12.1</version>
 		</dependency>
 
+		<dependency>
+			<groupId>com.ecls.as-15-8</groupId>
+			<artifactId>as-15-8-system-mode</artifactId>
+			<version>1.0</version>
+		</dependency>
+
 	</dependencies>
 
 </project>

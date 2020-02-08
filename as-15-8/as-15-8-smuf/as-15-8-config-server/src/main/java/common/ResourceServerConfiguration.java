@@ -18,6 +18,7 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
                 .antMatchers(HttpMethod.POST, "/actuator/bus-refresh/**").hasRole("MANAGE_CONFIGURATIONS")
                 .antMatchers("/robots/**").hasRole("MANAGE_CONFIGURATIONS")
                 .antMatchers(HttpMethod.GET, "/**").hasRole("CONFIG_CLIENT")
+                .antMatchers(HttpMethod.POST, "/mode/**", "/mode/current/**").permitAll()
             .anyRequest().authenticated()
         .and().httpBasic().disable().csrf().disable();
     }
