@@ -52,12 +52,9 @@ public class ImageProcessor {
 	/* LOAD FONT FROM FILE */ 
 	/**
 	 * Loads custom font from *.ttf file. Available for TrueType fonts only
-	 *
-	 * @param	filename name of the font file with path
 	 */
-	public void loadFontFromFile(String filename) throws Exception {
-		InputStream is = new BufferedInputStream(new FileInputStream(new File(filename)));
-		TEXT_FONT = Font.createFont(Font.TRUETYPE_FONT, is).deriveFont(Font.PLAIN, FONT_SIZE);
+	public void loadFontFromFile(InputStream fontInputStream) throws Exception {
+		TEXT_FONT = Font.createFont(Font.TRUETYPE_FONT, fontInputStream).deriveFont(Font.PLAIN, FONT_SIZE);
 	}
 	
 	/* GET IMAGE SIZE */

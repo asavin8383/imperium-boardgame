@@ -46,7 +46,7 @@ public class ResultService {
     @PostConstruct
     private void initImageProcessor() throws Exception {
         //Загружаем шрифт
-        imageProcessor.loadFontFromFile(Objects.requireNonNull(ResultService.class.getClassLoader().getResource("fonts/arial.ttf")).getFile());
+        imageProcessor.loadFontFromFile(Objects.requireNonNull(ResultService.class.getClassLoader().getResourceAsStream("fonts/arial.ttf")));
     }
 
     @Scheduled(cron = "${results.save.schedule}")
