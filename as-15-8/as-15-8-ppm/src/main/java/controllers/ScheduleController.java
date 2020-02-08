@@ -31,6 +31,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import repositories.ArrangementRepo;
+import repositories.SchedulePeriodRepo;
 import repositories.ScheduleRepo;
 import robots.SlaPeriod;
 import robots.SlaType;
@@ -62,6 +63,7 @@ public class ScheduleController {
     private final ArrangementService arrangementService;
     private final ScheduleService scheduleService;
     private final ScheduleRepo scheduleRepo;
+    private final SchedulePeriodRepo schedulePeriodRepo;
     private ObjectMapper mapper;
     private final SchedulerProperties schedulerProperties;
     private final ArrangementRepo arrangementRepo;
@@ -124,13 +126,14 @@ public class ScheduleController {
 
     @GetMapping(path = "/total_workers_count")
     public Integer getTotalWorkersCount(@RequestParam("id") Schedule schedule){
-        if(schedule==null){
+        /*if(schedule==null){
             throw new AS_15_8_PPM_Exception("Ошибка получения количества обработчиков! Расписание ещё не создано");
         }
         return scheduleService.getFreeWorkersCount(
                 LocalDate.now(),
                 scheduleRepo.getScheduleStartTime(schedule.getId()),
-                scheduleRepo.getScheduleEndTime(schedule.getId()));
+                scheduleRepo.getScheduleEndTime(schedule.getId()));*/
+        return scheduleService.getTotalWorkersCount();
     }
 
     //TODO кидать 400
@@ -161,12 +164,12 @@ public class ScheduleController {
                 new TypeReference<List<Arrangement>>() {});
 
         schedule.setMaxWorkersCount(scheduleData.get("maxWorkersCount").asInt());
-        int freeWorkersCount = scheduleService.getFreeWorkersCount(
+       /* int freeWorkersCount = scheduleService.getFreeWorkersCount(
                 LocalDate.now(),
                 scheduleRepo.getScheduleStartTime(schedule.getId()),
                 scheduleRepo.getScheduleEndTime(schedule.getId()));
         if(freeWorkersCount < schedule.getMaxWorkersCount())
-            throw new AS_15_8_PPM_Exception("Ошибка! Свободное количество обработчиков меньше, чем заданное для расчета ("+freeWorkersCount+" < "+schedule.getMaxWorkersCount()+")");
+            throw new AS_15_8_PPM_Exception("Ошибка! Свободное количество обработчиков меньше, чем заданное для расчета ("+freeWorkersCount+" < "+schedule.getMaxWorkersCount()+")");*/
         LocalDate plannedDate = null;
         if(scheduleData.has("plannedDate"))
             plannedDate = LocalDate.parse(scheduleData.get("plannedDate").asText(), DateTimeFormatter.ISO_DATE);
@@ -231,6 +234,10 @@ public class ScheduleController {
         return ResponseEntity.ok(briefArrangements);
     }
 
+    @GetMapping(path = "/all_periods_workers_count")
+    public List<String[]> getAllPeriodsWorkersCount(@RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        return schedulePeriodRepo.findAllPeriodsWorkersCount(date);
+    }
 
     @Data
     @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -338,14 +345,5 @@ public class ScheduleController {
             schedule.setDescription(description);
             scheduleRepo.save(schedule);
         }
-    }
-
-    @GetMapping(path = "/test")
-    @JsonView(Views.Full.class)
-    public String testTrafficSla(@RequestParam("id") Schedule schedule){
-        if (schedule != null) {
-            return analyzeRobotTrafficLimits(schedule);
-        }
-        return "нет превышения";
     }
 }
