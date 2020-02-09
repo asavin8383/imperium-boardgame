@@ -39,7 +39,7 @@ public class ConfigClient {
                     .path(ROBOTS_ENDPOINT)
                     .queryParam("name", name)
                     .build().toString(),
-                HttpMethod.GET,
+                HttpMethod.POST,
                 null,
                 new ParameterizedTypeReference<Map<String, String>>(){})
                 .getBody();

@@ -75,7 +75,7 @@ public class RobotController {
         robotService.delete(robot);
     }
 
-    @GetMapping("/orig_name")
+    @PostMapping("/orig_name")
     @PreAuthorize("hasRole('ROLE_SYSTEM')" )
     public Map<String, String> getOrigNameAndUrl(@RequestParam String name){
         Map<String, String> result = new HashMap<>();
