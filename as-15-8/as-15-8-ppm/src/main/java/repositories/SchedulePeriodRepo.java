@@ -40,7 +40,7 @@ public interface SchedulePeriodRepo extends JpaRepository<SchedulePeriod, Long> 
                 "join times t2 on t1.start_time < t2.start_time " +
                 "group by t1.start_time " +
             ") " +
-            "select intervals.start_time, intervals.end_time, coalesce(sum(p.max_workers_count), 0) workers_count " +
+            "select intervals.start_time, intervals.end_time, sum(coalesce(p.max_workers_count, 0)) workers_count " +
             "from intervals " +
             "join periods p " +
             "    on (intervals.start_time < p.end_time and intervals.end_time > p.start_time) " +

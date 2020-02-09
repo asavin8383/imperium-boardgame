@@ -38,7 +38,7 @@ public class SystemModeRequestTokenFilter implements Filter {
                                 authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ANONYMOUS"))
                 )
                 ) {
-                    httpServletResponse.sendError(HttpServletResponse.SC_FORBIDDEN, generateErrorMessage(systemModeUnit));
+                    httpServletResponse.sendError(423, generateErrorMessage(systemModeUnit));
                     return;
                 }
             }
