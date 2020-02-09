@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.SystemMode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.http.HttpEntity;
@@ -14,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -32,19 +34,21 @@ import java.util.List;
 @Slf4j
 public class SystemModeService {
 
+    @Value("${gateway.url}")
+    private String gatewayUrl;
+
     private final SystemModesRepository systemModesRepository;
     private final TaskScheduler scheduler;
     private final DiscoveryClient discoveryClient;
     private final String AUTOCONFIG_SYSTEM_MODE = "/actuator/system-mode";
+    private final String DISPATCHER_STOP_ARRANGEMENTS = "dispatcher/arrangements/stop_all_running";
     private final RestTemplate restTemplate;
+    private final OAuth2RestTemplate oAuth2RestTemplate;
 
     @Async
     public ResponseEntity planServiceModeChange(String plannedDateTime) {
 
-        LocalDateTime scheduleTime = parseLdt(plannedDateTime);
-
-        SystemMode mode = systemModesRepository.findBySystemMode(SystemModeUnit.SERVICE).orElseGet(() -> new SystemMode(SystemModeUnit.SERVICE, false));
-        mode.setPlannedDateTime(scheduleTime);
+        SystemMode mode = getOrCreateSystemMode(plannedDateTime);
 
         if(mode.getPlannedDateTime()!= null && mode.getPlannedDateTime().isAfter(LocalDateTime.now())) {
             systemModesRepository.save(mode);
@@ -53,6 +57,14 @@ public class SystemModeService {
         } else
             return ResponseEntity.badRequest().body("Смена режима работы на Сервисный не запланирована!");
 
+    }
+
+    private SystemMode getOrCreateSystemMode(String plannedDateTime) {
+        LocalDateTime scheduleTime = parseLdt(plannedDateTime);
+        SystemMode mode = systemModesRepository.findBySystemMode(SystemModeUnit.SERVICE)
+                .orElseGet(() -> new SystemMode(SystemModeUnit.SERVICE, false));
+        mode.setPlannedDateTime(scheduleTime);
+        return mode;
     }
 
     private LocalDateTime parseLdt(String ldt) {
@@ -64,17 +76,24 @@ public class SystemModeService {
     private Runnable changeMode(SystemMode mode) {
         return () -> {
             mode.setActive(true);
-            setAllSystemModesDisabled();
+            stopAllArrangements();
+            systemModesRepository.setAllSysemModesEnabled(false);
             systemModesRepository.save(mode);
             notifyAllApplications(mode.getSystemMode());
         };
     }
 
-    private void setAllSystemModesDisabled() {
-        systemModesRepository.findALL().get().forEach(systemMode -> {
-            systemMode.setActive(false);
-            systemModesRepository.save(systemMode);
-        });
+    private void stopAllArrangements() {
+        try {
+            oAuth2RestTemplate.postForObject(UriComponentsBuilder.
+                            fromHttpUrl(gatewayUrl)
+                            .path(DISPATCHER_STOP_ARRANGEMENTS)
+                            .build().toString(),
+                    null,
+                    ResponseEntity.class);
+        }catch (Exception ex) {
+            log.warn("Ошибка отправки запроса на отсанов всех мероприятий в dispatcher, код:" + ex);
+        }
     }
 
     private Date ldtToDate(LocalDateTime localDateTime) {
@@ -87,32 +106,31 @@ public class SystemModeService {
     }
 
     public void notifyAllApplications(SystemModeUnit systemModeUnit) {
-        List<ServiceInstance> instances = getAllUris();
-
+        List<ServiceInstance> instances = getAllApplicationInstances();
         instances.forEach(instance ->
-                postCurrentSystemMode(instance.getUri(), systemModeUnit, instance));
+                postSystemModeUnit(instance.getUri(), systemModeUnit, instance));
     }
 
-    private SystemModeUnit postCurrentSystemMode(URI uri, SystemModeUnit systemModeUnit, ServiceInstance instance) {
+    private SystemModeUnit postSystemModeUnit(URI uri, SystemModeUnit systemModeUnit, ServiceInstance instance) {
         try {
-            ResponseEntity response = restTemplate.postForEntity(createUri(uri),
+            ResponseEntity response = restTemplate.postForEntity(createUri(uri, AUTOCONFIG_SYSTEM_MODE),
                                                                  createEntity(systemModeUnit),
                                                                  SystemModeUnit.class);
             if (response.getStatusCode().is2xxSuccessful()) {
                 SystemModeUnit result = (SystemModeUnit) response.getBody();
-                log.warn("========================= ++++++++ Обновление автоконфигурации для uri " + instance.getInstanceId() + " успешно, ответ :" + result);
+                log.info("Обновление автоконфигурации System_Mode для uri " + instance.getInstanceId() + " успешно, ответ :" + result);
                 return result;
             }
         } catch (Exception ex) {
-            log.warn("============================= Обновление автоконфигурации для uri " + instance.getInstanceId() + " неуспешно, ошибка:" + ex);
+            log.warn("Обновление автоконфигурации System_Mode для uri " + instance.getInstanceId() + " не успешно, ошибка:" + ex);
         }
         return null;
     }
 
-    private String createUri(URI uri) {
+    private String createUri(URI uri, String path) {
         return UriComponentsBuilder
                 .fromUri(uri)
-                .path(AUTOCONFIG_SYSTEM_MODE)
+                .path(path)
                 .build().toString();
     }
 
@@ -124,7 +142,7 @@ public class SystemModeService {
         return entity;
     }
 
-    private List<ServiceInstance> getAllUris() {
+    private List<ServiceInstance> getAllApplicationInstances() {
         List<String> services = discoveryClient.getServices();
 
         List<ServiceInstance> instances = new ArrayList<ServiceInstance>();

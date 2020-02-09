@@ -75,4 +75,10 @@ public class ArrangementController {
     public Map<Long, Set<Long>> getStoppedArrangement() {
         return arrangementService.getStoppedArrangements();
     }
+
+    @PostMapping("/stop_all_running")
+    @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
+    public void stopAllRunningArrangements() {
+        arrangementService.stopAllRunningArrangements();
+    }
 }

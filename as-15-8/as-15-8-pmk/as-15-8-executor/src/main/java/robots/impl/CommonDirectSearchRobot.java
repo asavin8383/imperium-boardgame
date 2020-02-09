@@ -369,7 +369,7 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
     }
 
     private void observeHintLinks() {
-        try(InputStream inputStream = ScriptUtils.class.getClassLoader().getResourceAsStream("observeHintLinks.js")) {
+        try(InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("observeHintLinks.js")) {
             JavascriptExecutor js = (JavascriptExecutor) driver;
             String script = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
             js.executeScript(script, this.hintCSSClassName, this.hintLinkCSSClassName);
@@ -379,7 +379,7 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
     }
 
     private List<String> getHintLinks() {
-        try(InputStream inputStream = ScriptUtils.class.getClassLoader().getResourceAsStream("getHintLinks.js")) {
+        try(InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("getHintLinks.js")) {
             JavascriptExecutor js = (JavascriptExecutor) driver;
             String script = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
             return Arrays.asList(js.executeScript(script).toString().split(", "));

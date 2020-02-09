@@ -20,7 +20,7 @@ public class SystemModeRequestTokenFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
-        if(((HttpServletRequest)request).getRequestURI().equals("/mode")) {
+        if(((HttpServletRequest)request).getRequestURI().equals("/mode") || ((HttpServletRequest)request).getRequestURI().equals("/mode/current")) {
              filterChain.doFilter(request, response);
              return;
         }
@@ -31,11 +31,11 @@ public class SystemModeRequestTokenFilter implements Filter {
                 HttpServletResponse httpServletResponse = (HttpServletResponse) response;
                 Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
                 if (!(
-                        authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_SYSTEM")) ||
-                                authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_CONFIG_CLIENT")) ||
-                                authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_MANAGE_CONFIGURATIONS")) ||
-                                authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_MANAGE_FUNCTION_MODE")) ||
-                                authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ANONYMOUS"))
+                    authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_SYSTEM")) ||
+                    authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_CONFIG_CLIENT")) ||
+                    authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_MANAGE_CONFIGURATIONS")) ||
+                    authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_MANAGE_FUNCTION_MODE")) ||
+                    authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ANONYMOUS"))
                 )
                 ) {
                     httpServletResponse.sendError(423, generateErrorMessage(systemModeUnit));

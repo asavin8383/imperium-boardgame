@@ -141,4 +141,13 @@ public class ArrangementService {
     public Long getMaxCheckUnitsCount(Long arrangementId) {
         return arrangementRepo.findMaxCheckUnitsCount(arrangementId).orElse(null);
     }
+
+    public void stopAllRunningArrangements() {
+        List<Arrangement> arrangements = arrangementRepo.findAllRunning();
+        if (!arrangements.isEmpty()) {
+            arrangements.forEach(arrangement -> {
+                stopExecution(arrangement.getId(), arrangement.getVersion());
+            });
+        }
+    }
 }
