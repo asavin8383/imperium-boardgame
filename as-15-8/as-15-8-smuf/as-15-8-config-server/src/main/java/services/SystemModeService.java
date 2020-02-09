@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.SystemMode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.http.HttpEntity;
@@ -14,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -32,11 +34,16 @@ import java.util.List;
 @Slf4j
 public class SystemModeService {
 
+    @Value("${gateway.url}")
+    private String gatewayUrl;
+
     private final SystemModesRepository systemModesRepository;
     private final TaskScheduler scheduler;
     private final DiscoveryClient discoveryClient;
     private final String AUTOCONFIG_SYSTEM_MODE = "/actuator/system-mode";
+    private final String DISPATCHER_STOP_ARRANGEMENTS = "dispatcher/arrangements/stop_all_running";
     private final RestTemplate restTemplate;
+    private final OAuth2RestTemplate oAuth2RestTemplate;
 
     @Async
     public ResponseEntity planServiceModeChange(String plannedDateTime) {
@@ -69,10 +76,24 @@ public class SystemModeService {
     private Runnable changeMode(SystemMode mode) {
         return () -> {
             mode.setActive(true);
+            stopAllArrangements();
             systemModesRepository.setAllSysemModesEnabled(false);
             systemModesRepository.save(mode);
             notifyAllApplications(mode.getSystemMode());
         };
+    }
+
+    private void stopAllArrangements() {
+        try {
+            oAuth2RestTemplate.postForObject(UriComponentsBuilder.
+                            fromHttpUrl(gatewayUrl)
+                            .path(DISPATCHER_STOP_ARRANGEMENTS)
+                            .build().toString(),
+                    null,
+                    ResponseEntity.class);
+        }catch (Exception ex) {
+            log.warn("Ошибка отправки запроса на отсанов всех мероприятий в dispatcher, код:" + ex);
+        }
     }
 
     private Date ldtToDate(LocalDateTime localDateTime) {
@@ -92,7 +113,7 @@ public class SystemModeService {
 
     private SystemModeUnit postSystemModeUnit(URI uri, SystemModeUnit systemModeUnit, ServiceInstance instance) {
         try {
-            ResponseEntity response = restTemplate.postForEntity(createUri(uri),
+            ResponseEntity response = restTemplate.postForEntity(createUri(uri, AUTOCONFIG_SYSTEM_MODE),
                                                                  createEntity(systemModeUnit),
                                                                  SystemModeUnit.class);
             if (response.getStatusCode().is2xxSuccessful()) {
@@ -106,10 +127,10 @@ public class SystemModeService {
         return null;
     }
 
-    private String createUri(URI uri) {
+    private String createUri(URI uri, String path) {
         return UriComponentsBuilder
                 .fromUri(uri)
-                .path(AUTOCONFIG_SYSTEM_MODE)
+                .path(path)
                 .build().toString();
     }
 

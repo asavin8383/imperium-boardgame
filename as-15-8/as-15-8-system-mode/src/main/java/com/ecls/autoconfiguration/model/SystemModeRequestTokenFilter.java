@@ -31,14 +31,14 @@ public class SystemModeRequestTokenFilter implements Filter {
                 HttpServletResponse httpServletResponse = (HttpServletResponse) response;
                 Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
                 if (!(
-                        authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_SYSTEM")) ||
-                                authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_CONFIG_CLIENT")) ||
-                                authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_MANAGE_CONFIGURATIONS")) ||
-                                authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_MANAGE_FUNCTION_MODE")) ||
-                                authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ANONYMOUS"))
+                    authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_SYSTEM")) ||
+                    authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_CONFIG_CLIENT")) ||
+                    authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_MANAGE_CONFIGURATIONS")) ||
+                    authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_MANAGE_FUNCTION_MODE")) ||
+                    authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ANONYMOUS"))
                 )
                 ) {
-                    httpServletResponse.sendError(HttpServletResponse.SC_FORBIDDEN, generateErrorMessage(systemModeUnit));
+                    httpServletResponse.sendError(423, generateErrorMessage(systemModeUnit));
                     return;
                 }
             }
