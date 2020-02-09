@@ -235,7 +235,7 @@ public class ArrangementController {
     }
 
     @PreAuthorize("hasRole('ROLE_SYSTEM')" )
-    @GetMapping(path = "/arrangements/access_tool")
+    @GetMapping(path = "/access_tool")
     public String getAccessTool(@RequestParam("id") Arrangement arrangement){
         Optional.ofNullable(arrangement).orElseThrow(()-> new AS_15_8_PPT_Exception("Arrangement не найден"));
         return arrangement.getAccessTool();
