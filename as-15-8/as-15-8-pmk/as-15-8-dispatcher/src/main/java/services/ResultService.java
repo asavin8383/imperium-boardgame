@@ -4,6 +4,7 @@ import analysis.AnalysisResult;
 import analysis.CheckUnitResult;
 import analysis.CheckUnitStatusNotification;
 import checkUnits.CheckUnitKey;
+import common.DispatcherProperties;
 import enums.CheckUnitJobResult;
 import exceptions.AS_15_8_DispatcherException;
 import imprint.HeaderObject;
@@ -42,6 +43,7 @@ public class ResultService {
     //Объекты для создания штампа на скриншоте
     private final ImageProcessor imageProcessor = new ImageProcessor();
     private final HeaderObject headerObject = new HeaderObject();
+    private final DispatcherProperties dispatcherProperties;
 
     @PostConstruct
     private void initImageProcessor() throws Exception {
@@ -164,7 +166,13 @@ public class ResultService {
     }
 
     private byte[] imprintScreenshot(CheckUnitResult checkUnitResult, byte[] screenShot){
-        headerObject.setLabel1(checkUnitResult.getCheckUnit().getValue());
+        headerObject.setLabel1(dispatcherProperties.getImprint().getHeader());
+        headerObject.setLabel2("");
+        headerObject.setLabel3(dispatcherProperties.getImprint().getPs());
+        headerObject.setLabel4("");
+        headerObject.setLabel5(dispatcherProperties.getImprint().getIrtz());
+        headerObject.setLabel6(checkUnitResult.getCheckUnit().getValue());
+
         try {
             return imageProcessor.processImage(screenShot, headerObject);
         } catch (Exception ex) {
