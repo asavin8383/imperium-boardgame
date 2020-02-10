@@ -1,9 +1,11 @@
 package services;
 
+import accessTools.AccessToolDTO;
 import analysis.AnalysisResult;
 import analysis.CheckUnitResult;
 import analysis.CheckUnitStatusNotification;
 import checkUnits.CheckUnitKey;
+import common.DispatcherProperties;
 import enums.CheckUnitJobResult;
 import exceptions.AS_15_8_DispatcherException;
 import imprint.HeaderObject;
@@ -12,7 +14,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.*;
 import model.enums.ArrangementStatus;
+import model.enums.CheckType;
 import org.apache.kafka.streams.KeyValue;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -20,10 +24,13 @@ import repositories.ArrangementRepo;
 import repositories.ResultRepo;
 import repositories.ResultScreenShotRepo;
 import restapi.ArrangementRestApi;
+import restapi.ConfigClient;
+import restapi.PptClient;
 
 import javax.annotation.PostConstruct;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.text.SimpleDateFormat;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -42,6 +49,9 @@ public class ResultService {
     //Объекты для создания штампа на скриншоте
     private final ImageProcessor imageProcessor = new ImageProcessor();
     private final HeaderObject headerObject = new HeaderObject();
+    private final DispatcherProperties dispatcherProperties;
+    private final ConfigClient configClient;
+    private final PptClient pptClient;
 
     @PostConstruct
     private void initImageProcessor() throws Exception {
@@ -87,7 +97,7 @@ public class ResultService {
                     boolean isSaved = true;
                     while (resultsIterator.hasNext()) {
                         KeyValue<CheckUnitKey, CheckUnitResult> result = resultsIterator.next();
-                        isSaved = saveArrangementResult(result.key, result.value, arrangement);
+                        isSaved = saveArrangementResult(result.key, result.value, arrangement, getAccessToolInfo(arrangement.getId()));
                     }
                     if (isSaved) {
                         log.info("Мероприятие успешно сохранено в БД: " + arrangement.getId());
@@ -111,9 +121,9 @@ public class ResultService {
         }
     }
 
-    private boolean saveArrangementResult(CheckUnitKey checkUnitKey, CheckUnitResult checkUnitResult, Arrangement arrangement) {
+    private boolean saveArrangementResult(CheckUnitKey checkUnitKey, CheckUnitResult checkUnitResult, Arrangement arrangement, AccessToolDTO accessToolDTO) {
         try {
-            saveJobResult(arrangement, checkUnitKey.getJobId(), checkUnitResult);
+            saveJobResult(arrangement, checkUnitKey.getJobId(), checkUnitResult, accessToolDTO);
         } catch (Exception ex) {
             try {
                 log.error("Ошибка при сохранении результата проверки: " + checkUnitKey.getJobId() + ", " + checkUnitResult.getCheckUnit().getValue(), ex);
@@ -128,7 +138,7 @@ public class ResultService {
                 notification.setEndTime(checkUnitResult.getEndTime());
                 notification.setDescription(sw.toString());
 
-                saveJobResult(arrangement, checkUnitKey.getJobId(), notification);
+                saveJobResult(arrangement, checkUnitKey.getJobId(), notification, accessToolDTO);
                 log.info("Ошибка сохранена: " + checkUnitKey.getJobId());
             } catch (Exception newEx) {
                 log.error("Ошибка при сохранении ошибочной обработки сообщения с анализом результатов проверки: " + checkUnitKey.getJobId() + ", " + checkUnitResult.getCheckUnit().getValue(), newEx);
@@ -138,7 +148,7 @@ public class ResultService {
         return true;
     }
 
-    private void saveJobResult(Arrangement arrangement, Long jobId, CheckUnitResult checkUnitResult) {
+    private void saveJobResult(Arrangement arrangement, Long jobId, CheckUnitResult checkUnitResult, AccessToolDTO accessToolDTO) {
         DetailResultService<? super CheckUnitResult, ? extends DetailResult> service = AnalysisResultServiceFactory.getService(checkUnitResult.getClass());
         Result result = resultRepo.findById(jobId).orElseGet(Result::new);
         result.setArrangement(arrangement);
@@ -154,7 +164,7 @@ public class ResultService {
                     ResultScreenShot resultScreenShot = resultScreenShotRepo.findById(jobId).orElseGet(ResultScreenShot::new);
                     resultScreenShot.setResult(result);
                     //Устанавливаем штамп на скриншот
-                    resultScreenShot.setScreenshot(imprintScreenshot(checkUnitResult, screenshots.getScreenshot()));
+                    resultScreenShot.setScreenshot(imprintScreenshot(accessToolDTO, checkUnitResult, screenshots.getScreenshot(), result.getCheckType()));
                     resultScreenShot.setEtalonScreenshot(screenshots.getEtalonScreenshot());
                     result.setResultScreenShot(resultScreenShot);
                 }
@@ -163,8 +173,23 @@ public class ResultService {
         resultRepo.save(result);
     }
 
-    private byte[] imprintScreenshot(CheckUnitResult checkUnitResult, byte[] screenShot){
-        headerObject.setLabel1(checkUnitResult.getCheckUnit().getValue());
+    private byte[] imprintScreenshot(AccessToolDTO accessToolDTO, CheckUnitResult checkUnitResult, byte[] screenShot, CheckType checkType){
+        headerObject.setLabel1(dispatcherProperties.getImprint().getHeader());
+        headerObject.setLabel2("Дата: " + new SimpleDateFormat("yyyy-mm-dd").format(checkUnitResult.getEndTime()) +
+            " Время: " + new SimpleDateFormat("hh:mm:ss").format(checkUnitResult.getEndTime()));
+        if(checkType.equals(CheckType.PS)) {
+            headerObject.setLabel3(dispatcherProperties.getImprint().getPs());
+        } else if (checkType.equals(CheckType.PASD)){
+            headerObject.setLabel3(dispatcherProperties.getImprint().getPasd());
+        } else {
+            //Неподходящий тип, оставляем пробел - требование программы
+            headerObject.setLabel3(" ");
+        }
+        headerObject.setLabel4(accessToolDTO.getOriginalName());
+        headerObject.setLabel5(accessToolDTO.getUrl());
+        headerObject.setLabel6(dispatcherProperties.getImprint().getIrtz());
+        headerObject.setLabel7(checkUnitResult.getCheckUnit().getValue());
+
         try {
             return imageProcessor.processImage(screenShot, headerObject);
         } catch (Exception ex) {
@@ -176,5 +201,14 @@ public class ResultService {
     private boolean isArrangementFinished(Arrangement arrangement) {
         long count = resultsKafkaService.getResultsCount(arrangement.getId());
         return count != 0 && arrangement.getCheckUnitsCount() <= count;
+    }
+
+    private AccessToolDTO getAccessToolInfo(Long arrangementId) {
+        String accessTool = pptClient.getAccessTool(arrangementId);
+        if(Strings.isNotEmpty(accessTool)) {
+            return configClient.getRobotInfo(accessTool);
+        }
+        //Возвращаем строки с пробелом, чтобы не сломать скриншот
+        return new AccessToolDTO(accessTool, " ", " ");
     }
 }

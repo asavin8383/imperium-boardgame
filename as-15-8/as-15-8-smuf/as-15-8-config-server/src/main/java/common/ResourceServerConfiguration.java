@@ -20,7 +20,8 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
                 .antMatchers(HttpMethod.GET, "/**").hasRole("CONFIG_CLIENT")
                 .antMatchers(HttpMethod.POST,
                         "/mode/**",
-                        "/mode/current/**").permitAll()
+                        "/mode/current/**",
+                        "/mode/any/**").permitAll()
             .anyRequest().authenticated()
         .and().httpBasic().disable().csrf().disable();
     }

@@ -26,13 +26,14 @@ import java.util.regex.Pattern;
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @RequestMapping(path = "/robots", produces = MediaType.APPLICATION_JSON_VALUE)
-@PreAuthorize("hasAnyRole('ROLE_MANAGE_CONFIGURATIONS')")
+
 public class RobotController {
 
     private final RobotService robotService;
 
     @GetMapping
     @JsonView(Views.Brief.class)
+    @PreAuthorize("hasAnyRole('ROLE_MANAGE_CONFIGURATIONS')")
     public Page<Robot> getAll(@RequestParam(required = false) SortingDirection sortingDirection,
                               @RequestParam(required = false) String sortingColumn,
                               @RequestParam(defaultValue = "0") int pageNumber,
@@ -46,6 +47,7 @@ public class RobotController {
 
     @GetMapping("{id}")
     @JsonView(Views.Full.class)
+    @PreAuthorize("hasAnyRole('ROLE_MANAGE_CONFIGURATIONS')")
     public ResponseEntity<Robot> findById(@PathVariable Long id){
         return robotService.findById(id)
                 .map(ResponseEntity::ok)
@@ -53,6 +55,7 @@ public class RobotController {
     }
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAnyRole('ROLE_MANAGE_CONFIGURATIONS')")
     public ResponseEntity editRobot(@RequestParam("id") Robot robot, @RequestBody Robot newRobot) {
         Matcher nameMatcher = Pattern.compile("^[a-z,-]+$").matcher(newRobot.getName().toLowerCase());
         if(!nameMatcher.find())
@@ -61,7 +64,10 @@ public class RobotController {
     }
 
     @DeleteMapping
+    @PreAuthorize("hasAnyRole('ROLE_MANAGE_CONFIGURATIONS')")
     public void deleteRobot(@RequestParam("id") Robot robot){
         robotService.delete(robot);
     }
+
+
 }

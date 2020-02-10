@@ -75,8 +75,9 @@ public class SystemModeService {
 
     private Runnable changeMode(SystemMode mode) {
         return () -> {
-            mode.setActive(true);
             stopAllArrangements();
+            mode.setActive(true);
+            mode.setPlannedDateTime(null);
             systemModesRepository.setAllSysemModesEnabled(false);
             systemModesRepository.save(mode);
             notifyAllApplications(mode.getSystemMode());
