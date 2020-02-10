@@ -85,19 +85,19 @@ public class SystemModeService {
                 systemModesRepository.save(mode);
                 notifyAllApplications(mode.getSystemMode());
                 log.info("Произошёл запланированный переход в сервисный режим");
-            }
+            } else cancelSytemModeChange = false;
         };
     }
 
     public void cancelSystemModeSchedule() {
-        this.cancelSytemModeChange = true;
         Optional<SystemMode> mode = systemModesRepository.findBySystemMode(SystemModeUnit.SERVICE);
-        if (mode.isPresent()) {
+        if (mode.isPresent() && mode.get().getPlannedDateTime() != null) {
+            this.cancelSytemModeChange = true;
             mode.get().setPlannedDateTime(null);
             mode.get().setActive(false);
             systemModesRepository.save(mode.get());
+            log.info("Запланированный переход в сервисный режим отменён пользователем");
         }
-        log.info("Запланированный переход в сервисный режим отменён пользователем");
     }
 
     private void stopAllArrangements() {
