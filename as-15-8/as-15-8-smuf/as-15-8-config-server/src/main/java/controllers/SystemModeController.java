@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.*;
 import repositories.SystemModesRepository;
 import services.SystemModeService;
 
+import java.util.Optional;
+
 @RestController
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -45,6 +47,19 @@ public class SystemModeController {
     @PreAuthorize("hasAnyRole('ROLE_MANAGE_FUNCTION_MODE')")
     public ResponseEntity planServiceModeChanging(@RequestParam String plannedDateTime) {
         return systemModeService.planServiceModeChange(plannedDateTime);
+    }
+
+    @PostMapping(path = "/any")
+    public ResponseEntity getMode(@RequestParam String systemModeUnit){
+        try {
+            Optional<SystemMode> mode = systemModesRepository.findBySystemMode(SystemModeUnit.valueOf(systemModeUnit));
+            if (mode.isPresent())
+                return ResponseEntity.ok(mode.get());
+            else
+                return ResponseEntity.badRequest().body("Не удалось получить информацию о режиме работы :" + systemModeUnit);
+        } catch (Exception ex) {
+            return ResponseEntity.badRequest().body("Не удалось получить информацию о режиме работы :" + ex);
+        }
     }
 
 }
