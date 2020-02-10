@@ -23,7 +23,7 @@ public class DomainMask implements Serializable {
     private Long id;
 
     @NotNull
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String domainMask;
 
     @OneToMany(cascade = CascadeType.ALL,  mappedBy = "domainMask")
