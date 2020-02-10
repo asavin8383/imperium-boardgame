@@ -1,5 +1,6 @@
 package repositories;
 
+import enums.AccessToolParameter;
 import model.Robot;
 import model.RobotProperty;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,5 +13,5 @@ import java.util.List;
  */
 public interface RobotPropertyRepo extends JpaRepository<RobotProperty, Long> {
 
-    List<RobotProperty> findByRobotAndKey(Robot robot, String key);
+    List<RobotProperty> findByRobotAndKey(Robot robot, AccessToolParameter param);
 }
