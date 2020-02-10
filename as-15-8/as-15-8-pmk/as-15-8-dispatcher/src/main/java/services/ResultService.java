@@ -1,5 +1,6 @@
 package services;
 
+import accessTools.AccessToolDTO;
 import analysis.AnalysisResult;
 import analysis.CheckUnitResult;
 import analysis.CheckUnitStatusNotification;
@@ -30,8 +31,6 @@ import javax.annotation.PostConstruct;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -122,9 +121,9 @@ public class ResultService {
         }
     }
 
-    private boolean saveArrangementResult(CheckUnitKey checkUnitKey, CheckUnitResult checkUnitResult, Arrangement arrangement, Map<String, String> accessToolInfo) {
+    private boolean saveArrangementResult(CheckUnitKey checkUnitKey, CheckUnitResult checkUnitResult, Arrangement arrangement, AccessToolDTO accessToolDTO) {
         try {
-            saveJobResult(arrangement, checkUnitKey.getJobId(), checkUnitResult, accessToolInfo);
+            saveJobResult(arrangement, checkUnitKey.getJobId(), checkUnitResult, accessToolDTO);
         } catch (Exception ex) {
             try {
                 log.error("Ошибка при сохранении результата проверки: " + checkUnitKey.getJobId() + ", " + checkUnitResult.getCheckUnit().getValue(), ex);
@@ -139,7 +138,7 @@ public class ResultService {
                 notification.setEndTime(checkUnitResult.getEndTime());
                 notification.setDescription(sw.toString());
 
-                saveJobResult(arrangement, checkUnitKey.getJobId(), notification, accessToolInfo);
+                saveJobResult(arrangement, checkUnitKey.getJobId(), notification, accessToolDTO);
                 log.info("Ошибка сохранена: " + checkUnitKey.getJobId());
             } catch (Exception newEx) {
                 log.error("Ошибка при сохранении ошибочной обработки сообщения с анализом результатов проверки: " + checkUnitKey.getJobId() + ", " + checkUnitResult.getCheckUnit().getValue(), newEx);
@@ -149,7 +148,7 @@ public class ResultService {
         return true;
     }
 
-    private void saveJobResult(Arrangement arrangement, Long jobId, CheckUnitResult checkUnitResult, Map<String, String> accessToolInfo) {
+    private void saveJobResult(Arrangement arrangement, Long jobId, CheckUnitResult checkUnitResult, AccessToolDTO accessToolDTO) {
         DetailResultService<? super CheckUnitResult, ? extends DetailResult> service = AnalysisResultServiceFactory.getService(checkUnitResult.getClass());
         Result result = resultRepo.findById(jobId).orElseGet(Result::new);
         result.setArrangement(arrangement);
@@ -165,7 +164,7 @@ public class ResultService {
                     ResultScreenShot resultScreenShot = resultScreenShotRepo.findById(jobId).orElseGet(ResultScreenShot::new);
                     resultScreenShot.setResult(result);
                     //Устанавливаем штамп на скриншот
-                    resultScreenShot.setScreenshot(imprintScreenshot(accessToolInfo, checkUnitResult, screenshots.getScreenshot(), result.getCheckType()));
+                    resultScreenShot.setScreenshot(imprintScreenshot(accessToolDTO, checkUnitResult, screenshots.getScreenshot(), result.getCheckType()));
                     resultScreenShot.setEtalonScreenshot(screenshots.getEtalonScreenshot());
                     result.setResultScreenShot(resultScreenShot);
                 }
@@ -174,7 +173,7 @@ public class ResultService {
         resultRepo.save(result);
     }
 
-    private byte[] imprintScreenshot(Map<String, String> accessToolInfo, CheckUnitResult checkUnitResult, byte[] screenShot, CheckType checkType){
+    private byte[] imprintScreenshot(AccessToolDTO accessToolDTO, CheckUnitResult checkUnitResult, byte[] screenShot, CheckType checkType){
         headerObject.setLabel1(dispatcherProperties.getImprint().getHeader());
         headerObject.setLabel2("Дата: " + new SimpleDateFormat("yyyy-mm-dd").format(checkUnitResult.getEndTime()) +
             " Время: " + new SimpleDateFormat("hh:mm:ss").format(checkUnitResult.getEndTime()));
@@ -183,18 +182,11 @@ public class ResultService {
         } else if (checkType.equals(CheckType.PASD)){
             headerObject.setLabel3(dispatcherProperties.getImprint().getPasd());
         } else {
-            //Неподходящий тип, оставляем пробел
+            //Неподходящий тип, оставляем пробел - требование программы
             headerObject.setLabel3(" ");
         }
-        //Нужен пробел - требование программы
-        String accessToolName = " ";
-        String accessToolUrl = " ";
-        if(accessToolInfo.entrySet().size()==1){
-            accessToolName = accessToolInfo.keySet().toArray()[0].toString();
-            accessToolUrl = accessToolInfo.get(accessToolName);
-        }
-        headerObject.setLabel4(accessToolName);
-        headerObject.setLabel5(accessToolUrl);
+        headerObject.setLabel4(accessToolDTO.getOriginalName());
+        headerObject.setLabel5(accessToolDTO.getUrl());
         headerObject.setLabel6(dispatcherProperties.getImprint().getIrtz());
         headerObject.setLabel7(checkUnitResult.getCheckUnit().getValue());
 
@@ -211,12 +203,12 @@ public class ResultService {
         return count != 0 && arrangement.getCheckUnitsCount() <= count;
     }
 
-    private Map<String, String> getAccessToolInfo(Long arrangementId) {
+    private AccessToolDTO getAccessToolInfo(Long arrangementId) {
         String accessTool = pptClient.getAccessTool(arrangementId);
-        Map<String, String> accessToolInfo = new HashMap<>();
         if(Strings.isNotEmpty(accessTool)) {
-            accessToolInfo = configClient.getRobotInfo(accessTool);
+            return configClient.getRobotInfo(accessTool);
         }
-        return accessToolInfo;
+        //Возвращаем строки с пробелом, чтобы не сломать скриншот
+        return new AccessToolDTO(accessTool, " ", " ");
     }
 }
