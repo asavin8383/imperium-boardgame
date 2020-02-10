@@ -110,6 +110,8 @@ public class ProtocolController {
                         throw AS_15_8_DispatcherException.logAndGet(log, "Ошибка сохранения результатов от пользователя: " + ex.getMessage()); }
                     arrResult.setUserResult(result);
                     arrResult.setUserDescription(userResult.get("userDescription"));
+                    //Снимаем чек-бокс для акта (вдруг мы сменили с нарушения на что-то ещё)
+                    arrResult.setCheckForAct(false);
                     resultRepo.save(arrResult);
                     return new ResponseEntity<Object>(arrResult, HttpStatus.OK);
                 }).orElseGet(() -> {
