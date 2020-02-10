@@ -21,6 +21,7 @@ public class DispatcherProperties {
 
     @Data
     public static class ImprintProperties{
+        private boolean useImprint;
         private String header;
         private String ps;
         private String pasd;

@@ -2,6 +2,7 @@ package accessTools;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Created by san
@@ -9,6 +10,7 @@ import lombok.Data;
  */
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class AccessToolDTO {
     private String name;
     private String originalName;

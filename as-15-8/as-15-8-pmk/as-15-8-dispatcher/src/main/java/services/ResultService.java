@@ -97,7 +97,9 @@ public class ResultService {
                     boolean isSaved = true;
                     while (resultsIterator.hasNext()) {
                         KeyValue<CheckUnitKey, CheckUnitResult> result = resultsIterator.next();
-                        isSaved = saveArrangementResult(result.key, result.value, arrangement, getAccessToolInfo(arrangement.getId()));
+                        //Если штамп ставим, нужно попросить инфо об AccessTool
+                        AccessToolDTO accessToolDTO = dispatcherProperties.getImprint().isUseImprint() ? getAccessToolInfo(arrangement.getId()) : null;
+                        isSaved = saveArrangementResult(result.key, result.value, arrangement, accessToolDTO);
                     }
                     if (isSaved) {
                         log.info("Мероприятие успешно сохранено в БД: " + arrangement.getId());
@@ -163,8 +165,13 @@ public class ResultService {
                     (screenshots.getEtalonScreenshot() != null && screenshots.getEtalonScreenshot().length > 0)) {
                     ResultScreenShot resultScreenShot = resultScreenShotRepo.findById(jobId).orElseGet(ResultScreenShot::new);
                     resultScreenShot.setResult(result);
-                    //Устанавливаем штамп на скриншот
-                    resultScreenShot.setScreenshot(imprintScreenshot(accessToolDTO, checkUnitResult, screenshots.getScreenshot(), result.getCheckType()));
+                    if(dispatcherProperties.getImprint().isUseImprint()){
+                        //Устанавливаем штамп на скриншот
+                        resultScreenShot.setScreenshot(imprintScreenshot(accessToolDTO, checkUnitResult, screenshots.getScreenshot(), result.getCheckType()));
+                    } else {
+                        //Без штампа
+                        resultScreenShot.setScreenshot(screenshots.getScreenshot());
+                    }
                     resultScreenShot.setEtalonScreenshot(screenshots.getEtalonScreenshot());
                     result.setResultScreenShot(resultScreenShot);
                 }
