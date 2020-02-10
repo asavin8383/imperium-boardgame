@@ -77,7 +77,7 @@ public class SystemModeService {
     private Runnable changeMode(SystemMode mode) {
         return () -> {
             if (!cancelSytemModeChange) {
-                cancelSytemModeChange = true;
+                cancelSytemModeChange = false;
                 stopAllArrangements();
                 mode.setActive(true);
                 mode.setPlannedDateTime(null);
