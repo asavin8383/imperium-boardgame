@@ -174,8 +174,8 @@ public class ActController {
 
     private boolean checkForAct(Result result){
         //Отправляем в акт обнаруженную запрещёнку или установленные пользователем
-        return result.getUserResult()==null&&result.getResult().equals(CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED)||
-            result.getUserResult().equals(UserResult.FORBIDDEN_CONTENT_DETECTED);
+        return result.getUserResult()==null && result.getResult().equals(CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED) ||
+            result.getUserResult()!=null && result.getUserResult().equals(UserResult.FORBIDDEN_CONTENT_DETECTED);
 
     }
 
