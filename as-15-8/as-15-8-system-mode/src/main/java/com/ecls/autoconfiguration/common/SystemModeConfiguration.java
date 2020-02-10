@@ -14,14 +14,13 @@ import org.springframework.core.env.Environment;
 
 @Configuration
 
-@AutoConfigureAfter(name = "org.springframework.boot.actuate.autoconfigure.endpoint.EndpointAutoConfiguration")
+//@AutoConfigureAfter(name = "org.springframework.boot.actuate.autoconfigure.endpoint.EndpointAutoConfiguration")
 
 @ConditionalOnProperty("system.mode.autoconfig.url")
 public class SystemModeConfiguration {
 
     @Autowired
     private Environment env;
-
 
     @Bean
     public FilterRegistrationBean<SystemModeRequestTokenFilter> loggingFilter(){
@@ -44,7 +43,5 @@ public class SystemModeConfiguration {
         SystemModeEndpointRest endpoint = new SystemModeEndpointRest(currentSystemMode());
         return endpoint;
     }
-
-
 
 }

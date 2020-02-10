@@ -28,6 +28,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -44,6 +45,7 @@ public class SystemModeService {
     private final String DISPATCHER_STOP_ARRANGEMENTS = "dispatcher/arrangements/stop_all_running";
     private final RestTemplate restTemplate;
     private final OAuth2RestTemplate oAuth2RestTemplate;
+    private boolean cancelSytemModeChange = false;
 
     @Async
     public ResponseEntity planServiceModeChange(String plannedDateTime) {
@@ -56,7 +58,6 @@ public class SystemModeService {
             return ResponseEntity.ok("Смена сервисного режима запланирована на " + mode.getPlannedDateTime());
         } else
             return ResponseEntity.badRequest().body("Смена режима работы на Сервисный не запланирована!");
-
     }
 
     private SystemMode getOrCreateSystemMode(String plannedDateTime) {
@@ -75,13 +76,28 @@ public class SystemModeService {
 
     private Runnable changeMode(SystemMode mode) {
         return () -> {
-            stopAllArrangements();
-            mode.setActive(true);
-            mode.setPlannedDateTime(null);
-            systemModesRepository.setAllSysemModesEnabled(false);
-            systemModesRepository.save(mode);
-            notifyAllApplications(mode.getSystemMode());
+            if (!cancelSytemModeChange) {
+                cancelSytemModeChange = true;
+                stopAllArrangements();
+                mode.setActive(true);
+                mode.setPlannedDateTime(null);
+                systemModesRepository.setAllSysemModesEnabled(false);
+                systemModesRepository.save(mode);
+                notifyAllApplications(mode.getSystemMode());
+                log.info("Произошёл запланированный переход в сервисный режим");
+            }
         };
+    }
+
+    public void cancelSystemModeSchedule() {
+        this.cancelSytemModeChange = true;
+        Optional<SystemMode> mode = systemModesRepository.findBySystemMode(SystemModeUnit.SERVICE);
+        if (mode.isPresent()) {
+            mode.get().setPlannedDateTime(null);
+            mode.get().setActive(false);
+            systemModesRepository.save(mode.get());
+        }
+        log.info("Запланированный переход в сервисный режим отменён пользователем");
     }
 
     private void stopAllArrangements() {
