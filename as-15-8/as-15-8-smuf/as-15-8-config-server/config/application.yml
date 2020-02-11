@@ -4,7 +4,6 @@ server:
 gateway.url: ${GATEWAY_URI:http://localhost:15880}
 system.mode.autoconfig:
   url: http://localhost:15802/mode
-debug: true
 logging:
   config: config/logback-spring.xml
 eureka:

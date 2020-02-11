@@ -6,20 +6,17 @@ import exceptions.AS_15_8_PPT_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.enums.TrafficUnitType;
-import model.traffic.ErdiTrafficUnit;
 import model.traffic.SearchQueryPattern;
 import model.traffic.SearchQueryTrafficUnit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import repositories.SearchQueryPatternRepo;
 import repositories.SearchQueryTrafficUnitRepository;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -48,31 +45,24 @@ public class SearchQueryTrafficUnitController {
         }
     }
 
-    @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public SearchQueryTrafficUnit updateTemplate(@PathVariable("id") SearchQueryTrafficUnit existing,
+    @PutMapping(path = "/{id}/add", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public SearchQueryTrafficUnit addPatternsToTemplate(@PathVariable("id") SearchQueryTrafficUnit existing,
                                                  @RequestBody List<SearchQueryPattern> searchQueryPatterns) {
         if(existing==null){
-            throw new AS_15_8_PPT_Exception("Ошибка изменения трафик-юнита шаблонов! трафик-юнит не найден в БД");
+            throw new AS_15_8_PPT_Exception("Ошибка добавления шаблонов в трафик-юнит! трафик-юнит не найден в БД");
         }
-        existing.getSearchQueryPatterns().clear();
-        existing.setSearchQueryPatterns(new HashSet<>(searchQueryPatterns));
+        existing.getSearchQueryPatterns().addAll(searchQueryPatterns);
         return searchQueryTrafficUnitRepository.save(existing);
     }
 
-    @DeleteMapping(path = "/{id}")
-    @ResponseStatus(code = HttpStatus.NO_CONTENT)
-    public void deleteTemplate(@PathVariable Long id) {
-        Optional<SearchQueryTrafficUnit> optional = searchQueryTrafficUnitRepository.findById(id);
-        if (optional.isPresent()) {
-            SearchQueryTrafficUnit unit = optional.get();
-            if (unit.getType() == TrafficUnitType.TEMPLATE)
-                searchQueryTrafficUnitRepository.delete(unit);
-            else
-                throw new UnsupportedOperationException(
-                        "Only SearchQueryTrafficUnit with type=TEMPLATE can be deleted");
-        } else {
-            throw new AS_15_8_PPT_Exception("SearchQueryTrafficUnit not found by id=" + id);
+    @PutMapping(path = "/{id}/remove", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public SearchQueryTrafficUnit removePatternsFroTemplate(@PathVariable("id") SearchQueryTrafficUnit existing,
+                               @RequestBody List<SearchQueryPattern> searchQueryPatterns) {
+        if(existing==null){
+            throw new AS_15_8_PPT_Exception("Ошибка добавления шаблонов в трафик-юнит! трафик-юнит не найден в БД");
         }
+        existing.getSearchQueryPatterns().removeAll(searchQueryPatterns);
+        return searchQueryTrafficUnitRepository.save(existing);
     }
 
     @GetMapping(path = "/{id}/search_query_patterns")

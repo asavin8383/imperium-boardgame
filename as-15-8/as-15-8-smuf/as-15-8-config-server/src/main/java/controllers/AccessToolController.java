@@ -59,18 +59,18 @@ public class AccessToolController {
                 " получен не 1 робот. Размер коллекции: " + robots.size());
         }
         Robot robot = robots.get(0);
-        String urlKey;
+        AccessToolParameter urlParam;
         if (robot.getType()== RobotType.PS){
-            urlKey = AccessToolParameter.SEARCH_SYSTEM_URL.propertyKey();
+            urlParam = AccessToolParameter.SEARCH_SYSTEM_URL;
         } else if (robot.getType() == RobotType.PASD){
-            urlKey = AccessToolParameter.STUB_URL.propertyKey();
+            urlParam = AccessToolParameter.STUB_URL;
         } else {
             throw new IllegalArgumentException("Ошибка получения свойств робота! Недопустимый тип робота: " + robot.getType());
         }
-        List<RobotProperty> urls = robotPropertyRepo.findByRobotAndKey(robot, urlKey);
+        List<RobotProperty> urls = robotPropertyRepo.findByRobotAndKey(robot, urlParam);
         if(urls.size()!=1){
             throw new IllegalArgumentException("Ошибка получения свойств робота! По заданному роботу " + robot.getId() +
-                " и ключу: " + urlKey + " получено не 1 свойство. Размер коллекции: " + urls.size());
+                " и ключу: " + urlParam + " получено не 1 свойство. Размер коллекции: " + urls.size());
         }
         return new AccessToolDTO(name, robot.getOrigName(), urls.get(0).getValue());
     }
