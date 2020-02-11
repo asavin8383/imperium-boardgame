@@ -139,8 +139,8 @@ public class ActController {
         checkResult.setCheckUnitValue(result.getCheckUnitValue());
         checkResult.setContentId(result.getErdiId());
         checkResult.setForbiddenContentDetected(
-            result.getResult().equals(CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED)&&result.getUserResult()==null||
-            result.getUserResult().equals(UserResult.FORBIDDEN_CONTENT_DETECTED));
+            result.getResult().equals(CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED) && result.getUserResult()==null ||
+            result.getUserResult()!=null && result.getUserResult().equals(UserResult.FORBIDDEN_CONTENT_DETECTED));
 
         Date endDate = ldt2date(result.getEndDate());
         checkResult.setDate(endDate == null ? "" : dateFormat.format(endDate));
