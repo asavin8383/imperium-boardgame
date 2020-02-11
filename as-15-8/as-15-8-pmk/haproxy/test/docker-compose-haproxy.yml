@@ -1,0 +1,11 @@
+version: '3.7'
+services:
+  haproxy:
+    container_name: haproxy
+    image: harbor.ec-leasing.ru/as_15_8/haproxy:2.1.2
+    restart: always
+    volumes:
+      - /opt/haproxy/conf:/usr/local/etc/haproxy
+#      - /opt/haproxy/log:/dev/log
+    network_mode: "host"
+    command: ["-f", "/usr/local/etc/haproxy"]
