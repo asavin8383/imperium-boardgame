@@ -114,8 +114,8 @@ public class ScheduleController {
 
         if (Strings.isNotEmpty(query))
             return scheduleRepo.findAllByPlannedDateAndArrangement(plannedDate == null ? LocalDate.now() : plannedDate, query, page);
-
         return scheduleRepo.findAllByPlannedDate(plannedDate == null ? LocalDate.now() : plannedDate, page);
+
     }
 
     @GetMapping
