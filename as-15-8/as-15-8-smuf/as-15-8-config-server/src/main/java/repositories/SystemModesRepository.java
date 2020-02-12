@@ -19,10 +19,10 @@ public interface SystemModesRepository  extends JpaRepository<SystemMode, Long> 
     @Query("select m from SystemMode m where m.systemMode =:systemMode")
     Optional<SystemMode> findBySystemMode(@Param("systemMode") SystemModeUnit systemModeUnit);
 
-    @Transactional
+    /*@Transactional
     @Modifying(clearAutomatically = true)
     @Query("update SystemMode s set s.active=:enabled")
-    void setAllSysemModesEnabled(@Param("enabled") Boolean enabled);
+    void setAllSysemModesEnabled(@Param("enabled") Boolean enabled);*/
 
     @Query("select m from SystemMode m")
     Optional<List<SystemMode>> findALL();

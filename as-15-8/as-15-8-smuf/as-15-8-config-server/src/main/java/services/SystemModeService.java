@@ -93,7 +93,7 @@ public class SystemModeService {
                 stopAllArrangementsInDispatcher();
                 mode.setActive(true);
                 mode.setPlannedDateTime(null);
-                systemModesRepository.setAllSysemModesEnabled(false);
+                setAllSysemModesEnabled(false);
                 systemModesRepository.save(mode);
                 notifyAllApplications(mode.getSystemMode());
                 log.info("Произошёл запланированный переход в сервисный режим");
@@ -119,7 +119,7 @@ public class SystemModeService {
 
     private SystemMode activateNormalMode() {
         Optional<SystemMode> mode = systemModesRepository.findBySystemMode(SystemModeUnit.NORMAL);
-        systemModesRepository.setAllSysemModesEnabled(false);
+        setAllSysemModesEnabled(false);
         if (mode.isPresent()) {
             mode.get().setActive(true);
             return systemModesRepository.save(mode.get());
@@ -196,7 +196,7 @@ public class SystemModeService {
     }
 
     public SystemMode changeSystemMode(SystemMode mode) {
-        systemModesRepository.setAllSysemModesEnabled(false);
+        setAllSysemModesEnabled(false);
         notifyAllApplications(mode.getSystemMode());
         stopArrangementsIfNecessary(mode);
         return systemModesRepository.findBySystemMode(mode.getSystemMode())
@@ -217,4 +217,12 @@ public class SystemModeService {
         if (mode.getSystemMode() == SystemModeUnit.SERVICE || mode.getSystemMode() == SystemModeUnit.EMERGANCE)
             stopAllArrangementsInDispatcher();
     }
+
+    private void setAllSysemModesEnabled(boolean enabled) {
+        systemModesRepository.findALL().get().forEach(systemMode -> {
+            systemMode.setActive(enabled);
+            systemModesRepository.save(systemMode);
+        });
+    }
+
 }
