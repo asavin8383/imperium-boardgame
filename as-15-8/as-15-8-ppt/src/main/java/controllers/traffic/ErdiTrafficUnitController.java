@@ -106,6 +106,7 @@ public class ErdiTrafficUnitController {
             // assert unit.getType() == TrafficUnitType.CUSTOM
              unit.getCustomErdiList().removeAll(customErdiRepository.findAllById(ids));
         }
+        unit.getTraffic().setActualCheckUnitsCount(0L);
         erdiTrafficUnitRepository.save(unit);
     }
 

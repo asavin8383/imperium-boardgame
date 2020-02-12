@@ -23,6 +23,7 @@ import reactor.core.publisher.Flux;
 import repositories.ContentCheckUnitRepository;
 import repositories.ContentHistoryRepository;
 import repositories.ContentViewRepository;
+import repositories.DomainMaskRepo;
 import rest.ResponseStatusString;
 import restapi.ErdiRestClient;
 import services.ContentService;
@@ -38,7 +39,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-//@PreAuthorize("hasAnyRole('ROLE_SYSTEM', 'ROLE_OPERATOR')")
 @Slf4j
 public class ContentController {
 
@@ -48,6 +48,7 @@ public class ContentController {
     private final InfoService infoService;
     private final ContentHistoryRepository contentHistoryRepo;
     private final ContentCheckUnitRepository contentCheckUnitRepository;
+    private  final DomainMaskRepo domainMaskRepo;
 
     private static int BUFFER_SIZE = 1000;
 
@@ -267,6 +268,7 @@ public class ContentController {
 
     @PostMapping(path = "/erdi/check_units_count")
     public Long getCheckUnitsCount(@RequestBody List<Long> erdiIds) {
-        return (long) contentCheckUnitRepository.findAllByErdIds(erdiIds).size();
+        return contentService.getCheckUnitsCount(erdiIds);
     }
+
 }

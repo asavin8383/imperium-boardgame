@@ -14,7 +14,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -25,6 +24,7 @@ import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -45,19 +45,33 @@ public class SystemModeService {
     private final String DISPATCHER_STOP_ARRANGEMENTS = "dispatcher/arrangements/stop_all_running";
     private final RestTemplate restTemplate;
     private final OAuth2RestTemplate oAuth2RestTemplate;
-    private boolean cancelSytemModeChange = false;
+    private volatile boolean cancelServiceModeSchedule = false;
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
-    @Async
+    //@Async
     public ResponseEntity planServiceModeChange(String plannedDateTime) {
 
         SystemMode mode = getOrCreateSystemMode(plannedDateTime);
 
-        if(mode.getPlannedDateTime()!= null && mode.getPlannedDateTime().isAfter(LocalDateTime.now())) {
+        if (plannedTimeGreaterThanNow(mode)) {
+            cancelServiceModeSchedule = false;
             systemModesRepository.save(mode);
             scheduler.schedule(changeMode(mode), ldtToDate(mode.getPlannedDateTime()));
-            return ResponseEntity.ok("Смена сервисного режима запланирована на " + mode.getPlannedDateTime());
-        } else
-            return ResponseEntity.badRequest().body("Смена режима работы на Сервисный не запланирована!");
+            return ResponseEntity.ok("Смена сервисного режима запланирована на " + mode.getPlannedDateTime().format(formatter));
+        } if (plannedTimeEqualNow(mode)) {
+            changeSystemMode(mode);
+            return ResponseEntity.ok("Система перешла в сервисный режим");
+        }
+        else return ResponseEntity.badRequest().body("Смена режима работы на Сервисный не запланирована! Задано некорректное время.");
+    }
+
+    private boolean plannedTimeGreaterThanNow(SystemMode mode) {
+        return mode.getPlannedDateTime() != null && mode.getPlannedDateTime().isAfter(LocalDateTime.now());
+    }
+
+    private boolean plannedTimeEqualNow(SystemMode mode) {
+        return mode.getPlannedDateTime() != null && mode.getPlannedDateTime().truncatedTo(ChronoUnit.MINUTES)
+                .isEqual(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES));
     }
 
     private SystemMode getOrCreateSystemMode(String plannedDateTime) {
@@ -69,38 +83,52 @@ public class SystemModeService {
     }
 
     private LocalDateTime parseLdt(String ldt) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-        LocalDateTime dateTime = LocalDateTime.parse(ldt, formatter);
-        return dateTime;
+        return LocalDateTime.parse(ldt, formatter);
     }
 
     private Runnable changeMode(SystemMode mode) {
         return () -> {
-            if (!cancelSytemModeChange) {
-                cancelSytemModeChange = false;
-                stopAllArrangements();
+            if (!cancelServiceModeSchedule) {
+                cancelServiceModeSchedule = false;
+                stopAllArrangementsInDispatcher();
                 mode.setActive(true);
                 mode.setPlannedDateTime(null);
                 systemModesRepository.setAllSysemModesEnabled(false);
                 systemModesRepository.save(mode);
                 notifyAllApplications(mode.getSystemMode());
                 log.info("Произошёл запланированный переход в сервисный режим");
-            } else cancelSytemModeChange = false;
+            } else cancelServiceModeSchedule = false;
         };
     }
 
+
     public void cancelSystemModeSchedule() {
         Optional<SystemMode> mode = systemModesRepository.findBySystemMode(SystemModeUnit.SERVICE);
-        if (mode.isPresent() && mode.get().getPlannedDateTime() != null) {
-            this.cancelSytemModeChange = true;
-            mode.get().setPlannedDateTime(null);
-            mode.get().setActive(false);
-            systemModesRepository.save(mode.get());
-            log.info("Запланированный переход в сервисный режим отменён пользователем");
+        activateNormalMode();
+        if (mode.isPresent()) {
+            if (mode.get().isActive() || mode.get().getPlannedDateTime() != null) {
+                cancelServiceModeSchedule = true;
+                mode.get().setPlannedDateTime(null);
+                mode.get().setActive(false);
+                systemModesRepository.save(mode.get());
+                log.info("Запланированный переход в сервисный режим отменён пользователем");
+            }
+        } else cancelServiceModeSchedule = false;
+    }
+
+
+    private SystemMode activateNormalMode() {
+        Optional<SystemMode> mode = systemModesRepository.findBySystemMode(SystemModeUnit.NORMAL);
+        systemModesRepository.setAllSysemModesEnabled(false);
+        if (mode.isPresent()) {
+            mode.get().setActive(true);
+            return systemModesRepository.save(mode.get());
+        } else {
+            return systemModesRepository.save(new SystemMode(SystemModeUnit.NORMAL, true));
         }
     }
 
-    private void stopAllArrangements() {
+    private void stopAllArrangementsInDispatcher() {
         try {
             oAuth2RestTemplate.postForObject(UriComponentsBuilder.
                             fromHttpUrl(gatewayUrl)
@@ -109,7 +137,7 @@ public class SystemModeService {
                     null,
                     ResponseEntity.class);
         }catch (Exception ex) {
-            log.warn("Ошибка отправки запроса на отсанов всех мероприятий в dispatcher, код:" + ex);
+            log.warn("Ошибка отправки запроса на останов всех мероприятий в dispatcher, код: " + ex);
         }
     }
 
@@ -119,16 +147,17 @@ public class SystemModeService {
 
     public SystemMode getCurrentMode() {
         return systemModesRepository.getCurrentSystemMode()
-                .orElseGet(() -> systemModesRepository.save(new SystemMode(SystemModeUnit.NORMAL, true)));
+                //.orElseGet(() -> systemModesRepository.save(new SystemMode(SystemModeUnit.NORMAL, true)));
+                  .orElseGet(this::activateNormalMode);
     }
 
-    public void notifyAllApplications(SystemModeUnit systemModeUnit) {
+    private void notifyAllApplications(SystemModeUnit systemModeUnit) {
         List<ServiceInstance> instances = getAllApplicationInstances();
         instances.forEach(instance ->
-                postSystemModeUnit(instance.getUri(), systemModeUnit, instance));
+                postToSystemModeAutoconfiguration(instance.getUri(), systemModeUnit, instance));
     }
 
-    private SystemModeUnit postSystemModeUnit(URI uri, SystemModeUnit systemModeUnit, ServiceInstance instance) {
+    private SystemModeUnit postToSystemModeAutoconfiguration(URI uri, SystemModeUnit systemModeUnit, ServiceInstance instance) {
         try {
             ResponseEntity response = restTemplate.postForEntity(createUri(uri, AUTOCONFIG_SYSTEM_MODE),
                                                                  createEntity(systemModeUnit),
@@ -154,9 +183,7 @@ public class SystemModeService {
     private HttpEntity createEntity(SystemModeUnit systemModeUnit) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-
-        HttpEntity<SystemModeUnit> entity = new HttpEntity<>(systemModeUnit, headers);
-        return entity;
+        return new HttpEntity<>(systemModeUnit, headers);
     }
 
     private List<ServiceInstance> getAllApplicationInstances() {
@@ -168,27 +195,26 @@ public class SystemModeService {
         return instances;
     }
 
-    public void setCurrentSystemModeDisabled() {
-        systemModesRepository.getCurrentSystemMode().map(systemMode -> {
-            systemMode.setActive(false);
-            return systemModesRepository.save(systemMode);
-        }).orElseGet(() -> systemModesRepository.save(new SystemMode(SystemModeUnit.NORMAL, false)));
-    }
-
     public SystemMode changeSystemMode(SystemMode mode) {
-       return systemModesRepository.findBySystemMode(mode.getSystemMode())
+        systemModesRepository.setAllSysemModesEnabled(false);
+        notifyAllApplications(mode.getSystemMode());
+        stopArrangementsIfNecessary(mode);
+        return systemModesRepository.findBySystemMode(mode.getSystemMode())
                 .map(systemMode -> {
                     if(!systemMode.isActive()){
                         systemMode.setActive(true);
                         systemModesRepository.save(systemMode);
                     }
                     return mode;
-                    //return ResponseEntity.ok("Режим успешно сменен" + mode);
                 })
                 .orElseGet(() -> {
                     systemModesRepository.save(new SystemMode(mode.getSystemMode(), true));
                     return mode;
-                    //return ResponseEntity.ok("Режим успешно сменен" + mode);
                 });
+    }
+
+    private void stopArrangementsIfNecessary(SystemMode mode) {
+        if (mode.getSystemMode() == SystemModeUnit.SERVICE || mode.getSystemMode() == SystemModeUnit.EMERGANCE)
+            stopAllArrangementsInDispatcher();
     }
 }
