@@ -38,8 +38,6 @@ public class SystemModeController {
     @PreAuthorize("hasAnyRole('ROLE_MANAGE_FUNCTION_MODE')")
     @Transactional
     public SystemModeUnit setMode(@RequestBody SystemMode mode){
-        systemModeService.setCurrentSystemModeDisabled();
-        systemModeService.notifyAllApplications(mode.getSystemMode());
         return systemModeService.changeSystemMode(mode).getSystemMode();
     }
 
