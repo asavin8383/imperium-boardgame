@@ -78,6 +78,7 @@ public class TrafficService {
     private Long calculateActualCheckUnitsCount(Traffic traffic) {
         long formalErdiCount = traffic.getActualCheckUnitsCount();
         long customErdiCount = trafficRepository.countCustomErdiByTrafficId(traffic.getId());
+
         long staticCount = formalErdiCount + customErdiCount;
         return staticCount + dynamicCount;
     }
