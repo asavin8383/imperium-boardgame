@@ -68,10 +68,12 @@ public class ArrangementContentController {
                 searchQueryPatternRepo
                 .findAllByArrangement(arrangementId);
         searchQueryPatterns.forEach(searchQueryPattern -> {
+            log.info("Добавляем поисковые шаблоны в мероприятие {} для заданного шаблона {}", arrangementId, searchQueryPattern.getQueryPattern());
             List<CheckUnit> erdiCheckUnits = fillErdi(searchQueryPattern);
             List<CheckUnitJoinSearchPhrase> checkUnitJoinSearchPhrases = new ArrayList<>();
             //Собираем суррогатную коллекцию из ЕРДИ и фраз кросс-джойном
             if (erdiCheckUnits.size() > 0){
+                log.info("Заполняем шаблон записями ЕРДИ для мероприятия {}", arrangementId);
                 //если список поисковых фраз непустой, делаем кросс-джойн
                 if (searchQueryPattern.getSearchPhrases().size() > 0) {
                     checkUnitJoinSearchPhrases.addAll(
@@ -82,6 +84,7 @@ public class ArrangementContentController {
                                     .collect(Collectors.toList())
                     );
                 } else {
+                    log.info("Заполняем шаблон поисковыми фразами для мероприятия {}", arrangementId);
                     //Если в шаблоне нет фраз, то в чек-юниты войдут только чек-юниты
                     checkUnitJoinSearchPhrases.addAll(erdiCheckUnits
                             .stream()
@@ -90,6 +93,7 @@ public class ArrangementContentController {
                     );
                 }
             } else {
+                log.info("Заполняем шаблон поисковыми фразами для мероприятия {}", arrangementId);
                 //Если в шаблоне нет ЕРДИ, то в чек-юниты войдут только фразы
                 checkUnitJoinSearchPhrases.addAll(searchQueryPattern.getSearchPhrases()
                         .stream()
@@ -99,6 +103,7 @@ public class ArrangementContentController {
             }
             //Если список собрался, будем генерить чек-юниты, иначе в чек-юнит войдёт только поисковая фраза
             if (checkUnitJoinSearchPhrases.size() > 0) {
+                log.info("Выполняем генерацию чек-юнитов по шаблону для мероприятия {}", arrangementId);
                 checkUnitJoinSearchPhrases
                     .forEach(checkUnitJoinSearchPhrase ->
                         checkUnits
