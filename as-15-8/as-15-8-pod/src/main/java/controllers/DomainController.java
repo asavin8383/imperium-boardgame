@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.scheme.Domain;
 import model.scheme.DomainMask;
-import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -53,10 +52,11 @@ public class DomainController {
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
     public DomainMask postDomainMask(@RequestBody DomainMask domainMask) {
+        domainMask.getDomains().forEach(domain -> {
+            domain.setDomainMask(domainMask);
+        });
         return domainMaskRepo.save(domainMask);
-
     }
 
     @PutMapping
