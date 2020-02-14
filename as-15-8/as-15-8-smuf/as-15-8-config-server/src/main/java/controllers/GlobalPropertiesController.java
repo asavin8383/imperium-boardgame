@@ -28,6 +28,9 @@ public class GlobalPropertiesController {
     @Value("${kibana.link.key}")
     private String kibanaLinkKey;
 
+    @Value("${forward.proxy.link.key}")
+    private String forwardProxyLink;
+
     @PreAuthorize("hasRole('ROLE_MANAGE_CONFIGURATIONS')")
     @PostMapping
     @JsonView(Views.Brief.class)
@@ -73,4 +76,15 @@ public class GlobalPropertiesController {
             return ResponseEntity.badRequest().body("Ошибка извлечения kibana link из global_properties");
         }
     }
+
+    @PostMapping(value = "forward_proxy")
+    public ResponseEntity getForwardProxy() {
+        try {
+            String forwardProxy = globalPropertiesRepo.getGlobalPropertyByKey(forwardProxyLink);
+            return ResponseEntity.ok().body(forwardProxy);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Ошибка извлечения forwardProxy link из global_properties");
+        }
+    }
+
 }
