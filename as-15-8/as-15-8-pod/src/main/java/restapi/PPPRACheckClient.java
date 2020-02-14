@@ -23,7 +23,7 @@ public class PPPRACheckClient {
     @Value("${spring.rest_base_url}")
     private String baseUrl;
 
-    OAuth2RestTemplate restTemplate;
+    private final OAuth2RestTemplate restTemplate;
 
     public boolean checkRegistryIsAvailable() {
         try {
