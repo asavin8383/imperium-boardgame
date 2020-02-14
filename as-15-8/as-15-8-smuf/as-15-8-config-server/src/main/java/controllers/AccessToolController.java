@@ -79,7 +79,7 @@ public class AccessToolController {
         if (robot.getType()!= RobotType.PS){
             throw new IllegalArgumentException("Ошибка получения ссылки для ПС! переданный робот не является ПС: " + name);
         }
-        String psUrl = getPropertyValue(robot, AccessToolParameter.STUB_URL);
+        String psUrl = getPropertyValue(robot, AccessToolParameter.SEARCH_SYSTEM_URL);
         if(Strings.isEmpty(psUrl)){
             return ResponseEntity.noContent().build();
         }
