@@ -201,7 +201,6 @@ public class SystemModeService {
         return instances;
     }
 
-    @Async
     public SystemMode changeSystemMode(SystemMode mode) {
         notifyAllApplications(mode.getSystemMode());
         stopArrangementsIfNecessary(mode);
