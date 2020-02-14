@@ -75,19 +75,24 @@ public class AccessToolController {
     @PostMapping("/ps_search_query_url")
     @PreAuthorize("hasRole('ROLE_MANAGE_ARRANGEMENT')")
     public ResponseEntity<String> getSearchQueryUrl(@RequestParam String name){
-        Robot robot = getRobotByName(name);
-        if (robot.getType()!= RobotType.PS){
-            throw new IllegalArgumentException("Ошибка получения ссылки для ПС! переданный робот не является ПС: " + name);
+        try {
+            Robot robot = getRobotByName(name);
+            if (robot.getType()!= RobotType.PS){
+                throw new IllegalArgumentException("Ошибка получения ссылки для ПС! переданный робот не является ПС: " + name);
+            }
+            String psUrl = getPropertyValue(robot, AccessToolParameter.SEARCH_SYSTEM_URL);
+            if(Strings.isEmpty(psUrl)){
+                return ResponseEntity.noContent().build();
+            }
+            String psSearchQuery = getPropertyValue(robot, AccessToolParameter.SEARCH_SYSTEM_SEARCH_QUERY);
+            if(Strings.isEmpty(psSearchQuery)){
+                return ResponseEntity.noContent().build();
+            }
+            return ResponseEntity.ok(psUrl+psSearchQuery);
+        } catch (IllegalArgumentException ex){
+            log.error("Ошибка получения ссылки!", ex);
+            return ResponseEntity.badRequest().body(ex.getMessage());
         }
-        String psUrl = getPropertyValue(robot, AccessToolParameter.SEARCH_SYSTEM_URL);
-        if(Strings.isEmpty(psUrl)){
-            return ResponseEntity.noContent().build();
-        }
-        String psSearchQuery = getPropertyValue(robot, AccessToolParameter.SEARCH_SYSTEM_SEARCH_QUERY);
-        if(Strings.isEmpty(psSearchQuery)){
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.ok(psUrl+psSearchQuery);
     }
 
     private Robot getRobotByName(String name){
@@ -100,11 +105,15 @@ public class AccessToolController {
     }
 
     private String getPropertyValue(Robot robot, AccessToolParameter parameter){
-        List<RobotProperty> urls = robotPropertyRepo.findByRobotAndKey(robot, parameter);
-        if(urls.size()!=1){
+        List<RobotProperty> properties = robotPropertyRepo.findByRobotAndKey(robot, parameter);
+        if(properties.size()==0){
             throw new IllegalArgumentException("Ошибка получения свойств робота! По заданному роботу " + robot.getId() +
-                " и ключу: " + parameter + " получено не 1 свойство. Размер коллекции: " + urls.size());
+                " и ключу: " + parameter + " не найдено ни одно значение");
         }
-        return urls.get(0).getValue();
+        if(properties.size()>1){
+            throw new IllegalArgumentException("Ошибка получения свойств робота! По заданному роботу " + robot.getId() +
+                " и ключу: " + parameter + " получено не 1 свойство. Размер коллекции: " + properties.size());
+        }
+        return properties.get(0).getValue();
     }
 }
