@@ -8,22 +8,22 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface SystemModesRepository  extends JpaRepository<SystemMode, Long> {
 
-    @Query("select m from SystemMode m where m.active = true")
+    @Query("select m from SystemMode m " +
+            "join SystemModeCurrent mc " +
+            "on mc.systemModeCurrent = m.id ")
     Optional<SystemMode> getCurrentSystemMode();
+
+    @Transactional
+    @Modifying
+    @Query("update SystemModeCurrent smc " +
+            "set smc.systemModeCurrent = :id")
+    void setCurrentSystemMode(@Param("id") Long id);
 
     @Query("select m from SystemMode m where m.systemMode =:systemMode")
     Optional<SystemMode> findBySystemMode(@Param("systemMode") SystemModeUnit systemModeUnit);
 
-    /*@Transactional
-    @Modifying(clearAutomatically = true)
-    @Query("update SystemMode s set s.active=:enabled")
-    void setAllSysemModesEnabled(@Param("enabled") Boolean enabled);*/
-
-    @Query("select m from SystemMode m")
-    Optional<List<SystemMode>> findALL();
 }

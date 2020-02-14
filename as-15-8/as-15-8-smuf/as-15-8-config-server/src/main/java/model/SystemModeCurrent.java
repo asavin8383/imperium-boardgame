@@ -1,18 +1,19 @@
 package model;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import lombok.*;
-import enums.SystemModeUnit;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 
 @Entity
 @Data
-@Table(schema = "config", name = "system_modes")
+@Table(schema = "config", name = "system_modes_current")
 @NoArgsConstructor
 @RequiredArgsConstructor
-public class SystemMode {
+public class SystemModeCurrent {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,10 +21,7 @@ public class SystemMode {
     private Long id;
 
     @NonNull
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private SystemModeUnit systemMode;
+    private Long systemModeCurrent;
 
-    @Column
-    private LocalDateTime plannedDateTime;
 }

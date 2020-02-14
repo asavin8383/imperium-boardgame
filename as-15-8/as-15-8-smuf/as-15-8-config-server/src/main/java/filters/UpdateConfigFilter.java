@@ -21,7 +21,7 @@ public class UpdateConfigFilter implements Filter {
         String uri = ((HttpServletRequest) request).getRequestURI();
         if(uri.contains("/actuator/bus-refresh/")) {
             HttpServletResponse httpServletResponse = (HttpServletResponse) response;
-            SystemMode curMode = systemModesRepository.getCurrentSystemMode().orElse(new SystemMode(SystemModeUnit.NORMAL, true));
+            SystemMode curMode = systemModesRepository.getCurrentSystemMode().orElse(new SystemMode(SystemModeUnit.NORMAL));
 
             boolean isServiceMode = curMode.getSystemMode().equals(SystemModeUnit.SERVICE);
             if (!isServiceMode) {

@@ -63,7 +63,7 @@ public class SystemModeController {
     @PostMapping(path = "/service_mode_cancel")
     public ResponseEntity serviceModeCancel() {
         try {
-            systemModeService.cancelSystemModeSchedule();
+            systemModeService.cancelServiceModeSchedule();
             return ResponseEntity.ok("Запаланированный переход в сервисный режим отменён");
         } catch (Exception ex) {
             return ResponseEntity.badRequest().body("Запланированный переход в сервисный режим не отменён!");
