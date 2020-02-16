@@ -182,7 +182,7 @@ public class ResultService {
 
     private byte[] imprintScreenshot(AccessToolDTO accessToolDTO, CheckUnitResult checkUnitResult, byte[] screenShot, CheckType checkType){
         headerObject.setLabel1(dispatcherProperties.getImprint().getHeader());
-        headerObject.setLabel2("Дата: " + new SimpleDateFormat("yyyy-MM-dd").format(checkUnitResult.getEndTime()));
+        headerObject.setLabel2("Дата: " + new SimpleDateFormat("dd.MM.yyyy").format(checkUnitResult.getEndTime()));
         if(checkType.equals(CheckType.PS)) {
             headerObject.setLabel3(dispatcherProperties.getImprint().getPs());
         } else if (checkType.equals(CheckType.PASD)){
