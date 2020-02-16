@@ -107,11 +107,11 @@ public class AccessToolController {
     private String getPropertyValue(Robot robot, AccessToolParameter parameter){
         List<RobotProperty> properties = robotPropertyRepo.findByRobotAndKey(robot, parameter);
         if(properties.size()==0){
-            throw new IllegalArgumentException("Ошибка получения свойств робота! По заданному роботу " + robot.getId() +
+            throw new IllegalArgumentException("Ошибка получения свойств робота! По заданному роботу " + robot.getName() +
                 " и ключу: " + parameter + " не найдено ни одно значение");
         }
         if(properties.size()>1){
-            throw new IllegalArgumentException("Ошибка получения свойств робота! По заданному роботу " + robot.getId() +
+            throw new IllegalArgumentException("Ошибка получения свойств робота! По заданному роботу " + robot.getName() +
                 " и ключу: " + parameter + " получено не 1 свойство. Размер коллекции: " + properties.size());
         }
         return properties.get(0).getValue();
