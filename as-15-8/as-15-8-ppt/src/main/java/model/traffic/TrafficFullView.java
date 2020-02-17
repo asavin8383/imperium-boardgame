@@ -3,9 +3,6 @@ package model.traffic;
 import lombok.Data;
 import model.enums.TrafficUnitType;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Data
 public class TrafficFullView {
 
@@ -20,6 +17,8 @@ public class TrafficFullView {
     //private SearchQueryTrafficUnit searchPhraseUnit;
 
     private SearchQueryTrafficUnit searchTemplateUnit;
+
+    private DynamicTrafficUnit dynamicTrafficUnit;
 
 
 
@@ -42,7 +41,8 @@ public class TrafficFullView {
                 setSearchTemplateUnit((SearchQueryTrafficUnit) trafficUnit);
                 break;
             case DYNAMIC:
-                throw new UnsupportedOperationException("DYNAMIC not implemented");
+                setDynamicTrafficUnit((DynamicTrafficUnit) trafficUnit);
+                break;
         }
     }
 

@@ -170,12 +170,12 @@ public class TrafficService {
                                                                                 TrafficUnitType.CUSTOM,
                                                                                 category));
 
-        traffic.getSearchQueryTrafficUnits().add((SearchQueryTrafficUnit) fillTrafficUnit(new ErdiTrafficUnit(),
+        traffic.getSearchQueryTrafficUnits().add((SearchQueryTrafficUnit) fillTrafficUnit(new SearchQueryTrafficUnit(),
                                                                                 traffic,
                                                                                 TrafficUnitType.TEMPLATE,
                                                                                 category));
 
-        traffic.getDynamicTrafficUnits().add((DynamicTrafficUnit) fillTrafficUnit(new ErdiTrafficUnit(),
+        traffic.getDynamicTrafficUnits().add((DynamicTrafficUnit) fillTrafficUnit(new DynamicTrafficUnit(),
                                                                                 traffic,
                                                                                 TrafficUnitType.DYNAMIC,
                                                                                 category));
@@ -221,15 +221,19 @@ public class TrafficService {
     private Stream<TrafficUnit> getUnitStream(Traffic traffic) {
         List<ErdiTrafficUnit> erdiUnits = traffic.getErdiTrafficUnits();
         List<SearchQueryTrafficUnit> searchUnits = traffic.getSearchQueryTrafficUnits();
-        if (erdiUnits != null && searchUnits != null) {
+        List<DynamicTrafficUnit> dynamicUnits = traffic.getDynamicTrafficUnits();
+        if (erdiUnits != null && searchUnits != null && dynamicUnits != null) {
             return Stream.concat(
                     erdiUnits.stream().map(TrafficUnit.class::cast),
-                    searchUnits.stream().map(TrafficUnit.class::cast)
+                    Stream.concat(searchUnits.stream().map(TrafficUnit.class::cast),
+                    dynamicUnits.stream().map(TrafficUnit.class::cast))
             );
         } else if (erdiUnits != null) {
             return erdiUnits.stream().map(TrafficUnit.class::cast);
         } else if (searchUnits != null) {
             return searchUnits.stream().map(TrafficUnit.class::cast);
+        } else if (dynamicUnits != null) {
+            return dynamicUnits.stream().map(TrafficUnit.class::cast);
         } else {
             return Stream.empty();
         }
