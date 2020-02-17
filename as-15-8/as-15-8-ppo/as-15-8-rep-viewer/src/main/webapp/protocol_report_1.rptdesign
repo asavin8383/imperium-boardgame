@@ -16,7 +16,7 @@ gateway= System.getenv("GATEWAY_URI");
             <property name="dataType">decimal</property>
             <property name="distinct">true</property>
             <simple-property-list name="defaultValue">
-                <value type="constant">913</value>
+                <value type="constant">984</value>
             </simple-property-list>
             <list-property name="selectionList"/>
             <property name="paramType">simple</property>
@@ -512,7 +512,7 @@ completion_date-start_date as duration
                     <structure>
                         <property name="position">6</property>
                         <property name="name">erdi_id</property>
-                        <property name="dataType">string</property>
+                        <property name="dataType">decimal</property>
                     </structure>
                     <structure>
                         <property name="position">7</property>
@@ -562,8 +562,8 @@ completion_date-start_date as duration
                     <property name="position">6</property>
                     <property name="name">erdi_id</property>
                     <property name="nativeName">erdi_id</property>
-                    <property name="dataType">string</property>
-                    <property name="nativeDataType">12</property>
+                    <property name="dataType">decimal</property>
+                    <property name="nativeDataType">-5</property>
                 </structure>
                 <structure>
                     <property name="position">7</property>
@@ -589,7 +589,7 @@ join sor.content_info ci on ci.content_id=r.content_id and ci.content_version_id
 join sor.content on ch.content_id = content.id
 left outer join results.result_screenshots  s on r.id = s.result_id
 where r.arrangement_id=?
-and r.result in (
+and coalesce(r.user_result,r.result) in (
 --'COMPLETED'
 --,'DOUBTFUL',
 'FORBIDDEN_CONTENT_DETECTED'
@@ -799,7 +799,7 @@ and r.result in (
                     <structure>
                         <property name="position">6</property>
                         <property name="name">erdi_id</property>
-                        <property name="dataType">string</property>
+                        <property name="dataType">decimal</property>
                     </structure>
                     <structure>
                         <property name="position">7</property>
@@ -849,8 +849,8 @@ and r.result in (
                     <property name="position">6</property>
                     <property name="name">erdi_id</property>
                     <property name="nativeName">erdi_id</property>
-                    <property name="dataType">string</property>
-                    <property name="nativeDataType">12</property>
+                    <property name="dataType">decimal</property>
+                    <property name="nativeDataType">-5</property>
                 </structure>
                 <structure>
                     <property name="position">7</property>
@@ -877,7 +877,7 @@ join sor.content_info ci on ci.content_id=r.content_id and ci.content_version_id
 join sor.content on ch.content_id = content.id
 left join results.result_screenshots  s on r.id = s.result_id
 where r.arrangement_id=?
-and r.result in (
+and coalesce(r.user_result,r.result) in (
 --'COMPLETED',
 'DOUBTFUL'
 --,'FORBIDDEN_CONTENT_DETECTED','INTERNAL_ERROR'
@@ -1075,7 +1075,7 @@ and r.result in (
                     <structure>
                         <property name="position">5</property>
                         <property name="name">erdi_id</property>
-                        <property name="dataType">string</property>
+                        <property name="dataType">decimal</property>
                     </structure>
                     <structure>
                         <property name="position">6</property>
@@ -1118,8 +1118,8 @@ and r.result in (
                     <property name="position">5</property>
                     <property name="name">erdi_id</property>
                     <property name="nativeName">erdi_id</property>
-                    <property name="dataType">string</property>
-                    <property name="nativeDataType">12</property>
+                    <property name="dataType">decimal</property>
+                    <property name="nativeDataType">-5</property>
                 </structure>
                 <structure>
                     <property name="position">6</property>
@@ -1145,7 +1145,7 @@ join sor.content_info ci on ci.content_id=r.content_id and ci.content_version_id
 join sor.content on ch.content_id = content.id
 left join results.result_screenshots  s on r.id = s.result_id
 where r.arrangement_id=?
-and r.result in (
+and coalesce(r.user_result,r.result) in (
 'COMPLETED'
 --,'DOUBTFUL',
 --'FORBIDDEN_CONTENT_DETECTED'
@@ -1413,7 +1413,7 @@ join sor.content_info ci on ci.content_id=r.content_id and ci.content_version_id
 join results.result_screenshots  s on r.id = s.result_id
 left outer join   results.error_detail_results d on r.id = d.result_id
 where r.arrangement_id=?
-and r.result in (
+and coalesce(r.user_result,r.result) in (
 --'COMPLETED','DOUBTFUL','FORBIDDEN_CONTENT_DETECTED',
 'INTERNAL_ERROR'
     );]]></xml-property>
