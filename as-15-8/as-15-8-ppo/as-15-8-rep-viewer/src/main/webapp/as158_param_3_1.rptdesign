@@ -6536,8 +6536,7 @@ where msr_prd.eff_dttm::date = ?
                                     <data id="632">
                                         <property name="fontFamily">"Times New Roman"</property>
                                         <structure name="numberFormat">
-                                            <property name="category">Fixed</property>
-                                            <property name="pattern">###0.00{RoundingMode=HALF_UP}</property>
+                                            <property name="category">Custom</property>
                                         </structure>
                                         <property name="resultSetColumn">IRTZ_SS_F</property>
                                     </data>
