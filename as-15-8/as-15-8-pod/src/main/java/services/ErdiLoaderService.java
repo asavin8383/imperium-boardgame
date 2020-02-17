@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import repositories.*;
-import repositories.impl.ParameterRepositoryExtend;
 
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
@@ -42,7 +41,6 @@ public class ErdiLoaderService {
     private final ContentHistoryRepository contentHistoryRepository;
     private final ContentResourcesRepository contentResourcesRepository;
     private final ContentDelRepository contentDelRepository;
-    private final ParameterRepositoryExtend parameterRepository;
 
     // todo- удалить
     private static List<Date> timeLabels = new ArrayList<>();

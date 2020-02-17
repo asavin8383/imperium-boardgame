@@ -7,6 +7,7 @@ import enums.ErdiStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.projection.ContentView;
+import model.rest.control.UpdateErdiState;
 import org.apache.commons.lang.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -21,14 +22,13 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import repositories.ContentCheckUnitRepository;
 import repositories.ContentHistoryRepository;
-import repositories.ContentRepository;
 import repositories.ContentViewRepository;
+import repositories.DomainMaskRepo;
 import rest.ResponseStatusString;
 import restapi.ErdiRestClient;
 import services.ContentService;
 import services.InfoService;
 
-import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -39,7 +39,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-//@PreAuthorize("hasAnyRole('ROLE_SYSTEM', 'ROLE_OPERATOR')")
 @Slf4j
 public class ContentController {
 
@@ -48,8 +47,10 @@ public class ContentController {
     private final ErdiRestClient erdiRestClient;
     private final InfoService infoService;
     private final ContentHistoryRepository contentHistoryRepo;
-    private final ContentRepository contentRepository;
     private final ContentCheckUnitRepository contentCheckUnitRepository;
+    private  final DomainMaskRepo domainMaskRepo;
+
+    private static int BUFFER_SIZE = 1000;
 
     @GetMapping(path = "/erdi")
     @PreAuthorize("hasAnyRole('ROLE_MANAGE_ERDI')")
@@ -120,15 +121,16 @@ public class ContentController {
             @RequestParam(required = false) Long visitorsCntRussiaMin,
             @RequestParam(required = false) Long visitorsCntRussiaMax,
             @RequestParam(required = false) Long visitorsCntWorldMin,
-            @RequestParam(required = false) Long visitorsCntWorldMax
+            @RequestParam(required = false) Long visitorsCntWorldMax,
+            @RequestParam(defaultValue = "0") int pageNumber
     ) {
 
         if (!erdiRestClient.getIsLoading()) {
 
-            Pageable pageable = PageRequest.of(0, 10,
+            Pageable pageable = PageRequest.of(pageNumber, size,
                     SortingHelper.createSorting(sortingDirection, sortingColumn));
 
-            List<List<Long>> listContent =
+            List<Long> listContent =
                     contentViewRepository.findIds(
                             idMask,
                             categoryNames,
@@ -148,7 +150,7 @@ public class ContentController {
                             visitorsCntWorldMin,
                             visitorsCntWorldMax);
 
-            return Flux.fromIterable(listContent);
+            return Flux.fromIterable(listContent).buffer(BUFFER_SIZE);
         }
         else {
             return Flux.empty();
@@ -233,10 +235,13 @@ public class ContentController {
         return erdiRestClient.getUpdateDate();
     }
 
-    @GetMapping("/remove_content_version_to")
+    @GetMapping("/state_update_erdi")
     @PreAuthorize("hasAnyRole('ROLE_MANAGE_ERDI')")
-    public void removeLastContentVersion(@RequestParam int version) {
-        erdiRestClient.removeVersionTo(version);
+    public UpdateErdiState getState() {
+        return new UpdateErdiState(
+                erdiRestClient.getIsLoading(),
+                erdiRestClient.getStateDetails(),
+                erdiRestClient.getErrorMessage());
     }
 
     @GetMapping("/erdi/checkUnits")
@@ -263,6 +268,7 @@ public class ContentController {
 
     @PostMapping(path = "/erdi/check_units_count")
     public Long getCheckUnitsCount(@RequestBody List<Long> erdiIds) {
-        return Long.valueOf(contentCheckUnitRepository.findAllByErdIds(erdiIds).size());
+        return contentService.getCheckUnitsCount(erdiIds);
     }
+
 }

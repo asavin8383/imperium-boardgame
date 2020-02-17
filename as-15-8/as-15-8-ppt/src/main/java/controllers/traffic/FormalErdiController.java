@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import repositories.ErdiContentJoinRepository;
 import webClients.PodWebClient;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -46,7 +47,7 @@ public class FormalErdiController {
         if (erdiTrafficUnit != null) {
             Page<ErdiTrafficUnitContent> trafficUnitContents =
                     erdiContentJoinRepository
-                    .findByTrafficUnit(erdiTrafficUnit, pageable);
+                            .findByTrafficUnit(erdiTrafficUnit, pageable);
             List<Long> contentIds = trafficUnitContents
                     .stream()
                     .map(ErdiTrafficUnitContent::getErdiId)
@@ -58,4 +59,20 @@ public class FormalErdiController {
         }
     }
 
+    private Comparator<ObjectNode> createResultsComparator(String columnName) {
+        return (o1, o2) -> {
+                try {
+                    Object val1 = o1.get(columnName);
+                    Object val2 = o2.get(columnName);
+                    if(val1 instanceof Comparable && val2 instanceof Comparable) {
+                        @SuppressWarnings("unchecked")
+                        int res = ((Comparable)val1).compareTo(val2);
+                        return res;
+                    } else
+                        return 0;
+                } catch (Exception ex){
+                    return 0;
+                }
+            };
+    }
 }

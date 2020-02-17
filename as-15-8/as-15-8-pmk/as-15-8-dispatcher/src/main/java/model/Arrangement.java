@@ -26,7 +26,9 @@ public class Arrangement {
     @Enumerated(EnumType.STRING)
     private ArrangementStatus status;
 
-    @Column(name = "checkUnitsCount", nullable = false)
+    @Column(nullable = false)
     private Long checkUnitsCount;
 
+    @Column(nullable = false)
+    private Long maxCheckUnitsCount;
 }

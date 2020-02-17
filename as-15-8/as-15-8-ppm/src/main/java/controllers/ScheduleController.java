@@ -18,9 +18,11 @@ import model.Schedule;
 import model.SchedulePeriod;
 import model.Views;
 import model.enums.ScheduleStatus;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -29,6 +31,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import repositories.ArrangementRepo;
+import repositories.SchedulePeriodRepo;
 import repositories.ScheduleRepo;
 import robots.SlaPeriod;
 import robots.SlaType;
@@ -60,6 +63,7 @@ public class ScheduleController {
     private final ArrangementService arrangementService;
     private final ScheduleService scheduleService;
     private final ScheduleRepo scheduleRepo;
+    private final SchedulePeriodRepo schedulePeriodRepo;
     private ObjectMapper mapper;
     private final SchedulerProperties schedulerProperties;
     private final ArrangementRepo arrangementRepo;
@@ -82,18 +86,36 @@ public class ScheduleController {
         return arrangementService.findPage(page);
     }
 
-    //TODO Разобраться с Pageable и JsonView
     @GetMapping("/all")
     @JsonView(Views.Brief.class)
-    public List<Schedule> getScheduleList(
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate plannedDate/*,
+    public Page<Schedule> getScheduleList(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate plannedDate,
             @RequestParam(required = false) SortingDirection sortingDirection,
             @RequestParam(required = false) String sortingColumn,
             @RequestParam(defaultValue = "0") int pageNumber,
-            @RequestParam(defaultValue = "10") int pageSize*/){
-//        PageRequest page = PageRequest.of(
-//                pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
-        return scheduleRepo.findAllByPlannedDate(plannedDate == null ? LocalDate.now() : plannedDate);
+            @RequestParam(defaultValue = "10") int pageSize){
+        PageRequest page = PageRequest.of(
+                pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
+        return scheduleRepo.findAllByPlannedDate(plannedDate == null ? LocalDate.now() : plannedDate, page);
+    }
+
+    @GetMapping("/all_filtered")
+    @JsonView(Views.Brief.class)
+    public Page<Schedule> getScheduleList(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate plannedDate,
+            @RequestParam(required = false) SortingDirection sortingDirection,
+            @RequestParam(required = false) String sortingColumn,
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(required = false) String query) {
+
+        Pageable page = PageRequest.of(
+                pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
+
+        if (Strings.isNotEmpty(query))
+            return scheduleRepo.findAllByPlannedDateAndArrangement(plannedDate == null ? LocalDate.now() : plannedDate, query, page);
+        return scheduleRepo.findAllByPlannedDate(plannedDate == null ? LocalDate.now() : plannedDate, page);
+
     }
 
     @GetMapping
@@ -104,13 +126,14 @@ public class ScheduleController {
 
     @GetMapping(path = "/total_workers_count")
     public Integer getTotalWorkersCount(@RequestParam("id") Schedule schedule){
-        if(schedule==null){
+        /*if(schedule==null){
             throw new AS_15_8_PPM_Exception("Ошибка получения количества обработчиков! Расписание ещё не создано");
         }
         return scheduleService.getFreeWorkersCount(
                 LocalDate.now(),
                 scheduleRepo.getScheduleStartTime(schedule.getId()),
-                scheduleRepo.getScheduleEndTime(schedule.getId()));
+                scheduleRepo.getScheduleEndTime(schedule.getId()));*/
+        return scheduleService.getTotalWorkersCount();
     }
 
     //TODO кидать 400
@@ -141,12 +164,12 @@ public class ScheduleController {
                 new TypeReference<List<Arrangement>>() {});
 
         schedule.setMaxWorkersCount(scheduleData.get("maxWorkersCount").asInt());
-        int freeWorkersCount = scheduleService.getFreeWorkersCount(
+       /* int freeWorkersCount = scheduleService.getFreeWorkersCount(
                 LocalDate.now(),
                 scheduleRepo.getScheduleStartTime(schedule.getId()),
                 scheduleRepo.getScheduleEndTime(schedule.getId()));
         if(freeWorkersCount < schedule.getMaxWorkersCount())
-            throw new AS_15_8_PPM_Exception("Ошибка! Свободное количество обработчиков меньше, чем заданное для расчета ("+freeWorkersCount+" < "+schedule.getMaxWorkersCount()+")");
+            throw new AS_15_8_PPM_Exception("Ошибка! Свободное количество обработчиков меньше, чем заданное для расчета ("+freeWorkersCount+" < "+schedule.getMaxWorkersCount()+")");*/
         LocalDate plannedDate = null;
         if(scheduleData.has("plannedDate"))
             plannedDate = LocalDate.parse(scheduleData.get("plannedDate").asText(), DateTimeFormatter.ISO_DATE);
@@ -211,6 +234,10 @@ public class ScheduleController {
         return ResponseEntity.ok(briefArrangements);
     }
 
+    @GetMapping(path = "/all_periods_workers_count")
+    public List<String[]> getAllPeriodsWorkersCount(@RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        return schedulePeriodRepo.findAllPeriodsWorkersCount(date);
+    }
 
     @Data
     @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -237,9 +264,9 @@ public class ScheduleController {
                 List<Arrangement> arrangements = entry.getValue();
 
                 if (isRealTrafficGreaterThanSlaConfig(arrangements, schedule, SlaPeriod.DAY))
-                    description.set(description + "Превышение трафика за день для " + accessTool + ";  ");
+                    description.set(description + "Превышение трафика за день для " + accessTool + ";");
                 if (isRealTrafficGreaterThanSlaConfig(arrangements, schedule, SlaPeriod.MONTH))
-                    description.set(description + "Превышение трафика за месяц для " + accessTool + ";  ");
+                    description.set(description + "Превышение трафика за месяц для " + accessTool + ";");
             });
             writeDescriptionToDb(schedule, description.get());
             return description.get();
@@ -319,5 +346,4 @@ public class ScheduleController {
             scheduleRepo.save(schedule);
         }
     }
-
 }

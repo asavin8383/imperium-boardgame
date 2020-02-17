@@ -22,7 +22,7 @@ import org.springframework.kafka.support.serializer.JsonSerde;
 import org.springframework.stereotype.Service;
 import restapi.ErdiChecker;
 import services.ArrangementService;
-import services.ResultService;
+import services.ResultsKafkaService;
 
 import java.util.Date;
 
@@ -42,7 +42,7 @@ public class ResultsHandler {
     private String resultsCountTableName;
 
     private final ErdiChecker erdiChecker;
-    private final ResultService resultService;
+    private final ResultsKafkaService resultsKafkaService;
     private final ArrangementService arrangementService;
 
     @StreamListener(DispatcherChannels.INPUT_RESULTS)
@@ -80,21 +80,21 @@ public class ResultsHandler {
 
         resultsStream
             .filter((checkUnitKey, checkUnitResult) ->
-                arrangementService.isArrangementRunning(checkUnitKey.getArrangementId(), checkUnitKey.getVersion()))
-            .peek((key, result) ->
-                    log.info("\n   ---->>> Принято сообщение с анализом результатов проверки: " +
-                            "мероприятие: " + key.getArrangementId() + ", " + key.getJobId() + ", " + key.getVersion() + ", " +
-                            result.getCheckUnit().getValue() + ", результат: " + result.getCheckResult()))
-            .mapValues((key, result) -> {
-                result.setEndTime(new Date());
+                arrangementService.isArrangementRunning(checkUnitKey.getArrangementId(), checkUnitKey.getVersion()) &&
+                !stopIfForbiddenResultsLimited(checkUnitKey.getArrangementId(), checkUnitKey.getVersion())
+            ).peek((key, result) ->
+                log.info("\n   ---->>> Принято сообщение с анализом результатов проверки: " +
+                    "мероприятие: " + key.getArrangementId() + ", " + key.getJobId() + ", " + key.getVersion() + ", " +
+                    result.getCheckUnit().getValue() + ", результат: " + result.getCheckResult())
+            ).mapValues((key, result) -> {
                 result.setCheckResult(checkErdiStatus(result.getCheckUnit().getContentId(), result.getCheckResult()));
                 if(result instanceof AnalysisResult){
                     ((AnalysisResult)result).setScreenshot(null);
                     ((AnalysisResult)result).setEtalonScreenshot(null);
                 }
+                result.setEndTime(new Date());
                 return result;
-            })
-            .groupByKey()
+            }).groupByKey()
             .reduce((oldMessage, newMessage) -> newMessage,
                     Materialized.<CheckUnitKey, CheckUnitResult, KeyValueStore<Bytes, byte[]>>
                             as(resultsTableName)
@@ -108,5 +108,21 @@ public class ResultsHandler {
             return CheckUnitJobResult.EXCLUDED;
         else
             return status;
+    }
+
+    private boolean stopIfForbiddenResultsLimited(Long arrangementId, Long version){
+        try {
+            Long maxCheckUnitsCount = arrangementService.getMaxCheckUnitsCount(arrangementId);
+            if (maxCheckUnitsCount != null) {
+                long curCheckUnitsCount = resultsKafkaService.getArrangementForbiddenContentResultsCount(arrangementId);
+                if (maxCheckUnitsCount <= curCheckUnitsCount) {
+                    arrangementService.stopExecution(arrangementId, version);
+                    return true;
+                }
+            }
+        } catch (Exception ex) {
+            log.error("Ошибка остановки мероприятия по превышению лимита нарушений", ex);
+        }
+        return false;
     }
 }

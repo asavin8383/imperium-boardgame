@@ -976,6 +976,63 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Запрос поручений с мероприятиями у которых статус STOPPED и FORMED",
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqYWNreSIsInJvbGUiOiJST0xFX09QRVJBVE9SLFJPTEVfRk9STUFMX1RBU0ssUk9MRV9NQU5BR0VfRk9STUFMX1RBU0ssUk9MRV9NQU5BR0VfQVJSQU5HRU1FTlQsUk9MRV9QUkVQQVJBVElPTl9UUkFGRklDLFJPTEVfRElDVElPTkFSWSxST0xFX0ZPUk1BVElPTl9PRl9TQ0hFRFVMRSxST0xFX1ZJRVdfUkVTVUxULFJPTEVfU0VORF9BQ1RfQllfSEFORCxST0xFX01BTkFHRV9QU19QQVNELFJPTEVfTUFOQUdFX0VSREksUk9MRV9WSUVXX1JFUE9SVCxST0xFX0ZPUk1BVElPTl9QQVJBTV9SRVBPUlQsUk9MRV9NQU5BR0VfRE9NQUlOUyxST0xFX01BTkFHRV9NQU5VQUxfQVJSQU5HRU1FTlQiLCJtYWlsIjoiIiwidXNlcl9uYW1lIjoiamFjayIsInNjb3BlIjpbInJlYWQiLCJ3cml0ZSJdLCJleHAiOjE1ODA0NTU5NjUsInVzZXJOYW1lIjoiamFjayIsImF1dGhvcml0aWVzIjpbIlJPTEVfT1BFUkFUT1IiLCJST0xFX1BSRVBBUkFUSU9OX1RSQUZGSUMiLCJST0xFX0ZPUk1BVElPTl9QQVJBTV9SRVBPUlQiLCJST0xFX01BTkFHRV9NQU5VQUxfQVJSQU5HRU1FTlQiLCJST0xFX01BTkFHRV9QU19QQVNEIiwiUk9MRV9GT1JNQVRJT05fT0ZfU0NIRURVTEUiLCJST0xFX01BTkFHRV9FUkRJIiwiUk9MRV9GT1JNQUxfVEFTSyIsIlJPTEVfRElDVElPTkFSWSIsIlJPTEVfVklFV19SRVBPUlQiLCJST0xFX01BTkFHRV9GT1JNQUxfVEFTSyIsIlJPTEVfTUFOQUdFX0FSUkFOR0VNRU5UIiwiUk9MRV9WSUVXX1JFU1VMVCIsIlJPTEVfU0VORF9BQ1RfQllfSEFORCIsIlJPTEVfTUFOQUdFX0RPTUFJTlMiXSwianRpIjoiMzIyZDU3ZmUtNWYwYy00MDlmLWFiN2YtNTkwMGY0YTQ3ODkxIiwiY2xpZW50X2lkIjoiYXMtMTUtOCIsInNlY29uZE5hbWUiOiJjaGFuIn0.dx4Z0njDUvwSttnQAo5y2B7ioUWVAXp8BMufHdZi30W88cQUBKo0AM5rBYYAgULiEz0JttbpAYDk1HemT-YagtWpzW0mCeaFxhKBCkeK0bJ7kUVMmLnn5EDQmIM_aZ8ucTkUVmxkST9_nE4fvNtRt-PNWj9xtOKDzifSI72m-CqLpMwMslGOmF1tFuBBEOXsFgpVzglWGiL3dOMuwt3DhjkH1oyk3VVcvSrAylhGNddyhGE41vLc--MUC27H59AcZbVAx8rhjxemlrJ_rShixYTjMHRnylcSZHP9WuRZ-ZrRqIS2u-M7BTRKC8F5pyMa36L1u51ZIcHwzCPLOYN-4g",
+									"type": "string"
+								},
+								{
+									"key": "tokenType",
+									"value": "bearer",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/ppt/formal_tasks/formed_stopped?sortingDirection=ASC&sortingColumn=id&pageNumber=2&pageSize=10",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ppt",
+								"formal_tasks",
+								"formed_stopped"
+							],
+							"query": [
+								{
+									"key": "sortingDirection",
+									"value": "ASC"
+								},
+								{
+									"key": "sortingColumn",
+									"value": "id"
+								},
+								{
+									"key": "pageNumber",
+									"value": "2"
+								},
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
 				}
 			],
 			"protocolProfileBehavior": {}
@@ -3563,25 +3620,25 @@
 	],
 	"variable": [
 		{
-			"id": "0a0a0237-cfe9-4988-81e0-86eca3b30acf",
+			"id": "b0ddc476-c704-446f-ad8e-91d993c731a2",
 			"key": "url",
 			"value": "http://localhost:15800",
 			"type": "string"
 		},
 		{
-			"id": "a0edccb2-1b79-4983-b0e9-4c2c4bd5b036",
+			"id": "8f124469-9ec3-44f7-a281-cbf65f6480e2",
 			"key": "oper_token",
 			"value": "",
 			"type": "string"
 		},
 		{
-			"id": "77f0f75f-a240-4230-bb7e-0391c1f6ad17",
+			"id": "76001985-e413-4c7e-b705-f5b34dec06d3",
 			"key": "test_url",
 			"value": "http://192.168.5.253:15800",
 			"type": "string"
 		},
 		{
-			"id": "1a8049af-1945-40fe-aefb-abae6ff19418",
+			"id": "9fb4fa79-0590-4daf-992c-5196ee9be623",
 			"key": "admin_token",
 			"value": "",
 			"type": "string"

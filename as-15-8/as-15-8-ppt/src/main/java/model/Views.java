@@ -8,4 +8,5 @@ public final class Views {
     public interface Id{}
     public interface Brief extends Id {}
     public interface Full extends Brief {}
+    public interface FormalTaskWithArrangement extends Id  {}
 }

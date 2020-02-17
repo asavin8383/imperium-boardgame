@@ -16,7 +16,8 @@ public class TrafficBriefView {
     
     private final Long id;
     private final String name;
-    private Long count;
+    private Long actualCheckUnitsCount;
+    private Long erdiCount;
     private TrafficType type;
 
     @JsonIgnore

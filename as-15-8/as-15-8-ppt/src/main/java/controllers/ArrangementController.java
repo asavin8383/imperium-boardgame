@@ -3,15 +3,13 @@ package controllers;
 import controllers.helpers.SortingHelper;
 import enums.ExecutionStatus;
 import enums.SortingDirection;
-import model.traffic.Traffic;
-import repositories.TrafficRepository;
-import restapi.ppm.ArrangementUploader;
 import exceptions.AS_15_8_PPT_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.task.Arrangement;
 import model.task.ExecutionStatusStatistics;
 import model.task.FormalTask;
+import model.traffic.Traffic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,7 +19,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
 import repositories.ArrangementRepo;
+import repositories.TrafficRepository;
 import rest.ArrangementActData;
+import restapi.ppm.ArrangementUploader;
 import services.arrangement.impl.ArrangementService;
 
 import java.util.*;
@@ -173,7 +173,7 @@ public class ArrangementController {
         FormalTask formalTask = arrangement.getFormalTask();
 
         Set<ExecutionStatus> states =
-                new HashSet<>(Arrays.asList(ExecutionStatus.FINISHED, ExecutionStatus.ACT_SENT));
+                new HashSet<>(Arrays.asList(ExecutionStatus.STOPPED,ExecutionStatus.FINISHED, ExecutionStatus.ACT_SENT));
         Boolean res =
                 formalTask.getMissionId() != null && states.contains(arrangement.getStatus());
         return res;
@@ -199,6 +199,7 @@ public class ArrangementController {
         arrangement.setDeadlineDate(newArrangement.getDeadlineDate());
         arrangement.setTrafficId(newArrangement.getTrafficId());
         arrangement.setIsActAvailable(newArrangement.getIsActAvailable());
+        arrangement.setInterruptViolationNumber(newArrangement.getInterruptViolationNumber());
         Traffic traffic = trafficRepository.findById(newArrangement.getTrafficId())
                 .orElseThrow(() -> new AS_15_8_PPT_Exception("Ошибка при добавлении трафика! Трафик не найден по id: " + newArrangement.getTrafficId()));
         arrangement.setTrafficName(traffic.getName());
@@ -224,5 +225,19 @@ public class ArrangementController {
         arrangement.orElseThrow(()-> new AS_15_8_PPT_Exception("Arrangement не найден"));
         arrangement.get().setStatus(ExecutionStatus.ACT_SENT);
         arrangementRepo.save(arrangement.get());
+    }
+
+    @PreAuthorize("hasRole('ROLE_SYSTEM')" )
+    @GetMapping(path = "/interrupt_violation_number")
+    public Long changeActStatus(@RequestParam("id") Arrangement arrangement){
+        Optional.ofNullable(arrangement).orElseThrow(()-> new AS_15_8_PPT_Exception("Arrangement не найден"));
+        return arrangement.getInterruptViolationNumber();
+    }
+
+    @PreAuthorize("hasRole('ROLE_SYSTEM')" )
+    @GetMapping(path = "/access_tool")
+    public String getAccessTool(@RequestParam("id") Arrangement arrangement){
+        Optional.ofNullable(arrangement).orElseThrow(()-> new AS_15_8_PPT_Exception("Arrangement не найден"));
+        return arrangement.getAccessTool();
     }
 }

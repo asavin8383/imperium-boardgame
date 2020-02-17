@@ -56,11 +56,11 @@ public class ArrangementController {
         .map(arr -> {
             Long checkUnits = arrangement.getCheckUnitsCount();
 
-            if (checkUnits == null)
-                throw new AS_15_8_DispatcherException("Ошибка расчёта процента выполнения мероприятия. checkUnits is null");
+            if (checkUnits == null || checkUnits == 0)
+                return 0L;
 
             long arrangementsCount = resultsKafkaService.getResultsCount(arrangement.getId());
-            return arrangementsCount * 100 / checkUnits;
+            return Math.min(arrangementsCount * 100 / checkUnits, 100);
         }).orElse(0L);
     }
 
@@ -74,5 +74,11 @@ public class ArrangementController {
     @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
     public Map<Long, Set<Long>> getStoppedArrangement() {
         return arrangementService.getStoppedArrangements();
+    }
+
+    @PostMapping("/stop_all_running")
+    @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
+    public void stopAllRunningArrangements() {
+        arrangementService.stopAllRunningArrangements();
     }
 }

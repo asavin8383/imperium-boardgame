@@ -41,6 +41,7 @@ public class PodWebClient {
     private static final String GET_ERDI_CHECK_UNITS_COUNT = "pod/erdi/check_units_count";
 
     private static final int fetchFluxConcurrency = 50;
+    private static final int BUFFER_SIZE = 1000;
 
     @Value("${gateway.url}")
     private String gatewayUrl;
@@ -111,7 +112,7 @@ public class PodWebClient {
                         .queryParam("registryNames", registryNames == null ? null : String.join(",", registryNames))
                         .queryParam("resourceTypes", resourceTypes == null ? null : String.join(",", resourceTypes))
                         .queryParam("resourceValue", resourceValue)
-                        .queryParam("violationNames,", violationNames == null ? null : String.join(",", violationNames))
+                        .queryParam("violationNames", violationNames == null ? null : String.join(",", violationNames))
 
                         .queryParam("size", size)
                         .queryParam("startTime", startTime)
@@ -138,8 +139,8 @@ public class PodWebClient {
     }
 
     public Flux<List<CheckUnit>> fetchCheckUnits(List<Long> contentIds) {
-        List<List<Long>> ids = packListToLists(contentIds, 1000);
-        return Flux.fromIterable(ids)
+        return Flux.fromIterable(contentIds)
+                .buffer(BUFFER_SIZE)
                 .map(this::getCheckUnitsByContentIds);
     }
 
@@ -167,32 +168,6 @@ public class PodWebClient {
                     .block();
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
             throw AS_15_8_PPT_Exception.logAndGet(log, String.format("Ошибка получения чек-юнитов в ППТ, код возврата %s", ex.getStatusCode()), ex);
-        }
-    }
-
-    private Flux<CheckUnit> getCheckUnitsByContentId(Long contentId){
-        String uri = UriComponentsBuilder
-                .fromUriString(GET_CHECK_UNITS_URL)
-                .queryParam("id", contentId)
-                .build().toString();
-
-        try {
-            //log.info("Получение чек-юнитов ЕРДИ {} по запросу: {}", contentId, uri);
-            return webClient.get()
-                    .uri(uri)
-                    .exchange()
-                    .flatMapMany(clientResponse -> {
-                        if(clientResponse.statusCode().equals(HttpStatus.OK)){
-                            log.info("Чек юниты получены успешно, content_id: {}", contentId);
-                            return clientResponse.bodyToFlux(CheckUnit.class);
-                        } else {
-                            log.warn("Ошибка получения чек юнитов по content_id: {}, статус: {}", contentId, clientResponse.statusCode().toString());
-                            return Flux.empty();
-                        }
-                    });
-            //return Arrays.asList(oAuth2RestTemplate.getForObject(uri, CheckUnit[].class));
-        } catch (HttpClientErrorException | HttpServerErrorException ex) {
-            throw AS_15_8_PPT_Exception.logAndGet(log, String.format("Ошибка получения чек-юнитов ЕРДИ %d в ППТ, код возврата %s", contentId, ex.getStatusCode()), ex);
         }
     }
 
@@ -230,13 +205,6 @@ public class PodWebClient {
             });
     }
 
-    private static <T>List<List<T>> packListToLists(List<T> list, int subListSize) {
-        final AtomicInteger counter = new AtomicInteger();
-        return new ArrayList<>(list.stream()
-                .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / subListSize))
-                .values());
-    }
-
     private Mono<Long> getErdiIdsCheckUnitCount(List<Long> erdiIds) {
         if(erdiIds == null || erdiIds.size()==0)
             return Mono.just(0L);
@@ -257,17 +225,18 @@ public class PodWebClient {
         return UriComponentsBuilder.fromUriString(endPoint).build().toString();
     }
 
-    public Mono<TrafficBriefView> fetchErdiIdsCheckUnitCount(Traffic traffic, List<Long> erdiIds) {
+    public Mono<TrafficBriefView> fetchActualCheckUnitCount(Traffic traffic, List<Long> erdiIds) {
         if(erdiIds == null || erdiIds.size() == 0)
             return Mono.just(createTrafficBriefView(traffic, 0L));
-        List<List<Long>> ids = packListToLists(erdiIds, 5000);
-        return Flux.fromIterable(ids)
+        return Flux.fromIterable(erdiIds)
+                .buffer(5000)
                 .parallel(fetchFluxConcurrency)
                 .runOn(Schedulers.parallel())
                 .flatMap(this::getErdiIdsCheckUnitCount)
                 .map(staticCount -> createTrafficBriefView(traffic, staticCount))
                 .reduce((acc, current) -> {
-                    acc.setCount(acc.getCount()+current.getCount());
+                    acc.setActualCheckUnitsCount(acc.getActualCheckUnitsCount()+current.getActualCheckUnitsCount());
+                    //acc.setCount(acc.getCount()+current.getCount());
                     return acc;
                 });
     }
@@ -275,9 +244,9 @@ public class PodWebClient {
     public Long calculateActualCheckUnitCount(List<Long> erdiIds) {
         if(erdiIds == null || erdiIds.size() == 0)
             return 0L;
-        List<List<Long>> ids = packListToLists(erdiIds, 5000);
 
-        return Flux.fromIterable(ids)
+        return Flux.fromIterable(erdiIds)
+                .buffer(5000)
                 .parallel(fetchFluxConcurrency)
                 .runOn(Schedulers.parallel())
                 .flatMap(this::getErdiIdsCheckUnitCount)
@@ -288,7 +257,8 @@ public class PodWebClient {
     private TrafficBriefView createTrafficBriefView(Traffic traffic, Long staticCount) {
         TrafficBriefView view = new TrafficBriefView(traffic.getId(), traffic.getName());
         long dynamicCount = 0;
-        view.setCount(staticCount + dynamicCount);
+        //view.setCount(staticCount + dynamicCount);
+        view.setActualCheckUnitsCount(staticCount + dynamicCount);
         view.setType(getTrafficType(staticCount, dynamicCount));
         return view;
     }

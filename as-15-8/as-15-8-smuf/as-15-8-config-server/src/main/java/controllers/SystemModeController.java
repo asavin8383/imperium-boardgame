@@ -1,62 +1,73 @@
 package controllers;
 
+import enums.SystemModeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.SystemMode;
-import model.enums.SystemModeUnit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
 import repositories.SystemModesRepository;
+import services.SystemModeService;
 
-import javax.transaction.Transactional;
+import java.util.Optional;
 
 @RestController
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @RequestMapping(path = "/mode", produces = MediaType.APPLICATION_JSON_VALUE)
-@PreAuthorize("hasAnyRole('ROLE_MANAGE_FUNCTION_MODE', 'ROLE_MANAGE_CONFIGURATIONS')")
 public class SystemModeController {
 
+    private final SystemModeService systemModeService;
     private final SystemModesRepository systemModesRepository;
 
     @PostMapping
-    public SystemModeUnit getCurrentMode(){
-        return systemModesRepository.getCurrentMode()
-                .orElseGet(() -> systemModesRepository.save(new SystemMode(SystemModeUnit.NORMAL, true)).getSystemMode());
+    public SystemModeUnit getCurrentSystemModeUnit() {
+        return systemModeService.getCurrentMode().getSystemMode();
+    }
+
+    @PostMapping(path = "/current")
+    public SystemMode getCurrentMode() {
+        return systemModeService.getCurrentMode();
     }
 
     @PostMapping(path = "/set")
     @PreAuthorize("hasAnyRole('ROLE_MANAGE_FUNCTION_MODE')")
     @Transactional
-    public ResponseEntity setMode(@RequestBody SystemMode mode){
-        SystemModeUnit curMode = systemModesRepository.getCurrentMode()
-                .orElseGet(() -> systemModesRepository.save(new SystemMode(SystemModeUnit.NORMAL, false)).getSystemMode());
-        systemModesRepository.findBySystemMode(curMode)
-                .map(systemMode -> {
-                    systemMode.setActive(false);
-                    return systemModesRepository.save(systemMode);
-                }).orElseGet(() -> {
-                    throw new RuntimeException("Ошибка получения текущего режима");
-                });
+    public SystemModeUnit setMode(@RequestBody SystemMode mode){
+        return systemModeService.changeSystemMode(mode).getSystemMode();
+    }
 
-        return systemModesRepository.findBySystemMode(mode.getSystemMode())
-                .map(systemMode -> {
-                    if(!systemMode.isActive()){
-                        systemMode.setActive(true);
-                        systemModesRepository.save(systemMode);
-                    }
-                    return ResponseEntity.ok("Режим успешно сменен");
-                })
-        .orElseGet(() -> {
-            systemModesRepository.save(new SystemMode(mode.getSystemMode(), true));
-            return ResponseEntity.ok("Режим успешно сменен");
-        });
+    @PutMapping(path = "/service_mode_plan")
+    @PreAuthorize("hasAnyRole('ROLE_MANAGE_FUNCTION_MODE')")
+    public ResponseEntity planServiceModeChanging(@RequestParam String plannedDateTime) {
+        return systemModeService.planServiceModeChange(plannedDateTime);
+    }
+
+    @PostMapping(path = "/any")
+    public ResponseEntity getMode(@RequestParam String systemModeUnit){
+        try {
+            Optional<SystemMode> mode = systemModesRepository.findBySystemMode(SystemModeUnit.valueOf(systemModeUnit));
+            if (mode.isPresent())
+                return ResponseEntity.ok(mode.get());
+            else
+                return ResponseEntity.badRequest().body("Не удалось получить информацию о режиме работы :" + systemModeUnit);
+        } catch (Exception ex) {
+            return ResponseEntity.badRequest().body("Не удалось получить информацию о режиме работы :" + ex);
+        }
+    }
+
+    @PostMapping(path = "/service_mode_cancel")
+    public ResponseEntity serviceModeCancel() {
+        try {
+            systemModeService.cancelServiceModeSchedule();
+            return ResponseEntity.ok("Запаланированный переход в сервисный режим отменён");
+        } catch (Exception ex) {
+            return ResponseEntity.badRequest().body("Запланированный переход в сервисный режим не отменён!");
+        }
     }
 
 }

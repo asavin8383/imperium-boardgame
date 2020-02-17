@@ -70,7 +70,9 @@ public class ErdiTrafficUnitController {
                 visitorsCntWorldMin, visitorsCntWorldMax);
 
         List<Long> ids = idss.flatMap(Flux::fromIterable).collectList().block();
-        saveErdi(unit, ids);
+        if (ids != null) {
+            saveErdi(unit, ids);
+        }
         trafficService.actualizeTrafficCheckUnitsCount(unit.getTraffic().getId());
         return ids;
     }
@@ -104,6 +106,7 @@ public class ErdiTrafficUnitController {
             // assert unit.getType() == TrafficUnitType.CUSTOM
              unit.getCustomErdiList().removeAll(customErdiRepository.findAllById(ids));
         }
+        unit.getTraffic().setActualCheckUnitsCount(0L);
         erdiTrafficUnitRepository.save(unit);
     }
 

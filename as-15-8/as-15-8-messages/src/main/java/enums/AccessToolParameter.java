@@ -25,6 +25,9 @@ public enum AccessToolParameter {
     SEARCH_SYSTEM_PROXY,
     RESULT_NOT_FOUND_REGEXP,
     CHECK_SPELLING_LINK,
+    HINT_CLASS_NAME,
+    HINT_LINK_CLASS_NAME,
+    SEARCH_SYSTEM_SEARCH_QUERY,
 
     //vpn, proxy, anonimyzers, extentions
     STUB_URL,

@@ -2,11 +2,13 @@ subsystem: SMUF
 server:
   port: 15802
 gateway.url: ${GATEWAY_URI:http://localhost:15880}
+system.mode.autoconfig:
+  url: http://localhost:15802/mode
 logging:
   config: config/logback-spring.xml
 eureka:
   client:
-    fetchRegistry: false
+    fetchRegistry: true
     serviceUrl:
       defaultZone: ${gateway.url}/eureka
     oauth2:
@@ -22,7 +24,9 @@ eureka:
 security:
   oauth2:
     resource:
-      tokenInfoUri: ${gateway.url}/security/oauth/check_token
+      #tokenInfoUri: ${gateway.url}/security/oauth/check_token
+      jwk:
+        key-set-uri: ${gateway.url}/security/.well-known/jwks.json
     client:
       clientId: config-server
       clientSecret: 1q0p2w9o
@@ -73,6 +77,7 @@ spring:
 management.endpoints.web.exposure.include: bus-refresh
 user.activity.timeout.config.key: user.activity.timeout
 kibana.link.key: kibana.link
+forward.proxy.link.key: forward.proxy.link
 
 ---
 
@@ -178,7 +183,7 @@ spring:
 spring:
   profiles: dev_danikanov
   datasource:
-    url: jdbc:postgresql://192.168.5.195:5432/asdb
+    url: jdbc:postgresql://192.168.5.211:5432/asdb
   cloud:
     stream:
       bindings:

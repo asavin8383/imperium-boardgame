@@ -26,7 +26,9 @@ eureka:
 security:
   oauth2:
     resource:
-      tokenInfoUri: ${AUTH_SERVER_URI:http://localhost:15805}/oauth/check_token
+      #tokenInfoUri: ${AUTH_SERVER_URI:http://localhost:15805}/oauth/check_token
+      jwk:
+        key-set-uri: ${AUTH_SERVER_URI:http://localhost:15805}/.well-known/jwks.json
     client:
       clientId: discovery
       clientSecret: 1q0p2w9o

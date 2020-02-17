@@ -15,6 +15,7 @@
 	</parent>
 	<artifactId>as-15-8-ppo</artifactId>
 	<name>as-15-8-ppo</name>
+
     <build>
         <finalName>${project.artifactId}</finalName>
         <sourceDirectory>src/main/java</sourceDirectory>

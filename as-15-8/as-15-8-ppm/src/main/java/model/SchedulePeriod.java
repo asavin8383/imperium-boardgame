@@ -43,7 +43,7 @@ public class SchedulePeriod implements Comparable<SchedulePeriod>{
     @JsonView(Views.Brief.class)
     private SchedulePeriodState schedulePeriodState = SchedulePeriodState.CREATED;
 
-    @OneToMany(cascade=CascadeType.ALL, mappedBy = "schedulePeriod", fetch = FetchType.EAGER)
+    @OneToMany(cascade=CascadeType.ALL, mappedBy = "schedulePeriod")
     @JsonView(Views.Full.class)
     private Set<SchedulePeriodArrangement> schedulePeriodArrangements = new HashSet<>();
 

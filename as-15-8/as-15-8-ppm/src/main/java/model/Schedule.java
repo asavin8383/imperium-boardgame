@@ -55,7 +55,7 @@ public class Schedule {
     @ToString.Include
     private String description;
 
-    @OneToMany(cascade=CascadeType.ALL, mappedBy = "schedule", fetch = FetchType.EAGER)
+    @OneToMany(cascade=CascadeType.ALL, mappedBy = "schedule")
     @JsonView(Views.Full.class)
     @OrderBy("startTime")
     private SortedSet<SchedulePeriod> schedulePeriods = new TreeSet<>(Comparator.comparing(SchedulePeriod::getStartTime));

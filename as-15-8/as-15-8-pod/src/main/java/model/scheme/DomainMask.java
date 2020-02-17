@@ -1,6 +1,5 @@
 package model.scheme;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
@@ -8,9 +7,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(schema = "sor", name = "domain_masks")
@@ -23,11 +20,10 @@ public class DomainMask implements Serializable {
     private Long id;
 
     @NotNull
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String domainMask;
 
     @OneToMany(cascade = CascadeType.ALL,  mappedBy = "domainMask")
-    @JsonIgnore
     private List<Domain> domains = new ArrayList<>();
 
     public int getDomainsNumber() {

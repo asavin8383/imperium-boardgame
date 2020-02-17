@@ -1,5 +1,7 @@
 package repositories;
 
+import model.traffic.ErdiTrafficUnit;
+import model.traffic.ErdiTrafficUnitContent;
 import model.traffic.SearchQueryPattern;
 import model.traffic.SearchQueryTrafficUnit;
 import org.springframework.data.domain.Page;
@@ -17,9 +19,8 @@ import java.util.List;
  * Date: 26.11.2019
  */
 @Repository
-public interface SearchQueryPatternRepo extends JpaRepository<SearchQueryPattern, Long> {
+public interface SearchQueryPatternRepo extends JpaRepository<SearchQueryPattern, Long>, SearchQueryPatternRepoAdvanced {
 
-    Page<SearchQueryPattern> findAllByQueryPatternContaining(String pattern, Pageable pageable);
 
     Page<SearchQueryPattern> findAllBySearchQueryTrafficUnits(SearchQueryTrafficUnit searchQueryTrafficUnit, Pageable pageable);
 
@@ -30,4 +31,5 @@ public interface SearchQueryPatternRepo extends JpaRepository<SearchQueryPattern
                     " join Arrangement a on traffic.id = a.trafficId and a.id = :arrangement_id "
     )
     List<SearchQueryPattern> findAllByArrangement(@Param("arrangement_id") Long ArrangementId);
+
 }

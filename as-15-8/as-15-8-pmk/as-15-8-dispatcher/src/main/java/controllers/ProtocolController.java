@@ -24,8 +24,8 @@ import org.springframework.web.bind.annotation.*;
 import repositories.NmapDetailResultRepo;
 import repositories.ResultRepo;
 import repositories.ResultScreenShotRepo;
-import services.ResultService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -38,7 +38,6 @@ public class ProtocolController {
     private final ResultRepo resultRepo;
     private final ResultScreenShotRepo resultScreenShotRepo;
     private final NmapDetailResultRepo nmapDetailResultRepo;
-    private final ResultService resultService;
 
     @PreAuthorize("hasRole('ROLE_VIEW_RESULT')")
     @GetMapping
@@ -56,10 +55,17 @@ public class ProtocolController {
         Pageable pageable = PageRequest.of(pageNumber, pageSize,
                 SortingHelper.createSorting(sortingDirection, sortingColumn));
         if (checkUnitJobResults != null) {
+            List<UserResult> userResults = new ArrayList<>();
+            checkUnitJobResults.forEach(checkUnitJobResult -> {
+                if (UserResult.contains(checkUnitJobResult.name())){
+                    userResults.add(UserResult.valueOf(checkUnitJobResult.name()));
+                }
+            });
             return resultRepo.findByFilter(
                     arrangementId,
                     checkUnitJobResults,
                     checkUnitTypes,
+                    userResults,
                     query,
                     pageable);
         } else {
@@ -104,6 +110,8 @@ public class ProtocolController {
                         throw AS_15_8_DispatcherException.logAndGet(log, "Ошибка сохранения результатов от пользователя: " + ex.getMessage()); }
                     arrResult.setUserResult(result);
                     arrResult.setUserDescription(userResult.get("userDescription"));
+                    //Снимаем чек-бокс для акта (вдруг мы сменили с нарушения на что-то ещё)
+                    arrResult.setCheckForAct(false);
                     resultRepo.save(arrResult);
                     return new ResponseEntity<Object>(arrResult, HttpStatus.OK);
                 }).orElseGet(() -> {
@@ -113,7 +121,4 @@ public class ProtocolController {
                 });
     }
 
-    private boolean checkIsRunningOrPlanned(Result result) {
-        return result.getResult() == CheckUnitJobResult.RUNNING || result.getResult() == CheckUnitJobResult.PLANNED;
-    }
 }

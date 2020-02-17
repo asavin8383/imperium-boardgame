@@ -317,4 +317,25 @@ public class ArrangementController {
         return true;
     }
 
+    @PreAuthorize("hasRole('ROLE_MANAGE_ARRANGEMENT')")
+    @GetMapping()
+    public ResponseEntity getArrangement(@RequestParam("id") Arrangement arrangement){
+        if (arrangement == null){
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok().body(arrangement);
+    }
+
+    @PreAuthorize("hasRole('ROLE_MANAGE_ARRANGEMENT')")
+    @GetMapping("/schedule_id")
+    public ResponseEntity getSchedule(@RequestParam("id") Arrangement arrangement){
+        if (arrangement == null){
+            return ResponseEntity.noContent().build();
+        }
+        Long scheduleId = scheduleRepo.findMaxScheduleIdByArrangement(arrangement.getId());
+        if (scheduleId != null)
+            return ResponseEntity.ok().body(scheduleId);
+        else return ResponseEntity.noContent().build();
+    }
+
 }

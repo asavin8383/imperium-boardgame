@@ -3,7 +3,6 @@ package repositories;
 import enums.ExecutionStatus;
 import model.task.ExecutionStatusStatistics;
 import model.task.FormalTask;
-import model.task.Arrangement;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,7 +11,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface FormalTaskRepository extends JpaRepository<FormalTask, Long>, FormalTaskRepositoryAdvanced {
@@ -29,10 +27,8 @@ public interface FormalTaskRepository extends JpaRepository<FormalTask, Long>, F
 			"    f.status")
 	List<ExecutionStatusStatistics> findSummaryByStatus();
 
-
 	@Query("SELECT COUNT(f) FROM FormalTask f WHERE f.missionId=:missionId")
 	Long countByMissionId(@Param("missionId") Long missionId);
-
 
 	@Query("SELECT a.formalTask FROM Arrangement a WHERE a.id=:arrangementId")
 	FormalTask getByArrangementId(@Param("arrangementId") Long id);
@@ -41,4 +37,10 @@ public interface FormalTaskRepository extends JpaRepository<FormalTask, Long>, F
 	FormalTask getByMissionId(@Param("mission_id") Long id);
 
 	FormalTask findByFgisId(String fgisId);
+
+	@Query(value = "select f from FormalTask f " +
+			"join f.arrangements a " +
+			" on a.status in :statuses")
+
+	Page<FormalTask> findByArrangementStatus(@Param("statuses") List<ExecutionStatus> statuses, Pageable page);
 }

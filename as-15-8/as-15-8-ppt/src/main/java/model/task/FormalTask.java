@@ -1,9 +1,11 @@
 package model.task;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 import enums.ExecutionStatus;
 import lombok.Data;
+import model.Views;
 import model.enums.Priority;
+
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -26,12 +28,14 @@ public class FormalTask implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
+	@JsonView(Views.Id.class)
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "formal_tasks_generator")
 	@SequenceGenerator(name="formal_tasks_generator", schema = "portal", sequenceName = "formal_tasks_id_seq", allocationSize=1)
 	@Column(name="id", nullable=false, updatable=false)
 	private Long id;
 
 	/**Название*/
+	@JsonView(Views.FormalTaskWithArrangement.class)
 	@NotNull
 	@Column(nullable = false)
 	private String title;
@@ -70,11 +74,13 @@ public class FormalTask implements Serializable {
 	private Long missionId;
 
 	/**Ссылка на внешний id поручения*/
+	@JsonView(Views.FormalTaskWithArrangement.class)
 	private String fgisId;
 
 	/**Список мероприятий по заданию*/
-	@OneToMany(cascade=CascadeType.ALL,mappedBy="formalTask")
-	@JsonIgnore
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "formalTask")
+	//@JsonIgnore
+	@JsonView(Views.FormalTaskWithArrangement.class)
 	private List<Arrangement> arrangements = new ArrayList<>();
 	
 	public FormalTask() {

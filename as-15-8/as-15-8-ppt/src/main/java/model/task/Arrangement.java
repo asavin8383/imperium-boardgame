@@ -43,7 +43,7 @@ public class Arrangement implements Serializable {
 	@NotNull
 	@ToString.Include
 	@EqualsAndHashCode.Include
-	@JsonView(Views.Brief.class)
+	@JsonView({Views.Brief.class, Views.FormalTaskWithArrangement.class})
 	@Column(nullable = false)
 	private String title;
 
@@ -51,7 +51,7 @@ public class Arrangement implements Serializable {
 	@Enumerated(EnumType.STRING)
 	@NotNull
 	@ToString.Include
-	@JsonView(Views.Brief.class)
+	@JsonView({Views.Brief.class, Views.FormalTaskWithArrangement.class})
 	@Getter
 	@Column(nullable = false)
 	private ExecutionStatus status;
@@ -67,11 +67,11 @@ public class Arrangement implements Serializable {
 	private LocalDateTime deadlineDate;
 
 	/**Плановая время начала*/
-	@JsonView(Views.Brief.class)
+	@JsonView({Views.Brief.class, Views.FormalTaskWithArrangement.class})
 	private LocalTime plannedStartTime;
 
 	/**Плановое время окончания*/
-	@JsonView(Views.Brief.class)
+	@JsonView({Views.Brief.class, Views.FormalTaskWithArrangement.class})
 	private LocalTime plannedEndTime;
 
 	/**Дата начала*/
@@ -87,7 +87,7 @@ public class Arrangement implements Serializable {
 	private Integer maxWorkersCount;
 
 	/** ПС/ПАСД мероприятия*/
-	@JsonView(Views.Brief.class)
+	@JsonView({Views.Brief.class, Views.FormalTaskWithArrangement.class})
 	@ToString.Include
 	@NotNull
 	private String accessTool;
@@ -96,6 +96,7 @@ public class Arrangement implements Serializable {
 	@ManyToOne(optional=false)
 	@JoinColumn(name="formal_task_id", foreignKey = @ForeignKey(name = "FK_arrangements_formal_task_id"))
 	@JsonIgnore
+	//@JsonView(Views.JsonView.class)
 	private FormalTask formalTask;
 
 	@Column(nullable = false)
@@ -117,6 +118,11 @@ public class Arrangement implements Serializable {
 
 	@Column
 	private Boolean isActAvailable;
+
+	/**Количечтво проверок, после которых следует остановить мероприятие*/
+	@JsonView(Views.Brief.class)
+	@Column
+	private Long interruptViolationNumber;
 
 	public Arrangement() {
 		this.creationDate = LocalDateTime.now();

@@ -1,17 +1,23 @@
 package controllers;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import controllers.helpers.SortingHelper;
 import enums.ExecutionStatus;
 import enums.SortingDirection;
 import exceptions.AS_15_8_PPT_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import model.Views;
+import model.task.Arrangement;
 import model.task.ExecutionStatusStatistics;
 import model.task.FormalTask;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -202,4 +208,29 @@ public class FormalTaskController {
 		return formalTaskRepo.findByFgisId(fgis_id);
 	}
 
+
+    @PreAuthorize("hasRole('ROLE_FORMATION_OF_SCHEDULE')")
+    @GetMapping(path = "/formed_stopped")
+	@JsonView(Views.FormalTaskWithArrangement.class)
+    public Page<FormalTask> getForSchedule(@RequestParam(required = false) SortingDirection sortingDirection,
+										   @RequestParam(required = false) String sortingColumn,
+										   @RequestParam(defaultValue = "0") int pageNumber,
+										   @RequestParam(defaultValue = "10") int pageSize) {
+		Pageable page = PageRequest.of(
+				pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
+
+        List<ExecutionStatus> statuses = Arrays.asList(ExecutionStatus.STOPPED, ExecutionStatus.FORMED);
+        Page<FormalTask> result = formalTaskRepo.findByArrangementStatus(statuses, page);
+		List<FormalTask> filteredResults = result.stream().map(formalTask -> {
+			List<Arrangement> goodArr = formalTask.getArrangements().stream()
+										.filter(arrangement ->
+															 arrangement.getStatus().equals(ExecutionStatus.STOPPED) ||
+														     arrangement.getStatus().equals(ExecutionStatus.FORMED))
+										.collect(Collectors.toList());
+						formalTask.setArrangements(goodArr);
+						return formalTask;
+		}).collect(Collectors.toList());
+
+		return new PageImpl<>(filteredResults, page, filteredResults.size());
+    }
 }

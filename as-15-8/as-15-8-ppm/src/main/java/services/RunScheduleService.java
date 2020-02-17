@@ -95,7 +95,7 @@ public class RunScheduleService {
     private Boolean sendArrangementToDispatcher(Long scheduleId, SchedulePeriodArrangement schedulePeriodArrangement) {
         String url = UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(DISPATCHER_POST_ARR_ENDPOINT).build().toString();
         ArrangementToExecution arrangement = new ArrangementToExecution();
-        arrangement.setCheckUnitsCount(schedulePeriodCheckUnitRepo.getSchedulePeriodCheckUnitCount(scheduleId, schedulePeriodArrangement.getArrangementId()));
+        arrangement.setCheckUnitsCount(schedulePeriodCheckUnitRepo.getSchedulePeriodCheckUnitCount(schedulePeriodArrangement.getArrangementId()));
         arrangement.setId(schedulePeriodArrangement.getArrangementId());
         arrangement.setVersion(scheduleId);
 

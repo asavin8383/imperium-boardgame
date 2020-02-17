@@ -7,6 +7,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * Created by san
  * Date: 04.12.2019
@@ -15,4 +17,6 @@ import org.springframework.stereotype.Repository;
 public interface SearchQueryPatternContentJoinRepo extends JpaRepository<SearchQueryPatternContentJoin, Long> {
 
     Page<SearchQueryPatternContentJoin> findAllBySearchQueryPattern(SearchQueryPattern searchQueryPattern, Pageable pageable);
+
+    List<SearchQueryPatternContentJoin> findAllBySearchQueryPatternAndContentIdIn(SearchQueryPattern searchQueryPattern, List<Long> ids);
 }

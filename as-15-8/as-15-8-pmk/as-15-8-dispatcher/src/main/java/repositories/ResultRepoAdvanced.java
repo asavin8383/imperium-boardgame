@@ -3,6 +3,7 @@ package repositories;
 import checkUnits.CheckUnitType;
 import enums.CheckUnitJobResult;
 import model.Result;
+import model.enums.UserResult;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -15,6 +16,7 @@ public interface ResultRepoAdvanced {
             Long arrangementId,
             List<CheckUnitJobResult> checkUnitJobResultNames,
             List<CheckUnitType> checkUnitTypes,
+            List<UserResult> userResults,
             String query,
             Pageable pageable
     );
