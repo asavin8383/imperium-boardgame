@@ -22,7 +22,10 @@ public class DynamicTrafficController {
     private final DynamicTrafficUnitRepository dynamicTrafficUnitRepository;
 
     @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public void addDynamicTrafficQueryToUnit(@PathVariable("id") DynamicTrafficUnit unit) {
-        dynamicTrafficUnitRepository.save(unit);
+    public void addDynamicTrafficQueryToUnit(@PathVariable("id") DynamicTrafficUnit unit, String query) {
+        if (unit != null) {
+            unit.setQuery(query);
+            dynamicTrafficUnitRepository.save(unit);
+        }
     }
 }

@@ -23,11 +23,11 @@
     </changeSet>
     
     <changeSet author="danikanov" id="1581947264931-21">
-        <addForeignKeyConstraint baseColumnNames="category_id" baseTableName="dynamic_traffic_unit" baseTableschemaName="portal" constraintName="FKdplmry2b0qn4q3sxsb1ul54up" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="access_tools_categories" referencedTableSchemaName="portal" validate="true" onUpdate="CASCADE" onDelete="CASCADE"/>
+        <addForeignKeyConstraint baseColumnNames="category_id" baseTableName="dynamic_traffic_unit" baseTableSchemaName="portal" constraintName="FKdplmry2b0qn4q3sxsb1ul54up" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="access_tools_categories" referencedTableSchemaName="portal" validate="true" onUpdate="CASCADE" onDelete="CASCADE"/>
     </changeSet>
     
     <changeSet author="danikanov" id="1581947264931-22">
-        <addForeignKeyConstraint baseColumnNames="traffic_id" baseTableName="dynamic_traffic_unit" baseTableschemaName="portal" constraintName="FKetplqc3d046u0hn8wdn6lkqme" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="traffic" referencedTableSchemaName="portal" validate="true" onUpdate="CASCADE" onDelete="CASCADE"/>
+        <addForeignKeyConstraint baseColumnNames="traffic_id" baseTableName="dynamic_traffic_unit" baseTableSchemaName="portal" constraintName="FKetplqc3d046u0hn8wdn6lkqme" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="traffic" referencedTableSchemaName="portal" validate="true" onUpdate="CASCADE" onDelete="CASCADE"/>
     </changeSet>
     
 </databaseChangeLog>
