@@ -6,22 +6,18 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.enums.TrafficUnitType;
 import model.traffic.ErdiTrafficUnit;
-import model.traffic.ErdiTrafficUnitContent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Flux;
 import repositories.CustomErdiRepository;
 import repositories.ErdiContentJoinRepository;
 import repositories.ErdiTrafficUnitRepository;
-import services.traffic.TrafficService;
-import webClients.PodWebClient;
+import services.traffic.ErdiTrafficUnitService;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(path = "/traffic/unit/erdi", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -33,12 +29,11 @@ public class ErdiTrafficUnitController {
     private final ErdiTrafficUnitRepository erdiTrafficUnitRepository;
     private final CustomErdiRepository customErdiRepository;
     private final ErdiContentJoinRepository erdiContentJoinRepository;
-    private final PodWebClient podWebClient;
-    private final TrafficService trafficService;
+    private final ErdiTrafficUnitService erdiTrafficUnitService;
 
     @PutMapping(path = "/{id}/add", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void addErdiToUnit(@PathVariable("id") ErdiTrafficUnit unit, @RequestBody List<Long> ids) {
-        saveErdi(unit, ids);
+        erdiTrafficUnitService.saveErdi(unit, ids);
     }
 
     @PutMapping(path = "/{id}/addFromPod")
@@ -63,21 +58,14 @@ public class ErdiTrafficUnitController {
             @RequestParam(required = false) Long visitorsCntWorldMin,
             @RequestParam(required = false) Long visitorsCntWorldMax
             ) {
-
-        Flux<List<Long>> idss = podWebClient.getErdiIdList(idMask, categoryNames, decisionOrgs, infoTypeIds,
+        List<Long> ids = erdiTrafficUnitService.saveErdis(unit, idMask, categoryNames, decisionOrgs, infoTypeIds,
                 registryNames, resourceTypes, resourceValue, violationNames, size,
                 startTime, endTime, random, sortingDirection, sortingColumn, visitorsCntRussiaMin, visitorsCntRussiaMax,
                 visitorsCntWorldMin, visitorsCntWorldMax);
-
-        List<Long> ids = idss.flatMap(Flux::fromIterable).collectList().block();
-        if (ids != null) {
-            saveErdi(unit, ids);
-        }
-        trafficService.actualizeTrafficCheckUnitsCount(unit.getTraffic().getId());
         return ids;
     }
 
-    private void saveErdi(ErdiTrafficUnit unit, List<Long> ids) {
+    /*private void saveErdi(ErdiTrafficUnit unit, List<Long> ids) {
         if (unit == null)
             throw new AS_15_8_PPT_Exception("ErdiTrafficUnit not found");
 
@@ -92,7 +80,7 @@ public class ErdiTrafficUnitController {
         }
         erdiTrafficUnitRepository.save(unit);
         trafficService.actualizeTrafficCheckUnitsCount(unit.getTraffic().getId());
-    }
+    }*/
 
     @PutMapping(path = "/{id}/remove", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void removeErdiFromUnit(@PathVariable("id") ErdiTrafficUnit unit, @RequestBody List<Long> ids) {

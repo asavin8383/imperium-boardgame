@@ -51,4 +51,10 @@ public class Traffic implements Serializable {
             cascade = CascadeType.ALL)
     @JsonIgnore
     private List<SearchQueryTrafficUnit> searchQueryTrafficUnits = new ArrayList<>();
+
+    @OneToMany(mappedBy = "traffic", orphanRemoval = true,
+            cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<DynamicTrafficUnit> dynamicTrafficUnits = new ArrayList<>();
+
 }
