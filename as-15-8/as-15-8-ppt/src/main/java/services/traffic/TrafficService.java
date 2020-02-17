@@ -170,12 +170,12 @@ public class TrafficService {
                                                                                 TrafficUnitType.CUSTOM,
                                                                                 category));
 
-        traffic.getErdiTrafficUnits().add((ErdiTrafficUnit) fillTrafficUnit(new ErdiTrafficUnit(),
+        traffic.getSearchQueryTrafficUnits().add((SearchQueryTrafficUnit) fillTrafficUnit(new ErdiTrafficUnit(),
                                                                                 traffic,
                                                                                 TrafficUnitType.TEMPLATE,
                                                                                 category));
 
-        traffic.getErdiTrafficUnits().add((ErdiTrafficUnit) fillTrafficUnit(new ErdiTrafficUnit(),
+        traffic.getDynamicTrafficUnits().add((DynamicTrafficUnit) fillTrafficUnit(new ErdiTrafficUnit(),
                                                                                 traffic,
                                                                                 TrafficUnitType.DYNAMIC,
                                                                                 category));
