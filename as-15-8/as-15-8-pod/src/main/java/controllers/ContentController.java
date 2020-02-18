@@ -6,6 +6,7 @@ import controllers.utils.SortingHelper;
 import enums.ErdiStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import model.ErdiFilterFields;
 import model.projection.ContentView;
 import model.rest.control.UpdateErdiState;
 import org.apache.commons.lang.time.DateUtils;
@@ -20,10 +21,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
-import repositories.ContentCheckUnitRepository;
 import repositories.ContentHistoryRepository;
 import repositories.ContentViewRepository;
-import repositories.DomainMaskRepo;
 import rest.ResponseStatusString;
 import restapi.ErdiRestClient;
 import services.ContentService;
@@ -110,7 +109,7 @@ public class ContentController {
             @RequestParam(required = false) List<String> resourceTypes,
             @RequestParam(required = false) String resourceValue,
             @RequestParam(required = false) List<String> violationNames,
-            @RequestParam(required = false) Integer size,
+            @RequestParam(required = false, defaultValue = "0") Integer pageSize,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startTime,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endTime,
             @RequestParam(required = false) Boolean random,
@@ -124,9 +123,33 @@ public class ContentController {
             @RequestParam(required = false) String query
     ) {
 
+        if (query != null) {
+            query = query.replace("%26","&");
+            ErdiFilterFields eff = ErdiFilterFields.loadErdiFilterFields(query);
+            idMask = eff.getIdMask();
+            categoryNames = eff.getCategoryNames();
+            decisionOrgs = eff.getDecisionOrgs();
+            infoTypeIds = eff.getInfoTypeIds();
+            registryNames = eff.getRegistryNames();
+            resourceTypes = eff.getResourceTypes();
+            resourceValue = eff.getResourceValue();
+            violationNames = eff.getViolationNames();
+            pageSize = eff.getPageSize();
+            startTime = eff.getStartTime();
+            endTime = eff.getEndTime();
+            random = eff.getRandom();
+            sortingDirection = eff.getSortingDirection();
+            sortingColumn = eff.getSortingColumn();
+            visitorsCntRussiaMin = eff.getVisitorsCntRussiaMin();
+            visitorsCntRussiaMax = eff.getVisitorsCntRussiaMax();
+            visitorsCntWorldMin = eff.getVisitorsCntWorldMin();
+            visitorsCntWorldMax = eff.getVisitorsCntWorldMax();
+            pageNumber = eff.getPageNumber();
+        }
+
         if (!erdiRestClient.getIsLoading()) {
 
-            Pageable pageable = PageRequest.of(pageNumber, size,
+            Pageable pageable = PageRequest.of(pageNumber, pageSize,
                     SortingHelper.createSorting(sortingDirection, sortingColumn));
 
             List<Long> listContent =
@@ -139,7 +162,7 @@ public class ContentController {
                             resourceTypes,
                             resourceValue,
                             violationNames,
-                            size,
+                            pageSize,
                             convertToLocalDateTimeMin(startTime),
                             convertToLocalDateTimeMax(endTime),
                             random,
@@ -147,8 +170,7 @@ public class ContentController {
                             visitorsCntRussiaMin,
                             visitorsCntRussiaMax,
                             visitorsCntWorldMin,
-                            visitorsCntWorldMax,
-                            query);
+                            visitorsCntWorldMax);
 
             return Flux.fromIterable(listContent).buffer(BUFFER_SIZE);
         }

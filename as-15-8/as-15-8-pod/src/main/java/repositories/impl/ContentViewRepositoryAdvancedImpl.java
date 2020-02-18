@@ -50,7 +50,6 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
     private Long visitorsCntRussiaMax;
     private Long visitorsCntWorldMin;
     private Long visitorsCntWorldMax;
-    private String query;
 
     @Override
     public Page<ContentView> findPage(
@@ -74,9 +73,9 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
 
         initBasicArguments(idMask, categoryNames, decisionOrgs, infoTypeIds, registryNames, resourceTypes, resourceValue,
                 violationNames, startTime, endTime, random, pageable, visitorsCntRussiaMin, visitorsCntRussiaMax,
-                visitorsCntWorldMin, visitorsCntWorldMax, null);
+                visitorsCntWorldMin, visitorsCntWorldMax);
 
-        CriteriaQuery<ContentView> select = configurateCriteriaQuery(query);
+        CriteriaQuery<ContentView> select = configurateCriteriaQuery();
         return CriteriaHelper.createPage(em, select, pageable);
     }
 
@@ -98,21 +97,20 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
             Long visitorsCntRussiaMin,
             Long visitorsCntRussiaMax,
             Long visitorsCntWorldMin,
-            Long visitorsCntWorldMax,
-            String query) {
+            Long visitorsCntWorldMax) {
 
         initBasicArguments(idMask, categoryNames, decisionOrgs, infoTypeIds, registryNames, resourceTypes, resourceValue,
                 violationNames, startTime, endTime, random, pageable, visitorsCntRussiaMin, visitorsCntRussiaMax,
-                visitorsCntWorldMin, visitorsCntWorldMax, query);
+                visitorsCntWorldMin, visitorsCntWorldMax);
 
-        CriteriaQuery<ContentView> select = configurateCriteriaQuery(query);
+        CriteriaQuery<ContentView> select = configurateCriteriaQuery();
         return  CriteriaHelper.createIds(em, select, maxResults);
     }
 
     private void initBasicArguments(String idMask, List<String> categoryNames, List<String> decisionOrgs, List<String> infoTypeIds,
                                     List<String> registryNames, List<String> resourceTypes, String resourceValue, List<String> violationNames,
                                     LocalDateTime startTime, LocalDateTime endTime, Boolean random, Pageable pageable,
-                                    Long visitorsCntRussiaMin, Long visitorsCntRussiaMax, Long visitorsCntWorldMin, Long visitorsCntWorldMax, String query) {
+                                    Long visitorsCntRussiaMin, Long visitorsCntRussiaMax, Long visitorsCntWorldMin, Long visitorsCntWorldMax) {
         this.idMask = idMask;
         this.categoryNames = categoryNames;
         this.decisionOrgs = decisionOrgs;
@@ -129,19 +127,16 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
         this.visitorsCntRussiaMax =  visitorsCntRussiaMax;
         this.visitorsCntWorldMin = visitorsCntWorldMin;
         this.visitorsCntWorldMax = visitorsCntWorldMax;
-        this.query = query;
     }
 
-    private CriteriaQuery<ContentView> configurateCriteriaQuery(String query) {
+    private CriteriaQuery<ContentView> configurateCriteriaQuery() {
 
         CriteriaQuery<ContentView> cq = createCriteriaQuery();
         rootContentView = cq.from(ContentView.class);
 
         List<Predicate> predicates = new ArrayList<>();
 
-        if (query != null)
-            createPredicatesFromQuery(query, predicates);
-        else createPredicatesFromMasks(predicates);
+        createPredicatesFromMasks(predicates);
 
         cq.where(predicates.toArray(new Predicate[0]));
 
@@ -150,14 +145,6 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
     }
 
     private void orderByOrRandom(CriteriaQuery cq) {
-        /*if(random != null && pageable!= null && !random){
-            cq.orderBy(QueryUtils.toOrders(pageable.getSort(), rootContentView, criteriaBuilder));
-        } else if (pageable!= null) {
-            cq.orderBy(QueryUtils.toOrders(pageable.getSort(), rootContentView, criteriaBuilder));
-        } else {
-            cq.orderBy(criteriaBuilder.asc(criteriaBuilder.function("random", Double.class)));
-        }*/
-
         if (pageable!= null) {
             cq.orderBy(QueryUtils.toOrders(pageable.getSort(), rootContentView, criteriaBuilder));
         }
@@ -233,24 +220,6 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
             predicates.add(criteriaBuilder.lessThanOrEqualTo(rootContentView.get(ContentView_.VISITORS_CNT_WORLD), visitorsCntWorldMax));
         }
 
-        return predicates;
-    }
-
-    private List<Predicate> createPredicatesFromQuery(String query, List<Predicate> predicates) {
-        if (query != null) {
-            predicates.add(
-                    criteriaBuilder.or(
-                            criteriaBuilder.like(criteriaBuilder.upper(rootContentView.get(ContentView_.ID).as(String.class)), "%" + query.toUpperCase()),
-                            criteriaBuilder.like(criteriaBuilder.upper(rootContentView.get(ContentView_.CATEGORY_NAME)), "%" + query.toUpperCase() + "%"),
-                            criteriaBuilder.like(criteriaBuilder.upper(rootContentView.get(ContentView_.DECISION_ORG)), "%" + query.toUpperCase() + "%"),
-                            criteriaBuilder.like(criteriaBuilder.upper(rootContentView.get(ContentView_.INFO_TYPE_ID)), "%" + query.toUpperCase() + "%"),
-                            criteriaBuilder.like(criteriaBuilder.upper(rootContentView.get(ContentView_.REGISTRY_NAME)), "%" + query.toUpperCase() + "%"),
-                            criteriaBuilder.like(criteriaBuilder.upper(rootContentView.get(ContentView_.RESOURCE_TYPE)), "%" + query.toUpperCase() + "%"),
-                            criteriaBuilder.like(criteriaBuilder.upper(rootContentView.get(ContentView_.RESOURCE_VALUE)), "%" + query.toUpperCase() + "%"),
-                            criteriaBuilder.like(criteriaBuilder.upper(rootContentView.get(ContentView_.VIOLATION_NAME)), "%" + query.toUpperCase() + "%")
-                    )
-            );
-        }
         return predicates;
     }
 
