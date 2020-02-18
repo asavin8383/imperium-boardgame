@@ -6,10 +6,7 @@ import model.traffic.DynamicTrafficUnit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import repositories.DynamicTrafficUnitRepository;
 
 @RestController
@@ -22,9 +19,9 @@ public class DynamicTrafficController {
     private final DynamicTrafficUnitRepository dynamicTrafficUnitRepository;
 
     @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public void addDynamicTrafficQueryToUnit(@PathVariable("id") DynamicTrafficUnit unit, String query) {
+    public void addDynamicTrafficQueryToUnit(@PathVariable("id") DynamicTrafficUnit unit, @RequestParam String query) {
         if (unit != null) {
-            unit.setQuery(query);
+            unit.setQuery(query.replace("&", "%26"));
             dynamicTrafficUnitRepository.save(unit);
         }
     }
