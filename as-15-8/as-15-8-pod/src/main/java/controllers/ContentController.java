@@ -109,7 +109,7 @@ public class ContentController {
             @RequestParam(required = false) List<String> resourceTypes,
             @RequestParam(required = false) String resourceValue,
             @RequestParam(required = false) List<String> violationNames,
-            @RequestParam(required = false, defaultValue = "0") Integer pageSize,
+            @RequestParam(required = false) Integer size,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startTime,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endTime,
             @RequestParam(required = false) Boolean random,
@@ -134,7 +134,7 @@ public class ContentController {
             resourceTypes = eff.getResourceTypes();
             resourceValue = eff.getResourceValue();
             violationNames = eff.getViolationNames();
-            pageSize = eff.getPageSize();
+            size = eff.getSize();
             startTime = eff.getStartTime();
             endTime = eff.getEndTime();
             random = eff.getRandom();
@@ -149,7 +149,7 @@ public class ContentController {
 
         if (!erdiRestClient.getIsLoading()) {
 
-            Pageable pageable = PageRequest.of(pageNumber, pageSize,
+            Pageable pageable = PageRequest.of(pageNumber, 10,
                     SortingHelper.createSorting(sortingDirection, sortingColumn));
 
             List<Long> listContent =
@@ -162,7 +162,7 @@ public class ContentController {
                             resourceTypes,
                             resourceValue,
                             violationNames,
-                            pageSize,
+                            size,
                             convertToLocalDateTimeMin(startTime),
                             convertToLocalDateTimeMax(endTime),
                             random,
