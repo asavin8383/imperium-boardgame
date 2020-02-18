@@ -6,7 +6,6 @@ import enums.AccessToolParameter;
 import enums.CheckUnitJobResult;
 import execution.ExecutionJobResult;
 import execution.ExecutionPSJobResult;
-import io.micrometer.core.instrument.util.IOUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.openqa.selenium.NoSuchElementException;
@@ -19,10 +18,7 @@ import robots.exceptions.TimeoutScriptException;
 import robots.utils.EqualityTest;
 import robots.utils.ScriptUtils;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -337,30 +333,17 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         return false;
     }
 
-
     String extractUrl(WebElement element) {
         return element.getAttribute("href");
     }
 
     private boolean checkHintAndSearch(String value) {
         try {
-            observeHintLinks();
-
             WebElement inputField = driver.findElement(
                     By.xpath(xpathInputField));
-            ScriptUtils.type(inputField, inputDelay, value);
-
-            List<String> links = getHintLinks();
-            for(String link : links) {
-                try {
-                    if(equalityTest.equalTo(link)){
-                        return true;
-                    }
-                } catch (Exception ex) {
-                    log.error("Ошибка сверки результатов", ex);
-                }
-            }
-
+            observeHintLinks();
+            if(typeAndCheckHint(inputField, value, inputDelay))
+                return true;
             inputField.sendKeys(Keys.ENTER);
             return false;
         } catch (Exception ex){
@@ -368,24 +351,53 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         }
     }
 
-    private void observeHintLinks() {
-        try(InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("observeHintLinks.js")) {
-            JavascriptExecutor js = (JavascriptExecutor) driver;
-            String script = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
-            js.executeScript(script, this.hintCSSClassName, this.hintLinkCSSClassName);
-        } catch(IOException ex){
-            throw new RuntimeException("Ошибка! Скрипт отслеживания подсказки ПС не найден в ресурсах сервиса", ex);
+    private boolean typeAndCheckHint(WebElement inputField, String query, long sleep) {
+
+        for (char cp : query.toCharArray()) {
+            inputField.sendKeys(new String(
+                    Character.toChars(cp)));
+            if(checkHintLinks())
+                return true;
+            if(sleep > 0L) {
+                try {
+                    Thread.sleep(sleep);
+                } catch (InterruptedException ignored) {}
+            }
         }
+        return false;
+    }
+
+    private boolean checkHintLinks() {
+        List<String> links = getHintLinks();
+        for(String link : links) {
+            try {
+                if(equalityTest.equalTo(link)){
+                    stopHintLinksObserver();
+                    return true;
+                }
+            } catch (Exception ex) {
+                log.error("Ошибка сверки результатов", ex);
+            }
+        }
+        return false;
+    }
+
+    private void observeHintLinks() {
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        String script = ScriptUtils.getScriptFromResource("observeHintLinks.js");
+        js.executeScript(script, this.hintCSSClassName, this.hintLinkCSSClassName);
     }
 
     private List<String> getHintLinks() {
-        try(InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("getHintLinks.js")) {
-            JavascriptExecutor js = (JavascriptExecutor) driver;
-            String script = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
-            return Arrays.asList(js.executeScript(script).toString().split(", "));
-        } catch(IOException ex){
-            throw new RuntimeException("Ошибка! Скрипт получения ссылок из подсказки ПС не найден в ресурсах сервиса", ex);
-        }
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        String script = ScriptUtils.getScriptFromResource("getHintLinks.js");
+        return Arrays.asList(js.executeScript(script).toString().split(", "));
+    }
+
+    private void stopHintLinksObserver() {
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        String script = ScriptUtils.getScriptFromResource("stopHintLinksObserver.js");
+        js.executeScript(script);
     }
 
     private boolean checkPageResult() {

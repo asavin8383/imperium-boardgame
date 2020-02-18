@@ -1,6 +1,7 @@
 package robots.utils;
 
 import checkUnits.CheckUnit;
+import io.micrometer.core.instrument.util.IOUtils;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -13,6 +14,9 @@ import robots.ChromeSettings;
 import robots.exceptions.ExecutionException;
 
 import javax.annotation.Nullable;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -270,4 +274,11 @@ public class ScriptUtils {
         switchToTab(driver, 1);
     }
 
+    public static String getScriptFromResource(String resourceName){
+        try(InputStream inputStream = ScriptUtils.class.getClassLoader().getResourceAsStream(resourceName)) {
+            return IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+        } catch(IOException ex){
+            throw new RuntimeException("Ошибка! Скрипт " + resourceName + " не найден в ресурсах сервиса", ex);
+        }
+    }
 }

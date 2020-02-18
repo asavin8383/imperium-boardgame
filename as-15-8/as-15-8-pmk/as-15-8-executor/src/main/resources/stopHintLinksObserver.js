@@ -1,0 +1,1 @@
+window.observer.disconnect();
