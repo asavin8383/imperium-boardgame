@@ -26,7 +26,7 @@ public class ErdiFilterFields {
     private List<String> resourceTypes;
     private String resourceValue;
     private List<String> violationNames;
-    private Integer pageSize;
+    private Integer size;
     private LocalDate startTime;
     private LocalDate endTime;
     private Boolean random;
