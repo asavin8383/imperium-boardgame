@@ -7,10 +7,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Robot;
 import model.RobotProperty;
-import model.enums.RobotStatus;
 import model.Views;
+import model.enums.RobotStatus;
 import model.enums.RobotType;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -53,12 +55,7 @@ public class AccessToolController {
     @PostMapping("/access_tool_info")
     @PreAuthorize("hasRole('ROLE_SYSTEM')" )
     public AccessToolDTO getOrigNameAndUrl(@RequestParam String name){
-        List<Robot> robots = robotRepository.findByName(name);
-        if(robots.size()!=1){
-            throw new IllegalArgumentException("Ошибка получения свойств робота! По заданному имени робота " + name +
-                " получен не 1 робот. Размер коллекции: " + robots.size());
-        }
-        Robot robot = robots.get(0);
+        Robot robot = getRobotByName(name);
         AccessToolParameter urlParam;
         if (robot.getType()== RobotType.PS){
             urlParam = AccessToolParameter.SEARCH_SYSTEM_URL;
@@ -72,6 +69,51 @@ public class AccessToolController {
             throw new IllegalArgumentException("Ошибка получения свойств робота! По заданному роботу " + robot.getId() +
                 " и ключу: " + urlParam + " получено не 1 свойство. Размер коллекции: " + urls.size());
         }
-        return new AccessToolDTO(name, robot.getOrigName(), urls.get(0).getValue());
+        return new AccessToolDTO(name, robot.getOrigName(), getPropertyValue(robot, urlParam));
+    }
+
+    @PostMapping("/ps_search_query_url")
+    @PreAuthorize("hasRole('ROLE_MANAGE_ARRANGEMENT')")
+    public ResponseEntity<String> getSearchQueryUrl(@RequestParam String name){
+        try {
+            Robot robot = getRobotByName(name);
+            if (robot.getType()!= RobotType.PS){
+                throw new IllegalArgumentException("Ошибка получения ссылки для ПС! переданный робот не является ПС: " + name);
+            }
+            String psUrl = getPropertyValue(robot, AccessToolParameter.SEARCH_SYSTEM_URL);
+            if(Strings.isEmpty(psUrl)){
+                return ResponseEntity.noContent().build();
+            }
+            String psSearchQuery = getPropertyValue(robot, AccessToolParameter.SEARCH_SYSTEM_SEARCH_QUERY);
+            if(Strings.isEmpty(psSearchQuery)){
+                return ResponseEntity.noContent().build();
+            }
+            return ResponseEntity.ok(psUrl+psSearchQuery);
+        } catch (IllegalArgumentException ex){
+            log.error("Ошибка получения ссылки!", ex);
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        }
+    }
+
+    private Robot getRobotByName(String name){
+        List<Robot> robots = robotRepository.findByName(name);
+        if(robots.size()!=1){
+            throw new IllegalArgumentException("Ошибка получения свойств робота! По заданному имени робота " + name +
+                " получен не 1 робот. Размер коллекции: " + robots.size());
+        }
+        return robots.get(0);
+    }
+
+    private String getPropertyValue(Robot robot, AccessToolParameter parameter){
+        List<RobotProperty> properties = robotPropertyRepo.findByRobotAndKey(robot, parameter);
+        if(properties.size()==0){
+            throw new IllegalArgumentException("Ошибка получения свойств робота! По заданному роботу " + robot.getName() +
+                " и ключу: " + parameter + " не найдено ни одно значение");
+        }
+        if(properties.size()>1){
+            throw new IllegalArgumentException("Ошибка получения свойств робота! По заданному роботу " + robot.getName() +
+                " и ключу: " + parameter + " получено не 1 свойство. Размер коллекции: " + properties.size());
+        }
+        return properties.get(0).getValue();
     }
 }

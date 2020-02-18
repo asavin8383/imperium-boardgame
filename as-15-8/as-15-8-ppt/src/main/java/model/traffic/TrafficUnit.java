@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import model.Views;
+import model.catalog.AccessToolsCategory;
 import model.enums.TrafficUnitType;
 
 import javax.persistence.*;
@@ -38,6 +39,11 @@ public abstract class TrafficUnit implements Serializable {
     @ToString.Include
     private String name;
 
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "category_id", nullable = false)
+    @JsonView(Views.Brief.class)
+    protected AccessToolsCategory category;
+
     public abstract void setTraffic(Traffic traffic);
 
     public abstract void syncContentAssociation();
@@ -52,4 +58,6 @@ public abstract class TrafficUnit implements Serializable {
     public final boolean nonEmpty() {
         return !isEmpty();
     }
+
+
 }

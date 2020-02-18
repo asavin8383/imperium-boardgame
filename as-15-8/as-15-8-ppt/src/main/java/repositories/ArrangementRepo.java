@@ -56,4 +56,6 @@ public interface ArrangementRepo extends JpaRepository<Arrangement, Long>, Arran
     @Modifying(clearAutomatically = true)
     @Query("update Arrangement a set a.status =:status where a.id =:id")
     void updateStatusById(@Param("id") Long id, @Param("status") ExecutionStatus status);
+
+
 }

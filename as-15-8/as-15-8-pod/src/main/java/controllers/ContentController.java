@@ -47,8 +47,6 @@ public class ContentController {
     private final ErdiRestClient erdiRestClient;
     private final InfoService infoService;
     private final ContentHistoryRepository contentHistoryRepo;
-    private final ContentCheckUnitRepository contentCheckUnitRepository;
-    private  final DomainMaskRepo domainMaskRepo;
 
     private static int BUFFER_SIZE = 1000;
 
@@ -117,12 +115,13 @@ public class ContentController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endTime,
             @RequestParam(required = false) Boolean random,
             @RequestParam(required = false, defaultValue = "ASC") SortingDirection sortingDirection,
-            @RequestParam(required = false, defaultValue = "includetime") String sortingColumn,
+            @RequestParam(required = false, defaultValue = "includeTime") String sortingColumn,
             @RequestParam(required = false) Long visitorsCntRussiaMin,
             @RequestParam(required = false) Long visitorsCntRussiaMax,
             @RequestParam(required = false) Long visitorsCntWorldMin,
             @RequestParam(required = false) Long visitorsCntWorldMax,
-            @RequestParam(defaultValue = "0") int pageNumber
+            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(required = false) String query
     ) {
 
         if (!erdiRestClient.getIsLoading()) {
@@ -148,7 +147,8 @@ public class ContentController {
                             visitorsCntRussiaMin,
                             visitorsCntRussiaMax,
                             visitorsCntWorldMin,
-                            visitorsCntWorldMax);
+                            visitorsCntWorldMax,
+                            query);
 
             return Flux.fromIterable(listContent).buffer(BUFFER_SIZE);
         }

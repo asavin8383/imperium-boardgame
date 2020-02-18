@@ -7,11 +7,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.scheme.Domain;
 import model.scheme.DomainMask;
-import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import repositories.DomainMaskRepo;
@@ -53,20 +53,36 @@ public class DomainController {
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
     public DomainMask postDomainMask(@RequestBody DomainMask domainMask) {
+        domainMask.getDomains().forEach(domain -> {
+            domain.setDomainMask(domainMask);
+        });
         return domainMaskRepo.save(domainMask);
-
     }
 
     @PutMapping
     public DomainMask replaceDomainMask(@RequestBody DomainMask newDomainMaskItem, @RequestParam("id") DomainMask existingDomainMaskItem){
         if (existingDomainMaskItem == null) {
+            newDomainMaskItem.getDomains().forEach(domain -> {
+                domain.setDomainMask(newDomainMaskItem);
+            });
             return domainMaskRepo.save(newDomainMaskItem);
         } else {
             return domainMaskRepo.save(replaceFields(newDomainMaskItem, existingDomainMaskItem));
         }
     }
+
+    @PutMapping(path = "/domain")
+    public ResponseEntity updateDomain(@RequestParam("id") Domain domain, @RequestBody Domain newDomain){
+        if (domain != null) {
+            domain.setDomainMask(newDomain.getDomainMask());
+            domain.setDomain(newDomain.getDomain());
+            domainRepo.save(domain);
+            return ResponseEntity.ok().body(domain);
+        }
+        return ResponseEntity.badRequest().body("Домен не найден в базе");
+    }
+
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping
@@ -89,6 +105,7 @@ public class DomainController {
 
     private DomainMask replaceFields(DomainMask newDomainMask, DomainMask storedDomainMask){
         storedDomainMask.setDomainMask(newDomainMask.getDomainMask());
+        storedDomainMask.setDomains(newDomainMask.getDomains());
         return storedDomainMask;
     }
 

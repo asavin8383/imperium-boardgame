@@ -14,6 +14,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -48,15 +49,12 @@ public class SystemModeService {
     private volatile boolean cancelServiceModeSchedule = false;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
-    //@Async
     public ResponseEntity planServiceModeChange(String plannedDateTime) {
 
         SystemMode mode = getOrCreateSystemMode(plannedDateTime);
 
         if (plannedTimeGreaterThanNow(mode)) {
-            cancelServiceModeSchedule = false;
-            systemModesRepository.save(mode);
-            scheduler.schedule(changeMode(mode), ldtToDate(mode.getPlannedDateTime()));
+            planServiceModeChange(mode);
             return ResponseEntity.ok("Смена сервисного режима запланирована на " + mode.getPlannedDateTime().format(formatter));
         } if (plannedTimeEqualNow(mode)) {
             changeSystemMode(mode);
@@ -65,6 +63,20 @@ public class SystemModeService {
         else return ResponseEntity.badRequest().body("Смена режима работы на Сервисный не запланирована! Задано некорректное время.");
     }
 
+    private void planServiceModeChange(SystemMode mode) {
+        cancelServiceModeSchedule = false;
+        systemModesRepository.save(mode);
+        scheduler.schedule(changeMode(mode), ldtToDate(mode.getPlannedDateTime()));
+    }
+
+    private boolean ifServiceModeIsPlanned() {
+        Optional<SystemMode> mode = systemModesRepository.findBySystemMode(SystemModeUnit.SERVICE);
+        if (mode.isPresent()) {
+            if (plannedTimeGreaterThanNow(mode.get()) && plannedTimeEqualNow(mode.get()))
+                return true;
+        }
+        return false;
+    }
     private boolean plannedTimeGreaterThanNow(SystemMode mode) {
         return mode.getPlannedDateTime() != null && mode.getPlannedDateTime().isAfter(LocalDateTime.now());
     }
@@ -77,7 +89,7 @@ public class SystemModeService {
     private SystemMode getOrCreateSystemMode(String plannedDateTime) {
         LocalDateTime scheduleTime = parseLdt(plannedDateTime);
         SystemMode mode = systemModesRepository.findBySystemMode(SystemModeUnit.SERVICE)
-                .orElseGet(() -> new SystemMode(SystemModeUnit.SERVICE, false));
+                .orElseGet(() -> new SystemMode(SystemModeUnit.SERVICE));
         mode.setPlannedDateTime(scheduleTime);
         return mode;
     }
@@ -91,40 +103,35 @@ public class SystemModeService {
             if (!cancelServiceModeSchedule) {
                 cancelServiceModeSchedule = false;
                 stopAllArrangementsInDispatcher();
-                mode.setActive(true);
                 mode.setPlannedDateTime(null);
-                systemModesRepository.setAllSysemModesEnabled(false);
-                systemModesRepository.save(mode);
+                SystemMode savedMode = systemModesRepository.save(mode);
+                systemModesRepository.setCurrentSystemMode(savedMode.getId());
                 notifyAllApplications(mode.getSystemMode());
                 log.info("Произошёл запланированный переход в сервисный режим");
             } else cancelServiceModeSchedule = false;
         };
     }
 
-
-    public void cancelSystemModeSchedule() {
+    public void cancelServiceModeSchedule() {
         Optional<SystemMode> mode = systemModesRepository.findBySystemMode(SystemModeUnit.SERVICE);
-        activateNormalMode();
         if (mode.isPresent()) {
-            if (mode.get().isActive() || mode.get().getPlannedDateTime() != null) {
-                cancelServiceModeSchedule = true;
-                mode.get().setPlannedDateTime(null);
-                mode.get().setActive(false);
-                systemModesRepository.save(mode.get());
-                log.info("Запланированный переход в сервисный режим отменён пользователем");
-            }
-        } else cancelServiceModeSchedule = false;
+            cancelServiceModeSchedule = true;
+            mode.get().setPlannedDateTime(null);
+            systemModesRepository.save(mode.get());
+        }
+        activateNormalMode();
     }
 
 
     private SystemMode activateNormalMode() {
         Optional<SystemMode> mode = systemModesRepository.findBySystemMode(SystemModeUnit.NORMAL);
-        systemModesRepository.setAllSysemModesEnabled(false);
         if (mode.isPresent()) {
-            mode.get().setActive(true);
+            systemModesRepository.setCurrentSystemMode(mode.get().getId());
             return systemModesRepository.save(mode.get());
         } else {
-            return systemModesRepository.save(new SystemMode(SystemModeUnit.NORMAL, true));
+            SystemMode savedMode = systemModesRepository.save(new SystemMode(SystemModeUnit.NORMAL));
+            systemModesRepository.setCurrentSystemMode(savedMode.getId());
+            return savedMode;
         }
     }
 
@@ -147,7 +154,6 @@ public class SystemModeService {
 
     public SystemMode getCurrentMode() {
         return systemModesRepository.getCurrentSystemMode()
-                //.orElseGet(() -> systemModesRepository.save(new SystemMode(SystemModeUnit.NORMAL, true)));
                   .orElseGet(this::activateNormalMode);
     }
 
@@ -196,20 +202,19 @@ public class SystemModeService {
     }
 
     public SystemMode changeSystemMode(SystemMode mode) {
-        systemModesRepository.setAllSysemModesEnabled(false);
         notifyAllApplications(mode.getSystemMode());
         stopArrangementsIfNecessary(mode);
         return systemModesRepository.findBySystemMode(mode.getSystemMode())
                 .map(systemMode -> {
-                    if(!systemMode.isActive()){
-                        systemMode.setActive(true);
-                        systemModesRepository.save(systemMode);
-                    }
-                    return mode;
+                    systemMode.setPlannedDateTime(null);
+                    systemModesRepository.save(systemMode);
+                    systemModesRepository.setCurrentSystemMode(systemMode.getId());
+                    return systemMode;
                 })
                 .orElseGet(() -> {
-                    systemModesRepository.save(new SystemMode(mode.getSystemMode(), true));
-                    return mode;
+                    SystemMode savedMode = systemModesRepository.save(new SystemMode(mode.getSystemMode()));
+                    systemModesRepository.setCurrentSystemMode(savedMode.getId());
+                    return savedMode;
                 });
     }
 
@@ -217,4 +222,5 @@ public class SystemModeService {
         if (mode.getSystemMode() == SystemModeUnit.SERVICE || mode.getSystemMode() == SystemModeUnit.EMERGANCE)
             stopAllArrangementsInDispatcher();
     }
+
 }

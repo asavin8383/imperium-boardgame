@@ -1150,6 +1150,26 @@
 				{
 					"name": "Создание маски",
 					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqYWNreSIsInJvbGUiOiJST0xFX09QRVJBVE9SLFJPTEVfRk9STUFMX1RBU0ssUk9MRV9NQU5BR0VfRk9STUFMX1RBU0ssUk9MRV9NQU5BR0VfQVJSQU5HRU1FTlQsUk9MRV9QUkVQQVJBVElPTl9UUkFGRklDLFJPTEVfRElDVElPTkFSWSxST0xFX0ZPUk1BVElPTl9PRl9TQ0hFRFVMRSxST0xFX1ZJRVdfUkVTVUxULFJPTEVfU0VORF9BQ1RfQllfSEFORCxST0xFX01BTkFHRV9QU19QQVNELFJPTEVfTUFOQUdFX0VSREksUk9MRV9WSUVXX1JFUE9SVCxST0xFX0ZPUk1BVElPTl9QQVJBTV9SRVBPUlQsUk9MRV9NQU5BR0VfRE9NQUlOUyxST0xFX01BTkFHRV9NQU5VQUxfQVJSQU5HRU1FTlQiLCJtYWlsIjoiIiwidXNlcl9uYW1lIjoiamFjayIsInNjb3BlIjpbInJlYWQiLCJ3cml0ZSJdLCJleHAiOjE1ODE2Njc4MjMsInVzZXJOYW1lIjoiamFjayIsImF1dGhvcml0aWVzIjpbIlJPTEVfT1BFUkFUT1IiLCJST0xFX1BSRVBBUkFUSU9OX1RSQUZGSUMiLCJST0xFX0ZPUk1BVElPTl9QQVJBTV9SRVBPUlQiLCJST0xFX01BTkFHRV9NQU5VQUxfQVJSQU5HRU1FTlQiLCJST0xFX01BTkFHRV9QU19QQVNEIiwiUk9MRV9GT1JNQVRJT05fT0ZfU0NIRURVTEUiLCJST0xFX01BTkFHRV9FUkRJIiwiUk9MRV9GT1JNQUxfVEFTSyIsIlJPTEVfRElDVElPTkFSWSIsIlJPTEVfVklFV19SRVBPUlQiLCJST0xFX01BTkFHRV9GT1JNQUxfVEFTSyIsIlJPTEVfTUFOQUdFX0FSUkFOR0VNRU5UIiwiUk9MRV9WSUVXX1JFU1VMVCIsIlJPTEVfU0VORF9BQ1RfQllfSEFORCIsIlJPTEVfTUFOQUdFX0RPTUFJTlMiXSwianRpIjoiMDZmODNhNmMtY2E2Ni00NTgxLWFjNjktMzA5N2Q0Njg2MWRhIiwiY2xpZW50X2lkIjoiYXMtMTUtOCIsInNlY29uZE5hbWUiOiJjaGFuIn0.QpPjwKlNj4BAQSXtx0tGUqA-zlYa0KUcizzF9mc9lyueDzFT9yjMDb6QIj2gMEK00lPPbwr5sAcmfRk_rkE1kKAm1X5okkhztkS-M0fXfGzUfXZNhqP1AVMFI3zRui1UUCOTWuWWOBfe4QYIe4Iq6PO8wPcXSugf8uOuSWMiMWrR6tXagOhzpJ07cPyhQjkY69YSKmNbuDte82r8I2sM-9RTbznucmnvhkXdlcDGLLS8tJZZ84VstPzzLSgoL_9zZCZwYEmKRdWdooZs21dDzasohUCHL_lDsofQb-E3pgAJG1YQVjWVWrJxhtFy_fQMB_UAx-HyFKUHHT41D1KJbw",
+									"type": "string"
+								},
+								{
+									"key": "tokenType",
+									"value": "bearer",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [
 							{
@@ -1160,7 +1180,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"domainMask\": \"createdFromPostmanMask\",\n    \"domains\": {\"domain\": \"postmanDomaim\"}\n}"
+							"raw": "{\n    \"domainMask\": \"createdFromPostmanMask\",\n    \"domains\": [\n        {\n            \"domain\": \"postmanDomain\"\n        }\n    ]\n}"
 						},
 						"url": {
 							"raw": "{{url}}/pod/domain-masks/",
@@ -1215,7 +1235,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"domaink\": \"domainName\"\n}",
+							"raw": "{\n    \"domain\": \"postmanDomainTest\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1223,14 +1243,20 @@
 							}
 						},
 						"url": {
-							"raw": "{{url}}/pod/domain-masks/add_domain&id",
+							"raw": "{{url}}/pod/domain-masks/add_domain?id=164",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"pod",
 								"domain-masks",
-								"add_domain&id"
+								"add_domain"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "164"
+								}
 							]
 						}
 					},
