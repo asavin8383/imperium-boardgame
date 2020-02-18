@@ -70,6 +70,9 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
      *  выполнения поискового запроса*/
     private String resultNotFoundRegexp;
 
+    /** Необходимость проверки подсказки ПС */
+    private boolean needCheckHint;
+
     /** CSS класс всплывающей подсказки ПС */
     private String hintCSSClassName;
 
@@ -120,6 +123,9 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         this.xpathItemLink = scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_XPATH_ITEM_LINK);
         this.resultNotFoundRegexp = scriptParams.get(AccessToolParameter.RESULT_NOT_FOUND_REGEXP);
         this.checkSpellingLink = scriptParams.get(AccessToolParameter.CHECK_SPELLING_LINK);
+
+        String needCheckHintStr = scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_CHECK_HINT);
+        this.needCheckHint = Strings.isNotEmpty(needCheckHintStr) && Boolean.parseBoolean(needCheckHintStr);
         this.hintCSSClassName = scriptParams.get(AccessToolParameter.HINT_CLASS_NAME);
         this.hintLinkCSSClassName = scriptParams.get(AccessToolParameter.HINT_LINK_CLASS_NAME);
     }
@@ -188,8 +194,12 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
             return createMessage(false, CheckUnitJobResult.BAD_IP);
         }
 
-        if(checkHintAndSearch(checkUnit.getValue()))
-            return createMessage(true, CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED);
+        if(this.needCheckHint) {
+            if (checkHintAndSearch(checkUnit.getValue()))
+                return createMessage(true, CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED);
+        } else {
+            searchText(checkUnit.getValue());
+        }
 
         if (captcha())
             return createMessage(false, CheckUnitJobResult.CAPTCHA_DETECTED);
@@ -335,6 +345,13 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
 
     String extractUrl(WebElement element) {
         return element.getAttribute("href");
+    }
+
+    private void searchText(String value) {
+        WebElement inputField = driver.findElement(
+                By.xpath(xpathInputField));
+        ScriptUtils.type(inputField, inputDelay, value);
+        inputField.sendKeys(Keys.ENTER);
     }
 
     private boolean checkHintAndSearch(String value) {
