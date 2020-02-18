@@ -38,7 +38,7 @@ public class TestJobExecution {
 		CheckUnitJob checkUnitJob = new CheckUnitJob();
 		checkUnitJob.setAccessTool("yandex");
 
-		checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.DOMAIN, "www.facebook.com"));
+		checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.DOMAIN, "pikabu.ru"));
 		//checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.IP_V6, "2606:4700:0030:0000:0000:0000:681b:b458"));
 
 		ExecutionJobResult executionJobResult = checkUnitVerificationServiceFactory
