@@ -128,7 +128,7 @@ public class ArrangementService {
             }
             arrangementRepo.save(arr);
             if (!isStopped && isActAvailable) {
-                actService.createAct(arrangementId);
+                return actService.createAct(arrangementId);
             }
             return true;
         } catch (Exception ex) {
