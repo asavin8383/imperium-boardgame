@@ -114,7 +114,7 @@ public class PodWebClient {
                         .queryParam("resourceValue", resourceValue)
                         .queryParam("violationNames", violationNames == null ? null : String.join(",", violationNames))
 
-                        .queryParam("size", size)
+                        .queryParam("pageSize", size)
                         .queryParam("startTime", startTime)
                         .queryParam("endTime", endTime)
                         .queryParam("random", random)
