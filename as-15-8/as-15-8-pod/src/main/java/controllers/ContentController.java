@@ -119,7 +119,6 @@ public class ContentController {
             @RequestParam(required = false) Long visitorsCntRussiaMax,
             @RequestParam(required = false) Long visitorsCntWorldMin,
             @RequestParam(required = false) Long visitorsCntWorldMax,
-            @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(required = false) String query
     ) {
 
@@ -144,12 +143,11 @@ public class ContentController {
             visitorsCntRussiaMax = eff.getVisitorsCntRussiaMax();
             visitorsCntWorldMin = eff.getVisitorsCntWorldMin();
             visitorsCntWorldMax = eff.getVisitorsCntWorldMax();
-            pageNumber = eff.getPageNumber();
         }
 
         if (!erdiRestClient.getIsLoading()) {
 
-            Pageable pageable = PageRequest.of(pageNumber, 10,
+            Pageable pageable = PageRequest.of(0, 10,
                     SortingHelper.createSorting(sortingDirection, sortingColumn));
 
             List<Long> listContent =
