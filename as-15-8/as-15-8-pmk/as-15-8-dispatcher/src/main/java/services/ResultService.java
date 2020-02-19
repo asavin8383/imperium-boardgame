@@ -18,6 +18,7 @@ import model.enums.CheckType;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import repositories.ArrangementRepo;
@@ -57,7 +58,9 @@ public class ResultService {
     private final PptClient pptClient;
 
     private final EntityManagerFactory entityManagerFactory;
-    private final int batchSize = 500;
+
+    @Value("#{new Integer('${results.save.batch-size:500}')}")
+    private int batchSize = 500;
 
     @PostConstruct
     private void initImageProcessor() throws Exception {
@@ -173,7 +176,8 @@ public class ResultService {
 
     private void saveJobResult(EntityManager entityManager, Arrangement arrangement, Long jobId, CheckUnitResult checkUnitResult, AccessToolDTO accessToolDTO) {
         DetailResultService<? super CheckUnitResult, ? extends DetailResult> service = AnalysisResultServiceFactory.getService(checkUnitResult.getClass());
-        Result result = resultRepo.findById(jobId).orElseGet(Result::new);
+ //       Result result = resultRepo.findById(jobId).orElseGet(Result::new);
+        Result result = new Result();
         result.setArrangement(arrangement);
         resultsKafkaService.fillResult(result, jobId, checkUnitResult, service);
         DetailResult detailResult = service.getOrCreate(result, checkUnitResult);
