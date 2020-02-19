@@ -180,8 +180,7 @@ public class ResultService {
         Result result = new Result();
         result.setArrangement(arrangement);
         resultsKafkaService.fillResult(result, jobId, checkUnitResult, service);
-        DetailResult detailResult = service.create(checkUnitResult);
-        detailResult.setResult(result);
+        DetailResult detailResult = service.getOrCreate(result, checkUnitResult);
         result.setDetailResult(detailResult);
 
         if(checkUnitResult instanceof AnalysisResult) {
@@ -189,8 +188,7 @@ public class ResultService {
             screenshotsOpt.ifPresent(screenshots -> {
                 if ((screenshots.getScreenshot() != null && screenshots.getScreenshot().length > 0) ||
                     (screenshots.getEtalonScreenshot() != null && screenshots.getEtalonScreenshot().length > 0)) {
-                    //ResultScreenShot resultScreenShot = resultScreenShotRepo.findById(jobId).orElseGet(ResultScreenShot::new);
-                    ResultScreenShot resultScreenShot = new ResultScreenShot();
+                    ResultScreenShot resultScreenShot = resultScreenShotRepo.findById(jobId).orElseGet(ResultScreenShot::new);
                     resultScreenShot.setResult(result);
                     if(dispatcherProperties.getImprint().isUseImprint()){
                         //Устанавливаем штамп на скриншот
