@@ -9,6 +9,7 @@ import model.enums.TrafficType;
 import model.traffic.CustomErdiView;
 import model.traffic.Traffic;
 import model.traffic.TrafficBriefView;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
@@ -25,10 +26,7 @@ import reactor.core.scheduler.Schedulers;
 
 import javax.annotation.PostConstruct;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -139,6 +137,9 @@ public class PodWebClient {
     }
 
     public Flux<List<Long>> getErdiIdList(String query) {
+        if(Strings.isEmpty(query)){
+            return Flux.empty();
+        }
         return webClient.get()
                 .uri(UriComponentsBuilder
                         .fromUriString(PUT_ERDI_WITH_FILTERS)
