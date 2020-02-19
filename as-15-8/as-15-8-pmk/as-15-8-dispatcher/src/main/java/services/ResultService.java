@@ -203,7 +203,12 @@ public class ResultService {
             });
         }
         //resultRepo.save(result);
-        entityManager.merge(result);
+        try {
+            entityManager.persist(result);
+        } catch (Exception ex) {
+            log.warn("Результат уже записан в БД и будет обновлен: " + jobId);
+            entityManager.merge(result);
+        }
     }
 
     private byte[] imprintScreenshot(AccessToolDTO accessToolDTO, CheckUnitResult checkUnitResult, byte[] screenShot, CheckType checkType){
