@@ -180,7 +180,8 @@ public class ResultService {
         Result result = new Result();
         result.setArrangement(arrangement);
         resultsKafkaService.fillResult(result, jobId, checkUnitResult, service);
-        DetailResult detailResult = service.getOrCreate(result, checkUnitResult);
+        DetailResult detailResult = service.create(checkUnitResult);
+        detailResult.setResult(result);
         result.setDetailResult(detailResult);
 
         if(checkUnitResult instanceof AnalysisResult) {
@@ -188,7 +189,8 @@ public class ResultService {
             screenshotsOpt.ifPresent(screenshots -> {
                 if ((screenshots.getScreenshot() != null && screenshots.getScreenshot().length > 0) ||
                     (screenshots.getEtalonScreenshot() != null && screenshots.getEtalonScreenshot().length > 0)) {
-                    ResultScreenShot resultScreenShot = resultScreenShotRepo.findById(jobId).orElseGet(ResultScreenShot::new);
+                    //ResultScreenShot resultScreenShot = resultScreenShotRepo.findById(jobId).orElseGet(ResultScreenShot::new);
+                    ResultScreenShot resultScreenShot = new ResultScreenShot();
                     resultScreenShot.setResult(result);
                     if(dispatcherProperties.getImprint().isUseImprint()){
                         //Устанавливаем штамп на скриншот
@@ -203,12 +205,7 @@ public class ResultService {
             });
         }
         //resultRepo.save(result);
-        try {
-            entityManager.persist(result);
-        } catch (Exception ex) {
-            log.warn("Результат уже записан в БД и будет обновлен: " + jobId);
-            entityManager.merge(result);
-        }
+        entityManager.merge(result);
     }
 
     private byte[] imprintScreenshot(AccessToolDTO accessToolDTO, CheckUnitResult checkUnitResult, byte[] screenShot, CheckType checkType){
