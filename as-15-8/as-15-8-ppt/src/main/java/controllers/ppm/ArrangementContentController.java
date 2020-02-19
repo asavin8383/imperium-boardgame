@@ -2,13 +2,16 @@ package controllers.ppm;
 
 import checkUnits.CheckUnit;
 import checkUnits.CheckUnitType;
+import exceptions.AS_15_8_PPT_Exception;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.enums.SearchQueryReplacePattern;
+import model.task.Arrangement;
 import model.traffic.SearchQueryPattern;
 import model.traffic.SearchQueryPatternContentJoin;
+import model.traffic.Traffic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,9 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
-import repositories.ArrangementRepo;
-import repositories.CustomErdiUnitRepository;
-import repositories.SearchQueryPatternRepo;
+import repositories.*;
 import webClients.PodWebClient;
 
 import java.util.ArrayList;
@@ -40,18 +41,46 @@ public class ArrangementContentController {
     private final CustomErdiUnitRepository customErdiUnitRepository;
     private final PodWebClient podWebClient;
     private final SearchQueryPatternRepo searchQueryPatternRepo;
+    private final TrafficRepository trafficRepository;
+    private final DynamicTrafficUnitRepository dynamicTrafficUnitRepository;
 
     @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<List<CheckUnit>> getAndSendCheckUnits(@RequestParam("id") Long arrangementId) {
 
         //TODO получать все остальные трафик-юниты тут же
         log.info("Запрос на получение check units мероприятия: " + arrangementId);
+        Arrangement arrangement = arrangementRepo.findById(arrangementId).orElseThrow(() ->
+                new AS_15_8_PPT_Exception("Arranegemnt не найден по id: " + arrangementId));
+
+        Traffic traffic = trafficRepository.findById(arrangement.getTrafficId()).orElseThrow(() ->
+                new AS_15_8_PPT_Exception("Трафик не найден по id: " + arrangement.getTrafficId()));
+
         List<Long> contentIds = arrangementRepo.listContentIdsByArrangementId(arrangementId);
+
+        contentIds.addAll(getContenIdsForDynamicTraffic(traffic));
+
         return Flux.concat(
                 podWebClient.fetchCheckUnits(contentIds),
                 Flux.just(getCustomErdiCheckUnits(arrangementId)),
                 Flux.just(getSearchTemplateCheckUnits(arrangementId))
         );
+    }
+
+    private List<Long> getContenIdsForDynamicTraffic(Traffic traffic) {
+        List<Long> contentIds = new ArrayList<>();
+        try {
+            dynamicTrafficUnitRepository.findByTraffic(traffic).forEach( dynamicTrafficUnit -> {
+                log.info("Начат процесс заполнения чек юнитов для динамического трафика");
+                String query = dynamicTrafficUnit.getQuery();
+                Flux<List<Long>> idss = podWebClient.getErdiIdList(query);
+                List<Long> subContent = idss.flatMap(Flux::fromIterable).collectList().block();
+                if (subContent != null)
+                    contentIds.addAll(subContent);
+            });
+            return contentIds;
+        } catch (Exception ex) {
+            throw new AS_15_8_PPT_Exception("Процесс заполнения чек юнитов для динамического трафика неудачен, ошибка: " + ex);
+        }
     }
 
     private List<CheckUnit> getCustomErdiCheckUnits(Long arrangementId){

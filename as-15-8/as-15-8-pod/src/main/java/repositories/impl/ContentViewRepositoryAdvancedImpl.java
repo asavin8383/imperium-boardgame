@@ -1,5 +1,6 @@
 package repositories.impl;
 
+import com.rometools.utils.Strings;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.projection.ContentView;
@@ -50,6 +51,7 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
     private Long visitorsCntRussiaMax;
     private Long visitorsCntWorldMin;
     private Long visitorsCntWorldMax;
+    private String query;
 
     @Override
     public Page<ContentView> findPage(
@@ -73,9 +75,9 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
 
         initBasicArguments(idMask, categoryNames, decisionOrgs, infoTypeIds, registryNames, resourceTypes, resourceValue,
                 violationNames, startTime, endTime, random, pageable, visitorsCntRussiaMin, visitorsCntRussiaMax,
-                visitorsCntWorldMin, visitorsCntWorldMax);
+                visitorsCntWorldMin, visitorsCntWorldMax, query);
 
-        CriteriaQuery<ContentView> select = configurateCriteriaQuery(query);
+        CriteriaQuery<ContentView> select = configurateCriteriaQuery();
         return CriteriaHelper.createPage(em, select, pageable);
     }
 
@@ -101,16 +103,16 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
 
         initBasicArguments(idMask, categoryNames, decisionOrgs, infoTypeIds, registryNames, resourceTypes, resourceValue,
                 violationNames, startTime, endTime, random, pageable, visitorsCntRussiaMin, visitorsCntRussiaMax,
-                visitorsCntWorldMin, visitorsCntWorldMax);
+                visitorsCntWorldMin, visitorsCntWorldMax, null);
 
-        CriteriaQuery<ContentView> select = configurateCriteriaQuery(null);
+        CriteriaQuery<ContentView> select = configurateCriteriaQuery();
         return  CriteriaHelper.createIds(em, select, maxResults);
     }
 
     private void initBasicArguments(String idMask, List<String> categoryNames, List<String> decisionOrgs, List<String> infoTypeIds,
                                     List<String> registryNames, List<String> resourceTypes, String resourceValue, List<String> violationNames,
                                     LocalDateTime startTime, LocalDateTime endTime, Boolean random, Pageable pageable,
-                                    Long visitorsCntRussiaMin, Long visitorsCntRussiaMax, Long visitorsCntWorldMin, Long visitorsCntWorldMax) {
+                                    Long visitorsCntRussiaMin, Long visitorsCntRussiaMax, Long visitorsCntWorldMin, Long visitorsCntWorldMax, String query) {
         this.idMask = idMask;
         this.categoryNames = categoryNames;
         this.decisionOrgs = decisionOrgs;
@@ -127,17 +129,19 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
         this.visitorsCntRussiaMax =  visitorsCntRussiaMax;
         this.visitorsCntWorldMin = visitorsCntWorldMin;
         this.visitorsCntWorldMax = visitorsCntWorldMax;
+        this.query = query;
     }
 
-    private CriteriaQuery<ContentView> configurateCriteriaQuery(String query) {
+    private CriteriaQuery<ContentView> configurateCriteriaQuery() {
 
         CriteriaQuery<ContentView> cq = createCriteriaQuery();
         rootContentView = cq.from(ContentView.class);
 
         List<Predicate> predicates = new ArrayList<>();
 
-        createPredicatesFromMasks(predicates);
-        createPredicatesFromQuery(query, predicates);
+        if(!Strings.isEmpty(query)) {
+            createPredicatesFromQuery(query, predicates);
+        } else createPredicatesFromMasks(predicates);
 
         cq.where(predicates.toArray(new Predicate[0]));
 
@@ -146,15 +150,15 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
     }
 
     private void orderByOrRandom(CriteriaQuery cq) {
-        if(random != null && pageable!= null && !random){
+        if (pageable!= null) {
             cq.orderBy(QueryUtils.toOrders(pageable.getSort(), rootContentView, criteriaBuilder));
-        } else if (pageable!= null) {
-            cq.orderBy(QueryUtils.toOrders(pageable.getSort(), rootContentView, criteriaBuilder));
-        } else {
+        }
+
+        if (random != null && random){
             cq.orderBy(criteriaBuilder.asc(criteriaBuilder.function("random", Double.class)));
         }
-    }
 
+    }
 
     private CriteriaQuery<ContentView> createCriteriaQuery() {
         criteriaBuilder = em.getCriteriaBuilder();

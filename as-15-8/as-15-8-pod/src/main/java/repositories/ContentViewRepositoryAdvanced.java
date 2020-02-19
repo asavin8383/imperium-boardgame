@@ -51,6 +51,5 @@ public interface ContentViewRepositoryAdvanced {
             Long visitorsCntRussiaMax,
             Long visitorsCntWorldMin,
             Long visitorsCntWorldMax
-
     );
 }

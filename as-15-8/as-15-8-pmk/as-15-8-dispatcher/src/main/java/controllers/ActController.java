@@ -82,7 +82,8 @@ public class ActController {
     @PreAuthorize("hasAnyRole('ROLE_SEND_ACT_BY_HAND')")
     public ResponseEntity<Void> createAct(Long arrangementId){
         boolean created = actService.createAct(arrangementId);
-        arrangementRestApi.changeArrangementStatusToActSentPPT(arrangementId);
+        if(created)
+            arrangementRestApi.changeArrangementStatusToActSentPPT(arrangementId);
         return new ResponseEntity<>(created ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR);
     }
 

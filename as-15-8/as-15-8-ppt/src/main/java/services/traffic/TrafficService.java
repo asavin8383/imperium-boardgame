@@ -157,12 +157,28 @@ public class TrafficService {
 
         Traffic traffic = new Traffic();
         traffic.setName(trafficName);
-        traffic.getErdiTrafficUnits().add(createErdiTrafficUnit(
-                traffic, TrafficUnitType.FORMAL, category));
-        traffic.getErdiTrafficUnits().add(createErdiTrafficUnit(
-                traffic, TrafficUnitType.CUSTOM, category));
-        traffic.getSearchQueryTrafficUnits().add(createSearchTrafficUnit(
-                traffic, TrafficUnitType.TEMPLATE, category));
+
+
+
+        traffic.getErdiTrafficUnits().add((ErdiTrafficUnit) fillTrafficUnit(new ErdiTrafficUnit(),
+                                                                                traffic,
+                                                                                TrafficUnitType.FORMAL,
+                                                                                category));
+
+        traffic.getErdiTrafficUnits().add((ErdiTrafficUnit) fillTrafficUnit(new ErdiTrafficUnit(),
+                                                                                traffic,
+                                                                                TrafficUnitType.CUSTOM,
+                                                                                category));
+
+        traffic.getSearchQueryTrafficUnits().add((SearchQueryTrafficUnit) fillTrafficUnit(new SearchQueryTrafficUnit(),
+                                                                                traffic,
+                                                                                TrafficUnitType.TEMPLATE,
+                                                                                category));
+
+        traffic.getDynamicTrafficUnits().add((DynamicTrafficUnit) fillTrafficUnit(new DynamicTrafficUnit(),
+                                                                                traffic,
+                                                                                TrafficUnitType.DYNAMIC,
+                                                                                category));
 
         return convertToFullView(trafficRepository.save(traffic));
     }
@@ -205,15 +221,19 @@ public class TrafficService {
     private Stream<TrafficUnit> getUnitStream(Traffic traffic) {
         List<ErdiTrafficUnit> erdiUnits = traffic.getErdiTrafficUnits();
         List<SearchQueryTrafficUnit> searchUnits = traffic.getSearchQueryTrafficUnits();
-        if (erdiUnits != null && searchUnits != null) {
+        List<DynamicTrafficUnit> dynamicUnits = traffic.getDynamicTrafficUnits();
+        if (erdiUnits != null && searchUnits != null && dynamicUnits != null) {
             return Stream.concat(
                     erdiUnits.stream().map(TrafficUnit.class::cast),
-                    searchUnits.stream().map(TrafficUnit.class::cast)
+                    Stream.concat(searchUnits.stream().map(TrafficUnit.class::cast),
+                    dynamicUnits.stream().map(TrafficUnit.class::cast))
             );
         } else if (erdiUnits != null) {
             return erdiUnits.stream().map(TrafficUnit.class::cast);
         } else if (searchUnits != null) {
             return searchUnits.stream().map(TrafficUnit.class::cast);
+        } else if (dynamicUnits != null) {
+            return dynamicUnits.stream().map(TrafficUnit.class::cast);
         } else {
             return Stream.empty();
         }
@@ -230,27 +250,16 @@ public class TrafficService {
         return TrafficUnitUtils.generateRandomStringBounded();
     }
 
-    // todo unite following methods
-    private ErdiTrafficUnit createErdiTrafficUnit(Traffic traffic,
-                                                  TrafficUnitType type,
-                                                  AccessToolsCategory category) {
+    private TrafficUnit fillTrafficUnit(TrafficUnit trafficUnit,
+                                                        Traffic traffic,
+                                                        TrafficUnitType type,
+                                                        AccessToolsCategory category) {
         String name = TrafficUnitUtils.getNewName(traffic.getName(), type);
-        ErdiTrafficUnit unit = new ErdiTrafficUnit();
-        unit.setName(name);
-        unit.setCategory(category);
-        unit.setTraffic(traffic);
-        return unit;
-    }
 
-    private SearchQueryTrafficUnit createSearchTrafficUnit(Traffic traffic,
-                                                           TrafficUnitType type,
-                                                           AccessToolsCategory category) {
-        String name = TrafficUnitUtils.getNewName(traffic.getName(), type);
-        SearchQueryTrafficUnit unit = new SearchQueryTrafficUnit();
-        unit.setName(name);
-        unit.setCategory(category);
-        unit.setTraffic(traffic);
-        return unit;
+        trafficUnit.setName(name);
+        trafficUnit.setCategory(category);
+        trafficUnit.setTraffic(traffic);
+        return trafficUnit;
     }
 
     private Specification<Traffic> createTrafficSpecification(String query, AccessToolType type) {

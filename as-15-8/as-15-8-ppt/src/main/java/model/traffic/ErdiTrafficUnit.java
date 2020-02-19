@@ -3,12 +3,9 @@ package model.traffic;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import model.Views;
-import model.catalog.AccessToolsCategory;
 import model.enums.TrafficUnitType;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -31,11 +28,6 @@ import java.util.Set;
 public class ErdiTrafficUnit extends TrafficUnit implements Serializable {
 
     private static final long serialVersionUID = 1L;
-
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "category_id", nullable = false)
-    @JsonView(Views.Brief.class)
-    private AccessToolsCategory category;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "traffic_id", nullable = false, foreignKey = @ForeignKey(name = "FK_TRAFFIC"))
@@ -79,4 +71,5 @@ public class ErdiTrafficUnit extends TrafficUnit implements Serializable {
         if (formalErdiList != null)
             formalErdiList.forEach(join -> join.setTrafficUnit(this));
     }
+
 }

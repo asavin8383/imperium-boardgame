@@ -9,6 +9,7 @@ import model.enums.TrafficType;
 import model.traffic.CustomErdiView;
 import model.traffic.Traffic;
 import model.traffic.TrafficBriefView;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
@@ -25,10 +26,7 @@ import reactor.core.scheduler.Schedulers;
 
 import javax.annotation.PostConstruct;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -124,6 +122,28 @@ public class PodWebClient {
                         .queryParam("visitorsCntRussiaMax", visitorsCntRussiaMax)
                         .queryParam("visitorsCntWorldMin", visitorsCntWorldMin)
                         .queryParam("visitorsCntWorldMax", visitorsCntWorldMax)
+                        .build().toString())
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .flatMapMany(clientResponse -> {
+                    if(clientResponse.statusCode().equals(HttpStatus.OK)){
+                        log.info("список id ЕРДИ считан успешно");
+                        return clientResponse.bodyToFlux(new ParameterizedTypeReference<List<Long>>(){});
+                    } else {
+                        log.warn("Ошибка при чтении списка id ЕРДИ, статус: {}", clientResponse.statusCode().toString());
+                        return Flux.empty();
+                    }
+                });
+    }
+
+    public Flux<List<Long>> getErdiIdList(String query) {
+        if(Strings.isEmpty(query)){
+            return Flux.empty();
+        }
+        return webClient.get()
+                .uri(UriComponentsBuilder
+                        .fromUriString(PUT_ERDI_WITH_FILTERS)
+                        .queryParam("query", query)
                         .build().toString())
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
