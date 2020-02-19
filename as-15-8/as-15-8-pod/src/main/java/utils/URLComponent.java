@@ -46,19 +46,6 @@ public class URLComponent {
         String newFragment = isDecodedFragment(fragment) ? encodeFragment(component.getFullFragment()) : fragment;
         String newUrl = createNewURLString(u.getProtocol(), newHost, u.getPort(), newFragment);
 
-        String charset = detectEncodedCharset(fragment);
-
-        /*
-        System.out.println("***");
-        System.out.println(fragment);
-        //System.out.println(UriUtils.decode(fragment, charset));
-        //System.out.println(isDecodedFragment(fragment));
-
-        //System.out.println(UriUtils.encodeFragment(UriUtils.decode(fragment, charset), charset));
-
-        System.out.println(newFragment);
-        System.out.println(newUrl);*/
-
         return fromString(newUrl);
     }
 
