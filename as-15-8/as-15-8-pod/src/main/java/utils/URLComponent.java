@@ -150,7 +150,7 @@ public class URLComponent {
 
     public boolean isUrl() {
         String fragment = getFullFragment();
-        return isDomain() && !StringUtils.isEmpty(fragment) && !fragment.equals("/");
+        return !StringUtils.isEmpty(fragment) && !fragment.equals("/");
     }
 
     public String getFullFragment() {
