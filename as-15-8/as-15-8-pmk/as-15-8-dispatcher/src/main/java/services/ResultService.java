@@ -107,18 +107,11 @@ public class ResultService {
                 .ifPresent(resultsIterator -> {
                     boolean isSaved = true;
                     transaction.begin();
-                    int resultCount = 0;
                     while (resultsIterator.hasNext()) {
-                        if (resultCount > 0 && resultCount % batchSize == 0) {
-                            transaction.commit();
-                            transaction.begin();
-                            entityManager.clear();
-                        }
                         KeyValue<CheckUnitKey, CheckUnitResult> result = resultsIterator.next();
                         //Если штамп ставим, нужно попросить инфо об AccessTool
                         AccessToolDTO accessToolDTO = dispatcherProperties.getImprint().isUseImprint() ? getAccessToolInfo(arrangement.getId()) : null;
                         isSaved = saveArrangementResult(entityManager, result.key, result.value, arrangement, accessToolDTO);
-                        resultCount++;
                     }
                     transaction.commit();
                     if (isSaved) {
