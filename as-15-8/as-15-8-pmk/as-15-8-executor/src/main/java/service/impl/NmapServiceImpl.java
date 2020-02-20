@@ -31,10 +31,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
@@ -196,15 +193,14 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
         throw new ExecutionException("Ошибка создания конфигуратора proxychains. Не задан адрес прокси сервера");
     }
 
-    @SuppressWarnings("ComparatorMethodParameterNotUsed")
     private void fillInputFileWithRandomIpSubnet(Path inputFile, String subnet) throws ExecutionException {
         int subnetIpCount = executorProperties.getNmap().getSubnetIpCount();
         SubnetUtils utils = new SubnetUtils(subnet);
-        String[] allAddresses = utils.getInfo().getAllAddresses();
-        List<String> randomAddresses =
-            Arrays.stream(allAddresses)
-                .sorted((o1, o2) -> ThreadLocalRandom.current().nextInt(-1, 2))
-                .skip(ThreadLocalRandom.current().nextInt(allAddresses.length - subnetIpCount))
+        List<String> allAddresses = Arrays.asList(utils.getInfo().getAllAddresses());
+        Collections.shuffle(allAddresses);
+        List<String> randomAddresses = allAddresses
+                .stream()
+                .skip(ThreadLocalRandom.current().nextInt(allAddresses.size() - subnetIpCount))
                 .limit(subnetIpCount)
                 .collect(Collectors.toList());
 

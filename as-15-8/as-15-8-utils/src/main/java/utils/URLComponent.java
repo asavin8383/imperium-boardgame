@@ -1,13 +1,14 @@
 package utils;
 
+import lombok.NonNull;
 import org.apache.commons.validator.routines.InetAddressValidator;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriUtils;
 
-import javax.validation.constraints.NotNull;
 import java.net.IDN;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,7 +31,7 @@ public class URLComponent {
                 (u.getPort() > 0 ? ":" + u.getPort() : "") + fragment;
     }
 
-    public static URLComponent getDecodedFrom(@NotNull URLComponent component) throws MalformedURLException {
+    public static URLComponent getDecodedFrom(@NonNull URLComponent component) throws MalformedURLException {
         URL u = component.u;
         String newHost = decodeHost(u.getHost());
         String newFragment = decodeFragment(component.getFullFragment());
@@ -38,7 +39,7 @@ public class URLComponent {
         return fromString(newUrl);
     }
 
-    public static URLComponent getEncodedFrom(@NotNull URLComponent component) throws MalformedURLException {
+    public static URLComponent getEncodedFrom(@NonNull URLComponent component) throws MalformedURLException {
         URL u = component.u;
         String newHost = encodeHost(u.getHost());
 
@@ -50,14 +51,14 @@ public class URLComponent {
     }
 
 
-    public static URLComponent fromStringNull(@NotNull String url) {
+    public static URLComponent fromStringNull(@NonNull String url) {
         try {
             return fromString(url);
         } catch (MalformedURLException e) {
             return null;
         }
     }
-    public static URLComponent fromString(@NotNull String url) throws MalformedURLException {
+    public static URLComponent fromString(@NonNull String url) throws MalformedURLException {
         if (!url.matches("^\\w+://.*$")){
             url = "http://" + url;
         }
@@ -83,9 +84,7 @@ public class URLComponent {
 
     public boolean isSimpleFragment() {
         String fragment = getFullFragment();
-        String charset = detectEncodedCharset(fragment);
-        return fragment.equals(UriUtils.decode(fragment, charset)) &&
-                fragment.equals(UriUtils.encodeFragment(fragment, charset));
+        return fragment.equals(decodeFragment(fragment)) && fragment.equals(encodeFragment(fragment));
     }
 
     private static URL createNewURL(String protocol, String host, int port, String fragment) throws MalformedURLException {
@@ -157,21 +156,27 @@ public class URLComponent {
         return getFullFragmentFromUrl(u, StringUtils.isEmpty(origUrl) ? null : origUrl.endsWith("/"));
     }
 
-    public static String decodeHost(@NotNull String host){
+    public static String decodeHost(@NonNull String host){
         return IDN.toUnicode(host);
     }
 
-    public static String encodeHost(@NotNull String host){
+    public static String encodeHost(@NonNull String host){
         return Arrays.stream(host.split("\\.")).map(IDN::toASCII).collect(Collectors.joining("."));
     }
 
-    public static String decodeFragment(@NotNull String fragment){
+    public static String decodeFragment(@NonNull String fragment){
         String charset = detectEncodedCharset(fragment);
-        return UriUtils.decode(fragment, charset);
+        return decodeFragment(fragment, charset);
     }
-
-    public static String encodeFragment(@NotNull String fragment){
+    public static String decodeFragment(@NonNull String fragment, String charset){
+        return StringUtils.uriDecode(fragment, Charset.forName(charset));
+    }
+    
+    public static String encodeFragment(@NonNull String fragment){
         String charset = detectEncodedCharset(fragment);
+        return encodeFragment(fragment, charset);
+    }    
+    public static String encodeFragment(@NonNull String fragment, String charset){
         return UriUtils.encodeFragment(fragment, charset);
     }
 
@@ -196,8 +201,7 @@ public class URLComponent {
 
     public static boolean isDecodedFragment(String str) {
         try{
-            String charset = detectEncodedCharset(str);
-            return str.equals(UriUtils.decode(str, charset));
+            return str.equals(decodeFragment(str));
         }
         catch (Exception e){
             return false;
@@ -213,7 +217,7 @@ public class URLComponent {
         List<String> charsets = getCharsets();
         for (String charset : charsets){
             try {
-                if (str.equals(UriUtils.encodeFragment(UriUtils.decode(str, charset), charset))) {
+                if (str.equals(encodeFragment(decodeFragment(str, charset), charset))) {
                     return charset;
                 }
             }

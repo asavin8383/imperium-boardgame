@@ -22,6 +22,7 @@
 	</properties>
 
 	<modules>
+		<module>as-15-8-utils</module>
 		<module>as-15-8-messages</module>
 		<module>as-15-8-system-mode</module>
 		<module>as-15-8-ppt</module>
