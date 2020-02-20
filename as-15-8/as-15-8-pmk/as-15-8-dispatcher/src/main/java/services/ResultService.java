@@ -17,6 +17,9 @@ import model.enums.ArrangementStatus;
 import model.enums.CheckType;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.logging.log4j.util.Strings;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -29,9 +32,6 @@ import restapi.ConfigClient;
 import restapi.PptClient;
 
 import javax.annotation.PostConstruct;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
@@ -57,9 +57,9 @@ public class ResultService {
     private final ConfigClient configClient;
     private final PptClient pptClient;
 
-    private final EntityManagerFactory entityManagerFactory;
+    private final SessionFactory sessionFactory;
 
-    @Value("#{new Integer('${results.save.batch-size:500}')}")
+    @Value("#{new Integer('${spring.jpa.properties.hibernate.jdbc.batch_size:500}')}")
     private int batchSize = 500;
 
     @PostConstruct
@@ -99,8 +99,8 @@ public class ResultService {
 
     private void saveArrangementResults(Arrangement arrangement) {
         log.info("Начато сохранение мероприятия: " + arrangement.getId());
-        EntityManager entityManager = entityManagerFactory.createEntityManager();
-        EntityTransaction transaction = entityManager.getTransaction();
+        Session session = sessionFactory.openSession();
+        Transaction transaction = session.beginTransaction();
         boolean isStopped = !arrangementService.isArrangementRunning(arrangement.getId(), arrangement.getVersion());
         try {
             resultsKafkaService.getArrangementResultsIterator(arrangement.getId())
@@ -110,14 +110,13 @@ public class ResultService {
                     int resultCount = 0;
                     while (resultsIterator.hasNext()) {
                         if (resultCount > 0 && resultCount % batchSize == 0) {
-                            transaction.commit();
-                            transaction.begin();
-                            entityManager.clear();
+                            session.flush();
+                            session.clear();
                         }
                         KeyValue<CheckUnitKey, CheckUnitResult> result = resultsIterator.next();
                         //Если штамп ставим, нужно попросить инфо об AccessTool
                         AccessToolDTO accessToolDTO = dispatcherProperties.getImprint().isUseImprint() ? getAccessToolInfo(arrangement.getId()) : null;
-                        isSaved = saveArrangementResult(entityManager, result.key, result.value, arrangement, accessToolDTO);
+                        isSaved = saveArrangementResult(session, result.key, result.value, arrangement, accessToolDTO);
                         resultCount++;
                     }
                     transaction.commit();
@@ -143,13 +142,13 @@ public class ResultService {
             arrangement.setStatus(isStopped ? ArrangementStatus.STOPPING : ArrangementStatus.RUNNING);
             arrangementRepo.save(arrangement);
         } finally {
-            entityManager.close();
+            session.close();
         }
     }
 
-    private boolean saveArrangementResult(EntityManager entityManager, CheckUnitKey checkUnitKey, CheckUnitResult checkUnitResult, Arrangement arrangement, AccessToolDTO accessToolDTO) {
+    private boolean saveArrangementResult(Session session, CheckUnitKey checkUnitKey, CheckUnitResult checkUnitResult, Arrangement arrangement, AccessToolDTO accessToolDTO) {
         try {
-            saveJobResult(entityManager, arrangement, checkUnitKey.getJobId(), checkUnitResult, accessToolDTO);
+            saveJobResult(session, arrangement, checkUnitKey.getJobId(), checkUnitResult, accessToolDTO);
         } catch (Exception ex) {
             try {
                 log.error("Ошибка при сохранении результата проверки: " + checkUnitKey.getJobId() + ", " + checkUnitResult.getCheckUnit().getValue(), ex);
@@ -164,7 +163,7 @@ public class ResultService {
                 notification.setEndTime(checkUnitResult.getEndTime());
                 notification.setDescription(sw.toString());
 
-                saveJobResult(entityManager, arrangement, checkUnitKey.getJobId(), notification, accessToolDTO);
+                saveJobResult(session, arrangement, checkUnitKey.getJobId(), notification, accessToolDTO);
                 log.info("Ошибка сохранена: " + checkUnitKey.getJobId());
             } catch (Exception newEx) {
                 log.error("Ошибка при сохранении ошибочной обработки сообщения с анализом результатов проверки: " + checkUnitKey.getJobId() + ", " + checkUnitResult.getCheckUnit().getValue(), newEx);
@@ -174,7 +173,7 @@ public class ResultService {
         return true;
     }
 
-    private void saveJobResult(EntityManager entityManager, Arrangement arrangement, Long jobId, CheckUnitResult checkUnitResult, AccessToolDTO accessToolDTO) {
+    private void saveJobResult(Session session, Arrangement arrangement, Long jobId, CheckUnitResult checkUnitResult, AccessToolDTO accessToolDTO) {
         DetailResultService<? super CheckUnitResult, ? extends DetailResult> service = AnalysisResultServiceFactory.getService(checkUnitResult.getClass());
  //       Result result = resultRepo.findById(jobId).orElseGet(Result::new);
         Result result = new Result();
@@ -209,7 +208,8 @@ public class ResultService {
         }
         //resultRepo.save(result);
         log.info("Начинаем сохранение");
-        entityManager.merge(result);
+        //entityManager.merge(result);
+        session.save(result);
         log.info("Сохранение закончено");
     }
 
