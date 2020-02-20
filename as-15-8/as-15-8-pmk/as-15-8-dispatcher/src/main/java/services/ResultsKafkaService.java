@@ -38,6 +38,9 @@ import java.util.stream.StreamSupport;
 @RequiredArgsConstructor(onConstructor_={@Autowired})
 public class ResultsKafkaService {
 
+    private static final long minValue = 0L;
+    private static final long maxValue = 9999999999999L;
+    
     @Value("${spring.cloud.stream.bindings.results_table.destination}")
     private String resultsTableName;
 
@@ -146,8 +149,8 @@ public class ResultsKafkaService {
         return getResultsKeyValueStore()
             .flatMap(store -> getLastIteratorValue(
                 store.range(
-                    new CheckUnitKey(arrangementId, jobId, Long.MIN_VALUE),
-                    new CheckUnitKey(arrangementId, jobId, Long.MAX_VALUE)
+                    new CheckUnitKey(arrangementId, jobId, minValue),
+                    new CheckUnitKey(arrangementId, jobId, maxValue)
                 )
             )
             .map(kv -> kv.value));
@@ -157,8 +160,8 @@ public class ResultsKafkaService {
         return getScreenshotsKeyValueStore()
             .flatMap(store -> getLastIteratorValue(
                 store.range(
-                    new CheckUnitKey(arrangementId, jobId, Long.MIN_VALUE),
-                    new CheckUnitKey(arrangementId, jobId, Long.MAX_VALUE)
+                    new CheckUnitKey(arrangementId, jobId, minValue),
+                    new CheckUnitKey(arrangementId, jobId, maxValue)
                 )
             )
             .map(kv -> kv.value));
@@ -208,8 +211,8 @@ public class ResultsKafkaService {
 
     Optional<KeyValueIterator<CheckUnitKey, CheckUnitResult>> getArrangementResultsIterator(Long arrangementId) {
         return getResultsKeyValueStore().map(store -> store.range(
-                new CheckUnitKey(arrangementId, Long.MIN_VALUE, Long.MIN_VALUE),
-                new CheckUnitKey(arrangementId, Long.MAX_VALUE, Long.MAX_VALUE))
+                new CheckUnitKey(arrangementId, minValue, minValue),
+                new CheckUnitKey(arrangementId, maxValue, maxValue))
         );
     }
 
