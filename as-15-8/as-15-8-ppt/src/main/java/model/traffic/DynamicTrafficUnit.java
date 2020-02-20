@@ -121,6 +121,10 @@ public class DynamicTrafficUnit extends TrafficUnit implements Serializable {
     @JsonView(Views.Brief.class)
     private Long visitorsCntWorldMax;
 
+    @Column
+    @JsonView(Views.Brief.class)
+    private Long erdiCountAbout = 0L;
+
     @Override
     public void syncContentAssociation() {
 

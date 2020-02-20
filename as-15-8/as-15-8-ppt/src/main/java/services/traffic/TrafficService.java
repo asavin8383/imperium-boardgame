@@ -11,6 +11,7 @@ import model.enums.AccessToolType;
 import model.enums.TrafficType;
 import model.enums.TrafficUnitType;
 import model.traffic.*;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -92,9 +93,14 @@ public class TrafficService {
         long formalErdiCount = trafficRepository.countContentErdiByTrafficId(traffic.getId());
         long customErdiCount = trafficRepository.countCustomErdiByTrafficId(traffic.getId());
         long staticCount = formalErdiCount + customErdiCount;
-        //long dynamicErdiCount = countDynamicTrafficErdis(traffic);
-        //return staticCount + dynamicErdiCount;
-        return staticCount;
+        long dynamicErdiCount = getDynamicTraficErdiCount(traffic);
+        return staticCount + dynamicErdiCount;
+
+    }
+
+    private long getDynamicTraficErdiCount(Traffic traffic) {
+        return dynamicTrafficUnitRepository.findByTraffic(traffic).
+                stream().findFirst().orElseGet(DynamicTrafficUnit::new).getErdiCountAbout();
     }
 
     public Long actualizeTrafficCheckUnitsCount(Long trafficId) {
@@ -338,7 +344,9 @@ public class TrafficService {
     }
 
     private DynamicTrafficUnit replceDynamicTrafficFields(DynamicTrafficUnit dynamicTraffic, DynamicTrafficUnit newDynamicTraffic) {
-        dynamicTraffic.setQuery(newDynamicTraffic.getQuery().replace("&", "%26"));
+        if (!Strings.isEmpty(newDynamicTraffic.getQuery()))
+            dynamicTraffic.setQuery(newDynamicTraffic.getQuery().replace("&", "%26"));
+        else dynamicTraffic.setQuery(null);
         dynamicTraffic.setIdMask(newDynamicTraffic.getIdMask());
         dynamicTraffic.setCategoryNames(newDynamicTraffic.getCategoryNames());
         dynamicTraffic.setDecisionOrgs(newDynamicTraffic.getDecisionOrgs());
@@ -356,6 +364,7 @@ public class TrafficService {
         dynamicTraffic.setVisitorsCntRussiaMax(newDynamicTraffic.getVisitorsCntRussiaMax());
         dynamicTraffic.setVisitorsCntWorldMin(newDynamicTraffic.getVisitorsCntWorldMin());
         dynamicTraffic.setVisitorsCntWorldMax(newDynamicTraffic.getVisitorsCntWorldMax());
+        dynamicTraffic.setErdiCountAbout(newDynamicTraffic.getErdiCountAbout());
 
         return dynamicTraffic;
     }
