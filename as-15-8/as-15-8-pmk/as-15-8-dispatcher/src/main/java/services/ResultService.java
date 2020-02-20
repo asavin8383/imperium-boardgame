@@ -38,6 +38,8 @@ import java.text.SimpleDateFormat;
 import java.util.Objects;
 import java.util.Optional;
 
+import static model.Result_.resultScreenShot;
+
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Slf4j
@@ -180,7 +182,10 @@ public class ResultService {
         Result result = new Result();
         result.setArrangement(arrangement);
         resultsKafkaService.fillResult(result, jobId, checkUnitResult, service);
-        DetailResult detailResult = service.getOrCreate(result, checkUnitResult);
+        //DetailResult detailResult = service.getOrCreate(result, checkUnitResult);
+        DetailResult detailResult = service.create(checkUnitResult);
+        detailResult.setId(jobId);
+        detailResult.setResult(result);
         result.setDetailResult(detailResult);
 
         if(checkUnitResult instanceof AnalysisResult) {
@@ -188,7 +193,9 @@ public class ResultService {
             screenshotsOpt.ifPresent(screenshots -> {
                 if ((screenshots.getScreenshot() != null && screenshots.getScreenshot().length > 0) ||
                     (screenshots.getEtalonScreenshot() != null && screenshots.getEtalonScreenshot().length > 0)) {
-                    ResultScreenShot resultScreenShot = resultScreenShotRepo.findById(jobId).orElseGet(ResultScreenShot::new);
+                    //ResultScreenShot resultScreenShot = resultScreenShotRepo.findById(jobId).orElseGet(ResultScreenShot::new);
+                    ResultScreenShot resultScreenShot = new ResultScreenShot();
+                    resultScreenShot.setId(jobId);
                     resultScreenShot.setResult(result);
                     if(dispatcherProperties.getImprint().isUseImprint()){
                         //Устанавливаем штамп на скриншот
