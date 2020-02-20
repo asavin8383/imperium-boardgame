@@ -5,7 +5,9 @@ import exceptions.AS_15_8_POD_Exception;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -27,6 +29,15 @@ public class ResourceTypeConverter implements AttributeConverter<CheckUnitType, 
 
     @Override
     public Integer convertToDatabaseColumn(CheckUnitType checkUnitType) {
+        return typeToInt(checkUnitType);
+    }
+
+    @Override
+    public CheckUnitType convertToEntityAttribute(Integer checkUnitTypeId) {
+        return intToType(checkUnitTypeId);
+    }
+
+    public static Integer typeToInt(CheckUnitType checkUnitType) {
         if (checkUnitType == null)
             checkUnitType = CheckUnitType.URL;
 
@@ -37,8 +48,7 @@ public class ResourceTypeConverter implements AttributeConverter<CheckUnitType, 
         return map.get(checkUnitType);
     }
 
-    @Override
-    public CheckUnitType convertToEntityAttribute(Integer checkUnitTypeId) {
+    public static CheckUnitType intToType(Integer checkUnitTypeId) {
         if (checkUnitTypeId == null)
             checkUnitTypeId = map.get(CheckUnitType.URL);
 
@@ -54,5 +64,21 @@ public class ResourceTypeConverter implements AttributeConverter<CheckUnitType, 
             throw new AS_15_8_POD_Exception("Невозможно определить checkUnitType по checkUnitTypeId = " + checkUnitTypeId);
 
         return result;
+    }
+
+    public static List<Integer> typeToIntList(CheckUnitType ...list) {
+        List<Integer> res = new ArrayList<>();
+        for (CheckUnitType type : list){
+            res.add(typeToInt(type));
+        }
+        return res;
+    }
+
+    public static List<CheckUnitType> intToTypeList(Integer ...list) {
+        List<CheckUnitType> res = new ArrayList<>();
+        for (Integer id : list){
+            res.add(intToType(id));
+        }
+        return res;
     }
 }
