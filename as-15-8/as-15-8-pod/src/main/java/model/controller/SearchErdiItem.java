@@ -6,6 +6,7 @@ import lombok.Data;
 
 @Data
 public class SearchErdiItem {
+    private Long erdiOriginId;
     private Long erdiId;
     private CheckUnitType checkUnitType;
     private String checkUnitValue;
