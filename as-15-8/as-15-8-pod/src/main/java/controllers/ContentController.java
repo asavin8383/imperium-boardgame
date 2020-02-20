@@ -10,6 +10,7 @@ import model.ErdiFilterFields;
 import model.projection.ContentView;
 import model.rest.control.UpdateErdiState;
 import org.apache.commons.lang.time.DateUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -120,9 +121,10 @@ public class ContentController {
             @RequestParam(required = false) Long visitorsCntWorldMin,
             @RequestParam(required = false) Long visitorsCntWorldMax,
             @RequestParam(required = false) String query
+
     ) {
 
-        if (query != null) {
+        if (!Strings.isEmpty(query)) {
             query = query.replace("%26","&");
             ErdiFilterFields eff = ErdiFilterFields.loadErdiFilterFields(query);
             idMask = eff.getIdMask();

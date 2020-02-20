@@ -19,6 +19,7 @@ public class TrafficBriefView {
     private Long actualCheckUnitsCount;
     private Long erdiCount;
     private TrafficType type;
+    private boolean containsDynamicTraffic = false;
 
     @JsonIgnore
     //@JsonFormat(pattern = "HH:mm dd.MM.yy")

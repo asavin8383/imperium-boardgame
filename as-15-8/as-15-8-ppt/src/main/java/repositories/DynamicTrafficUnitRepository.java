@@ -14,4 +14,6 @@ public interface DynamicTrafficUnitRepository extends JpaRepository<DynamicTraff
 
     @Query("select e from DynamicTrafficUnit e where e.traffic =:traffic")
     List<DynamicTrafficUnit> findByTraffic(@Param("traffic") Traffic traffic);
+
+
 }

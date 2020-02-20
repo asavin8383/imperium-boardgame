@@ -71,8 +71,9 @@ public class ArrangementContentController {
         try {
             dynamicTrafficUnitRepository.findByTraffic(traffic).forEach( dynamicTrafficUnit -> {
                 log.info("Начат процесс заполнения чек юнитов для динамического трафика");
-                String query = dynamicTrafficUnit.getQuery();
-                Flux<List<Long>> idss = podWebClient.getErdiIdList(query);
+                //String query = dynamicTrafficUnit.getQuery();
+                //Flux<List<Long>> idss = podWebClient.getErdiIdList(query);
+                Flux<List<Long>> idss = podWebClient.getErdiIdList(dynamicTrafficUnit);
                 List<Long> subContent = idss.flatMap(Flux::fromIterable).collectList().block();
                 if (subContent != null)
                     contentIds.addAll(subContent);

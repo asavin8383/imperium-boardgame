@@ -7,6 +7,7 @@ import exceptions.AS_15_8_PPT_Exception;
 import lombok.extern.slf4j.Slf4j;
 import model.enums.TrafficType;
 import model.traffic.CustomErdiView;
+import model.traffic.DynamicTrafficUnit;
 import model.traffic.Traffic;
 import model.traffic.TrafficBriefView;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,10 +26,7 @@ import reactor.core.scheduler.Schedulers;
 
 import javax.annotation.PostConstruct;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -99,7 +97,8 @@ public class PodWebClient {
              Long visitorsCntRussiaMin,
              Long visitorsCntRussiaMax,
              Long visitorsCntWorldMin,
-             Long visitorsCntWorldMax
+             Long visitorsCntWorldMax,
+             String query
 
     ) {
         return webClient.get()
@@ -124,6 +123,7 @@ public class PodWebClient {
                         .queryParam("visitorsCntRussiaMax", visitorsCntRussiaMax)
                         .queryParam("visitorsCntWorldMin", visitorsCntWorldMin)
                         .queryParam("visitorsCntWorldMax", visitorsCntWorldMax)
+                        .queryParam("query", query)
                         .build().toString())
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
@@ -138,23 +138,26 @@ public class PodWebClient {
                 });
     }
 
-    public Flux<List<Long>> getErdiIdList(String query) {
-        return webClient.get()
-                .uri(UriComponentsBuilder
-                        .fromUriString(PUT_ERDI_WITH_FILTERS)
-                        .queryParam("query", query)
-                        .build().toString())
-                .accept(MediaType.TEXT_EVENT_STREAM)
-                .exchange()
-                .flatMapMany(clientResponse -> {
-                    if(clientResponse.statusCode().equals(HttpStatus.OK)){
-                        log.info("список id ЕРДИ считан успешно");
-                        return clientResponse.bodyToFlux(new ParameterizedTypeReference<List<Long>>(){});
-                    } else {
-                        log.warn("Ошибка при чтении списка id ЕРДИ, статус: {}", clientResponse.statusCode().toString());
-                        return Flux.empty();
-                    }
-                });
+    public Flux<List<Long>> getErdiIdList(DynamicTrafficUnit dynamicTrafficUnit) {
+        return getErdiIdList(dynamicTrafficUnit.getIdMask(),
+                            dynamicTrafficUnit.getCategoryNames(),
+                            dynamicTrafficUnit.getDecisionOrgs(),
+                            dynamicTrafficUnit.getInfoTypeIds(),
+                            dynamicTrafficUnit.getRegistryNames(),
+                            dynamicTrafficUnit.getResourceTypes(),
+                            dynamicTrafficUnit.getResourceValue(),
+                            dynamicTrafficUnit.getViolationNames(),
+                            dynamicTrafficUnit.getSize(),
+                            dynamicTrafficUnit.getStartTime(),
+                            dynamicTrafficUnit.getEndTime(),
+                            dynamicTrafficUnit.getRandom(),
+                            dynamicTrafficUnit.getSortingDirection(),
+                            dynamicTrafficUnit.getSortingColumn(),
+                            dynamicTrafficUnit.getVisitorsCntRussiaMin(),
+                            dynamicTrafficUnit.getVisitorsCntRussiaMax(),
+                            dynamicTrafficUnit.getVisitorsCntWorldMin(),
+                            dynamicTrafficUnit.getVisitorsCntWorldMax(),
+                            dynamicTrafficUnit.getQuery());
     }
 
     public Flux<List<CheckUnit>> fetchCheckUnits(List<Long> contentIds) {

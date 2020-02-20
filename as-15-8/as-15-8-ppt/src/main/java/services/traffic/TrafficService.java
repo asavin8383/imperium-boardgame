@@ -1,5 +1,6 @@
 package services.traffic;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import controllers.helpers.SortingHelper;
 import enums.SortingDirection;
 import exceptions.AS_15_8_PPT_Exception;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
 import repositories.AccessToolsCategoriesRepo;
+import repositories.DynamicTrafficUnitRepository;
 import repositories.TrafficRepository;
 import utils.TrafficUnitUtils;
 import webClients.PodWebClient;
@@ -28,6 +30,7 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -42,7 +45,7 @@ public class TrafficService {
     private final TrafficRepository trafficRepository;
     private final AccessToolsCategoriesRepo accessToolsCategoriesRepo;
     private final PodWebClient podWebClient;
-    private static long dynamicCount = 0;
+    private final DynamicTrafficUnitRepository dynamicTrafficUnitRepository;
 
     public Page<TrafficBriefView> getBriefTrafficList(SortingDirection sortingDirection,
                                                       String sortingColumn,
@@ -70,6 +73,8 @@ public class TrafficService {
         view.setActualCheckUnitsCount(calculateActualCheckUnitsCount(traffic));
         view.setErdiCount(calculateErdiCount(traffic));
 
+        if (traffic.getDynamicTrafficUnits().size()>0)
+            view.setContainsDynamicTraffic(true);
         view.setType(TrafficType.MIXED);
 
         return view;
@@ -80,14 +85,15 @@ public class TrafficService {
         long customErdiCount = trafficRepository.countCustomErdiByTrafficId(traffic.getId());
 
         long staticCount = formalErdiCount + customErdiCount;
-        return staticCount + dynamicCount;
+        return staticCount;
     }
 
     private Long calculateErdiCount(Traffic traffic) {
         long formalErdiCount = trafficRepository.countContentErdiByTrafficId(traffic.getId());
         long customErdiCount = trafficRepository.countCustomErdiByTrafficId(traffic.getId());
         long staticCount = formalErdiCount + customErdiCount;
-        return staticCount;
+        long dynamicErdiCount = countDynamicTrafficErdis(traffic);
+        return staticCount + dynamicErdiCount;
     }
 
     public Long actualizeTrafficCheckUnitsCount(Long trafficId) {
@@ -104,8 +110,7 @@ public class TrafficService {
     private Long getActualTrafficCheckUnitCount(Long trafficId) {
         try {
             List<Long> erdiIds = trafficRepository.allContentErdiByTrafficId(trafficId);
-            Long actualCheckUnitsCount = podWebClient.calculateActualCheckUnitCount(erdiIds);
-            return actualCheckUnitsCount;
+            return podWebClient.calculateActualCheckUnitCount(erdiIds);
         } catch (Exception e) {
             return 0L;
         }
@@ -175,10 +180,10 @@ public class TrafficService {
                                                                                 TrafficUnitType.TEMPLATE,
                                                                                 category));
 
-        traffic.getDynamicTrafficUnits().add((DynamicTrafficUnit) fillTrafficUnit(new DynamicTrafficUnit(),
+        /*traffic.getDynamicTrafficUnits().add((DynamicTrafficUnit) fillTrafficUnit(new DynamicTrafficUnit(),
                                                                                 traffic,
                                                                                 TrafficUnitType.DYNAMIC,
-                                                                                category));
+                                                                                category));*/
 
         return convertToFullView(trafficRepository.save(traffic));
     }
@@ -292,4 +297,72 @@ public class TrafficService {
         };
     }
 
+    public TrafficFullView addDynamicTrafficUnit(Traffic traffic, DynamicTrafficUnit dynamicTrafficUnit) {
+        AccessToolsCategory category = accessToolsCategoriesRepo
+                .findOneByOrderByIdDesc();
+
+        traffic.getDynamicTrafficUnits().add((DynamicTrafficUnit) fillTrafficUnit(dynamicTrafficUnit,
+                traffic,
+                TrafficUnitType.DYNAMIC,
+                category));
+        return convertToFullView(trafficRepository.save(traffic));
+    }
+
+    public TrafficFullView removeAllDynamicTrafficUnits(Traffic traffic) {
+        traffic.getDynamicTrafficUnits().clear();
+        return convertToFullView(trafficRepository.save(traffic));
+    }
+
+    public List<ObjectNode> getAllErdisForDynamicTraffic(Traffic traffic) {
+        List<Long> contentIds = getDynamicTrafficContentIds(traffic);
+        List<ObjectNode> dynamicTrafficErdiIds = podWebClient.fetchErdi(contentIds);
+        return dynamicTrafficErdiIds;
+    }
+
+    private List<Long> getDynamicTrafficContentIds(Traffic traffic) {
+        List<Long> contentIds = new ArrayList<>();
+        traffic.getDynamicTrafficUnits().forEach(dynamicTrafficUnit -> {
+            Flux<List<Long>> idsFlux = podWebClient.getErdiIdList(dynamicTrafficUnit);
+            List<Long> ids = idsFlux.flatMap(Flux::fromIterable).collectList().block();
+            contentIds.addAll(ids);
+        });
+        return  contentIds;
+    }
+
+    public DynamicTrafficUnit upadateFirstDynamicTrafficUnit(Traffic traffic, DynamicTrafficUnit newDynamicTrafficUnit) {
+        DynamicTrafficUnit dynamicTrafficUnit = traffic.getDynamicTrafficUnits().stream().findFirst().orElseThrow(() ->
+                new AS_15_8_PPT_Exception("У профильного трафика id: " + traffic.getId() + " пустой список динамических трафиков"));
+        dynamicTrafficUnit = replceDynamicTrafficFields(dynamicTrafficUnit, newDynamicTrafficUnit);
+        return dynamicTrafficUnitRepository.save(dynamicTrafficUnit);
+    }
+
+    private DynamicTrafficUnit replceDynamicTrafficFields(DynamicTrafficUnit dynamicTraffic, DynamicTrafficUnit newDynamicTraffic) {
+        dynamicTraffic.setQuery(newDynamicTraffic.getQuery().replace("&", "%26"));
+        dynamicTraffic.setIdMask(newDynamicTraffic.getIdMask());
+        dynamicTraffic.setCategoryNames(newDynamicTraffic.getCategoryNames());
+        dynamicTraffic.setDecisionOrgs(newDynamicTraffic.getDecisionOrgs());
+        dynamicTraffic.setInfoTypeIds(newDynamicTraffic.getInfoTypeIds());
+        dynamicTraffic.setRegistryNames(newDynamicTraffic.getRegistryNames());
+        dynamicTraffic.setResourceTypes(newDynamicTraffic.getResourceTypes());
+        dynamicTraffic.setResourceValue(newDynamicTraffic.getResourceValue());
+        dynamicTraffic.setViolationNames(newDynamicTraffic.getViolationNames());
+        dynamicTraffic.setSize(newDynamicTraffic.getSize());
+        dynamicTraffic.setStartTime(newDynamicTraffic.getStartTime());
+        dynamicTraffic.setEndTime(newDynamicTraffic.getEndTime());
+        dynamicTraffic.setRandom(newDynamicTraffic.getRandom());
+        dynamicTraffic.setSortingDirection(newDynamicTraffic.getSortingDirection());
+        dynamicTraffic.setVisitorsCntRussiaMin(newDynamicTraffic.getVisitorsCntRussiaMin());
+        dynamicTraffic.setVisitorsCntRussiaMax(newDynamicTraffic.getVisitorsCntRussiaMax());
+        dynamicTraffic.setVisitorsCntWorldMin(newDynamicTraffic.getVisitorsCntWorldMin());
+        dynamicTraffic.setVisitorsCntWorldMax(newDynamicTraffic.getVisitorsCntWorldMax());
+
+        return dynamicTraffic;
+    }
+
+    private Long countDynamicTrafficErdis(Traffic traffic) {
+        List<Long> ids = getDynamicTrafficContentIds(traffic);
+        if (ids != null)
+            return (long) ids.size();
+        else return 0L;
+    }
 }
