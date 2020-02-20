@@ -127,6 +127,7 @@ public class ExecutorProperties {
         private String path;
         private Boolean useProxy;
         private String[] portsToCheck;
+        private int subnetIpCount;
     }
 
     @Data

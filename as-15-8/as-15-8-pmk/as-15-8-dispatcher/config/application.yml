@@ -64,8 +64,8 @@ spring:
     properties:
       hibernate:
         format_sql: true
-        order_inserts: true
-        order_updates: true
+        order_inserts: false
+        order_updates: false
         jdbc:
           lob.non_contextual_creation: true
     databasePlatform: org.hibernate.dialect.PostgreSQL9Dialect
