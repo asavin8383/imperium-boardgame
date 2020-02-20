@@ -105,6 +105,12 @@ spring:
     banner-mode: "off"
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb
+  cloud:
+    stream:
+      kafka:
+        streams.binder:
+          configuration:
+            num.stream.threads: 10
 eureka:
   instance:
     metadata-map:
