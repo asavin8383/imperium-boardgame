@@ -16,6 +16,7 @@ import nmap4j.core.scans.IScan;
 import nmap4j.data.NMapRun;
 import nmap4j.data.host.ports.Port;
 import nmap4j.parser.OnePassParser;
+import org.apache.commons.net.util.SubnetUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -27,9 +28,15 @@ import robots.exceptions.ExecutionException;
 import service.CheckUnitVerificationService;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 @Service
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -62,6 +69,7 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
             log.info("Запуск проверки nmap: " + verificationName);
 
             ProxychainsConfigurator proxychainsConfigurator = null;
+            Path inputFile = null;
             Path outputFile = Files.createTempFile("job_" + jobId + "_output", ".xml");
             try {
                 if(nmapProperties.getUseProxy())
@@ -72,7 +80,15 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
                 else
                     baseScan = new BaseScan(nmapProperties.getPath());
 
-                baseScan.includeHost(checkUnitJob.getCheckUnit().getValue());
+                if(checkUnitJob.getCheckUnit().getType().equals(CheckUnitType.IP_V4_SUBNET) ||
+                        checkUnitJob.getCheckUnit().getType().equals(CheckUnitType.IP_V6_SUBNET)){
+                    inputFile = Files.createTempFile("job_" + jobId + "_input", ".txt");
+                    fillInputFileWithRandomIpSubnet(inputFile, checkUnitJob.getCheckUnit().getValue());
+                    baseScan.getArgumentProperties().addFlag(Flag.INPUT_FILENAME, inputFile.toAbsolutePath().toString());
+                } else {
+                    baseScan.includeHost(checkUnitJob.getCheckUnit().getValue());
+                }
+
                 baseScan.addPorts(Arrays.stream(nmapProperties.getPortsToCheck()).mapToInt(Integer::parseInt).toArray());
                 baseScan.addFlag(Flag.TREAT_HOSTS_AS_ONLINE);
                 baseScan.addFlag(Flag.CONNECT_SCAN);
@@ -116,6 +132,9 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
             } finally {
                 if(proxychainsConfigurator != null)
                     proxychainsConfigurator.close();
+                if(inputFile != null && inputFile.toFile().exists())
+                    if(!inputFile.toFile().delete())
+                        log.warn("Ошибка удаления файла с входными адресами для проверки в nmap. Job: " + jobId);
                 if(outputFile != null && outputFile.toFile().exists())
                     if(!outputFile.toFile().delete())
                         log.warn("Ошибка удаления файла с результатом работы nmap. Job: " + jobId);
@@ -175,6 +194,25 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
             );
         }
         throw new ExecutionException("Ошибка создания конфигуратора proxychains. Не задан адрес прокси сервера");
+    }
+
+    @SuppressWarnings("ComparatorMethodParameterNotUsed")
+    private void fillInputFileWithRandomIpSubnet(Path inputFile, String subnet) throws ExecutionException {
+        int subnetIpCount = executorProperties.getNmap().getSubnetIpCount();
+        SubnetUtils utils = new SubnetUtils(subnet);
+        String[] allAddresses = utils.getInfo().getAllAddresses();
+        List<String> randomAddresses =
+            Arrays.stream(allAddresses)
+                .sorted((o1, o2) -> ThreadLocalRandom.current().nextInt(-1, 2))
+                .skip(ThreadLocalRandom.current().nextInt(allAddresses.length - subnetIpCount))
+                .limit(subnetIpCount)
+                .collect(Collectors.toList());
+
+        try(PrintWriter writer = new PrintWriter(inputFile.toFile())){
+            randomAddresses.forEach(writer::println);
+        } catch (Exception ex) {
+            throw new ExecutionException("Ошибка при записи файла IP адресов подсети для проверки по nmap", ex);
+        }
     }
 
     private NMapRun parseNmapResult(Path outputFile) {

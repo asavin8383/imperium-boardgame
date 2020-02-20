@@ -9,6 +9,11 @@
 	</parent>
 
 	<dependencies>
+		<dependency>
+			<groupId>com.ecls.as-15-8</groupId>
+			<artifactId>as-15-8-system-mode</artifactId>
+			<version>1.0</version>
+		</dependency>
 
 		<!-- Spring boot -->
 		<dependency>
@@ -28,16 +33,17 @@
             <version>0.11</version>
         </dependency>
 
+		<!-- Apache -->
+        <dependency>
+            <groupId>commons-net</groupId>
+            <artifactId>commons-net</artifactId>
+            <version>3.6</version>
+        </dependency>
+
         <dependency>
 		    <groupId>junit</groupId>
 		    <artifactId>junit</artifactId>
 		    <scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>com.ecls.as-15-8</groupId>
-			<artifactId>as-15-8-system-mode</artifactId>
-			<version>1.0</version>
 		</dependency>
 
     </dependencies>
