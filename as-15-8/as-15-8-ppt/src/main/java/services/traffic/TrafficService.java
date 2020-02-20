@@ -92,8 +92,9 @@ public class TrafficService {
         long formalErdiCount = trafficRepository.countContentErdiByTrafficId(traffic.getId());
         long customErdiCount = trafficRepository.countCustomErdiByTrafficId(traffic.getId());
         long staticCount = formalErdiCount + customErdiCount;
-        long dynamicErdiCount = countDynamicTrafficErdis(traffic);
-        return staticCount + dynamicErdiCount;
+        //long dynamicErdiCount = countDynamicTrafficErdis(traffic);
+        //return staticCount + dynamicErdiCount;
+        return staticCount;
     }
 
     public Long actualizeTrafficCheckUnitsCount(Long trafficId) {
@@ -359,10 +360,10 @@ public class TrafficService {
         return dynamicTraffic;
     }
 
-    private Long countDynamicTrafficErdis(Traffic traffic) {
+    /*private Long countDynamicTrafficErdis(Traffic traffic) {
         List<Long> ids = getDynamicTrafficContentIds(traffic);
         if (ids != null)
             return (long) ids.size();
         else return 0L;
-    }
+    }*/
 }
