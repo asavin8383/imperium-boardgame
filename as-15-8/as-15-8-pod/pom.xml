@@ -123,14 +123,14 @@
         </dependency>
 
         <dependency>
-            <groupId>commons-validator</groupId>
-            <artifactId>commons-validator</artifactId>
-            <version>1.6</version>
+            <groupId>com.ecls.as-15-8</groupId>
+            <artifactId>as-15-8-system-mode</artifactId>
+            <version>1.0</version>
         </dependency>
 
         <dependency>
             <groupId>com.ecls.as-15-8</groupId>
-            <artifactId>as-15-8-system-mode</artifactId>
+            <artifactId>as-15-8-utils</artifactId>
             <version>1.0</version>
         </dependency>
 
