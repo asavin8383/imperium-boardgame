@@ -38,8 +38,6 @@ import java.text.SimpleDateFormat;
 import java.util.Objects;
 import java.util.Optional;
 
-import static model.Result_.resultScreenShot;
-
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Slf4j
@@ -110,17 +108,21 @@ public class ResultService {
                     boolean isSaved = true;
                     transaction.begin();
                     int resultCount = 0;
-                    while (resultsIterator.hasNext()) {
-                        if(resultCount > 0 && resultCount % batchSize == 0){
-                            transaction.commit();
-                            transaction.begin();
-                            entityManager.clear();
+                    try {
+                        while (resultsIterator.hasNext()) {
+                            if (resultCount > 0 && resultCount % batchSize == 0) {
+                                transaction.commit();
+                                transaction.begin();
+                                entityManager.clear();
+                            }
+                            KeyValue<CheckUnitKey, CheckUnitResult> result = resultsIterator.next();
+                            //Если штамп ставим, нужно попросить инфо об AccessTool
+                            AccessToolDTO accessToolDTO = dispatcherProperties.getImprint().isUseImprint() ? getAccessToolInfo(arrangement.getId()) : null;
+                            isSaved = saveArrangementResult(entityManager, result.key, result.value, arrangement, accessToolDTO);
+                            resultCount++;
                         }
-                        KeyValue<CheckUnitKey, CheckUnitResult> result = resultsIterator.next();
-                        //Если штамп ставим, нужно попросить инфо об AccessTool
-                        AccessToolDTO accessToolDTO = dispatcherProperties.getImprint().isUseImprint() ? getAccessToolInfo(arrangement.getId()) : null;
-                        isSaved = saveArrangementResult(entityManager, result.key, result.value, arrangement, accessToolDTO);
-                        resultCount++;
+                    } finally {
+                        resultsIterator.close();
                     }
                     transaction.commit();
                     if (isSaved) {
@@ -210,7 +212,9 @@ public class ResultService {
             });
         }
         //resultRepo.save(result);
+        log.info("Начинаем сохранение");
         entityManager.merge(result);
+        log.info("Сохранение закончено");
     }
 
     private byte[] imprintScreenshot(AccessToolDTO accessToolDTO, CheckUnitResult checkUnitResult, byte[] screenShot, CheckType checkType){

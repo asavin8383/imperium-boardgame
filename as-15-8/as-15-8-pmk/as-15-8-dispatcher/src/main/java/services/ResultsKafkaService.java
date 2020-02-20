@@ -112,36 +112,46 @@ public class ResultsKafkaService {
 
         return getArrangementResultsIterator(arrangementId)
                 .map(resultsIterator ->  {
-                    Comparator<Result> checkUnitResultComparator = null;
-                    if(Strings.isNotEmpty(sortingColumn)) {
-                        checkUnitResultComparator = createResultsComparator(sortingColumn);
-                        if (sortingDirection != null && sortingDirection.equals(SortingDirection.DESC))
-                            checkUnitResultComparator = checkUnitResultComparator.reversed();
+                    try {
+                        Comparator<Result> checkUnitResultComparator = null;
+                        if (Strings.isNotEmpty(sortingColumn)) {
+                            checkUnitResultComparator = createResultsComparator(sortingColumn);
+                            if (sortingDirection != null && sortingDirection.equals(SortingDirection.DESC))
+                                checkUnitResultComparator = checkUnitResultComparator.reversed();
+                        }
+
+                        Stream<Result> resultsStream = StreamSupport
+                                .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), false)
+                                .filter(filter)
+                                .map(kv -> {
+                                    DetailResultService<? super CheckUnitResult, ? extends DetailResult> service = AnalysisResultServiceFactory.getService(kv.value.getClass());
+                                    Result result = new Result();
+                                    fillResult(result, kv.key.getJobId(), kv.value, service);
+                                    return result;
+                                });
+                        if (checkUnitResultComparator != null)
+                            resultsStream = resultsStream.sorted(checkUnitResultComparator);
+
+                        return resultsStream;
+                    } finally {
+                        resultsIterator.close();
                     }
-
-                    Stream<Result> resultsStream = StreamSupport
-                            .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), false)
-                            .filter(filter)
-                            .map(kv -> {
-                                DetailResultService<? super CheckUnitResult, ? extends DetailResult> service = AnalysisResultServiceFactory.getService(kv.value.getClass());
-                                Result result = new Result();
-                                fillResult(result, kv.key.getJobId(), kv.value, service);
-                                return result;
-                            });
-                    if(checkUnitResultComparator != null)
-                        resultsStream = resultsStream.sorted(checkUnitResultComparator);
-
-                    return resultsStream;
                 })
                 .orElseGet(Stream::empty);
     }
 
     public List<Long> getArrangementResultIds(Long arrangementId) {
         return getArrangementResultsIterator(arrangementId)
-                .map(resultsIterator -> StreamSupport
-                    .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), false)
-                    .map(kv -> kv.key.getJobId())
-                    .collect(Collectors.toList()))
+                .map(resultsIterator -> {
+                    try {
+                        return StreamSupport
+                            .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), false)
+                            .map(kv -> kv.key.getJobId())
+                            .collect(Collectors.toList());
+                    } finally {
+                        resultsIterator.close();
+                    }
+                })
                 .orElseGet(ArrayList::new);
     }
 
@@ -191,21 +201,32 @@ public class ResultsKafkaService {
 
     private <T> List<T> getDistinctResultValues(Long arrangementId, Function<KeyValue<CheckUnitKey, CheckUnitResult>, T> function){
         return getArrangementResultsIterator(arrangementId)
-            .map(resultsIterator -> StreamSupport
-                .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), false)
-                .map(function)
-                .distinct()
-                .collect(Collectors.toList())
-            )
+            .map(resultsIterator -> {
+                try {
+                    return StreamSupport
+                        .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), false)
+                        .map(function)
+                        .distinct()
+                        .collect(Collectors.toList());
+                } finally {
+                    resultsIterator.close();
+                }
+            })
             .orElse(new ArrayList<>());
     }
 
     private long getResultsCount(Long arrangementId, Predicate<KeyValue<CheckUnitKey, CheckUnitResult>> filter){
         return getArrangementResultsIterator(arrangementId)
-                .map(resultsIterator -> StreamSupport
-                        .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), false)
-                        .filter(filter)
-                        .count())
+                .map(resultsIterator -> {
+                    try {
+                        return StreamSupport
+                            .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), false)
+                            .filter(filter)
+                            .count();
+                    } finally {
+                        resultsIterator.close();
+                    }
+                })
                 .orElse(0L);
     }
 
