@@ -97,8 +97,7 @@ public class PodWebClient {
              Long visitorsCntRussiaMin,
              Long visitorsCntRussiaMax,
              Long visitorsCntWorldMin,
-             Long visitorsCntWorldMax,
-             String query
+             Long visitorsCntWorldMax
 
     ) {
         return webClient.get()
@@ -123,6 +122,24 @@ public class PodWebClient {
                         .queryParam("visitorsCntRussiaMax", visitorsCntRussiaMax)
                         .queryParam("visitorsCntWorldMin", visitorsCntWorldMin)
                         .queryParam("visitorsCntWorldMax", visitorsCntWorldMax)
+                        .build().toString())
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .flatMapMany(clientResponse -> {
+                    if(clientResponse.statusCode().equals(HttpStatus.OK)){
+                        log.info("список id ЕРДИ считан успешно");
+                        return clientResponse.bodyToFlux(new ParameterizedTypeReference<List<Long>>(){});
+                    } else {
+                        log.warn("Ошибка при чтении списка id ЕРДИ, статус: {}", clientResponse.statusCode().toString());
+                        return Flux.empty();
+                    }
+                });
+    }
+    //TODO убрать, как только будет готов новый фронт под трафик
+    public Flux<List<Long>> getErdiIdList(String query) {
+        return webClient.get()
+                .uri(UriComponentsBuilder
+                        .fromUriString(PUT_ERDI_WITH_FILTERS)
                         .queryParam("query", query)
                         .build().toString())
                 .accept(MediaType.TEXT_EVENT_STREAM)
@@ -156,8 +173,7 @@ public class PodWebClient {
                             dynamicTrafficUnit.getVisitorsCntRussiaMin(),
                             dynamicTrafficUnit.getVisitorsCntRussiaMax(),
                             dynamicTrafficUnit.getVisitorsCntWorldMin(),
-                            dynamicTrafficUnit.getVisitorsCntWorldMax(),
-                            dynamicTrafficUnit.getQuery());
+                            dynamicTrafficUnit.getVisitorsCntWorldMax());
     }
 
     public Flux<List<CheckUnit>> fetchCheckUnits(List<Long> contentIds) {

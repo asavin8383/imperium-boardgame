@@ -17,6 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import repositories.DynamicTrafficUnitRepository;
 import services.traffic.TrafficService;
 
 import java.util.List;
@@ -29,6 +30,7 @@ import java.util.List;
 public class DynamicTrafficController {
 
     private final TrafficService trafficService;
+    private final DynamicTrafficUnitRepository dynamicTrafficUnitRepository;
 
     @GetMapping
     public ResponseEntity getDynamicTraffic(@RequestParam("trafficId") Traffic traffic) {
@@ -83,6 +85,15 @@ public class DynamicTrafficController {
             DynamicTrafficUnit dynamicTraffic = trafficService.upadateFirstDynamicTrafficUnit(traffic, newDynamicTraffic);
             return ResponseEntity.ok(dynamicTraffic);
         } else return ResponseEntity.badRequest().body("В теле пакета нет динамического трафика");
+    }
+
+    //TODO убрать, как только поменяется фронт для трафиков
+    @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public void addDynamicTrafficQueryToUnit(@PathVariable("id") DynamicTrafficUnit unit, @RequestParam String query) {
+        if (unit != null) {
+            unit.setQuery(query);
+            dynamicTrafficUnitRepository.save(unit);
+        }
     }
 
 }

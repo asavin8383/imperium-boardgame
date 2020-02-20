@@ -12,6 +12,7 @@ import model.task.Arrangement;
 import model.traffic.SearchQueryPattern;
 import model.traffic.SearchQueryPatternContentJoin;
 import model.traffic.Traffic;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -71,9 +72,14 @@ public class ArrangementContentController {
         try {
             dynamicTrafficUnitRepository.findByTraffic(traffic).forEach( dynamicTrafficUnit -> {
                 log.info("Начат процесс заполнения чек юнитов для динамического трафика");
-                //String query = dynamicTrafficUnit.getQuery();
-                //Flux<List<Long>> idss = podWebClient.getErdiIdList(query);
-                Flux<List<Long>> idss = podWebClient.getErdiIdList(dynamicTrafficUnit);
+                String query = dynamicTrafficUnit.getQuery();
+                //TODO как только будет готов фронт - убрать query
+                Flux<List<Long>> idss = Flux.empty();
+                if (!Strings.isEmpty(query)) {
+                     idss = podWebClient.getErdiIdList(query);
+                } else {
+                     idss = podWebClient.getErdiIdList(dynamicTrafficUnit);
+                }
                 List<Long> subContent = idss.flatMap(Flux::fromIterable).collectList().block();
                 if (subContent != null)
                     contentIds.addAll(subContent);
