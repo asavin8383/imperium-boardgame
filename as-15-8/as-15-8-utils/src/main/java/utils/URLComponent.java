@@ -26,9 +26,24 @@ public class URLComponent {
 
     @Override
     public String toString(){
-        String fragment = getFullFragment();
-        return u.getProtocol() + "://" + u.getHost() +
-                (u.getPort() > 0 ? ":" + u.getPort() : "") + fragment;
+        return toString(true, true, true, true);
+    }
+
+    public String toStringWithoutScheme(){
+        return toString(false, true, true, true);
+    }
+
+    public String toString(boolean isScheme, boolean isHost, boolean isPort, boolean isFragment){
+        String res = "";
+        if (isScheme)
+            res += u.getProtocol() + "://";
+        if (isHost)
+            res += u.getHost();
+        if (isPort)
+            res += (u.getPort() > 0 ? ":" + u.getPort() : "");
+        if (isFragment)
+            res += getFullFragment();
+        return res;
     }
 
     public static URLComponent getDecodedFrom(@NonNull URLComponent component) throws MalformedURLException {
@@ -73,6 +88,13 @@ public class URLComponent {
 
     public String getHost() {
         return u.getHost();
+    }
+
+    public String getDecodedHost() {
+        return decodeHost(u.getHost());
+    }
+    public String getEncodedHost() {
+        return encodeHost(u.getHost());
     }
 
     public boolean isSimpleHost() {
@@ -124,6 +146,12 @@ public class URLComponent {
                 throw e;
             return false;
         }
+    }
+
+    public boolean equals(URLComponent comp) {
+        if (comp == null)
+            return false;
+        return this.toString().equals(comp.toString());
     }
 
 

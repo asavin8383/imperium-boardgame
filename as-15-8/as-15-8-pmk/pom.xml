@@ -23,6 +23,12 @@
 		    <artifactId>as-15-8-messages</artifactId>
 		    <version>1.0</version>
 		</dependency>
+
+		<dependency>
+			<groupId>com.ecls.as-15-8</groupId>
+			<artifactId>as-15-8-utils</artifactId>
+			<version>1.0</version>
+		</dependency>
 	
 		<!-- Spring boot -->
 		<dependency>
@@ -83,12 +89,6 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>commons-validator</groupId>
-			<artifactId>commons-validator</artifactId>
-			<version>1.6</version>
 		</dependency>
 
 	</dependencies>
