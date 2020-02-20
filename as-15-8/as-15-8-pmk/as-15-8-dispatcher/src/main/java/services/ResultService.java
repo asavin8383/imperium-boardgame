@@ -208,9 +208,7 @@ public class ResultService {
             });
         }
         //resultRepo.save(result);
-        log.info("Начинаем сохранение");
         entityManager.merge(result);
-        log.info("Сохранение закончено");
     }
 
     private byte[] imprintScreenshot(AccessToolDTO accessToolDTO, CheckUnitResult checkUnitResult, byte[] screenShot, CheckType checkType){
