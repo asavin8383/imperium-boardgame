@@ -32,6 +32,8 @@ import restapi.ConfigClient;
 import restapi.PptClient;
 
 import javax.annotation.PostConstruct;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
@@ -57,7 +59,7 @@ public class ResultService {
     private final ConfigClient configClient;
     private final PptClient pptClient;
 
-    private final SessionFactory sessionFactory;
+    private final EntityManagerFactory entityManagerFactory;
 
     @Value("#{new Integer('${spring.jpa.properties.hibernate.jdbc.batch_size:500}')}")
     private int batchSize = 500;
@@ -99,7 +101,8 @@ public class ResultService {
 
     private void saveArrangementResults(Arrangement arrangement) {
         log.info("Начато сохранение мероприятия: " + arrangement.getId());
-        Session session = sessionFactory.openSession();
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        Session session = entityManager.unwrap(Session.class);
         Transaction transaction = session.beginTransaction();
         boolean isStopped = !arrangementService.isArrangementRunning(arrangement.getId(), arrangement.getVersion());
         try {
@@ -143,6 +146,7 @@ public class ResultService {
             arrangementRepo.save(arrangement);
         } finally {
             session.close();
+            entityManager.close();
         }
     }
 
