@@ -18,7 +18,6 @@ import model.enums.CheckType;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.logging.log4j.util.Strings;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -62,7 +61,7 @@ public class ResultService {
     private final EntityManagerFactory entityManagerFactory;
 
     @Value("#{new Integer('${spring.jpa.properties.hibernate.jdbc.batch_size:500}')}")
-    private int batchSize = 500;
+    private int batchSize;
 
     @PostConstruct
     private void initImageProcessor() throws Exception {
@@ -109,7 +108,7 @@ public class ResultService {
             resultsKafkaService.getArrangementResultsIterator(arrangement.getId())
                 .ifPresent(resultsIterator -> {
                     boolean isSaved = true;
-                    transaction.begin();
+        //            transaction.begin();
                     int resultCount = 0;
                     while (resultsIterator.hasNext()) {
                         if (resultCount > 0 && resultCount % batchSize == 0) {
