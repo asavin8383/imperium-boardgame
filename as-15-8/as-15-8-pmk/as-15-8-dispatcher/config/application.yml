@@ -13,8 +13,6 @@ spring:
           destination: results_table
         screenshots_table:
           destination: screenshots_table
-        results_count_table:
-          destination: results_count_table
         arrangementEvents:
           destination: arrangement_events
         springCloudBusInput:

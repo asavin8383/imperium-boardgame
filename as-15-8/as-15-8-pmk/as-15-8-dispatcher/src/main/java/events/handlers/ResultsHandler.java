@@ -9,7 +9,6 @@ import events.DispatcherChannels;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Screenshots;
-import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.Materialized;
@@ -38,9 +37,6 @@ public class ResultsHandler {
     @Value("${spring.cloud.stream.bindings.screenshots_table.destination}")
     private String screenshotsTableName;
 
-    @Value("${spring.cloud.stream.bindings.results_count_table.destination}")
-    private String resultsCountTableName;
-
     private final ErdiChecker erdiChecker;
     private final ResultsKafkaService resultsKafkaService;
     private final ArrangementService arrangementService;
@@ -65,17 +61,6 @@ public class ResultsHandler {
                         as(screenshotsTableName)
                         .withKeySerde(new JsonSerde<>(CheckUnitKey.class))
                         .withValueSerde(new JsonSerde<>(Screenshots.class))
-            );
-
-        resultsStream
-            .filter((checkUnitKey, checkUnitResult) ->
-                arrangementService.isArrangementRunning(checkUnitKey.getArrangementId(), checkUnitKey.getVersion()))
-            .groupBy((checkUnitKey, checkUnitResult) -> checkUnitKey.getArrangementId())
-            .count(
-                Materialized.<Long, Long, KeyValueStore<Bytes, byte[]>>
-                        as(resultsCountTableName)
-                        .withKeySerde(Serdes.Long())
-                        .withValueSerde(Serdes.Long())
             );
 
         resultsStream
