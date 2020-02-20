@@ -7,9 +7,9 @@ import exceptions.AS_15_8_PPT_Exception;
 import lombok.extern.slf4j.Slf4j;
 import model.enums.TrafficType;
 import model.traffic.CustomErdiView;
+import model.traffic.DynamicTrafficUnit;
 import model.traffic.Traffic;
 import model.traffic.TrafficBriefView;
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
@@ -135,11 +135,8 @@ public class PodWebClient {
                     }
                 });
     }
-
+    //TODO убрать, как только будет готов новый фронт под трафик
     public Flux<List<Long>> getErdiIdList(String query) {
-        if(Strings.isEmpty(query)){
-            return Flux.empty();
-        }
         return webClient.get()
                 .uri(UriComponentsBuilder
                         .fromUriString(PUT_ERDI_WITH_FILTERS)
@@ -156,6 +153,27 @@ public class PodWebClient {
                         return Flux.empty();
                     }
                 });
+    }
+
+    public Flux<List<Long>> getErdiIdList(DynamicTrafficUnit dynamicTrafficUnit) {
+        return getErdiIdList(dynamicTrafficUnit.getIdMask(),
+                            dynamicTrafficUnit.getCategoryNames(),
+                            dynamicTrafficUnit.getDecisionOrgs(),
+                            dynamicTrafficUnit.getInfoTypeIds(),
+                            dynamicTrafficUnit.getRegistryNames(),
+                            dynamicTrafficUnit.getResourceTypes(),
+                            dynamicTrafficUnit.getResourceValue(),
+                            dynamicTrafficUnit.getViolationNames(),
+                            dynamicTrafficUnit.getSize(),
+                            dynamicTrafficUnit.getStartTime(),
+                            dynamicTrafficUnit.getEndTime(),
+                            dynamicTrafficUnit.getRandom(),
+                            dynamicTrafficUnit.getSortingDirection(),
+                            dynamicTrafficUnit.getSortingColumn(),
+                            dynamicTrafficUnit.getVisitorsCntRussiaMin(),
+                            dynamicTrafficUnit.getVisitorsCntRussiaMax(),
+                            dynamicTrafficUnit.getVisitorsCntWorldMin(),
+                            dynamicTrafficUnit.getVisitorsCntWorldMax());
     }
 
     public Flux<List<CheckUnit>> fetchCheckUnits(List<Long> contentIds) {

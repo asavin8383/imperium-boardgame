@@ -2484,6 +2484,290 @@
 					"_postman_isSubFolder": true
 				},
 				{
+					"name": "Динамический трафик",
+					"item": [
+						{
+							"name": "Получение динамического трафика по id трафика",
+							"request": {
+								"auth": {
+									"type": "oauth2",
+									"oauth2": [
+										{
+											"key": "accessToken",
+											"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqYWNreSIsInJvbGUiOiJST0xFX09QRVJBVE9SLFJPTEVfRk9STUFMX1RBU0ssUk9MRV9NQU5BR0VfRk9STUFMX1RBU0ssUk9MRV9NQU5BR0VfQVJSQU5HRU1FTlQsUk9MRV9QUkVQQVJBVElPTl9UUkFGRklDLFJPTEVfRElDVElPTkFSWSxST0xFX0ZPUk1BVElPTl9PRl9TQ0hFRFVMRSxST0xFX1ZJRVdfUkVTVUxULFJPTEVfU0VORF9BQ1RfQllfSEFORCxST0xFX01BTkFHRV9QU19QQVNELFJPTEVfTUFOQUdFX0VSREksUk9MRV9WSUVXX1JFUE9SVCxST0xFX0ZPUk1BVElPTl9QQVJBTV9SRVBPUlQsUk9MRV9NQU5BR0VfRE9NQUlOUyxST0xFX01BTkFHRV9NQU5VQUxfQVJSQU5HRU1FTlQiLCJtYWlsIjoiIiwidXNlcl9uYW1lIjoiamFjayIsInNjb3BlIjpbInJlYWQiLCJ3cml0ZSJdLCJleHAiOjE1ODIxOTc1ODMsInVzZXJOYW1lIjoiamFjayIsImF1dGhvcml0aWVzIjpbIlJPTEVfT1BFUkFUT1IiLCJST0xFX1BSRVBBUkFUSU9OX1RSQUZGSUMiLCJST0xFX0ZPUk1BVElPTl9QQVJBTV9SRVBPUlQiLCJST0xFX01BTkFHRV9NQU5VQUxfQVJSQU5HRU1FTlQiLCJST0xFX01BTkFHRV9QU19QQVNEIiwiUk9MRV9GT1JNQVRJT05fT0ZfU0NIRURVTEUiLCJST0xFX01BTkFHRV9FUkRJIiwiUk9MRV9GT1JNQUxfVEFTSyIsIlJPTEVfRElDVElPTkFSWSIsIlJPTEVfVklFV19SRVBPUlQiLCJST0xFX01BTkFHRV9GT1JNQUxfVEFTSyIsIlJPTEVfTUFOQUdFX0FSUkFOR0VNRU5UIiwiUk9MRV9WSUVXX1JFU1VMVCIsIlJPTEVfU0VORF9BQ1RfQllfSEFORCIsIlJPTEVfTUFOQUdFX0RPTUFJTlMiXSwianRpIjoiNmU3ZTA1NDAtMWEyYS00NGJlLWE1ZTYtZGUzYWFiMmY0ZmQ0IiwiY2xpZW50X2lkIjoiYXMtMTUtOCIsInNlY29uZE5hbWUiOiJjaGFuIn0.FSGzE8sqSnBi7VfLSInZVfyNmLYRIwZDX0QwMfacXkoSWxMA1EF59jgMYnE21p6jxCZuuuJUdANhNeRGrfgXvLeGz1iLKYPs0ax0Vxobbz81GO8uLcAZdr51yh223DYtO0CMrGcuNv9osj2ppzJO4iZDsKTK1ccWs3Q8xswL0dHG55AfAV4qhHTpWz1vNSjv4Tw0HL8dbUxF4KuSkBEi8UPF0WXaqSDAlNfndVSDcGIapW-x2iUC7J-fO_uHDxO-nihXrKWND0mVbnWBMjQoIPwwuvKK_IYNvTXO2gvpEq2FnqBmDv6gwoL5FYqVFbdv8SocCyLyiNFn7ohZMDmlDw",
+											"type": "string"
+										},
+										{
+											"key": "tokenType",
+											"value": "bearer",
+											"type": "string"
+										},
+										{
+											"key": "addTokenTo",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/traffic/unit/dynamic?trafficId=73",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"traffic",
+										"unit",
+										"dynamic"
+									],
+									"query": [
+										{
+											"key": "trafficId",
+											"value": "73"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Получение записей ЕРДИ согласно шаблону диначисеского трафика",
+							"request": {
+								"auth": {
+									"type": "oauth2",
+									"oauth2": [
+										{
+											"key": "accessToken",
+											"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqYWNreSIsInJvbGUiOiJST0xFX09QRVJBVE9SLFJPTEVfRk9STUFMX1RBU0ssUk9MRV9NQU5BR0VfRk9STUFMX1RBU0ssUk9MRV9NQU5BR0VfQVJSQU5HRU1FTlQsUk9MRV9QUkVQQVJBVElPTl9UUkFGRklDLFJPTEVfRElDVElPTkFSWSxST0xFX0ZPUk1BVElPTl9PRl9TQ0hFRFVMRSxST0xFX1ZJRVdfUkVTVUxULFJPTEVfU0VORF9BQ1RfQllfSEFORCxST0xFX01BTkFHRV9QU19QQVNELFJPTEVfTUFOQUdFX0VSREksUk9MRV9WSUVXX1JFUE9SVCxST0xFX0ZPUk1BVElPTl9QQVJBTV9SRVBPUlQsUk9MRV9NQU5BR0VfRE9NQUlOUyxST0xFX01BTkFHRV9NQU5VQUxfQVJSQU5HRU1FTlQiLCJtYWlsIjoiIiwidXNlcl9uYW1lIjoiamFjayIsInNjb3BlIjpbInJlYWQiLCJ3cml0ZSJdLCJleHAiOjE1ODIxOTc1ODMsInVzZXJOYW1lIjoiamFjayIsImF1dGhvcml0aWVzIjpbIlJPTEVfT1BFUkFUT1IiLCJST0xFX1BSRVBBUkFUSU9OX1RSQUZGSUMiLCJST0xFX0ZPUk1BVElPTl9QQVJBTV9SRVBPUlQiLCJST0xFX01BTkFHRV9NQU5VQUxfQVJSQU5HRU1FTlQiLCJST0xFX01BTkFHRV9QU19QQVNEIiwiUk9MRV9GT1JNQVRJT05fT0ZfU0NIRURVTEUiLCJST0xFX01BTkFHRV9FUkRJIiwiUk9MRV9GT1JNQUxfVEFTSyIsIlJPTEVfRElDVElPTkFSWSIsIlJPTEVfVklFV19SRVBPUlQiLCJST0xFX01BTkFHRV9GT1JNQUxfVEFTSyIsIlJPTEVfTUFOQUdFX0FSUkFOR0VNRU5UIiwiUk9MRV9WSUVXX1JFU1VMVCIsIlJPTEVfU0VORF9BQ1RfQllfSEFORCIsIlJPTEVfTUFOQUdFX0RPTUFJTlMiXSwianRpIjoiNmU3ZTA1NDAtMWEyYS00NGJlLWE1ZTYtZGUzYWFiMmY0ZmQ0IiwiY2xpZW50X2lkIjoiYXMtMTUtOCIsInNlY29uZE5hbWUiOiJjaGFuIn0.FSGzE8sqSnBi7VfLSInZVfyNmLYRIwZDX0QwMfacXkoSWxMA1EF59jgMYnE21p6jxCZuuuJUdANhNeRGrfgXvLeGz1iLKYPs0ax0Vxobbz81GO8uLcAZdr51yh223DYtO0CMrGcuNv9osj2ppzJO4iZDsKTK1ccWs3Q8xswL0dHG55AfAV4qhHTpWz1vNSjv4Tw0HL8dbUxF4KuSkBEi8UPF0WXaqSDAlNfndVSDcGIapW-x2iUC7J-fO_uHDxO-nihXrKWND0mVbnWBMjQoIPwwuvKK_IYNvTXO2gvpEq2FnqBmDv6gwoL5FYqVFbdv8SocCyLyiNFn7ohZMDmlDw",
+											"type": "string"
+										},
+										{
+											"key": "tokenType",
+											"value": "bearer",
+											"type": "string"
+										},
+										{
+											"key": "addTokenTo",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/traffic/unit/dynamic/erdi?trafficId=73",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"traffic",
+										"unit",
+										"dynamic",
+										"erdi"
+									],
+									"query": [
+										{
+											"key": "trafficId",
+											"value": "73"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Удаление шаблона динамического трафика",
+							"request": {
+								"auth": {
+									"type": "oauth2",
+									"oauth2": [
+										{
+											"key": "accessToken",
+											"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqYWNreSIsInJvbGUiOiJST0xFX09QRVJBVE9SLFJPTEVfRk9STUFMX1RBU0ssUk9MRV9NQU5BR0VfRk9STUFMX1RBU0ssUk9MRV9NQU5BR0VfQVJSQU5HRU1FTlQsUk9MRV9QUkVQQVJBVElPTl9UUkFGRklDLFJPTEVfRElDVElPTkFSWSxST0xFX0ZPUk1BVElPTl9PRl9TQ0hFRFVMRSxST0xFX1ZJRVdfUkVTVUxULFJPTEVfU0VORF9BQ1RfQllfSEFORCxST0xFX01BTkFHRV9QU19QQVNELFJPTEVfTUFOQUdFX0VSREksUk9MRV9WSUVXX1JFUE9SVCxST0xFX0ZPUk1BVElPTl9QQVJBTV9SRVBPUlQsUk9MRV9NQU5BR0VfRE9NQUlOUyxST0xFX01BTkFHRV9NQU5VQUxfQVJSQU5HRU1FTlQiLCJtYWlsIjoiIiwidXNlcl9uYW1lIjoiamFjayIsInNjb3BlIjpbInJlYWQiLCJ3cml0ZSJdLCJleHAiOjE1ODIxOTc1ODMsInVzZXJOYW1lIjoiamFjayIsImF1dGhvcml0aWVzIjpbIlJPTEVfT1BFUkFUT1IiLCJST0xFX1BSRVBBUkFUSU9OX1RSQUZGSUMiLCJST0xFX0ZPUk1BVElPTl9QQVJBTV9SRVBPUlQiLCJST0xFX01BTkFHRV9NQU5VQUxfQVJSQU5HRU1FTlQiLCJST0xFX01BTkFHRV9QU19QQVNEIiwiUk9MRV9GT1JNQVRJT05fT0ZfU0NIRURVTEUiLCJST0xFX01BTkFHRV9FUkRJIiwiUk9MRV9GT1JNQUxfVEFTSyIsIlJPTEVfRElDVElPTkFSWSIsIlJPTEVfVklFV19SRVBPUlQiLCJST0xFX01BTkFHRV9GT1JNQUxfVEFTSyIsIlJPTEVfTUFOQUdFX0FSUkFOR0VNRU5UIiwiUk9MRV9WSUVXX1JFU1VMVCIsIlJPTEVfU0VORF9BQ1RfQllfSEFORCIsIlJPTEVfTUFOQUdFX0RPTUFJTlMiXSwianRpIjoiNmU3ZTA1NDAtMWEyYS00NGJlLWE1ZTYtZGUzYWFiMmY0ZmQ0IiwiY2xpZW50X2lkIjoiYXMtMTUtOCIsInNlY29uZE5hbWUiOiJjaGFuIn0.FSGzE8sqSnBi7VfLSInZVfyNmLYRIwZDX0QwMfacXkoSWxMA1EF59jgMYnE21p6jxCZuuuJUdANhNeRGrfgXvLeGz1iLKYPs0ax0Vxobbz81GO8uLcAZdr51yh223DYtO0CMrGcuNv9osj2ppzJO4iZDsKTK1ccWs3Q8xswL0dHG55AfAV4qhHTpWz1vNSjv4Tw0HL8dbUxF4KuSkBEi8UPF0WXaqSDAlNfndVSDcGIapW-x2iUC7J-fO_uHDxO-nihXrKWND0mVbnWBMjQoIPwwuvKK_IYNvTXO2gvpEq2FnqBmDv6gwoL5FYqVFbdv8SocCyLyiNFn7ohZMDmlDw",
+											"type": "string"
+										},
+										{
+											"key": "tokenType",
+											"value": "bearer",
+											"type": "string"
+										},
+										{
+											"key": "addTokenTo",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/traffic/unit/dynamic/?trafficId=73",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"traffic",
+										"unit",
+										"dynamic",
+										""
+									],
+									"query": [
+										{
+											"key": "trafficId",
+											"value": "73"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Обновление шаблона динамического трафика",
+							"request": {
+								"auth": {
+									"type": "oauth2",
+									"oauth2": [
+										{
+											"key": "accessToken",
+											"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqYWNreSIsInJvbGUiOiJST0xFX09QRVJBVE9SLFJPTEVfRk9STUFMX1RBU0ssUk9MRV9NQU5BR0VfRk9STUFMX1RBU0ssUk9MRV9NQU5BR0VfQVJSQU5HRU1FTlQsUk9MRV9QUkVQQVJBVElPTl9UUkFGRklDLFJPTEVfRElDVElPTkFSWSxST0xFX0ZPUk1BVElPTl9PRl9TQ0hFRFVMRSxST0xFX1ZJRVdfUkVTVUxULFJPTEVfU0VORF9BQ1RfQllfSEFORCxST0xFX01BTkFHRV9QU19QQVNELFJPTEVfTUFOQUdFX0VSREksUk9MRV9WSUVXX1JFUE9SVCxST0xFX0ZPUk1BVElPTl9QQVJBTV9SRVBPUlQsUk9MRV9NQU5BR0VfRE9NQUlOUyxST0xFX01BTkFHRV9NQU5VQUxfQVJSQU5HRU1FTlQiLCJtYWlsIjoiIiwidXNlcl9uYW1lIjoiamFjayIsInNjb3BlIjpbInJlYWQiLCJ3cml0ZSJdLCJleHAiOjE1ODIxOTc1ODMsInVzZXJOYW1lIjoiamFjayIsImF1dGhvcml0aWVzIjpbIlJPTEVfT1BFUkFUT1IiLCJST0xFX1BSRVBBUkFUSU9OX1RSQUZGSUMiLCJST0xFX0ZPUk1BVElPTl9QQVJBTV9SRVBPUlQiLCJST0xFX01BTkFHRV9NQU5VQUxfQVJSQU5HRU1FTlQiLCJST0xFX01BTkFHRV9QU19QQVNEIiwiUk9MRV9GT1JNQVRJT05fT0ZfU0NIRURVTEUiLCJST0xFX01BTkFHRV9FUkRJIiwiUk9MRV9GT1JNQUxfVEFTSyIsIlJPTEVfRElDVElPTkFSWSIsIlJPTEVfVklFV19SRVBPUlQiLCJST0xFX01BTkFHRV9GT1JNQUxfVEFTSyIsIlJPTEVfTUFOQUdFX0FSUkFOR0VNRU5UIiwiUk9MRV9WSUVXX1JFU1VMVCIsIlJPTEVfU0VORF9BQ1RfQllfSEFORCIsIlJPTEVfTUFOQUdFX0RPTUFJTlMiXSwianRpIjoiNmU3ZTA1NDAtMWEyYS00NGJlLWE1ZTYtZGUzYWFiMmY0ZmQ0IiwiY2xpZW50X2lkIjoiYXMtMTUtOCIsInNlY29uZE5hbWUiOiJjaGFuIn0.FSGzE8sqSnBi7VfLSInZVfyNmLYRIwZDX0QwMfacXkoSWxMA1EF59jgMYnE21p6jxCZuuuJUdANhNeRGrfgXvLeGz1iLKYPs0ax0Vxobbz81GO8uLcAZdr51yh223DYtO0CMrGcuNv9osj2ppzJO4iZDsKTK1ccWs3Q8xswL0dHG55AfAV4qhHTpWz1vNSjv4Tw0HL8dbUxF4KuSkBEi8UPF0WXaqSDAlNfndVSDcGIapW-x2iUC7J-fO_uHDxO-nihXrKWND0mVbnWBMjQoIPwwuvKK_IYNvTXO2gvpEq2FnqBmDv6gwoL5FYqVFbdv8SocCyLyiNFn7ohZMDmlDw",
+											"type": "string"
+										},
+										{
+											"key": "tokenType",
+											"value": "bearer",
+											"type": "string"
+										},
+										{
+											"key": "addTokenTo",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"resourceTypes\": [\n        \"domain\",\n        \"url\"\n    ],\n    \"size\": 4,\n    \"random\": true,\n    \"sortingDirection\": \"DESC\",\n    \"sortingColumn\": \"id\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/traffic/unit/dynamic?trafficId=73",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"traffic",
+										"unit",
+										"dynamic"
+									],
+									"query": [
+										{
+											"key": "trafficId",
+											"value": "73"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Добавление динамического трафика в профильный трафик",
+							"request": {
+								"auth": {
+									"type": "oauth2",
+									"oauth2": [
+										{
+											"key": "accessToken",
+											"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqYWNreSIsInJvbGUiOiJST0xFX09QRVJBVE9SLFJPTEVfRk9STUFMX1RBU0ssUk9MRV9NQU5BR0VfRk9STUFMX1RBU0ssUk9MRV9NQU5BR0VfQVJSQU5HRU1FTlQsUk9MRV9QUkVQQVJBVElPTl9UUkFGRklDLFJPTEVfRElDVElPTkFSWSxST0xFX0ZPUk1BVElPTl9PRl9TQ0hFRFVMRSxST0xFX1ZJRVdfUkVTVUxULFJPTEVfU0VORF9BQ1RfQllfSEFORCxST0xFX01BTkFHRV9QU19QQVNELFJPTEVfTUFOQUdFX0VSREksUk9MRV9WSUVXX1JFUE9SVCxST0xFX0ZPUk1BVElPTl9QQVJBTV9SRVBPUlQsUk9MRV9NQU5BR0VfRE9NQUlOUyxST0xFX01BTkFHRV9NQU5VQUxfQVJSQU5HRU1FTlQiLCJtYWlsIjoiIiwidXNlcl9uYW1lIjoiamFjayIsInNjb3BlIjpbInJlYWQiLCJ3cml0ZSJdLCJleHAiOjE1ODIxOTc1ODMsInVzZXJOYW1lIjoiamFjayIsImF1dGhvcml0aWVzIjpbIlJPTEVfT1BFUkFUT1IiLCJST0xFX1BSRVBBUkFUSU9OX1RSQUZGSUMiLCJST0xFX0ZPUk1BVElPTl9QQVJBTV9SRVBPUlQiLCJST0xFX01BTkFHRV9NQU5VQUxfQVJSQU5HRU1FTlQiLCJST0xFX01BTkFHRV9QU19QQVNEIiwiUk9MRV9GT1JNQVRJT05fT0ZfU0NIRURVTEUiLCJST0xFX01BTkFHRV9FUkRJIiwiUk9MRV9GT1JNQUxfVEFTSyIsIlJPTEVfRElDVElPTkFSWSIsIlJPTEVfVklFV19SRVBPUlQiLCJST0xFX01BTkFHRV9GT1JNQUxfVEFTSyIsIlJPTEVfTUFOQUdFX0FSUkFOR0VNRU5UIiwiUk9MRV9WSUVXX1JFU1VMVCIsIlJPTEVfU0VORF9BQ1RfQllfSEFORCIsIlJPTEVfTUFOQUdFX0RPTUFJTlMiXSwianRpIjoiNmU3ZTA1NDAtMWEyYS00NGJlLWE1ZTYtZGUzYWFiMmY0ZmQ0IiwiY2xpZW50X2lkIjoiYXMtMTUtOCIsInNlY29uZE5hbWUiOiJjaGFuIn0.FSGzE8sqSnBi7VfLSInZVfyNmLYRIwZDX0QwMfacXkoSWxMA1EF59jgMYnE21p6jxCZuuuJUdANhNeRGrfgXvLeGz1iLKYPs0ax0Vxobbz81GO8uLcAZdr51yh223DYtO0CMrGcuNv9osj2ppzJO4iZDsKTK1ccWs3Q8xswL0dHG55AfAV4qhHTpWz1vNSjv4Tw0HL8dbUxF4KuSkBEi8UPF0WXaqSDAlNfndVSDcGIapW-x2iUC7J-fO_uHDxO-nihXrKWND0mVbnWBMjQoIPwwuvKK_IYNvTXO2gvpEq2FnqBmDv6gwoL5FYqVFbdv8SocCyLyiNFn7ohZMDmlDw",
+											"type": "string"
+										},
+										{
+											"key": "tokenType",
+											"value": "bearer",
+											"type": "string"
+										},
+										{
+											"key": "addTokenTo",
+											"value": "header",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"idMask\": \"208\",\n    \"categoryNames\": [\n        \"Экстремизм\",\n        \"СМИ\"\n    ],\n    \"decisionOrgs\": [\n        \"Суд\",\n        \"Роскомнадзор\"\n    ],\n    \"infoTypeIds\": [\n        \"1-6\",\n        \"1-4-6\"\n    ],\n    \"registryNames\": [\n        \"реестр ПД\",\n        \"реестр ЕАИС\"\n    ],\n    \"resourceTypes\": [\n        \"domain\",\n        \"url\"\n    ],\n    \"resourceValue\": \"что-то\",\n    \"violationNames\": [\n        \"БАД\",\n        \"Стероиды\"\n    ],\n    \"size\": 4,\n    \"startTime\": \"2020-01-01\",\n    \"endTime\": \"2020-02-01\",\n    \"random\": true,\n    \"sortingDirection\": \"DESC\",\n    \"sortingColumn\": \"id\",\n    \"visitorsCntRussiaMin\": 100,\n    \"visitorsCntRussiaMax\": 1000,\n    \"visitorsCntWorldMin\": 10001,\n    \"visitorsCntWorldMax\": 100000\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/traffic/unit/dynamic?trafficId=73",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"traffic",
+										"unit",
+										"dynamic"
+									],
+									"query": [
+										{
+											"key": "trafficId",
+											"value": "73"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
 					"name": "Получение списка трафиков",
 					"request": {
 						"auth": {
@@ -3620,25 +3904,25 @@
 	],
 	"variable": [
 		{
-			"id": "b0ddc476-c704-446f-ad8e-91d993c731a2",
+			"id": "a730f21c-eca8-4e77-bc43-30c5ac4fd274",
 			"key": "url",
 			"value": "http://localhost:15800",
 			"type": "string"
 		},
 		{
-			"id": "8f124469-9ec3-44f7-a281-cbf65f6480e2",
+			"id": "ce470082-d413-4c14-a246-15c4a82e97f1",
 			"key": "oper_token",
 			"value": "",
 			"type": "string"
 		},
 		{
-			"id": "76001985-e413-4c7e-b705-f5b34dec06d3",
+			"id": "1b8b8bcb-8546-4f8e-ad23-3cae775ab33e",
 			"key": "test_url",
 			"value": "http://192.168.5.253:15800",
 			"type": "string"
 		},
 		{
-			"id": "9fb4fa79-0590-4daf-992c-5196ee9be623",
+			"id": "6465cb18-ece8-47e1-bec8-5e4b6af93ed4",
 			"key": "admin_token",
 			"value": "",
 			"type": "string"

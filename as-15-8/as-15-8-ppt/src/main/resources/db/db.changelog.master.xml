@@ -61,4 +61,5 @@
     <include file="db/changelog/ppt.0033.arrangements.STOPPING.xml"/>
     <include file="db/changelog/ppt.0034.arrangement_violation_number.xml"/>
     <include file="db/changelog/ppt.0035.dynamic_traffic_unit.xml"/>
+    <include file="db/changelog/ppt.0036.dynamic_traffic_query_to_model.xml"/>
 </databaseChangeLog>

@@ -26,7 +26,6 @@ public class CurrentSystemMode {
         systemModeUnit = systemModeUnit_;
     }
 
-
     private SystemModeUnit requestCurrentSystemMode() {
         try {
             ResponseEntity<SystemModeUnit> responseEntity = new RestTemplate()
