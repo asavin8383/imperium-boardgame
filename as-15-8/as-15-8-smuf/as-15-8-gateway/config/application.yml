@@ -99,7 +99,7 @@ eureka:
 ---
 
 spring:
-  profiles: dev_pvorobiev, dev_asavin, dev_ashabalin, dev_asinyavin, dev_danikanov
+  profiles: dev_pvorobiev, dev_asavin, dev_ashabalin, dev_asinyavin, dev_danikanov, dev_msnopok
   profiles.include: local_log
 
 ---

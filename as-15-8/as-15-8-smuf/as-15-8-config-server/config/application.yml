@@ -114,7 +114,7 @@ eureka:
 ---
 
 spring:
-  profiles: dev_pvorobiev, dev_asavin, dev_ashabalin, dev_danikanov, dev_asin
+  profiles: dev_pvorobiev, dev_asavin, dev_ashabalin, dev_danikanov, dev_asin, dev_msnopok
   profiles.include: local_log
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb_test
@@ -189,3 +189,15 @@ spring:
       bindings:
         springCloudBusInput. destination: bus_config_output_danikanov
         springCloudBusOutput.destination: bus_config_input_danikanov
+
+---
+
+spring:
+  profiles: dev_msnopok
+  datasource:
+    url: jdbc:postgresql://192.168.5.195:5432/asdb
+  cloud:
+    stream:
+      bindings:
+        springCloudBusInput. destination: bus_config_output_msnopok
+        springCloudBusOutput.destination: bus_config_input_msnopok
