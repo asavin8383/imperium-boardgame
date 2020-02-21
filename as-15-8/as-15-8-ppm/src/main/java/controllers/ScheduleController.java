@@ -13,10 +13,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import model.Arrangement;
-import model.Schedule;
-import model.SchedulePeriod;
-import model.Views;
+import model.*;
+import model.enums.ArrangementStatus;
 import model.enums.ScheduleStatus;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -124,7 +122,14 @@ public class ScheduleController {
         return schedule;
     }
 
-    @GetMapping(path = "/total_workers_count")
+    @GetMapping(path = "/has_stopped")
+    @JsonView(Views.Full.class)
+    public boolean hasStoppedArrangements(@RequestParam("id") Schedule schedule) {
+        return arrangementRepo.findAllBySchedule(schedule.getId()).stream()
+                .anyMatch(arrangement -> arrangement.getStatus().equals(ArrangementStatus.STOPPED));
+    }
+
+        @GetMapping(path = "/total_workers_count")
     public Integer getTotalWorkersCount(@RequestParam("id") Schedule schedule){
         /*if(schedule==null){
             throw new AS_15_8_PPM_Exception("Ошибка получения количества обработчиков! Расписание ещё не создано");
