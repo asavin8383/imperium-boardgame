@@ -21,10 +21,21 @@ import java.util.stream.Collectors;
 public class CriteriaHelper {
 
     public static <T> PageImpl<T> createPage(EntityManager em, CriteriaQuery<T> select, Pageable pageable) {
+        return createPage(em, select, pageable, null);
+    }
+
+    public static <T> PageImpl<T> createPage(EntityManager em, CriteriaQuery<T> select, Pageable pageable, Integer size) {
         TypedQuery<T> query = em.createQuery(select);
-        long total = countRowsCount(em, select);
+        long total;
         query.setFirstResult(pageable.getPageNumber() * pageable.getPageSize());
-        query.setMaxResults(pageable.getPageSize());
+        if (size != null) {
+            total = size;
+            query.setMaxResults(size);
+        } else {
+            total = countRowsCount(em, select);
+            query.setMaxResults(pageable.getPageSize());
+        }
+
         List<T> models = query.getResultList();
         return new PageImpl<>(models, pageable, total);
     }
