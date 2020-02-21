@@ -104,7 +104,9 @@ public class ArrangementController {
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public Arrangement update(@RequestBody Arrangement newArrangement, @RequestParam("id") Arrangement arrangement) {
         if(arrangement == null){
-            throw AS_15_8_PPT_Exception.logAndGet(log, "Ошибка изменения мероприятия! Мероприятие не было найдено в БД");
+            throw new AS_15_8_PPT_Exception("Ошибка изменения мероприятия! Мероприятие не было найдено в БД");
+        } else if (arrangement.getStatus() != ExecutionStatus.NEW && arrangement.getStatus() != ExecutionStatus.FORMED) {
+            throw new AS_15_8_PPT_Exception("Ошибка изменения мероприятия! Неверный статус: " + arrangement.getStatus().getDescription());
         }
         checkAndSetDeadlineDate(arrangement.getFormalTask(), newArrangement);
         return arrangementRepo.save(replaceFields(newArrangement, arrangement));
@@ -112,7 +114,7 @@ public class ArrangementController {
 
     private void checkAndSetDeadlineDate(FormalTask formalTask, Arrangement arrangement){
         if(formalTask == null){
-            throw AS_15_8_PPT_Exception.logAndGet(log, "Ошибка установки даты 'Выполнить до' мероприятию " + arrangement.getId() + ". Поручение не найдено в БД");
+            throw new AS_15_8_PPT_Exception("Ошибка установки даты 'Выполнить до' мероприятию " + arrangement.getId() + ". Поручение не найдено в БД");
         }
         if(formalTask.getDeadlineDate() != null && (arrangement.getDeadlineDate() == null || arrangement.getDeadlineDate().isAfter(formalTask.getDeadlineDate()))){
             arrangement.setDeadlineDate(formalTask.getDeadlineDate());
@@ -137,10 +139,10 @@ public class ArrangementController {
             if(arrangement.getStatus().equals(ExecutionStatus.NEW) || arrangement.getStatus().equals(ExecutionStatus.FORMED)){
                 arrangementUploader.updateArrangement(arrangement);
             } else {
-                throw AS_15_8_PPT_Exception.logAndGet(log, "Ошибка отправки мероприятия в ППМ. Мероприятие " + arrangement.getId() + " имеет недопустимый статус: " + arrangement.getStatus());
+                throw new AS_15_8_PPT_Exception("Ошибка отправки мероприятия в ППМ. Мероприятие " + arrangement.getId() + " имеет недопустимый статус: " + arrangement.getStatus());
             }
         } else {
-            throw AS_15_8_PPT_Exception.logAndGet(log, "Ошибка отправки мероприятия в ППМ. Мероприятие не было найдено в БД");
+            throw new AS_15_8_PPT_Exception("Ошибка отправки мероприятия в ППМ. Мероприятие не было найдено в БД");
         }
     }
 
