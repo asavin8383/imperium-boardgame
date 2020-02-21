@@ -19,4 +19,9 @@ public interface DomainRepo extends JpaRepository<Domain, Long> {
     @Query("select d from Domain d " +
             "join d.domainMask dm on  dm.domainMask =:mask")
     Set<Domain> getDomainsByMaskId(@Param("mask") String mask);
+
+    @Query("select count(d.id) from Domain d")
+    long countDomains();
+
+
 }

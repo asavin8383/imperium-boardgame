@@ -29,4 +29,7 @@ public class DomainMask implements Serializable {
     public int getDomainsNumber() {
         return domains.size();
     }
+
+
+
 }
