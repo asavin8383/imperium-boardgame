@@ -78,7 +78,9 @@ public class ArrangementContentController {
                 if (!Strings.isEmpty(query)) {
                      idss = podWebClient.getErdiIdList(query);
                 } else {
-                     idss = podWebClient.getErdiIdList(dynamicTrafficUnit);
+                    if (dynamicTrafficUnit.getSize() != null) {
+                        idss = podWebClient.getErdiIdList(dynamicTrafficUnit);
+                    }
                 }
                 List<Long> subContent = idss.flatMap(Flux::fromIterable).collectList().block();
                 if (subContent != null)

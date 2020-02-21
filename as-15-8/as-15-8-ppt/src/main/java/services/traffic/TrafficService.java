@@ -375,4 +375,10 @@ public class TrafficService {
             return (long) ids.size();
         else return 0L;
     }*/
+
+    public void analyzeDynamicTraffic(DynamicTrafficUnit newDynamicTraffic) {
+        if (newDynamicTraffic.getSize() == null || newDynamicTraffic.getSize() < 0) {
+            throw new AS_15_8_PPT_Exception("Обязательно следует указать размер динамического трафика!");
+        }
+    }
 }

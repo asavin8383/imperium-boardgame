@@ -62,6 +62,7 @@ public class DynamicTrafficController {
     public ResponseEntity postDynamicTraffic(@RequestParam("trafficId") Traffic traffic,
                                              @RequestBody DynamicTrafficUnit newDynamicTraffic) {
         if (traffic != null) {
+            trafficService.analyzeDynamicTraffic(newDynamicTraffic);
             trafficService.removeAllDynamicTrafficUnits(traffic);
             return ResponseEntity.ok().body(trafficService.addDynamicTrafficUnit(traffic, newDynamicTraffic));
         } else return ResponseEntity.badRequest().body("Такой трафик не обнаружен в БД");
@@ -82,6 +83,7 @@ public class DynamicTrafficController {
         if (traffic == null)
             throw new AS_15_8_PPT_Exception("Такой трафик не обнаружен в БД");
         if (newDynamicTraffic != null) {
+            trafficService.analyzeDynamicTraffic(newDynamicTraffic);
             DynamicTrafficUnit dynamicTraffic = trafficService.upadateFirstDynamicTrafficUnit(traffic, newDynamicTraffic);
             return ResponseEntity.ok(dynamicTraffic);
         } else return ResponseEntity.badRequest().body("В теле пакета нет динамического трафика");
