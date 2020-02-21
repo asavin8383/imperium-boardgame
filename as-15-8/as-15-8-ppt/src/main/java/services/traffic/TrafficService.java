@@ -62,7 +62,7 @@ public class TrafficService {
                 SortingHelper.createSorting(sortingDirection, sortingColumn));
 
         Page<Traffic> traffics = trafficRepository.findAll(createTrafficSpecification(query, accessToolType), pageable);
-        List<TrafficBriefView> views = traffics.getContent().parallelStream().map(traffic ->
+        List<TrafficBriefView> views = traffics.getContent().stream().map(traffic ->
                 createTrafficBriefView(traffic)).collect(Collectors.toList());
 
         return new PageImpl<>(views, pageable, traffics.getTotalElements());
@@ -90,7 +90,8 @@ public class TrafficService {
     }
 
     private Long calculateErdiCount(Traffic traffic) {
-        long formalErdiCount = trafficRepository.countContentErdiByTrafficId(traffic.getId());
+        //long formalErdiCount = trafficRepository.countContentErdiByTrafficId(traffic.getId());
+        long formalErdiCount = 99999;
         long customErdiCount = trafficRepository.countCustomErdiByTrafficId(traffic.getId());
         long staticCount = formalErdiCount + customErdiCount;
         long dynamicErdiCount = getDynamicTraficErdiCount(traffic);
