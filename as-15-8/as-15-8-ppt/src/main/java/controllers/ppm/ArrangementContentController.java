@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.enums.SearchQueryReplacePattern;
 import model.task.Arrangement;
+import model.traffic.DynamicTrafficUnit;
 import model.traffic.SearchQueryPattern;
 import model.traffic.SearchQueryPatternContentJoin;
 import model.traffic.Traffic;
@@ -26,6 +27,7 @@ import webClients.PodWebClient;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -70,22 +72,23 @@ public class ArrangementContentController {
     private List<Long> getContenIdsForDynamicTraffic(Traffic traffic) {
         List<Long> contentIds = new ArrayList<>();
         try {
-            dynamicTrafficUnitRepository.findByTraffic(traffic).forEach( dynamicTrafficUnit -> {
+            Optional<DynamicTrafficUnit> dynamicTrafficUnit = dynamicTrafficUnitRepository.findByTraffic(traffic).stream().findFirst();
+            if (dynamicTrafficUnit.isPresent()) {
                 log.info("Начат процесс заполнения чек юнитов для динамического трафика");
-                String query = dynamicTrafficUnit.getQuery();
+                String query = dynamicTrafficUnit.get().getQuery();
                 //TODO как только будет готов фронт - убрать query
                 Flux<List<Long>> idss = Flux.empty();
                 if (!Strings.isEmpty(query)) {
-                     idss = podWebClient.getErdiIdList(query);
+                    idss = podWebClient.getErdiIdList(query);
                 } else {
-                    if (dynamicTrafficUnit.getSize() != null) {
-                        idss = podWebClient.getErdiIdList(dynamicTrafficUnit);
+                    if (dynamicTrafficUnit.get().getSize() != null) {
+                        idss = podWebClient.getErdiIdList(dynamicTrafficUnit.get());
                     }
                 }
                 List<Long> subContent = idss.flatMap(Flux::fromIterable).collectList().block();
                 if (subContent != null)
                     contentIds.addAll(subContent);
-            });
+            }
             return contentIds;
         } catch (Exception ex) {
             throw new AS_15_8_PPT_Exception("Процесс заполнения чек юнитов для динамического трафика неудачен, ошибка: " + ex);
