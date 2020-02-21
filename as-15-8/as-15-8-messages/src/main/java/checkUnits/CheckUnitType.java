@@ -12,8 +12,8 @@ public enum CheckUnitType {
 	URL(CheckMethod.BROWSER),
 	DOMAIN(CheckMethod.BROWSER),
 	DOMAIN_MASK(CheckMethod.BROWSER),
-	IP_V4(CheckMethod.BROWSER),
-	IP_V6(CheckMethod.BROWSER),
+	IP_V4(CheckMethod.NMAP),
+	IP_V6(CheckMethod.NMAP),
 	IP_V4_SUBNET(CheckMethod.NMAP),
 	IP_V6_SUBNET(CheckMethod.NMAP),
 	SEARCH_PHRASE(CheckMethod.BROWSER);

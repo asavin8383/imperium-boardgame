@@ -27,6 +27,8 @@ import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -46,9 +48,6 @@ public class ResultsKafkaService {
 
     @Value("${spring.cloud.stream.bindings.screenshots_table.destination}")
     private String screenshotsTableName;
-
-    @Value("${spring.cloud.stream.bindings.results_count_table.destination}")
-    private String resultsCountTableName;
 
     private final InteractiveQueryService interactiveQueryService;
 
@@ -168,11 +167,15 @@ public class ResultsKafkaService {
     }
 
     public long getResultsCount(Long arrangementId) {
-        return getResultsCountKeyValueStore()
-                .map(store ->
-                        Optional.ofNullable(store.get(arrangementId))
-                        .orElse(0L)
-                ).orElse(0L);
+        return getResultsKeyValueStore()
+            .map(store -> {
+                AtomicLong count = new AtomicLong(0);
+                store.range(
+                        new CheckUnitKey(arrangementId, minValue, minValue),
+                        new CheckUnitKey(arrangementId, maxValue, maxValue)
+                ).forEachRemaining(cu -> count.getAndIncrement());
+                return count.longValue();
+            }).orElse(0L);
     }
 
     public List<CheckUnitType> getDictinctCheckUnitTypes(Long arrangementId){
@@ -283,14 +286,6 @@ public class ResultsKafkaService {
                         resultsTableName,
                         QueryableStoreTypes.keyValueStore()
                 ) : resultsStore);
-    }
-
-    private Optional<ReadOnlyKeyValueStore<Long, Long>> getResultsCountKeyValueStore() {
-        return Optional.ofNullable(resultsCountStore == null ?
-                interactiveQueryService.getQueryableStore(
-                        resultsCountTableName,
-                        QueryableStoreTypes.keyValueStore()
-                ) : resultsCountStore);
     }
 
     private Optional<ReadOnlyKeyValueStore<CheckUnitKey, Screenshots>> getScreenshotsKeyValueStore() {

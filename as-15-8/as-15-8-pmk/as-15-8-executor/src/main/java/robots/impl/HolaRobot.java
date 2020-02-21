@@ -62,6 +62,7 @@ public class HolaRobot extends SeleniumRobot {
 
         ExecutionVpnJobResult message = new ExecutionVpnJobResult();
         message.setStubUrl(stubUrl);
+        message.setUseStubUrl(true);
 
 
         // Эталонная страница с дефолтного драйвера с дефолтным прокси

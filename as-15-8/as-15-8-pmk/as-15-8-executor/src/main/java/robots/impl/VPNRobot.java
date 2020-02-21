@@ -65,6 +65,7 @@ public class VPNRobot extends SeleniumRobot {
 
         ExecutionVpnJobResult message = new ExecutionVpnJobResult();
         message.setStubUrl(stubUrl);
+        message.setUseStubUrl(true);
 
         pageGetterFuture = CompletableFuture
                 .runAsync(() -> {

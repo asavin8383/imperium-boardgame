@@ -43,7 +43,8 @@ public class StubAnalysis {
         double k = sumPoints / maxPoints;
         boolean result = k >= weights.threshold;
 
-        String info = String.format("Заглушка: %s (коэф = %.2f, порог = %.2f).", (result ? "да" : "нет"), k, weights.threshold);
+        String info = String.format("Результат анализа контента: %s (коэф = %.2f, порог = %.2f).",
+                (result ? "обнаружена заглушка" : "обнаружен контент страницы"), k, weights.threshold);
         log.info(info);
 
         AnalysisUtils.appendString(details, info);
@@ -55,10 +56,12 @@ public class StubAnalysis {
     public static boolean isLittleStub(StubAnalysisResult aRes, String content, StringBuffer details) {
         content = content == null ? "" : content;
 
-        boolean res = (aRes.getPageSize() < 2048 && aRes.getDomainNameCount() <= 1 && aRes.getLinkCount() <= 2);
+        boolean res = (aRes.getPageSize() < 1024 && aRes.getDomainNameCount() <= 1 && aRes.getLinkCount() <= 2);
         if (res){
             String title = AnalysisUtils.getTitle(content);
-            AnalysisUtils.appendString(details, "Найдена заглушка: " + (StringUtils.isEmpty(title) ? "<no title>" : title) + ".");
+            AnalysisUtils.appendString(details,
+                    "Результат анализа контента: найдена 'пустая страница'" +
+                    (StringUtils.isEmpty(title) ? "" : " с заголовком: " + title) + ".");
         }
         return res;
     }
