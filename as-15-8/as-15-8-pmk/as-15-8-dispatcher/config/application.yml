@@ -13,8 +13,6 @@ spring:
           destination: results_table
         screenshots_table:
           destination: screenshots_table
-        results_count_table:
-          destination: results_count_table
         arrangementEvents:
           destination: arrangement_events
         springCloudBusInput:
@@ -63,9 +61,11 @@ spring:
   jpa:
     properties:
       hibernate:
+        format_sql: true
+        order_inserts: false
+        order_updates: false
         jdbc:
           lob.non_contextual_creation: true
-        format_sql: true
     databasePlatform: org.hibernate.dialect.PostgreSQL9Dialect
   jackson.serialization.FAIL_ON_EMPTY_BEANS: false
 results.save.schedule: '0 */1 * * * ?'
@@ -105,6 +105,12 @@ spring:
     banner-mode: "off"
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb
+  cloud:
+    stream:
+      kafka:
+        streams.binder:
+          configuration:
+            num.stream.threads: 10
 eureka:
   instance:
     metadata-map:

@@ -79,6 +79,12 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
     /** CSS класс ссылки на сайт во всплывающей подсказке ПС */
     private String hintLinkCSSClassName;
 
+    /** префикс в поисковом запросе ПС */
+    private String searchQueryPrefixForUrl;
+
+    /** префикс в поисковом запросе ПС */
+    private String searchQueryPrefixForDomain;
+
     /**
      * Ссылка на возвращение к исходному тексту после правки правописания
      */
@@ -128,8 +134,10 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         this.needCheckHint = Strings.isNotEmpty(needCheckHintStr) && Boolean.parseBoolean(needCheckHintStr);
         this.hintCSSClassName = scriptParams.get(AccessToolParameter.HINT_CLASS_NAME);
         this.hintLinkCSSClassName = scriptParams.get(AccessToolParameter.HINT_LINK_CLASS_NAME);
-    }
 
+        this.searchQueryPrefixForUrl = scriptParams.get(AccessToolParameter.SEARCH_PREFIX_FOR_URL);
+        this.searchQueryPrefixForDomain = scriptParams.get(AccessToolParameter.SEARCH_PREFIX_FOR_DOMAIN);
+    }
 
 
     public int getSearchResultLimit() {
@@ -193,6 +201,14 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
             log.info("ПС обнаружила робота для URL: {}", checkUnit.getValue());
             return createMessage(false, CheckUnitJobResult.BAD_IP);
         }
+
+        String value = checkUnit.getValue();
+
+        if(checkUnit.getType().equals(CheckUnitType.URL) && Strings.isNotEmpty(searchQueryPrefixForUrl))
+            value = searchQueryPrefixForUrl + value;
+        if(checkUnit.getType().equals(CheckUnitType.DOMAIN) && Strings.isNotEmpty(searchQueryPrefixForDomain))
+            value = searchQueryPrefixForDomain + value;
+        checkUnit.setValue(value);
 
         if(this.needCheckHint) {
             if (checkHintAndSearch(checkUnit.getValue()))

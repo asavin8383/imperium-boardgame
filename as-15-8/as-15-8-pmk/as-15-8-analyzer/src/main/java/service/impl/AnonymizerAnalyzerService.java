@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import service.AnalyzerService;
 import service.ClassificationService;
+import utils.URLUtils;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -77,7 +78,6 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 	public AnalysisResult analyzeResult(ExecutionAnonymizerResult executionResult) throws AnalysisException {
 		AnonymizerAnalysisResult analysisResult = new AnonymizerAnalysisResult();
 		obtainResult(analysisResult, executionResult);
-		obtainResultNLP(analysisResult, executionResult);
 		saveSources(analysisResult, executionResult);
 
 		return analysisResult;
@@ -149,21 +149,14 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 
 		boolean wasRedirect = false;
 		if (!isEmpty(analysisResult.getFinalUrl())){
-			wasRedirect = !AnalysisUtils.simpleCompareUrls(analysisResult.getFinalUrl(), executionResult.getCheckUnit().getValue());
+			wasRedirect = !URLUtils.simpleCompareUrls(analysisResult.getFinalUrl(), executionResult.getCheckUnit().getValue());
 		}
 		analysisResult.setRedirectionDetected(wasRedirect);
 
-		if (analysisResult.getPageSize() < EMPTY_PAGE_SIZE) {
-			analysisResult.setCheckResult(DOUBTFUL);	// todo - так сказали делать
-			appendInfo(analysisResult, "Пустая страница: размер <" + EMPTY_PAGE_SIZE + " байт.");
-			return;
-		}
 
 		// todo check that hidemyass final url equals to initial or contains in erdi
 
-		/* ETALON */
-
-        if ( analysisResult.getUseEtalon() ) {
+		if (analysisResult.getUseEtalon()) {
 
             // проверка на критическую ошибку эталона
             if (analysisResult.hasEtalonError()){
@@ -172,22 +165,29 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
                     analysisResult.setCheckResult(errorResult);
                     return;
                 }
+                else {
+					// алгоритм без эталона!
+				}
             }
-
-		    if (!analysisResult.hasEtalonError()){
+		    else {
                 try {
                     analysisResult.setSimilarityPercent(
                             AnalysisUtils.getTextSimilarityPercent(
                                     executionResult.getPageContent(),
                                     executionResult.getEtalonPageContent()));
 
-                    if (analysisResult.getSimilarityPercent() > similarityThreshold) {
+					boolean isSimilarityEtalon = analysisResult.getSimilarityPercent() > similarityThreshold;
+                    if (isSimilarityEtalon) {
                         analysisResult.setCheckResult(FORBIDDEN_CONTENT_DETECTED);
-                        appendInfo(analysisResult, "Порог сходства текста >= " + similarityThreshold + "%.");
+						appendInfo(analysisResult, String.format("Сходство текста %d%% (порог: %d%%).",
+								analysisResult.getSimilarityPercent(), similarityThreshold));
                         return;
                     }
-
-                } catch (IOException e) {
+                    else {
+						// алгоритм без эталона!
+					}
+                }
+                catch (IOException e) {
                     String msg = "Ошибка при сверке с эталоном";
                     log.error(msg, e);
                     throw new AnalysisException(msg, e);
@@ -195,40 +195,48 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
             }
 		}
 
-		/* STUB */
-
-		try {
-			if (isStub(analysisResult, executionResult)) {
-				analysisResult.setCheckResult(DOUBTFUL);	// todo - так сказали делать
-				return;
-			}
-		} catch (IOException e) {
-			String msg = "Ошибка при проверке заглушки";
-			log.error(msg, e);
-			throw new AnalysisException(msg, e);
+		// проверка на 'пустую страницу'
+		boolean isEmptyPage = analysisResult.getPageSize() < EMPTY_PAGE_SIZE;
+		if (isEmptyPage) {
+			appendInfo(analysisResult,
+					String.format("Результат анализа контента: найдена 'пустая страница' (размер: %d байт, порог: %d байт).",
+							analysisResult.getPageSize(), EMPTY_PAGE_SIZE));
 		}
 
-		// проверка без эталона
-		if (!wasRedirect){
-			StringBuffer contentDetails = new StringBuffer();
-			boolean isForbidden = ContentAnalysis.forbiddenContent(analysisResult, contentDetails);
-			appendInfo(analysisResult, contentDetails.toString());
-			if (isForbidden){
-				analysisResult.setCheckResult(FORBIDDEN_CONTENT_DETECTED);
-				return;
-			}
+		NLPCategory resultNLP = getResultNLP(analysisResult.getFinalUrl(), executionResult);
+		analysisResult.setResultNLP(resultNLP.getDescription());
+		appendInfo(analysisResult, String.format("Результат NLP: %s.", resultNLP.getDescription()));
+
+		if (isEmptyPage){
+			analysisResult.setCheckResult(DOUBTFUL);
+			return;
+		}
+
+		if (resultNLP == NLPCategory.ERROR){
+			analysisResult.setCheckResult(DOUBTFUL);
+			return;
+		}
+		if (resultNLP == NLPCategory.STUB){
+			analysisResult.setCheckResult(COMPLETED);
+			return;
+		}
+
+		if (wasRedirect){
+			// ничего. Т.к. для анонимайзера сложно/невозможно проверить редирект.
 		}
 
 		analysisResult.setCheckResult(DOUBTFUL);
 	}
 
-	private void obtainResultNLP(AnonymizerAnalysisResult analysisResult, ExecutionAnonymizerResult result){
+	private NLPCategory getResultNLP(String url, ExecutionAnonymizerResult result){
 		String page = clearResult(result.getPageContent());
 
+		log.info("Запуск NLP: " + url);
 		NLPCategory nlpCategory = classificationService.classify(page);
 		nlpCategory = nlpCategory == null ? NLPCategory.EXCEPTION : nlpCategory;
 
-		analysisResult.setResultNLP(nlpCategory.getDescription());
+		log.info("Результат NLP: " + nlpCategory.getDescription());
+		return nlpCategory;
 	}
 
 	private CheckUnitJobResult obtainErrorResult(AnonymizerAnalysisResult aRes) {
@@ -280,7 +288,7 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 		stubUrl = stubUrl.toLowerCase();
 
 		return finalUrl.contains(stubUrl) ||
-				AnalysisUtils.simpleCompareUrls(finalUrl, stubUrl);
+				URLUtils.simpleCompareUrls(finalUrl, stubUrl);
 	}
 
 	private Integer sizeOf(String pageContent) {

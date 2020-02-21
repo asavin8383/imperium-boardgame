@@ -10,6 +10,7 @@ import model.ErdiFilterFields;
 import model.projection.ContentView;
 import model.rest.control.UpdateErdiState;
 import org.apache.commons.lang.time.DateUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -71,7 +72,8 @@ public class ContentController {
             @RequestParam(required = false) Long visitorsCntRussiaMin,
             @RequestParam(required = false) Long visitorsCntRussiaMax,
             @RequestParam(required = false) Long visitorsCntWorldMin,
-            @RequestParam(required = false) Long visitorsCntWorldMax
+            @RequestParam(required = false) Long visitorsCntWorldMax,
+            @RequestParam(required = false) Integer size
     ) {
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize,
@@ -94,7 +96,8 @@ public class ContentController {
                         visitorsCntRussiaMin,
                         visitorsCntRussiaMax,
                         visitorsCntWorldMin,
-                        visitorsCntWorldMax);
+                        visitorsCntWorldMax,
+                        size);
         return new ResponseEntity<>(pageContent, HttpStatus.OK);
     }
 
@@ -119,11 +122,11 @@ public class ContentController {
             @RequestParam(required = false) Long visitorsCntRussiaMax,
             @RequestParam(required = false) Long visitorsCntWorldMin,
             @RequestParam(required = false) Long visitorsCntWorldMax,
-            @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(required = false) String query
+
     ) {
 
-        if (query != null) {
+        if (!Strings.isEmpty(query)) {
             query = query.replace("%26","&");
             ErdiFilterFields eff = ErdiFilterFields.loadErdiFilterFields(query);
             idMask = eff.getIdMask();
@@ -144,12 +147,11 @@ public class ContentController {
             visitorsCntRussiaMax = eff.getVisitorsCntRussiaMax();
             visitorsCntWorldMin = eff.getVisitorsCntWorldMin();
             visitorsCntWorldMax = eff.getVisitorsCntWorldMax();
-            pageNumber = eff.getPageNumber();
         }
 
         if (!erdiRestClient.getIsLoading()) {
 
-            Pageable pageable = PageRequest.of(pageNumber, 10,
+            Pageable pageable = PageRequest.of(0, 10,
                     SortingHelper.createSorting(sortingDirection, sortingColumn));
 
             List<Long> listContent =

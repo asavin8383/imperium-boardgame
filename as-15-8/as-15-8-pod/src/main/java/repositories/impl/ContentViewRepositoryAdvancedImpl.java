@@ -71,14 +71,15 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
             Long visitorsCntRussiaMin,
             Long visitorsCntRussiaMax,
             Long visitorsCntWorldMin,
-            Long visitorsCntWorldMax) {
+            Long visitorsCntWorldMax,
+            Integer size) {
 
         initBasicArguments(idMask, categoryNames, decisionOrgs, infoTypeIds, registryNames, resourceTypes, resourceValue,
                 violationNames, startTime, endTime, random, pageable, visitorsCntRussiaMin, visitorsCntRussiaMax,
                 visitorsCntWorldMin, visitorsCntWorldMax, query);
 
         CriteriaQuery<ContentView> select = configurateCriteriaQuery();
-        return CriteriaHelper.createPage(em, select, pageable);
+        return CriteriaHelper.createPage(em, select, pageable, size);
     }
 
     @Override
@@ -91,7 +92,7 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
             List<String> resourceTypes,
             String resourceValue,
             List<String> violationNames,
-            Integer maxResults,
+            Integer size,
             LocalDateTime startTime,
             LocalDateTime endTime,
             Boolean random,
@@ -106,7 +107,7 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
                 visitorsCntWorldMin, visitorsCntWorldMax, null);
 
         CriteriaQuery<ContentView> select = configurateCriteriaQuery();
-        return  CriteriaHelper.createIds(em, select, maxResults);
+        return  CriteriaHelper.createIds(em, select, size);
     }
 
     private void initBasicArguments(String idMask, List<String> categoryNames, List<String> decisionOrgs, List<String> infoTypeIds,

@@ -12,6 +12,13 @@
     <artifactId>as-15-8-rep-scheduler</artifactId>
 
     <dependencies>
+        <!-- AS-15-8 -->
+        <dependency>
+            <groupId>com.ecls.as-15-8</groupId>
+            <artifactId>as-15-8-system-mode</artifactId>
+            <version>1.0</version>
+        </dependency>
+
         <!-- Spring framework -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

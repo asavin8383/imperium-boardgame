@@ -27,6 +27,8 @@ import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -38,14 +40,14 @@ import java.util.stream.StreamSupport;
 @RequiredArgsConstructor(onConstructor_={@Autowired})
 public class ResultsKafkaService {
 
+    private static final long minValue = 0L;
+    private static final long maxValue = 9999999999999L;
+    
     @Value("${spring.cloud.stream.bindings.results_table.destination}")
     private String resultsTableName;
 
     @Value("${spring.cloud.stream.bindings.screenshots_table.destination}")
     private String screenshotsTableName;
-
-    @Value("${spring.cloud.stream.bindings.results_count_table.destination}")
-    private String resultsCountTableName;
 
     private final InteractiveQueryService interactiveQueryService;
 
@@ -146,8 +148,8 @@ public class ResultsKafkaService {
         return getResultsKeyValueStore()
             .flatMap(store -> getLastIteratorValue(
                 store.range(
-                    new CheckUnitKey(arrangementId, jobId, Long.MIN_VALUE),
-                    new CheckUnitKey(arrangementId, jobId, Long.MAX_VALUE)
+                    new CheckUnitKey(arrangementId, jobId, minValue),
+                    new CheckUnitKey(arrangementId, jobId, maxValue)
                 )
             )
             .map(kv -> kv.value));
@@ -157,19 +159,23 @@ public class ResultsKafkaService {
         return getScreenshotsKeyValueStore()
             .flatMap(store -> getLastIteratorValue(
                 store.range(
-                    new CheckUnitKey(arrangementId, jobId, Long.MIN_VALUE),
-                    new CheckUnitKey(arrangementId, jobId, Long.MAX_VALUE)
+                    new CheckUnitKey(arrangementId, jobId, minValue),
+                    new CheckUnitKey(arrangementId, jobId, maxValue)
                 )
             )
             .map(kv -> kv.value));
     }
 
     public long getResultsCount(Long arrangementId) {
-        return getResultsCountKeyValueStore()
-                .map(store ->
-                        Optional.ofNullable(store.get(arrangementId))
-                        .orElse(0L)
-                ).orElse(0L);
+        return getResultsKeyValueStore()
+            .map(store -> {
+                AtomicLong count = new AtomicLong(0);
+                store.range(
+                        new CheckUnitKey(arrangementId, minValue, minValue),
+                        new CheckUnitKey(arrangementId, maxValue, maxValue)
+                ).forEachRemaining(cu -> count.getAndIncrement());
+                return count.longValue();
+            }).orElse(0L);
     }
 
     public List<CheckUnitType> getDictinctCheckUnitTypes(Long arrangementId){
@@ -208,8 +214,8 @@ public class ResultsKafkaService {
 
     Optional<KeyValueIterator<CheckUnitKey, CheckUnitResult>> getArrangementResultsIterator(Long arrangementId) {
         return getResultsKeyValueStore().map(store -> store.range(
-                new CheckUnitKey(arrangementId, Long.MIN_VALUE, Long.MIN_VALUE),
-                new CheckUnitKey(arrangementId, Long.MAX_VALUE, Long.MAX_VALUE))
+                new CheckUnitKey(arrangementId, minValue, minValue),
+                new CheckUnitKey(arrangementId, maxValue, maxValue))
         );
     }
 
@@ -280,14 +286,6 @@ public class ResultsKafkaService {
                         resultsTableName,
                         QueryableStoreTypes.keyValueStore()
                 ) : resultsStore);
-    }
-
-    private Optional<ReadOnlyKeyValueStore<Long, Long>> getResultsCountKeyValueStore() {
-        return Optional.ofNullable(resultsCountStore == null ?
-                interactiveQueryService.getQueryableStore(
-                        resultsCountTableName,
-                        QueryableStoreTypes.keyValueStore()
-                ) : resultsCountStore);
     }
 
     private Optional<ReadOnlyKeyValueStore<CheckUnitKey, Screenshots>> getScreenshotsKeyValueStore() {

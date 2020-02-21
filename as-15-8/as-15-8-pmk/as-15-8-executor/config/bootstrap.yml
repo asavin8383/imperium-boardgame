@@ -56,3 +56,9 @@ spring:
       uri: http://localhost:15802
       profile: default
       label: latest
+
+---
+
+spring:
+  profiles: dev_ashabalin
+gateway.url: ${GATEWAY_URI:http://192.168.5.50:15880}
