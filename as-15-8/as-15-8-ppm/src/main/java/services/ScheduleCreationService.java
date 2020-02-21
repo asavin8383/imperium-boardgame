@@ -24,6 +24,9 @@ public class ScheduleCreationService {
     private final ArrangementRepo arrangementRepo;
 
     public Schedule create(Map<Arrangement, TreeSet<ScheduleCheckUnit>> arrangementCheckUnits, int maxWorkersCount){
+        if(maxWorkersCount==0){
+            throw new AS_15_8_PPM_Exception("Ошибка создания расписания! Для расчета расписания не доступно ни одного обработчика");
+        }
         Schedule schedule = createNewSchedule(arrangementCheckUnits, maxWorkersCount);
         calculateWorkers(schedule, arrangementCheckUnits);
         if(schedule.getSchedulePeriods().size() == 0)

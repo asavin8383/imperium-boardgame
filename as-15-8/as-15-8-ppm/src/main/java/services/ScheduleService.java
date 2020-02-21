@@ -125,7 +125,7 @@ public class ScheduleService {
             clearSchedulePeriods(schedule);
             maxWorkersCount = schedule.getMaxWorkersCount();
         } else {
-            maxWorkersCount = getMaxWorkersCount(arrangementCheckUnits.keySet(), plannedDate);
+            maxWorkersCount = getTotalWorkersCount();
         }
        /* if(maxWorkersCount <= 0){
             throw new AS_15_8_PPM_Exception("Ошибка при создании расписания! В данный момент в системе не осталось свободных обработчиков!");
