@@ -3,6 +3,7 @@ package schedule;
 import checkUnits.CheckUnitType;
 import common.SchedulerApplicationConfiguration;
 import model.*;
+import model.enums.ArrangementStatus;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,8 +36,8 @@ public class TestSchedule {
         Map<Arrangement, TreeSet<ScheduleCheckUnit>> scheduleArrangements = new HashMap<>();
 
         scheduleArrangements.put(
-                createArrangement("arr1", "yandex", "11:00:00","11:10:00"),
-                generateCheckUnits( 2000));
+                createArrangement("arr1", "kaspersky", "11:00:00","12:10:00"),
+                generateCheckUnits( 19524, CheckUnitType.IP_V4));
 
         /*scheduleArrangements.put(
             createArrangement("arr2", AccessToolUnit.YANDEX,"09:00", "10:00"),
@@ -63,18 +64,20 @@ public class TestSchedule {
 
     private Arrangement createArrangement(String name, String accessTool, String startTime, String endTime){
         Arrangement arrangement = new Arrangement();
+        arrangement.setId(999999999999L);
         arrangement.setTitle(name);
         arrangement.setAccessTool(accessTool);
         arrangement.setPlannedStartTime(LocalTime.parse(startTime, formatter));
         arrangement.setPlannedEndTime(LocalTime.parse(endTime, formatter));
+        arrangement.setStatus(ArrangementStatus.NEW);
         return arrangement;
     }
 
-    private TreeSet<ScheduleCheckUnit> generateCheckUnits(int count){
+    private TreeSet<ScheduleCheckUnit> generateCheckUnits(int count, CheckUnitType checkUnitType){
         TreeSet<ScheduleCheckUnit> checkUnits = new TreeSet<>(Comparator.comparing(ScheduleCheckUnit::getCheckUnitValue));
         for(int i = 0; i < count; i++){
             ScheduleCheckUnit checkUnit = new ScheduleCheckUnit();
-            checkUnit.setCheckUnitType(CheckUnitType.URL);
+            checkUnit.setCheckUnitType(checkUnitType);
             checkUnit.setCheckUnitValue("http://test"+i+".com");
             checkUnits.add(checkUnit);
         }
