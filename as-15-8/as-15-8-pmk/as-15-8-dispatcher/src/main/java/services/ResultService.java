@@ -90,7 +90,7 @@ public class ResultService {
     }
 
     @Transactional
-    private void saveArrangementResults(Arrangement arrangement) {
+    void saveArrangementResults(Arrangement arrangement) {
         log.info("Начато сохранение мероприятия: " + arrangement.getId());
         boolean isStopped = !arrangementService.isArrangementRunning(arrangement.getId(), arrangement.getVersion());
         try {
