@@ -55,7 +55,7 @@ public class SearchQueryTrafficUnitController {
         }
         existing.getSearchQueryPatterns().addAll(searchQueryPatterns);
         SearchQueryTrafficUnit searchQueryTrafficUnit = searchQueryTrafficUnitRepository.save(existing);
-        trafficService.actualizeTrafficCheckUnitsCount(existing);
+        trafficService.actualizeTrafficCheckUnitsCount(searchQueryTrafficUnit);
         return searchQueryTrafficUnit;
     }
 
@@ -67,7 +67,7 @@ public class SearchQueryTrafficUnitController {
         }
         existing.getSearchQueryPatterns().removeAll(searchQueryPatterns);
         SearchQueryTrafficUnit searchQueryTrafficUnit = searchQueryTrafficUnitRepository.save(existing);
-        trafficService.actualizeTrafficCheckUnitsCount(existing);
+        trafficService.actualizeTrafficCheckUnitsCount(searchQueryTrafficUnit);
         return searchQueryTrafficUnit;
     }
 
