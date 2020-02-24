@@ -3,6 +3,7 @@ package services.impl;
 import analysis.VpnAnalysisResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import model.DetailResult;
 import model.PasdDetailResult;
 import model.Result;
 import model.enums.CheckType;
@@ -64,8 +65,32 @@ public class VpnDetailResultService implements DetailResultService<VpnAnalysisRe
 	}
 
 	@Override
-	public void save(PasdDetailResult pasdDetailResult) {
-		pasdDetailResultRepo.save(pasdDetailResult);
+	public void save(DetailResult pasdDetailResult) {
+		PasdDetailResult detailResult = (PasdDetailResult) pasdDetailResult;
+		pasdDetailResultRepo.upsert(
+				detailResult.getId(),
+				detailResult.getDomainNameCount(),
+				detailResult.getForbiddenFinalUrl(),
+				detailResult.getHttpHeaders(),
+				detailResult.getHttpHeadersEtalon(),
+				detailResult.getHttpStatus(),
+				detailResult.getHttpStatusEtalon(),
+				detailResult.getKeyWordsCount(),
+				detailResult.getLinkCount(),
+				detailResult.getPageSize(),
+				detailResult.getPageSizeEtalon(),
+				detailResult.getPageUrlFinal(),
+				detailResult.getPageUrlFinalEtalon(),
+				detailResult.getRedirectionDetected(),
+				detailResult.getResponseError(),
+				detailResult.getResponseErrorCode(),
+				detailResult.getResponseErrorCodeEtalon(),
+				detailResult.getResultNLP(),
+				detailResult.getSimilarityOriginPercent(),
+				detailResult.getStubScoreInfo(),
+				detailResult.getStubUrl(),
+				detailResult.getUseEtalon()
+		);
 	}
 
 	@Override

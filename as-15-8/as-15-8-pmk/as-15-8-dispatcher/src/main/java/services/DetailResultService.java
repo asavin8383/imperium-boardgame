@@ -1,5 +1,6 @@
 package services;
 
+import model.DetailResult;
 import model.Result;
 import model.enums.CheckType;
 
@@ -17,7 +18,7 @@ public interface DetailResultService<T, R> {
 
 	R getOrCreate(Result result, T analysisResult);
 
-	void save(R detailResult);
+	void save(DetailResult detailResult);
 
 	String getErrorText(T checkUnitResult);
 	
