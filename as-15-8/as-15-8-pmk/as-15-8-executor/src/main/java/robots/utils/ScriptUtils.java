@@ -96,21 +96,25 @@ public class ScriptUtils {
 
             String screenSrc = wait
                     .until(ExpectedConditions.presenceOfElementLocated(
-                            By.xpath("//img[@src and string-length(@src)!=0]")))
+                            By.xpath("//img[@id = 'screen' and @src and string-length(@src)!=0]")))
                     .getAttribute("src");
 
             if(Strings.isEmpty(screenSrc))
                 throw new ExecutionException("Ошибка получения скриншота: не найдено данных изображения");
 
-            String[] screenSrcSplit = screenSrc.split(",");
+            String[] screenSrcSplit = screenSrc.split("base64,");
             String base64Image = screenSrcSplit[screenSrcSplit.length - 1];
 
             // close screenshot tab
             webDriver.close();
             switchToTab(webDriver, 1);
 
-            return Base64.getDecoder().decode(base64Image);
-        }catch(Exception ex){
+            try {
+                return Base64.getDecoder().decode(base64Image);
+            } catch (Exception ex) {
+                throw new RuntimeException("Ошибка декодирования скриншота: " + base64Image, ex);
+            }
+        } catch(Exception ex){
             throw new RuntimeException("Ошибка получения скриншота", ex);
         }
     }
