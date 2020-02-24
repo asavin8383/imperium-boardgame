@@ -72,7 +72,8 @@ public class ContentController {
             @RequestParam(required = false) Long visitorsCntRussiaMin,
             @RequestParam(required = false) Long visitorsCntRussiaMax,
             @RequestParam(required = false) Long visitorsCntWorldMin,
-            @RequestParam(required = false) Long visitorsCntWorldMax
+            @RequestParam(required = false) Long visitorsCntWorldMax,
+            @RequestParam(required = false) Integer size
     ) {
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize,
@@ -95,7 +96,8 @@ public class ContentController {
                         visitorsCntRussiaMin,
                         visitorsCntRussiaMax,
                         visitorsCntWorldMin,
-                        visitorsCntWorldMax);
+                        visitorsCntWorldMax,
+                        size);
         return new ResponseEntity<>(pageContent, HttpStatus.OK);
     }
 

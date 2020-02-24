@@ -19,6 +19,7 @@ import rest.ResponseStatusString;
 import restapi.PODExchange;
 import service.AnalyzerService;
 import service.ClassificationService;
+import utils.URLUtils;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -94,7 +95,6 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 
 		CheckUnitJobResult checkUnitJobResult = obtainResult(analysisResult, result);
 		analysisResult.setCheckResult(checkUnitJobResult);
-		obtainResultNLP(analysisResult, result);
 		checkFinalUrlForForbidden(analysisResult);
 		saveSources(analysisResult, result, checkUnitJobResult);
 		return analysisResult;
@@ -126,7 +126,8 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 	}
 
 	private void checkFinalUrlForForbidden(VpnAnalysisResult analysisResult){
-		if (analysisResult.getNeedTestFinalUrl() != null && analysisResult.getNeedTestFinalUrl()){
+		Boolean needTestFinalUrl = analysisResult.getNeedTestFinalUrl();
+		if (needTestFinalUrl != null && needTestFinalUrl){
 			ResponseStatusString check = podExchange.checkUrl(analysisResult.getFinalUrl());
 			if (check.isStatus()){
 				analysisResult.setCheckResult(FORBIDDEN_CONTENT_DETECTED);
@@ -139,19 +140,20 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 		}
 	}
 
-	private void obtainResultNLP(VpnAnalysisResult analysisResult, ExecutionVpnJobResult result){
-	    if (StringUtils.isEmpty(analysisResult.getPageUrlFinal())){
-            log.info("NLP не запущен, URL пустой!");
-	        return;
-        }
-		log.info("Запуск NLP: " + analysisResult.getPageUrlFinal());
+	private NLPCategory getResultNLP(String url, ExecutionVpnJobResult result){
+		if (StringUtils.isEmpty(url)){
+			log.info("NLP не запущен, URL пустой!");
+			return NLPCategory.STUB;
+		}
+
+		log.info("Запуск NLP: " + url);
 		String page = clearResult(result.getPageContent());
 
 		NLPCategory nlpCategory = classificationService.classify(page);
 		nlpCategory = nlpCategory == null ? NLPCategory.EXCEPTION : nlpCategory;
-
-		analysisResult.setResultNLP(nlpCategory.getDescription());
 		log.info("Результат NLP: " + nlpCategory.getDescription());
+
+		return nlpCategory;
 	}
 
 	private String clearResult(String result){
@@ -179,6 +181,7 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 		aRes.setResponseErrorCode(chromeErrorCode);
 		aRes.setResponseErrorCodeEtalon(chromeErrorCodeEtalon);
 		aRes.setUseEtalon(jobRes.getUseEtalon() == null || jobRes.getUseEtalon());
+		aRes.setUseStubUrl(jobRes.getUseStubUrl() == null || jobRes.getUseStubUrl());
 
 		if (!responseError) {
 			aRes.setPageSize(pageContent.length());
@@ -198,7 +201,7 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 			// сравнение конечного и начального URL
 			boolean wasRedirect = false;
 			if (!isEmpty(aRes.getPageUrlFinal())){
-				wasRedirect = !AnalysisUtils.simpleCompareUrls(aRes.getPageUrlFinal(), jobRes.getCheckUnit().getValue());
+				wasRedirect = !URLUtils.simpleCompareUrls(aRes.getPageUrlFinal(), jobRes.getCheckUnit().getValue());
 			}
 			aRes.setRedirectionDetected(wasRedirect);
 		}
@@ -206,73 +209,71 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 
 
 	private CheckUnitJobResult obtainResult(VpnAnalysisResult aRes, ExecutionVpnJobResult jobRes) {
-		boolean wasRedirect = aRes.getRedirectionDetected() != null && aRes.getRedirectionDetected();
-
         if (aRes.hasError()) {
             return obtainErrorResult(aRes);
         }
 
+		boolean wasRedirect = aRes.getRedirectionDetected() != null && aRes.getRedirectionDetected();
+
 		// конечный URL совпадает с vpn - заглушкой
-		if (AnalysisUtils.compareDomainsInUrls(aRes.getPageUrlFinal(), aRes.getStubUrl())){
-			appendInfo(aRes, "Определена заглушка по URL заглушки");
+		if (aRes.getUseStubUrl()){
+			if (URLUtils.compareDomainsInUrls(aRes.getPageUrlFinal(), aRes.getStubUrl())){
+				appendInfo(aRes, "Определена заглушка по URL заглушки");
+				return COMPLETED;
+			}
+		}
+
+		if (aRes.getUseEtalon()){
+			// проверка на критическую ошибку эталона
+			if (aRes.hasEtalonError()){
+				CheckUnitJobResult criticalErrorResult = obtainErrorEtalon(aRes);
+				if (criticalErrorResult != null){
+					return criticalErrorResult;
+				}
+				else {
+					// алгоритм без эталона!
+				}
+			}
+			else {
+				// проверяем эталон и оригинал на сходство
+				boolean isSimilarityEtalon = (aRes.getSimilarityOriginPercent() >= similarityThreshold);
+				if (isSimilarityEtalon){
+					if (wasRedirect){
+						appendInfo(aRes, String.format("Сходство текста %d%% (порог: %d%%), но произошел редирект.",
+								aRes.getSimilarityOriginPercent(), similarityThreshold));
+						aRes.setNeedTestFinalUrl(true);
+						return DOUBTFUL;
+					}
+					else {
+						appendInfo(aRes, String.format("Сходство текста %d%% (порог: %d%%).",
+								aRes.getSimilarityOriginPercent(), similarityThreshold));
+						return FORBIDDEN_CONTENT_DETECTED;
+					}
+				}
+				else {
+					// алгоритм без эталона!
+				}
+			}
+		}
+
+		// проверка на маленькую заглушку (пустую страницу)
+		StringBuffer stubLittleDetails = new StringBuffer();
+		boolean isEmptyPage = StubAnalysis.isLittleStub(aRes, jobRes.getPageContent(), stubLittleDetails);
+		appendInfo(aRes, stubLittleDetails.toString());
+
+		NLPCategory resultNLP = getResultNLP(aRes.getPageUrlFinal(), jobRes);
+		aRes.setResultNLP(resultNLP.getDescription());
+		appendInfo(aRes, String.format("Результат NLP: %s.", resultNLP.getDescription()));
+
+		if (isEmptyPage){
 			return COMPLETED;
 		}
 
-		boolean useEtalon = aRes.getUseEtalon() == null || aRes.getUseEtalon();
-
-		// проверка на критическую ошибку эталона
-		if (useEtalon && aRes.hasEtalonError()){
-			CheckUnitJobResult errorResult = obtainErrorEtalon(aRes);
-			if (errorResult != null){
-				return errorResult;
-			}
+		if (resultNLP == NLPCategory.ERROR){
+			return DOUBTFUL;
 		}
-
-		// если эталон есть, проверяем на схожесть
-		boolean isSimilarityEtalon = false;
-		if (useEtalon && !aRes.hasEtalonError()){
-			if (aRes.getSimilarityOriginPercent() >= similarityThreshold){
-				isSimilarityEtalon = true;
-			}
-		}
-
-		// проверка на маленькую заглушку
-		StringBuffer stubLittleDetails = new StringBuffer();
-		boolean isLittleStub = StubAnalysis.isLittleStub(aRes, jobRes.getPageContent(), stubLittleDetails);
-		if (isLittleStub){
-			appendInfo(aRes, stubLittleDetails.toString());
-			return DOUBTFUL;	// todo - так сказали делать
-		}
-
-		// проверка на заглушку
-		StringBuffer stubDetails = new StringBuffer();
-		boolean isStub = StubAnalysis.isStub(aRes, StubAnalysis.getDefaultStubWeights(), stubDetails);
-		appendInfo(aRes, stubDetails.toString());
-		if (isStub){
-			return DOUBTFUL;	// todo - так сказали делать
-		}
-
-		// результат по сходству
-		if (isSimilarityEtalon){
-			if (wasRedirect){
-                appendInfo(aRes, "Порог сходства текста >= " + similarityThreshold + "%, но прошел редирект.");
-                aRes.setNeedTestFinalUrl(true);
-				return DOUBTFUL;
-			}
-			else {
-                appendInfo(aRes, "Порог сходства текста >= " + similarityThreshold + "%.");
-				return FORBIDDEN_CONTENT_DETECTED;
-			}
-		}
-
-		// проверка без эталона
-		if (!wasRedirect){
-			StringBuffer contentDetails = new StringBuffer();
-			boolean isForbidden = ContentAnalysis.forbiddenContent(aRes, contentDetails);
-			appendInfo(aRes, contentDetails.toString());
-			if (isForbidden){
-				return FORBIDDEN_CONTENT_DETECTED;
-			}
+		if (resultNLP == NLPCategory.STUB){
+			return COMPLETED;
 		}
 
 		if (wasRedirect){

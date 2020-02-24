@@ -30,7 +30,8 @@ public interface ContentViewRepositoryAdvanced {
             Long visitorsCntRussiaMin,
             Long visitorsCntRussiaMax,
             Long visitorsCntWorldMin,
-            Long visitorsCntWorldMax
+            Long visitorsCntWorldMax,
+            Integer size
     );
 
     List<Long> findIds(

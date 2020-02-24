@@ -29,6 +29,8 @@ public enum AccessToolParameter {
     HINT_CLASS_NAME,
     HINT_LINK_CLASS_NAME,
     SEARCH_SYSTEM_SEARCH_QUERY,
+    SEARCH_PREFIX_FOR_URL,
+    SEARCH_PREFIX_FOR_DOMAIN,
 
     //vpn, proxy, anonimyzers, extentions
     STUB_URL,

@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.traffic.DynamicTrafficUnit;
 import model.traffic.Traffic;
+import model.traffic.TrafficFullView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -62,8 +63,11 @@ public class DynamicTrafficController {
     public ResponseEntity postDynamicTraffic(@RequestParam("trafficId") Traffic traffic,
                                              @RequestBody DynamicTrafficUnit newDynamicTraffic) {
         if (traffic != null) {
+            trafficService.analyzeDynamicTraffic(newDynamicTraffic);
             trafficService.removeAllDynamicTrafficUnits(traffic);
-            return ResponseEntity.ok().body(trafficService.addDynamicTrafficUnit(traffic, newDynamicTraffic));
+            TrafficFullView trafficFullView = trafficService.addDynamicTrafficUnit(traffic, newDynamicTraffic);
+            trafficService.actualizeTrafficCheckUnitsCount(traffic.getId());
+            return ResponseEntity.ok().body(trafficFullView);
         } else return ResponseEntity.badRequest().body("Такой трафик не обнаружен в БД");
     }
 
@@ -73,6 +77,7 @@ public class DynamicTrafficController {
             throw new AS_15_8_PPT_Exception("DynamicTrafficUnit not found");
         } else {
             trafficService.removeAllDynamicTrafficUnits(traffic);
+            trafficService.actualizeTrafficCheckUnitsCount(traffic.getId());
         }
     }
 
@@ -82,7 +87,9 @@ public class DynamicTrafficController {
         if (traffic == null)
             throw new AS_15_8_PPT_Exception("Такой трафик не обнаружен в БД");
         if (newDynamicTraffic != null) {
+            trafficService.analyzeDynamicTraffic(newDynamicTraffic);
             DynamicTrafficUnit dynamicTraffic = trafficService.upadateFirstDynamicTrafficUnit(traffic, newDynamicTraffic);
+            trafficService.actualizeTrafficCheckUnitsCount(traffic.getId());
             return ResponseEntity.ok(dynamicTraffic);
         } else return ResponseEntity.badRequest().body("В теле пакета нет динамического трафика");
     }
@@ -93,6 +100,7 @@ public class DynamicTrafficController {
         if (unit != null) {
             unit.setQuery(query);
             dynamicTrafficUnitRepository.save(unit);
+            trafficService.actualizeTrafficCheckUnitsCount(unit.getTraffic().getId());
         }
     }
 

@@ -62,8 +62,8 @@ public class TrafficService {
                 SortingHelper.createSorting(sortingDirection, sortingColumn));
 
         Page<Traffic> traffics = trafficRepository.findAll(createTrafficSpecification(query, accessToolType), pageable);
-        List<TrafficBriefView> views = traffics.getContent().parallelStream().map(traffic ->
-                createTrafficBriefView(traffic)).collect(Collectors.toList());
+        List<TrafficBriefView> views = traffics.getContent().stream().map(this::
+                createTrafficBriefView).collect(Collectors.toList());
 
         return new PageImpl<>(views, pageable, traffics.getTotalElements());
     }
@@ -85,8 +85,7 @@ public class TrafficService {
         long formalErdiCount = traffic.getActualCheckUnitsCount();
         long customErdiCount = trafficRepository.countCustomErdiByTrafficId(traffic.getId());
 
-        long staticCount = formalErdiCount + customErdiCount;
-        return staticCount;
+        return formalErdiCount + customErdiCount;
     }
 
     private Long calculateErdiCount(Traffic traffic) {
@@ -112,6 +111,16 @@ public class TrafficService {
         traffic.get().setActualCheckUnitsCount(actualCheckUnitsCount);
         trafficRepository.save(traffic.get());
         return actualCheckUnitsCount;
+    }
+
+    public Long actualizeTrafficCheckUnitsCount(SearchQueryTrafficUnit searchQueryTrafficUnit) {
+        Long trafficId = searchQueryTrafficUnit.getTraffic().getId();
+        return actualizeTrafficCheckUnitsCount(trafficId);
+    }
+
+    void actualizeCheckUnitsCount(CustomErdi customErdi) {
+        customErdi.getErdiTrafficUnits().stream().findFirst().ifPresent(erdiTrafficUnit ->
+                actualizeTrafficCheckUnitsCount(erdiTrafficUnit.getId()));
     }
 
     private Long getActualTrafficCheckUnitCount(Long trafficId) {
@@ -322,8 +331,7 @@ public class TrafficService {
 
     public List<ObjectNode> getAllErdisForDynamicTraffic(Traffic traffic) {
         List<Long> contentIds = getDynamicTrafficContentIds(traffic);
-        List<ObjectNode> dynamicTrafficErdiIds = podWebClient.fetchErdi(contentIds);
-        return dynamicTrafficErdiIds;
+        return podWebClient.fetchErdi(contentIds);
     }
 
     private List<Long> getDynamicTrafficContentIds(Traffic traffic) {
@@ -331,6 +339,7 @@ public class TrafficService {
         traffic.getDynamicTrafficUnits().forEach(dynamicTrafficUnit -> {
             Flux<List<Long>> idsFlux = podWebClient.getErdiIdList(dynamicTrafficUnit);
             List<Long> ids = idsFlux.flatMap(Flux::fromIterable).collectList().block();
+            assert ids != null;
             contentIds.addAll(ids);
         });
         return  contentIds;
@@ -375,4 +384,10 @@ public class TrafficService {
             return (long) ids.size();
         else return 0L;
     }*/
+
+    public void analyzeDynamicTraffic(DynamicTrafficUnit newDynamicTraffic) {
+        if (newDynamicTraffic.getSize() == null || newDynamicTraffic.getSize() < 0) {
+            throw new AS_15_8_PPT_Exception("Обязательно следует указать размер динамического трафика!");
+        }
+    }
 }

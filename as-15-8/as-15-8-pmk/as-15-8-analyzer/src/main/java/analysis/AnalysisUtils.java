@@ -1,27 +1,23 @@
 package analysis;
 
 import enums.CheckUnitJobResult;
+import lombok.extern.slf4j.Slf4j;
 import model.KeyWord;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
-import org.springframework.web.util.UriUtils;
+import utils.URLComponent;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
-
 import static enums.CheckUnitJobResult.*;
-import static java.net.IDN.toASCII;
-import static java.net.IDN.toUnicode;
 import static org.springframework.util.StringUtils.isEmpty;
 
-public class AnalysisUtils {
 
-    public static final String UTF8 =  StandardCharsets.UTF_8.name();
+@Slf4j
+public class AnalysisUtils {
 
     public static int getTextSimilarityPercent(String t1, String t2) throws IOException {
         CosineDocumentSimilarity cos = new CosineDocumentSimilarity(t1, t2);
@@ -38,8 +34,16 @@ public class AnalysisUtils {
     }
 
     public static int getDomainCount(String url, String text) {
-        String domain1 = getDomainDecoded(url);
-        String domain2 = getDomainEncoded(url);
+        URLComponent comp;
+        try {
+            comp = URLComponent.fromString(url);
+        }
+        catch (MalformedURLException e) {
+            e.printStackTrace();
+            return 0;
+        }
+        String domain1 = comp.getDecodedHost();
+        String domain2 = comp.getEncodedHost();
 
         int count1 = 0;
         int count2 = 0;
@@ -51,42 +55,6 @@ public class AnalysisUtils {
             count2 = countMatches(text, domain2);
         }
         return count1 + count2;
-    }
-
-    public static String getDomainDecoded(String url) {
-        if (url == null || url.trim().isEmpty()){
-            return null;
-        }
-        if (!url.startsWith("http"))
-            url = "http://" + url;
-
-        try {
-            URL u = new URL(url);
-            String host = u.getHost() == null ? "" : u.getHost();
-            return toUnicode(host);
-        }
-        catch (MalformedURLException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    public static String getDomainEncoded(String url) {
-        if (url == null || url.trim().isEmpty()){
-            return null;
-        }
-        if (!url.startsWith("http"))
-            url = "http://" + url;
-
-        try {
-            URL u = new URL(url);
-            String host = u.getHost() == null ? "" : u.getHost();
-            return toASCII(host);
-        }
-        catch (MalformedURLException e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 
     public static int getLinkCounts(String text){
@@ -103,80 +71,6 @@ public class AnalysisUtils {
         Document doc = Jsoup.parse(text);
         Elements title = doc.select("title");
         return title.text();
-    }
-
-    public static boolean simpleCompareUrls(String url1, String url2) {
-        url1 = url1 == null ? "" : url1.trim();
-        url2 = url2 == null ? "" : url2.trim();
-
-        if (url1.isEmpty() || url2.isEmpty())
-            return false;
-
-        if (!url1.startsWith("http"))
-            url1 = "http://" + url1;
-        if (!url2.startsWith("http"))
-            url2 = "http://" + url2;
-
-        try {
-            URL u1 = new URL(url1);
-            URL u2 = new URL(url2);
-
-            String host1 = u1.getHost() == null ? "" : u1.getHost();
-            String host2 = u2.getHost() == null ? "" : u2.getHost();
-            boolean hostsEquals = host1.equals(host2) || host1.equals(toUnicode(host2)) || host1.equals(toASCII(host2));
-
-            String path1 = u1.getPath();
-            path1 = path1 == null ? "" : path1;
-            path1 += path1.endsWith("/") ? "" : "/";
-
-            String path2 = u2.getPath();
-            path2 = path2 == null ? "" : path2;
-            path2 += path2.endsWith("/") ? "" : "/";
-
-            boolean pathsEquals = path1.equals(path2) ||
-                    path1.equals(UriUtils.decode(path2, UTF8)) ||
-                    path1.equals(UriUtils.encodeFragment(UriUtils.decode(path2, UTF8), UTF8));
-
-            return hostsEquals && pathsEquals;
-        }
-        catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    public static boolean compareDomainsInUrls(String url1, String url2){
-        url2 = url2 != null ? url2 : "";
-        url1 = url1 != null ? url1 : "";
-
-        if (url2.isEmpty() || url1.isEmpty())
-            return false;
-
-        if (!url1.startsWith("http"))
-            url1 = "http://" + url1;
-        if (!url2.startsWith("http"))
-            url2 = "http://" + url2;
-
-        try {
-            URL u1 = new URL(url1);
-            URL u2 = new URL(url2);
-            String host1 = u1.getHost() == null ? "" : u1.getHost();
-            String host2 = u2.getHost() == null ? "" : u2.getHost();
-
-            boolean res1 = host2.endsWith(host1) ||
-                    host2.endsWith(toUnicode(host1)) ||
-                    host2.endsWith(toASCII(host1));
-
-            boolean res2 = host1.endsWith(host2) ||
-                    host1.endsWith(toUnicode(host2)) ||
-                    host1.endsWith(toASCII(host2));
-
-            return res1 || res2;
-        }
-        catch (MalformedURLException e) {
-            e.printStackTrace();
-            return false;
-        }
     }
 
     public static String appendString(String str, String append){
@@ -197,81 +91,77 @@ public class AnalysisUtils {
         }
     }
 
-
     public static CheckUnitJobResult obtainErrorResult(String errorCode, StringBuffer details){
-        details = details == null ? new StringBuffer() : details;
-        CheckUnitJobResult result = null;
-        String message = null;
-
-        if (!isEmpty(errorCode)){
-            if (errorCode.contains(INTERNAL_ERROR.name())) {
-                message = "Ошибка " + errorCode + ".";
-                result = INTERNAL_ERROR;
-            }
-            else if (errorCode.contains("NO_INTERNET")) {
-                message = "Ошибка! Нет интернета! " + errorCode;
-                result = INTERNAL_ERROR;
-            }
-            else if (errorCode.contains("ERR_PROXY")) {
-                message = "Ошибка доступа к прокси! " + errorCode;
-                result = INTERNAL_ERROR;
-            }
-            else if (errorCode.contains("SOCKET")){
-                message = "Ошибка доступа к ресурсу: " + errorCode + ". Есть вероятность проблемы с сетью.";
-                result = DOUBTFUL;
-            }
-            else if (errorCode.contains("CAPTCHA")){
-                message = "Обнаружена капча: " + errorCode + ".";
-                result = DOUBTFUL;
-            }
-            else if (errorCode.contains("TIME_OUT_CHECKING")) {
-                message = "Ошибка таймаута при проверке браузера: " + errorCode + ". Возможно ресурс доступен.";
-                result = DOUBTFUL;
-            }
-            else if (errorCode.contains("TIMEOUT") || errorCode.contains("TIME_OUT")) {
-                message = "Ошибка таймаута: " + errorCode + ". Ресурс вероятно недоступен.";
-                result = COMPLETED;
-            }
-            else if (errorCode.contains("DNS")){
-            }
-
-            if (result == null){
-                message = "Ошибка доступа к ресурсу: " + errorCode;
-                result = COMPLETED;
-            }
-
-            details.append(message);
-            return result;
-        }
-        return null;
+        return obtainErrorResultFull(errorCode, details);
     }
 
     public static CheckUnitJobResult obtainErrorResultEtalon(String errorCode, StringBuffer details){
+        String ETALON = "[Эталон] ";
+        StringBuffer detailsError = new StringBuffer();
+        CheckUnitJobResult result = obtainErrorResultFull(errorCode, detailsError);
+
+        if (result == INTERNAL_ERROR){
+            details.append(ETALON);
+            details.append(detailsError);
+        }
+        else {
+            String message = String.format("Не критическая ошибка: %s", errorCode);
+            details.append(ETALON);
+            details.append(message);
+            result = null;
+        }
+        return result;
+    }
+
+    public static CheckUnitJobResult obtainErrorResultFull(String errorCode, StringBuffer details){
+        if (isEmpty(errorCode))
+            return null;
+
         details = details == null ? new StringBuffer() : details;
+
         CheckUnitJobResult result = null;
         String message = null;
 
-        if (!isEmpty(errorCode)){
-            if (errorCode.contains(INTERNAL_ERROR.name())) {
-                message = "Ошибка ЭТАЛОНА! " + errorCode;
-                result = INTERNAL_ERROR;
-            }
-            else if (errorCode.contains("NO_INTERNET")) {
-                message = "Ошибка ЭТАЛОНА - нет интернета! " + errorCode;
-                result = INTERNAL_ERROR;
-            }
-            else if (errorCode.contains("ERR_PROXY")) {
-                message = "Ошибка ЭТАЛОНА - доступ к прокси! " + errorCode;
-                result = INTERNAL_ERROR;
-            }
-            else {
-                message = "Не критическая ошибка ЭТАЛОНА: " + errorCode;
-            }
-
-            details.append(message);
-            return result;
+        if (errorCode.contains(INTERNAL_ERROR.name())) {
+            message = String.format("Внутренняя ошибка робота: %s.", errorCode);
+            result = INTERNAL_ERROR;
         }
-        return null;
+        else if (errorCode.contains("NO_INTERNET")) {
+            message = String.format("Ошибка доступа к сети: нет интернета: %s.", errorCode);
+            result = INTERNAL_ERROR;
+        }
+        else if (errorCode.contains("ERR_PROXY")) {
+            message = String.format("Ошибка доступа к ПСД: %s.", errorCode);
+            result = INTERNAL_ERROR;
+        }
+        else if (errorCode.contains("SOCKET")){
+            message = String.format("Ошибка протокола связи: %s.", errorCode);
+            result = DOUBTFUL;
+        }
+        else if (errorCode.contains("CAPTCHA")){
+            message = String.format("Обнаружена капча: %s.", errorCode);
+            result = DOUBTFUL;
+        }
+        else if (errorCode.contains("TIME_OUT_CHECKING")) {
+            message = "Превышено время ожидания при проверке браузера.";
+            result = DOUBTFUL;
+        }
+        else if (errorCode.contains("TIMEOUT") || errorCode.contains("TIME_OUT")) {
+            message = String.format("Превышено время ожидания ответа ресурса: %s", errorCode);
+            result = DOUBTFUL;
+        }
+        else if (errorCode.contains("DNS")){
+            message = String.format("Ошибка DNS сервера: %s", errorCode);
+            result = COMPLETED;
+        }
+
+        if (result == null){
+            message = String.format("Внешняя ошибка: %s", errorCode);
+            result = DOUBTFUL;
+        }
+
+        details.append(message);
+        return result;
     }
 
 }

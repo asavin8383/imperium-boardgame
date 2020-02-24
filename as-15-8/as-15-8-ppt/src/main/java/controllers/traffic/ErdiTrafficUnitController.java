@@ -15,6 +15,7 @@ import repositories.CustomErdiRepository;
 import repositories.ErdiContentJoinRepository;
 import repositories.ErdiTrafficUnitRepository;
 import services.traffic.ErdiTrafficUnitService;
+import services.traffic.TrafficService;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -30,6 +31,7 @@ public class ErdiTrafficUnitController {
     private final CustomErdiRepository customErdiRepository;
     private final ErdiContentJoinRepository erdiContentJoinRepository;
     private final ErdiTrafficUnitService erdiTrafficUnitService;
+    private final TrafficService trafficService;
 
     @PutMapping(path = "/{id}/add", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void addErdiToUnit(@PathVariable("id") ErdiTrafficUnit unit, @RequestBody List<Long> ids) {
@@ -65,23 +67,6 @@ public class ErdiTrafficUnitController {
         return ids;
     }
 
-    /*private void saveErdi(ErdiTrafficUnit unit, List<Long> ids) {
-        if (unit == null)
-            throw new AS_15_8_PPT_Exception("ErdiTrafficUnit not found");
-
-        if (unit.getType() == TrafficUnitType.FORMAL) {
-            List<ErdiTrafficUnitContent> records = ids.stream()
-                    .map(id -> new ErdiTrafficUnitContent(unit, id))
-                    .collect(Collectors.toList());
-            unit.getFormalErdiList().addAll(records);
-        } else {
-            // assert unit.getType() == TrafficUnitType.CUSTOM
-            unit.getCustomErdiList().addAll(customErdiRepository.findAllById(ids));
-        }
-        erdiTrafficUnitRepository.save(unit);
-        trafficService.actualizeTrafficCheckUnitsCount(unit.getTraffic().getId());
-    }*/
-
     @PutMapping(path = "/{id}/remove", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void removeErdiFromUnit(@PathVariable("id") ErdiTrafficUnit unit, @RequestBody List<Long> ids) {
         if (unit == null)
@@ -96,6 +81,7 @@ public class ErdiTrafficUnitController {
         }
         unit.getTraffic().setActualCheckUnitsCount(0L);
         erdiTrafficUnitRepository.save(unit);
+        trafficService.actualizeTrafficCheckUnitsCount(unit.getTraffic().getId());
     }
 
 }

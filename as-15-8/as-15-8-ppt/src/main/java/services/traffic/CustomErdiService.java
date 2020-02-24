@@ -26,9 +26,9 @@ public class CustomErdiService {
 
     private static final String TRAFFIC_ID_COLUMN = "id";
 
-    //private final EntityManager em;
     private final CustomErdiRepository customErdiRepository;
     private final CustomErdiViewRepository viewRepository;
+    private final TrafficService trafficService;
 
     private List<SingularAttribute<CustomErdiView, String>> searchQueryColumns;
 
@@ -105,7 +105,9 @@ public class CustomErdiService {
     public CustomErdi createCustomErdi(CustomErdi customErdi) {
         customErdi.getCustomErdiUnits().forEach(
                 unit -> unit.setCustomErdi(customErdi));
-        return customErdiRepository.save(customErdi);
+        CustomErdi erdi = customErdiRepository.save(customErdi);
+        trafficService.actualizeCheckUnitsCount(erdi);
+        return erdi;
     }
 
     public CustomErdi getCustomErdiById(Long id) {
@@ -120,10 +122,15 @@ public class CustomErdiService {
         customErdi.getCustomErdiUnits().clear();
         newCustomErdi.getCustomErdiUnits().forEach(customErdiUnit -> customErdiUnit.setCustomErdi(customErdi));
         customErdi.getCustomErdiUnits().addAll(newCustomErdi.getCustomErdiUnits());
-        return customErdiRepository.save(customErdi);
+        CustomErdi erdi = customErdiRepository.save(customErdi);
+        trafficService.actualizeCheckUnitsCount(erdi);
+        return erdi;
     }
 
     public void deleteCustomErdi(Long id) {
         customErdiRepository.deleteById(id);
+        customErdiRepository.findById(id).ifPresent(customErdi ->
+                trafficService.actualizeCheckUnitsCount(customErdi));
     }
+
 }
