@@ -50,7 +50,7 @@ public class SearchQueryTrafficUnitController {
     @PutMapping(path = "/{id}/add", consumes = MediaType.APPLICATION_JSON_VALUE)
     public SearchQueryTrafficUnit addPatternsToTemplate(@PathVariable("id") SearchQueryTrafficUnit existing,
                                                  @RequestBody List<SearchQueryPattern> searchQueryPatterns) {
-        if(existing==null){
+        if(existing == null){
             throw new AS_15_8_PPT_Exception("Ошибка добавления шаблонов в трафик-юнит! трафик-юнит не найден в БД");
         }
         existing.getSearchQueryPatterns().addAll(searchQueryPatterns);
@@ -62,7 +62,7 @@ public class SearchQueryTrafficUnitController {
     @PutMapping(path = "/{id}/remove", consumes = MediaType.APPLICATION_JSON_VALUE)
     public SearchQueryTrafficUnit removePatternsFroTemplate(@PathVariable("id") SearchQueryTrafficUnit existing,
                                @RequestBody List<SearchQueryPattern> searchQueryPatterns) {
-        if(existing==null){
+        if(existing == null){
             throw new AS_15_8_PPT_Exception("Ошибка добавления шаблонов в трафик-юнит! трафик-юнит не найден в БД");
         }
         existing.getSearchQueryPatterns().removeAll(searchQueryPatterns);
