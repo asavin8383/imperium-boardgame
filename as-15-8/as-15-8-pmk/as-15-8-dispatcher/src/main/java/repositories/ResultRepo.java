@@ -18,6 +18,7 @@ import org.springframework.stereotype.Repository;
 
 import enums.CheckUnitJobResult;
 import model.Result;
+import org.springframework.transaction.annotation.Transactional;
 
 
 /**
@@ -28,6 +29,7 @@ import model.Result;
 @Repository
 public interface ResultRepo extends JpaRepository<Result, Long>, ResultRepoAdvanced {
 
+	@Transactional
 	@Modifying
 	@Query(
 		value = "insert into results.results " +
