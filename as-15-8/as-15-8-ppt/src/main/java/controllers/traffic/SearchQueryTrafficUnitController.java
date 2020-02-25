@@ -16,6 +16,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import repositories.SearchQueryPatternRepo;
 import repositories.SearchQueryTrafficUnitRepository;
+import services.traffic.TrafficService;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,6 +31,7 @@ public class SearchQueryTrafficUnitController {
 
     private final SearchQueryTrafficUnitRepository searchQueryTrafficUnitRepository;
     private final SearchQueryPatternRepo searchQueryPatternRepo;
+    private final TrafficService trafficService;
 
     @GetMapping(path = "/{id}")
     public SearchQueryTrafficUnit getTemplate(@PathVariable Long id) {
@@ -52,7 +54,9 @@ public class SearchQueryTrafficUnitController {
             throw new AS_15_8_PPT_Exception("Ошибка добавления шаблонов в трафик-юнит! трафик-юнит не найден в БД");
         }
         existing.getSearchQueryPatterns().addAll(searchQueryPatterns);
-        return searchQueryTrafficUnitRepository.save(existing);
+        SearchQueryTrafficUnit searchQueryTrafficUnit = searchQueryTrafficUnitRepository.save(existing);
+        trafficService.actualizeTrafficCheckUnitsCount(searchQueryTrafficUnit);
+        return searchQueryTrafficUnit;
     }
 
     @PutMapping(path = "/{id}/remove", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -62,7 +66,9 @@ public class SearchQueryTrafficUnitController {
             throw new AS_15_8_PPT_Exception("Ошибка добавления шаблонов в трафик-юнит! трафик-юнит не найден в БД");
         }
         existing.getSearchQueryPatterns().removeAll(searchQueryPatterns);
-        return searchQueryTrafficUnitRepository.save(existing);
+        SearchQueryTrafficUnit searchQueryTrafficUnit = searchQueryTrafficUnitRepository.save(existing);
+        trafficService.actualizeTrafficCheckUnitsCount(searchQueryTrafficUnit);
+        return searchQueryTrafficUnit;
     }
 
     @GetMapping(path = "/{id}/search_query_patterns")

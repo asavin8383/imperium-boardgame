@@ -2,6 +2,7 @@ package repositories;
 
 import model.ResultScreenShot;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -12,6 +13,25 @@ import java.util.List;
  * Date: 10.11.2019
  */
 public interface ResultScreenShotRepo extends JpaRepository<ResultScreenShot, Long> {
+
+    @Modifying
+    @Query(
+            value = "insert into results.result_screenshots " +
+                        "(result_id, screenshot, etalon_screenshot) " +
+                    "values " +
+                        "(:id, :screenshot, :etalonScreenshot) " +
+                    "on conflict do update " +
+                    "set " +
+                        "result_id = :id, " +
+                        "screenshot = :screenshot, " +
+                        "etalon_screenshot = :etalonScreenshot",
+            nativeQuery = true
+    )
+    int upsert(
+            @Param("id") Long id,
+            @Param("screenshot") byte[] screenshot,
+            @Param("etalonScreenshot") byte[] etalonScreenshot
+    );
 
     @Query("select r from ResultScreenShot r " +
             "where r.id in :ids")

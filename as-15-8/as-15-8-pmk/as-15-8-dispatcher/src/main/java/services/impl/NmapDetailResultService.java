@@ -2,6 +2,7 @@ package services.impl;
 
 import analysis.NMapAnalysisJobResult;
 import lombok.RequiredArgsConstructor;
+import model.DetailResult;
 import model.NmapDetailResult;
 import model.Result;
 import model.enums.CheckType;
@@ -47,8 +48,9 @@ public class NmapDetailResultService implements DetailResultService<NMapAnalysis
 	}
 
 	@Override
-	public void save(NmapDetailResult nmapDetailResult) {
-		nmapDetailResultRepo.save(nmapDetailResult);
+	public void save(DetailResult nmapDetailResult) {
+		NmapDetailResult detailResult = (NmapDetailResult) nmapDetailResult;
+		nmapDetailResultRepo.upsert(detailResult.getId(), detailResult.getLog());
 	}
 
 	@Override

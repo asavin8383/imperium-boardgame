@@ -2,6 +2,7 @@ package services.impl;
 
 import analysis.PsAnalysisJobResult;
 import lombok.RequiredArgsConstructor;
+import model.DetailResult;
 import model.PsDetailResult;
 import model.Result;
 import model.enums.CheckType;
@@ -47,8 +48,9 @@ public class PsDetailResultService implements DetailResultService<PsAnalysisJobR
 	}
 
 	@Override
-	public void save(PsDetailResult psDetailResult) {
-		psDetailResultRepo.save(psDetailResult);
+	public void save(DetailResult psDetailResult) {
+		PsDetailResult detailResult = (PsDetailResult) psDetailResult;
+		psDetailResultRepo.upsert(detailResult.getId(), detailResult.getDescription());
 	}
 
     @Override

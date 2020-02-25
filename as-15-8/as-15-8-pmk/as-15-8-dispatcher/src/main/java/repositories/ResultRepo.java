@@ -6,10 +6,12 @@ import java.util.List;
 import java.util.Optional;
 
 import checkUnits.CheckUnitType;
+import model.enums.CheckType;
 import model.enums.UserResult;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -25,6 +27,37 @@ import model.Result;
 
 @Repository
 public interface ResultRepo extends JpaRepository<Result, Long>, ResultRepoAdvanced {
+
+	@Modifying
+	@Query(
+		value = "insert into results.results " +
+					"(id, arrangement_id, content_id, result, start_date, end_date, check_type, check_unit_type, check_unit_value) " +
+				"values " +
+					"(:id, :arrangementId, :contentId, :result, :startDate, :endDate, :checkType, :checkUnitType, :checkUnitValue) " +
+				"on conflict do update " +
+				"set " +
+					"id = :id, " +
+					"arrangement_id = :arrangementId, " +
+					"content_id = :contentId, " +
+					"result = :result, " +
+					"start_date = :startDate, " +
+					"end_date = :endDate, " +
+					"check_type = :checkType, " +
+					"check_unit_type = :checkUnitType, " +
+					"check_unit_value = :checkUnitValue",
+		nativeQuery = true
+	)
+	int upsert(
+			@Param("id") Long id,
+			@Param("arrangementId") Long arrangementId,
+			@Param("contentId") Long contentId,
+			@Param("result") CheckUnitJobResult result,
+			@Param("startDate") LocalDateTime startDate,
+			@Param("endDate") LocalDateTime endDate,
+			@Param("checkType") CheckType checkType,
+			@Param("checkUnitType") CheckUnitType checkUnitType,
+			@Param("checkUnitValue") String checkUnitValue
+	);
 
 	@Query("select r from Result r " +
 			"join r.arrangement a " +
