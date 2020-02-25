@@ -12,6 +12,7 @@ public enum AccessToolParameter {
     BROWSER,
     PLATFORM,
     VERSION,
+    MAKE_SCREENSHOT_ON_COMPLETED,
 
     //search-systems
     INPUT_DELAY,

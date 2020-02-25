@@ -95,6 +95,11 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
      * кнопкой "показать больше" */
     private ResultPageType resultPageType;
 
+    /**
+     * Делать ли скриншот, если нарушений не найдено
+     */
+    private boolean makeScreenShotOnCompleted;
+
 
 
     /** Сверяет ссылку с проверяемой */
@@ -137,6 +142,9 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
 
         this.searchQueryPrefixForUrl = scriptParams.get(AccessToolParameter.SEARCH_PREFIX_FOR_URL);
         this.searchQueryPrefixForDomain = scriptParams.get(AccessToolParameter.SEARCH_PREFIX_FOR_DOMAIN);
+
+        this.makeScreenShotOnCompleted = !scriptParams.containsKey(AccessToolParameter.MAKE_SCREENSHOT_ON_COMPLETED)
+            || Boolean.parseBoolean(scriptParams.get(AccessToolParameter.MAKE_SCREENSHOT_ON_COMPLETED));
     }
 
 
@@ -180,7 +188,9 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         ExecutionPSJobResult message = new ExecutionPSJobResult();
         message.setLinkFound(linkFound);
         message.setError(false);
-        message.setScreenshot(ScriptUtils.getScreenshot(driver));
+        if(!checkUnitJobResult.equals(CheckUnitJobResult.COMPLETED) || this.makeScreenShotOnCompleted){
+            message.setScreenshot(ScriptUtils.getScreenshot(driver));
+        }
         message.setUrls(urls);
         message.setCheckUnitJobResult(checkUnitJobResult);
         return message;
