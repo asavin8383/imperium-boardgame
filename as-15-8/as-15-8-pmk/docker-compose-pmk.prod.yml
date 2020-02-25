@@ -11,7 +11,7 @@ services:
     deploy:
       placement:
         constraints:
-          - node.hostname == pmk-master
+          - node.hostname == pmk
       mode: replicated
       replicas: 1
     environment:
@@ -42,7 +42,7 @@ services:
       mode: global
       placement:
         constraints:
-          - node.hostname != pmk-master
+          - node.hostname != pmk
     networks:
       - as-15-8-net
     stop_grace_period: 5m
@@ -73,7 +73,7 @@ services:
       mode: global
       placement:
         constraints:
-          - node.hostname != pmk-master
+          - node.hostname != pmk
     networks:
       - as-15-8-net
     environment:
