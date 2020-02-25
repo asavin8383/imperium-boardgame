@@ -188,7 +188,7 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         ExecutionPSJobResult message = new ExecutionPSJobResult();
         message.setLinkFound(linkFound);
         message.setError(false);
-        if(!checkUnitJobResult.equals(CheckUnitJobResult.COMPLETED) || this.makeScreenShotOnCompleted){
+        if(checkUnitJobResult== null || !checkUnitJobResult.equals(CheckUnitJobResult.COMPLETED) || this.makeScreenShotOnCompleted){
             message.setScreenshot(ScriptUtils.getScreenshot(driver));
         }
         message.setUrls(urls);
