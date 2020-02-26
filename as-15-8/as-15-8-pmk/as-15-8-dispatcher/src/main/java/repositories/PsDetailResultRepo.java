@@ -6,18 +6,20 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Repository
 public interface PsDetailResultRepo extends JpaRepository<PsDetailResult, Long> {
 
+    @Transactional
     @Modifying
     @Query(
             value = "insert into results.ps_detail_results " +
                         "(result_id, description) " +
                     "values " +
                         "(:id, :description) " +
-                    "on conflict do update " +
+                    "on conflict(result_id) do update " +
                     "set " +
                         "result_id = :id, " +
                         "description = :description",

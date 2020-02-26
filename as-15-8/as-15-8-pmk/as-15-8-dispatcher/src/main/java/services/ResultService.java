@@ -189,11 +189,11 @@ public class ResultService {
                 result.getId(),
                 result.getArrangement().getId(),
                 result.getErdiId(),
-                result.getResult(),
+                result.getResult().name(),
                 result.getStartDate(),
                 result.getEndDate(),
-                result.getCheckType(),
-                result.getCheckUnitType(),
+                result.getCheckType().name(),
+                result.getCheckUnitType().name(),
                 result.getCheckUnitValue()
         );
         if(resultScreenShot != null) {

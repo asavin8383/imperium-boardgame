@@ -6,11 +6,13 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Repository
 public interface PasdDetailResultRepo extends JpaRepository<PasdDetailResult, Long> {
 
+    @Transactional
     @Modifying
     @Query(
             value = "insert into results.pasd_detail_results " +
@@ -25,7 +27,7 @@ public interface PasdDetailResultRepo extends JpaRepository<PasdDetailResult, Lo
                         ":keyWordsCount, :linkCount, :pageSize, :pageSizeEtalon, :pageUrlFinal, :pageUrlFinalEtalon, " +
                         ":redirectionDetected, :responseError, :responseErrorCode, :responseErrorCodeEtalon, " +
                         ":resultNlp, :similarityOriginPercent, :stubScoreInfo, :stubUrl, :useEtalon) " +
-                    "on conflict do update " +
+                    "on conflict(result_id) do update " +
                     "set " +
                         "result_id = :id, " +
                         "domain_name_count = :domainNameCount, " +
