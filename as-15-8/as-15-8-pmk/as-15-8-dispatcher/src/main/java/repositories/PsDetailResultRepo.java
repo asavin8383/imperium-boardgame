@@ -19,7 +19,7 @@ public interface PsDetailResultRepo extends JpaRepository<PsDetailResult, Long> 
                         "(result_id, description) " +
                     "values " +
                         "(:id, :description) " +
-                    "on conflict do update " +
+                    "on conflict(result_id) do update " +
                     "set " +
                         "result_id = :id, " +
                         "description = :description",

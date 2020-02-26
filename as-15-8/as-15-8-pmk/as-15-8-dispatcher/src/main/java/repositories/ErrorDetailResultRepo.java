@@ -19,7 +19,7 @@ public interface ErrorDetailResultRepo extends JpaRepository<ErrorDetailResult, 
                         "(result_id, error) " +
                     "values " +
                         "(:id, :error) " +
-                    "on conflict do update " +
+                    "on conflict(result_id) do update " +
                     "set " +
                         "result_id = :id, " +
                         "error = :error",

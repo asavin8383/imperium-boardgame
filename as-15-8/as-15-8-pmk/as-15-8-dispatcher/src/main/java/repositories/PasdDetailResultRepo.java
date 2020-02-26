@@ -27,7 +27,7 @@ public interface PasdDetailResultRepo extends JpaRepository<PasdDetailResult, Lo
                         ":keyWordsCount, :linkCount, :pageSize, :pageSizeEtalon, :pageUrlFinal, :pageUrlFinalEtalon, " +
                         ":redirectionDetected, :responseError, :responseErrorCode, :responseErrorCodeEtalon, " +
                         ":resultNlp, :similarityOriginPercent, :stubScoreInfo, :stubUrl, :useEtalon) " +
-                    "on conflict do update " +
+                    "on conflict(result_id) do update " +
                     "set " +
                         "result_id = :id, " +
                         "domain_name_count = :domainNameCount, " +
