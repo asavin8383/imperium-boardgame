@@ -38,10 +38,6 @@ public class DynamicTrafficUnit extends TrafficUnit implements Serializable {
 
     @Column
     @JsonView(Views.Brief.class)
-    private String query;
-
-    @Column
-    @JsonView(Views.Brief.class)
     private String idMask;
 
     @Column

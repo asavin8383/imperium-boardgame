@@ -358,9 +358,6 @@ public class TrafficService {
     }
 
     private DynamicTrafficUnit replceDynamicTrafficFields(DynamicTrafficUnit dynamicTraffic, DynamicTrafficUnit newDynamicTraffic) {
-        if (!Strings.isEmpty(newDynamicTraffic.getQuery()))
-            dynamicTraffic.setQuery(newDynamicTraffic.getQuery().replace("&", "%26"));
-        else dynamicTraffic.setQuery(null);
         dynamicTraffic.setIdMask(newDynamicTraffic.getIdMask());
         dynamicTraffic.setCategoryNames(newDynamicTraffic.getCategoryNames());
         dynamicTraffic.setDecisionOrgs(newDynamicTraffic.getDecisionOrgs());

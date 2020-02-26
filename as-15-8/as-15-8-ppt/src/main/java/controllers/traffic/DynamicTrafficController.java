@@ -18,7 +18,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import repositories.DynamicTrafficUnitRepository;
 import services.traffic.TrafficService;
 
 import java.util.List;
@@ -31,7 +30,6 @@ import java.util.List;
 public class DynamicTrafficController {
 
     private final TrafficService trafficService;
-    private final DynamicTrafficUnitRepository dynamicTrafficUnitRepository;
 
     @GetMapping
     public ResponseEntity getDynamicTraffic(@RequestParam("trafficId") Traffic traffic) {
