@@ -12,8 +12,11 @@ import model.traffic.Traffic;
 import model.traffic.TrafficBriefView;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
@@ -77,6 +80,43 @@ public class PodWebClient {
                         return Mono.empty();
                     }
                 });
+    }
+
+    public ResponseEntity getTrafficUnitContentIdsFiltered(
+           Pageable pageable,
+           List<Long> contentIds
+
+    ) {
+        Sort.Order order = pageable.getSort().stream().findFirst().orElseThrow(() ->
+                new AS_15_8_PPT_Exception("Невозможно отправить запрос на получение сортированных записей ЕРДИ в ПОД, т.к сортировка не задана"));
+
+        return webClient.post()
+                .uri(UriComponentsBuilder
+                        .fromUriString(PUT_ERDI_WITH_FILTERS)
+                        .queryParam("sortingDirection", SortingDirection.valueOf(order.getDirection().name()))
+                        .queryParam("sortingColumn", order.getProperty())
+                        .queryParam("pageNumber", pageable.getPageNumber())
+                        .queryParam("pageSize", pageable.getPageSize())
+                        .build().toString())
+                .body(BodyInserters.fromObject(contentIds))
+                .exchange()
+                .flatMap(clientResponse -> {
+                    if (clientResponse.statusCode().equals(HttpStatus.OK)) {
+                        log.info("список id ЕРДИ считан успешно");
+
+                        return clientResponse
+                                .bodyToMono(ObjectNode.class)
+                                .flatMap(objectNodes -> Mono.just(ResponseEntity.ok(objectNodes)));
+
+                    } else {
+                        log.warn("Ошибка при чтении списка id ЕРДИ, статус: {}", clientResponse.statusCode().toString());
+                        return clientResponse
+                                .bodyToMono(String.class)
+                                .flatMap(error -> Mono.just(ResponseEntity.badRequest().body(error)));
+
+                    }
+                }).block();
+
     }
 
     public Flux<List<Long>> getErdiIdList(

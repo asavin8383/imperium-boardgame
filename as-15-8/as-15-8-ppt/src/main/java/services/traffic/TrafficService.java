@@ -16,13 +16,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
 import repositories.AccessToolsCategoriesRepo;
 import repositories.DynamicTrafficUnitRepository;
+import repositories.ErdiContentJoinRepository;
 import repositories.TrafficRepository;
 import utils.TrafficUnitUtils;
 import webClients.PodWebClient;
@@ -47,6 +50,7 @@ public class TrafficService {
     private final AccessToolsCategoriesRepo accessToolsCategoriesRepo;
     private final PodWebClient podWebClient;
     private final DynamicTrafficUnitRepository dynamicTrafficUnitRepository;
+    private final ErdiContentJoinRepository erdiContentJoinRepository;
 
     public Page<TrafficBriefView> getBriefTrafficList(SortingDirection sortingDirection,
                                                       String sortingColumn,
@@ -55,15 +59,16 @@ public class TrafficService {
                                                       AccessToolType accessToolType,
                                                       String filteredName) {
 
-        if (filteredName != null && !filteredName.isEmpty())
+        if (Strings.isNotEmpty(filteredName))
             query = filteredName;
 
         PageRequest pageable = PageRequest.of(pageNumber, pageSize,
                 SortingHelper.createSorting(sortingDirection, sortingColumn));
 
         Page<Traffic> traffics = trafficRepository.findAll(createTrafficSpecification(query, accessToolType), pageable);
-        List<TrafficBriefView> views = traffics.getContent().stream().map(this::
-                createTrafficBriefView).collect(Collectors.toList());
+        List<TrafficBriefView> views = traffics.getContent()
+                .stream()
+                .map(this::createTrafficBriefView).collect(Collectors.toList());
 
         return new PageImpl<>(views, pageable, traffics.getTotalElements());
     }
@@ -389,5 +394,24 @@ public class TrafficService {
         if (newDynamicTraffic.getSize() == null || newDynamicTraffic.getSize() < 0) {
             throw new AS_15_8_PPT_Exception("Обязательно следует указать размер динамического трафика!");
         }
+    }
+
+    public ResponseEntity<Page<ObjectNode>> getSortedContentViewFromPod(ErdiTrafficUnit erdiTrafficUnit, Pageable pageable) {
+        List<Long> contentIds = erdiContentJoinRepository.findContentIds(erdiTrafficUnit);
+        return podWebClient.getTrafficUnitContentIdsFiltered(pageable, contentIds);
+    }
+
+    public Page<ObjectNode> getUnsortedContentViewFromPod(ErdiTrafficUnit erdiTrafficUnit, Pageable pageable) {
+        Page<ErdiTrafficUnitContent> trafficUnitContentIdsUnsorted =
+                erdiContentJoinRepository
+                        .findByTrafficUnit(erdiTrafficUnit, pageable);
+
+        List<Long> contentIds = trafficUnitContentIdsUnsorted
+                .stream()
+                .map(ErdiTrafficUnitContent::getErdiId)
+                .collect(Collectors.toList());
+
+        List<ObjectNode> erdiList = podWebClient.fetchErdi(contentIds);
+        return new PageImpl<>(erdiList, pageable, trafficUnitContentIdsUnsorted.getTotalElements());
     }
 }

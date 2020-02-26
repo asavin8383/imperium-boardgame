@@ -48,6 +48,8 @@ public class ContentController {
     private final InfoService infoService;
     private final ContentHistoryRepository contentHistoryRepo;
 
+
+
     private static int BUFFER_SIZE = 1000;
 
     @GetMapping(path = "/erdi")
@@ -123,7 +125,6 @@ public class ContentController {
             @RequestParam(required = false) Long visitorsCntWorldMin,
             @RequestParam(required = false) Long visitorsCntWorldMax,
             @RequestParam(required = false) String query
-
     ) {
 
         if (!Strings.isEmpty(query)) {
@@ -179,6 +180,22 @@ public class ContentController {
         else {
             return Flux.empty();
         }
+    }
+
+    @PostMapping(path = "/erdi/ids")
+    public ResponseEntity<Page<ContentView>> getFilteredContentIds(
+            @RequestParam(required = false, defaultValue = "ASC") SortingDirection sortingDirection,
+            @RequestParam(required = false, defaultValue = "includeTime") String sortingColumn,
+            @RequestParam Integer pageNumber,
+            @RequestParam Integer pageSize,
+            @RequestBody List<Long> contentIds
+    ) {
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize,
+                SortingHelper.createSorting(sortingDirection, sortingColumn));
+
+        return contentService.filterContentView(pageable, contentIds);
+
     }
 
     private LocalDateTime convertToLocalDateTimeMin(LocalDate dateToConvert) {
