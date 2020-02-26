@@ -36,7 +36,7 @@ public interface ResultRepo extends JpaRepository<Result, Long>, ResultRepoAdvan
 					"(id, arrangement_id, content_id, result, start_date, end_date, check_type, check_unit_type, check_unit_value) " +
 				"values " +
 					"(:id, :arrangementId, :contentId, :result, :startDate, :endDate, :checkType, :checkUnitType, :checkUnitValue) " +
-				"on conflict(id) do update " +
+				"on conflict on constraint ck_check_type do update " +
 				"set " +
 					"id = :id, " +
 					"arrangement_id = :arrangementId, " +
@@ -46,18 +46,7 @@ public interface ResultRepo extends JpaRepository<Result, Long>, ResultRepoAdvan
 					"end_date = :endDate, " +
 					"check_type = :checkType, " +
 					"check_unit_type = :checkUnitType, " +
-					"check_unit_value = :checkUnitValue " +
-                "on constraint (ck_check_type) do update " +
-                    "set " +
-                    "id = :id, " +
-                    "arrangement_id = :arrangementId, " +
-                    "content_id = :contentId, " +
-                    "result = :result, " +
-                    "start_date = :startDate, " +
-                    "end_date = :endDate, " +
-                    "check_type = :checkType, " +
-                    "check_unit_type = :checkUnitType, " +
-                    "check_unit_value = :checkUnitValue",
+					"check_unit_value = :checkUnitValue",
 		nativeQuery = true
 	)
 	int upsert(
