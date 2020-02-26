@@ -56,8 +56,8 @@ public interface ResultRepo extends JpaRepository<Result, Long>, ResultRepoAdvan
 			@Param("result") CheckUnitJobResult result,
 			@Param("startDate") LocalDateTime startDate,
 			@Param("endDate") LocalDateTime endDate,
-			@Param("checkType") CheckType checkType,
-			@Param("checkUnitType") CheckUnitType checkUnitType,
+			@Param("checkType") String checkType,
+			@Param("checkUnitType") String checkUnitType,
 			@Param("checkUnitValue") String checkUnitValue
 	);
 

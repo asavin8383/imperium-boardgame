@@ -192,8 +192,8 @@ public class ResultService {
                 result.getResult(),
                 result.getStartDate(),
                 result.getEndDate(),
-                result.getCheckType(),
-                result.getCheckUnitType(),
+                result.getCheckType().name(),
+                result.getCheckUnitType().name(),
                 result.getCheckUnitValue()
         );
         if(resultScreenShot != null) {
