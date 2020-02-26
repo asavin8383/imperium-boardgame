@@ -53,7 +53,7 @@ public interface ResultRepo extends JpaRepository<Result, Long>, ResultRepoAdvan
 			@Param("id") Long id,
 			@Param("arrangementId") Long arrangementId,
 			@Param("contentId") Long contentId,
-			@Param("result") CheckUnitJobResult result,
+			@Param("result") String result,
 			@Param("startDate") LocalDateTime startDate,
 			@Param("endDate") LocalDateTime endDate,
 			@Param("checkType") String checkType,

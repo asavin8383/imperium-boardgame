@@ -189,7 +189,7 @@ public class ResultService {
                 result.getId(),
                 result.getArrangement().getId(),
                 result.getErdiId(),
-                result.getResult(),
+                result.getResult().name(),
                 result.getStartDate(),
                 result.getEndDate(),
                 result.getCheckType().name(),
