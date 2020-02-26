@@ -2,6 +2,7 @@ package services.impl;
 
 import analysis.CheckUnitStatusNotification;
 import lombok.RequiredArgsConstructor;
+import model.DetailResult;
 import model.ErrorDetailResult;
 import model.Result;
 import model.enums.CheckType;
@@ -47,8 +48,9 @@ public class ErrorResultService implements DetailResultService<CheckUnitStatusNo
 	}
 
 	@Override
-	public void save(ErrorDetailResult detailResult) {
-		errorDetailResultRepo.save(detailResult);
+	public void save(DetailResult errorDetailResult) {
+		ErrorDetailResult detailResult = (ErrorDetailResult) errorDetailResult;
+		errorDetailResultRepo.upsert(detailResult.getId(), detailResult.getError());
 	}
 
     @Override

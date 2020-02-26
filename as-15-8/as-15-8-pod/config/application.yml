@@ -149,6 +149,18 @@ spring:
       missions: '0 0 0 * * ?'
 
 ---
+
+spring:
+  profiles: dev_msnopok
+  datasource:
+    url: jdbc:postgresql://192.168.5.195:5432/asdb
+  liquibase:
+    enabled: true
+  app:
+    schedule:
+      missions: '0 0 0 * * ?'
+
+---
 logging:
   config:
   level:

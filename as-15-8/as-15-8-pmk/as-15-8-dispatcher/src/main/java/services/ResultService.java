@@ -18,9 +18,9 @@ import model.enums.CheckType;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import repositories.ArrangementRepo;
 import repositories.ResultRepo;
 import repositories.ResultScreenShotRepo;
@@ -29,9 +29,6 @@ import restapi.ConfigClient;
 import restapi.PptClient;
 
 import javax.annotation.PostConstruct;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
@@ -56,11 +53,6 @@ public class ResultService {
     private final DispatcherProperties dispatcherProperties;
     private final ConfigClient configClient;
     private final PptClient pptClient;
-
-    private final EntityManagerFactory entityManagerFactory;
-
-    @Value("#{new Integer('${spring.jpa.properties.hibernate.jdbc.batch_size:500}')}")
-    private int batchSize;
 
     @PostConstruct
     private void initImageProcessor() throws Exception {
@@ -97,23 +89,20 @@ public class ResultService {
         saveArrangementResults(arrangement);
     }
 
-    private void saveArrangementResults(Arrangement arrangement) {
+    @Transactional
+    void saveArrangementResults(Arrangement arrangement) {
         log.info("Начато сохранение мероприятия: " + arrangement.getId());
-        EntityManager entityManager = entityManagerFactory.createEntityManager();
-        EntityTransaction transaction = entityManager.getTransaction();
         boolean isStopped = !arrangementService.isArrangementRunning(arrangement.getId(), arrangement.getVersion());
         try {
             resultsKafkaService.getArrangementResultsIterator(arrangement.getId())
                 .ifPresent(resultsIterator -> {
                     boolean isSaved = true;
-                    transaction.begin();
                     while (resultsIterator.hasNext()) {
                         KeyValue<CheckUnitKey, CheckUnitResult> result = resultsIterator.next();
                         //Если штамп ставим, нужно попросить инфо об AccessTool
                         AccessToolDTO accessToolDTO = dispatcherProperties.getImprint().isUseImprint() ? getAccessToolInfo(arrangement.getId()) : null;
-                        isSaved = saveArrangementResult(entityManager, result.key, result.value, arrangement, accessToolDTO);
+                        isSaved = saveArrangementResult(result.key, result.value, arrangement, accessToolDTO);
                     }
-                    transaction.commit();
                     if (isSaved) {
                         log.info("Мероприятие успешно сохранено в БД: " + arrangement.getId());
                         if(isArrangementFinished(arrangement) || isStopped) {
@@ -131,18 +120,14 @@ public class ResultService {
                 });
         } catch (Exception ex){
             log.error("Ошибка при созранении результатов проверок мероприятия " + arrangement.getId(), ex);
-            if(transaction.isActive())
-                transaction.rollback();
             arrangement.setStatus(isStopped ? ArrangementStatus.STOPPING : ArrangementStatus.RUNNING);
             arrangementRepo.save(arrangement);
-        } finally {
-            entityManager.close();
         }
     }
 
-    private boolean saveArrangementResult(EntityManager entityManager, CheckUnitKey checkUnitKey, CheckUnitResult checkUnitResult, Arrangement arrangement, AccessToolDTO accessToolDTO) {
+    private boolean saveArrangementResult(CheckUnitKey checkUnitKey, CheckUnitResult checkUnitResult, Arrangement arrangement, AccessToolDTO accessToolDTO) {
         try {
-            saveJobResult(entityManager, arrangement, checkUnitKey.getJobId(), checkUnitResult, accessToolDTO);
+            saveJobResult(arrangement, checkUnitKey.getJobId(), checkUnitResult, accessToolDTO);
         } catch (Exception ex) {
             try {
                 log.error("Ошибка при сохранении результата проверки: " + checkUnitKey.getJobId() + ", " + checkUnitResult.getCheckUnit().getValue(), ex);
@@ -157,7 +142,7 @@ public class ResultService {
                 notification.setEndTime(checkUnitResult.getEndTime());
                 notification.setDescription(sw.toString());
 
-                saveJobResult(entityManager, arrangement, checkUnitKey.getJobId(), notification, accessToolDTO);
+                saveJobResult(arrangement, checkUnitKey.getJobId(), notification, accessToolDTO);
                 log.info("Ошибка сохранена: " + checkUnitKey.getJobId());
             } catch (Exception newEx) {
                 log.error("Ошибка при сохранении ошибочной обработки сообщения с анализом результатов проверки: " + checkUnitKey.getJobId() + ", " + checkUnitResult.getCheckUnit().getValue(), newEx);
@@ -167,7 +152,7 @@ public class ResultService {
         return true;
     }
 
-    private void saveJobResult(EntityManager entityManager, Arrangement arrangement, Long jobId, CheckUnitResult checkUnitResult, AccessToolDTO accessToolDTO) {
+    private void saveJobResult(Arrangement arrangement, Long jobId, CheckUnitResult checkUnitResult, AccessToolDTO accessToolDTO) {
         DetailResultService<? super CheckUnitResult, ? extends DetailResult> service = AnalysisResultServiceFactory.getService(checkUnitResult.getClass());
  //       Result result = resultRepo.findById(jobId).orElseGet(Result::new);
         Result result = new Result();
@@ -176,18 +161,17 @@ public class ResultService {
         //DetailResult detailResult = service.getOrCreate(result, checkUnitResult);
         DetailResult detailResult = service.create(checkUnitResult);
         detailResult.setId(jobId);
-        detailResult.setResult(result);
-        result.setDetailResult(detailResult);
 
+        ResultScreenShot resultScreenShot = null;
         if(checkUnitResult instanceof AnalysisResult) {
             Optional<Screenshots> screenshotsOpt = resultsKafkaService.getScreenshot(arrangement.getId(), jobId);
-            screenshotsOpt.ifPresent(screenshots -> {
+            if(screenshotsOpt.isPresent()) {
+                Screenshots screenshots = screenshotsOpt.get();
                 if ((screenshots.getScreenshot() != null && screenshots.getScreenshot().length > 0) ||
                     (screenshots.getEtalonScreenshot() != null && screenshots.getEtalonScreenshot().length > 0)) {
                     //ResultScreenShot resultScreenShot = resultScreenShotRepo.findById(jobId).orElseGet(ResultScreenShot::new);
-                    ResultScreenShot resultScreenShot = new ResultScreenShot();
+                    resultScreenShot = new ResultScreenShot();
                     resultScreenShot.setId(jobId);
-                    resultScreenShot.setResult(result);
                     if(dispatcherProperties.getImprint().isUseImprint()){
                         //Устанавливаем штамп на скриншот
                         resultScreenShot.setScreenshot(imprintScreenshot(accessToolDTO, checkUnitResult, screenshots.getScreenshot(), result.getCheckType()));
@@ -196,12 +180,30 @@ public class ResultService {
                         resultScreenShot.setScreenshot(screenshots.getScreenshot());
                     }
                     resultScreenShot.setEtalonScreenshot(screenshots.getEtalonScreenshot());
-                    result.setResultScreenShot(resultScreenShot);
                 }
-            });
+            }
         }
         //resultRepo.save(result);
-        entityManager.merge(result);
+        //entityManager.merge(result);
+        resultRepo.upsert(
+                result.getId(),
+                result.getArrangement().getId(),
+                result.getErdiId(),
+                result.getResult().name(),
+                result.getStartDate(),
+                result.getEndDate(),
+                result.getCheckType().name(),
+                result.getCheckUnitType().name(),
+                result.getCheckUnitValue()
+        );
+        if(resultScreenShot != null) {
+            resultScreenShotRepo.upsert(
+                    resultScreenShot.getId(),
+                    resultScreenShot.getScreenshot(),
+                    resultScreenShot.getEtalonScreenshot()
+            );
+        }
+        service.save(detailResult);
     }
 
     private byte[] imprintScreenshot(AccessToolDTO accessToolDTO, CheckUnitResult checkUnitResult, byte[] screenShot, CheckType checkType){

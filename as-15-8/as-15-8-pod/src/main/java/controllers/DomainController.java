@@ -52,6 +52,11 @@ public class DomainController {
         return domainMaskRepo.getOne(id);
     }
 
+    @GetMapping(path = "/count_domains")
+    public long countDomains(){
+        return domainRepo.countDomains();
+    }
+
     @PostMapping
     public DomainMask postDomainMask(@RequestBody DomainMask domainMask) {
         domainMask.getDomains().forEach(domain -> {
@@ -90,6 +95,7 @@ public class DomainController {
         domainMaskRepo.delete(domainMask);
     }
 
+
     @GetMapping(path = "/all")
     public Page<DomainMask> findAllDomainMasks(
             @RequestParam(required = false) SortingDirection sortingDirection,
@@ -102,6 +108,8 @@ public class DomainController {
             return domainMaskRepo.findDomainMasksPage(page);
         else return domainMaskRepo.findDomainMasksPage(domainMask, page);
     }
+
+
 
     private DomainMask replaceFields(DomainMask newDomainMask, DomainMask storedDomainMask){
         storedDomainMask.setDomainMask(newDomainMask.getDomainMask());

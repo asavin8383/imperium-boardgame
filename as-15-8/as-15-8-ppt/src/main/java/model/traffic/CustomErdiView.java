@@ -46,18 +46,18 @@ public class CustomErdiView implements Serializable {
     private String name;
 
     @ToString.Include
-    private String subtypeId;
-
-    @ToString.Include
     private String unitType;
-
-    @ToString.Include
-    private String unitValue;
 
     /** Имя подсистемы будем получать из ПОД по ИД*/
     @Transient
     @Setter
     private String subtype;
+
+    @ToString.Include
+    private String subtypeId;
+
+    @ToString.Include
+    private String unitValue;
 
     @ManyToMany(mappedBy = "customErdiList")
     @JsonIgnore
@@ -66,4 +66,9 @@ public class CustomErdiView implements Serializable {
     @ManyToMany(mappedBy = "customErdiList")
     @JsonIgnore
     private List<ErdiTrafficUnit> erdiTrafficUnits;
+
+//    public String getUnitValueAndSubtypeId() {
+//        return unitValue + " " + subtypeId;
+//    }
+
 }

@@ -7,6 +7,7 @@ import checkUnits.CheckUnitType;
 import common.SchedulerProperties;
 import enums.AccessToolUnit;
 import enums.ArrangementEvents;
+import enums.ExecutionStatus;
 import enums.Protocol;
 import exceptions.AS_15_8_PPM_Exception;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,7 @@ import repositories.SchedulePeriodArrangementRepo;
 import repositories.ScheduleRepo;
 import restapi.ArrangementStatusUploader;
 import restapi.pod.DomainMaskUploader;
+import restapi.ppt.PptRestApi;
 import services.ArrangementService;
 import services.ScheduleService;
 import webClients.PPT_WebClient;
@@ -65,6 +67,7 @@ public class ArrangementController {
     private final ScheduleService scheduleService;
     private final OAuth2RestTemplate restTemplate;
     private final SchedulePeriodArrangementRepo schedulePeriodArrangementRepo;
+    private final PptRestApi pptRestApi;
 
     @Value("${gateway.url}")
     private String gatewayUrl;
@@ -199,20 +202,47 @@ public class ArrangementController {
         return ResponseEntity.ok().build();
     }
 
+    @PreAuthorize("hasRole('ROLE_MANAGE_ARRANGEMENT')")
+    @GetMapping()
+    public ResponseEntity getArrangement(@RequestParam("id") Arrangement arrangement){
+        if (arrangement == null){
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok().body(arrangement);
+    }
+
+    @PreAuthorize("hasRole('ROLE_MANAGE_ARRANGEMENT')")
+    @GetMapping("/schedule_id")
+    public ResponseEntity getSchedule(@RequestParam("id") Arrangement arrangement){
+        if (arrangement == null){
+            return ResponseEntity.noContent().build();
+        }
+        Long scheduleId = scheduleRepo.findMaxScheduleIdByArrangement(arrangement.getId());
+        if (scheduleId != null)
+            return ResponseEntity.ok().body(scheduleId);
+        else return ResponseEntity.noContent().build();
+    }
+
+    @PreAuthorize("hasRole('ROLE_MANAGE_ARRANGEMENT')")
+    @GetMapping("/execution_status_by_id")
+    public String getStatusById(@RequestParam("id") Long id) {
+        return pptRestApi.fetchExecutionStatus(id).getDescription();
+    }
+
     private boolean sendStopSignalToDispatcher(Long arrangementId, Long scheduleId){
 
         log.info("Отправка сообщения на остановку мероприятия {} из расписания {} диспетчеру", arrangementId, scheduleId);
         try {
             restTemplate.exchange(
-                UriComponentsBuilder
-                    .fromHttpUrl(gatewayUrl)
-                    .path(DISPATCHER_STOP_ENDPOINT)
-                    .queryParam("arrangementId", arrangementId)
-                    .queryParam("version", scheduleId)
-                    .build().toString(),
-                HttpMethod.POST,
-                null,
-                Void.class);
+                    UriComponentsBuilder
+                            .fromHttpUrl(gatewayUrl)
+                            .path(DISPATCHER_STOP_ENDPOINT)
+                            .queryParam("arrangementId", arrangementId)
+                            .queryParam("version", scheduleId)
+                            .build().toString(),
+                    HttpMethod.POST,
+                    null,
+                    Void.class);
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
             log.error("Ошибка отправки сообщения на остановку мероприятия {} из расписания {} диспетчеру", arrangementId, scheduleId);
             log.error("Информация об ошибке", ex);
@@ -248,7 +278,7 @@ public class ArrangementController {
             throw new AS_15_8_PPM_Exception("Ошибка при получении конфигурации робота " + arrangement.getAccessTool() + ". Проверьте и обновите конфигурацию ППМ");
         AccessToolUnit accessToolUnit = AccessToolUnit.fromPropertyKey(unitName);
         boolean isPS = accessToolUnit == AccessToolUnit.SEARCH_SYSTEM ||
-            accessToolUnit == AccessToolUnit.GOOGLE_API;
+                accessToolUnit == AccessToolUnit.GOOGLE_API;
         List<ScheduleCheckUnit> scheduleCheckUnits = new ArrayList<>();
         switch (checkUnit.getType()){
             case DOMAIN: {
@@ -257,8 +287,8 @@ public class ArrangementController {
             }
             case DOMAIN_MASK: {
                 domainMaskUploader.getDomains(checkUnit.getValue())
-                    .forEach(domain ->
-                        addDomainToScheduleCheckUnits(isPS, scheduleCheckUnits, checkUnit.getContentId(), domain, arrangement));
+                        .forEach(domain ->
+                                addDomainToScheduleCheckUnits(isPS, scheduleCheckUnits, checkUnit.getContentId(), domain, arrangement));
                 return scheduleCheckUnits;
             }
             case IP_V4:
@@ -315,27 +345,6 @@ public class ArrangementController {
         }
         log.info("Сообщение с изменением статуса мероприятия {} успешно отправлено в ППТ", arrangementStatusNotification.getArrangementId());
         return true;
-    }
-
-    @PreAuthorize("hasRole('ROLE_MANAGE_ARRANGEMENT')")
-    @GetMapping()
-    public ResponseEntity getArrangement(@RequestParam("id") Arrangement arrangement){
-        if (arrangement == null){
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.ok().body(arrangement);
-    }
-
-    @PreAuthorize("hasRole('ROLE_MANAGE_ARRANGEMENT')")
-    @GetMapping("/schedule_id")
-    public ResponseEntity getSchedule(@RequestParam("id") Arrangement arrangement){
-        if (arrangement == null){
-            return ResponseEntity.noContent().build();
-        }
-        Long scheduleId = scheduleRepo.findMaxScheduleIdByArrangement(arrangement.getId());
-        if (scheduleId != null)
-            return ResponseEntity.ok().body(scheduleId);
-        else return ResponseEntity.noContent().build();
     }
 
 }

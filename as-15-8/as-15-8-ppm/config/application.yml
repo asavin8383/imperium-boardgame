@@ -79,7 +79,7 @@ eureka:
 ---
 
 spring:
-  profiles: dev_asavin, dev_ashabalin, dev_pvorobiev, dev_asinjavin, dev_danikanov
+  profiles: dev_asavin, dev_ashabalin, dev_pvorobiev, dev_asinjavin, dev_danikanov, dev_msnopok
   profiles.include: local_log
   datasource:
     url: jdbc:postgresql://192.168.5.195:5432/asdb_test
@@ -141,6 +141,21 @@ spring:
 ---
 
 spring:
+  profiles: dev_msnopok
+  cloud:
+    stream:
+      bindings:
+        outputJobs.destination: jobs_msnopok
+        springCloudBusInput.destination: bus_config_input_msnopok
+        springCloudBusOutput.destination: bus_config_output_msnopok
+  datasource:
+    url: jdbc:postgresql://192.168.5.195:5432/asdb
+  liquibase:
+    enabled: true
+
+---
+
+spring:
   profiles: dev_ashabalin
   cloud:
     stream:
@@ -149,7 +164,7 @@ spring:
         springCloudBusInput.destination: bus_config_input_ashabalin
         springCloudBusOutput.destination: bus_config_output_ashabalin
   datasource:
-    url: jdbc:postgresql://192.168.5.211:5432/asdb_test
+    url: jdbc:postgresql://192.168.5.195:5432/asdb
     #url: jdbc:postgresql://192.168.5.195:5432/asdb
     liquibase:
       enabled: true

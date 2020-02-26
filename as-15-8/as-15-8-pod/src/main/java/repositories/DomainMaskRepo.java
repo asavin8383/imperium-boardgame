@@ -1,18 +1,14 @@
 package repositories;
 
-import enums.Dictionary;
 import model.scheme.Domain;
 import model.scheme.DomainMask;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import repositories.helper.DictionaryRepository;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -42,4 +38,6 @@ public interface DomainMaskRepo extends JpaRepository<DomainMask, Long> {
     //Set<DomainMask> findAllDomainsByMask(@Param("domainMask") String domainMask);
     //Set<DomainMask> findAllDomainsByMask(@Param("domainMask") String domainMask);
     Set<DomainMask> findAllDomainMasksLike(@Param("domainMask") String domainMask);
+
+
 }

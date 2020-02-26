@@ -111,6 +111,13 @@ spring:
 
 ---
 
+
+spring:
+  profiles: dev_msnopok
+  datasource:
+    url: jdbc:postgresql://192.168.5.195:5432/asdb
+---
+
 logging:
   config:
   level:
