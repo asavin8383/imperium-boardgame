@@ -140,8 +140,7 @@ public class DynamicTrafficUnit extends TrafficUnit implements Serializable {
     @Override
     public boolean isEmpty() {
        return  getId() == null && category == null &&
-               StringUtils.isEmpty(getName()) &&
-               StringUtils.isEmpty(query);
+               StringUtils.isEmpty(getName());
     }
 
 }

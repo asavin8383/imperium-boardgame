@@ -75,15 +75,9 @@ public class ArrangementContentController {
             Optional<DynamicTrafficUnit> dynamicTrafficUnit = dynamicTrafficUnitRepository.findByTraffic(traffic).stream().findFirst();
             if (dynamicTrafficUnit.isPresent()) {
                 log.info("Начат процесс заполнения чек юнитов для динамического трафика");
-                String query = dynamicTrafficUnit.get().getQuery();
-                //TODO как только будет готов фронт - убрать query
                 Flux<List<Long>> idss = Flux.empty();
-                if (!Strings.isEmpty(query)) {
-                    idss = podWebClient.getErdiIdList(query);
-                } else {
                     if (dynamicTrafficUnit.get().getSize() != null) {
                         idss = podWebClient.getErdiIdList(dynamicTrafficUnit.get());
-                    }
                 }
                 List<Long> subContent = idss.flatMap(Flux::fromIterable).collectList().block();
                 if (subContent != null)

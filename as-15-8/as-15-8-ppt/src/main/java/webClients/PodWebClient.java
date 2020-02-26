@@ -175,25 +175,6 @@ public class PodWebClient {
                     }
                 });
     }
-    //TODO убрать, как только будет готов новый фронт под трафик
-    public Flux<List<Long>> getErdiIdList(String query) {
-        return webClient.get()
-                .uri(UriComponentsBuilder
-                        .fromUriString(PUT_ERDI_WITH_FILTERS)
-                        .queryParam("query", query)
-                        .build().toString())
-                .accept(MediaType.TEXT_EVENT_STREAM)
-                .exchange()
-                .flatMapMany(clientResponse -> {
-                    if(clientResponse.statusCode().equals(HttpStatus.OK)){
-                        log.info("список id ЕРДИ считан успешно");
-                        return clientResponse.bodyToFlux(new ParameterizedTypeReference<List<Long>>(){});
-                    } else {
-                        log.warn("Ошибка при чтении списка id ЕРДИ, статус: {}", clientResponse.statusCode().toString());
-                        return Flux.empty();
-                    }
-                });
-    }
 
     public Flux<List<Long>> getErdiIdList(DynamicTrafficUnit dynamicTrafficUnit) {
         return getErdiIdList(dynamicTrafficUnit.getIdMask(),

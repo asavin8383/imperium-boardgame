@@ -200,11 +200,11 @@ public class TrafficService {
                                                                                 traffic,
                                                                                 TrafficUnitType.TEMPLATE,
                                                                                 category));
-        //TODO - убрать как только будет готов фронт
+        /*//TODO - убрать как только будет готов фронт
         traffic.getDynamicTrafficUnits().add((DynamicTrafficUnit) fillTrafficUnit(new DynamicTrafficUnit(),
                                                                                 traffic,
                                                                                 TrafficUnitType.DYNAMIC,
-                                                                                category));
+                                                                                category));*/
 
         return convertToFullView(trafficRepository.save(traffic));
     }

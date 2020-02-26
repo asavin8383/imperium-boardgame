@@ -123,32 +123,8 @@ public class ContentController {
             @RequestParam(required = false) Long visitorsCntRussiaMin,
             @RequestParam(required = false) Long visitorsCntRussiaMax,
             @RequestParam(required = false) Long visitorsCntWorldMin,
-            @RequestParam(required = false) Long visitorsCntWorldMax,
-            @RequestParam(required = false) String query
+            @RequestParam(required = false) Long visitorsCntWorldMax
     ) {
-
-        if (!Strings.isEmpty(query)) {
-            query = query.replace("%26","&");
-            ErdiFilterFields eff = ErdiFilterFields.loadErdiFilterFields(query);
-            idMask = eff.getIdMask();
-            categoryNames = eff.getCategoryNames();
-            decisionOrgs = eff.getDecisionOrgs();
-            infoTypeIds = eff.getInfoTypeIds();
-            registryNames = eff.getRegistryNames();
-            resourceTypes = eff.getResourceTypes();
-            resourceValue = eff.getResourceValue();
-            violationNames = eff.getViolationNames();
-            size = eff.getSize();
-            startTime = eff.getStartTime();
-            endTime = eff.getEndTime();
-            random = eff.getRandom();
-            sortingDirection = eff.getSortingDirection();
-            sortingColumn = eff.getSortingColumn();
-            visitorsCntRussiaMin = eff.getVisitorsCntRussiaMin();
-            visitorsCntRussiaMax = eff.getVisitorsCntRussiaMax();
-            visitorsCntWorldMin = eff.getVisitorsCntWorldMin();
-            visitorsCntWorldMax = eff.getVisitorsCntWorldMax();
-        }
 
         if (!erdiRestClient.getIsLoading()) {
 

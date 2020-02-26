@@ -94,14 +94,4 @@ public class DynamicTrafficController {
         } else return ResponseEntity.badRequest().body("В теле пакета нет динамического трафика");
     }
 
-    //TODO убрать, как только поменяется фронт для трафиков
-    @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public void addDynamicTrafficQueryToUnit(@PathVariable("id") DynamicTrafficUnit unit, @RequestParam String query) {
-        if (unit != null) {
-            unit.setQuery(query);
-            dynamicTrafficUnitRepository.save(unit);
-            trafficService.actualizeTrafficCheckUnitsCount(unit.getTraffic().getId());
-        }
-    }
-
 }
