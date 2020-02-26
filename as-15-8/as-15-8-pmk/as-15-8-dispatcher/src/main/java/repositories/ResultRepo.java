@@ -36,7 +36,7 @@ public interface ResultRepo extends JpaRepository<Result, Long>, ResultRepoAdvan
 					"(id, arrangement_id, content_id, result, start_date, end_date, check_type, check_unit_type, check_unit_value) " +
 				"values " +
 					"(:id, :arrangementId, :contentId, :result, :startDate, :endDate, :checkType, :checkUnitType, :checkUnitValue) " +
-				"on conflict on constraint ck_check_type do update " +
+				"on conflict do update " +
 				"set " +
 					"id = :id, " +
 					"arrangement_id = :arrangementId, " +
