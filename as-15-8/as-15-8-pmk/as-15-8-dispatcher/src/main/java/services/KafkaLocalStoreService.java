@@ -9,13 +9,14 @@ import org.apache.kafka.streams.state.KeyValueStore;
 import org.apache.kafka.streams.state.Stores;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.stream.binder.kafka.streams.InteractiveQueryService;
 import org.springframework.kafka.support.serializer.JsonSerde;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import repositories.ResultRepo;
 
 import java.time.LocalDateTime;
-import java.util.Iterator;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -29,11 +30,13 @@ public class KafkaLocalStoreService {
     private int resultsRetentionDays;
 
     private final ResultRepo resultRepo;
+    private final InteractiveQueryService interactiveQueryService;
 
     @Scheduled(cron = "${results.clear.schedule}")
     public void clearOldMessages() {
         log.info("Запуск регламентной очистки локального хранилища");
         try {
+
             KeyValueStore<CheckUnitKey, CheckUnitResult> store =
                     Stores.keyValueStoreBuilder(
                             Stores.persistentKeyValueStore(resultsTableName),
@@ -41,9 +44,8 @@ public class KafkaLocalStoreService {
                             new JsonSerde<>(CheckUnitResult.class)
                     ).build();
             try {
-                Iterator<Result> oldResults = resultRepo.findResultIdsBeforeDate(LocalDateTime.now().minusDays(resultsRetentionDays));
-                while (oldResults.hasNext()) {
-                    Result result = oldResults.next();
+                List<Result> oldResults = resultRepo.findResultIdsBeforeDate(LocalDateTime.now().minusDays(resultsRetentionDays));
+                oldResults.forEach(result -> {
                     CheckUnitKey checkUnitKey = new CheckUnitKey(
                             result.getArrangement().getId(),
                             result.getId(),
@@ -51,9 +53,10 @@ public class KafkaLocalStoreService {
                     );
                     store.delete(checkUnitKey);
                     log.info("Результат " + result.getId() + " от " + result.getEndDate() + " успешно удален из локального хранилища");
-                }
+                });
             } finally {
-                store.close();
+                if(store != null)
+                    store.close();
             }
         } catch (Exception ex) {
             log.error("Ошибка при очистке локального хранилища", ex);
