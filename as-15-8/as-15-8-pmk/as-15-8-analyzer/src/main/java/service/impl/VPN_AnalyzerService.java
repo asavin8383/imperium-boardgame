@@ -94,7 +94,7 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 		}
 
 		CheckUnitJobResult checkUnitJobResult = obtainResult(analysisResult, result);
-		if(checkUnitJobResult.equals(FORBIDDEN_CONTENT_DETECTED) || screenshotAnalyzerHelper.screenshotRequired(result.getAccessTool())) {
+		if(checkUnitJobResult.equals(FORBIDDEN_CONTENT_DETECTED) || checkUnitJobResult.equals(DOUBTFUL) || screenshotAnalyzerHelper.screenshotRequired(result.getAccessTool())) {
 			analysisResult.setScreenshot(result.getScreenshot());
 			analysisResult.setEtalonScreenshot(result.getEtalonScreenshot());
 		}
