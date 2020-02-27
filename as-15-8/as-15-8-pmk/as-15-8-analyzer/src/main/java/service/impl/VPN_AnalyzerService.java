@@ -19,6 +19,7 @@ import rest.ResponseStatusString;
 import restapi.PODExchange;
 import service.AnalyzerService;
 import service.ClassificationService;
+import utils.ScreenshotAnalyzerHelper;
 import utils.URLUtils;
 
 import javax.annotation.PostConstruct;
@@ -53,19 +54,20 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 	private List<KeyWord> keyWords = new ArrayList<>();
 
 	private final ResourceLoader resourceLoader;
-
 	private final PODExchange podExchange;
-
 	private final ClassificationService classificationService;
+	private final ScreenshotAnalyzerHelper screenshotAnalyzerHelper;
 
 	public VPN_AnalyzerService(
 			ResourceLoader resourceLoader,
 			PODExchange podExchange,
-			@Qualifier("openNLPClassificator") ClassificationService classificationService) {
+			@Qualifier("openNLPClassificator") ClassificationService classificationService,
+			ScreenshotAnalyzerHelper screenshotAnalyzerHelper) {
 
 		this.resourceLoader = resourceLoader;
 		this.podExchange = podExchange;
 		this.classificationService = classificationService;
+		this.screenshotAnalyzerHelper = screenshotAnalyzerHelper;
 	}
 
 	@PostConstruct
@@ -84,8 +86,6 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 	public AnalysisResult analyzeResult(ExecutionVpnJobResult result) throws AnalysisException {
 		VpnAnalysisResult analysisResult = new VpnAnalysisResult();
 		analysisResult.setCheckUnit(result.getCheckUnit());
-		analysisResult.setScreenshot(result.getScreenshot());
-		analysisResult.setEtalonScreenshot(result.getEtalonScreenshot());
 
 		try {
 			prepareResult(analysisResult, result);
@@ -94,6 +94,10 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 		}
 
 		CheckUnitJobResult checkUnitJobResult = obtainResult(analysisResult, result);
+		if(checkUnitJobResult.equals(FORBIDDEN_CONTENT_DETECTED) || screenshotAnalyzerHelper.screenshotRequired(result.getAccessTool())) {
+			analysisResult.setScreenshot(result.getScreenshot());
+			analysisResult.setEtalonScreenshot(result.getEtalonScreenshot());
+		}
 		analysisResult.setCheckResult(checkUnitJobResult);
 		checkFinalUrlForForbidden(analysisResult);
 		saveSources(analysisResult, result, checkUnitJobResult);
