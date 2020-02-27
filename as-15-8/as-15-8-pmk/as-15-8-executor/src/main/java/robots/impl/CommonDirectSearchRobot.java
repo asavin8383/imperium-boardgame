@@ -218,13 +218,12 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
             value = searchQueryPrefixForUrl + value;
         if(checkUnit.getType().equals(CheckUnitType.DOMAIN) && Strings.isNotEmpty(searchQueryPrefixForDomain))
             value = searchQueryPrefixForDomain + value;
-        checkUnit.setValue(value);
 
         if(this.needCheckHint) {
-            if (checkHintAndSearch(checkUnit.getValue()))
+            if (checkHintAndSearch(value))
                 return createMessage(true, CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED);
         } else {
-            searchText(checkUnit.getValue());
+            searchText(value);
         }
 
         if (captcha())
