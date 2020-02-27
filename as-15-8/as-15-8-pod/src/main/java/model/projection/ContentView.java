@@ -28,7 +28,7 @@ public class ContentView {
 
     @Column(name = "includetime")
     @ToString.Include
-    private LocalDateTime includeTime;
+    private LocalDateTime includetime;
 
     // 12
     @ToString.Include

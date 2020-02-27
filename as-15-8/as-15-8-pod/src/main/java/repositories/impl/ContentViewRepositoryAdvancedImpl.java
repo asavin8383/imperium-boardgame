@@ -202,11 +202,11 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
         }
 
         if (startTime != null) {
-            predicates.add(criteriaBuilder.greaterThanOrEqualTo(rootContentView.get(ContentView_.INCLUDE_TIME), startTime));
+            predicates.add(criteriaBuilder.greaterThanOrEqualTo(rootContentView.get(ContentView_.INCLUDETIME), startTime));
         }
 
         if (endTime != null) {
-            predicates.add(criteriaBuilder.lessThanOrEqualTo(rootContentView.get(ContentView_.INCLUDE_TIME), endTime));
+            predicates.add(criteriaBuilder.lessThanOrEqualTo(rootContentView.get(ContentView_.INCLUDETIME), endTime));
         }
 
         if (visitorsCntRussiaMin != null) {

@@ -2,6 +2,7 @@ package repositories;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -145,4 +146,8 @@ public interface ResultRepo extends JpaRepository<Result, Long>, ResultRepoAdvan
 			"join res.arrangement a " +
 			"on a.id = :id AND (res.result NOT IN :results)")
 	Long countByNotResultIn(@Param("id") Long id, @Param("results") List<CheckUnitJobResult> results);
+
+	@Query("select r.id from Result r " +
+			"where r.endDate < :dateTime")
+	Iterator<Result> findResultIdsBeforeDate(@Param("dateTime") LocalDateTime dateTime);
 }
