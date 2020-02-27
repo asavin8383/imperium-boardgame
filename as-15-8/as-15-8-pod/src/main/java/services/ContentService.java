@@ -164,8 +164,7 @@ public class ContentService {
     }
 
     public String convertCamelCaseToSnakeCase(String parse) {
-        if (!parse.contains("include"))
-            parse = parse.replaceAll("([^_A-Z])([A-Z])", "$1_$2");
+        parse = parse.replaceAll("([^_A-Z])([A-Z])", "$1_$2");
         parse.toLowerCase();
         return parse;
 

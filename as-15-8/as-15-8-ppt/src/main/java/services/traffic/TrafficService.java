@@ -118,6 +118,7 @@ public class TrafficService {
         long customErdiCount = trafficRepository.countCustomErdiByTrafficId(traffic.getId());
         long staticCount = formalErdiCount + customErdiCount;
         long dynamicErdiCount = getDynamicTraficErdiCount(traffic.getId());
+        traffic.setErdiCount(staticCount + dynamicErdiCount);
         return staticCount + dynamicErdiCount;
     }
 
