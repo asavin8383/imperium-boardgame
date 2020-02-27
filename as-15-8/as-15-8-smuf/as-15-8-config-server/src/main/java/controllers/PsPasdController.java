@@ -3,7 +3,6 @@ package controllers;
 import controllers.entity.PS;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import model.enums.Microservice;
 import model.Robot;
 import model.enums.RobotType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import repositories.RobotRepository;
 import services.ConfigurationsService;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -28,11 +26,10 @@ import java.util.stream.Collectors;
 @PreAuthorize("hasRole('ROLE_SYSTEM')")
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class PsPasdController
-{
+public class PsPasdController {
+
     private final RobotRepository robotRepository;
     private final ConfigurationsService configurationsService;
-
 
     /**
      * Прием новых записей о ПС
@@ -87,10 +84,7 @@ public class PsPasdController
                 newRobot.setOrigName(ps.getName());
                 newRobot.setName(robotName);
                 newRobot.setType(robotType);
-                newRobot.setConfigurations(new HashSet<>(Arrays.asList(
-                        configurationsService.getOrCreate(Microservice.executor),
-                        configurationsService.getOrCreate(Microservice.ppm)
-                )));
+                newRobot.setConfigurations(new HashSet<>(configurationsService.getMsRequiredRobotsConfigs()));
                 robotRepository.save(newRobot);
                 newCnt++;
             }

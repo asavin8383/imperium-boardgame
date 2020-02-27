@@ -63,4 +63,6 @@
     <include file="db/changelog/ppt.0035.dynamic_traffic_unit.xml"/>
     <include file="db/changelog/ppt.0036.dynamic_traffic_query_to_model.xml"/>
     <include file="db/changelog/ppt.0037.dynamic_traffic_erdi_count_about.xml"/>
+    <include file="db/changelog/ppt.0038.dynamic_traffic_query_remove.xml"/>
+    <include file="db/changelog/ppt.0039.traffic_erdi_count.xml"/>
 </databaseChangeLog>

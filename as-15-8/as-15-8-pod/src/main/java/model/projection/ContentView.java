@@ -2,7 +2,6 @@ package model.projection;
 
 import lombok.*;
 import org.hibernate.annotations.Immutable;
-import org.hibernate.annotations.Subselect;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -29,7 +28,7 @@ public class ContentView {
 
     @Column(name = "includetime")
     @ToString.Include
-    private LocalDateTime includeTime;
+    private LocalDateTime includetime;
 
     // 12
     @ToString.Include
@@ -56,8 +55,10 @@ public class ContentView {
     // 18
     private String violationName;
 
+    @ToString.Include
     private Long visitorsCntRussia;
 
+    @ToString.Include
     private Long visitorsCntWorld;
     // 2
     // @Value("#{target.contentInfo.includetime}")

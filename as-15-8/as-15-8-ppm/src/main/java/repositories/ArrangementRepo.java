@@ -1,5 +1,6 @@
 package repositories;
 
+import enums.ExecutionStatus;
 import model.Arrangement;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -38,4 +39,6 @@ public interface ArrangementRepo extends JpaRepository<Arrangement, Long> {
             "from Arrangement a " +
             "where a.accessTool = :accessTool")
     List<Arrangement> findAllByAccessTool(@Param("accessTool") String accessTool);
+
+
 }

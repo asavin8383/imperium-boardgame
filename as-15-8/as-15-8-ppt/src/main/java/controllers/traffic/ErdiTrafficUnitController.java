@@ -81,7 +81,7 @@ public class ErdiTrafficUnitController {
         }
         unit.getTraffic().setActualCheckUnitsCount(0L);
         erdiTrafficUnitRepository.save(unit);
-        trafficService.actualizeTrafficCheckUnitsCount(unit.getTraffic().getId());
+        trafficService.actualizeTraffic(unit.getTraffic().getId());
     }
 
 }

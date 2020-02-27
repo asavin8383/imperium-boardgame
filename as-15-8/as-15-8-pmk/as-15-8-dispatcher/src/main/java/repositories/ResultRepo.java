@@ -37,7 +37,7 @@ public interface ResultRepo extends JpaRepository<Result, Long>, ResultRepoAdvan
 					"(id, arrangement_id, content_id, result, start_date, end_date, check_type, check_unit_type, check_unit_value) " +
 				"values " +
 					"(:id, :arrangementId, :contentId, :result, :startDate, :endDate, :checkType, :checkUnitType, :checkUnitValue) " +
-				"on conflict do update " +
+				"on conflict(id) do update " +
 				"set " +
 					"id = :id, " +
 					"arrangement_id = :arrangementId, " +
@@ -54,11 +54,11 @@ public interface ResultRepo extends JpaRepository<Result, Long>, ResultRepoAdvan
 			@Param("id") Long id,
 			@Param("arrangementId") Long arrangementId,
 			@Param("contentId") Long contentId,
-			@Param("result") CheckUnitJobResult result,
+			@Param("result") String result,
 			@Param("startDate") LocalDateTime startDate,
 			@Param("endDate") LocalDateTime endDate,
-			@Param("checkType") CheckType checkType,
-			@Param("checkUnitType") CheckUnitType checkUnitType,
+			@Param("checkType") String checkType,
+			@Param("checkUnitType") String checkUnitType,
 			@Param("checkUnitValue") String checkUnitValue
 	);
 

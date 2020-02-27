@@ -6,11 +6,9 @@ import controllers.utils.SortingHelper;
 import enums.ErdiStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import model.ErdiFilterFields;
 import model.projection.ContentView;
 import model.rest.control.UpdateErdiState;
 import org.apache.commons.lang.time.DateUtils;
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -47,6 +45,8 @@ public class ContentController {
     private final ErdiRestClient erdiRestClient;
     private final InfoService infoService;
     private final ContentHistoryRepository contentHistoryRepo;
+
+
 
     private static int BUFFER_SIZE = 1000;
 
@@ -121,33 +121,8 @@ public class ContentController {
             @RequestParam(required = false) Long visitorsCntRussiaMin,
             @RequestParam(required = false) Long visitorsCntRussiaMax,
             @RequestParam(required = false) Long visitorsCntWorldMin,
-            @RequestParam(required = false) Long visitorsCntWorldMax,
-            @RequestParam(required = false) String query
-
+            @RequestParam(required = false) Long visitorsCntWorldMax
     ) {
-
-        if (!Strings.isEmpty(query)) {
-            query = query.replace("%26","&");
-            ErdiFilterFields eff = ErdiFilterFields.loadErdiFilterFields(query);
-            idMask = eff.getIdMask();
-            categoryNames = eff.getCategoryNames();
-            decisionOrgs = eff.getDecisionOrgs();
-            infoTypeIds = eff.getInfoTypeIds();
-            registryNames = eff.getRegistryNames();
-            resourceTypes = eff.getResourceTypes();
-            resourceValue = eff.getResourceValue();
-            violationNames = eff.getViolationNames();
-            size = eff.getSize();
-            startTime = eff.getStartTime();
-            endTime = eff.getEndTime();
-            random = eff.getRandom();
-            sortingDirection = eff.getSortingDirection();
-            sortingColumn = eff.getSortingColumn();
-            visitorsCntRussiaMin = eff.getVisitorsCntRussiaMin();
-            visitorsCntRussiaMax = eff.getVisitorsCntRussiaMax();
-            visitorsCntWorldMin = eff.getVisitorsCntWorldMin();
-            visitorsCntWorldMax = eff.getVisitorsCntWorldMax();
-        }
 
         if (!erdiRestClient.getIsLoading()) {
 
@@ -179,6 +154,22 @@ public class ContentController {
         else {
             return Flux.empty();
         }
+    }
+
+    @PostMapping(path = "/erdi/ids")
+    public ResponseEntity<Page<ContentView>> getFilteredContentIds(
+            @RequestParam(required = false, defaultValue = "ASC") SortingDirection sortingDirection,
+            @RequestParam(required = false, defaultValue = "includeTime") String sortingColumn,
+            @RequestParam Integer pageNumber,
+            @RequestParam Integer pageSize,
+            @RequestBody List<Long> contentIds
+    ) {
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize,
+                SortingHelper.createSorting(sortingDirection,
+                        contentService.convertCamelCaseToSnakeCase(sortingColumn)));
+        return contentService.filterContentView(pageable, contentIds);
+
     }
 
     private LocalDateTime convertToLocalDateTimeMin(LocalDate dateToConvert) {

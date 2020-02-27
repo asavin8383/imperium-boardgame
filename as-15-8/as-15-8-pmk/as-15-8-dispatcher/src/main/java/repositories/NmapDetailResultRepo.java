@@ -25,7 +25,7 @@ public interface NmapDetailResultRepo extends JpaRepository<NmapDetailResult, Lo
                         "(result_id, log) " +
                     "values " +
                         "(:id, :log) " +
-                    "on conflict do update " +
+                    "on conflict(result_id) do update " +
                     "set " +
                         "result_id = :id, " +
                         "log = :log",

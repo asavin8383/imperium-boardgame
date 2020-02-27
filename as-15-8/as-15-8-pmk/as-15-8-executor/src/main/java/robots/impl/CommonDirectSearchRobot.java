@@ -188,7 +188,7 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         ExecutionPSJobResult message = new ExecutionPSJobResult();
         message.setLinkFound(linkFound);
         message.setError(false);
-        if(!checkUnitJobResult.equals(CheckUnitJobResult.COMPLETED) || this.makeScreenShotOnCompleted){
+        if(linkFound || this.makeScreenShotOnCompleted){
             message.setScreenshot(ScriptUtils.getScreenshot(driver));
         }
         message.setUrls(urls);
@@ -218,13 +218,12 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
             value = searchQueryPrefixForUrl + value;
         if(checkUnit.getType().equals(CheckUnitType.DOMAIN) && Strings.isNotEmpty(searchQueryPrefixForDomain))
             value = searchQueryPrefixForDomain + value;
-        checkUnit.setValue(value);
 
         if(this.needCheckHint) {
-            if (checkHintAndSearch(checkUnit.getValue()))
+            if (checkHintAndSearch(value))
                 return createMessage(true, CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED);
         } else {
-            searchText(checkUnit.getValue());
+            searchText(value);
         }
 
         if (captcha())
