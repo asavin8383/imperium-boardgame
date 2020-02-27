@@ -64,7 +64,7 @@ public class DynamicTrafficController {
             trafficService.analyzeDynamicTraffic(newDynamicTraffic);
             trafficService.removeAllDynamicTrafficUnits(traffic);
             TrafficFullView trafficFullView = trafficService.addDynamicTrafficUnit(traffic, newDynamicTraffic);
-            trafficService.actualizeTrafficCheckUnitsCount(traffic.getId());
+            trafficService.actualizeTraffic(traffic.getId());
             return ResponseEntity.ok().body(trafficFullView);
         } else return ResponseEntity.badRequest().body("Такой трафик не обнаружен в БД");
     }
@@ -75,7 +75,7 @@ public class DynamicTrafficController {
             throw new AS_15_8_PPT_Exception("DynamicTrafficUnit not found");
         } else {
             trafficService.removeAllDynamicTrafficUnits(traffic);
-            trafficService.actualizeTrafficCheckUnitsCount(traffic.getId());
+            trafficService.actualizeTraffic(traffic.getId());
         }
     }
 
@@ -87,7 +87,7 @@ public class DynamicTrafficController {
         if (newDynamicTraffic != null) {
             trafficService.analyzeDynamicTraffic(newDynamicTraffic);
             DynamicTrafficUnit dynamicTraffic = trafficService.upadateFirstDynamicTrafficUnit(traffic, newDynamicTraffic);
-            trafficService.actualizeTrafficCheckUnitsCount(traffic.getId());
+            trafficService.actualizeTraffic(traffic.getId());
             return ResponseEntity.ok(dynamicTraffic);
         } else return ResponseEntity.badRequest().body("В теле пакета нет динамического трафика");
     }

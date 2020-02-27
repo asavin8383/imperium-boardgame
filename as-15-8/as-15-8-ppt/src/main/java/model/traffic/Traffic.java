@@ -42,6 +42,11 @@ public class Traffic implements Serializable {
     @ToString.Include
     private Long actualCheckUnitsCount = 0L;
 
+    @NotNull
+    @Column (nullable = false)
+    @ToString.Include
+    private Long erdiCount = 0L;
+
     @OneToMany(mappedBy = "traffic", orphanRemoval = true,
             cascade = CascadeType.ALL)
     @JsonIgnore

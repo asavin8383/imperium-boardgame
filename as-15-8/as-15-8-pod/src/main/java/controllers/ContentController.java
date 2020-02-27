@@ -6,11 +6,9 @@ import controllers.utils.SortingHelper;
 import enums.ErdiStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import model.ErdiFilterFields;
 import model.projection.ContentView;
 import model.rest.control.UpdateErdiState;
 import org.apache.commons.lang.time.DateUtils;
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -168,8 +166,8 @@ public class ContentController {
     ) {
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize,
-                SortingHelper.createSorting(sortingDirection, sortingColumn));
-
+                SortingHelper.createSorting(sortingDirection,
+                        contentService.convertCamelCaseToSnakeCase(sortingColumn)));
         return contentService.filterContentView(pageable, contentIds);
 
     }

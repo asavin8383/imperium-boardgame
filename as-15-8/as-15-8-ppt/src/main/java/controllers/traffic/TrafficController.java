@@ -44,8 +44,8 @@ public class TrafficController {
     @PutMapping(path = "/actual_check_units")
     public ResponseEntity calculateActualCheckUnits(@RequestParam("id") Traffic traffic) {
         try {
-            Long res = trafficService.actualizeTrafficCheckUnitsCount(traffic.getId());
-            return ResponseEntity.ok().body(res);
+            trafficService.actualizeTraffic(traffic.getId());
+            return ResponseEntity.ok().body(traffic);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Ошибка при подсчёте актуального числа чек юнитов для трафика");
         }
@@ -73,7 +73,7 @@ public class TrafficController {
     @ResponseStatus(code = HttpStatus.CREATED)
     public TrafficFullView createTraffic() {
         TrafficFullView trafficFullView  = trafficService.createTraffic();
-        trafficService.actualizeTrafficCheckUnitsCount(trafficFullView.getId());
+        trafficService.actualizeTraffic(trafficFullView.getId());
         return trafficFullView;
     }
 
@@ -82,7 +82,7 @@ public class TrafficController {
     public TrafficFullView updateTraffic(@RequestBody TrafficFullView fullView,
                                          @PathVariable("id") Traffic traffic) {
         TrafficFullView trafficFullView = trafficService.updateTraffic(fullView, traffic);
-        trafficService.actualizeTrafficCheckUnitsCount(traffic.getId());
+        trafficService.actualizeTraffic(traffic.getId());
         return trafficFullView;
     }
 

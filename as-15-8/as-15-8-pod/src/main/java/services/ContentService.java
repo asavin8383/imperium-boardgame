@@ -162,4 +162,12 @@ public class ContentService {
         session.flush();
         session.clear();
     }
+
+    public String convertCamelCaseToSnakeCase(String parse) {
+
+        parse = parse.replaceAll("([^_A-Z])([A-Z])", "$1_$2");
+        parse.toLowerCase();
+        return parse;
+
+    }
 }

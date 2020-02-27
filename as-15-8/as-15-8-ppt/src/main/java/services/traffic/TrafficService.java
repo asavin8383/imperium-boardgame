@@ -76,8 +76,8 @@ public class TrafficService {
     private TrafficBriefView createTrafficBriefView(Traffic traffic) {
         TrafficBriefView view = new TrafficBriefView(traffic.getId(), traffic.getName());
 
-        view.setActualCheckUnitsCount(calculateActualCheckUnitsCount(traffic));
-        view.setErdiCount(calculateErdiCount(traffic));
+        view.setActualCheckUnitsCount(traffic.getActualCheckUnitsCount());
+        view.setErdiCount(traffic.getErdiCount());
 
         if (traffic.getDynamicTrafficUnits().size()>0)
             view.setContainsDynamicTraffic(true);
@@ -86,46 +86,44 @@ public class TrafficService {
         return view;
     }
 
-    private Long calculateActualCheckUnitsCount(Traffic traffic) {
-        long formalErdiCount = traffic.getActualCheckUnitsCount();
-        long customErdiCount = trafficRepository.countCustomErdiByTrafficId(traffic.getId());
-
-        return formalErdiCount + customErdiCount;
-    }
-
-    private Long calculateErdiCount(Traffic traffic) {
-        long formalErdiCount = trafficRepository.countContentErdiByTrafficId(traffic.getId());
-        long customErdiCount = trafficRepository.countCustomErdiByTrafficId(traffic.getId());
-        long staticCount = formalErdiCount + customErdiCount;
-        long dynamicErdiCount = getDynamicTraficErdiCount(traffic);
-        return staticCount + dynamicErdiCount;
-
-    }
-
-    private long getDynamicTraficErdiCount(Traffic traffic) {
-        return dynamicTrafficUnitRepository.findByTraffic(traffic).
-                stream().findFirst().orElseGet(DynamicTrafficUnit::new).getErdiCountAbout();
-    }
-
-    public Long actualizeTrafficCheckUnitsCount(Long trafficId) {
+    private long getDynamicTraficErdiCount(Long trafficId) {
         Optional<Traffic> traffic = trafficRepository.findById(trafficId);
         traffic.orElseThrow(() ->
                 new AS_15_8_PPT_Exception("Ошибка при актуализации количества чек юнитов для трафика, трафик с такми id не найден: "+ trafficId));
 
-        Long actualCheckUnitsCount = getActualTrafficCheckUnitCount(trafficId);
-        traffic.get().setActualCheckUnitsCount(actualCheckUnitsCount);
+        return dynamicTrafficUnitRepository.findByTraffic(traffic.get()).
+                stream().findFirst().orElseGet(DynamicTrafficUnit::new).getErdiCountAbout();
+    }
+
+    public void actualizeTraffic(Long trafficId) {
+
+        Optional<Traffic> traffic = trafficRepository.findById(trafficId);
+        traffic.orElseThrow(() ->
+                new AS_15_8_PPT_Exception("Ошибка при актуализации количества чек юнитов для трафика, трафик с такми id не найден: "+ trafficId));
+
+        actualizeTrafficCheckUnitsCount(traffic.get());
+        actualizeErdiCount(traffic.get());
+
         trafficRepository.save(traffic.get());
+    }
+
+    private Long actualizeTrafficCheckUnitsCount(Traffic traffic) {
+        Long actualCheckUnitsCount = getActualTrafficCheckUnitCount(traffic.getId());
+        traffic.setActualCheckUnitsCount(actualCheckUnitsCount);
         return actualCheckUnitsCount;
     }
 
-    public Long actualizeTrafficCheckUnitsCount(SearchQueryTrafficUnit searchQueryTrafficUnit) {
-        Long trafficId = searchQueryTrafficUnit.getTraffic().getId();
-        return actualizeTrafficCheckUnitsCount(trafficId);
+    private Long actualizeErdiCount(Traffic traffic) {
+        long formalErdiCount = trafficRepository.countContentErdiByTrafficId(traffic.getId());
+        long customErdiCount = trafficRepository.countCustomErdiByTrafficId(traffic.getId());
+        long staticCount = formalErdiCount + customErdiCount;
+        long dynamicErdiCount = getDynamicTraficErdiCount(traffic.getId());
+        return staticCount + dynamicErdiCount;
     }
 
     void actualizeCheckUnitsCount(CustomErdi customErdi) {
         customErdi.getErdiTrafficUnits().stream().findFirst().ifPresent(erdiTrafficUnit ->
-                actualizeTrafficCheckUnitsCount(erdiTrafficUnit.getId()));
+                actualizeTrafficCheckUnitsCount(erdiTrafficUnit.getTraffic()));
     }
 
     private Long getActualTrafficCheckUnitCount(Long trafficId) {
@@ -200,11 +198,6 @@ public class TrafficService {
                                                                                 traffic,
                                                                                 TrafficUnitType.TEMPLATE,
                                                                                 category));
-        /*//TODO - убрать как только будет готов фронт
-        traffic.getDynamicTrafficUnits().add((DynamicTrafficUnit) fillTrafficUnit(new DynamicTrafficUnit(),
-                                                                                traffic,
-                                                                                TrafficUnitType.DYNAMIC,
-                                                                                category));*/
 
         return convertToFullView(trafficRepository.save(traffic));
     }
