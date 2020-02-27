@@ -13,7 +13,6 @@ import robots.impl.*;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -26,7 +25,9 @@ public class RobotsFactoryImpl implements RobotsFactory {
         put(AccessToolUnit.PROXY, VPNRobot.class);
         put(AccessToolUnit.VPN, VPNRobot.class);
         put(AccessToolUnit.HOLA, HolaRobot.class);
+        put(AccessToolUnit.EXTENSION, ExtensionRobot.class);
         put(AccessToolUnit.CAMELEO_XYZ, CameleoRobot.class);
+        put(AccessToolUnit.ANONYMIZER, CommonAnonymizerRobot.class);
         put(AccessToolUnit.HIDEMYASS, HideMyAssRobot.class);
         put(AccessToolUnit.GOOGLE_API, GoogleApiRobot.class);
     }};

@@ -38,14 +38,14 @@ public class TestJobExecution {
 		CheckUnitJob checkUnitJob = new CheckUnitJob();
 		checkUnitJob.setAccessTool("yandex");
 
-		checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.DOMAIN, "d.herrutor.org"));
+		checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.DOMAIN, "facebook.com"));
 		//checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.IP_V6, "2606:4700:0030:0000:0000:0000:681b:b458"));
 
 		ExecutionJobResult executionJobResult = checkUnitVerificationServiceFactory
 				.getService(checkUnitJob)
 				.run(1L, checkUnitJob);
 
-		Files.write(Paths.get("output.jpg"), executionJobResult.getScreenshot(),
+		Files.write(Paths.get("output1.jpg"), executionJobResult.getScreenshot(),
 			StandardOpenOption.CREATE, StandardOpenOption.APPEND);
 //
 //        ByteArrayInputStream bis2 = new ByteArrayInputStream(executionJobResult.getEtalonScreenshot());

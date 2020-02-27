@@ -44,8 +44,10 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 			put(AccessToolUnit.PROXY, Arrays.asList(CheckUnitType.URL, CheckUnitType.DOMAIN));
 			put(AccessToolUnit.VPN, Arrays.asList(CheckUnitType.URL, CheckUnitType.DOMAIN));
 			put(AccessToolUnit.CAMELEO_XYZ, Collections.singletonList(CheckUnitType.URL));
+			put(AccessToolUnit.ANONYMIZER, Collections.singletonList(CheckUnitType.URL));
 			put(AccessToolUnit.HIDEMYASS, Collections.singletonList(CheckUnitType.URL));
 			put(AccessToolUnit.HOLA, Collections.singletonList(CheckUnitType.URL));
+			put(AccessToolUnit.EXTENSION, Collections.singletonList(CheckUnitType.URL));
 			put(AccessToolUnit.GOOGLE_API, Arrays.asList(CheckUnitType.URL, CheckUnitType.DOMAIN, CheckUnitType.SEARCH_PHRASE));
 		}};
     }

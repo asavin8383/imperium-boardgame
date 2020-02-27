@@ -1,0 +1,16 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+    <changeSet id="1570778877812-1" author="msnopok (generated)">
+        <sql>
+            alter table config.robots drop constraint if exists ck_access_tool;
+            alter table config.robots add constraint ck_access_tool check ( access_tool in ('search-system','vpn','proxy', 'cameleo-xyz', 'hidemyass', 'hola', 'google-api', 'anonimyzer'));
+        </sql>
+        <rollback>
+            alter table config.robots drop constraint if exists ck_access_tool;
+            alter table config.robots add constraint ck_access_tool check ( access_tool in ('search-system','vpn','proxy', 'cameleo-xyz', 'hidemyass', 'hola', 'google-api'));
+        </rollback>
+    </changeSet>
+</databaseChangeLog>
