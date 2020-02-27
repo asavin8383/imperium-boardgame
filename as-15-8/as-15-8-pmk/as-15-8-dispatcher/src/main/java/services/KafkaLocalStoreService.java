@@ -6,14 +6,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Result;
 import org.apache.kafka.streams.state.KeyValueStore;
-import org.apache.kafka.streams.state.StoreBuilder;
 import org.apache.kafka.streams.state.Stores;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.support.serializer.JsonSerde;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import repositories.ArrangementRepo;
 import repositories.ResultRepo;
 
 import java.time.LocalDateTime;
@@ -27,7 +25,7 @@ public class KafkaLocalStoreService {
     @Value("${spring.cloud.stream.bindings.results_table.destination}")
     private String resultsTableName;
 
-    @Value("results.retention.days")
+    @Value("${results.retention.days:7}")
     private int resultsRetentionDays;
 
     private final ResultRepo resultRepo;
@@ -35,22 +33,30 @@ public class KafkaLocalStoreService {
     @Scheduled(cron = "${results.clear.schedule}")
     public void clearOldMessages() {
         log.info("Запуск регламентной очистки локального хранилища");
-        KeyValueStore<CheckUnitKey, CheckUnitResult> store =
-                Stores.keyValueStoreBuilder(
-                        Stores.persistentKeyValueStore(resultsTableName),
-                        new JsonSerde<>(CheckUnitKey.class),
-                        new JsonSerde<>(CheckUnitResult.class)
-                ).build();
-        Iterator<Result> oldResults = resultRepo.findResultIdsBeforeDate(LocalDateTime.now().minusDays(resultsRetentionDays));
-        while (oldResults.hasNext()) {
-            Result result = oldResults.next();
-            CheckUnitKey checkUnitKey = new CheckUnitKey(
-                    result.getArrangement().getId(),
-                    result.getId(),
-                    result.getArrangement().getVersion()
-            );
-            store.delete(checkUnitKey);
-            log.info("Результат " + result.getId() + " от " + result.getEndDate() + " успешно удален из локального хранилища");
+        try {
+            KeyValueStore<CheckUnitKey, CheckUnitResult> store =
+                    Stores.keyValueStoreBuilder(
+                            Stores.persistentKeyValueStore(resultsTableName),
+                            new JsonSerde<>(CheckUnitKey.class),
+                            new JsonSerde<>(CheckUnitResult.class)
+                    ).build();
+            try {
+                Iterator<Result> oldResults = resultRepo.findResultIdsBeforeDate(LocalDateTime.now().minusDays(resultsRetentionDays));
+                while (oldResults.hasNext()) {
+                    Result result = oldResults.next();
+                    CheckUnitKey checkUnitKey = new CheckUnitKey(
+                            result.getArrangement().getId(),
+                            result.getId(),
+                            result.getArrangement().getVersion()
+                    );
+                    store.delete(checkUnitKey);
+                    log.info("Результат " + result.getId() + " от " + result.getEndDate() + " успешно удален из локального хранилища");
+                }
+            } finally {
+                store.close();
+            }
+        } catch (Exception ex) {
+            log.error("Ошибка при очистке локального хранилища", ex);
         }
     }
 
