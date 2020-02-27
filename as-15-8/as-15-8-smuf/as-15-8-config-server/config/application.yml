@@ -78,6 +78,8 @@ management.endpoints.web.exposure.include: bus-refresh
 user.activity.timeout.config.key: user.activity.timeout
 kibana.link.key: kibana.link
 forward.proxy.link.key: forward.proxy.link
+microservices:
+  required-robots: executor, ppm, analyzer
 
 ---
 
@@ -176,7 +178,7 @@ spring:
         springCloudBusInput.destination: bus_config_output_asavin
         springCloudBusOutput.destination: bus_config_input_asavin
   datasource:
-    url: jdbc:postgresql://192.168.5.211:5432/asdb_test2
+    url: jdbc:postgresql://192.168.5.195:5432/asdb
 
 ---
 
