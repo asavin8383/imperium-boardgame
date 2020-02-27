@@ -43,8 +43,9 @@ public class KafkaLocalStoreService {
                             new JsonSerde<>(CheckUnitKey.class),
                             new JsonSerde<>(CheckUnitResult.class)
                     ).build();
-            try {
+           // try {
                 List<Result> oldResults = resultRepo.findResultIdsBeforeDate(LocalDateTime.now().minusDays(resultsRetentionDays));
+                log.info("Отобрано записей для очистки: " + oldResults.size());
                 oldResults.forEach(result -> {
                     CheckUnitKey checkUnitKey = new CheckUnitKey(
                             result.getArrangement().getId(),
@@ -54,10 +55,10 @@ public class KafkaLocalStoreService {
                     store.delete(checkUnitKey);
                     log.info("Результат " + result.getId() + " от " + result.getEndDate() + " успешно удален из локального хранилища");
                 });
-            } finally {
+            /*} finally {
                 if(store != null)
                     store.close();
-            }
+            }*/
         } catch (Exception ex) {
             log.error("Ошибка при очистке локального хранилища", ex);
         }
