@@ -18,7 +18,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import repositories.DynamicTrafficUnitRepository;
 import services.traffic.TrafficService;
 
 import java.util.List;
@@ -31,7 +30,6 @@ import java.util.List;
 public class DynamicTrafficController {
 
     private final TrafficService trafficService;
-    private final DynamicTrafficUnitRepository dynamicTrafficUnitRepository;
 
     @GetMapping
     public ResponseEntity getDynamicTraffic(@RequestParam("trafficId") Traffic traffic) {
@@ -66,7 +64,7 @@ public class DynamicTrafficController {
             trafficService.analyzeDynamicTraffic(newDynamicTraffic);
             trafficService.removeAllDynamicTrafficUnits(traffic);
             TrafficFullView trafficFullView = trafficService.addDynamicTrafficUnit(traffic, newDynamicTraffic);
-            trafficService.actualizeTrafficCheckUnitsCount(traffic.getId());
+            trafficService.actualizeTraffic(traffic.getId());
             return ResponseEntity.ok().body(trafficFullView);
         } else return ResponseEntity.badRequest().body("Такой трафик не обнаружен в БД");
     }
@@ -77,7 +75,7 @@ public class DynamicTrafficController {
             throw new AS_15_8_PPT_Exception("DynamicTrafficUnit not found");
         } else {
             trafficService.removeAllDynamicTrafficUnits(traffic);
-            trafficService.actualizeTrafficCheckUnitsCount(traffic.getId());
+            trafficService.actualizeTraffic(traffic.getId());
         }
     }
 
@@ -89,19 +87,9 @@ public class DynamicTrafficController {
         if (newDynamicTraffic != null) {
             trafficService.analyzeDynamicTraffic(newDynamicTraffic);
             DynamicTrafficUnit dynamicTraffic = trafficService.upadateFirstDynamicTrafficUnit(traffic, newDynamicTraffic);
-            trafficService.actualizeTrafficCheckUnitsCount(traffic.getId());
+            trafficService.actualizeTraffic(traffic.getId());
             return ResponseEntity.ok(dynamicTraffic);
         } else return ResponseEntity.badRequest().body("В теле пакета нет динамического трафика");
-    }
-
-    //TODO убрать, как только поменяется фронт для трафиков
-    @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public void addDynamicTrafficQueryToUnit(@PathVariable("id") DynamicTrafficUnit unit, @RequestParam String query) {
-        if (unit != null) {
-            unit.setQuery(query);
-            dynamicTrafficUnitRepository.save(unit);
-            trafficService.actualizeTrafficCheckUnitsCount(unit.getTraffic().getId());
-        }
     }
 
 }

@@ -38,10 +38,6 @@ public class DynamicTrafficUnit extends TrafficUnit implements Serializable {
 
     @Column
     @JsonView(Views.Brief.class)
-    private String query;
-
-    @Column
-    @JsonView(Views.Brief.class)
     private String idMask;
 
     @Column
@@ -140,8 +136,7 @@ public class DynamicTrafficUnit extends TrafficUnit implements Serializable {
     @Override
     public boolean isEmpty() {
        return  getId() == null && category == null &&
-               StringUtils.isEmpty(getName()) &&
-               StringUtils.isEmpty(query);
+               StringUtils.isEmpty(getName());
     }
 
 }
