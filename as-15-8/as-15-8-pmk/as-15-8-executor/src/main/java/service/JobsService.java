@@ -37,6 +37,9 @@ public class JobsService {
     @Value("${executor.timeout:60}")
     private int jobTimeout;
 
+    @Value("${fetch-stooped-jobs-enabled:true}")
+    private boolean fetchStoppedJobsEnabled;
+
     private final OAuth2RestTemplate oAuth2RestTemplate;
     private final CheckUnitVerificationServiceFactory checkUnitVerificationServiceFactory;
 
@@ -44,6 +47,8 @@ public class JobsService {
 
     @PostConstruct
     private void fillStoppedArrangements() {
+        if(!fetchStoppedJobsEnabled)
+            return;
         try {
             UriComponents uriComponents =
                     UriComponentsBuilder

@@ -20,8 +20,11 @@ public enum AccessToolUnit {
 
 	CAMELEO_XYZ,
 	HIDEMYASS,
+	ANONYMIZER,
+
 
 	HOLA,
+	EXTENSION,
 
 	//TORGUARD,
 	PROXY;

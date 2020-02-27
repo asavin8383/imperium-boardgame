@@ -33,17 +33,26 @@ public enum AccessToolParameter {
     SEARCH_PREFIX_FOR_URL,
     SEARCH_PREFIX_FOR_DOMAIN,
 
-    //vpn, proxy, anonimyzers, extentions
+    //vpn, proxy, anonymizers, extentions
     STUB_URL,
     PROXY_TYPE,
     PROXY_DNS_NAME,
     PROXY_PORT,
     IGNORE_CAPTCHA_APPS,
 
+    //universal anonymizers
+    ANONYMIZER_URL,
+    ANONYMIZER_XPATH_FIELD,
+    ANONYMIZER_XPATH_BUTTON,
+
     //extensions
     EXTENSION_ID,
     EXTENSION_VERSION,
     EXTENSION_POPUP,
+    EXTENSION_URL,
+    EXTENSION_XPATH_FIELD,
+    EXTENSION_XPATH_BUTTON,
+
 
     //google-api
     SEARCH_SYSTEM_ID,

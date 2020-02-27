@@ -3,8 +3,9 @@ package robots;
 import checkUnits.CheckUnit;
 import checkUnits.CheckUnitJob;
 import checkUnits.CheckUnitType;
+import common.ApplicationConfiguration;
+import enums.AccessToolParameter;
 import execution.ExecutionJobResult;
-import lombok.RequiredArgsConstructor;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,42 +13,38 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import robots.exceptions.ExecutionException;
-import robots.factory.RobotsFactory;
 import service.CheckUnitVerificationServiceFactory;
-import service.impl.RobotsServiceImpl;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {CheckUnitVerificationServiceFactory.class, RobotsServiceImpl.class, RobotsFactory.class})
+@SpringBootTest(classes = {ApplicationConfiguration.class})
 @PropertySource("file:config/application.yml")
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class TestHolaJobExecution {
+public class TestAnonymizerJobExecution {
 
-
-	private final CheckUnitVerificationServiceFactory checkUnitVerificationServiceFactory;
+	@Autowired
+	private CheckUnitVerificationServiceFactory checkUnitVerificationServiceFactory;
 
 	@Test
 	public void test() throws ExecutionException, IOException {
-
+		
 		CheckUnitJob checkUnitJob = new CheckUnitJob();
-		checkUnitJob.setAccessTool("hola");
+		checkUnitJob.setAccessTool("cameleo");
 
-		checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.URL, "myip.ru"));
+		checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.URL, "vk.com"));
 
 		ExecutionJobResult executionJobResult = checkUnitVerificationServiceFactory
 				.getService(checkUnitJob)
 				.run(1L, checkUnitJob);
 
-		ByteArrayInputStream bis = new ByteArrayInputStream(executionJobResult.getScreenshot());
-		BufferedImage bImage2 = ImageIO.read(bis);
-		ImageIO.write(bImage2, "jpg", new File("output.jpg"));
+//		Files.write(Paths.get("output_" + checkUnitJob.getCheckUnit().getValue() + ".jpg"), executionJobResult.getScreenshot(),
+//			StandardOpenOption.CREATE);
+
 
 		System.out.println(executionJobResult.toString());
 	}
-
+	
 }

@@ -23,4 +23,8 @@ public class ExecutionVpnJobResult extends ExecutionJobResult{
     private String pageContentEtalon;
     private String chromeErrorCodeEtalon;
     private String stubUrl;
+
+    public boolean hasError() {
+        return chromeErrorCode != null;
+    }
 }
