@@ -22,7 +22,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
-import reactor.core.scheduler.Schedulers;
 import repositories.AccessToolsCategoriesRepo;
 import repositories.DynamicTrafficUnitRepository;
 import repositories.ErdiContentJoinRepository;
@@ -139,15 +138,10 @@ public class TrafficService {
     public void actualizeCheckUnitsCountForAllTraffic() {
         List<Traffic> traffics = trafficRepository.findAll();
 
-        Map<Traffic, List<Long>> mapTraffics = createTrafficErdiIdsKV(traffics);
+        traffics.stream().forEach(traffic -> {
+            actualizeTraffic(traffic.getId());
+        });
 
-        List<TrafficBriefView> views = Flux.fromIterable(mapTraffics.entrySet())
-                .parallel(50)
-                .runOn(Schedulers.parallel())
-                .flatMap(trafficEntry -> podWebClient.fetchActualCheckUnitCount(trafficEntry.getKey(), trafficEntry.getValue()))
-                .sequential()
-                .collectList()
-                .block();
     }
 
     private Map<Traffic, List<Long>> createTrafficErdiIdsKV(List<Traffic> traffics) {
