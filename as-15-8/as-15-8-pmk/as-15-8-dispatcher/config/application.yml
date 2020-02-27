@@ -68,7 +68,10 @@ spring:
           lob.non_contextual_creation: true
     databasePlatform: org.hibernate.dialect.PostgreSQL9Dialect
   jackson.serialization.FAIL_ON_EMPTY_BEANS: false
-results.save.schedule: '0 */1 * * * ?'
+results:
+  save.schedule: '0 */1 * * * ?'
+  clear.schedule: '0 30 16 * * ?'
+  retention.days: 3
 
 ---
 
