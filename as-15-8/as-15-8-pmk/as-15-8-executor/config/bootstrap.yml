@@ -62,9 +62,3 @@ spring:
 spring:
   profiles: dev_ashabalin
 gateway.url: ${GATEWAY_URI:http://192.168.5.50:15880}
-
----
-
-spring:
-  profiles: dev_msnopok
-gateway.url: ${GATEWAY_URI:http://192.168.5.50:15880}

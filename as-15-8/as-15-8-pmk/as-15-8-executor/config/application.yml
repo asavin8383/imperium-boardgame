@@ -1,4 +1,5 @@
 selenium-hub-url: http://user:1q0p2w9o@192.168.5.75:4445/wd/hub
+fetch-stooped-jobs-enabled: false
 spring:
   main.allow-bean-definition-overriding: true
   kafka.consumer.properties.spring.json.trusted.packages: checkUnits
@@ -78,7 +79,7 @@ eureka:
 ---
 
 spring:
-  profiles: dev_ashabalin, dev_asin, dev_asavin, dev_pvorobiev, dev_danikanov
+  profiles: dev_ashabalin, dev_asin, dev_asavin, dev_pvorobiev, dev_danikanov, dev_msnopok
   profiles.include: local_log
   cloud:
     stream:
@@ -154,3 +155,17 @@ spring:
         springCloudBusInput.destination: bus_config_input_danikanov
         springCloudBusOutput.destination: bus_config_output_danikanov
 eureka.client.enabled: false
+
+---
+
+spring:
+  profiles: dev_msnopok
+  cloud:
+    stream:
+      bindings:
+        jobs.destination: jobs_msnopok
+        executionResults.destination: exec_results_msnopok
+        results.destination: results_msnopok
+        springCloudBusInput.destination: bus_config_input_msnopok
+        springCloudBusOutput.destination: bus_config_output_msnopok
+fetch-stooped-jobs-enabled: false

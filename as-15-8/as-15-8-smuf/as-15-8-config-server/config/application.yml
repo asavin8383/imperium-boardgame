@@ -195,9 +195,10 @@ spring:
 spring:
   profiles: dev_msnopok
   datasource:
-    url: jdbc:postgresql://192.168.5.195:5432/asdb
+    url: jdbc:postgresql://192.168.5.211:5432/asdb
   cloud:
     stream:
       bindings:
         springCloudBusInput. destination: bus_config_output_msnopok
         springCloudBusOutput.destination: bus_config_input_msnopok
+gateway.url: ${GATEWAY_URI:http://localhost:15880}
