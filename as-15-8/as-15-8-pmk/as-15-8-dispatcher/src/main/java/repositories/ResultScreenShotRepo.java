@@ -22,7 +22,7 @@ public interface ResultScreenShotRepo extends JpaRepository<ResultScreenShot, Lo
                         "(result_id, screenshot, etalon_screenshot) " +
                     "values " +
                         "(:id, :screenshot, :etalonScreenshot) " +
-                    "on conflict do update " +
+                    "on conflict(result_id) do update " +
                     "set " +
                         "result_id = :id, " +
                         "screenshot = :screenshot, " +

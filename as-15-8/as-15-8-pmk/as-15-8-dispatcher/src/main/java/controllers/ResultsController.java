@@ -76,7 +76,7 @@ public class ResultsController {
     public @ResponseBody
     ResponseEntity getScreenshot(@RequestParam Long arrangementId, @RequestParam Long id){
         return resultService.getScreenshot(arrangementId, id)
-            .map(screen -> ResponseEntity.ok(screen.getScreenshot()))
+            .map(screen -> screen.getScreenshot()==null ? ResponseEntity.noContent().build() : ResponseEntity.ok(screen.getScreenshot()))
             .orElseGet(() -> ResponseEntity.noContent().build());
     }
 
@@ -84,7 +84,7 @@ public class ResultsController {
     public @ResponseBody
     ResponseEntity getEtalonScreenshot(@RequestParam Long arrangementId, @RequestParam Long id){
         return resultService.getScreenshot(arrangementId, id)
-                .map(screen -> ResponseEntity.ok(screen.getEtalonScreenshot()))
+                .map(screen -> screen.getEtalonScreenshot()==null ? ResponseEntity.noContent().build() : ResponseEntity.ok(screen.getEtalonScreenshot()))
                 .orElseGet(() -> ResponseEntity.noContent().build());
     }
 

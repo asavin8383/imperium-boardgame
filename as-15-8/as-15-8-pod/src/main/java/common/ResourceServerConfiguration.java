@@ -25,7 +25,8 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
                     .antMatchers(HttpMethod.POST,
                         "/act/**",
                             "/erdi/checkUnits/**",
-                            "/erdi/check_units_count/**"
+                            "/erdi/check_units_count/**",
+                            "/erdi/ids/**"
                     ).permitAll()
                 .anyRequest().authenticated()
             .and()

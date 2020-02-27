@@ -50,7 +50,8 @@ public class GatewaySecurityConfiguration extends ResourceServerConfigurerAdapte
                             "/viewer/**",
                             "/config/mode/**",
                             "/config/mode/current/**",
-                            "/config/mode/any/**"
+                            "/config/mode/any/**",
+                            "/pod/erdi/ids/**"
                     ).permitAll()
                     .antMatchers(HttpMethod.OPTIONS, "/viewer/**")
                     .permitAll()

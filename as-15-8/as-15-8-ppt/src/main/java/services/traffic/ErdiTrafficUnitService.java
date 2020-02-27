@@ -4,7 +4,6 @@ import enums.SortingDirection;
 import exceptions.AS_15_8_PPT_Exception;
 import lombok.RequiredArgsConstructor;
 import model.enums.TrafficUnitType;
-import model.traffic.DynamicTrafficUnit;
 import model.traffic.ErdiTrafficUnit;
 import model.traffic.ErdiTrafficUnitContent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,7 +76,7 @@ public class ErdiTrafficUnitService {
             unit.getCustomErdiList().addAll(customErdiRepository.findAllById(ids));
         }
         erdiTrafficUnitRepository.save(unit);
-        trafficService.actualizeTrafficCheckUnitsCount(unit.getTraffic().getId());
+        trafficService.actualizeTraffic(unit.getTraffic().getId());
     }
 
 

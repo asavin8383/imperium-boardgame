@@ -16,13 +16,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
-import reactor.core.scheduler.Schedulers;
 import repositories.AccessToolsCategoriesRepo;
 import repositories.DynamicTrafficUnitRepository;
+import repositories.ErdiContentJoinRepository;
 import repositories.TrafficRepository;
 import utils.TrafficUnitUtils;
 import webClients.PodWebClient;
@@ -47,6 +49,7 @@ public class TrafficService {
     private final AccessToolsCategoriesRepo accessToolsCategoriesRepo;
     private final PodWebClient podWebClient;
     private final DynamicTrafficUnitRepository dynamicTrafficUnitRepository;
+    private final ErdiContentJoinRepository erdiContentJoinRepository;
 
     public Page<TrafficBriefView> getBriefTrafficList(SortingDirection sortingDirection,
                                                       String sortingColumn,
@@ -55,15 +58,16 @@ public class TrafficService {
                                                       AccessToolType accessToolType,
                                                       String filteredName) {
 
-        if (filteredName != null && !filteredName.isEmpty())
+        if (Strings.isNotEmpty(filteredName))
             query = filteredName;
 
         PageRequest pageable = PageRequest.of(pageNumber, pageSize,
                 SortingHelper.createSorting(sortingDirection, sortingColumn));
 
         Page<Traffic> traffics = trafficRepository.findAll(createTrafficSpecification(query, accessToolType), pageable);
-        List<TrafficBriefView> views = traffics.getContent().stream().map(this::
-                createTrafficBriefView).collect(Collectors.toList());
+        List<TrafficBriefView> views = traffics.getContent()
+                .stream()
+                .map(this::createTrafficBriefView).collect(Collectors.toList());
 
         return new PageImpl<>(views, pageable, traffics.getTotalElements());
     }
@@ -71,8 +75,8 @@ public class TrafficService {
     private TrafficBriefView createTrafficBriefView(Traffic traffic) {
         TrafficBriefView view = new TrafficBriefView(traffic.getId(), traffic.getName());
 
-        view.setActualCheckUnitsCount(calculateActualCheckUnitsCount(traffic));
-        view.setErdiCount(calculateErdiCount(traffic));
+        view.setActualCheckUnitsCount(traffic.getActualCheckUnitsCount());
+        view.setErdiCount(traffic.getErdiCount());
 
         if (traffic.getDynamicTrafficUnits().size()>0)
             view.setContainsDynamicTraffic(true);
@@ -81,46 +85,45 @@ public class TrafficService {
         return view;
     }
 
-    private Long calculateActualCheckUnitsCount(Traffic traffic) {
-        long formalErdiCount = traffic.getActualCheckUnitsCount();
-        long customErdiCount = trafficRepository.countCustomErdiByTrafficId(traffic.getId());
-
-        return formalErdiCount + customErdiCount;
-    }
-
-    private Long calculateErdiCount(Traffic traffic) {
-        long formalErdiCount = trafficRepository.countContentErdiByTrafficId(traffic.getId());
-        long customErdiCount = trafficRepository.countCustomErdiByTrafficId(traffic.getId());
-        long staticCount = formalErdiCount + customErdiCount;
-        long dynamicErdiCount = getDynamicTraficErdiCount(traffic);
-        return staticCount + dynamicErdiCount;
-
-    }
-
-    private long getDynamicTraficErdiCount(Traffic traffic) {
-        return dynamicTrafficUnitRepository.findByTraffic(traffic).
-                stream().findFirst().orElseGet(DynamicTrafficUnit::new).getErdiCountAbout();
-    }
-
-    public Long actualizeTrafficCheckUnitsCount(Long trafficId) {
+    private long getDynamicTraficErdiCount(Long trafficId) {
         Optional<Traffic> traffic = trafficRepository.findById(trafficId);
         traffic.orElseThrow(() ->
                 new AS_15_8_PPT_Exception("Ошибка при актуализации количества чек юнитов для трафика, трафик с такми id не найден: "+ trafficId));
 
-        Long actualCheckUnitsCount = getActualTrafficCheckUnitCount(trafficId);
-        traffic.get().setActualCheckUnitsCount(actualCheckUnitsCount);
+        return dynamicTrafficUnitRepository.findByTraffic(traffic.get()).
+                stream().findFirst().orElseGet(DynamicTrafficUnit::new).getErdiCountAbout();
+    }
+
+    public void actualizeTraffic(Long trafficId) {
+
+        Optional<Traffic> traffic = trafficRepository.findById(trafficId);
+        traffic.orElseThrow(() ->
+                new AS_15_8_PPT_Exception("Ошибка при актуализации количества чек юнитов для трафика, трафик с такми id не найден: "+ trafficId));
+
+        actualizeTrafficCheckUnitsCount(traffic.get());
+        actualizeErdiCount(traffic.get());
+
         trafficRepository.save(traffic.get());
+    }
+
+    private Long actualizeTrafficCheckUnitsCount(Traffic traffic) {
+        Long actualCheckUnitsCount = getActualTrafficCheckUnitCount(traffic.getId());
+        traffic.setActualCheckUnitsCount(actualCheckUnitsCount);
         return actualCheckUnitsCount;
     }
 
-    public Long actualizeTrafficCheckUnitsCount(SearchQueryTrafficUnit searchQueryTrafficUnit) {
-        Long trafficId = searchQueryTrafficUnit.getTraffic().getId();
-        return actualizeTrafficCheckUnitsCount(trafficId);
+    private Long actualizeErdiCount(Traffic traffic) {
+        long formalErdiCount = trafficRepository.countContentErdiByTrafficId(traffic.getId());
+        long customErdiCount = trafficRepository.countCustomErdiByTrafficId(traffic.getId());
+        long staticCount = formalErdiCount + customErdiCount;
+        long dynamicErdiCount = getDynamicTraficErdiCount(traffic.getId());
+        traffic.setErdiCount(staticCount + dynamicErdiCount);
+        return staticCount + dynamicErdiCount;
     }
 
     void actualizeCheckUnitsCount(CustomErdi customErdi) {
         customErdi.getErdiTrafficUnits().stream().findFirst().ifPresent(erdiTrafficUnit ->
-                actualizeTrafficCheckUnitsCount(erdiTrafficUnit.getId()));
+                actualizeTrafficCheckUnitsCount(erdiTrafficUnit.getTraffic()));
     }
 
     private Long getActualTrafficCheckUnitCount(Long trafficId) {
@@ -135,15 +138,10 @@ public class TrafficService {
     public void actualizeCheckUnitsCountForAllTraffic() {
         List<Traffic> traffics = trafficRepository.findAll();
 
-        Map<Traffic, List<Long>> mapTraffics = createTrafficErdiIdsKV(traffics);
+        traffics.stream().forEach(traffic -> {
+            actualizeTraffic(traffic.getId());
+        });
 
-        List<TrafficBriefView> views = Flux.fromIterable(mapTraffics.entrySet())
-                .parallel(50)
-                .runOn(Schedulers.parallel())
-                .flatMap(trafficEntry -> podWebClient.fetchActualCheckUnitCount(trafficEntry.getKey(), trafficEntry.getValue()))
-                .sequential()
-                .collectList()
-                .block();
     }
 
     private Map<Traffic, List<Long>> createTrafficErdiIdsKV(List<Traffic> traffics) {
@@ -194,11 +192,6 @@ public class TrafficService {
         traffic.getSearchQueryTrafficUnits().add((SearchQueryTrafficUnit) fillTrafficUnit(new SearchQueryTrafficUnit(),
                                                                                 traffic,
                                                                                 TrafficUnitType.TEMPLATE,
-                                                                                category));
-        //TODO - убрать как только будет готов фронт
-        traffic.getDynamicTrafficUnits().add((DynamicTrafficUnit) fillTrafficUnit(new DynamicTrafficUnit(),
-                                                                                traffic,
-                                                                                TrafficUnitType.DYNAMIC,
                                                                                 category));
 
         return convertToFullView(trafficRepository.save(traffic));
@@ -353,9 +346,6 @@ public class TrafficService {
     }
 
     private DynamicTrafficUnit replceDynamicTrafficFields(DynamicTrafficUnit dynamicTraffic, DynamicTrafficUnit newDynamicTraffic) {
-        if (!Strings.isEmpty(newDynamicTraffic.getQuery()))
-            dynamicTraffic.setQuery(newDynamicTraffic.getQuery().replace("&", "%26"));
-        else dynamicTraffic.setQuery(null);
         dynamicTraffic.setIdMask(newDynamicTraffic.getIdMask());
         dynamicTraffic.setCategoryNames(newDynamicTraffic.getCategoryNames());
         dynamicTraffic.setDecisionOrgs(newDynamicTraffic.getDecisionOrgs());
@@ -389,5 +379,24 @@ public class TrafficService {
         if (newDynamicTraffic.getSize() == null || newDynamicTraffic.getSize() < 0) {
             throw new AS_15_8_PPT_Exception("Обязательно следует указать размер динамического трафика!");
         }
+    }
+
+    public ResponseEntity<Page<ObjectNode>> getSortedContentViewFromPod(ErdiTrafficUnit erdiTrafficUnit, Pageable pageable) {
+        List<Long> contentIds = erdiContentJoinRepository.findContentIds(erdiTrafficUnit);
+        return podWebClient.getTrafficUnitContentIdsFiltered(pageable, contentIds);
+    }
+
+    public Page<ObjectNode> getUnsortedContentViewFromPod(ErdiTrafficUnit erdiTrafficUnit, Pageable pageable) {
+        Page<ErdiTrafficUnitContent> trafficUnitContentIdsUnsorted =
+                erdiContentJoinRepository
+                        .findByTrafficUnit(erdiTrafficUnit, pageable);
+
+        List<Long> contentIds = trafficUnitContentIdsUnsorted
+                .stream()
+                .map(ErdiTrafficUnitContent::getErdiId)
+                .collect(Collectors.toList());
+
+        List<ObjectNode> erdiList = podWebClient.fetchErdi(contentIds);
+        return new PageImpl<>(erdiList, pageable, trafficUnitContentIdsUnsorted.getTotalElements());
     }
 }

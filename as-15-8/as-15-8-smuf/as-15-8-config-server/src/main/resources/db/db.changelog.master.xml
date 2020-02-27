@@ -32,5 +32,6 @@
     <include file="db/changelog/config.0027.access_tool_ck.xml"/>
     <include file="db/changelog/config.0028.access_tool_ck.xml"/>
     <include file="db/changelog/config.0029.access_tool_ck.xml"/>
+    <include file="db/changelog/config.0046.config_view_analyzer.xml"/>
 
 </databaseChangeLog>

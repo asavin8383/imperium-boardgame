@@ -13,13 +13,15 @@ import org.springframework.stereotype.Service;
 import rest.ResponseStatusString;
 import restapi.PODExchange;
 import service.AnalyzerService;
+import utils.ScreenshotAnalyzerHelper;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static enums.CheckUnitJobResult.*;
+import static enums.CheckUnitJobResult.COMPLETED;
+import static enums.CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED;
 
 /**
  * Сервис проверки результата работы робота, проверяющего ПС
@@ -32,14 +34,20 @@ import static enums.CheckUnitJobResult.*;
 public class PS_AnalyzerService implements AnalyzerService<ExecutionPSJobResult> {
 
 	private final PODExchange podExchange;
+	private final ScreenshotAnalyzerHelper screenshotAnalyzerHelper;
 
 	@Override
 	public AnalysisResult analyzeResult(ExecutionPSJobResult result) {
 		PsAnalysisJobResult analysisResult = new PsAnalysisJobResult();
 		analysisResult.setCheckUnit(result.getCheckUnit());
-		analysisResult.setCheckResult(obtainResult(result, analysisResult));
-		analysisResult.setScreenshot(result.getScreenshot());
-		analysisResult.setEtalonScreenshot(result.getEtalonScreenshot());
+		CheckUnitJobResult checkUnitJobResult = obtainResult(result, analysisResult);
+		analysisResult.setCheckResult(checkUnitJobResult);
+		if(checkUnitJobResult.equals(FORBIDDEN_CONTENT_DETECTED) || screenshotAnalyzerHelper.screenshotRequired(result.getAccessTool())){
+			analysisResult.setScreenshot(result.getScreenshot());
+			analysisResult.setEtalonScreenshot(result.getEtalonScreenshot());
+		} else {
+			analysisResult.setDescription("В конфигурации робота " + result.getAccessTool() + " установлено не сохранять скриншоты для отсутствия нарушений!");
+		}
 		return analysisResult;
 	}
 
