@@ -4,6 +4,9 @@ import analysis.AnalysisResult;
 import analysis.PsAnalysisJobResult;
 import checkUnits.CheckUnit;
 import checkUnits.CheckUnitType;
+import common.AnalyzerProperties;
+import enums.AccessToolParameter;
+import enums.AccessToolUnit;
 import enums.CheckUnitJobResult;
 import execution.ExecutionPSJobResult;
 import lombok.RequiredArgsConstructor;
@@ -32,15 +35,30 @@ import static enums.CheckUnitJobResult.*;
 public class PS_AnalyzerService implements AnalyzerService<ExecutionPSJobResult> {
 
 	private final PODExchange podExchange;
+	private final AnalyzerProperties analyzerProperties;
 
 	@Override
 	public AnalysisResult analyzeResult(ExecutionPSJobResult result) {
 		PsAnalysisJobResult analysisResult = new PsAnalysisJobResult();
 		analysisResult.setCheckUnit(result.getCheckUnit());
-		analysisResult.setCheckResult(obtainResult(result, analysisResult));
-		analysisResult.setScreenshot(result.getScreenshot());
-		analysisResult.setEtalonScreenshot(result.getEtalonScreenshot());
+		CheckUnitJobResult checkUnitJobResult = obtainResult(result, analysisResult);
+		analysisResult.setCheckResult(checkUnitJobResult);
+		if(checkUnitJobResult.equals(FORBIDDEN_CONTENT_DETECTED) || needToMakeScreenShot(result.getAccessTool())){
+			analysisResult.setScreenshot(result.getScreenshot());
+			analysisResult.setEtalonScreenshot(result.getEtalonScreenshot());
+		} else {
+			analysisResult.setDescription("В конфигурации робота " + result.getAccessTool() + " установлено не сохранять скриншоты для отсутствия нарушений!");
+		}
 		return analysisResult;
+	}
+
+	private boolean needToMakeScreenShot(String accessTool){
+		AccessToolUnit accessToolUnit = analyzerProperties.getAccessToolUnit(accessTool)
+			.orElseThrow(() -> new RuntimeException("Ошибка при получении типа робота "+accessTool));
+		Map<AccessToolParameter, String> props = analyzerProperties.getProps().getAccessToolUnits().get(accessToolUnit)
+			.getRobotProps().get(accessTool).getProps();
+		return !props.containsKey(AccessToolParameter.MAKE_SCREENSHOT_ON_COMPLETED)
+			|| Boolean.parseBoolean(props.get(AccessToolParameter.MAKE_SCREENSHOT_ON_COMPLETED));
 	}
 
 	private CheckUnitJobResult obtainResult(ExecutionPSJobResult result, PsAnalysisJobResult analysisResult) {
