@@ -14,6 +14,8 @@ import org.apache.kafka.streams.state.internals.StateStoreProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.binder.kafka.streams.InteractiveQueryService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.kafka.support.serializer.JsonSerde;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -55,10 +57,11 @@ public class KafkaLocalStoreService {
                             new JsonSerde<>(CheckUnitResult.class)
                     ).build();*/
            // try {
-                Iterator<Result> resultIterator = resultRepo.findResultIdsBeforeDate(LocalDateTime.now().minusDays(resultsRetentionDays));
-                //log.info("Отобрано записей для очистки: " + oldResults.size());
-                while(resultIterator.hasNext()){
-                    Result result = resultIterator.next();
+            PageRequest pageable = PageRequest.of(0, 100);
+            Page<Result> resultPage = resultRepo.findResultIdsBeforeDate(LocalDateTime.now().minusDays(resultsRetentionDays), pageable);
+            int curPage = 0;
+            do {
+                resultPage.getContent().forEach(result -> {
                     CheckUnitKey checkUnitKey = new CheckUnitKey(
                             result.getArrangement().getId(),
                             result.getId(),
@@ -66,7 +69,11 @@ public class KafkaLocalStoreService {
                     );
                     store.delete(checkUnitKey);
                     log.info("Результат " + result.getId() + " от " + result.getEndDate() + " успешно удален из локального хранилища");
-                }
+                });
+                curPage++;
+                pageable = PageRequest.of(curPage, 100);
+                resultPage = resultRepo.findResultIdsBeforeDate(LocalDateTime.now().minusDays(resultsRetentionDays), pageable);
+            } while (resultPage.getTotalPages() > curPage);
             /*} finally {
                 if(store != null)
                     store.close();

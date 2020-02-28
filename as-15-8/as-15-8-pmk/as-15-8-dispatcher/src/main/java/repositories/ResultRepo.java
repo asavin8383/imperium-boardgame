@@ -149,5 +149,5 @@ public interface ResultRepo extends JpaRepository<Result, Long>, ResultRepoAdvan
 
 	@Query("select r from Result r " +
 			"where r.endDate < :dateTime")
-	Iterator<Result> findResultIdsBeforeDate(@Param("dateTime") LocalDateTime dateTime);
+	Page<Result> findResultIdsBeforeDate(@Param("dateTime") LocalDateTime dateTime, Pageable pageable);
 }
