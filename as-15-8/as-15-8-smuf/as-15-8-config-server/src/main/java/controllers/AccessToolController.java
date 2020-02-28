@@ -3,6 +3,7 @@ package controllers;
 import accessTools.AccessToolDTO;
 import com.fasterxml.jackson.annotation.JsonView;
 import enums.AccessToolParameter;
+import enums.AccessToolUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Robot;
@@ -20,7 +21,11 @@ import org.springframework.web.bind.annotation.RestController;
 import repositories.RobotPropertyRepo;
 import repositories.RobotRepository;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @Slf4j
@@ -45,6 +50,17 @@ public class AccessToolController {
     @JsonView(Views.Brief.class)
     public List<Robot> findByName(@RequestParam String name) {
         return robotRepository.findByName(name);
+    }
+
+    /**
+     * Получение списка параметров AccessToolParameter
+     * по значению AccessToolUnit
+     */
+    @PostMapping("/access_tool_parameters")
+    @PreAuthorize("hasRole('ROLE_MANAGE_ARRANGEMENT')")
+    public Set<AccessToolParameter> getAccessToolParameters(@RequestParam String accessToolUnit) {
+        return AccessToolUnit.getSetOfAccessToolParameters(AccessToolUnit.fromPropertyKey(accessToolUnit));
+
     }
 
     /**

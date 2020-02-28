@@ -1,5 +1,9 @@
 package enums;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 public enum AccessToolUnit {
 
 	SEARCH_SYSTEM,
@@ -28,6 +32,14 @@ public enum AccessToolUnit {
 
 	//TORGUARD,
 	PROXY;
+
+	private Set<AccessToolParameter> accessToolParameters;
+
+	public static Set<AccessToolParameter> getSetOfAccessToolParameters (AccessToolUnit accessToolUnit) {
+		return Stream.of(AccessToolParameter.values())
+				.filter(accessToolParameter -> accessToolParameter.hasAccessToolUnit(accessToolUnit))
+				.collect(Collectors.toSet());
+	}
 
 	public String propertyKey(){
 		return this.name().replaceAll("_", "-").toLowerCase();
