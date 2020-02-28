@@ -147,7 +147,7 @@ public interface ResultRepo extends JpaRepository<Result, Long>, ResultRepoAdvan
 			"on a.id = :id AND (res.result NOT IN :results)")
 	Long countByNotResultIn(@Param("id") Long id, @Param("results") List<CheckUnitJobResult> results);
 
-	@Query("select r.id from Result r " +
+	@Query("select r from Result r " +
 			"where r.endDate < :dateTime")
-	List<Result> findResultIdsBeforeDate(@Param("dateTime") LocalDateTime dateTime);
+	Page<Result> findResultIdsBeforeDate(@Param("dateTime") LocalDateTime dateTime, Pageable pageable);
 }

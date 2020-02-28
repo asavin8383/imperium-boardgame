@@ -70,7 +70,7 @@ spring:
   jackson.serialization.FAIL_ON_EMPTY_BEANS: false
 results:
   save.schedule: '0 */1 * * * ?'
-  clear.schedule: '0 30 16 * * ?'
+  clear.schedule: '0 */3 * * * ?'
   retention.days: 3
 
 ---
