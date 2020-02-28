@@ -5,8 +5,12 @@ import checkUnits.CheckUnitKey;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Result;
+import org.apache.kafka.streams.processor.StateStore;
 import org.apache.kafka.streams.state.KeyValueStore;
+import org.apache.kafka.streams.state.QueryableStoreType;
 import org.apache.kafka.streams.state.Stores;
+import org.apache.kafka.streams.state.internals.MeteredKeyValueStore;
+import org.apache.kafka.streams.state.internals.StateStoreProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.binder.kafka.streams.InteractiveQueryService;
@@ -16,7 +20,9 @@ import org.springframework.stereotype.Service;
 import repositories.ResultRepo;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -36,17 +42,23 @@ public class KafkaLocalStoreService {
     public void clearOldMessages() {
         log.info("Запуск регламентной очистки локального хранилища");
         try {
-
             KeyValueStore<CheckUnitKey, CheckUnitResult> store =
+                interactiveQueryService.getQueryableStore(
+                        resultsTableName,
+                        new KeyValueStoreType<CheckUnitKey, CheckUnitResult>()
+                );
+
+           /* KeyValueStore<CheckUnitKey, CheckUnitResult> store =
                     Stores.keyValueStoreBuilder(
                             Stores.persistentKeyValueStore(resultsTableName),
                             new JsonSerde<>(CheckUnitKey.class),
                             new JsonSerde<>(CheckUnitResult.class)
-                    ).build();
+                    ).build();*/
            // try {
-                List<Result> oldResults = resultRepo.findResultIdsBeforeDate(LocalDateTime.now().minusDays(resultsRetentionDays));
-                log.info("Отобрано записей для очистки: " + oldResults.size());
-                oldResults.forEach(result -> {
+                Iterator<Result> resultIterator = resultRepo.findResultIdsBeforeDate(LocalDateTime.now().minusDays(resultsRetentionDays));
+                //log.info("Отобрано записей для очистки: " + oldResults.size());
+                while(resultIterator.hasNext()){
+                    Result result = resultIterator.next();
                     CheckUnitKey checkUnitKey = new CheckUnitKey(
                             result.getArrangement().getId(),
                             result.getId(),
@@ -54,7 +66,7 @@ public class KafkaLocalStoreService {
                     );
                     store.delete(checkUnitKey);
                     log.info("Результат " + result.getId() + " от " + result.getEndDate() + " успешно удален из локального хранилища");
-                });
+                }
             /*} finally {
                 if(store != null)
                     store.close();
@@ -64,4 +76,36 @@ public class KafkaLocalStoreService {
         }
     }
 
+    public static class KeyValueStoreType<K, V> implements QueryableStoreType<KeyValueStore<CheckUnitKey, CheckUnitResult>> {
+
+        private final Set<Class> matchTo;
+
+        KeyValueStoreType() {
+            this.matchTo = Collections.singleton(MeteredKeyValueStore.class);
+        }
+
+        public KeyValueStore<CheckUnitKey, CheckUnitResult> create(StateStoreProvider storeProvider, String storeName) {
+            return Stores.keyValueStoreBuilder(
+                    Stores.persistentKeyValueStore(storeName),
+                    new JsonSerde<>(CheckUnitKey.class),
+                    new JsonSerde<>(CheckUnitResult.class)
+            ).build();
+        }
+
+        public boolean accepts(StateStore stateStore) {
+            Iterator iterator = this.matchTo.iterator();
+
+            Class matchToClass;
+            //noinspection unchecked
+            do {
+                if (!iterator.hasNext()) {
+                    return true;
+                }
+
+                matchToClass = (Class)iterator.next();
+            } while(matchToClass.isAssignableFrom(stateStore.getClass()));
+
+            return false;
+        }
+    }
 }
