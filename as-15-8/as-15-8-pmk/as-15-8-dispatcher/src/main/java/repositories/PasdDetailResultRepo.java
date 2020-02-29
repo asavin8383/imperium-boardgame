@@ -22,7 +22,7 @@ public interface PasdDetailResultRepo extends JpaRepository<PasdDetailResult, Lo
                         "redirection_detected, response_error, response_error_code, response_error_code_etalon, " +
                         "result_nlp, similarity_origin_percent, stub_score_info, stub_url, use_etalon) " +
                     "values " +
-                        "(:resultId, :domainNameCount, :forbiddenFinalUrl, " +
+                        "(:id, :domainNameCount, :forbiddenFinalUrl, " +
                         ":httpHeaders, :httpHeadersEtalon, :httpStatus, :httpStatusEtalon, " +
                         ":keyWordsCount, :linkCount, :pageSize, :pageSizeEtalon, :pageUrlFinal, :pageUrlFinalEtalon, " +
                         ":redirectionDetected, :responseError, :responseErrorCode, :responseErrorCodeEtalon, " +
