@@ -40,7 +40,7 @@ public class KafkaLocalStoreService {
     private final ResultRepo resultRepo;
     private final InteractiveQueryService interactiveQueryService;
 
-    @Scheduled(cron = "${results.clear.schedule}")
+    //@Scheduled(cron = "${results.clear.schedule}")
     public void clearOldMessages() {
         log.info("Запуск регламентной очистки локального хранилища");
         try {
