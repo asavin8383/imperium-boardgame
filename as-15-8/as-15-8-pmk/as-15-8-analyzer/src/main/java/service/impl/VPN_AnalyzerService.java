@@ -273,19 +273,21 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 			return COMPLETED;
 		}
 
-		if (resultNLP == NLPCategory.ERROR){
-			return DOUBTFUL;
-		}
-		if (resultNLP == NLPCategory.STUB){
-			return COMPLETED;
-		}
-
 		if (wasRedirect){
 			aRes.setNeedTestFinalUrl(true);
 		}
 
-		// не прошли проверку - сомнительно
-		return DOUBTFUL;
+		switch (resultNLP) {
+			case STUB:
+				return COMPLETED;
+			case NO_STUB:
+				return FORBIDDEN_CONTENT_DETECTED;
+			case ERROR:
+				return DOUBTFUL;
+			case EXCEPTION:
+			default:
+				return INTERNAL_ERROR;
+		}
 	}
 
 	private CheckUnitJobResult obtainErrorResult(VpnAnalysisResult aRes){
