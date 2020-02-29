@@ -132,14 +132,20 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 	private void checkFinalUrlForForbidden(VpnAnalysisResult analysisResult){
 		Boolean needTestFinalUrl = analysisResult.getNeedTestFinalUrl();
 		if (needTestFinalUrl != null && needTestFinalUrl){
+			String additionalInfo = "";
 			ResponseStatusString check = podExchange.checkUrl(analysisResult.getFinalUrl());
 			if (check.isStatus()){
 				analysisResult.setCheckResult(FORBIDDEN_CONTENT_DETECTED);
 				analysisResult.setForbiddenFinalUrl(true);
-				String info = analysisResult.getStubScoreInfo();
-				info = info == null ? "" : info + ". ";
-				analysisResult.setStubScoreInfo(info + "Обнаружен редирект на запрещенный ресурс. ЕРДИ ID:" + check.getResponse() + ".");
+				additionalInfo = "Обнаружен редирект на запрещенный ресурс. ЕРДИ ID:" + check.getResponse() + ".";
+			} else {
+				analysisResult.setCheckResult(DOUBTFUL);
+				additionalInfo = "Обнаружен редирект на ресурс, не содержащийся в ЕРДИ.";
 			}
+			String info = analysisResult.getStubScoreInfo();
+			info = info == null ? "" : info + ". ";
+			analysisResult.setStubScoreInfo(info + additionalInfo);
+
 			log.info("Результат проверки URL на находжение в ЕРДИ: " + check + ", URL = " + analysisResult.getPageUrlFinal());
 		}
 	}
