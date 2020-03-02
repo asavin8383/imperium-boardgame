@@ -12,16 +12,6 @@
     <artifactId>as-15-8-pod</artifactId>
     <name>as-15-8-pod</name>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>commons-validator</groupId>
-                <artifactId>commons-validator</artifactId>
-                <version>${commons-validator.version}</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
     <dependencies>
 
         <dependency>
