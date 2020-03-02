@@ -1,13 +1,10 @@
 package restapi.ppm;
 
 import arrangement.ArrangementToPPM;
-import checkUnits.CheckUnit;
-import enums.ExecutionStatus;
 import exceptions.AS_15_8_PPT_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.task.Arrangement;
-import model.traffic.Traffic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -20,12 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.util.UriComponentsBuilder;
-import reactor.core.publisher.Flux;
-import repositories.ArrangementRepo;
-import repositories.TrafficRepository;
-import services.arrangement.impl.ArrangementService;
-
-import java.util.List;
 
 /**
  * Created by san
@@ -38,7 +29,6 @@ public class ArrangementUploader {
 
     private final String ARRANGEMENTS_URI = "/ppm/arrangements";
     private final String MANUAL_ARRANGEMENT_TO_DISPATCHER = "/dispatcher/manual_arrangement";
-    private final TrafficRepository trafficRepository;
 
     @Value("${gateway.url}")
     private String gatewayUrl;
@@ -87,11 +77,6 @@ public class ArrangementUploader {
     }
 
     public void sendManualArrangementToDispatcher(Arrangement arrangement) {
-        arrangement.setStatus(ExecutionStatus.RUNNING);
-        //arrangementRepo.save(arrangement);
-
-        //Flux<List<CheckUnit>> checkUnitsFlux = arrangementService.getCheckUnitsFromPod(arrangement.getId());
-
         log.info("Отправка ручного мероприятия в Dispatcher: {}", arrangement.getId());
         try {
             String url = UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(MANUAL_ARRANGEMENT_TO_DISPATCHER).build().toString();

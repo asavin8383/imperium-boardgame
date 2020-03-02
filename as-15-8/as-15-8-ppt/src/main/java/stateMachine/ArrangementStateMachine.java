@@ -80,6 +80,11 @@ public class ArrangementStateMachine {
 
                     .and()
                     .withExternal()
+                    .source(ExecutionStatus.NEW).target(ExecutionStatus.FINISHED)
+                    .event(ArrangementEvents.STOP)
+
+                    .and()
+                    .withExternal()
                     .source(ExecutionStatus.SCHEDULED).target(ExecutionStatus.FORMED)
                     .event(ArrangementEvents.SCHEDULE_ROLLBACK)
 
