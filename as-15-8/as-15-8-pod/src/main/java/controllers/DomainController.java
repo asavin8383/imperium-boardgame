@@ -1,5 +1,6 @@
 package controllers;
 
+import com.rometools.utils.Strings;
 import controllers.utils.SortingDirection;
 import controllers.utils.SortingHelper;
 import exceptions.AS_15_8_POD_Exception;
@@ -102,10 +103,14 @@ public class DomainController {
             @RequestParam(required = false) String sortingColumn,
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "30") int pageSize,
-            @RequestParam(required = false, defaultValue = "") String domainMask) {
+            @RequestParam(required = false, defaultValue = "") String domainMask,
+            @RequestParam(required = false) String query) {
         PageRequest page = PageRequest.of(pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
-        if (domainMask.isEmpty())
+        if (domainMask.isEmpty()) {
+            if (Strings.isNotEmpty(query))
+                return domainMaskRepo.findDomainMasksPageFiltered(page, query);
             return domainMaskRepo.findDomainMasksPage(page);
+        }
         else return domainMaskRepo.findDomainMasksPage(domainMask, page);
     }
 

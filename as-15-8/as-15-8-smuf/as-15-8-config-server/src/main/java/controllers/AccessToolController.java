@@ -21,10 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import repositories.RobotPropertyRepo;
 import repositories.RobotRepository;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -57,10 +54,18 @@ public class AccessToolController {
      * по значению AccessToolUnit
      */
     @PostMapping("/access_tool_parameters")
-    @PreAuthorize("hasRole('ROLE_MANAGE_ARRANGEMENT')")
+    @PreAuthorize("hasRole('ROLE_MANAGE_CONFIGURATIONS')")
     public Set<AccessToolParameter> getAccessToolParameters(@RequestParam String accessToolUnit) {
         return AccessToolUnit.getSetOfAccessToolParameters(AccessToolUnit.fromPropertyKey(accessToolUnit));
+    }
 
+    /**
+     * Получение списка AccessToolUnit'ов
+     */
+    @PostMapping("/access_tool_units")
+    @PreAuthorize("hasRole('ROLE_MANAGE_CONFIGURATIONS')")
+    public List<AccessToolUnit> getAccessToolUnits() {
+        return Arrays.asList(AccessToolUnit.values());
     }
 
     /**

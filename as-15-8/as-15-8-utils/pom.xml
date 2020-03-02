@@ -9,6 +9,10 @@
 		<version>1.0</version>
 	</parent>
 
+	<properties>
+		<commons-validator.version>1.6</commons-validator.version>
+	</properties>
+
 	<dependencies>
 
 		<!-- Lombok -->
