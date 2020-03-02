@@ -43,7 +43,7 @@ public class InfoService {
                 "T.erdi_id, \n" +
                 "RS.content_id, \n" +
                 "RS.resource_type_id, \n" +
-                "RS.value" +
+                "RS.value " +
                 "from \n" +
                 "sor.content T \n" +
                 "join sor.content_history H on T.id = H.content_id \n" +
