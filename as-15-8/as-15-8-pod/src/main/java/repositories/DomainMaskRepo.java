@@ -26,9 +26,13 @@ public interface DomainMaskRepo extends JpaRepository<DomainMask, Long> {
     //Page<Domain> findPage(PageRequest page);
     Page<Domain> findDomainsPage(Pageable page);
 
+    @Query("select p from DomainMask p where p.domainMask like concat('%',:name,'%')")
+        //Page<DomainMask> findDomainMasksPage(PageRequest page);
+        Page<DomainMask> findDomainMasksPageFiltered(Pageable page, @Param("name") String domainMaskName);
+
     @Query("select p from DomainMask p")
         //Page<DomainMask> findDomainMasksPage(PageRequest page);
-        Page<DomainMask> findDomainMasksPage(Pageable page);
+    Page<DomainMask> findDomainMasksPage(Pageable page);
 
     //@Query("select p from Domain p where p.domainMask like concat('%',:domainMask,'%')")
     @Query("select p from DomainMask p where p.domainMask like concat('%',:domainMask,'%')")
