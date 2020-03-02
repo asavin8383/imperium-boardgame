@@ -40,6 +40,7 @@ public class CommonAnonymizerRobot extends SeleniumRobot {
 
         this.message = new ExecutionAnonymizerResult();
         this.message.setStubUrl(scriptParams.get(AccessToolParameter.STUB_URL));
+        this.message.setUseEtalon(ExecutorProperties.getEtalon().getEnabled());
         this.anonymizerURL = scriptParams.get(AccessToolParameter.ANONYMIZER_URL);
         this.xpathField = scriptParams.get(AccessToolParameter.ANONYMIZER_XPATH_FIELD);
         this.xpathButton = scriptParams.get(AccessToolParameter.ANONYMIZER_XPATH_BUTTON);
