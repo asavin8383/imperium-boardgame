@@ -1,8 +1,6 @@
 package enums;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 
 import java.util.Arrays;
@@ -14,7 +12,6 @@ import java.util.Set;
  * Author: asavin
  * Параметры скриптов, передаваемые с фронта
  */
-@JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum AccessToolParameter {
 
     //	AccessToolUnit.SEARCH_SYSTEM, AccessToolUnit.GOOGLE_API, AccessToolUnit.VPN, AccessToolUnit.CAMELEO_XYZ, AccessToolUnit.HIDEMYASS, AccessToolUnit.ANONYMIZER, AccessToolUnit.HOLA, AccessToolUnit.EXTENSION, AccessToolUnit.PROXY;
@@ -76,10 +73,6 @@ public enum AccessToolParameter {
 
     @Getter
     private String description;
-
-    public String getKey() {
-        return this.name();
-    }
 
     AccessToolParameter(String description, AccessToolUnit ... accessToolUnits) {
         this.accessToolUnits = new HashSet<>(Arrays.asList(accessToolUnits));

@@ -1,14 +1,11 @@
 package enums;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum AccessToolUnit {
 
 	SEARCH_SYSTEM("Поисковые системы"),
@@ -41,10 +38,6 @@ public enum AccessToolUnit {
 
 	@Getter
 	private String description;
-
-	public String getKey() {
-		return this.name();
-	}
 
 	AccessToolUnit(String description) {
 		this.description = description;
