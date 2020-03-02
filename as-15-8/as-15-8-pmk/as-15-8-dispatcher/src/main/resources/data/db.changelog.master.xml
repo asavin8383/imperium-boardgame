@@ -36,5 +36,5 @@
     <include file="data/changelog/dispatcher.0031.arrangements_stopping_status.xml"/>
     <include file="data/changelog/dispatcher.0032.arrangements_max_check_units_count.xml"/>
     <include file="data/changelog/dispatcher.0033.results_drop_constraint.xml"/>
-
+    <include file="data/changelog/dispatcher.0034.arrangement_is_manual_ck_chek_unit_manual.xml"/>
 </databaseChangeLog>

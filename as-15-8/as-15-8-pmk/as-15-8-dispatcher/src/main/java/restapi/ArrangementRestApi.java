@@ -28,6 +28,7 @@ import java.util.Optional;
 public class ArrangementRestApi {
 
     private final String PPM_STATUS_ENDPOINT = "/ppm/arrangements/close";
+    private final String PPT_STATUS_ENDPOINT = "/ppt/arrangements/status";
     //private final String PPT_ARRANGEMENT_EXECUTION_STATUS = "/arrangements/execution_status";
     private final String PPT_IS_ACT_AVAILABLE_FOR_AUTOMATIC_SEND = "/arrangements/act_available_for_automatic_send";
     private final String PPT_ACT_SENT_STATUS = "/arrangements/act_sent_status";
@@ -38,6 +39,14 @@ public class ArrangementRestApi {
     private String gatewayUrl;
 
     public boolean sendStatusNotificationToPPM(Long arrangementId, boolean isStopped){
+        return sendStatusNotification(arrangementId, isStopped, PPM_STATUS_ENDPOINT);
+    }
+
+    public boolean sendStatusNotificationToPPT(Long arrangementId, boolean isStopped){
+        return sendStatusNotification(arrangementId, isStopped, PPT_STATUS_ENDPOINT);
+    }
+
+    private boolean sendStatusNotification(Long arrangementId, boolean isStopped, String path){
         ArrangementStatusNotification notification = new ArrangementStatusNotification(
                 arrangementId,
                 isStopped ? ArrangementEvents.STOP : ArrangementEvents.FINISH
@@ -51,7 +60,11 @@ public class ArrangementRestApi {
 
         log.info("Отправка сообщения с изменением статуса мероприятия {} в ППМ", arrangementId);
         try {
-            restTemplate.put(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(PPM_STATUS_ENDPOINT).queryParam("id", arrangementId).build().toString(), entity);
+            restTemplate.put(UriComponentsBuilder
+                    .fromHttpUrl(gatewayUrl)
+                    .path(PPM_STATUS_ENDPOINT)
+                    .queryParam("id", arrangementId)
+                    .build().toString(), entity);
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
             log.info("Ошибка отправки сообщения с изменением статуса мероприятия " + arrangementId + " в ППМ, код возврата " + ex.getStatusCode());
             return false;

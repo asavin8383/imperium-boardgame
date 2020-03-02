@@ -1,12 +1,17 @@
 package enums;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonValue;
+import lombok.Getter;
+
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum AccessToolUnit {
 
-	SEARCH_SYSTEM,
+	SEARCH_SYSTEM("Поисковые системы"),
 	/*GOOGLE,
 	GOOGLE_API,
 	YANDEX,
@@ -16,22 +21,34 @@ public enum AccessToolUnit {
 	SPUTNIK,
 	DUCK_DUCK_GO,*/
 
-	GOOGLE_API,
+	GOOGLE_API ("Google API"),
 
-	VPN,
+	VPN ("VPN"),
 	/*EXPRESS,
 	KASPERSKY,*/
 
-	CAMELEO_XYZ,
-	HIDEMYASS,
-	ANONYMIZER,
+	CAMELEO_XYZ ("Cameleo"),
+	HIDEMYASS ("HideMyAss"),
+	ANONYMIZER ("Анонимайзеры"),
 
 
-	HOLA,
-	EXTENSION,
+	HOLA ("Hola"),
+	EXTENSION ("Расширения для браузеров"),
 
 	//TORGUARD,
-	PROXY;
+	PROXY ("Прокси");
+
+
+	@Getter
+	private String description;
+
+	public String getKey() {
+		return this.name();
+	}
+
+	AccessToolUnit(String description) {
+		this.description = description;
+	}
 
 	private Set<AccessToolParameter> accessToolParameters;
 

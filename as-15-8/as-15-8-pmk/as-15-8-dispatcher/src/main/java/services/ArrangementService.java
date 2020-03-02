@@ -1,21 +1,36 @@
 package services;
 
 import arrangement.ArrangementToExecution;
+import checkUnits.CheckUnit;
 import events.producers.ArrangementStopEventProducer;
 import exceptions.AS_15_8_DispatcherException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Arrangement;
+import model.Result;
 import model.enums.ArrangementStatus;
+import model.enums.CheckType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
+import reactor.core.publisher.Flux;
 import remoteEvents.ArrangementStopEvent;
 import repositories.ArrangementRepo;
+import repositories.ResultRepo;
 import restapi.ArrangementRestApi;
 
 import javax.annotation.PostConstruct;
@@ -31,6 +46,9 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ArrangementService {
 
+    @Value("${gateway.url}")
+    private String gatewayUrl;
+
     @Getter
     private Map<Long, Set<Long>> stoppedArrangements = new ConcurrentHashMap<>();
 
@@ -39,6 +57,9 @@ public class ArrangementService {
     private final ResultsKafkaService resultsKafkaService;
     private final ActService actService;
     private final ArrangementRestApi arrangementRestApi;
+    private final ResultRepo resultRepo;
+
+    private final String GET_CHECK_UNITS_FROM_PPT = "/ppt/arrangements/checkUnits";
 
     @PostConstruct
     private void fillStoppedArrangements() {
@@ -122,7 +143,7 @@ public class ArrangementService {
                     .orElseThrow(() -> new AS_15_8_DispatcherException("Ошибка при закрытии мероприятия. Мероприятие не найдено по ID: " + arrangementId));
             if (!isStopped)
                 arr.setStatus(ArrangementStatus.FINISHED);
-            else{
+            else {
                 arr.setStatus(ArrangementStatus.STOPPED);
                 //arr.setCheckUnitsCount(resultsKafkaService.getResultsCount(arrangementId));
             }
@@ -148,6 +169,99 @@ public class ArrangementService {
             arrangements.forEach(arrangement -> {
                 stopExecution(arrangement.getId(), arrangement.getVersion());
             });
+        }
+    }
+
+    public ResponseEntity<Object> createManualArrangement(Long arrangementId) {
+        try {
+            List<CheckUnit> checkUnits = getCheckUnitsFromPPT(arrangementId);
+            Arrangement arrangement = createNewManualArrangement(arrangementId, checkUnits.size());
+            arrangementRepo.save(arrangement);
+
+            List<Result> results = createResultsForManualArrangement(arrangement, checkUnits);
+            saveResults(results);
+
+            return new ResponseEntity<>( HttpStatus.OK);
+        } catch (Exception e){
+            return new ResponseEntity<>("Ошибка записи в мероприятия в репозиторий", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    private List<Result> createResultsForManualArrangement(Arrangement arrangement, List<CheckUnit> checkUnits) {
+        List<Result> results = new ArrayList<>();
+        checkUnits.forEach(checkUnit -> {
+            Result result = new Result();
+            result.setId(arrangement.getId());
+            result.setArrangement(arrangement);
+            result.setCheckType(CheckType.MANUAL);
+            result.setCheckUnitType(checkUnit.getType());
+            result.setCheckUnitValue(checkUnit.getValue());
+            result.setErdiId(checkUnit.getContentId());
+            results.add(result);
+        });
+
+        return results;
+    }
+
+    private void saveResults(List<Result> manualArrResults) {
+        manualArrResults.forEach(result -> {
+            resultRepo.upsert(
+                    result.getId(),
+                    result.getArrangement().getId(),
+                    result.getErdiId(),
+                    result.getResult().name(),
+                    result.getStartDate(),
+                    result.getEndDate(),
+                    result.getCheckType().name(),
+                    result.getCheckUnitType().name(),
+                    result.getCheckUnitValue()
+            );
+        });
+    }
+
+
+    private Arrangement createNewManualArrangement(Long arrangementId, int checkUnitsCount) {
+        Arrangement arrangement = new Arrangement();
+        arrangement.setId(arrangementId);
+        arrangement.setCreationDate(LocalDateTime.now());
+        arrangement.setStatus(ArrangementStatus.RUNNING);
+        arrangement.setIsManual(true);
+        arrangement.setVersion(-1L);
+        arrangement.setCheckUnitsCount((long) checkUnitsCount);
+        arrangement.setMaxCheckUnitsCount(0L);
+        return arrangement;
+    }
+
+    private List<CheckUnit> getCheckUnitsFromPPT(Long arrangementId) {
+        String uri = UriComponentsBuilder.fromUriString(GET_CHECK_UNITS_FROM_PPT)
+                .queryParam("id", arrangementId)
+                .build()
+                .toString();
+        try {
+            log.info("Получение чек-юнитов мероприятия {} по запросу: {}", arrangementId, uri);
+
+            return WebClient.create(gatewayUrl)
+                    .get()
+                    .uri(uri)
+                    .accept(MediaType.TEXT_EVENT_STREAM)
+                    .exchange()
+                    .flatMapMany(clientResponse -> {
+                        if(clientResponse.statusCode().equals(HttpStatus.OK)){
+                            log.info("Check units мероприятия {} успешно сформированы", arrangementId);
+                            return clientResponse.bodyToFlux(new ParameterizedTypeReference<List<CheckUnit>>(){})
+                                    .flatMap(Flux::fromIterable);
+                        } else {
+                            log.warn("Ошибка получения чек-юнитов мероприятия {} в ППМ код возврата {}", arrangementId, clientResponse.statusCode().toString());
+                            return (Flux.empty());
+                        }
+                    })
+                    .collectList()
+                    .block();
+
+        } catch (HttpClientErrorException | HttpServerErrorException ex) {
+            throw AS_15_8_DispatcherException.logAndGet(log, String.format("Ошибка получения чек-юнитов мероприятия %d в ППМ, код возврата %s", arrangementId, ex.getStatusCode()), ex);
+        } catch (Exception ex){
+            throw AS_15_8_DispatcherException.logAndGet(log, String.format("Ошибка получения чек-юнитов мероприятия %d в ППМ", arrangementId), ex);
         }
     }
 }

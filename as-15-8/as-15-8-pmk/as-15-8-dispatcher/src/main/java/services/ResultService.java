@@ -119,7 +119,7 @@ public class ResultService {
                     }
                 });
         } catch (Exception ex){
-            log.error("Ошибка при созранении результатов проверок мероприятия " + arrangement.getId(), ex);
+            log.error("Ошибка при сохранении результатов проверок мероприятия " + arrangement.getId(), ex);
             arrangement.setStatus(isStopped ? ArrangementStatus.STOPPING : ArrangementStatus.RUNNING);
             arrangementRepo.save(arrangement);
         }
