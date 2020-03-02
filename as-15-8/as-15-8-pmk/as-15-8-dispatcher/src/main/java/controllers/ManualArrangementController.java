@@ -91,8 +91,9 @@ public class ManualArrangementController {
     public ResponseEntity finishArrangement(@RequestParam("id") Arrangement arrangement) {
         if (arrangement != null) {
             arrangement.setStatus(ArrangementStatus.FINISHED);
-            arrangementRestApi.sendStatusNotificationToPPT(arrangement.getId(), true);
-            return ResponseEntity.ok().body(arrangementRepo.save(arrangementRepo.save(arrangement)));
+            if (arrangementRestApi.sendStatusNotificationToPPT(arrangement.getId(), true))
+                return ResponseEntity.ok().body(arrangementRepo.save(arrangementRepo.save(arrangement)));
+            else return ResponseEntity.badRequest().body("Ошибка отправки статуса меропрития в ППТ");
         } else {
             return ResponseEntity.badRequest().body("Мероприятие не найдено в БД");
         }

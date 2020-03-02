@@ -58,18 +58,18 @@ public class ArrangementRestApi {
         MappingJacksonValue jacksonValue = new MappingJacksonValue(notification);
         HttpEntity<MappingJacksonValue> entity = new HttpEntity<>(jacksonValue, headers);
 
-        log.info("Отправка сообщения с изменением статуса мероприятия {} в ППМ", arrangementId);
+        log.info("Отправка сообщения с изменением статуса мероприятия {}, путь: " + path, arrangementId);
         try {
             restTemplate.put(UriComponentsBuilder
                     .fromHttpUrl(gatewayUrl)
-                    .path(PPM_STATUS_ENDPOINT)
+                    .path(path)
                     .queryParam("id", arrangementId)
                     .build().toString(), entity);
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
-            log.info("Ошибка отправки сообщения с изменением статуса мероприятия " + arrangementId + " в ППМ, код возврата " + ex.getStatusCode());
+            log.info("Ошибка отправки сообщения с изменением статуса мероприятия, " + arrangementId + " путь: " + path + ", код возврата " + ex.getStatusCode());
             return false;
         }
-        log.info("Сообщение с изменением статуса мероприятия {} успешно отправлено в ППМ", arrangementId);
+        log.info("Сообщение с изменением статуса мероприятия {} успешно отправлено, путь: " + path, arrangementId);
         return true;
     }
 
