@@ -4,5 +4,6 @@ public enum CheckType {
     PS,
     PASD,
     NMAP,
-    ERROR
+    ERROR,
+    MANUAL
 }

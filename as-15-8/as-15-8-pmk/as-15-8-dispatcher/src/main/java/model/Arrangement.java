@@ -31,4 +31,7 @@ public class Arrangement {
 
     @Column(nullable = false)
     private Long maxCheckUnitsCount;
+
+    @Column (nullable = false)
+    private Boolean isManual = false;
 }

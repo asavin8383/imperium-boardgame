@@ -38,4 +38,8 @@ public interface ResultScreenShotRepo extends JpaRepository<ResultScreenShot, Lo
     @Query("select r from ResultScreenShot r " +
             "where r.id in :ids")
     List<ResultScreenShot> findByResultIds(@Param("ids") List<Long> resultIds);
+
+    @Query("select r from ResultScreenShot r " +
+            "where r.id = :id")
+    ResultScreenShot findByResultId(@Param("id") Long resultId);
 }

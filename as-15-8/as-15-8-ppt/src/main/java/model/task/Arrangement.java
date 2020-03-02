@@ -119,6 +119,9 @@ public class Arrangement implements Serializable {
 	@Column
 	private Boolean isActAvailable;
 
+	@Column(nullable = false)
+	private Boolean isManual = false;
+
 	/**Количечтво проверок, после которых следует остановить мероприятие*/
 	@JsonView(Views.Brief.class)
 	@Column

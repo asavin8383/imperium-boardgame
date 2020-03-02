@@ -137,7 +137,11 @@ public class ArrangementController {
         if(arrangement!= null) {
             //В ППМ отправляем только не запланированные мероприятия
             if(arrangement.getStatus().equals(ExecutionStatus.NEW) || arrangement.getStatus().equals(ExecutionStatus.FORMED)){
-                arrangementUploader.updateArrangement(arrangement);
+                if (arrangement.getIsManual()) {
+                    arrangementUploader.sendManualArrangementToDispatcher(arrangement);
+                } else {
+                    arrangementUploader.updateArrangement(arrangement);
+                }
             } else {
                 throw new AS_15_8_PPT_Exception("Ошибка отправки мероприятия в ППМ. Мероприятие " + arrangement.getId() + " имеет недопустимый статус: " + arrangement.getStatus());
             }
@@ -202,6 +206,7 @@ public class ArrangementController {
         arrangement.setTrafficId(newArrangement.getTrafficId());
         arrangement.setIsActAvailable(newArrangement.getIsActAvailable());
         arrangement.setInterruptViolationNumber(newArrangement.getInterruptViolationNumber());
+        arrangement.setIsManual(newArrangement.getIsManual());
         Traffic traffic = trafficRepository.findById(newArrangement.getTrafficId())
                 .orElseThrow(() -> new AS_15_8_PPT_Exception("Ошибка при добавлении трафика! Трафик не найден по id: " + newArrangement.getTrafficId()));
         arrangement.setTrafficName(traffic.getName());
@@ -242,4 +247,13 @@ public class ArrangementController {
         Optional.ofNullable(arrangement).orElseThrow(()-> new AS_15_8_PPT_Exception("Arrangement не найден"));
         return arrangement.getAccessTool();
     }
+
+    /*@PreAuthorize("hasRole('ROLE_MANAGE_ARRANGEMENT')" )
+    @GetMapping(path = "/manual")
+    public void createManualArrangement(@RequestParam("id") Long arrangementId){
+        Arrangement arrangement = new Arrangement();
+        arrangement.setId(arrangementId);
+        arrangementUploader.sendManualArrangementToDispatcher(arrangement);
+    }*/
+
 }

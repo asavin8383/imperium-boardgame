@@ -1,21 +1,31 @@
 package restapi.ppm;
 
 import arrangement.ArrangementToPPM;
+import checkUnits.CheckUnit;
+import enums.ExecutionStatus;
 import exceptions.AS_15_8_PPT_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.task.Arrangement;
+import model.traffic.Traffic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.util.UriComponentsBuilder;
+import reactor.core.publisher.Flux;
+import repositories.ArrangementRepo;
+import repositories.TrafficRepository;
+import services.arrangement.impl.ArrangementService;
+
+import java.util.List;
 
 /**
  * Created by san
@@ -27,6 +37,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class ArrangementUploader {
 
     private final String ARRANGEMENTS_URI = "/ppm/arrangements";
+    private final String MANUAL_ARRANGEMENT_TO_DISPATCHER = "/dispatcher/manual_arrangement";
+    private final TrafficRepository trafficRepository;
 
     @Value("${gateway.url}")
     private String gatewayUrl;
@@ -41,7 +53,11 @@ public class ArrangementUploader {
         //TODO сделать POJO для межсервисного обмена. В случае 400 ошибки - смотреть тело
         log.info("Отправка мероприятия в ППМ: {}", arrangement.getId());
         try {
-            oAuth2RestTemplate.put(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(ARRANGEMENTS_URI).queryParam("id", arrangement.getId()).build().toString(), entity);
+            oAuth2RestTemplate.put(UriComponentsBuilder.fromHttpUrl(gatewayUrl)
+                    .path(ARRANGEMENTS_URI)
+                    .queryParam("id", arrangement.getId())
+                    .build()
+                    .toString(), entity);
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
              throw AS_15_8_PPT_Exception.logAndGet(log, String.format("Ошибка отправки мероприятия %d в ППМ, код возврата %s", arrangement.getId(), ex.getStatusCode()), ex);
         }
@@ -68,5 +84,23 @@ public class ArrangementUploader {
         HttpEntity<MappingJacksonValue> entity = new HttpEntity<>(jacksonValue, headers);
 
         return entity;
+    }
+
+    public void sendManualArrangementToDispatcher(Arrangement arrangement) {
+        arrangement.setStatus(ExecutionStatus.RUNNING);
+        //arrangementRepo.save(arrangement);
+
+        //Flux<List<CheckUnit>> checkUnitsFlux = arrangementService.getCheckUnitsFromPod(arrangement.getId());
+
+        log.info("Отправка ручного мероприятия в Dispatcher: {}", arrangement.getId());
+        try {
+            String url = UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(MANUAL_ARRANGEMENT_TO_DISPATCHER).build().toString();
+            ResponseEntity<String> response = oAuth2RestTemplate.postForEntity(url, arrangement.getId(), String.class);
+
+        } catch (HttpClientErrorException | HttpServerErrorException ex) {
+            throw AS_15_8_PPT_Exception.logAndGet(log, String.format("Ошибка отправки мероприятия %d в Dispatcher, код возврата %s", arrangement.getId(), ex.getStatusCode()), ex);
+        }
+        log.info("Мероприятие {} успешно отправлено в Dispatcher", arrangement.getId());
+
     }
 }
