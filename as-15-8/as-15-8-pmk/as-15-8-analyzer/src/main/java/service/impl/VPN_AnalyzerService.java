@@ -279,7 +279,7 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 			return COMPLETED;
 		}
 
-		if (wasRedirect){
+		if (wasRedirect && resultNLP.equals(NLPCategory.NO_STUB)){
 			aRes.setNeedTestFinalUrl(true);
 		}
 

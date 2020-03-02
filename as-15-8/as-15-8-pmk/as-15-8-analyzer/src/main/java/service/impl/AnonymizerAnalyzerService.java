@@ -220,6 +220,10 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 			analysisResult.setCheckResult(COMPLETED);
 			return;
 		}
+		if (resultNLP == NLPCategory.NO_STUB){
+			analysisResult.setCheckResult(FORBIDDEN_CONTENT_DETECTED);
+			return;
+		}
 
 		if (wasRedirect){
 			// ничего. Т.к. для анонимайзера сложно/невозможно проверить редирект.
