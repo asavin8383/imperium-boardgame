@@ -2,6 +2,8 @@ package controllers;
 
 import accessTools.AccessToolDTO;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import enums.AccessToolParameter;
 import enums.AccessToolUnit;
 import lombok.RequiredArgsConstructor;
@@ -55,8 +57,16 @@ public class AccessToolController {
      */
     @PostMapping("/access_tool_parameters")
     @PreAuthorize("hasRole('ROLE_MANAGE_CONFIGURATIONS')")
-    public Set<AccessToolParameter> getAccessToolParameters(@RequestParam String accessToolUnit) {
-        return AccessToolUnit.getSetOfAccessToolParameters(AccessToolUnit.fromPropertyKey(accessToolUnit));
+    public Set<ObjectNode> getAccessToolParameters(@RequestParam String accessToolUnit) {
+        return AccessToolUnit
+                .getSetOfAccessToolParameters(AccessToolUnit.fromPropertyKey(accessToolUnit))
+                .stream()
+                .map(param -> {
+                    ObjectNode paramNode = new ObjectMapper().createObjectNode();
+                    paramNode.put("key", param.name());
+                    paramNode.put("description", param.getDescription());
+                    return paramNode;
+                }).collect(Collectors.toSet());
     }
 
     /**
@@ -64,8 +74,14 @@ public class AccessToolController {
      */
     @PostMapping("/access_tool_units")
     @PreAuthorize("hasRole('ROLE_MANAGE_CONFIGURATIONS')")
-    public List<AccessToolUnit> getAccessToolUnits() {
-        return Arrays.asList(AccessToolUnit.values());
+    public List<ObjectNode> getAccessToolUnits() {
+        return Arrays.stream(AccessToolUnit.values())
+                .map(param -> {
+                    ObjectNode paramNode = new ObjectMapper().createObjectNode();
+                    paramNode.put("key", param.name());
+                    paramNode.put("description", param.getDescription());
+                    return paramNode;
+                }).collect(Collectors.toList());
     }
 
     /**
