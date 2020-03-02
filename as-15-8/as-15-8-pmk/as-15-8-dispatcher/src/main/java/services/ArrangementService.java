@@ -2,6 +2,7 @@ package services;
 
 import arrangement.ArrangementToExecution;
 import checkUnits.CheckUnit;
+import enums.CheckUnitJobResult;
 import events.producers.ArrangementStopEventProducer;
 import exceptions.AS_15_8_DispatcherException;
 import lombok.Getter;
@@ -183,7 +184,7 @@ public class ArrangementService {
 
             return new ResponseEntity<>( HttpStatus.OK);
         } catch (Exception e){
-            return new ResponseEntity<>("Ошибка записи в мероприятия в репозиторий", HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>("Ошибка записи ручного мероприятия в репозиторий", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -191,7 +192,7 @@ public class ArrangementService {
         List<Result> results = new ArrayList<>();
         checkUnits.forEach(checkUnit -> {
             Result result = new Result();
-            result.setId(arrangement.getId());
+            result.setId(checkUnit.getContentId());
             result.setArrangement(arrangement);
             result.setCheckType(CheckType.MANUAL);
             result.setCheckUnitType(checkUnit.getType());
@@ -209,9 +210,9 @@ public class ArrangementService {
                     result.getId(),
                     result.getArrangement().getId(),
                     result.getErdiId(),
-                    result.getResult().name(),
+                    CheckUnitJobResult.RUNNING.toString(),
                     result.getStartDate(),
-                    result.getEndDate(),
+                    result.getStartDate(),
                     result.getCheckType().name(),
                     result.getCheckUnitType().name(),
                     result.getCheckUnitValue()

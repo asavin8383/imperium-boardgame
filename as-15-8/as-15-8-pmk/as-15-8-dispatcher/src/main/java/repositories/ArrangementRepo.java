@@ -14,16 +14,16 @@ import java.util.Optional;
 public interface ArrangementRepo extends JpaRepository<Arrangement, Long> {
 
     @Query("select a from Arrangement a " +
-            "where a.status = 'RUNNING' or a.status = 'STOPPING'")
+            "where a.status = 'RUNNING' or a.status = 'STOPPING' and a.isManual = false")
     List<Arrangement> findReadyToUpload();
 
     @Query("select a from Arrangement a " +
             "where a.creationDate > :date and " +
-            "(a.status = 'STOPPED' or a.status = 'STOPPING')")
+            "(a.status = 'STOPPED' or a.status = 'STOPPING') and a.isManual = false")
     List<Arrangement> findStopped(@Param("date") LocalDateTime date);
 
     @Query("select a from Arrangement a " +
-            "where a.status = 'RUNNING'")
+            "where a.status = 'RUNNING' and a.isManual = false")
     List<Arrangement> findAllRunning();
 
     Optional<Arrangement> findByIdAndVersion(Long id, Long version);
