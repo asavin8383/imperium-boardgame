@@ -62,10 +62,10 @@ public class ManualArrangementController {
     public ResponseEntity editResult(@RequestBody Result newResult,
                                      @RequestParam("resultId") Result result) {
         if (result != null) {
-            result.setStartDate(LocalDateTime.now());
-            result.setUserDescription(newResult.getUserDescription());
             result.setEndDate(LocalDateTime.now());
+            result.setUserDescription(newResult.getUserDescription());
             result.setResult(newResult.getResult());
+            result.setCheckForAct(newResult.isCheckForAct());
 
             return ResponseEntity.ok().body(resultRepo.save(result));
         } else {
@@ -90,10 +90,12 @@ public class ManualArrangementController {
     @PutMapping(path = "/finish_arrangement")
     public ResponseEntity finishArrangement(@RequestParam("id") Arrangement arrangement) {
         if (arrangement != null) {
-            arrangement.setStatus(ArrangementStatus.FINISHED);
-            if (arrangementRestApi.sendStatusNotificationToPPT(arrangement.getId(), true))
-                return ResponseEntity.ok().body(arrangementRepo.save(arrangementRepo.save(arrangement)));
-            else return ResponseEntity.badRequest().body("Ошибка отправки статуса меропрития в ППТ");
+            if (arrangement.getStatus().equals(ArrangementStatus.RUNNING)) {
+                arrangement.setStatus(ArrangementStatus.FINISHED);
+                if (arrangementRestApi.sendStatusNotificationToPPT(arrangement.getId(), true))
+                    return ResponseEntity.ok().body(arrangementRepo.save(arrangementRepo.save(arrangement)));
+                else return ResponseEntity.badRequest().body("Ошибка отправки статуса меропрития в ППТ");
+            } else return ResponseEntity.badRequest().body("Невозможно остановить мероприятие со статусом : " + arrangement.getStatus());
         } else {
             return ResponseEntity.badRequest().body("Мероприятие не найдено в БД");
         }
