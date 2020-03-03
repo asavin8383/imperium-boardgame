@@ -64,7 +64,7 @@ public class ManualArrangementController {
         if (result != null) {
             result.setEndDate(LocalDateTime.now());
             result.setUserDescription(newResult.getUserDescription());
-            result.setResult(newResult.getResult());
+            result.setUserResult(newResult.getUserResult());
             result.setCheckForAct(newResult.isCheckForAct());
 
             return ResponseEntity.ok().body(resultRepo.save(result));

@@ -1,7 +1,5 @@
 package model.enums;
 
-import java.awt.*;
-
 /**
  * Результат проверки запрещенного ресурса, установленный пользователем
  * @author shabalinAI
