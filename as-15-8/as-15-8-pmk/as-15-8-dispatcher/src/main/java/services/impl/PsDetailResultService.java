@@ -8,8 +8,11 @@ import model.Result;
 import model.enums.CheckType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import repositories.PsDetailResultRepo;
 import services.DetailResultService;
+
+import javax.persistence.EntityManager;
 
 /**
  * Класс для работы с результатами анализа проверок запрещенных ресурсов в ПС
@@ -47,8 +50,8 @@ public class PsDetailResultService implements DetailResultService<PsAnalysisJobR
 		psDetailResult.setDescription(analysisResult.getDescription());
 	}
 
-	@Override
-	public void save(DetailResult psDetailResult) {
+    @Override
+	public void save(EntityManager entityManager, DetailResult psDetailResult) {
 		PsDetailResult detailResult = (PsDetailResult) psDetailResult;
 		psDetailResultRepo.upsert(detailResult.getId(), detailResult.getDescription());
 	}

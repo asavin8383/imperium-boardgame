@@ -8,8 +8,11 @@ import model.Result;
 import model.enums.CheckType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import repositories.ErrorDetailResultRepo;
 import services.DetailResultService;
+
+import javax.persistence.EntityManager;
 
 /**
  * Класс для работы с результатами анализа проверок запрещенных ресурсов в ПС
@@ -47,8 +50,8 @@ public class ErrorResultService implements DetailResultService<CheckUnitStatusNo
 		detailResult.setError(checkUnitResult.getDescription());
 	}
 
-	@Override
-	public void save(DetailResult errorDetailResult) {
+    @Override
+	public void save(EntityManager entityManager, DetailResult errorDetailResult) {
 		ErrorDetailResult detailResult = (ErrorDetailResult) errorDetailResult;
 		errorDetailResultRepo.upsert(detailResult.getId(), detailResult.getError());
 	}
