@@ -30,6 +30,9 @@ import restapi.ConfigClient;
 import restapi.PptClient;
 
 import javax.annotation.PostConstruct;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
@@ -54,6 +57,8 @@ public class ResultService {
     private final DispatcherProperties dispatcherProperties;
     private final ConfigClient configClient;
     private final PptClient pptClient;
+
+    private final EntityManagerFactory entityManagerFactory;
 
     @PostConstruct
     private void initImageProcessor() throws Exception {
@@ -93,17 +98,22 @@ public class ResultService {
     @Transactional
     void saveArrangementResults(Arrangement arrangement) {
         log.info("Начато сохранение мероприятия: " + arrangement.getId());
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        EntityTransaction transaction = entityManager.getTransaction();
         boolean isStopped = !arrangementService.isArrangementRunning(arrangement.getId(), arrangement.getVersion());
         try {
             resultsKafkaService.getArrangementResultsIterator(arrangement.getId())
                 .ifPresent(resultsIterator -> {
                     boolean isSaved = true;
+                    transaction.begin();
+                    int resultCount = 0;
                     while (resultsIterator.hasNext()) {
                         KeyValue<CheckUnitKey, CheckUnitResult> result = resultsIterator.next();
                         //Если штамп ставим, нужно попросить инфо об AccessTool
                         AccessToolDTO accessToolDTO = dispatcherProperties.getImprint().isUseImprint() ? getAccessToolInfo(arrangement.getId()) : null;
-                        isSaved = saveArrangementResult(result.key, result.value, arrangement, accessToolDTO);
+                        isSaved = saveArrangementResult(entityManager, result.key, result.value, arrangement, accessToolDTO);
                     }
+                    transaction.commit();
                     if (isSaved) {
                         log.info("Мероприятие успешно сохранено в БД: " + arrangement.getId());
                         if(isArrangementFinished(arrangement) || isStopped) {
@@ -121,14 +131,18 @@ public class ResultService {
                 });
         } catch (Exception ex){
             log.error("Ошибка при сохранении результатов проверок мероприятия " + arrangement.getId(), ex);
+            if(transaction.isActive())
+                transaction.rollback();
             arrangement.setStatus(isStopped ? ArrangementStatus.STOPPING : ArrangementStatus.RUNNING);
             arrangementRepo.save(arrangement);
+        } finally {
+            entityManager.close();
         }
     }
 
-    private boolean saveArrangementResult(CheckUnitKey checkUnitKey, CheckUnitResult checkUnitResult, Arrangement arrangement, AccessToolDTO accessToolDTO) {
+    private boolean saveArrangementResult(EntityManager entityManager, CheckUnitKey checkUnitKey, CheckUnitResult checkUnitResult, Arrangement arrangement, AccessToolDTO accessToolDTO) {
         try {
-            saveJobResult(arrangement, checkUnitKey.getJobId(), checkUnitResult, accessToolDTO);
+            saveJobResult(entityManager, arrangement, checkUnitKey.getJobId(), checkUnitResult, accessToolDTO);
         } catch (Exception ex) {
             try {
                 log.error("Ошибка при сохранении результата проверки: " + checkUnitKey.getJobId() + ", " + checkUnitResult.getCheckUnit().getValue(), ex);
@@ -143,7 +157,7 @@ public class ResultService {
                 notification.setEndTime(checkUnitResult.getEndTime());
                 notification.setDescription(sw.toString());
 
-                saveJobResult(arrangement, checkUnitKey.getJobId(), notification, accessToolDTO);
+                saveJobResult(entityManager, arrangement, checkUnitKey.getJobId(), notification, accessToolDTO);
                 log.info("Ошибка сохранена: " + checkUnitKey.getJobId());
             } catch (Exception newEx) {
                 log.error("Ошибка при сохранении ошибочной обработки сообщения с анализом результатов проверки: " + checkUnitKey.getJobId() + ", " + checkUnitResult.getCheckUnit().getValue(), newEx);
@@ -153,7 +167,7 @@ public class ResultService {
         return true;
     }
 
-    private void saveJobResult(Arrangement arrangement, Long jobId, CheckUnitResult checkUnitResult, AccessToolDTO accessToolDTO) {
+    private void saveJobResult(EntityManager entityManager, Arrangement arrangement, Long jobId, CheckUnitResult checkUnitResult, AccessToolDTO accessToolDTO) {
         DetailResultService<? super CheckUnitResult, ? extends DetailResult> service = AnalysisResultServiceFactory.getService(checkUnitResult.getClass());
  //       Result result = resultRepo.findById(jobId).orElseGet(Result::new);
         Result result = new Result();
@@ -204,7 +218,7 @@ public class ResultService {
                     resultScreenShot.getEtalonScreenshot()
             );
         }
-        service.save(detailResult);
+        service.save(entityManager, detailResult);
     }
 
     private byte[] imprintScreenshot(AccessToolDTO accessToolDTO, CheckUnitResult checkUnitResult, byte[] screenShot, CheckType checkType){

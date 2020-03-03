@@ -173,7 +173,7 @@ spring:
         springCloudBusInput.destination: bus_config_input_asavin
         springCloudBusOutput.destination: bus_config_output_asavin
   datasource:
-    url: jdbc:postgresql://192.168.5.211:5432/asdb_test2
+    url: jdbc:postgresql://192.168.5.195:5432/asdb
 
 ---
 

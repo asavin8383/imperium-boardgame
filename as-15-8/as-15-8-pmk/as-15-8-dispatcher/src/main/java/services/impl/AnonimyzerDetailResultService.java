@@ -9,8 +9,11 @@ import model.Result;
 import model.enums.CheckType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import repositories.PasdDetailResultRepo;
 import services.DetailResultService;
+
+import javax.persistence.EntityManager;
 
 
 @Service
@@ -64,7 +67,7 @@ public class AnonimyzerDetailResultService implements DetailResultService<Anonym
 	}
 
 	@Override
-	public void save(DetailResult pasdDetailResult) {
+	public void save(EntityManager entityManager, DetailResult pasdDetailResult) {
 		PasdDetailResult detailResult = (PasdDetailResult) pasdDetailResult;
 		pasdDetailResultRepo.upsert(
 			detailResult.getId(),

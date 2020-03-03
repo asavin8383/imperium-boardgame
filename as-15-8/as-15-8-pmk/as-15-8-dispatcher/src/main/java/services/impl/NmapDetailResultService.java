@@ -8,8 +8,11 @@ import model.Result;
 import model.enums.CheckType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import repositories.NmapDetailResultRepo;
 import services.DetailResultService;
+
+import javax.persistence.EntityManager;
 
 /**
  * Класс для работы с результатами анализа проверок запрещенных ресурсов в ПС
@@ -48,7 +51,7 @@ public class NmapDetailResultService implements DetailResultService<NMapAnalysis
 	}
 
 	@Override
-	public void save(DetailResult nmapDetailResult) {
+	public void save(EntityManager entityManager, DetailResult nmapDetailResult) {
 		NmapDetailResult detailResult = (NmapDetailResult) nmapDetailResult;
 		nmapDetailResultRepo.upsert(detailResult.getId(), detailResult.getLog());
 	}
