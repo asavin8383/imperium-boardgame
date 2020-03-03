@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import model.*;
 import model.enums.ArrangementStatus;
 import model.enums.CheckType;
+import model.enums.Reason;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;

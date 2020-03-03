@@ -12,6 +12,7 @@ import model.Arrangement;
 import model.Result;
 import model.enums.ArrangementStatus;
 import model.enums.CheckType;
+import model.enums.Reason;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
@@ -108,10 +109,11 @@ public class ArrangementService {
     }
 
     @Transactional
-    public void stopExecution(Long arrangementId, Long version) {
+    public void stopExecution(Long arrangementId, Long version, Reason reason) {
         Arrangement arrangement = arrangementRepo
                 .findById(arrangementId)
                 .orElseThrow(() -> new AS_15_8_DispatcherException("Ошибка остановки мероприятия. Мероприятие не найдено по ID: " + arrangementId));
+
         if(!arrangement.getVersion().equals(version)) {
             log.warn("Ошибка остановки мероприятия. Мероприятие " + arrangementId + ", версия " + version + " было запущено с новой версией: " + arrangement.getVersion());
             return;
@@ -126,6 +128,7 @@ public class ArrangementService {
             stoppedArrangements.put(arrangementId, new HashSet<>(Collections.singletonList(version)));
 
         arrangement.setStatus(ArrangementStatus.STOPPING);
+        arrangement.setReason(reason);
         arrangementRepo.save(arrangement);
 
         final ArrangementStopEvent event = new ArrangementStopEvent(arrangementId, version);
@@ -145,8 +148,17 @@ public class ArrangementService {
             if (!isStopped)
                 arr.setStatus(ArrangementStatus.FINISHED);
             else {
-                arr.setStatus(ArrangementStatus.STOPPED);
-                //arr.setCheckUnitsCount(resultsKafkaService.getResultsCount(arrangementId));
+                switch (arr.getReason()) {
+                    case STOPPED_BY_SERVICE_MODE:
+                        arr.setStatus(ArrangementStatus.STOPPED_BY_SERVICE_MODE);
+                        break;
+                    case STOPPED_BY_MAX_CHECK_UNITS_COUNT:
+                        arr.setStatus(ArrangementStatus.STOPPED_BY_MAX_CHECK_UNITS);
+                        break;
+                    case MANUAL:
+                        arr.setStatus(ArrangementStatus.STOPPED);
+                        break;
+                }
             }
             arrangementRepo.save(arr);
             if (!isStopped && isActAvailable) {
@@ -164,11 +176,11 @@ public class ArrangementService {
         return arrangementRepo.findMaxCheckUnitsCount(arrangementId).orElse(null);
     }
 
-    public void stopAllRunningArrangements() {
+    public void stopAllRunningArrangements(Reason reason) {
         List<Arrangement> arrangements = arrangementRepo.findAllRunning();
         if (!arrangements.isEmpty()) {
             arrangements.forEach(arrangement -> {
-                stopExecution(arrangement.getId(), arrangement.getVersion());
+                stopExecution(arrangement.getId(), arrangement.getVersion(), reason);
             });
         }
     }

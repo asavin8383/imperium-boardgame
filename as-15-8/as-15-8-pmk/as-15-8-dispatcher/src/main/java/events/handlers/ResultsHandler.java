@@ -9,6 +9,7 @@ import events.DispatcherChannels;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Screenshots;
+import model.enums.Reason;
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.Materialized;
@@ -101,7 +102,7 @@ public class ResultsHandler {
             if (maxCheckUnitsCount != null) {
                 long curCheckUnitsCount = resultsKafkaService.getArrangementForbiddenContentResultsCount(arrangementId);
                 if (maxCheckUnitsCount <= curCheckUnitsCount) {
-                    arrangementService.stopExecution(arrangementId, version);
+                    arrangementService.stopExecution(arrangementId, version, Reason.STOPPED_BY_MAX_CHECK_UNITS_COUNT);
                     return true;
                 }
             }

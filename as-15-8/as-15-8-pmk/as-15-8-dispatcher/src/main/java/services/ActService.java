@@ -43,7 +43,7 @@ public class ActService {
 
             return webClient.sendAct(actRequest);
         } catch (Exception ex){
-            log.error("Ошибка при формировании данных для акта по мероприятию: "+arrangementId);
+            log.error("Ошибка при формировании данных для акта по мероприятию: " + arrangementId);
             return false;
         }
     }

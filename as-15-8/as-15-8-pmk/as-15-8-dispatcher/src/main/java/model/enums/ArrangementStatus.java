@@ -5,5 +5,7 @@ public enum ArrangementStatus {
     STOPPING,
     STOPPED,
     UPLOADING,
-    FINISHED
+    FINISHED,
+    STOPPED_BY_SERVICE_MODE,
+    STOPPED_BY_MAX_CHECK_UNITS
 }

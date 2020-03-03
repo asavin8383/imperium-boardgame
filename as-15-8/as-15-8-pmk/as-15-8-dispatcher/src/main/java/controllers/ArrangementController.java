@@ -5,6 +5,7 @@ import exceptions.AS_15_8_DispatcherException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Arrangement;
+import model.enums.Reason;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -67,7 +68,7 @@ public class ArrangementController {
     @PostMapping("/stop")
     @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
     public void stopArrangement(@RequestParam Long arrangementId, @RequestParam Long version) {
-        arrangementService.stopExecution(arrangementId, version);
+        arrangementService.stopExecution(arrangementId, version, Reason.MANUAL);
     }
 
     @GetMapping("/stopped")
@@ -79,6 +80,6 @@ public class ArrangementController {
     @PostMapping("/stop_all_running")
     @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
     public void stopAllRunningArrangements() {
-        arrangementService.stopAllRunningArrangements();
+        arrangementService.stopAllRunningArrangements(Reason.STOPPED_BY_SERVICE_MODE);
     }
 }

@@ -80,6 +80,16 @@ public class ArrangementStateMachine {
 
                     .and()
                     .withExternal()
+                    .source(ExecutionStatus.STOPPING).target(ExecutionStatus.STOPPED_BY_MAX_CHECK_UNITS)
+                    .event(ArrangementEvents.STOP)
+
+                    .and()
+                    .withExternal()
+                    .source(ExecutionStatus.STOPPING).target(ExecutionStatus.STOPPED_BY_SERVICE_MODE)
+                    .event(ArrangementEvents.STOP)
+
+                    .and()
+                    .withExternal()
                     .source(ExecutionStatus.NEW).target(ExecutionStatus.FINISHED)
                     .event(ArrangementEvents.STOP)
 
@@ -133,14 +143,22 @@ public class ArrangementStateMachine {
                     .source(ExecutionStatus.ACT_SENT).target(ExecutionStatus.ACT_SENT)
                     .event(ArrangementEvents.SEND_ACT)
 
+                    .and()
+                    .withExternal()
+                    .source(ExecutionStatus.STOPPED_BY_SERVICE_MODE).target(ExecutionStatus.ACT_SENT)
+                    .event(ArrangementEvents.SEND_ACT)
+
+                    .and()
+                    .withExternal()
+                    .source(ExecutionStatus.STOPPED_BY_MAX_CHECK_UNITS).target(ExecutionStatus.ACT_SENT)
+                    .event(ArrangementEvents.SEND_ACT)
             ;
+
         } catch (Exception ex) {
             throw new AS_15_8_PPT_Exception("Ошибка создания конечного автомата!", ex);
         }
 
         return builder.build();
     }
-
-
 
 }

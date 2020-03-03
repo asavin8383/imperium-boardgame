@@ -66,4 +66,6 @@
     <include file="db/changelog/ppt.0038.dynamic_traffic_query_remove.xml"/>
     <include file="db/changelog/ppt.0039.traffic_erdi_count.xml"/>
     <include file="db/changelog/ppt.0040.arrangement_is_manual.xml"/>
+    <include file="db/changelog/ppt.0041.arrangement_status_ck_service_mode_stopped_by_max_check_units_count.xml"/>
+
 </databaseChangeLog>

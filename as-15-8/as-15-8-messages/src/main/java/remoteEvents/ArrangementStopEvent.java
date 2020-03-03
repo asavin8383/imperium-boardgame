@@ -11,5 +11,4 @@ public class ArrangementStopEvent {
 
     private Long arrangementId;
     private Long version;
-
 }

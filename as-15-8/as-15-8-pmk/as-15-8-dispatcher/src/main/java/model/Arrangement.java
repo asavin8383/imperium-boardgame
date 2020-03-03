@@ -3,6 +3,7 @@ package model;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import model.enums.ArrangementStatus;
+import model.enums.Reason;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -34,4 +35,7 @@ public class Arrangement {
 
     @Column (nullable = false)
     private Boolean isManual = false;
+
+    @Column (nullable = false)
+    private Reason reason;
 }
