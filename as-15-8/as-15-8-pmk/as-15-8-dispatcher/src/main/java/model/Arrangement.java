@@ -37,5 +37,5 @@ public class Arrangement {
     private Boolean isManual = false;
 
     @Column (nullable = false)
-    private Reason reason;
+    private Reason reason = Reason.MANUAL;
 }
