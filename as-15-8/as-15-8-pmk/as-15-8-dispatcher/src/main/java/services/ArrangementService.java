@@ -61,8 +61,7 @@ public class ArrangementService {
     private final ResultsKafkaService resultsKafkaService;
     private final ActService actService;
     private final ArrangementRestApi arrangementRestApi;
-    private final ResultService resultService;
-    private final EntityManagerFactory emf;
+    private final ResultRepo resultRepo;
 
     private final String GET_CHECK_UNITS_FROM_PPT = "/ppt/arrangements/checkUnits";
 
@@ -220,11 +219,9 @@ public class ArrangementService {
     }
 
     private void saveResults(List<Result> manualArrResults) {
-        EntityManager entityManager = emf.createEntityManager();
         manualArrResults.forEach(result -> {
-            resultService.upsertResult(entityManager,result);
+            resultRepo.save(result);
         });
-        emf.close();
     }
 
     private Arrangement createNewManualArrangement(Long arrangementId, int checkUnitsCount) {
