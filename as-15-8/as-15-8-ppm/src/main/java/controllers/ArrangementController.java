@@ -132,7 +132,9 @@ public class ArrangementController {
         }
 
         if (sendToPPT(notification)) {
-            if(notification.getEvent().equals(ArrangementEvents.STOP)){
+            if(notification.getEvent().equals(ArrangementEvents.STOP)
+                    || notification.getEvent().equals(ArrangementEvents.STOP_BY_MAX_CHECK_UNITS_COUNT)
+                    || notification.getEvent().equals(ArrangementEvents.STOP_BY_SERVICE_MODE)){
                 arrangementService.refreshStoppedArrangement(arrangement);
                 arrangement.setStatus(ArrangementStatus.STOPPED);
             }
