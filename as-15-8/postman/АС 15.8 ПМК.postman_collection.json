@@ -483,18 +483,44 @@
 				{
 					"name": "Обновление скриншота для результата",
 					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqYWNreSIsInJvbGUiOiJST0xFX09QRVJBVE9SLFJPTEVfRk9STUFMX1RBU0ssUk9MRV9NQU5BR0VfRk9STUFMX1RBU0ssUk9MRV9NQU5BR0VfQVJSQU5HRU1FTlQsUk9MRV9QUkVQQVJBVElPTl9UUkFGRklDLFJPTEVfRElDVElPTkFSWSxST0xFX0ZPUk1BVElPTl9PRl9TQ0hFRFVMRSxST0xFX1ZJRVdfUkVTVUxULFJPTEVfU0VORF9BQ1RfQllfSEFORCxST0xFX01BTkFHRV9QU19QQVNELFJPTEVfTUFOQUdFX0VSREksUk9MRV9WSUVXX1JFUE9SVCxST0xFX0ZPUk1BVElPTl9QQVJBTV9SRVBPUlQsUk9MRV9NQU5BR0VfRE9NQUlOUyxST0xFX01BTkFHRV9NQU5VQUxfQVJSQU5HRU1FTlQiLCJtYWlsIjoiIiwidXNlcl9uYW1lIjoiamFjayIsInNjb3BlIjpbInJlYWQiLCJ3cml0ZSJdLCJleHAiOjE1ODMzOTM0NjMsInVzZXJOYW1lIjoiamFjayIsImF1dGhvcml0aWVzIjpbIlJPTEVfT1BFUkFUT1IiLCJST0xFX1BSRVBBUkFUSU9OX1RSQUZGSUMiLCJST0xFX0ZPUk1BVElPTl9QQVJBTV9SRVBPUlQiLCJST0xFX01BTkFHRV9NQU5VQUxfQVJSQU5HRU1FTlQiLCJST0xFX01BTkFHRV9QU19QQVNEIiwiUk9MRV9GT1JNQVRJT05fT0ZfU0NIRURVTEUiLCJST0xFX01BTkFHRV9FUkRJIiwiUk9MRV9GT1JNQUxfVEFTSyIsIlJPTEVfRElDVElPTkFSWSIsIlJPTEVfVklFV19SRVBPUlQiLCJST0xFX01BTkFHRV9GT1JNQUxfVEFTSyIsIlJPTEVfTUFOQUdFX0FSUkFOR0VNRU5UIiwiUk9MRV9WSUVXX1JFU1VMVCIsIlJPTEVfU0VORF9BQ1RfQllfSEFORCIsIlJPTEVfTUFOQUdFX0RPTUFJTlMiXSwianRpIjoiMTUzNjRmYmYtNzBlNC00ZDhmLTllOTQtODRjYTRiMjMwODgzIiwiY2xpZW50X2lkIjoiYXMtMTUtOCIsInNlY29uZE5hbWUiOiJjaGFuIn0.Xij-rJI5UpMwEDuO7hjPKRntUPoYsk6iqHnhQJnjRyjwe8Upe6VaN1PaYw8KJ50K35WnbctNCCYlYfRbXpyQ6GZ3mWkfzobnuLZ_yvoQTeQ20kXASmsnspN6FYROvyu9Lj8QyAtpAjgOdySxjGbaZeNSxUvRgpLBvobJRhoveq5I9cNF3VqglVxquVRjvkUBcZJ2IOmJSxyZ2jSGPoKP0j9hTn-H-v7X9preYcCQPwRX0iictUjeDyZ75-lqfzMJI6sp2CvE8wIaro1be5zK9G40V1EhdnoYfoJBq61_bJCm_dNvJr-3WxVn9ohOHLu9syEoQRbqCa_nnFv_C_hprA",
+									"type": "string"
+								},
+								{
+									"key": "tokenType",
+									"value": "bearer",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
 						"method": "PUT",
 						"header": [
 							{
 								"key": "Content-Type",
 								"name": "Content-Type",
-								"value": "application/json",
+								"value": "application/x-www-form-urlencoded",
 								"type": "text"
 							}
 						],
 						"body": {
-							"mode": "file",
-							"file": {},
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/C:/Users/user/Desktop/traffic 3.png"
+								}
+							],
 							"options": {
 								"raw": {
 									"language": "json"
@@ -502,18 +528,19 @@
 							}
 						},
 						"url": {
-							"raw": "{{url}}/dispatcher/screenshot?resultId",
+							"raw": "{{url}}/dispatcher/manual_arrangement/screenshot?resultId=826387",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"dispatcher",
+								"manual_arrangement",
 								"screenshot"
 							],
 							"query": [
 								{
 									"key": "resultId",
-									"value": null
+									"value": "826387"
 								}
 							]
 						}
@@ -591,18 +618,19 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{url}}/dispatcher/screenshot?resultId",
+							"raw": "{{url}}/dispatcher/manual_arrangement/screenshot?resultId=826387",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"dispatcher",
+								"manual_arrangement",
 								"screenshot"
 							],
 							"query": [
 								{
 									"key": "resultId",
-									"value": null
+									"value": "826387"
 								}
 							]
 						}
