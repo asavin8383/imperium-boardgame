@@ -6,9 +6,10 @@ import model.DetailResult;
 import model.NmapDetailResult;
 import model.Result;
 import model.enums.CheckType;
+import org.hibernate.query.NativeQuery;
+import org.hibernate.type.StringType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import repositories.NmapDetailResultRepo;
 import services.DetailResultService;
 
@@ -53,7 +54,18 @@ public class NmapDetailResultService implements DetailResultService<NMapAnalysis
 	@Override
 	public void save(EntityManager entityManager, DetailResult nmapDetailResult) {
 		NmapDetailResult detailResult = (NmapDetailResult) nmapDetailResult;
-		nmapDetailResultRepo.upsert(detailResult.getId(), detailResult.getLog());
+		String sql = "insert into results.nmap_detail_results " +
+			"(result_id, log) " +
+			"values " +
+			"(:id, :log) " +
+			"on conflict(result_id) do update " +
+			"set " +
+			"result_id = :id, " +
+			"log = :log";
+		NativeQuery nativeQuery = entityManager.createNativeQuery(sql).unwrap(NativeQuery.class);
+		nativeQuery.setParameter("id", detailResult.getId());
+		nativeQuery.setParameter("log", detailResult.getLog(), StringType.INSTANCE);
+		nativeQuery.executeUpdate();
 	}
 
 	@Override

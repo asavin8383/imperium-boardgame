@@ -6,9 +6,10 @@ import model.DetailResult;
 import model.ErrorDetailResult;
 import model.Result;
 import model.enums.CheckType;
+import org.hibernate.query.NativeQuery;
+import org.hibernate.type.StringType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import repositories.ErrorDetailResultRepo;
 import services.DetailResultService;
 
@@ -53,7 +54,18 @@ public class ErrorResultService implements DetailResultService<CheckUnitStatusNo
     @Override
 	public void save(EntityManager entityManager, DetailResult errorDetailResult) {
 		ErrorDetailResult detailResult = (ErrorDetailResult) errorDetailResult;
-		errorDetailResultRepo.upsert(detailResult.getId(), detailResult.getError());
+		String sql = "insert into results.error_detail_results " +
+			"(result_id, error) " +
+			"values " +
+			"(:id, :error) " +
+			"on conflict(result_id) do update " +
+			"set " +
+			"result_id = :id, " +
+			"error = :error";
+		NativeQuery nativeQuery = entityManager.createNativeQuery(sql).unwrap(NativeQuery.class);
+		nativeQuery.setParameter("id", detailResult.getId());
+		nativeQuery.setParameter("error", detailResult.getError(), StringType.INSTANCE);
+		nativeQuery.executeUpdate();
 	}
 
     @Override

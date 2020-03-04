@@ -6,9 +6,10 @@ import model.DetailResult;
 import model.PsDetailResult;
 import model.Result;
 import model.enums.CheckType;
+import org.hibernate.query.NativeQuery;
+import org.hibernate.type.StringType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import repositories.PsDetailResultRepo;
 import services.DetailResultService;
 
@@ -53,7 +54,18 @@ public class PsDetailResultService implements DetailResultService<PsAnalysisJobR
     @Override
 	public void save(EntityManager entityManager, DetailResult psDetailResult) {
 		PsDetailResult detailResult = (PsDetailResult) psDetailResult;
-		psDetailResultRepo.upsert(detailResult.getId(), detailResult.getDescription());
+		String sql = "insert into results.ps_detail_results " +
+			"(result_id, description) " +
+			"values " +
+			"(:id, :description) " +
+			"on conflict(result_id) do update " +
+			"set " +
+			"result_id = :id, " +
+			"description = :description";
+		NativeQuery nativeQuery = entityManager.createNativeQuery(sql).unwrap(NativeQuery.class);
+		nativeQuery.setParameter("id", detailResult.getId());
+		nativeQuery.setParameter("description", detailResult.getDescription(), StringType.INSTANCE);
+		nativeQuery.executeUpdate();
 	}
 
     @Override
