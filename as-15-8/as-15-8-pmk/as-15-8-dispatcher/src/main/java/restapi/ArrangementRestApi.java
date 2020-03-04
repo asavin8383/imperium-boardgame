@@ -5,6 +5,7 @@ import enums.ArrangementEvents;
 import exceptions.AS_15_8_DispatcherException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import model.Arrangement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.util.UriComponentsBuilder;
+import repositories.ArrangementRepo;
 
 import java.util.Optional;
 
@@ -34,11 +36,12 @@ public class ArrangementRestApi {
     private final String PPT_ACT_SENT_STATUS = "/arrangements/act_sent_status";
     private final String PPT_ARRANGEMENT_INTERRUPT_VIOLATION_NUMBER = "/arrangements/interrupt_violation_number";
     private final OAuth2RestTemplate restTemplate;
+    private final ArrangementRepo arrangementRepo;
 
     @Value("${gateway.url}")
     private String gatewayUrl;
 
-    public boolean sendStatusNotificationToPPM(Long arrangementId, boolean isStopped){
+    public boolean sendStatusNotificationToPPM(Long arrangementId, boolean isStopped) {
         return sendStatusNotification(arrangementId, isStopped, PPM_STATUS_ENDPOINT);
     }
 
@@ -47,11 +50,7 @@ public class ArrangementRestApi {
     }
 
     private boolean sendStatusNotification(Long arrangementId, boolean isStopped, String path){
-        ArrangementStatusNotification notification = new ArrangementStatusNotification(
-                arrangementId,
-                isStopped ? ArrangementEvents.STOP : ArrangementEvents.FINISH
-        );
-
+        ArrangementStatusNotification notification = createStatusNotification(arrangementId, isStopped);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -73,6 +72,28 @@ public class ArrangementRestApi {
         return true;
     }
 
+    private ArrangementStatusNotification createStatusNotification(Long arrangementId, boolean isStopped) {
+        ArrangementStatusNotification notification = null;
+
+        Arrangement arr = arrangementRepo.findById(arrangementId).orElseThrow(() ->
+            new AS_15_8_DispatcherException("Ошибка создания уведомления для отправки в ППМ или ППТ, мероприятие не найдено id:" + arrangementId));
+
+        switch (arr.getReason()) {
+            case MANUAL:
+                notification = new ArrangementStatusNotification(
+                        arrangementId,
+                        isStopped ? ArrangementEvents.STOP : ArrangementEvents.FINISH);
+                break;
+            case STOPPED_BY_MAX_CHECK_UNITS_COUNT:
+                notification = new ArrangementStatusNotification(arrangementId, ArrangementEvents.STOP_BY_MAX_CHECK_UNITS_COUNT);
+                break;
+            case STOPPED_BY_SERVICE_MODE:
+                notification = new ArrangementStatusNotification(arrangementId, ArrangementEvents.STOP_BY_SERVICE_MODE);
+                break;
+        }
+
+        return notification;
+    }
 
     /*public ExecutionStatus getArrangementExcecutionStatus(Long arrangementId) {
         log.info("Отправка сообщения с запросом статуса мероприятия {} в ППТ", arrangementId);

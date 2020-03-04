@@ -81,12 +81,12 @@ public class ArrangementStateMachine {
                     .and()
                     .withExternal()
                     .source(ExecutionStatus.STOPPING).target(ExecutionStatus.STOPPED_BY_MAX_CHECK_UNITS)
-                    .event(ArrangementEvents.STOP)
+                    .event(ArrangementEvents.STOP_BY_MAX_CHECK_UNITS_COUNT)
 
                     .and()
                     .withExternal()
                     .source(ExecutionStatus.STOPPING).target(ExecutionStatus.STOPPED_BY_SERVICE_MODE)
-                    .event(ArrangementEvents.STOP)
+                    .event(ArrangementEvents.STOP_BY_SERVICE_MODE)
 
                     .and()
                     .withExternal()
