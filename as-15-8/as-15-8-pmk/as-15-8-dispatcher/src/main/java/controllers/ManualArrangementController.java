@@ -8,6 +8,7 @@ import model.Arrangement;
 import model.Result;
 import model.ResultScreenShot;
 import model.enums.ArrangementStatus;
+import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,12 +17,14 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import repositories.ArrangementRepo;
 import repositories.ResultRepo;
 import repositories.ResultScreenShotRepo;
 import restapi.ArrangementRestApi;
 import services.ArrangementService;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 
 @RestController
@@ -74,14 +77,15 @@ public class ManualArrangementController {
     }
 
     @PutMapping(path = "/screenshot")
-    public ResponseEntity saveScreenshot(@RequestBody byte[] screenshot,
-                                         @RequestParam("resultId") Result result) {
+    public ResponseEntity saveScreenshot(@RequestParam("file") MultipartFile file,
+                                         @RequestParam("resultId") Result result) throws IOException {
         if (result != null) {
+
             ResultScreenShot resultScreenShot = new ResultScreenShot();
             resultScreenShot.setId(result.getId());
             resultScreenShot.setResult(result);
-            resultScreenShot.setScreenshot(screenshot);
-            return ResponseEntity.ok().body(resultScreenShotRepo.save(resultScreenShot));
+            resultScreenShot.setScreenshot(file.getBytes());
+            return ResponseEntity.ok().build();
         } else {
             return ResponseEntity.badRequest().body("Результат не найден в БД");
         }
@@ -101,8 +105,8 @@ public class ManualArrangementController {
         }
     }
 
-    @GetMapping(path = "/screenshot")
-    public ResponseEntity finishArrangement(@RequestParam("resultId") Result result) {
+    @GetMapping(path = "/screenshot",produces = MediaType.IMAGE_PNG_VALUE)
+    public @ResponseBody ResponseEntity finishArrangement(@RequestParam("resultId") Result result) {
         if (result != null) {
             ResultScreenShot resultScreenshot = resultScreenShotRepo.findByResultId(result.getId());
             return ResponseEntity.ok().body(resultScreenshot.getScreenshot());
