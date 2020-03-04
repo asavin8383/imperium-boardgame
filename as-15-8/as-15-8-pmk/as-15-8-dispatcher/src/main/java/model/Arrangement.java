@@ -37,5 +37,6 @@ public class Arrangement {
     private Boolean isManual = false;
 
     @Column (nullable = false)
+    @Enumerated(EnumType.STRING)
     private Reason reason = Reason.MANUAL;
 }
