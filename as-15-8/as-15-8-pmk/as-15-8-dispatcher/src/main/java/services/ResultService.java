@@ -246,7 +246,7 @@ public class ResultService {
         NativeQuery nativeQuery = entityManager.createNativeQuery(sql).unwrap(NativeQuery.class);
         nativeQuery.setParameter("id", resultScreenShot.getId());
         nativeQuery.setParameter("screenshot", resultScreenShot.getScreenshot());
-        nativeQuery.setParameter("etalon_screenshot", resultScreenShot.getEtalonScreenshot());
+        nativeQuery.setParameter("etalonScreenshot", resultScreenShot.getEtalonScreenshot());
         nativeQuery.executeUpdate();
     }
 
