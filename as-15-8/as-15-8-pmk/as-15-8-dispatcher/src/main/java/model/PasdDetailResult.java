@@ -2,10 +2,8 @@ package model;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.apache.commons.beanutils.converters.IntegerConverter;
 
 import javax.persistence.Column;
-import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 

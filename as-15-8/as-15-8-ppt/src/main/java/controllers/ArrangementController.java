@@ -248,12 +248,4 @@ public class ArrangementController {
         return arrangement.getAccessTool();
     }
 
-    /*@PreAuthorize("hasRole('ROLE_MANAGE_ARRANGEMENT')" )
-    @GetMapping(path = "/manual")
-    public void createManualArrangement(@RequestParam("id") Long arrangementId){
-        Arrangement arrangement = new Arrangement();
-        arrangement.setId(arrangementId);
-        arrangementUploader.sendManualArrangementToDispatcher(arrangement);
-    }*/
-
 }
