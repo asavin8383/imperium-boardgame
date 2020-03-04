@@ -8,7 +8,6 @@ import model.Arrangement;
 import model.Result;
 import model.ResultScreenShot;
 import model.enums.ArrangementStatus;
-import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
