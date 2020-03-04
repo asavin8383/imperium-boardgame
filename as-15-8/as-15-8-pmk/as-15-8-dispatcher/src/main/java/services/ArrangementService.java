@@ -224,7 +224,7 @@ public class ArrangementService {
                     result.getErdiId(),
                     CheckUnitJobResult.RUNNING.toString(),
                     result.getStartDate(),
-                    result.getStartDate(),
+                    null,
                     result.getCheckType().name(),
                     result.getCheckUnitType().name(),
                     result.getCheckUnitValue()
