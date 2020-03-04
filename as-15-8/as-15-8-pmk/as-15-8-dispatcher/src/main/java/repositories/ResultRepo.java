@@ -30,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 public interface ResultRepo extends JpaRepository<Result, Long>, ResultRepoAdvanced {
 
-	@Transactional
+	/*@Transactional
 	@Modifying
 	@Query(
 		value = "insert into results.results " +
@@ -60,7 +60,7 @@ public interface ResultRepo extends JpaRepository<Result, Long>, ResultRepoAdvan
 			@Param("checkType") String checkType,
 			@Param("checkUnitType") String checkUnitType,
 			@Param("checkUnitValue") String checkUnitValue
-	);
+	);*/
 
 	@Query("select r from Result r " +
 			"join r.arrangement a " +

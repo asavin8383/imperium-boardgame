@@ -36,6 +36,8 @@ import repositories.ResultRepo;
 import restapi.ArrangementRestApi;
 
 import javax.annotation.PostConstruct;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -59,7 +61,8 @@ public class ArrangementService {
     private final ResultsKafkaService resultsKafkaService;
     private final ActService actService;
     private final ArrangementRestApi arrangementRestApi;
-    private final ResultRepo resultRepo;
+    private final ResultService resultService;
+    private final EntityManagerFactory emf;
 
     private final String GET_CHECK_UNITS_FROM_PPT = "/ppt/arrangements/checkUnits";
 
@@ -217,21 +220,12 @@ public class ArrangementService {
     }
 
     private void saveResults(List<Result> manualArrResults) {
+        EntityManager entityManager = emf.createEntityManager();
         manualArrResults.forEach(result -> {
-            resultRepo.upsert(
-                    result.getId(),
-                    result.getArrangement().getId(),
-                    result.getErdiId(),
-                    CheckUnitJobResult.RUNNING.toString(),
-                    result.getStartDate(),
-                    null,
-                    result.getCheckType().name(),
-                    result.getCheckUnitType().name(),
-                    result.getCheckUnitValue()
-            );
+            resultService.upsertResult(entityManager,result);
         });
+        emf.close();
     }
-
 
     private Arrangement createNewManualArrangement(Long arrangementId, int checkUnitsCount) {
         Arrangement arrangement = new Arrangement();

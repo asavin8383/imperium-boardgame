@@ -203,7 +203,7 @@ public class ResultService {
         service.save(entityManager, detailResult);
     }
 
-    private void upsertResult(EntityManager entityManager, Result result){
+    public void upsertResult(EntityManager entityManager, Result result){
         String sql = "insert into results.results " +
             "(id, arrangement_id, content_id, result, start_date, end_date, check_type, check_unit_type, check_unit_value) " +
             "values " +
