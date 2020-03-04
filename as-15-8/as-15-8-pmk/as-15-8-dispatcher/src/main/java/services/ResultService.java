@@ -15,16 +15,17 @@ import lombok.extern.slf4j.Slf4j;
 import model.*;
 import model.enums.ArrangementStatus;
 import model.enums.CheckType;
-import model.enums.Reason;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.logging.log4j.util.Strings;
+import org.hibernate.query.NativeQuery;
+import org.hibernate.type.LocalDateTimeType;
+import org.hibernate.type.LongType;
+import org.hibernate.type.StringType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import repositories.ArrangementRepo;
-import repositories.ResultRepo;
-import repositories.ResultScreenShotRepo;
 import restapi.ArrangementRestApi;
 import restapi.ConfigClient;
 import restapi.PptClient;
@@ -47,8 +48,6 @@ public class ResultService {
     private final ResultsKafkaService resultsKafkaService;
 
     private final ArrangementRepo arrangementRepo;
-    private final ResultRepo resultRepo;
-    private final ResultScreenShotRepo resultScreenShotRepo;
     private final ArrangementRestApi arrangementRestApi;
     private final ArrangementService arrangementService;
     //Объекты для создания штампа на скриншоте
@@ -106,7 +105,6 @@ public class ResultService {
                 .ifPresent(resultsIterator -> {
                     boolean isSaved = true;
                     transaction.begin();
-                    int resultCount = 0;
                     while (resultsIterator.hasNext()) {
                         KeyValue<CheckUnitKey, CheckUnitResult> result = resultsIterator.next();
                         //Если штамп ставим, нужно попросить инфо об AccessTool
@@ -198,27 +196,58 @@ public class ResultService {
                 }
             }
         }
-        //resultRepo.save(result);
-        //entityManager.merge(result);
-        resultRepo.upsert(
-                result.getId(),
-                result.getArrangement().getId(),
-                result.getErdiId(),
-                result.getResult().name(),
-                result.getStartDate(),
-                result.getEndDate(),
-                result.getCheckType().name(),
-                result.getCheckUnitType().name(),
-                result.getCheckUnitValue()
-        );
+        upsertResult(entityManager, result);
         if(resultScreenShot != null) {
-            resultScreenShotRepo.upsert(
-                    resultScreenShot.getId(),
-                    resultScreenShot.getScreenshot(),
-                    resultScreenShot.getEtalonScreenshot()
-            );
+            upsertResultScreenShot(entityManager, resultScreenShot);
         }
         service.save(entityManager, detailResult);
+    }
+
+    private void upsertResult(EntityManager entityManager, Result result){
+        String sql = "insert into results.results " +
+            "(id, arrangement_id, content_id, result, start_date, end_date, check_type, check_unit_type, check_unit_value) " +
+            "values " +
+            "(:id, :arrangementId, :contentId, :result, :startDate, :endDate, :checkType, :checkUnitType, :checkUnitValue) " +
+            "on conflict(id) do update " +
+            "set " +
+            "id = :id, " +
+            "arrangement_id = :arrangementId, " +
+            "content_id = :contentId, " +
+            "result = :result, " +
+            "start_date = :startDate, " +
+            "end_date = :endDate, " +
+            "check_type = :checkType, " +
+            "check_unit_type = :checkUnitType, " +
+            "check_unit_value = :checkUnitValue";
+        NativeQuery nativeQuery = entityManager.createNativeQuery(sql).unwrap(NativeQuery.class);
+        nativeQuery.setParameter("id", result.getId());
+        nativeQuery.setParameter("arrangementId", result.getArrangement().getId(), LongType.INSTANCE);
+        nativeQuery.setParameter("contentId", result.getErdiId(), LongType.INSTANCE);
+        nativeQuery.setParameter("result", result.getResult().name(), StringType.INSTANCE);
+        nativeQuery.setParameter("startDate", result.getStartDate(), LocalDateTimeType.INSTANCE);
+        nativeQuery.setParameter("endDate", result.getEndDate(), LocalDateTimeType.INSTANCE);
+        nativeQuery.setParameter("checkType", result.getCheckType().name(), StringType.INSTANCE);
+        nativeQuery.setParameter("checkUnitType", result.getCheckUnitType().name(), StringType.INSTANCE);
+        nativeQuery.setParameter("checkUnitType", result.getCheckUnitValue(), StringType.INSTANCE);
+
+        nativeQuery.executeUpdate();
+    }
+
+    private void upsertResultScreenShot(EntityManager entityManager, ResultScreenShot resultScreenShot){
+        String sql = "insert into results.result_screenshots " +
+            "(result_id, screenshot, etalon_screenshot) " +
+            "values " +
+            "(:id, :screenshot, :etalonScreenshot) " +
+            "on conflict(result_id) do update " +
+            "set " +
+            "result_id = :id, " +
+            "screenshot = :screenshot, " +
+            "etalon_screenshot = :etalonScreenshot";
+        NativeQuery nativeQuery = entityManager.createNativeQuery(sql).unwrap(NativeQuery.class);
+        nativeQuery.setParameter("id", resultScreenShot.getId());
+        nativeQuery.setParameter("screenshot", resultScreenShot.getScreenshot());
+        nativeQuery.setParameter("etalon_screenshot", resultScreenShot.getEtalonScreenshot());
+        nativeQuery.executeUpdate();
     }
 
     private byte[] imprintScreenshot(AccessToolDTO accessToolDTO, CheckUnitResult checkUnitResult, byte[] screenShot, CheckType checkType){

@@ -7,9 +7,12 @@ import model.DetailResult;
 import model.PasdDetailResult;
 import model.Result;
 import model.enums.CheckType;
+import org.hibernate.query.NativeQuery;
+import org.hibernate.type.BooleanType;
+import org.hibernate.type.IntegerType;
+import org.hibernate.type.StringType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import repositories.PasdDetailResultRepo;
 import services.DetailResultService;
 
@@ -69,30 +72,66 @@ public class AnonimyzerDetailResultService implements DetailResultService<Anonym
 	@Override
 	public void save(EntityManager entityManager, DetailResult pasdDetailResult) {
 		PasdDetailResult detailResult = (PasdDetailResult) pasdDetailResult;
-		pasdDetailResultRepo.upsert(
-			detailResult.getId(),
-			detailResult.getDomainNameCount(),
-			detailResult.getForbiddenFinalUrl(),
-			detailResult.getHttpHeaders(),
-			detailResult.getHttpHeadersEtalon(),
-			detailResult.getHttpStatus(),
-			detailResult.getHttpStatusEtalon(),
-			detailResult.getKeyWordsCount(),
-			detailResult.getLinkCount(),
-			detailResult.getPageSize(),
-			detailResult.getPageSizeEtalon(),
-			detailResult.getPageUrlFinal(),
-			detailResult.getPageUrlFinalEtalon(),
-			detailResult.getRedirectionDetected(),
-			detailResult.getResponseError(),
-			detailResult.getResponseErrorCode(),
-			detailResult.getResponseErrorCodeEtalon(),
-			detailResult.getResultNLP(),
-			detailResult.getSimilarityOriginPercent(),
-			detailResult.getStubScoreInfo(),
-			detailResult.getStubUrl(),
-			detailResult.getUseEtalon()
-		);
+		String sql = "insert into results.pasd_detail_results " +
+			"(result_id, domain_name_count, forbidden_final_url, " +
+			"http_headers, http_headers_etalon, http_status, http_status_etalon, " +
+			"key_words_count, link_count, page_size, page_size_etalon, page_url_final, page_url_final_etalon, " +
+			"redirection_detected, response_error, response_error_code, response_error_code_etalon, " +
+			"result_nlp, similarity_origin_percent, stub_score_info, stub_url, use_etalon) " +
+			"values " +
+			"(:id, :domainNameCount, :forbiddenFinalUrl, " +
+			":httpHeaders, :httpHeadersEtalon, :httpStatus, :httpStatusEtalon, " +
+			":keyWordsCount, :linkCount, :pageSize, :pageSizeEtalon, :pageUrlFinal, :pageUrlFinalEtalon, " +
+			":redirectionDetected, :responseError, :responseErrorCode, :responseErrorCodeEtalon, " +
+			":resultNlp, :similarityOriginPercent, :stubScoreInfo, :stubUrl, :useEtalon) " +
+			"on conflict(result_id) do update " +
+			"set " +
+			"result_id = :id, " +
+			"domain_name_count = :domainNameCount, " +
+			"forbidden_final_url = :forbiddenFinalUrl, " +
+			"http_headers = :httpHeaders, " +
+			"http_headers_etalon = :httpHeadersEtalon, " +
+			"http_status = :httpStatus, " +
+			"http_status_etalon = :httpStatusEtalon, " +
+			"key_words_count = :keyWordsCount, " +
+			"link_count = :linkCount, " +
+			"page_size = :pageSize, " +
+			"page_size_etalon = :pageSizeEtalon, " +
+			"page_url_final = :pageUrlFinal, " +
+			"page_url_final_etalon = :pageUrlFinalEtalon, " +
+			"redirection_detected = :redirectionDetected, " +
+			"response_error = :responseError, " +
+			"response_error_code = :responseErrorCode, " +
+			"response_error_code_etalon = :responseErrorCodeEtalon, " +
+			"result_nlp = :resultNlp, " +
+			"similarity_origin_percent = :similarityOriginPercent, " +
+			"stub_score_info = :stubScoreInfo, " +
+			"stub_url = :stubUrl, " +
+			"use_etalon = :useEtalon";
+		NativeQuery nativeQuery = entityManager.createNativeQuery(sql).unwrap(NativeQuery.class);
+		nativeQuery.setParameter("id", detailResult.getId());
+		nativeQuery.setParameter("domainNameCount", detailResult.getDomainNameCount(), IntegerType.INSTANCE);
+		nativeQuery.setParameter("forbiddenFinalUrl", detailResult.getForbiddenFinalUrl(), BooleanType.INSTANCE);
+		nativeQuery.setParameter("httpHeaders", detailResult.getHttpHeaders(), StringType.INSTANCE);
+		nativeQuery.setParameter("httpHeadersEtalon", detailResult.getHttpHeadersEtalon(), StringType.INSTANCE);
+		nativeQuery.setParameter("httpStatus", detailResult.getHttpStatus(), IntegerType.INSTANCE);
+		nativeQuery.setParameter("httpStatusEtalon", detailResult.getHttpStatusEtalon(), IntegerType.INSTANCE);
+		nativeQuery.setParameter("keyWordsCount", detailResult.getKeyWordsCount(), IntegerType.INSTANCE);
+		nativeQuery.setParameter("linkCount", detailResult.getLinkCount(), IntegerType.INSTANCE);
+		nativeQuery.setParameter("pageSize", detailResult.getPageSize(), IntegerType.INSTANCE);
+		nativeQuery.setParameter("pageSizeEtalon", detailResult.getPageSizeEtalon(), IntegerType.INSTANCE);
+		nativeQuery.setParameter("pageUrlFinal", detailResult.getPageUrlFinal(), StringType.INSTANCE);
+		nativeQuery.setParameter("pageUrlFinalEtalon", detailResult.getPageUrlFinalEtalon(), StringType.INSTANCE);
+		nativeQuery.setParameter("redirectionDetected", detailResult.getRedirectionDetected(), BooleanType.INSTANCE);
+		nativeQuery.setParameter("responseError", detailResult.getResponseError(), BooleanType.INSTANCE);
+		nativeQuery.setParameter("responseErrorCode", detailResult.getResponseErrorCode(), StringType.INSTANCE);
+		nativeQuery.setParameter("responseErrorCodeEtalon", detailResult.getResponseErrorCodeEtalon(), StringType.INSTANCE);
+		nativeQuery.setParameter("resultNlp", detailResult.getResultNLP(), StringType.INSTANCE);
+		nativeQuery.setParameter("similarityOriginPercent", detailResult.getSimilarityOriginPercent(), IntegerType.INSTANCE);
+		nativeQuery.setParameter("stubScoreInfo", detailResult.getStubScoreInfo(), StringType.INSTANCE);
+		nativeQuery.setParameter("stubUrl", detailResult.getStubUrl(), StringType.INSTANCE);
+		nativeQuery.setParameter("useEtalon", detailResult.getUseEtalon(), BooleanType.INSTANCE);
+		nativeQuery.executeUpdate();
 	}
 
 	@Override
