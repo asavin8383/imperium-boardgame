@@ -83,8 +83,11 @@ public class ManualArrangementController {
             ResultScreenShot resultScreenShot = new ResultScreenShot();
             resultScreenShot.setId(result.getId());
             resultScreenShot.setResult(result);
-            resultScreenShot.setScreenshot(file.getBytes());
-            return ResponseEntity.ok().build();
+            byte[] screenshot = file.getBytes();
+            if (screenshot != null && screenshot.length > 0 ) {
+                resultScreenShot.setScreenshot(file.getBytes());
+                return ResponseEntity.ok().build();
+            } else return ResponseEntity.badRequest().body("Файл со скриншотом пустой или имеет нулевой размер");
         } else {
             return ResponseEntity.badRequest().body("Результат не найден в БД");
         }
@@ -108,7 +111,10 @@ public class ManualArrangementController {
     public @ResponseBody ResponseEntity finishArrangement(@RequestParam("resultId") Result result) {
         if (result != null) {
             ResultScreenShot resultScreenshot = resultScreenShotRepo.findByResultId(result.getId());
-            return ResponseEntity.ok().body(resultScreenshot.getScreenshot());
+            byte[] screenshot = resultScreenshot.getScreenshot();
+            if (screenshot != null && screenshot.length > 0)
+                return ResponseEntity.ok().body(screenshot);
+            else return ResponseEntity.badRequest().body("У результата нет скриншота");
         } else {
             return ResponseEntity.badRequest().body("Результат не найден в БД");
         }
