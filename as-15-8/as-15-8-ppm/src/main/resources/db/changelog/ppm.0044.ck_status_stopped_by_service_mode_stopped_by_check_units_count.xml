@@ -11,7 +11,7 @@
             'STOPPED',
             'FINISHED',
             'STOPPED_BY_SERVICE_MODE',
-            'STOPPED_MAX_CHECK_UNITS_COUNT'));
+            'STOPPED_BY_MAX_CHECK_UNITS_COUNT'));
         </sql>
         <rollback>
             <sql>

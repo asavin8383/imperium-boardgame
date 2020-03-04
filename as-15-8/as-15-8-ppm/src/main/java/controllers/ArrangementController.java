@@ -132,21 +132,23 @@ public class ArrangementController {
         }
 
         if (sendToPPT(notification)) {
-            if(notification.getEvent().equals(ArrangementEvents.STOP)
-                    || notification.getEvent().equals(ArrangementEvents.STOP_BY_MAX_CHECK_UNITS_COUNT)
-                    || notification.getEvent().equals(ArrangementEvents.STOP_BY_SERVICE_MODE)){
-                arrangementService.refreshStoppedArrangement(arrangement);
+            if (notification.getEvent().equals(ArrangementEvents.STOP)) {
                 arrangement.setStatus(ArrangementStatus.STOPPED);
+            } else if (notification.getEvent().equals(ArrangementEvents.STOP_BY_MAX_CHECK_UNITS_COUNT)) {
+                arrangement.setStatus(ArrangementStatus.STOPPED_BY_MAX_CHECK_UNITS_COUNT);
+            } else if (notification.getEvent().equals(ArrangementEvents.STOP_BY_SERVICE_MODE)) {
+                arrangement.setStatus(ArrangementStatus.STOPPED_BY_SERVICE_MODE);
             }
-            else
-                arrangement.setStatus(ArrangementStatus.FINISHED);
-            arrangementRepo.save(arrangement);
+                arrangementService.refreshStoppedArrangement(arrangement);
+            } else arrangement.setStatus(ArrangementStatus.FINISHED);
+
+        arrangementRepo.save(arrangement);
             //Проверка, не нужно ли закрыть расписание
             scheduleRepo
                 .findByArrangement(arrangement.getId())
                 .forEach(scheduleService::checkAndCloseSchedule);
-        }
     }
+
 
     @PutMapping(value = "/stop")
     @PreAuthorize("hasRole('ROLE_MANAGE_ARRANGEMENT')")
