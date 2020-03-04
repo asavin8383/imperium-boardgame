@@ -228,7 +228,7 @@ public class ResultService {
         nativeQuery.setParameter("endDate", result.getEndDate(), LocalDateTimeType.INSTANCE);
         nativeQuery.setParameter("checkType", result.getCheckType().name(), StringType.INSTANCE);
         nativeQuery.setParameter("checkUnitType", result.getCheckUnitType().name(), StringType.INSTANCE);
-        nativeQuery.setParameter("checkUnitType", result.getCheckUnitValue(), StringType.INSTANCE);
+        nativeQuery.setParameter("checkUnitValue", result.getCheckUnitValue(), StringType.INSTANCE);
 
         nativeQuery.executeUpdate();
     }
@@ -246,7 +246,7 @@ public class ResultService {
         NativeQuery nativeQuery = entityManager.createNativeQuery(sql).unwrap(NativeQuery.class);
         nativeQuery.setParameter("id", resultScreenShot.getId());
         nativeQuery.setParameter("screenshot", resultScreenShot.getScreenshot());
-        nativeQuery.setParameter("etalon_screenshot", resultScreenShot.getEtalonScreenshot());
+        nativeQuery.setParameter("etalonScreenshot", resultScreenShot.getEtalonScreenshot());
         nativeQuery.executeUpdate();
     }
 
