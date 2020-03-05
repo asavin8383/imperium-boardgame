@@ -64,6 +64,7 @@ public class ManualArrangementController {
     public ResponseEntity editResult(@RequestBody Result newResult,
                                      @RequestParam("resultId") Result result) {
         if (result != null) {
+            checkArrangementStatus(result);
             result.setEndDate(LocalDateTime.now());
             result.setUserDescription(newResult.getUserDescription());
             result.setUserResult(newResult.getUserResult());
@@ -79,7 +80,7 @@ public class ManualArrangementController {
     public ResponseEntity saveScreenshot(@RequestParam("file") MultipartFile file,
                                          @RequestParam("resultId") Result result) throws IOException {
         if (result != null) {
-
+            checkArrangementStatus(result);
             ResultScreenShot resultScreenShot = new ResultScreenShot();
             resultScreenShot.setId(result.getId());
             resultScreenShot.setResult(result);
@@ -125,4 +126,9 @@ public class ManualArrangementController {
         }
     }
 
+    private ResponseEntity checkArrangementStatus(Result result) {
+        if (result.getArrangement().getStatus().equals(ArrangementStatus.FINISHED))
+            return ResponseEntity.badRequest().body("Мероприятие уже завершено");
+        return null;
+    }
 }
