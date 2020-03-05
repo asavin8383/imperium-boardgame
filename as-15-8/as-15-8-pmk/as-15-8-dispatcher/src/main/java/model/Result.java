@@ -4,6 +4,7 @@ import checkUnits.CheckUnitType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import enums.CheckUnitJobResult;
+import jdk.nashorn.internal.objects.annotations.Getter;
 import lombok.Data;
 import model.enums.CheckType;
 import model.enums.UserResult;
@@ -131,5 +132,17 @@ public class Result implements Serializable {
             this.nmapDetailResult = (NmapDetailResult) detailResult;
         else if(detailResult instanceof ErrorDetailResult)
             this.errorDetailResult = (ErrorDetailResult) detailResult;
+    }
+
+    @Transient
+    private boolean isScreenshotAvailable;
+
+    @Getter
+    public boolean isScreenshotAvailable() {
+         if (this.getResultScreenShot() != null) {
+             if (this.getResultScreenShot().getScreenshot() != null && this.getResultScreenShot().getScreenshot().length > 0)
+                 isScreenshotAvailable = true;
+         } else isScreenshotAvailable = false;
+         return isScreenshotAvailable;
     }
 }

@@ -17,10 +17,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import repositories.ArrangementRepo;
 import repositories.ResultRepo;
 import repositories.ResultScreenShotRepo;
-import restapi.ArrangementRestApi;
 import services.ArrangementService;
 
 import java.io.IOException;
@@ -36,8 +34,6 @@ public class ManualArrangementController {
     private final ArrangementService arrangementService;
     private final ResultRepo resultRepo;
     private final ResultScreenShotRepo resultScreenShotRepo;
-    private final ArrangementRepo arrangementRepo;
-    private final ArrangementRestApi arrangementRestApi;
 
     @PostMapping
     @PreAuthorize("hasRole('ROLE_SYSTEM')")
@@ -95,35 +91,16 @@ public class ManualArrangementController {
         }
     }
 
-    @PutMapping(path = "/finish_arrangement")
-    public ResponseEntity finishArrangement(@RequestParam("id") Arrangement arrangement) {
-        if (arrangement != null) {
-            if (arrangement.getStatus().equals(ArrangementStatus.RUNNING)) {
-                arrangement.setStatus(ArrangementStatus.FINISHED);
-                if (arrangementRestApi.sendStatusNotificationToPPT(arrangement.getId(), true)) {
-                    arrangementRepo.save(arrangement);
-                    return ResponseEntity.ok().body(arrangement);
-                } else return ResponseEntity.badRequest().body("Ошибка отправки статуса меропрития в ППТ");
-            } else return ResponseEntity.badRequest().body("Невозможно остановить мероприятие со статусом : " + arrangement.getStatus());
-        } else {
-            return ResponseEntity.badRequest().body("Мероприятие не найдено в БД");
-        }
-    }
-
     @GetMapping(path = "/screenshot", produces = MediaType.IMAGE_PNG_VALUE)
     public @ResponseBody ResponseEntity finishArrangement(@RequestParam("resultId") Result result) {
         if (result != null) {
-            ResultScreenShot resultScreenshot = resultScreenShotRepo.findByResultId(result.getId());
-            if (resultScreenshot != null) {
+            if (result.isScreenshotAvailable()) {
+                ResultScreenShot resultScreenshot = resultScreenShotRepo.findByResultId(result.getId());
                 byte[] screenshot = resultScreenshot.getScreenshot();
-                if (screenshot != null && screenshot.length > 0) {
-                    return ResponseEntity.ok().body(screenshot);
-                } else  ResponseEntity.badRequest().body("У результата нет сохранённого скриншота");
-            }
-            return ResponseEntity.badRequest().body("У результата нет скриншота");
-        } else {
+                return ResponseEntity.ok().body(screenshot);
+            } else return ResponseEntity.badRequest().body("У результата нет скриншота");
+        } else
             return ResponseEntity.badRequest().body("Результат не найден в БД");
-        }
     }
 
     private ResponseEntity checkArrangementStatus(Result result) {
@@ -131,4 +108,5 @@ public class ManualArrangementController {
             return ResponseEntity.badRequest().body("Мероприятие уже завершено");
         return null;
     }
+
 }
