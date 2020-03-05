@@ -206,7 +206,8 @@ public class ArrangementController {
         arrangement.setTrafficId(newArrangement.getTrafficId());
         arrangement.setIsActAvailable(newArrangement.getIsActAvailable());
         arrangement.setInterruptViolationNumber(newArrangement.getInterruptViolationNumber());
-        arrangement.setIsManual(newArrangement.getIsManual());
+        if (arrangement.getStatus().equals(ExecutionStatus.NEW))
+            arrangement.setIsManual(newArrangement.getIsManual());
         Traffic traffic = trafficRepository.findById(newArrangement.getTrafficId())
                 .orElseThrow(() -> new AS_15_8_PPT_Exception("Ошибка при добавлении трафика! Трафик не найден по id: " + newArrangement.getTrafficId()));
         arrangement.setTrafficName(traffic.getName());
