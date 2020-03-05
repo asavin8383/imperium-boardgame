@@ -1,6 +1,7 @@
 package restapi.ppm;
 
 import arrangement.ArrangementToPPM;
+import enums.ArrangementEvents;
 import exceptions.AS_15_8_PPT_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.time.LocalDateTime;
 
 /**
  * Created by san
@@ -80,8 +83,8 @@ public class ArrangementUploader {
         log.info("Отправка ручного мероприятия в Dispatcher: {}", arrangement.getId());
         try {
             String url = UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(MANUAL_ARRANGEMENT_TO_DISPATCHER).build().toString();
-            ResponseEntity<String> response = oAuth2RestTemplate.postForEntity(url, arrangement.getId(), String.class);
-
+            oAuth2RestTemplate.postForEntity(url, arrangement.getId(), String.class);
+            arrangement.sendEvent(ArrangementEvents.MANUAL_SCHEDULE, LocalDateTime.now());
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
             throw AS_15_8_PPT_Exception.logAndGet(log, String.format("Ошибка отправки мероприятия %d в Dispatcher, код возврата %s", arrangement.getId(), ex.getStatusCode()), ex);
         }

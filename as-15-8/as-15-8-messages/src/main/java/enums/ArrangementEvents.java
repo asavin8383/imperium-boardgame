@@ -15,5 +15,6 @@ public enum ArrangementEvents {
     STOP,
     SEND_ACT,
     STOP_BY_SERVICE_MODE,
-    STOP_BY_MAX_CHECK_UNITS_COUNT
+    STOP_BY_MAX_CHECK_UNITS_COUNT,
+    MANUAL_SCHEDULE
 }
