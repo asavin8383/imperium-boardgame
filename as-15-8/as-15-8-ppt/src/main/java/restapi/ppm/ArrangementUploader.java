@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.util.UriComponentsBuilder;
+import repositories.ArrangementRepo;
 
 import java.time.LocalDateTime;
 
@@ -32,6 +33,7 @@ public class ArrangementUploader {
 
     private final String ARRANGEMENTS_URI = "/ppm/arrangements";
     private final String MANUAL_ARRANGEMENT_TO_DISPATCHER = "/dispatcher/manual_arrangement";
+    private final ArrangementRepo arrangementRepo;
 
     @Value("${gateway.url}")
     private String gatewayUrl;
@@ -85,6 +87,7 @@ public class ArrangementUploader {
             String url = UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(MANUAL_ARRANGEMENT_TO_DISPATCHER).build().toString();
             oAuth2RestTemplate.postForEntity(url, arrangement.getId(), String.class);
             arrangement.sendEvent(ArrangementEvents.MANUAL_SCHEDULE, LocalDateTime.now());
+            arrangementRepo.save(arrangement);
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
             throw AS_15_8_PPT_Exception.logAndGet(log, String.format("Ошибка отправки мероприятия %d в Dispatcher, код возврата %s", arrangement.getId(), ex.getStatusCode()), ex);
         }
