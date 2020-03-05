@@ -130,7 +130,6 @@ public class ArrangementController {
         if (notification == null){
             throw new AS_15_8_PPM_Exception("Ошибка закрытия мероприятия! ArrangementStatusNotification is null");
         }
-
         if (sendToPPT(notification)) {
             if (notification.getEvent().equals(ArrangementEvents.STOP)) {
                 arrangement.setStatus(ArrangementStatus.STOPPED);
@@ -138,10 +137,9 @@ public class ArrangementController {
                 arrangement.setStatus(ArrangementStatus.STOPPED_BY_MAX_CHECK_UNITS_COUNT);
             } else if (notification.getEvent().equals(ArrangementEvents.STOP_BY_SERVICE_MODE)) {
                 arrangement.setStatus(ArrangementStatus.STOPPED_BY_SERVICE_MODE);
-            }
-                arrangementService.refreshStoppedArrangement(arrangement);
             } else arrangement.setStatus(ArrangementStatus.FINISHED);
-
+        }
+        arrangementService.refreshStoppedArrangement(arrangement);
         arrangementRepo.save(arrangement);
             //Проверка, не нужно ли закрыть расписание
             scheduleRepo
@@ -157,7 +155,7 @@ public class ArrangementController {
         if (arrangement == null){
             return ResponseEntity.noContent().build();
         }
-        if(arrangement.getStatus()!=ArrangementStatus.RUNNING){
+        if(arrangement.getStatus()!= ArrangementStatus.RUNNING){
             return ResponseEntity.badRequest().body("Мероприятие с ID: " + arrangement.getId() + " имеет недопустимый статус для остановки: " + arrangement.getStatus());
         } else {
             List<Schedule> schedules = scheduleRepo.findByStatusAndArrangement(ScheduleStatus.RUNNING, arrangement.getId());
@@ -190,6 +188,20 @@ public class ArrangementController {
             return ResponseEntity.ok().build();
         }
     }
+
+    /*@PutMapping(value = "/finish")
+    @PreAuthorize("hasRole('ROLE_MANAGE_ARRANGEMENT')")
+    @Transactional
+    public ResponseEntity stopArrangement(@RequestParam("id") Arrangement arrangement){
+        if (arrangement == null){
+            return ResponseEntity.noContent().build();
+        }
+        if(arrangement.getStatus()!= ArrangementStatus.RUNNING){
+            return ResponseEntity.badRequest().body("Мероприятие с ID: " + arrangement.getId() + " имеет недопустимый статус для остановки: " + arrangement.getStatus());
+        } else {
+
+        }
+    }*/
 
     /**
      * Обновление статусов чек-юнитов для возможности повторного запуска мероприятия
