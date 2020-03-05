@@ -155,7 +155,11 @@ public class ScheduleService {
     public void checkAndCloseSchedule(Schedule schedule){
         boolean needToClose = arrangementRepo.findAllBySchedule(schedule.getId())
                 .stream()
-                .allMatch(arrangement -> arrangement.getStatus() == ArrangementStatus.FINISHED || arrangement.getStatus() == ArrangementStatus.STOPPED);
+                .allMatch(arrangement -> arrangement.getStatus() == ArrangementStatus.FINISHED
+                        || arrangement.getStatus() == ArrangementStatus.STOPPED
+                        || arrangement.getStatus() == ArrangementStatus.STOPPED_BY_SERVICE_MODE
+                        || arrangement.getStatus() == ArrangementStatus.STOPPED_BY_MAX_CHECK_UNITS_COUNT
+                );
         if(needToClose){
             schedule.setStatus(ScheduleStatus.FINISHED);
             scheduleRepo.save(schedule);
