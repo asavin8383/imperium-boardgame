@@ -99,9 +99,10 @@ public class ManualArrangementController {
         if (arrangement != null) {
             if (arrangement.getStatus().equals(ArrangementStatus.RUNNING)) {
                 arrangement.setStatus(ArrangementStatus.FINISHED);
-                if (arrangementRestApi.sendStatusNotificationToPPT(arrangement.getId(), true))
-                    return ResponseEntity.ok().body(arrangementRepo.save(arrangementRepo.save(arrangement)));
-                else return ResponseEntity.badRequest().body("Ошибка отправки статуса меропрития в ППТ");
+                if (arrangementRestApi.sendStatusNotificationToPPT(arrangement.getId(), true)) {
+                    arrangementRepo.save(arrangement);
+                    return ResponseEntity.ok().body(arrangement);
+                } else return ResponseEntity.badRequest().body("Ошибка отправки статуса меропрития в ППТ");
             } else return ResponseEntity.badRequest().body("Невозможно остановить мероприятие со статусом : " + arrangement.getStatus());
         } else {
             return ResponseEntity.badRequest().body("Мероприятие не найдено в БД");
