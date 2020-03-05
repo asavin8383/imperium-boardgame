@@ -206,6 +206,7 @@ public class ArrangementService {
         List<Result> results = new ArrayList<>();
         checkUnits.forEach(checkUnit -> {
             Result result = new Result();
+            result.setResult(CheckUnitJobResult.PLANNED);
             result.setId(checkUnit.getContentId());
             result.setArrangement(arrangement);
             result.setCheckType(CheckType.MANUAL);

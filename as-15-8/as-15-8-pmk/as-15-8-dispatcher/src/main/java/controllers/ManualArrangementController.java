@@ -109,7 +109,7 @@ public class ManualArrangementController {
         }
     }
 
-    @GetMapping(path = "/screenshot",produces = MediaType.IMAGE_PNG_VALUE)
+    @GetMapping(path = "/screenshot", produces = MediaType.IMAGE_PNG_VALUE)
     public @ResponseBody ResponseEntity finishArrangement(@RequestParam("resultId") Result result) {
         if (result != null) {
             ResultScreenShot resultScreenshot = resultScreenShotRepo.findByResultId(result.getId());
