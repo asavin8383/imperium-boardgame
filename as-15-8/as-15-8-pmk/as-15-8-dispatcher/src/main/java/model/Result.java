@@ -137,7 +137,6 @@ public class Result implements Serializable {
     @Transient
     private boolean isScreenshotAvailable;
 
-    @Getter
     public boolean isScreenshotAvailable() {
          if (this.getResultScreenShot() != null) {
              if (this.getResultScreenShot().getScreenshot() != null && this.getResultScreenShot().getScreenshot().length > 0)

@@ -17,8 +17,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import repositories.ArrangementRepo;
 import repositories.ResultRepo;
 import repositories.ResultScreenShotRepo;
+import restapi.ArrangementRestApi;
 import services.ArrangementService;
 
 import java.io.IOException;
@@ -34,6 +36,8 @@ public class ManualArrangementController {
     private final ArrangementService arrangementService;
     private final ResultRepo resultRepo;
     private final ResultScreenShotRepo resultScreenShotRepo;
+    private final ArrangementRestApi arrangementRestApi;
+    private final ArrangementRepo arrangementRepo;
 
     @PostMapping
     @PreAuthorize("hasRole('ROLE_SYSTEM')")
@@ -101,6 +105,21 @@ public class ManualArrangementController {
             } else return ResponseEntity.badRequest().body("У результата нет скриншота");
         } else
             return ResponseEntity.badRequest().body("Результат не найден в БД");
+    }
+
+    @PutMapping(path = "/finish_arrangement")
+    public ResponseEntity finishArrangement(@RequestParam("id") Arrangement arrangement) {
+        if (arrangement != null) {
+            if (arrangement.getStatus().equals(ArrangementStatus.RUNNING)) {
+                arrangement.setStatus(ArrangementStatus.FINISHED);
+                if (arrangementRestApi.sendStatusNotificationToPPT(arrangement.getId(), false)) {
+                    arrangementRepo.save(arrangement);
+                    return ResponseEntity.ok().body(arrangement);
+                } else return ResponseEntity.badRequest().body("Ошибка отправки статуса меропрития в ППТ");
+            } else return ResponseEntity.badRequest().body("Невозможно остановить мероприятие со статусом : " + arrangement.getStatus());
+        } else {
+            return ResponseEntity.badRequest().body("Мероприятие не найдено в БД");
+        }
     }
 
     private ResponseEntity checkArrangementStatus(Result result) {

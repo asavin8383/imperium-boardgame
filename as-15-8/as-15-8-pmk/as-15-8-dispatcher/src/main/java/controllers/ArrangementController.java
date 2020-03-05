@@ -1,7 +1,6 @@
 package controllers;
 
 import arrangement.ArrangementToExecution;
-import exceptions.AS_15_8_DispatcherException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Arrangement;
@@ -12,7 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import repositories.ArrangementRepo;
+import restapi.ArrangementRestApi;
 import services.ArrangementService;
 import services.ResultService;
 import services.ResultsKafkaService;
@@ -28,10 +27,11 @@ import java.util.concurrent.CompletableFuture;
 @Slf4j
 public class ArrangementController {
 
-    private final ArrangementRepo arrangementRepo;
     private final ResultService resultService;
     private final ResultsKafkaService resultsKafkaService;
     private final ArrangementService arrangementService;
+    private final ArrangementRestApi arrangementRestApi;
+
 
     @PostMapping("/save")
     @PreAuthorize("hasAnyRole('ROLE_VIEW_RESULT')")
@@ -70,6 +70,12 @@ public class ArrangementController {
     public void stopArrangement(@RequestParam Long arrangementId, @RequestParam Long version) {
         arrangementService.stopExecution(arrangementId, version, Reason.MANUAL);
     }
+
+    /*@PostMapping("/finish")
+    @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
+    public void finishArrangement(@RequestParam Long arrangementId) {
+        arrangementRestApi.sendStatusNotificationToPPM(arrangementId, false);
+    }*/
 
     @GetMapping("/stopped")
     @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
