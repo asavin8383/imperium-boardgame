@@ -1,6 +1,8 @@
 package controllers;
 
 import arrangement.ArrangementToExecution;
+import enums.ExecutionStatus;
+import exceptions.AS_15_8_DispatcherException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Arrangement;
@@ -11,7 +13,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import restapi.ArrangementRestApi;
 import services.ArrangementService;
 import services.ResultService;
 import services.ResultsKafkaService;
@@ -30,8 +31,6 @@ public class ArrangementController {
     private final ResultService resultService;
     private final ResultsKafkaService resultsKafkaService;
     private final ArrangementService arrangementService;
-    private final ArrangementRestApi arrangementRestApi;
-
 
     @PostMapping("/save")
     @PreAuthorize("hasAnyRole('ROLE_VIEW_RESULT')")
@@ -65,17 +64,19 @@ public class ArrangementController {
         }).orElse(0L);
     }
 
-    @PostMapping("/stop")
+    /*@PostMapping("/stop")
     @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
     public void stopArrangement(@RequestParam Long arrangementId, @RequestParam Long version) {
         arrangementService.stopExecution(arrangementId, version, Reason.MANUAL);
-    }
-
-    /*@PostMapping("/finish")
-    @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
-    public void finishArrangement(@RequestParam Long arrangementId) {
-        arrangementRestApi.sendStatusNotificationToPPM(arrangementId, false);
     }*/
+
+    @PostMapping("/status")
+    @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
+    public void changeStatus(@RequestBody ExecutionStatus status, @RequestParam Long arrangementId, @RequestParam Long version) {
+        if (status == null)
+            throw new AS_15_8_DispatcherException("Невозможно изменить статус т.к он null" + status);
+        arrangementService.changeStatus(status, arrangementId, version, Reason.MANUAL);
+    }
 
     @GetMapping("/stopped")
     @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")

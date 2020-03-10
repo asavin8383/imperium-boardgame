@@ -22,10 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
-import repositories.AccessToolsCategoriesRepo;
-import repositories.DynamicTrafficUnitRepository;
-import repositories.ErdiContentJoinRepository;
-import repositories.TrafficRepository;
+import repositories.*;
 import utils.TrafficUnitUtils;
 import webClients.PodWebClient;
 
@@ -37,6 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -50,6 +48,7 @@ public class TrafficService {
     private final PodWebClient podWebClient;
     private final DynamicTrafficUnitRepository dynamicTrafficUnitRepository;
     private final ErdiContentJoinRepository erdiContentJoinRepository;
+    private final CustomErdiRepository customErdiRepository;
 
     public Page<TrafficBriefView> getBriefTrafficList(SortingDirection sortingDirection,
                                                       String sortingColumn,
@@ -107,9 +106,25 @@ public class TrafficService {
     }
 
     private Long actualizeTrafficCheckUnitsCount(Traffic traffic) {
-        Long actualCheckUnitsCount = getActualTrafficCheckUnitCount(traffic.getId());
-        traffic.setActualCheckUnitsCount(actualCheckUnitsCount);
+        Long actualCheckUnitsCount = getActualTrafficCheckUnitCountFromPod(traffic.getId());
+        Long customErdiCount = getActualCustomErdiCount(traffic);
+
+        traffic.setActualCheckUnitsCount(actualCheckUnitsCount + customErdiCount);
         return actualCheckUnitsCount;
+    }
+
+    private Long getActualCustomErdiCount(Traffic traffic) {
+        List<Long> customErdiIds = trafficRepository.getCustomErdiIdByTrafficId(traffic.getId());
+        AtomicReference<Long> customErdiCount = new AtomicReference<>(0L);
+
+        customErdiIds.forEach(customErdiId -> {
+            CustomErdi customErdi =  customErdiRepository.findById(customErdiId).orElseThrow(() ->
+                    new AS_15_8_PPT_Exception("Ошибка подсчёта актуального числа единичных проверок для custom ERDI c id:" + customErdiId));
+
+            Long customErdiCountSub = Long.valueOf(customErdi.getCustomErdiUnits().size());
+            customErdiCount.set(customErdiCount.get() + customErdiCountSub);
+        });
+        return customErdiCount.get();
     }
 
     private Long actualizeErdiCount(Traffic traffic) {
@@ -126,7 +141,7 @@ public class TrafficService {
                 actualizeTrafficCheckUnitsCount(erdiTrafficUnit.getTraffic()));
     }
 
-    private Long getActualTrafficCheckUnitCount(Long trafficId) {
+    private Long getActualTrafficCheckUnitCountFromPod(Long trafficId) {
         try {
             List<Long> erdiIds = trafficRepository.allContentErdiByTrafficId(trafficId);
             return podWebClient.calculateActualCheckUnitCount(erdiIds);

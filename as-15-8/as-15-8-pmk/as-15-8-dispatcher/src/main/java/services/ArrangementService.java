@@ -3,6 +3,7 @@ package services;
 import arrangement.ArrangementToExecution;
 import checkUnits.CheckUnit;
 import enums.CheckUnitJobResult;
+import enums.ExecutionStatus;
 import events.producers.ArrangementStopEventProducer;
 import exceptions.AS_15_8_DispatcherException;
 import lombok.Getter;
@@ -22,7 +23,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
@@ -36,8 +36,6 @@ import repositories.ResultRepo;
 import restapi.ArrangementRestApi;
 
 import javax.annotation.PostConstruct;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -135,6 +133,26 @@ public class ArrangementService {
 
         final ArrangementStopEvent event = new ArrangementStopEvent(arrangementId, version);
         arrangementStopEventProducer.send(event);
+    }
+
+    @Transactional
+    public void finishArrangement(Long arrangementId) {
+        Arrangement arrangement = arrangementRepo
+                .findById(arrangementId)
+                .orElseThrow(() -> new AS_15_8_DispatcherException("Ошибка остановки мероприятия. Мероприятие не найдено по ID: " + arrangementId));
+        arrangement.setStatus(ArrangementStatus.FINISHED);
+        arrangementRepo.save(arrangement);
+    }
+
+    public void changeStatus(ExecutionStatus status, Long arrangementId, Long version, Reason reason) {
+        switch (status) {
+            case STOPPED:
+                stopExecution(arrangementId, version, reason);
+                break;
+            case FINISHED:
+                finishArrangement(arrangementId);
+                break;
+        }
     }
 
     public synchronized boolean isArrangementRunning(Long arrangementId, Long version) {
@@ -269,4 +287,6 @@ public class ArrangementService {
             throw AS_15_8_DispatcherException.logAndGet(log, String.format("Ошибка получения чек-юнитов мероприятия %d в ППМ", arrangementId), ex);
         }
     }
+
+
 }

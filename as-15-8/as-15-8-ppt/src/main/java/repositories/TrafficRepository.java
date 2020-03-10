@@ -28,6 +28,13 @@ public interface TrafficRepository extends JpaRepository<Traffic, Long>, JpaSpec
             "where units.traffic_id = :trafficId", nativeQuery = true)
     List<Long> allContentErdiByTrafficId(@Param("trafficId") long trafficId);
 
+    @Query(value = "select jointable.custom_erdi_id " +
+            "from portal.erdi_traffic_units_custom_erdi jointable " +
+            "join portal.erdi_traffic_units units " +
+            "on jointable.traffic_unit_id = units.id " +
+            "where units.traffic_id = :trafficId", nativeQuery = true)
+    List<Long> getCustomErdiIdByTrafficId(@Param("trafficId") long trafficId);
+
     @Query(value = "select count(*) " +
             "from portal.erdi_traffic_units_custom_erdi jointable " +
             "join portal.erdi_traffic_units units " +

@@ -20,17 +20,12 @@ import model.enums.ScheduleStatus;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
-import org.springframework.http.converter.json.MappingJacksonValue;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
-import org.springframework.web.util.UriComponentsBuilder;
 import repositories.ArrangementRepo;
-import repositories.ScheduleCheckUnitRepo;
-import repositories.SchedulePeriodArrangementRepo;
 import repositories.ScheduleRepo;
 import restapi.ArrangementStatusUploader;
 import restapi.pod.DomainMaskUploader;
@@ -65,15 +60,10 @@ public class ArrangementController {
     private final DomainMaskUploader domainMaskUploader;
     private final ScheduleRepo scheduleRepo;
     private final ScheduleService scheduleService;
-    private final OAuth2RestTemplate restTemplate;
-    private final SchedulePeriodArrangementRepo schedulePeriodArrangementRepo;
     private final PptRestApi pptRestApi;
 
     @Value("${gateway.url}")
     private String gatewayUrl;
-    private final String PPT_STATUS_ENDPOINT = "/ppt/arrangements/status";
-    private final String DISPATCHER_STOP_ENDPOINT = "/dispatcher/arrangements/stop";
-    private final ScheduleCheckUnitRepo scheduleCheckUnitRepo;
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @Transactional
@@ -130,7 +120,7 @@ public class ArrangementController {
         if (notification == null){
             throw new AS_15_8_PPM_Exception("Ошибка закрытия мероприятия! ArrangementStatusNotification is null");
         }
-        if (sendToPPT(notification)) {
+        if (arrangementService.notifyPPT(notification)) {
             if (notification.getEvent().equals(ArrangementEvents.STOP)) {
                 arrangement.setStatus(ArrangementStatus.STOPPED);
             } else if (notification.getEvent().equals(ArrangementEvents.STOP_BY_MAX_CHECK_UNITS_COUNT)) {
@@ -159,49 +149,55 @@ public class ArrangementController {
             return ResponseEntity.badRequest().body("Мероприятие с ID: " + arrangement.getId() + " имеет недопустимый статус для остановки: " + arrangement.getStatus());
         } else {
             List<Schedule> schedules = scheduleRepo.findByStatusAndArrangement(ScheduleStatus.RUNNING, arrangement.getId());
-            if(schedules.size() != 1){
-                String errorDescription = String.format("Ошибка остановки мероприятия! Ошибка получения запущенного расписания с мероприятием %d, список расписаний либо пуст либо содержит более 1 элемента: %s", arrangement.getId(), schedules.toString());
+            if (arrangementService.isScheduleAvailable(arrangement, schedules)) {
+                Long scheduleId = arrangementService.getRunningScheduleId(arrangement.getId());
+                if (!arrangementService.sendStatusChangeToDispatcher(arrangement.getId(), scheduleId, ExecutionStatus.STOPPED))
+                    return ResponseEntity.badRequest().body(String.format("Ошибка остановки мероприятия %d из расписания %d", arrangement.getId(), scheduleId));
+
+                log.info("Мероприятие {} из расписания {} остановлено, закрываем schedulePeriodArrangements", arrangement.getId(), scheduleId);
+
+                arrangementService.closeSchedulePeriodArrangements(arrangement, scheduleId);
+                arrangementService.saveArrangementStatus(arrangement, scheduleId, ArrangementStatus.STOPPING);
+
+                log.info("Отправляем в ППТ запрос смены статуса мероприятию {} из расписания {} на STOPPING", arrangement.getId(), scheduleId);
+                arrangementService.notifyPPT(new ArrangementStatusNotification(
+                        arrangement.getId(),
+                        ArrangementEvents.PREPARE_TO_STOP
+                ));
+                return ResponseEntity.ok().build();
+            } else {
+                String errorDescription = String.format("Ошибка остановки мероприятия! Ошибка получения запущенного расписания" +
+                        " с мероприятием %d, список расписаний либо пуст либо содержит более 1 элемента: %s",
+                        arrangement.getId(),
+                        schedules.toString());
                 log.error(errorDescription);
                 return ResponseEntity.badRequest().body(errorDescription);
             }
-            log.info("Отправляем сигнал на закрытие мероприятия {} из расписания {} диспетчеру", arrangement.getId(), schedules.get(0).getId());
-            if (!sendStopSignalToDispatcher(arrangement.getId(), schedules.get(0).getId())){
-                log.error("Ошибка остановки мероприятия {} из расписания {}", arrangement.getId(), schedules.get(0).getId());
-                return ResponseEntity.badRequest().body(String.format("Ошибка остановки мероприятия %d из расписания %d", arrangement.getId(), schedules.get(0).getId()));
-            }
-            log.info("Мероприятие {} из расписания {} остановлено, закрываем schedulePeriodArrangements", arrangement.getId(), schedules.get(0).getId());
-            //Закрываем schedulePeriodArrangement у текущего расписания для данного мероприятия
-            schedulePeriodArrangementRepo.findAllByScheduleAndArrangement(schedules.get(0).getId(), arrangement.getId())
-                .forEach(schedulePeriodArrangement -> {
-                    schedulePeriodArrangement.setStopped(true);
-                    schedulePeriodArrangementRepo.save(schedulePeriodArrangement);
-                });
-            //Меняем статус мероприятию
-            log.info("Меняем статус мероприятию {} из расписания {} на STOPPING", arrangement.getId(), schedules.get(0).getId());
-            arrangement.setStatus(ArrangementStatus.STOPPING);
-            arrangementRepo.save(arrangement);
-            log.info("Отправляем в ППТ запрос смены статуса мероприятию {} из расписания {} на STOPPING", arrangement.getId(), schedules.get(0).getId());
-            sendToPPT(new ArrangementStatusNotification(
-                arrangement.getId(),
-                ArrangementEvents.PREPARE_TO_STOP
-            ));
-            return ResponseEntity.ok().build();
         }
     }
 
-    /*@PutMapping(value = "/finish")
+    @PutMapping(value = "/finish")
     @PreAuthorize("hasRole('ROLE_MANAGE_ARRANGEMENT')")
     @Transactional
-    public ResponseEntity stopArrangement(@RequestParam("id") Arrangement arrangement){
+    public ResponseEntity finishArrangement(@RequestParam("id") Arrangement arrangement){
         if (arrangement == null){
             return ResponseEntity.noContent().build();
         }
-        if(arrangement.getStatus()!= ArrangementStatus.RUNNING){
-            return ResponseEntity.badRequest().body("Мероприятие с ID: " + arrangement.getId() + " имеет недопустимый статус для остановки: " + arrangement.getStatus());
+        if (arrangement.getStatus() != ArrangementStatus.STOPPED
+                && arrangement.getStatus()!= ArrangementStatus.STOPPED_BY_MAX_CHECK_UNITS_COUNT
+                && arrangement.getStatus()!= ArrangementStatus.STOPPED_BY_SERVICE_MODE){
+            return ResponseEntity.badRequest().body("Мероприятие с ID: " + arrangement.getId() + " имеет недопустимый статус для завершения: " + arrangement.getStatus());
         } else {
+            if (arrangementService.sendStatusChangeToDispatcher(arrangement.getId(), null, ExecutionStatus.FINISHED)) {
+                arrangementService.notifyPPT(new ArrangementStatusNotification(
+                        arrangement.getId(),
+                        ArrangementEvents.FINISH));
+                arrangementService.saveArrangementStatus(arrangement, null, ArrangementStatus.FINISHED);
+                return ResponseEntity.ok().build();
 
+            } return ResponseEntity.badRequest().body("Мероприятие не переведено в статус FINISHED");
         }
-    }*/
+    }
 
     /**
      * Обновление статусов чек-юнитов для возможности повторного запуска мероприятия
@@ -243,29 +239,6 @@ public class ArrangementController {
     @GetMapping("/execution_status_by_id")
     public String getStatusById(@RequestParam("id") Long id) {
         return pptRestApi.fetchExecutionStatus(id).getDescription();
-    }
-
-    private boolean sendStopSignalToDispatcher(Long arrangementId, Long scheduleId){
-
-        log.info("Отправка сообщения на остановку мероприятия {} из расписания {} диспетчеру", arrangementId, scheduleId);
-        try {
-            restTemplate.exchange(
-                    UriComponentsBuilder
-                            .fromHttpUrl(gatewayUrl)
-                            .path(DISPATCHER_STOP_ENDPOINT)
-                            .queryParam("arrangementId", arrangementId)
-                            .queryParam("version", scheduleId)
-                            .build().toString(),
-                    HttpMethod.POST,
-                    null,
-                    Void.class);
-        } catch (HttpClientErrorException | HttpServerErrorException ex) {
-            log.error("Ошибка отправки сообщения на остановку мероприятия {} из расписания {} диспетчеру", arrangementId, scheduleId);
-            log.error("Информация об ошибке", ex);
-            return false;
-        }
-        log.info("Сообщение на остановку мероприятия {} из расписания {} успешно отправлено диспетчеру", arrangementId, scheduleId);
-        return true;
     }
 
     private void getAndSaveArrangementCheckUnits(Arrangement arrangement){
@@ -343,24 +316,5 @@ public class ArrangementController {
         return scheduleCheckUnit;
     }
 
-    private boolean sendToPPT(ArrangementStatusNotification arrangementStatusNotification){
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        MappingJacksonValue jacksonValue = new MappingJacksonValue(arrangementStatusNotification);
-        HttpEntity<MappingJacksonValue> entity = new HttpEntity<>(jacksonValue, headers);
-
-        log.info("Отправка сообщения с изменением статуса мероприятия {} в ППТ", arrangementStatusNotification.getArrangementId());
-        try {
-            restTemplate.put(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(PPT_STATUS_ENDPOINT).build().toString(), entity);
-        } catch (HttpClientErrorException | HttpServerErrorException ex) {
-            //throw AS_15_8_PPM_Exception.logAndGet(log, String.format("Ошибка отправки сообщения с изменением статуса мероприятия %d в ППТ, код возврата %s", arrangementStatusNotification.getArrangementId(), ex.getStatusCode()));
-            log.info("Ошибка отправки сообщения с изменением статуса мероприятия {} в ППТ, код возврата {}", arrangementStatusNotification.getArrangementId(), ex.getStatusCode());
-            return false;
-        }
-        log.info("Сообщение с изменением статуса мероприятия {} успешно отправлено в ППТ", arrangementStatusNotification.getArrangementId());
-        return true;
-    }
 
 }

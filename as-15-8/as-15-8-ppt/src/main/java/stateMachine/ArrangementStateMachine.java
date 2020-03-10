@@ -175,6 +175,16 @@ public class ArrangementStateMachine {
                     .source(ExecutionStatus.SCHEDULED).target(ExecutionStatus.SCHEDULED)
                     .event(ArrangementEvents.MANUAL_SCHEDULE)
 
+                    .and()
+                    .withExternal()
+                    .source(ExecutionStatus.STOPPED_BY_SERVICE_MODE).target(ExecutionStatus.FINISHED)
+                    .event(ArrangementEvents.FINISH)
+
+                    .and()
+                    .withExternal()
+                    .source(ExecutionStatus.STOPPED_BY_MAX_CHECK_UNITS).target(ExecutionStatus.FINISHED)
+                    .event(ArrangementEvents.FINISH)
+
             ;
 
         } catch (Exception ex) {
