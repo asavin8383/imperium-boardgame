@@ -26,7 +26,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import repositories.ArrangementRepo;
-import restapi.ArrangementRestApi;
 import restapi.ConfigClient;
 import restapi.PptClient;
 
@@ -48,7 +47,6 @@ public class ResultService {
     private final ResultsKafkaService resultsKafkaService;
 
     private final ArrangementRepo arrangementRepo;
-    private final ArrangementRestApi arrangementRestApi;
     private final ArrangementService arrangementService;
     //Объекты для создания штампа на скриншоте
     private final ImageProcessor imageProcessor = new ImageProcessor();
@@ -116,11 +114,11 @@ public class ResultService {
                         log.info("Мероприятие успешно сохранено в БД: " + arrangement.getId());
                         if(isArrangementFinished(arrangement) || isStopped) {
                             //if (arrangementRestApi.sendStatusNotificationToPPM(arrangement.getId(), isStopped)) {
-                            if (arrangementRestApi.sendStopOrFinishedStatusNotificationToPPT(arrangement.getId(), isStopped)) {
-                                boolean isActAvailable = arrangementRestApi.isActAvailableFromPPT(arrangement.getId());
+                            if (arrangementService.sendStopOrFinishedStatusNotificationToPPT(arrangement.getId(), isStopped)) {
+                                boolean isActAvailable = arrangementService.isActAvailableFromPPT(arrangement.getId());
                                 boolean isFinished = arrangementService.finishArrangement(arrangement.getId(), isStopped, isActAvailable);
                                 if (!isStopped && isFinished && isActAvailable)
-                                    arrangementRestApi.changeArrangementStatusToActSentPPT(arrangement.getId());
+                                    arrangementService.changeArrangementStatusToActSentPPT(arrangement.getId());
                                 log.info("Мероприятие успешно завершено: " + arrangement.getId());
                             }
                         }

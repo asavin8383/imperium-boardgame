@@ -20,9 +20,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.stereotype.Service;
@@ -35,7 +34,6 @@ import reactor.core.publisher.Flux;
 import remoteEvents.ArrangementStopEvent;
 import repositories.ArrangementRepo;
 import repositories.ResultRepo;
-import restapi.ArrangementRestApi;
 
 import javax.annotation.PostConstruct;
 import java.time.LocalDate;
@@ -60,11 +58,14 @@ public class ArrangementService {
     private final ArrangementStopEventProducer arrangementStopEventProducer;
     private final ResultsKafkaService resultsKafkaService;
     private final ActService actService;
-    private final ArrangementRestApi arrangementRestApi;
     private final ResultRepo resultRepo;
 
     private final String GET_CHECK_UNITS_FROM_PPT = "/ppt/arrangements/checkUnits";
     private final String PPT_STATUS_ENDPOINT = "/ppt/arrangements/status";
+    private final String PPT_IS_ACT_AVAILABLE_FOR_AUTOMATIC_SEND = "/arrangements/act_available_for_automatic_send";
+    private final String PPT_ACT_SENT_STATUS = "/arrangements/act_sent_status";
+    private final String PPT_ARRANGEMENT_INTERRUPT_VIOLATION_NUMBER = "/arrangements/interrupt_violation_number";
+
     private final OAuth2RestTemplate restTemplate;
 
     @PostConstruct
@@ -99,7 +100,7 @@ public class ArrangementService {
         arrangement.setCreationDate(LocalDateTime.now());
         arrangement.setVersion(Optional.ofNullable(arrangementToExecution.getVersion()).orElse(0L));
         arrangement.setStatus(ArrangementStatus.RUNNING);
-        arrangement.setMaxCheckUnitsCount(arrangementRestApi.getInterruptViolationNumberFromPPT(arrangementToExecution.getId()));
+        arrangement.setMaxCheckUnitsCount(getInterruptViolationNumberFromPPT(arrangementToExecution.getId()));
         arrangementRepo.save(arrangement);
 
         if(arrangement.getId() != null && arrangement.getStatus().equals(ArrangementStatus.STOPPED)) {
@@ -139,7 +140,7 @@ public class ArrangementService {
         arrangementStopEventProducer.send(event);
 
         //arrangementRestApi.sendStatusNotificationToPPT(arrangementId, true);
-        arrangementRestApi.sendStatusNotificationToPPT(new ArrangementStatusNotification(
+        sendStatusNotificationToPPT(new ArrangementStatusNotification(
                 arrangement.getId(),
                 ArrangementEvents.PREPARE_TO_STOP
         ));
@@ -152,7 +153,7 @@ public class ArrangementService {
                 .orElseThrow(() -> new AS_15_8_DispatcherException("Ошибка остановки мероприятия. Мероприятие не найдено по ID: " + arrangementId));
         arrangement.setStatus(ArrangementStatus.FINISHED);
 
-        arrangementRestApi.sendStopOrFinishedStatusNotificationToPPT(arrangementId, true);
+        sendStopOrFinishedStatusNotificationToPPT(arrangementId, true);
     }
 
     public synchronized boolean isArrangementRunning(Long arrangementId, Long version) {
@@ -288,4 +289,104 @@ public class ArrangementService {
         }
     }
 
+
+    public boolean sendStopOrFinishedStatusNotificationToPPT(Long arrangementId, boolean isStopped){
+        ArrangementStatusNotification notification = createStatusNotification(arrangementId, isStopped);
+        return sendStatusNotificationToPPT(notification);
+    }
+
+    public boolean sendStatusNotificationToPPT(ArrangementStatusNotification notification){
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        MappingJacksonValue jacksonValue = new MappingJacksonValue(notification);
+        HttpEntity<MappingJacksonValue> entity = new HttpEntity<>(jacksonValue, headers);
+
+        log.info("Отправка сообщения с изменением статуса мероприятия {}, путь: " + PPT_STATUS_ENDPOINT, notification.getArrangementId());
+        try {
+            restTemplate.put(UriComponentsBuilder
+                    .fromHttpUrl(gatewayUrl)
+                    .path(PPT_STATUS_ENDPOINT)
+                    .queryParam("id", notification.getArrangementId())
+                    .build().toString(), entity);
+        } catch (HttpClientErrorException | HttpServerErrorException ex) {
+            log.info("Ошибка отправки сообщения с изменением статуса мероприятия, " + notification.getArrangementId() + " путь: " + PPT_STATUS_ENDPOINT + ", код возврата " + ex.getStatusCode());
+            return false;
+        }
+        log.info("Сообщение с изменением статуса мероприятия {} успешно отправлено, путь: " + PPT_STATUS_ENDPOINT, notification.getArrangementId());
+        return true;
+    }
+
+    private ArrangementStatusNotification createStatusNotification(Long arrangementId, boolean isStopped) {
+        ArrangementStatusNotification notification = null;
+
+        Arrangement arr = arrangementRepo.findById(arrangementId).orElseThrow(() ->
+                new AS_15_8_DispatcherException("Ошибка создания уведомления для отправки в ППМ или ППТ, мероприятие не найдено id:" + arrangementId));
+
+        switch (arr.getReason()) {
+            case MANUAL:
+                notification = new ArrangementStatusNotification(
+                        arrangementId,
+                        isStopped ? ArrangementEvents.STOP : ArrangementEvents.FINISH);
+                break;
+            case STOPPED_BY_MAX_CHECK_UNITS_COUNT:
+                notification = new ArrangementStatusNotification(arrangementId, ArrangementEvents.STOP_BY_MAX_CHECK_UNITS_COUNT);
+                break;
+            case STOPPED_BY_SERVICE_MODE:
+                notification = new ArrangementStatusNotification(arrangementId, ArrangementEvents.STOP_BY_SERVICE_MODE);
+                break;
+        }
+
+        return notification;
+    }
+
+    public boolean isActAvailableFromPPT(Long arrangementId) {
+        try {
+            Optional<Boolean> result = restTemplate.exchange(
+                    createUri(arrangementId, PPT_IS_ACT_AVAILABLE_FOR_AUTOMATIC_SEND),
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<Optional<Boolean>>(){}
+            ).getBody();
+            //FIXME Как то много опшеналов...
+            return Optional.ofNullable(result).map(res -> res.orElse(false)).orElse(false);
+        } catch (Exception ex) {
+            throw AS_15_8_DispatcherException.logAndGet(log, String.format("Ошибка отправки сообщения с запросом статуса доступности отправки акта мероприятию %d в ППТ", arrangementId));
+        }
+    }
+
+    public void changeArrangementStatusToActSentPPT(Long arrangementId) {
+        try {
+            restTemplate.getForObject(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(PPT_ACT_SENT_STATUS).queryParam("id", arrangementId).build().toString(), Boolean.class);
+        } catch (HttpClientErrorException | HttpServerErrorException ex) {
+            throw AS_15_8_DispatcherException.logAndGet(log, String.format("Ошибка отправки сообщения с изменение статуса ACT_SENT %d в ППТ, код возврата %s", arrangementId, ex.getStatusCode()));
+        }
+    }
+
+    public Long getInterruptViolationNumberFromPPT(Long arrangementId) {
+        try {
+            ResponseEntity<Long> result = restTemplate.getForEntity(
+                    createUri(arrangementId, PPT_ARRANGEMENT_INTERRUPT_VIOLATION_NUMBER),
+                    Long.class
+            );
+
+            if (result.getBody() != null) {
+                return result.getBody();
+            } else return null;
+
+        } catch (Exception ex) {
+            log.error("Ошибка запроса предельного числа проверок для прерывания мероприятия " + arrangementId + " из ППТ", ex);
+            return null;
+        }
+    }
+
+    private String createUri(Long arrangementId, String path) {
+        return UriComponentsBuilder
+                .fromHttpUrl(gatewayUrl)
+                .path(path)
+                .queryParam("id", arrangementId)
+                .build()
+                .toString();
+    }
 }

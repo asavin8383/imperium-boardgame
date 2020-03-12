@@ -21,8 +21,8 @@ import repositories.ResultRepo;
 import repositories.ResultScreenShotRepo;
 import rest.ActAttachment;
 import rest.ActCheckResult;
-import restapi.ArrangementRestApi;
 import services.ActService;
+import services.ArrangementService;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -45,7 +45,7 @@ public class ActController {
     private final ResultRepo resultRepo;
     private final ResultScreenShotRepo resultScreenShotRepo;
     private final NmapDetailResultRepo nmapDetailResultRepo;
-    private final ArrangementRestApi arrangementRestApi;
+    private final ArrangementService arrangementService;
 
     private DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
@@ -83,7 +83,7 @@ public class ActController {
     public ResponseEntity<Void> createAct(Long arrangementId){
         boolean created = actService.createAct(arrangementId);
         if(created)
-            arrangementRestApi.changeArrangementStatusToActSentPPT(arrangementId);
+            arrangementService.changeArrangementStatusToActSentPPT(arrangementId);
         return new ResponseEntity<>(created ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR);
     }
 

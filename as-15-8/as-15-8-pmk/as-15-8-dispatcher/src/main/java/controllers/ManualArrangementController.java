@@ -20,7 +20,6 @@ import org.springframework.web.multipart.MultipartFile;
 import repositories.ArrangementRepo;
 import repositories.ResultRepo;
 import repositories.ResultScreenShotRepo;
-import restapi.ArrangementRestApi;
 import services.ArrangementService;
 
 import java.io.IOException;
@@ -36,7 +35,6 @@ public class ManualArrangementController {
     private final ArrangementService arrangementService;
     private final ResultRepo resultRepo;
     private final ResultScreenShotRepo resultScreenShotRepo;
-    private final ArrangementRestApi arrangementRestApi;
     private final ArrangementRepo arrangementRepo;
 
     @PostMapping
@@ -112,7 +110,7 @@ public class ManualArrangementController {
         if (arrangement != null) {
             if (arrangement.getStatus().equals(ArrangementStatus.RUNNING)) {
                 arrangement.setStatus(ArrangementStatus.FINISHED);
-                if (arrangementRestApi.sendStopOrFinishedStatusNotificationToPPT(arrangement.getId(), false)) {
+                if (arrangementService.sendStopOrFinishedStatusNotificationToPPT(arrangement.getId(), false)) {
                     arrangementRepo.save(arrangement);
                     return ResponseEntity.ok().body(arrangement);
                 } else return ResponseEntity.badRequest().body("Ошибка отправки статуса меропрития в ППТ");
