@@ -10,6 +10,6 @@ import java.util.List;
 
 public interface FormalTaskRepositoryAdvanced {
 
-	Page<FormalTask> findPage(List<ExecutionStatus> statuses, Long id, String operator, String fgisId, Pageable pageable);
+	Page<FormalTask> findPage(List<ExecutionStatus> statuses, Long id, String operator, String fgisId, Pageable pageable, Boolean onlyPPPRA);
 
 }

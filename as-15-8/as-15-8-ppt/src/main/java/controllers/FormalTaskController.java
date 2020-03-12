@@ -77,9 +77,8 @@ public class FormalTaskController {
 			@RequestParam(required = false, defaultValue = "false") Boolean onlyPPPRA){
 		PageRequest page = PageRequest.of(
 				pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
-		if (onlyPPPRA)
-			 return formalTaskRepo.findOnlyPPPRA(page);
-		else return formalTaskRepo.findPage(statuses, taskId, operator, fgisId, page);
+
+		return formalTaskRepo.findPage(statuses, taskId, operator, fgisId, page, onlyPPPRA);
 	}
 
 	@GetMapping("{task}")

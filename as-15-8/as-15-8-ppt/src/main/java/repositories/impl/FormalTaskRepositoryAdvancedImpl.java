@@ -30,13 +30,18 @@ public class FormalTaskRepositoryAdvancedImpl implements FormalTaskRepositoryAdv
 	}
 
 	@Override
-	public Page<FormalTask> findPage(List<ExecutionStatus> statuses, Long id, String operator, String fgisId, Pageable pageable) {
+	public Page<FormalTask> findPage(List<ExecutionStatus> statuses, Long id, String operator, String fgisId, Pageable pageable, Boolean onlyPPPRA) {
 		CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
 		CriteriaQuery<FormalTask> select = criteriaBuilder.createQuery(FormalTask.class);
 		Root<FormalTask> fromFormalTask = select.from(FormalTask.class);
 	 
 	    List<Predicate> predicates = new ArrayList<>();
-	     
+
+	    if (onlyPPPRA) {
+			predicates.add(criteriaBuilder.isNotNull(fromFormalTask.get(FormalTask_.FGIS_ID)));
+			predicates.add(criteriaBuilder.notLike(fromFormalTask.get(FormalTask_.FGIS_ID), ""));
+		}
+
 	    if (id != null) {
 	        predicates.add(criteriaBuilder.equal(fromFormalTask.get("id"), id));
 	    }
