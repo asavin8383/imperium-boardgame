@@ -74,7 +74,7 @@ public class FormalTaskController {
 			@RequestParam(defaultValue = "0") int pageNumber,
 			@RequestParam(defaultValue = "10") int pageSize,
 			@RequestParam(required = false) List<ExecutionStatus> statuses,
-			@RequestParam(required = false) Boolean onlyPPPRA){
+			@RequestParam(required = false, defaultValue = "false") Boolean onlyPPPRA){
 		PageRequest page = PageRequest.of(
 				pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
 		if (onlyPPPRA)

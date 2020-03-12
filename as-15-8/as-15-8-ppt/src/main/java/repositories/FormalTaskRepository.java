@@ -45,7 +45,7 @@ public interface FormalTaskRepository extends JpaRepository<FormalTask, Long>, F
 	Page<FormalTask> findByArrangementStatus(@Param("statuses") List<ExecutionStatus> statuses, Pageable page);
 
 
-	@Query("SELECT a FROM FormalTask a WHERE a.fgisId <> null")
+	@Query("SELECT a FROM FormalTask a WHERE a.fgisId <> 'NULL' and a.fgisId <> '' ")
 	Page<FormalTask> findOnlyPPPRA(Pageable page);
 
 }
