@@ -152,8 +152,9 @@ public class ArrangementService {
                 .findById(arrangementId)
                 .orElseThrow(() -> new AS_15_8_DispatcherException("Ошибка остановки мероприятия. Мероприятие не найдено по ID: " + arrangementId));
         arrangement.setStatus(ArrangementStatus.FINISHED);
+        arrangementRepo.save(arrangement);
 
-        sendStopOrFinishedStatusNotificationToPPT(arrangementId, true);
+        sendStopOrFinishedStatusNotificationToPPT(arrangementId, false);
     }
 
     public synchronized boolean isArrangementRunning(Long arrangementId, Long version) {
