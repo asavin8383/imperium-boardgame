@@ -87,7 +87,7 @@ public class ArrangementController {
 
     @PutMapping("/finish")
     @PreAuthorize("hasAnyRole('ROLE_MANAGE_ARRANGEMENT')")
-    public void finishArrangement(@RequestParam Long id, @RequestParam Long version) {
+    public void finishArrangement(@RequestParam Long id) {
         arrangementService.finishArrangement(id);
     }
 
