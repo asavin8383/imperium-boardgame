@@ -112,7 +112,7 @@ public class ManualArrangementController {
         if (arrangement != null) {
             if (arrangement.getStatus().equals(ArrangementStatus.RUNNING)) {
                 arrangement.setStatus(ArrangementStatus.FINISHED);
-                if (arrangementRestApi.sendStatusNotificationToPPT(arrangement.getId(), false)) {
+                if (arrangementRestApi.sendStopOrFinishedStatusNotificationToPPT(arrangement.getId(), false)) {
                     arrangementRepo.save(arrangement);
                     return ResponseEntity.ok().body(arrangement);
                 } else return ResponseEntity.badRequest().body("Ошибка отправки статуса меропрития в ППТ");

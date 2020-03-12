@@ -1,9 +1,9 @@
 package services.arrangement.impl;
 
-import enums.ExecutionStatus;
 import exceptions.AS_15_8_PPT_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import model.enums.ExecutionStatus;
 import model.task.Arrangement;
 import model.task.ClientNotification;
 import model.task.FormalTask;

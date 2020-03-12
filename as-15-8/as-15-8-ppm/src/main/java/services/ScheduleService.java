@@ -7,7 +7,6 @@ import exceptions.AS_15_8_PPM_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.*;
-import model.enums.ArrangementStatus;
 import model.enums.SchedulePeriodState;
 import model.enums.ScheduleStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import repositories.*;
 import restapi.ArrangementStatusUploader;
-import restapi.ppt.PptRestApi;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -38,7 +36,6 @@ public class ScheduleService {
     private final ArrangementStatusUploader arrangementStatusUploader;
     private final SchedulePeriodRepo schedulePeriodRepo;
     private final SchedulerProperties schedulerProperties;
-    private final PptRestApi pptRestApi;
 
     @Transactional
     public void deleteSchedule(Schedule schedule){
@@ -52,7 +49,7 @@ public class ScheduleService {
         arrangements.forEach(arrangement -> {
             arrangementStatusUploader.changeArrangementStatus(
                     new ArrangementStatusNotification(arrangement.getId(), ArrangementEvents.SCHEDULE_ROLLBACK));
-            arrangement.setStatus(pptRestApi.fetchActualStatus(arrangement.getId()));
+            arrangement.setIsScheduled(false);
             arrangementRepo.save(arrangement);
             }
         );
@@ -150,21 +147,6 @@ public class ScheduleService {
 
     public int getTotalWorkersCount(){
         return schedulerProperties.getTotalWorkersCount();
-    }
-
-    public void checkAndCloseSchedule(Schedule schedule){
-        boolean needToClose = arrangementRepo.findAllBySchedule(schedule.getId())
-                .stream()
-                .allMatch(arrangement -> arrangement.getStatus() == ArrangementStatus.FINISHED
-                        || arrangement.getStatus() == ArrangementStatus.STOPPED
-                        || arrangement.getStatus() == ArrangementStatus.STOPPED_BY_SERVICE_MODE
-                        || arrangement.getStatus() == ArrangementStatus.STOPPED_BY_MAX_CHECK_UNITS_COUNT
-                );
-        if(needToClose){
-            schedule.setStatus(ScheduleStatus.FINISHED);
-            scheduleRepo.save(schedule);
-            log.info("Статус расписания с ИД: {} сменился на 'ЗАКРЫТО'", schedule.getId());
-        }
     }
 
     private int getMaxWorkersCount(Set<Arrangement> arrangements, LocalDate plannedDate){

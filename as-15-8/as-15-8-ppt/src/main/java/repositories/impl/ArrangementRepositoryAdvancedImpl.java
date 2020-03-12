@@ -1,6 +1,6 @@
 package repositories.impl;
 
-import enums.ExecutionStatus;
+import model.enums.ExecutionStatus;
 import model.task.Arrangement;
 import model.task.Arrangement_;
 import model.task.FormalTask;

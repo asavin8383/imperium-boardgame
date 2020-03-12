@@ -7,16 +7,12 @@ import checkUnits.CheckUnitType;
 import common.SchedulerProperties;
 import enums.AccessToolUnit;
 import enums.ArrangementEvents;
-import enums.ExecutionStatus;
 import enums.Protocol;
 import exceptions.AS_15_8_PPM_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Arrangement;
-import model.Schedule;
 import model.ScheduleCheckUnit;
-import model.enums.ArrangementStatus;
-import model.enums.ScheduleStatus;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,9 +25,7 @@ import repositories.ArrangementRepo;
 import repositories.ScheduleRepo;
 import restapi.ArrangementStatusUploader;
 import restapi.pod.DomainMaskUploader;
-import restapi.ppt.PptRestApi;
 import services.ArrangementService;
-import services.ScheduleService;
 import webClients.PPT_WebClient;
 
 import javax.transaction.Transactional;
@@ -59,8 +53,6 @@ public class ArrangementController {
     private final SchedulerProperties schedulerProperties;
     private final DomainMaskUploader domainMaskUploader;
     private final ScheduleRepo scheduleRepo;
-    private final ScheduleService scheduleService;
-    private final PptRestApi pptRestApi;
 
     @Value("${gateway.url}")
     private String gatewayUrl;
@@ -76,7 +68,7 @@ public class ArrangementController {
                 arrangementRepo.delete(arrangement);
                 log.info("Мероприятие {} удалено при замене", arrangement.getId());
             }
-            newArrangement.setStatus(ArrangementStatus.NEW);
+            newArrangement.setIsScheduled(false);
             if (newArrangement.getPlannedStartTime() == null) {
                 newArrangement.setPlannedStartTime(LocalTime.of(9, 0));
             }
@@ -110,93 +102,15 @@ public class ArrangementController {
         return arrangement;
     }
 
-    @PutMapping(value = "/close", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @Transactional
-    public void updateArrangementStatus(@RequestParam("id") Arrangement arrangement, @RequestBody ArrangementStatusNotification notification){
-        if (arrangement == null){
-            throw new AS_15_8_PPM_Exception("Ошибка закрытия мероприятия! Мероприятие не было найдено в БД");
-        }
-
-        if (notification == null){
-            throw new AS_15_8_PPM_Exception("Ошибка закрытия мероприятия! ArrangementStatusNotification is null");
-        }
-        if (arrangementService.notifyPPT(notification)) {
-            if (notification.getEvent().equals(ArrangementEvents.STOP)) {
-                arrangement.setStatus(ArrangementStatus.STOPPED);
-            } else if (notification.getEvent().equals(ArrangementEvents.STOP_BY_MAX_CHECK_UNITS_COUNT)) {
-                arrangement.setStatus(ArrangementStatus.STOPPED_BY_MAX_CHECK_UNITS_COUNT);
-            } else if (notification.getEvent().equals(ArrangementEvents.STOP_BY_SERVICE_MODE)) {
-                arrangement.setStatus(ArrangementStatus.STOPPED_BY_SERVICE_MODE);
-            } else arrangement.setStatus(ArrangementStatus.FINISHED);
-        }
-        arrangementService.refreshStoppedArrangement(arrangement);
-        arrangementRepo.save(arrangement);
-            //Проверка, не нужно ли закрыть расписание
-            scheduleRepo
-                .findByArrangement(arrangement.getId())
-                .forEach(scheduleService::checkAndCloseSchedule);
-    }
-
-
     @PutMapping(value = "/stop")
-    @PreAuthorize("hasRole('ROLE_MANAGE_ARRANGEMENT')")
+    @PreAuthorize("hasRole('ROLE_SYSTEM')")
     @Transactional
     public ResponseEntity stopArrangement(@RequestParam("id") Arrangement arrangement){
         if (arrangement == null){
             return ResponseEntity.noContent().build();
         }
-        if(arrangement.getStatus()!= ArrangementStatus.RUNNING){
-            return ResponseEntity.badRequest().body("Мероприятие с ID: " + arrangement.getId() + " имеет недопустимый статус для остановки: " + arrangement.getStatus());
-        } else {
-            List<Schedule> schedules = scheduleRepo.findByStatusAndArrangement(ScheduleStatus.RUNNING, arrangement.getId());
-            if (arrangementService.isScheduleAvailable(arrangement, schedules)) {
-                Long scheduleId = arrangementService.getRunningScheduleId(arrangement.getId());
-                if (!arrangementService.sendStatusChangeToDispatcher(arrangement.getId(), scheduleId, ExecutionStatus.STOPPED))
-                    return ResponseEntity.badRequest().body(String.format("Ошибка остановки мероприятия %d из расписания %d", arrangement.getId(), scheduleId));
 
-                log.info("Мероприятие {} из расписания {} остановлено, закрываем schedulePeriodArrangements", arrangement.getId(), scheduleId);
-
-                arrangementService.closeSchedulePeriodArrangements(arrangement, scheduleId);
-                arrangementService.saveArrangementStatus(arrangement, scheduleId, ArrangementStatus.STOPPING);
-
-                log.info("Отправляем в ППТ запрос смены статуса мероприятию {} из расписания {} на STOPPING", arrangement.getId(), scheduleId);
-                arrangementService.notifyPPT(new ArrangementStatusNotification(
-                        arrangement.getId(),
-                        ArrangementEvents.PREPARE_TO_STOP
-                ));
-                return ResponseEntity.ok().build();
-            } else {
-                String errorDescription = String.format("Ошибка остановки мероприятия! Ошибка получения запущенного расписания" +
-                        " с мероприятием %d, список расписаний либо пуст либо содержит более 1 элемента: %s",
-                        arrangement.getId(),
-                        schedules.toString());
-                log.error(errorDescription);
-                return ResponseEntity.badRequest().body(errorDescription);
-            }
-        }
-    }
-
-    @PutMapping(value = "/finish")
-    @PreAuthorize("hasRole('ROLE_MANAGE_ARRANGEMENT')")
-    @Transactional
-    public ResponseEntity finishArrangement(@RequestParam("id") Arrangement arrangement){
-        if (arrangement == null){
-            return ResponseEntity.noContent().build();
-        }
-        if (arrangement.getStatus() != ArrangementStatus.STOPPED
-                && arrangement.getStatus()!= ArrangementStatus.STOPPED_BY_MAX_CHECK_UNITS_COUNT
-                && arrangement.getStatus()!= ArrangementStatus.STOPPED_BY_SERVICE_MODE){
-            return ResponseEntity.badRequest().body("Мероприятие с ID: " + arrangement.getId() + " имеет недопустимый статус для завершения: " + arrangement.getStatus());
-        } else {
-            if (arrangementService.sendStatusChangeToDispatcher(arrangement.getId(), null, ExecutionStatus.FINISHED)) {
-                arrangementService.notifyPPT(new ArrangementStatusNotification(
-                        arrangement.getId(),
-                        ArrangementEvents.FINISH));
-                arrangementService.saveArrangementStatus(arrangement, null, ArrangementStatus.FINISHED);
-                return ResponseEntity.ok().build();
-
-            } return ResponseEntity.badRequest().body("Мероприятие не переведено в статус FINISHED");
-        }
+        return arrangementService.stop(arrangement);
     }
 
     /**
@@ -235,11 +149,11 @@ public class ArrangementController {
         else return ResponseEntity.noContent().build();
     }
 
-    @PreAuthorize("hasRole('ROLE_MANAGE_ARRANGEMENT')")
+    /*@PreAuthorize("hasRole('ROLE_MANAGE_ARRANGEMENT')")
     @GetMapping("/execution_status_by_id")
     public String getStatusById(@RequestParam("id") Long id) {
         return pptRestApi.fetchExecutionStatus(id).getDescription();
-    }
+    }*/
 
     private void getAndSaveArrangementCheckUnits(Arrangement arrangement){
         arrangement.getScheduleCheckUnits().addAll(

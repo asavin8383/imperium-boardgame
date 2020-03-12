@@ -3,13 +3,13 @@ package model.task;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;
 import enums.ArrangementEvents;
-import enums.ExecutionStatus;
 import exceptions.AS_15_8_PPT_Exception;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import model.Views;
+import model.enums.ExecutionStatus;
 import stateMachine.ArrangementStateMachine;
 
 import javax.persistence.*;

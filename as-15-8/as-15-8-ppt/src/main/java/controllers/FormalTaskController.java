@@ -2,12 +2,12 @@ package controllers;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import controllers.helpers.SortingHelper;
-import enums.ExecutionStatus;
 import enums.SortingDirection;
 import exceptions.AS_15_8_PPT_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Views;
+import model.enums.ExecutionStatus;
 import model.task.Arrangement;
 import model.task.ExecutionStatusStatistics;
 import model.task.FormalTask;
@@ -63,6 +63,7 @@ public class FormalTaskController {
 		return formalTaskRepo.save(formalTask);
 	}
 
+	//TODO добавить для фронта onlyPPPRA
 	@GetMapping
 	public Page<FormalTask> findList(
 			@RequestParam(required = false) Long taskId,
@@ -72,10 +73,13 @@ public class FormalTaskController {
 			@RequestParam(required = false) String sortingColumn,
 			@RequestParam(defaultValue = "0") int pageNumber,
 			@RequestParam(defaultValue = "10") int pageSize,
-			@RequestParam(required = false) List<ExecutionStatus> statuses){
+			@RequestParam(required = false) List<ExecutionStatus> statuses,
+			@RequestParam(required = false) Boolean onlyPPPRA){
 		PageRequest page = PageRequest.of(
 				pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
-		return formalTaskRepo.findPage(statuses, taskId, operator, fgisId, page);
+		if (onlyPPPRA)
+			 return formalTaskRepo.findOnlyPPPRA(page);
+		else return formalTaskRepo.findPage(statuses, taskId, operator, fgisId, page);
 	}
 
 	@GetMapping("{task}")

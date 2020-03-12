@@ -1,8 +1,8 @@
 package model.task;
 
-import enums.ExecutionStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import model.enums.ExecutionStatus;
 
 /**
  * Created by san

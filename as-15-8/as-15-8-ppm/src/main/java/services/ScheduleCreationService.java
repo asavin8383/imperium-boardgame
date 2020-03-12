@@ -5,7 +5,6 @@ import exceptions.AS_15_8_PPM_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.*;
-import model.enums.ArrangementStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import repositories.ArrangementRepo;
@@ -32,14 +31,15 @@ public class ScheduleCreationService {
         if(schedule.getSchedulePeriods().size() == 0)
             throw new AS_15_8_PPM_Exception("Ошибка формирования расписания! Не было сформировано ни одного периода!");
         //Меняем статус, чтобы мероприятия пропали из списка допустимых
-        updateStatus(arrangementCheckUnits.keySet(), ArrangementStatus.SCHEDULED);
+        updateIsSheduledState(arrangementCheckUnits.keySet(), true);
         return schedule;
     }
 
-    private void updateStatus(Collection<Arrangement> arrangements, ArrangementStatus status){
-        log.info("Меняем статусы мероприятиям: {} на {}", arrangements.stream().map(arrangement -> arrangement.getId().toString()).collect(Collectors.joining(",")), status);
+    private void updateIsSheduledState(Collection<Arrangement> arrangements, Boolean isScheduled){
+        log.info("Меняем статусы мероприятиям: {} на isScheduled = {}", arrangements.stream().map(arrangement ->
+                arrangement.getId().toString()).collect(Collectors.joining(",")), isScheduled);
         arrangements.forEach(arrangement -> {
-            arrangement.setStatus(status);
+            arrangement.setIsScheduled(isScheduled);
             arrangementRepo.save(arrangement);
         });
     }

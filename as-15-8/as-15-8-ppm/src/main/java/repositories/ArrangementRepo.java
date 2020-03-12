@@ -1,6 +1,5 @@
 package repositories;
 
-import enums.ExecutionStatus;
 import model.Arrangement;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,12 +26,12 @@ public interface ArrangementRepo extends JpaRepository<Arrangement, Long> {
 
     @Query("select DISTINCT a " +
             "from Arrangement a " +
-            "where a.status in ('NEW', 'STOPPED')")
+            "where a.isScheduled = false")
     Page<Arrangement> findAllAvailableArrangements(Pageable pageable);
 
     @Query("select DISTINCT a " +
-        "from Arrangement a " +
-        "where a.status in ('NEW', 'STOPPED')")
+            "from Arrangement a " +
+            "where a.isScheduled = false")
     List<Arrangement> findAllAvailableArrangements();
 
     @Query("select a " +

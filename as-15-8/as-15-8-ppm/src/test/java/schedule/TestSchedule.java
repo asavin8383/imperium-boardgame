@@ -3,7 +3,6 @@ package schedule;
 import checkUnits.CheckUnitType;
 import common.SchedulerApplicationConfiguration;
 import model.*;
-import model.enums.ArrangementStatus;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,7 +68,7 @@ public class TestSchedule {
         arrangement.setAccessTool(accessTool);
         arrangement.setPlannedStartTime(LocalTime.parse(startTime, formatter));
         arrangement.setPlannedEndTime(LocalTime.parse(endTime, formatter));
-        arrangement.setStatus(ArrangementStatus.NEW);
+        arrangement.setIsScheduled(false);
         return arrangement;
     }
 

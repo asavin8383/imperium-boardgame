@@ -1,6 +1,6 @@
 package repositories;
 
-import enums.ExecutionStatus;
+import model.enums.ExecutionStatus;
 import model.task.Arrangement;
 import model.task.ExecutionStatusStatistics;
 import org.springframework.data.domain.Page;

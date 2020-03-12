@@ -14,7 +14,6 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.*;
-import model.enums.ArrangementStatus;
 import model.enums.ScheduleStatus;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -126,7 +125,8 @@ public class ScheduleController {
     @JsonView(Views.Full.class)
     public boolean hasStoppedArrangements(@RequestParam("id") Schedule schedule) {
         return arrangementRepo.findAllBySchedule(schedule.getId()).stream()
-                .anyMatch(arrangement -> arrangement.getStatus().equals(ArrangementStatus.STOPPED));
+                //.anyMatch(arrangement -> arrangement.getStatus().equals(ArrangementStatus.STOPPED));
+                .anyMatch(arrangement -> !arrangement.getIsScheduled());
     }
 
         @GetMapping(path = "/total_workers_count")

@@ -1,6 +1,6 @@
 package repositories.impl;
 
-import enums.ExecutionStatus;
+import model.enums.ExecutionStatus;
 import model.task.FormalTask;
 import model.task.FormalTask_;
 import org.springframework.beans.factory.annotation.Autowired;

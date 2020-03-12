@@ -1,9 +1,9 @@
 package model.task;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import enums.ExecutionStatus;
 import lombok.Data;
 import model.Views;
+import model.enums.ExecutionStatus;
 import model.enums.Priority;
 
 

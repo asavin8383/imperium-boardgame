@@ -1,11 +1,21 @@
 package services.arrangement.impl;
 
 import arrangement.ArrangementStatusNotification;
+import enums.ArrangementEvents;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.json.MappingJacksonValue;
+import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.util.UriComponentsBuilder;
 import repositories.ArrangementRepo;
 import services.arrangement.ArrangementNotificationService;
 import services.arrangement.ArrangementStatusService;
@@ -20,8 +30,13 @@ import services.arrangement.ArrangementStatusService;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class ArrangementNotificationServiceImpl implements ArrangementNotificationService {
 
+    @Value("${gateway.url}")
+    private String gatewayUrl;
+
     private final ArrangementRepo arrangementRepo;
     private final ArrangementStatusService arrangementStatusService;
+    private final String PPM_STOP_ENDPOINT = "/ppm/arrangements/stop";
+    private final OAuth2RestTemplate restTemplate;
 
     @Override
     public void processNotification(ArrangementStatusNotification arrangementStatusNotification) {
@@ -31,19 +46,46 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
                     arrangement.setInfo(arrangementStatusNotification.getInfo());
                     arrangementRepo.save(arrangement);
                 }
-                arrangement.sendEvent(arrangementStatusNotification.getEvent(), arrangementStatusNotification.getEventDate());
-                try {
-                    arrangementStatusService.processArrangementStatusChange(arrangement);
-                    log.info("Статус мероприятия {} сменился на: {}", arrangement.getId(), arrangement.getStatus());
-                    return true;
-                } catch (Exception ex) {
-                    log.error("не удалось сменить статус мероприятия {} на {}", arrangement.getId(), arrangement.getStatus(), ex);
-                    return false;
-                }
+
+                if (notifyPPMAboutStopEvent(arrangementStatusNotification)) {
+                    arrangement.sendEvent(arrangementStatusNotification.getEvent(), arrangementStatusNotification.getEventDate());
+                    try {
+                        arrangementStatusService.processArrangementStatusChange(arrangement);
+                        log.info("Статус мероприятия {} сменился на: {}", arrangement.getId(), arrangement.getStatus());
+                        return true;
+                    } catch (Exception ex) {
+                        log.error("не удалось сменить статус мероприятия {} на {}", arrangement.getId(), arrangement.getStatus(), ex);
+                        return false;
+                    }
+                } else return false;
             })
             .orElseGet(() -> {
                 log.error("Ошибка смены статуса мероприятия. Мероприятие не было найдено по ID: {}", arrangementStatusNotification.getArrangementId());
                 return false;
             });
+    }
+
+    private boolean notifyPPMAboutStopEvent(ArrangementStatusNotification notification) {
+        if (notification.getEvent().equals(ArrangementEvents.STOP)) {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            MappingJacksonValue jacksonValue = new MappingJacksonValue(notification);
+            HttpEntity<MappingJacksonValue> entity = new HttpEntity<>(jacksonValue, headers);
+
+            log.info("Отправка сообщения с изменением статуса мероприятия {}, путь: " + PPM_STOP_ENDPOINT, notification.getArrangementId());
+            try {
+                restTemplate.put(UriComponentsBuilder
+                        .fromHttpUrl(gatewayUrl)
+                        .path(PPM_STOP_ENDPOINT)
+                        .queryParam("id", notification.getArrangementId())
+                        .build().toString(), entity);
+            } catch (HttpClientErrorException | HttpServerErrorException ex) {
+                log.info("Ошибка отправки сообщения с изменением статуса мероприятия, " + notification.getArrangementId() + " путь: " + PPM_STOP_ENDPOINT + ", код возврата " + ex.getStatusCode());
+                return false;
+            }
+            log.info("Сообщение с изменением статуса мероприятия {} успешно отправлено, путь: " + PPM_STOP_ENDPOINT, notification.getArrangementId());
+            return true;
+        } else return true;
     }
 }

@@ -29,9 +29,7 @@ import java.util.Optional;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class ArrangementRestApi {
 
-    private final String PPM_STATUS_ENDPOINT = "/ppm/arrangements/close";
     private final String PPT_STATUS_ENDPOINT = "/ppt/arrangements/status";
-    //private final String PPT_ARRANGEMENT_EXECUTION_STATUS = "/arrangements/execution_status";
     private final String PPT_IS_ACT_AVAILABLE_FOR_AUTOMATIC_SEND = "/arrangements/act_available_for_automatic_send";
     private final String PPT_ACT_SENT_STATUS = "/arrangements/act_sent_status";
     private final String PPT_ARRANGEMENT_INTERRUPT_VIOLATION_NUMBER = "/arrangements/interrupt_violation_number";
@@ -41,34 +39,32 @@ public class ArrangementRestApi {
     @Value("${gateway.url}")
     private String gatewayUrl;
 
-    public boolean sendStatusNotificationToPPM(Long arrangementId, boolean isStopped) {
-        return sendStatusNotification(arrangementId, isStopped, PPM_STATUS_ENDPOINT);
-    }
 
-    public boolean sendStatusNotificationToPPT(Long arrangementId, boolean isStopped){
-        return sendStatusNotification(arrangementId, isStopped, PPT_STATUS_ENDPOINT);
-    }
-
-    private boolean sendStatusNotification(Long arrangementId, boolean isStopped, String path){
+    public boolean sendStopOrFinishedStatusNotificationToPPT(Long arrangementId, boolean isStopped){
         ArrangementStatusNotification notification = createStatusNotification(arrangementId, isStopped);
+        return sendStatusNotificationToPPT(notification);
+    }
+
+    public boolean sendStatusNotificationToPPT(ArrangementStatusNotification notification){
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         MappingJacksonValue jacksonValue = new MappingJacksonValue(notification);
         HttpEntity<MappingJacksonValue> entity = new HttpEntity<>(jacksonValue, headers);
 
-        log.info("Отправка сообщения с изменением статуса мероприятия {}, путь: " + path, arrangementId);
+        log.info("Отправка сообщения с изменением статуса мероприятия {}, путь: " + PPT_STATUS_ENDPOINT, notification.getArrangementId());
         try {
             restTemplate.put(UriComponentsBuilder
                     .fromHttpUrl(gatewayUrl)
-                    .path(path)
-                    .queryParam("id", arrangementId)
+                    .path(PPT_STATUS_ENDPOINT)
+                    .queryParam("id", notification.getArrangementId())
                     .build().toString(), entity);
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
-            log.info("Ошибка отправки сообщения с изменением статуса мероприятия, " + arrangementId + " путь: " + path + ", код возврата " + ex.getStatusCode());
+            log.info("Ошибка отправки сообщения с изменением статуса мероприятия, " + notification.getArrangementId() + " путь: " + PPT_STATUS_ENDPOINT + ", код возврата " + ex.getStatusCode());
             return false;
         }
-        log.info("Сообщение с изменением статуса мероприятия {} успешно отправлено, путь: " + path, arrangementId);
+        log.info("Сообщение с изменением статуса мероприятия {} успешно отправлено, путь: " + PPT_STATUS_ENDPOINT, notification.getArrangementId());
         return true;
     }
 

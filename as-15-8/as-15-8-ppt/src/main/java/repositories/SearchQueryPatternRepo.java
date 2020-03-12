@@ -1,7 +1,5 @@
 package repositories;
 
-import model.traffic.ErdiTrafficUnit;
-import model.traffic.ErdiTrafficUnitContent;
 import model.traffic.SearchQueryPattern;
 import model.traffic.SearchQueryTrafficUnit;
 import org.springframework.data.domain.Page;

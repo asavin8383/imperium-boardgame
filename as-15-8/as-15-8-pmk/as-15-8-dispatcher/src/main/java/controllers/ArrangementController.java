@@ -1,8 +1,6 @@
 package controllers;
 
 import arrangement.ArrangementToExecution;
-import enums.ExecutionStatus;
-import exceptions.AS_15_8_DispatcherException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Arrangement;
@@ -64,20 +62,6 @@ public class ArrangementController {
         }).orElse(0L);
     }
 
-    /*@PostMapping("/stop")
-    @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
-    public void stopArrangement(@RequestParam Long arrangementId, @RequestParam Long version) {
-        arrangementService.stopExecution(arrangementId, version, Reason.MANUAL);
-    }*/
-
-    @PostMapping("/status")
-    @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
-    public void changeStatus(@RequestBody ExecutionStatus status, @RequestParam Long arrangementId, @RequestParam Long version) {
-        if (status == null)
-            throw new AS_15_8_DispatcherException("Невозможно изменить статус т.к он null" + status);
-        arrangementService.changeStatus(status, arrangementId, version, Reason.MANUAL);
-    }
-
     @GetMapping("/stopped")
     @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
     public Map<Long, Set<Long>> getStoppedArrangement() {
@@ -89,4 +73,17 @@ public class ArrangementController {
     public void stopAllRunningArrangements() {
         arrangementService.stopAllRunningArrangements(Reason.STOPPED_BY_SERVICE_MODE);
     }
+
+    @PostMapping("/stop")
+    @PreAuthorize("hasAnyRole('ROLE_MANAGE_ARRANGEMENT')")
+    public void stopArrangement(@RequestParam Long arrangementId, @RequestParam Long version) {
+        arrangementService.stopExecution(arrangementId, version, Reason.MANUAL);
+    }
+
+    @PostMapping("/finish")
+    @PreAuthorize("hasAnyRole('ROLE_MANAGE_ARRANGEMENT')")
+    public void finishArrangement(@RequestParam Long arrangementId, @RequestParam Long version) {
+        arrangementService.finishArrangement(arrangementId);
+    }
+
 }

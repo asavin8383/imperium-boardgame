@@ -2,12 +2,12 @@ package services.arrangement.impl;
 
 import checkUnits.CheckUnit;
 import checkUnits.CheckUnitType;
-import enums.ExecutionStatus;
 import exceptions.AS_15_8_PPT_Exception;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import model.enums.ExecutionStatus;
 import model.enums.SearchQueryReplacePattern;
 import model.task.Arrangement;
 import model.task.FormalTask;

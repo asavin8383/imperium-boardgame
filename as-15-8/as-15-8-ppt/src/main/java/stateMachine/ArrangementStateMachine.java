@@ -2,7 +2,7 @@ package stateMachine;
 
 import enums.ArrangementEvents;
 import exceptions.AS_15_8_PPT_Exception;
-import enums.ExecutionStatus;
+import model.enums.ExecutionStatus;
 import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.config.StateMachineBuilder;
 

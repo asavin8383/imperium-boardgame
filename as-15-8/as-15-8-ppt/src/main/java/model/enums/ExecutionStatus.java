@@ -1,4 +1,4 @@
-package enums;
+package model.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,9 +15,7 @@ public enum ExecutionStatus {
 	STOPPED_BY_SERVICE_MODE(6,"Остановлено при переходе в сервисный режим"),
 	STOPPED_BY_MAX_CHECK_UNITS(7, "Остановлено по превышению количества ИРТЗ"),
 	FINISHED(8, "Выполнено"),
-	ACT_SENT(9, "Отправлен акт"),
-	CLOSED(10, "Закрыто"),
-	ERROR(11, "Ошибка");
+	ACT_SENT(9, "Отправлен акт");
 
 	@Getter
 	private int priority;

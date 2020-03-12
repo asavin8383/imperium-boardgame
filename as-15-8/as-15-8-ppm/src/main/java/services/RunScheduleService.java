@@ -13,7 +13,6 @@ import model.Arrangement;
 import model.ScheduleCheckUnit;
 import model.SchedulePeriodArrangement;
 import model.SchedulePeriodCheckUnit;
-import model.enums.ArrangementStatus;
 import model.enums.SchedulePeriodCheckUnitStatus;
 import model.enums.SchedulePeriodState;
 import model.enums.ScheduleStatus;
@@ -70,11 +69,12 @@ public class RunScheduleService {
                                 log.debug("Запуск на выполнение schedulePeriodArrangement с ИД {}", schedulePeriodArrangement.getId());
 
                                 Arrangement arrangement = schedulePeriodArrangement.getArrangement();
-                                if(arrangement.getStatus()== ArrangementStatus.SCHEDULED){
-                                    arrangement.setStatus(ArrangementStatus.RUNNING);
+
+                                if (arrangement.getIsScheduled() == true) {
                                     arrangementRepo.save(arrangement);
                                     arrangementStatusUploader.changeArrangementStatus(new ArrangementStatusNotification(arrangement.getId(), ArrangementEvents.RUN));
                                 }
+
                                 List<SchedulePeriodCheckUnit> schedulePeriodCheckUnits = schedulePeriodCheckUnitRepo.findAllBySchedulePeriodArrangement(schedulePeriodArrangement);
                                 schedulePeriodCheckUnits.forEach(schedulePeriodCheckUnit ->
                                                 runCheckUnit(schedulePeriodCheckUnit, schedule.getId(), schedulePeriodArrangement.getArrangementId()));

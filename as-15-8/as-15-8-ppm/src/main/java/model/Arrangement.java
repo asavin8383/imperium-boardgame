@@ -1,12 +1,10 @@
 package model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import model.enums.ArrangementStatus;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -62,9 +60,8 @@ public class Arrangement implements Serializable {
     @NotNull
     private String accessTool;
 
-    @Column(nullable = false, columnDefinition = "text default 'NEW'")
-    @Enumerated(EnumType.STRING)
-    private ArrangementStatus status;
+    @Column
+    private Boolean isScheduled = false;
 
     @OneToMany(cascade=CascadeType.ALL, mappedBy = "arrangement")
     @JsonIgnore

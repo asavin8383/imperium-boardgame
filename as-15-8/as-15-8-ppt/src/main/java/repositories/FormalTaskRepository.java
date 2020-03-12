@@ -1,6 +1,6 @@
 package repositories;
 
-import enums.ExecutionStatus;
+import model.enums.ExecutionStatus;
 import model.task.ExecutionStatusStatistics;
 import model.task.FormalTask;
 import org.springframework.data.domain.Page;
@@ -43,4 +43,9 @@ public interface FormalTaskRepository extends JpaRepository<FormalTask, Long>, F
 			" on a.status in :statuses")
 
 	Page<FormalTask> findByArrangementStatus(@Param("statuses") List<ExecutionStatus> statuses, Pageable page);
+
+
+	@Query("SELECT a FROM FormalTask a WHERE a.fgisId <> null")
+	Page<FormalTask> findOnlyPPPRA(Pageable page);
+
 }
