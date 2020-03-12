@@ -216,8 +216,8 @@ public class ArrangementController {
 
     @PreAuthorize("hasAnyRole('ROLE_SYSTEM', 'ROLE_MANAGE_ARRANGEMENT')")
     @GetMapping("/execution_status")
-    public ExecutionStatus getExecutionStatus(@RequestParam("id") Arrangement arrangement) {
-        return arrangement.getStatus();
+    public String getExecutionStatus(@RequestParam("id") Arrangement arrangement) {
+        return arrangement.getStatus().getDescription();
     }
 
     @PreAuthorize("hasAnyRole('ROLE_SYSTEM', 'ROLE_MANAGE_ARRANGEMENT')" )
