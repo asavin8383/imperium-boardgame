@@ -159,27 +159,27 @@ public class ArrangementService {
         //Проверка, не нужно ли закрыть расписание
         refreshStoppedArrangement(arrangement);
         arrangementRepo.save(arrangement);
-        log.info("Проверка, следует ли закрыть расписания с мероприятием, id = ", arrangement.getId());
         try {
             scheduleRepo
                     .findByArrangement(arrangement.getId())
                     .forEach(this::checkAndCloseSchedule);
-            log.info("Расписания с мероприятием, id = {} закрыты", arrangement.getId());
             return ResponseEntity.ok().build();
         } catch (Exception ex) {
-            log.info("Расписания с мероприятием, id = {} не закрыты! ", arrangement.getId());
             return ResponseEntity.badRequest().body(ex);
         }
     }
 
     private void checkAndCloseSchedule(Schedule schedule){
+        log.info("Проврека, необходимо ли закрыть расписание, id = ", schedule.getId());
         boolean needToClose = arrangementRepo.findAllBySchedule(schedule.getId())
                 .stream()
                 .noneMatch(Arrangement::getIsScheduled);
-        if(needToClose){
+        if (needToClose) {
             schedule.setStatus(ScheduleStatus.FINISHED);
             scheduleRepo.save(schedule);
             log.info("Статус расписания с ИД: {} сменился на 'ЗАКРЫТО'", schedule.getId());
+        } else {
+            log.info("Статус расписания не изменился! id = ", schedule.getId());
         }
     }
 }

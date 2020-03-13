@@ -81,8 +81,12 @@ public class ScheduleService {
         scheduleRepo.save(schedule);
         log.info("Изменяем статусы всем мероприятиям из расписания с ИД: {}", schedule.getId());
         arrangementRepo.findAllBySchedule(schedule.getId()).forEach(
-            arrangement -> arrangementStatusUploader.changeArrangementStatus(
-                new ArrangementStatusNotification(arrangement.getId(), ArrangementEvents.SCHEDULE))
+            arrangement -> {
+                arrangementStatusUploader.changeArrangementStatus(
+                        new ArrangementStatusNotification(arrangement.getId(), ArrangementEvents.SCHEDULE));
+                arrangement.setIsScheduled(true);
+                arrangementRepo.save(arrangement);
+            }
         );
         log.info("Cтатусы всех мероприятий из расписания с ИД: {} сохранены, расписание запланировано", schedule.getId());
         return schedule;
