@@ -141,12 +141,7 @@ public class ArrangementService {
 
                 arrangement.setIsScheduled(false);
                 refreshStoppedArrangement(arrangement);
-
                 arrangementRepo.save(arrangement);
-                //Проверка, не нужно ли закрыть расписание
-                scheduleRepo
-                        .findByArrangement(arrangement.getId())
-                        .forEach(this::checkAndCloseSchedule);
 
                 return ResponseEntity.ok().build();
             } else {
@@ -160,10 +155,22 @@ public class ArrangementService {
         }
     }
 
+    public ResponseEntity finishSchedule(Arrangement arrangement) {
+        //Проверка, не нужно ли закрыть расписание
+        try {
+            scheduleRepo
+                    .findByArrangement(arrangement.getId())
+                    .forEach(this::checkAndCloseSchedule);
+            return ResponseEntity.ok().build();
+        } catch (Exception ex) {
+            return ResponseEntity.badRequest().body(ex);
+        }
+    }
+
     private void checkAndCloseSchedule(Schedule schedule){
         boolean needToClose = arrangementRepo.findAllBySchedule(schedule.getId())
                 .stream()
-                .allMatch(arrangement -> arrangement.getIsScheduled() == false);
+                .noneMatch(Arrangement::getIsScheduled);
         if(needToClose){
             schedule.setStatus(ScheduleStatus.FINISHED);
             scheduleRepo.save(schedule);

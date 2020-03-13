@@ -113,6 +113,17 @@ public class ArrangementController {
         return arrangementService.stop(arrangement);
     }
 
+    @PutMapping(value = "/finish")
+    @PreAuthorize("hasRole('ROLE_SYSTEM')")
+    @Transactional
+    public ResponseEntity finishSchedule(@RequestParam("id") Arrangement arrangement){
+        if (arrangement == null){
+            return ResponseEntity.noContent().build();
+        }
+
+        return arrangementService.finishSchedule(arrangement);
+    }
+
     /**
      * Обновление статусов чек-юнитов для возможности повторного запуска мероприятия
      * @param arrangement мероприятие, которое требуется запустить повторно
