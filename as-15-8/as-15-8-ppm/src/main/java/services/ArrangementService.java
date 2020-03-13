@@ -164,10 +164,10 @@ public class ArrangementService {
             scheduleRepo
                     .findByArrangement(arrangement.getId())
                     .forEach(this::checkAndCloseSchedule);
-            log.info("Расписания с мероприятием, id = {} закрыто", arrangement.getId());
+            log.info("Расписания с мероприятием, id = {} закрыты", arrangement.getId());
             return ResponseEntity.ok().build();
         } catch (Exception ex) {
-            log.info("Расписания с мероприятием, id = {} не закрыто! ", arrangement.getId());
+            log.info("Расписания с мероприятием, id = {} не закрыты! ", arrangement.getId());
             return ResponseEntity.badRequest().body(ex);
         }
     }

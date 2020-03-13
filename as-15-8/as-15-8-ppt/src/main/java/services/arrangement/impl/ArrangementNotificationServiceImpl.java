@@ -50,7 +50,6 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
                 }
 
                 if (!notifyPPMAboutStopEvent(arrangementStatusNotification)) {
-                    log.warn("Ошибка отправки события STOP в ППМ, arrangementId = " + arrangement.getId());
                     return false;
                 }
                 if (!notifyPPMAboutFinishEvent(arrangementStatusNotification)) {
@@ -68,14 +67,21 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
 
     private boolean notifyPPMAboutStopEvent(ArrangementStatusNotification notification) {
         if (notification.getEvent().equals(ArrangementEvents.STOP)) {
+            log.info("Отправка события STOP в ППМ, arrangementId = " + notification.getArrangementId());
             return createPutRequest(notification, PPM_STOP_ENDPOINT);
-        } else return true;
+        } else {
+            log.warn("Ошибка отправки события STOP в ППМ, arrangementId = " + notification.getArrangementId());
+            return true;
+        }
     }
 
     private boolean notifyPPMAboutFinishEvent(ArrangementStatusNotification notification) {
         if (notification.getEvent().equals(ArrangementEvents.FINISH)) {
+            log.info("Отправка события FINISH в ППМ, arrangementId = " + notification.getArrangementId());
             return createPutRequest(notification, PPM_FINISH_ENDPOINT);
-        } else return true;
+        } else {
+            return true;
+        }
     }
 
     private boolean createPutRequest(ArrangementStatusNotification notification, String path) {
@@ -85,7 +91,7 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
         MappingJacksonValue jacksonValue = new MappingJacksonValue(notification);
         HttpEntity<MappingJacksonValue> entity = new HttpEntity<>(jacksonValue, headers);
 
-        log.info("Отправка сообщения с изменением статуса мероприятия {}, путь: " + path, notification.getArrangementId());
+        log.info("Отправка сообщения с изменением статуса мероприятия {} в ППМ, путь: {} " + path, notification.getArrangementId());
         try {
             restTemplate.put(UriComponentsBuilder
                     .fromHttpUrl(gatewayUrl)
@@ -93,7 +99,7 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
                     .queryParam("id", notification.getArrangementId())
                     .build().toString(), entity);
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
-            log.info("Ошибка отправки сообщения с изменением статуса мероприятия, " + notification.getArrangementId() + " путь: " + path + ", код возврата " + ex.getStatusCode());
+            log.info("Ошибка отправки сообщения с изменением статуса мероприятия в ППМ, путь: {}, ошибка: {} ", path, ex);
             return false;
         }
         log.info("Сообщение с изменением статуса мероприятия {} успешно отправлено, путь: " + path, notification.getArrangementId());
@@ -104,10 +110,10 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
         arrangement.sendEvent(arrangementStatusNotification.getEvent(), arrangementStatusNotification.getEventDate());
         try {
             arrangementStatusService.processArrangementStatusChange(arrangement);
-            log.info("Статус мероприятия {} сменился на: {} ", arrangement.getId(), arrangement.getStatus());
+            log.info("Статус мероприятия {} сменился в ППТ на: {} ", arrangement.getId(), arrangement.getStatus());
             return true;
         } catch (Exception ex) {
-            log.error("не удалось сменить статус мероприятия {} на {} ", arrangement.getId(), arrangement.getStatus(), ex);
+            log.error("не удалось сменить статус мероприятия в ППТ {} на {} ", arrangement.getId(), arrangement.getStatus(), ex);
             return false;
         }
     }
