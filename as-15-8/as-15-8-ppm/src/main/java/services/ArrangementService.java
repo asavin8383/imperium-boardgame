@@ -158,6 +158,7 @@ public class ArrangementService {
     public ResponseEntity finishSchedule(Arrangement arrangement) {
         //Проверка, не нужно ли закрыть расписание
         refreshStoppedArrangement(arrangement);
+        arrangement.setIsScheduled(false);
         arrangementRepo.save(arrangement);
         try {
             scheduleRepo
@@ -170,7 +171,7 @@ public class ArrangementService {
     }
 
     private void checkAndCloseSchedule(Schedule schedule){
-        log.info("Проврека, необходимо ли закрыть расписание, id = ", schedule.getId());
+        log.info("Проверка, необходимо ли закрыть расписание, id = ", schedule.getId());
         boolean needToClose = arrangementRepo.findAllBySchedule(schedule.getId())
                 .stream()
                 .noneMatch(Arrangement::getIsScheduled);
