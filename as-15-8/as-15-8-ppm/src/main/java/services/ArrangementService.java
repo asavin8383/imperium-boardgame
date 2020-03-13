@@ -137,7 +137,7 @@ public class ArrangementService {
                 log.info("Мероприятие {} из расписания {} остановлено, закрываем schedulePeriodArrangements", arrangement.getId(), scheduleId);
 
                 closeSchedulePeriodArrangements(arrangement, scheduleId);
-                saveScheduledState(arrangement, scheduleId, true);
+                saveScheduledState(arrangement, scheduleId, false);
 
                 arrangement.setIsScheduled(false);
                 refreshStoppedArrangement(arrangement);
