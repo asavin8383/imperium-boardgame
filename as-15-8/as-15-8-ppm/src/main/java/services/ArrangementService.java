@@ -157,12 +157,17 @@ public class ArrangementService {
 
     public ResponseEntity finishSchedule(Arrangement arrangement) {
         //Проверка, не нужно ли закрыть расписание
+        refreshStoppedArrangement(arrangement);
+        arrangementRepo.save(arrangement);
+        log.info("Проверка, следует ли закрыть расписания с мероприятием, id = ", arrangement.getId());
         try {
             scheduleRepo
                     .findByArrangement(arrangement.getId())
                     .forEach(this::checkAndCloseSchedule);
+            log.info("Расписания с мероприятием, id = {} закрыто", arrangement.getId());
             return ResponseEntity.ok().build();
         } catch (Exception ex) {
+            log.info("Расписания с мероприятием, id = {} не закрыто! ", arrangement.getId());
             return ResponseEntity.badRequest().body(ex);
         }
     }

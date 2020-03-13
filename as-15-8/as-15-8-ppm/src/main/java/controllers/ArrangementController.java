@@ -109,7 +109,6 @@ public class ArrangementController {
         if (arrangement == null){
             return ResponseEntity.noContent().build();
         }
-
         return arrangementService.stop(arrangement);
     }
 
@@ -120,7 +119,6 @@ public class ArrangementController {
         if (arrangement == null){
             return ResponseEntity.noContent().build();
         }
-
         return arrangementService.finishSchedule(arrangement);
     }
 

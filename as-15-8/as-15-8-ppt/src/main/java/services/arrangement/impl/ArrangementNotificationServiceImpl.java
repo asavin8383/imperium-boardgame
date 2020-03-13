@@ -50,9 +50,11 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
                 }
 
                 if (!notifyPPMAboutStopEvent(arrangementStatusNotification)) {
+                    log.warn("Ошибка отправки события STOP в ППМ, arrangementId = " + arrangement.getId());
                     return false;
                 }
                 if (!notifyPPMAboutFinishEvent(arrangementStatusNotification)) {
+                    log.warn("Ошибка отправки события FINISH в ППМ, arrangementId = " + arrangement.getId());
                     return false;
                 }
                 return processNotificationInPPM(arrangement, arrangementStatusNotification);
