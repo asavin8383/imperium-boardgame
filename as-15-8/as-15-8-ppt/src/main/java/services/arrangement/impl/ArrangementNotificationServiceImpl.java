@@ -53,7 +53,6 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
                     return false;
                 }
                 if (!notifyPPMAboutFinishEvent(arrangementStatusNotification)) {
-                    log.warn("Ошибка отправки события FINISH в ППМ, arrangementId = " + arrangement.getId());
                     return false;
                 }
                 return processNotificationInPPM(arrangement, arrangementStatusNotification);
@@ -95,7 +94,7 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
         try {
             restTemplate.put(UriComponentsBuilder
                     .fromHttpUrl(gatewayUrl)
-                    .path(PPM_STOP_ENDPOINT)
+                    .path(path)
                     .queryParam("id", notification.getArrangementId())
                     .build().toString(), entity);
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
