@@ -130,28 +130,26 @@ public class ArrangementService {
         if(!arrangement.getIsScheduled()){
             return ResponseEntity.badRequest().body("Мероприятие с ID: " + arrangement.getId() + " имеет недопустимый статус для остановки, isScheduled = " + arrangement.getIsScheduled());
         } else {
-            List<Schedule> schedules = scheduleRepo.findByStatusAndArrangement(ScheduleStatus.RUNNING, arrangement.getId());
-            if (isScheduleAvailable(arrangement, schedules)) {
-                Long scheduleId = getRunningScheduleId(arrangement.getId());
+            List<Schedule> runningSchedules = scheduleRepo.findByStatusAndArrangement(ScheduleStatus.RUNNING, arrangement.getId());
 
-                log.info("Мероприятие {} из расписания {} остановлено, закрываем schedulePeriodArrangements", arrangement.getId(), scheduleId);
-
-                closeSchedulePeriodArrangements(arrangement, scheduleId);
-                saveScheduledState(arrangement, scheduleId, false);
-
-                arrangement.setIsScheduled(false);
-                refreshStoppedArrangement(arrangement);
-                arrangementRepo.save(arrangement);
-
-                return ResponseEntity.ok().build();
-            } else {
+            if (runningSchedules.isEmpty()) {
                 String errorDescription = String.format("Ошибка остановки мероприятия! Ошибка получения запущенного расписания" +
-                                " с мероприятием %d, список расписаний либо пуст либо содержит более 1 элемента: %s",
-                        arrangement.getId(),
-                        schedules.toString());
+                                " с мероприятием %d, список расписаний пуст",
+                        arrangement.getId());
+
                 log.error(errorDescription);
                 return ResponseEntity.badRequest().body(errorDescription);
             }
+
+            runningSchedules.forEach(schedule -> {
+                log.info("Мероприятие {} из расписания {} остановлено, закрываем schedulePeriodArrangements", arrangement.getId(), schedule.getId());
+
+                closeSchedulePeriodArrangements(arrangement, schedule.getId());
+                saveScheduledState(arrangement, schedule.getId(), false);
+
+                finishSchedule(arrangement);
+            });
+            return ResponseEntity.ok().build();
         }
     }
 
@@ -160,6 +158,7 @@ public class ArrangementService {
         refreshStoppedArrangement(arrangement);
         arrangement.setIsScheduled(false);
         arrangementRepo.save(arrangement);
+
         try {
             scheduleRepo
                     .findByArrangement(arrangement.getId())
@@ -170,7 +169,7 @@ public class ArrangementService {
         }
     }
 
-    private void checkAndCloseSchedule(Schedule schedule){
+    private void checkAndCloseSchedule(Schedule schedule) {
         log.info("Проверка, необходимо ли закрыть расписание, id = ", schedule.getId());
         boolean needToClose = arrangementRepo.findAllBySchedule(schedule.getId())
                 .stream()
