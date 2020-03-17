@@ -222,13 +222,14 @@ public class FormalTaskController {
 		Pageable page = PageRequest.of(
 				pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
 
-        List<ExecutionStatus> statuses = Arrays.asList(ExecutionStatus.STOPPED, ExecutionStatus.FORMED, ExecutionStatus.STOPPED_BY_SERVICE_MODE);
+        List<ExecutionStatus> statuses = Arrays.asList(ExecutionStatus.STOPPED, ExecutionStatus.FORMED);
         Page<FormalTask> result = formalTaskRepo.findByArrangementStatus(statuses, page);
 		List<FormalTask> filteredResults = result.stream().map(formalTask -> {
 			List<Arrangement> goodArr = formalTask.getArrangements().stream()
 										.filter(arrangement ->
 															 arrangement.getStatus().equals(ExecutionStatus.STOPPED) ||
-														     arrangement.getStatus().equals(ExecutionStatus.FORMED))
+														     arrangement.getStatus().equals(ExecutionStatus.FORMED) ||
+														     arrangement.getStatus().equals(ExecutionStatus.STOPPED_BY_SERVICE_MODE))
 										.collect(Collectors.toList());
 						formalTask.setArrangements(goodArr);
 						return formalTask;
