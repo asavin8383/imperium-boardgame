@@ -31,7 +31,7 @@ public class ScheduleCreationService {
         if(schedule.getSchedulePeriods().size() == 0)
             throw new AS_15_8_PPM_Exception("Ошибка формирования расписания! Не было сформировано ни одного периода!");
         //Меняем статус, чтобы мероприятия пропали из списка допустимых
-        updateIsSheduledState(arrangementCheckUnits.keySet(), true);
+        updateIsSheduledState(arrangementCheckUnits.keySet(), false);
         return schedule;
     }
 
