@@ -78,12 +78,11 @@ public class ArrangementStateMachine {
                     .source(ExecutionStatus.STOPPING).target(ExecutionStatus.STOPPED)
                     .event(ArrangementEvents.STOP)
 
-
-
                     .and()
                     .withExternal()
                     .source(ExecutionStatus.RUNNING).target(ExecutionStatus.STOPPED_BY_MAX_CHECK_UNITS)
                     .event(ArrangementEvents.STOP_BY_MAX_CHECK_UNITS_COUNT)
+
                     .and()
                     .withExternal()
                     .source(ExecutionStatus.RUNNING).target(ExecutionStatus.STOPPED_BY_SERVICE_MODE)
@@ -184,6 +183,11 @@ public class ArrangementStateMachine {
                     .withExternal()
                     .source(ExecutionStatus.STOPPED_BY_MAX_CHECK_UNITS).target(ExecutionStatus.FINISHED)
                     .event(ArrangementEvents.FINISH)
+
+                    .and()
+                    .withExternal()
+                    .source(ExecutionStatus.STOPPED_BY_SERVICE_MODE).target(ExecutionStatus.SCHEDULED)
+                    .event(ArrangementEvents.SCHEDULE)
 
             ;
 
