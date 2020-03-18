@@ -139,7 +139,6 @@ public class ArrangementService {
         final ArrangementStopEvent event = new ArrangementStopEvent(arrangementId, version);
         arrangementStopEventProducer.send(event);
 
-        //arrangementRestApi.sendStatusNotificationToPPT(arrangementId, true);
         sendStatusNotificationToPPT(new ArrangementStatusNotification(
                 arrangement.getId(),
                 ArrangementEvents.PREPARE_TO_STOP
@@ -147,14 +146,18 @@ public class ArrangementService {
     }
 
     @Transactional
-    public void finishArrangement(Long arrangementId) {
+    public boolean finishArrangement(Long arrangementId) {
         Arrangement arrangement = arrangementRepo
                 .findById(arrangementId)
-                .orElseThrow(() -> new AS_15_8_DispatcherException("Ошибка остановки мероприятия. Мероприятие не найдено по ID: " + arrangementId));
+                .orElseThrow(() -> new AS_15_8_DispatcherException("Ошибка завершения мероприятия. Мероприятие не найдено по ID: " + arrangementId));
         arrangement.setStatus(ArrangementStatus.FINISHED);
         arrangementRepo.save(arrangement);
 
-        sendStopOrFinishedStatusNotificationToPPT(arrangementId, false);
+        if (sendStatusNotificationToPPT(new ArrangementStatusNotification(
+                arrangement.getId(),
+                ArrangementEvents.FINISH))) {
+            return true;
+        } else return false;
     }
 
     public synchronized boolean isArrangementRunning(Long arrangementId, Long version) {
