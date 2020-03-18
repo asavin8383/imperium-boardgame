@@ -66,7 +66,8 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
 
     private boolean notifyPPMAboutStopEvent(ArrangementStatusNotification notification) {
         if (notification.getEvent().equals(ArrangementEvents.STOP)) {
-            log.info("Отправка события STOP в ППМ, arrangementId = " + notification.getArrangementId());
+            log.info("Отправка события STOP в ППМ, arrangementId = {}, событие: {}",
+                    notification.getArrangementId(), notification.getEvent());
             return createPutRequest(notification, PPM_STOP_ENDPOINT);
         } else {
             log.warn("Ошибка отправки события STOP в ППМ, arrangementId = " + notification.getArrangementId());
@@ -76,7 +77,8 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
 
     private boolean notifyPPMAboutFinishEvent(ArrangementStatusNotification notification) {
         if (notification.getEvent().equals(ArrangementEvents.FINISH)) {
-            log.info("Отправка события FINISH в ППМ, arrangementId = " + notification.getArrangementId());
+            log.info("Отправка события FINISH в ППМ, arrangementId = {}, событие: {}",
+                    notification.getArrangementId(), notification.getEvent());
             return createPutRequest(notification, PPM_FINISH_ENDPOINT);
         } else {
             return true;
