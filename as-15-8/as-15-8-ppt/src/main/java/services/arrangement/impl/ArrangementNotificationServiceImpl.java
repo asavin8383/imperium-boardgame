@@ -55,7 +55,7 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
                 if (!notifyPPMAboutFinishEvent(arrangementStatusNotification)) {
                     return false;
                 }
-                return processNotificationInPPM(arrangement, arrangementStatusNotification);
+                return processNotificationInPPT(arrangement, arrangementStatusNotification);
 
             })
             .orElseGet(() -> {
@@ -65,22 +65,29 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
     }
 
     private boolean notifyPPMAboutStopEvent(ArrangementStatusNotification notification) {
-        if (notification.getEvent().equals(ArrangementEvents.STOP)) {
-            log.info("Отправка события STOP в ППМ, arrangementId = {}, событие: {}",
-                    notification.getArrangementId(), notification.getEvent());
+        if (notification.getEvent().equals(ArrangementEvents.STOP ) ||
+                notification.getEvent().equals(ArrangementEvents.STOP_BY_SERVICE_MODE)) {
+
+            log.info("Отправка события {} в ППМ, arrangementId = {}",
+                    notification.getEvent(), notification.getArrangementId());
+
             return createPutRequest(notification, PPM_STOP_ENDPOINT);
         } else {
-            log.warn("Ошибка отправки события STOP в ППМ, arrangementId = " + notification.getArrangementId());
+            log.info("Ошибка отправки события STOP в ППМ, arrangementId = {}, событие: {}",
+                    notification.getArrangementId(), notification.getEvent());
             return true;
         }
     }
 
     private boolean notifyPPMAboutFinishEvent(ArrangementStatusNotification notification) {
         if (notification.getEvent().equals(ArrangementEvents.FINISH)) {
-            log.info("Отправка события FINISH в ППМ, arrangementId = {}, событие: {}",
-                    notification.getArrangementId(), notification.getEvent());
+            log.info("Отправка события FINISH в ППМ, arrangementId = {}",
+                    notification.getArrangementId());
+
             return createPutRequest(notification, PPM_FINISH_ENDPOINT);
         } else {
+            log.info("Ошибка отправки события FINISH в ППМ, arrangementId = {}, событие: {}",
+                    notification.getArrangementId(), notification.getEvent());
             return true;
         }
     }
@@ -107,7 +114,7 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
         return true;
     }
 
-    private boolean processNotificationInPPM(Arrangement arrangement, ArrangementStatusNotification arrangementStatusNotification) {
+    private boolean processNotificationInPPT(Arrangement arrangement, ArrangementStatusNotification arrangementStatusNotification) {
         arrangement.sendEvent(arrangementStatusNotification.getEvent(), arrangementStatusNotification.getEventDate());
         try {
             arrangementStatusService.processArrangementStatusChange(arrangement);
