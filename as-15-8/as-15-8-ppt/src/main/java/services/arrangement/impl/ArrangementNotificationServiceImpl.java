@@ -69,12 +69,14 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
                 notification.getEvent().equals(ArrangementEvents.STOP_BY_SERVICE_MODE)) {
 
             log.info("Отправка события {} в ППМ, arrangementId = {}",
-                    notification.getEvent(), notification.getArrangementId());
+                    notification.getEvent(),
+                    notification.getArrangementId());
 
             return createPutRequest(notification, PPM_STOP_ENDPOINT);
         } else {
             log.info("Ошибка отправки события STOP в ППМ, arrangementId = {}, событие: {}",
-                    notification.getArrangementId(), notification.getEvent());
+                    notification.getArrangementId(),
+                    notification.getEvent());
             return true;
         }
     }
@@ -87,7 +89,8 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
             return createPutRequest(notification, PPM_FINISH_ENDPOINT);
         } else {
             log.info("Ошибка отправки события FINISH в ППМ, arrangementId = {}, событие: {}",
-                    notification.getArrangementId(), notification.getEvent());
+                    notification.getArrangementId(),
+                    notification.getEvent());
             return true;
         }
     }
@@ -99,7 +102,10 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
         MappingJacksonValue jacksonValue = new MappingJacksonValue(notification);
         HttpEntity<MappingJacksonValue> entity = new HttpEntity<>(jacksonValue, headers);
 
-        log.info("Отправка сообщения с изменением статуса мероприятия {} в ППМ, путь: {} " + path, notification.getArrangementId());
+        log.info("Отправка сообщения с изменением статуса мероприятия {} в ППМ, путь: {}, событие {} ",
+                notification.getArrangementId(),
+                notification.getArrangementId(),
+                notification.getEvent());
         try {
             restTemplate.put(UriComponentsBuilder
                     .fromHttpUrl(gatewayUrl)
@@ -121,7 +127,7 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
             log.info("Статус мероприятия {} сменился в ППТ на: {} ", arrangement.getId(), arrangement.getStatus());
             return true;
         } catch (Exception ex) {
-            log.error("не удалось сменить статус мероприятия в ППТ {} на {} ", arrangement.getId(), arrangement.getStatus(), ex);
+            log.error("не удалось сменить статус мероприятия {} в ППТ на {} ", arrangement.getId(), arrangement.getStatus(), ex);
             return false;
         }
     }
