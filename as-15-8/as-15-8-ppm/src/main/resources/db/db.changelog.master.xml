@@ -24,4 +24,5 @@
     <include file="db/changelog/ppm.0043.description.xml"/>
     <include file="db/changelog/ppm.0044.ck_status_stopped_by_service_mode_stopped_by_check_units_count.xml"/>
     <include file="db/changelog/ppm.0045.arrangement_isScheduled_add.xml"/>
+    <include file="db/changelog/ppm.0046.schedule_contains_stopped_arrs.xml"/>
 </databaseChangeLog>

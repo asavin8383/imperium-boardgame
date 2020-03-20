@@ -124,10 +124,11 @@ public class ScheduleController {
     @GetMapping(path = "/has_stopped")
     @JsonView(Views.Full.class)
     public boolean hasStoppedArrangements(@RequestParam("id") Schedule schedule) {
-        return schedule.getContainsStoppedArrangements();
+        if (schedule != null)
+            return schedule.getContainsStoppedArrangements();
+        else return false;
         /*return arrangementRepo.findAllBySchedule(schedule.getId()).stream()
                 .anyMatch(arrangement -> !arrangement.getIsScheduled());*/
-
     }
 
         @GetMapping(path = "/total_workers_count")

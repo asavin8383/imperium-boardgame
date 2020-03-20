@@ -55,10 +55,9 @@ public class Schedule {
     @ToString.Include
     private String description;
 
-    @Transient
     @JsonView(Views.Brief.class)
     @ToString.Include
-    private Boolean containsStoppedArrangements = false;
+    private Boolean containsStoppedArrangements;
 
     @OneToMany(cascade=CascadeType.ALL, mappedBy = "schedule")
     @JsonView(Views.Full.class)
