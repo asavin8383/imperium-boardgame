@@ -109,7 +109,7 @@ public class ArrangementService {
                 });
     }
 
-    public void saveScheduledState(Arrangement arrangement, Long scheduleId, Boolean isScheduled) {
+    public void saveArrangementState(Arrangement arrangement, Long scheduleId, Boolean isScheduled) {
         log.info("Меняем статус мероприятию в ППМ {} из расписания {} на isScheduled = {} ", arrangement.getId(), scheduleId, isScheduled);
         arrangement.setIsScheduled(isScheduled);
         arrangementRepo.save(arrangement);
@@ -145,8 +145,8 @@ public class ArrangementService {
                 log.info("Мероприятие {} из расписания {} остановлено, закрываем schedulePeriodArrangements", arrangement.getId(), schedule.getId());
 
                 closeSchedulePeriodArrangements(arrangement, schedule.getId());
-                saveScheduledState(arrangement, schedule.getId(), false);
-
+                saveArrangementState(arrangement, schedule.getId(), false);
+                madeSheduleIsStopped(schedule, true);
                 finishSchedule(arrangement);
             });
             return ResponseEntity.ok().build();
@@ -181,5 +181,10 @@ public class ArrangementService {
         } else {
             log.info("Статус расписания не изменился! id = ", schedule.getId());
         }
+    }
+
+    private void madeSheduleIsStopped(Schedule schedule, Boolean containsStoppedArrangements) {
+        schedule.setContainsStoppedArrangements(containsStoppedArrangements);
+        scheduleRepo.save(schedule);
     }
 }
