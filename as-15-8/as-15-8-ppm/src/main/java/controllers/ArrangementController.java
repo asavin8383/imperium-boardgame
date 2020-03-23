@@ -105,7 +105,7 @@ public class ArrangementController {
     @PutMapping(value = "/stop")
     @PreAuthorize("hasRole('ROLE_SYSTEM')")
     @Transactional
-    public ResponseEntity stopArrangement(@RequestParam("id") Arrangement arrangement){
+    public ResponseEntity stopArrangement(@RequestParam("id") Arrangement arrangement) {
         if (arrangement == null){
             return ResponseEntity.noContent().build();
         }
@@ -115,7 +115,7 @@ public class ArrangementController {
     @PutMapping(value = "/finish")
     @PreAuthorize("hasRole('ROLE_SYSTEM')")
     @Transactional
-    public ResponseEntity finishSchedule(@RequestParam("id") Arrangement arrangement){
+    public ResponseEntity finishSchedule(@RequestParam("id") Arrangement arrangement) {
         if (arrangement == null){
             return ResponseEntity.noContent().build();
         }
