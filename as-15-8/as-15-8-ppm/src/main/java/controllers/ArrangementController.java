@@ -107,7 +107,7 @@ public class ArrangementController {
     @Transactional
     public ResponseEntity stopArrangement(@RequestBody ArrangementStatusNotification arrangementStatusNotification) {
         if (arrangementStatusNotification == null) {
-            log.warn("Останов мероприятие невозможен, arrangementStatusNotification == null");
+            log.warn("Останов мероприятия невозможен, arrangementStatusNotification == null");
             return ResponseEntity.noContent().build();
         }
         log.info("Вызван останов мероприятия id = {}, причина = {}, % выполнения = {} ",
@@ -121,11 +121,12 @@ public class ArrangementController {
     @PutMapping(value = "/finish")
     @PreAuthorize("hasRole('ROLE_SYSTEM')")
     @Transactional
-    public ResponseEntity finishSchedule(@RequestParam("id") Arrangement arrangement) {
-        if (arrangement == null){
+    public ResponseEntity finishSchedule(@RequestBody ArrangementStatusNotification arrangementStatusNotification) {
+        if (arrangementStatusNotification == null) {
+            log.warn("Завершение мероприятия невозможно, arrangementStatusNotification == null");
             return ResponseEntity.noContent().build();
         }
-        return arrangementService.finishSchedule(arrangement);
+        return arrangementService.finishSchedule(arrangementStatusNotification);
     }
 
     /**

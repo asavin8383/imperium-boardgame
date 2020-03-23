@@ -149,14 +149,16 @@ public class ArrangementService {
                 closeSchedulePeriodArrangements(arrangement, schedule.getId());
                 saveArrangementState(arrangement, schedule.getId(), false);
                 madeSheduleIsStopped(schedule, true);
-                finishSchedule(arrangement);
+                finishSchedule(arrangementStatusNotification);
                 fillStoppedArrangementsTable(arrangementStatusNotification, schedule);
             });
             return ResponseEntity.ok().build();
         }
     }
 
-    public ResponseEntity finishSchedule(Arrangement arrangement) {
+    public ResponseEntity finishSchedule(ArrangementStatusNotification arrangementStatusNotification) {
+        Arrangement arrangement = arrangementRepo.findById(arrangementStatusNotification.getArrangementId()).orElseThrow(() ->
+                new AS_15_8_PPM_Exception("Невозможно завершить расписание, мероприятие не существует id = " + arrangementStatusNotification.getArrangementId()));
         //Проверка, не нужно ли закрыть расписание
         refreshStoppedArrangement(arrangement);
         arrangement.setIsScheduled(false);
