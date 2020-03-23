@@ -10,9 +10,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 
 @Data
 @ToString(onlyExplicitlyIncluded = true)
@@ -63,6 +61,10 @@ public class Schedule {
     @JsonView(Views.Full.class)
     @OrderBy("startTime")
     private SortedSet<SchedulePeriod> schedulePeriods = new TreeSet<>(Comparator.comparing(SchedulePeriod::getStartTime));
+
+    @OneToMany(cascade=CascadeType.ALL, mappedBy = "schedule")
+    @JsonView(Views.Full.class)
+    private final List<StoppedArrangement> stoppedArrangements = new ArrayList<>();
 
     public Schedule(){
         this.creationDate = LocalDateTime.now();

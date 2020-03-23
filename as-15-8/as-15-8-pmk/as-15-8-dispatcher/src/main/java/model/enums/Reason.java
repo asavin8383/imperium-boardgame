@@ -1,7 +1,14 @@
 package model.enums;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@AllArgsConstructor
 public enum Reason {
-    STOPPED_BY_SERVICE_MODE,
-    STOPPED_BY_MAX_CHECK_UNITS_COUNT,
-    MANUAL
+    STOPPED_BY_SERVICE_MODE("Остановлено при переходе в сервисный режим"),
+    STOPPED_BY_MAX_CHECK_UNITS_COUNT("Отсановлено по превышению ИРТЗ"),
+    MANUAL("Остановлено пользователем");
+
+    @Getter
+    private String description;
 }

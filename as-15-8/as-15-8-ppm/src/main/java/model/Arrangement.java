@@ -15,12 +15,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**Мероприятие в рамках формализованного задания*/
-
 @Entity
 @Table(schema="schedule", name="arrangements")
 @Data
 @ToString(onlyExplicitlyIncluded = true)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+
 public class Arrangement implements Serializable {
 
     private static final long serialVersionUID = 1L;

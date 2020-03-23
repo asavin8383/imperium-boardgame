@@ -1,11 +1,13 @@
 package services;
 
+import arrangement.ArrangementStatusNotification;
 import exceptions.AS_15_8_PPM_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Arrangement;
 import model.Schedule;
 import model.ScheduleCheckUnit;
+import model.StoppedArrangement;
 import model.enums.ScheduleStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,10 +16,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import repositories.ArrangementRepo;
-import repositories.ScheduleCheckUnitRepo;
-import repositories.SchedulePeriodArrangementRepo;
-import repositories.ScheduleRepo;
+import repositories.*;
 import webClients.DispatcherWebClient;
 
 import java.time.LocalDate;
@@ -43,6 +42,7 @@ public class ArrangementService {
     private final SchedulePeriodArrangementRepo schedulePeriodArrangementRepo;
     private final ScheduleRepo scheduleRepo;
     private final DispatcherWebClient dispatcherWebClient;
+    private final StoppedArrangementsRepo stoppedArrangementsRepo;
 
     public void updateArrangementPlanInfo(Arrangement arrangement){
         if(arrangement.getPlannedStartTime()==null || arrangement.getPlannedEndTime() == null){
@@ -126,7 +126,9 @@ public class ArrangementService {
         return  schedules.get(0).getId();
     }
 
-    public ResponseEntity stop(Arrangement arrangement) {
+    public ResponseEntity stop(ArrangementStatusNotification arrangementStatusNotification) {
+        Arrangement arrangement = arrangementRepo.findById(arrangementStatusNotification.getArrangementId()).orElseThrow(() ->
+                new AS_15_8_PPM_Exception("Ошибка остановки мероприятия на ППМ, мероприятие не найдено в БД, id = " + arrangementStatusNotification.getArrangementId()));
         if(!arrangement.getIsScheduled()){
             return ResponseEntity.badRequest().body("Мероприятие с ID: " + arrangement.getId() + " имеет недопустимый статус для остановки, isScheduled = " + arrangement.getIsScheduled());
         } else {
@@ -148,6 +150,7 @@ public class ArrangementService {
                 saveArrangementState(arrangement, schedule.getId(), false);
                 madeSheduleIsStopped(schedule, true);
                 finishSchedule(arrangement);
+                fillStoppedArrangementsTable(arrangementStatusNotification, schedule);
             });
             return ResponseEntity.ok().build();
         }
@@ -186,5 +189,13 @@ public class ArrangementService {
     private void madeSheduleIsStopped(Schedule schedule, Boolean containsStoppedArrangements) {
         schedule.setContainsStoppedArrangements(containsStoppedArrangements);
         scheduleRepo.save(schedule);
+    }
+
+    private void fillStoppedArrangementsTable(ArrangementStatusNotification arrangementStatusNotification, Schedule schedule) {
+        StoppedArrangement stoppedArrangement = new StoppedArrangement();
+        stoppedArrangement.setArrangementId(arrangementStatusNotification.getArrangementId());
+        stoppedArrangement.setCompletionPerscent(arrangementStatusNotification.getCompletionPerscent());
+        stoppedArrangement.setSchedule(schedule);
+        stoppedArrangementsRepo.save(stoppedArrangement);
     }
 }

@@ -53,16 +53,7 @@ public class ArrangementController {
     @PreAuthorize("hasAnyRole('ROLE_VIEW_RESULT')")
     @GetMapping(path = "/completion")
     public long getArrangementCompletion(@RequestParam(name = "id", required = false) Arrangement arrangement){
-        return Optional.ofNullable(arrangement)
-        .map(arr -> {
-            Long checkUnits = arrangement.getCheckUnitsCount();
-
-            if (checkUnits == null || checkUnits == 0)
-                return 0L;
-
-            long arrangementsCount = resultsKafkaService.getResultsCount(arrangement.getId());
-            return Math.min(arrangementsCount * 100 / checkUnits, 100);
-        }).orElse(0L);
+        return arrangementService.getCompletionPerscent(arrangement);
     }
 
     @GetMapping("/stopped")

@@ -105,11 +105,17 @@ public class ArrangementController {
     @PutMapping(value = "/stop")
     @PreAuthorize("hasRole('ROLE_SYSTEM')")
     @Transactional
-    public ResponseEntity stopArrangement(@RequestParam("id") Arrangement arrangement) {
-        if (arrangement == null){
+    public ResponseEntity stopArrangement(@RequestBody ArrangementStatusNotification arrangementStatusNotification) {
+        if (arrangementStatusNotification == null) {
+            log.warn("Останов мероприятие невозможен, arrangementStatusNotification == null");
             return ResponseEntity.noContent().build();
         }
-        return arrangementService.stop(arrangement);
+        log.info("Вызван останов мероприятия id = {}, причина = {}, % выполнения = {} ",
+                arrangementStatusNotification.getArrangementId(),
+                arrangementStatusNotification.getEvent().getDescription(),
+                arrangementStatusNotification.getEventDate());
+
+        return arrangementService.stop(arrangementStatusNotification);
     }
 
     @PutMapping(value = "/finish")

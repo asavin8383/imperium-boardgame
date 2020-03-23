@@ -26,4 +26,5 @@
     <include file="db/changelog/ppm.0045.arrangement_isScheduled_add.xml"/>
     <include file="db/changelog/ppm.0046.schedule_contains_stopped_arrs.xml"/>
     <include file="db/changelog/ppm.0047.arrangement_status_remove.xml"/>
+    <include file="db/changelog/ppm.0048.stopped_arrangements_add.xml"/>
 </databaseChangeLog>

@@ -31,8 +31,17 @@ public class ArrangementStatusNotification {
     /**Дата события*/
     private LocalDateTime eventDate = LocalDateTime.now();
 
+    private Long completionPerscent;
+
     public ArrangementStatusNotification(Long arrangementId, ArrangementEvents event) {
         this.arrangementId = arrangementId;
         this.event = event;
+        this.completionPerscent = 0L;
+    }
+
+    public ArrangementStatusNotification(Long arrangementId, ArrangementEvents event, Long completionPerscent) {
+        this.arrangementId = arrangementId;
+        this.event = event;
+        this.completionPerscent = completionPerscent;
     }
 }

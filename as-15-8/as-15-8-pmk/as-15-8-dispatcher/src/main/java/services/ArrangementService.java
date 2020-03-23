@@ -141,7 +141,8 @@ public class ArrangementService {
 
         sendStatusNotificationToPPT(new ArrangementStatusNotification(
                 arrangement.getId(),
-                ArrangementEvents.PREPARE_TO_STOP
+                ArrangementEvents.PREPARE_TO_STOP,
+                getCompletionPerscent(arrangement)
         ));
     }
 
@@ -155,7 +156,8 @@ public class ArrangementService {
 
         if (sendStatusNotificationToPPT(new ArrangementStatusNotification(
                 arrangement.getId(),
-                ArrangementEvents.FINISH))) {
+                ArrangementEvents.FINISH,
+                getCompletionPerscent(arrangement)))) {
             return true;
         } else return false;
     }
@@ -332,13 +334,18 @@ public class ArrangementService {
             case MANUAL:
                 notification = new ArrangementStatusNotification(
                         arrangementId,
-                        isStopped ? ArrangementEvents.STOP : ArrangementEvents.FINISH);
+                        isStopped ? ArrangementEvents.STOP : ArrangementEvents.FINISH,
+                        getCompletionPerscent(arr));
                 break;
             case STOPPED_BY_MAX_CHECK_UNITS_COUNT:
-                notification = new ArrangementStatusNotification(arrangementId, ArrangementEvents.STOP_BY_MAX_CHECK_UNITS_COUNT);
+                notification = new ArrangementStatusNotification(arrangementId,
+                        ArrangementEvents.STOP_BY_MAX_CHECK_UNITS_COUNT,
+                        getCompletionPerscent(arr));
                 break;
             case STOPPED_BY_SERVICE_MODE:
-                notification = new ArrangementStatusNotification(arrangementId, ArrangementEvents.STOP_BY_SERVICE_MODE);
+                notification = new ArrangementStatusNotification(arrangementId,
+                        ArrangementEvents.STOP_BY_SERVICE_MODE,
+                        getCompletionPerscent(arr));
                 break;
         }
 
@@ -392,5 +399,21 @@ public class ArrangementService {
                 .queryParam("id", arrangementId)
                 .build()
                 .toString();
+    }
+
+    public Long getCompletionPerscent(Arrangement arrangement) {
+        /*Arrangement arrangement = arrangementRepo.findById(arrangementId).orElseThrow(() ->
+                new AS_15_8_DispatcherException("Ошибка расчёта % выполнения для мероприятия id =  " + arrangementId));
+        */
+        return Optional.ofNullable(arrangement)
+                .map(arr -> {
+                    Long checkUnits = arrangement.getCheckUnitsCount();
+
+                    if (checkUnits == null || checkUnits == 0)
+                        return 0L;
+
+                    long arrangementsCount = resultsKafkaService.getResultsCount(arrangement.getId());
+                    return Math.min(arrangementsCount * 100 / checkUnits, 100);
+                }).orElse(0L);
     }
 }
