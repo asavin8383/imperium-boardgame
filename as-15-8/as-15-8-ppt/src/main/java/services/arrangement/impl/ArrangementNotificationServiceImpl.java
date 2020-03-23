@@ -110,7 +110,7 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
             restTemplate.put(UriComponentsBuilder
                     .fromHttpUrl(gatewayUrl)
                     .path(path)
-                    .queryParam("id", notification.getArrangementId())
+                    //.queryParam("id", notification.getArrangementId())
                     .build().toString(), entity);
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
             log.info("Ошибка отправки сообщения с изменением статуса мероприятия в ППМ, путь: {}, ошибка: {} ", path, ex);
