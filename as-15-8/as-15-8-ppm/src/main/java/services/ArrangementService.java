@@ -194,6 +194,7 @@ public class ArrangementService {
     private void fillStoppedArrangementsTable(ArrangementStatusNotification arrangementStatusNotification, Schedule schedule) {
         StoppedArrangement stoppedArrangement = new StoppedArrangement();
         stoppedArrangement.setArrangementId(arrangementStatusNotification.getArrangementId());
+        stoppedArrangement.setStoppingReason(arrangementStatusNotification.getEvent().getDescription());
         stoppedArrangement.setCompletionPerscent(arrangementStatusNotification.getCompletionPerscent());
         stoppedArrangement.setSchedule(schedule);
         stoppedArrangementsRepo.save(stoppedArrangement);

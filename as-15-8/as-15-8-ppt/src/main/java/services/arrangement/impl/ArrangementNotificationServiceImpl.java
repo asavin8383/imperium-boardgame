@@ -104,7 +104,7 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
 
         log.info("Отправка сообщения с изменением статуса мероприятия {} в ППМ, путь: {}, событие {} ",
                 notification.getArrangementId(),
-                notification.getArrangementId(),
+                path,
                 notification.getEvent());
         try {
             restTemplate.put(UriComponentsBuilder
