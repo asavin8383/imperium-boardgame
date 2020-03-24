@@ -84,15 +84,6 @@ public class ResultService {
         }
     }
 
-    /*@Scheduled(cron = "${results.save.schedule}")
-    public void stotLastDayArrangements() {
-        try {
-            arrangementService.stopAllRunningArrangements(Reason.STOPPED_BY_DAY_GONE);
-        } catch (Exception ex){
-            log.error("Ошибка при сохранении результатов мероприятий", ex);
-        }
-    }*/
-
     public void saveArrangementResults(Long arrangementId){
         Arrangement arrangement = arrangementRepo
                 .findById(arrangementId)
