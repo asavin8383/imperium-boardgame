@@ -39,8 +39,8 @@ public interface FormalTaskRepository extends JpaRepository<FormalTask, Long>, F
 	FormalTask findByFgisId(String fgisId);
 
 	@Query(value = "select f from FormalTask f " +
-			"join f.arrangements a " +
-			" on a.status in :statuses")
+						"join f.arrangements a " +
+						" on a.status in :statuses")
 
 	Page<FormalTask> findByArrangementStatus(@Param("statuses") List<ExecutionStatus> statuses, Pageable page);
 
