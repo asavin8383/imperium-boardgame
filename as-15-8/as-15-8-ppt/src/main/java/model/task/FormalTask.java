@@ -79,7 +79,7 @@ public class FormalTask implements Serializable {
 
 	/**Список мероприятий по заданию*/
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "formalTask")
-	@OrderBy
+	@OrderBy("id DESC")
 	@JsonView(Views.FormalTaskWithArrangement.class)
 	private List<Arrangement> arrangements = new ArrayList<>();
 	
