@@ -191,6 +191,11 @@ public class ArrangementStateMachine {
 
                     .and()
                     .withExternal()
+                    .source(ExecutionStatus.STOPPED_BY_DAY_GONE).target(ExecutionStatus.SCHEDULED)
+                    .event(ArrangementEvents.SCHEDULE)
+
+                    .and()
+                    .withExternal()
                     .source(ExecutionStatus.STOPPED_BY_DAY_GONE).target(ExecutionStatus.ACT_SENT)
                     .event(ArrangementEvents.SEND_ACT)
 
