@@ -347,6 +347,11 @@ public class ArrangementService {
                         ArrangementEvents.STOP_BY_SERVICE_MODE,
                         getCompletionPerscent(arr));
                 break;
+            case STOPPED_BY_DAY_GONE:
+                notification = new ArrangementStatusNotification(arrangementId,
+                        ArrangementEvents.STOP_BY_DAY_GONE,
+                        getCompletionPerscent(arr));
+                break;
         }
 
         return notification;

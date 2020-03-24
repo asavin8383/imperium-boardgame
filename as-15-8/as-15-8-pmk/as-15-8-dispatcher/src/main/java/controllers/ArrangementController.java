@@ -82,4 +82,10 @@ public class ArrangementController {
         arrangementService.finishArrangement(id);
     }
 
+    @PutMapping("/stop_by_day_gone")
+    @PreAuthorize("hasAnyRole('ROLE_MANAGE_ARRANGEMENT')")
+    public void stopAllArrsByDayGone(@RequestParam Long id) {
+        arrangementService.stopAllRunningArrangements(Reason.STOPPED_BY_DAY_GONE);
+    }
+
 }

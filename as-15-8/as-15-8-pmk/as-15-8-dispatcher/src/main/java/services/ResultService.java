@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import model.*;
 import model.enums.ArrangementStatus;
 import model.enums.CheckType;
+import model.enums.Reason;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.logging.log4j.util.Strings;
 import org.hibernate.query.NativeQuery;
@@ -82,6 +83,15 @@ public class ResultService {
             log.error("Ошибка при сохранении результатов мероприятий", ex);
         }
     }
+
+    /*@Scheduled(cron = "${results.save.schedule}")
+    public void stotLastDayArrangements() {
+        try {
+            arrangementService.stopAllRunningArrangements(Reason.STOPPED_BY_DAY_GONE);
+        } catch (Exception ex){
+            log.error("Ошибка при сохранении результатов мероприятий", ex);
+        }
+    }*/
 
     public void saveArrangementResults(Long arrangementId){
         Arrangement arrangement = arrangementRepo
