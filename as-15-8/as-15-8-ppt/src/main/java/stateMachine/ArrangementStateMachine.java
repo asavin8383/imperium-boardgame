@@ -210,6 +210,11 @@ public class ArrangementStateMachine {
                     .source(ExecutionStatus.STOPPED_BY_DAY_GONE).target(ExecutionStatus.FINISHED)
                     .event(ArrangementEvents.FINISH)
 
+                    .and()
+                    .withExternal()
+                    .source(ExecutionStatus.STOPPING).target(ExecutionStatus.FINISHED)
+                    .event(ArrangementEvents.FINISH)
+
             ;
 
         } catch (Exception ex) {
