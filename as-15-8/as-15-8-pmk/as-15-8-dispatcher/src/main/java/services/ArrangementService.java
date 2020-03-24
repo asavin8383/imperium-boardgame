@@ -84,6 +84,17 @@ public class ArrangementService {
         stoppedArrangements.clear();
     }
 
+    //@Scheduled(cron = "0 0 0 * * ?")
+    @Scheduled(cron = "0 20 12 ? * * *")
+    public void stopAllRunningArrangementsByDayGone() {
+        try {
+            log.info("Попытка завершения всех мероприятий по шедулеру на текущий день");
+            stopAllRunningArrangements(Reason.MANUAL);
+        } catch (Exception ex){
+            log.error("Ошибка при остановке мероприятий по окончанию для ", ex);
+        }
+    }
+
     @CacheEvict(value = "maxCheckUnitsCount", allEntries = true)
     public void evictCaches() {}
 
