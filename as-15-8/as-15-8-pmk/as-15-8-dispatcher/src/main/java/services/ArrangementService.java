@@ -87,12 +87,12 @@ public class ArrangementService {
         stoppedArrangements.clear();
     }
 
-    @Scheduled(cron = "0 0/5 0 ? * * *")
+    @Scheduled(cron = "0 0/5 0 ? * *")
     public void stopAllRunningArrangementsByDayGone() {
         try {
             stopAllRunningArrangements(Reason.STOPPED_BY_DAY_GONE);
         } catch (Exception ex){
-            log.error("Ошибка при остановке мероприй по кончанию для ", ex);
+            log.error("Ошибка при остановке мероприятий по кончанию для ", ex);
         }
     }
 
