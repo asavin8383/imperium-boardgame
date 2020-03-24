@@ -189,6 +189,27 @@ public class ArrangementStateMachine {
                     .source(ExecutionStatus.STOPPED_BY_SERVICE_MODE).target(ExecutionStatus.SCHEDULED)
                     .event(ArrangementEvents.SCHEDULE)
 
+                    .and()
+                    .withExternal()
+                    .source(ExecutionStatus.STOPPED_BY_DAY_GONE).target(ExecutionStatus.ACT_SENT)
+                    .event(ArrangementEvents.SEND_ACT)
+
+                    .and()
+                    .withExternal()
+                    .source(ExecutionStatus.RUNNING).target(ExecutionStatus.STOPPED_BY_DAY_GONE)
+                    .event(ArrangementEvents.STOP_BY_DAY_GONE)
+
+
+                    .and()
+                    .withExternal()
+                    .source(ExecutionStatus.STOPPING).target(ExecutionStatus.STOPPED_BY_DAY_GONE)
+                    .event(ArrangementEvents.STOP_BY_DAY_GONE)
+
+                    .and()
+                    .withExternal()
+                    .source(ExecutionStatus.STOPPED_BY_DAY_GONE).target(ExecutionStatus.FINISHED)
+                    .event(ArrangementEvents.FINISH)
+
             ;
 
         } catch (Exception ex) {

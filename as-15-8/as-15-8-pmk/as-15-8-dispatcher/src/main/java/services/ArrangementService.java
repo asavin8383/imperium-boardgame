@@ -185,6 +185,8 @@ public class ArrangementService {
                     case MANUAL:
                         arr.setStatus(ArrangementStatus.STOPPED);
                         break;
+                    case STOPPED_BY_DAY_GONE:
+                        arr.setStatus(ArrangementStatus.STOPPED_BY_DAY_GONE);
                 }
             }
             arrangementRepo.save(arr);
