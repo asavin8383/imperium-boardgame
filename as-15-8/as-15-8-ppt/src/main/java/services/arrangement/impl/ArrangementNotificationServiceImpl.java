@@ -66,7 +66,8 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
 
     private boolean notifyPPMAboutStopEvent(ArrangementStatusNotification notification) {
         if (notification.getEvent().equals(ArrangementEvents.STOP ) ||
-                notification.getEvent().equals(ArrangementEvents.STOP_BY_SERVICE_MODE)) {
+                notification.getEvent().equals(ArrangementEvents.STOP_BY_SERVICE_MODE) ||
+                notification.getEvent().equals(ArrangementEvents.STOP_BY_MAX_CHECK_UNITS_COUNT)) {
 
             log.info("Отправка события {} в ППМ, arrangementId = {}",
                     notification.getEvent(),
