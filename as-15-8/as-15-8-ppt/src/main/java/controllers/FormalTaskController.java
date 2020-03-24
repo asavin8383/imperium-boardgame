@@ -224,9 +224,22 @@ public class FormalTaskController {
 
         List<ExecutionStatus> arrangementStatuses = Arrays.asList(ExecutionStatus.STOPPED,
 				ExecutionStatus.STOPPED_BY_SERVICE_MODE,
-				ExecutionStatus.FORMED);
+				ExecutionStatus.FORMED,
+				ExecutionStatus.STOPPED_BY_DAY_GONE);
 
         Page<FormalTask> result = formalTaskRepo.findByArrangementStatus(arrangementStatuses, page);
-		return result;
+		List<FormalTask> filteredResults = result.stream().map(formalTask -> {
+			List<Arrangement> goodArr = formalTask.getArrangements().stream()
+					.filter(arrangement ->
+							arrangement.getStatus().equals(ExecutionStatus.STOPPED) ||
+									arrangement.getStatus().equals(ExecutionStatus.FORMED) ||
+									arrangement.getStatus().equals(ExecutionStatus.STOPPED_BY_SERVICE_MODE) ||
+									arrangement.getStatus().equals(ExecutionStatus.STOPPED_BY_DAY_GONE))
+					.collect(Collectors.toList());
+			formalTask.setArrangements(goodArr);
+			return formalTask;
+		}).collect(Collectors.toList());
+
+		return new PageImpl<>(filteredResults, page, filteredResults.size());
     }
 }

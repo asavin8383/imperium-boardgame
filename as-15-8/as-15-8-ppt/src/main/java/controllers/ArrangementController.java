@@ -103,7 +103,7 @@ public class ArrangementController {
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public Arrangement update(@RequestBody Arrangement newArrangement, @RequestParam("id") Arrangement arrangement) {
-        if(arrangement == null){
+        if(arrangement == null) {
             throw new AS_15_8_PPT_Exception("Ошибка изменения мероприятия! Мероприятие не было найдено в БД");
         } else if (arrangement.getStatus() != ExecutionStatus.NEW) {
             throw new AS_15_8_PPT_Exception("Ошибка изменения мероприятия! Неверный статус: " + arrangement.getStatus().getDescription());
