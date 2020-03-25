@@ -6,6 +6,7 @@ import helpers.SortingHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Arrangement;
+import model.Schedule;
 import model.ScheduleCheckUnit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -18,8 +19,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import repositories.ScheduleCheckUnitRepo;
-import repositories.SchedulePeriodCheckUnitRepo;
+import repositories.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Created by san
@@ -34,6 +38,8 @@ public class CheckUnitController {
 
     private final ScheduleCheckUnitRepo scheduleCheckUnitRepo;
     private final SchedulePeriodCheckUnitRepo schedulePeriodCheckUnitRepo;
+    private final ScheduleRepo scheduleRepo;
+    private final ArrangementRepo arrangementRepo;
 
     @GetMapping
     public Page<ScheduleCheckUnit> findPage(
@@ -51,17 +57,37 @@ public class CheckUnitController {
     }
 
     @GetMapping(path ="/arrangement_analytics")
-    public ResponseEntity getArrangementAnalytics(@RequestParam("id") Arrangement arrangement) {
-        if (arrangement == null)
-            throw new AS_15_8_PPM_Exception("Ошибка анализа запланированного мероприятия - оно не найдено в БД (возможно не заполнено)");
-        Long actualCheckUnits = scheduleCheckUnitRepo.findCheckUnitsCount(arrangement);
-        Long spcu = schedulePeriodCheckUnitRepo.getSchedulePeriodCheckUnitCount(arrangement.getId());
-        if (spcu < actualCheckUnits) {
-           return ResponseEntity.badRequest().body("Внимание! Планировщиком на конец дня для мероприятия id = " + arrangement.getId() +
-                    " запланировано (и лишь столько будет выполнено): " + spcu +
-                    " проверок. В мероприятие внесено " + actualCheckUnits +
-                    " проверок. Если вы хотите выполнить мероприятие целиком - следует запланировать мероприятие на следующий день.");
+    public ResponseEntity getArrangementAnalytics(@RequestParam("id") Schedule schedule) {
+        if (schedule == null)
+            throw new AS_15_8_PPM_Exception("Ошибка анализа запланированных мероприятий для расписания");
+
+        List<Long> arrangementIds = new ArrayList();
+        schedule.getSchedulePeriods().forEach(schedulePeriod -> {
+            schedulePeriod.getSchedulePeriodArrangements().forEach(schedulePeriodArrangement -> {
+                arrangementIds.add(schedulePeriodArrangement.getArrangement().getId());
+            });
+        });
+
+        List<String> notifications = analyzeArrangement(arrangementIds);
+        if (!notifications.isEmpty()) {
+            return ResponseEntity.badRequest().body(notifications.get(0));
         } else return ResponseEntity.ok().build();
 
+    }
+
+    private List<String> analyzeArrangement(List<Long> arrangementIds) {
+        List<String> result = new ArrayList<>();
+        arrangementIds.forEach(id-> {
+            Optional<Arrangement> arr = arrangementRepo.findById(id);
+            Long actualCheckUnits = scheduleCheckUnitRepo.findCheckUnitsCount(arr.get());
+            Long spcu = schedulePeriodCheckUnitRepo.getSchedulePeriodCheckUnitCount(id);
+            if (spcu < actualCheckUnits) {
+                result.add("Внимание! Планировщиком на конец дня для мероприятия id = " + id +
+                        " запланировано (и лишь столько будет выполнено): " + spcu +
+                        " проверок. В мероприятие внесено " + actualCheckUnits +
+                        " проверок. Если вы хотите выполнить мероприятие целиком - следует запланировать мероприятие на следующий день.");
+            }
+        });
+        return result;
     }
 }
