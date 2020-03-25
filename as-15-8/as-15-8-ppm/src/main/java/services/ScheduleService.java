@@ -146,7 +146,7 @@ public class ScheduleService {
     }
 
     public int getFreeWorkersCount(LocalDate plannedDate, LocalTime startTime, LocalTime endTime){
-        return Math.max(schedulerProperties.getTotalWorkersCount() - scheduleRepo.getBusyWorkersCount(plannedDate, startTime, endTime), 0);
+        return Math.max(schedulerProperties.getTotalWorkersCount() - schedulePeriodRepo.getBusyWorkersCount(plannedDate, startTime, endTime), 0);
     }
 
     public int getTotalWorkersCount(){
