@@ -1,6 +1,7 @@
 package controllers;
 
 import enums.SortingDirection;
+import exceptions.AS_15_8_PPM_Exception;
 import helpers.SortingHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,8 +10,8 @@ import model.ScheduleCheckUnit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import repositories.ScheduleCheckUnitRepo;
+import repositories.SchedulePeriodCheckUnitRepo;
 
 /**
  * Created by san
@@ -31,6 +33,7 @@ import repositories.ScheduleCheckUnitRepo;
 public class CheckUnitController {
 
     private final ScheduleCheckUnitRepo scheduleCheckUnitRepo;
+    private final SchedulePeriodCheckUnitRepo schedulePeriodCheckUnitRepo;
 
     @GetMapping
     public Page<ScheduleCheckUnit> findPage(
@@ -47,4 +50,18 @@ public class CheckUnitController {
                 scheduleCheckUnitRepo.findAllByArrangement(arrangement, query, page);
     }
 
+    @GetMapping(path ="/arrangement_analytics")
+    public ResponseEntity getArrangementAnalytics(@RequestParam("id") Arrangement arrangement) {
+        if (arrangement == null)
+            throw new AS_15_8_PPM_Exception("Ошибка анализа запланированного мероприятия - оно не найдено в БД (возможно не заполнено)");
+        Long actualCheckUnits = scheduleCheckUnitRepo.findCheckUnitsCount(arrangement);
+        Long spcu = schedulePeriodCheckUnitRepo.getSchedulePeriodCheckUnitCount(arrangement.getId());
+        if (spcu < actualCheckUnits) {
+           return ResponseEntity.badRequest().body("Внимание! Планировщиком на конец дня для мероприятия id = " + arrangement.getId() +
+                    " запланировано (и лишь столько будет выполнено): " + spcu +
+                    " проверок. В мероприятие внесено " + actualCheckUnits +
+                    " проверок. Если вы хотите выполнить мероприятие целиком - следует запланировать мероприятие на следующий день.");
+        } else return ResponseEntity.ok().build();
+
+    }
 }

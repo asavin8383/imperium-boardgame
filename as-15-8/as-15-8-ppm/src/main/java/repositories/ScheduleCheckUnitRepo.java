@@ -35,4 +35,8 @@ public interface ScheduleCheckUnitRepo extends JpaRepository<ScheduleCheckUnit, 
     void changeFinished(@Param("arrangement") Arrangement arrangement,
                         @Param("schedule_check_units") List<Long> scheduleCheckUnits,
                         @Param("finished")boolean finished);
+
+    @Query("select count(scu) from ScheduleCheckUnit scu" +
+            " where scu.arrangement = :ar")
+    Long findCheckUnitsCount(@Param("ar") Arrangement arrangement);
 }
