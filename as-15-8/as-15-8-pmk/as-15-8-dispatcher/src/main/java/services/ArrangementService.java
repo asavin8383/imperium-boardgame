@@ -83,12 +83,12 @@ public class ArrangementService {
 
     @Scheduled(cron = "0 0 0 * * ?")
     void clearStoppedArrangements() {
+        stopAllRunningArrangementsByDayGone();
         evictCaches();
         stoppedArrangements.clear();
     }
 
-    @Scheduled(cron = "0 0 0 * * ?")
-    public void stopAllRunningArrangementsByDayGone() {
+    private void stopAllRunningArrangementsByDayGone() {
         try {
             log.info("Попытка завершения всех мероприятий по шедулеру на текущий день");
             stopAllRunningArrangements(Reason.STOPPED_BY_DAY_GONE);
@@ -193,6 +193,7 @@ public class ArrangementService {
                         arr.setStatus(ArrangementStatus.STOPPED_BY_MAX_CHECK_UNITS);
                         break;
                     case MANUAL:
+                    case NORMAL:
                         arr.setStatus(ArrangementStatus.STOPPED);
                         break;
                     case STOPPED_BY_DAY_GONE:
@@ -343,6 +344,7 @@ public class ArrangementService {
                 new AS_15_8_DispatcherException("Ошибка создания уведомления для отправки в ППМ или ППТ, мероприятие не найдено id:" + arrangementId));
 
         switch (arr.getReason()) {
+            case NORMAL:
             case MANUAL:
                 notification = new ArrangementStatusNotification(
                         arrangementId,

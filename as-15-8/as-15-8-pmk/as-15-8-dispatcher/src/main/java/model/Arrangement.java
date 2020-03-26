@@ -38,5 +38,5 @@ public class Arrangement {
 
     @Column (nullable = false)
     @Enumerated(EnumType.STRING)
-    private Reason reason = Reason.MANUAL;
+    private Reason reason = Reason.NORMAL;
 }

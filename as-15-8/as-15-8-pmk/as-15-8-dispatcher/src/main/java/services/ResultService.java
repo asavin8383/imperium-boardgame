@@ -98,8 +98,12 @@ public class ResultService {
         log.info("Начато сохранение мероприятия: " + arrangement.getId());
         EntityManager entityManager = entityManagerFactory.createEntityManager();
         EntityTransaction transaction = entityManager.getTransaction();
-        boolean isStopped = !arrangementService.isArrangementRunning(arrangement.getId(), arrangement.getVersion());
+        boolean isStopped = false;
+        if (arrangementRepo.findByIdAndVersionAndReason(arrangement.getId(), arrangement.getVersion(), Reason.NORMAL).isPresent()) {
+            isStopped = true;
+        }
         try {
+            boolean finalIsStopped = isStopped;
             resultsKafkaService.getArrangementResultsIterator(arrangement.getId())
                 .ifPresent(resultsIterator -> {
                     boolean isSaved = true;
@@ -113,11 +117,11 @@ public class ResultService {
                     transaction.commit();
                     if (isSaved) {
                         log.info("Мероприятие успешно сохранено в БД: " + arrangement.getId());
-                        if(isArrangementFinished(arrangement) || isStopped) {
-                            if (arrangementService.sendStopOrFinishedStatusNotificationToPPT(arrangement.getId(), isStopped)) {
+                        if(isArrangementFinished(arrangement) || finalIsStopped) {
+                            if (arrangementService.sendStopOrFinishedStatusNotificationToPPT(arrangement.getId(), finalIsStopped)) {
                                 boolean isActAvailable = arrangementService.isActAvailableFromPPT(arrangement.getId());
-                                boolean isFinished = arrangementService.finishArrangement(arrangement.getId(), isStopped, isActAvailable);
-                                if (!isStopped && isFinished && isActAvailable)
+                                boolean isFinished = arrangementService.finishArrangement(arrangement.getId(), finalIsStopped, isActAvailable);
+                                if (!finalIsStopped && isFinished && isActAvailable)
                                     arrangementService.changeArrangementStatusToActSentPPT(arrangement.getId());
                                 log.info("Мероприятие успешно завершено: " + arrangement.getId());
                             }

@@ -57,7 +57,7 @@ public class CheckUnitController {
     }
 
     @GetMapping(path ="/arrangement_analytics")
-    public ResponseEntity getArrangementAnalytics(@RequestParam("id") Schedule schedule) {
+    public ResponseEntity<List<String>> getArrangementAnalytics(@RequestParam("id") Schedule schedule) {
         if (schedule == null)
             throw new AS_15_8_PPM_Exception("Ошибка анализа запланированных мероприятий для расписания");
 
@@ -70,7 +70,7 @@ public class CheckUnitController {
 
         List<String> notifications = analyzeArrangement(arrangementIds);
         if (!notifications.isEmpty()) {
-            return ResponseEntity.badRequest().body(notifications.get(0));
+            return ResponseEntity.badRequest().body(notifications);
         } else return ResponseEntity.ok().build();
 
     }
