@@ -99,7 +99,7 @@ public class ResultService {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
         EntityTransaction transaction = entityManager.getTransaction();
         boolean isStopped = false;
-        if (arrangementRepo.findByIdAndVersionAndReason(arrangement.getId(), arrangement.getVersion(), Reason.NORMAL).isPresent()) {
+        if (arrangementRepo.findByIdAndVersionAndReasonIsNot(arrangement.getId(), arrangement.getVersion(), Reason.NORMAL).isPresent()) {
             isStopped = true;
         }
         try {

@@ -33,5 +33,5 @@ public interface ArrangementRepo extends JpaRepository<Arrangement, Long> {
             " where a.id = :arrangementId")
     Optional<Long> findMaxCheckUnitsCount(@Param("arrangementId") Long arrangementId);
 
-    Optional<Arrangement> findByIdAndVersionAndReason(Long id, Long version, Reason reason);
+    Optional<Arrangement> findByIdAndVersionAndReasonIsNot(Long id, Long version, Reason reason);
 }
