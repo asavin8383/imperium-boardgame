@@ -46,7 +46,7 @@
 											}
 										],
 										"url": {
-											"raw": "{{url}}/pod/erdi?",
+											"raw": "{{url}}/pod/erdi",
 											"host": [
 												"{{url}}"
 											],
@@ -376,15 +376,10 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "",
-											"options": {
-												"raw": {
-													"language": "json"
-												}
-											}
+											"raw": ""
 										},
 										"url": {
-											"raw": "{{url}}/pod/erdi/ids?",
+											"raw": "{{url}}/pod/erdi/ids",
 											"host": [
 												"{{url}}"
 											],
@@ -484,6 +479,120 @@
 													"key": "visitorsCntWorldMax",
 													"value": "2800000",
 													"disabled": true
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Получение чек юнитов для ЕРДИ",
+									"request": {
+										"auth": {
+											"type": "oauth2",
+											"oauth2": [
+												{
+													"key": "accessToken",
+													"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqYWNreSIsInJvbGUiOiJST0xFX09QRVJBVE9SLFJPTEVfRk9STUFMX1RBU0ssUk9MRV9NQU5BR0VfRk9STUFMX1RBU0ssUk9MRV9NQU5BR0VfQVJSQU5HRU1FTlQsUk9MRV9QUkVQQVJBVElPTl9UUkFGRklDLFJPTEVfRElDVElPTkFSWSxST0xFX0ZPUk1BVElPTl9PRl9TQ0hFRFVMRSxST0xFX1ZJRVdfUkVTVUxULFJPTEVfU0VORF9BQ1RfQllfSEFORCxST0xFX01BTkFHRV9QU19QQVNELFJPTEVfTUFOQUdFX0VSREksUk9MRV9WSUVXX1JFUE9SVCxST0xFX0ZPUk1BVElPTl9QQVJBTV9SRVBPUlQsUk9MRV9NQU5BR0VfRE9NQUlOUyxST0xFX01BTkFHRV9NQU5VQUxfQVJSQU5HRU1FTlQiLCJtYWlsIjoiIiwidXNlcl9uYW1lIjoiamFjayIsInNjb3BlIjpbInJlYWQiLCJ3cml0ZSJdLCJleHAiOjE1ODUzMDAxNDMsInVzZXJOYW1lIjoiamFjayIsImF1dGhvcml0aWVzIjpbIlJPTEVfT1BFUkFUT1IiLCJST0xFX1BSRVBBUkFUSU9OX1RSQUZGSUMiLCJST0xFX0ZPUk1BVElPTl9QQVJBTV9SRVBPUlQiLCJST0xFX01BTkFHRV9NQU5VQUxfQVJSQU5HRU1FTlQiLCJST0xFX01BTkFHRV9QU19QQVNEIiwiUk9MRV9GT1JNQVRJT05fT0ZfU0NIRURVTEUiLCJST0xFX01BTkFHRV9FUkRJIiwiUk9MRV9GT1JNQUxfVEFTSyIsIlJPTEVfRElDVElPTkFSWSIsIlJPTEVfVklFV19SRVBPUlQiLCJST0xFX01BTkFHRV9GT1JNQUxfVEFTSyIsIlJPTEVfTUFOQUdFX0FSUkFOR0VNRU5UIiwiUk9MRV9WSUVXX1JFU1VMVCIsIlJPTEVfU0VORF9BQ1RfQllfSEFORCIsIlJPTEVfTUFOQUdFX0RPTUFJTlMiXSwianRpIjoiNjRhNGY2OWUtMGIxZS00NGQxLWFjOWItMGM5ZTBhYTYwYjkwIiwiY2xpZW50X2lkIjoiYXMtMTUtOCIsInNlY29uZE5hbWUiOiJjaGFuIn0.jeFDNZohjDDqVLCHqXSOCcIkyu0qIkdDSxbVZAonmbmRpBE21jZrBEt3rgDQVKzRW_oqmr8IhEvicEDLcE83KuAjD4Kr_3E1Tb4UsVES_yy16zaR3siPasX6kCF6UD4FAbqS6TjEOQH1FLJVkzRShnbEeZIj44z2a-t9htFxXaXtXbm8qk-cqvn-0XCu57TROx1GHDX4BdVsQ6mj_0vEzgyfcb-EBk0cEqvZvb44ZaQedvgPCtmdSucVqK5MxHNAWWFsJJD74aD8X_LX72t0yDC1BQPKW3OBdZzbjNx-hxXNpELDKPsxj8h9va0KTrLnYJek1glxsnULGS-ab_W-OQ",
+													"type": "string"
+												},
+												{
+													"key": "tokenType",
+													"value": "bearer",
+													"type": "string"
+												},
+												{
+													"key": "addTokenTo",
+													"value": "header",
+													"type": "string"
+												}
+											]
+										},
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{url}}/pod/erdi/checkUnits_page?id=2146311&pageNumber=0&pageSize=2&erdi_id=2146311",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"pod",
+												"erdi",
+												"checkUnits_page"
+											],
+											"query": [
+												{
+													"key": "id",
+													"value": "2146311"
+												},
+												{
+													"key": "pageNumber",
+													"value": "0"
+												},
+												{
+													"key": "pageSize",
+													"value": "2"
+												},
+												{
+													"key": "erdi_id",
+													"value": "2146311"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Поиск среди ЕРДИ по чек юниту",
+									"request": {
+										"auth": {
+											"type": "oauth2",
+											"oauth2": [
+												{
+													"key": "accessToken",
+													"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqYWNreSIsInJvbGUiOiJST0xFX09QRVJBVE9SLFJPTEVfRk9STUFMX1RBU0ssUk9MRV9NQU5BR0VfRk9STUFMX1RBU0ssUk9MRV9NQU5BR0VfQVJSQU5HRU1FTlQsUk9MRV9QUkVQQVJBVElPTl9UUkFGRklDLFJPTEVfRElDVElPTkFSWSxST0xFX0ZPUk1BVElPTl9PRl9TQ0hFRFVMRSxST0xFX1ZJRVdfUkVTVUxULFJPTEVfU0VORF9BQ1RfQllfSEFORCxST0xFX01BTkFHRV9QU19QQVNELFJPTEVfTUFOQUdFX0VSREksUk9MRV9WSUVXX1JFUE9SVCxST0xFX0ZPUk1BVElPTl9QQVJBTV9SRVBPUlQsUk9MRV9NQU5BR0VfRE9NQUlOUyxST0xFX01BTkFHRV9NQU5VQUxfQVJSQU5HRU1FTlQiLCJtYWlsIjoiIiwidXNlcl9uYW1lIjoiamFjayIsInNjb3BlIjpbInJlYWQiLCJ3cml0ZSJdLCJleHAiOjE1ODUzMDAxNDMsInVzZXJOYW1lIjoiamFjayIsImF1dGhvcml0aWVzIjpbIlJPTEVfT1BFUkFUT1IiLCJST0xFX1BSRVBBUkFUSU9OX1RSQUZGSUMiLCJST0xFX0ZPUk1BVElPTl9QQVJBTV9SRVBPUlQiLCJST0xFX01BTkFHRV9NQU5VQUxfQVJSQU5HRU1FTlQiLCJST0xFX01BTkFHRV9QU19QQVNEIiwiUk9MRV9GT1JNQVRJT05fT0ZfU0NIRURVTEUiLCJST0xFX01BTkFHRV9FUkRJIiwiUk9MRV9GT1JNQUxfVEFTSyIsIlJPTEVfRElDVElPTkFSWSIsIlJPTEVfVklFV19SRVBPUlQiLCJST0xFX01BTkFHRV9GT1JNQUxfVEFTSyIsIlJPTEVfTUFOQUdFX0FSUkFOR0VNRU5UIiwiUk9MRV9WSUVXX1JFU1VMVCIsIlJPTEVfU0VORF9BQ1RfQllfSEFORCIsIlJPTEVfTUFOQUdFX0RPTUFJTlMiXSwianRpIjoiNjRhNGY2OWUtMGIxZS00NGQxLWFjOWItMGM5ZTBhYTYwYjkwIiwiY2xpZW50X2lkIjoiYXMtMTUtOCIsInNlY29uZE5hbWUiOiJjaGFuIn0.jeFDNZohjDDqVLCHqXSOCcIkyu0qIkdDSxbVZAonmbmRpBE21jZrBEt3rgDQVKzRW_oqmr8IhEvicEDLcE83KuAjD4Kr_3E1Tb4UsVES_yy16zaR3siPasX6kCF6UD4FAbqS6TjEOQH1FLJVkzRShnbEeZIj44z2a-t9htFxXaXtXbm8qk-cqvn-0XCu57TROx1GHDX4BdVsQ6mj_0vEzgyfcb-EBk0cEqvZvb44ZaQedvgPCtmdSucVqK5MxHNAWWFsJJD74aD8X_LX72t0yDC1BQPKW3OBdZzbjNx-hxXNpELDKPsxj8h9va0KTrLnYJek1glxsnULGS-ab_W-OQ",
+													"type": "string"
+												},
+												{
+													"key": "tokenType",
+													"value": "bearer",
+													"type": "string"
+												},
+												{
+													"key": "addTokenTo",
+													"value": "header",
+													"type": "string"
+												}
+											]
+										},
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{url}}/pod/erdi/by_check_unit_value?id=2146311&pageNumber=0&pageSize=10&value=rutor",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"pod",
+												"erdi",
+												"by_check_unit_value"
+											],
+											"query": [
+												{
+													"key": "id",
+													"value": "2146311"
+												},
+												{
+													"key": "pageNumber",
+													"value": "0"
+												},
+												{
+													"key": "pageSize",
+													"value": "10"
+												},
+												{
+													"key": "value",
+													"value": "rutor"
 												}
 											]
 										}
@@ -1120,12 +1229,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"domainMask\": \"testMaskValue2\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
+							"raw": "{\n    \"domainMask\": \"testMaskValue2\"\n}"
 						},
 						"url": {
 							"raw": "{{url}}/pod/domain-masks/?id=5",
@@ -1235,12 +1339,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"domain\": \"postmanDomainTest\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
+							"raw": "{\n    \"domain\": \"postmanDomainTest\"\n}"
 						},
 						"url": {
 							"raw": "{{url}}/pod/domain-masks/add_domain?id=164",
