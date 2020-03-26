@@ -193,10 +193,6 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
             predicates.add(rootContentView.get(ContentView_.RESOURCE_TYPE).in(resourceTypes));
         }
 
-        if (resourceValue != null) {
-            predicates.add(criteriaBuilder.like(criteriaBuilder.upper(rootContentView.get(ContentView_.RESOURCE_VALUE)), "%" + resourceValue.toUpperCase() + "%"));
-        }
-
         if (violationNames != null && violationNames.size() > 0) {
             predicates.add(rootContentView.get(ContentView_.VIOLATION_NAME).in(violationNames));
         }
@@ -238,7 +234,6 @@ public class ContentViewRepositoryAdvancedImpl implements ContentViewRepositoryA
                             criteriaBuilder.like(criteriaBuilder.upper(rootContentView.get(ContentView_.INFO_TYPE_ID)), "%" + query.toUpperCase() + "%"),
                             criteriaBuilder.like(criteriaBuilder.upper(rootContentView.get(ContentView_.REGISTRY_NAME)), "%" + query.toUpperCase() + "%"),
                             criteriaBuilder.like(criteriaBuilder.upper(rootContentView.get(ContentView_.RESOURCE_TYPE)), "%" + query.toUpperCase() + "%"),
-                            criteriaBuilder.like(criteriaBuilder.upper(rootContentView.get(ContentView_.RESOURCE_VALUE)), "%" + query.toUpperCase() + "%"),
                             criteriaBuilder.like(criteriaBuilder.upper(rootContentView.get(ContentView_.VIOLATION_NAME)), "%" + query.toUpperCase() + "%")
                     )
             );

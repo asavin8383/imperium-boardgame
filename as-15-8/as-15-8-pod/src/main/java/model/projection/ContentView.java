@@ -30,10 +30,6 @@ public class ContentView {
     @ToString.Include
     private LocalDateTime includetime;
 
-    // 12
-    @ToString.Include
-    private String resourceValue;
-
     // 10
     @ToString.Include
     private String resourceType;
@@ -60,6 +56,9 @@ public class ContentView {
 
     @ToString.Include
     private Long visitorsCntWorld;
+
+    @ToString.Include
+    private Long contentId;
     // 2
     // @Value("#{target.contentInfo.includetime}")
 //    @JsonFormat(timezone = "GMT+03:00")

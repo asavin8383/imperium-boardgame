@@ -18,7 +18,6 @@ public class ContentViewSpecifications {
     private static final List<SingularAttribute<ContentView, String>> SEARCH_QUERY_COLUMNS;
     static {
         SEARCH_QUERY_COLUMNS = new ArrayList<>(3);
-        SEARCH_QUERY_COLUMNS.add(ContentView_.resourceValue);
         SEARCH_QUERY_COLUMNS.add(ContentView_.resourceType);
         SEARCH_QUERY_COLUMNS.add(ContentView_.decisionOrg);
     }

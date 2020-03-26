@@ -6,6 +6,7 @@ import controllers.utils.SortingHelper;
 import enums.ErdiStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import model.actualViews.ContentCheckUnit;
 import model.projection.ContentView;
 import model.rest.control.UpdateErdiState;
 import org.apache.commons.lang.time.DateUtils;
@@ -45,8 +46,6 @@ public class ContentController {
     private final ErdiRestClient erdiRestClient;
     private final InfoService infoService;
     private final ContentHistoryRepository contentHistoryRepo;
-
-
 
     private static int BUFFER_SIZE = 1000;
 
@@ -262,13 +261,14 @@ public class ContentController {
     @GetMapping("/erdi/checkUnits")
     public ResponseEntity<List<CheckUnit>> getCheckUnits(@RequestParam("id") Long erdiId){
         List<CheckUnit> checkUnits = contentService.getActualCheckUnits(erdiId).stream()
-            .map(contentCheckUnit -> new CheckUnit(contentCheckUnit.getContentId(), contentCheckUnit.getCheckUnitType(), contentCheckUnit.getCheckUnitValue()))
-            .collect(Collectors.toList());
+                .map(contentCheckUnit -> new CheckUnit(contentCheckUnit.getContentId(), contentCheckUnit.getCheckUnitType(), contentCheckUnit.getCheckUnitValue()))
+                .collect(Collectors.toList());
         if(checkUnits.size() > 0)
             return ResponseEntity.ok(checkUnits);
         else
             return ResponseEntity.badRequest().build();
     }
+
 
     @PostMapping("/erdi/checkUnits")
     public ResponseEntity<List<CheckUnit>> getCheckUnitsByIds(@RequestBody List<Long> erdiIds){
@@ -284,6 +284,26 @@ public class ContentController {
     @PostMapping(path = "/erdi/check_units_count")
     public Long getCheckUnitsCount(@RequestBody List<Long> erdiIds) {
         return contentService.getCheckUnitsCount(erdiIds);
+    }
+
+    @GetMapping(path = "/erdi/checkUnits_page")
+    public ResponseEntity<Page<ContentCheckUnit>> getCheckUnitsPage(@RequestParam Integer pageNumber,
+                                                             @RequestParam Integer pageSize,
+                                                             @RequestParam long erdi_id) {
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Page<ContentCheckUnit> pageContent = contentService.getActualCheckUnits(erdi_id, pageable);
+        return new ResponseEntity(pageContent, HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/erdi/by_check_unit_value")
+    public ResponseEntity<Page<ContentView>> getContentByCheckUnitValue(@RequestParam Integer pageNumber,
+                                                             @RequestParam Integer pageSize,
+                                                             @RequestParam String value) {
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Page<ContentView> pageContent = contentViewRepository.findContentViewByCheckUnitValue(value, pageable);
+        return new ResponseEntity(pageContent, HttpStatus.OK);
     }
 
 }

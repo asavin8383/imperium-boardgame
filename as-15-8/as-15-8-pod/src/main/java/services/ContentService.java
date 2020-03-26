@@ -53,8 +53,12 @@ public class ContentService {
      * @param erdiId ИД ЕРДИ
      * @return список актуальных чек-юнитов
      */
-    public List<ContentCheckUnit> getActualCheckUnits(Long erdiId){
+    public List<ContentCheckUnit> getActualCheckUnits(Long erdiId) {
         return contentCheckUnitRepository.findAllByErdId(erdiId);
+    }
+
+    public Page<ContentCheckUnit> getActualCheckUnits(Long erdiId, Pageable page) {
+        return contentCheckUnitRepository.findAllByErdId(erdiId, page);
     }
 
     public List<ContentCheckUnit> getActualCheckUnits(List<Long> erdiIds){
