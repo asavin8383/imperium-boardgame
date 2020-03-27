@@ -376,7 +376,12 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": ""
+											"raw": "",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
 										},
 										"url": {
 											"raw": "{{url}}/pod/erdi/ids",
@@ -511,7 +516,7 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "{{url}}/pod/erdi/checkUnits_page?id=2146311&pageNumber=0&pageSize=2&erdi_id=2146311",
+											"raw": "{{url}}/pod/erdi/checkUnits_page?pageNumber=0&pageSize=2&erdi_id=2146311",
 											"host": [
 												"{{url}}"
 											],
@@ -523,7 +528,8 @@
 											"query": [
 												{
 													"key": "id",
-													"value": "2146311"
+													"value": "2146311",
+													"disabled": true
 												},
 												{
 													"key": "pageNumber",
@@ -568,7 +574,7 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "{{url}}/pod/erdi/by_check_unit_value?id=2146311&pageNumber=0&pageSize=10&value=rutor",
+											"raw": "{{url}}/pod/erdi/by_check_unit_value?pageNumber=0&pageSize=10&value=rutor",
 											"host": [
 												"{{url}}"
 											],
@@ -580,7 +586,8 @@
 											"query": [
 												{
 													"key": "id",
-													"value": "2146311"
+													"value": "2146311",
+													"disabled": true
 												},
 												{
 													"key": "pageNumber",
@@ -1229,7 +1236,12 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"domainMask\": \"testMaskValue2\"\n}"
+							"raw": "{\n    \"domainMask\": \"testMaskValue2\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
 						"url": {
 							"raw": "{{url}}/pod/domain-masks/?id=5",
@@ -1339,7 +1351,12 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"domain\": \"postmanDomainTest\"\n}"
+							"raw": "{\n    \"domain\": \"postmanDomainTest\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
 						"url": {
 							"raw": "{{url}}/pod/domain-masks/add_domain?id=164",
