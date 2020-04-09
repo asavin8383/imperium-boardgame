@@ -376,12 +376,7 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "",
-											"options": {
-												"raw": {
-													"language": "json"
-												}
-											}
+											"raw": ""
 										},
 										"url": {
 											"raw": "{{url}}/pod/erdi/ids",
@@ -600,6 +595,61 @@
 												{
 													"key": "value",
 													"value": "rutor"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Получение доп. информации для записи ЕРДИ",
+									"request": {
+										"auth": {
+											"type": "oauth2",
+											"oauth2": [
+												{
+													"key": "accessToken",
+													"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFzLTE1LTgta2V5LWlkIn0.eyJmaXJzdE5hbWUiOiJqYWNreSIsInJvbGUiOiJST0xFX09QRVJBVE9SLFJPTEVfRk9STUFMX1RBU0ssUk9MRV9NQU5BR0VfRk9STUFMX1RBU0ssUk9MRV9NQU5BR0VfQVJSQU5HRU1FTlQsUk9MRV9QUkVQQVJBVElPTl9UUkFGRklDLFJPTEVfRElDVElPTkFSWSxST0xFX0ZPUk1BVElPTl9PRl9TQ0hFRFVMRSxST0xFX1ZJRVdfUkVTVUxULFJPTEVfU0VORF9BQ1RfQllfSEFORCxST0xFX01BTkFHRV9QU19QQVNELFJPTEVfTUFOQUdFX0VSREksUk9MRV9WSUVXX1JFUE9SVCxST0xFX0ZPUk1BVElPTl9QQVJBTV9SRVBPUlQsUk9MRV9NQU5BR0VfRE9NQUlOUyxST0xFX01BTkFHRV9NQU5VQUxfQVJSQU5HRU1FTlQiLCJtYWlsIjoiIiwidXNlcl9uYW1lIjoiamFjayIsInNjb3BlIjpbInJlYWQiLCJ3cml0ZSJdLCJleHAiOjE1ODY1MTYzMjAsInVzZXJOYW1lIjoiamFjayIsImF1dGhvcml0aWVzIjpbIlJPTEVfT1BFUkFUT1IiLCJST0xFX1BSRVBBUkFUSU9OX1RSQUZGSUMiLCJST0xFX0ZPUk1BVElPTl9QQVJBTV9SRVBPUlQiLCJST0xFX01BTkFHRV9NQU5VQUxfQVJSQU5HRU1FTlQiLCJST0xFX01BTkFHRV9QU19QQVNEIiwiUk9MRV9GT1JNQVRJT05fT0ZfU0NIRURVTEUiLCJST0xFX01BTkFHRV9FUkRJIiwiUk9MRV9GT1JNQUxfVEFTSyIsIlJPTEVfRElDVElPTkFSWSIsIlJPTEVfVklFV19SRVBPUlQiLCJST0xFX01BTkFHRV9GT1JNQUxfVEFTSyIsIlJPTEVfTUFOQUdFX0FSUkFOR0VNRU5UIiwiUk9MRV9WSUVXX1JFU1VMVCIsIlJPTEVfU0VORF9BQ1RfQllfSEFORCIsIlJPTEVfTUFOQUdFX0RPTUFJTlMiXSwianRpIjoiM2I3ODlhNDktM2E1NC00NWMwLTg4OGEtY2EwMzYxZjJhNzU4IiwiY2xpZW50X2lkIjoiYXMtMTUtOCIsInNlY29uZE5hbWUiOiJjaGFuIn0.V951Q_C6xfGSWYsxRgiJJ9j7yHXMJ2F8h4C4tMrYYr1su0C0dfvTD9G1eEeIO6cq6LeXzja-79EK3bSD4xd5lXSHxo0pCNpo2P2jQDtLtk4S_4gkNo2RLeWnU1ANb5sZ3IJI9OMo8qFpDVzll_5kTKCLIbCHAbXtKQaB1qYtz7iP3ww5vdphQjUgy72bTOTVQhLSjAoIENp4TjgOhirXP3OoNjXy2hI04nW8MFnO8453rGkbpi6vv7mBwm4F0VHys8QFvbkfPjji6DUqRw7dYcv-axIFyHMFDNJaAiJfd7aT_RS1jv62m6-01TBkbU9dzGbytZ2RqNzifWcTxJBdMA",
+													"type": "string"
+												},
+												{
+													"key": "tokenType",
+													"value": "bearer",
+													"type": "string"
+												},
+												{
+													"key": "addTokenTo",
+													"value": "header",
+													"type": "string"
+												}
+											]
+										},
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{url}}/pod/erdi/additional_info?erdiIds=1000866, 656",
+											"host": [
+												"{{url}}"
+											],
+											"path": [
+												"pod",
+												"erdi",
+												"additional_info"
+											],
+											"query": [
+												{
+													"key": "",
+													"value": "",
+													"disabled": true
+												},
+												{
+													"key": "",
+													"value": "",
+													"disabled": true
+												},
+												{
+													"key": "erdiIds",
+													"value": "1000866, 656"
 												}
 											]
 										}
@@ -1236,12 +1286,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"domainMask\": \"testMaskValue2\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
+							"raw": "{\n    \"domainMask\": \"testMaskValue2\"\n}"
 						},
 						"url": {
 							"raw": "{{url}}/pod/domain-masks/?id=5",
@@ -1351,12 +1396,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"domain\": \"postmanDomainTest\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
+							"raw": "{\n    \"domain\": \"postmanDomainTest\"\n}"
 						},
 						"url": {
 							"raw": "{{url}}/pod/domain-masks/add_domain?id=164",
