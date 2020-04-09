@@ -7,6 +7,7 @@ import enums.ErdiStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.actualViews.ContentCheckUnit;
+import model.projection.ContenViewAdditionalInfo;
 import model.projection.ContentView;
 import model.rest.control.UpdateErdiState;
 import org.apache.commons.lang.time.DateUtils;
@@ -21,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
+import repositories.ContentCheckUnitRepository;
 import repositories.ContentHistoryRepository;
 import repositories.ContentViewRepository;
 import rest.ResponseStatusString;
@@ -46,6 +48,7 @@ public class ContentController {
     private final ErdiRestClient erdiRestClient;
     private final InfoService infoService;
     private final ContentHistoryRepository contentHistoryRepo;
+    private final ContentCheckUnitRepository contentCheckUnitRepository;
 
     private static int BUFFER_SIZE = 1000;
 
@@ -306,4 +309,16 @@ public class ContentController {
         return new ResponseEntity(pageContent, HttpStatus.OK);
     }
 
+    @GetMapping(path = "/erdi/additional_info")
+    @PreAuthorize("hasAnyRole('ROLE_MANAGE_ERDI')")
+    public ResponseEntity getAdditionalInfo(
+                            @RequestParam(required = false) List<Long> erdiIds) {
+        if (erdiIds.size() > 25)
+            return ResponseEntity.badRequest().body("Слишком большой массив запрашиваемых данных, он должен быть меньше или равен 25");
+        List<ContenViewAdditionalInfo> res  = contentCheckUnitRepository.findAdditionalInfo(erdiIds);
+        if(res !=null && res.size() > 0)
+            return new ResponseEntity(res, HttpStatus.OK);
+        else
+            return ResponseEntity.badRequest().body("Нет данных");
+    }
 }
