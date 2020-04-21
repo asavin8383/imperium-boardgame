@@ -127,6 +127,11 @@ public class Arrangement implements Serializable {
 	@Column
 	private Long interruptViolationNumber;
 
+	/**Имя оператора, который отправил акт*/
+	@JsonView(Views.Brief.class)
+	@Column
+	private String actCreationOperator;
+
 	public Arrangement() {
 		this.creationDate = LocalDateTime.now();
 		this.status = ExecutionStatus.NEW;

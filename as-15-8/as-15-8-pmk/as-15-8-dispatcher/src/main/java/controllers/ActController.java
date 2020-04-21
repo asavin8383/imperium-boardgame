@@ -24,6 +24,7 @@ import rest.ActCheckResult;
 import services.ActService;
 import services.ArrangementService;
 
+import java.security.Principal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -80,8 +81,8 @@ public class ActController {
 
     @GetMapping(path = "/create")
     @PreAuthorize("hasAnyRole('ROLE_SEND_ACT_BY_HAND')")
-    public ResponseEntity<Void> createAct(Long arrangementId){
-        boolean created = actService.createAct(arrangementId);
+    public ResponseEntity<Void> createAct(Long arrangementId, Principal principal){
+        boolean created = actService.createManualAct(arrangementId, principal.getName());
         if(created)
             arrangementService.changeArrangementStatusToActSentPPT(arrangementId);
         return new ResponseEntity<>(created ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR);
@@ -179,5 +180,4 @@ public class ActController {
             result.getUserResult()!=null && result.getUserResult().equals(UserResult.FORBIDDEN_CONTENT_DETECTED);
 
     }
-
 }

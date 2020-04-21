@@ -178,7 +178,7 @@ public class ArrangementService {
                 .orElse(true);
     }
 
-    boolean finishArrangement(Long arrangementId, boolean isStopped, boolean isActAvailable) {
+    boolean finishArrangement(Long arrangementId, boolean isStopped, boolean isActSendAutomatically) {
         try {
             Arrangement arr = arrangementRepo.findById(arrangementId)
                     .orElseThrow(() -> new AS_15_8_DispatcherException("Ошибка при закрытии мероприятия. Мероприятие не найдено по ID: " + arrangementId));
@@ -201,8 +201,8 @@ public class ArrangementService {
                 }
             }
             arrangementRepo.save(arr);
-            if (!isStopped && isActAvailable) {
-                return actService.createAct(arrangementId);
+            if (!isStopped && isActSendAutomatically) {
+                return actService.createAutomaticAct(arrangementId);
             }
             return true;
         } catch (Exception ex) {

@@ -119,9 +119,9 @@ public class ResultService {
                         log.info("Мероприятие успешно сохранено в БД: " + arrangement.getId());
                         if(isArrangementFinished(arrangement) || finalIsStopped) {
                             if (arrangementService.sendStopOrFinishedStatusNotificationToPPT(arrangement.getId(), finalIsStopped)) {
-                                boolean isActAvailable = arrangementService.isActAvailableFromPPT(arrangement.getId());
-                                boolean isFinished = arrangementService.finishArrangement(arrangement.getId(), finalIsStopped, isActAvailable);
-                                if (!finalIsStopped && isFinished && isActAvailable)
+                                boolean isActSendAutomatically = arrangementService.isActAvailableFromPPT(arrangement.getId());
+                                boolean isFinished = arrangementService.finishArrangement(arrangement.getId(), finalIsStopped, isActSendAutomatically);
+                                if (!finalIsStopped && isFinished && isActSendAutomatically)
                                     arrangementService.changeArrangementStatusToActSentPPT(arrangement.getId());
                                 log.info("Мероприятие успешно завершено: " + arrangement.getId());
                             }
