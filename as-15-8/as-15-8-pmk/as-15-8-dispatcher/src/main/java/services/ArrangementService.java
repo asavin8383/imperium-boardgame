@@ -435,4 +435,18 @@ public class ArrangementService {
                     return Math.min(arrangementsCount * 100 / checkUnits, 100);
                 }).orElse(0L);
     }
+
+    public String hastNotCheckedCheckUnits(Arrangement arrangement) {
+        String result = "";
+        Long resultsCount = resultsKafkaService.getResultsCount(arrangement.getId());
+        Long checkUnitsCount = arrangement.getCheckUnitsCount();
+        /*log.info("============== Проверка мероприятия на незавершённые проверки");
+        log.info("Результаты из   кафки: " + resultsCount);
+        log.info("Чек юниты мероприятия: " + checkUnitsCount);*/
+        result = result + "Результаты из   кафки: " + resultsCount + '\n';
+        result = result + "Чек юниты мероприятия: " + checkUnitsCount + '\n';
+        result = result + "Содержит непроверенные: " + (resultsCount > checkUnitsCount);
+        //return resultsCount > checkUnitsCount;
+        return result;
+    }
 }

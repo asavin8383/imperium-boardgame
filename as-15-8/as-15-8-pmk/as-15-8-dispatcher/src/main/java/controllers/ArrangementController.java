@@ -88,4 +88,10 @@ public class ArrangementController {
         arrangementService.stopAllRunningArrangements(Reason.STOPPED_BY_DAY_GONE);
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_VIEW_RESULT')")
+    @GetMapping(path = "/not_checked_check_units")
+    public ResponseEntity hasNotFinishedCheckUnits(@RequestParam(name = "id", required = false) Arrangement arrangement) {
+        return ResponseEntity.ok(arrangementService.hastNotCheckedCheckUnits(arrangement));
+    }
+
 }
