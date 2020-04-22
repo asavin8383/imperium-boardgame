@@ -282,8 +282,8 @@ public class ErdiRestClient {
         log.info("---> Установка типов ИРТЗ завершено");
         jdbcTemplate.execute("select sor.update_check_units()");
         log.info("---> Вызов sor.update_check_units завершен");
-        jdbcTemplate.execute("REFRESH MATERIALIZED VIEW sor.content_view");
-        log.info("---> Обновление sor.content_view завершено");
+        jdbcTemplate.execute("select sor.update_content_view()");
+        log.info("---> Вызов sor.update_content_view завершен");
     }
 
 
