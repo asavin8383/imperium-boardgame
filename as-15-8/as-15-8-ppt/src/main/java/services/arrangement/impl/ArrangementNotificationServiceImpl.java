@@ -42,8 +42,9 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
     private final OAuth2RestTemplate restTemplate;
 
     @Override
-    public void processNotification(ArrangementStatusNotification arrangementStatusNotification) {
-        arrangementRepo.findById(arrangementStatusNotification.getArrangementId())
+    public boolean processNotification(ArrangementStatusNotification arrangementStatusNotification) {
+        boolean result = false;
+        result = arrangementRepo.findById(arrangementStatusNotification.getArrangementId())
             .map(arrangement -> {
                 if (Strings.isNotEmpty(arrangementStatusNotification.getInfo())){
                     arrangement.setInfo(arrangementStatusNotification.getInfo());
@@ -63,7 +64,10 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
                 log.error("Ошибка смены статуса мероприятия. Мероприятие не было найдено по ID: {}", arrangementStatusNotification.getArrangementId());
                 return false;
             });
+        return result;
     }
+
+
 
     private boolean notifyPPMAboutStopEvent(ArrangementStatusNotification notification) {
         if (notification.getEvent().equals(ArrangementEvents.STOP ) ||

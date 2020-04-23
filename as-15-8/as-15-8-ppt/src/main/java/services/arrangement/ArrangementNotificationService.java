@@ -10,5 +10,5 @@ import arrangement.ArrangementStatusNotification;
 
 public interface ArrangementNotificationService {
 
-    void processNotification(ArrangementStatusNotification arrangementStatusNotification);
+    boolean processNotification(ArrangementStatusNotification arrangementStatusNotification);
 }

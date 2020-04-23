@@ -53,9 +53,12 @@ public class ArrangementNotificationController {
             arrangementStatusNotification.setArrangementId(arrangement.getId());
             arrangementStatusNotification.setEvent(ArrangementEvents.STOP);
             arrangementStatusNotification.setEventDate(LocalDateTime.now());
+            arrangementStatusNotification.setCompletionPerscent(0L);
 
-            arrangementNotificationService.processNotification(arrangementStatusNotification);
-            return ResponseEntity.ok().build();
+            if (arrangementNotificationService.processNotification(arrangementStatusNotification))
+                return ResponseEntity.ok().build();
+             else return ResponseEntity.badRequest().body("Невозможно сменить статус мероприятию");
+
         } else {
             return ResponseEntity.badRequest().body(
                     "Недопутимый статус! Операция доступна только для мероприятий со статусом ACT_SENT, текущий статус: " + arrangement.getStatus());
