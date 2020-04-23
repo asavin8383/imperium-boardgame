@@ -109,10 +109,13 @@ public class RestClientUtils {
         }
 
         List<DeltaIdEntry> list = resp.response;
-        list = list.stream()
+        List<DeltaIdEntry> actualList = list.stream()
                 .filter(deltaIdEntry -> !deltaIdEntry.isEmpty)
                 .collect(Collectors.toList());
-        return list;
+
+        log.info("По дате = {} получено дельт ЕРДИ: {}, из них актуальных (не пустых): {}", dateStr, list.size(), actualList.size());
+
+        return actualList;
     }
 
 }
