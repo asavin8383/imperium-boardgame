@@ -11,4 +11,5 @@ import arrangement.ArrangementStatusNotification;
 public interface ArrangementNotificationService {
 
     boolean processNotification(ArrangementStatusNotification arrangementStatusNotification);
+    boolean processNotificationInPPT(ArrangementStatusNotification arrangementStatusNotification);
 }

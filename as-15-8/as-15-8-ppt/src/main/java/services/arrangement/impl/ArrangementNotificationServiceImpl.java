@@ -2,6 +2,7 @@ package services.arrangement.impl;
 
 import arrangement.ArrangementStatusNotification;
 import enums.ArrangementEvents;
+import exceptions.AS_15_8_PPT_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.enums.ExecutionStatus;
@@ -57,7 +58,7 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
                 if (!notifyPPMAboutFinishEvent(arrangementStatusNotification)) {
                     return false;
                 }
-                return processNotificationInPPT(arrangement, arrangementStatusNotification);
+                return processNotificationInPPT(arrangementStatusNotification);
 
             })
             .orElseGet(() -> {
@@ -67,7 +68,22 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
         return result;
     }
 
+    @Override
+    public boolean processNotificationInPPT(ArrangementStatusNotification arrangementStatusNotification) {
+        Arrangement arrangement = arrangementRepo.findById(arrangementStatusNotification.getArrangementId()).orElseThrow(() ->
+                new AS_15_8_PPT_Exception("Мероприятие не найдено в БД, id: " + arrangementStatusNotification.getArrangementId()));
 
+        processArrangementForUncompletedCheckUnits(arrangement, arrangementStatusNotification);
+        arrangement.sendEvent(arrangementStatusNotification.getEvent(), arrangementStatusNotification.getEventDate());
+        try {
+            arrangementStatusService.processArrangementStatusChange(arrangement);
+            log.info("Статус мероприятия {} сменился в ППТ на: {} ", arrangement.getId(), arrangement.getStatus());
+            return true;
+        } catch (Exception ex) {
+            log.error("не удалось сменить статус мероприятия {} в ППТ на {} ", arrangement.getId(), arrangement.getStatus(), ex);
+            return false;
+        }
+    }
 
     private boolean notifyPPMAboutStopEvent(ArrangementStatusNotification notification) {
         if (notification.getEvent().equals(ArrangementEvents.STOP ) ||
@@ -126,20 +142,7 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
         return true;
     }
 
-    private boolean processNotificationInPPT(Arrangement arrangement, ArrangementStatusNotification arrangementStatusNotification) {
-        processArrangementForUncompletedCheckResults(arrangement, arrangementStatusNotification);
-        arrangement.sendEvent(arrangementStatusNotification.getEvent(), arrangementStatusNotification.getEventDate());
-        try {
-            arrangementStatusService.processArrangementStatusChange(arrangement);
-            log.info("Статус мероприятия {} сменился в ППТ на: {} ", arrangement.getId(), arrangement.getStatus());
-            return true;
-        } catch (Exception ex) {
-            log.error("не удалось сменить статус мероприятия {} в ППТ на {} ", arrangement.getId(), arrangement.getStatus(), ex);
-            return false;
-        }
-    }
-
-    private void processArrangementForUncompletedCheckResults(Arrangement arrangement, ArrangementStatusNotification notification) {
+    private void processArrangementForUncompletedCheckUnits(Arrangement arrangement, ArrangementStatusNotification notification) {
         if (notification.getEvent().equals(ExecutionStatus.ACT_SENT)) {
             if (arrangement.getStatus().equals(ArrangementEvents.STOP ) ||
                     notification.getEvent().equals(ArrangementEvents.STOP_BY_SERVICE_MODE) ||
@@ -148,8 +151,6 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
 
                 arrangement.setContainsUncompletedCheckUnits(true);
             }
-        } else {
-            arrangement.setContainsUncompletedCheckUnits(false);
         }
         arrangementRepo.save(arrangement);
     }

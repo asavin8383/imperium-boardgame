@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import repositories.ArrangementRepo;
 import services.arrangement.ArrangementNotificationService;
 
 import java.time.LocalDateTime;
@@ -28,6 +29,7 @@ import java.time.LocalDateTime;
 public class ArrangementNotificationController {
 
     private final ArrangementNotificationService arrangementNotificationService;
+    private final ArrangementRepo arrangementRepo;
 
     @PreAuthorize("hasRole('ROLE_SYSTEM')")
     @PutMapping
@@ -55,9 +57,11 @@ public class ArrangementNotificationController {
             arrangementStatusNotification.setEventDate(LocalDateTime.now());
             arrangementStatusNotification.setCompletionPerscent(0L);
 
-            if (arrangementNotificationService.processNotification(arrangementStatusNotification))
+            if (arrangementNotificationService.processNotificationInPPT(arrangementStatusNotification)) {
+                arrangement.setContainsUncompletedCheckUnits(false);
+                arrangementRepo.save(arrangement);
                 return ResponseEntity.ok().build();
-             else return ResponseEntity.badRequest().body("Невозможно сменить статус мероприятию");
+            } else return ResponseEntity.badRequest().body("Невозможно сменить статус мероприятию");
 
         } else {
             return ResponseEntity.badRequest().body(
