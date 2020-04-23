@@ -69,4 +69,5 @@
     <include file="db/changelog/ppt.0041.arrangement_status_ck_service_mode_stopped_by_max_check_units_count.xml"/>
     <include file="db/changelog/ppt.0042.arrangement_status_ck_stopped_by_day_gonet.xml"/>
     <include file="db/changelog/ppt.0043.arrangement_act_creation_operator.xml"/>
+    <include file="db/changelog/ppt.0044.arrangement_contains_uncompleted_check_units.xml"/>
 </databaseChangeLog>

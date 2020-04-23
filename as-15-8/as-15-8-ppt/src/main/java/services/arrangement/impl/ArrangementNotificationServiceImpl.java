@@ -4,6 +4,7 @@ import arrangement.ArrangementStatusNotification;
 import enums.ArrangementEvents;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import model.enums.ExecutionStatus;
 import model.task.Arrangement;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -122,6 +123,7 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
     }
 
     private boolean processNotificationInPPT(Arrangement arrangement, ArrangementStatusNotification arrangementStatusNotification) {
+        processArrangementForUncompletedCheckResults(arrangement, arrangementStatusNotification);
         arrangement.sendEvent(arrangementStatusNotification.getEvent(), arrangementStatusNotification.getEventDate());
         try {
             arrangementStatusService.processArrangementStatusChange(arrangement);
@@ -131,5 +133,20 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
             log.error("не удалось сменить статус мероприятия {} в ППТ на {} ", arrangement.getId(), arrangement.getStatus(), ex);
             return false;
         }
+    }
+
+    private void processArrangementForUncompletedCheckResults(Arrangement arrangement, ArrangementStatusNotification notification) {
+        if (notification.getEvent().equals(ExecutionStatus.ACT_SENT)) {
+            if (arrangement.getStatus().equals(ArrangementEvents.STOP ) ||
+                    notification.getEvent().equals(ArrangementEvents.STOP_BY_SERVICE_MODE) ||
+                    notification.getEvent().equals(ArrangementEvents.STOP_BY_MAX_CHECK_UNITS_COUNT) ||
+                    notification.getEvent().equals(ArrangementEvents.STOP_BY_DAY_GONE)) {
+
+                arrangement.setContainsUncompletedCheckUnits(true);
+            }
+        } else {
+            arrangement.setContainsUncompletedCheckUnits(false);
+        }
+        arrangementRepo.save(arrangement);
     }
 }
