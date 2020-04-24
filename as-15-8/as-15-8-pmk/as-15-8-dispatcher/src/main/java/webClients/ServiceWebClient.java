@@ -25,7 +25,7 @@ import rest.ActRequest;
 public class ServiceWebClient {
 
     private static final String CREATE_ACT_URL = "/pod/act";
-    private static final String NOTIFY_PPT = "/ppt/arrangements/info_about_act";
+    private static final String INFO_ABOUT_ACT = "/ppt/arrangements/info_about_act";
 
     @Value("${gateway.url}")
     private String gatewayUrl;
@@ -51,7 +51,7 @@ public class ServiceWebClient {
         }
     }
 
-    public boolean notifyPPT(@NonNull ActRequest actRequest){
+    public boolean notifyPPTAboutActInfo(@NonNull ActRequest actRequest){
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -59,14 +59,14 @@ public class ServiceWebClient {
         MappingJacksonValue jacksonValue = new MappingJacksonValue(actRequest);
         HttpEntity<MappingJacksonValue> entity = new HttpEntity<>(jacksonValue, headers);
 
-        log.info("Отправка сообщения с обновлением инфо о акте для мероприятия {}, путь: {}", actRequest.getArragementId(), NOTIFY_PPT);
+        log.info("Отправка сообщения с обновлением инфо о акте для мероприятия {}, путь: {}", actRequest.getArragementId(), INFO_ABOUT_ACT);
         try {
             restTemplate.put(UriComponentsBuilder
                     .fromHttpUrl(gatewayUrl)
-                    .path(NOTIFY_PPT)
+                    .path(INFO_ABOUT_ACT)
                     .build().toString(), entity);
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
-            log.info("Ошибка отправки сообщения с изменением статуса мероприятия, " + actRequest.getArragementId() + " путь: " + NOTIFY_PPT + ", код возврата " + ex.getStatusCode());
+            log.info("Ошибка отправки сообщения с изменением статуса мероприятия, " + actRequest.getArragementId() + " путь: " + INFO_ABOUT_ACT + ", код возврата " + ex.getStatusCode());
             return false;
         }
         return true;

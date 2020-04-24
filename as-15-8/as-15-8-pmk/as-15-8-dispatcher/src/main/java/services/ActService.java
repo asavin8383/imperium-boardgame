@@ -1,5 +1,7 @@
 package services;
 
+import arrangement.ArrangementStatusNotification;
+import enums.ArrangementEvents;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +28,7 @@ public class ActService {
 
     private final ServiceWebClient webClient;
     private final ResultRepo arrangementResultRepo;
+    private final ArrangementService arrangementService;
 
     public boolean createManualAct(Long arrangementId, String operatorName) {
         return createAct(arrangementId, operatorName, false);
@@ -50,7 +53,12 @@ public class ActService {
             actRequest.setOperatorName(operatorName);
             actRequest.setGeneratedAutomatically(isGeneratedAutomatically);
 
-            webClient.notifyPPT(actRequest);
+            webClient.notifyPPTAboutActInfo(actRequest);
+
+            arrangementService.sendStatusNotificationToPPT(new ArrangementStatusNotification(
+                    arrangementId,
+                    ArrangementEvents.SEND_ACT));
+
             return webClient.sendActToPOD(actRequest);
         } catch (Exception ex){
             log.error("Ошибка при формировании данных для акта по мероприятию: " + arrangementId);
