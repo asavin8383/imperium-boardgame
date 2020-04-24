@@ -146,11 +146,12 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
     }
 
     private void processArrangementForUncompletedCheckUnits(Arrangement arrangement, ArrangementStatusNotification notification) {
-        if (arrangement.getStatus().equals(ArrangementEvents.STOP ) ||
-                notification.getEvent().equals(ArrangementEvents.STOP_BY_SERVICE_MODE) ||
-                notification.getEvent().equals(ArrangementEvents.STOP_BY_MAX_CHECK_UNITS_COUNT) ||
-                notification.getEvent().equals(ArrangementEvents.STOP_BY_DAY_GONE)) {
-            if (notification.getEvent().equals(ExecutionStatus.ACT_SENT)) {
+        if (arrangement.getStatus().equals(ExecutionStatus.STOPPED ) ||
+                notification.getEvent().equals(ExecutionStatus.STOPPED_BY_SERVICE_MODE) ||
+                notification.getEvent().equals(ExecutionStatus.STOPPED_BY_MAX_CHECK_UNITS) ||
+                notification.getEvent().equals(ExecutionStatus.STOPPED_BY_DAY_GONE)) {
+
+            if (notification.getEvent().equals(ArrangementEvents.SEND_ACT)) {
                 arrangement.setContainsUncompletedCheckUnits(true);
                 arrangementRepo.save(arrangement);
             }
