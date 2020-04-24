@@ -239,7 +239,7 @@ public class FormalTaskController {
 			formalTask.setArrangements(goodArr);
 			return formalTask;
 		}).collect(Collectors.toList());
-
-		return new PageImpl<>(filteredResults, page, filteredResults.size());
+		result.getTotalElements();
+		return new PageImpl<>(filteredResults, page, result.getTotalElements());
     }
 }
