@@ -28,7 +28,6 @@ public class ActService {
 
     private final ServiceWebClient webClient;
     private final ResultRepo arrangementResultRepo;
-    private final ArrangementService arrangementService;
 
     public boolean createManualAct(Long arrangementId, String operatorName) {
         return createAct(arrangementId, operatorName, false);
@@ -54,10 +53,6 @@ public class ActService {
             actRequest.setGeneratedAutomatically(isGeneratedAutomatically);
 
             webClient.notifyPPTAboutActInfo(actRequest);
-
-            arrangementService.sendStatusNotificationToPPT(new ArrangementStatusNotification(
-                    arrangementId,
-                    ArrangementEvents.SEND_ACT));
 
             return webClient.sendActToPOD(actRequest);
         } catch (Exception ex){

@@ -1,5 +1,7 @@
 package controllers;
 
+import arrangement.ArrangementStatusNotification;
+import enums.ArrangementEvents;
 import enums.CheckUnitJobResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
+import repositories.ArrangementRepo;
 import repositories.NmapDetailResultRepo;
 import repositories.ResultRepo;
 import repositories.ResultScreenShotRepo;
@@ -47,6 +50,7 @@ public class ActController {
     private final ResultScreenShotRepo resultScreenShotRepo;
     private final NmapDetailResultRepo nmapDetailResultRepo;
     private final ArrangementService arrangementService;
+    private final ArrangementRepo arrangementRepo;
 
     private DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
@@ -81,10 +85,14 @@ public class ActController {
 
     @GetMapping(path = "/create")
     @PreAuthorize("hasAnyRole('ROLE_SEND_ACT_BY_HAND')")
-    public ResponseEntity<Void> createAct(Long arrangementId, Principal principal){
+    public ResponseEntity<Void> createAct(Long arrangementId, Principal principal) {
         boolean created = actService.createManualAct(arrangementId, principal.getName());
-        if(created)
+        if(created) {
             arrangementService.changeArrangementStatusToActSentPPT(arrangementId);
+            arrangementService.sendStatusNotificationToPPT(new ArrangementStatusNotification(
+                    arrangementId,
+                    ArrangementEvents.SEND_ACT));
+        }
         return new ResponseEntity<>(created ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR);
     }
 

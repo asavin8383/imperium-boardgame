@@ -202,7 +202,15 @@ public class ArrangementService {
             }
             arrangementRepo.save(arr);
             if (!isStopped && isActSendAutomatically) {
-                return actService.createAutomaticAct(arrangementId);
+                if (actService.createAutomaticAct(arrangementId)) {
+
+                    sendStatusNotificationToPPT(new ArrangementStatusNotification(
+                            arrangementId,
+                            ArrangementEvents.SEND_ACT,
+                            getCompletionPerscent(arr)));
+
+                    return true;
+                } return false;
             }
             return true;
         } catch (Exception ex) {
