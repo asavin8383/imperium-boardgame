@@ -146,6 +146,12 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
     }
 
     private void processArrangementForUncompletedCheckUnits(Arrangement arrangement, ArrangementStatusNotification notification) {
+
+        log.info("Определение наличия незавершённых чек юнитов для мероприяти id: {}, текущий статус: {}, событие: {}",
+                arrangement.getId(),
+                arrangement.getStatus(),
+                notification.getEvent());
+
         if (arrangement.getStatus().equals(ExecutionStatus.STOPPED ) ||
                 notification.getEvent().equals(ExecutionStatus.STOPPED_BY_SERVICE_MODE) ||
                 notification.getEvent().equals(ExecutionStatus.STOPPED_BY_MAX_CHECK_UNITS) ||
@@ -154,6 +160,7 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
             if (notification.getEvent().equals(ArrangementEvents.SEND_ACT)) {
                 arrangement.setContainsUncompletedCheckUnits(true);
                 arrangementRepo.save(arrangement);
+                log.info("Незавершённые чек юниты присутсвуют");
             }
         }
     }

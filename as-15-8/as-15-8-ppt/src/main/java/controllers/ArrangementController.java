@@ -271,6 +271,8 @@ public class ArrangementController {
                 operator = actRequest.getOperatorName();
             }
 
+
+
             arr.setActCreationOperator(operator);
             arrangementRepo.save(arr);
             return ResponseEntity.ok(arr);
