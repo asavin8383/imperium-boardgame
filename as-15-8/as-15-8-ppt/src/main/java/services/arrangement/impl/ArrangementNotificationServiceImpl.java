@@ -88,15 +88,6 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
         }
     }
 
-    @Override
-    public ArrangementStatusNotification createNotification(Long arrangementId, ArrangementEvents event, Long completion) {
-        ArrangementStatusNotification arrangementStatusNotification = new ArrangementStatusNotification();
-        arrangementStatusNotification.setArrangementId(arrangementId);
-        arrangementStatusNotification.setEvent(event);
-        arrangementStatusNotification.setCompletionPerscent(completion);
-        return arrangementStatusNotification;
-    }
-
     private boolean notifyPPMAboutStopEvent(ArrangementStatusNotification notification) {
         if (notification.getEvent().equals(ArrangementEvents.STOP ) ||
                 notification.getEvent().equals(ArrangementEvents.STOP_BY_SERVICE_MODE) ||

@@ -60,15 +60,13 @@ public class ArrangementNotificationController {
             if (!dispatcherWebClient.setStoppingReasonToNormal(arrangement.getId()))
                 return ResponseEntity.badRequest().body("Невозможно сменить статус мероприятию ");
 
-            //long completion = dispatcherWebClient.getCompletion(arrangement.getId());
-            long completion = 39;
-
-            ArrangementStatusNotification notification = arrangementNotificationService.createNotification(arrangement.getId(),
-                    ArrangementEvents.STOP,
-                    completion);
+            ArrangementStatusNotification notification = new ArrangementStatusNotification(arrangement.getId(),
+                    ArrangementEvents.STOP);
 
             if (arrangementNotificationService.processNotificationInPPT(notification)) {
                 arrangement.setContainsUncompletedCheckUnits(false);
+                arrangement.setCompletionDate(null);
+                arrangement.setDeadlineDate(null);
                 arrangementRepo.save(arrangement);
                 return ResponseEntity.ok().build();
 

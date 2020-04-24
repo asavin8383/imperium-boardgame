@@ -12,6 +12,5 @@ import enums.ArrangementEvents;
 public interface ArrangementNotificationService {
 
     boolean processNotification(ArrangementStatusNotification arrangementStatusNotification);
-    boolean processNotificationInPPT(ArrangementStatusNotification arrangementStatusNotification);
-    ArrangementStatusNotification createNotification(Long arrangementId, ArrangementEvents event, Long completion);
+    boolean  processNotificationInPPT(ArrangementStatusNotification arrangementStatusNotification);
 }

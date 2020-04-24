@@ -26,11 +26,6 @@ public class DispatcherWebClient {
     private final String DISPATCHER_SET_STOPPING_REASOM_TO_NORMAL = "/dispatcher/arrangements/stoping_reason_normal";
     private final OAuth2RestTemplate restTemplate;
 
-    public long getCompletion(Long arrangementId) {
-
-        return 0;
-    }
-
     public boolean setStoppingReasonToNormal(Long arrangementId) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -38,7 +33,7 @@ public class DispatcherWebClient {
         MappingJacksonValue jacksonValue = new MappingJacksonValue(arrangementId);
         HttpEntity<MappingJacksonValue> entity = new HttpEntity<>(jacksonValue, headers);
 
-        log.info("Отправка сообщения с изменением статуса мероприятия {} в ПМК, путь: {} ",
+        log.info("Отправка сообщения с изменением статуса мероприятия {} в PMK, путь: {} ",
                 arrangementId,
                 DISPATCHER_SET_STOPPING_REASOM_TO_NORMAL);
         try {
