@@ -137,7 +137,8 @@ public class ContentService {
     }
 
     private void fillTempContentTable(List<Long> contentIds) {
-        em.createNativeQuery("insert into content_temp (contentId) values(unnest(array" + contentIds.toString() + ")) ON CONFLICT DO NOTHING").executeUpdate();
+        if (contentIds.size() > 0)
+            em.createNativeQuery("insert into content_temp (contentId) values(unnest(array" + contentIds.toString() + ")) ON CONFLICT DO NOTHING").executeUpdate();
     }
 
     private List<ContentView> filterContentView(String sortingDirection, String sortingColumn) {
