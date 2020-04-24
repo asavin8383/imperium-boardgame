@@ -235,14 +235,6 @@ public class ArrangementController {
     }
 
     @PreAuthorize("hasRole('ROLE_SYSTEM')" )
-    @GetMapping(path = "/act_sent_status")
-    public void changeActStatus(@RequestParam("id") Optional<Arrangement> arrangement){
-        arrangement.orElseThrow(()-> new AS_15_8_PPT_Exception("Arrangement не найден"));
-        arrangement.get().setStatus(ExecutionStatus.ACT_SENT);
-        arrangementRepo.save(arrangement.get());
-    }
-
-    @PreAuthorize("hasRole('ROLE_SYSTEM')" )
     @GetMapping(path = "/interrupt_violation_number")
     public Long changeActStatus(@RequestParam("id") Arrangement arrangement){
         Optional.ofNullable(arrangement).orElseThrow(()-> new AS_15_8_PPT_Exception("Arrangement не найден"));

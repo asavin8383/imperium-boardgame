@@ -63,7 +63,6 @@ public class ArrangementService {
     private final String GET_CHECK_UNITS_FROM_PPT = "/ppt/arrangements/checkUnits";
     private final String PPT_STATUS_ENDPOINT = "/ppt/arrangements/status";
     private final String PPT_IS_ACT_AVAILABLE_FOR_AUTOMATIC_SEND = "/arrangements/act_available_for_automatic_send";
-    private final String PPT_ACT_SENT_STATUS = "/arrangements/act_sent_status";
     private final String PPT_ARRANGEMENT_INTERRUPT_VIOLATION_NUMBER = "/arrangements/interrupt_violation_number";
 
     private final OAuth2RestTemplate restTemplate;
@@ -202,15 +201,7 @@ public class ArrangementService {
             }
             arrangementRepo.save(arr);
             if (!isStopped && isActSendAutomatically) {
-                if (actService.createAutomaticAct(arrangementId)) {
-
-                    sendStatusNotificationToPPT(new ArrangementStatusNotification(
-                            arrangementId,
-                            ArrangementEvents.SEND_ACT,
-                            getCompletionPerscent(arr)));
-
-                    return true;
-                } return false;
+                return actService.createAutomaticAct(arrangementId);
             }
             return true;
         } catch (Exception ex) {
@@ -394,13 +385,14 @@ public class ArrangementService {
         }
     }
 
-    public void changeArrangementStatusToActSentPPT(Long arrangementId) {
+    //TODO убрать, заменить на нотификешн
+    /*public void changeArrangementStatusToActSentPPT(Long arrangementId) {
         try {
             restTemplate.getForObject(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(PPT_ACT_SENT_STATUS).queryParam("id", arrangementId).build().toString(), Boolean.class);
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
             throw AS_15_8_DispatcherException.logAndGet(log, String.format("Ошибка отправки сообщения с изменение статуса ACT_SENT %d в ППТ, код возврата %s", arrangementId, ex.getStatusCode()));
         }
-    }
+    }*/
 
     public Long getInterruptViolationNumberFromPPT(Long arrangementId) {
         try {

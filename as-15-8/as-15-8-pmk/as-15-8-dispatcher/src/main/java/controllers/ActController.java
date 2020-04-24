@@ -88,7 +88,7 @@ public class ActController {
     public ResponseEntity<Void> createAct(Long arrangementId, Principal principal) {
         boolean created = actService.createManualAct(arrangementId, principal.getName());
         if(created) {
-            arrangementService.changeArrangementStatusToActSentPPT(arrangementId);
+            //arrangementService.changeArrangementStatusToActSentPPT(arrangementId);
             arrangementService.sendStatusNotificationToPPT(new ArrangementStatusNotification(
                     arrangementId,
                     ArrangementEvents.SEND_ACT));
