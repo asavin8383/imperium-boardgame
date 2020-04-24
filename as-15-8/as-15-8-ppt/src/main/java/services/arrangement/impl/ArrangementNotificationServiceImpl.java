@@ -23,6 +23,8 @@ import repositories.ArrangementRepo;
 import services.arrangement.ArrangementNotificationService;
 import services.arrangement.ArrangementStatusService;
 
+import java.time.LocalDateTime;
+
 /**
  * Creation date: 29.05.2019
  * Author: asavin
@@ -40,6 +42,7 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
     private final ArrangementStatusService arrangementStatusService;
     private final String PPM_STOP_ENDPOINT = "/ppm/arrangements/stop";
     private final String PPM_FINISH_ENDPOINT = "/ppm/arrangements/finish";
+
     private final OAuth2RestTemplate restTemplate;
 
     @Override
@@ -83,6 +86,15 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
             log.error("не удалось сменить статус мероприятия {} в ППТ на {} ", arrangement.getId(), arrangement.getStatus(), ex);
             return false;
         }
+    }
+
+    @Override
+    public ArrangementStatusNotification createNotification(Long arrangementId, ArrangementEvents event, Long completion) {
+        ArrangementStatusNotification arrangementStatusNotification = new ArrangementStatusNotification();
+        arrangementStatusNotification.setArrangementId(arrangementId);
+        arrangementStatusNotification.setEvent(event);
+        arrangementStatusNotification.setCompletionPerscent(completion);
+        return arrangementStatusNotification;
     }
 
     private boolean notifyPPMAboutStopEvent(ArrangementStatusNotification notification) {

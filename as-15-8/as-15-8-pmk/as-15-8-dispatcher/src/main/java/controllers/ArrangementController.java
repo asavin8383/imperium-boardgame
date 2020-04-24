@@ -87,4 +87,15 @@ public class ArrangementController {
     public void stopAllArrsByDayGone(@RequestParam Long id) {
         arrangementService.stopAllRunningArrangements(Reason.STOPPED_BY_DAY_GONE);
     }
+
+    @PutMapping("/stoping_reason_normal")
+    @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
+    public ResponseEntity changeStoppingReasonToNormal(@RequestBody Long id) {
+        Arrangement arrangement = arrangementRepo.findById(id).orElseThrow(() ->
+                new AS_15_8_DispatcherException("Ошибка остановки мероприятия. Такое мероприятие не найдено в БД, id = " + id));
+
+        arrangement.setReason(Reason.NORMAL);
+        arrangementRepo.save(arrangement);
+        return ResponseEntity.ok().build();
+    }
 }

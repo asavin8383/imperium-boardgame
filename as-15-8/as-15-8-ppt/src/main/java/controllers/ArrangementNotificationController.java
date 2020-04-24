@@ -13,7 +13,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import repositories.ArrangementRepo;
+import restapi.dispatcher.DispatcherWebClient;
 import services.arrangement.ArrangementNotificationService;
+import services.arrangement.impl.ArrangementService;
 
 import java.time.LocalDateTime;
 
@@ -29,7 +31,9 @@ import java.time.LocalDateTime;
 public class ArrangementNotificationController {
 
     private final ArrangementNotificationService arrangementNotificationService;
+    private final DispatcherWebClient dispatcherWebClient;
     private final ArrangementRepo arrangementRepo;
+    private final ArrangementService arrangementService;
 
     @PreAuthorize("hasRole('ROLE_SYSTEM')")
     @PutMapping
@@ -44,23 +48,30 @@ public class ArrangementNotificationController {
 
     @PreAuthorize("hasAnyRole('ROLE_MANAGE_ARRANGEMENT')")
     @PutMapping("/stopped")
-    public ResponseEntity changeExecutionStatusToStopped(@RequestParam("id") Arrangement arrangement) {
+    public ResponseEntity prepareStoppedActSentArrangementToBeRunned(@RequestParam("id") Arrangement arrangement) {
         if (arrangement == null)
             throw new AS_15_8_PPT_Exception("Мероприятие не найдено");
+
         if (arrangement.getStatus().equals(ExecutionStatus.ACT_SENT)) {
             if (!arrangement.getContainsUncompletedCheckUnits())
                 return ResponseEntity.badRequest().body(
                         "У мероприятия нет незавершённых проверок id: " + arrangement.getId());
-            ArrangementStatusNotification arrangementStatusNotification = new ArrangementStatusNotification();
-            arrangementStatusNotification.setArrangementId(arrangement.getId());
-            arrangementStatusNotification.setEvent(ArrangementEvents.STOP);
-            arrangementStatusNotification.setEventDate(LocalDateTime.now());
-            arrangementStatusNotification.setCompletionPerscent(0L);
 
-            if (arrangementNotificationService.processNotificationInPPT(arrangementStatusNotification)) {
+            if (!dispatcherWebClient.setStoppingReasonToNormal(arrangement.getId()))
+                return ResponseEntity.badRequest().body("Невозможно сменить статус мероприятию ");
+
+            //long completion = dispatcherWebClient.getCompletion(arrangement.getId());
+            long completion = 39;
+
+            ArrangementStatusNotification notification = arrangementNotificationService.createNotification(arrangement.getId(),
+                    ArrangementEvents.STOP,
+                    completion);
+
+            if (arrangementNotificationService.processNotificationInPPT(notification)) {
                 arrangement.setContainsUncompletedCheckUnits(false);
                 arrangementRepo.save(arrangement);
                 return ResponseEntity.ok().build();
+
             } else return ResponseEntity.badRequest().body("Невозможно сменить статус мероприятию");
 
         } else {
@@ -68,5 +79,4 @@ public class ArrangementNotificationController {
                     "Недопутимый статус! Операция доступна только для мероприятий со статусом ACT_SENT, текущий статус: " + arrangement.getStatus());
         }
     }
-
 }
