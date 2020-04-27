@@ -76,7 +76,7 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
         Arrangement arrangement = arrangementRepo.findById(arrangementStatusNotification.getArrangementId()).orElseThrow(() ->
                 new AS_15_8_PPT_Exception("Мероприятие не найдено в БД, id: " + arrangementStatusNotification.getArrangementId()));
 
-        processArrangementForUncompletedCheckUnits(arrangement, arrangementStatusNotification);
+        checkActSendArrangementForUncompletedCheckUnits(arrangement, arrangementStatusNotification);
         arrangement.sendEvent(arrangementStatusNotification.getEvent(), arrangementStatusNotification.getEventDate());
         try {
             arrangementStatusService.processArrangementStatusChange(arrangement);
@@ -145,7 +145,7 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
         return true;
     }
 
-    private void processArrangementForUncompletedCheckUnits(Arrangement arrangement, ArrangementStatusNotification notification) {
+    private void checkActSendArrangementForUncompletedCheckUnits(Arrangement arrangement, ArrangementStatusNotification notification) {
 
         log.info("Определение наличия незавершённых чек юнитов для мероприяти id: {}, текущий статус: {}, событие: {}",
                 arrangement.getId(),
