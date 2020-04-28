@@ -23,8 +23,6 @@ import repositories.ArrangementRepo;
 import services.arrangement.ArrangementNotificationService;
 import services.arrangement.ArrangementStatusService;
 
-import java.time.LocalDateTime;
-
 /**
  * Creation date: 29.05.2019
  * Author: asavin
@@ -80,10 +78,15 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
         arrangement.sendEvent(arrangementStatusNotification.getEvent(), arrangementStatusNotification.getEventDate());
         try {
             arrangementStatusService.processArrangementStatusChange(arrangement);
-            log.info("Статус мероприятия {} сменился в ППТ на: {} ", arrangement.getId(), arrangement.getStatus());
+            log.info("Статус мероприятия id: {} сменился в ППТ на: {} ",
+                    arrangement.getId(),
+                    arrangement.getStatus());
             return true;
         } catch (Exception ex) {
-            log.error("не удалось сменить статус мероприятия {} в ППТ на {} ", arrangement.getId(), arrangement.getStatus(), ex);
+            log.error("не удалось сменить статус мероприятия id: {} в ППТ на {}, ошибка: {}",
+                    arrangement.getId(),
+                    arrangement.getStatus(),
+                    ex);
             return false;
         }
     }
@@ -94,15 +97,8 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
                 notification.getEvent().equals(ArrangementEvents.STOP_BY_MAX_CHECK_UNITS_COUNT) ||
                 notification.getEvent().equals(ArrangementEvents.STOP_BY_DAY_GONE)) {
 
-            log.info("Отправка события {} в ППМ, arrangementId = {}",
-                    notification.getEvent(),
-                    notification.getArrangementId());
-
             return createPutRequest(notification, PPM_STOP_ENDPOINT);
         } else {
-            log.info("Ошибка отправки события STOP в ППМ, arrangementId = {}, событие: {}",
-                    notification.getArrangementId(),
-                    notification.getEvent());
             return true;
         }
     }
@@ -114,9 +110,6 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
 
             return createPutRequest(notification, PPM_FINISH_ENDPOINT);
         } else {
-            log.info("Ошибка отправки события FINISH в ППМ, arrangementId = {}, событие: {}",
-                    notification.getArrangementId(),
-                    notification.getEvent());
             return true;
         }
     }
@@ -128,7 +121,7 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
         MappingJacksonValue jacksonValue = new MappingJacksonValue(notification);
         HttpEntity<MappingJacksonValue> entity = new HttpEntity<>(jacksonValue, headers);
 
-        log.info("Отправка сообщения с изменением статуса мероприятия {} в ППМ, путь: {}, событие {} ",
+        log.info("Отправка сообщения с изменением статуса мероприятия id: {}, путь: {}, событие: {} ",
                 notification.getArrangementId(),
                 path,
                 notification.getEvent());
@@ -138,10 +131,15 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
                     .path(path)
                     .build().toString(), entity);
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
-            log.info("Ошибка отправки сообщения с изменением статуса мероприятия в ППМ, путь: {}, ошибка: {} ", path, ex);
+            log.info("Ошибка отправки сообщения с изменением статуса мероприятия, путь: {}, ошибка: {} ",
+                    path,
+                    ex);
             return false;
         }
-        log.info("Сообщение с изменением статуса мероприятия {} успешно отправлено, путь: " + path, notification.getArrangementId());
+        log.info("Сообщение с изменением статуса мероприятия id: {} успешно отправлено, путь: {}, событие: {}",
+                notification.getArrangementId(),
+                path,
+                notification.getEvent());
         return true;
     }
 

@@ -321,7 +321,7 @@ public class ArrangementService {
         MappingJacksonValue jacksonValue = new MappingJacksonValue(notification);
         HttpEntity<MappingJacksonValue> entity = new HttpEntity<>(jacksonValue, headers);
 
-        log.info("Отправка сообщения с изменением статуса мероприятия {}, путь: " + PPT_STATUS_ENDPOINT, notification.getArrangementId());
+        log.info("Отправка сообщения с изменением статуса мероприятия id:  {}, путь: {}, событие: {} ", notification.getArrangementId(), PPT_STATUS_ENDPOINT, notification.getEvent());
         try {
             restTemplate.put(UriComponentsBuilder
                     .fromHttpUrl(gatewayUrl)
