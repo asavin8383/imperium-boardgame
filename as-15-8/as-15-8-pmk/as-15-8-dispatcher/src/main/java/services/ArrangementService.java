@@ -109,6 +109,7 @@ public class ArrangementService {
         arrangement.setCreationDate(LocalDateTime.now());
         arrangement.setVersion(Optional.ofNullable(arrangementToExecution.getVersion()).orElse(0L));
         arrangement.setStatus(ArrangementStatus.RUNNING);
+        arrangement.setReason(Reason.NORMAL);
         arrangement.setMaxCheckUnitsCount(getInterruptViolationNumberFromPPT(arrangementToExecution.getId()));
         arrangementRepo.save(arrangement);
 
