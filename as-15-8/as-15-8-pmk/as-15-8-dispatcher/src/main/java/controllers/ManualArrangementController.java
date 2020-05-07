@@ -27,7 +27,6 @@ import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping(path = "/manual_arrangement", produces = MediaType.APPLICATION_JSON_VALUE)
-@PreAuthorize("hasRole('ROLE_VIEW_RESULT')")
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Slf4j
 public class ManualArrangementController {
@@ -43,6 +42,7 @@ public class ManualArrangementController {
         return arrangementService.createManualArrangement(arrangementId);
     }
 
+    @PreAuthorize("hasRole('ROLE_VIEW_RESULT')")
     @GetMapping
     public ResponseEntity getManualArrangementResults(@RequestParam(required = false) SortingDirection sortingDirection,
                                                       @RequestParam(required = false) String sortingColumn,
@@ -58,6 +58,7 @@ public class ManualArrangementController {
 
     }
 
+    @PreAuthorize("hasRole('ROLE_VIEW_RESULT')")
     @PutMapping
     public ResponseEntity editResult(@RequestBody Result newResult,
                                      @RequestParam("resultId") Result result) {
@@ -74,6 +75,7 @@ public class ManualArrangementController {
         }
     }
 
+    @PreAuthorize("hasRole('ROLE_VIEW_RESULT')")
     @PutMapping(path = "/screenshot")
     public ResponseEntity saveScreenshot(@RequestParam("file") MultipartFile file,
                                          @RequestParam("resultId") Result result) throws IOException {
@@ -105,6 +107,7 @@ public class ManualArrangementController {
             return ResponseEntity.badRequest().body("Результат не найден в БД");
     }
 
+    @PreAuthorize("hasRole('ROLE_VIEW_RESULT')")
     @PutMapping(path = "/finish_arrangement")
     public ResponseEntity finishArrangement(@RequestParam("id") Arrangement arrangement) {
         if (arrangement != null) {
