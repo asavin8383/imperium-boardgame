@@ -129,6 +129,7 @@ public class ErdiRestClient {
                     countLoadedDeltaERDI,
                     countLoadedAddons);
 
+            log.info(stateDetails);
             log.info("====== Конец обновления справочников");
         }
         catch(Exception ex){
