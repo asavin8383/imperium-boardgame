@@ -40,4 +40,5 @@
     <include file="data/changelog/pod.0021.domain_mask_unique.xml"/>
     <include file="data/changelog/pod.0022.crawler.xml"/>
     <include file="data/changelog/pod.0023.content_view_join_sor_content_remove.xml"/>
+    <include file="data/changelog/pod.0024.sor_remove_hist.xml"/>
 </databaseChangeLog>
