@@ -2,8 +2,10 @@ package services.arrangement.impl;
 
 import arrangement.ArrangementStatusNotification;
 import enums.ArrangementEvents;
+import exceptions.AS_15_8_PPT_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import model.enums.ExecutionStatus;
 import model.task.Arrangement;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,11 +40,13 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
     private final ArrangementStatusService arrangementStatusService;
     private final String PPM_STOP_ENDPOINT = "/ppm/arrangements/stop";
     private final String PPM_FINISH_ENDPOINT = "/ppm/arrangements/finish";
+
     private final OAuth2RestTemplate restTemplate;
 
     @Override
-    public void processNotification(ArrangementStatusNotification arrangementStatusNotification) {
-        arrangementRepo.findById(arrangementStatusNotification.getArrangementId())
+    public boolean processNotification(ArrangementStatusNotification arrangementStatusNotification) {
+        boolean result = false;
+        result = arrangementRepo.findById(arrangementStatusNotification.getArrangementId())
             .map(arrangement -> {
                 if (Strings.isNotEmpty(arrangementStatusNotification.getInfo())){
                     arrangement.setInfo(arrangementStatusNotification.getInfo());
@@ -55,13 +59,36 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
                 if (!notifyPPMAboutFinishEvent(arrangementStatusNotification)) {
                     return false;
                 }
-                return processNotificationInPPT(arrangement, arrangementStatusNotification);
+                return processNotificationInPPT(arrangementStatusNotification);
 
             })
             .orElseGet(() -> {
                 log.error("Ошибка смены статуса мероприятия. Мероприятие не было найдено по ID: {}", arrangementStatusNotification.getArrangementId());
                 return false;
             });
+        return result;
+    }
+
+    @Override
+    public boolean processNotificationInPPT(ArrangementStatusNotification arrangementStatusNotification) {
+        Arrangement arrangement = arrangementRepo.findById(arrangementStatusNotification.getArrangementId()).orElseThrow(() ->
+                new AS_15_8_PPT_Exception("Мероприятие не найдено в БД, id: " + arrangementStatusNotification.getArrangementId()));
+
+        checkActSendArrangementForUncompletedCheckUnits(arrangement, arrangementStatusNotification);
+        arrangement.sendEvent(arrangementStatusNotification.getEvent(), arrangementStatusNotification.getEventDate());
+        try {
+            arrangementStatusService.processArrangementStatusChange(arrangement);
+            log.info("Статус мероприятия id: {} сменился в ППТ на: {} ",
+                    arrangement.getId(),
+                    arrangement.getStatus());
+            return true;
+        } catch (Exception ex) {
+            log.error("не удалось сменить статус мероприятия id: {} в ППТ на {}, ошибка: {}",
+                    arrangement.getId(),
+                    arrangement.getStatus(),
+                    ex);
+            return false;
+        }
     }
 
     private boolean notifyPPMAboutStopEvent(ArrangementStatusNotification notification) {
@@ -70,15 +97,8 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
                 notification.getEvent().equals(ArrangementEvents.STOP_BY_MAX_CHECK_UNITS_COUNT) ||
                 notification.getEvent().equals(ArrangementEvents.STOP_BY_DAY_GONE)) {
 
-            log.info("Отправка события {} в ППМ, arrangementId = {}",
-                    notification.getEvent(),
-                    notification.getArrangementId());
-
             return createPutRequest(notification, PPM_STOP_ENDPOINT);
         } else {
-            log.info("Ошибка отправки события STOP в ППМ, arrangementId = {}, событие: {}",
-                    notification.getArrangementId(),
-                    notification.getEvent());
             return true;
         }
     }
@@ -90,9 +110,6 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
 
             return createPutRequest(notification, PPM_FINISH_ENDPOINT);
         } else {
-            log.info("Ошибка отправки события FINISH в ППМ, arrangementId = {}, событие: {}",
-                    notification.getArrangementId(),
-                    notification.getEvent());
             return true;
         }
     }
@@ -104,7 +121,7 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
         MappingJacksonValue jacksonValue = new MappingJacksonValue(notification);
         HttpEntity<MappingJacksonValue> entity = new HttpEntity<>(jacksonValue, headers);
 
-        log.info("Отправка сообщения с изменением статуса мероприятия {} в ППМ, путь: {}, событие {} ",
+        log.info("Отправка сообщения с изменением статуса мероприятия id: {}, путь: {}, событие: {} ",
                 notification.getArrangementId(),
                 path,
                 notification.getEvent());
@@ -114,22 +131,35 @@ public class ArrangementNotificationServiceImpl implements ArrangementNotificati
                     .path(path)
                     .build().toString(), entity);
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
-            log.info("Ошибка отправки сообщения с изменением статуса мероприятия в ППМ, путь: {}, ошибка: {} ", path, ex);
+            log.info("Ошибка отправки сообщения с изменением статуса мероприятия, путь: {}, ошибка: {} ",
+                    path,
+                    ex);
             return false;
         }
-        log.info("Сообщение с изменением статуса мероприятия {} успешно отправлено, путь: " + path, notification.getArrangementId());
+        log.info("Сообщение с изменением статуса мероприятия id: {} успешно отправлено, путь: {}, событие: {}",
+                notification.getArrangementId(),
+                path,
+                notification.getEvent());
         return true;
     }
 
-    private boolean processNotificationInPPT(Arrangement arrangement, ArrangementStatusNotification arrangementStatusNotification) {
-        arrangement.sendEvent(arrangementStatusNotification.getEvent(), arrangementStatusNotification.getEventDate());
-        try {
-            arrangementStatusService.processArrangementStatusChange(arrangement);
-            log.info("Статус мероприятия {} сменился в ППТ на: {} ", arrangement.getId(), arrangement.getStatus());
-            return true;
-        } catch (Exception ex) {
-            log.error("не удалось сменить статус мероприятия {} в ППТ на {} ", arrangement.getId(), arrangement.getStatus(), ex);
-            return false;
+    private void checkActSendArrangementForUncompletedCheckUnits(Arrangement arrangement, ArrangementStatusNotification notification) {
+
+        log.info("Определение наличия незавершённых чек юнитов для мероприяти id: {}, текущий статус: {}, событие: {}",
+                arrangement.getId(),
+                arrangement.getStatus(),
+                notification.getEvent());
+
+        if (arrangement.getStatus().equals(ExecutionStatus.STOPPED ) ||
+                notification.getEvent().equals(ExecutionStatus.STOPPED_BY_SERVICE_MODE) ||
+                notification.getEvent().equals(ExecutionStatus.STOPPED_BY_MAX_CHECK_UNITS) ||
+                notification.getEvent().equals(ExecutionStatus.STOPPED_BY_DAY_GONE)) {
+
+            if (notification.getEvent().equals(ArrangementEvents.SEND_ACT)) {
+                arrangement.setContainsUncompletedCheckUnits(true);
+                arrangementRepo.save(arrangement);
+                log.info("Незавершённые чек юниты присутсвуют");
+            }
         }
     }
 }

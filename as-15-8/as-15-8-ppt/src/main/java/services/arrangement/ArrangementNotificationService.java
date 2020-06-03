@@ -1,6 +1,7 @@
 package services.arrangement;
 
 import arrangement.ArrangementStatusNotification;
+import enums.ArrangementEvents;
 
 /**
  * Creation date: 29.05.2019
@@ -10,5 +11,6 @@ import arrangement.ArrangementStatusNotification;
 
 public interface ArrangementNotificationService {
 
-    void processNotification(ArrangementStatusNotification arrangementStatusNotification);
+    boolean processNotification(ArrangementStatusNotification arrangementStatusNotification);
+    boolean  processNotificationInPPT(ArrangementStatusNotification arrangementStatusNotification);
 }

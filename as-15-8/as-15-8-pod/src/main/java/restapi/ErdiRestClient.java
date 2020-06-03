@@ -129,6 +129,7 @@ public class ErdiRestClient {
                     countLoadedDeltaERDI,
                     countLoadedAddons);
 
+            log.info(stateDetails);
             log.info("====== Конец обновления справочников");
         }
         catch(Exception ex){
@@ -280,10 +281,10 @@ public class ErdiRestClient {
         log.info("---> Установка типов ИРТЗ и Обновление MATERIALIZED VIEWS");
         jdbcTemplate.execute("select sor.set_irtz_type()");
         log.info("---> Установка типов ИРТЗ завершено");
-        jdbcTemplate.execute("REFRESH MATERIALIZED VIEW sor.check_units");
-        log.info("---> Обновление sor.check_units завершено");
-        jdbcTemplate.execute("REFRESH MATERIALIZED VIEW sor.content_view");
-        log.info("---> Обновление sor.content_view завершено");
+        jdbcTemplate.execute("select sor.update_check_units()");
+        log.info("---> Вызов sor.update_check_units завершен");
+        jdbcTemplate.execute("select sor.update_content_view()");
+        log.info("---> Вызов sor.update_content_view завершен");
     }
 
 

@@ -40,6 +40,7 @@ public class GatewaySecurityConfiguration extends ResourceServerConfigurerAdapte
                             "/dispatcher/results/protocol/screenshot/**",
                             "/dispatcher/results/protocol/etalon_screenshot/**",
                             "/dispatcher/results/protocol/nmap_log/**",
+                            "/dispatcher/manual_arrangement/screenshot/**",
                             "/app/kibana/**",
                             "/pod/erdi/ids/**")
                     .permitAll()

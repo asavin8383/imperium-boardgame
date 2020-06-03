@@ -1,5 +1,7 @@
 package controllers;
 
+import arrangement.ArrangementStatusNotification;
+import enums.ArrangementEvents;
 import enums.CheckUnitJobResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
+import repositories.ArrangementRepo;
 import repositories.NmapDetailResultRepo;
 import repositories.ResultRepo;
 import repositories.ResultScreenShotRepo;
@@ -24,6 +27,7 @@ import rest.ActCheckResult;
 import services.ActService;
 import services.ArrangementService;
 
+import java.security.Principal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -46,6 +50,7 @@ public class ActController {
     private final ResultScreenShotRepo resultScreenShotRepo;
     private final NmapDetailResultRepo nmapDetailResultRepo;
     private final ArrangementService arrangementService;
+    private final ArrangementRepo arrangementRepo;
 
     private DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
@@ -80,10 +85,14 @@ public class ActController {
 
     @GetMapping(path = "/create")
     @PreAuthorize("hasAnyRole('ROLE_SEND_ACT_BY_HAND')")
-    public ResponseEntity<Void> createAct(Long arrangementId){
-        boolean created = actService.createAct(arrangementId);
-        if(created)
-            arrangementService.changeArrangementStatusToActSentPPT(arrangementId);
+    public ResponseEntity<Void> createAct(Long arrangementId, Principal principal) {
+        boolean created = actService.createManualAct(arrangementId, principal.getName());
+        if(created) {
+            //arrangementService.changeArrangementStatusToActSentPPT(arrangementId);
+            arrangementService.sendStatusNotificationToPPT(new ArrangementStatusNotification(
+                    arrangementId,
+                    ArrangementEvents.SEND_ACT));
+        }
         return new ResponseEntity<>(created ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -179,5 +188,4 @@ public class ActController {
             result.getUserResult()!=null && result.getUserResult().equals(UserResult.FORBIDDEN_CONTENT_DETECTED);
 
     }
-
 }

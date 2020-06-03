@@ -70,16 +70,21 @@ public class ArrangementStatusServiceImpl implements ArrangementStatusService {
                 .min(Comparator.comparing(ExecutionStatus::getPriority));
     }
 
-    private void saveArrangementView(Arrangement arrangement){
-        if (arrangement.getStatus().equals(ExecutionStatus.FINISHED)){
+    private void saveArrangementView(Arrangement arrangement) {
+        if (arrangement.getStatus().equals(ExecutionStatus.FINISHED) ||
+                arrangement.getStatus().equals(ExecutionStatus.STOPPED_BY_DAY_GONE) ||
+                arrangement.getStatus().equals(ExecutionStatus.STOPPED_BY_SERVICE_MODE) ||
+                arrangement.getStatus().equals(ExecutionStatus.STOPPED_BY_MAX_CHECK_UNITS)) {
+
             ClientNotification clientNotification = new ClientNotification();
             clientNotification.setOperator(arrangement.getFormalTask().getOperator());
             clientNotification.setMessageText("Статус мероприятия " + arrangement.getId() + " сменился на '" + arrangement.getStatus().getDescription() + "'");
             clientNotification.setViewed(false);
             clientNotificationRepo.save(clientNotification);
 
-            log.info("Сохранение поручения " + clientNotification);
+            log.info("Сохранение уведомления " + clientNotification);
             log.info("clientNotification.getOperator = " + clientNotification.getOperator());
         }
     }
+
 }
