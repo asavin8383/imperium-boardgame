@@ -47,9 +47,3 @@ spring:
           clientSecret: 1q0p2w9o
           grantType: client_credentials
           accessTokenUri: ${gateway.url}/security/oauth/token
-
----
-
-spring:
-  profiles: dev_ashabalin
-gateway.url: ${GATEWAY_URI:http://192.168.5.50:15880}

@@ -23,7 +23,7 @@ public interface SchedulePeriodRepo extends JpaRepository<SchedulePeriod, Long> 
 
     @Query(value =
             "with periods as ( " +
-                "select p.start_time, p.end_time, s.max_workers_count " +
+                "select p.schedule_id, p.start_time, p.end_time, s.max_workers_count " +
                 "from schedule.schedule_periods p " +
                 "join schedule.schedules s " +
                     "on p.schedule_id = s.id and " +
@@ -40,7 +40,7 @@ public interface SchedulePeriodRepo extends JpaRepository<SchedulePeriod, Long> 
                 "join times t2 on t1.start_time < t2.start_time " +
                 "group by t1.start_time " +
             ") " +
-            "select intervals.start_time, intervals.end_time, sum(coalesce(p.max_workers_count, 0)) workers_count " +
+            "select intervals.start_time, intervals.end_time, sum(coalesce(p.max_workers_count, 0)) workers_count, array_to_string(array_agg(schedule_id), ',') as schedule_ids " +
             "from intervals " +
             "join periods p " +
             "    on (intervals.start_time < p.end_time and intervals.end_time > p.start_time) " +

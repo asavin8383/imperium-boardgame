@@ -127,6 +127,16 @@ public class Arrangement implements Serializable {
 	@Column
 	private Long interruptViolationNumber;
 
+	/**Имя оператора, который отправил акт*/
+	@JsonView(Views.Brief.class)
+	@Column
+	private String actCreationOperator;
+
+	/**Флаг, который позволяет понять, можно ли продолжить мероприятие, для которого был отправлен акт*/
+	@JsonView(Views.Brief.class)
+	@Column
+	private Boolean containsUncompletedCheckUnits = false;
+
 	public Arrangement() {
 		this.creationDate = LocalDateTime.now();
 		this.status = ExecutionStatus.NEW;

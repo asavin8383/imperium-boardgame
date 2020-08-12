@@ -2,6 +2,7 @@ package repositories;
 
 import checkUnits.CheckUnitType;
 import model.actualViews.ContentCheckUnit;
+import model.projection.ContenViewAdditionalInfo;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -33,6 +34,16 @@ public interface ContentCheckUnitRepository extends JpaRepository<ContentCheckUn
                     "and history.endDate = '3000-01-01'"
     )
     Page<ContentCheckUnit> findAllByErdId(@Param("erdi_id") Long erdiId, Pageable page);
+
+    @Query(
+            "select new model.projection.ContenViewAdditionalInfo(min(ccu.checkUnitValue), count(ccu), content.erdiId) from ContentCheckUnit ccu " +
+                    "join Content content on ccu.contentId = content.id " +
+                    "and content.erdiId in(:erdi_ids) " +
+                    "join ContentHistory history on content.id = history.content.id " +
+                    "and history.endDate = '3000-01-01'" +
+                    "group by ccu.contentId, content.erdiId"
+    )
+    List<ContenViewAdditionalInfo> findAdditionalInfo(@Param("erdi_ids") List<Long> erdiIds);
 
     @Query(
             "select ccu from ContentCheckUnit ccu " +

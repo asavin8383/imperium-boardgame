@@ -140,7 +140,7 @@ public class SendCheckUnitToKafka {
 
 		System.out.println("BEGIN -------------------------------");
 
-		actService.createAct(1000L);
+		actService.createManualAct(1000L, "testOpName");
 		//actService.createAct(666L);
 
 		System.out.println("END -------------------------------");

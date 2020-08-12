@@ -137,8 +137,11 @@ public class TrafficService {
     }
 
     void actualizeCheckUnitsCount(CustomErdi customErdi) {
-        customErdi.getErdiTrafficUnits().stream().findFirst().ifPresent(erdiTrafficUnit ->
-                actualizeTrafficCheckUnitsCount(erdiTrafficUnit.getTraffic()));
+        List<ErdiTrafficUnit> list = customErdi.getErdiTrafficUnits();
+        if (list != null){
+            list.stream().findFirst().ifPresent(erdiTrafficUnit ->
+                    actualizeTrafficCheckUnitsCount(erdiTrafficUnit.getTraffic()));
+        }
     }
 
     private Long getActualTrafficCheckUnitCountFromPod(Long trafficId) {

@@ -43,6 +43,14 @@ spring:
           results:
             producer.configuration:
               key.serializer: org.springframework.kafka.support.serializer.JsonSerializer
+          springCloudBusInput:
+            consumer:
+              resetOffsets: true
+              startOffset: latest
+          arrangementEvents:
+            consumer:
+              resetOffsets: true
+              startOffset: latest
 
 ---
 

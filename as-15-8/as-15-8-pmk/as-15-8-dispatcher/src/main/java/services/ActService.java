@@ -1,5 +1,7 @@
 package services;
 
+import arrangement.ArrangementStatusNotification;
+import enums.ArrangementEvents;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,7 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import repositories.ResultRepo;
 import rest.ActRequest;
-import webClients.PodWebClient;
+import webClients.ServiceWebClient;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -24,11 +26,18 @@ public class ActService {
     @Value("${gateway.url}")
     private String gatewayUrl;
 
-    private final PodWebClient webClient;
+    private final ServiceWebClient webClient;
     private final ResultRepo arrangementResultRepo;
 
+    public boolean createManualAct(Long arrangementId, String operatorName) {
+        return createAct(arrangementId, operatorName, false);
+    }
 
-    public boolean createAct(Long arrangementId){
+    public boolean createAutomaticAct(Long arrangementId) {
+        return createAct(arrangementId, null, true);
+    }
+
+    private boolean createAct(Long arrangementId, String operatorName, boolean isGeneratedAutomatically) {
         log.info("Подготовка данных для акта. ID мероприятия: {}", arrangementId);
         try {
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
@@ -40,8 +49,12 @@ public class ActService {
             actRequest.setArragementId(arrangementId);
             actRequest.setStartDate(minDate != null ? dateFormat.format(minDate) : "");
             actRequest.setEndDate(maxDate != null ? dateFormat.format(maxDate) : actRequest.getStartDate());
+            actRequest.setOperatorName(operatorName);
+            actRequest.setGeneratedAutomatically(isGeneratedAutomatically);
 
-            return webClient.sendAct(actRequest);
+            webClient.notifyPPTAboutActInfo(actRequest);
+
+            return webClient.sendActToPOD(actRequest);
         } catch (Exception ex){
             log.error("Ошибка при формировании данных для акта по мероприятию: " + arrangementId);
             return false;

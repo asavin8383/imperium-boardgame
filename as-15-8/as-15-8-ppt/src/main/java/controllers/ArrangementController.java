@@ -15,11 +15,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
 import repositories.ArrangementRepo;
 import repositories.TrafficRepository;
+import rest.ActRequest;
 import rest.ArrangementActData;
 import restapi.ppm.ArrangementUploader;
 import services.arrangement.impl.ArrangementService;
@@ -215,9 +217,14 @@ public class ArrangementController {
     }
 
     @PreAuthorize("hasAnyRole('ROLE_SYSTEM', 'ROLE_MANAGE_ARRANGEMENT')")
+    @GetMapping("/execution_status_description")
+    public String getExecutionStatusName(@RequestParam("id") Arrangement arrangement) {
+        return arrangement.getStatus().getDescription();
+    }
+    @PreAuthorize("hasAnyRole('ROLE_SYSTEM', 'ROLE_MANAGE_ARRANGEMENT')")
     @GetMapping("/execution_status")
     public String getExecutionStatus(@RequestParam("id") Arrangement arrangement) {
-        return arrangement.getStatus().getDescription();
+        return arrangement.getStatus().name();
     }
 
     @PreAuthorize("hasAnyRole('ROLE_SYSTEM', 'ROLE_MANAGE_ARRANGEMENT')" )
@@ -225,14 +232,6 @@ public class ArrangementController {
     public Optional<Boolean> isActAvailable(@RequestParam("id") Optional<Arrangement> arrangement){
         arrangement.orElseThrow(()-> new AS_15_8_PPT_Exception("Arrangement не найден"));
         return Optional.ofNullable(arrangement.get().getIsActAvailable());
-    }
-
-    @PreAuthorize("hasRole('ROLE_SYSTEM')" )
-    @GetMapping(path = "/act_sent_status")
-    public void changeActStatus(@RequestParam("id") Optional<Arrangement> arrangement){
-        arrangement.orElseThrow(()-> new AS_15_8_PPT_Exception("Arrangement не найден"));
-        arrangement.get().setStatus(ExecutionStatus.ACT_SENT);
-        arrangementRepo.save(arrangement.get());
     }
 
     @PreAuthorize("hasRole('ROLE_SYSTEM')" )
@@ -249,4 +248,24 @@ public class ArrangementController {
         return arrangement.getAccessTool();
     }
 
+    @PreAuthorize("hasRole('ROLE_SYSTEM')")
+    @PutMapping(path = "/info_about_act")
+    public ResponseEntity updateArrangementAboutAct(@RequestBody ActRequest actRequest) {
+        if(actRequest != null) {
+
+            Arrangement arr = arrangementRepo.findById(actRequest.getArragementId()).orElseThrow(() ->
+                    new AS_15_8_PPT_Exception("Невозможно обновить иформацию о акте для мероприятия, мероприятие не найдено id:"  + actRequest.getArragementId()));
+            String operator;
+
+            if (actRequest.isGeneratedAutomatically()) {
+                 operator = arr.getFormalTask().getOperator();
+            } else {
+                operator = actRequest.getOperatorName();
+            }
+
+            arr.setActCreationOperator(operator);
+            arrangementRepo.save(arr);
+            return ResponseEntity.ok(arr);
+        } return ResponseEntity.badRequest().build();
+    }
 }

@@ -63,7 +63,6 @@ public class ArrangementService {
     private final String GET_CHECK_UNITS_FROM_PPT = "/ppt/arrangements/checkUnits";
     private final String PPT_STATUS_ENDPOINT = "/ppt/arrangements/status";
     private final String PPT_IS_ACT_AVAILABLE_FOR_AUTOMATIC_SEND = "/arrangements/act_available_for_automatic_send";
-    private final String PPT_ACT_SENT_STATUS = "/arrangements/act_sent_status";
     private final String PPT_ARRANGEMENT_INTERRUPT_VIOLATION_NUMBER = "/arrangements/interrupt_violation_number";
 
     private final OAuth2RestTemplate restTemplate;
@@ -110,6 +109,7 @@ public class ArrangementService {
         arrangement.setCreationDate(LocalDateTime.now());
         arrangement.setVersion(Optional.ofNullable(arrangementToExecution.getVersion()).orElse(0L));
         arrangement.setStatus(ArrangementStatus.RUNNING);
+        arrangement.setReason(Reason.NORMAL);
         arrangement.setMaxCheckUnitsCount(getInterruptViolationNumberFromPPT(arrangementToExecution.getId()));
         arrangementRepo.save(arrangement);
 
@@ -178,7 +178,7 @@ public class ArrangementService {
                 .orElse(true);
     }
 
-    boolean finishArrangement(Long arrangementId, boolean isStopped, boolean isActAvailable) {
+    boolean finishArrangement(Long arrangementId, boolean isStopped, boolean isActSendAutomatically) {
         try {
             Arrangement arr = arrangementRepo.findById(arrangementId)
                     .orElseThrow(() -> new AS_15_8_DispatcherException("Ошибка при закрытии мероприятия. Мероприятие не найдено по ID: " + arrangementId));
@@ -201,8 +201,8 @@ public class ArrangementService {
                 }
             }
             arrangementRepo.save(arr);
-            if (!isStopped && isActAvailable) {
-                return actService.createAct(arrangementId);
+            if (!isStopped && isActSendAutomatically) {
+                return actService.createAutomaticAct(arrangementId);
             }
             return true;
         } catch (Exception ex) {
@@ -322,7 +322,7 @@ public class ArrangementService {
         MappingJacksonValue jacksonValue = new MappingJacksonValue(notification);
         HttpEntity<MappingJacksonValue> entity = new HttpEntity<>(jacksonValue, headers);
 
-        log.info("Отправка сообщения с изменением статуса мероприятия {}, путь: " + PPT_STATUS_ENDPOINT, notification.getArrangementId());
+        log.info("Отправка сообщения с изменением статуса мероприятия id:  {}, путь: {}, событие: {} ", notification.getArrangementId(), PPT_STATUS_ENDPOINT, notification.getEvent());
         try {
             restTemplate.put(UriComponentsBuilder
                     .fromHttpUrl(gatewayUrl)
@@ -386,13 +386,14 @@ public class ArrangementService {
         }
     }
 
-    public void changeArrangementStatusToActSentPPT(Long arrangementId) {
+    //TODO убрать, заменить на нотификешн
+    /*public void changeArrangementStatusToActSentPPT(Long arrangementId) {
         try {
             restTemplate.getForObject(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(PPT_ACT_SENT_STATUS).queryParam("id", arrangementId).build().toString(), Boolean.class);
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
             throw AS_15_8_DispatcherException.logAndGet(log, String.format("Ошибка отправки сообщения с изменение статуса ACT_SENT %d в ППТ, код возврата %s", arrangementId, ex.getStatusCode()));
         }
-    }
+    }*/
 
     public Long getInterruptViolationNumberFromPPT(Long arrangementId) {
         try {
@@ -435,4 +436,5 @@ public class ArrangementService {
                     return Math.min(arrangementsCount * 100 / checkUnits, 100);
                 }).orElse(0L);
     }
+
 }

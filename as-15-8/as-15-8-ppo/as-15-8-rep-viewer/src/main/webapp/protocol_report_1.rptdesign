@@ -46,7 +46,7 @@ gateway= System.getenv("GATEWAY_URI");
                 </ex-property>
             </list-property>
             <property name="odaDriverClass">org.postgresql.Driver</property>
-            <property name="odaURL">jdbc:postgresql://asdb:5432/asdb</property>
+            <property name="odaURL">jdbc:postgresql://192.168.5.195:5432/asdb</property>
             <property name="odaUser">as_user</property>
             <encrypted-property name="odaPassword" encryptionID="base64">YXNfdXNlcg==</encrypted-property>
         </oda-data-source>
@@ -578,7 +578,7 @@ row_number() OVER ()  AS num,
 case when r.check_for_act then 'Да' else '' end check_for_act,
  r.check_unit_value, --ИРТЗ
        --r.result, -- Статус
-        coalesce(ci.blocktype,'DEFAULT') as blocktype, -- Тип блокировки
+        coalesce(ci.blocktype,'url') as blocktype, -- Тип блокировки
        to_char (r.end_date,'DD.MM.YYYY HH24:MI:SS') as end_date, -- Дата и время проверки
               content.erdi_id as erdi_id,
        s.result_id::text as screenshot_id -- ID для формирования ссылки
@@ -865,7 +865,7 @@ row_number() OVER ()  AS num,
 case when r.check_for_act then 'Да' else '' end check_for_act,
  r.check_unit_value, --ИРТЗ
        --r.result, -- Статус
-        coalesce(ci.blocktype,'DEFAULT') as blocktype, -- Тип блокировки
+        coalesce(ci.blocktype,'url') as blocktype, -- Тип блокировки
        to_char (r.end_date,'DD.MM.YYYY HH24:MI:SS') as end_date, -- Дата и время проверки
               content.erdi_id as erdi_id,
        
@@ -1133,7 +1133,7 @@ and coalesce(r.user_result,r.result) in (
 row_number() OVER ()  AS num,
  r.check_unit_value, --ИРТЗ
        --r.result, -- Статус
-        coalesce(ci.blocktype,'DEFAULT') as blocktype, -- Тип блокировки
+        coalesce(ci.blocktype,'url') as blocktype, -- Тип блокировки
        to_char (r.end_date,'DD.MM.YYYY HH24:MI:SS') as end_date, -- Дата и время проверки
               content.erdi_id as erdi_id,
        
@@ -1402,7 +1402,7 @@ and coalesce(r.user_result,r.result) in (
 row_number() OVER ()  AS num,
  r.check_unit_value, --ИРТЗ
        --r.result, -- Статус
-        coalesce(ci.blocktype,'DEFAULT') as blocktype, -- Тип блокировки
+        coalesce(ci.blocktype,'url') as blocktype, -- Тип блокировки
        to_char (r.end_date,'DD.MM.YYYY HH24:MI:SS') as end_date, -- Дата и время проверки
        r.id as screenshot_id, -- ID для формирования ссылки
 	   case when coalesce(r.user_result,r.result)='INTERNAL_ERROR' then  error

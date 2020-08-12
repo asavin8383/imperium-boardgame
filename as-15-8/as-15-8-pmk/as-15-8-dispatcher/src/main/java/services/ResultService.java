@@ -4,8 +4,10 @@ import accessTools.AccessToolDTO;
 import analysis.AnalysisResult;
 import analysis.CheckUnitResult;
 import analysis.CheckUnitStatusNotification;
+import arrangement.ArrangementStatusNotification;
 import checkUnits.CheckUnitKey;
 import common.DispatcherProperties;
+import enums.ArrangementEvents;
 import enums.CheckUnitJobResult;
 import exceptions.AS_15_8_DispatcherException;
 import imprint.HeaderObject;
@@ -119,10 +121,12 @@ public class ResultService {
                         log.info("Мероприятие успешно сохранено в БД: " + arrangement.getId());
                         if(isArrangementFinished(arrangement) || finalIsStopped) {
                             if (arrangementService.sendStopOrFinishedStatusNotificationToPPT(arrangement.getId(), finalIsStopped)) {
-                                boolean isActAvailable = arrangementService.isActAvailableFromPPT(arrangement.getId());
-                                boolean isFinished = arrangementService.finishArrangement(arrangement.getId(), finalIsStopped, isActAvailable);
-                                if (!finalIsStopped && isFinished && isActAvailable)
-                                    arrangementService.changeArrangementStatusToActSentPPT(arrangement.getId());
+                                boolean isActSendAutomatically = arrangementService.isActAvailableFromPPT(arrangement.getId());
+                                boolean isFinished = arrangementService.finishArrangement(arrangement.getId(), finalIsStopped, isActSendAutomatically);
+                                if (!finalIsStopped && isFinished && isActSendAutomatically)
+                                    arrangementService.sendStatusNotificationToPPT(new ArrangementStatusNotification(
+                                            arrangement.getId(),
+                                            ArrangementEvents.SEND_ACT));
                                 log.info("Мероприятие успешно завершено: " + arrangement.getId());
                             }
                         }

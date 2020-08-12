@@ -37,6 +37,10 @@ spring:
               configuration:
                 max.request.size: 10485760
                 key.serializer: org.springframework.kafka.support.serializer.JsonSerializer
+          springCloudBusInput:
+            consumer:
+              resetOffsets: true
+              startOffset: latest
 gateway.url: ${GATEWAY_URI:http://localhost:15880}
 source_path_vpn: /logs/content.txt
 source_path_anonym: /logs/content.txt
