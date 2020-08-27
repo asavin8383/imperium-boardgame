@@ -267,17 +267,18 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
 		}
 
 		// проверка на маленькую заглушку (пустую страницу)
-		StringBuffer stubLittleDetails = new StringBuffer();
-		boolean isEmptyPage = StubAnalysis.isLittleStub(aRes, jobRes.getPageContent(), stubLittleDetails);
-		appendInfo(aRes, stubLittleDetails.toString());
+		//!!!!!!Маленькая заглушка путает алгоритм распознавания. Проверка убрана из релиза!!!!!!!
+		//StringBuffer stubLittleDetails = new StringBuffer();
+		//boolean isEmptyPage = StubAnalysis.isLittleStub(aRes, jobRes.getPageContent(), stubLittleDetails);
+		//appendInfo(aRes, stubLittleDetails.toString());
 
 		NLPCategory resultNLP = getResultNLP(aRes.getPageUrlFinal(), jobRes);
 		aRes.setResultNLP(resultNLP.getDescription());
 		appendInfo(aRes, String.format("Результат NLP: %s.", resultNLP.getDescription()));
 
-		if (isEmptyPage){
+		/*if (isEmptyPage){
 			return COMPLETED;
-		}
+		}*/
 
 		if (wasRedirect && resultNLP.equals(NLPCategory.NO_STUB)){
 			aRes.setNeedTestFinalUrl(true);
