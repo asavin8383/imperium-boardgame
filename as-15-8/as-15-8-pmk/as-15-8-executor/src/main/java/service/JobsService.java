@@ -33,7 +33,7 @@ public class JobsService {
     @Value("${gateway.url}")
     private String gatewayUrl;
 
-    private final ExecutorProperties.ExecutorProps executorProps;
+    private final ExecutorProperties executorProps;
 
     @Value("${fetch-stooped-jobs-enabled:true}")
     private boolean fetchStoppedJobsEnabled;
@@ -44,7 +44,7 @@ public class JobsService {
     private final Map<Long, Set<Long>> stoppedJobs = new ConcurrentHashMap<>();
 
     public int getJobTimeout(){
-        return Optional.ofNullable(executorProps.getTimeout()).orElse(180);
+        return Optional.ofNullable(executorProps.getExecutor().getTimeout()).orElse(180);
     }
 
     @PostConstruct
