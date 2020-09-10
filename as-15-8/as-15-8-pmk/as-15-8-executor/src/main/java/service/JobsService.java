@@ -94,12 +94,12 @@ public class JobsService {
                         .supplyAsync(() -> service.run(key.getJobId(), job), executorService)
                         .applyToEither(timeoutAfter(getJobTimeout(), TimeUnit.SECONDS), (result) -> result)
                         .exceptionally(throwable -> {
-                            service.stop(key.getJobId());
                             throw new CompletionException(throwable);
                         })
                         .join();
-            } catch (Timeout_ExecutionException ex) {
+            } catch (Exception ex) {
                 executorService.shutdownNow();
+                service.stop(key.getJobId());
                 throw ex;
             }
         }
