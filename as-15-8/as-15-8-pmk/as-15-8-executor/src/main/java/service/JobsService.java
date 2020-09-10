@@ -2,6 +2,7 @@ package service;
 
 import checkUnits.CheckUnitJob;
 import checkUnits.CheckUnitKey;
+import common.ExecutorProperties;
 import execution.ExecutionJobResult;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -34,9 +35,10 @@ public class JobsService {
     @Value("${gateway.url}")
     private String gatewayUrl;
 
-    @Getter @Setter
-    @Value("${executor.timeout:60}")
+    @Getter
     private int jobTimeout;
+
+    private final ExecutorProperties executorProperties;
 
     @Value("${fetch-stooped-jobs-enabled:true}")
     private boolean fetchStoppedJobsEnabled;
@@ -48,6 +50,7 @@ public class JobsService {
 
     @PostConstruct
     private void fillStoppedArrangements() {
+        this.jobTimeout = Optional.ofNullable(executorProperties.getExecutor().getTimeout()).orElse(180);
         if(!fetchStoppedJobsEnabled)
             return;
         try {
