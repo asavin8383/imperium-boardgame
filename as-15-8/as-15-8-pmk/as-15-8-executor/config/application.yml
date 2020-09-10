@@ -1,5 +1,5 @@
 selenium-hub-url: http://user:1q0p2w9o@192.168.5.75:4445/wd/hub
-fetch-stooped-jobs-enabled: false
+# fetch-stooped-jobs-enabled: false
 spring:
   main.allow-bean-definition-overriding: true
   kafka.consumer.properties.spring.json.trusted.packages: checkUnits
