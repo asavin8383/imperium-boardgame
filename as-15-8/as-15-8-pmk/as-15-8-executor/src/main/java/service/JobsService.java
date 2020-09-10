@@ -33,7 +33,6 @@ public class JobsService {
     @Value("${gateway.url}")
     private String gatewayUrl;
 
-    @Getter
     @Value("${executor.timeout:60}")
     private int jobTimeout;
 
