@@ -4,9 +4,7 @@ import checkUnits.CheckUnitJob;
 import checkUnits.CheckUnitKey;
 import common.ExecutorProperties;
 import execution.ExecutionJobResult;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,17 +26,14 @@ import java.util.*;
 import java.util.concurrent.*;
 
 @Service
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Slf4j
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class JobsService {
 
     @Value("${gateway.url}")
     private String gatewayUrl;
 
-    @Getter
-    private int jobTimeout;
-
-    private final ExecutorProperties executorProperties;
+    private final ExecutorProperties.ExecutorProps executorProps;
 
     @Value("${fetch-stooped-jobs-enabled:true}")
     private boolean fetchStoppedJobsEnabled;
@@ -46,11 +41,14 @@ public class JobsService {
     private final OAuth2RestTemplate oAuth2RestTemplate;
     private final CheckUnitVerificationServiceFactory checkUnitVerificationServiceFactory;
 
-    private Map<Long, Set<Long>> stoppedJobs = new ConcurrentHashMap<>();
+    private final Map<Long, Set<Long>> stoppedJobs = new ConcurrentHashMap<>();
+
+    public int getJobTimeout(){
+        return Optional.ofNullable(executorProps.getTimeout()).orElse(180);
+    }
 
     @PostConstruct
     private void fillStoppedArrangements() {
-        this.jobTimeout = Optional.ofNullable(executorProperties.getExecutor().getTimeout()).orElse(180);
         if(!fetchStoppedJobsEnabled)
             return;
         try {
@@ -89,10 +87,10 @@ public class JobsService {
 
         ExecutionJobResult executionJobResult;
 
-        if (service instanceof RobotsServiceImpl && jobTimeout >= 0){
+        if (service instanceof RobotsServiceImpl && getJobTimeout() >= 0){
             executionJobResult = CompletableFuture
                     .supplyAsync(() -> service.run(key.getJobId(), job))
-                    .applyToEither(timeoutAfter(jobTimeout, TimeUnit.SECONDS), (result) -> result)
+                    .applyToEither(timeoutAfter(getJobTimeout(), TimeUnit.SECONDS), (result) -> result)
                     .exceptionally(throwable -> {
                         service.stop();
                         throw new CompletionException(throwable);
