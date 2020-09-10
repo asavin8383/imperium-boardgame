@@ -15,6 +15,7 @@ import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
+import robots.exceptions.ExecutionException;
 import robots.exceptions.Timeout_ExecutionException;
 import service.impl.RobotsServiceImpl;
 
@@ -89,18 +90,23 @@ public class JobsService {
 
         if (service instanceof RobotsServiceImpl && getJobTimeout() >= 0){
             ExecutorService executorService = Executors.newSingleThreadExecutor();
+
             try {
-                executionJobResult = CompletableFuture
-                        .supplyAsync(() -> service.run(key.getJobId(), job), executorService)
-                        .applyToEither(timeoutAfter(getJobTimeout(), TimeUnit.SECONDS), (result) -> result)
-                        .exceptionally(throwable -> {
-                            throw new CompletionException(throwable);
-                        })
-                        .join();
+                ExecutorService worker = Executors.newSingleThreadExecutor();
+                CompletableFuture<ExecutionJobResult> future
+                        = CompletableFuture.supplyAsync(() -> service.run(key.getJobId(), job), worker);
+                future.whenComplete((x,y) -> worker.shutdownNow());
+
+                try {
+                    executionJobResult = future.get(getJobTimeout(), TimeUnit.SECONDS);
+                }
+                catch(TimeoutException ex) {
+                    service.stop(key.getJobId());
+                    throw new Timeout_ExecutionException();
+                }
+
             } catch (Exception ex) {
-                executorService.shutdownNow();
-                service.stop(key.getJobId());
-                throw ex;
+                throw new ExecutionException(ex);
             }
         }
         else {
