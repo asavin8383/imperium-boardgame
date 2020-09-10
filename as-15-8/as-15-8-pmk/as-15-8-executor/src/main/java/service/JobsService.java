@@ -88,14 +88,20 @@ public class JobsService {
         ExecutionJobResult executionJobResult;
 
         if (service instanceof RobotsServiceImpl && getJobTimeout() >= 0){
-            executionJobResult = CompletableFuture
-                    .supplyAsync(() -> service.run(key.getJobId(), job))
-                    .applyToEither(timeoutAfter(getJobTimeout(), TimeUnit.SECONDS), (result) -> result)
-                    .exceptionally(throwable -> {
-                        service.stop(key.getJobId());
-                        throw new CompletionException(throwable);
-                    })
-                    .join();
+            ExecutorService executorService = Executors.newSingleThreadExecutor();
+            try {
+                executionJobResult = CompletableFuture
+                        .supplyAsync(() -> service.run(key.getJobId(), job), executorService)
+                        .applyToEither(timeoutAfter(getJobTimeout(), TimeUnit.SECONDS), (result) -> result)
+                        .exceptionally(throwable -> {
+                            service.stop(key.getJobId());
+                            throw new CompletionException(throwable);
+                        })
+                        .join();
+            } catch (Timeout_ExecutionException ex) {
+                executorService.shutdownNow();
+                throw ex;
+            }
         }
         else {
             executionJobResult = service.run(key.getJobId(), job);
