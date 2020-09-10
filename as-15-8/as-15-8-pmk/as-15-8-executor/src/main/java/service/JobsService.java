@@ -5,6 +5,7 @@ import checkUnits.CheckUnitKey;
 import execution.ExecutionJobResult;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,6 +34,7 @@ public class JobsService {
     @Value("${gateway.url}")
     private String gatewayUrl;
 
+    @Getter @Setter
     @Value("${executor.timeout:60}")
     private int jobTimeout;
 
