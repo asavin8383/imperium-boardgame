@@ -92,7 +92,7 @@ public class JobsService {
                     .supplyAsync(() -> service.run(key.getJobId(), job))
                     .applyToEither(timeoutAfter(getJobTimeout(), TimeUnit.SECONDS), (result) -> result)
                     .exceptionally(throwable -> {
-                        service.stop();
+                        service.stop(key.getJobId());
                         throw new CompletionException(throwable);
                     })
                     .join();

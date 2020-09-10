@@ -25,5 +25,7 @@ public interface CheckUnitVerificationService extends SmartLifecycle {
 	 * @return
 	 */
 	ExecutionJobResult run(Long jobId, CheckUnitJob checkUnitJob) throws ExecutionException;
+
+	void stop(Long jobId);
 	
 }

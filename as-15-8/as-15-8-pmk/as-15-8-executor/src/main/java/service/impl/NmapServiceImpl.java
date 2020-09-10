@@ -145,6 +145,11 @@ public class NmapServiceImpl implements CheckUnitVerificationService {
     }
 
     @Override
+    public void stop(Long jobId) {
+        isRunning = false;
+    }
+
+    @Override
     public void start() {
         this.isRunning = true;
     }

@@ -19,6 +19,7 @@ import service.CheckUnitVerificationService;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Сервис управления роботами Selenium
@@ -34,7 +35,7 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 	/** Список роботов */
 	private final RobotsFactory robotsFactory;
 	
-    private volatile Set<Robot> robots = new HashSet<>();
+    private final Map<Long, Robot> robots = new ConcurrentHashMap<>();
     
     private boolean isRunning = false;
 
@@ -64,7 +65,7 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 
 			Robot robot = robotsFactory.createRobot(checkUnitJob.getAccessTool());
 			
-			robots.add(robot);
+			robots.put(jobId, robot);
 			
 			ExecutionJobResult message;
 			boolean needToStop = true;
@@ -86,7 +87,7 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 					}
 				}
 			}
-			robots.remove(robot);
+			robots.remove(jobId);
 			message.setCheckUnit(checkUnitJob.getCheckUnit());
 	        message.setAccessTool(checkUnitJob.getAccessTool());
 
@@ -99,7 +100,24 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
                 throw new ExecutionException("Ошибка при выполнении скрипта робота", ex);
 		}
 	}
-	
+
+	@Override
+	public void stop(Long jobId) {
+    	log.info("Остановка робота, выполняющего задание {}", jobId);
+		try {
+			Robot robot = this.robots.get(jobId);
+			if(robot != null) {
+				robot.destroy();
+				this.robots.remove(jobId);
+				log.info("Робот, выполняющий задание {} успешно остановлен", jobId);
+			} else {
+				log.warn("Не найдено активного робота, выполняющего задание " + jobId);
+			}
+		} catch (Exception ex) {
+			log.warn("Ошибка при остановке робота, выполняющего задание " + jobId, ex);
+		}
+	}
+
 	@Override
 	public void start() {
 		this.isRunning = true;
@@ -111,13 +129,14 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 		log.info("\n\n-----------------------------\n"
 				+ "Oстановка активных роботов..."
 				+ "\n-----------------------------\n");
-		for(Robot robot : robots) {
+		for(Robot robot : robots.values()) {
 			try {
 				robot.destroy();
 			} catch (IOException ex) {
-				log.error("Ошибка при остановке робота", ex);
+				log.warn("Ошибка при остановке робота", ex);
 			}
 		}
+		this.robots.clear();
 		log.info("\n\n-----------------------------\n"
 				+ "Pоботы успешно остановлены"
 				+ "\n-----------------------------\n");
