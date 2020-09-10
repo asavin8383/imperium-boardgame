@@ -92,7 +92,7 @@ public class JobsService {
             ExecutorService executorService = Executors.newSingleThreadExecutor();
 
             try {
-                ExecutorService worker = Executors.newSingleThreadExecutor();
+                ExecutorService worker = Executors.newFixedThreadPool(1);
                 CompletableFuture<ExecutionJobResult> future
                         = CompletableFuture.supplyAsync(() -> service.run(key.getJobId(), job), worker);
                 future.whenComplete((x,y) -> worker.shutdownNow());
@@ -106,20 +106,16 @@ public class JobsService {
                 }
 
             } catch (Exception ex) {
-                throw new ExecutionException(ex);
+                if(ex instanceof ExecutionException)
+                    throw (ExecutionException)ex;
+                else
+                    throw new ExecutionException(ex);
             }
         }
         else {
             executionJobResult = service.run(key.getJobId(), job);
         }
         return executionJobResult;
-    }
-
-    private <T> CompletableFuture<T> timeoutAfter(long timeout, TimeUnit unit) {
-        CompletableFuture<T> result = new CompletableFuture<>();
-        ScheduledExecutorService timeoutService = Executors.newSingleThreadScheduledExecutor();
-        timeoutService.schedule(() -> result.completeExceptionally(new Timeout_ExecutionException()), timeout, unit);
-        return result;
     }
 
     public synchronized boolean isJobActual(Long arrangementId, Long version, LocalDateTime jobTime) {
