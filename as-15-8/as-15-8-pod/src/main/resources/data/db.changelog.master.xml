@@ -42,4 +42,5 @@
     <include file="data/changelog/pod.0023.content_view_join_sor_content_remove.xml"/>
     <include file="data/changelog/pod.0024.sor_remove_hist.xml"/>
     <include file="data/changelog/pod.0025.sor_remove_hist_v2.xml"/>
+    <include file="data/changelog/pod.0026.sor_content_view.xml"/>
 </databaseChangeLog>

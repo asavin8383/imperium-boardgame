@@ -12,6 +12,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import repositories.CustomErdiRepository;
 import repositories.CustomErdiViewRepository;
+import utils.MessageUtils;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.criteria.*;
@@ -105,7 +106,14 @@ public class CustomErdiService {
     public CustomErdi createCustomErdi(CustomErdi customErdi) {
         customErdi.getCustomErdiUnits().forEach(
                 unit -> unit.setCustomErdi(customErdi));
-        CustomErdi erdi = customErdiRepository.save(customErdi);
+
+        CustomErdi erdi = null;
+        try{
+            erdi = customErdiRepository.save(customErdi);
+        }
+        catch(Throwable e){
+            MessageUtils.wrapAndThrowUserMessageException(e);
+        }
         trafficService.actualizeCheckUnitsCount(erdi);
         return erdi;
     }

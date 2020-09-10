@@ -5,6 +5,9 @@ local jwt = require "resty.jwt"
     local token  = ngx.var.cookie_COOKIE_BEARER
 
 if token == nil then
+   token = ngx.var.arg_token
+end
+if token == nil then
     ngx.status = ngx.HTTP_UNAUTHORIZED
     ngx.header.content_type = "application/json; charset=utf-8"
     ngx.say("{\"error\": \"missing JWT token or Authorization header\"}")
