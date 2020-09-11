@@ -86,7 +86,7 @@ public abstract class SeleniumRobot implements Robot {
 
 	protected synchronized WebDriver getDriver() throws InterruptedException {
 		if(this.driver == null) {
-			log.info("Драйвер был закрыт: " + Thread.currentThread().getId());
+			log.info("Драйвер был закрыт: " + Thread.currentThread().getName());
 			throw new InterruptedException("Робот был остановлен");
 		}
 		return this.driver;
@@ -101,6 +101,7 @@ public abstract class SeleniumRobot implements Robot {
 	public void destroy() throws IOException {
 		try {
 			close(getDriver());
+			log.info("Драйвер был остановлен: " + Thread.currentThread().getName());
 			this.driver = null;
 		} catch (InterruptedException ignored) {}
 	}
