@@ -452,7 +452,7 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         }
     }
 
-    private boolean checkPageResult(List<WebElement> links) {
+    private boolean checkPageResult(List<WebElement> links) throws InterruptedException {
         Iterator<WebElement> it = links.iterator();
         while (it.hasNext() && counter++ < searchResultLimit) {
             WebElement link = it.next();
