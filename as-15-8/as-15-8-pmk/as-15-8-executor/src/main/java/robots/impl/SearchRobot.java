@@ -66,21 +66,21 @@ public abstract class SearchRobot extends SeleniumRobot {
         SearchRobot.input(element, inputDelay, query);
     }
 
-    final void scrollTo(WebElement webElement) {
-        Actions actions = new Actions(driver);
+    final void scrollTo(WebElement webElement) throws InterruptedException {
+        Actions actions = new Actions(getDriver());
         actions.moveToElement(webElement, 0, 0).perform();
     }
 
-    boolean nextPage() throws TimeoutScriptException {
+    boolean nextPage() throws TimeoutScriptException, InterruptedException {
         WebElement next = findElementIfExists(
-                nextPageLocator(), driver);
+                nextPageLocator(), getDriver());
         try {
             if (next != null) {
                 next.click(); //  not clickable ?
-                ScriptUtils.waitPageLoading(driver);
+                ScriptUtils.waitPageLoading(getDriver());
                 return true;
             }
-        } catch (TimeoutException e) {
+        } catch (TimeoutException | InterruptedException e) {
             throw new TimeoutScriptException(e);
         }
         return false;
@@ -88,7 +88,7 @@ public abstract class SearchRobot extends SeleniumRobot {
     }
 
     boolean checkSearchResult(EqualityTest test)
-            throws ExecutionException {
+            throws ExecutionException, InterruptedException {
         do {
             if (captcha())
                 throw new Captcha_ExecutionException(
@@ -102,20 +102,20 @@ public abstract class SearchRobot extends SeleniumRobot {
         return false;
     }
 
-    final ExecutionPSJobResult createMessage(boolean linkFound) {
+    final ExecutionPSJobResult createMessage(boolean linkFound) throws InterruptedException {
         ExecutionPSJobResult message = new ExecutionPSJobResult();
         message.setLinkFound(linkFound);
         message.setError(false);
-        message.setScreenshot(ScriptUtils.getScreenshot(driver));
+        message.setScreenshot(ScriptUtils.getScreenshot(getDriver()));
         return message;
     }
 
-    final ExecutionPSJobResult createErrorMessage(String errorDetails) {
+    final ExecutionPSJobResult createErrorMessage(String errorDetails) throws InterruptedException {
         ExecutionPSJobResult message = new ExecutionPSJobResult();
         message.setLinkFound(false);
         message.setError(true);
         message.setErrorDetails(errorDetails);
-        message.setScreenshot(ScriptUtils.getScreenshot(driver));
+        message.setScreenshot(ScriptUtils.getScreenshot(getDriver()));
         return message;
     }
 

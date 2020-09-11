@@ -27,8 +27,8 @@ public class YandexRobot extends CommonDirectSearchRobot {
     }
 
     @Override
-    public ExecutionJobResult execute(CheckUnit checkUnit) throws ExecutionException {
-        driver.get(getSearchSystemUrl());
+    public ExecutionJobResult execute(CheckUnit checkUnit) throws ExecutionException, InterruptedException {
+        getDriver().get(getSearchSystemUrl());
 
         equalityTest = EqualityTest.forCheckUnit(checkUnit);
         if (checkSuggestedLink(checkUnit.getValue(), equalityTest))
@@ -40,14 +40,14 @@ public class YandexRobot extends CommonDirectSearchRobot {
         return createMessage(checkPaginatedSearchResult(), null);
     }
 
-    String extractUrl(WebElement element) {
+    String extractUrl(WebElement element) throws InterruptedException {
         String url = element.getAttribute("href");
         return isWrapped(url) ? getDirectUrl(url) : url;
     }
 
 
 
-    private boolean checkLink(@Nullable WebElement element, EqualityTest test) {
+    private boolean checkLink(@Nullable WebElement element, EqualityTest test) throws InterruptedException {
         if (element == null)
             return false;
 
@@ -62,11 +62,11 @@ public class YandexRobot extends CommonDirectSearchRobot {
         return false;
     }
 
-    private boolean checkSuggestedLink(String query, EqualityTest test) {
-        WebElement inputField = driver.findElement(By.xpath(getXpathInputField()));
+    private boolean checkSuggestedLink(String query, EqualityTest test) throws InterruptedException {
+        WebElement inputField = getDriver().findElement(By.xpath(getXpathInputField()));
         ScriptUtils.type(inputField, getInputDelay(), query + " ");
 
-        WebElement suggestedLink = getSuggestedLink(driver);
+        WebElement suggestedLink = getSuggestedLink(getDriver());
         if (checkLink(suggestedLink, test)) return true;
 
         inputField.sendKeys(Keys.ENTER);
@@ -85,20 +85,20 @@ public class YandexRobot extends CommonDirectSearchRobot {
         }
     }
 
-    private String getDirectUrl(String wrappedUrl) {
+    private String getDirectUrl(String wrappedUrl) throws InterruptedException {
         // open new tab
-        ((JavascriptExecutor) driver).executeScript("window.open()");
+        ((JavascriptExecutor) getDriver()).executeScript("window.open()");
         // switch to tab
-        ArrayList<String> tabs = new ArrayList<>(driver.getWindowHandles());
-        driver.switchTo().window(tabs.get(1));
+        ArrayList<String> tabs = new ArrayList<>(getDriver().getWindowHandles());
+        getDriver().switchTo().window(tabs.get(1));
         // navigate to url
-        driver.get(wrappedUrl);
+        getDriver().get(wrappedUrl);
         // get current url
-        String result = driver.getCurrentUrl();
+        String result = getDriver().getCurrentUrl();
         // close tab
-        driver.close();
+        getDriver().close();
         // switch to previous tab
-        driver.switchTo().window(tabs.get(0));
+        getDriver().switchTo().window(tabs.get(0));
         return result;
     }
 

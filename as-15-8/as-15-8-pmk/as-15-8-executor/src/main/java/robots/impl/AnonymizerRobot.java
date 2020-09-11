@@ -61,12 +61,12 @@ public abstract class AnonymizerRobot extends SeleniumRobot {
         this.message.setStubUrl(scriptParams.get(AccessToolParameter.STUB_URL));
     }
 
-    ExecutionJobResult process(CheckUnit checkUnit) throws ExecutionException {
+    ExecutionJobResult process(CheckUnit checkUnit) throws ExecutionException, InterruptedException {
 
-        ScriptUtils.PageResult page = ScriptUtils.getPageSource(driver);
+        ScriptUtils.PageResult page = ScriptUtils.getPageSource(getDriver());
 
         if (message.getHttpStatus() == null){
-            HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(driver);
+            HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(getDriver());
             if (responseMeta != null){
                 message.setHttpStatus(responseMeta.status);
                 message.setHttpHeaders(HttpResponseHelper.headers2Str(responseMeta.jsonHeaders));
@@ -74,29 +74,30 @@ public abstract class AnonymizerRobot extends SeleniumRobot {
         }
         message.setErrorCode(page.errorCodeChrome);
         message.setPageContent(page.pageSource);
-        message.setScreenshot(ScriptUtils.getScreenshot(driver));
+        message.setScreenshot(ScriptUtils.getScreenshot(getDriver()));
 
         if (message.hasError())
             return message;
 
         if (StringUtils.isEmpty(message.getFinalUrl())){
-            message.setFinalUrl(ScriptUtils.getCurrentUrl(driver));
+            message.setFinalUrl(ScriptUtils.getCurrentUrl(getDriver()));
         }
 
-        close(driver);
+        close(getDriver());
 
         if (useEtalon){
-            driver = DriverFactory.createDriver(
+            setDriver(DriverFactory.createDriver(
                     ExecutorProperties.getSeleniumHubUrl(),
                     Platform.valueOf(getScriptParams().get(AccessToolParameter.PLATFORM)),
                     getScriptParams().get(AccessToolParameter.BROWSER),
                     getScriptParams().get(AccessToolParameter.VERSION),
                     etalonProxy,
-                    true);
+                    true)
+            );
 
-            driver.get(ScriptUtils.getCheckUnitValue(checkUnit));
+            getDriver().get(ScriptUtils.getCheckUnitValue(checkUnit));
             ScriptUtils.PageResult etalon = loadEtalon();
-            HttpResponseMeta responseMetaEtalon = HttpResponseHelper.getGetResponseMeta(driver);
+            HttpResponseMeta responseMetaEtalon = HttpResponseHelper.getGetResponseMeta(getDriver());
 
             if (responseMetaEtalon != null){
                 message.setHttpStatusEtalon(responseMetaEtalon.status);
@@ -104,9 +105,9 @@ public abstract class AnonymizerRobot extends SeleniumRobot {
             }
             message.setEtalonErrorCode(etalon.errorCodeChrome);
             message.setEtalonPageContent(etalon.pageSource);
-            message.setEtalonScreenshot(ScriptUtils.getScreenshot(driver));
+            message.setEtalonScreenshot(ScriptUtils.getScreenshot(getDriver()));
 
-            close(driver);
+            close(getDriver());
         }
 
         message.setUseEtalon(this.useEtalon);
@@ -114,18 +115,18 @@ public abstract class AnonymizerRobot extends SeleniumRobot {
 	    return message;
     }
 
-    ExecutionJobResult getTimeoutMessage() {
+    ExecutionJobResult getTimeoutMessage() throws InterruptedException {
         message.setErrorCode(TIME_OUT_ERROR);
-        message.setScreenshot(ScriptUtils.getScreenshot(driver));
+        message.setScreenshot(ScriptUtils.getScreenshot(getDriver()));
         return message;
     }
 
-    ExecutionJobResult getErrorMessage(String errorCode) {
+    ExecutionJobResult getErrorMessage(String errorCode) throws InterruptedException {
         return getErrorMessage(errorCode, null);
     }
 
-    ExecutionJobResult getErrorMessage(String errorCode, String details) {
-        HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(driver);
+    ExecutionJobResult getErrorMessage(String errorCode, String details) throws InterruptedException {
+        HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(getDriver());
         if (responseMeta != null){
             message.setHttpStatus(responseMeta.status);
             message.setHttpHeaders(HttpResponseHelper.headers2Str(responseMeta.jsonHeaders));
@@ -133,25 +134,25 @@ public abstract class AnonymizerRobot extends SeleniumRobot {
         message.setErrorCode(errorCode);
         if (details != null)
             message.setDetails(details);
-        message.setScreenshot(ScriptUtils.getScreenshot(driver));
+        message.setScreenshot(ScriptUtils.getScreenshot(getDriver()));
         return message;
     }
 
     private ScriptUtils.PageResult loadEtalon() throws ExecutionException {
         try {
-            ScriptUtils.waitPageLoading(driver);
-            CloudflareUtils.waitCloudflareRedirect(driver);
-            ScriptUtils.waitPageLoading(driver);
-            if (CloudflareUtils.isCloudflareError(driver)) {
+            ScriptUtils.waitPageLoading(getDriver());
+            CloudflareUtils.waitCloudflareRedirect(getDriver());
+            ScriptUtils.waitPageLoading(getDriver());
+            if (CloudflareUtils.isCloudflareError(getDriver())) {
                 new ScriptUtils.PageResult(null,
-                        CloudflareUtils.getCloudflareErrorDetails(driver));
+                        CloudflareUtils.getCloudflareErrorDetails(getDriver()));
             }
             String plainError = ScriptUtils
-                    .getPlainErrorDescriptionIfOccurred(driver);
+                    .getPlainErrorDescriptionIfOccurred(getDriver());
             if (plainError != null)
                 return new ScriptUtils.PageResult(null, plainError);
 
-            return ScriptUtils.getPageSource(driver);
+            return ScriptUtils.getPageSource(getDriver());
         } catch (TimeoutException | TimeoutScriptException e) {
             log.info("TimeoutException при получении эталона", e);
             return new ScriptUtils.PageResult(null, TIME_OUT_ERROR);

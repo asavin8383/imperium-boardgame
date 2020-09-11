@@ -70,21 +70,21 @@ public class VPNRobot extends SeleniumRobot {
         pageGetterFuture = CompletableFuture
                 .runAsync(() -> {
                     try {
-                        PageResult pageResult = RobotScriptUtils.loadPage(url, driver);
+                        PageResult pageResult = RobotScriptUtils.loadPage(url, getDriver());
 
-                        HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(driver,
+                        HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(getDriver(),
                                 pageResult.errorCodeChrome != null && pageResult.errorCodeChrome.toLowerCase().contains("err_"),
                                 "CODE: " + pageResult.errorCodeChrome +
                                 ", checkUnit: " + checkUnit.toString() +
-                                ", finalUrl: " + ScriptUtils.getCurrentUrl(driver) +
+                                ", finalUrl: " + ScriptUtils.getCurrentUrl(getDriver()) +
                                 ", ИСХОДНИК.");
                         if (responseMeta != null){
                             message.setHttpStatus(responseMeta.status);
                             message.setHttpHeaders(HttpResponseHelper.headers2Str(responseMeta.jsonHeaders));
                         }
 
-                        byte[] screenShot = ScriptUtils.getScreenshot(driver);
-                        String finalUrl = ScriptUtils.getCurrentUrl(driver);
+                        byte[] screenShot = ScriptUtils.getScreenshot(getDriver());
+                        String finalUrl = ScriptUtils.getCurrentUrl(getDriver());
 
                         message.setResponseError(pageResult.errorCodeChrome != null);
                         message.setChromeErrorCode(pageResult.errorCodeChrome);
@@ -94,11 +94,15 @@ public class VPNRobot extends SeleniumRobot {
                             message.setFinalUrlPage(finalUrl);
                         }
                     }
-                    catch (ExecutionException e) {
+                    catch (ExecutionException | InterruptedException e) {
                         throw new CompletionException(e);
                     }
                     finally {
-                        close(driver);
+                        try {
+                            close(getDriver());
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                     }
                 });
 

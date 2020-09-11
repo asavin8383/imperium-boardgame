@@ -48,14 +48,14 @@ public class HideMyAssRobot extends AnonymizerRobot {
 	}
 
     @Override
-    public ExecutionJobResult execute(CheckUnit checkUnit) throws ExecutionException {
+    public ExecutionJobResult execute(CheckUnit checkUnit) throws ExecutionException, InterruptedException {
 
-        driver.manage().timeouts().pageLoadTimeout(WAIT_TIMEOUT_PAGE, TimeUnit.SECONDS);
+        getDriver().manage().timeouts().pageLoadTimeout(WAIT_TIMEOUT_PAGE, TimeUnit.SECONDS);
 
         try {
             ScriptUtils.PageResult pageResult = null;
             try {
-                pageResult = RobotScriptUtils.simpleLoadPage(driver, URL, WAIT_TIMEOUT, 3);
+                pageResult = RobotScriptUtils.simpleLoadPage(getDriver(), URL, WAIT_TIMEOUT, 3);
             }
             catch (TimeoutException e){
                 return getErrorMessage(HIDEMYASS_ERROR, "Таймаут. Hidemyass недоступен!");
@@ -64,27 +64,27 @@ public class HideMyAssRobot extends AnonymizerRobot {
                 return getErrorMessage(HIDEMYASS_ERROR, "Hidemyass недоступен! " + pageResult.errorCodeChrome + ".");
             }
 
-            WebElement input = driver.findElement(By.id("form_url_fake"));
+            WebElement input = getDriver().findElement(By.id("form_url_fake"));
             input.sendKeys(checkUnit.getValue());
 
             By submitLocator = By.xpath("/html/body/form/div[3]/a");
-            WebElement submitButton = ScriptUtils.getElementBy(submitLocator, driver);
+            WebElement submitButton = ScriptUtils.getElementBy(submitLocator, getDriver());
             if (submitButton == null || !isSubmitButton(submitButton)) {
                 return getErrorMessage(HIDEMYASS_ERROR, "Не удалось найти кнопку перехода.");
             }
 
             submitButton.click();
 
-            ScriptUtils.waitDriver(driver, 1);
-            ScriptUtils.waitPageLoading(driver, WAIT_TIMEOUT);
+            ScriptUtils.waitDriver(getDriver(), 1);
+            ScriptUtils.waitPageLoading(getDriver(), WAIT_TIMEOUT);
 
-            CloudflareUtils.waitCloudflareRedirect(driver, WAIT_TIMEOUT, true);
+            CloudflareUtils.waitCloudflareRedirect(getDriver(), WAIT_TIMEOUT, true);
 
-            ScriptUtils.waitPageLoading(driver, WAIT_TIMEOUT);
+            ScriptUtils.waitPageLoading(getDriver(), WAIT_TIMEOUT);
 
-            if (CloudflareUtils.isCloudflareError(driver)) {
+            if (CloudflareUtils.isCloudflareError(getDriver())) {
                 return getErrorMessage(CloudflareUtils
-                        .getCloudflareErrorDetails(driver));
+                        .getCloudflareErrorDetails(getDriver()));
             }
 
             if (captcha()) {
@@ -102,8 +102,8 @@ public class HideMyAssRobot extends AnonymizerRobot {
             if (agreeButton != null){
                 log.info("Обнаружена страница 'Agree & Connect', попытка пройти");
                 agreeButton.click();
-                ScriptUtils.waitDriver(driver, 5);
-                ScriptUtils.waitPageLoading(driver);
+                ScriptUtils.waitDriver(getDriver(), 5);
+                ScriptUtils.waitPageLoading(getDriver());
             }
             WebElement agreeButtonSecond = getAgreeButtonPage();
             if (agreeButtonSecond != null){
@@ -113,10 +113,10 @@ public class HideMyAssRobot extends AnonymizerRobot {
 
             message.setFinalUrl(getFinalUrl());
 
-            ScriptUtils.tryRemoveElementById(driver, "hma-top");
+            ScriptUtils.tryRemoveElementById(getDriver(), "hma-top");
 
             String plainError = ScriptUtils
-                    .getPlainErrorDescriptionIfOccurred(driver);
+                    .getPlainErrorDescriptionIfOccurred(getDriver());
             if (plainError != null)
                 return getErrorMessage(plainError);
 
@@ -135,43 +135,43 @@ public class HideMyAssRobot extends AnonymizerRobot {
 
     private boolean captcha() {
         try {
-            WebElement captchaForm = driver.findElement(
+            WebElement captchaForm = getDriver().findElement(
                     By.xpath("//*[@id=\"captcha-form\"]"));
             return captchaForm != null;
-        } catch (NoSuchElementException e) {
+        } catch (NoSuchElementException | InterruptedException e) {
             // ignore
         }
         return false;
     }
 
-    private boolean isHideMyAssErrorPage() {
+    private boolean isHideMyAssErrorPage() throws InterruptedException {
         WebElement headerElement = ScriptUtils.findElementIfExists(
-                By.xpath("//*[@id=\"top\"]/div/h1"), driver);
+                By.xpath("//*[@id=\"top\"]/div/h1"), getDriver());
         String text = ScriptUtils.getTextOrDefault(
                 headerElement, null);
         return text != null && text.equalsIgnoreCase(
                 "Oops! Something’s gone wrong...");
     }
 
-    private String getHideMyAssErrorDetails() {
+    private String getHideMyAssErrorDetails() throws InterruptedException {
         WebElement element = ScriptUtils.findElementIfExists(
-                By.xpath("//*[@id=\"top\"]/div/p"), driver);
+                By.xpath("//*[@id=\"top\"]/div/p"), getDriver());
         return ScriptUtils.getTextOrDefault(element,
                 "Описание ошибки не найдено");
     }
 
-    private WebElement getAgreeButtonPage() {
+    private WebElement getAgreeButtonPage() throws InterruptedException {
         WebElement button = ScriptUtils.findElementIfExists(
-                By.cssSelector(".terms-agree-wrapper > a.button"), driver);
+                By.cssSelector(".terms-agree-wrapper > a.button"), getDriver());
         String text = ScriptUtils.getTextOrDefault(
                 button, null);
         return text != null &&
                 text.toLowerCase().contains("Agree & Connect".toLowerCase()) ? button : null;
     }
 
-    private String getFinalUrl() {
+    private String getFinalUrl() throws InterruptedException {
         WebElement button = ScriptUtils.findElementIfExists(
-                By.cssSelector("input#hma-top-input-url"), driver);
+                By.cssSelector("input#hma-top-input-url"), getDriver());
         String text = button == null ? null : button.getAttribute("value");
         return text == null ? null : text.trim();
     }
@@ -180,13 +180,18 @@ public class HideMyAssRobot extends AnonymizerRobot {
      * Метод, который скорее всего пригодится.
      */
     @SuppressWarnings("unused")
-	private boolean submit(WebDriver driver, By locator, int retryCount) {
-        WebElement button = ScriptUtils.waitClickable(driver, locator, DEFAULT_LOAD_TIMEOUT);
+	private boolean submit(WebDriver driver, By locator, int retryCount) throws InterruptedException {
+        WebElement button = ScriptUtils.waitClickable(getDriver(), locator, DEFAULT_LOAD_TIMEOUT);
 
         Consumer<WebElement> tryClick = el -> { if (el != null) el.click(); };
 
         Supplier<WebElement> refresher = () -> {
-            WebElement el = ScriptUtils.findElementIfExists(locator, driver);
+            WebElement el = null;
+            try {
+                el = ScriptUtils.findElementIfExists(locator, getDriver());
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             return isSubmitButton(el) ? el : null;
         };
 
@@ -201,7 +206,7 @@ public class HideMyAssRobot extends AnonymizerRobot {
                 return true;
             }
             if (button != null) {
-                ScriptUtils.waitDriver(driver, 1);
+                ScriptUtils.waitDriver(getDriver(), 1);
                 button = refresher.get();
             }
         } while (button != null && ++counter < retryCount);

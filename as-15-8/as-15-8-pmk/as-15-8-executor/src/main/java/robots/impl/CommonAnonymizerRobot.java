@@ -46,12 +46,12 @@ public class CommonAnonymizerRobot extends SeleniumRobot {
         this.xpathButton = scriptParams.get(AccessToolParameter.ANONYMIZER_XPATH_BUTTON);
     }
 
-    ExecutionJobResult process(CheckUnit checkUnit) throws ExecutionException {
+    ExecutionJobResult process(CheckUnit checkUnit) throws ExecutionException, InterruptedException {
 
-        ScriptUtils.PageResult page = ScriptUtils.getPageSource(driver);
+        ScriptUtils.PageResult page = ScriptUtils.getPageSource(getDriver());
 
         if (message.getHttpStatus() == null){
-            HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(driver);
+            HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(getDriver());
             if (responseMeta != null){
                 message.setHttpStatus(responseMeta.status);
                 message.setHttpHeaders(HttpResponseHelper.headers2Str(responseMeta.jsonHeaders));
@@ -59,32 +59,32 @@ public class CommonAnonymizerRobot extends SeleniumRobot {
         }
         message.setErrorCode(page.errorCodeChrome);
         message.setPageContent(page.pageSource);
-        message.setScreenshot(ScriptUtils.getScreenshot(driver));
+        message.setScreenshot(ScriptUtils.getScreenshot(getDriver()));
 
         if (message.hasError())
             return message;
 
         if (StringUtils.isEmpty(message.getFinalUrl())){
-            message.setFinalUrl(ScriptUtils.getCurrentUrl(driver));
+            message.setFinalUrl(ScriptUtils.getCurrentUrl(getDriver()));
         }
 
-        close(driver);
+        close(getDriver());
 
 	    return message;
     }
 
-    ExecutionJobResult getTimeoutMessage() {
+    ExecutionJobResult getTimeoutMessage() throws InterruptedException {
         message.setErrorCode(TIME_OUT_ERROR);
-        message.setScreenshot(ScriptUtils.getScreenshot(driver));
+        message.setScreenshot(ScriptUtils.getScreenshot(getDriver()));
         return message;
     }
 
-    ExecutionJobResult getErrorMessage(String errorCode) {
+    ExecutionJobResult getErrorMessage(String errorCode) throws InterruptedException {
         return getErrorMessage(errorCode, null);
     }
 
-    ExecutionJobResult getErrorMessage(String errorCode, String details) {
-        HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(driver);
+    ExecutionJobResult getErrorMessage(String errorCode, String details) throws InterruptedException {
+        HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(getDriver());
         if (responseMeta != null){
             message.setHttpStatus(responseMeta.status);
             message.setHttpHeaders(HttpResponseHelper.headers2Str(responseMeta.jsonHeaders));
@@ -92,32 +92,32 @@ public class CommonAnonymizerRobot extends SeleniumRobot {
         message.setErrorCode(errorCode);
         if (details != null)
             message.setDetails(details);
-        message.setScreenshot(ScriptUtils.getScreenshot(driver));
+        message.setScreenshot(ScriptUtils.getScreenshot(getDriver()));
         return message;
     }
 
     @Override
-    public ExecutionJobResult execute(CheckUnit checkUnit) throws ExecutionException {
-        driver.get(anonymizerURL);
+    public ExecutionJobResult execute(CheckUnit checkUnit) throws ExecutionException, InterruptedException {
+        getDriver().get(anonymizerURL);
 
         try {
-            ScriptUtils.waitPageLoading(driver);
-            WebElement input = driver.findElement(By.xpath(xpathField));
+            ScriptUtils.waitPageLoading(getDriver());
+            WebElement input = getDriver().findElement(By.xpath(xpathField));
             input.sendKeys(checkUnit.getValue());
-            driver.findElement(By.xpath(xpathButton)).click();
+            getDriver().findElement(By.xpath(xpathButton)).click();
 
 
-            ScriptUtils.waitPageLoading(driver);
+            ScriptUtils.waitPageLoading(getDriver());
 
-            CloudflareUtils.waitCloudflareRedirect(driver);
-            ScriptUtils.waitPageLoading(driver);
-            if (CloudflareUtils.isCloudflareError(driver)) {
+            CloudflareUtils.waitCloudflareRedirect(getDriver());
+            ScriptUtils.waitPageLoading(getDriver());
+            if (CloudflareUtils.isCloudflareError(getDriver())) {
                 return getErrorMessage(CloudflareUtils
-                        .getCloudflareErrorDetails(driver));
+                        .getCloudflareErrorDetails(getDriver()));
             }
 
             String plainError = ScriptUtils
-                    .getPlainErrorDescriptionIfOccurred(driver);
+                    .getPlainErrorDescriptionIfOccurred(getDriver());
             if (plainError != null)
                 return getErrorMessage(plainError);
 

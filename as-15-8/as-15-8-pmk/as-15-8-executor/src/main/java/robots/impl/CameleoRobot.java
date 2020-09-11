@@ -25,25 +25,25 @@ public class CameleoRobot extends AnonymizerRobot {
 	}
 
     @Override
-    public ExecutionJobResult execute(CheckUnit checkUnit) throws ExecutionException {
-        driver.get(CAMELEO_URL);
+    public ExecutionJobResult execute(CheckUnit checkUnit) throws ExecutionException, InterruptedException {
+        getDriver().get(CAMELEO_URL);
 
         try {
-            ScriptUtils.waitPageLoading(driver);
-            WebElement input = driver.findElement(By.id("url"));
+            ScriptUtils.waitPageLoading(getDriver());
+            WebElement input = getDriver().findElement(By.id("url"));
             input.sendKeys(checkUnit.getValue());
-            driver.findElement(By.xpath("//*[@id=\"proxy\"]/div/div[2]/input")).click();
-            ScriptUtils.waitPageLoading(driver);
+            getDriver().findElement(By.xpath("//*[@id=\"proxy\"]/div/div[2]/input")).click();
+            ScriptUtils.waitPageLoading(getDriver());
 
-            CloudflareUtils.waitCloudflareRedirect(driver);
-            ScriptUtils.waitPageLoading(driver);
-            if (CloudflareUtils.isCloudflareError(driver)) {
+            CloudflareUtils.waitCloudflareRedirect(getDriver());
+            ScriptUtils.waitPageLoading(getDriver());
+            if (CloudflareUtils.isCloudflareError(getDriver())) {
                 return getErrorMessage(CloudflareUtils
-                        .getCloudflareErrorDetails(driver));
+                        .getCloudflareErrorDetails(getDriver()));
             }
 
             String plainError = ScriptUtils
-                    .getPlainErrorDescriptionIfOccurred(driver);
+                    .getPlainErrorDescriptionIfOccurred(getDriver());
             if (plainError != null)
                 return getErrorMessage(plainError);
 

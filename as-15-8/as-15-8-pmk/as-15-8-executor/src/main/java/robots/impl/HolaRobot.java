@@ -53,7 +53,7 @@ public class HolaRobot extends SeleniumRobot {
     }
 
     @Override
-	public ExecutionJobResult execute(CheckUnit checkUnit) throws ExecutionException {
+	public ExecutionJobResult execute(CheckUnit checkUnit) throws ExecutionException, InterruptedException {
         // работате только с хромом!
         if (!checkBrowserChrome())
             throw new ExecutionException("Ошибка, неверный браузер! Для данного робота поддерживатся только браузер CHROME!");
@@ -68,14 +68,14 @@ public class HolaRobot extends SeleniumRobot {
         // Эталонная страница с дефолтного драйвера с дефолтным прокси
         try {
             if (useEtalon) {
-                PageResult pageResult = RobotScriptUtils.loadPage(url, driver);
-                HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(driver);
+                PageResult pageResult = RobotScriptUtils.loadPage(url, getDriver());
+                HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(getDriver());
                 if (responseMeta != null){
                     message.setHttpStatus(responseMeta.status);
                     message.setHttpHeaders(HttpResponseHelper.headers2Str(responseMeta.jsonHeaders));
                 }
-                byte[] screenShot = ScriptUtils.getScreenshot(driver);
-                String finalUrl = ScriptUtils.getCurrentUrl(driver);
+                byte[] screenShot = ScriptUtils.getScreenshot(getDriver());
+                String finalUrl = ScriptUtils.getCurrentUrl(getDriver());
 
                 message.setChromeErrorCodeEtalon(pageResult.errorCodeChrome);
                 message.setPageContentEtalon(pageResult.pageSource);
@@ -85,34 +85,35 @@ public class HolaRobot extends SeleniumRobot {
                 }
             }
         } finally {
-            close(driver);
+            close(getDriver());
         }
 
         try {
-            driver = DriverFactory.createChromeDriver(
+            setDriver(DriverFactory.createChromeDriver(
                     ExecutorProperties.getSeleniumHubUrl(),
                     Platform.valueOf(getScriptParams().get(AccessToolParameter.PLATFORM)),
                     getScriptParams().get(AccessToolParameter.VERSION),
                     Collections.singletonList(extension)
+                    )
             );
 
             // opens empty tab
             // ((JavascriptExecutor) driver).executeScript("window.open()");
 
-//            driver.get(ChromeSettings.Extension.HOLA.getPopupUrl());
+//            getDriver().get(ChromeSettings.Extension.HOLA.getPopupUrl());
 //            wait.until(ExpectedConditions.presenceOfElementLocated(
 //                    By.xpath("//div[@class=\"popular-view-footer\"]/a"))).click();
 
-            driver.get("https://hola.org/unblock/popular"); // todo config
+            getDriver().get("https://hola.org/unblock/popular"); // todo config
 
-            WebDriverWait wait = new WebDriverWait(driver, 60);
+            WebDriverWait wait = new WebDriverWait(getDriver(), 60);
             // Конфигурируем холу на доступ для данного URL
             WebElement searchBox = wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("input")));
             searchBox.sendKeys(url);
             try {
                 searchBox.sendKeys(Keys.ENTER);
             } catch (StaleElementReferenceException e) {
-                driver.findElement(By.tagName("input")).sendKeys(Keys.ENTER);
+                getDriver().findElement(By.tagName("input")).sendKeys(Keys.ENTER);
             }
 
             // Ждем, пока закончаться все редиректы
@@ -122,16 +123,16 @@ public class HolaRobot extends SeleniumRobot {
             wait.until(pageLoaded);
             wait.until(pageLoaded);
 
-            driver.manage().window().maximize();
-            PageResult pageResult = RobotScriptUtils.loadPage(url, driver);
-            HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(driver);
+            getDriver().manage().window().maximize();
+            PageResult pageResult = RobotScriptUtils.loadPage(url, getDriver());
+            HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(getDriver());
             if (responseMeta != null){
                 message.setHttpStatus(responseMeta.status);
                 message.setHttpHeaders(HttpResponseHelper.headers2Str(responseMeta.jsonHeaders));
             }
 
-            byte[] screenShot = ScriptUtils.getScreenshot(driver);
-            String finalUrl = ScriptUtils.getCurrentUrl(driver);
+            byte[] screenShot = ScriptUtils.getScreenshot(getDriver());
+            String finalUrl = ScriptUtils.getCurrentUrl(getDriver());
             message.setResponseError(pageResult.errorCodeChrome != null);
             message.setChromeErrorCode(pageResult.errorCodeChrome);
             message.setPageContent(pageResult.pageSource);
@@ -140,7 +141,7 @@ public class HolaRobot extends SeleniumRobot {
                 message.setFinalUrlPage(finalUrl);
             }
         } finally {
-            close(driver);
+            close(getDriver());
         }
 
         return message;

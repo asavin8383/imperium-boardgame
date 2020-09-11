@@ -25,7 +25,7 @@ import java.util.concurrent.CancellationException;
 @Slf4j
 public abstract class SeleniumRobot implements Robot {
 
-    protected WebDriver driver;
+    private WebDriver driver;
 	protected String proxy;
 	protected boolean enableLog;
 
@@ -67,13 +67,11 @@ public abstract class SeleniumRobot implements Robot {
 	/**
 	 * Метод, запускаюший выполнение скрипта робота
 	 * @param checkUnit Ресурс для проверки
-	 * @return
-	 * @throws ExecutionException
 	 */
-	protected abstract ExecutionJobResult execute(CheckUnit checkUnit) throws ExecutionException;
+	protected abstract ExecutionJobResult execute(CheckUnit checkUnit) throws ExecutionException, InterruptedException;
 
 	protected WebDriver createDriver(String proxy, boolean enableLog, String checkUrl) {
-		WebDriver driver = DriverFactory.createDriver(
+		return DriverFactory.createDriver(
 				ExecutorProperties.getSeleniumHubUrl(),
 				Platform.valueOf(getScriptParams().get(AccessToolParameter.PLATFORM).toUpperCase().trim()),
 				getScriptParams().get(AccessToolParameter.BROWSER),
@@ -81,19 +79,29 @@ public abstract class SeleniumRobot implements Robot {
 				proxy,
 				enableLog
 		);
-		return driver;
+	}
+
+	protected synchronized WebDriver getDriver() throws InterruptedException {
+		if(this.driver == null)
+			throw new InterruptedException("Робот был остановлен");
+		return this.driver;
+	}
+
+	protected synchronized void setDriver(WebDriver driver) {
+		this.driver = driver;
+
 	}
 
 	@Override
 	public void destroy() throws IOException {
-		close(driver);
+		close(this.driver);
+		this.driver = null;
 	}
 
 	public void close(WebDriver driver) {
 		if (driver != null) {
 			try {
 				driver.quit();
-				driver = null;
 			} catch (Exception ex){
 				log.warn("Ошибка при закрытии драйвера", ex);
 			}

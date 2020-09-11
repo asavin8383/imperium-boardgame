@@ -93,10 +93,10 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 
 			log.info("Робот успешно завершил работу: "+robotName);
 			return message;
-		} catch(Exception ex) {
+		} catch (Exception ex) {
             if(ex instanceof ExecutionException)
                 throw ex;
-            else
+			else
                 throw new ExecutionException("Ошибка при выполнении скрипта робота", ex);
 		}
 	}
