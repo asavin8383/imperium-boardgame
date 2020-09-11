@@ -66,7 +66,7 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 			Robot robot = robotsFactory.createRobot(checkUnitJob.getAccessTool());
 			
 			robots.put(jobId, robot);
-			
+
 			ExecutionJobResult message;
 			boolean needToStop = true;
 			try{
@@ -82,12 +82,13 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 				if(needToStop && robot != null) {
 					try {
 						robot.destroy();
+						robots.remove(jobId);
+						log.info("Робот был закрыт");
 					} catch (IOException ex) {
 						log.error("Ошибка при закрытии скрипта", ex);
 					}
 				}
 			}
-			robots.remove(jobId);
 			message.setCheckUnit(checkUnitJob.getCheckUnit());
 	        message.setAccessTool(checkUnitJob.getAccessTool());
 
