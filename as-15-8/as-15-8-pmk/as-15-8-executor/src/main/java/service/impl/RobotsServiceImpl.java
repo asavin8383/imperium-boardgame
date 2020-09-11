@@ -83,7 +83,7 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 					try {
 						robot.destroy();
 						robots.remove(jobId);
-						log.info("Робот был закрыт");
+						log.info("Робот был закрыт: " + Thread.currentThread().getId());
 					} catch (IOException ex) {
 						log.error("Ошибка при закрытии скрипта", ex);
 					}
