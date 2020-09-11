@@ -80,13 +80,15 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 					throw new ExecutionException("Ошибка при выполнении скрипта робота", ex);
 			} finally {
 				//if(needToStop && robot != null) {
-					try {
-						robot.destroy();
-						robots.remove(jobId);
-						log.info("Робот был закрыт: " + Thread.currentThread().getId());
-					} catch (IOException ex) {
-						log.error("Ошибка при закрытии скрипта", ex);
-					}
+				if(robot == null)
+					log.info("Робот пустой: " + Thread.currentThread().getId());
+				try {
+					robot.destroy();
+					robots.remove(jobId);
+					log.info("Робот был закрыт: " + Thread.currentThread().getId());
+				} catch (IOException ex) {
+					log.error("Ошибка при закрытии скрипта", ex);
+				}
 				//}
 			}
 			message.setCheckUnit(checkUnitJob.getCheckUnit());
