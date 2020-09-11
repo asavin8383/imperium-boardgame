@@ -92,14 +92,14 @@ public class JobsService {
             ExecutorService executorService = Executors.newSingleThreadExecutor();
 
             try {
+                ExecutorService threadExecutor = Executors.newSingleThreadExecutor();
                 CompletableFuture<ExecutionJobResult> future
-                        = CompletableFuture.supplyAsync(() -> service.run(key.getJobId(), job))
-                        .whenComplete((x, y) -> Thread.currentThread().stop());
-
+                        = CompletableFuture.supplyAsync(() -> service.run(key.getJobId(), job), threadExecutor);
                 try {
                     executionJobResult = future.get(getJobTimeout(), TimeUnit.SECONDS);
                 }
                 catch(TimeoutException ex) {
+                    threadExecutor.execute(() -> Thread.currentThread().stop());
                     service.stop(key.getJobId());
                     throw new Timeout_ExecutionException();
                 }
