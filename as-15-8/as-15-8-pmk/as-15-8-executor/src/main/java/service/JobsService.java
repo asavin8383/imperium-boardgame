@@ -105,6 +105,7 @@ public class JobsService {
                 }
 
             } catch (Exception ex) {
+                log.warn("JobsService exc", ex);
                 if(ex instanceof ExecutionException)
                     throw (ExecutionException)ex;
                 else

@@ -68,20 +68,9 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 			robots.put(jobId, robot);
 
 			ExecutionJobResult message;
-			boolean needToStop = true;
 			try{
 				message = robot.run(checkUnitJob.getCheckUnit());
-			} catch (Exception ex) {
-				if(ex instanceof ExecutionException) {
-					if(ex instanceof Captcha_ExecutionException)
-						needToStop = false;
-					throw (ExecutionException)ex;
-				} else
-					throw new ExecutionException("Ошибка при выполнении скрипта робота", ex);
 			} finally {
-				//if(needToStop && robot != null) {
-				if(robot == null)
-					log.info("Робот пустой: " + Thread.currentThread().getId());
 				try {
 					robot.destroy();
 					robots.remove(jobId);
@@ -89,7 +78,6 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 				} catch (IOException ex) {
 					log.error("Ошибка при закрытии скрипта", ex);
 				}
-				//}
 			}
 			message.setCheckUnit(checkUnitJob.getCheckUnit());
 	        message.setAccessTool(checkUnitJob.getAccessTool());
@@ -97,6 +85,7 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 			log.info("Робот успешно завершил работу: "+robotName);
 			return message;
 		} catch (Exception ex) {
+			log.warn("RobotServiceImpl exc", ex);
             if(ex instanceof ExecutionException)
                 throw ex;
 			else

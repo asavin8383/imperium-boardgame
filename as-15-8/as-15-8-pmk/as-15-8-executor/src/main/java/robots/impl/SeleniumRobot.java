@@ -54,12 +54,8 @@ public abstract class SeleniumRobot implements Robot {
 		try {
 			this.driver = createDriver(proxy, enableLog, checkUnit.getValue());
 			return execute(checkUnit);
-		} catch (CancellationException ex) {
-			throw new Cancel_ExecutionException(ex);
-		} catch(InterruptedException ex) {
-			log.info("Работа робота была прервана: " + Thread.currentThread().getId());
-			throw new Cancel_ExecutionException(ex);
 		} catch (Exception ex) {
+			log.warn("SeleniumRobot exc", ex);
 			if(ex instanceof ExecutionException)
 				throw (ExecutionException)ex;
 			else
