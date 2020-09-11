@@ -79,15 +79,15 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 				} else
 					throw new ExecutionException("Ошибка при выполнении скрипта робота", ex);
 			} finally {
-				if(needToStop && robot != null) {
+				//if(needToStop && robot != null) {
 					try {
 						robot.destroy();
 						robots.remove(jobId);
-						log.info("Робот был закрыт: " + Thread.currentThread().getName());
+						log.info("Робот был закрыт: " + Thread.currentThread().getId());
 					} catch (IOException ex) {
 						log.error("Ошибка при закрытии скрипта", ex);
 					}
-				}
+				//}
 			}
 			message.setCheckUnit(checkUnitJob.getCheckUnit());
 	        message.setAccessTool(checkUnitJob.getAccessTool());
