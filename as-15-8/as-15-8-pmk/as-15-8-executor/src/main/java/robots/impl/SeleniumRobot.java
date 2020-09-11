@@ -25,7 +25,7 @@ import java.util.concurrent.CancellationException;
 @Slf4j
 public abstract class SeleniumRobot implements Robot {
 
-    private WebDriver driver;
+    private volatile WebDriver driver;
 	protected String proxy;
 	protected boolean enableLog;
 
@@ -99,8 +99,10 @@ public abstract class SeleniumRobot implements Robot {
 
 	@Override
 	public void destroy() throws IOException {
-		close(this.driver);
-		this.driver = null;
+		try {
+			close(getDriver());
+			this.driver = null;
+		} catch (InterruptedException ignored) {}
 	}
 
 	public void close(WebDriver driver) {
