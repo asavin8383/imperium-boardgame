@@ -25,9 +25,10 @@ import java.util.concurrent.CancellationException;
 @Slf4j
 public abstract class SeleniumRobot implements Robot {
 
-    private volatile WebDriver driver;
+    private WebDriver driver;
 	protected String proxy;
 	protected boolean enableLog;
+	private volatile boolean isDestroyed = false;
 
 	@Getter
 	private Map<AccessToolParameter, String> scriptParams;
@@ -81,7 +82,7 @@ public abstract class SeleniumRobot implements Robot {
 	}
 
 	protected synchronized WebDriver getDriver() throws InterruptedException {
-		if(this.driver == null) {
+		if(this.isDestroyed) {
 			log.info("Драйвер был закрыт: " + Thread.currentThread().getId());
 			throw new InterruptedException("Робот был остановлен");
 		}
@@ -90,15 +91,14 @@ public abstract class SeleniumRobot implements Robot {
 
 	protected synchronized void setDriver(WebDriver driver) {
 		this.driver = driver;
-
 	}
 
 	@Override
 	public void destroy() throws IOException {
 		try {
 			close(getDriver());
+			this.isDestroyed = true;
 			log.info("Драйвер был остановлен: " + Thread.currentThread().getId());
-			this.driver = null;
 		} catch (InterruptedException ignored) {}
 	}
 
