@@ -61,7 +61,7 @@ spring:
     hibernate:
       ddl-auto: none
   datasource:
-    url: jdbc:postgresql://192.168.5.195:5432/asdb
+    url: jdbc:postgresql://192.168.5.195:5432/asdb_release
 eureka:
   instance:
     metadata-map:
@@ -104,7 +104,7 @@ spring:
 spring:
   profiles: dev_danikanov
   datasource:
-    url: jdbc:postgresql://192.168.5.195:5432/asdb
+    url: jdbc:postgresql://192.168.5.195:5432/asdb_release
 
 ---
 

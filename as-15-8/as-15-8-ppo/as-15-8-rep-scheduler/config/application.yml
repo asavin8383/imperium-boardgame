@@ -86,7 +86,7 @@ spring:
   profiles: test
   profiles.include: docker_log
   datasource:
-    url: jdbc:postgresql://192.168.5.195:5432/asdb
+    url: jdbc:postgresql://192.168.5.195:5432/asdb_release
   liquibase:
     enabled: true
   main:
