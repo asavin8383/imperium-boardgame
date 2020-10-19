@@ -104,14 +104,14 @@ public class ResultService {
             resultsKafkaService.getArrangementResultsIterator(arrangement.getId())
                 .ifPresent(resultsIterator -> {
                     boolean isSaved = true;
-                    transaction.begin();
                     while (resultsIterator.hasNext()) {
+                        transaction.begin();
                         KeyValue<CheckUnitKey, CheckUnitResult> result = resultsIterator.next();
                         //Если штамп ставим, нужно попросить инфо об AccessTool
                         AccessToolDTO accessToolDTO = dispatcherProperties.getImprint().isUseImprint() ? getAccessToolInfo(arrangement.getId()) : null;
                         isSaved = saveArrangementResult(entityManager, result.key, result.value, arrangement, accessToolDTO);
+                        transaction.commit();
                     }
-                    transaction.commit();
                     if (isSaved) {
                         log.info("Мероприятие успешно сохранено в БД: " + arrangement.getId());
                         if(isArrangementFinished(arrangement) || isStopped) {
