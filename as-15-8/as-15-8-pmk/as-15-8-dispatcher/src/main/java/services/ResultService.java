@@ -134,6 +134,12 @@ public class ResultService {
 
                         logEvery_N_Result(transactionCount);
                     }
+
+                    if (transaction.isActive()) {
+                        transaction.commit();
+                        log.info("Записано {} результатов", transactionCount);
+                    }
+
                     if (isSaved) {
                         log.info("Мероприятие успешно сохранено в БД: " + arrangement.getId());
                         if(isArrangementFinished(arrangement) || isStopped) {
