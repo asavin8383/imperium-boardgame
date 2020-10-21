@@ -60,7 +60,7 @@ public class ResultService {
 
     private final EntityManagerFactory entityManagerFactory;
 
-    @Value("${transaction.batch.size}")
+    @Value("${results.transaction.batch.size}")
     private int transactionBatchSize;
 
     @PostConstruct
