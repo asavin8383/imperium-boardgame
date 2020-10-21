@@ -72,7 +72,7 @@ results:
   save.schedule: '0 */1 * * * ?'
   clear.schedule: '0 */3 * * * ?'
   retention.days: 3
-  transaction.batch.size: 50
+  transaction.batch.size: 5
   log.every: 1000
 ---
 
