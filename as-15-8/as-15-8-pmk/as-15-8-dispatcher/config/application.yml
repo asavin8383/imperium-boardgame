@@ -73,7 +73,7 @@ results:
   clear.schedule: '0 */3 * * * ?'
   retention.days: 3
   transaction.batch.size: 5
-  log.every: 1000
+  log.every: 5
 ---
 
 spring:
