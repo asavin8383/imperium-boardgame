@@ -22,6 +22,7 @@ import org.hibernate.type.LocalDateTimeType;
 import org.hibernate.type.LongType;
 import org.hibernate.type.StringType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,6 +59,9 @@ public class ResultService {
     private final PptClient pptClient;
 
     private final EntityManagerFactory entityManagerFactory;
+
+    @Value("${transaction.batch.size}")
+    private int transactionBatchSize;
 
     @PostConstruct
     private void initImageProcessor() throws Exception {
@@ -104,13 +108,21 @@ public class ResultService {
             resultsKafkaService.getArrangementResultsIterator(arrangement.getId())
                 .ifPresent(resultsIterator -> {
                     boolean isSaved = true;
+                    int transactionCount = 0;
                     while (resultsIterator.hasNext()) {
-                        transaction.begin();
+
+                        if (transactionCount % transactionBatchSize == 0)
+                            transaction.begin();
+
                         KeyValue<CheckUnitKey, CheckUnitResult> result = resultsIterator.next();
                         //Если штамп ставим, нужно попросить инфо об AccessTool
                         AccessToolDTO accessToolDTO = dispatcherProperties.getImprint().isUseImprint() ? getAccessToolInfo(arrangement.getId()) : null;
                         isSaved = saveArrangementResult(entityManager, result.key, result.value, arrangement, accessToolDTO);
-                        transaction.commit();
+
+                        if (transactionCount % transactionBatchSize == 0)
+                            transaction.commit();
+
+                        transactionCount++;
                     }
                     if (isSaved) {
                         log.info("Мероприятие успешно сохранено в БД: " + arrangement.getId());
