@@ -63,6 +63,9 @@ public class ResultService {
     @Value("${results.transaction.batch.size}")
     private int transactionBatchSize;
 
+    @Value("${results.log.every}")
+    private int logEvery;
+
     @PostConstruct
     private void initImageProcessor() throws Exception {
         //Загружаем шрифт
@@ -98,6 +101,11 @@ public class ResultService {
         saveArrangementResults(arrangement);
     }
 
+    private void logEvery_N_Result(int transactionCount) {
+        if (transactionCount % logEvery == 0)
+            log.info("Записано {} результатов", transactionCount);
+    }
+
     @Transactional
     void saveArrangementResults(Arrangement arrangement) {
         log.info("Начато сохранение мероприятия: " + arrangement.getId());
@@ -123,6 +131,7 @@ public class ResultService {
                             transaction.commit();
 
                         transactionCount++;
+                        logEvery_N_Result(transactionCount);
                     }
                     if (isSaved) {
                         log.info("Мероприятие успешно сохранено в БД: " + arrangement.getId());
