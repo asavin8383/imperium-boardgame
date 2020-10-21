@@ -127,10 +127,11 @@ public class ResultService {
                         AccessToolDTO accessToolDTO = dispatcherProperties.getImprint().isUseImprint() ? getAccessToolInfo(arrangement.getId()) : null;
                         isSaved = saveArrangementResult(entityManager, result.key, result.value, arrangement, accessToolDTO);
 
+                        transactionCount++;
+
                         if (transactionCount % transactionBatchSize == 0)
                             transaction.commit();
 
-                        transactionCount++;
                         logEvery_N_Result(transactionCount);
                     }
                     if (isSaved) {
