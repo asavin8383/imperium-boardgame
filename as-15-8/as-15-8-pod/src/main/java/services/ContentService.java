@@ -24,6 +24,8 @@ import repositories.DomainMaskRepo;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -82,6 +84,7 @@ public class ContentService {
 
     public ResponseEntity filterContentView(Pageable pageable, List<Long> contentIds) {
 
+        LocalDateTime startTime = LocalDateTime.now();
 
         Sort.Order order = pageable.getSort().stream().findFirst().orElseThrow(() ->
                 new AS_15_8_POD_Exception("фильтрация записей ерди невозможна, сортировка не задана!"));
@@ -113,6 +116,9 @@ public class ContentService {
         } finally {
             session.close();
             em.close();
+
+            long timeDuration = ChronoUnit.SECONDS.between(startTime, LocalDateTime.now());
+            log.info("Загрузка трафика заняла: {} секунд - pod.filterContentView", timeDuration);
         }
     }
 

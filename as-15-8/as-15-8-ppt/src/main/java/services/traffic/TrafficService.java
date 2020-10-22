@@ -6,6 +6,7 @@ import enums.SortingDirection;
 import exceptions.AS_15_8_PPT_Exception;
 import liquibase.util.StringUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import model.catalog.AccessToolsCategory;
 import model.enums.AccessToolType;
 import model.enums.TrafficType;
@@ -33,6 +34,8 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +46,7 @@ import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
+@Slf4j
 public class TrafficService {
 
     private final TrafficRepository trafficRepository;
@@ -382,7 +386,14 @@ public class TrafficService {
     }
 
     public ResponseEntity<Page<ObjectNode>> getSortedContentViewFromPod(ErdiTrafficUnit erdiTrafficUnit, Pageable pageable) {
+
+        LocalDateTime startTime = LocalDateTime.now();
+
         List<Long> contentIds = erdiContentJoinRepository.findContentIds(erdiTrafficUnit);
+
+        long timeDuration = ChronoUnit.SECONDS.between(startTime, LocalDateTime.now());
+        log.info("Загрузка списка erdi занял: {} секунд - ppt.trafficService", timeDuration);
+
         return podWebClient.getTrafficUnitContentIdsFiltered(pageable, contentIds);
     }
 
