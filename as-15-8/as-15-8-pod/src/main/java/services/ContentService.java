@@ -92,15 +92,19 @@ public class ContentService {
         EntityTransaction transaction = em.getTransaction();
         transaction.begin();
         try {
+//            createTempContentTable();
+//
+//            fillTempContentTable(contentIds);
+//
+//            List<ContentView> contentViewsSorted = filterContentView(order.getDirection().toString(), order.getProperty());
+//
+//            pageContent = createPageable(pageable, contentViewsSorted, contentIds.size());
+//
+//            return ResponseEntity.ok().body(pageContent);
             createTempContentTable();
+            unnestTestLog(contentIds);
+            return ResponseEntity.ok(createPageable(pageable, new ArrayList<ContentView>(), contentIds.size()));
 
-            fillTempContentTable(contentIds);
-
-            List<ContentView> contentViewsSorted = filterContentView(order.getDirection().toString(), order.getProperty());
-
-            pageContent = createPageable(pageable, contentViewsSorted, contentIds.size());
-
-            return ResponseEntity.ok().body(pageContent);
         } catch (Exception ex) {
             if(transaction.isActive())
                 transaction.rollback();
@@ -149,8 +153,12 @@ public class ContentService {
 
     private void fillTempContentTable(List<Long> contentIds) {
         LocalDateTime startTime = LocalDateTime.now();
-
         em.createNativeQuery("insert into content_temp (contentId) values(unnest(array" + contentIds.toString() + "))").executeUpdate();
+        logTime("Insert в temp таблицу ", startTime);
+    }
+
+    private void unnestTestLog(List<Long> contentIds) {
+        LocalDateTime startTime = LocalDateTime.now();
 
         List<String> res = em.createNativeQuery("explain analyze select unnest(array" + contentIds.toString() + ")")
                 .getResultList();
@@ -159,7 +167,7 @@ public class ContentService {
                 .map(n -> String.valueOf(n))
                 .collect(Collectors.joining("\n"));
 
-        logTime("Insert в temp таблицу ", startTime);
+        logTime("Unnest в temp таблицу ", startTime);
         log.info("Unnest analyze log");
         log.info(result);
     }
