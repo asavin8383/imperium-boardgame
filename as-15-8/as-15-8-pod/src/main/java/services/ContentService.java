@@ -135,8 +135,12 @@ public class ContentService {
     private void createTempContentTable() {
         LocalDateTime startTime = LocalDateTime.now();
 
+//        String queryStr = "CREATE TEMPORARY TABLE content_temp ("
+//                + "contentId bigint NOT NULL PRIMARY KEY)";
+
         String queryStr = "CREATE TEMPORARY TABLE content_temp ("
-                + "contentId bigint NOT NULL PRIMARY KEY)";
+                + "contentId bigint NOT NULL)";
+
         em.createNativeQuery(queryStr).executeUpdate();
 
         logTime("Create temp таблицы ", startTime);
@@ -145,10 +149,10 @@ public class ContentService {
     private void fillTempContentTable(List<Long> contentIds) {
         LocalDateTime startTime = LocalDateTime.now();
 
-//        em.createNativeQuery("insert into content_temp (contentId) values(unnest(array" + contentIds.toString() + ")) " +
-//                    "ON CONFLICT DO NOTHING").executeUpdate();
-
-        em.createNativeQuery("insert into content_temp (contentId) values(unnest(array" + contentIds.toString() + ")) ").executeUpdate();
+        List<List<Long>> subContents = ListUtils.partition(contentIds, 50000);
+        subContents.forEach(subContentIds -> {
+            em.createNativeQuery("insert into content_temp (contentId) values(unnest(array" + subContentIds.toString() + ")) ").executeUpdate();
+        });
 
         logTime("Insert в temp таблицу ", startTime);
     }
