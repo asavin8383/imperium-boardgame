@@ -7,8 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import model.actualViews.ContentCheckUnit;
 import model.projection.ContentView;
 import model.scheme.DomainMask;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
@@ -24,6 +22,7 @@ import repositories.DomainMaskRepo;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -43,7 +42,6 @@ public class ContentService {
     private final DomainMaskRepo domainMaskRepo;
     private final EntityManagerFactory emf;
     private EntityManager em;
-    private Session session;
 
     @Cacheable
     public Optional<ContentView> getFormalErdiView(Long id) {
@@ -91,17 +89,14 @@ public class ContentService {
 
         Page<ContentView> pageContent;
         em = emf.createEntityManager();
-        session = em.unwrap(Session.class);
-        Transaction transaction = session.beginTransaction();
+        EntityTransaction transaction = em.getTransaction();
         try {
+            transaction.begin();
             createTempContentTable();
             fillTempContentTable(contentIds);
             List<ContentView> contentViewsSorted = filterContentView(order.getDirection().toString(), order.getProperty());
             pageContent = createPageable(pageable, contentViewsSorted, contentIds.size());
             dropTempTable();
-            flushAndClearSession();
-
-            transaction.commit();
 
             return ResponseEntity.ok().body(pageContent);
         } catch (Exception ex) {
@@ -114,7 +109,7 @@ public class ContentService {
 
             return ResponseEntity.badRequest().body(String.join(":\n", errorMessages));
         } finally {
-            session.close();
+            transaction.commit();
             em.close();
 
             long timeDuration = ChronoUnit.SECONDS.between(startTime, LocalDateTime.now());
@@ -162,11 +157,6 @@ public class ContentService {
 
     private void dropTempTable() {
         em.createNativeQuery("DROP TABLE content_temp").executeUpdate();
-    }
-
-    private void flushAndClearSession() {
-        session.flush();
-        session.clear();
     }
 
     public String convertCamelCaseToSnakeCase(String parse) {
