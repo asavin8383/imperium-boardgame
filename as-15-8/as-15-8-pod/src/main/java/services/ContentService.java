@@ -151,7 +151,7 @@ public class ContentService {
 
         //em.getTransaction().begin();
         subSets.forEach(subListId ->{
-            em.createNativeQuery("insert into content_temp (contentId) values(unnest(array" + contentIds.toString() + ")) " +
+            em.createNativeQuery("insert into content_temp (contentId) values(unnest(array" + subListId.toString() + ")) " +
                     "ON CONFLICT DO NOTHING").executeUpdate();
 
         });
@@ -162,8 +162,8 @@ public class ContentService {
         @SuppressWarnings("unchecked")
         List<ContentView> contentViews = em.createNativeQuery("select c.* from sor.content_view c " +
                         "join content_temp t " +
-                        "on t.contentId = c.id " +
-                        "ORDER BY " + sortingColumn + " " + sortingDirection
+                        "on t.contentId = c.id "// +
+//                        "ORDER BY " + sortingColumn + " " + sortingDirection
                 , ContentView.class).getResultList();
 
         return contentViews;
