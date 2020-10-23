@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import model.actualViews.ContentCheckUnit;
 import model.projection.ContentView;
 import model.scheme.DomainMask;
+import org.apache.commons.collections4.ListUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
@@ -89,28 +90,25 @@ public class ContentService {
 
         Page<ContentView> pageContent;
         em = emf.createEntityManager();
-        //EntityTransaction transaction = em.getTransaction();
+        EntityTransaction transaction = em.getTransaction();
+        transaction.begin();
         try {
-            em.getTransaction().begin();
+            //em.getTransaction().begin();
             createTempContentTable();
-            em.getTransaction().commit();
+            //em.getTransaction().commit();
 
-            em.getTransaction().begin();
-            fillTempContentTable(contentIds);
-            em.getTransaction().commit();
+            fillTempContentTable(contentIds, em);
 
-
-            em.getTransaction().begin();
+            //em.getTransaction().begin();
             List<ContentView> contentViewsSorted = filterContentView(order.getDirection().toString(), order.getProperty());
-            em.getTransaction().commit();
+            //em.getTransaction().commit();
 
             pageContent = createPageable(pageable, contentViewsSorted, contentIds.size());
 
             return ResponseEntity.ok().body(pageContent);
         } catch (Exception ex) {
-            /*if(transaction.isActive())
+            if(transaction.isActive())
                 transaction.rollback();
-            */
 
             log.error("Ошибка при получении списка ЕРДИ", ex);
 
@@ -118,11 +116,12 @@ public class ContentService {
 
             return ResponseEntity.badRequest().body(String.join(":\n", errorMessages));
         } finally {
-            //transaction.commit();
-
-            em.getTransaction().begin();
             dropTempTable();
-            em.getTransaction().commit();
+            transaction.commit();
+
+            //em.getTransaction().begin();
+
+            //em.getTransaction().commit();
 
             em.close();
 
@@ -147,8 +146,16 @@ public class ContentService {
         em.createNativeQuery(queryStr).executeUpdate();
     }
 
-    private void fillTempContentTable(List<Long> contentIds) {
-        em.createNativeQuery("insert into content_temp (contentId) values(unnest(array" + contentIds.toString() + ")) ON CONFLICT DO NOTHING").executeUpdate();
+    private void fillTempContentTable(List<Long> contentIds, EntityManager em) {
+        List<List<Long>> subSets = ListUtils.partition(contentIds, 50000);
+
+        //em.getTransaction().begin();
+        subSets.forEach(subListId ->{
+            em.createNativeQuery("insert into content_temp (contentId) values(unnest(array" + contentIds.toString() + ")) " +
+                    "ON CONFLICT DO NOTHING").executeUpdate();
+
+        });
+        //em.getTransaction().commit();
     }
 
     private List<ContentView> filterContentView(String sortingDirection, String sortingColumn) {
