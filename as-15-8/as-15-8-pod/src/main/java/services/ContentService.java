@@ -89,19 +89,28 @@ public class ContentService {
 
         Page<ContentView> pageContent;
         em = emf.createEntityManager();
-        EntityTransaction transaction = em.getTransaction();
+        //EntityTransaction transaction = em.getTransaction();
         try {
-            transaction.begin();
+            em.getTransaction().begin();
             createTempContentTable();
+            em.getTransaction().commit();
+
+            em.getTransaction().begin();
             fillTempContentTable(contentIds);
+            em.getTransaction().commit();
+
+
+            em.getTransaction().begin();
             List<ContentView> contentViewsSorted = filterContentView(order.getDirection().toString(), order.getProperty());
+            em.getTransaction().commit();
+
             pageContent = createPageable(pageable, contentViewsSorted, contentIds.size());
-            dropTempTable();
 
             return ResponseEntity.ok().body(pageContent);
         } catch (Exception ex) {
-            if(transaction.isActive())
+            /*if(transaction.isActive())
                 transaction.rollback();
+            */
 
             log.error("Ошибка при получении списка ЕРДИ", ex);
 
@@ -109,7 +118,12 @@ public class ContentService {
 
             return ResponseEntity.badRequest().body(String.join(":\n", errorMessages));
         } finally {
-            transaction.commit();
+            //transaction.commit();
+
+            em.getTransaction().begin();
+            dropTempTable();
+            em.getTransaction().commit();
+
             em.close();
 
             long timeDuration = ChronoUnit.SECONDS.between(startTime, LocalDateTime.now());
