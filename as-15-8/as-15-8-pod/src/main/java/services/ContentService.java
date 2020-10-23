@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 @Service
 @CacheConfig(cacheNames={"sor_content"})
@@ -139,15 +140,8 @@ public class ContentService {
 //                + "contentId bigint NOT NULL PRIMARY KEY)";
 
         String queryStr = "CREATE TEMPORARY TABLE content_temp ("
-                + "contentId bigint NOT NULL)";
+                + "contentId bigint)";
 
-        em.createNativeQuery(queryStr).executeUpdate();
-
-
-        queryStr = "CREATE INDEX contentId_index ON content_temp(contentId)";
-        em.createNativeQuery(queryStr).executeUpdate();
-
-        queryStr = "ALTER TABLE content_temp CLUSTER ON contentId_index";
         em.createNativeQuery(queryStr).executeUpdate();
 
         logTime("Create temp таблицы ", startTime);
@@ -158,10 +152,16 @@ public class ContentService {
 
 //        List<List<Long>> subContents = ListUtils.partition(contentIds, 1000);
 //        subContents.forEach(subContentIds -> {
-        em.createNativeQuery("insert into content_temp (contentId) values(unnest(array" + contentIds.toString() + ")) ").executeUpdate();
-        //});
+        List<String> res = em.createNativeQuery("explain analyze insert into content_temp (contentId) values(unnest(array" + contentIds.toString() + "))")
+                .getResultList();
+
+        String result = res.stream()
+                .map(n -> String.valueOf(n))
+                .collect(Collectors.joining("\n"));
 
         logTime("Insert в temp таблицу ", startTime);
+        log.info("Insert analyze log");
+        log.info(result);
     }
 
     private List<ContentView> filterContentView(String sortingDirection, String sortingColumn) {
