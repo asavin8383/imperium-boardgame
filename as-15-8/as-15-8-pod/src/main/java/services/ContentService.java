@@ -145,8 +145,10 @@ public class ContentService {
     private void fillTempContentTable(List<Long> contentIds) {
         LocalDateTime startTime = LocalDateTime.now();
 
-        em.createNativeQuery("insert into content_temp (contentId) values(unnest(array" + contentIds.toString() + ")) " +
-                    "ON CONFLICT DO NOTHING").executeUpdate();
+//        em.createNativeQuery("insert into content_temp (contentId) values(unnest(array" + contentIds.toString() + ")) " +
+//                    "ON CONFLICT DO NOTHING").executeUpdate();
+
+        em.createNativeQuery("insert into content_temp (contentId) values(unnest(array" + contentIds.toString() + ")) ").executeUpdate();
 
         logTime("Insert в temp таблицу ", startTime);
     }

@@ -36,10 +36,7 @@ import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -391,12 +388,12 @@ public class TrafficService {
 
         List<Long> contentIds = erdiContentJoinRepository.findContentIds(erdiTrafficUnit);
 
-        long timeDuration = ChronoUnit.SECONDS.between(startTime, LocalDateTime.now());
-        log.info("Загрузка списка erdi занял: {} секунд - ppt.trafficService", timeDuration);
+        List<Long> dedupedContentIds = contentIds.stream().distinct().collect(Collectors.toList());
 
-        return podWebClient.getTrafficUnitContentIdsFiltered(pageable, contentIds);
+        return podWebClient.getTrafficUnitContentIdsFiltered(pageable, dedupedContentIds);
     }
 
+    
     public Page<ObjectNode> getUnsortedContentViewFromPod(ErdiTrafficUnit erdiTrafficUnit, Pageable pageable) {
         Page<ErdiTrafficUnitContent> trafficUnitContentIdsUnsorted =
                 erdiContentJoinRepository
