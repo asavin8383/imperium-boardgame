@@ -83,8 +83,6 @@ public class ContentService {
 
     public ResponseEntity filterContentView(Pageable pageable, List<Long> contentIds) {
 
-        LocalDateTime startTime = LocalDateTime.now();
-
         Sort.Order order = pageable.getSort().stream().findFirst().orElseThrow(() ->
                 new AS_15_8_POD_Exception("фильтрация записей ерди невозможна, сортировка не задана!"));
 
@@ -93,15 +91,11 @@ public class ContentService {
         EntityTransaction transaction = em.getTransaction();
         transaction.begin();
         try {
-            //em.getTransaction().begin();
             createTempContentTable();
-            //em.getTransaction().commit();
 
-            fillTempContentTable(contentIds, em);
+            fillTempContentTable(contentIds);
 
-            //em.getTransaction().begin();
             List<ContentView> contentViewsSorted = filterContentView(order.getDirection().toString(), order.getProperty());
-            //em.getTransaction().commit();
 
             pageContent = createPageable(pageable, contentViewsSorted, contentIds.size());
 
@@ -119,15 +113,13 @@ public class ContentService {
             dropTempTable();
             transaction.commit();
 
-            //em.getTransaction().begin();
-
-            //em.getTransaction().commit();
-
             em.close();
-
-            long timeDuration = ChronoUnit.SECONDS.between(startTime, LocalDateTime.now());
-            log.info("Загрузка трафика заняла: {} секунд - pod.filterContentView", timeDuration);
         }
+    }
+
+    private void logTime(String msg, LocalDateTime startTime) {
+        long timeDuration = ChronoUnit.SECONDS.between(startTime, LocalDateTime.now());
+        log.info(msg + " {} секунд", timeDuration);
     }
 
     private List<String> getErrorMessagesByCause(Exception ex) {
@@ -141,31 +133,34 @@ public class ContentService {
     }
 
     private void createTempContentTable() {
+        LocalDateTime startTime = LocalDateTime.now();
+
         String queryStr = "CREATE TEMPORARY TABLE content_temp ("
                 + "contentId bigint NOT NULL PRIMARY KEY)";
         em.createNativeQuery(queryStr).executeUpdate();
+
+        logTime("Create temp таблицы ", startTime);
     }
 
-    private void fillTempContentTable(List<Long> contentIds, EntityManager em) {
-        List<List<Long>> subSets = ListUtils.partition(contentIds, 50000);
+    private void fillTempContentTable(List<Long> contentIds) {
+        LocalDateTime startTime = LocalDateTime.now();
 
-        //em.getTransaction().begin();
-        subSets.forEach(subListId ->{
-            em.createNativeQuery("insert into content_temp (contentId) values(unnest(array" + subListId.toString() + ")) " +
+        em.createNativeQuery("insert into content_temp (contentId) values(unnest(array" + contentIds.toString() + ")) " +
                     "ON CONFLICT DO NOTHING").executeUpdate();
 
-        });
-        //em.getTransaction().commit();
+        logTime("Insert в temp таблицу ", startTime);
     }
 
     private List<ContentView> filterContentView(String sortingDirection, String sortingColumn) {
-        @SuppressWarnings("unchecked")
+        LocalDateTime startTime = LocalDateTime.now();
+
         List<ContentView> contentViews = em.createNativeQuery("select c.* from sor.content_view c " +
                         "join content_temp t " +
                         "on t.contentId = c.id "// +
 //                        "ORDER BY " + sortingColumn + " " + sortingDirection
                 , ContentView.class).getResultList();
 
+        logTime("Join c temp таблицей ", startTime);
         return contentViews;
     }
 
