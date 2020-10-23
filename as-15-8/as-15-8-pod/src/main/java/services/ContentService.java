@@ -143,16 +143,23 @@ public class ContentService {
 
         em.createNativeQuery(queryStr).executeUpdate();
 
+
+        queryStr = "CREATE INDEX contentId_index ON content_temp(contentId)";
+        em.createNativeQuery(queryStr).executeUpdate();
+
+        queryStr = "ALTER TABLE content_temp CLUSTER ON contentId_index";
+        em.createNativeQuery(queryStr).executeUpdate();
+
         logTime("Create temp таблицы ", startTime);
     }
 
     private void fillTempContentTable(List<Long> contentIds) {
         LocalDateTime startTime = LocalDateTime.now();
 
-        List<List<Long>> subContents = ListUtils.partition(contentIds, 50000);
-        subContents.forEach(subContentIds -> {
-            em.createNativeQuery("insert into content_temp (contentId) values(unnest(array" + subContentIds.toString() + ")) ").executeUpdate();
-        });
+//        List<List<Long>> subContents = ListUtils.partition(contentIds, 1000);
+//        subContents.forEach(subContentIds -> {
+        em.createNativeQuery("insert into content_temp (contentId) values(unnest(array" + contentIds.toString() + ")) ").executeUpdate();
+        //});
 
         logTime("Insert в temp таблицу ", startTime);
     }
