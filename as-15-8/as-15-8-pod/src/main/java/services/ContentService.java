@@ -92,19 +92,11 @@ public class ContentService {
         EntityTransaction transaction = em.getTransaction();
         transaction.begin();
         try {
-//            createTempContentTable();
-//
-//            fillTempContentTable(contentIds);
-//
-//            List<ContentView> contentViewsSorted = filterContentView(order.getDirection().toString(), order.getProperty());
-//
-//            pageContent = createPageable(pageable, contentViewsSorted, contentIds.size());
-//
-//            return ResponseEntity.ok().body(pageContent);
             createTempContentTable();
-            unnestTestLog(contentIds);
-            return ResponseEntity.ok(createPageable(pageable, new ArrayList<ContentView>(), contentIds.size()));
-
+            fillTempContentTable(contentIds);
+            List<ContentView> contentViewsSorted = filterContentView(order.getDirection().toString(), order.getProperty());
+            pageContent = createPageable(pageable, contentViewsSorted, contentIds.size());
+            return ResponseEntity.ok().body(pageContent);
         } catch (Exception ex) {
             if(transaction.isActive())
                 transaction.rollback();
@@ -144,7 +136,7 @@ public class ContentService {
 //                + "contentId bigint NOT NULL PRIMARY KEY)";
 
         String queryStr = "CREATE TEMPORARY TABLE content_temp ("
-                + "contentId bigint NOT NULL)";
+                + "contentId bigint)";
 
         em.createNativeQuery(queryStr).executeUpdate();
 
