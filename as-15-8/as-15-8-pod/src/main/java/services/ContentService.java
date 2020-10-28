@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import model.actualViews.ContentCheckUnit;
 import model.projection.ContentView;
 import model.scheme.DomainMask;
-import org.apache.commons.collections4.ListUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
@@ -31,7 +30,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 @Service
 @CacheConfig(cacheNames={"sor_content"})
@@ -92,9 +90,9 @@ public class ContentService {
         EntityTransaction transaction = em.getTransaction();
         transaction.begin();
         try {
-            createTempContentTable();
-            fillTempContentTable(contentIds);
-            List<ContentView> contentViewsSorted = filterContentView(order.getDirection().toString(), order.getProperty());
+            List<ContentView> contentViewsSorted = filterContentViewUnnest(order.getDirection().toString(),
+                    order.getProperty(),
+                    contentIds);
             pageContent = createPageable(pageable, contentViewsSorted, contentIds.size());
             return ResponseEntity.ok().body(pageContent);
         } catch (Exception ex) {
@@ -102,14 +100,10 @@ public class ContentService {
                 transaction.rollback();
 
             log.error("Ошибка при получении списка ЕРДИ", ex);
-
             List<String> errorMessages = getErrorMessagesByCause(ex);
-
             return ResponseEntity.badRequest().body(String.join(":\n", errorMessages));
         } finally {
-            dropTempTable();
             transaction.commit();
-
             em.close();
         }
     }
@@ -129,49 +123,14 @@ public class ContentService {
         return resultErrorMessage;
     }
 
-    private void createTempContentTable() {
+    private List<ContentView> filterContentViewUnnest(String sortingDirection, String sortingColumn, List<Long> contentIds) {
         LocalDateTime startTime = LocalDateTime.now();
 
-//        String queryStr = "CREATE TEMPORARY TABLE content_temp ("
-//                + "contentId bigint NOT NULL PRIMARY KEY)";
-
-        String queryStr = "CREATE TEMPORARY TABLE content_temp ("
-                + "contentId bigint)";
-
-        em.createNativeQuery(queryStr).executeUpdate();
-
-        logTime("Create temp таблицы ", startTime);
-    }
-
-    private void fillTempContentTable(List<Long> contentIds) {
-        LocalDateTime startTime = LocalDateTime.now();
-        em.createNativeQuery("insert into content_temp (contentId) values(unnest(array" + contentIds.toString() + "))").executeUpdate();
-        logTime("Insert в temp таблицу ", startTime);
-    }
-
-    private void unnestTestLog(List<Long> contentIds) {
-        LocalDateTime startTime = LocalDateTime.now();
-
-        List<String> res = em.createNativeQuery("explain analyze select unnest(array" + contentIds.toString() + ")")
-                .getResultList();
-
-        String result = res.stream()
-                .map(n -> String.valueOf(n))
-                .collect(Collectors.joining("\n"));
-
-        logTime("Unnest в temp таблицу ", startTime);
-        log.info("Unnest analyze log");
-        log.info(result);
-    }
-
-    private List<ContentView> filterContentView(String sortingDirection, String sortingColumn) {
-        LocalDateTime startTime = LocalDateTime.now();
-
-        List<ContentView> contentViews = em.createNativeQuery("select c.* from sor.content_view c " +
-                        "join content_temp t " +
-                        "on t.contentId = c.id "// +
-//                        "ORDER BY " + sortingColumn + " " + sortingDirection
-                , ContentView.class).getResultList();
+        List<ContentView> contentViews = em.createNativeQuery("select * from sor.content_view c" +
+                        " join unnest(array" + contentIds.toString() + ")" +
+                        " AS ppt_content_id " +
+                        " on ppt_content_id = c.content_id;",
+                ContentView.class).getResultList();
 
         logTime("Join c temp таблицей ", startTime);
         return contentViews;
@@ -182,10 +141,6 @@ public class ContentService {
         int end = (start + pageable.getPageSize()) > result.size() ? result.size() : (start + pageable.getPageSize());
 
         return new PageImpl<ContentView>((result.subList(start, end)), pageable, totalElements);
-    }
-
-    private void dropTempTable() {
-        em.createNativeQuery("DROP TABLE content_temp").executeUpdate();
     }
 
     public String convertCamelCaseToSnakeCase(String parse) {
