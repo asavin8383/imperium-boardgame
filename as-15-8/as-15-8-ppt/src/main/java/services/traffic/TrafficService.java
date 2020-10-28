@@ -6,6 +6,7 @@ import enums.SortingDirection;
 import exceptions.AS_15_8_PPT_Exception;
 import liquibase.util.StringUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import model.catalog.AccessToolsCategory;
 import model.enums.AccessToolType;
 import model.enums.TrafficType;
@@ -33,16 +34,16 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
+@Slf4j
 public class TrafficService {
 
     private final TrafficRepository trafficRepository;
@@ -382,10 +383,17 @@ public class TrafficService {
     }
 
     public ResponseEntity<Page<ObjectNode>> getSortedContentViewFromPod(ErdiTrafficUnit erdiTrafficUnit, Pageable pageable) {
+
+        LocalDateTime startTime = LocalDateTime.now();
+
         List<Long> contentIds = erdiContentJoinRepository.findContentIds(erdiTrafficUnit);
-        return podWebClient.getTrafficUnitContentIdsFiltered(pageable, contentIds);
+
+        List<Long> dedupedContentIds = contentIds.stream().distinct().collect(Collectors.toList());
+
+        return podWebClient.getTrafficUnitContentIdsFiltered(pageable, dedupedContentIds);
     }
 
+    
     public Page<ObjectNode> getUnsortedContentViewFromPod(ErdiTrafficUnit erdiTrafficUnit, Pageable pageable) {
         Page<ErdiTrafficUnitContent> trafficUnitContentIdsUnsorted =
                 erdiContentJoinRepository

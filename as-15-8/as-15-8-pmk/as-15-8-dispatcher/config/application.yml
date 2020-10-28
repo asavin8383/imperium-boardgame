@@ -71,6 +71,8 @@ spring:
 results:
   save.schedule: '0 */1 * * * ?'
   clear.schedule: '0 */3 * * * ?'
+  transaction.batch.size: 50
+  log.every: 1000
   retention.days: 31
 
 ---

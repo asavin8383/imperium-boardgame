@@ -22,6 +22,7 @@ import org.hibernate.type.LocalDateTimeType;
 import org.hibernate.type.LongType;
 import org.hibernate.type.StringType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,6 +60,12 @@ public class ResultService {
 
     private final EntityManagerFactory entityManagerFactory;
 
+    @Value("${results.transaction.batch.size}")
+    private int transactionBatchSize;
+
+    @Value("${results.log.every}")
+    private int logEvery;
+
     @PostConstruct
     private void initImageProcessor() throws Exception {
         //Загружаем шрифт
@@ -94,6 +101,11 @@ public class ResultService {
         saveArrangementResults(arrangement);
     }
 
+    private void logEvery_N_Result(int transactionCount) {
+        if (transactionCount % logEvery == 0)
+            log.info("Записано {} результатов", transactionCount);
+    }
+
     @Transactional
     void saveArrangementResults(Arrangement arrangement) {
         log.info("Начато сохранение мероприятия: " + arrangement.getId());
@@ -104,14 +116,30 @@ public class ResultService {
             resultsKafkaService.getArrangementResultsIterator(arrangement.getId())
                 .ifPresent(resultsIterator -> {
                     boolean isSaved = true;
+                    int transactionCount = 0;
                     while (resultsIterator.hasNext()) {
-                        transaction.begin();
+
+                        if (transactionCount % transactionBatchSize == 0)
+                            transaction.begin();
+
                         KeyValue<CheckUnitKey, CheckUnitResult> result = resultsIterator.next();
                         //Если штамп ставим, нужно попросить инфо об AccessTool
                         AccessToolDTO accessToolDTO = dispatcherProperties.getImprint().isUseImprint() ? getAccessToolInfo(arrangement.getId()) : null;
                         isSaved = saveArrangementResult(entityManager, result.key, result.value, arrangement, accessToolDTO);
-                        transaction.commit();
+
+                        transactionCount++;
+
+                        if (transactionCount % transactionBatchSize == 0)
+                            transaction.commit();
+
+                        logEvery_N_Result(transactionCount);
                     }
+
+                    if (transaction.isActive()) {
+                        transaction.commit();
+                        log.info("Записано {} результатов", transactionCount);
+                    }
+
                     if (isSaved) {
                         log.info("Мероприятие успешно сохранено в БД: " + arrangement.getId());
                         if(isArrangementFinished(arrangement) || isStopped) {
