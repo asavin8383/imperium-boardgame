@@ -71,7 +71,7 @@ spring:
 results:
   save.schedule: '0 */1 * * * ?'
   clear.schedule: '0 */3 * * * ?'
-  retention.days: 3
+  retention.days: 31
 
 ---
 
