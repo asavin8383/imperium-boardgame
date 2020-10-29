@@ -24,6 +24,7 @@ import restapi.ErdiChecker;
 import services.ArrangementService;
 import services.ResultsKafkaService;
 
+import java.time.Duration;
 import java.util.Date;
 
 @Service
@@ -31,6 +32,9 @@ import java.util.Date;
 @EnableBinding(DispatcherChannels.class)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class ResultsHandler {
+
+    @Value("${results.retention.days:31}")
+    private int resultsRetentionDays;
 
     @Value("${spring.cloud.stream.bindings.results_table.destination}")
     private String resultsTableName;
@@ -62,6 +66,7 @@ public class ResultsHandler {
                         as(screenshotsTableName)
                         .withKeySerde(new JsonSerde<>(CheckUnitKey.class))
                         .withValueSerde(new JsonSerde<>(Screenshots.class))
+                        .withRetention(Duration.ofDays(resultsRetentionDays))
             );
 
         resultsStream
@@ -86,6 +91,7 @@ public class ResultsHandler {
                             as(resultsTableName)
                             .withKeySerde(new JsonSerde<>(CheckUnitKey.class))
                             .withValueSerde(new JsonSerde<>(CheckUnitResult.class))
+                            .withRetention(Duration.ofDays(resultsRetentionDays))
             );
     }
 
