@@ -129,11 +129,12 @@ public class ContentService {
         LocalDateTime startTime = LocalDateTime.now();
         List<ContentView> result = new ArrayList<>();
         List<List<Long>> subContentIds = Lists.partition(contentIds, 10000);
-        subContentIds.forEach(subContent ->{
+        subContentIds.forEach(subContent -> {
             List<ContentView> contentViewsBstch = em.createNativeQuery("select * from sor.content_view c" +
                             " join unnest(array" + subContent.toString() + ")" +
                             " AS ppt_content_id" +
-                            " on c.id = ppt_content_id",
+                            " on c.id = ppt_content_id" +
+                            " ORDER BY " + sortingColumn + " " + sortingDirection,
                     ContentView.class).getResultList();
              result.addAll(contentViewsBstch);
         });
