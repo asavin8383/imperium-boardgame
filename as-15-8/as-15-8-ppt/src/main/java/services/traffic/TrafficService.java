@@ -383,13 +383,8 @@ public class TrafficService {
     }
 
     public ResponseEntity<Page<ObjectNode>> getSortedContentViewFromPod(ErdiTrafficUnit erdiTrafficUnit, Pageable pageable) {
-
         LocalDateTime startTime = LocalDateTime.now();
-
         List<Long> contentIds = erdiContentJoinRepository.findContentIds(erdiTrafficUnit);
-
-        //List<Long> dedupedContentIds = contentIds.stream().distinct().collect(Collectors.toList());
-
         return podWebClient.getTrafficUnitContentIdsFiltered(pageable, contentIds);
     }
 
