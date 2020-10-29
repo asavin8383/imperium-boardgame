@@ -44,6 +44,7 @@ public class ContentService {
     private final DomainMaskRepo domainMaskRepo;
     private final EntityManagerFactory emf;
     private EntityManager em;
+    private final int trafficContentViewBatchSize = 10000;
 
     @Cacheable
     public Optional<ContentView> getFormalErdiView(Long id) {
@@ -128,7 +129,7 @@ public class ContentService {
     private List<ContentView> filterContentViewUnnest(String sortingDirection, String sortingColumn, List<Long> contentIds) {
         LocalDateTime startTime = LocalDateTime.now();
         List<ContentView> result = new ArrayList<>();
-        List<List<Long>> subContentIds = Lists.partition(contentIds, 10000);
+        List<List<Long>> subContentIds = Lists.partition(contentIds, trafficContentViewBatchSize);
         subContentIds.forEach(subContent -> {
             List<ContentView> contentViewsBstch = em.createNativeQuery("select * from sor.content_view c" +
                             " join unnest(array" + subContent.toString() + ")" +
