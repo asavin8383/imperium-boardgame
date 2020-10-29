@@ -88,4 +88,15 @@ public class ArrangementController {
     public void stopAllRunningArrangements() {
         arrangementService.stopAllRunningArrangements(Reason.STOPPED_BY_SERVICE_MODE);
     }
+
+    @GetMapping("/test_cron")
+    @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
+    public ResponseEntity testCron() {
+        try {
+            arrangementService.stopAllRunningArrangementsByDayGone();
+            return new ResponseEntity<>( HttpStatus.OK);
+        } catch (Exception ex) {
+            return ResponseEntity.badRequest().body("Ошибка! Тест крона провален.");
+        }
+    }
 }
