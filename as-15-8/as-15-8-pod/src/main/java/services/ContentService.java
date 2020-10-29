@@ -128,8 +128,8 @@ public class ContentService {
 
         List<ContentView> contentViews = em.createNativeQuery("select * from sor.content_view c" +
                         " join unnest(array" + contentIds.toString() + ")" +
-                        " AS ppt_content_id " +
-                        " on ppt_content_id = c.content_id;",
+                        " AS ppt_content_id" +
+                        " on c.id = ppt_content_id",
                 ContentView.class).getResultList();
 
         logTime("Join c temp таблицей ", startTime);
