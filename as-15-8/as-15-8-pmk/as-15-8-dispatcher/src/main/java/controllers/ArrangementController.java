@@ -90,7 +90,7 @@ public class ArrangementController {
     }
 
     @GetMapping("/test_cron")
-    @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
+    @PreAuthorize("hasAnyRole('ROLE_VIEW_RESULT')")
     public ResponseEntity testCron() {
         try {
             arrangementService.stopAllRunningArrangementsByDayGone();
