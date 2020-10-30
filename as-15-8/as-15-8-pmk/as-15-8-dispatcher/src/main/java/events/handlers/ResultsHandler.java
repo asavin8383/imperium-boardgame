@@ -13,7 +13,9 @@ import model.enums.Reason;
 import org.apache.kafka.common.utils.Bytes;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.Materialized;
+import org.apache.kafka.streams.kstream.TimeWindows;
 import org.apache.kafka.streams.state.KeyValueStore;
+import org.apache.kafka.streams.state.WindowStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.annotation.EnableBinding;
@@ -35,6 +37,9 @@ public class ResultsHandler {
 
     @Value("${results.retention.days:31}")
     private int resultsRetentionDays;
+
+    @Value("${results.windowed.days:7}")
+    private int resultsWindowedDays;
 
     @Value("${spring.cloud.stream.bindings.results_table.destination}")
     private String resultsTableName;
@@ -60,9 +65,10 @@ public class ResultsHandler {
                 )
             )
             .groupByKey()
+            .windowedBy(TimeWindows.of(Duration.ofDays(resultsWindowedDays)))
             .reduce(
                 (oldScreen, newScreen) -> newScreen,
-                Materialized.<CheckUnitKey, Screenshots, KeyValueStore<Bytes, byte[]>>
+                Materialized.<CheckUnitKey, Screenshots, WindowStore<Bytes, byte[]>>
                         as(screenshotsTableName)
                         .withKeySerde(new JsonSerde<>(CheckUnitKey.class))
                         .withValueSerde(new JsonSerde<>(Screenshots.class))
@@ -86,8 +92,9 @@ public class ResultsHandler {
                 result.setEndTime(new Date());
                 return result;
             }).groupByKey()
+            .windowedBy(TimeWindows.of(Duration.ofDays(resultsWindowedDays)))
             .reduce((oldMessage, newMessage) -> newMessage,
-                    Materialized.<CheckUnitKey, CheckUnitResult, KeyValueStore<Bytes, byte[]>>
+                    Materialized.<CheckUnitKey, CheckUnitResult, WindowStore<Bytes, byte[]>>
                             as(resultsTableName)
                             .withKeySerde(new JsonSerde<>(CheckUnitKey.class))
                             .withValueSerde(new JsonSerde<>(CheckUnitResult.class))
