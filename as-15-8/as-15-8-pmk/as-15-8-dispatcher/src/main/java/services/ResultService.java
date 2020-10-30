@@ -140,6 +140,13 @@ public class ResultService {
                         log.info("Записано {} результатов", transactionCount);
                     }
 
+                    //TODO убрать!
+                    try {
+                        Thread.sleep(300000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
                     if (isSaved) {
                         log.info("Мероприятие успешно сохранено в БД: " + arrangement.getId());
                         if(isArrangementFinished(arrangement) || isStopped) {
