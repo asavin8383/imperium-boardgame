@@ -1,12 +1,14 @@
 package services;
 
 import checkUnits.CheckUnitType;
+import com.google.common.collect.Lists;
 import exceptions.AS_15_8_POD_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.actualViews.ContentCheckUnit;
 import model.projection.ContentView;
 import model.scheme.DomainMask;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
@@ -42,6 +44,7 @@ public class ContentService {
     private final DomainMaskRepo domainMaskRepo;
     private final EntityManagerFactory emf;
     private EntityManager em;
+    private final int trafficContentViewBatchSize = 10000;
 
     @Cacheable
     public Optional<ContentView> getFormalErdiView(Long id) {
@@ -125,15 +128,20 @@ public class ContentService {
 
     private List<ContentView> filterContentViewUnnest(String sortingDirection, String sortingColumn, List<Long> contentIds) {
         LocalDateTime startTime = LocalDateTime.now();
-
-        List<ContentView> contentViews = em.createNativeQuery("select * from sor.content_view c" +
-                        " join unnest(array" + contentIds.toString() + ")" +
-                        " AS ppt_content_id " +
-                        " on ppt_content_id = c.content_id;",
-                ContentView.class).getResultList();
+        List<ContentView> result = new ArrayList<>();
+        List<List<Long>> subContentIds = Lists.partition(contentIds, trafficContentViewBatchSize);
+        subContentIds.forEach(subContent -> {
+            List<ContentView> contentViewsBstch = em.createNativeQuery("select * from sor.content_view c" +
+                            " join unnest(array" + subContent.toString() + ")" +
+                            " AS ppt_content_id" +
+                            " on c.id = ppt_content_id" +
+                            " ORDER BY " + sortingColumn + " " + sortingDirection,
+                    ContentView.class).getResultList();
+             result.addAll(contentViewsBstch);
+        });
 
         logTime("Join c temp таблицей ", startTime);
-        return contentViews;
+        return result;
     }
 
     private Page<ContentView> createPageable(Pageable pageable, List<ContentView> result, Integer totalElements) {

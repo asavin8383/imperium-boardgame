@@ -39,4 +39,5 @@
     <include file="data/changelog/pod.0020.content_view_left_join_decision.xml"/>
     <include file="data/changelog/pod.0021.domain_mask_unique.xml"/>
     <include file="data/changelog/pod.0022.crawler.xml"/>
+    <include file="data/changelog/pod.0023_pmk_release_1_0.content_view_index_add.xml"/>
 </databaseChangeLog>
