@@ -258,6 +258,8 @@ public class ResultService {
         nativeQuery.setParameter("checkUnitType", result.getCheckUnitType().name(), StringType.INSTANCE);
         nativeQuery.setParameter("checkUnitValue", result.getCheckUnitValue(), StringType.INSTANCE);
 
+        log.info("Upsert result query: {}", nativeQuery.getQueryString());
+
         nativeQuery.executeUpdate();
     }
 
@@ -275,6 +277,9 @@ public class ResultService {
         nativeQuery.setParameter("id", resultScreenShot.getId());
         nativeQuery.setParameter("screenshot", resultScreenShot.getScreenshot());
         nativeQuery.setParameter("etalonScreenshot", resultScreenShot.getEtalonScreenshot());
+
+        log.info("Upsert result screenshot query: {}", nativeQuery.getQueryString());
+
         nativeQuery.executeUpdate();
     }
 
