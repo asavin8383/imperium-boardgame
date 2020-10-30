@@ -41,6 +41,7 @@ spring:
               max.poll.records: 100
               max.poll.interval.ms: 600000
               replication.factor: 3
+              retries: 10
           bindings:
             inputResults:
               consumer:
