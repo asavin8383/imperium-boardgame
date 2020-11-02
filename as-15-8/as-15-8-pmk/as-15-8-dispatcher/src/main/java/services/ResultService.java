@@ -16,6 +16,7 @@ import model.*;
 import model.enums.ArrangementStatus;
 import model.enums.CheckType;
 import org.apache.kafka.streams.KeyValue;
+import org.apache.kafka.streams.kstream.Windowed;
 import org.apache.logging.log4j.util.Strings;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.type.LocalDateTimeType;
@@ -122,7 +123,8 @@ public class ResultService {
                         if (transactionCount % transactionBatchSize == 0)
                             transaction.begin();
 
-                        KeyValue<CheckUnitKey, CheckUnitResult> result = resultsIterator.next();
+                        KeyValue<Windowed<CheckUnitKey>, CheckUnitResult> windowedResult = resultsIterator.next();
+                        KeyValue<CheckUnitKey, CheckUnitResult> result = KeyValue.pair(windowedResult.key.key(), windowedResult.value);
                         //Если штамп ставим, нужно попросить инфо об AccessTool
                         AccessToolDTO accessToolDTO = dispatcherProperties.getImprint().isUseImprint() ? getAccessToolInfo(arrangement.getId()) : null;
                         isSaved = saveArrangementResult(entityManager, result.key, result.value, arrangement, accessToolDTO);

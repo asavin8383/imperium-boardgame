@@ -22,7 +22,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
@@ -36,8 +35,6 @@ import repositories.ResultRepo;
 import restapi.ArrangementRestApi;
 
 import javax.annotation.PostConstruct;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -54,7 +51,7 @@ public class ArrangementService {
     private String gatewayUrl;
 
     @Getter
-    private Map<Long, Set<Long>> stoppedArrangements = new ConcurrentHashMap<>();
+    private final Map<Long, Set<Long>> stoppedArrangements = new ConcurrentHashMap<>();
 
     private final ArrangementRepo arrangementRepo;
     private final ArrangementStopEventProducer arrangementStopEventProducer;
@@ -191,9 +188,7 @@ public class ArrangementService {
     public void stopAllRunningArrangements(Reason reason) {
         List<Arrangement> arrangements = arrangementRepo.findAllRunning();
         if (!arrangements.isEmpty()) {
-            arrangements.forEach(arrangement -> {
-                stopExecution(arrangement.getId(), arrangement.getVersion(), reason);
-            });
+            arrangements.forEach(arrangement -> stopExecution(arrangement.getId(), arrangement.getVersion(), reason));
         }
     }
 
@@ -230,9 +225,7 @@ public class ArrangementService {
     }
 
     private void saveResults(List<Result> manualArrResults) {
-        manualArrResults.forEach(result -> {
-            resultRepo.save(result);
-        });
+        manualArrResults.forEach(resultRepo::save);
     }
 
     private Arrangement createNewManualArrangement(Long arrangementId, int checkUnitsCount) {
