@@ -51,8 +51,8 @@ public class ResultsKafkaService {
     @Value("${spring.cloud.stream.bindings.screenshots_table.destination}")
     private String screenshotsTableName;
 
-    @Value("${results.windowed.days:7}")
-    private int resultsWindowedDays;
+    @Value("${results.retention.days:31}")
+    private int resultsRetentionDays;
 
     private final InteractiveQueryService interactiveQueryService;
 
@@ -155,7 +155,7 @@ public class ResultsKafkaService {
                 store.fetch(
                     new CheckUnitKey(arrangementId, jobId, minValue),
                     new CheckUnitKey(arrangementId, jobId, maxValue),
-                    Instant.now().minus(resultsWindowedDays, ChronoUnit.DAYS),
+                    Instant.now().minus(resultsRetentionDays, ChronoUnit.DAYS),
                     Instant.now()
                 )
             )
@@ -168,7 +168,7 @@ public class ResultsKafkaService {
                 store.fetch(
                     new CheckUnitKey(arrangementId, jobId, minValue),
                     new CheckUnitKey(arrangementId, jobId, maxValue),
-                    Instant.now().minus(resultsWindowedDays, ChronoUnit.DAYS),
+                    Instant.now().minus(resultsRetentionDays, ChronoUnit.DAYS),
                     Instant.now()
                 )
             )
@@ -182,7 +182,7 @@ public class ResultsKafkaService {
                 store.fetch(
                     new CheckUnitKey(arrangementId, minValue, minValue),
                     new CheckUnitKey(arrangementId, maxValue, maxValue),
-                    Instant.now().minus(resultsWindowedDays, ChronoUnit.DAYS),
+                    Instant.now().minus(resultsRetentionDays, ChronoUnit.DAYS),
                     Instant.now()
                 ).forEachRemaining(cu -> count.getAndIncrement());
                 return count.longValue();
@@ -229,7 +229,7 @@ public class ResultsKafkaService {
         return getResultsKeyValueStore().map(store -> store.fetch(
                 new CheckUnitKey(arrangementId, minValue, minValue),
                 new CheckUnitKey(arrangementId, maxValue, maxValue),
-                Instant.now().minus(resultsWindowedDays, ChronoUnit.DAYS),
+                Instant.now().minus(resultsRetentionDays, ChronoUnit.DAYS),
                 Instant.now()
             )
         );
