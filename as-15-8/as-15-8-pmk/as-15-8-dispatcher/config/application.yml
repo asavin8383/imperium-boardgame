@@ -74,7 +74,7 @@ results:
   clear.schedule: '0 */3 * * * ?'
   transaction.batch.size: 1000
   log.every: 250
-  windowed.days: 5
+  windowed.days: 7
   retention.days: 31
 
 ---
