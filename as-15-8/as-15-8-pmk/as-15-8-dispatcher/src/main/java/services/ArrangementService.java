@@ -75,15 +75,16 @@ public class ArrangementService {
         );
     }
 
-    //@Scheduled(cron = "0 40 11 * * ?")
-    @Scheduled(cron = "0 0 0 * * ?")
+    @Scheduled(cron = "0 55 15 * * ?")
+    //@Scheduled(cron = "0 0 0 * * ?")
     void clearStoppedArrangements() {
+        log.info("evictCaches clear");
         evictCaches();
         stoppedArrangements.clear();
     }
 
-    //@Scheduled(cron = "0 40 11 * * ?")
-    @Scheduled(cron = "0 0 0 * * ?")
+    @Scheduled(cron = "0 55 15 * * ?")
+    //@Scheduled(cron = "0 0 0 * * ?")
     public void stopAllRunningArrangementsByDayGone() {
         try {
             log.info("Попытка завершения всех мероприятий по шедулеру на текущий день");

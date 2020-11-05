@@ -137,6 +137,13 @@ public class ResultService {
                         logEvery_N_Result(transactionCount);
                     }
 
+                    //TODO убрать!
+                    try {
+                        Thread.sleep(300000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
                     if (transaction.isActive()) {
                         transaction.commit();
                         log.info("Записано {} результатов", transactionCount);
