@@ -235,6 +235,16 @@ public class ResultsKafkaService {
         );
     }
 
+    Optional<KeyValueIterator<Windowed<CheckUnitKey>, Screenshots>> getArrangementResultScreenshotsIterator(Long arrangementId) {
+        return getScreenshotsKeyValueStore().map(store -> store.fetch(
+                new CheckUnitKey(arrangementId, minValue, minValue),
+                new CheckUnitKey(arrangementId, maxValue, maxValue),
+                Instant.now().minus(resultsRetentionDays, ChronoUnit.DAYS),
+                Instant.now()
+                )
+        );
+    }
+
     void fillResult(Result result, Long jobId, CheckUnitResult checkUnitResult, DetailResultService<? super CheckUnitResult, ? extends DetailResult> service){
         if(result.getId() == null)
             result.setId(jobId);
