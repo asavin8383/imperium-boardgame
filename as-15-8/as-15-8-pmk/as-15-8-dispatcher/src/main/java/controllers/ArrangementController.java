@@ -36,7 +36,7 @@ public class ArrangementController {
     @PostMapping("/save")
     @PreAuthorize("hasAnyRole('ROLE_VIEW_RESULT')")
     public void saveResults(@RequestParam Long arrangementId) {
-        CompletableFuture.runAsync(() -> resultService.saveArrangementResults(arrangementId));
+        CompletableFuture.runAsync(() -> resultService.saveArrangement(arrangementId));
     }
 
     @PostMapping
