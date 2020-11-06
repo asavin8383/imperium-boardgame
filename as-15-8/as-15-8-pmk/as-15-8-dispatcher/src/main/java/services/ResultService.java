@@ -107,6 +107,7 @@ public class ResultService {
             log.info("Записано {} {}", transactionCount, objectName);
     }
 
+    @Async
     @Transactional
     void saveArrangement(Arrangement arrangement) {
         log.info("Начато сохранение мероприятия: " + arrangement.getId());
@@ -146,7 +147,6 @@ public class ResultService {
         }
     }
 
-    @Async
     boolean saveArrangementResults(
             Arrangement arrangement,
             KeyValueIterator<Windowed<CheckUnitKey>, CheckUnitResult> resultsIterator,
