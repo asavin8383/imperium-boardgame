@@ -75,7 +75,7 @@ public class ArrangementService {
         );
     }
 
-    @Scheduled(cron = "0 17 17 * * ?")
+    @Scheduled(cron = "0 25 11 * * ?")
     //@Scheduled(cron = "0 0 0 * * ?")
     void clearStoppedArrangements() {
         log.info("evictCaches clear");
@@ -83,7 +83,7 @@ public class ArrangementService {
         stoppedArrangements.clear();
     }
 
-    @Scheduled(cron = "0 17 17 * * ?")
+    @Scheduled(cron = "0 25 11 * * ?")
     //@Scheduled(cron = "0 0 0 * * ?")
     public void stopAllRunningArrangementsByDayGone() {
         try {
