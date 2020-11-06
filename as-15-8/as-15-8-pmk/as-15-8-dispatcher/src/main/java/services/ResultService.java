@@ -147,6 +147,7 @@ public class ResultService {
         }
     }
 
+    @Async
     boolean saveArrangementResults(
             Arrangement arrangement,
             KeyValueIterator<Windowed<CheckUnitKey>, CheckUnitResult> resultsIterator,
