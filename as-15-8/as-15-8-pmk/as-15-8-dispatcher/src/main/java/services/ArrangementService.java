@@ -76,7 +76,7 @@ public class ArrangementService {
         );
     }
 
-    @Scheduled(cron = "0 55 16 * * ?")
+    @Scheduled(cron = "0 27 17 * * ?")
     //@Scheduled(cron = "0 0 0 * * ?")
     void clearStoppedArrangements() {
         stopAllRunningArrangementsByDayGone();
