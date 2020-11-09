@@ -73,6 +73,7 @@ public class ResultService {
         imageProcessor.loadFontFromFile(Objects.requireNonNull(ResultService.class.getClassLoader().getResourceAsStream("fonts/arial.ttf")));
     }
 
+    @Async
     @Scheduled(cron = "${results.save.schedule}")
     public void saveCompletionArrangements() {
         try{
@@ -107,7 +108,7 @@ public class ResultService {
             log.info("Записано {} {}", transactionCount, objectName);
     }
 
-    @Async
+
     @Transactional
     void saveArrangement(Arrangement arrangement) {
         log.info("Начато сохранение мероприятия: " + arrangement.getId());
@@ -380,19 +381,4 @@ public class ResultService {
         return new AccessToolDTO(accessTool, " ", " ");
     }
 
-    @Async
-    @Transactional
-    public void longRunningTest() {
-        log.info("Start long running");
-        someSleep();
-        log.info("long running FINISHED");
-    }
-
-    private void someSleep() {
-        try {
-            Thread.sleep(300000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
 }
