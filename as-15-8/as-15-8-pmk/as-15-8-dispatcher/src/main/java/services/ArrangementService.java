@@ -77,20 +77,13 @@ public class ArrangementService {
     }
 
     @Async
-    @Scheduled(cron = "0 26 11 * * ?")
+    @Scheduled(cron = "0 47 14 * * ?")
     //@Scheduled(cron = "0 0 0 * * ?")
     void clearStoppedArrangements() {
         stopAllRunningArrangementsByDayGone();
         log.info("evictCaches clear");
         evictCaches();
         stoppedArrangements.clear();
-    }
-
-    @Scheduled(cron = "0 07 12 * * ?")
-        //@Scheduled(cron = "0 0 0 * * ?")
-    void testCron() {
-        log.info("cron executed");
-
     }
 
     private void stopAllRunningArrangementsByDayGone() {
