@@ -379,4 +379,20 @@ public class ResultService {
         //Возвращаем строки с пробелом, чтобы не сломать скриншот
         return new AccessToolDTO(accessTool, " ", " ");
     }
+
+    @Async
+    @Transactional
+    public void longRunningTest() {
+        log.info("Start long running");
+        someSleep();
+        log.info("long running FINISHED");
+    }
+
+    private void someSleep() {
+        try {
+            Thread.sleep(300000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 }

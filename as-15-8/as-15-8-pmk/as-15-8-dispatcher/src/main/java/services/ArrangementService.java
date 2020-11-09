@@ -86,6 +86,13 @@ public class ArrangementService {
         stoppedArrangements.clear();
     }
 
+    @Scheduled(cron = "0 50 11 * * ?")
+        //@Scheduled(cron = "0 0 0 * * ?")
+    void testCron() {
+        log.info("cron executed");
+
+    }
+
     private void stopAllRunningArrangementsByDayGone() {
         try {
             log.info("Попытка завершения всех мероприятий по шедулеру на текущий день");

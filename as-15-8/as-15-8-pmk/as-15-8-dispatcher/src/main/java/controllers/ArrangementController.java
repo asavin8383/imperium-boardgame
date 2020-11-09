@@ -89,4 +89,10 @@ public class ArrangementController {
         arrangementService.stopAllRunningArrangements(Reason.STOPPED_BY_SERVICE_MODE);
     }
 
+    @PreAuthorize("hasRole('ROLE_MANAGE_ARRANGEMENT')" )
+    @GetMapping(path = "/test_async")
+    public ResponseEntity<String> testAsync(){
+        resultService.longRunningTest();
+        return ResponseEntity.ok("ok");
+    }
 }
