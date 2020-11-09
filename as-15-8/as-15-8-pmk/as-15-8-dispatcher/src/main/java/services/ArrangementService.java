@@ -77,7 +77,7 @@ public class ArrangementService {
     }
 
     @Async
-    @Scheduled(cron = "0 06 11 * * ?")
+    @Scheduled(cron = "0 26 11 * * ?")
     //@Scheduled(cron = "0 0 0 * * ?")
     void clearStoppedArrangements() {
         stopAllRunningArrangementsByDayGone();
