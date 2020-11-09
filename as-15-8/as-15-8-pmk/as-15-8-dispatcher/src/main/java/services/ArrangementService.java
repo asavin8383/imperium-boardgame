@@ -86,7 +86,7 @@ public class ArrangementService {
         stoppedArrangements.clear();
     }
 
-    @Scheduled(cron = "0 50 11 * * ?")
+    @Scheduled(cron = "0 07 12 * * ?")
         //@Scheduled(cron = "0 0 0 * * ?")
     void testCron() {
         log.info("cron executed");
