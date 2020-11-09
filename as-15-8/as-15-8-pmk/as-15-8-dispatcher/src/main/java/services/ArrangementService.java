@@ -21,6 +21,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -75,16 +76,17 @@ public class ArrangementService {
         );
     }
 
-    //@Scheduled(cron = "0 40 11 * * ?")
-    @Scheduled(cron = "0 0 0 * * ?")
+    @Async
+    @Scheduled(cron = "0 55 16 * * ?")
+    //@Scheduled(cron = "0 0 0 * * ?")
     void clearStoppedArrangements() {
+        stopAllRunningArrangementsByDayGone();
+        log.info("evictCaches clear");
         evictCaches();
         stoppedArrangements.clear();
     }
 
-    //@Scheduled(cron = "0 40 11 * * ?")
-    @Scheduled(cron = "0 0 0 * * ?")
-    public void stopAllRunningArrangementsByDayGone() {
+    private void stopAllRunningArrangementsByDayGone() {
         try {
             log.info("Попытка завершения всех мероприятий по шедулеру на текущий день");
             stopAllRunningArrangements(Reason.MANUAL);

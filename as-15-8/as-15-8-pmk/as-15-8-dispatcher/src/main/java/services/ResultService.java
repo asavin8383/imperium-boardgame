@@ -24,6 +24,7 @@ import org.hibernate.type.LongType;
 import org.hibernate.type.StringType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -106,6 +107,7 @@ public class ResultService {
             log.info("Записано {} {}", transactionCount, objectName);
     }
 
+    @Async
     @Transactional
     void saveArrangement(Arrangement arrangement) {
         log.info("Начато сохранение мероприятия: " + arrangement.getId());
@@ -145,7 +147,8 @@ public class ResultService {
         }
     }
 
-    private boolean saveArrangementResults(
+    @Async
+    boolean saveArrangementResults(
             Arrangement arrangement,
             KeyValueIterator<Windowed<CheckUnitKey>, CheckUnitResult> resultsIterator,
             EntityManager entityManager){
@@ -170,6 +173,13 @@ public class ResultService {
                     transaction.commit();
 
                 logEvery_N_Result(transactionCount, "результатов");
+            }
+
+            //TODO убрать!
+            try {
+                Thread.sleep(300000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
 
             if (transaction.isActive()) {
@@ -307,7 +317,7 @@ public class ResultService {
         nativeQuery.setParameter("checkUnitType", result.getCheckUnitType().name(), StringType.INSTANCE);
         nativeQuery.setParameter("checkUnitValue", result.getCheckUnitValue(), StringType.INSTANCE);
 
-        log.info("Upsert result query: {}", nativeQuery.getQueryString());
+        log.info("Результат с id: {} загружен", result.getId());
 
         nativeQuery.executeUpdate();
     }
@@ -327,7 +337,7 @@ public class ResultService {
         nativeQuery.setParameter("screenshot", resultScreenShot.getScreenshot());
         nativeQuery.setParameter("etalonScreenshot", resultScreenShot.getEtalonScreenshot());
 
-        log.info("Upsert result screenshot query: {}", nativeQuery.getQueryString());
+        log.info("Скриншот с id: {} загружен", resultScreenShot.getId());
 
         nativeQuery.executeUpdate();
     }
