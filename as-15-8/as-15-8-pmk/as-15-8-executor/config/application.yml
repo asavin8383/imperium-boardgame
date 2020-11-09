@@ -39,11 +39,15 @@ spring:
                 auto.offset.reset: latest
           executionResults:
             producer.configuration:
-              retries: 10
+              retries: 100
+              retry.backoff.ms: 1000
+              acks: all
               key.serializer: org.springframework.kafka.support.serializer.JsonSerializer
           results:
             producer.configuration:
-              retries: 10
+              retries: 100
+              retry.backoff.ms: 1000
+              acks: all
               key.serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
 ---
