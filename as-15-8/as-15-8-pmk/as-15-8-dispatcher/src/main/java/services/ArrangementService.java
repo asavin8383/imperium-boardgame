@@ -84,7 +84,8 @@ public class ArrangementService {
         stoppedArrangements.clear();
     }
 
-    @Scheduled(cron = "0 05 14 * * ?")
+    @Async
+    @Scheduled(cron = "0 45 14 * * ?")
     void stopAllRunningArrangementsByDayGone() {
         try {
             log.info("Попытка завершения всех мероприятий по шедулеру на текущий день");
