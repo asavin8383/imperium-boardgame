@@ -73,7 +73,7 @@ public class ResultService {
         imageProcessor.loadFontFromFile(Objects.requireNonNull(ResultService.class.getClassLoader().getResourceAsStream("fonts/arial.ttf")));
     }
 
-    //@Async
+    @Async
     @Scheduled(cron = "${results.save.schedule}")
     public void saveCompletionArrangements() {
         try{
