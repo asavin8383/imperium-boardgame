@@ -40,6 +40,9 @@ import javax.persistence.EntityTransaction;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Objects;
 
 @Service
@@ -71,6 +74,7 @@ public class ResultService {
     private void initImageProcessor() throws Exception {
         //Загружаем шрифт
         imageProcessor.loadFontFromFile(Objects.requireNonNull(ResultService.class.getClassLoader().getResourceAsStream("fonts/arial.ttf")));
+
     }
 
     @Async
@@ -108,12 +112,19 @@ public class ResultService {
             log.info("Записано {} {}", transactionCount, objectName);
     }
 
+    public boolean isArrangemnentStopped(Arrangement arrangement) {
+        return arrangementRepo
+                .findStopped(LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT))
+                .stream()
+                .anyMatch(stoppedArr -> stoppedArr.getId().equals(arrangement.getId())
+                        && stoppedArr.getVersion().equals(arrangement.getVersion()));
+    }
+
     @Transactional
     void saveArrangement(Arrangement arrangement) {
         log.info("Начато сохранение мероприятия: " + arrangement.getId());
         EntityManager entityManager = entityManagerFactory.createEntityManager();
-        boolean isStopped = !arrangementService.isArrangementRunning(arrangement.getId(), arrangement.getVersion());
-
+        boolean isStopped = isArrangemnentStopped(arrangement);
         try {
             KeyValueIterator<Windowed<CheckUnitKey>, CheckUnitResult> resultsIterator =
                     resultsKafkaService.getArrangementResultsIterator(arrangement.getId())
@@ -124,6 +135,13 @@ public class ResultService {
 
             boolean isSaved = saveArrangementResults(arrangement, resultsIterator, entityManager);
             saveArrangementScreenshots(arrangement, screenshotsIterator, entityManager);
+
+            //TODO убрать!
+            try {
+                Thread.sleep(300000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
             if (isSaved) {
                 log.info("Мероприятие успешно сохранено в БД: " + arrangement.getId());

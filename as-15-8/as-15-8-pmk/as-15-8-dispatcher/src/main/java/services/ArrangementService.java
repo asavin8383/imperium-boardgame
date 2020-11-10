@@ -78,11 +78,12 @@ public class ArrangementService {
 
 
     @Async
-    @Scheduled(cron = "0 0 0 * * ?")
+    //@Scheduled(cron = "0 0 0 * * ?")
+    @Scheduled(cron = "0 15 18 * * ?")
     void clearStoppedArrangements() {
-        stopAllRunningArrangementsByDayGone();
         evictCaches();
         stoppedArrangements.clear();
+        stopAllRunningArrangementsByDayGone();
     }
 
     void stopAllRunningArrangementsByDayGone() {
