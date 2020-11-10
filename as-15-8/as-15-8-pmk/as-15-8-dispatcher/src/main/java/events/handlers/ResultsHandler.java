@@ -55,7 +55,7 @@ public class ResultsHandler {
     public void processResults(KStream<CheckUnitKey, CheckUnitResult> resultsStream){
         resultsStream
             .filter((checkUnitKey, checkUnitResult) ->
-                arrangementService.isArrangementRunning(checkUnitKey.getArrangementId(), checkUnitKey.getVersion()))
+                filterArrangementResult(checkUnitKey))
             .filter((checkUnitKey, checkUnitResult) ->
                 checkUnitResult instanceof AnalysisResult)
             .mapValues(checkUnitResult ->
@@ -77,8 +77,7 @@ public class ResultsHandler {
 
         resultsStream
             .filter((checkUnitKey, checkUnitResult) ->
-                arrangementService.isArrangementRunning(checkUnitKey.getArrangementId(), checkUnitKey.getVersion()) &&
-                !stopIfForbiddenResultsLimited(checkUnitKey.getArrangementId(), checkUnitKey.getVersion())
+                    filterArrangementResult(checkUnitKey)
             ).peek((key, result) ->
                 log.info("\n   ---->>> Принято сообщение с анализом результатов проверки: " +
                     "мероприятие: " + key.getArrangementId() + ", " + key.getJobId() + ", " + key.getVersion() + ", " +
@@ -100,6 +99,11 @@ public class ResultsHandler {
                             .withValueSerde(new JsonSerde<>(CheckUnitResult.class))
                             .withRetention(Duration.ofDays(resultsRetentionDays))
             );
+    }
+
+    private boolean filterArrangementResult(CheckUnitKey checkUnitKey) {
+       return arrangementService.isArrangementRunning(checkUnitKey.getArrangementId(), checkUnitKey.getVersion()) &&
+                !stopIfForbiddenResultsLimited(checkUnitKey.getArrangementId(), checkUnitKey.getVersion());
     }
 
     private CheckUnitJobResult checkErdiStatus(Long contentId, CheckUnitJobResult status){
