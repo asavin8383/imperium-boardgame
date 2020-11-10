@@ -127,7 +127,7 @@ public class ResultService {
 
             //TODO убрать!
             try {
-                Thread.sleep(150000);
+                Thread.sleep(300000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
