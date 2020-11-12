@@ -136,12 +136,12 @@ public class ResultService {
             boolean isSaved = saveArrangementResults(arrangement, resultsIterator, entityManager);
             saveArrangementScreenshots(arrangement, screenshotsIterator, entityManager);
 
-            /*//TODO убрать!
+            //TODO убрать!
             try {
                 Thread.sleep(300000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
-            }*/
+            }
 
             if (isSaved) {
                 log.info("Мероприятие успешно сохранено в БД: " + arrangement.getId());
