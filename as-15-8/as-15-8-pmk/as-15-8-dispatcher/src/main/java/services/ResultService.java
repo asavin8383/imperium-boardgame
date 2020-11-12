@@ -112,9 +112,9 @@ public class ResultService {
             log.info("Записано {} {}", transactionCount, objectName);
     }
 
-    public boolean isArrangemnentStopped(Arrangement arrangement) {
+    public boolean isArrangemnentUploading(Arrangement arrangement) {
         return arrangementRepo
-                .findStopped(LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT))
+                .findUploading(LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT))
                 .stream()
                 .anyMatch(stoppedArr -> stoppedArr.getId().equals(arrangement.getId())
                         && stoppedArr.getVersion().equals(arrangement.getVersion()));
@@ -124,7 +124,7 @@ public class ResultService {
     void saveArrangement(Arrangement arrangement) {
         log.info("Начато сохранение мероприятия: " + arrangement.getId());
         EntityManager entityManager = entityManagerFactory.createEntityManager();
-        boolean isStopped = isArrangemnentStopped(arrangement);
+        boolean isStopped = isArrangemnentUploading(arrangement);
         try {
             KeyValueIterator<Windowed<CheckUnitKey>, CheckUnitResult> resultsIterator =
                     resultsKafkaService.getArrangementResultsIterator(arrangement.getId())
@@ -136,12 +136,12 @@ public class ResultService {
             boolean isSaved = saveArrangementResults(arrangement, resultsIterator, entityManager);
             saveArrangementScreenshots(arrangement, screenshotsIterator, entityManager);
 
-            //TODO убрать!
+            /*//TODO убрать!
             try {
                 Thread.sleep(300000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
-            }
+            }*/
 
             if (isSaved) {
                 log.info("Мероприятие успешно сохранено в БД: " + arrangement.getId());
