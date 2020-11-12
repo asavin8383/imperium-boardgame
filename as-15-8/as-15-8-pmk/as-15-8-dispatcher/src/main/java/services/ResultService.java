@@ -136,13 +136,6 @@ public class ResultService {
             boolean isSaved = saveArrangementResults(arrangement, resultsIterator, entityManager);
             saveArrangementScreenshots(arrangement, screenshotsIterator, entityManager);
 
-            //TODO убрать!
-            try {
-                Thread.sleep(300000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
             if (isSaved) {
                 log.info("Мероприятие успешно сохранено в БД: " + arrangement.getId());
                 if(isArrangementFinished(arrangement) || isStopped) {
@@ -329,8 +322,6 @@ public class ResultService {
         nativeQuery.setParameter("checkUnitType", result.getCheckUnitType().name(), StringType.INSTANCE);
         nativeQuery.setParameter("checkUnitValue", result.getCheckUnitValue(), StringType.INSTANCE);
 
-        //log.info("Результат с id: {} загружен", result.getId());
-
         nativeQuery.executeUpdate();
     }
 
@@ -348,8 +339,6 @@ public class ResultService {
         nativeQuery.setParameter("id", resultScreenShot.getId());
         nativeQuery.setParameter("screenshot", resultScreenShot.getScreenshot());
         nativeQuery.setParameter("etalonScreenshot", resultScreenShot.getEtalonScreenshot());
-
-        //log.info("Скриншот с id: {} загружен", resultScreenShot.getId());
 
         nativeQuery.executeUpdate();
     }
