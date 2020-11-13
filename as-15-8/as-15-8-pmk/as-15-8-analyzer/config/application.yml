@@ -21,7 +21,7 @@ spring:
           minPartitionCount: 30
           replicationFactor: 3
           configuration:
-            max.request.size: 10485760
+            max.request.size: 31457280
         bindings:
           input:
             consumer:
@@ -35,7 +35,6 @@ spring:
           output:
             producer:
               configuration:
-                max.request.size: 10485760
                 retry.backoff.ms: 1000
                 acks: all
                 key.serializer: org.springframework.kafka.support.serializer.JsonSerializer
