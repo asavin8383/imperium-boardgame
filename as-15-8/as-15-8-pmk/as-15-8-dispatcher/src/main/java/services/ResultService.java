@@ -40,6 +40,9 @@ import javax.persistence.EntityTransaction;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Objects;
 
 @Service
@@ -71,6 +74,7 @@ public class ResultService {
     private void initImageProcessor() throws Exception {
         //Загружаем шрифт
         imageProcessor.loadFontFromFile(Objects.requireNonNull(ResultService.class.getClassLoader().getResourceAsStream("fonts/arial.ttf")));
+
     }
 
     @Async
@@ -108,12 +112,19 @@ public class ResultService {
             log.info("Записано {} {}", transactionCount, objectName);
     }
 
+    public boolean isArrangemnentUploading(Arrangement arrangement) {
+        return arrangementRepo
+                .findUploading(LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT))
+                .stream()
+                .anyMatch(stoppedArr -> stoppedArr.getId().equals(arrangement.getId())
+                        && stoppedArr.getVersion().equals(arrangement.getVersion()));
+    }
 
     @Transactional
     void saveArrangement(Arrangement arrangement) {
         log.info("Начато сохранение мероприятия: " + arrangement.getId());
         EntityManager entityManager = entityManagerFactory.createEntityManager();
-        boolean isStopped = !arrangementService.isArrangementRunning(arrangement.getId(), arrangement.getVersion());
+        boolean isStopped = isArrangemnentUploading(arrangement);
         try {
             KeyValueIterator<Windowed<CheckUnitKey>, CheckUnitResult> resultsIterator =
                     resultsKafkaService.getArrangementResultsIterator(arrangement.getId())
@@ -124,13 +135,6 @@ public class ResultService {
 
             boolean isSaved = saveArrangementResults(arrangement, resultsIterator, entityManager);
             saveArrangementScreenshots(arrangement, screenshotsIterator, entityManager);
-
-            //TODO убрать!
-            try {
-                Thread.sleep(300000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
 
             if (isSaved) {
                 log.info("Мероприятие успешно сохранено в БД: " + arrangement.getId());
@@ -318,8 +322,6 @@ public class ResultService {
         nativeQuery.setParameter("checkUnitType", result.getCheckUnitType().name(), StringType.INSTANCE);
         nativeQuery.setParameter("checkUnitValue", result.getCheckUnitValue(), StringType.INSTANCE);
 
-        //log.info("Результат с id: {} загружен", result.getId());
-
         nativeQuery.executeUpdate();
     }
 
@@ -337,8 +339,6 @@ public class ResultService {
         nativeQuery.setParameter("id", resultScreenShot.getId());
         nativeQuery.setParameter("screenshot", resultScreenShot.getScreenshot());
         nativeQuery.setParameter("etalonScreenshot", resultScreenShot.getEtalonScreenshot());
-
-        //log.info("Скриншот с id: {} загружен", resultScreenShot.getId());
 
         nativeQuery.executeUpdate();
     }

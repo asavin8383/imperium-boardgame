@@ -23,6 +23,11 @@ public interface ArrangementRepo extends JpaRepository<Arrangement, Long> {
     List<Arrangement> findStopped(@Param("date") LocalDateTime date);
 
     @Query("select a from Arrangement a " +
+            "where a.creationDate > :date and " +
+            "(a.status = 'UPLOADING') and a.isManual = false")
+    List<Arrangement> findUploading(@Param("date") LocalDateTime date);
+
+    @Query("select a from Arrangement a " +
             "where a.status = 'RUNNING' and a.isManual = false")
     List<Arrangement> findAllRunning();
 
