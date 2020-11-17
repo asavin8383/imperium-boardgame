@@ -63,13 +63,13 @@ public class RobotScriptUtils {
                     pageSourceResult = ScriptUtils.getPageSource(webDriver);
                 }
             } catch (TimeoutCheckingBrowserException e) {
-                log.info("TimeoutException на проверке браузера", e);
+                log.info("Таймаут проверки браузера: " + e.getMessage());
                 return new ScriptUtils.PageResult(null, TIME_OUT_CHECKING_ERROR);
             } catch (TimeoutException | TimeoutScriptException e) {
-                log.info("TimeoutException при получении страницы", e);
+                log.info("Таймаут при получении страницы: " + e.getMessage());
                 pageSourceResult = new ScriptUtils.PageResult(null, TIME_OUT_ERROR);
             } catch (WebDriverException ex) {
-                    throw new ExecutionException("Ошибка загрузки страницы браузером", ex);
+                    throw new ExecutionException("Страница не была загружена браузером: " + ex.getMessage());
             } catch (InterruptedException e) {
                 throw new ExecutionException("Выполнение потока прервано", e);
             }
