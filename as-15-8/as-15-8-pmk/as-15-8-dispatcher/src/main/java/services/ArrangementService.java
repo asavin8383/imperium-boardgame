@@ -79,7 +79,7 @@ public class ArrangementService {
 
     @Async
     //@Scheduled(cron = "0 0 0 * * ?")
-    @Scheduled(cron = "0 44 09 * * ?")
+    @Scheduled(cron = "0 50 09 * * ?")
     void clearStoppedArrangements() {
         evictCaches();
         stoppedArrangements.clear();
