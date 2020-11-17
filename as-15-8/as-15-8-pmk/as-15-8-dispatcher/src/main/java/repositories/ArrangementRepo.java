@@ -37,5 +37,4 @@ public interface ArrangementRepo extends JpaRepository<Arrangement, Long> {
             " where a.id = :arrangementId")
     Optional<Long> findMaxCheckUnitsCount(@Param("arrangementId") Long arrangementId);
 
-    //and a.isManual = false
 }
