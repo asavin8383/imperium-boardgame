@@ -20,7 +20,9 @@ spring:
         bindings:
           outputJobs:
             producer.configuration:
-              retries: 10
+              retries: 100
+              retry.backoff.ms: 1000
+              acks: all
               key.serializer: org.springframework.kafka.support.serializer.JsonSerializer
   liquibase:
     enabled: true
