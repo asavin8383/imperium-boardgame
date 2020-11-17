@@ -6,7 +6,6 @@ import analysis.CheckUnitStatusNotification;
 import checkUnits.CheckUnitKey;
 import common.DispatcherProperties;
 import enums.CheckUnitJobResult;
-import exceptions.AS_15_8_DispatcherException;
 import imprint.HeaderObject;
 import imprint.ImageProcessor;
 import lombok.RequiredArgsConstructor;
@@ -41,7 +40,6 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -82,27 +80,20 @@ public class ResultService {
             arrangementRepo
                     .findReadyToUpload()
                     .stream()
-                    .filter(arrangement -> {
-                        if(arrangement.getStatus().equals(ArrangementStatus.STOPPING) || isArrangementFinished(arrangement)) {
-                            arrangement.setStatus(ArrangementStatus.UPLOADING);
-                            arrangementRepo.save(arrangement);
-                            return true;
-                        }
-                        return false;
-                    })
+                    .filter(arrangement ->
+                        arrangement.getStatus().equals(ArrangementStatus.STOPPING) ||
+                                isArrangementFinished(arrangement))
                     .forEach(this::saveArrangement);
         } catch (Exception ex){
             log.error("Ошибка при сохранении результатов мероприятий", ex);
         }
     }
 
-    public void saveArrangement(Long arrangementId){
-        Arrangement arrangement = arrangementRepo
-                .findById(arrangementId)
-                .orElseThrow((() -> new AS_15_8_DispatcherException("Ошибка! Мероприятие для выгрузки не найдено в БД по id: " + arrangementId)));
+    public void saveArrangement(Arrangement arrangement){
+        boolean isStopping = arrangement.getStatus().equals(ArrangementStatus.STOPPING);
         arrangement.setStatus(ArrangementStatus.UPLOADING);
         arrangementRepo.save(arrangement);
-        saveArrangement(arrangement);
+        saveArrangement(arrangement, isStopping);
     }
 
     private void logEvery_N_Result(int transactionCount, String objectName) {
@@ -110,21 +101,10 @@ public class ResultService {
             log.info("Записано {} {}", transactionCount, objectName);
     }
 
-    public boolean isArrangementUploadingStoppingStopped(Arrangement arrangement) {
-        AtomicBoolean result = new AtomicBoolean(false);
-        arrangementRepo.findByIdAndVersion(arrangement.getId(), arrangement.getVersion()).ifPresent(arr ->
-                result.set(arr.getStatus().equals(ArrangementStatus.STOPPED) ||
-                        arr.getStatus().equals(ArrangementStatus.STOPPING) ||
-                        arr.getStatus().equals(ArrangementStatus.UPLOADING))
-        );
-        return result.get();
-    }
-
     @Transactional
-    void saveArrangement(Arrangement arrangement) {
+    void saveArrangement(Arrangement arrangement, boolean isStopping) {
         log.info("Начато сохранение мероприятия: " + arrangement.getId());
         EntityManager entityManager = entityManagerFactory.createEntityManager();
-        boolean isArrangementUploadingStoppingStopped = isArrangementUploadingStoppingStopped(arrangement);
         try {
             KeyValueIterator<Windowed<CheckUnitKey>, CheckUnitResult> resultsIterator =
                     resultsKafkaService.getArrangementResultsIterator(arrangement.getId())
@@ -138,11 +118,11 @@ public class ResultService {
 
             if (isSaved) {
                 log.info("Мероприятие успешно сохранено в БД: " + arrangement.getId());
-                if(isArrangementFinished(arrangement) || isArrangementUploadingStoppingStopped) {
-                    if (arrangementRestApi.sendStatusNotificationToPPM(arrangement.getId(), isArrangementUploadingStoppingStopped)) {
+                if(isArrangementFinished(arrangement) || isStopping) {
+                    if (arrangementRestApi.sendStatusNotificationToPPM(arrangement.getId(), isStopping)) {
                         boolean isActAvailable = arrangementRestApi.isActAvailableFromPPT(arrangement.getId());
-                        boolean isFinished = arrangementService.finishArrangement(arrangement.getId(), isArrangementUploadingStoppingStopped, isActAvailable);
-                        if (!isArrangementUploadingStoppingStopped && isFinished && isActAvailable)
+                        boolean isFinished = arrangementService.finishArrangement(arrangement.getId(), isStopping, isActAvailable);
+                        if (!isStopping && isFinished && isActAvailable)
                             arrangementRestApi.changeArrangementStatusToActSentPPT(arrangement.getId());
                         log.info("Мероприятие успешно завершено: " + arrangement.getId());
                     }
@@ -152,7 +132,7 @@ public class ResultService {
             }
         } catch (Exception ex){
             log.error("Ошибка при сохранении результатов проверок мероприятия " + arrangement.getId(), ex);
-            arrangement.setStatus(isArrangementUploadingStoppingStopped ? ArrangementStatus.STOPPING : ArrangementStatus.RUNNING);
+            arrangement.setStatus(isStopping ? ArrangementStatus.STOPPING : ArrangementStatus.RUNNING);
             arrangementRepo.save(arrangement);
         } finally {
             entityManager.close();
