@@ -27,7 +27,7 @@ spring:
           minPartitionCount: 30
           replicationFactor: 3
           configuration:
-            max.request.size: 10485760
+            max.request.size: 31457280
         bindings:
           jobs:
             consumer:
