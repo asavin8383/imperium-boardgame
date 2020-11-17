@@ -36,11 +36,13 @@ spring:
               spring.json:
                 key.default.type: checkUnits.CheckUnitKey
                 value.default.type: analysis.CheckUnitResult
+              replication.factor: 3
               max.request.size: 31457280
               max.partition.fetch.bytes: 31457280
               max.poll.records: 10
-              max.poll.interval.ms: 600000
-              replication.factor: 3
+              max.poll.interval.ms: 300000
+              request.timeout.ms: 150000
+              session.timeout.ms: 60000
               retries: 100
               retry.backoff.ms: 1000
               acks: all

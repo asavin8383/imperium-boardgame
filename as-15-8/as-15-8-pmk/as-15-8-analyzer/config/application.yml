@@ -27,11 +27,14 @@ spring:
             consumer:
               concurrency: 1
               ackEachRecord: true
+              resetOffsets: true
+              startOffset: latest
               configuration:
                 key.deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
                 max.poll.records: 1
-                max.poll.interval.ms: 120000
-                auto.offset.reset: latest
+                max.poll.interval.ms: 300000
+                request.timeout.ms: 150000
+                session.timeout.ms: 60000
           output:
             producer:
               configuration:
