@@ -40,10 +40,8 @@ import javax.persistence.EntityTransaction;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -112,19 +110,21 @@ public class ResultService {
             log.info("Записано {} {}", transactionCount, objectName);
     }
 
-    public boolean isArrangemnentUploading(Arrangement arrangement) {
-        return arrangementRepo
-                .findUploading(LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT))
-                .stream()
-                .anyMatch(stoppedArr -> stoppedArr.getId().equals(arrangement.getId())
-                        && stoppedArr.getVersion().equals(arrangement.getVersion()));
+    public boolean isArrangementUploadingStoppingStopped(Arrangement arrangement) {
+        AtomicBoolean result = new AtomicBoolean(false);
+        arrangementRepo.findByIdAndVersion(arrangement.getId(), arrangement.getVersion()).ifPresent(arr ->
+                result.set(arr.getStatus().equals(ArrangementStatus.STOPPED) ||
+                        arr.getStatus().equals(ArrangementStatus.STOPPING) ||
+                        arr.getStatus().equals(ArrangementStatus.UPLOADING))
+        );
+        return result.get();
     }
 
     @Transactional
     void saveArrangement(Arrangement arrangement) {
         log.info("Начато сохранение мероприятия: " + arrangement.getId());
         EntityManager entityManager = entityManagerFactory.createEntityManager();
-        boolean isStopped = isArrangemnentUploading(arrangement);
+        boolean isArrangementUploadingStoppingStopped = isArrangementUploadingStoppingStopped(arrangement);
         try {
             KeyValueIterator<Windowed<CheckUnitKey>, CheckUnitResult> resultsIterator =
                     resultsKafkaService.getArrangementResultsIterator(arrangement.getId())
@@ -138,11 +138,11 @@ public class ResultService {
 
             if (isSaved) {
                 log.info("Мероприятие успешно сохранено в БД: " + arrangement.getId());
-                if(isArrangementFinished(arrangement) || isStopped) {
-                    if (arrangementRestApi.sendStatusNotificationToPPM(arrangement.getId(), isStopped)) {
+                if(isArrangementFinished(arrangement) || isArrangementUploadingStoppingStopped) {
+                    if (arrangementRestApi.sendStatusNotificationToPPM(arrangement.getId(), isArrangementUploadingStoppingStopped)) {
                         boolean isActAvailable = arrangementRestApi.isActAvailableFromPPT(arrangement.getId());
-                        boolean isFinished = arrangementService.finishArrangement(arrangement.getId(), isStopped, isActAvailable);
-                        if (!isStopped && isFinished && isActAvailable)
+                        boolean isFinished = arrangementService.finishArrangement(arrangement.getId(), isArrangementUploadingStoppingStopped, isActAvailable);
+                        if (!isArrangementUploadingStoppingStopped && isFinished && isActAvailable)
                             arrangementRestApi.changeArrangementStatusToActSentPPT(arrangement.getId());
                         log.info("Мероприятие успешно завершено: " + arrangement.getId());
                     }
@@ -152,7 +152,7 @@ public class ResultService {
             }
         } catch (Exception ex){
             log.error("Ошибка при сохранении результатов проверок мероприятия " + arrangement.getId(), ex);
-            arrangement.setStatus(isStopped ? ArrangementStatus.STOPPING : ArrangementStatus.RUNNING);
+            arrangement.setStatus(isArrangementUploadingStoppingStopped ? ArrangementStatus.STOPPING : ArrangementStatus.RUNNING);
             arrangementRepo.save(arrangement);
         } finally {
             entityManager.close();
