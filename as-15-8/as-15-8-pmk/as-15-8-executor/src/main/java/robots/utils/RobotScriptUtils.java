@@ -13,6 +13,7 @@ import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 
 import lombok.extern.slf4j.Slf4j;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.remote.UnreachableBrowserException;
 import robots.exceptions.ExecutionException;
 import robots.exceptions.TimeoutCheckingBrowserException;
@@ -67,6 +68,8 @@ public class RobotScriptUtils {
             } catch (TimeoutException | TimeoutScriptException e) {
                 log.info("TimeoutException при получении страницы", e);
                 pageSourceResult = new ScriptUtils.PageResult(null, TIME_OUT_ERROR);
+            } catch (WebDriverException ex) {
+                    throw new ExecutionException("Ошибка загрузки страницы браузером", ex);
             } catch (InterruptedException e) {
                 throw new ExecutionException("Выполнение потока прервано", e);
             }
