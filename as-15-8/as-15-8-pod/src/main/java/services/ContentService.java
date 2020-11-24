@@ -140,7 +140,6 @@ public class ContentService {
              result.addAll(contentViewsBstch);
         });
 
-        logTime("Join c temp таблицей ", startTime);
         return result;
     }
 
