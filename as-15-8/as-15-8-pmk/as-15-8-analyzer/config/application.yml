@@ -38,6 +38,7 @@ spring:
           output:
             producer:
               configuration:
+                retries: 100
                 retry.backoff.ms: 1000
                 acks: all
                 key.serializer: org.springframework.kafka.support.serializer.JsonSerializer
