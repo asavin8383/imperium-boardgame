@@ -1,36 +1,6 @@
 <qa:browsers xmlns:qa="urn:config.gridrouter.qatools.ru">
-<browser name="chrome" defaultVersion="basic">
-    <version number="basic">
-        <region name="1">
-            <host name="10.97.220.165" port="4444" count="6"/>
-            <host name="10.97.220.166" port="4444" count="6"/>
-            <host name="10.97.220.167" port="4444" count="6"/>
-            <host name="10.97.220.168" port="4444" count="6"/>
-            <host name="10.97.220.169" port="4444" count="6"/>
-            <host name="10.97.220.170" port="4444" count="6"/>
-            <host name="10.97.220.171" port="4444" count="6"/>
-            <host name="10.97.220.172" port="4444" count="6"/>
-            <host name="10.97.220.173" port="4444" count="6"/>
-            <host name="10.97.220.174" port="4444" count="6"/>
-            <host name="10.97.220.211" port="4444" count="6"/>
-            <host name="10.97.220.212" port="4444" count="6"/>
-            <host name="10.97.220.213" port="4444" count="6"/>
-            <host name="10.97.220.214" port="4444" count="6"/>
-            <host name="10.97.220.215" port="4444" count="6"/>
-            <host name="10.97.220.216" port="4444" count="6"/>
-            <host name="10.97.220.217" port="4444" count="6"/>
-            <host name="10.97.220.218" port="4444" count="6"/>
-            <host name="10.97.220.219" port="4444" count="6"/>
-            <host name="10.97.220.220" port="4444" count="6"/>
-            <host name="10.97.220.221" port="4444" count="6"/>
-            <host name="10.97.220.222" port="4444" count="6"/>
-            <host name="10.97.220.223" port="4444" count="6"/>
-            <host name="10.97.220.224" port="4444" count="6"/>
-            <host name="10.97.220.225" port="4444" count="6"/>
-            <host name="10.97.220.226" port="4444" count="6"/>
-        </region>
-    </version>
-    <version number="hola">
+<browser name="chrome" defaultVersion="119.0">
+    <version number="119.0">
         <region name="1">
             <host name="10.97.220.165" port="4444" count="6"/>
             <host name="10.97.220.166" port="4444" count="6"/>
