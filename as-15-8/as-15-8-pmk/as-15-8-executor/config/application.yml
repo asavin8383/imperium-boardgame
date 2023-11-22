@@ -112,6 +112,11 @@ spring:
         springCloudBusInput.destination: bus_config_input_ashabalin
         springCloudBusOutput.destination: bus_config_output_ashabalin
 nmap.path: C:\Program Files (x86)\Nmap
+selenium-hub-url: http://user:1q0p2w9o@as-15-8-ggr.eclsoft.ru:4445/wd/hub
+screenshot:
+  ext-id: "jnnpjgplfflpajnenldfnegaafmabmfn"
+  ext-version: "1.0"
+  ext-popup: "/popup.html"
 
 ---
 

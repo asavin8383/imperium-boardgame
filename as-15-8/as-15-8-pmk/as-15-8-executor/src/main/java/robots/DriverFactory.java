@@ -12,9 +12,14 @@ import org.openqa.selenium.logging.LoggingPreferences;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import robots.exceptions.ExecutionException;
 import robots.utils.ScriptUtils;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
@@ -67,7 +72,10 @@ public class DriverFactory {
 		}
 
 		ChromeOptions options = new ChromeOptions();
-		setLoadExtensions(options, Collections.singletonList(ChromeSettings.getScreenshotExtension()));
+
+		//setLoadExtensions(options, Collections.singletonList(ChromeSettings.getScreenshotExtension()));
+		addScreenshotExtension(options);
+
 		setOptimalChromeOptions(options);
         setChromeAnonimyzerParams(options);
 
@@ -100,6 +108,7 @@ public class DriverFactory {
         ChromeOptions options = new ChromeOptions();
 		setOptimalChromeOptions(options);
 		setLoadExtensions(options, extensions);
+		addScreenshotExtension(options);
 		cpb.setCapability(ChromeOptions.CAPABILITY, options);
 		WebDriver driver = new RemoteWebDriver(hubURL, cpb);
 		ScriptUtils.openScreenshotExtension(driver);
@@ -121,8 +130,8 @@ public class DriverFactory {
 		logPrefs.enable( LogType.PERFORMANCE, Level.ALL );
 		options.setCapability( "goog:loggingPrefs", logPrefs );
 
-		options.addArguments("--user-data-dir=" + ExecutorProperties.getChromeProperties().getUserDataDir());
-		options.addArguments("--profile-directory=" + ExecutorProperties.getChromeProperties().getProfileName());
+		//options.addArguments("--user-data-dir=" + ExecutorProperties.getChromeProperties().getUserDataDir());
+		//options.addArguments("--profile-directory=" + ExecutorProperties.getChromeProperties().getProfileName());
 		options.addArguments("--auto-select-desktop-capture-source=Entire screen");
 
 		//Для отображения полного URL
@@ -158,6 +167,18 @@ public class DriverFactory {
 
 	private static void setLoadExtensions(ChromeOptions options, List<ChromeSettings.Extension> extensions) {
 		options.addArguments("--load-extension=" + ChromeSettings.buildLoadExtensionArgValue(extensions));
+	}
+
+	private static void addScreenshotExtension(ChromeOptions options) {
+		URL extUrl = DriverFactory.class.getClassLoader().getResource("screenshot_ext.crx");
+		if(extUrl == null){
+			throw new ExecutionException("Ошибка! Не найден файл с расширением для скриншота screenshot_ext.crx");
+		}
+		try {
+			options.addExtensions(new File(URLDecoder.decode(extUrl.getPath(), "UTF-8")));
+		} catch (Exception ex) {
+			throw new ExecutionException("Ошибка загрузки расширения для скриншота", ex);
+		}
 	}
 
 	/**
