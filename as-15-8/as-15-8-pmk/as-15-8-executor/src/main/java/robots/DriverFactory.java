@@ -1,5 +1,6 @@
 package robots;
 
+import com.google.common.io.Files;
 import common.ExecutorProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
@@ -15,11 +16,11 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import robots.exceptions.ExecutionException;
 import robots.utils.ScriptUtils;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
@@ -170,14 +171,28 @@ public class DriverFactory {
 	}
 
 	private static void addScreenshotExtension(ChromeOptions options) {
-		URL extUrl = DriverFactory.class.getClassLoader().getResource("screenshot_ext.crx");
-		if(extUrl == null){
-			throw new ExecutionException("Ошибка! Не найден файл с расширением для скриншота screenshot_ext.crx");
-		}
-		try {
-			options.addExtensions(new File(URLDecoder.decode(extUrl.getPath(), "UTF-8")));
-		} catch (Exception ex) {
-			throw new ExecutionException("Ошибка загрузки расширения для скриншота", ex);
+		try{
+			try(InputStream extIS = DriverFactory.class.getClassLoader().getResourceAsStream("screenshot_ext.crx")){
+
+				if(extIS == null){
+					throw new ExecutionException("Ошибка! Не найден файл с расширением для скриншота screenshot_ext.crx");
+				}
+
+				ByteArrayOutputStream extOS = new ByteArrayOutputStream();
+				byte[] buffer = new byte[1024];
+				int length;
+				while ((length = extIS.read(buffer)) != -1) {
+					extOS.write(buffer, 0, length);
+				}
+
+				try {
+					options.addEncodedExtensions(Base64.getEncoder().encodeToString(extOS.toByteArray()));
+				} catch (Exception ex) {
+					throw new ExecutionException("Ошибка загрузки расширения для скриншота", ex);
+				}
+			}
+		} catch (IOException ex) {
+			throw new ExecutionException("Ошибка закрытия потока чтения расширения скриншота");
 		}
 	}
 
