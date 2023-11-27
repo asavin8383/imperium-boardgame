@@ -108,7 +108,6 @@ public class DriverFactory {
 
         ChromeOptions options = new ChromeOptions();
 		setOptimalChromeOptions(options);
-		setLoadExtensions(options, extensions);
 		addScreenshotExtension(options);
 		cpb.setCapability(ChromeOptions.CAPABILITY, options);
 		WebDriver driver = new RemoteWebDriver(hubURL, cpb);
@@ -119,20 +118,12 @@ public class DriverFactory {
     private static void setOptimalChromeOptions(ChromeOptions options){
 		options.addArguments("--start-maximized");
 		options.addArguments("--ignore-certificate-errors");
-		//options.addArguments("--disable-popup-blocking");
-		//options.addArguments("--headless");
-		//options.addArguments("--window-size=1920,1080");
-		//options.addArguments("--no-sandbox");				// избавляет от некоторых проблем с таймаутом, рендерингом, но не безопасно!
+		// избавляет от некоторых проблем с таймаутом, рендерингом, но не безопасно!
 		options.addArguments("--dns-prefetch-disable");		// отключение предварительной выборки DNS. в теории должно ускорить работу
-		//options.addArguments("--disable-gpu");				// говорят частично решает проблему с рендерингом (скриншотом)
-		//options.addArguments("--disable-features=VizDisplayCompositor");	// у кого-то в 73 версии устранило проблему: Timed out receiving message from renderer: 10.000
-		//options.setPageLoadStrategy(PageLoadStrategy.NORMAL);
 		LoggingPreferences logPrefs = new LoggingPreferences();
 		logPrefs.enable( LogType.PERFORMANCE, Level.ALL );
 		options.setCapability( "goog:loggingPrefs", logPrefs );
 
-		//options.addArguments("--user-data-dir=" + ExecutorProperties.getChromeProperties().getUserDataDir());
-		//options.addArguments("--profile-directory=" + ExecutorProperties.getChromeProperties().getProfileName());
 		options.addArguments("--auto-select-desktop-capture-source=Entire screen");
 
 		//Для отображения полного URL
@@ -164,10 +155,6 @@ public class DriverFactory {
 		}
 		capability.setCapability("enableVNC", true);
 		return capability;
-	}
-
-	private static void setLoadExtensions(ChromeOptions options, List<ChromeSettings.Extension> extensions) {
-		options.addArguments("--load-extension=" + ChromeSettings.buildLoadExtensionArgValue(extensions));
 	}
 
 	private static void addScreenshotExtension(ChromeOptions options) {

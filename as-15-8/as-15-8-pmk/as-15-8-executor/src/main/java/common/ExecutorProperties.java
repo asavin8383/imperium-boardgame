@@ -26,16 +26,12 @@ public class ExecutorProperties {
 
     private NmapProperties nmap;
 
-    private ChromeProperties chrome;
-
     private ScreenshotProperties screenshot;
 
     private ExecutorProps executor;
 
 
     private static EtalonProperties etalonExtProperties;
-
-    private static ChromeProperties chromeProperties;
 
     private static ScreenshotProperties screenshotProperties;
 
@@ -48,7 +44,6 @@ public class ExecutorProperties {
     private void loadProps() throws MalformedURLException {
         etalonExtProperties = etalon;
         seleniumHubUrlExt = new URL(seleniumHubUrl);
-        chromeProperties = chrome;
         screenshotProperties = screenshot;
 
         this.props = new AccessToolUnits();
@@ -80,10 +75,6 @@ public class ExecutorProperties {
 
     public static EtalonProperties getEtalon(){
         return etalonExtProperties;
-    }
-
-    public static ChromeProperties getChromeProperties(){
-        return chromeProperties;
     }
 
     public static URL getSeleniumHubUrl(){
@@ -128,13 +119,6 @@ public class ExecutorProperties {
         private Boolean useProxy;
         private String[] portsToCheck;
         private int subnetIpCount;
-    }
-
-    @Data
-    public static class ChromeProperties {
-        private String userDataDir;
-        private String extensionsDir;
-        private String profileName;
     }
 
     @Data
