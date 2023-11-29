@@ -3,8 +3,10 @@ package robots.impl;
 import checkUnits.CheckUnit;
 import common.ExecutorProperties;
 import enums.AccessToolParameter;
+import enums.CheckUnitJobResult;
 import execution.ExecutionJobResult;
 import execution.ExecutionVpnJobResult;
+import org.apache.commons.lang.NotImplementedException;
 import org.openqa.selenium.WebDriver;
 import robots.ProxyUtils;
 import robots.exceptions.ExecutionException;
@@ -128,6 +130,11 @@ public class VPNRobot extends SeleniumRobot {
         message.setUseEtalon(this.useEtalon);
 
         return message;
+    }
+
+    @Override
+    public ExecutionJobResult createMessage(boolean linkFound, CheckUnitJobResult checkUnitJobResult) {
+        throw new NotImplementedException();
     }
 
     private boolean checkBrowserChrome(){

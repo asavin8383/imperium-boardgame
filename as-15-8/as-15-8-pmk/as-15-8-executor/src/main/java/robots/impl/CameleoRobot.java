@@ -2,8 +2,10 @@ package robots.impl;
 
 import checkUnits.CheckUnit;
 import enums.AccessToolParameter;
+import enums.CheckUnitJobResult;
 import execution.ExecutionJobResult;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.NotImplementedException;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.TimeoutException;
@@ -59,5 +61,10 @@ public class CameleoRobot extends AnonymizerRobot {
             throw new ExecutionException(
                     "Выполнение потока прервано", e);
         }
+    }
+
+    @Override
+    public ExecutionJobResult createMessage(boolean linkFound, CheckUnitJobResult checkUnitJobResult) {
+        throw new NotImplementedException();
     }
 }

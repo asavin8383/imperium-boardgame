@@ -13,6 +13,8 @@ import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import robots.exceptions.BadIP_ExecutionExeption;
+import robots.exceptions.Captcha_ExecutionException;
 import robots.exceptions.ExecutionException;
 import robots.exceptions.TimeoutScriptException;
 import robots.utils.EqualityTest;
@@ -181,7 +183,7 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
     }
 
 
-    final ExecutionPSJobResult createMessage(boolean linkFound, CheckUnitJobResult checkUnitJobResult) {
+    public final ExecutionPSJobResult createMessage(boolean linkFound, CheckUnitJobResult checkUnitJobResult) {
         return createMessage(linkFound, checkUnitJobResult, null);
     }
     final ExecutionPSJobResult createMessage(boolean linkFound, CheckUnitJobResult checkUnitJobResult, List<String> urls) {
@@ -203,13 +205,12 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         equalityTest = EqualityTest.forCheckUnit(checkUnit);
 
         if (captcha())
-            return createMessage(false, CheckUnitJobResult.CAPTCHA_DETECTED);
+            throw new Captcha_ExecutionException(String.format("ПС выдала капчу на url: %s", checkUnit.getValue()));
 
         try {
             driver.findElement(By.xpath(xpathInputField));
         } catch(NoSuchElementException ex) {
-            log.info("ПС обнаружила робота для URL: {}", checkUnit.getValue());
-            return createMessage(false, CheckUnitJobResult.BAD_IP);
+            throw new BadIP_ExecutionExeption(String.format("ПС выдала BAD IP на url: %s", checkUnit.getValue()));
         }
 
         String value = checkUnit.getValue();

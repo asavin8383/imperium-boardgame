@@ -10,6 +10,8 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import enums.AccessToolParameter;
+import enums.CheckUnitJobResult;
+import org.apache.commons.lang.NotImplementedException;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -131,6 +133,11 @@ public class HideMyAssRobot extends AnonymizerRobot {
         } catch (NoSuchElementException e) {
             return getErrorMessage(HIDEMYASS_ERROR, "Не удалось найти элементы навигации.");
         }
+    }
+
+    @Override
+    public ExecutionJobResult createMessage(boolean linkFound, CheckUnitJobResult checkUnitJobResult) {
+        throw new NotImplementedException();
     }
 
     private boolean captcha() {

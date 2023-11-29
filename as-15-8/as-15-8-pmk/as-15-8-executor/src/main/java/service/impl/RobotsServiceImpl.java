@@ -1,17 +1,24 @@
 package service.impl;
 
+import checkUnits.CheckUnit;
 import checkUnits.CheckUnitJob;
 import checkUnits.CheckUnitType;
 import enums.AccessToolUnit;
+import enums.CheckUnitJobResult;
 import execution.ExecutionJobResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.openqa.selenium.WebDriverException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.kafka.listener.AbstractMessageListenerContainer;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import robots.Robot;
+import robots.exceptions.BadIP_ExecutionExeption;
 import robots.exceptions.Captcha_ExecutionException;
 import robots.exceptions.ExecutionException;
 import robots.factory.RobotsFactory;
@@ -26,7 +33,6 @@ import java.util.*;
  *
  */
 @Service
-@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class RobotsServiceImpl implements CheckUnitVerificationService {
@@ -37,6 +43,12 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
     private volatile Set<Robot> robots = new HashSet<>();
     
     private boolean isRunning = false;
+
+	@Value("${retryExecution.maxAttempts}")
+	private int retryAttempts;
+	private int attemptsLeft;
+	@Value("${retryExecution.maxDelay}")
+	private int retryDelay;
 
     public Map<AccessToolUnit, List<CheckUnitType>> getSupportedTypes() {
     	return new HashMap<AccessToolUnit, List<CheckUnitType>>(){{
@@ -69,11 +81,13 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 			ExecutionJobResult message;
 			boolean needToStop = true;
 			try{
-				message = robot.run(checkUnitJob.getCheckUnit());
+				attemptsLeft = retryAttempts - 1;
+				message = runWithRetry(robot, checkUnitJob.getCheckUnit());
 			} catch (Exception ex) {
 				if(ex instanceof ExecutionException) {
-					if(ex instanceof Captcha_ExecutionException)
+					if(ex instanceof Captcha_ExecutionException  || ex instanceof BadIP_ExecutionExeption) {
 						needToStop = false;
+					}
 					throw (ExecutionException)ex;
 				} else
 					throw new ExecutionException("Ошибка при выполнении скрипта робота", ex);
@@ -97,6 +111,26 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
                 throw ex;
             else
                 throw new ExecutionException("Ошибка при выполнении скрипта робота", ex);
+		}
+	}
+
+	public ExecutionJobResult runWithRetry(Robot robot, CheckUnit checkUnit) {
+		try {
+			log.info("Запуск {}-й попытки проверки ресурса: {}", retryAttempts - attemptsLeft, checkUnit.getValue());
+			return robot.run(checkUnit);
+		} catch (Captcha_ExecutionException | BadIP_ExecutionExeption | WebDriverException ex) {
+			if (attemptsLeft > 0) {
+				attemptsLeft--;
+				try {
+					Thread.sleep(retryDelay);
+				} catch (InterruptedException e) {
+					throw new RuntimeException(e);
+				}
+				return runWithRetry(robot, checkUnit);
+			} else {
+				throw ex;
+			}
+
 		}
 	}
 	

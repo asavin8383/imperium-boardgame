@@ -3,8 +3,10 @@ package robots.impl;
 import checkUnits.CheckUnit;
 import common.ExecutorProperties;
 import enums.AccessToolParameter;
+import enums.CheckUnitJobResult;
 import execution.ExecutionJobResult;
 import execution.ExecutionVpnJobResult;
+import org.apache.commons.lang.NotImplementedException;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -144,6 +146,11 @@ public class HolaRobot extends SeleniumRobot {
         }
 
         return message;
+    }
+
+    @Override
+    public ExecutionJobResult createMessage(boolean linkFound, CheckUnitJobResult checkUnitJobResult) {
+        throw new NotImplementedException();
     }
 
     private boolean checkBrowserChrome(){

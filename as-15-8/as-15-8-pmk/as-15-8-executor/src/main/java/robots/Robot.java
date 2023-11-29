@@ -3,6 +3,7 @@ package robots;
 import java.io.IOException;
 
 import checkUnits.CheckUnit;
+import enums.CheckUnitJobResult;
 import execution.ExecutionJobResult;
 import robots.exceptions.ExecutionException;
 
@@ -20,6 +21,8 @@ public interface Robot {
 	 * @throws ExecutionException
 	 */
 	ExecutionJobResult run(CheckUnit checkUnit) throws ExecutionException;
+
+	ExecutionJobResult createMessage(boolean linkFound, CheckUnitJobResult checkUnitJobResult);
 	
 	/**
 	 * Метод уничтожения робота

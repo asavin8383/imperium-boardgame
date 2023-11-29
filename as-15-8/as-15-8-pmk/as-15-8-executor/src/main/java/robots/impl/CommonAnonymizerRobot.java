@@ -3,9 +3,11 @@ package robots.impl;
 import checkUnits.CheckUnit;
 import common.ExecutorProperties;
 import enums.AccessToolParameter;
+import enums.CheckUnitJobResult;
 import execution.ExecutionAnonymizerResult;
 import execution.ExecutionJobResult;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.NotImplementedException;
 import org.openqa.selenium.*;
 import org.springframework.util.StringUtils;
 import robots.ProxyUtils;
@@ -133,5 +135,10 @@ public class CommonAnonymizerRobot extends SeleniumRobot {
             throw new ExecutionException(
                     "Выполнение потока прервано", e);
         }
+    }
+
+    @Override
+    public ExecutionJobResult createMessage(boolean linkFound, CheckUnitJobResult checkUnitJobResult) {
+        throw new NotImplementedException();
     }
 }
