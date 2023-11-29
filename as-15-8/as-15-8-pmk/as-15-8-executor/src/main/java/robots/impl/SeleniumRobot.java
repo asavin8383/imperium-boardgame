@@ -60,13 +60,11 @@ public abstract class SeleniumRobot implements Robot {
 		try {
 			this.driver = createDriver(proxy, enableLog, checkUnit.getValue());
 			return execute(checkUnit);
-		} catch (Captcha_ExecutionException | BadIP_ExecutionExeption | WebDriverException ex) {
-			throw ex;
 		} catch (CancellationException ex) {
 			throw new Cancel_ExecutionException(ex);
 		} catch (Exception ex) {
-			if(ex instanceof ExecutionException)
-				throw (ExecutionException)ex;
+			if(ex instanceof Captcha_ExecutionException || ex instanceof BadIP_ExecutionExeption || ex instanceof WebDriverException)
+				throw ex;
 			else
 				throw new ExecutionException("Ошибка при выполнении робота", ex);
 		}
