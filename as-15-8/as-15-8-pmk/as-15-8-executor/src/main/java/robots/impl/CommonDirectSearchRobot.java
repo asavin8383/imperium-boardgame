@@ -228,7 +228,7 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         }
 
         if (captcha())
-            return createMessage(false, CheckUnitJobResult.CAPTCHA_DETECTED);
+            throw new Captcha_ExecutionException(String.format("ПС выдала капчу на url: %s", checkUnit.getValue()));
 
         //Проверим, не исправилось ли правописание. Если исправилось, возвращаем назад
         if(Strings.isNotEmpty(this.checkSpellingLink)){
@@ -295,11 +295,11 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
                     return Optional.of(createMessage(false, CheckUnitJobResult.COMPLETED));
                 } else {
                     //Плохой IP
-                    return Optional.of(createMessage(false, CheckUnitJobResult.BAD_IP));
+                    throw new BadIP_ExecutionExeption(String.format("ПС выдала BAD IP на url: %s", checkUnit.getValue()));
                 }
             } else {
                 //регулярку не задали, считаем плохим IP
-                return Optional.of(createMessage(false, CheckUnitJobResult.BAD_IP));
+                throw new BadIP_ExecutionExeption(String.format("ПС выдала BAD IP на url: %s", checkUnit.getValue()));
             }
         }
         return Optional.empty();

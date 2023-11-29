@@ -60,7 +60,7 @@ public abstract class SeleniumRobot implements Robot {
 		try {
 			this.driver = createDriver(proxy, enableLog, checkUnit.getValue());
 			return execute(checkUnit);
-		} catch (Captcha_ExecutionException | BadIP_ExecutionExeption ex) {
+		} catch (Captcha_ExecutionException | BadIP_ExecutionExeption | WebDriverException ex) {
 			throw ex;
 		} catch (CancellationException ex) {
 			throw new Cancel_ExecutionException(ex);
@@ -72,19 +72,6 @@ public abstract class SeleniumRobot implements Robot {
 		}
 	}
 
-	@Retryable(
-//		value = {Captcha_ExecutionException.class, BadIP_ExecutionExeption.class, WebDriverException.class},
-		value = {Exception.class},
-		maxAttempts = 10,
-		backoff = @Backoff(delay=3000))
-//		maxAttemptsExpression = "${retryExecution.maxAttempts}",
-//		backoff = @Backoff(delayExpression = "${retryExecution.maxDelay}"))
-	public ExecutionJobResult runWithRetry(CheckUnit checkUnit) {
-		log.info("Запуск проверки ресурса: {}", checkUnit.getValue());
-		this.driver = createDriver(proxy, enableLog, checkUnit.getValue());
-		return execute(checkUnit);
-	}
-	
 	/**
 	 * Метод, запускаюший выполнение скрипта робота
 	 * @param checkUnit Ресурс для проверки
@@ -92,7 +79,6 @@ public abstract class SeleniumRobot implements Robot {
 	 * @throws ExecutionException
 	 */
 	protected abstract ExecutionJobResult execute(CheckUnit checkUnit) throws ExecutionException;
-
 
 	protected WebDriver createDriver(String proxy, boolean enableLog, String checkUrl) {
 		WebDriver driver = DriverFactory.createDriver(
