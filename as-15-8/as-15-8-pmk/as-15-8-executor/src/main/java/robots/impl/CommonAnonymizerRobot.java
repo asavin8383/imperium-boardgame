@@ -100,7 +100,7 @@ public class CommonAnonymizerRobot extends SeleniumRobot {
     }
 
     @Override
-    public ExecutionJobResult execute(CheckUnit checkUnit) throws ExecutionException {
+    public ExecutionJobResult execute(CheckUnit checkUnit, boolean throwExceptionByCaptchaOrBadIP) throws ExecutionException {
         driver.get(anonymizerURL);
 
         try {

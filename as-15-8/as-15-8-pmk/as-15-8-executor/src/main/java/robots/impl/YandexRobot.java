@@ -27,7 +27,7 @@ public class YandexRobot extends CommonDirectSearchRobot {
     }
 
     @Override
-    public ExecutionJobResult execute(CheckUnit checkUnit) throws ExecutionException {
+    public ExecutionJobResult execute(CheckUnit checkUnit, boolean throwExceptionByCaptchaOrBadIP) throws ExecutionException {
         driver.get(getSearchSystemUrl());
 
         equalityTest = EqualityTest.forCheckUnit(checkUnit);
@@ -35,7 +35,11 @@ public class YandexRobot extends CommonDirectSearchRobot {
             return createMessage(true, null);
 
         if (captcha())
-            return createMessage(true, CheckUnitJobResult.CAPTCHA_DETECTED);
+            if (throwExceptionByCaptchaOrBadIP) {
+                throw new Captcha_ExecutionException(String.format("ПС выдала капчу на url: %s", checkUnit.getValue()));
+            } else {
+                return createMessage(true, CheckUnitJobResult.CAPTCHA_DETECTED);
+            }
 
         return createMessage(checkPaginatedSearchResult(), null);
     }

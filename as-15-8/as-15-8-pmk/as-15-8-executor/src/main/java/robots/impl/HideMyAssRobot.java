@@ -42,7 +42,7 @@ public class HideMyAssRobot extends AnonymizerRobot {
 	}
 
     @Override
-    public ExecutionJobResult execute(CheckUnit checkUnit) throws ExecutionException {
+    public ExecutionJobResult execute(CheckUnit checkUnit, boolean throwExceptionByCaptchaOrBadIP) throws ExecutionException {
 
         driver.manage().timeouts().pageLoadTimeout(WAIT_TIMEOUT_PAGE, TimeUnit.SECONDS);
 

@@ -54,7 +54,7 @@ public class VPNRobot extends SeleniumRobot {
     }
 
     @Override
-	public ExecutionJobResult execute(CheckUnit checkUnit) throws ExecutionException {
+	public ExecutionJobResult execute(CheckUnit checkUnit, boolean throwExceptionByCaptchaOrBadIP) throws ExecutionException {
         // работате только с хромом!
         if (!checkBrowserChrome())
             throw new ExecutionException("Ошибка, неверный браузер! Для данного робота поддерживатся только браузер CHROME!");

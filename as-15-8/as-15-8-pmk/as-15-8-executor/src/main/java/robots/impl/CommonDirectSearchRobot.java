@@ -200,17 +200,25 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
 
 
     @Override
-    public ExecutionJobResult execute(CheckUnit checkUnit) throws ExecutionException {
+    public ExecutionJobResult execute(CheckUnit checkUnit, boolean throwExceptionByCaptchaOrBadIP) throws ExecutionException {
         driver.get(searchSystemUrl);
         equalityTest = EqualityTest.forCheckUnit(checkUnit);
 
         if (captcha())
-            throw new Captcha_ExecutionException(String.format("ПС выдала капчу на url: %s", checkUnit.getValue()));
+            if (throwExceptionByCaptchaOrBadIP) {
+                throw new Captcha_ExecutionException(String.format("ПС выдала капчу на url: %s", checkUnit.getValue()));
+            } else {
+                return createMessage(false, CheckUnitJobResult.CAPTCHA_DETECTED);
+            }
 
         try {
             driver.findElement(By.xpath(xpathInputField));
         } catch(NoSuchElementException ex) {
-            throw new BadIP_ExecutionExeption(String.format("ПС выдала BAD IP на url: %s", checkUnit.getValue()));
+            if (throwExceptionByCaptchaOrBadIP) {
+                throw new BadIP_ExecutionExeption(String.format("ПС выдала BAD IP на url: %s", checkUnit.getValue()));
+            } else {
+                return createMessage(false, CheckUnitJobResult.BAD_IP);
+            }
         }
 
         String value = checkUnit.getValue();
@@ -228,7 +236,11 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         }
 
         if (captcha())
-            throw new Captcha_ExecutionException(String.format("ПС выдала капчу на url: %s", checkUnit.getValue()));
+            if (throwExceptionByCaptchaOrBadIP) {
+                throw new Captcha_ExecutionException(String.format("ПС выдала капчу на url: %s", checkUnit.getValue()));
+            } else {
+                return createMessage(false, CheckUnitJobResult.CAPTCHA_DETECTED);
+            }
 
         //Проверим, не исправилось ли правописание. Если исправилось, возвращаем назад
         if(Strings.isNotEmpty(this.checkSpellingLink)){
@@ -244,7 +256,7 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         }
 
         //Проверяем, не вылез ли подозрительный трафик
-        Optional<ExecutionJobResult> optExecutionJobResult = checkNoLinks(checkUnit);
+        Optional<ExecutionJobResult> optExecutionJobResult = checkNoLinks(checkUnit, throwExceptionByCaptchaOrBadIP);
         if(optExecutionJobResult.isPresent()){
             return optExecutionJobResult.get();
         }
@@ -281,12 +293,16 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         return (listNext != null && listNext.size() > 0);
     }
 
-    private Optional<ExecutionJobResult> checkNoLinks(CheckUnit checkUnit){
+    private Optional<ExecutionJobResult> checkNoLinks(CheckUnit checkUnit, boolean throwExceptionByCaptchaOrBadIP){
         //Проверяем, не вылез ли подозрительный трафик
         if(!linksFound()) {
             log.debug("По URL {} Список ссылок пустой нужно проверить на пустой IP", checkUnit.getValue());
             if(Strings.isNotEmpty(resultNotFoundRegexp)) {
                 String content = ScriptUtils.getPageSource(driver).pageSource;
+                if(content==null) {
+                    // Завис скрипт, ставим сомнительный результат
+                    return Optional.of(createMessage(false, CheckUnitJobResult.DOUBTFUL));
+                }
                 //log.info("Контент страницы: {}", content);
                 log.debug("Регулярное выражение для проверки: {}", resultNotFoundRegexp);
                 Matcher matcher = Pattern.compile(resultNotFoundRegexp).matcher(content);
@@ -295,11 +311,19 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
                     return Optional.of(createMessage(false, CheckUnitJobResult.COMPLETED));
                 } else {
                     //Плохой IP
-                    throw new BadIP_ExecutionExeption(String.format("ПС выдала BAD IP на url: %s", checkUnit.getValue()));
+                    if (throwExceptionByCaptchaOrBadIP) {
+                        throw new BadIP_ExecutionExeption(String.format("ПС выдала BAD IP на url: %s", checkUnit.getValue()));
+                    } else {
+                        return Optional.of(createMessage(false, CheckUnitJobResult.BAD_IP));
+                    }
                 }
             } else {
                 //регулярку не задали, считаем плохим IP
-                throw new BadIP_ExecutionExeption(String.format("ПС выдала BAD IP на url: %s", checkUnit.getValue()));
+                if (throwExceptionByCaptchaOrBadIP) {
+                    throw new BadIP_ExecutionExeption(String.format("ПС выдала BAD IP на url: %s", checkUnit.getValue()));
+                } else {
+                    return Optional.of(createMessage(false, CheckUnitJobResult.BAD_IP));
+                }
             }
         }
         return Optional.empty();

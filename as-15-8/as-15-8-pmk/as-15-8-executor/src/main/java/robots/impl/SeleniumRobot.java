@@ -3,15 +3,12 @@ package robots.impl;
 import checkUnits.CheckUnit;
 import common.ExecutorProperties;
 import enums.AccessToolParameter;
-import enums.CheckUnitJobResult;
 import execution.ExecutionJobResult;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 import robots.DriverFactory;
 import robots.Robot;
 import robots.exceptions.BadIP_ExecutionExeption;
@@ -56,10 +53,11 @@ public abstract class SeleniumRobot implements Robot {
 		this.scriptParams = scriptParams;
 	}
 
-	public ExecutionJobResult run(CheckUnit checkUnit) throws ExecutionException {
+	@Override
+	public ExecutionJobResult run(CheckUnit checkUnit, boolean throwExceptionByCaptchaOrBadIP) throws ExecutionException {
 		try {
 			this.driver = createDriver(proxy, enableLog, checkUnit.getValue());
-			return execute(checkUnit);
+			return execute(checkUnit, throwExceptionByCaptchaOrBadIP);
 		} catch (CancellationException ex) {
 			throw new Cancel_ExecutionException(ex);
 		} catch (Exception ex) {
@@ -76,7 +74,7 @@ public abstract class SeleniumRobot implements Robot {
 	 * @return
 	 * @throws ExecutionException
 	 */
-	protected abstract ExecutionJobResult execute(CheckUnit checkUnit) throws ExecutionException;
+	protected abstract ExecutionJobResult execute(CheckUnit checkUnit, boolean throwExceptionByCaptchaOrBadIP) throws ExecutionException;
 
 	protected WebDriver createDriver(String proxy, boolean enableLog, String checkUrl) {
 		WebDriver driver = DriverFactory.createDriver(

@@ -19,7 +19,7 @@ public interface Robot {
 	 * @return
 	 * @throws ExecutionException
 	 */
-	ExecutionJobResult run(CheckUnit checkUnit) throws ExecutionException;
+	ExecutionJobResult run(CheckUnit checkUnit, boolean throwExceptionByCaptchaOrBadIP) throws ExecutionException;
 
 	/**
 	 * Метод уничтожения робота
