@@ -4,18 +4,13 @@ import checkUnits.CheckUnit;
 import checkUnits.CheckUnitJob;
 import checkUnits.CheckUnitType;
 import enums.AccessToolUnit;
-import enums.CheckUnitJobResult;
 import execution.ExecutionJobResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.WebDriverException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.kafka.listener.AbstractMessageListenerContainer;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import robots.Robot;
 import robots.exceptions.BadIP_ExecutionExeption;
@@ -126,6 +121,7 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 				} catch (InterruptedException e) {
 					throw new RuntimeException(e);
 				}
+				log.warn("Будет выполнен {}-й перезапуск проверки ресурса {} по следующей причине: {}", retryAttempts - attemptsLeft, checkUnit.getValue(), ex.getMessage());
 				return runWithRetry(robot, checkUnit);
 			} else {
 				throw ex;

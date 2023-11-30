@@ -3,12 +3,13 @@ package robots.impl;
 import checkUnits.CheckUnit;
 import common.ExecutorProperties;
 import enums.AccessToolParameter;
-import enums.CheckUnitJobResult;
 import execution.ExecutionAnonymizerResult;
 import execution.ExecutionJobResult;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.NotImplementedException;
-import org.openqa.selenium.*;
+import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebElement;
 import org.springframework.util.StringUtils;
 import robots.ProxyUtils;
 import robots.exceptions.ExecutionException;
@@ -137,8 +138,4 @@ public class CommonAnonymizerRobot extends SeleniumRobot {
         }
     }
 
-    @Override
-    public ExecutionJobResult createMessage(boolean linkFound, CheckUnitJobResult checkUnitJobResult) {
-        throw new NotImplementedException();
-    }
 }

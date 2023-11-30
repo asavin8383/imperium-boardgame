@@ -2,11 +2,9 @@ package robots.impl;
 
 import checkUnits.CheckUnit;
 import enums.AccessToolParameter;
-import enums.CheckUnitJobResult;
 import execution.ExecutionJobResult;
 import execution.ExecutionPSJobResult;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.NotImplementedException;
 import org.apache.logging.log4j.util.Strings;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -68,11 +66,6 @@ public class GoogleApiRobot implements Robot{
 		} catch(Exception ex) {
 			throw new ExecutionException(ex);
 		}
-	}
-
-	@Override
-	public ExecutionJobResult createMessage(boolean linkFound, CheckUnitJobResult checkUnitJobResult) {
-		throw new NotImplementedException();
 	}
 
 	@Override

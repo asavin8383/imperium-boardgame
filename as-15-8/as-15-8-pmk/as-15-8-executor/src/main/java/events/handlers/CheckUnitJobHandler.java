@@ -16,10 +16,7 @@ import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
-import robots.exceptions.Cancel_ExecutionException;
-import robots.exceptions.Captcha_ExecutionException;
-import robots.exceptions.ExecutionException;
-import robots.exceptions.Timeout_ExecutionException;
+import robots.exceptions.*;
 import service.JobsService;
 
 import java.io.PrintWriter;
@@ -119,6 +116,9 @@ public class CheckUnitJobHandler {
         else if(te instanceof Captcha_ExecutionException) {
             log.warn("Выполнение проверки остановлено, обнаружена капча: " + verificationName);
         }
+        else if(te instanceof BadIP_ExecutionExeption) {
+            log.warn("Выполнение проверки остановлено, ПС(ПАСД) обнаружила подозрительный IP: " + verificationName);
+        }
         else if(te instanceof ExecutionException) {
             log.error("Выполнение проверки завершено с ошибкой: "+verificationName, te);
         }
@@ -156,6 +156,9 @@ public class CheckUnitJobHandler {
                     .startTime(startTime);
             if(cause instanceof Captcha_ExecutionException) {
                 notificationBuilder.checkResult(CheckUnitJobResult.CAPTCHA_DETECTED);
+            }
+            else if(cause instanceof BadIP_ExecutionExeption) {
+                notificationBuilder.checkResult(CheckUnitJobResult.BAD_IP);
             }
             else if(cause instanceof Timeout_ExecutionException) {
                 notificationBuilder.checkResult(CheckUnitJobResult.TIMEOUT_ERROR);

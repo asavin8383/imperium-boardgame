@@ -183,7 +183,7 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
     }
 
 
-    public final ExecutionPSJobResult createMessage(boolean linkFound, CheckUnitJobResult checkUnitJobResult) {
+    final ExecutionPSJobResult createMessage(boolean linkFound, CheckUnitJobResult checkUnitJobResult) {
         return createMessage(linkFound, checkUnitJobResult, null);
     }
     final ExecutionPSJobResult createMessage(boolean linkFound, CheckUnitJobResult checkUnitJobResult, List<String> urls) {

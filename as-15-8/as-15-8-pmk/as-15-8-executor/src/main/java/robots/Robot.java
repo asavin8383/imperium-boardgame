@@ -1,11 +1,10 @@
 package robots;
 
-import java.io.IOException;
-
 import checkUnits.CheckUnit;
-import enums.CheckUnitJobResult;
 import execution.ExecutionJobResult;
 import robots.exceptions.ExecutionException;
+
+import java.io.IOException;
 
 /**
  * Интефейс скрипта робота
@@ -22,8 +21,6 @@ public interface Robot {
 	 */
 	ExecutionJobResult run(CheckUnit checkUnit) throws ExecutionException;
 
-	ExecutionJobResult createMessage(boolean linkFound, CheckUnitJobResult checkUnitJobResult);
-	
 	/**
 	 * Метод уничтожения робота
 	 * @throws IOException

@@ -3,28 +3,21 @@ package robots.impl;
 import checkUnits.CheckUnit;
 import common.ExecutorProperties;
 import enums.AccessToolParameter;
-import enums.CheckUnitJobResult;
-import execution.ExecutionAnonymizerResult;
 import execution.ExecutionJobResult;
 import execution.ExecutionVpnJobResult;
-import org.apache.commons.lang.NotImplementedException;
-import org.openqa.selenium.*;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.By;
+import org.openqa.selenium.Platform;
+import org.openqa.selenium.WebElement;
 import org.springframework.util.StringUtils;
 import robots.ChromeSettings;
 import robots.DriverFactory;
-import robots.ProxyUtils;
 import robots.exceptions.ExecutionException;
 import robots.utils.CloudflareUtils;
 import robots.utils.HttpResponseHelper;
-import robots.utils.RobotScriptUtils;
 import robots.utils.ScriptUtils;
-import robots.utils.ScriptUtils.PageResult;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.function.Function;
 
 import static robots.utils.HttpResponseHelper.HttpResponseMeta;
 import static robots.utils.ScriptUtils.TIME_OUT_ERROR;
@@ -127,11 +120,6 @@ public class ExtensionRobot extends SeleniumRobot {
         }
 
         return message;
-    }
-
-    @Override
-    public ExecutionJobResult createMessage(boolean linkFound, CheckUnitJobResult checkUnitJobResult) {
-        throw new NotImplementedException();
     }
 
     private boolean checkBrowserChrome(){

@@ -1,33 +1,25 @@
 package robots.impl;
 
-import static enums.CheckUnitJobResult.INTERNAL_ERROR;
-import static robots.utils.ScriptUtils.TIME_OUT_CHECKING_ERROR;
-import static robots.utils.ScriptUtils.getTextOrDefault;
-
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
-
-import enums.AccessToolParameter;
-import enums.CheckUnitJobResult;
-import org.apache.commons.lang.NotImplementedException;
-import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.StaleElementReferenceException;
-import org.openqa.selenium.TimeoutException;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-
 import checkUnits.CheckUnit;
+import enums.AccessToolParameter;
 import execution.ExecutionJobResult;
 import lombok.extern.slf4j.Slf4j;
+import org.openqa.selenium.*;
 import robots.exceptions.ExecutionException;
 import robots.exceptions.TimeoutCheckingBrowserException;
 import robots.exceptions.TimeoutScriptException;
 import robots.utils.CloudflareUtils;
 import robots.utils.RobotScriptUtils;
 import robots.utils.ScriptUtils;
+
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
+import static enums.CheckUnitJobResult.INTERNAL_ERROR;
+import static robots.utils.ScriptUtils.TIME_OUT_CHECKING_ERROR;
+import static robots.utils.ScriptUtils.getTextOrDefault;
 
 @Slf4j
 public class HideMyAssRobot extends AnonymizerRobot {
@@ -133,11 +125,6 @@ public class HideMyAssRobot extends AnonymizerRobot {
         } catch (NoSuchElementException e) {
             return getErrorMessage(HIDEMYASS_ERROR, "Не удалось найти элементы навигации.");
         }
-    }
-
-    @Override
-    public ExecutionJobResult createMessage(boolean linkFound, CheckUnitJobResult checkUnitJobResult) {
-        throw new NotImplementedException();
     }
 
     private boolean captcha() {
