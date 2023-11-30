@@ -5,6 +5,8 @@ import common.ExecutorProperties;
 import enums.AccessToolParameter;
 import execution.ExecutionJobResult;
 import execution.ExecutionVpnJobResult;
+import lombok.Getter;
+import lombok.Setter;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -28,6 +30,10 @@ public class HolaRobot extends SeleniumRobot {
 
     private String stubUrl;
     private boolean useEtalon;
+
+    @Getter
+    @Setter
+    private int remainingAttempts;
 
     private ChromeSettings.Extension extension;
 

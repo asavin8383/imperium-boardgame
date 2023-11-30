@@ -5,6 +5,8 @@ import common.ExecutorProperties;
 import enums.AccessToolParameter;
 import execution.ExecutionJobResult;
 import execution.ExecutionVpnJobResult;
+import lombok.Getter;
+import lombok.Setter;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebElement;
@@ -29,6 +31,10 @@ public class ExtensionRobot extends SeleniumRobot {
 
     private String xpathField;
     private String xpathButton;
+
+    @Getter
+    @Setter
+    private int remainingAttempts;
 
     private ChromeSettings.Extension extension;
     protected ExecutionVpnJobResult message = new ExecutionVpnJobResult();

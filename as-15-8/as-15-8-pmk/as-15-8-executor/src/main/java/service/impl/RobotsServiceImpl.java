@@ -41,7 +41,6 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 
 	@Value("${retryExecution.maxAttempts}")
 	private int retryAttempts;
-	private int attemptsLeft;
 	@Value("${retryExecution.maxDelay}")
 	private int retryDelay;
 
@@ -70,13 +69,14 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 			log.info("Запуск робота: " + robotName);
 
 			Robot robot = robotsFactory.createRobot(checkUnitJob.getAccessTool());
+			robot.setRemainingAttempts(retryAttempts);
 			
 			robots.add(robot);
 			
 			ExecutionJobResult message;
 			boolean needToStop = true;
 			try{
-				attemptsLeft = retryAttempts - 1;
+				robot.setRemainingAttempts(robot.getRemainingAttempts() - 1);
 				message = runWithRetry(robot, checkUnitJob.getCheckUnit());
 			} catch (Exception ex) {
 				if(ex instanceof ExecutionException) {
@@ -111,15 +111,15 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 
 	public ExecutionJobResult runWithRetry(Robot robot, CheckUnit checkUnit) {
 		try {
-			log.info("Запуск {}-й попытки проверки ресурса: {}", retryAttempts - attemptsLeft, checkUnit.getValue());
+			log.info("Запуск {}-й попытки проверки ресурса: {}", retryAttempts - robot.getRemainingAttempts(), checkUnit.getValue());
 			boolean throwExceptionByCaptchaOrBadIP = true;
-			if (attemptsLeft==1) {
+			if (robot.getRemainingAttempts()==1) {
 				throwExceptionByCaptchaOrBadIP = false;
 			}
 			return robot.run(checkUnit, throwExceptionByCaptchaOrBadIP);
 		} catch (Captcha_ExecutionException | BadIP_ExecutionExeption | WebDriverException ex) {
-			if (attemptsLeft > 0) {
-				attemptsLeft--;
+			if (robot.getRemainingAttempts() > 0) {
+				robot.setRemainingAttempts(robot.getRemainingAttempts() - 1);
 				try {
 					Thread.sleep(retryDelay);
 				} catch (InterruptedException e) {
@@ -130,7 +130,7 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 				} catch (IOException e) {
 					log.error("Ошибка при закрытии скрипта", e);
 				}
-				log.warn("Будет выполнен {}-й перезапуск проверки ресурса {} по следующей причине: {}", retryAttempts - attemptsLeft, checkUnit.getValue(), ex.getMessage());
+				log.warn("Будет выполнен {}-й перезапуск проверки ресурса {} по следующей причине: {}", retryAttempts - robot.getRemainingAttempts(), checkUnit.getValue(), ex.getMessage());
 				return runWithRetry(robot, checkUnit);
 			} else {
 				throw ex;

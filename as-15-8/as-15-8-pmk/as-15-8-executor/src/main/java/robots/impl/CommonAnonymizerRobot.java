@@ -5,6 +5,8 @@ import common.ExecutorProperties;
 import enums.AccessToolParameter;
 import execution.ExecutionAnonymizerResult;
 import execution.ExecutionJobResult;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -29,6 +31,10 @@ public class CommonAnonymizerRobot extends SeleniumRobot {
     private String anonymizerURL;
     private String xpathField;
     private String xpathButton;
+
+    @Getter
+    @Setter
+    private int remainingAttempts;
 
     protected ExecutionAnonymizerResult message;
 

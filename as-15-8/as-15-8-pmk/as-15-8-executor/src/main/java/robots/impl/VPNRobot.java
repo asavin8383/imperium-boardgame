@@ -5,6 +5,8 @@ import common.ExecutorProperties;
 import enums.AccessToolParameter;
 import execution.ExecutionJobResult;
 import execution.ExecutionVpnJobResult;
+import lombok.Getter;
+import lombok.Setter;
 import org.openqa.selenium.WebDriver;
 import robots.ProxyUtils;
 import robots.exceptions.ExecutionException;
@@ -21,6 +23,10 @@ import static robots.utils.HttpResponseHelper.HttpResponseMeta;
 
 
 public class VPNRobot extends SeleniumRobot {
+
+    @Getter
+    @Setter
+    private int remainingAttempts;
 
     private boolean useEtalon;
     private String etalonProxy;

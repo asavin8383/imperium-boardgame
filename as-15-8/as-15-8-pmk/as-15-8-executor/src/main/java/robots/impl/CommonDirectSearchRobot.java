@@ -6,6 +6,8 @@ import enums.AccessToolParameter;
 import enums.CheckUnitJobResult;
 import execution.ExecutionJobResult;
 import execution.ExecutionPSJobResult;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.openqa.selenium.NoSuchElementException;
@@ -32,6 +34,10 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         PAGINATION,
         CONTINUOUS
     }
+
+    @Getter
+    @Setter
+    private int remainingAttempts;
 
     /** Время ожидания загрузки результатов (сек) */
     private static final int SEARCH_RESULT_TIMEOUT = 3;

@@ -26,4 +26,8 @@ public interface Robot {
 	 * @throws IOException
 	 */
 	void destroy() throws IOException;
+
+	int getRemainingAttempts();
+
+	void setRemainingAttempts(int value);
 }

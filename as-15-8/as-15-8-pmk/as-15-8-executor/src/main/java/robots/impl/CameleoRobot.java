@@ -3,6 +3,8 @@ package robots.impl;
 import checkUnits.CheckUnit;
 import enums.AccessToolParameter;
 import execution.ExecutionJobResult;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -19,6 +21,10 @@ import java.util.Map;
 public class CameleoRobot extends AnonymizerRobot {
 
 	private static final String CAMELEO_URL = "http://www.cameleo.xyz";
+
+    @Getter
+    @Setter
+    private int remainingAttempts;
 	
 	public CameleoRobot(Map<AccessToolParameter, String> scriptParams)  {
 		super(scriptParams);

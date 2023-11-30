@@ -3,6 +3,8 @@ package robots.impl;
 import checkUnits.CheckUnit;
 import enums.AccessToolParameter;
 import execution.ExecutionJobResult;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.*;
 import robots.exceptions.ExecutionException;
@@ -23,6 +25,10 @@ import static robots.utils.ScriptUtils.getTextOrDefault;
 
 @Slf4j
 public class HideMyAssRobot extends AnonymizerRobot {
+
+    @Getter
+    @Setter
+    private int remainingAttempts;
 	
 	private static final String URL = "https://proxy.hidemyass.com";
 

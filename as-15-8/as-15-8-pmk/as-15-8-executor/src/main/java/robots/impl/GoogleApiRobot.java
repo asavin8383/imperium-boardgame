@@ -4,6 +4,8 @@ import checkUnits.CheckUnit;
 import enums.AccessToolParameter;
 import execution.ExecutionJobResult;
 import execution.ExecutionPSJobResult;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.json.JSONArray;
@@ -28,6 +30,9 @@ import java.util.stream.Collectors;
 @Slf4j
 public class GoogleApiRobot implements Robot{
 
+	@Getter @Setter
+	private int remainingAttempts;
+
 	/** Сервис доступа к REST api */
 	private static RestTemplate restTemplate = new RestTemplate();
 	
@@ -42,7 +47,7 @@ public class GoogleApiRobot implements Robot{
 	private String region;
 	
 	private int searchLimit;
-	
+
 	public GoogleApiRobot(Map<AccessToolParameter, String> scriptParams) {
 		this.searchSystemID = scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_ID);
 		this.key = scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_KEY);
