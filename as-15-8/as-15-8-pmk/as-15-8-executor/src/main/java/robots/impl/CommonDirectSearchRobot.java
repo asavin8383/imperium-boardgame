@@ -307,7 +307,11 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
                 String content = ScriptUtils.getPageSource(driver).pageSource;
                 if(content==null) {
                     // Завис скрипт, ставим сомнительный результат
-                    return Optional.of(createMessage(false, CheckUnitJobResult.DOUBTFUL));
+                    if (throwExceptionByCaptchaOrBadIP) {
+                        throw new BadIP_ExecutionExeption(String.format("ПС выдала BAD IP на url: %s", checkUnit.getValue()));
+                    } else {
+                        return Optional.of(createMessage(false, CheckUnitJobResult.DOUBTFUL));
+                    }
                 }
                 //log.info("Контент страницы: {}", content);
                 log.debug("Регулярное выражение для проверки: {}", resultNotFoundRegexp);
