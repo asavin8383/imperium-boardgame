@@ -3,6 +3,7 @@ package service.impl;
 import checkUnits.CheckUnit;
 import checkUnits.CheckUnitJob;
 import checkUnits.CheckUnitType;
+import common.ExecutorProperties;
 import enums.AccessToolUnit;
 import execution.ExecutionJobResult;
 import lombok.RequiredArgsConstructor;
@@ -16,11 +17,13 @@ import robots.Robot;
 import robots.exceptions.BadIP_ExecutionExeption;
 import robots.exceptions.Captcha_ExecutionException;
 import robots.exceptions.ExecutionException;
+import robots.exceptions.Timeout_ExecutionException;
 import robots.factory.RobotsFactory;
 import service.CheckUnitVerificationService;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.*;
 
 /**
  * Сервис управления роботами Selenium
@@ -35,14 +38,20 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 	/** Список роботов */
 	private final RobotsFactory robotsFactory;
 	
-    private volatile Set<Robot> robots = new HashSet<>();
+    private volatile Set<Robot> robots = ConcurrentHashMap.newKeySet();
     
     private boolean isRunning = false;
+
+	private final ExecutorProperties executorProps;
 
 	@Value("${retryExecution.maxAttempts}")
 	private int retryAttempts;
 	@Value("${retryExecution.maxDelay}")
 	private int retryDelay;
+
+	public int getJobTimeout(){
+		return Optional.ofNullable(executorProps.getExecutor().getTimeout()).orElse(180);
+	}
 
     public Map<AccessToolUnit, List<CheckUnitType>> getSupportedTypes() {
     	return new HashMap<AccessToolUnit, List<CheckUnitType>>(){{
@@ -77,7 +86,7 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 			boolean needToStop = true;
 			try{
 				robot.setRemainingAttempts(robot.getRemainingAttempts() - 1);
-				message = runWithRetry(robot, checkUnitJob.getCheckUnit());
+				message = runWithTimeOut(robot, checkUnitJob.getCheckUnit());
 			} catch (Exception ex) {
 				if(ex instanceof ExecutionException) {
 					if(ex instanceof Captcha_ExecutionException  || ex instanceof BadIP_ExecutionExeption) {
@@ -109,7 +118,7 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 		}
 	}
 
-	public ExecutionJobResult runWithRetry(Robot robot, CheckUnit checkUnit) {
+	private ExecutionJobResult runWithRetry(Robot robot, CheckUnit checkUnit) {
 		try {
 			log.info("Запуск {}-й попытки проверки ресурса: {}", retryAttempts - robot.getRemainingAttempts(), checkUnit.getValue());
 			boolean throwExceptionByCaptchaOrBadIP = true;
@@ -117,7 +126,7 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 				throwExceptionByCaptchaOrBadIP = false;
 			}
 			return robot.run(checkUnit, throwExceptionByCaptchaOrBadIP);
-		} catch (Captcha_ExecutionException | BadIP_ExecutionExeption | WebDriverException ex) {
+		} catch (Captcha_ExecutionException | BadIP_ExecutionExeption | WebDriverException | Timeout_ExecutionException ex) {
 			if (robot.getRemainingAttempts() > 0) {
 				log.warn("Будет выполнен {}-й перезапуск проверки ресурса {} по следующей причине: {}", retryAttempts - robot.getRemainingAttempts(), checkUnit.getValue(), ex.getMessage());
 				robot.setRemainingAttempts(robot.getRemainingAttempts() - 1);
@@ -131,12 +140,28 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 				} catch (IOException e) {
 					log.error("Ошибка при закрытии скрипта", e);
 				}
-				return runWithRetry(robot, checkUnit);
+				return runWithTimeOut(robot, checkUnit);
 			} else {
 				throw ex;
 			}
 
 		}
+	}
+	public ExecutionJobResult runWithTimeOut(Robot robot, CheckUnit checkUnit) {
+		return CompletableFuture
+			.supplyAsync(() -> runWithRetry(robot, checkUnit))
+			.applyToEither(timeoutAfter(getJobTimeout(), TimeUnit.SECONDS), (result) -> result)
+			.exceptionally(throwable -> {
+				throw new CompletionException(throwable);
+			})
+			.join();
+	}
+
+	private <T> CompletableFuture<T> timeoutAfter(long timeout, TimeUnit unit) {
+		CompletableFuture<T> result = new CompletableFuture<>();
+		ScheduledExecutorService timeoutService = Executors.newSingleThreadScheduledExecutor();
+		timeoutService.schedule(() -> result.completeExceptionally(new Timeout_ExecutionException()), timeout, unit);
+		return result;
 	}
 	
 	@Override
