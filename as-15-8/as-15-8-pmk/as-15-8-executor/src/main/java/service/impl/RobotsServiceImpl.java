@@ -111,7 +111,7 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 			log.info("Робот успешно завершил работу: "+robotName);
 			return message;
 		} catch(Exception ex) {
-            if(ex instanceof ExecutionException)
+            if(ex instanceof ExecutionException || ex instanceof CompletionException)
                 throw ex;
             else
                 throw new ExecutionException("Ошибка при выполнении скрипта робота", ex);
@@ -126,7 +126,11 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 				throwExceptionByCaptchaOrBadIP = false;
 			}
 			return robot.run(checkUnit, throwExceptionByCaptchaOrBadIP);
-		} catch (Captcha_ExecutionException | BadIP_ExecutionExeption | WebDriverException | Timeout_ExecutionException ex) {
+		} catch (Captcha_ExecutionException | BadIP_ExecutionExeption | WebDriverException | CompletionException ex) {
+			//Берём только те CompletionException, внутри которых лежит Timeout_ExecutionException
+			if (ex.getCause() == null || !(ex instanceof CompletionException) || !(ex.getCause() instanceof Timeout_ExecutionException)) {
+				throw ex;
+			}
 			if (robot.getRemainingAttempts() > 0) {
 				log.warn("Будет выполнен {}-й перезапуск проверки ресурса {} по следующей причине: {}", retryAttempts - robot.getRemainingAttempts(), checkUnit.getValue(), ex.getMessage());
 				robot.setRemainingAttempts(robot.getRemainingAttempts() - 1);
