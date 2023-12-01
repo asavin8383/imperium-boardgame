@@ -14,10 +14,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.listener.AbstractMessageListenerContainer;
 import org.springframework.stereotype.Service;
 import robots.Robot;
-import robots.exceptions.BadIP_ExecutionExeption;
-import robots.exceptions.Captcha_ExecutionException;
 import robots.exceptions.ExecutionException;
-import robots.exceptions.Timeout_ExecutionException;
+import robots.exceptions.*;
 import robots.factory.RobotsFactory;
 import service.CheckUnitVerificationService;
 
@@ -126,11 +124,7 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 				throwExceptionByCaptchaOrBadIP = false;
 			}
 			return robot.run(checkUnit, throwExceptionByCaptchaOrBadIP);
-		} catch (Captcha_ExecutionException | BadIP_ExecutionExeption | WebDriverException | CompletionException ex) {
-			//Берём только те CompletionException, внутри которых лежит Timeout_ExecutionException
-			if (ex.getCause() == null || !(ex instanceof CompletionException) || !(ex.getCause() instanceof Timeout_ExecutionException)) {
-				throw ex;
-			}
+		} catch (Captcha_ExecutionException | BadIP_ExecutionExeption | WebDriverException | Timeout_ExecutionException ex) {
 			if (robot.getRemainingAttempts() > 0) {
 				log.warn("Будет выполнен {}-й перезапуск проверки ресурса {} по следующей причине: {}", retryAttempts - robot.getRemainingAttempts(), checkUnit.getValue(), ex.getMessage());
 				robot.setRemainingAttempts(robot.getRemainingAttempts() - 1);
@@ -152,13 +146,35 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 		}
 	}
 	public ExecutionJobResult runWithTimeOut(Robot robot, CheckUnit checkUnit) {
-		return CompletableFuture
-			.supplyAsync(() -> runWithRetry(robot, checkUnit))
-			.applyToEither(timeoutAfter(getJobTimeout(), TimeUnit.SECONDS), (result) -> result)
-			.exceptionally(throwable -> {
-				throw new CompletionException(throwable);
-			})
-			.join();
+		try {
+			return CompletableFuture
+				.supplyAsync(() -> runWithRetry(robot, checkUnit))
+				.applyToEither(timeoutAfter(getJobTimeout(), TimeUnit.SECONDS), (result) -> result)
+				.exceptionally(throwable -> {
+					throw new CompletionException(throwable);
+				})
+				.join();
+		} catch (CompletionException ex) {
+			Throwable te = ex;
+			while(te.getCause() != null && te instanceof CompletionException) {
+				te = te.getCause();
+			}
+			if (te instanceof Timeout_ExecutionException){
+				throw (Timeout_ExecutionException)te;
+			}
+			else if(te instanceof Cancel_ExecutionException) {
+				throw (Cancel_ExecutionException)te;
+			}
+			else if(te instanceof Captcha_ExecutionException) {
+				throw (Captcha_ExecutionException)te;
+			}
+			else if(te instanceof BadIP_ExecutionExeption) {
+				throw (BadIP_ExecutionExeption)te;
+			}
+			else {
+				throw (ExecutionException)te;
+			}
+		}
 	}
 
 	private <T> CompletableFuture<T> timeoutAfter(long timeout, TimeUnit unit) {
