@@ -4,6 +4,7 @@ import common.ApplicationConfiguration;
 import common.ExecutorProperties;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebDriver;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,16 +23,26 @@ import java.io.IOException;
 public class TestScreenshot {
 
     @Test
-    public void testScreenshot() {
+    public void testScreenshot() throws InterruptedException {
 
         WebDriver driver = DriverFactory.createDriver(
                 ExecutorProperties.getSeleniumHubUrl(),
                 Platform.ANY,
                 "chrome",
-                "119.0"
+                "undetected_119",
+                "http://proxy.eclsoft.ru:3128",
+                false
         );
 
-        driver.get("https://google.com");
+        String url = "https://nowsecure.nl";
+//        driver.get(url);
+
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        js.executeScript("window.open('" + url + "', '_blank');");
+        Thread.sleep(3000);
+        driver.switchTo().window(driver.getWindowHandles().toArray()[1].toString());
+
+        Thread.sleep(5000);
 
         byte[] screen = ScriptUtils.getScreenshot(driver);
 
@@ -41,5 +52,6 @@ public class TestScreenshot {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        driver.close();
     }
 }

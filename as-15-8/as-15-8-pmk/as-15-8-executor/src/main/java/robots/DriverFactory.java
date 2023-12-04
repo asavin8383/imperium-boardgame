@@ -74,11 +74,9 @@ public class DriverFactory {
 
 		ChromeOptions options = new ChromeOptions();
 
-		//setLoadExtensions(options, Collections.singletonList(ChromeSettings.getScreenshotExtension()));
-		addScreenshotExtension(options);
-
 		setOptimalChromeOptions(options);
-        setChromeAnonimyzerParams(options);
+		setOptionsForAnonymization(options);
+		addScreenshotExtension(options);
 
 		if (enableLog){
 			LoggingPreferences logPrefs = new LoggingPreferences();
@@ -108,8 +106,10 @@ public class DriverFactory {
 
         ChromeOptions options = new ChromeOptions();
 		setOptimalChromeOptions(options);
+		setOptionsForAnonymization(options);
 		addScreenshotExtension(options);
 		cpb.setCapability(ChromeOptions.CAPABILITY, options);
+
 		WebDriver driver = new RemoteWebDriver(hubURL, cpb);
 		ScriptUtils.openScreenshotExtension(driver);
 		return driver;
@@ -130,11 +130,29 @@ public class DriverFactory {
 		options.addArguments("--enable-experimental-web-platform-features");
 		options.addArguments("--enable-features=TemporaryUnexpireFlagsM76");
 		options.addArguments("--disable-features=OmniboxUIExperimentHideSteadyStateUrlScheme,OmniboxUIExperimentHideSteadyStateUrlTrivialSubdomains");
+
+		options.addArguments(
+				"--no-default-browser-check",
+				"--no-first-run",
+				"--no-sandbox",
+				"--test-type",
+				"--window-size=1920,1080"
+		);
 	}
 
-	private static void setChromeAnonimyzerParams(ChromeOptions options){
-        options.setExperimentalOption("excludeSwitches", Collections.singletonList("enable-automation"));
-    }
+	private static void setOptionsForAnonymization(ChromeOptions options){
+		options.setExperimentalOption("excludeSwitches", Collections.singletonList("enable-automation"));
+
+		options.addArguments(
+				"--no-default-browser-check",
+				"--no-first-run",
+				"--no-sandbox",
+				"--test-type",
+				"--window-size=1920,1080",
+				"--lang=ru-RU",
+				"--user-data-dir=/home/selenium/chrome_profile"
+		);
+	}
 
 	/**
 	 * Метод создания параметров драйвера
