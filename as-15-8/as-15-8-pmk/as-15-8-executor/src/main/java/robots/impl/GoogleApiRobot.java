@@ -56,7 +56,7 @@ public class GoogleApiRobot implements Robot{
 	}
 
 	@Override
-	public ExecutionJobResult run(CheckUnit checkUnit, boolean throwExceptionByCaptchaOrBadIP) throws ExecutionException {
+	public ExecutionJobResult run(CheckUnit checkUnit, long webDriverTimeout, boolean throwExceptionByCaptchaOrBadIP) throws ExecutionException {
 		try {
 			EqualityTest test = EqualityTest.forCheckUnit(checkUnit);
 			Map<String, List<String>> urls = searchUrlsInGoogle(checkUnit.getValue());

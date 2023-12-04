@@ -19,6 +19,7 @@ import robots.exceptions.ExecutionException;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Скрипт робота проверки ПС/ПАСД
@@ -54,9 +55,10 @@ public abstract class SeleniumRobot implements Robot {
 	}
 
 	@Override
-	public ExecutionJobResult run(CheckUnit checkUnit, boolean throwExceptionByCaptchaOrBadIP) throws ExecutionException {
+	public ExecutionJobResult run(CheckUnit checkUnit, long webDriverTimeout, boolean throwExceptionByCaptchaOrBadIP) throws ExecutionException {
 		try {
 			this.driver = createDriver(proxy, enableLog, checkUnit.getValue());
+			driver.manage().timeouts().setScriptTimeout(webDriverTimeout, TimeUnit.SECONDS);
 			return execute(checkUnit, throwExceptionByCaptchaOrBadIP);
 		} catch (CancellationException ex) {
 			throw new Cancel_ExecutionException(ex);

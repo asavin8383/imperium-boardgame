@@ -3,6 +3,7 @@ package service.impl;
 import checkUnits.CheckUnit;
 import checkUnits.CheckUnitJob;
 import checkUnits.CheckUnitType;
+import common.ExecutorProperties;
 import enums.AccessToolUnit;
 import execution.ExecutionJobResult;
 import lombok.RequiredArgsConstructor;
@@ -19,8 +20,10 @@ import robots.exceptions.ExecutionException;
 import robots.factory.RobotsFactory;
 import service.CheckUnitVerificationService;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Сервис управления роботами Selenium
@@ -34,8 +37,10 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 	
 	/** Список роботов */
 	private final RobotsFactory robotsFactory;
+
+	private final ExecutorProperties executorProps;
 	
-    private volatile Set<Robot> robots = new HashSet<>();
+    private volatile Set<Robot> robots = ConcurrentHashMap.newKeySet();
     
     private boolean isRunning = false;
 
@@ -43,6 +48,23 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 	private int retryAttempts;
 	@Value("${retryExecution.maxDelay}")
 	private int retryDelay;
+	long webdriverTimeout;
+
+	@PostConstruct
+	private void countTimeout() {
+		//Рассчитываем таймаут исходя из таймаута сервиса executor
+		long timeout = 30;
+		if (retryAttempts > 0) {
+			long countTimeout = (long) ((Optional.ofNullable(executorProps.getExecutor().getTimeout()).orElse(180) * 0.9 - (retryAttempts - 1) * retryDelay) / retryAttempts);
+			if (countTimeout > timeout) {
+				timeout = countTimeout;
+
+			}
+		}
+		webdriverTimeout = timeout;
+		log.info("Рассчитанный таймаут одной проверки составит {} секунд", webdriverTimeout);
+	}
+
 
     public Map<AccessToolUnit, List<CheckUnitType>> getSupportedTypes() {
     	return new HashMap<AccessToolUnit, List<CheckUnitType>>(){{
@@ -76,7 +98,6 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 			ExecutionJobResult message;
 			boolean needToStop = true;
 			try{
-				robot.setRemainingAttempts(robot.getRemainingAttempts() - 1);
 				message = runWithRetry(robot, checkUnitJob.getCheckUnit());
 			} catch (Exception ex) {
 				if(ex instanceof ExecutionException) {
@@ -111,18 +132,18 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 
 	public ExecutionJobResult runWithRetry(Robot robot, CheckUnit checkUnit) {
 		try {
+			robot.setRemainingAttempts(robot.getRemainingAttempts() - 1);
 			log.info("Запуск {}-й попытки проверки ресурса: {}", retryAttempts - robot.getRemainingAttempts(), checkUnit.getValue());
 			boolean throwExceptionByCaptchaOrBadIP = true;
-			if (robot.getRemainingAttempts()==1) {
+			if (robot.getRemainingAttempts()==0) {
 				throwExceptionByCaptchaOrBadIP = false;
 			}
-			return robot.run(checkUnit, throwExceptionByCaptchaOrBadIP);
+			return robot.run(checkUnit, webdriverTimeout, throwExceptionByCaptchaOrBadIP);
 		} catch (Captcha_ExecutionException | BadIP_ExecutionExeption | WebDriverException ex) {
 			if (robot.getRemainingAttempts() > 0) {
 				log.warn("Будет выполнен {}-й перезапуск проверки ресурса {} по следующей причине: {}", retryAttempts - robot.getRemainingAttempts(), checkUnit.getValue(), ex.getMessage());
-				robot.setRemainingAttempts(robot.getRemainingAttempts() - 1);
 				try {
-					Thread.sleep(retryDelay);
+					Thread.sleep(retryDelay * 1000);
 				} catch (InterruptedException e) {
 					throw new RuntimeException(e);
 				}

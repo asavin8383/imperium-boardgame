@@ -15,15 +15,13 @@ import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
-import robots.exceptions.Timeout_ExecutionException;
-import service.impl.RobotsServiceImpl;
 
 import javax.annotation.PostConstruct;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @Slf4j
@@ -85,29 +83,7 @@ public class JobsService {
                 checkUnitVerificationServiceFactory
                         .getService(job);
 
-        ExecutionJobResult executionJobResult;
-
-        if (service instanceof RobotsServiceImpl && getJobTimeout() >= 0){
-            executionJobResult = CompletableFuture
-                    .supplyAsync(() -> service.run(key.getJobId(), job))
-                    .applyToEither(timeoutAfter(getJobTimeout(), TimeUnit.SECONDS), (result) -> result)
-                    .exceptionally(throwable -> {
-                        service.stop();
-                        throw new CompletionException(throwable);
-                    })
-                    .join();
-        }
-        else {
-            executionJobResult = service.run(key.getJobId(), job);
-        }
-        return executionJobResult;
-    }
-
-    private <T> CompletableFuture<T> timeoutAfter(long timeout, TimeUnit unit) {
-        CompletableFuture<T> result = new CompletableFuture<>();
-        ScheduledExecutorService timeoutService = Executors.newSingleThreadScheduledExecutor();
-        timeoutService.schedule(() -> result.completeExceptionally(new Timeout_ExecutionException()), timeout, unit);
-        return result;
+        return service.run(key.getJobId(), job);
     }
 
     public synchronized boolean isJobActual(Long arrangementId, Long version, LocalDateTime jobTime) {
