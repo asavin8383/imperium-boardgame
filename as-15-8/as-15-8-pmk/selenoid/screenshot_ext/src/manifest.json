@@ -1,0 +1,29 @@
+{
+  "background": {
+    "persistent": true,
+    "scripts": [
+      "javascript/background.js"
+    ]
+  },
+  "browser_action": {
+    "default_popup": "popup.html"
+  },
+  "converted_from_user_script": true,
+  "description": "Take a desktop screenshot for AS 15.8",
+  "manifest_version": 2,
+  "name": "Screenshot by AS 15.8",
+  "permissions": [
+    "activeTab",
+    "background",
+    "desktopCapture",
+    "webNavigation",
+    "tabs",
+    "<all_urls>",
+    "contextMenus"
+  ],
+  "short_name": "Screenshot by AS 15.8",
+  "version": "1.0",
+  "web_accessible_resources": [
+    "javascript/*"
+  ]
+}
