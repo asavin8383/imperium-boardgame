@@ -207,7 +207,17 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
 
     @Override
     public ExecutionJobResult execute(CheckUnit checkUnit, boolean throwExceptionByCaptchaOrBadIP) throws ExecutionException {
-        driver.get(searchSystemUrl);
+        //driver.get(searchSystemUrl);
+
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        js.executeScript("window.open('" + searchSystemUrl + "', '_blank');");
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        driver.switchTo().window(driver.getWindowHandles().toArray()[driver.getWindowHandles().size()-1].toString());
+
         equalityTest = EqualityTest.forCheckUnit(checkUnit);
 
         if (captcha())
