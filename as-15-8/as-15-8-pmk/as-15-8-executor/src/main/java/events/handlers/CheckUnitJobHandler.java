@@ -25,7 +25,6 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.TimeZone;
-import java.util.concurrent.CompletionException;
 
 @Service
 @EnableBinding(ExecutorChannels.class)
@@ -97,9 +96,9 @@ public class CheckUnitJobHandler {
             Integer partitionId,
             Date startTime) {
         Throwable te = ex;
-        while(te.getCause() != null && te instanceof CompletionException) {
-            te = te.getCause();
-        }
+//        while(te.getCause() != null && te instanceof CompletionException) {
+//            te = te.getCause();
+//        }
 
         try {
             sendCheckJobErrorNotification(te, key, job.getCheckUnit(), partitionId, startTime);
