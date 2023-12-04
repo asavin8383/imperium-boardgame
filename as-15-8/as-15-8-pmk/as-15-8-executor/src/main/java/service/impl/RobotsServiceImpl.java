@@ -98,7 +98,6 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 			ExecutionJobResult message;
 			boolean needToStop = true;
 			try{
-				robot.setRemainingAttempts(robot.getRemainingAttempts() - 1);
 				message = runWithRetry(robot, checkUnitJob.getCheckUnit());
 			} catch (Exception ex) {
 				if(ex instanceof ExecutionException) {
@@ -133,17 +132,16 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 
 	public ExecutionJobResult runWithRetry(Robot robot, CheckUnit checkUnit) {
 		try {
+			robot.setRemainingAttempts(robot.getRemainingAttempts() - 1);
 			log.info("Запуск {}-й попытки проверки ресурса: {}", retryAttempts - robot.getRemainingAttempts(), checkUnit.getValue());
 			boolean throwExceptionByCaptchaOrBadIP = true;
-			if (robot.getRemainingAttempts()==1) {
+			if (robot.getRemainingAttempts()==0) {
 				throwExceptionByCaptchaOrBadIP = false;
 			}
-
 			return robot.run(checkUnit, webdriverTimeout, throwExceptionByCaptchaOrBadIP);
 		} catch (Captcha_ExecutionException | BadIP_ExecutionExeption | WebDriverException ex) {
 			if (robot.getRemainingAttempts() > 0) {
 				log.warn("Будет выполнен {}-й перезапуск проверки ресурса {} по следующей причине: {}", retryAttempts - robot.getRemainingAttempts(), checkUnit.getValue(), ex.getMessage());
-				robot.setRemainingAttempts(robot.getRemainingAttempts() - 1);
 				try {
 					Thread.sleep(retryDelay * 1000);
 				} catch (InterruptedException e) {
