@@ -118,7 +118,7 @@ public class DriverFactory {
     private static void setOptimalChromeOptions(ChromeOptions options){
 		options.addArguments("--start-maximized");
 		options.addArguments("--ignore-certificate-errors");
-		// избавляет от некоторых проблем с таймаутом, рендерингом, но не безопасно!
+
 		options.addArguments("--dns-prefetch-disable");		// отключение предварительной выборки DNS. в теории должно ускорить работу
 		LoggingPreferences logPrefs = new LoggingPreferences();
 		logPrefs.enable( LogType.PERFORMANCE, Level.ALL );
@@ -142,15 +142,19 @@ public class DriverFactory {
 
 	private static void setOptionsForAnonymization(ChromeOptions options){
 		options.setExperimentalOption("excludeSwitches", Collections.singletonList("enable-automation"));
+		options.setExperimentalOption("useAutomationExtension", false);
 
 		options.addArguments(
 				"--no-default-browser-check",
 				"--no-first-run",
 				"--no-sandbox",
 				"--test-type",
+				"--disable-gpu",
 				"--window-size=1920,1080",
-				"--lang=ru-RU",
-				"--user-data-dir=/home/selenium/chrome_profile"
+				"--lang=ru-RU,ru,en-US,en",
+				"--user-data-dir=/home/selenium/chrome_profile",
+				"--disable-blink-features",
+				"--disable-blink-features=AutomationControlled"
 		);
 	}
 
