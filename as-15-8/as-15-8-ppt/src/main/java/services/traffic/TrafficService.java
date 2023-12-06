@@ -34,7 +34,6 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -51,7 +50,6 @@ public class TrafficService {
     private final PodWebClient podWebClient;
     private final DynamicTrafficUnitRepository dynamicTrafficUnitRepository;
     private final ErdiContentJoinRepository erdiContentJoinRepository;
-    private final CustomErdiRepository customErdiRepository;
 
     public Page<TrafficBriefView> getBriefTrafficList(SortingDirection sortingDirection,
                                                       String sortingColumn,
@@ -128,7 +126,7 @@ public class TrafficService {
                 actualizeTrafficCheckUnitsCount(erdiTrafficUnit.getTraffic()));
     }
 
-    private Long getActualTrafficCheckUnitCountFromPod(Long trafficId) {
+    private Long getActualTrafficCheckUnitCount(Long trafficId) {
         try {
             List<Long> erdiIds = trafficRepository.allContentErdiByTrafficId(trafficId);
             return podWebClient.calculateActualCheckUnitCount(erdiIds);
@@ -263,18 +261,6 @@ public class TrafficService {
             if (!exists) return name;
         }
         return TrafficUnitUtils.generateRandomStringBounded();
-    }
-
-    private TrafficUnit fillTrafficUnit(TrafficUnit trafficUnit,
-                                                        Traffic traffic,
-                                                        TrafficUnitType type,
-                                                        AccessToolsCategory category) {
-        String name = TrafficUnitUtils.getNewName(traffic.getName(), type);
-
-        trafficUnit.setName(name);
-        trafficUnit.setCategory(category);
-        trafficUnit.setTraffic(traffic);
-        return trafficUnit;
     }
 
     private Specification<Traffic> createTrafficSpecification(String query, AccessToolType type) {
