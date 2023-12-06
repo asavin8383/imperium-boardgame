@@ -15,14 +15,14 @@ import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import robots.exceptions.BadIP_ExecutionExeption;
-import robots.exceptions.Captcha_ExecutionException;
-import robots.exceptions.ExecutionException;
-import robots.exceptions.TimeoutScriptException;
+import robots.exceptions.*;
 import robots.utils.EqualityTest;
 import robots.utils.ScriptUtils;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -209,14 +209,27 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
     public ExecutionJobResult execute(CheckUnit checkUnit, boolean throwExceptionByCaptchaOrBadIP) throws ExecutionException {
         //driver.get(searchSystemUrl);
 
-        JavascriptExecutor js = (JavascriptExecutor) driver;
-        js.executeScript("window.open('" + searchSystemUrl + "', '_blank');");
         try {
+            //Вставляем случайным образом задержку до 10 секунд для неравномерного запуска проверок
+            Thread.sleep(new Random().nextInt((int)10000));
+
+            JavascriptExecutor js = (JavascriptExecutor) driver;
+            js.executeScript("window.open('" + searchSystemUrl + "', '_blank');");
             Thread.sleep(3000);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
         driver.switchTo().window(driver.getWindowHandles().toArray()[driver.getWindowHandles().size()-1].toString());
+        //Проверим доступность ПС
+        try {
+            checkInternalError();
+        } catch (InternalError_ExecutionException ex) {
+            if (throwExceptionByCaptchaOrBadIP) {
+                throw ex;
+            } else {
+                return createMessage(false, CheckUnitJobResult.INTERNAL_ERROR);
+            }
+        }
 
         equalityTest = EqualityTest.forCheckUnit(checkUnit);
 
@@ -248,7 +261,15 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
             if (checkHintAndSearch(value))
                 return createMessage(true, CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED);
         } else {
-            searchText(value);
+            try {
+                searchText(value);
+            } catch (InternalError_ExecutionException ex) {
+                if (throwExceptionByCaptchaOrBadIP) {
+                    throw ex;
+                } else {
+                    return createMessage(false, CheckUnitJobResult.INTERNAL_ERROR);
+                }
+            }
         }
 
         if (captcha())
@@ -420,8 +441,32 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
     private void searchText(String value) {
         WebElement inputField = driver.findElement(
                 By.xpath(xpathInputField));
-        ScriptUtils.type(inputField, inputDelay, value);
+        long delayRand = inputDelay - new Random().nextInt((int)inputDelay);
+        ScriptUtils.type(inputField, delayRand, value);
         inputField.sendKeys(Keys.ENTER);
+        //Проверим, нет ли ошибки сервера
+        checkInternalError();
+
+    }
+
+    private void checkInternalError() {
+        // получаем URL страницы с результатами поиска
+        String currentUrl = driver.getCurrentUrl();
+
+        try {
+            // создаем объект HttpURLConnection для отправки GET-запроса
+            URL url = new URL(currentUrl);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+
+            // проверяем код ответа сервера
+            int responseCode = connection.getResponseCode();
+            if (responseCode > 500) {
+                throw new InternalError_ExecutionException(String.format("Сервер вернул код %d", responseCode));
+            }
+        } catch (IOException ex) {
+            throw new ExecutionException("Ошибка ввода текста в поисковую строку",ex);
+        }
     }
 
     private boolean checkHintAndSearch(String value) {
