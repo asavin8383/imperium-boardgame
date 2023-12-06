@@ -220,6 +220,16 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
             throw new RuntimeException(e);
         }
         driver.switchTo().window(driver.getWindowHandles().toArray()[driver.getWindowHandles().size()-1].toString());
+        //Проверим доступность ПС
+        try {
+            checkInternalError();
+        } catch (InternalError_ExecutionException ex) {
+            if (throwExceptionByCaptchaOrBadIP) {
+                throw ex;
+            } else {
+                return createMessage(false, CheckUnitJobResult.INTERNAL_ERROR);
+            }
+        }
 
         equalityTest = EqualityTest.forCheckUnit(checkUnit);
 
@@ -434,7 +444,12 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         long delayRand = inputDelay - new Random().nextInt((int)inputDelay);
         ScriptUtils.type(inputField, delayRand, value);
         inputField.sendKeys(Keys.ENTER);
+        //Проверим, нет ли ошибки сервера
+        checkInternalError();
 
+    }
+
+    private void checkInternalError() {
         // получаем URL страницы с результатами поиска
         String currentUrl = driver.getCurrentUrl();
 
@@ -452,7 +467,6 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         } catch (IOException ex) {
             throw new ExecutionException("Ошибка ввода текста в поисковую строку",ex);
         }
-
     }
 
     private boolean checkHintAndSearch(String value) {
