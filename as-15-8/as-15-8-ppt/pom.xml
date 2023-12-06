@@ -129,6 +129,12 @@
             <artifactId>as-15-8-system-mode</artifactId>
             <version>1.0</version>
         </dependency>
+        <dependency>
+            <groupId>commons-validator</groupId>
+            <artifactId>commons-validator</artifactId>
+            <version>1.7</version>
+            <scope>compile</scope>
+        </dependency>
 
     </dependencies>
 	<build>

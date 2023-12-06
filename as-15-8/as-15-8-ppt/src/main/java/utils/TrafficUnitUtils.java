@@ -1,6 +1,7 @@
 package utils;
 
 import lombok.experimental.UtilityClass;
+import model.catalog.AccessToolsCategory;
 import model.enums.TrafficUnitType;
 import model.traffic.Traffic;
 import model.traffic.TrafficUnit;
@@ -60,6 +61,18 @@ public class TrafficUnitUtils {
             buffer.append((char) randomLimitedInt);
         }
         return buffer.toString();
+    }
+
+    public static TrafficUnit fillTrafficUnit(TrafficUnit trafficUnit,
+                                       Traffic traffic,
+                                       TrafficUnitType type,
+                                       AccessToolsCategory category) {
+        String name = getNewName(traffic.getName(), type);
+
+        trafficUnit.setName(name);
+        trafficUnit.setCategory(category);
+        trafficUnit.setTraffic(traffic);
+        return trafficUnit;
     }
 
 }

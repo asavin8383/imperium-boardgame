@@ -6,7 +6,6 @@ import enums.SortingDirection;
 import exceptions.AS_15_8_PPT_Exception;
 import liquibase.util.StringUtils;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import model.catalog.AccessToolsCategory;
 import model.enums.AccessToolType;
 import model.enums.TrafficType;
@@ -41,9 +40,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static utils.TrafficUnitUtils.fillTrafficUnit;
+
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-@Slf4j
 public class TrafficService {
 
     private final TrafficRepository trafficRepository;
@@ -51,6 +51,7 @@ public class TrafficService {
     private final PodWebClient podWebClient;
     private final DynamicTrafficUnitRepository dynamicTrafficUnitRepository;
     private final ErdiContentJoinRepository erdiContentJoinRepository;
+    private final CustomErdiRepository customErdiRepository;
 
     public Page<TrafficBriefView> getBriefTrafficList(SortingDirection sortingDirection,
                                                       String sortingColumn,
@@ -79,7 +80,7 @@ public class TrafficService {
         view.setActualCheckUnitsCount(traffic.getActualCheckUnitsCount());
         view.setErdiCount(traffic.getErdiCount());
 
-        if (traffic.getDynamicTrafficUnits().size()>0)
+        if (traffic.getDynamicTrafficUnits().size() > 0)
             view.setContainsDynamicTraffic(true);
         view.setType(TrafficType.MIXED);
 
@@ -89,7 +90,7 @@ public class TrafficService {
     private long getDynamicTraficErdiCount(Long trafficId) {
         Optional<Traffic> traffic = trafficRepository.findById(trafficId);
         traffic.orElseThrow(() ->
-                new AS_15_8_PPT_Exception("Ошибка при актуализации количества чек юнитов для трафика, трафик с такми id не найден: "+ trafficId));
+                new AS_15_8_PPT_Exception("Ошибка при актуализации количества чек юнитов для трафика, трафик с такми id не найден: " + trafficId));
 
         return dynamicTrafficUnitRepository.findByTraffic(traffic.get()).
                 stream().findFirst().orElseGet(DynamicTrafficUnit::new).getErdiCountAbout();
@@ -99,7 +100,7 @@ public class TrafficService {
 
         Optional<Traffic> traffic = trafficRepository.findById(trafficId);
         traffic.orElseThrow(() ->
-                new AS_15_8_PPT_Exception("Ошибка при актуализации количества чек юнитов для трафика, трафик с такми id не найден: "+ trafficId));
+                new AS_15_8_PPT_Exception("Ошибка при актуализации количества чек юнитов для трафика, трафик с такми id не найден: " + trafficId));
 
         actualizeTrafficCheckUnitsCount(traffic.get());
         actualizeErdiCount(traffic.get());
@@ -127,7 +128,7 @@ public class TrafficService {
                 actualizeTrafficCheckUnitsCount(erdiTrafficUnit.getTraffic()));
     }
 
-    private Long getActualTrafficCheckUnitCount(Long trafficId) {
+    private Long getActualTrafficCheckUnitCountFromPod(Long trafficId) {
         try {
             List<Long> erdiIds = trafficRepository.allContentErdiByTrafficId(trafficId);
             return podWebClient.calculateActualCheckUnitCount(erdiIds);
@@ -179,21 +180,20 @@ public class TrafficService {
         traffic.setName(trafficName);
 
 
+        traffic.getErdiTrafficUnits().add((ErdiTrafficUnit) fillTrafficUnit(new ErdiTrafficUnit(),
+                traffic,
+                TrafficUnitType.FORMAL,
+                category));
 
         traffic.getErdiTrafficUnits().add((ErdiTrafficUnit) fillTrafficUnit(new ErdiTrafficUnit(),
-                                                                                traffic,
-                                                                                TrafficUnitType.FORMAL,
-                                                                                category));
-
-        traffic.getErdiTrafficUnits().add((ErdiTrafficUnit) fillTrafficUnit(new ErdiTrafficUnit(),
-                                                                                traffic,
-                                                                                TrafficUnitType.CUSTOM,
-                                                                                category));
+                traffic,
+                TrafficUnitType.CUSTOM,
+                category));
 
         traffic.getSearchQueryTrafficUnits().add((SearchQueryTrafficUnit) fillTrafficUnit(new SearchQueryTrafficUnit(),
-                                                                                traffic,
-                                                                                TrafficUnitType.TEMPLATE,
-                                                                                category));
+                traffic,
+                TrafficUnitType.TEMPLATE,
+                category));
 
         return convertToFullView(trafficRepository.save(traffic));
     }
@@ -241,7 +241,7 @@ public class TrafficService {
             return Stream.concat(
                     erdiUnits.stream().map(TrafficUnit.class::cast),
                     Stream.concat(searchUnits.stream().map(TrafficUnit.class::cast),
-                    dynamicUnits.stream().map(TrafficUnit.class::cast))
+                            dynamicUnits.stream().map(TrafficUnit.class::cast))
             );
         } else if (erdiUnits != null) {
             return erdiUnits.stream().map(TrafficUnit.class::cast);
@@ -260,7 +260,7 @@ public class TrafficService {
         for (int i = 0; i < Integer.MAX_VALUE; i++) {
             String name = fName.apply(i);
             boolean exists = trafficRepository.existsByName(name);
-            if ( !exists ) return name;
+            if (!exists) return name;
         }
         return TrafficUnitUtils.generateRandomStringBounded();
     }
@@ -336,7 +336,7 @@ public class TrafficService {
             assert ids != null;
             contentIds.addAll(ids);
         });
-        return  contentIds;
+        return contentIds;
     }
 
     public DynamicTrafficUnit upadateFirstDynamicTrafficUnit(Traffic traffic, DynamicTrafficUnit newDynamicTrafficUnit) {
@@ -388,7 +388,7 @@ public class TrafficService {
         return podWebClient.getTrafficUnitContentIdsFiltered(pageable, contentIds);
     }
 
-    
+
     public Page<ObjectNode> getUnsortedContentViewFromPod(ErdiTrafficUnit erdiTrafficUnit, Pageable pageable) {
         Page<ErdiTrafficUnitContent> trafficUnitContentIdsUnsorted =
                 erdiContentJoinRepository

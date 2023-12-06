@@ -48,7 +48,7 @@ public class Traffic implements Serializable {
     private Long erdiCount = 0L;
 
     @OneToMany(mappedBy = "traffic", orphanRemoval = true,
-            cascade = CascadeType.ALL)
+            cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonIgnore
     private List<ErdiTrafficUnit> erdiTrafficUnits = new ArrayList<>();
 
@@ -61,5 +61,9 @@ public class Traffic implements Serializable {
             cascade = CascadeType.ALL)
     @JsonIgnore
     private List<DynamicTrafficUnit> dynamicTrafficUnits = new ArrayList<>();
+
+    public void addErdiTrafficUnit(ErdiTrafficUnit erdiTrafficUnit) {
+        this.erdiTrafficUnits.add(erdiTrafficUnit);
+    }
 
 }

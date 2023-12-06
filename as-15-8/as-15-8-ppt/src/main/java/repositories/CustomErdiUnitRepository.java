@@ -15,7 +15,7 @@ public interface CustomErdiUnitRepository extends JpaRepository<CustomErdiUnit, 
 
     Page<CustomErdiUnit> findByCustomErdiId(Long customErdiId, Pageable pageable);
 
-    @Query ( "select units from CustomErdiUnit units " +
+    @Query("select units from CustomErdiUnit units " +
             " join units.customErdi erdi " +
             " join erdi.erdiTrafficUnits traffic_units " +
             "join traffic_units.traffic traffic " +

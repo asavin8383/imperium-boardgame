@@ -8,26 +8,27 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import model.catalog.AccessToolsCategory;
 import model.enums.SearchQueryReplacePattern;
+import model.enums.TrafficUnitType;
 import model.task.Arrangement;
 import model.task.FormalTask;
-import model.traffic.DynamicTrafficUnit;
-import model.traffic.SearchQueryPattern;
-import model.traffic.SearchQueryPatternContentJoin;
-import model.traffic.Traffic;
+import model.traffic.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
 import repositories.*;
+import services.traffic.CustomErdiService;
+import services.traffic.TrafficService;
 import webClients.PodWebClient;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static utils.TrafficUnitUtils.fillTrafficUnit;
 
 /**
  * Creation date: 05.08.2019
@@ -37,7 +38,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor(onConstructor_={@Autowired})
+@RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class ArrangementService {
 
     private final ArrangementRepo arrangementRepo;
@@ -46,30 +47,33 @@ public class ArrangementService {
     private final CustomErdiUnitRepository customErdiUnitRepository;
     private final SearchQueryPatternRepo searchQueryPatternRepo;
     private final DynamicTrafficUnitRepository dynamicTrafficUnitRepository;
+    private final CustomErdiService customErdiService;
+    private final AccessToolsCategoriesRepo accessToolsCategoriesRepo;
+    private final TrafficService trafficService;
 
-    public Arrangement saveArrangement(Arrangement arrangement, FormalTask formalTask){
+    public Arrangement saveArrangement(Arrangement arrangement, FormalTask formalTask) {
         arrangement.setFormalTask(formalTask);
         return arrangementRepo.save(arrangement);
     }
 
-    public Arrangement getById(Long id){
+    public Arrangement getById(Long id) {
         return arrangementRepo.findById(id)
-            .orElseThrow(() -> AS_15_8_PPT_Exception.logAndGet(log, String.format("Мероприятие с ИД: {} не было найдено в БД ППТ", id)));
+                .orElseThrow(() -> AS_15_8_PPT_Exception.logAndGet(log, String.format("Мероприятие с ИД: {} не было найдено в БД ППТ", id)));
     }
 
-    public void updateArrangementPlanInfo(Arrangement arrangement){
-        if(arrangement.getPlannedStartTime()==null || arrangement.getPlannedEndTime() == null){
+    public void updateArrangementPlanInfo(Arrangement arrangement) {
+        if (arrangement.getPlannedStartTime() == null || arrangement.getPlannedEndTime() == null) {
             throw AS_15_8_PPT_Exception.logAndGet(log, String.format("Ошибка изменения планового времени мероприятия. Некорректные входные параметры: дата начала - %s, дата окончания - %s", arrangement.getPlannedStartTime(), arrangement.getPlannedEndTime()));
         }
         Arrangement updateArrangement =
                 arrangementRepo.findById(arrangement.getId())
-                .orElseThrow(() -> new AS_15_8_PPT_Exception("Ошибка изменения планового времени мероприятия. Мероприятие с ИД: " + arrangement.getId() + " не было найдено в БД"));
+                        .orElseThrow(() -> new AS_15_8_PPT_Exception("Ошибка изменения планового времени мероприятия. Мероприятие с ИД: " + arrangement.getId() + " не было найдено в БД"));
         updateArrangement.setPlannedStartTime(arrangement.getPlannedStartTime());
         updateArrangement.setPlannedEndTime(arrangement.getPlannedEndTime());
         arrangementRepo.save(updateArrangement);
     }
 
-    public Page<Arrangement> findPageByStatus(ExecutionStatus status, PageRequest page){
+    public Page<Arrangement> findPageByStatus(ExecutionStatus status, PageRequest page) {
         return arrangementRepo.findPageByStatus(ExecutionStatus.FORMED, page);
     }
 
@@ -126,7 +130,7 @@ public class ArrangementService {
         }
     }
 
-    private List<CheckUnit> getCustomErdiCheckUnits(Long arrangementId){
+    private List<CheckUnit> getCustomErdiCheckUnits(Long arrangementId) {
         return customErdiUnitRepository
                 .findByArrangementId(arrangementId)
                 .stream()
@@ -134,7 +138,7 @@ public class ArrangementService {
                 .collect(Collectors.toList());
     }
 
-    private List<CheckUnit> getSearchTemplateCheckUnits(Long arrangementId){
+    private List<CheckUnit> getSearchTemplateCheckUnits(Long arrangementId) {
         List<CheckUnit> checkUnits = new ArrayList<>();
         List<SearchQueryPattern> searchQueryPatterns =
                 searchQueryPatternRepo
@@ -144,7 +148,7 @@ public class ArrangementService {
             List<CheckUnit> erdiCheckUnits = fillErdi(searchQueryPattern);
             List<CheckUnitJoinSearchPhrase> checkUnitJoinSearchPhrases = new ArrayList<>();
             //Собираем суррогатную коллекцию из ЕРДИ и фраз кросс-джойном
-            if (erdiCheckUnits.size() > 0){
+            if (erdiCheckUnits.size() > 0) {
                 log.info("Заполняем шаблон записями ЕРДИ для мероприятия {}", arrangementId);
                 //если список поисковых фраз непустой, делаем кросс-джойн
                 if (searchQueryPattern.getSearchPhrases().size() > 0) {
@@ -192,7 +196,7 @@ public class ArrangementService {
     private List<CheckUnit> fillErdi(SearchQueryPattern searchQueryPattern) {
         List<CheckUnit> checkUnits = new ArrayList<>();
         String patternString = searchQueryPattern.getQueryPattern();
-        if(patternString != null && patternString.contains(SearchQueryReplacePattern.ERDI.getPattern())){
+        if (patternString != null && patternString.contains(SearchQueryReplacePattern.ERDI.getPattern())) {
             List<Long> contentIds = searchQueryPattern.getFormalErdiList()
                     .stream()
                     .mapToLong(SearchQueryPatternContentJoin::getContentId)
@@ -203,7 +207,7 @@ public class ArrangementService {
                     .flatMap(checkUnitList -> Flux.fromIterable(Objects.requireNonNull(checkUnitList)))
                     .collectList()
                     .block();
-            if(podCheckUnits != null) {
+            if (podCheckUnits != null) {
                 checkUnits.addAll(podCheckUnits);
             }
             searchQueryPattern.getCustomErdiList().forEach(
@@ -216,7 +220,7 @@ public class ArrangementService {
         return checkUnits;
     }
 
-    private CheckUnit createFromJoin(String pattern, CheckUnitJoinSearchPhrase join){
+    private CheckUnit createFromJoin(String pattern, CheckUnitJoinSearchPhrase join) {
         return new CheckUnit(
                 null,
                 CheckUnitType.SEARCH_PHRASE,
@@ -225,6 +229,45 @@ public class ArrangementService {
                         .replace(SearchQueryReplacePattern.EXPRESSION.getPattern(), join.getSearchPhrase() == null ? "" : join.getSearchPhrase())
         );
     }
+
+    public Traffic updateTrafficFromFile(Long arrangementId, MultipartFile file) {
+
+        Arrangement arrangement = arrangementRepo.findById(arrangementId).orElseThrow(() ->
+                new AS_15_8_PPT_Exception("Arranegemnt не найден по id: " + arrangementId));
+
+        Traffic traffic = trafficRepository.findById(arrangement.getTrafficId()).orElseThrow(() ->
+                new AS_15_8_PPT_Exception("Трафик не найден по id: " + arrangement.getTrafficId()));
+
+        List<String> existingCustomErdisValues = customErdiUnitRepository
+                .findByArrangementId(arrangementId)
+                .stream()
+                .map(CustomErdiUnit::getValue)
+                .collect(Collectors.toList());
+
+//        List<String> existingCustomErdisValues = traffic.getErdiTrafficUnits().stream()
+//                .flatMap(erdiTrafficUnit -> erdiTrafficUnit.getCustomErdiList().stream()
+//                        .flatMap(customErdi -> customErdi.getCustomErdiUnits().stream()))
+//                .map(CustomErdiUnit::getValue)
+//                .collect(Collectors.toList());
+
+        Set<CustomErdi> customErdisFromFile = customErdiService.createCustomErdisFromFile(file, existingCustomErdisValues);
+
+        AccessToolsCategory category = accessToolsCategoriesRepo.findOneByOrderByIdDesc();
+
+        ErdiTrafficUnit erdiTrafficUnit = (ErdiTrafficUnit) fillTrafficUnit(new ErdiTrafficUnit(),
+                traffic,
+                TrafficUnitType.CUSTOM,
+                category);
+
+        erdiTrafficUnit.setCustomErdiList(customErdisFromFile);
+
+        traffic.addErdiTrafficUnit(erdiTrafficUnit);
+        Traffic save = trafficRepository.save(traffic);
+        trafficService.actualizeTraffic(save.getId());
+        return save;
+
+    }
+
 
     @Data
     @AllArgsConstructor
