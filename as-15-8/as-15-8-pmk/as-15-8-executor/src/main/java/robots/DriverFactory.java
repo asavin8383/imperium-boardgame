@@ -76,6 +76,7 @@ public class DriverFactory {
 
 		setOptimalChromeOptions(options);
 		setOptionsForAnonymization(options);
+		addStealthExtension(options);
 		addScreenshotExtension(options);
 
 		if (enableLog){
@@ -86,7 +87,7 @@ public class DriverFactory {
 		}
 
 		cpb.setCapability(ChromeOptions.CAPABILITY, options);
-		WebDriver driver = new RemoteWebDriver(hubURL, cpb);
+		RemoteWebDriver driver = new RemoteWebDriver(hubURL, cpb);
 		ScriptUtils.openScreenshotExtension(driver);
 		return driver;
 	}
@@ -107,6 +108,7 @@ public class DriverFactory {
         ChromeOptions options = new ChromeOptions();
 		setOptimalChromeOptions(options);
 		setOptionsForAnonymization(options);
+		addStealthExtension(options);
 		addScreenshotExtension(options);
 		cpb.setCapability(ChromeOptions.CAPABILITY, options);
 
@@ -149,7 +151,6 @@ public class DriverFactory {
 				"--no-first-run",
 				"--no-sandbox",
 				"--test-type",
-				"--disable-gpu",
 				"--window-size=1920,1080",
 				"--lang=ru-RU,ru,en-US,en",
 				"--user-data-dir=/home/selenium/chrome_profile",
@@ -180,11 +181,19 @@ public class DriverFactory {
 	}
 
 	private static void addScreenshotExtension(ChromeOptions options) {
+		addExtension("screenshot_ext.crx", options);
+	}
+
+	private static void addStealthExtension(ChromeOptions options) {
+		addExtension("stealth_ext.crx", options);
+	}
+
+	private static void addExtension(String extName, ChromeOptions options) {
 		try{
-			try(InputStream extIS = DriverFactory.class.getClassLoader().getResourceAsStream("screenshot_ext.crx")){
+			try(InputStream extIS = DriverFactory.class.getClassLoader().getResourceAsStream(extName)){
 
 				if(extIS == null){
-					throw new ExecutionException("Ошибка! Не найден файл с расширением для скриншота screenshot_ext.crx");
+					throw new ExecutionException("Ошибка! Не найден файл с расширением " + extName);
 				}
 
 				ByteArrayOutputStream extOS = new ByteArrayOutputStream();
@@ -197,11 +206,11 @@ public class DriverFactory {
 				try {
 					options.addEncodedExtensions(Base64.getEncoder().encodeToString(extOS.toByteArray()));
 				} catch (Exception ex) {
-					throw new ExecutionException("Ошибка загрузки расширения для скриншота", ex);
+					throw new ExecutionException("Ошибка загрузки расширения" + extName, ex);
 				}
 			}
 		} catch (IOException ex) {
-			throw new ExecutionException("Ошибка закрытия потока чтения расширения скриншота");
+			throw new ExecutionException("Ошибка закрытия потока чтения расширения" + extName);
 		}
 	}
 

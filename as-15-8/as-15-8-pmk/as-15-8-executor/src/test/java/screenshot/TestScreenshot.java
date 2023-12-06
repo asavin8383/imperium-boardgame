@@ -34,7 +34,8 @@ public class TestScreenshot {
                 false
         );
 
-        String url = "https://nowsecure.nl";
+        // String url = "https://nowsecure.nl";
+        String url = "https://bot.sannysoft.com/";
 //        driver.get(url);
 
         JavascriptExecutor js = (JavascriptExecutor) driver;
@@ -42,7 +43,7 @@ public class TestScreenshot {
         Thread.sleep(3000);
         driver.switchTo().window(driver.getWindowHandles().toArray()[1].toString());
 
-        Thread.sleep(5000);
+        Thread.sleep(500000);
 
         byte[] screen = ScriptUtils.getScreenshot(driver);
 
