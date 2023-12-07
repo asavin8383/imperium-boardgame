@@ -460,7 +460,7 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
 
             // проверяем код ответа сервера
             int responseCode = connection.getResponseCode();
-            if (responseCode > 500) {
+            if (responseCode >= 400) {
                 throw new InternalError_ExecutionException(String.format("Сервер вернул код %d", responseCode));
             }
         } catch (IOException ex) {
