@@ -14,7 +14,7 @@ import java.util.Map;
 @Configuration
 public class OpenApiConfiguration {
 
-    @Value("${security.oauth2.client.accessTokenUri}")
+    @Value("${springdoc.swagger-ui.oauth.uri}")
     private String tokenUri;
 
     @Configuration
