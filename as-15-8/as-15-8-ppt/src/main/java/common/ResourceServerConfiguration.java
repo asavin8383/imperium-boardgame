@@ -6,6 +6,8 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
+import org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter;
+import org.springframework.web.filter.ForwardedHeaderFilter;
 
 @Configuration
 @EnableResourceServer
@@ -28,5 +30,6 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
                 .anyRequest().authenticated()
                 .and()
                 .httpBasic().disable();
+        http.addFilterBefore(new ForwardedHeaderFilter(), WebAsyncManagerIntegrationFilter.class);
     }
 }
