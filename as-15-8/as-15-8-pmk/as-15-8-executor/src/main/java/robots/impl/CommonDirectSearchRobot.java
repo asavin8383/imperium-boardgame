@@ -209,6 +209,17 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
     public ExecutionJobResult execute(CheckUnit checkUnit, boolean throwExceptionByCaptchaOrBadIP) throws ExecutionException {
         //driver.get(searchSystemUrl);
 
+        //Проверим доступность ПС
+        try {
+            checkInternalError(searchSystemUrl);
+        } catch (InternalError_ExecutionException ex) {
+            if (throwExceptionByCaptchaOrBadIP) {
+                throw ex;
+            } else {
+                return createMessage(false, CheckUnitJobResult.INTERNAL_ERROR);
+            }
+        }
+
         try {
             //Вставляем случайным образом задержку до 10 секунд для неравномерного запуска проверок
             Thread.sleep(new Random().nextInt((int)10000));
@@ -220,16 +231,6 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
             throw new RuntimeException(e);
         }
         driver.switchTo().window(driver.getWindowHandles().toArray()[driver.getWindowHandles().size()-1].toString());
-        //Проверим доступность ПС
-        try {
-            checkInternalError();
-        } catch (InternalError_ExecutionException ex) {
-            if (throwExceptionByCaptchaOrBadIP) {
-                throw ex;
-            } else {
-                return createMessage(false, CheckUnitJobResult.INTERNAL_ERROR);
-            }
-        }
 
         equalityTest = EqualityTest.forCheckUnit(checkUnit);
 
@@ -445,13 +446,11 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         ScriptUtils.type(inputField, delayRand, value);
         inputField.sendKeys(Keys.ENTER);
         //Проверим, нет ли ошибки сервера
-        checkInternalError();
+        checkInternalError(searchSystemUrl);
 
     }
 
-    private void checkInternalError() {
-        // получаем URL страницы с результатами поиска
-        String currentUrl = driver.getCurrentUrl();
+    private void checkInternalError(String currentUrl) {
 
         try {
             // создаем объект HttpURLConnection для отправки GET-запроса
@@ -461,7 +460,7 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
 
             // проверяем код ответа сервера
             int responseCode = connection.getResponseCode();
-            if (responseCode > 500) {
+            if (responseCode >= 400) {
                 throw new InternalError_ExecutionException(String.format("Сервер вернул код %d", responseCode));
             }
         } catch (IOException ex) {
