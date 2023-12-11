@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import repositories.CustomErdiViewRepository;
+import services.traffic.CreateCustomErdiService;
 import services.traffic.CustomErdiService;
 import webClients.PodWebClient;
 
@@ -34,6 +35,7 @@ import java.util.List;
 public class CustomErdiController {
 
     private final CustomErdiService customErdiService;
+    private final CreateCustomErdiService createCustomErdiService;
     private final CustomErdiViewRepository customErdiViewRepository;
     private final PodWebClient podWebClient;
 
@@ -92,7 +94,7 @@ public class CustomErdiController {
     @ResponseStatus(code = HttpStatus.CREATED)
     @JsonView(Views.Full.class)
     public List<CustomErdi> createCustomErdisFromFile(@RequestPart("file") MultipartFile file) {
-        return customErdiService.createCustomErdisFromFile(file);
+        return createCustomErdiService.createCustomErdisFromFile(file);
     }
 
 }

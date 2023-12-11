@@ -3,6 +3,18 @@ server:
   port: 15800
   tomcat:
     max-threads: 200
+springdoc:
+  api-docs:
+    path: /swagger/api
+  swagger-ui:
+    operationsSorter: method
+    tagsSorter: alpha
+    docExpansion: none
+    tryItOutEnabled: true
+    filter: Трафик
+    oauth:
+      clientId: as-15-8
+      clientSecret: 1q0p2w9o
 gateway.url: ${GATEWAY_URI:http://localhost:15880}
 eureka:
   client:
@@ -113,7 +125,11 @@ spring:
 spring:
   profiles: dev_msnopok
   datasource:
-    url: jdbc:postgresql://192.168.5.195:5432/asdb
+    url: jdbc:postgresql://as-15-8-pg-dev.eclsoft.ru:5432/asdb
+    password: sdfHFG674$^fdsFG
+    username: postgres
+gateway.url: https://as-15-8-dev.eclsoft.ru/api
+
 ---
 
 logging:

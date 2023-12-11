@@ -6,6 +6,7 @@ import enums.SortingDirection;
 import exceptions.AS_15_8_PPT_Exception;
 import liquibase.util.StringUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import model.catalog.AccessToolsCategory;
 import model.enums.AccessToolType;
 import model.enums.TrafficType;
@@ -21,11 +22,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
-import repositories.AccessToolsCategoriesRepo;
-import repositories.DynamicTrafficUnitRepository;
-import repositories.ErdiContentJoinRepository;
-import repositories.TrafficRepository;
+import repositories.*;
 import utils.TrafficUnitUtils;
 import webClients.PodWebClient;
 
@@ -41,15 +40,18 @@ import java.util.stream.Stream;
 
 import static utils.TrafficUnitUtils.fillTrafficUnit;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class TrafficService {
 
     private final TrafficRepository trafficRepository;
+    private final CustomErdiUnitRepository customErdiUnitRepository;
     private final AccessToolsCategoriesRepo accessToolsCategoriesRepo;
-    private final PodWebClient podWebClient;
     private final DynamicTrafficUnitRepository dynamicTrafficUnitRepository;
     private final ErdiContentJoinRepository erdiContentJoinRepository;
+    private final PodWebClient podWebClient;
+    private final CreateCustomErdiService createCustomErdiService;
 
     public Page<TrafficBriefView> getBriefTrafficList(SortingDirection sortingDirection,
                                                       String sortingColumn,
@@ -388,4 +390,39 @@ public class TrafficService {
         List<ObjectNode> erdiList = podWebClient.fetchErdi(contentIds);
         return new PageImpl<>(erdiList, pageable, trafficUnitContentIdsUnsorted.getTotalElements());
     }
+
+    public Traffic updateTrafficFromFile(Long trafficId, MultipartFile file) {
+
+        Traffic traffic = trafficRepository.findById(trafficId).orElseThrow(() ->
+                new AS_15_8_PPT_Exception("Трафик не найден по id: " + trafficId));
+
+        List<String> existingCustomErdisValues = customErdiUnitRepository
+                .findByTrafficId(trafficId)
+                .stream()
+                .map(CustomErdiUnit::getValue)
+                .collect(Collectors.toList());
+
+//        List<String> existingCustomErdisValues = traffic.getErdiTrafficUnits().stream()
+//                .flatMap(erdiTrafficUnit -> erdiTrafficUnit.getCustomErdiList().stream()
+//                        .flatMap(customErdi -> customErdi.getCustomErdiUnits().stream()))
+//                .map(CustomErdiUnit::getValue)
+//                .collect(Collectors.toList());
+
+        Set<CustomErdi> customErdisFromFile = createCustomErdiService.createCustomErdisFromFile(file, existingCustomErdisValues);
+
+        AccessToolsCategory category = accessToolsCategoriesRepo.findOneByOrderByIdDesc();
+
+        ErdiTrafficUnit erdiTrafficUnit = (ErdiTrafficUnit) fillTrafficUnit(new ErdiTrafficUnit(),
+                traffic,
+                TrafficUnitType.CUSTOM,
+                category);
+
+        erdiTrafficUnit.setCustomErdiList(customErdisFromFile);
+
+        traffic.addErdiTrafficUnit(erdiTrafficUnit);
+        Traffic save = trafficRepository.save(traffic);
+        actualizeTraffic(save.getId());
+        return save;
+    }
+
 }

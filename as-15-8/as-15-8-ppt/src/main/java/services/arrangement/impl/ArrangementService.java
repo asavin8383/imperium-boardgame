@@ -8,12 +8,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import model.catalog.AccessToolsCategory;
 import model.enums.SearchQueryReplacePattern;
-import model.enums.TrafficUnitType;
 import model.task.Arrangement;
 import model.task.FormalTask;
-import model.traffic.*;
+import model.traffic.DynamicTrafficUnit;
+import model.traffic.SearchQueryPattern;
+import model.traffic.SearchQueryPatternContentJoin;
+import model.traffic.Traffic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,14 +22,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
 import repositories.*;
-import services.traffic.CustomErdiService;
 import services.traffic.TrafficService;
 import webClients.PodWebClient;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
-
-import static utils.TrafficUnitUtils.fillTrafficUnit;
 
 /**
  * Creation date: 05.08.2019
@@ -47,8 +48,6 @@ public class ArrangementService {
     private final CustomErdiUnitRepository customErdiUnitRepository;
     private final SearchQueryPatternRepo searchQueryPatternRepo;
     private final DynamicTrafficUnitRepository dynamicTrafficUnitRepository;
-    private final CustomErdiService customErdiService;
-    private final AccessToolsCategoriesRepo accessToolsCategoriesRepo;
     private final TrafficService trafficService;
 
     public Arrangement saveArrangement(Arrangement arrangement, FormalTask formalTask) {
@@ -230,42 +229,12 @@ public class ArrangementService {
         );
     }
 
-    public Traffic updateTrafficFromFile(Long arrangementId, MultipartFile file) {
+    public void updateTrafficFromFile(Long arrangementId, MultipartFile file) {
 
         Arrangement arrangement = arrangementRepo.findById(arrangementId).orElseThrow(() ->
                 new AS_15_8_PPT_Exception("Arranegemnt не найден по id: " + arrangementId));
 
-        Traffic traffic = trafficRepository.findById(arrangement.getTrafficId()).orElseThrow(() ->
-                new AS_15_8_PPT_Exception("Трафик не найден по id: " + arrangement.getTrafficId()));
-
-        List<String> existingCustomErdisValues = customErdiUnitRepository
-                .findByArrangementId(arrangementId)
-                .stream()
-                .map(CustomErdiUnit::getValue)
-                .collect(Collectors.toList());
-
-//        List<String> existingCustomErdisValues = traffic.getErdiTrafficUnits().stream()
-//                .flatMap(erdiTrafficUnit -> erdiTrafficUnit.getCustomErdiList().stream()
-//                        .flatMap(customErdi -> customErdi.getCustomErdiUnits().stream()))
-//                .map(CustomErdiUnit::getValue)
-//                .collect(Collectors.toList());
-
-        Set<CustomErdi> customErdisFromFile = customErdiService.createCustomErdisFromFile(file, existingCustomErdisValues);
-
-        AccessToolsCategory category = accessToolsCategoriesRepo.findOneByOrderByIdDesc();
-
-        ErdiTrafficUnit erdiTrafficUnit = (ErdiTrafficUnit) fillTrafficUnit(new ErdiTrafficUnit(),
-                traffic,
-                TrafficUnitType.CUSTOM,
-                category);
-
-        erdiTrafficUnit.setCustomErdiList(customErdisFromFile);
-
-        traffic.addErdiTrafficUnit(erdiTrafficUnit);
-        Traffic save = trafficRepository.save(traffic);
-        trafficService.actualizeTraffic(save.getId());
-        return save;
-
+        trafficService.updateTrafficFromFile(arrangement.getTrafficId(), file);
     }
 
 

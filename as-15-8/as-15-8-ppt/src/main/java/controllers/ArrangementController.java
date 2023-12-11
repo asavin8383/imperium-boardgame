@@ -228,15 +228,15 @@ public class ArrangementController {
         return Optional.ofNullable(arrangement.get().getIsActAvailable());
     }
 
-    @PreAuthorize("hasRole('ROLE_SYSTEM')" )
+    @PreAuthorize("hasRole('ROLE_SYSTEM')")
     @GetMapping(path = "/act_sent_status")
-    public void changeActStatus(@RequestParam("id") Optional<Arrangement> arrangement){
-        arrangement.orElseThrow(()-> new AS_15_8_PPT_Exception("Arrangement не найден"));
+    public void changeActStatus(@RequestParam("id") Optional<Arrangement> arrangement) {
+        arrangement.orElseThrow(() -> new AS_15_8_PPT_Exception("Arrangement не найден"));
         arrangement.get().setStatus(ExecutionStatus.ACT_SENT);
         arrangementRepo.save(arrangement.get());
     }
 
-    @PreAuthorize("hasRole('ROLE_SYSTEM')" )
+    @PreAuthorize("hasRole('ROLE_SYSTEM')")
     @GetMapping(path = "/interrupt_violation_number")
     public Long changeActStatus(@RequestParam("id") Arrangement arrangement) {
         Optional.ofNullable(arrangement).orElseThrow(() -> new AS_15_8_PPT_Exception("Arrangement не найден"));
@@ -252,8 +252,9 @@ public class ArrangementController {
 
     @PreAuthorize("hasAnyRole('ROLE_SYSTEM', 'ROLE_MANAGE_ARRANGEMENT')")
     @PutMapping(path = "{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity updateTrafficFromFile(@PathVariable("id") Long arrangementId,
-                                                @RequestPart("file") MultipartFile file) {
-        return ResponseEntity.ok(arrangementService.updateTrafficFromFile(arrangementId, file));
+    public ResponseEntity<Object> updateTrafficFromFile(@PathVariable("id") Long arrangementId,
+                                                        @RequestPart("file") MultipartFile file) {
+        arrangementService.updateTrafficFromFile(arrangementId, file);
+        return ResponseEntity.noContent().build();
     }
 }

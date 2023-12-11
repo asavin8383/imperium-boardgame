@@ -11,16 +11,22 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.R
 @EnableResourceServer
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter {
+
+    private static final String[] AUTH_WHITELIST = {
+            "/swagger/**",
+            "/swagger-ui/**",
+            "/swagger-ui.html"
+    };
+
     @Override
     public void configure(final HttpSecurity http) throws Exception {
         http
-            .antMatcher("/**")
+                .antMatcher("/**")
                 .authorizeRequests()
-                .antMatchers(HttpMethod.GET,
-                        "/arrangements/checkUnits/**"
-                ).permitAll()
+                .antMatchers(HttpMethod.GET, "/arrangements/checkUnits/**").permitAll()
+                .antMatchers(HttpMethod.GET, AUTH_WHITELIST).permitAll()
                 .anyRequest().authenticated()
-            .and()
+                .and()
                 .httpBasic().disable();
     }
 }

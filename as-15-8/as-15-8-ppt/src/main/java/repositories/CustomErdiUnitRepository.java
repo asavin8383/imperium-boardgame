@@ -16,10 +16,19 @@ public interface CustomErdiUnitRepository extends JpaRepository<CustomErdiUnit, 
     Page<CustomErdiUnit> findByCustomErdiId(Long customErdiId, Pageable pageable);
 
     @Query("select units from CustomErdiUnit units " +
-            " join units.customErdi erdi " +
-            " join erdi.erdiTrafficUnits traffic_units " +
+            "join units.customErdi erdi " +
+            "join erdi.erdiTrafficUnits traffic_units " +
             "join traffic_units.traffic traffic " +
             "join Arrangement a on traffic.id = a.trafficId and a.id=:id"
     )
     List<CustomErdiUnit> findByArrangementId(@Param("id") Long arrangementId);
+
+    @Query("select units from CustomErdiUnit units " +
+            "join units.customErdi erdi " +
+            "join erdi.erdiTrafficUnits traffic_units " +
+            "join traffic_units.traffic traffic " +
+            "where  traffic.id=:id"
+    )
+    List<CustomErdiUnit> findByTrafficId(@Param("id") Long trafficId);
+
 }
