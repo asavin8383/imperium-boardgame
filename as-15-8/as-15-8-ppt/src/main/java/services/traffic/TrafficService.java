@@ -396,19 +396,7 @@ public class TrafficService {
         Traffic traffic = trafficRepository.findById(trafficId).orElseThrow(() ->
                 new AS_15_8_PPT_Exception("Трафик не найден по id: " + trafficId));
 
-        List<String> existingCustomErdisValues = customErdiUnitRepository
-                .findByTrafficId(trafficId)
-                .stream()
-                .map(CustomErdiUnit::getValue)
-                .collect(Collectors.toList());
-
-//        List<String> existingCustomErdisValues = traffic.getErdiTrafficUnits().stream()
-//                .flatMap(erdiTrafficUnit -> erdiTrafficUnit.getCustomErdiList().stream()
-//                        .flatMap(customErdi -> customErdi.getCustomErdiUnits().stream()))
-//                .map(CustomErdiUnit::getValue)
-//                .collect(Collectors.toList());
-
-        Set<CustomErdi> customErdisFromFile = createCustomErdiService.createCustomErdisFromFile(file, existingCustomErdisValues);
+        Set<CustomErdi> customErdisFromFile = createCustomErdiService.createCustomErdiUnitsFromFile(file);
 
         AccessToolsCategory category = accessToolsCategoriesRepo.findOneByOrderByIdDesc();
 
