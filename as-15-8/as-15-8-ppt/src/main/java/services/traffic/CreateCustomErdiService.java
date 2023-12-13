@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import repositories.CustomErdiRepository;
+import repositories.CustomErdiUnitRepository;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,6 +22,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -30,12 +32,13 @@ import java.util.stream.Collectors;
 public class CreateCustomErdiService {
 
     private final CustomErdiRepository customErdiRepository;
+    private final CustomErdiUnitRepository customErdiUnitRepository;
 
     public Set<CustomErdi> createCustomErdiUnitsFromFile(MultipartFile file) {
         try (InputStream inputStream = file.getInputStream();
              BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
             return reader.lines()
-                    .map(this::createAndSaveCustomErdi)
+                    .map(this::createOrGetCustomErdi)
                     .filter(Objects::nonNull)
                     .collect(Collectors.toSet());
         } catch (IOException e) {
@@ -44,20 +47,27 @@ public class CreateCustomErdiService {
     }
 
 
-    private CustomErdi createAndSaveCustomErdi(String address) {
-        CheckUnitType checkUnitType;
-        try {
-            checkUnitType = getCheckUnitType(address);
-        } catch (URISyntaxException e) {
-            log.warn("Не удалось определить CheckUnitType для ресурса {}. Ресурс не будет добавлен к мероприятию", address);
-            return null;
-        }
-        CustomErdi customErdi = createCustomErdi(address, checkUnitType);
-        try {
-            return customErdiRepository.save(customErdi);
-        } catch (Exception e) {
-            log.warn("CustomErdi для ресурса {} уже существует", address);
-            return null;
+    private CustomErdi createOrGetCustomErdi(String address) {
+
+        Optional<CustomErdiUnit> customErdiUnitOptional = customErdiUnitRepository.findByValue(address);
+
+        if (customErdiUnitOptional.isPresent()) {
+            return customErdiUnitOptional.get().getCustomErdi();
+        } else {
+            CheckUnitType checkUnitType;
+            try {
+                checkUnitType = getCheckUnitType(address);
+            } catch (URISyntaxException e) {
+                log.warn("Не удалось определить CheckUnitType для ресурса {}. Ресурс не будет добавлен к мероприятию", address);
+                return null;
+            }
+            CustomErdi customErdi = createCustomErdi(address, checkUnitType);
+            try {
+                return customErdiRepository.save(customErdi);
+            } catch (Exception e) {
+                log.warn("CustomErdi для ресурса {} уже существует", address);
+                return null;
+            }
         }
     }
 
