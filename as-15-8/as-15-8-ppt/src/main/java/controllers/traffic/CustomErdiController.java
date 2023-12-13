@@ -60,7 +60,8 @@ public class CustomErdiController {
         } else {
             customErdiViews = customErdiViewRepository.findAllByQuery(query, pageable);
         }
-        return new PageImpl<>(podWebClient.fetchSubtypes(customErdiViews.getContent()), pageable, customErdiViews.getTotalElements());
+//        return new PageImpl<>(podWebClient.fetchSubtypes(customErdiViews.getContent()), pageable, customErdiViews.getTotalElements());
+        return  customErdiViews;
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
