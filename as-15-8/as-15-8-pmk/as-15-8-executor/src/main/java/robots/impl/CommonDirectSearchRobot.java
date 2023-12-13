@@ -207,36 +207,38 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
 
     @Override
     public ExecutionJobResult execute(CheckUnit checkUnit, boolean throwExceptionByCaptchaOrBadIP) throws ExecutionException {
-        //driver.get(searchSystemUrl);
 
-        //Проверим доступность ПС
-        try {
-            checkInternalError(searchSystemUrl);
-        } catch (InternalError_ExecutionException ex) {
-            if (throwExceptionByCaptchaOrBadIP) {
-                throw ex;
-            } else {
-                return createMessage(false, CheckUnitJobResult.INTERNAL_ERROR);
-            }
-        }
+//        //Проверим доступность ПС
+//        try {
+//            checkInternalError(searchSystemUrl);
+//        } catch (InternalError_ExecutionException ex) {
+//            if (throwExceptionByCaptchaOrBadIP) {
+//                throw ex;
+//            } else {
+//                return createMessage(false, CheckUnitJobResult.INTERNAL_ERROR);
+//            }
+//        }
 
         try {
             //Вставляем случайным образом задержку до 10 секунд для неравномерного запуска проверок
-            Thread.sleep(new Random().nextInt((int)10000));
-
-            JavascriptExecutor js = (JavascriptExecutor) driver;
-            js.executeScript("window.open('" + searchSystemUrl + "', '_blank');");
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
+//            Thread.sleep(new Random().nextInt((int)10000));
+//
+//            JavascriptExecutor js = (JavascriptExecutor) driver;
+//            js.executeScript("window.open('" + searchSystemUrl + "', '_blank');");
+//            Thread.sleep(3000);
+            driver.get(searchSystemUrl);
+        } catch (WebDriverException ex) {
+            ex.printStackTrace();
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        driver.switchTo().window(driver.getWindowHandles().toArray()[driver.getWindowHandles().size()-1].toString());
+        // driver.switchTo().window(driver.getWindowHandles().toArray()[driver.getWindowHandles().size()-1].toString());
 
         equalityTest = EqualityTest.forCheckUnit(checkUnit);
 
         if (captcha())
             if (throwExceptionByCaptchaOrBadIP) {
-                throw new Captcha_ExecutionException(String.format("ПС выдала капчу на url: %s", checkUnit.getValue()));
+                throw new Captcha_ExecutionException(String.format("ПС выдала капчу на url ПС: %s", searchSystemUrl));
             } else {
                 return createMessage(false, CheckUnitJobResult.CAPTCHA_DETECTED);
             }
@@ -446,7 +448,7 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         ScriptUtils.type(inputField, delayRand, value);
         inputField.sendKeys(Keys.ENTER);
         //Проверим, нет ли ошибки сервера
-        checkInternalError(searchSystemUrl);
+        //checkInternalError(searchSystemUrl);
 
     }
 
