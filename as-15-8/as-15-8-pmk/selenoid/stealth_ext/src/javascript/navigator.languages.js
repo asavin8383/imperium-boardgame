@@ -5,7 +5,4 @@
   Object.defineProperty(Object.getPrototypeOf(navigator), 'languages', {
     get: () => languages || ['en-US', 'en']
   })
-  Object.defineProperty(Object.getPrototypeOf(navigator), 'language', {
-    get: () => language || ['en-US']
-  })
 })()

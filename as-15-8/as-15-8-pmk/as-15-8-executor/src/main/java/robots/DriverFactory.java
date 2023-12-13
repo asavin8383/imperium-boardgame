@@ -132,19 +132,10 @@ public class DriverFactory {
 		options.addArguments("--enable-experimental-web-platform-features");
 		options.addArguments("--enable-features=TemporaryUnexpireFlagsM76");
 		options.addArguments("--disable-features=OmniboxUIExperimentHideSteadyStateUrlScheme,OmniboxUIExperimentHideSteadyStateUrlTrivialSubdomains");
-
-		options.addArguments(
-				"--no-default-browser-check",
-				"--no-first-run",
-				"--no-sandbox",
-				"--test-type",
-				"--window-size=1920,1080"
-		);
 	}
 
 	private static void setOptionsForAnonymization(ChromeOptions options){
 		options.setExperimentalOption("excludeSwitches", Collections.singletonList("enable-automation"));
-		options.setExperimentalOption("useAutomationExtension", false);
 
 		options.addArguments(
 				"--no-default-browser-check",
