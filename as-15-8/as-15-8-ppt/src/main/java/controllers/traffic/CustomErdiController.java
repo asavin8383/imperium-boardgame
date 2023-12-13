@@ -25,7 +25,7 @@ import services.traffic.CreateCustomErdiService;
 import services.traffic.CustomErdiService;
 import webClients.PodWebClient;
 
-import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping(path = "/erdi/custom", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -60,7 +60,8 @@ public class CustomErdiController {
         } else {
             customErdiViews = customErdiViewRepository.findAllByQuery(query, pageable);
         }
-        return new PageImpl<>(podWebClient.fetchSubtypes(customErdiViews.getContent()), pageable, customErdiViews.getTotalElements());
+//        return new PageImpl<>(podWebClient.fetchSubtypes(customErdiViews.getContent()), pageable, customErdiViews.getTotalElements());
+        return  customErdiViews;
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -93,8 +94,8 @@ public class CustomErdiController {
     @PostMapping
     @ResponseStatus(code = HttpStatus.CREATED)
     @JsonView(Views.Full.class)
-    public List<CustomErdi> createCustomErdisFromFile(@RequestPart("file") MultipartFile file) {
-        return createCustomErdiService.createCustomErdisFromFile(file);
+    public Set<CustomErdi> createCustomErdisFromFile(@RequestPart("file") MultipartFile file) {
+        return createCustomErdiService.createCustomErdiUnitsFromFile(file);
     }
 
 }

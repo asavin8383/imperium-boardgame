@@ -124,6 +124,7 @@ spring:
 ---
 
 spring:
+  application.name: ppt_msnopok
   profiles: dev_msnopok
   datasource:
     url: jdbc:postgresql://as-15-8-pg-dev.eclsoft.ru:5432/asdb
