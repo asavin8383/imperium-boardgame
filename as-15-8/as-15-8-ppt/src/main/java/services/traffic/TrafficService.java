@@ -50,6 +50,7 @@ public class TrafficService {
     private final AccessToolsCategoriesRepo accessToolsCategoriesRepo;
     private final DynamicTrafficUnitRepository dynamicTrafficUnitRepository;
     private final ErdiContentJoinRepository erdiContentJoinRepository;
+    private final ErdiTrafficUnitRepository erdiTrafficUnitRepository;
     private final PodWebClient podWebClient;
     private final CreateCustomErdiService createCustomErdiService;
 
@@ -400,14 +401,20 @@ public class TrafficService {
 
         AccessToolsCategory category = accessToolsCategoriesRepo.findOneByOrderByIdDesc();
 
-        ErdiTrafficUnit erdiTrafficUnit = (ErdiTrafficUnit) fillTrafficUnit(new ErdiTrafficUnit(),
-                traffic,
-                TrafficUnitType.CUSTOM,
-                category);
+        ErdiTrafficUnit erdiTrafficUnit = erdiTrafficUnitRepository.findFirstByNameEndingWithIgnoreCaseOrderByIdDesc("_CUSTOM")
+                .orElseGet(() -> {
+                    ErdiTrafficUnit newErdiTrafficUnit = (ErdiTrafficUnit) fillTrafficUnit(new ErdiTrafficUnit(),
+                            traffic,
+                            TrafficUnitType.CUSTOM,
+                            category);
 
-        erdiTrafficUnit.setCustomErdiList(customErdisFromFile);
+                    traffic.addErdiTrafficUnit(newErdiTrafficUnit);
+                    return newErdiTrafficUnit;
 
-        traffic.addErdiTrafficUnit(erdiTrafficUnit);
+                });
+
+        erdiTrafficUnit.addAllCustomErdiList(customErdisFromFile);
+
         Traffic save = trafficRepository.save(traffic);
         actualizeTraffic(save.getId());
         return save;
