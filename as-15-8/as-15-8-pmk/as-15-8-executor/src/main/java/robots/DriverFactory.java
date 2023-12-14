@@ -131,6 +131,7 @@ public class DriverFactory {
 		//Для отображения полного URL
 		options.addArguments("--enable-experimental-web-platform-features");
 		options.addArguments("--enable-features=TemporaryUnexpireFlagsM76");
+		options.addArguments("--disable-ipv6");
 		options.addArguments("--disable-features=OmniboxUIExperimentHideSteadyStateUrlScheme,OmniboxUIExperimentHideSteadyStateUrlTrivialSubdomains");
 	}
 
