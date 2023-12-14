@@ -67,5 +67,6 @@
     <include file="db/changelog/ppt.0039.traffic_erdi_count.xml"/>
     <include file="db/changelog/ppt.0040.arrangement_is_manual.xml"/>
     <include file="db/changelog/ppt.0041.arrangement_status_ck_service_mode_stopped_by_max_check_units_count.xml"/>
+    <include file="db/changelog/ppt.0042.add_uniq_constraint_on_value_at_custom_erdi_units.xml"/>
 
 </databaseChangeLog>

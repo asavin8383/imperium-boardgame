@@ -251,7 +251,7 @@ public class ArrangementController {
     }
 
     @PreAuthorize("hasAnyRole('ROLE_SYSTEM', 'ROLE_MANAGE_ARRANGEMENT')")
-    @PutMapping(path = "{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(path = "{id}/import-resources", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Object> updateTrafficFromFile(@PathVariable("id") Long arrangementId,
                                                         @RequestPart("file") MultipartFile file) {
         arrangementService.updateTrafficFromFile(arrangementId, file);

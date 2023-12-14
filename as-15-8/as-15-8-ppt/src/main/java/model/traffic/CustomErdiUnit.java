@@ -35,7 +35,7 @@ public class CustomErdiUnit {
     private CheckUnitType type;
 
     @NotNull
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     @JsonView(Views.Brief.class)
     @ToString.Include
     private String value;
