@@ -98,7 +98,7 @@ spring:
   datasource:
     url: jdbc:postgresql://as-15-8-pg.eclsoft.ru:5432/asdb
     password: pHlAYup2
-gateway.url: https://as-15-8.eclsoft.ru/api
+gateway.url: https://as-15-8-dev.eclsoft.ru/api
 
 ---
 
