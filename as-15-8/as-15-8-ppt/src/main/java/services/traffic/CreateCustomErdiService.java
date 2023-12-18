@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.traffic.CustomErdi;
 import model.traffic.CustomErdiUnit;
-import org.apache.commons.validator.routines.UrlValidator;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,8 +18,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.IDN;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.Optional;
@@ -48,6 +46,7 @@ public class CreateCustomErdiService {
 
 
     private CustomErdi createOrGetCustomErdi(String address) {
+        address = address.toLowerCase().trim();
 
         Optional<CustomErdiUnit> customErdiUnitOptional = customErdiUnitRepository.findByValue(address);
 
@@ -55,25 +54,26 @@ public class CreateCustomErdiService {
             return customErdiUnitOptional.get().getCustomErdi();
         } else {
             CheckUnitType checkUnitType;
-            try {
-                checkUnitType = getCheckUnitType(address);
-            } catch (URISyntaxException e) {
-                log.warn("Не удалось определить CheckUnitType для ресурса {}. Ресурс не будет добавлен к мероприятию", address);
-                return null;
-            }
-            CustomErdi customErdi = createCustomErdi(address, checkUnitType);
+//            try {
+//                checkUnitType = getCheckUnitType(address);
+//            } catch (URISyntaxException e) {
+//                log.warn("Не удалось определить CheckUnitType для ресурса {}. Ресурс не будет добавлен к мероприятию", address);
+//                return null;
+//            }
+            String customErdiName = address.startsWith("xn--") ? IDN.toUnicode(address) : address;
+            checkUnitType = getCheckUnitType(customErdiName);
+            CustomErdi customErdi = createCustomErdi(address, customErdiName, checkUnitType);
             try {
                 return customErdiRepository.save(customErdi);
             } catch (Exception e) {
-                log.warn("CustomErdi для ресурса {} уже существует", address);
+                log.warn("Не удалось создать CustomErdi для ресурса {}. Причина: {}", address, e.getCause().getCause().getMessage());
                 return null;
             }
         }
     }
 
-    private CustomErdi createCustomErdi(String address, CheckUnitType checkUnitType) {
+    private CustomErdi createCustomErdi(String address, String customErdiName, CheckUnitType checkUnitType) {
 
-        String customErdiName = address.startsWith("xn--") ? IDN.toUnicode(address) : address;
         CustomErdi customErdi = customErdiRepository.findByName(customErdiName)
                 .orElse(new CustomErdi().setName(customErdiName));
 
@@ -88,14 +88,21 @@ public class CreateCustomErdiService {
     }
 
 
-    private CheckUnitType getCheckUnitType(String address) throws URISyntaxException {
-        UrlValidator urlValidator = new UrlValidator();
-        if (urlValidator.isValid(address)) {
+    private CheckUnitType getCheckUnitType(String customErdiName) {
+
+        if (StringUtils.startsWithAny(customErdiName, "http://", "https://")) {
             return CheckUnitType.URL;
         } else {
-            URI uri = new URI(address);
             return CheckUnitType.DOMAIN;
         }
+
+//        UrlValidator urlValidator = new UrlValidator();
+//        if (urlValidator.isValid(address)) {
+//            return CheckUnitType.URL;
+//        } else {
+//            URI uri = new URI(address);
+//            return CheckUnitType.DOMAIN;
+//        }
     }
 
 }
