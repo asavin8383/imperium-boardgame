@@ -11,7 +11,6 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.File;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Random;
 
 @Slf4j
@@ -91,8 +90,7 @@ public class RecaptchaV2Solver implements CaptchaSolver {
             throw new CaptchaSolverException("Google обнаружил автоматические запросы. Решить капчу невозможно.");
         }
 
-        Path tempDir = Files.createTempDirectory(System.getProperty("java.io.tmpdir"));
-        File mp3File = Files.createTempFile(tempDir, "recaptcha_v2", ".mp3").toFile();
+        File mp3File = Files.createTempFile("recaptcha_v2", ".mp3").toFile();
 
         String link = downloadLink.getAttribute("href");
         CaptchaUtils.downloadFile(link, mp3File);
@@ -105,7 +103,7 @@ public class RecaptchaV2Solver implements CaptchaSolver {
                 log.warn("Не удалось удалить временный файл: " + mp3File.getAbsolutePath());
         }
 
-        WebElement responseTextbox = driver.findElement(By.id("audio-response"));
+        WebElement responseTextbox = waitForElement(driver, By.id("audio-response"), 5);
         humanType(responseTextbox, recognizedText);
     }
 
@@ -118,16 +116,25 @@ public class RecaptchaV2Solver implements CaptchaSolver {
         return wait.until(ExpectedConditions.visibilityOfElementLocated(by));
     }
 
-    private void randomDelay() throws InterruptedException {
+    private void randomDelay() {
         Random random = new Random();
-        Thread.sleep(random.nextInt(1250 - 750 + 1) + 750);
+        try {
+            Thread.sleep(random.nextInt(1250 - 750 + 1) + 750);
+        } catch (InterruptedException ex) {
+            log.warn("Ошибка ожидания", ex);
+        }
     }
 
-    private void humanType(WebElement element, String text) throws InterruptedException {
+    private void humanType(WebElement element, String text) {
         Random random = new Random();
+        element.click();
         for(char sym : text.toCharArray()) {
-            element.sendKeys(String.valueOf(sym));
-            Thread.sleep(random.nextInt(100 - 50 + 1) + 50);
+            element.sendKeys(new String(Character.toChars(sym)));
+            try {
+                Thread.sleep(random.nextInt(100 - 50 + 1) + 50);
+            } catch (InterruptedException ex) {
+                log.warn("Ошибка ожидания ввода текста", ex);
+            }
         }
     }
 }

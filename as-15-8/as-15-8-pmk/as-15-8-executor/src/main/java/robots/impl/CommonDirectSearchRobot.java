@@ -1,5 +1,7 @@
 package robots.impl;
 
+import captcha.CaptchaSolver;
+import captcha.CaptchaSolverFactory;
 import checkUnits.CheckUnit;
 import checkUnits.CheckUnitType;
 import enums.AccessToolParameter;
@@ -236,13 +238,19 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
 
         equalityTest = EqualityTest.forCheckUnit(checkUnit);
 
-        if (captcha())
-            if (throwExceptionByCaptchaOrBadIP) {
-                throw new Captcha_ExecutionException(String.format("ПС выдала капчу на url ПС: %s", searchSystemUrl));
-            } else {
-                return createMessage(false, CheckUnitJobResult.CAPTCHA_DETECTED);
+        if (captcha()) {
+            try {
+                CaptchaSolver captchaSolver = CaptchaSolverFactory.createCaptchaSolver("RECAPTCHA_V2");
+                captchaSolver.solve(driver);
+            } catch (Exception ex) {
+                log.warn("Ошибка при попытке решить капчу", ex);
+                if (throwExceptionByCaptchaOrBadIP) {
+                    throw new Captcha_ExecutionException(String.format("ПС выдала капчу на url ПС: %s", searchSystemUrl));
+                } else {
+                    return createMessage(false, CheckUnitJobResult.CAPTCHA_DETECTED);
+                }
             }
-
+        }
         try {
             driver.findElement(By.xpath(xpathInputField));
         } catch(NoSuchElementException ex) {
@@ -276,10 +284,16 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         }
 
         if (captcha())
-            if (throwExceptionByCaptchaOrBadIP) {
-                throw new Captcha_ExecutionException(String.format("ПС выдала капчу на url: %s", checkUnit.getValue()));
-            } else {
-                return createMessage(false, CheckUnitJobResult.CAPTCHA_DETECTED);
+            try{
+                CaptchaSolver captchaSolver = CaptchaSolverFactory.createCaptchaSolver("RECAPTCHA_V2");
+                captchaSolver.solve(driver);
+            } catch (Exception ex) {
+                log.warn("Ошибка при попытке решить капчу", ex);
+                if (throwExceptionByCaptchaOrBadIP) {
+                    throw new Captcha_ExecutionException(String.format("ПС выдала капчу на url: %s", checkUnit.getValue()));
+                } else {
+                    return createMessage(false, CheckUnitJobResult.CAPTCHA_DETECTED);
+                }
             }
 
         //Проверим, не исправилось ли правописание. Если исправилось, возвращаем назад
