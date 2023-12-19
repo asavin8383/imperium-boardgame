@@ -4,6 +4,7 @@ import enums.AccessToolParameter;
 import enums.AccessToolUnit;
 import lombok.Data;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import javax.annotation.PostConstruct;
@@ -15,13 +16,16 @@ import java.util.Optional;
 
 @Data
 @ConfigurationProperties
+@Slf4j
 public class ExecutorProperties {
 
     private final Map<String, Map<String, Map<String, String>>> robots = new HashMap<>();
 
     private EtalonProperties etalon;
 
-    /** URL selenium хаба */
+    /**
+     * URL selenium хаба
+     */
     private String seleniumHubUrl;
 
     private NmapProperties nmap;
@@ -47,7 +51,7 @@ public class ExecutorProperties {
         screenshotProperties = screenshot;
 
         this.props = new AccessToolUnits();
-        robots.forEach((accessToolUnitString, accessToolUnitPropsMap) ->{
+        robots.forEach((accessToolUnitString, accessToolUnitPropsMap) -> {
             AccessToolUnit accessToolUnit = AccessToolUnit.fromPropertyKey(accessToolUnitString);
             AccessToolUnitProps accessToolUnitProps = new AccessToolUnitProps();
             accessToolUnitPropsMap.forEach((robotName, robotPropsMap) -> {
@@ -62,7 +66,7 @@ public class ExecutorProperties {
         });
     }
 
-    public Optional<AccessToolUnit> getAccessToolUnit(String accessTool){
+    public Optional<AccessToolUnit> getAccessToolUnit(String accessTool) {
         return props.getAccessToolUnits().entrySet()
                 .stream()
                 .filter(accessToolUnitProps ->
@@ -73,28 +77,30 @@ public class ExecutorProperties {
                 .findFirst();
     }
 
-    public static EtalonProperties getEtalon(){
+    public static EtalonProperties getEtalon() {
         return etalonExtProperties;
     }
 
-    public static URL getSeleniumHubUrl(){
+    public static URL getSeleniumHubUrl() {
         return seleniumHubUrlExt;
     }
 
-    public static ScreenshotProperties getScreenshotProperties() { return screenshotProperties; }
+    public static ScreenshotProperties getScreenshotProperties() {
+        return screenshotProperties;
+    }
 
     @Data
-    public static class AccessToolUnits{
+    public static class AccessToolUnits {
         private Map<AccessToolUnit, AccessToolUnitProps> accessToolUnits = new HashMap<>();
     }
 
     @Data
-    public static class AccessToolUnitProps{
+    public static class AccessToolUnitProps {
         private Map<String, RobotProps> robotProps = new HashMap<>();
     }
 
     @Data
-    public static class RobotProps{
+    public static class RobotProps {
         private Map<AccessToolParameter, String> props = new HashMap<>();
     }
 
@@ -122,14 +128,36 @@ public class ExecutorProperties {
     }
 
     @Data
-    public static class ScreenshotProperties{
+    public static class ScreenshotProperties {
         private String extId;
         private String extVersion;
         private String extPopup;
     }
 
     @Data
-    public static class ExecutorProps{
+    public static class ExecutorProps {
         private Integer timeout;
+        private Integer maxRetryAttempts;
+        private Integer maxRetryDelay;
+
+        public long getWebdriverTimeout() {
+            //Рассчитываем таймаут исходя из таймаута сервиса executor
+            long webdriverTimeout = 30;
+            int retryAttempts = this.getMaxRetryAttempts();
+            int retryDelay = this.getMaxRetryDelay();
+            if (retryAttempts > 0) {
+                long countTimeout = (long) ((Optional.ofNullable(this.getTimeout())
+                        .orElse(180) * 0.9 - (long) (retryAttempts - 1) * retryDelay) / retryAttempts);
+                if (countTimeout > timeout) {
+                    webdriverTimeout = countTimeout;
+                }
+            }
+            log.info("Параметры executor'а:\ntimeout={}\nmaxRetryAttempts={}\nmaxRetryDelay={}",
+                    this.getTimeout(),
+                    this.getMaxRetryAttempts(),
+                    this.getMaxRetryDelay());
+            log.info("Рассчитанный таймаут одной проверки составит {} секунд", webdriverTimeout);
+            return webdriverTimeout;
+        }
     }
 }

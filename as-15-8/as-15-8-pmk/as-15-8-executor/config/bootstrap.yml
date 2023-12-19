@@ -61,10 +61,10 @@ spring:
 
 spring:
   profiles: dev_ashabalin
-gateway.url: https://as-15-8.eclsoft.ru/api
+gateway.url: https://as-15-8-dev.eclsoft.ru/api
 
 ---
 
 spring:
   profiles: dev_asavin
-gateway.url: https://as-15-8.eclsoft.ru/api
+gateway.url: https://as-15-8-dev.eclsoft.ru/api
