@@ -33,6 +33,22 @@
             <version>0.11</version>
         </dependency>
 
+		<dependency>
+			<groupId>edu.cmu.sphinx</groupId>
+			<artifactId>sphinx4-core</artifactId>
+			<version>5prealpha</version>
+		</dependency>
+		<dependency>
+			<groupId>edu.cmu.sphinx</groupId>
+			<artifactId>sphinx4-data</artifactId>
+			<version>5prealpha</version>
+		</dependency>
+		<dependency>
+			<groupId>com.tagtraum</groupId>
+			<artifactId>ffsampledsp-complete</artifactId>
+			<version>0.9.53</version>
+		</dependency>
+
 		<!-- Apache -->
         <dependency>
             <groupId>commons-net</groupId>
