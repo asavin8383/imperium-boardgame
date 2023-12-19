@@ -131,5 +131,7 @@ public class ExecutorProperties {
     @Data
     public static class ExecutorProps{
         private Integer timeout;
+        private Integer maxRetryAttempts;
+        private Integer maxRetryDelay;
     }
 }

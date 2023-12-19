@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.WebDriverException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.listener.AbstractMessageListenerContainer;
 import org.springframework.stereotype.Service;
 import robots.Robot;
@@ -44,22 +43,19 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
     private volatile Set<Robot> robots = ConcurrentHashMap.newKeySet();
     
     private boolean isRunning = false;
-
-	@Value("${retryExecution.maxAttempts}")
-	private int retryAttempts;
-	@Value("${retryExecution.maxDelay}")
-	private int retryDelay;
 	long webdriverTimeout;
 
 	@PostConstruct
 	private void countTimeout() {
 		//Рассчитываем таймаут исходя из таймаута сервиса executor
 		long timeout = 30;
-		if (retryAttempts > 0) {
-			long countTimeout = (long) ((Optional.ofNullable(executorProps.getExecutor().getTimeout()).orElse(180) * 0.9 - (retryAttempts - 1) * retryDelay) / retryAttempts);
+		int retryAttempts = executorProps.getExecutor().getMaxRetryAttempts();
+		int retryDelay = executorProps.getExecutor().getMaxRetryDelay();
+		if (executorProps.getExecutor().getMaxRetryAttempts() > 0) {
+			long countTimeout = (long) ((Optional.ofNullable(executorProps.getExecutor().getTimeout())
+					.orElse(180) * 0.9 - (long) (retryAttempts - 1) * retryDelay) / retryAttempts);
 			if (countTimeout > timeout) {
 				timeout = countTimeout;
-
 			}
 		}
 		webdriverTimeout = timeout;
@@ -92,7 +88,7 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 			log.info("Запуск робота: " + robotName);
 
 			Robot robot = robotsFactory.createRobot(checkUnitJob.getAccessTool());
-			robot.setRemainingAttempts(retryAttempts);
+			robot.setRemainingAttempts(executorProps.getExecutor().getMaxRetryAttempts());
 			
 			robots.add(robot);
 			
@@ -134,7 +130,7 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 	public ExecutionJobResult runWithRetry(Robot robot, CheckUnit checkUnit) {
 		try {
 			robot.setRemainingAttempts(robot.getRemainingAttempts() - 1);
-			log.info("Запуск {}-й попытки проверки ресурса: {}", retryAttempts - robot.getRemainingAttempts(), checkUnit.getValue());
+			log.info("Запуск {}-й попытки проверки ресурса: {}", executorProps.getExecutor().getMaxRetryAttempts() - robot.getRemainingAttempts(), checkUnit.getValue());
 			boolean throwExceptionByCaptchaOrBadIP = true;
 			if (robot.getRemainingAttempts()==0) {
 				throwExceptionByCaptchaOrBadIP = false;
@@ -143,9 +139,9 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 		} catch (Captcha_ExecutionException | BadIP_ExecutionExeption | WebDriverException |
 				 InternalError_ExecutionException ex) {
 			if (robot.getRemainingAttempts() > 0) {
-				log.warn("Будет выполнен {}-й перезапуск проверки ресурса {} по следующей причине: {}", retryAttempts - robot.getRemainingAttempts(), checkUnit.getValue(), ex.getMessage());
+				log.warn("Будет выполнен {}-й перезапуск проверки ресурса {} по следующей причине: {}", executorProps.getExecutor().getMaxRetryAttempts() - robot.getRemainingAttempts(), checkUnit.getValue(), ex.getMessage());
 				try {
-					Thread.sleep(retryDelay * 1000);
+					Thread.sleep(executorProps.getExecutor().getMaxRetryDelay() * 1000);
 				} catch (InterruptedException e) {
 					throw new RuntimeException(e);
 				}
