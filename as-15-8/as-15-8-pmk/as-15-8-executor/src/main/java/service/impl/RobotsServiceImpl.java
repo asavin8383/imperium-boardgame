@@ -20,7 +20,6 @@ import robots.exceptions.InternalError_ExecutionException;
 import robots.factory.RobotsFactory;
 import service.CheckUnitVerificationService;
 
-import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -45,24 +44,6 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
     private volatile Set<Robot> robots = ConcurrentHashMap.newKeySet();
 
     private boolean isRunning = false;
-    long webdriverTimeout;
-
-    @PostConstruct
-    private void countTimeout() {
-        //Рассчитываем таймаут исходя из таймаута сервиса executor
-        long timeout = 30;
-        int retryAttempts = executorProps.getExecutor().getMaxRetryAttempts();
-        int retryDelay = executorProps.getExecutor().getMaxRetryDelay();
-        if (executorProps.getExecutor().getMaxRetryAttempts() > 0) {
-            long countTimeout = (long) ((Optional.ofNullable(executorProps.getExecutor().getTimeout())
-                    .orElse(180) * 0.9 - (long) (retryAttempts - 1) * retryDelay) / retryAttempts);
-            if (countTimeout > timeout) {
-                timeout = countTimeout;
-            }
-        }
-        webdriverTimeout = timeout;
-        log.info("Рассчитанный таймаут одной проверки составит {} секунд", webdriverTimeout);
-    }
 
 
     public Map<AccessToolUnit, List<CheckUnitType>> getSupportedTypes() {
@@ -88,9 +69,6 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 			/*if(!this.isRunning)
 				throw new ExecutionException("Ошибка при запуске проверки запрещенного ресурса. Сервис проверки остановлен!");*/
             log.info(String.format("Запуск робота: %s", robotName));
-            log.info(String.format("Параметры executor'a:\nmaxRetryAttempts=%s\nmaxRetryDelay=%s",
-                    executorProps.getExecutor().getMaxRetryAttempts(),
-                    executorProps.getExecutor().getMaxRetryDelay()));
 
             Robot robot = robotsFactory.createRobot(checkUnitJob.getAccessTool());
             robot.setRemainingAttempts(executorProps.getExecutor().getMaxRetryAttempts());
@@ -136,14 +114,12 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
         try {
             robot.setRemainingAttempts(robot.getRemainingAttempts() - 1);
             log.info("Запуск {}-й попытки проверки ресурса: {}", executorProps.getExecutor().getMaxRetryAttempts() - robot.getRemainingAttempts(), checkUnit.getValue());
-            log.info(String.format("Параметры executor'a:\nmaxRetryAttempts=%s\nmaxRetryDelay=%s",
-                    executorProps.getExecutor().getMaxRetryAttempts(),
-                    executorProps.getExecutor().getMaxRetryDelay()));
+
             boolean throwExceptionByCaptchaOrBadIP = true;
             if (robot.getRemainingAttempts() == 0) {
                 throwExceptionByCaptchaOrBadIP = false;
             }
-            return robot.run(checkUnit, webdriverTimeout, throwExceptionByCaptchaOrBadIP);
+            return robot.run(checkUnit, executorProps.getExecutor().getWebdriverTimeout(), throwExceptionByCaptchaOrBadIP);
         } catch (Captcha_ExecutionException | BadIP_ExecutionExeption | WebDriverException |
                  InternalError_ExecutionException ex) {
             if (robot.getRemainingAttempts() > 0) {
