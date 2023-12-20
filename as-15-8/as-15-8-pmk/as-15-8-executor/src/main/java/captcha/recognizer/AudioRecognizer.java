@@ -3,6 +3,7 @@ package captcha.recognizer;
 import edu.cmu.sphinx.api.Configuration;
 import edu.cmu.sphinx.api.SpeechResult;
 import edu.cmu.sphinx.api.StreamSpeechRecognizer;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +16,7 @@ import java.util.List;
 
 @Component
 @Scope(value="prototype")
+@Slf4j
 public class AudioRecognizer {
 
     private final StreamSpeechRecognizer recognizer;
@@ -25,6 +27,7 @@ public class AudioRecognizer {
         configuration.setLanguageModelPath("resource:/edu/cmu/sphinx/models/en-us/en-us.lm.bin");
 
         this.recognizer = new StreamSpeechRecognizer(configuration);
+        log.info("Создан распознаватель аудио");
     }
 
     public String recognize(File file) throws IOException, UnsupportedAudioFileException {
@@ -62,7 +65,8 @@ public class AudioRecognizer {
     }
 
     public static void main(String[] args) throws UnsupportedAudioFileException, IOException {
-        Path file = new File("D:\\projects\\git\\as-15-8\\backend\\as-15-8\\as-15-8-pmk\\as-15-8-executor\\audio.mp3").toPath();
+        // Path file = new File("D:\\projects\\git\\as-15-8\\backend\\as-15-8\\as-15-8-pmk\\as-15-8-executor\\audio.mp3").toPath();
+        Path file = new File("C:\\Users\\shabalinAI\\Downloads\\voice.mp3").toPath();
         // Path file = new File("D:\\projects\\git\\as-15-8\\selenium-recaptcha-solver\\tst.wav").toPath();
         AudioRecognizer recognizer = new AudioRecognizer();
         String text = recognizer.recognize(file.toFile());
