@@ -1,5 +1,7 @@
 package captcha;
 
+import captcha.solver.CaptchaSolverException;
+
 import javax.sound.sampled.*;
 import java.io.File;
 import java.io.FileOutputStream;

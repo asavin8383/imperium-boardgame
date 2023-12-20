@@ -1,9 +1,10 @@
-package captcha;
+package captcha.recognizer;
 
 import edu.cmu.sphinx.api.Configuration;
 import edu.cmu.sphinx.api.SpeechResult;
 import edu.cmu.sphinx.api.StreamSpeechRecognizer;
-import robots.exceptions.ExecutionException;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import javax.sound.sampled.*;
 import java.io.File;
@@ -12,35 +13,33 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
+@Scope(value="prototype")
 public class AudioRecognizer {
 
-    static StreamSpeechRecognizer recognizer;
-    static {
+    private final StreamSpeechRecognizer recognizer;
+    public AudioRecognizer() throws IOException {
         Configuration configuration = new Configuration();
         configuration.setAcousticModelPath("resource:/edu/cmu/sphinx/models/en-us/en-us");
         configuration.setDictionaryPath("resource:/edu/cmu/sphinx/models/en-us/cmudict-en-us.dict");
         configuration.setLanguageModelPath("resource:/edu/cmu/sphinx/models/en-us/en-us.lm.bin");
 
-        try {
-            recognizer = new StreamSpeechRecognizer(configuration);
-        } catch (IOException ex) {
-            throw new ExecutionException(ex);
-        }
+        this.recognizer = new StreamSpeechRecognizer(configuration);
     }
 
     public String recognize(File file) throws IOException, UnsupportedAudioFileException {
         try( AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(file)) {
             try (AudioInputStream stream = convertToWav(audioInputStream)) {
-                recognizer.startRecognition(stream);
+                this.recognizer.startRecognition(stream);
                 SpeechResult result;
                 List<String> textList = new ArrayList<>();
-                while ((result = recognizer.getResult()) != null) {
+                while ((result = this.recognizer.getResult()) != null) {
                     textList.add(result
                             .getHypothesis()
                             .replaceAll("\\sif|\\sit|\\sf\\.|\\sf$", "")
                     );
                 }
-                recognizer.stopRecognition();
+                this.recognizer.stopRecognition();
 
                 return String.join(" ", textList);
             }

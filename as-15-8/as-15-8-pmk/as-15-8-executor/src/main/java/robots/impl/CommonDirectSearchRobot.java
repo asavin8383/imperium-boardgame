@@ -1,7 +1,7 @@
 package robots.impl;
 
-import captcha.CaptchaSolver;
-import captcha.CaptchaSolverFactory;
+import captcha.solver.CaptchaSolver;
+import captcha.solver.CaptchaSolverFactory;
 import captcha.CaptchaType;
 import checkUnits.CheckUnit;
 import checkUnits.CheckUnitType;
@@ -408,7 +408,7 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
             try {
                 if(!this.captchaType.equals(CaptchaType.UNKNOWN) && Strings.isNotEmpty(this.xpathCaptchaElement)) {
                     if (this.captchaSolver == null)
-                        this.captchaSolver = CaptchaSolverFactory.createCaptchaSolver(this.captchaType);
+                        this.captchaSolver = CaptchaSolverFactory.getSolver(this.captchaType);
 
                     WebElement captchaElement = driver.findElement(
                             By.xpath(this.xpathCaptchaElement));

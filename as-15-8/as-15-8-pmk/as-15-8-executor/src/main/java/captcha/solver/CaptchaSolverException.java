@@ -1,4 +1,4 @@
-package captcha;
+package captcha.solver;
 
 public class CaptchaSolverException extends Exception {
 

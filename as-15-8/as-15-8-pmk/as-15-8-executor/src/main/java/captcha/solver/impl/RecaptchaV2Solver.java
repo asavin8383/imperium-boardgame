@@ -1,30 +1,34 @@
-package captcha.impl;
+package captcha.solver.impl;
 
-import captcha.AudioRecognizer;
-import captcha.CaptchaSolver;
-import captcha.CaptchaSolverException;
-import captcha.CaptchaUtils;
+import captcha.*;
+import captcha.recognizer.AudioRecognizer;
+import captcha.solver.CaptchaSolver;
+import captcha.solver.CaptchaSolverException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.*;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.Random;
 
 @Slf4j
+@Component
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class RecaptchaV2Solver implements CaptchaSolver {
 
     private final AudioRecognizer recognizer;
 
-    public RecaptchaV2Solver() throws IOException {
-        this.recognizer = new AudioRecognizer();
+    @Override
+    public CaptchaType getCaptchaType() {
+        return CaptchaType.RECAPTCHA_V2;
     }
-
 
     @Override
     public void solve(WebDriver driver, WebElement recaptchaIframe) throws CaptchaSolverException {
