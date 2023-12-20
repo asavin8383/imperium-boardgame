@@ -11,12 +11,19 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.Random;
 
 @Slf4j
 public class RecaptchaV2Solver implements CaptchaSolver {
+
+    private final AudioRecognizer recognizer;
+
+    public RecaptchaV2Solver() throws IOException {
+        this.recognizer = new AudioRecognizer();
+    }
 
 
     @Override
@@ -108,7 +115,7 @@ public class RecaptchaV2Solver implements CaptchaSolver {
         URL proxyUrl = proxy == null ? null : new URL("http://" + proxy.getHttpProxy());
         CaptchaUtils.downloadFile(link, mp3File, proxyUrl);
 
-        String recognizedText = AudioRecognizer.recognize(mp3File);
+        String recognizedText = recognizer.recognize(mp3File);
 
         if(mp3File.exists()){
             boolean deleted = mp3File.delete();
