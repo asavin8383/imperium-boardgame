@@ -3,6 +3,7 @@ package captcha;
 import edu.cmu.sphinx.api.Configuration;
 import edu.cmu.sphinx.api.SpeechResult;
 import edu.cmu.sphinx.api.StreamSpeechRecognizer;
+import robots.exceptions.ExecutionException;
 
 import javax.sound.sampled.*;
 import java.io.File;
@@ -13,29 +14,33 @@ import java.util.List;
 
 public class AudioRecognizer {
 
-    StreamSpeechRecognizer recognizer;
-    public AudioRecognizer() throws IOException {
+    static StreamSpeechRecognizer recognizer;
+    static {
         Configuration configuration = new Configuration();
         configuration.setAcousticModelPath("resource:/edu/cmu/sphinx/models/en-us/en-us");
         configuration.setDictionaryPath("resource:/edu/cmu/sphinx/models/en-us/cmudict-en-us.dict");
         configuration.setLanguageModelPath("resource:/edu/cmu/sphinx/models/en-us/en-us.lm.bin");
 
-        this.recognizer = new StreamSpeechRecognizer(configuration);
+        try {
+            recognizer = new StreamSpeechRecognizer(configuration);
+        } catch (IOException ex) {
+            throw new ExecutionException(ex);
+        }
     }
 
     public String recognize(File file) throws IOException, UnsupportedAudioFileException {
         try( AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(file)) {
             try (AudioInputStream stream = convertToWav(audioInputStream)) {
-                this.recognizer.startRecognition(stream);
+                recognizer.startRecognition(stream);
                 SpeechResult result;
                 List<String> textList = new ArrayList<>();
-                while ((result = this.recognizer.getResult()) != null) {
+                while ((result = recognizer.getResult()) != null) {
                     textList.add(result
                             .getHypothesis()
                             .replaceAll("\\sif|\\sit|\\sf\\.|\\sf$", "")
                     );
                 }
-                this.recognizer.stopRecognition();
+                recognizer.stopRecognition();
 
                 return String.join(" ", textList);
             }
