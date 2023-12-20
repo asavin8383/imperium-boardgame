@@ -20,10 +20,10 @@ import java.util.Random;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class RecaptchaV2Solver implements CaptchaSolver {
 
-    private final AudioRecognizer recognizer;
+    @Autowired
+    private AudioRecognizer recognizer;
 
     @Override
     public CaptchaType getCaptchaType() {
