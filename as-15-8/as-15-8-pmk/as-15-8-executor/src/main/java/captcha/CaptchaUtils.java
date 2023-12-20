@@ -1,27 +1,27 @@
 package captcha;
 
-import edu.cmu.sphinx.api.Configuration;
-import edu.cmu.sphinx.api.LiveSpeechRecognizer;
-import edu.cmu.sphinx.api.SpeechResult;
-import edu.cmu.sphinx.api.StreamSpeechRecognizer;
-import edu.cmu.sphinx.result.WordResult;
-
 import javax.sound.sampled.*;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.net.URL;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 
 public class CaptchaUtils {
 
-    public static void downloadFile(String fileUrl, File file) throws IOException, CaptchaSolverException {
+    public static void downloadFile(String fileUrl, File file, URL proxyUrl) throws IOException, CaptchaSolverException {
         URL url = new URL(fileUrl);
-        HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
+        HttpURLConnection httpConn;
+        if(proxyUrl == null) {
+            httpConn = (HttpURLConnection) url.openConnection();
+        } else {
+            Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyUrl.getHost(), proxyUrl.getPort()));
+            httpConn = (HttpURLConnection) url.openConnection(proxy);
+        }
         int responseCode = httpConn.getResponseCode();
 
         if (responseCode == HttpURLConnection.HTTP_OK ||
@@ -32,7 +32,7 @@ public class CaptchaUtils {
             InputStream inputStream = httpConn.getInputStream();
             FileOutputStream outputStream = new FileOutputStream(file);
 
-            int bytesRead = -1;
+            int bytesRead;
             byte[] buffer = new byte[4096];
             while ((bytesRead = inputStream.read(buffer)) != -1) {
                 outputStream.write(buffer, 0, bytesRead);

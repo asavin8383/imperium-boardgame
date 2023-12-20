@@ -6,10 +6,12 @@ import captcha.CaptchaSolverException;
 import captcha.CaptchaUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.*;
+import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.File;
+import java.net.URL;
 import java.nio.file.Files;
 import java.util.Random;
 
@@ -88,7 +90,10 @@ public class RecaptchaV2Solver implements CaptchaSolver {
         File mp3File = Files.createTempFile("recaptcha_v2", ".mp3").toFile();
 
         String link = downloadLink.getAttribute("href");
-        CaptchaUtils.downloadFile(link, mp3File);
+
+        Proxy proxy = (Proxy) ((RemoteWebDriver)driver).getCapabilities().getCapability("proxy");
+        URL proxyUrl = proxy == null ? null : new URL("http://" + proxy.getHttpProxy());
+        CaptchaUtils.downloadFile(link, mp3File, proxyUrl);
 
         String recognizedText = AudioRecognizer.recognize(mp3File);
 
