@@ -2,6 +2,7 @@ package robots.impl;
 
 import captcha.CaptchaSolver;
 import captcha.CaptchaSolverFactory;
+import captcha.CaptchaType;
 import checkUnits.CheckUnit;
 import checkUnits.CheckUnitType;
 import enums.AccessToolParameter;
@@ -64,9 +65,16 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
     /** xpath поисковой строки */
     private String xpathInputField;
 
+    /** Тип капчи, выдаваемый поисковой системой.
+     *  Варианты (RECAPTCHA_V2) */
+    private CaptchaType captchaType;
+
     /** xpath элемента, по которому
      * опредеяется наличие капчи */
     private String xpathCaptcha;
+
+    /** xpath элемента капчи */
+    private String xpathCaptchaElement;
 
     /** xpath элемента, по клику на который
      * происходит переход на следующую страницу */
@@ -118,6 +126,8 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
     /** Кол-во проверенных ссылок */
     protected Integer counter = 0;
 
+    protected CaptchaSolver captchaSolver;
+
     public CommonDirectSearchRobot(Map<AccessToolParameter, String> scriptParams) {
         super(scriptParams,
                 Strings.isNotEmpty(scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_PROXY)) ?
@@ -139,11 +149,14 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
 
         this.searchSystemUrl = scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_URL);
         this.xpathInputField = scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_XPATH_INPUT_FIELD);
-        this.xpathCaptcha = scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_XPATH_CAPTCHA);
         this.xpathNextPage = scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_XPATH_NEXT_PAGE);
         this.xpathItemLink = scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_XPATH_ITEM_LINK);
         this.resultNotFoundRegexp = scriptParams.get(AccessToolParameter.RESULT_NOT_FOUND_REGEXP);
         this.checkSpellingLink = scriptParams.get(AccessToolParameter.CHECK_SPELLING_LINK);
+
+        this.captchaType = CaptchaType.of(scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_CAPTCHA_TYPE));
+        this.xpathCaptcha = scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_XPATH_CAPTCHA);
+        this.xpathCaptchaElement = scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_XPATH_CAPTCHA_ELEMENT);
 
         String needCheckHintStr = scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_CHECK_HINT);
         this.needCheckHint = Strings.isNotEmpty(needCheckHintStr) && Boolean.parseBoolean(needCheckHintStr);
@@ -174,9 +187,13 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         return xpathInputField;
     }
 
+    public CaptchaType getCaptchaType() {return captchaType; }
+
     public String getXpathCaptcha() {
         return xpathCaptcha;
     }
+
+    public String getXpathCaptchaElement() { return xpathCaptchaElement; }
 
     public String getXpathNextPage() {
         return xpathNextPage;
@@ -238,17 +255,11 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
 
         equalityTest = EqualityTest.forCheckUnit(checkUnit);
 
-        if (captcha()) {
-            try {
-                CaptchaSolver captchaSolver = CaptchaSolverFactory.createCaptchaSolver("RECAPTCHA_V2");
-                captchaSolver.solve(driver);
-            } catch (Exception ex) {
-                log.warn("Ошибка при попытке решить капчу", ex);
-                if (throwExceptionByCaptchaOrBadIP) {
-                    throw new Captcha_ExecutionException(String.format("ПС выдала капчу на url ПС: %s", searchSystemUrl));
-                } else {
-                    return createMessage(false, CheckUnitJobResult.CAPTCHA_DETECTED);
-                }
+        if (!solveCaptcha(this.driver)) {
+            if(throwExceptionByCaptchaOrBadIP)
+                throw new Captcha_ExecutionException(String.format("ПС выдала капчу на url ПС: %s", searchSystemUrl));
+            else {
+                return createMessage(false, CheckUnitJobResult.CAPTCHA_DETECTED);
             }
         }
         try {
@@ -283,18 +294,13 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
             }
         }
 
-        if (captcha())
-            try{
-                CaptchaSolver captchaSolver = CaptchaSolverFactory.createCaptchaSolver("RECAPTCHA_V2");
-                captchaSolver.solve(driver);
-            } catch (Exception ex) {
-                log.warn("Ошибка при попытке решить капчу", ex);
-                if (throwExceptionByCaptchaOrBadIP) {
-                    throw new Captcha_ExecutionException(String.format("ПС выдала капчу на url: %s", checkUnit.getValue()));
-                } else {
-                    return createMessage(false, CheckUnitJobResult.CAPTCHA_DETECTED);
-                }
+        if (!solveCaptcha(this.driver)) {
+            if (throwExceptionByCaptchaOrBadIP) {
+                throw new Captcha_ExecutionException(String.format("ПС выдала капчу на url: %s", checkUnit.getValue()));
+            } else {
+                return createMessage(false, CheckUnitJobResult.CAPTCHA_DETECTED);
             }
+        }
 
         //Проверим, не исправилось ли правописание. Если исправилось, возвращаем назад
         if(Strings.isNotEmpty(this.checkSpellingLink)){
@@ -393,9 +399,28 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
             getPaginatedLinks() : getContinuousLinks();
     }
 
-    boolean captcha() {
-        return xpathCaptcha != null && xpathCaptcha.length() > 0 &&
+    boolean solveCaptcha(WebDriver driver) {
+
+        boolean captchaDetected = xpathCaptcha != null && xpathCaptcha.length() > 0 &&
                 driver.findElements(By.xpath(xpathCaptcha)).size() > 0;
+
+        if (captchaDetected) {
+            try {
+                if(!this.captchaType.equals(CaptchaType.UNKNOWN) && Strings.isNotEmpty(this.xpathCaptchaElement)) {
+                    if (this.captchaSolver == null)
+                        this.captchaSolver = CaptchaSolverFactory.createCaptchaSolver(this.xpathCaptcha);
+
+                    WebElement captchaElement = driver.findElement(
+                            By.xpath(this.xpathCaptchaElement));
+                    captchaSolver.solve(driver, captchaElement);
+                    return true;
+                }
+            } catch (Exception ex) {
+                log.warn("Ошибка при попытке решить капчу", ex);
+            }
+            return false;
+        }
+        return true;
     }
 
     List<WebElement> getContinuousLinks() throws ExecutionException {

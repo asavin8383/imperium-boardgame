@@ -34,7 +34,7 @@ public class YandexRobot extends CommonDirectSearchRobot {
         if (checkSuggestedLink(checkUnit.getValue(), equalityTest))
             return createMessage(true, null);
 
-        if (captcha())
+        if (!solveCaptcha(this.driver))
             if (throwExceptionByCaptchaOrBadIP) {
                 throw new Captcha_ExecutionException(String.format("ПС выдала капчу на url: %s", checkUnit.getValue()));
             } else {

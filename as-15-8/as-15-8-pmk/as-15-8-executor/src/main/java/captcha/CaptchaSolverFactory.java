@@ -7,14 +7,14 @@ import java.util.Map;
 
 public class CaptchaSolverFactory {
 
-    private static final Map<Captcha, CaptchaSolver> captchaSolvers = new HashMap<Captcha, CaptchaSolver>(){{
-        put(Captcha.RECAPTCHA_V2, new RecaptchaV2Solver());
+    private static final Map<CaptchaType, CaptchaSolver> captchaSolvers = new HashMap<CaptchaType, CaptchaSolver>(){{
+        put(CaptchaType.RECAPTCHA_V2, new RecaptchaV2Solver());
     }};
 
     public static CaptchaSolver createCaptchaSolver(String captchaName) throws CaptchaSolverException {
         try {
-            Captcha captcha = Captcha.valueOf(captchaName);
-            return captchaSolvers.get(captcha);
+            CaptchaType captchaType = CaptchaType.valueOf(captchaName);
+            return captchaSolvers.get(captchaType);
         } catch (IllegalArgumentException ex){
             throw new CaptchaSolverException("Ошибка! Капча " + captchaName + " не поддерживается");
         }

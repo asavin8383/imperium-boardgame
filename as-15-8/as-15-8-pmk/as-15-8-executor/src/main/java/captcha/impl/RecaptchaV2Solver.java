@@ -16,38 +16,33 @@ import java.util.Random;
 @Slf4j
 public class RecaptchaV2Solver implements CaptchaSolver {
 
+
     @Override
-    public void solve(WebDriver driver) throws CaptchaSolverException {
+    public void solve(WebDriver driver, WebElement recaptchaIframe) throws CaptchaSolverException {
         try {
-            WebElement recaptchaIframe = driver.findElement(
-                    By.xpath("//iframe[@title=\"reCAPTCHA\"]"));
-            clickToCaptcha(driver, recaptchaIframe);
+            driver.switchTo().frame(recaptchaIframe);
+
+            WebElement checkbox = waitForElement(driver, By.id("recaptcha-anchor"), 10);
+
+            jsClick(driver, checkbox);
+
+            if(checkbox.getAttribute("aria-checked").equals("true")){
+                return;
+            }
+
+            randomDelay();
+
+            driver.switchTo().parentFrame();
+
+            WebElement captchaChallenge = waitForElement(driver,
+                    By.xpath("//iframe[contains(@src, \"recaptcha\") and contains(@src, \"bframe\")]"),
+                    5
+            );
+
+            solveChallenge(driver, captchaChallenge);
         } catch (Exception ex) {
             throw new CaptchaSolverException("Ошибка при решении RecaptchaV2", ex);
         }
-    }
-
-    private void clickToCaptcha(WebDriver driver, WebElement recaptchaIframe) throws Exception {
-        driver.switchTo().frame(recaptchaIframe);
-
-        WebElement checkbox = waitForElement(driver, By.id("recaptcha-anchor"), 10);
-
-        jsClick(driver, checkbox);
-
-        if(checkbox.getAttribute("aria-checked").equals("true")){
-            return;
-        }
-
-        randomDelay();
-
-        driver.switchTo().parentFrame();
-
-        WebElement captchaChallenge = waitForElement(driver,
-                By.xpath("//iframe[contains(@src, \"recaptcha\") and contains(@src, \"bframe\")]"),
-                5
-        );
-
-        solveChallenge(driver, captchaChallenge);
     }
 
     private void solveChallenge(WebDriver driver, WebElement captchaChallenge) throws Exception {
