@@ -4,9 +4,9 @@ LABEL Alex Shabalin <ashabalin@ec-leasing.ru>
 
 EXPOSE 11100
 
-RUN apk add --no-cache nmap \
-    && apk add --no-cache proxychains-ng \
-    && mkdir -p /share/nmap
+RUN apt update && \
+    apt install -y nmap proxychains-ng && \
+    mkdir -p /share/nmap
 
 ENV APP_PATH="/as-15-8-executor.jar" \
     LOG_PATH="/log"
