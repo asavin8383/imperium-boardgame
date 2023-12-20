@@ -24,7 +24,7 @@ public class RecaptchaV2Solver implements CaptchaSolver {
         try {
             driver.switchTo().frame(recaptchaIframe);
 
-            WebElement checkbox = waitForElement(driver, By.id("recaptcha-anchor"), 10);
+            WebElement checkbox = waitForElement(driver, By.id("recaptcha-anchor"), 20);
 
             jsClick(driver, checkbox);
 
@@ -51,7 +51,7 @@ public class RecaptchaV2Solver implements CaptchaSolver {
         driver.switchTo().frame(captchaChallenge);
 
         try{
-            waitForElement(driver, By.xpath("//*[@id=\"recaptcha-audio-button\"]"), 1)
+            waitForElement(driver, By.xpath("//*[@id=\"recaptcha-audio-button\"]"), 10)
                     .click();
         } catch (Exception ignored){
 
@@ -59,30 +59,43 @@ public class RecaptchaV2Solver implements CaptchaSolver {
 
         solveAudioChallenge(driver);
 
-        WebElement verifyButton = waitForElement(driver, By.id("recaptcha-verify-button"), 5);
+        WebElement verifyButton = waitForElement(driver, By.id("recaptcha-verify-button"), 15);
         jsClick(driver, verifyButton);
         randomDelay();
 
+        for(int i = 0; i < 3; i++){
+            if(!checkAndSolveRepeatedCaptcha(driver)){
+                break;
+            }
+        }
+
+        driver.switchTo().parentFrame();
+    }
+
+    private boolean checkAndSolveRepeatedCaptcha(WebDriver driver) throws Exception {
         try{
             waitForElement(driver,
                     By.xpath("//div[normalize-space()=\"Multiple correct solutions required - please solve more.\"]"),
-                    1
+                    2
             );
 
             solveAudioChallenge(driver);
 
-            WebElement secondVerifyButton = waitForElement(driver, By.id("recaptcha-verify-button"), 5);
+            WebElement secondVerifyButton = waitForElement(driver, By.id("recaptcha-verify-button"), 15);
             jsClick(driver, secondVerifyButton);
-        } catch (TimeoutException ignored) {}
 
-        driver.switchTo().parentFrame();
+            randomDelay();
+            return true;
+        } catch (TimeoutException ignored) {
+            return false;
+        }
     }
 
     private void solveAudioChallenge(WebDriver driver) throws Exception {
 
         WebElement downloadLink;
         try{
-            downloadLink = waitForElement(driver, By.className("rc-audiochallenge-tdownload-link"), 10);
+            downloadLink = waitForElement(driver, By.className("rc-audiochallenge-tdownload-link"), 20);
         } catch (Exception ex) {
             throw new CaptchaSolverException("Google обнаружил автоматические запросы. Решить капчу невозможно.");
         }
@@ -103,7 +116,7 @@ public class RecaptchaV2Solver implements CaptchaSolver {
                 log.warn("Не удалось удалить временный файл: " + mp3File.getAbsolutePath());
         }
 
-        WebElement responseTextbox = waitForElement(driver, By.id("audio-response"), 5);
+        WebElement responseTextbox = waitForElement(driver, By.id("audio-response"), 15);
         humanType(responseTextbox, recognizedText);
     }
 
