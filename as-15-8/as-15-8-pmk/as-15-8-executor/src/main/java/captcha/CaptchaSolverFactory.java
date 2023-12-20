@@ -11,12 +11,11 @@ public class CaptchaSolverFactory {
         put(CaptchaType.RECAPTCHA_V2, new RecaptchaV2Solver());
     }};
 
-    public static CaptchaSolver createCaptchaSolver(String captchaName) throws CaptchaSolverException {
+    public static CaptchaSolver createCaptchaSolver(CaptchaType captchaType) throws CaptchaSolverException {
         try {
-            CaptchaType captchaType = CaptchaType.valueOf(captchaName);
             return captchaSolvers.get(captchaType);
         } catch (IllegalArgumentException ex){
-            throw new CaptchaSolverException("Ошибка! Капча " + captchaName + " не поддерживается");
+            throw new CaptchaSolverException("Ошибка! Капча " + captchaType.name() + " не поддерживается");
         }
     }
 }

@@ -408,7 +408,7 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
             try {
                 if(!this.captchaType.equals(CaptchaType.UNKNOWN) && Strings.isNotEmpty(this.xpathCaptchaElement)) {
                     if (this.captchaSolver == null)
-                        this.captchaSolver = CaptchaSolverFactory.createCaptchaSolver(this.xpathCaptcha);
+                        this.captchaSolver = CaptchaSolverFactory.createCaptchaSolver(this.captchaType);
 
                     WebElement captchaElement = driver.findElement(
                             By.xpath(this.xpathCaptchaElement));
