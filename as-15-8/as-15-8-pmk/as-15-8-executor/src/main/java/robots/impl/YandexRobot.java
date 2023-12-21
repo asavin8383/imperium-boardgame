@@ -1,5 +1,7 @@
 package robots.impl;
 
+import captcha.solver.CaptchaSolverBadIPException;
+import captcha.solver.CaptchaSolverException;
 import checkUnits.CheckUnit;
 import enums.AccessToolParameter;
 import enums.CheckUnitJobResult;
@@ -34,12 +36,18 @@ public class YandexRobot extends CommonDirectSearchRobot {
         if (checkSuggestedLink(checkUnit.getValue(), equalityTest))
             return createMessage(true, null);
 
-        if (!solveCaptcha(this.driver))
+        try{
+            solveCaptcha(driver);
+        } catch (CaptchaSolverException ex) {
             if (throwExceptionByCaptchaOrBadIP) {
                 throw new Captcha_ExecutionException(String.format("ПС выдала капчу на url: %s", checkUnit.getValue()));
             } else {
-                return createMessage(true, CheckUnitJobResult.CAPTCHA_DETECTED);
+                if(ex instanceof CaptchaSolverBadIPException)
+                    return createMessage(false, CheckUnitJobResult.BAD_IP);
+                else
+                    return createMessage(false, CheckUnitJobResult.CAPTCHA_DETECTED);
             }
+        }
 
         return createMessage(checkPaginatedSearchResult(), null);
     }

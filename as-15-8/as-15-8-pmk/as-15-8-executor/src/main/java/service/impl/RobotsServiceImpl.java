@@ -120,8 +120,7 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
                 throwExceptionByCaptchaOrBadIP = false;
             }
             return robot.run(checkUnit, executorProps.getExecutor().getWebdriverTimeout(), throwExceptionByCaptchaOrBadIP);
-        } catch (Captcha_ExecutionException | BadIP_ExecutionExeption | WebDriverException |
-                 InternalError_ExecutionException ex) {
+        } catch (ExecutionException | WebDriverException ex) {
             if (robot.getRemainingAttempts() > 0) {
                 log.warn("Будет выполнен {}-й перезапуск проверки ресурса {} по следующей причине: {}", executorProps.getExecutor().getMaxRetryAttempts() - robot.getRemainingAttempts(), checkUnit.getValue(), ex.getMessage());
                 try {

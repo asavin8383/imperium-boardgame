@@ -3,6 +3,7 @@ package captcha.solver.impl;
 import captcha.*;
 import captcha.recognizer.AudioRecognizer;
 import captcha.solver.CaptchaSolver;
+import captcha.solver.CaptchaSolverBadIPException;
 import captcha.solver.CaptchaSolverException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,7 +50,7 @@ public class RecaptchaV2Solver implements CaptchaSolver {
 
             WebElement captchaChallenge = waitForElement(driver,
                     By.xpath("//iframe[contains(@src, \"recaptcha\") and contains(@src, \"bframe\")]"),
-                    5
+                    10
             );
 
             solveChallenge(driver, captchaChallenge);
@@ -108,7 +109,7 @@ public class RecaptchaV2Solver implements CaptchaSolver {
         try{
             downloadLink = waitForElement(driver, By.className("rc-audiochallenge-tdownload-link"), 20);
         } catch (Exception ex) {
-            throw new CaptchaSolverException("Google обнаружил автоматические запросы. Решить капчу невозможно.");
+            throw new CaptchaSolverBadIPException("Google обнаружил автоматические запросы.");
         }
 
         File mp3File = Files.createTempFile("recaptcha_v2", ".mp3").toFile();

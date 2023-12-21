@@ -1,6 +1,8 @@
 package robots.impl;
 
 import captcha.solver.CaptchaSolver;
+import captcha.solver.CaptchaSolverBadIPException;
+import captcha.solver.CaptchaSolverException;
 import captcha.solver.CaptchaSolverFactory;
 import captcha.CaptchaType;
 import checkUnits.CheckUnit;
@@ -227,48 +229,41 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
     @Override
     public ExecutionJobResult execute(CheckUnit checkUnit, boolean throwExceptionByCaptchaOrBadIP) throws ExecutionException {
 
-//        //Проверим доступность ПС
-//        try {
-//            checkInternalError(searchSystemUrl);
-//        } catch (InternalError_ExecutionException ex) {
-//            if (throwExceptionByCaptchaOrBadIP) {
-//                throw ex;
-//            } else {
-//                return createMessage(false, CheckUnitJobResult.INTERNAL_ERROR);
-//            }
-//        }
-
         try {
             //Вставляем случайным образом задержку до 10 секунд для неравномерного запуска проверок
-//            Thread.sleep(new Random().nextInt((int)10000));
-//
+            Thread.sleep(new Random().nextInt(10000));
+
 //            JavascriptExecutor js = (JavascriptExecutor) driver;
 //            js.executeScript("window.open('" + searchSystemUrl + "', '_blank');");
 //            Thread.sleep(3000);
             driver.get(searchSystemUrl);
-        } catch (WebDriverException ex) {
-            ex.printStackTrace();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new ExecutionException("Ошибка открытия ПС", e);
         }
         // driver.switchTo().window(driver.getWindowHandles().toArray()[driver.getWindowHandles().size()-1].toString());
 
         equalityTest = EqualityTest.forCheckUnit(checkUnit);
 
-        if (!solveCaptcha(this.driver)) {
-            if(throwExceptionByCaptchaOrBadIP)
-                throw new Captcha_ExecutionException(String.format("ПС выдала капчу на url ПС: %s", searchSystemUrl));
-            else {
-                return createMessage(false, CheckUnitJobResult.CAPTCHA_DETECTED);
+        try{
+            solveCaptcha(driver);
+        } catch (CaptchaSolverException ex) {
+            if (throwExceptionByCaptchaOrBadIP) {
+                throw new Captcha_ExecutionException(String.format("ПС выдала капчу на url: %s", checkUnit.getValue()));
+            } else {
+                if(ex instanceof CaptchaSolverBadIPException)
+                    return createMessage(false, CheckUnitJobResult.BAD_IP);
+                else
+                    return createMessage(false, CheckUnitJobResult.CAPTCHA_DETECTED);
             }
         }
+
         try {
             driver.findElement(By.xpath(xpathInputField));
         } catch(NoSuchElementException ex) {
             if (throwExceptionByCaptchaOrBadIP) {
-                throw new BadIP_ExecutionExeption(String.format("ПС выдала BAD IP на url: %s", checkUnit.getValue()));
+                throw new ExecutionException(String.format("Не получилось найти поисковую строку на странице ПС: %s", checkUnit.getValue()));
             } else {
-                return createMessage(false, CheckUnitJobResult.BAD_IP);
+                return createMessage(false, CheckUnitJobResult.DOUBTFUL);
             }
         }
 
@@ -294,11 +289,16 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
             }
         }
 
-        if (!solveCaptcha(this.driver)) {
+        try{
+            solveCaptcha(driver);
+        } catch (CaptchaSolverException ex) {
             if (throwExceptionByCaptchaOrBadIP) {
                 throw new Captcha_ExecutionException(String.format("ПС выдала капчу на url: %s", checkUnit.getValue()));
             } else {
-                return createMessage(false, CheckUnitJobResult.CAPTCHA_DETECTED);
+                if(ex instanceof CaptchaSolverBadIPException)
+                    return createMessage(false, CheckUnitJobResult.BAD_IP);
+                else
+                    return createMessage(false, CheckUnitJobResult.CAPTCHA_DETECTED);
             }
         }
 
@@ -314,6 +314,18 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
                 throw new TimeoutScriptException(e);
             }
         }
+
+        try{
+            WebDriverWait wait = new WebDriverWait(driver, 2);
+            WebElement errorElem = wait.until(ExpectedConditions
+                    .visibilityOfElementLocated(By.xpath("//div[@class='error-code']")));
+            if (throwExceptionByCaptchaOrBadIP) {
+                throw new ExecutionException(String.format("Ошибка доступа к ПС: %s", checkUnit.getValue()));
+            } else {
+                return createMessage(false, CheckUnitJobResult.SOCKET_ERROR);
+            }
+
+        } catch (TimeoutException ignored){}
 
         //Проверяем, не вылез ли подозрительный трафик
         Optional<ExecutionJobResult> optExecutionJobResult = checkNoLinks(checkUnit, throwExceptionByCaptchaOrBadIP);
@@ -362,7 +374,7 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
                 if(content==null) {
                     // Завис скрипт, ставим сомнительный результат
                     if (throwExceptionByCaptchaOrBadIP) {
-                        throw new BadIP_ExecutionExeption(String.format("ПС выдала BAD IP на url: %s", checkUnit.getValue()));
+                        throw new ExecutionException(String.format("ПС выдала сомнительный ответ на url: %s", checkUnit.getValue()));
                     } else {
                         return Optional.of(createMessage(false, CheckUnitJobResult.DOUBTFUL));
                     }
@@ -376,17 +388,17 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
                 } else {
                     //Плохой IP
                     if (throwExceptionByCaptchaOrBadIP) {
-                        throw new BadIP_ExecutionExeption(String.format("ПС выдала BAD IP на url: %s", checkUnit.getValue()));
+                        throw new ExecutionException(String.format("ПС выдала сомнительный ответ на url: %s", checkUnit.getValue()));
                     } else {
-                        return Optional.of(createMessage(false, CheckUnitJobResult.BAD_IP));
+                        return Optional.of(createMessage(false, CheckUnitJobResult.DOUBTFUL));
                     }
                 }
             } else {
                 //регулярку не задали, считаем плохим IP
                 if (throwExceptionByCaptchaOrBadIP) {
-                    throw new BadIP_ExecutionExeption(String.format("ПС выдала BAD IP на url: %s", checkUnit.getValue()));
+                    throw new ExecutionException(String.format("ПС выдала сомнительный ответ на url: %s", checkUnit.getValue()));
                 } else {
-                    return Optional.of(createMessage(false, CheckUnitJobResult.BAD_IP));
+                    return Optional.of(createMessage(false, CheckUnitJobResult.DOUBTFUL));
                 }
             }
         }
@@ -399,32 +411,22 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
             getPaginatedLinks() : getContinuousLinks();
     }
 
-    boolean solveCaptcha(WebDriver driver) {
-
-        boolean solved = true;
-
+    void solveCaptcha(WebDriver driver) throws CaptchaSolverException {
         for(int i = 0; i < 3; i++) {
             boolean captchaDetected = xpathCaptcha != null && xpathCaptcha.length() > 0 &&
                     driver.findElements(By.xpath(xpathCaptcha)).size() > 0;
 
             if (captchaDetected) {
-                try {
-                    if (!this.captchaType.equals(CaptchaType.UNKNOWN) && Strings.isNotEmpty(this.xpathCaptchaElement)) {
-                        if (this.captchaSolver == null)
-                            this.captchaSolver = CaptchaSolverFactory.getSolver(this.captchaType);
+                if (!this.captchaType.equals(CaptchaType.UNKNOWN) && Strings.isNotEmpty(this.xpathCaptchaElement)) {
+                    if (this.captchaSolver == null)
+                        this.captchaSolver = CaptchaSolverFactory.getSolver(this.captchaType);
 
-                        WebElement captchaElement = driver.findElement(
-                                By.xpath(this.xpathCaptchaElement));
-                        captchaSolver.solve(driver, captchaElement);
-                        solved = true;
-                    }
-                } catch (Exception ex) {
-                    log.warn("Ошибка при попытке решить капчу", ex);
-                    solved = false;
+                    WebElement captchaElement = driver.findElement(
+                            By.xpath(this.xpathCaptchaElement));
+                    captchaSolver.solve(driver, captchaElement);
                 }
             }
         }
-        return solved;
     }
 
     List<WebElement> getContinuousLinks() throws ExecutionException {
