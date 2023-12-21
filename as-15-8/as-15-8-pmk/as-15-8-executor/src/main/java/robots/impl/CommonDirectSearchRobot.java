@@ -401,26 +401,30 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
 
     boolean solveCaptcha(WebDriver driver) {
 
-        boolean captchaDetected = xpathCaptcha != null && xpathCaptcha.length() > 0 &&
-                driver.findElements(By.xpath(xpathCaptcha)).size() > 0;
+        boolean solved = true;
 
-        if (captchaDetected) {
-            try {
-                if(!this.captchaType.equals(CaptchaType.UNKNOWN) && Strings.isNotEmpty(this.xpathCaptchaElement)) {
-                    if (this.captchaSolver == null)
-                        this.captchaSolver = CaptchaSolverFactory.getSolver(this.captchaType);
+        for(int i = 0; i < 3; i++) {
+            boolean captchaDetected = xpathCaptcha != null && xpathCaptcha.length() > 0 &&
+                    driver.findElements(By.xpath(xpathCaptcha)).size() > 0;
 
-                    WebElement captchaElement = driver.findElement(
-                            By.xpath(this.xpathCaptchaElement));
-                    captchaSolver.solve(driver, captchaElement);
-                    return true;
+            if (captchaDetected) {
+                try {
+                    if (!this.captchaType.equals(CaptchaType.UNKNOWN) && Strings.isNotEmpty(this.xpathCaptchaElement)) {
+                        if (this.captchaSolver == null)
+                            this.captchaSolver = CaptchaSolverFactory.getSolver(this.captchaType);
+
+                        WebElement captchaElement = driver.findElement(
+                                By.xpath(this.xpathCaptchaElement));
+                        captchaSolver.solve(driver, captchaElement);
+                        solved = true;
+                    }
+                } catch (Exception ex) {
+                    log.warn("Ошибка при попытке решить капчу", ex);
+                    solved = false;
                 }
-            } catch (Exception ex) {
-                log.warn("Ошибка при попытке решить капчу", ex);
             }
-            return false;
         }
-        return true;
+        return solved;
     }
 
     List<WebElement> getContinuousLinks() throws ExecutionException {

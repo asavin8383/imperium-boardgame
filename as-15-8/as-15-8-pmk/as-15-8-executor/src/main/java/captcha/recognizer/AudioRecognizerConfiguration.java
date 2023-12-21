@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 public class AudioRecognizerConfiguration {
 
     @Value("$spring.cloud.stream.bindings.jobs.consumer.concurrency")
-    private int maxConcurrent;
+    private Integer maxConcurrent;
 
     @Bean
     public CommonsPool2TargetSource AudioRecognizerPooledTargetSource() {

@@ -68,11 +68,7 @@ public class RecaptchaV2Solver implements CaptchaSolver {
 
         }
 
-        solveAudioChallenge(driver);
-
-        WebElement verifyButton = waitForElement(driver, By.id("recaptcha-verify-button"), 15);
-        jsClick(driver, verifyButton);
-        randomDelay();
+        solveAndTypeAudio(driver);
 
         for(int i = 0; i < 3; i++){
             if(!checkAndSolveRepeatedCaptcha(driver)){
@@ -90,16 +86,20 @@ public class RecaptchaV2Solver implements CaptchaSolver {
                     2
             );
 
-            solveAudioChallenge(driver);
-
-            WebElement secondVerifyButton = waitForElement(driver, By.id("recaptcha-verify-button"), 15);
-            jsClick(driver, secondVerifyButton);
-
-            randomDelay();
+            solveAndTypeAudio(driver);
             return true;
         } catch (TimeoutException ignored) {
             return false;
         }
+    }
+
+    private void solveAndTypeAudio(WebDriver driver) throws Exception {
+        solveAudioChallenge(driver);
+
+        WebElement secondVerifyButton = waitForElement(driver, By.id("recaptcha-verify-button"), 15);
+        jsClick(driver, secondVerifyButton);
+
+        randomDelay();
     }
 
     private void solveAudioChallenge(WebDriver driver) throws Exception {
