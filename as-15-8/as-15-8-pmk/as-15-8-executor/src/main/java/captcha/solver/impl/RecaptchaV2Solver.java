@@ -40,7 +40,7 @@ public class RecaptchaV2Solver implements CaptchaSolver {
 
             jsClick(driver, checkbox);
 
-            if(checkbox.getAttribute("aria-checked").equals("true")){
+            if (checkbox.getAttribute("aria-checked").equals("true")) {
                 return;
             }
 
@@ -54,6 +54,8 @@ public class RecaptchaV2Solver implements CaptchaSolver {
             );
 
             solveChallenge(driver, captchaChallenge);
+        } catch (CaptchaSolverException ex) {
+            throw ex;
         } catch (Exception ex) {
             throw new CaptchaSolverException("Ошибка при решении RecaptchaV2", ex);
         }
