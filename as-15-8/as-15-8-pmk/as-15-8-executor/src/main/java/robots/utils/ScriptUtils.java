@@ -88,7 +88,7 @@ public class ScriptUtils {
             String[] windowHandles = webDriver.getWindowHandles().toArray(new String[0]);
             webDriver.switchTo().window(windowHandles[1]);
             WebDriverWait wait = new WebDriverWait(webDriver, WAIT_TIMEOUT);
-            wait.until(ExpectedConditions.presenceOfElementLocated(
+            wait.until(ExpectedConditions.visibilityOfElementLocated(
                     By.id("screen"))).click();
 
             ScriptUtils.waitForTab(webDriver, windowHandles.length-1);
@@ -97,7 +97,7 @@ public class ScriptUtils {
             webDriver.switchTo().window(windowHandles[windowHandles.length - 1]);
 
             String screenSrc = wait
-                    .until(ExpectedConditions.presenceOfElementLocated(
+                    .until(ExpectedConditions.visibilityOfElementLocated(
                             By.xpath("//img[@id = 'screen' and @src and string-length(@src)!=0]")))
                     .getAttribute("src");
 

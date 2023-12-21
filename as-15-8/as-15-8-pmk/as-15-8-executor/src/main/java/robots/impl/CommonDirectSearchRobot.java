@@ -237,8 +237,15 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
 //            js.executeScript("window.open('" + searchSystemUrl + "', '_blank');");
 //            Thread.sleep(3000);
             driver.get(searchSystemUrl);
-        } catch (Exception e) {
-            throw new ExecutionException("Ошибка открытия ПС", e);
+        } catch (Exception ex) {
+            if (throwExceptionByCaptchaOrBadIP) {
+                throw new ExecutionException("Ошибка открытия ПС", ex);
+            } else {
+                if (ex.getMessage().contains("unknown error: net::"))
+                    return createMessage(false, CheckUnitJobResult.SOCKET_ERROR);
+                else
+                    return createMessage(false, CheckUnitJobResult.INTERNAL_ERROR);
+            }
         }
         // driver.switchTo().window(driver.getWindowHandles().toArray()[driver.getWindowHandles().size()-1].toString());
 
@@ -413,18 +420,21 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
 
     void solveCaptcha(WebDriver driver) throws CaptchaSolverException {
         for(int i = 0; i < 3; i++) {
-            boolean captchaDetected = xpathCaptcha != null && xpathCaptcha.length() > 0 &&
-                    driver.findElements(By.xpath(xpathCaptcha)).size() > 0;
+            if(xpathCaptcha != null && xpathCaptcha.length() > 0) {
+                try {
+                    WebDriverWait wait = new WebDriverWait(driver, 2);
+                    wait.until(ExpectedConditions
+                            .visibilityOfElementLocated(By.xpath(xpathCaptcha)));
 
-            if (captchaDetected) {
-                if (!this.captchaType.equals(CaptchaType.UNKNOWN) && Strings.isNotEmpty(this.xpathCaptchaElement)) {
-                    if (this.captchaSolver == null)
-                        this.captchaSolver = CaptchaSolverFactory.getSolver(this.captchaType);
+                    if (!this.captchaType.equals(CaptchaType.UNKNOWN) && Strings.isNotEmpty(this.xpathCaptchaElement)) {
+                        if (this.captchaSolver == null)
+                            this.captchaSolver = CaptchaSolverFactory.getSolver(this.captchaType);
 
-                    WebElement captchaElement = driver.findElement(
-                            By.xpath(this.xpathCaptchaElement));
-                    captchaSolver.solve(driver, captchaElement);
-                }
+                        WebElement captchaElement = wait.until(ExpectedConditions
+                                .visibilityOfElementLocated(By.xpath(this.xpathCaptchaElement)));
+                        captchaSolver.solve(driver, captchaElement);
+                    }
+                } catch (TimeoutException ignored) {}
             }
         }
     }
