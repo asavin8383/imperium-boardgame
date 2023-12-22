@@ -64,6 +64,8 @@ public class RecaptchaV2Solver implements CaptchaSolver {
     private void solveChallenge(WebDriver driver, WebElement captchaChallenge) throws Exception {
         driver.switchTo().frame(captchaChallenge);
 
+        ((JavascriptExecutor)driver).executeScript("window.alert = function() {};");
+
         try{
             waitForElement(driver, By.xpath("//*[@id=\"recaptcha-audio-button\"]"), 10)
                     .click();
