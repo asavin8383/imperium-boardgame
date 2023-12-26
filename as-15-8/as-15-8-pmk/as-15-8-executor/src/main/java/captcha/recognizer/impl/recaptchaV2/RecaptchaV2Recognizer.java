@@ -1,10 +1,12 @@
-package captcha.recognizer;
+package captcha.recognizer.impl.recaptchaV2;
 
+import captcha.recognizer.CaptchaRecognizer;
 import edu.cmu.sphinx.api.Configuration;
 import edu.cmu.sphinx.api.SpeechResult;
 import edu.cmu.sphinx.api.StreamSpeechRecognizer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
 import javax.sound.sampled.*;
@@ -17,17 +19,18 @@ import java.util.List;
 @Component
 @Scope(value="prototype")
 @Slf4j
-public class AudioRecognizer {
+public class RecaptchaV2Recognizer implements CaptchaRecognizer {
 
     private final StreamSpeechRecognizer recognizer;
-    public AudioRecognizer() throws IOException {
+    public RecaptchaV2Recognizer() throws IOException {
         Configuration configuration = new Configuration();
+
         configuration.setAcousticModelPath("resource:/edu/cmu/sphinx/models/en-us/en-us");
         configuration.setDictionaryPath("resource:/edu/cmu/sphinx/models/en-us/cmudict-en-us.dict");
         configuration.setLanguageModelPath("resource:/edu/cmu/sphinx/models/en-us/en-us.lm.bin");
 
         this.recognizer = new StreamSpeechRecognizer(configuration);
-        log.info("Создан распознаватель аудио");
+        log.info("Создан распознаватель recaptcha V2");
     }
 
     public String recognize(File file) throws IOException, UnsupportedAudioFileException {
@@ -49,26 +52,11 @@ public class AudioRecognizer {
         }
     }
 
-    private AudioInputStream convertToWav(AudioInputStream audioInputStream) {
-        // convert to PCM 16-bit signed little-endian format (16-bit WAV)
-            AudioFormat targetFormat = new AudioFormat(
-                    AudioFormat.Encoding.PCM_SIGNED,
-                    16000, // Частота дискретизации 16 кГц
-                    16, // 16 бит на сэмпл
-                    1, // Монофонический звук
-                    2, // 2 байта на фрейм (little-endian)
-                    16000, // Кадров в секунду
-                    false // Без выравнивания
-            );
-        // create output stream
-        return AudioSystem.getAudioInputStream(targetFormat, audioInputStream);
-    }
-
     public static void main(String[] args) throws UnsupportedAudioFileException, IOException {
         // Path file = new File("D:\\projects\\git\\as-15-8\\backend\\as-15-8\\as-15-8-pmk\\as-15-8-executor\\audio.mp3").toPath();
         Path file = new File("C:\\Users\\shabalinAI\\Downloads\\voice.mp3").toPath();
         // Path file = new File("D:\\projects\\git\\as-15-8\\selenium-recaptcha-solver\\tst.wav").toPath();
-        AudioRecognizer recognizer = new AudioRecognizer();
+        RecaptchaV2Recognizer recognizer = new RecaptchaV2Recognizer();
         String text = recognizer.recognize(file.toFile());
         System.out.println(text);
     }

@@ -230,9 +230,6 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
     public ExecutionJobResult execute(CheckUnit checkUnit, boolean throwExceptionByCaptchaOrBadIP) throws ExecutionException {
 
         try {
-            //Вставляем случайным образом задержку до 10 секунд для неравномерного запуска проверок
-            Thread.sleep(new Random().nextInt(10000));
-
 //            JavascriptExecutor js = (JavascriptExecutor) driver;
 //            js.executeScript("window.open('" + searchSystemUrl + "', '_blank');");
 //            Thread.sleep(3000);

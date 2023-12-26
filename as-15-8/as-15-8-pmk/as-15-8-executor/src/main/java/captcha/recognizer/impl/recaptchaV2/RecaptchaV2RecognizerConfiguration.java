@@ -1,5 +1,6 @@
-package captcha.recognizer;
+package captcha.recognizer.impl.recaptchaV2;
 
+import captcha.recognizer.CaptchaRecognizer;
 import org.springframework.aop.framework.ProxyFactoryBean;
 import org.springframework.aop.target.CommonsPool2TargetSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,31 +9,31 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class AudioRecognizerConfiguration {
+public class RecaptchaV2RecognizerConfiguration {
 
     @Value("${spring.cloud.stream.bindings.jobs.consumer.concurrency}")
     private Integer maxConcurrent;
 
     @Bean
-    public CommonsPool2TargetSource AudioRecognizerPooledTargetSource() {
+    public CommonsPool2TargetSource recaptchaV2RecognizerPooledTargetSource() {
         final CommonsPool2TargetSource commonsPoolTargetSource = new CommonsPool2TargetSource();
-        commonsPoolTargetSource.setTargetBeanName("audioRecognizer");
-        commonsPoolTargetSource.setTargetClass(AudioRecognizer.class);
+        commonsPoolTargetSource.setTargetBeanName("recaptchaV2Recognizer");
+        commonsPoolTargetSource.setTargetClass(RecaptchaV2Recognizer.class);
         commonsPoolTargetSource.setMaxSize(this.maxConcurrent);
         return commonsPoolTargetSource;
     }
 
     @Bean
     @Autowired
-    public ProxyFactoryBean AudioRecognizerProxyFactoryBean(CommonsPool2TargetSource audioRecognizerPooledTargetSource) {
+    public ProxyFactoryBean recaptchaV2RecognizerProxyFactoryBean(CommonsPool2TargetSource recaptchaV2RecognizerPooledTargetSource) {
         final ProxyFactoryBean proxyFactoryBean = new ProxyFactoryBean();
-        proxyFactoryBean.setTargetSource(audioRecognizerPooledTargetSource);
+        proxyFactoryBean.setTargetSource(recaptchaV2RecognizerPooledTargetSource);
         return proxyFactoryBean;
     }
 
     @Bean
     @Autowired
-    public AudioRecognizer recognizer(ProxyFactoryBean audioRecognizerProxyFactoryBean) {
-        return (AudioRecognizer)audioRecognizerProxyFactoryBean.getObject();
+    public CaptchaRecognizer recaptchaV2(ProxyFactoryBean recaptchaV2RecognizerProxyFactoryBean) {
+        return (CaptchaRecognizer)recaptchaV2RecognizerProxyFactoryBean.getObject();
     }
 }

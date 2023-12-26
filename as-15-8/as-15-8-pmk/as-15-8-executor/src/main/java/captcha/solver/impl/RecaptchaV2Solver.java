@@ -1,11 +1,11 @@
 package captcha.solver.impl;
 
 import captcha.*;
-import captcha.recognizer.AudioRecognizer;
+import captcha.recognizer.CaptchaRecognizer;
+import captcha.recognizer.impl.recaptchaV2.RecaptchaV2Recognizer;
 import captcha.solver.CaptchaSolver;
 import captcha.solver.CaptchaSolverBadIPException;
 import captcha.solver.CaptchaSolverException;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.*;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -24,7 +24,7 @@ import java.util.Random;
 public class RecaptchaV2Solver implements CaptchaSolver {
 
     @Autowired
-    private AudioRecognizer recognizer;
+    private CaptchaRecognizer recaptchaV2;
 
     @Override
     public CaptchaType getCaptchaType() {
@@ -124,7 +124,7 @@ public class RecaptchaV2Solver implements CaptchaSolver {
         URL proxyUrl = proxy == null ? null : new URL("http://" + proxy.getHttpProxy());
         CaptchaUtils.downloadFile(link, mp3File, proxyUrl);
 
-        String recognizedText = recognizer.recognize(mp3File);
+        String recognizedText = recaptchaV2.recognize(mp3File);
 
         if(mp3File.exists()){
             boolean deleted = mp3File.delete();
