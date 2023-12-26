@@ -416,23 +416,29 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
     }
 
     void solveCaptcha(WebDriver driver) throws CaptchaSolverException {
-        for(int i = 0; i < 3; i++) {
-            if(xpathCaptcha != null && xpathCaptcha.length() > 0) {
-                try {
-                    WebDriverWait wait = new WebDriverWait(driver, 2);
-                    wait.until(ExpectedConditions
-                            .visibilityOfElementLocated(By.xpath(xpathCaptcha)));
+        if (xpathCaptcha != null && xpathCaptcha.length() > 0) {
+            WebDriverWait wait = new WebDriverWait(driver, 1);
+            try {
+                wait.until(ExpectedConditions
+                        .visibilityOfElementLocated(By.xpath(xpathCaptcha)));
 
-                    if (!this.captchaType.equals(CaptchaType.UNKNOWN) && Strings.isNotEmpty(this.xpathCaptchaElement)) {
-                        if (this.captchaSolver == null)
-                            this.captchaSolver = CaptchaSolverFactory.getSolver(this.captchaType);
+                if (!this.captchaType.equals(CaptchaType.UNKNOWN) && Strings.isNotEmpty(this.xpathCaptchaElement)) {
+                    for (int i = 0; i < 3; i++) {
 
-                        WebElement captchaElement = wait.until(ExpectedConditions
-                                .visibilityOfElementLocated(By.xpath(this.xpathCaptchaElement)));
-                        captchaSolver.solve(driver, captchaElement);
+                        try {
+                            if (this.captchaSolver == null)
+                                this.captchaSolver = CaptchaSolverFactory.getSolver(this.captchaType);
+
+                            WebElement captchaElement = wait.until(ExpectedConditions
+                                    .visibilityOfElementLocated(By.xpath(this.xpathCaptchaElement)));
+                            captchaSolver.solve(driver, captchaElement);
+
+                        } catch (TimeoutException ignored) {}
                     }
-                } catch (TimeoutException ignored) {}
-            }
+                } else {
+                    throw new CaptchaSolverException("Не указан метод решения капчи для ПС");
+                }
+            } catch (TimeoutException ignored) {}
         }
     }
 
