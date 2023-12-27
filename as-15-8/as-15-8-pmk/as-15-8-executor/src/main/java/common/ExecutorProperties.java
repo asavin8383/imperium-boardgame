@@ -139,25 +139,5 @@ public class ExecutorProperties {
         private Integer timeout;
         private Integer maxRetryAttempts;
         private Integer maxRetryDelay;
-
-        public long getExecutionTimeout() {
-            //Рассчитываем таймаут исходя из таймаута сервиса executor
-            long webdriverTimeout = 30;
-            int retryAttempts = this.getMaxRetryAttempts();
-            int retryDelay = this.getMaxRetryDelay();
-            if (retryAttempts > 0) {
-                long countTimeout = (long) ((Optional.ofNullable(this.getTimeout())
-                        .orElse(180) * 0.9 - (long) (retryAttempts - 1) * retryDelay) / retryAttempts);
-                if (countTimeout > timeout) {
-                    webdriverTimeout = countTimeout;
-                }
-            }
-            log.info("Параметры executor'а:\ntimeout={}\nmaxRetryAttempts={}\nmaxRetryDelay={}",
-                    this.getTimeout(),
-                    this.getMaxRetryAttempts(),
-                    this.getMaxRetryDelay());
-            log.info("Рассчитанный таймаут одной проверки составит {} секунд", webdriverTimeout);
-            return webdriverTimeout;
-        }
     }
 }
