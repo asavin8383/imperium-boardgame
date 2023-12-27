@@ -140,7 +140,7 @@ public class ExecutorProperties {
         private Integer maxRetryAttempts;
         private Integer maxRetryDelay;
 
-        public long getWebdriverTimeout() {
+        public long getExecutionTimeout() {
             //Рассчитываем таймаут исходя из таймаута сервиса executor
             long webdriverTimeout = 30;
             int retryAttempts = this.getMaxRetryAttempts();

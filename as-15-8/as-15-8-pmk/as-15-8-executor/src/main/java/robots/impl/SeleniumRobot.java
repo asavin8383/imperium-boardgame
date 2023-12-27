@@ -11,15 +11,12 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import robots.DriverFactory;
 import robots.Robot;
-import robots.exceptions.BadIP_ExecutionExeption;
-import robots.exceptions.Cancel_ExecutionException;
-import robots.exceptions.Captcha_ExecutionException;
 import robots.exceptions.ExecutionException;
+import robots.exceptions.*;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * Скрипт робота проверки ПС/ПАСД
@@ -55,19 +52,44 @@ public abstract class SeleniumRobot implements Robot {
 	}
 
 	@Override
-	public ExecutionJobResult run(CheckUnit checkUnit, long webDriverTimeout, boolean throwExceptionByCaptchaOrBadIP) throws ExecutionException {
+	public ExecutionJobResult run(CheckUnit checkUnit, long executionTimeout, boolean throwExceptionByCaptchaOrBadIP) throws ExecutionException {
 		try {
 			this.driver = createDriver(proxy, enableLog, checkUnit.getValue());
-			driver.manage().timeouts().setScriptTimeout(webDriverTimeout, TimeUnit.SECONDS);
-			return execute(checkUnit, throwExceptionByCaptchaOrBadIP);
-		} catch (CancellationException ex) {
-			throw new Cancel_ExecutionException(ex);
-		} catch (Exception ex) {
-			if(ex instanceof Captcha_ExecutionException || ex instanceof BadIP_ExecutionExeption || ex instanceof WebDriverException)
-				throw ex;
-			else
+
+			return CompletableFuture
+					.supplyAsync(() -> execute(checkUnit, throwExceptionByCaptchaOrBadIP))
+					.applyToEither(timeoutAfter(executionTimeout, TimeUnit.SECONDS), (result) -> result)
+					.exceptionally(throwable -> {
+						try {
+							destroy();
+						} catch (IOException ignored) {
+						}
+						throw new CompletionException(throwable);
+					})
+					.join();
+		} catch (CompletionException compEx) {
+			Throwable ex = compEx.getCause();
+			 if(ex instanceof CancellationException) {
+				throw new Cancel_ExecutionException(ex);
+			 } else if(ex instanceof Timeout_ExecutionException) {
+				throw (Timeout_ExecutionException) ex;
+			 } else if (ex instanceof Captcha_ExecutionException){
+				 throw (Captcha_ExecutionException) ex;
+			 } else if(ex instanceof BadIP_ExecutionExeption) {
+				 throw (BadIP_ExecutionExeption) ex;
+			 } else if(ex instanceof WebDriverException) {
+				 throw (WebDriverException) ex;
+			 } else {
 				throw new ExecutionException("Ошибка при выполнении робота", ex);
+			}
 		}
+	}
+
+	private <T> CompletableFuture<T> timeoutAfter(long timeout, TimeUnit unit) {
+		CompletableFuture<T> result = new CompletableFuture<>();
+		ScheduledExecutorService timeoutService = Executors.newSingleThreadScheduledExecutor();
+		timeoutService.schedule(() -> result.completeExceptionally(new Timeout_ExecutionException()), timeout, unit);
+		return result;
 	}
 
 	/**
@@ -79,7 +101,7 @@ public abstract class SeleniumRobot implements Robot {
 	protected abstract ExecutionJobResult execute(CheckUnit checkUnit, boolean throwExceptionByCaptchaOrBadIP) throws ExecutionException;
 
 	protected WebDriver createDriver(String proxy, boolean enableLog, String checkUrl) {
-		WebDriver driver = DriverFactory.createDriver(
+		return DriverFactory.createDriver(
 				ExecutorProperties.getSeleniumHubUrl(),
 				Platform.valueOf(getScriptParams().get(AccessToolParameter.PLATFORM).toUpperCase().trim()),
 				getScriptParams().get(AccessToolParameter.BROWSER),
@@ -87,7 +109,6 @@ public abstract class SeleniumRobot implements Robot {
 				proxy,
 				enableLog
 		);
-		return driver;
 	}
 
 	@Override
