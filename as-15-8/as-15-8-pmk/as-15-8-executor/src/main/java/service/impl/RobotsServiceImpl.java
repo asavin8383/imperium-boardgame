@@ -112,7 +112,10 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
     public ExecutionJobResult runWithRetry(Robot robot, CheckUnit checkUnit) {
         try {
             robot.setRemainingAttempts(robot.getRemainingAttempts() - 1);
-            log.info("Запуск {}-й попытки проверки ресурса: {}", executorProps.getExecutor().getMaxRetryAttempts() - robot.getRemainingAttempts(), checkUnit.getValue());
+            log.info("Запуск {}-й попытки проверки ресурса: {}, таймаут {}",
+                    executorProps.getExecutor().getMaxRetryAttempts() - robot.getRemainingAttempts(),
+                    checkUnit.getValue(),
+                    executorProps.getExecutor().getTimeout());
 
             boolean throwExceptionByCaptchaOrBadIP = true;
             if (robot.getRemainingAttempts() == 0) {
@@ -121,7 +124,9 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
             return robot.run(checkUnit, executorProps.getExecutor().getTimeout(), throwExceptionByCaptchaOrBadIP);
         } catch (ExecutionException | WebDriverException ex) {
             if (robot.getRemainingAttempts() > 0) {
-                log.warn("Будет выполнен {}-й перезапуск проверки ресурса {} по следующей причине: {}", executorProps.getExecutor().getMaxRetryAttempts() - robot.getRemainingAttempts(), checkUnit.getValue(), ex.getMessage());
+                log.warn("Будет выполнен {}-й перезапуск проверки ресурса {} по следующей причине: {}",
+                        executorProps.getExecutor().getMaxRetryAttempts() - robot.getRemainingAttempts(),
+                        checkUnit.getValue(), ex.getMessage());
                 try {
                     Thread.sleep(executorProps.getExecutor().getMaxRetryDelay() * 1000);
                 } catch (InterruptedException e) {
