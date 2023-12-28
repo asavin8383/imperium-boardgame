@@ -433,7 +433,9 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
                                     .visibilityOfElementLocated(By.xpath(this.xpathCaptchaElement)));
                             captchaSolver.solve(driver, captchaElement);
 
-                        } catch (TimeoutException ignored) {}
+                        } catch (TimeoutException ignored) {
+                            log.info("Капча была решена");
+                        }
                     }
                 } else {
                     throw new CaptchaSolverException("Не указан метод решения капчи для ПС");

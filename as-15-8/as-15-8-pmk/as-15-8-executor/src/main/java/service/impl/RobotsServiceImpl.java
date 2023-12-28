@@ -87,7 +87,7 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
                 } else
                     throw new ExecutionException("Ошибка при выполнении скрипта робота", ex);
             } finally {
-                if (needToStop && robot != null) {
+                if (needToStop) {
                     try {
                         robot.destroy();
                     } catch (IOException ex) {
@@ -101,7 +101,7 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 
             log.info("Робот успешно завершил работу: " + robotName);
             return message;
-        } catch (Exception ex) {
+        } catch (Throwable ex) {
             if (ex instanceof ExecutionException)
                 throw ex;
             else
@@ -109,7 +109,7 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
         }
     }
 
-    public ExecutionJobResult runWithRetry(Robot robot, CheckUnit checkUnit) {
+    public ExecutionJobResult runWithRetry(Robot robot, CheckUnit checkUnit) throws Exception {
         try {
             robot.setRemainingAttempts(robot.getRemainingAttempts() - 1);
             log.info("Запуск {}-й попытки проверки ресурса: {}, таймаут {}",
@@ -141,7 +141,8 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
             } else {
                 throw ex;
             }
-
+        } catch (Throwable ex) {
+            throw new Exception("Ошибка робота", ex);
         }
     }
 

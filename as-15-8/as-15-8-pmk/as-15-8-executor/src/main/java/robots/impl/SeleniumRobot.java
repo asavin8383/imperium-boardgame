@@ -52,7 +52,7 @@ public abstract class SeleniumRobot implements Robot {
 	}
 
 	@Override
-	public ExecutionJobResult run(CheckUnit checkUnit, long executionTimeout, boolean throwExceptionByCaptchaOrBadIP) throws ExecutionException {
+	public ExecutionJobResult run(CheckUnit checkUnit, long executionTimeout, boolean throwExceptionByCaptchaOrBadIP) throws Throwable {
 		try {
 			this.driver = createDriver(proxy, enableLog, checkUnit.getValue());
 
@@ -68,17 +68,12 @@ public abstract class SeleniumRobot implements Robot {
 					})
 					.join();
 		} catch (CompletionException compEx) {
-			Throwable ex = compEx.getCause();
-			 if(ex instanceof CancellationException) {
-				throw new Cancel_ExecutionException(ex);
-			 } else if(ex instanceof Timeout_ExecutionException) {
-				throw (Timeout_ExecutionException) ex;
-			 } else if (ex instanceof Captcha_ExecutionException){
-				 throw (Captcha_ExecutionException) ex;
-			 } else if(ex instanceof BadIP_ExecutionExeption) {
-				 throw (BadIP_ExecutionExeption) ex;
-			 } else if(ex instanceof WebDriverException) {
-				 throw (WebDriverException) ex;
+			Throwable ex = compEx;
+			while(ex.getCause() != null && ex instanceof CompletionException) {
+				ex = ex.getCause();
+			}
+			 if(ex instanceof ExecutionException) {
+				 throw ex;
 			 } else {
 				throw new ExecutionException("Ошибка при выполнении робота", ex);
 			}
