@@ -144,6 +144,8 @@ public class ResultsKafkaService {
         return getArrangementResultsIterator(arrangementId)
                 .map(resultsIterator -> StreamSupport
                     .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), false)
+                    .filter(kv -> kv.value.getCheckResult().equals(CheckUnitJobResult.COMPLETED) ||
+                            kv.value.getCheckResult().equals(CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED))
                     .map(kv -> kv.key.key().getJobId())
                     .collect(Collectors.toList()))
                 .orElseGet(ArrayList::new);
