@@ -210,11 +210,15 @@ public class ArrangementController {
      */
     @PreAuthorize("hasRole('ROLE_MANAGE_ARRANGEMENT')")
     @PutMapping("/refresh")
-    public ResponseEntity refreshArrangement(@RequestParam("id") Arrangement arrangement){
+    public ResponseEntity refreshArrangement(@RequestParam("id") Arrangement arrangement, @RequestParam(value = "renew", defaultValue = "false") boolean renew){
         if (arrangement == null){
             return ResponseEntity.noContent().build();
         }
         arrangementService.refreshStoppedArrangement(arrangement);
+        if(renew){
+            arrangement.setStatus(ArrangementStatus.NEW);
+            arrangementRepo.save(arrangement);
+        }
         return ResponseEntity.ok().build();
     }
 
