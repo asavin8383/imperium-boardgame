@@ -118,6 +118,7 @@ public class ArrangementController {
     }
 
     @PostMapping(path = "/change_to_formed")
+    @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
     public ResponseEntity<Object> setFormedStatus(@RequestParam("id") Arrangement arrangement) {
         try {
             arrangement.setStatus(ExecutionStatus.FORMED);
