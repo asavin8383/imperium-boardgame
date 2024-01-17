@@ -217,6 +217,7 @@ public class ArrangementController {
         arrangementService.refreshStoppedArrangement(arrangement);
         if(renew){
             arrangement.setStatus(ArrangementStatus.NEW);
+            pptRestApi.changeToFormed(arrangement.getId());
             arrangementRepo.save(arrangement);
         }
         return ResponseEntity.ok().build();

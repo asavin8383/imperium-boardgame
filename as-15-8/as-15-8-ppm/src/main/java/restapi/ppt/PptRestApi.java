@@ -11,7 +11,6 @@ import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
@@ -19,7 +18,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Slf4j
 public class PptRestApi {
 
-    private final String URI = "/ppt/arrangements/execution_status";
+    private final String EXECUTION_STATUS_URI = "/ppt/arrangements/execution_status";
+
+    private final String CHANGE_TO_FORMED_URI = "/ppt/arrangements/change_to_formed";
 
     @Value("${gateway.url}")
     private String gatewayUrl;
@@ -31,7 +32,7 @@ public class PptRestApi {
             ExecutionStatus execStatus = oAuth2RestTemplate
                     .getForObject(UriComponentsBuilder
                             .fromHttpUrl(gatewayUrl)
-                            .path(URI)
+                            .path(EXECUTION_STATUS_URI)
                             .queryParam("id", arrangementId)
                             .build()
                             .toString(),
@@ -39,6 +40,24 @@ public class PptRestApi {
             return execStatus;
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
             throw new AS_15_8_PPM_Exception(String.format("Ошибка отправки запроса на получение статуса мероприятия из ППТ, код возврата %s", ex.getStatusCode()));
+        }
+    }
+
+    public void changeToFormed(Long arrangementId){
+        try {
+            oAuth2RestTemplate
+                    .postForObject(
+                        UriComponentsBuilder
+                            .fromHttpUrl(gatewayUrl)
+                            .path(CHANGE_TO_FORMED_URI)
+                            .queryParam("id", arrangementId)
+                            .build()
+                            .toString(),
+                "",
+                        String.class
+                    );
+        } catch (HttpClientErrorException | HttpServerErrorException ex) {
+            throw new AS_15_8_PPM_Exception(String.format("Ошибка отправки запроса на изменение статуса на FORMED мероприятия из ППТ, код возврата %s", ex.getStatusCode()));
         }
     }
 

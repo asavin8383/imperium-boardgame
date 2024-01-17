@@ -24,6 +24,7 @@ import repositories.ArrangementRepo;
 import repositories.TrafficRepository;
 import rest.ArrangementActData;
 import restapi.ppm.ArrangementUploader;
+import services.arrangement.ArrangementStatusService;
 import services.arrangement.impl.ArrangementService;
 
 import java.util.*;
@@ -44,6 +45,8 @@ public class ArrangementController {
     private final ArrangementService arrangementService;
     private final ArrangementUploader arrangementUploader;
     private final TrafficRepository trafficRepository;
+
+    private final ArrangementStatusService arrangementStatusService;
 
     @GetMapping
     public Page<Arrangement> findList(
@@ -112,6 +115,17 @@ public class ArrangementController {
         }
         checkAndSetDeadlineDate(arrangement.getFormalTask(), newArrangement);
         return arrangementRepo.save(replaceFields(newArrangement, arrangement));
+    }
+
+    @PostMapping(path = "/change_to_formed")
+    public ResponseEntity<Object> setFormedStatus(@RequestParam("id") Arrangement arrangement) {
+        try {
+            arrangement.setStatus(ExecutionStatus.FORMED);
+            arrangementStatusService.processArrangementStatusChange(arrangement);
+            return ResponseEntity.ok().build();
+        } catch (Exception ex){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+        }
     }
 
     private void checkAndSetDeadlineDate(FormalTask formalTask, Arrangement arrangement) {
