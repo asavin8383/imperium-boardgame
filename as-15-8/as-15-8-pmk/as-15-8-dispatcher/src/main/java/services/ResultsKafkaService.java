@@ -124,7 +124,14 @@ public class ResultsKafkaService {
 
                     Stream<Result> resultsStream = StreamSupport
                             .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), false)
-                            .map(val -> KeyValue.pair(val.key.key(), val.value))
+                            .collect(Collectors.groupingBy(
+                                    v -> v.key.key().getJobId(),
+                                    Collectors.maxBy(Comparator.comparingLong(v -> v.key.key().getVersion()))
+                            ))
+                            .values()
+                            .stream()
+                            .filter(Optional::isPresent)
+                            .map(val -> KeyValue.pair(val.get().key.key(), val.get().value))
                             .filter(filter)
                             .map(kv -> {
                                 DetailResultService<? super CheckUnitResult, ? extends DetailResult> service = AnalysisResultServiceFactory.getService(kv.value.getClass());
@@ -209,16 +216,9 @@ public class ResultsKafkaService {
         return getArrangementResultsIterator(arrangementId)
             .map(resultsIterator -> StreamSupport
                 .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), false)
-//                .map(val -> KeyValue.pair(val.key.key(), val.value))
-//                .map(function)
-                .collect(Collectors.groupingBy(
-                        v -> v.key.key().getJobId(),
-                        Collectors.maxBy(Comparator.comparingLong(v -> v.key.key().getVersion()))
-                )).values()
-                .stream()
-                .filter(Optional::isPresent)
-                .map(val -> KeyValue.pair(val.get().key.key(), val.get().value))
+                .map(val -> KeyValue.pair(val.key.key(), val.value))
                 .map(function)
+                .distinct()
                 .collect(Collectors.toList())
             )
             .orElse(new ArrayList<>());
