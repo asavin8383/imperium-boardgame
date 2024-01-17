@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.Proxy;
+import org.openqa.selenium.UnexpectedAlertBehaviour;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.logging.LogType;
@@ -133,6 +134,9 @@ public class DriverFactory {
 		options.addArguments("--enable-features=TemporaryUnexpireFlagsM76");
 		options.addArguments("--disable-ipv6");
 		options.addArguments("--disable-features=OmniboxUIExperimentHideSteadyStateUrlScheme,OmniboxUIExperimentHideSteadyStateUrlTrivialSubdomains");
+
+		//принимать все непонятные алерты
+		options.setCapability(CapabilityType.UNEXPECTED_ALERT_BEHAVIOUR, UnexpectedAlertBehaviour.ACCEPT);
 	}
 
 	private static void setOptionsForAnonymization(ChromeOptions options){

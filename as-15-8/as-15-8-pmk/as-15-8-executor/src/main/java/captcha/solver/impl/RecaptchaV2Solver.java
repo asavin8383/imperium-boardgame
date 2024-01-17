@@ -64,8 +64,6 @@ public class RecaptchaV2Solver implements CaptchaSolver {
     private void solveChallenge(WebDriver driver, WebElement captchaChallenge) throws Exception {
         driver.switchTo().frame(captchaChallenge);
 
-        ((JavascriptExecutor)driver).executeScript("window.alert = function() {};");
-
         try{
             waitForElement(driver, By.xpath("//*[@id=\"recaptcha-audio-button\"]"), 10)
                     .click();
@@ -112,7 +110,7 @@ public class RecaptchaV2Solver implements CaptchaSolver {
         WebElement downloadLink;
         try{
             downloadLink = waitForElement(driver, By.className("rc-audiochallenge-tdownload-link"), 20);
-        } catch (Exception ex) {
+        } catch (TimeoutException ex) {
             throw new CaptchaSolverBadIPException("Google обнаружил автоматические запросы.");
         }
 
