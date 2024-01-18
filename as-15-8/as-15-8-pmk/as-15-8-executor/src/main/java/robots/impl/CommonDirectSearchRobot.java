@@ -17,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import robots.exceptions.Captcha_ExecutionException;
@@ -27,12 +26,8 @@ import robots.exceptions.TimeoutScriptException;
 import robots.utils.EqualityTest;
 import robots.utils.ScriptUtils;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j(topic = "robots")
 public class CommonDirectSearchRobot extends SeleniumRobot {
@@ -238,7 +233,6 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
                 return createMessageByException(ex);
             }
         }
-        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
         // driver.switchTo().window(driver.getWindowHandles().toArray()[driver.getWindowHandles().size()-1].toString());
 
         equalityTest = EqualityTest.forCheckUnit(checkUnit);
@@ -497,27 +491,6 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         long delayRand = inputDelay - new Random().nextInt((int)inputDelay);
         ScriptUtils.type(inputField, delayRand, value);
         inputField.sendKeys(Keys.ENTER);
-        //Проверим, нет ли ошибки сервера
-        //checkInternalError(searchSystemUrl);
-
-    }
-
-    private void checkInternalError(String currentUrl) {
-
-        try {
-            // создаем объект HttpURLConnection для отправки GET-запроса
-            URL url = new URL(currentUrl);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-
-            // проверяем код ответа сервера
-            int responseCode = connection.getResponseCode();
-            if (responseCode >= 400) {
-                throw new InternalError_ExecutionException(String.format("Сервер вернул код %d", responseCode));
-            }
-        } catch (IOException ex) {
-            throw new ExecutionException("Ошибка ввода текста в поисковую строку",ex);
-        }
     }
 
     private boolean checkHintAndSearch(String value) {
