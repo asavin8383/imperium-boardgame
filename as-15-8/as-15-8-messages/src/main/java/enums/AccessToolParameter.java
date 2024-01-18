@@ -31,7 +31,6 @@ public enum AccessToolParameter {
     SEARCH_SYSTEM_XPATH_NEXT_PAGE("Xpath кнопки перехода на следующую страницу", AccessToolUnit.SEARCH_SYSTEM),
     SEARCH_SYSTEM_XPATH_ITEM_LINK("Xpath ссылок", AccessToolUnit.SEARCH_SYSTEM),
     SEARCH_SYSTEM_PROXY("Прокси сервер", AccessToolUnit.SEARCH_SYSTEM),
-    RESULT_NOT_FOUND_REGEXP("Регулярное выражение «ссылок не найдено»", AccessToolUnit.SEARCH_SYSTEM),
     CHECK_SPELLING_LINK("Ссылка для отмены автозамены поискового запроса", AccessToolUnit.SEARCH_SYSTEM),
     SEARCH_SYSTEM_CHECK_HINT("Необходимость проверки нарушений в подсказке ПС", AccessToolUnit.SEARCH_SYSTEM),
     HINT_CLASS_NAME("CSS класс контейнера с подсказками", AccessToolUnit.SEARCH_SYSTEM),
