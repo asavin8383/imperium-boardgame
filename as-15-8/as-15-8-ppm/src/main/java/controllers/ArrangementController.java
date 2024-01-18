@@ -7,7 +7,6 @@ import checkUnits.CheckUnitType;
 import common.SchedulerProperties;
 import enums.AccessToolUnit;
 import enums.ArrangementEvents;
-import enums.ExecutionStatus;
 import enums.Protocol;
 import exceptions.AS_15_8_PPM_Exception;
 import lombok.RequiredArgsConstructor;
@@ -33,11 +32,11 @@ import repositories.ScheduleCheckUnitRepo;
 import repositories.SchedulePeriodArrangementRepo;
 import repositories.ScheduleRepo;
 import restapi.ArrangementStatusUploader;
+import restapi.pmk.PmkRestApi;
 import restapi.pod.DomainMaskUploader;
 import restapi.ppt.PptRestApi;
 import services.ArrangementService;
 import services.ScheduleService;
-import webClients.DispatcherWebClient;
 import webClients.PPT_WebClient;
 
 import javax.transaction.Transactional;
@@ -70,7 +69,7 @@ public class ArrangementController {
     private final SchedulePeriodArrangementRepo schedulePeriodArrangementRepo;
     private final PptRestApi pptRestApi;
 
-    private final DispatcherWebClient dispatcherWebClient;
+    private final PmkRestApi pmkRestApi;
 
     @Value("${gateway.url}")
     private String gatewayUrl;
@@ -221,7 +220,7 @@ public class ArrangementController {
         if(renew){
             arrangement.setStatus(ArrangementStatus.NEW);
             pptRestApi.changeToFormed(arrangement.getId());
-            dispatcherWebClient.resetArrangementStatus(arrangement.getId());
+            pmkRestApi.resetArrangementStatus(arrangement.getId());
             arrangementRepo.save(arrangement);
         }
         return ResponseEntity.ok().build();

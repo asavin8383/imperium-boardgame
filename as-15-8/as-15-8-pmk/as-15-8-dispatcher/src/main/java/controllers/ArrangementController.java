@@ -70,6 +70,7 @@ public class ArrangementController {
     }
 
     @PostMapping(path = "resetStatus")
+    @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
     public void resetStatus(@RequestParam("arrangementId") Arrangement arrangement){
         arrangement.setStatus(ArrangementStatus.RUNNING);
         arrangementRepo.save(arrangement);

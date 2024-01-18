@@ -16,8 +16,10 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Service
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class ResultsDownloader {
-    private final String URI = "/dispatcher/results/not_planned_not_running";
+public class PmkRestApi {
+    private final String NOT_PLANNED_NOT_RUNNING_URI = "/dispatcher/results/not_planned_not_running";
+
+    private final String RESET_ARRANGEMENT_STATUS_URI = "/dispatcher/arrangements/resetStatus";
 
     @Value("${gateway.url}")
     private String gatewayUrl;
@@ -30,10 +32,27 @@ public class ResultsDownloader {
 
         log.debug("Отправка запроса на получение количества заверёшнных результатов в ПМК: {}", arrangementId);
         try {
-            return oAuth2RestTemplate.getForObject(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(URI).queryParam("id", arrangementId).build().toString(), Long.class);
+            return oAuth2RestTemplate.getForObject(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(NOT_PLANNED_NOT_RUNNING_URI).queryParam("id", arrangementId).build().toString(), Long.class);
             //log.info("Запрос на получение количества заверёшнных результатов успешно отправлен в ПМК");
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
             throw AS_15_8_PPM_Exception.logAndGet(log, String.format("Ошибка отправки запроса на получение количества заверёшнных результатов в ПМК, код возврата %s", ex.getStatusCode()));
+        }
+    }
+
+    public void resetArrangementStatus(Long arrangementId) {
+
+        log.debug("Отправка запроса на сброс статуса мериприятия в ПМК: {}", arrangementId);
+        try {
+            oAuth2RestTemplate
+                    .postForObject(UriComponentsBuilder
+                            .fromHttpUrl(gatewayUrl)
+                            .path(RESET_ARRANGEMENT_STATUS_URI)
+                            .queryParam("id", arrangementId)
+                            .build().toString(),
+                "",
+                        String.class);
+        } catch (HttpClientErrorException | HttpServerErrorException ex) {
+            throw AS_15_8_PPM_Exception.logAndGet(log, String.format("Ошибка отправки запроса на сброс статуса мериприятия в ПМК, код возврата %s", ex.getStatusCode()));
         }
     }
 }

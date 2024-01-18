@@ -26,7 +26,6 @@ import java.util.List;
 public class DispatcherWebClient {
 
     private final String DISPATCHER_RESULTS_URI = "/dispatcher/results/ids";
-    private final String DISPATCHER_RESET_ARRANGEMENT_STATUS_URI = "/dispatcher/arrangements/resetStatus";
 
 
     @Value("${gateway.url}")
@@ -59,27 +58,5 @@ public class DispatcherWebClient {
         } catch (Exception ex){
             throw AS_15_8_PPM_Exception.logAndGet(log, String.format("Ошибка получения списка jobId завершенных проверок мероприятия %d в ППМ", arrangementId), ex);
         }
-    }
-
-    public void resetArrangementStatus(Long arrangementId){
-        String uri = UriComponentsBuilder
-                .fromUriString(DISPATCHER_RESET_ARRANGEMENT_STATUS_URI)
-                .queryParam("arrangementId", arrangementId)
-                .build().toString();
-
-        WebClient.create(gatewayUrl)
-                .post()
-                .uri(uri)
-                .exchange()
-                .flatMapMany(clientResponse -> {
-                    if(clientResponse.statusCode().equals(HttpStatus.OK)){
-                        log.info("Статус мероприятия {} успешно сброшен", arrangementId);
-                    } else {
-                        log.warn("Ошибка сброса статуса мероприятия {}, код возврата {}", arrangementId, clientResponse.statusCode().toString());
-                    }
-                    return (Flux.empty());
-                })
-                .collectList()
-                .block();
     }
 }
