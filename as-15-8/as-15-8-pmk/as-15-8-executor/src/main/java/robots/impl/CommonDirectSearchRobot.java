@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import robots.exceptions.Captcha_ExecutionException;
@@ -384,14 +385,19 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
 
     void solveCaptcha(WebDriver driver) throws CaptchaSolverException {
         if (captchaUrlPath != null && captchaUrlPath.length() > 0) {
+            WebDriverWait wait = new WebDriverWait(driver, 1);
             try {
+                wait.until(webDriver ->
+                        ((JavascriptExecutor) webDriver)
+                                .executeScript("return document.readyState")
+                                .equals("complete"));
+
                 if(!driver.getCurrentUrl().contains(captchaUrlPath)){
                     return;
                 }
 
                 if (!this.captchaType.equals(CaptchaType.UNKNOWN) && Strings.isNotEmpty(this.xpathCaptchaElement)) {
 
-                    WebDriverWait wait = new WebDriverWait(driver, 1);
                     for (int i = 0; i < 3; i++) {
 
                         try {
