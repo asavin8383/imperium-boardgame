@@ -73,7 +73,7 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
 
     /** xpath элемента, по которому
      * опредеяется наличие капчи */
-    private String xpathCaptcha;
+    private String captchaUrlPath;
 
     /** xpath элемента капчи */
     private String xpathCaptchaElement;
@@ -152,7 +152,7 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         this.checkSpellingLink = scriptParams.get(AccessToolParameter.CHECK_SPELLING_LINK);
 
         this.captchaType = CaptchaType.of(scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_CAPTCHA_TYPE));
-        this.xpathCaptcha = scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_XPATH_CAPTCHA);
+        this.captchaUrlPath = scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_CAPTCHA_URL_PATH);
         this.xpathCaptchaElement = scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_XPATH_CAPTCHA_ELEMENT);
 
         String needCheckHintStr = scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_CHECK_HINT);
@@ -186,8 +186,8 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
 
     public CaptchaType getCaptchaType() {return captchaType; }
 
-    public String getXpathCaptcha() {
-        return xpathCaptcha;
+    public String getCaptchaUrlPath() {
+        return captchaUrlPath;
     }
 
     public String getXpathCaptchaElement() { return xpathCaptchaElement; }
@@ -383,13 +383,15 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
     }
 
     void solveCaptcha(WebDriver driver) throws CaptchaSolverException {
-        if (xpathCaptcha != null && xpathCaptcha.length() > 0) {
-            WebDriverWait wait = new WebDriverWait(driver, 1);
+        if (captchaUrlPath != null && captchaUrlPath.length() > 0) {
             try {
-                wait.until(ExpectedConditions
-                        .visibilityOfElementLocated(By.xpath(xpathCaptcha)));
+                if(!driver.getCurrentUrl().contains(captchaUrlPath)){
+                    return;
+                }
 
                 if (!this.captchaType.equals(CaptchaType.UNKNOWN) && Strings.isNotEmpty(this.xpathCaptchaElement)) {
+
+                    WebDriverWait wait = new WebDriverWait(driver, 1);
                     for (int i = 0; i < 3; i++) {
 
                         try {

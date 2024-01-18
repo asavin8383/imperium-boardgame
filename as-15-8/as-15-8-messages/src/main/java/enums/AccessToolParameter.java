@@ -40,7 +40,7 @@ public enum AccessToolParameter {
     SEARCH_PREFIX_FOR_DOMAIN("Префикс для формирования поискового запроса по домену", AccessToolUnit.SEARCH_SYSTEM),
 
     SEARCH_SYSTEM_CAPTCHA_TYPE("Тип капчи, выдаваемый поисковой системой. Варианты (RECAPTCHA_V2)", AccessToolUnit.SEARCH_SYSTEM),
-    SEARCH_SYSTEM_XPATH_CAPTCHA("Xpath для определения капчи", AccessToolUnit.SEARCH_SYSTEM),
+    SEARCH_SYSTEM_CAPTCHA_URL_PATH("Путь в URL ПС для определения капчи", AccessToolUnit.SEARCH_SYSTEM),
 
     SEARCH_SYSTEM_XPATH_CAPTCHA_ELEMENT("Xpath элемента капчи", AccessToolUnit.SEARCH_SYSTEM),
 
