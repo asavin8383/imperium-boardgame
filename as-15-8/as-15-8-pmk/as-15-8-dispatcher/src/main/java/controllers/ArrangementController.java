@@ -4,6 +4,7 @@ import arrangement.ArrangementToExecution;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Arrangement;
+import model.enums.ArrangementStatus;
 import model.enums.Reason;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import repositories.ArrangementRepo;
 import restapi.ArrangementRestApi;
 import services.ArrangementService;
 import services.ResultService;
@@ -31,6 +33,8 @@ public class ArrangementController {
     private final ResultsKafkaService resultsKafkaService;
     private final ArrangementService arrangementService;
     private final ArrangementRestApi arrangementRestApi;
+
+    private final ArrangementRepo arrangementRepo;
 
 
     @PostMapping("/save")
@@ -63,6 +67,13 @@ public class ArrangementController {
             long arrangementsCount = resultsKafkaService.getResultsCount(arrangement.getId());
             return Math.min(arrangementsCount * 100 / checkUnits, 100);
         }).orElse(0L);
+    }
+
+    @PostMapping(path = "resetStatus")
+    @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
+    public void resetStatus(@RequestParam("arrangementId") Arrangement arrangement){
+        arrangement.setStatus(ArrangementStatus.RUNNING);
+        arrangementRepo.save(arrangement);
     }
 
     @PostMapping("/stop")

@@ -37,6 +37,7 @@ import restapi.pod.DomainMaskUploader;
 import restapi.ppt.PptRestApi;
 import services.ArrangementService;
 import services.ScheduleService;
+import webClients.DispatcherWebClient;
 import webClients.PPT_WebClient;
 
 import javax.transaction.Transactional;
@@ -68,6 +69,8 @@ public class ArrangementController {
     private final OAuth2RestTemplate restTemplate;
     private final SchedulePeriodArrangementRepo schedulePeriodArrangementRepo;
     private final PptRestApi pptRestApi;
+
+    private final DispatcherWebClient dispatcherWebClient;
 
     @Value("${gateway.url}")
     private String gatewayUrl;
@@ -218,6 +221,7 @@ public class ArrangementController {
         if(renew){
             arrangement.setStatus(ArrangementStatus.NEW);
             pptRestApi.changeToFormed(arrangement.getId());
+            dispatcherWebClient.resetArrangementStatus(arrangement.getId());
             arrangementRepo.save(arrangement);
         }
         return ResponseEntity.ok().build();
