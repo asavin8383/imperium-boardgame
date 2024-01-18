@@ -47,7 +47,7 @@ public class PmkRestApi {
                     .postForObject(UriComponentsBuilder
                             .fromHttpUrl(gatewayUrl)
                             .path(RESET_ARRANGEMENT_STATUS_URI)
-                            .queryParam("id", arrangementId)
+                            .queryParam("arrangementId", arrangementId)
                             .build().toString(),
                 "",
                         String.class);
