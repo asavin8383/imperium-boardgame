@@ -106,11 +106,13 @@ public class ResultService {
         log.info("Начато сохранение мероприятия: " + arrangement.getId());
         EntityManager entityManager = entityManagerFactory.createEntityManager();
         try {
+            Long version = resultsKafkaService.getLastVersion(arrangement.getId()).orElse(null);
+
             KeyValueIterator<Windowed<CheckUnitKey>, CheckUnitResult> resultsIterator =
-                    resultsKafkaService.getArrangementResultsIterator(arrangement.getId())
+                    resultsKafkaService.getArrangementResultsIterator(arrangement.getId(), version)
                     .orElseThrow(() -> new Exception("Не удалось получить результаты мероприятия из временного хранилища"));
             KeyValueIterator<Windowed<CheckUnitKey>, Screenshots> screenshotsIterator =
-                    resultsKafkaService.getArrangementResultScreenshotsIterator(arrangement.getId())
+                    resultsKafkaService.getArrangementResultScreenshotsIterator(arrangement.getId(), version)
                     .orElseThrow(() -> new Exception("Не удалось получить скриншоты результатов мероприятия из временного хранилища"));
 
             boolean isSaved = saveArrangementResults(arrangement, resultsIterator, entityManager);

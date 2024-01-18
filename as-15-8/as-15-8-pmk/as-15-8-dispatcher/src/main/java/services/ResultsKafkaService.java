@@ -172,16 +172,31 @@ public class ResultsKafkaService {
     }
 
     public Optional<Screenshots> getScreenshot(Long arrangementId, Long jobId) {
+        Optional<Long> version = getLastVersion(arrangementId);
+
         return getScreenshotsKeyValueStore()
             .flatMap(store -> getLastIteratorValue(
                 store.fetch(
-                    new CheckUnitKey(arrangementId, jobId, minValue),
-                    new CheckUnitKey(arrangementId, jobId, maxValue),
+                    new CheckUnitKey(arrangementId, jobId, version.orElse(minValue)),
+                    new CheckUnitKey(arrangementId, jobId, version.orElse(maxValue)),
                     Instant.now().minus(resultsRetentionDays, ChronoUnit.DAYS),
                     Instant.now()
                 )
             )
             .map(kv -> kv.value));
+    }
+
+    public Optional<Long> getLastVersion(Long arrangementId) {
+        return getResultsKeyValueStore()
+                .flatMap(store -> getLastIteratorValue(
+                        store.fetch(
+                                new CheckUnitKey(arrangementId, minValue, minValue),
+                                new CheckUnitKey(arrangementId, maxValue, maxValue),
+                                Instant.now().minus(resultsRetentionDays, ChronoUnit.DAYS),
+                                Instant.now()
+                        )
+                )
+                .map(kv -> kv.key.getVersion()));
     }
 
     public long getResultsCount(Long arrangementId) {
@@ -216,7 +231,14 @@ public class ResultsKafkaService {
         return getArrangementResultsIterator(arrangementId)
             .map(resultsIterator -> StreamSupport
                 .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), false)
-                .map(val -> KeyValue.pair(val.key.key(), val.value))
+                .collect(Collectors.groupingBy(
+                        v -> v.key.key().getJobId(),
+                        Collectors.maxBy(Comparator.comparingLong(v -> v.key.key().getVersion()))
+                ))
+                .values()
+                .stream()
+                .filter(Optional::isPresent)
+                .map(val -> KeyValue.pair(val.get().key.key(), val.get().value))
                 .map(function)
                 .distinct()
                 .collect(Collectors.toList())
@@ -242,19 +264,27 @@ public class ResultsKafkaService {
     }
 
     Optional<KeyValueIterator<Windowed<CheckUnitKey>, CheckUnitResult>> getArrangementResultsIterator(Long arrangementId) {
+        return getArrangementResultsIterator(arrangementId, null);
+    }
+
+    Optional<KeyValueIterator<Windowed<CheckUnitKey>, CheckUnitResult>> getArrangementResultsIterator(Long arrangementId, Long version) {
         return getResultsKeyValueStore().map(store -> store.fetch(
-                new CheckUnitKey(arrangementId, minValue, minValue),
-                new CheckUnitKey(arrangementId, maxValue, maxValue),
-                Instant.now().minus(resultsRetentionDays, ChronoUnit.DAYS),
-                Instant.now()
-            )
+                        new CheckUnitKey(arrangementId, minValue, version == null ? minValue : version),
+                        new CheckUnitKey(arrangementId, maxValue, version == null ? maxValue : version),
+                        Instant.now().minus(resultsRetentionDays, ChronoUnit.DAYS),
+                        Instant.now()
+                )
         );
     }
 
     Optional<KeyValueIterator<Windowed<CheckUnitKey>, Screenshots>> getArrangementResultScreenshotsIterator(Long arrangementId) {
+        return getArrangementResultScreenshotsIterator(arrangementId, null);
+    }
+
+    Optional<KeyValueIterator<Windowed<CheckUnitKey>, Screenshots>> getArrangementResultScreenshotsIterator(Long arrangementId, Long version) {
         return getScreenshotsKeyValueStore().map(store -> store.fetch(
-                new CheckUnitKey(arrangementId, minValue, minValue),
-                new CheckUnitKey(arrangementId, maxValue, maxValue),
+                new CheckUnitKey(arrangementId, minValue, version == null ? minValue : version),
+                new CheckUnitKey(arrangementId, maxValue, version == null ? maxValue : version),
                 Instant.now().minus(resultsRetentionDays, ChronoUnit.DAYS),
                 Instant.now()
                 )
