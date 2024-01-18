@@ -4,9 +4,7 @@ import common.ApplicationConfiguration;
 import common.ExecutorProperties;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.Platform;
-import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.*;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -34,16 +32,21 @@ public class TestScreenshot {
                 false
         );
 
+        // String url = "https://bot.incolumitas.com/#botBehavior";
         // String url = "https://nowsecure.nl";
-        String url = "https://bot.sannysoft.com/";
+        // String url = "https://hmaker.github.io/selenium-detector/";
+        String url = "https://google.ru";
+        // String url = "https://bot.sannysoft.com/";
+        // String url = "https://antcpt.com/score_detector/";
 //        driver.get(url);
 
         JavascriptExecutor js = (JavascriptExecutor) driver;
         js.executeScript("window.open('" + url + "', '_blank');");
         Thread.sleep(3000);
-        driver.switchTo().window(driver.getWindowHandles().toArray()[1].toString());
+        driver.switchTo().window(driver.getWindowHandles()
+                .toArray()[driver.getWindowHandles().size() - 1].toString());
 
-        Thread.sleep(500000);
+        Thread.sleep(15000);
 
         byte[] screen = ScriptUtils.getScreenshot(driver);
 

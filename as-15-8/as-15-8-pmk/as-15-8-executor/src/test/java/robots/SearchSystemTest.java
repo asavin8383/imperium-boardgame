@@ -43,7 +43,7 @@ public class SearchSystemTest {
         params.put(SEARCH_SYSTEM_URL, "https://www.google.ru");
         params.put(SEARCH_SYSTEM_RESULT_PAGE_TYPE, "pagination");
         params.put(SEARCH_SYSTEM_XPATH_INPUT_FIELD, "//input[@name=\"q\"]");
-        params.put(SEARCH_SYSTEM_XPATH_CAPTCHA, "//form[@id=\"captcha-form\"]");
+        params.put(SEARCH_SYSTEM_CAPTCHA_URL_PATH, "//form[@id=\"captcha-form\"]");
         params.put(SEARCH_SYSTEM_XPATH_NEXT_PAGE, "//*[@id=\"pnnext\"]");
         params.put(SEARCH_SYSTEM_XPATH_ITEM_LINK, "//div[@class=\"g\"]//div[@class=\"r\"]/a[1]");
         return params;
@@ -54,7 +54,7 @@ public class SearchSystemTest {
         params.put(SEARCH_SYSTEM_URL, "https://yandex.ru");
         params.put(SEARCH_SYSTEM_RESULT_PAGE_TYPE, "pagination");
         params.put(SEARCH_SYSTEM_XPATH_INPUT_FIELD, "//input[@name=\"text\"]");
-        params.put(SEARCH_SYSTEM_XPATH_CAPTCHA, "//form[@action=\"/checkcaptcha\"]");
+        params.put(SEARCH_SYSTEM_CAPTCHA_URL_PATH, "//form[@action=\"/checkcaptcha\"]");
         params.put(SEARCH_SYSTEM_XPATH_NEXT_PAGE, "//div[contains(@class, \"pager \")]/a[last()]");
         params.put(SEARCH_SYSTEM_XPATH_ITEM_LINK, "//*[@class=\"serp-item\"]//div[contains(@class, \"organic__path\")]/a[last()]");
         return params;
@@ -65,7 +65,7 @@ public class SearchSystemTest {
         params.put(SEARCH_SYSTEM_URL, "https://www.bing.com/");
         params.put(SEARCH_SYSTEM_RESULT_PAGE_TYPE, "pagination");
         params.put(SEARCH_SYSTEM_XPATH_INPUT_FIELD, "//input[@id=\"sb_form_q\"]");
-        params.put(SEARCH_SYSTEM_XPATH_CAPTCHA, "");
+        params.put(SEARCH_SYSTEM_CAPTCHA_URL_PATH, "");
         params.put(SEARCH_SYSTEM_XPATH_NEXT_PAGE, "//ol[@id=\"b_results\"]/li[@class=\"b_pag\"]/nav/ul/li[last()]/a");
         params.put(SEARCH_SYSTEM_XPATH_ITEM_LINK, "//ol[@id=\"b_results\"]/li//h2/a");
         return params;
@@ -76,7 +76,7 @@ public class SearchSystemTest {
         params.put(SEARCH_SYSTEM_URL, "https://www.yahoo.com/");
         params.put(SEARCH_SYSTEM_RESULT_PAGE_TYPE, "pagination");
         params.put(SEARCH_SYSTEM_XPATH_INPUT_FIELD, "//input[@id=\"uh-search-box\"]");
-        params.put(SEARCH_SYSTEM_XPATH_CAPTCHA, "");
+        params.put(SEARCH_SYSTEM_CAPTCHA_URL_PATH, "");
         params.put(SEARCH_SYSTEM_XPATH_NEXT_PAGE, "//div[@class=\"compPagination\"]/a[@class=\"next\"]");
         params.put(SEARCH_SYSTEM_XPATH_ITEM_LINK, "//ol/li//h3/a");
         return params;
@@ -87,7 +87,7 @@ public class SearchSystemTest {
         params.put(SEARCH_SYSTEM_URL, "https://www.sputnik.ru/");
         params.put(SEARCH_SYSTEM_RESULT_PAGE_TYPE, "pagination");
         params.put(SEARCH_SYSTEM_XPATH_INPUT_FIELD, "//*[@id=\"js-search-input\"]");
-        params.put(SEARCH_SYSTEM_XPATH_CAPTCHA, ""); //
+        params.put(SEARCH_SYSTEM_CAPTCHA_URL_PATH, ""); //
         params.put(SEARCH_SYSTEM_XPATH_NEXT_PAGE, "//div[@class=\"b-paging\"]/a[last()]");
         params.put(SEARCH_SYSTEM_XPATH_ITEM_LINK, "//div[@class=\"b-result-list js-result-list\"]/div/div[@class=\"b-result-title\"]/a");
         return params;
@@ -98,7 +98,7 @@ public class SearchSystemTest {
         params.put(SEARCH_SYSTEM_URL, "https://mail.ru/");
         params.put(SEARCH_SYSTEM_RESULT_PAGE_TYPE, "pagination");
         params.put(SEARCH_SYSTEM_XPATH_INPUT_FIELD, "//*[@id=\"q\"]");
-        params.put(SEARCH_SYSTEM_XPATH_CAPTCHA, "");
+        params.put(SEARCH_SYSTEM_CAPTCHA_URL_PATH, "");
         params.put(SEARCH_SYSTEM_XPATH_NEXT_PAGE, "//section[@id=\"js-bottomBar\"]//li[last()]/a");
         params.put(SEARCH_SYSTEM_XPATH_ITEM_LINK, "//ul[@id=\"js-result\"]/li/div[1]/div/span/a");
         return params;
@@ -109,7 +109,7 @@ public class SearchSystemTest {
         params.put(SEARCH_SYSTEM_URL, "https://duckduckgo.com");
         params.put(SEARCH_SYSTEM_RESULT_PAGE_TYPE, "continuous");
         params.put(SEARCH_SYSTEM_XPATH_INPUT_FIELD, "//input[@id=\"search_form_input_homepage\"]");
-        params.put(SEARCH_SYSTEM_XPATH_CAPTCHA, "");
+        params.put(SEARCH_SYSTEM_CAPTCHA_URL_PATH, "");
         params.put(SEARCH_SYSTEM_XPATH_NEXT_PAGE, "//div[@id=\"links\"]/div[contains(@class, \"result--more\")]/a");
         params.put(SEARCH_SYSTEM_XPATH_ITEM_LINK, "//div[@id=\"links\"]/div[starts-with(@id, \"r1-\")]//a[@class=\"result__a\"]");
         return params;
@@ -119,7 +119,7 @@ public class SearchSystemTest {
     public void printLinks() throws InterruptedException {
         Map<AccessToolParameter, String> params = mailParams();
         String xpathInputField = params.get(SEARCH_SYSTEM_XPATH_INPUT_FIELD);
-        String xpathCaptcha = params.get(SEARCH_SYSTEM_XPATH_CAPTCHA);
+        String xpathCaptcha = params.get(SEARCH_SYSTEM_CAPTCHA_URL_PATH);
         String xpathNext = params.get(SEARCH_SYSTEM_XPATH_NEXT_PAGE);
         String xpathLink = params.get(SEARCH_SYSTEM_XPATH_ITEM_LINK);
         CommonDirectSearchRobot.ResultPageType type = CommonDirectSearchRobot.ResultPageType
