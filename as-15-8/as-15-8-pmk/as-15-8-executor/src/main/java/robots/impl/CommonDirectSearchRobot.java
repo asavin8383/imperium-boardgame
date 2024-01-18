@@ -32,6 +32,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j(topic = "robots")
 public class CommonDirectSearchRobot extends SeleniumRobot {
@@ -237,6 +238,7 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
                 return createMessageByException(ex);
             }
         }
+        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
         // driver.switchTo().window(driver.getWindowHandles().toArray()[driver.getWindowHandles().size()-1].toString());
 
         equalityTest = EqualityTest.forCheckUnit(checkUnit);
@@ -387,11 +389,6 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         if (captchaUrlPath != null && captchaUrlPath.length() > 0) {
             WebDriverWait wait = new WebDriverWait(driver, 1);
             try {
-                new WebDriverWait(driver, 20).until(webDriver ->
-                        ((JavascriptExecutor) webDriver)
-                                .executeScript("return document.readyState")
-                                .equals("complete"));
-
                 if(!driver.getCurrentUrl().contains(captchaUrlPath)){
                     return;
                 }
