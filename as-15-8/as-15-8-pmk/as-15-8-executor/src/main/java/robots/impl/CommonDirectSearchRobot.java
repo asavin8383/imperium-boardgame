@@ -387,7 +387,7 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         if (captchaUrlPath != null && captchaUrlPath.length() > 0) {
             WebDriverWait wait = new WebDriverWait(driver, 1);
             try {
-                wait.until(webDriver ->
+                new WebDriverWait(driver, 20).until(webDriver ->
                         ((JavascriptExecutor) webDriver)
                                 .executeScript("return document.readyState")
                                 .equals("complete"));
