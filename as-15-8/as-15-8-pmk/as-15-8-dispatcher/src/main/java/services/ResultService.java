@@ -153,13 +153,13 @@ public class ResultService {
             int transactionCount = 0;
             while (resultsIterator.hasNext()) {
 
-                if (transactionCount % transactionBatchSize == 0)
-                    transaction.begin();
-
                 KeyValue<Windowed<CheckUnitKey>, CheckUnitResult> windowedResult = resultsIterator.next();
                 KeyValue<CheckUnitKey, CheckUnitResult> result = KeyValue.pair(windowedResult.key.key(), windowedResult.value);
 
                 if(version == null || result.key.getVersion().equals(version)) {
+
+                    if (transactionCount % transactionBatchSize == 0)
+                        transaction.begin();
 
                     if (!saveArrangementResult(entityManager, arrangement, result.key, result.value))
                         isSaved = false;
