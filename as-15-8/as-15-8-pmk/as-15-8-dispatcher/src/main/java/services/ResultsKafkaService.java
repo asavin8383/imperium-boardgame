@@ -167,7 +167,7 @@ public class ResultsKafkaService {
         return getScreenshotsKeyValueStore()
             .flatMap(store -> getLastIteratorValue(
                 store.fetch(
-                    new CheckUnitKey(arrangementId, jobId, version == null ? minValue : version),
+                    new CheckUnitKey(arrangementId, jobId, minValue),
                     new CheckUnitKey(arrangementId, jobId, version == null ? maxValue : version),
                     Instant.now().minus(resultsRetentionDays, ChronoUnit.DAYS),
                     Instant.now()

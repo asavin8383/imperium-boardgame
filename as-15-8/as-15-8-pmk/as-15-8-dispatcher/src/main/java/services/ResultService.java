@@ -156,6 +156,8 @@ public class ResultService {
                 KeyValue<Windowed<CheckUnitKey>, CheckUnitResult> windowedResult = resultsIterator.next();
                 KeyValue<CheckUnitKey, CheckUnitResult> result = KeyValue.pair(windowedResult.key.key(), windowedResult.value);
 
+                log.info("jobId: " + result.key.getJobId() + ", version: " + result.key.getVersion());
+
                 if(version == null || result.key.getVersion().equals(version)) {
 
                     if (transactionCount % transactionBatchSize == 0)
