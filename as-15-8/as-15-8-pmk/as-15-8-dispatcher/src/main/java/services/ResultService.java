@@ -156,8 +156,6 @@ public class ResultService {
                 KeyValue<Windowed<CheckUnitKey>, CheckUnitResult> windowedResult = resultsIterator.next();
                 KeyValue<CheckUnitKey, CheckUnitResult> result = KeyValue.pair(windowedResult.key.key(), windowedResult.value);
 
-                log.info("jobId: " + result.key.getJobId() + ", version: " + result.key.getVersion());
-
                 if(version == null || result.key.getVersion().equals(version)) {
 
                     if (transactionCount % transactionBatchSize == 0)
@@ -196,13 +194,13 @@ public class ResultService {
             int transactionCount = 0;
             while (screenshotsIterator.hasNext()) {
 
-                if (transactionCount % transactionBatchSize == 0)
-                    transaction.begin();
-
                 KeyValue<Windowed<CheckUnitKey>, Screenshots> windowedResult = screenshotsIterator.next();
                 KeyValue<CheckUnitKey, Screenshots> screenshot = KeyValue.pair(windowedResult.key.key(), windowedResult.value);
 
                 if(version == null || screenshot.key.getVersion().equals(version)) {
+
+                    if (transactionCount % transactionBatchSize == 0)
+                        transaction.begin();
 
                     //Если штамп ставим, нужно попросить инфо об AccessTool
                     AccessToolDTO accessToolDTO = dispatcherProperties.getImprint().isUseImprint() ? getAccessToolInfo(arrangement.getId()) : null;

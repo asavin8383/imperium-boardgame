@@ -151,7 +151,7 @@ public class ResultsKafkaService {
 
     public Optional<CheckUnitResult> getArrangementResult(Long arrangementId, Long jobId) {
         return getResultsKeyValueStore()
-            .flatMap(store -> getLastIteratorValue(
+            .flatMap(store -> getLastVersionValues(
                 store.fetch(
                     new CheckUnitKey(arrangementId, jobId, minValue),
                     new CheckUnitKey(arrangementId, jobId, maxValue),
@@ -159,13 +159,14 @@ public class ResultsKafkaService {
                     Instant.now()
                 )
             )
-            .map(kv -> kv.value));
+            .map(kv -> kv.value)
+            .findFirst());
     }
 
     public Optional<Screenshots> getScreenshot(Long arrangementId, Long jobId, Long version) {
 
         return getScreenshotsKeyValueStore()
-            .flatMap(store -> getLastIteratorValue(
+            .flatMap(store -> getLastVersionValues(
                 store.fetch(
                     new CheckUnitKey(arrangementId, jobId, minValue),
                     new CheckUnitKey(arrangementId, jobId, version == null ? maxValue : version),
@@ -173,7 +174,8 @@ public class ResultsKafkaService {
                     Instant.now()
                 )
             )
-            .map(kv -> kv.value));
+            .map(kv -> kv.value)
+            .findFirst());
     }
 
     public long getResultsCount(Long arrangementId) {
@@ -317,14 +319,7 @@ public class ResultsKafkaService {
                 ) : screenshotsStore);
     }
 
-    private <K, V> Optional<KeyValue<K, V>> getLastIteratorValue(KeyValueIterator<Windowed<K>, V> resultsIterator){
-        return StreamSupport
-            .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), false)
-            .map(val -> KeyValue.pair(val.key.key(), val.value))
-            .reduce((first, second) -> second);
-    }
-
-    private Stream<KeyValue<CheckUnitKey, CheckUnitResult>> getLastVersionValues(KeyValueIterator<Windowed<CheckUnitKey>, CheckUnitResult> resultsIterator) {
+    private <V> Stream<KeyValue<CheckUnitKey, V>> getLastVersionValues(KeyValueIterator<Windowed<CheckUnitKey>, V> resultsIterator) {
         return StreamSupport
                 .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), false)
                 .collect(Collectors.groupingBy(
