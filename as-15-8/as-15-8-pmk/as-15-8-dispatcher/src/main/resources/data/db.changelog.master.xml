@@ -39,4 +39,5 @@
     <include file="data/changelog/dispatcher.0034.arrangement_is_manual_ck_chek_unit_manual.xml"/>
     <include file="data/changelog/dispatcher.0035.arrangement_reason_ck_stopped_by_service_mode_max_check_units_count.xml"/>
     <include file="data/changelog/dispatcher.0036_pmk_release_1.result_screenshot_external_storage.xml"/>
+    <include file="data/changelog/dispatcher.0037.arrangement_status_planned.xml"/>
 </databaseChangeLog>

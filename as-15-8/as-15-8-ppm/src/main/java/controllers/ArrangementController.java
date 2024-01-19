@@ -65,6 +65,8 @@ public class ArrangementController {
     private final DomainMaskUploader domainMaskUploader;
     private final ScheduleRepo scheduleRepo;
     private final ScheduleService scheduleService;
+
+    @SuppressWarnings("deprecation")
     private final OAuth2RestTemplate restTemplate;
     private final SchedulePeriodArrangementRepo schedulePeriodArrangementRepo;
     private final PptRestApi pptRestApi;
@@ -153,7 +155,7 @@ public class ArrangementController {
     @PutMapping(value = "/stop")
     @PreAuthorize("hasRole('ROLE_MANAGE_ARRANGEMENT')")
     @Transactional
-    public ResponseEntity stopArrangement(@RequestParam("id") Arrangement arrangement){
+    public ResponseEntity<?> stopArrangement(@RequestParam("id") Arrangement arrangement){
         if (arrangement == null){
             return ResponseEntity.noContent().build();
         }
@@ -162,7 +164,7 @@ public class ArrangementController {
         } else {
             List<Schedule> schedules = scheduleRepo.findByStatusAndArrangement(ScheduleStatus.RUNNING, arrangement.getId());
             if(schedules.size() != 1){
-                String errorDescription = String.format("Ошибка остановки мероприятия! Ошибка получения запущенного расписания с мероприятием %d, список расписаний либо пуст либо содержит более 1 элемента: %s", arrangement.getId(), schedules.toString());
+                String errorDescription = String.format("Ошибка остановки мероприятия! Ошибка получения запущенного расписания с мероприятием %d, список расписаний либо пуст либо содержит более 1 элемента: %s", arrangement.getId(), schedules);
                 log.error(errorDescription);
                 return ResponseEntity.badRequest().body(errorDescription);
             }
@@ -212,23 +214,27 @@ public class ArrangementController {
      */
     @PreAuthorize("hasRole('ROLE_MANAGE_ARRANGEMENT')")
     @PutMapping("/refresh")
-    public ResponseEntity refreshArrangement(@RequestParam("id") Arrangement arrangement, @RequestParam(value = "renew", defaultValue = "false") boolean renew){
+    public ResponseEntity<?> refreshArrangement(@RequestParam("id") Arrangement arrangement, @RequestParam(value = "renew", defaultValue = "false") boolean renew){
         if (arrangement == null){
             return ResponseEntity.noContent().build();
         }
-        arrangementService.refreshStoppedArrangement(arrangement);
+        int finishedCheckUnitsCount = arrangementService.refreshStoppedArrangement(arrangement);
         if(renew){
-            arrangement.setStatus(ArrangementStatus.NEW);
-            pptRestApi.changeToFormed(arrangement.getId());
-            pmkRestApi.resetArrangementStatus(arrangement.getId());
-            arrangementRepo.save(arrangement);
+            if(finishedCheckUnitsCount < arrangement.getScheduleCheckUnits().size()) {
+                arrangement.setStatus(ArrangementStatus.NEW);
+                pptRestApi.changeToFormed(arrangement.getId());
+                pmkRestApi.resetArrangementStatus(arrangement.getId());
+                arrangementRepo.save(arrangement);
+            } else {
+                return ResponseEntity.badRequest().body("У мероприятия " + arrangement.getId() + " не найдено проверок для перезапуска");
+            }
         }
         return ResponseEntity.ok().build();
     }
 
     @PreAuthorize("hasRole('ROLE_MANAGE_ARRANGEMENT')")
     @GetMapping()
-    public ResponseEntity getArrangement(@RequestParam("id") Arrangement arrangement){
+    public ResponseEntity<?> getArrangement(@RequestParam("id") Arrangement arrangement){
         if (arrangement == null){
             return ResponseEntity.noContent().build();
         }
@@ -237,7 +243,7 @@ public class ArrangementController {
 
     @PreAuthorize("hasRole('ROLE_MANAGE_ARRANGEMENT')")
     @GetMapping("/schedule_id")
-    public ResponseEntity getSchedule(@RequestParam("id") Arrangement arrangement){
+    public ResponseEntity<?> getSchedule(@RequestParam("id") Arrangement arrangement){
         if (arrangement == null){
             return ResponseEntity.noContent().build();
         }

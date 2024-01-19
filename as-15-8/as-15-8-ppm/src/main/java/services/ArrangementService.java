@@ -80,7 +80,7 @@ public class ArrangementService {
     }
 
     @Transactional
-    public void refreshStoppedArrangement(Arrangement arrangement){
+    public int refreshStoppedArrangement(Arrangement arrangement){
         //Меняем статус для чек-юнитов, завершенных на диспетчере
         List<Long> dispatcherJobIds = dispatcherWebClient.getJobIdsFromDispatcher(arrangement.getId());
         List<List<Long>> batchedJobIds = Lists.partition(dispatcherJobIds, 10000);
@@ -93,5 +93,6 @@ public class ArrangementService {
         });
 
         log.info("Статусы у ScheduleCheckUnit обновлены успешно");
+        return dispatcherJobIds.size();
     }
 }

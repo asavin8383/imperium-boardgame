@@ -105,7 +105,7 @@ public class ResultService {
     void saveArrangement(Arrangement arrangement, boolean isStopping) {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
         try {
-            Long version = resultsKafkaService.getLastVersion(arrangement.getId()).orElse(null);
+            Long version = arrangement.getVersion();
             log.info("Начато сохранение мероприятия: " + arrangement.getId() + ", версия: " + version);
 
             KeyValueIterator<Windowed<CheckUnitKey>, CheckUnitResult> resultsIterator =

@@ -9,6 +9,7 @@ import enums.CheckUnitJobResult;
 import enums.SortingDirection;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import model.Arrangement;
 import model.DetailResult;
 import model.Result;
 import model.Views;
@@ -74,22 +75,23 @@ public class ResultsController {
 
     @GetMapping(path = "/screenshot", produces = MediaType.IMAGE_PNG_VALUE)
     public @ResponseBody
-    ResponseEntity getScreenshot(@RequestParam Long arrangementId, @RequestParam Long id){
-        return resultService.getScreenshot(arrangementId, id)
+    ResponseEntity<?> getScreenshot(@RequestParam("arrangementId") Arrangement arrangement, @RequestParam Long id){
+
+        return resultService.getScreenshot(arrangement.getId(), id, arrangement.getVersion())
             .map(screen -> screen.getScreenshot()==null ? ResponseEntity.noContent().build() : ResponseEntity.ok(screen.getScreenshot()))
             .orElseGet(() -> ResponseEntity.noContent().build());
     }
 
     @GetMapping(path = "/etalon_screenshot", produces = MediaType.IMAGE_PNG_VALUE)
     public @ResponseBody
-    ResponseEntity getEtalonScreenshot(@RequestParam Long arrangementId, @RequestParam Long id){
-        return resultService.getScreenshot(arrangementId, id)
+    ResponseEntity<?> getEtalonScreenshot(@RequestParam("arrangementId") Arrangement arrangement, @RequestParam Long id){
+        return resultService.getScreenshot(arrangement.getId(), id, arrangement.getVersion())
                 .map(screen -> screen.getEtalonScreenshot()==null ? ResponseEntity.noContent().build() : ResponseEntity.ok(screen.getEtalonScreenshot()))
                 .orElseGet(() -> ResponseEntity.noContent().build());
     }
 
     @GetMapping(path = "/nmap_log", produces = MediaType.TEXT_PLAIN_VALUE)
-    public @ResponseBody ResponseEntity getNmapLog(@RequestParam Long arrangementId, @RequestParam Long id){
+    public @ResponseBody ResponseEntity<?> getNmapLog(@RequestParam Long arrangementId, @RequestParam Long id){
         return resultService.getArrangementResult(arrangementId, id)
                 .map(checkUnitResult -> {
                     if(checkUnitResult instanceof NMapAnalysisJobResult)

@@ -162,32 +162,18 @@ public class ResultsKafkaService {
             .map(kv -> kv.value));
     }
 
-    public Optional<Screenshots> getScreenshot(Long arrangementId, Long jobId) {
-        Optional<Long> version = getLastVersion(arrangementId);
+    public Optional<Screenshots> getScreenshot(Long arrangementId, Long jobId, Long version) {
 
         return getScreenshotsKeyValueStore()
             .flatMap(store -> getLastIteratorValue(
                 store.fetch(
-                    new CheckUnitKey(arrangementId, jobId, version.orElse(minValue)),
-                    new CheckUnitKey(arrangementId, jobId, version.orElse(maxValue)),
+                    new CheckUnitKey(arrangementId, jobId, version == null ? minValue : version),
+                    new CheckUnitKey(arrangementId, jobId, version == null ? maxValue : version),
                     Instant.now().minus(resultsRetentionDays, ChronoUnit.DAYS),
                     Instant.now()
                 )
             )
             .map(kv -> kv.value));
-    }
-
-    public Optional<Long> getLastVersion(Long arrangementId) {
-        return getResultsKeyValueStore()
-                .flatMap(store -> getLastIteratorValue(
-                        store.fetch(
-                                new CheckUnitKey(arrangementId, minValue, minValue),
-                                new CheckUnitKey(arrangementId, maxValue, maxValue),
-                                Instant.now().minus(resultsRetentionDays, ChronoUnit.DAYS),
-                                Instant.now()
-                        )
-                )
-                .map(kv -> kv.key.getVersion()));
     }
 
     public long getResultsCount(Long arrangementId) {

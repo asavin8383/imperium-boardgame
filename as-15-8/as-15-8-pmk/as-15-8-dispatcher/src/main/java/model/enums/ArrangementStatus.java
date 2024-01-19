@@ -1,6 +1,8 @@
 package model.enums;
 
 public enum ArrangementStatus {
+    PLANNED,
+
     RUNNING,
     STOPPING,
     STOPPED,
