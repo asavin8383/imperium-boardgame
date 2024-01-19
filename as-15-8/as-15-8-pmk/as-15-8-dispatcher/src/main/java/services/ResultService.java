@@ -119,7 +119,7 @@ public class ResultService {
             saveArrangementScreenshots(arrangement, version, screenshotsIterator, entityManager);
 
             if (isSaved) {
-                log.info("Мероприятие успешно сохранено в БД: " + arrangement.getId());
+                log.info("Мероприятие успешно сохранено в БД: " + arrangement.getId() + ", версия: " + version);
                 if(isArrangementFinished(arrangement) || isStopping) {
                     if (arrangementRestApi.sendStatusNotificationToPPM(arrangement.getId(), isStopping)) {
                         boolean isActAvailable = arrangementRestApi.isActAvailableFromPPT(arrangement.getId());
