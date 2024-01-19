@@ -109,14 +109,14 @@ public class ResultService {
             log.info("Начато сохранение мероприятия: " + arrangement.getId() + ", версия: " + version);
 
             KeyValueIterator<Windowed<CheckUnitKey>, CheckUnitResult> resultsIterator =
-                    resultsKafkaService.getArrangementResultsIterator(arrangement.getId(), version)
+                    resultsKafkaService.getArrangementResultsIterator(arrangement.getId())
                     .orElseThrow(() -> new Exception("Не удалось получить результаты мероприятия из временного хранилища"));
             KeyValueIterator<Windowed<CheckUnitKey>, Screenshots> screenshotsIterator =
-                    resultsKafkaService.getArrangementResultScreenshotsIterator(arrangement.getId(), version)
+                    resultsKafkaService.getArrangementResultScreenshotsIterator(arrangement.getId())
                     .orElseThrow(() -> new Exception("Не удалось получить скриншоты результатов мероприятия из временного хранилища"));
 
-            boolean isSaved = saveArrangementResults(arrangement, resultsIterator, entityManager);
-            saveArrangementScreenshots(arrangement, screenshotsIterator, entityManager);
+            boolean isSaved = saveArrangementResults(arrangement, version, resultsIterator, entityManager);
+            saveArrangementScreenshots(arrangement, version, screenshotsIterator, entityManager);
 
             if (isSaved) {
                 log.info("Мероприятие успешно сохранено в БД: " + arrangement.getId());
@@ -144,6 +144,7 @@ public class ResultService {
 
     boolean saveArrangementResults(
             Arrangement arrangement,
+            Long version,
             KeyValueIterator<Windowed<CheckUnitKey>, CheckUnitResult> resultsIterator,
             EntityManager entityManager){
         boolean isSaved = true;
@@ -158,15 +159,18 @@ public class ResultService {
                 KeyValue<Windowed<CheckUnitKey>, CheckUnitResult> windowedResult = resultsIterator.next();
                 KeyValue<CheckUnitKey, CheckUnitResult> result = KeyValue.pair(windowedResult.key.key(), windowedResult.value);
 
-                if (!saveArrangementResult(entityManager, arrangement, result.key, result.value))
-                    isSaved = false;
+                if(version == null || result.key.getVersion().equals(version)) {
 
-                transactionCount++;
+                    if (!saveArrangementResult(entityManager, arrangement, result.key, result.value))
+                        isSaved = false;
 
-                if (transactionCount % transactionBatchSize == 0)
-                    transaction.commit();
+                    transactionCount++;
 
-                logEvery_N_Result(transactionCount, "результатов");
+                    if (transactionCount % transactionBatchSize == 0)
+                        transaction.commit();
+
+                    logEvery_N_Result(transactionCount, "результатов");
+                }
             }
 
             if (transaction.isActive()) {
@@ -182,6 +186,7 @@ public class ResultService {
 
     private void saveArrangementScreenshots(
             Arrangement arrangement,
+            Long version,
             KeyValueIterator<Windowed<CheckUnitKey>, Screenshots> screenshotsIterator,
             EntityManager entityManager){
         EntityTransaction transaction = entityManager.getTransaction();
@@ -195,15 +200,18 @@ public class ResultService {
                 KeyValue<Windowed<CheckUnitKey>, Screenshots> windowedResult = screenshotsIterator.next();
                 KeyValue<CheckUnitKey, Screenshots> screenshot = KeyValue.pair(windowedResult.key.key(), windowedResult.value);
 
-                //Если штамп ставим, нужно попросить инфо об AccessTool
-                AccessToolDTO accessToolDTO = dispatcherProperties.getImprint().isUseImprint() ? getAccessToolInfo(arrangement.getId()) : null;
+                if(version == null || screenshot.key.getVersion().equals(version)) {
 
-                saveScreenshot(screenshot.value, entityManager, screenshot.key.getJobId(), accessToolDTO);
+                    //Если штамп ставим, нужно попросить инфо об AccessTool
+                    AccessToolDTO accessToolDTO = dispatcherProperties.getImprint().isUseImprint() ? getAccessToolInfo(arrangement.getId()) : null;
 
-                transactionCount++;
-                if (transactionCount % transactionBatchSize == 0)
-                    transaction.commit();
-                logEvery_N_Result(transactionCount, "скриншотов");
+                    saveScreenshot(screenshot.value, entityManager, screenshot.key.getJobId(), accessToolDTO);
+
+                    transactionCount++;
+                    if (transactionCount % transactionBatchSize == 0)
+                        transaction.commit();
+                    logEvery_N_Result(transactionCount, "скриншотов");
+                }
             }
 
             if (transaction.isActive()) {
@@ -293,7 +301,7 @@ public class ResultService {
             "check_type = :checkType, " +
             "check_unit_type = :checkUnitType, " +
             "check_unit_value = :checkUnitValue";
-        NativeQuery nativeQuery = entityManager.createNativeQuery(sql).unwrap(NativeQuery.class);
+        NativeQuery<?> nativeQuery = entityManager.createNativeQuery(sql).unwrap(NativeQuery.class);
         nativeQuery.setParameter("id", result.getId());
         nativeQuery.setParameter("arrangementId", result.getArrangement().getId(), LongType.INSTANCE);
         nativeQuery.setParameter("contentId", result.getErdiId(), LongType.INSTANCE);
@@ -317,7 +325,7 @@ public class ResultService {
             "result_id = :id, " +
             "screenshot = :screenshot, " +
             "etalon_screenshot = :etalonScreenshot";
-        NativeQuery nativeQuery = entityManager.createNativeQuery(sql).unwrap(NativeQuery.class);
+        NativeQuery<?> nativeQuery = entityManager.createNativeQuery(sql).unwrap(NativeQuery.class);
         nativeQuery.setParameter("id", resultScreenShot.getId());
         nativeQuery.setParameter("screenshot", resultScreenShot.getScreenshot());
         nativeQuery.setParameter("etalonScreenshot", resultScreenShot.getEtalonScreenshot());

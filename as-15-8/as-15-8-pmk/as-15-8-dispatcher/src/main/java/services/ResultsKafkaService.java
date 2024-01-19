@@ -122,16 +122,7 @@ public class ResultsKafkaService {
                             checkUnitResultComparator = checkUnitResultComparator.reversed();
                     }
 
-                    Stream<Result> resultsStream = StreamSupport
-                            .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), false)
-                            .collect(Collectors.groupingBy(
-                                    v -> v.key.key().getJobId(),
-                                    Collectors.maxBy(Comparator.comparingLong(v -> v.key.key().getVersion()))
-                            ))
-                            .values()
-                            .stream()
-                            .filter(Optional::isPresent)
-                            .map(val -> KeyValue.pair(val.get().key.key(), val.get().value))
+                    Stream<Result> resultsStream = getLastVersionValues(resultsIterator)
                             .filter(filter)
                             .map(kv -> {
                                 DetailResultService<? super CheckUnitResult, ? extends DetailResult> service = AnalysisResultServiceFactory.getService(kv.value.getClass());
@@ -229,16 +220,7 @@ public class ResultsKafkaService {
 
     private <T> List<T> getDistinctResultValues(Long arrangementId, Function<KeyValue<CheckUnitKey, CheckUnitResult>, T> function){
         return getArrangementResultsIterator(arrangementId)
-            .map(resultsIterator -> StreamSupport
-                .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), false)
-                .collect(Collectors.groupingBy(
-                        v -> v.key.key().getJobId(),
-                        Collectors.maxBy(Comparator.comparingLong(v -> v.key.key().getVersion()))
-                ))
-                .values()
-                .stream()
-                .filter(Optional::isPresent)
-                .map(val -> KeyValue.pair(val.get().key.key(), val.get().value))
+            .map(resultsIterator -> getLastVersionValues(resultsIterator)
                 .map(function)
                 .distinct()
                 .collect(Collectors.toList())
@@ -248,29 +230,16 @@ public class ResultsKafkaService {
 
     private long getResultsCount(Long arrangementId, Predicate<KeyValue<CheckUnitKey, CheckUnitResult>> filter){
         return getArrangementResultsIterator(arrangementId)
-                .map(resultsIterator -> StreamSupport
-                        .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), false)
-                        .collect(Collectors.groupingBy(
-                                v -> v.key.key().getJobId(),
-                                Collectors.maxBy(Comparator.comparingLong(v -> v.key.key().getVersion()))
-                        ))
-                        .values()
-                        .stream()
-                        .filter(Optional::isPresent)
-                        .map(val -> KeyValue.pair(val.get().key.key(), val.get().value))
+                .map(resultsIterator -> getLastVersionValues(resultsIterator)
                         .filter(filter)
                         .count())
                 .orElse(0L);
     }
 
     Optional<KeyValueIterator<Windowed<CheckUnitKey>, CheckUnitResult>> getArrangementResultsIterator(Long arrangementId) {
-        return getArrangementResultsIterator(arrangementId, null);
-    }
-
-    Optional<KeyValueIterator<Windowed<CheckUnitKey>, CheckUnitResult>> getArrangementResultsIterator(Long arrangementId, Long version) {
         return getResultsKeyValueStore().map(store -> store.fetch(
-                        new CheckUnitKey(arrangementId, minValue, version == null ? minValue : version),
-                        new CheckUnitKey(arrangementId, maxValue, version == null ? maxValue : version),
+                        new CheckUnitKey(arrangementId, minValue, minValue),
+                        new CheckUnitKey(arrangementId, maxValue, maxValue),
                         Instant.now().minus(resultsRetentionDays, ChronoUnit.DAYS),
                         Instant.now()
                 )
@@ -278,15 +247,11 @@ public class ResultsKafkaService {
     }
 
     Optional<KeyValueIterator<Windowed<CheckUnitKey>, Screenshots>> getArrangementResultScreenshotsIterator(Long arrangementId) {
-        return getArrangementResultScreenshotsIterator(arrangementId, null);
-    }
-
-    Optional<KeyValueIterator<Windowed<CheckUnitKey>, Screenshots>> getArrangementResultScreenshotsIterator(Long arrangementId, Long version) {
         return getScreenshotsKeyValueStore().map(store -> store.fetch(
-                new CheckUnitKey(arrangementId, minValue, version == null ? minValue : version),
-                new CheckUnitKey(arrangementId, maxValue, version == null ? maxValue : version),
-                Instant.now().minus(resultsRetentionDays, ChronoUnit.DAYS),
-                Instant.now()
+                        new CheckUnitKey(arrangementId, minValue, minValue),
+                        new CheckUnitKey(arrangementId, maxValue, maxValue),
+                        Instant.now().minus(resultsRetentionDays, ChronoUnit.DAYS),
+                        Instant.now()
                 )
         );
     }
@@ -313,11 +278,9 @@ public class ResultsKafkaService {
             List<CheckUnitType> checkUnitTypes,
             String query) {
 
-        boolean notFiltered = true;
-        if(checkUnitJobResults != null && checkUnitJobResults.size() > 0 &&
-                !checkUnitJobResults.contains(checkUnitResult.getCheckResult())
-        )
-            notFiltered = false;
+        boolean notFiltered = checkUnitJobResults == null || checkUnitJobResults.size() == 0 ||
+                checkUnitJobResults.contains(checkUnitResult.getCheckResult());
+
         if(checkUnitTypes != null && checkUnitTypes.size() > 0 &&
                 !checkUnitTypes.contains(checkUnitResult.getCheckUnit().getType())
         )
@@ -373,5 +336,18 @@ public class ResultsKafkaService {
             .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), false)
             .map(val -> KeyValue.pair(val.key.key(), val.value))
             .reduce((first, second) -> second);
+    }
+
+    private Stream<KeyValue<CheckUnitKey, CheckUnitResult>> getLastVersionValues(KeyValueIterator<Windowed<CheckUnitKey>, CheckUnitResult> resultsIterator) {
+        return StreamSupport
+                .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), false)
+                .collect(Collectors.groupingBy(
+                        v -> v.key.key().getJobId(),
+                        Collectors.maxBy(Comparator.comparingLong(v -> v.key.key().getVersion()))
+                ))
+                .values()
+                .stream()
+                .filter(Optional::isPresent)
+                .map(val -> KeyValue.pair(val.get().key.key(), val.get().value));
     }
 }
