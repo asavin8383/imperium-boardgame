@@ -129,7 +129,7 @@ public class ScheduleController {
                 .anyMatch(arrangement -> arrangement.getStatus().equals(ArrangementStatus.STOPPED));
     }
 
-        @GetMapping(path = "/total_workers_count")
+    @GetMapping(path = "/total_workers_count")
     public Integer getTotalWorkersCount(@RequestParam("id") Schedule schedule){
         /*if(schedule==null){
             throw new AS_15_8_PPM_Exception("Ошибка получения количества обработчиков! Расписание ещё не создано");
@@ -213,7 +213,7 @@ public class ScheduleController {
     }
 
     @DeleteMapping
-    public ResponseEntity deleteSchedule(@RequestParam("id") Schedule schedule){
+    public ResponseEntity<?> deleteSchedule(@RequestParam("id") Schedule schedule){
         if(schedule == null)
             return ResponseEntity.badRequest().body("Ошибка при удалении расписания. Расписание не найдено по ID");
         scheduleService.deleteSchedule(schedule);
@@ -222,7 +222,7 @@ public class ScheduleController {
 
     @GetMapping(path = "/gant")
     @JsonView(Views.Full.class)
-    public ResponseEntity getScheduleGant(@RequestParam("id") Schedule schedule){
+    public ResponseEntity<?> getScheduleGant(@RequestParam("id") Schedule schedule){
         if(schedule == null)
             return ResponseEntity.badRequest().body("Ошибка при расчете времени расписания. Расписание не найдено по ID");
         List<BriefArrangement> briefArrangements = new ArrayList<>();

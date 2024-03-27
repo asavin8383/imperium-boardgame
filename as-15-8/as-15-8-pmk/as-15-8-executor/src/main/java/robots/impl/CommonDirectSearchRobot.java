@@ -271,6 +271,9 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         } else {
             try {
                 searchText(value);
+                try {
+                    Thread.sleep(15000);
+                } catch (InterruptedException ignored) { }
             } catch (InternalError_ExecutionException ex) {
                 if (throwExceptionByCaptchaOrBadIP) {
                     throw ex;
