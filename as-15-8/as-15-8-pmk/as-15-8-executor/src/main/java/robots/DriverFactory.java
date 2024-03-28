@@ -77,7 +77,7 @@ public class DriverFactory {
 
 		setOptimalChromeOptions(options);
 		setOptionsForAnonymization(options);
-		addStealthExtension(options);
+		//addStealthExtension(options);
 		addScreenshotExtension(options);
 
 		if (enableLog){
@@ -109,7 +109,7 @@ public class DriverFactory {
         ChromeOptions options = new ChromeOptions();
 		setOptimalChromeOptions(options);
 		setOptionsForAnonymization(options);
-		addStealthExtension(options);
+		//addStealthExtension(options);
 		addScreenshotExtension(options);
 		cpb.setCapability(ChromeOptions.CAPABILITY, options);
 
@@ -122,18 +122,18 @@ public class DriverFactory {
 		options.addArguments("--start-maximized");
 		options.addArguments("--ignore-certificate-errors");
 
-		//options.addArguments("--dns-prefetch-disable");		// отключение предварительной выборки DNS. в теории должно ускорить работу
-//		LoggingPreferences logPrefs = new LoggingPreferences();
-//		logPrefs.enable( LogType.PERFORMANCE, Level.ALL );
-//		options.setCapability( "goog:loggingPrefs", logPrefs );
+		options.addArguments("--dns-prefetch-disable");		// отключение предварительной выборки DNS. в теории должно ускорить работу
+		LoggingPreferences logPrefs = new LoggingPreferences();
+		logPrefs.enable( LogType.PERFORMANCE, Level.ALL );
+		options.setCapability( "goog:loggingPrefs", logPrefs );
 
 		options.addArguments("--auto-select-desktop-capture-source=Entire screen");
 
 		//Для отображения полного URL
-//		options.addArguments("--enable-experimental-web-platform-features");
-//		options.addArguments("--enable-features=TemporaryUnexpireFlagsM76");
-//		options.addArguments("--disable-ipv6");
-//		options.addArguments("--disable-features=OmniboxUIExperimentHideSteadyStateUrlScheme,OmniboxUIExperimentHideSteadyStateUrlTrivialSubdomains");
+		options.addArguments("--enable-experimental-web-platform-features");
+		options.addArguments("--enable-features=TemporaryUnexpireFlagsM76");
+		options.addArguments("--disable-ipv6");
+		options.addArguments("--disable-features=OmniboxUIExperimentHideSteadyStateUrlScheme,OmniboxUIExperimentHideSteadyStateUrlTrivialSubdomains");
 
 		//принимать все непонятные алерты
 		options.setCapability(CapabilityType.UNEXPECTED_ALERT_BEHAVIOUR, UnexpectedAlertBehaviour.ACCEPT);
@@ -143,15 +143,15 @@ public class DriverFactory {
 		options.setExperimentalOption("excludeSwitches", Collections.singletonList("enable-automation"));
 
 		options.addArguments(
-//				"--no-default-browser-check",
-//				"--no-first-run",
-//				"--no-sandbox",
-//				"--test-type",
+				"--no-default-browser-check",
+				"--no-first-run",
+				"--no-sandbox",
+				"--test-type",
 				"--window-size=1920,1080",
-				"--lang=ru-RU,ru,en-US,en"
-//				"--user-data-dir=/home/selenium/chrome_profile",
-//				"--disable-blink-features",
-//				"--disable-blink-features=AutomationControlled"
+				"--lang=ru-RU,ru,en-US,en",
+				"--user-data-dir=/home/selenium/chrome_profile",
+				"--disable-blink-features",
+				"--disable-blink-features=AutomationControlled"
 		);
 	}
 
@@ -172,7 +172,7 @@ public class DriverFactory {
 		if(Strings.isNotEmpty(version)) {
 			capability.setVersion(version);
 		}
-		//capability.setCapability("enableVNC", true);
+		capability.setCapability("enableVNC", true);
 		return capability;
 	}
 
