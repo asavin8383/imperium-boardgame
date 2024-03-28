@@ -44,7 +44,7 @@ public class RetryTest {
         params.put(SEARCH_SYSTEM_URL, "https://www.google.ru");
         params.put(SEARCH_SYSTEM_RESULT_PAGE_TYPE, "pagination");
         params.put(SEARCH_SYSTEM_XPATH_INPUT_FIELD, "//input[@name=\"q\"]");
-        params.put(SEARCH_SYSTEM_CAPTCHA_URL_PATH, "//form[@id=\"captcha-form\"]");
+        params.put(SEARCH_SYSTEM_XPATH_CAPTCHA, "//form[@id=\"captcha-form\"]");
         params.put(SEARCH_SYSTEM_XPATH_NEXT_PAGE, "//*[@id=\"pnnext\"]");
         params.put(SEARCH_SYSTEM_XPATH_ITEM_LINK, "//div[@class=\"g\"]//div[@class=\"r\"]/a[1]");
         return params;
