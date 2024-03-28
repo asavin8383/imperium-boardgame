@@ -77,7 +77,8 @@ public class DriverFactory {
 
 		setOptimalChromeOptions(options);
 		setOptionsForAnonymization(options);
-		//addStealthExtension(options);
+		addStealthExtension(options);
+		addUBlockExtension(options);
 		addScreenshotExtension(options);
 
 		if (enableLog){
@@ -109,7 +110,8 @@ public class DriverFactory {
         ChromeOptions options = new ChromeOptions();
 		setOptimalChromeOptions(options);
 		setOptionsForAnonymization(options);
-		//addStealthExtension(options);
+		addStealthExtension(options);
+		addUBlockExtension(options);
 		addScreenshotExtension(options);
 		cpb.setCapability(ChromeOptions.CAPABILITY, options);
 
@@ -182,6 +184,10 @@ public class DriverFactory {
 
 	private static void addStealthExtension(ChromeOptions options) {
 		addExtension("stealth_ext.crx", options);
+	}
+
+	private static void addUBlockExtension(ChromeOptions options) {
+		addExtension("uBlock.crx", options);
 	}
 
 	private static void addExtension(String extName, ChromeOptions options) {
