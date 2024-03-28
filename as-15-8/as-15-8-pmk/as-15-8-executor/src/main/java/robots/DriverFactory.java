@@ -172,7 +172,7 @@ public class DriverFactory {
 		if(Strings.isNotEmpty(version)) {
 			capability.setVersion(version);
 		}
-		capability.setCapability("enableVNC", true);
+		//capability.setCapability("enableVNC", true);
 		return capability;
 	}
 

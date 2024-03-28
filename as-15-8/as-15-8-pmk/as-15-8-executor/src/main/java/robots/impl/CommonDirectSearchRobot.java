@@ -26,7 +26,10 @@ import robots.exceptions.TimeoutScriptException;
 import robots.utils.EqualityTest;
 import robots.utils.ScriptUtils;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
 
 @Slf4j(topic = "robots")
@@ -70,7 +73,7 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
 
     /** xpath элемента, по которому
      * опредеяется наличие капчи */
-    private String captchaUrlPath;
+    private String xpathCaptcha;
 
     /** xpath элемента капчи */
     private String xpathCaptchaElement;
@@ -149,7 +152,7 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         this.checkSpellingLink = scriptParams.get(AccessToolParameter.CHECK_SPELLING_LINK);
 
         this.captchaType = CaptchaType.of(scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_CAPTCHA_TYPE));
-        this.captchaUrlPath = scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_CAPTCHA_URL_PATH);
+        this.xpathCaptcha = scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_XPATH_CAPTCHA);
         this.xpathCaptchaElement = scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_XPATH_CAPTCHA_ELEMENT);
 
         String needCheckHintStr = scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_CHECK_HINT);
@@ -183,8 +186,8 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
 
     public CaptchaType getCaptchaType() {return captchaType; }
 
-    public String getCaptchaUrlPath() {
-        return captchaUrlPath;
+    public String getXpathCaptcha() {
+        return xpathCaptcha;
     }
 
     public String getXpathCaptchaElement() { return xpathCaptchaElement; }
@@ -271,9 +274,6 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         } else {
             try {
                 searchText(value);
-                try {
-                    Thread.sleep(15000);
-                } catch (InterruptedException ignored) { }
             } catch (InternalError_ExecutionException ex) {
                 if (throwExceptionByCaptchaOrBadIP) {
                     throw ex;
@@ -383,15 +383,13 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
     }
 
     void solveCaptcha(WebDriver driver) throws CaptchaSolverException {
-        if (captchaUrlPath != null && captchaUrlPath.length() > 0) {
+        if (xpathCaptcha != null && xpathCaptcha.length() > 0) {
             WebDriverWait wait = new WebDriverWait(driver, 1);
             try {
-                if(!driver.getCurrentUrl().contains(captchaUrlPath)){
-                    return;
-                }
+                wait.until(ExpectedConditions
+                        .visibilityOfElementLocated(By.xpath(xpathCaptcha)));
 
                 if (!this.captchaType.equals(CaptchaType.UNKNOWN) && Strings.isNotEmpty(this.xpathCaptchaElement)) {
-
                     for (int i = 0; i < 3; i++) {
 
                         try {
@@ -494,6 +492,27 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         long delayRand = inputDelay - new Random().nextInt((int)inputDelay);
         ScriptUtils.type(inputField, delayRand, value);
         inputField.sendKeys(Keys.ENTER);
+        //Проверим, нет ли ошибки сервера
+        //checkInternalError(searchSystemUrl);
+
+    }
+
+    private void checkInternalError(String currentUrl) {
+
+        try {
+            // создаем объект HttpURLConnection для отправки GET-запроса
+            URL url = new URL(currentUrl);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+
+            // проверяем код ответа сервера
+            int responseCode = connection.getResponseCode();
+            if (responseCode >= 400) {
+                throw new InternalError_ExecutionException(String.format("Сервер вернул код %d", responseCode));
+            }
+        } catch (IOException ex) {
+            throw new ExecutionException("Ошибка ввода текста в поисковую строку",ex);
+        }
     }
 
     private boolean checkHintAndSearch(String value) {
