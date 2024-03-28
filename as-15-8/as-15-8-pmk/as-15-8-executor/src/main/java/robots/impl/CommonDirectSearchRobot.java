@@ -519,9 +519,10 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         try {
             WebElement inputField = driver.findElement(
                     By.xpath(xpathInputField));
-            observeHintLinks();
-            if(typeAndCheckHint(inputField, value, inputDelay))
-                return true;
+            // observeHintLinks();
+//            if(typeAndCheckHint(inputField, value, inputDelay))
+//                return true;
+            inputField.sendKeys(value);
             inputField.sendKeys(Keys.ENTER);
             return false;
         } catch (Exception ex){
