@@ -40,7 +40,7 @@ public class RetryTest {
         Map<AccessToolParameter, String> params = new HashMap<>();
         params.put(PLATFORM, Platform.ANY.toString());
         params.put(BROWSER, "chrome");
-        params.put(VERSION, "undetected_119");
+        params.put(VERSION, "123");
         params.put(SEARCH_SYSTEM_URL, "https://www.google.ru");
         params.put(SEARCH_SYSTEM_RESULT_PAGE_TYPE, "pagination");
         params.put(SEARCH_SYSTEM_XPATH_INPUT_FIELD, "//input[@name=\"q\"]");
@@ -50,10 +50,40 @@ public class RetryTest {
         return params;
     }
 
+    public static Map<AccessToolParameter, String> yandexParams() {
+        Map<AccessToolParameter, String> params = new HashMap<>();
+        params.put(PLATFORM, Platform.ANY.toString());
+        params.put(BROWSER, "chrome");
+        params.put(VERSION, "123");
+        params.put(SEARCH_SYSTEM_URL, "https://ya.ru");
+        params.put(SEARCH_SYSTEM_RESULT_PAGE_TYPE, "pagination");
+        params.put(SEARCH_SYSTEM_XPATH_INPUT_FIELD, "//input[@name=\"text\"]");
+        params.put(SEARCH_SYSTEM_XPATH_CAPTCHA, "//form[@id=\"checkbox-captcha-form\"]");
+        params.put(SEARCH_SYSTEM_XPATH_NEXT_PAGE, "//div[contains(@class, \"pager \")]//a[last()]");
+        params.put(SEARCH_SYSTEM_XPATH_ITEM_LINK, "///*[contains(@class, 'serp-item')]//div[contains(@class, \"organic__path\")]/a[last()]");
+        return params;
+    }
+
     @Test
     public void execute() {
 
-        List<String> testList = Arrays.asList(
+        for (String tst : testList) {
+            CheckUnit checkUnit = new CheckUnit();
+            checkUnit.setType(CheckUnitType.DOMAIN);
+            checkUnit.setValue(tst);
+            CheckUnitJob job = new CheckUnitJob();
+            job.setCheckUnit(checkUnit);
+            job.setAccessTool("yandex-local-anonimyzing");
+            robotsService.run(0L, job);
+        }
+//
+//        Map<AccessToolParameter, String> params = googleParams();
+//        CommonDirectSearchRobot robot = new CommonDirectSearchRobot(params);
+//
+//        robot.run(checkUnit);
+    }
+
+    List<String> testList = Arrays.asList(
             "sigaretioptomrf.com",
             "i.torrentfilmov.net",
             "casino-mars1.hot-tops.com",
@@ -155,21 +185,5 @@ public class RetryTest {
             "www.666.video.az",
             "diplom197.com",
             "kinovit.org"
-        );
-
-        for (String tst : testList) {
-            CheckUnit checkUnit = new CheckUnit();
-            checkUnit.setType(CheckUnitType.DOMAIN);
-            checkUnit.setValue(tst);
-            CheckUnitJob job = new CheckUnitJob();
-            job.setCheckUnit(checkUnit);
-            job.setAccessTool("google-local-anonimyzing");
-            robotsService.run(0L, job);
-        }
-//
-//        Map<AccessToolParameter, String> params = googleParams();
-//        CommonDirectSearchRobot robot = new CommonDirectSearchRobot(params);
-//
-//        robot.run(checkUnit);
-    }
+    );
 }

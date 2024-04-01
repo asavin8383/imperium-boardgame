@@ -78,7 +78,7 @@ public class DriverFactory {
 		setOptimalChromeOptions(options);
 		setOptionsForAnonymization(options);
 		addStealthExtension(options);
-		addUBlockExtension(options);
+		//addUBlockExtension(options);
 		addScreenshotExtension(options);
 
 		if (enableLog){
