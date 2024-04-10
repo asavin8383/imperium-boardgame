@@ -50,18 +50,15 @@ public class ScriptUtils {
     }
 
     public static void waitDriver(WebDriver driver, Integer seconds){
-        try{
-            WebDriverWait wait = new WebDriverWait(driver, seconds);
-            wait.until(webDriver -> {
+        new WebDriverWait(driver, seconds)
+            .until(webDriver -> {
                 try {
                     ((JavascriptExecutor) webDriver).executeScript("return window.name");
                     return true;
-                } catch (Exception ex){
+                } catch (Exception ignored){
                     return false;
                 }
             });
-        }
-        catch (TimeoutException ignored){}
     }
 
     public static void waitPageLoading(WebDriver driver) {
@@ -69,13 +66,16 @@ public class ScriptUtils {
     }
 
     public static void waitPageLoading(WebDriver driver, int timeoutInSeconds) {
-        ArrayList<String> tabs = new ArrayList<>(driver.getWindowHandles());
-        driver.switchTo().window(tabs.get(tabs.size()-1));
-
-        new WebDriverWait(driver, timeoutInSeconds)
+            new WebDriverWait(driver, timeoutInSeconds)
                 .withMessage("загрузка страницы")
-                .until(webDriver -> ((JavascriptExecutor) webDriver)
-                        .executeScript("return document.readyState").equals("complete"));
+                .until(webDriver -> {
+                    try {
+                        return ((JavascriptExecutor) webDriver)
+                                .executeScript("return document.readyState").equals("complete");
+                    } catch (Exception ignored) {
+                        return false;
+                    }
+                });
     }
 
     private static String getErrorCode(WebDriver driver){
