@@ -51,7 +51,14 @@ public class ScriptUtils {
     public static void waitDriver(WebDriver driver, Integer seconds){
         try{
             WebDriverWait wait = new WebDriverWait(driver, seconds);
-            wait.until(webDriver -> false);
+            wait.until(webDriver -> {
+                try {
+                    ((JavascriptExecutor) webDriver).executeScript("return window.name");
+                    return true;
+                } catch (Exception ex){
+                    return false;
+                }
+            });
         }
         catch (TimeoutException ignored){}
     }
