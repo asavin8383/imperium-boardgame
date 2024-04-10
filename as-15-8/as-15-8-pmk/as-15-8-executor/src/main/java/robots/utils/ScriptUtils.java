@@ -41,7 +41,7 @@ public class ScriptUtils {
     }
 
     private static Integer WAIT_TIMEOUT = 30000;
-    private static Integer WAIT_DRIVER_DEFAULT = 3;
+    private static Integer WAIT_DRIVER_DEFAULT = 15;
 
 
     public static void waitDriver(WebDriver driver){
