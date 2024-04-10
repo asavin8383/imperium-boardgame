@@ -225,6 +225,7 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
     public ExecutionJobResult execute(CheckUnit checkUnit, boolean throwExceptionByCaptchaOrBadIP) throws ExecutionException {
 
         try {
+            ScriptUtils.waitDriver(driver);
             ((JavascriptExecutor) driver).executeScript("window.open('" + searchSystemUrl + "', '_blank');");
             ArrayList<String> tabs = new ArrayList<>(driver.getWindowHandles());
             driver.switchTo().window(tabs.get(tabs.size()-1));
@@ -382,8 +383,9 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
 
     void solveCaptcha(WebDriver driver) throws CaptchaSolverException {
         if (xpathCaptcha != null && xpathCaptcha.length() > 0) {
-            WebDriverWait wait = new WebDriverWait(driver, 1);
             try {
+                ScriptUtils.waitPageLoading(driver);
+                WebDriverWait wait = new WebDriverWait(driver, 1);
                 wait.until(ExpectedConditions
                         .visibilityOfElementLocated(By.xpath(xpathCaptcha)));
 
