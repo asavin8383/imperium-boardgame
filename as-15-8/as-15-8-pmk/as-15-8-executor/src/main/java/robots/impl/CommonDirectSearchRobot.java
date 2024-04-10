@@ -225,10 +225,9 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
     public ExecutionJobResult execute(CheckUnit checkUnit, boolean throwExceptionByCaptchaOrBadIP) throws ExecutionException {
 
         try {
- //           JavascriptExecutor js = (JavascriptExecutor) driver;
- //           js.executeScript("window.open('" + searchSystemUrl + "', '_blank');");
-//            Thread.sleep(3000);
-            driver.get(searchSystemUrl);
+            ((JavascriptExecutor) driver).executeScript("window.open('" + searchSystemUrl + "', '_blank');");
+            ArrayList<String> tabs = new ArrayList<>(driver.getWindowHandles());
+            driver.switchTo().window(tabs.get(tabs.size()-1));
         } catch (Exception ex) {
             if (throwExceptionByCaptchaOrBadIP) {
                 throw new ExecutionException("Ошибка открытия ПС", ex);
@@ -236,7 +235,6 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
                 return createMessageByException(ex);
             }
         }
-        // driver.switchTo().window(driver.getWindowHandles().toArray()[driver.getWindowHandles().size()-1].toString());
 
         equalityTest = EqualityTest.forCheckUnit(checkUnit);
 
