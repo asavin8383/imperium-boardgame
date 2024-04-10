@@ -17,6 +17,7 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.function.Consumer;
@@ -68,6 +69,9 @@ public class ScriptUtils {
     }
 
     public static void waitPageLoading(WebDriver driver, int timeoutInSeconds) {
+        ArrayList<String> tabs = new ArrayList<>(driver.getWindowHandles());
+        driver.switchTo().window(tabs.get(tabs.size()-1));
+
         new WebDriverWait(driver, timeoutInSeconds)
                 .withMessage("загрузка страницы")
                 .until(webDriver -> ((JavascriptExecutor) webDriver)
