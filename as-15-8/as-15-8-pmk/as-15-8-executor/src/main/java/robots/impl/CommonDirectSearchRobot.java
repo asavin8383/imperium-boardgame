@@ -231,7 +231,6 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
             driver.get(searchSystemUrl);
         } catch (Exception ex) {
             if (throwExceptionByCaptchaOrBadIP) {
-                log.error("Ошибка открытия ПС", ex);
                 throw new ExecutionException("Ошибка открытия ПС", ex);
             } else {
                 return createMessageByException(ex);
@@ -451,6 +450,7 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
     }
 
     private ExecutionPSJobResult createMessageByException(Exception ex){
+        log.error("Ошибка при выполнении проверки ПС", ex);
         if (ex.getMessage().contains("unknown error: net::"))
             return createMessage(false, CheckUnitJobResult.SOCKET_ERROR);
         else
