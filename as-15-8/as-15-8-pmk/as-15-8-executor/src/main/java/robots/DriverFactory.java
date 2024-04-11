@@ -75,8 +75,9 @@ public class DriverFactory {
 
 		setOptimalChromeOptions(options);
 		setOptionsForAnonymization(options);
-		addStealthExtension(options);
-		//addUBlockExtension(options);
+		//addStealthExtension(options);
+		//addUBlockOriginalExtension(options);
+		addAllFingerprintDefenderExtension(options);
 		addScreenshotExtension(options);
 
 		if (enableLog){
@@ -108,8 +109,9 @@ public class DriverFactory {
         ChromeOptions options = new ChromeOptions();
 		setOptimalChromeOptions(options);
 		setOptionsForAnonymization(options);
-		addStealthExtension(options);
-		addUBlockExtension(options);
+		//addStealthExtension(options);
+		//addUBlockOriginalExtension(options);
+		addAllFingerprintDefenderExtension(options);
 		addScreenshotExtension(options);
 		cpb.setCapability(ChromeOptions.CAPABILITY, options);
 
@@ -184,8 +186,12 @@ public class DriverFactory {
 		addExtension("stealth_ext.crx", options);
 	}
 
-	private static void addUBlockExtension(ChromeOptions options) {
-		addExtension("uBlock.crx", options);
+	private static void addUBlockOriginalExtension(ChromeOptions options) {
+		addExtension("uBlockOriginal.crx", options);
+	}
+
+	private static void addAllFingerprintDefenderExtension(ChromeOptions options) {
+		addExtension("allFingerprintsDefender.crx", options);
 	}
 
 	private static void addExtension(String extName, ChromeOptions options) {

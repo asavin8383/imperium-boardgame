@@ -1,10 +1,7 @@
 package robots.impl;
 
 import captcha.CaptchaType;
-import captcha.solver.CaptchaSolver;
-import captcha.solver.CaptchaSolverBadIPException;
-import captcha.solver.CaptchaSolverException;
-import captcha.solver.CaptchaSolverFactory;
+import captcha.solver.*;
 import checkUnits.CheckUnit;
 import checkUnits.CheckUnitType;
 import enums.AccessToolParameter;
@@ -382,7 +379,9 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         return processException(checkResult, ex, needThrowEx);
     }
     private ExecutionJobResult processException(CheckUnitJobResult checkResult, Exception ex, boolean needThrowEx) {
-        log.error("Ошибка при выполнении проверки ПС", ex);
+        if(!(ex instanceof CaptchaSolverNotImplementedException)) {
+            log.error("Ошибка при выполнении проверки ПС", ex);
+        }
         if (needThrowEx) {
             throw new RuntimeException(ex);
         } else {
@@ -419,7 +418,7 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
                         }
                     }
                 } else {
-                    throw new CaptchaSolverException("Не указан метод решения капчи для ПС");
+                    throw new CaptchaSolverNotImplementedException("Не указан метод решения капчи для ПС");
                 }
             } catch (TimeoutException ignored) {}
         }
