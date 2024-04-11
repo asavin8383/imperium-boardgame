@@ -1,7 +1,5 @@
 package robots;
 
-import com.google.common.io.Files;
-import common.ExecutorProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.openqa.selenium.Platform;
@@ -17,10 +15,10 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import robots.exceptions.ExecutionException;
 import robots.utils.ScriptUtils;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
-import java.net.URLDecoder;
-import java.nio.charset.Charset;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
