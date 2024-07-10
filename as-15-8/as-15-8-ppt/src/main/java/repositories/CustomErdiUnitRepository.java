@@ -10,11 +10,14 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface CustomErdiUnitRepository extends JpaRepository<CustomErdiUnit, Long> {
 
     Optional<CustomErdiUnit> findByValue(String value);
+
+    Set<CustomErdiUnit> findAllByValueIn(Set<String> values);
 
     Page<CustomErdiUnit> findByCustomErdiId(Long customErdiId, Pageable pageable);
 
