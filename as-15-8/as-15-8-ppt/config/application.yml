@@ -41,9 +41,12 @@ spring:
     properties:
       hibernate:
         jdbc:
+          batch_size: 5000
           lob:
             non_contextual_creation: true
         format_sql: true
+        order_inserts: true
+        order_updates: true
     databasePlatform: org.hibernate.dialect.PostgreSQL9Dialect
 
 ---
@@ -148,6 +151,12 @@ spring:
     url: jdbc:postgresql://as-15-8-pg-dev.eclsoft.ru:5432/asdb
     password: sdfHFG674$^fdsFG
     username: postgres
+  jpa:
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 10000
+        generate_statistics: true
 gateway.url: https://as-15-8-dev.eclsoft.ru/api
 
 ---

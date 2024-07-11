@@ -8,6 +8,7 @@ import model.traffic.CustomErdi;
 import model.traffic.CustomErdiUnit;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import repositories.CustomErdiRepository;
@@ -29,6 +30,8 @@ public class CreateCustomErdiService {
 
     private final CustomErdiRepository customErdiRepository;
     private final CustomErdiUnitRepository customErdiUnitRepository;
+    @Value("${spring.jpa.hibernate.jdbc.batch_size:1000}")
+    private Integer batchSize;
 
     public Set<CustomErdi> createCustomErdiUnitsFromFile1(MultipartFile file) {
         try (InputStream inputStream = file.getInputStream();
@@ -70,7 +73,7 @@ public class CreateCustomErdiService {
             subSet.add(element);
             count++;
 
-            if (count == 30000) {
+            if (count == batchSize) {
                 result.add(subSet);
                 subSet = new HashSet<>();
                 count = 0;

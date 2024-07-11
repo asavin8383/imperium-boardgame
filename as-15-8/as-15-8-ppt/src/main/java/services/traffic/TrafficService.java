@@ -401,23 +401,25 @@ public class TrafficService {
 
         AccessToolsCategory category = accessToolsCategoriesRepo.findOneByOrderByIdDesc();
 
-        ErdiTrafficUnit erdiTrafficUnit = erdiTrafficUnitRepository.findFirstByNameEndingWithIgnoreCaseOrderByIdDesc("_CUSTOM")
-                .orElseGet(() -> {
-                    ErdiTrafficUnit newErdiTrafficUnit = (ErdiTrafficUnit) fillTrafficUnit(new ErdiTrafficUnit(),
-                            traffic,
-                            TrafficUnitType.CUSTOM,
-                            category);
+        Optional<ErdiTrafficUnit> erdiTrafficUnitOpt = erdiTrafficUnitRepository.findFirstByNameEndingWithIgnoreCaseOrderByIdDesc("_CUSTOM");
+        ErdiTrafficUnit erdiTrafficUnit;
 
-                    traffic.addErdiTrafficUnit(newErdiTrafficUnit);
-                    return newErdiTrafficUnit;
+        if (erdiTrafficUnitOpt.isPresent()) {
+            erdiTrafficUnit = erdiTrafficUnitOpt.get();
+        } else {
+            erdiTrafficUnit = (ErdiTrafficUnit) fillTrafficUnit(new ErdiTrafficUnit(),
+                    traffic,
+                    TrafficUnitType.CUSTOM,
+                    category);
 
-                });
+            traffic.addErdiTrafficUnit(erdiTrafficUnit);
+        }
 
         erdiTrafficUnit.addAllCustomErdiList(customErdisFromFile);
+        erdiTrafficUnitRepository.save(erdiTrafficUnit);
 
-        Traffic save = trafficRepository.save(traffic);
-        actualizeTraffic(save.getId());
-        return save;
+        actualizeTraffic(trafficId);
+        return trafficRepository.findById(trafficId).orElse(traffic);
     }
 
 }
