@@ -49,32 +49,55 @@ public class CreateCustomErdiService {
                     .map(address -> address.toLowerCase().trim())
                     .collect(Collectors.toSet());
 
-            return this.createOrGetCustomErdis(addresses);
+            Set<Set<String>> addressesPackages = splitSet(addresses);
+            Set<CustomErdi> result = new HashSet<>();
+            for (Set<String> addressPackage : addressesPackages) {
+                result.addAll(this.createOrGetCustomErdis(addressPackage));
+            }
+            return result;
 
         } catch (IOException e) {
             throw new AS_15_8_PPT_Exception(String.format("Не удалось прочитать файл %s", file.getOriginalFilename()));
         }
     }
 
+    private Set<Set<String>> splitSet(Set<String> originalSet) {
+        Set<Set<String>> result = new HashSet<>();
+        Set<String> subSet = new HashSet<>();
+        int count = 0;
+
+        for (String element : originalSet) {
+            subSet.add(element);
+            count++;
+
+            if (count == 30000) {
+                result.add(subSet);
+                subSet = new HashSet<>();
+                count = 0;
+            }
+        }
+
+        if (!subSet.isEmpty()) {
+            result.add(subSet);
+        }
+
+        return result;
+    }
+
     private Set<CustomErdi> createOrGetCustomErdis(Set<String> addresses) {
-        Set<CustomErdiUnit> customErdiUnits = customErdiUnitRepository.findAllByValueIn(addresses);
-
-        Set<CustomErdi> foundedByCustimErdisUnits = customErdiUnits.stream()
-                .map(CustomErdiUnit::getCustomErdi)
-                .collect(Collectors.toSet());
-
+        Set<CustomErdi> existsCustomErdiWithCustomErdiUnitsValues = customErdiRepository.findAllByCustomErdiUnitsValuesIn(addresses);
+        Set<String> existsCustomErdiUnitsValues = customErdiUnitRepository.findValuesByValueIn(addresses);
         Set<String> notFoundedInCustomErdiUnits = addresses.stream()
-                .filter(address -> customErdiUnits.stream()
-                        .noneMatch(customErdiUnit -> customErdiUnit.getValue().equals(address)))
+                .filter(address -> !existsCustomErdiUnitsValues.contains(address))
                 .collect(Collectors.toSet());
 
-        Set<CustomErdi> foundedCustomErdis = customErdiRepository.findAllByNameIn(notFoundedInCustomErdiUnits);
-        Set<String> notFoundedInCustomErdis = notFoundedInCustomErdiUnits.stream()
-                .filter(address -> foundedCustomErdis.stream()
-                        .noneMatch(customErdi -> customErdi.getName().equals(address)))
+        Set<CustomErdi> existsCustomErdis = customErdiRepository.findAllByNameIn(notFoundedInCustomErdiUnits);
+        Set<String> existsCustomErdisNames = customErdiRepository.findNamesByNameIn(notFoundedInCustomErdiUnits);
+        Set<String> notFoundedInCustomErdisAndCustomErdiUnits = notFoundedInCustomErdiUnits.stream()
+                .filter(address -> !existsCustomErdisNames.contains(address))
                 .collect(Collectors.toSet());
 
-        Set<CustomErdi> createdCustomErdi = notFoundedInCustomErdis.stream()
+        Set<CustomErdi> createdCustomErdi = notFoundedInCustomErdisAndCustomErdiUnits.stream()
                 .map(address -> {
                     String customErdiName = address.startsWith("xn--") ? IDN.toUnicode(address) : address;
                     CheckUnitType checkUnitType = getCheckUnitType(customErdiName);
@@ -95,8 +118,8 @@ public class CreateCustomErdiService {
         List<CustomErdi> savedCustomErdis = customErdiRepository.saveAll(createdCustomErdi);
 
         Set<CustomErdi> resultCustomErdis = new HashSet<>(savedCustomErdis);
-        resultCustomErdis.addAll(foundedCustomErdis);
-        resultCustomErdis.addAll(foundedByCustimErdisUnits);
+        resultCustomErdis.addAll(existsCustomErdis);
+        resultCustomErdis.addAll(existsCustomErdiWithCustomErdiUnitsValues);
         return resultCustomErdis;
     }
 

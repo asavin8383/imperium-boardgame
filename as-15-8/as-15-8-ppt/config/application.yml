@@ -134,6 +134,24 @@ gateway.url: https://as-15-8-dev.eclsoft.ru/api
 
 ---
 
+#logging:
+#  level.org.hibernate:
+#    SQL: DEBUG
+#    type:
+#      descriptor:
+#        sql:
+#          BasicBinder: TRACE
+spring:
+  application.name: ppt_ifilimonov
+  profiles: dev_ifilimonov
+  datasource:
+    url: jdbc:postgresql://as-15-8-pg-dev.eclsoft.ru:5432/asdb
+    password: sdfHFG674$^fdsFG
+    username: postgres
+gateway.url: https://as-15-8-dev.eclsoft.ru/api
+
+---
+
 logging:
   config:
   level:
