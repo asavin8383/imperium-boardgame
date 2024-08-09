@@ -5,7 +5,6 @@ import checkUnits.CheckUnitJob;
 import checkUnits.CheckUnitType;
 import common.ApplicationConfiguration;
 import execution.ExecutionJobResult;
-import execution.ExecutionPSJobResult;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +14,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import robots.exceptions.ExecutionException;
 import service.CheckUnitVerificationServiceFactory;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -36,9 +31,12 @@ public class TestJobExecution {
 	public void test() throws ExecutionException, IOException {
 		
 		CheckUnitJob checkUnitJob = new CheckUnitJob();
-		checkUnitJob.setAccessTool("yandex");
+		checkUnitJob.setAccessTool("pure-channel-pasd");
+		String resource = "https://www.ya.ru";
+		String resource1 = "https://a-s.bxfilm-4.me";
+		String resource2 = "https://medium.com";
 
-		checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.DOMAIN, "facebook.com"));
+		checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.URL, resource));
 		//checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.IP_V6, "2606:4700:0030:0000:0000:0000:681b:b458"));
 
 		ExecutionJobResult executionJobResult = checkUnitVerificationServiceFactory
@@ -52,7 +50,7 @@ public class TestJobExecution {
 //        BufferedImage bImage3 = ImageIO.read(bis2);
 //        ImageIO.write(bImage3, "png", new File("outputEtalon.png") );
 
-		System.out.println(((ExecutionPSJobResult)executionJobResult).getCheckUnitJobResult());
+		System.out.println(executionJobResult.toString());
 	}
 	
 }
