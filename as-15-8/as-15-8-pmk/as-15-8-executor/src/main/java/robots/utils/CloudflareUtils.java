@@ -1,18 +1,17 @@
 package robots.utils;
 
 import lombok.experimental.UtilityClass;
-import robots.exceptions.TimeoutCheckingBrowserException;
-import robots.exceptions.TimeoutScriptException;
-
-import static robots.utils.ScriptUtils.findElementIfExists;
-import static robots.utils.ScriptUtils.getTextOrDefault;
-
 import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import robots.exceptions.TimeoutCheckingBrowserException;
+import robots.exceptions.TimeoutScriptException;
+
+import static robots.utils.ScriptUtils.findElementIfExists;
+import static robots.utils.ScriptUtils.getTextOrDefault;
 
 @UtilityClass
 public class CloudflareUtils {
@@ -44,16 +43,11 @@ public class CloudflareUtils {
     }
 
     public static boolean isCloudflareDdosProtection(WebDriver driver) {
-
-        WebElement cloudflareLink = findElementIfExists(
-                By.cssSelector(".cf-browser-verification #cf-content1, .attribution"), driver);
-
-        if (cloudflareLink != null){
-            String text = ScriptUtils.getTextOrDefault(cloudflareLink, "").toLowerCase();
-            return (text.contains("check") && text.contains("browser")) ||
-                    (text.contains("ddos") && text.contains("cloudflare"));
-        }
-        return false;
+        WebElement cloudFlareSpinner = findElementIfExists(
+                By.className("loading-spinner"),
+                driver
+        );
+        return cloudFlareSpinner != null;
     }
 
     public static void waitCloudflareRedirect(WebDriver driver, int timeoutMs)

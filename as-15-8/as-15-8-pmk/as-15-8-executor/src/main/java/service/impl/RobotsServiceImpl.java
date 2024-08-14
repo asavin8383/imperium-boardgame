@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import robots.Robot;
 import robots.exceptions.BadIP_ExecutionExeption;
 import robots.exceptions.Captcha_ExecutionException;
+import robots.exceptions.CloudflareBlockExecutionException;
 import robots.exceptions.ExecutionException;
 import robots.factory.RobotsFactory;
 import service.CheckUnitVerificationService;
@@ -80,7 +81,9 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
                 message = runWithRetry(robot, checkUnitJob.getCheckUnit());
             } catch (Exception ex) {
                 if (ex instanceof ExecutionException) {
-                    if (ex instanceof Captcha_ExecutionException || ex instanceof BadIP_ExecutionExeption) {
+                    if (ex instanceof Captcha_ExecutionException
+                            || ex instanceof BadIP_ExecutionExeption
+                            || ex instanceof CloudflareBlockExecutionException) {
                         needToStop = false;
                     }
                     throw (ExecutionException) ex;

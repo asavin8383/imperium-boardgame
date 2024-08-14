@@ -1,24 +1,22 @@
 package robots.utils;
 
-import static robots.utils.ScriptUtils.TIME_OUT_CHECKING_ERROR;
-import static robots.utils.ScriptUtils.TIME_OUT_ERROR;
+import lombok.extern.slf4j.Slf4j;
+import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
+import robots.exceptions.CloudflareBlockExecutionException;
+import robots.exceptions.ExecutionException;
+import robots.exceptions.TimeoutCheckingBrowserException;
+import robots.exceptions.TimeoutScriptException;
+import robots.utils.ScriptUtils.PageResult;
 
-import java.net.ProtocolException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import org.openqa.selenium.TimeoutException;
-import org.openqa.selenium.WebDriver;
-
-import lombok.extern.slf4j.Slf4j;
-import org.openqa.selenium.WebDriverException;
-import org.openqa.selenium.remote.UnreachableBrowserException;
-import robots.exceptions.ExecutionException;
-import robots.exceptions.TimeoutCheckingBrowserException;
-import robots.exceptions.TimeoutScriptException;
-import robots.utils.ScriptUtils.PageResult;
+import static robots.utils.ScriptUtils.TIME_OUT_CHECKING_ERROR;
+import static robots.utils.ScriptUtils.TIME_OUT_ERROR;
 
 
 @Slf4j
@@ -58,7 +56,7 @@ public class RobotScriptUtils {
                 ScriptUtils.waitPageLoading(webDriver);
 
                 if (CloudflareUtils.isCloudflareError(webDriver)) {
-                    pageSourceResult = new ScriptUtils.PageResult(null, CloudflareUtils.getCloudflareErrorDetailsOpt(webDriver, null));
+                    throw new CloudflareBlockExecutionException("Доступ был заблокирован Cloudflare.");
                 } else {
                     pageSourceResult = ScriptUtils.getPageSource(webDriver);
                 }
