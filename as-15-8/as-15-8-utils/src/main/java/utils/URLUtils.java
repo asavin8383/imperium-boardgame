@@ -22,16 +22,20 @@ public class URLUtils {
             URLComponent decode2 = URLComponent.getDecodedFrom(comp2);
             URLComponent encode2 = URLComponent.getEncodedFrom(comp2);
 
-            return decode1.toStringWithoutScheme().equals(decode2.toStringWithoutScheme()) ||
-                    encode1.toStringWithoutScheme().equals(encode2.toStringWithoutScheme());
-        }
-        catch (Exception e){
+            String decode1WithoutScheme = removeDomainPrefix(decode1.toStringWithoutScheme());
+            String decode2WithoutScheme = removeDomainPrefix(decode2.toStringWithoutScheme());
+            String encode1WithoutScheme = removeDomainPrefix(encode1.toStringWithoutScheme());
+            String encode2WithoutScheme = removeDomainPrefix(encode2.toStringWithoutScheme());
+
+            return decode1WithoutScheme.equals(decode2WithoutScheme) ||
+                    encode1WithoutScheme.equals(encode2WithoutScheme);
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return false;
     }
 
-    public static boolean compareDomainsInUrls(String url1, String url2){
+    public static boolean compareDomainsInUrls(String url1, String url2) {
         if (isEmpty(url1) || isEmpty(url2))
             return false;
 
@@ -41,11 +45,13 @@ public class URLUtils {
 
             return comp1.getDecodedHost().equals(comp2.getDecodedHost()) ||
                     comp1.getEncodedHost().equals(comp2.getEncodedHost());
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return false;
     }
 
+    private static String removeDomainPrefix(String url) {
+        return url.replaceFirst("^(www\\.wap\\.|www\\.|wap\\.)", "");
+    }
 }
