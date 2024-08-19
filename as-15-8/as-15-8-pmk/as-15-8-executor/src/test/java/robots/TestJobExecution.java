@@ -34,8 +34,9 @@ public class TestJobExecution {
         int index = 0;
         for (int i = 0; i < 10; i++) {
             List<String> resources = Arrays.asList(
-                    "https://2024-c.kino-ok7.art",
-                    "https://a-s.bxfilm-4.me"
+                    "https://hiqqu.com/files/www.hiqqu.com-a0c090f0ed437b5581340d4b1904cba1e63033ad.jpg"
+//                    "https://2024-c.kino-ok7.art",
+//                    "https://a-s.bxfilm-4.me"
             );
 
             for (String resource : resources) {
