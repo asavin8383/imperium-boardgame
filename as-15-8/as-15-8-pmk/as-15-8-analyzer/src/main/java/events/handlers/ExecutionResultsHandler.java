@@ -39,12 +39,15 @@ public class ExecutionResultsHandler {
         Integer partitionId = message.getHeaders().get(KafkaHeaders.RECEIVED_PARTITION_ID, Integer.class);
         CheckUnitKey key = message.getHeaders().get(KafkaHeaders.RECEIVED_MESSAGE_KEY, CheckUnitKey.class);
         assert key != null;
-        log.info("Принято задание на анализ: " +
-                "ID: " + key.getJobId() +
-                ", checkUnit: " + job.getCheckUnit().getValue() +
-                ", key: " + key +
-                ", partition: " + partitionId +
-                ", offset: "+message.getHeaders().get(KafkaHeaders.OFFSET, Long.class));
+
+        log.info("Принято задание на анализ: ID: {}, checkUnit: {}, key: {}, partition: {}, offset: {}",
+                key.getJobId(),
+                job.getCheckUnit().getValue(),
+                key,
+                partitionId,
+                message.getHeaders().get(KafkaHeaders.OFFSET, Long.class)
+        );
+
         try {
             AnalyzerService<? super ExecutionJobResult> service = AnalyzerServiceFactory.getService(job.getClass());
             AnalysisResult analysisResult = service.analyzeResult(job);

@@ -76,6 +76,8 @@ public class PureChannel_AnalyzerService implements AnalyzerService<ExecutionPur
 
     @Override
     public AnalysisResult analyzeResult(ExecutionPureChannelJobResult result) throws AnalysisException {
+        log.info("Анализ сервисом обработки результатов чистого канала. URL запроса: {}", result.getCheckUnit().getValue());
+
         VpnAnalysisResult analysisResult = new VpnAnalysisResult();
         analysisResult.setCheckUnit(result.getCheckUnit());
 
@@ -88,7 +90,6 @@ public class PureChannel_AnalyzerService implements AnalyzerService<ExecutionPur
         CheckUnitJobResult checkUnitJobResult = obtainResult(analysisResult, result);
         if (checkUnitJobResult.equals(FORBIDDEN_CONTENT_DETECTED) || checkUnitJobResult.equals(DOUBTFUL) || screenshotAnalyzerHelper.screenshotRequired(result.getAccessTool())) {
             analysisResult.setScreenshot(result.getScreenshot());
-            analysisResult.setEtalonScreenshot(result.getEtalonScreenshot());
         }
         analysisResult.setCheckResult(checkUnitJobResult);
         checkFinalUrlForForbidden(analysisResult);
