@@ -27,7 +27,7 @@ import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 
 import static enums.CheckUnitJobResult.*;
@@ -43,8 +43,9 @@ public class PureChannel_AnalyzerService implements AnalyzerService<ExecutionPur
 
     private static final String keyWordsSource = "classpath:key_words.json";
     private static final int similarityThreshold = 85;
-    private static final List<String> skippingErrorsKeywords = Collections.singletonList(
-            "ERR_TUNNEL_CONNECTION_FAILED"
+    private static final List<String> skippingErrorsKeywords = Arrays.asList(
+            "ERR_TUNNEL_CONNECTION_FAILED",
+            "ERR_NAME_NOT_RESOLVED"
     );
 
     @Getter
