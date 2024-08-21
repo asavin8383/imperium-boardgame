@@ -33,7 +33,9 @@ public enum AccessToolUnit {
 	EXTENSION ("Расширения для браузеров"),
 
 	//TORGUARD,
-	PROXY ("Прокси");
+	PROXY ("Прокси"),
+
+	PURE_CHANNEL("Чистый канал");
 
 
 	@Getter
