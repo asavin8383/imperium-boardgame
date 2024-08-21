@@ -1,7 +1,7 @@
 package services.impl;
 
 import analysis.PureChannelAnalysisResult;
-import analysis.VpnAnalysisResult;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.DetailResult;

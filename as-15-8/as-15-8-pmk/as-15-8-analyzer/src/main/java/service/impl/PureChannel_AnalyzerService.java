@@ -92,7 +92,7 @@ public class PureChannel_AnalyzerService implements AnalyzerService<ExecutionPur
         }
 
         CheckUnitJobResult checkUnitJobResult = obtainResult(analysisResult, result);
-        if (checkUnitJobResult.equals(FORBIDDEN_CONTENT_DETECTED) || checkUnitJobResult.equals(DOUBTFUL) || screenshotAnalyzerHelper.screenshotRequired(result.getAccessTool())) {
+        if (result.getScreenshot() != null) {
             analysisResult.setScreenshot(result.getScreenshot());
         }
         analysisResult.setCheckResult(checkUnitJobResult);
