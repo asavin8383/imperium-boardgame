@@ -162,9 +162,6 @@ public class CheckUnitJobHandler {
             else if(cause instanceof Timeout_ExecutionException) {
                 notificationBuilder.checkResult(CheckUnitJobResult.TIMEOUT_ERROR);
                 notificationBuilder.description("Работа робота остановлена по таймауту: " + jobsService.getJobTimeout() + " сек.");
-            } else if (cause instanceof ExecutionException && cause.getMessage().contains("unknown error: net::")){
-                notificationBuilder.checkResult(CheckUnitJobResult.SOCKET_ERROR);
-                notificationBuilder.description(cause.getMessage());
             } else {
                 notificationBuilder.checkResult(CheckUnitJobResult.INTERNAL_ERROR);
                 StringWriter sw = new StringWriter();

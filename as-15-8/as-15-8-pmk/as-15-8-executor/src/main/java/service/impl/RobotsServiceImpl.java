@@ -57,18 +57,20 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
             put(AccessToolUnit.HOLA, Collections.singletonList(CheckUnitType.URL));
             put(AccessToolUnit.EXTENSION, Collections.singletonList(CheckUnitType.URL));
             put(AccessToolUnit.GOOGLE_API, Arrays.asList(CheckUnitType.URL, CheckUnitType.DOMAIN, CheckUnitType.SEARCH_PHRASE));
+            put(AccessToolUnit.PURE_CHANNEL, Collections.singletonList(CheckUnitType.URL));
         }};
     }
 
     @Override
     public ExecutionJobResult run(Long jobId, CheckUnitJob checkUnitJob) throws ExecutionException {
         try {
-            String robotName = "jobID = " + jobId +
-                    " accessTool = " + checkUnitJob.getAccessTool() +
-                    " checkUnit = " + checkUnitJob.getCheckUnit().getValue();
-			/*if(!this.isRunning)
-				throw new ExecutionException("Ошибка при запуске проверки запрещенного ресурса. Сервис проверки остановлен!");*/
-            log.info(String.format("Запуск робота: %s", robotName));
+            String robotName = String.format("jobId = %s, accessTool = %s, checkUnit = %s",
+                    jobId,
+                    checkUnitJob.getAccessTool(),
+                    checkUnitJob.getCheckUnit().getValue()
+            );
+
+            log.info("Запуск робота: {}", robotName);
 
             Robot robot = robotsFactory.createRobot(checkUnitJob.getAccessTool());
             robot.setRemainingAttempts(executorProps.getExecutor().getMaxRetryAttempts());
@@ -77,13 +79,12 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
 
             ExecutionJobResult message;
             boolean needToStop = true;
+
             try {
                 message = runWithRetry(robot, checkUnitJob.getCheckUnit());
             } catch (Exception ex) {
                 if (ex instanceof ExecutionException) {
-                    if (ex instanceof Captcha_ExecutionException
-                            || ex instanceof BadIP_ExecutionExeption
-                            || ex instanceof CloudflareBlockExecutionException) {
+                    if (ex instanceof Captcha_ExecutionException || ex instanceof BadIP_ExecutionExeption || ex instanceof CloudflareBlockExecutionException) {
                         needToStop = false;
                     }
                     throw (ExecutionException) ex;
@@ -98,6 +99,7 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
                     }
                 }
             }
+
             robots.remove(robot);
             message.setCheckUnit(checkUnitJob.getCheckUnit());
             message.setAccessTool(checkUnitJob.getAccessTool());

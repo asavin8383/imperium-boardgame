@@ -30,6 +30,7 @@ public class RobotsFactoryImpl implements RobotsFactory {
         put(AccessToolUnit.ANONYMIZER, CommonAnonymizerRobot.class);
         put(AccessToolUnit.HIDEMYASS, HideMyAssRobot.class);
         put(AccessToolUnit.GOOGLE_API, GoogleApiRobot.class);
+        put(AccessToolUnit.PURE_CHANNEL, PureChannelRobot.class);
     }};
 
     public Robot createRobot(String accessTool){

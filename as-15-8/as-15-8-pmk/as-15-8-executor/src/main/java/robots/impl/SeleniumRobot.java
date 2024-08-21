@@ -8,11 +8,10 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebDriverException;
 import robots.DriverFactory;
 import robots.Robot;
 import robots.exceptions.ExecutionException;
-import robots.exceptions.*;
+import robots.exceptions.Timeout_ExecutionException;
 
 import java.io.IOException;
 import java.util.Map;
@@ -120,5 +119,5 @@ public abstract class SeleniumRobot implements Robot {
 				log.warn("Ошибка при закрытии драйвера", ex);
 			}
 		}
-	}	
+	}
 }

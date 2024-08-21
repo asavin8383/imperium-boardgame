@@ -204,3 +204,12 @@ spring:
         springCloudBusInput. destination: bus_config_output_msnopok
         springCloudBusOutput.destination: bus_config_input_msnopok
 gateway.url: ${GATEWAY_URI:http://localhost:15880}
+
+---
+
+spring:
+  profiles: ifilimonov
+  datasource:
+    url: jdbc:postgresql://as-15-8-pg-dev.eclsoft.ru:5432/asdb
+    username: as_user
+    password: pHlAYup2
