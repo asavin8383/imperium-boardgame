@@ -1,5 +1,7 @@
 spring:
-  main.allow-bean-definition-overriding: true
+  main:
+    allow-bean-definition-overriding: true
+    banner-mode: "off"
   kafka.consumer.properties.spring.json.trusted.packages: checkUnits
   cloud:
     stream:
@@ -8,7 +10,7 @@ spring:
           destination: exec_results
           group: analyzers
           consumer:
-            concurrency: 6
+            concurrency: 10
             useNativeDecoding: true
         output.destination: results
         springCloudBusInput:
@@ -17,34 +19,40 @@ spring:
         springCloudBusOutput.destination: bus_config_output
       kafka:
         binder:
-          brokers: 192.168.5.12:9094,192.168.5.33:9094,192.168.5.184:9094
-          minPartitionCount: 30
+          brokers:
+            "kafka-0-as-15-8-dev.eclsoft.ru:9094,
+            kafka-1-as-15-8-dev.eclsoft.ru:9094,
+            kafka-2-as-15-8-dev.eclsoft.ru:9094"
+          minPartitionCount: 12
           replicationFactor: 3
           configuration:
-            max.request.size: 31457280
+            max.request.size: 10485760
         bindings:
           input:
             consumer:
-              concurrency: 1
               ackEachRecord: true
-              resetOffsets: true
-              startOffset: latest
               configuration:
                 key.deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
                 max.poll.records: 1
-                max.poll.interval.ms: 300000
-                request.timeout.ms: 150000
-                session.timeout.ms: 60000
+                max.poll.interval.ms: 120000
+                auto.offset.reset: latest
           output:
             producer:
               configuration:
-                retries: 100
-                retry.backoff.ms: 1000
-                acks: all
+                max.request.size: 10485760
+                retries: 10
                 key.serializer: org.springframework.kafka.support.serializer.JsonSerializer
-gateway.url: ${GATEWAY_URI:http://localhost:15880}
+          springCloudBusInput:
+            consumer:
+              resetOffsets: true
+              startOffset: latest
+gateway.url: "https://as-15-8-dev.eclsoft.ru/api"
 source_path_vpn: /logs/content.txt
 source_path_anonym: /logs/content.txt
+eureka:
+  instance:
+    metadata-map:
+      expectedAmount: 1
 
 ---
 
@@ -84,7 +92,7 @@ eureka:
 ---
 
 spring:
-  profiles: dev_ashabalin, dev_asinyavin, dev_asavin, dev_pvorobiev, dev_danikanov
+  profiles: dev_ashabalin, dev_asavin, ifilimonov
   profiles.include: local_log
   cloud.stream:
     bindings:
@@ -107,19 +115,6 @@ spring:
       output.destination: results_ashabalin
       springCloudBusInput.destination: bus_config_input_ashabalin
       springCloudBusOutput.destination: bus_config_output_ashabalin
-
----
-
-
-spring:
-  profiles: dev_asinyavin
-  cloud.stream:
-    bindings:
-      input.destination: exec_results_asinyavin
-      output.destination: results_asinyavin
-      springCloudBusInput.destination: bus_config_input_asinyavin
-      springCloudBusOutput.destination: bus_config_output_asinyavin
-
 ---
 
 spring:
@@ -130,25 +125,3 @@ spring:
       output.destination: results_asavin
       springCloudBusInput.destination: bus_config_input_asavin
       springCloudBusOutput.destination: bus_config_output_asavin
-
----
-
-spring:
-  profiles: dev_pvorobiev
-  cloud.stream:
-    bindings:
-      input. destination: exec_results_pvorobiev
-      output.destination: results_pvorobiev
-      springCloudBusInput.destination: bus_config_input_pvorobiev
-      springCloudBusOutput.destination: bus_config_output_pvorobiev
-
----
-
-spring:
-  profiles: dev_danikanov
-  cloud.stream:
-    bindings:
-      input.destination: exec_results_danikanov
-      output.destination: results_danikanov
-      springCloudBusInput.destination: bus_config_input_danikanov
-      springCloudBusOutput.destination: bus_config_output_danikanov

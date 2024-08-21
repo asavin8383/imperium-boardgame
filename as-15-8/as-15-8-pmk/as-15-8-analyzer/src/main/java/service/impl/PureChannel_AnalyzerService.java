@@ -2,7 +2,7 @@ package service.impl;
 
 import analysis.AnalysisResult;
 import analysis.AnalysisUtils;
-import analysis.VpnAnalysisResult;
+import analysis.PureChannelAnalysisResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import common.AnalysisException;
 import enums.CheckUnitJobResult;
@@ -27,6 +27,7 @@ import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static enums.CheckUnitJobResult.*;
@@ -42,6 +43,9 @@ public class PureChannel_AnalyzerService implements AnalyzerService<ExecutionPur
 
     private static final String keyWordsSource = "classpath:key_words.json";
     private static final int similarityThreshold = 85;
+    private static final List<String> skippingErrorsKeywords = Collections.singletonList(
+            "ERR_TUNNEL_CONNECTION_FAILED"
+    );
 
     @Getter
     private List<KeyWord> keyWords = new ArrayList<>();
@@ -78,7 +82,7 @@ public class PureChannel_AnalyzerService implements AnalyzerService<ExecutionPur
     public AnalysisResult analyzeResult(ExecutionPureChannelJobResult result) throws AnalysisException {
         log.info("Анализ сервисом обработки результатов чистого канала. URL запроса: {}", result.getCheckUnit().getValue());
 
-        VpnAnalysisResult analysisResult = new VpnAnalysisResult();
+        PureChannelAnalysisResult analysisResult = new PureChannelAnalysisResult();
         analysisResult.setCheckUnit(result.getCheckUnit());
 
         try {
@@ -96,24 +100,18 @@ public class PureChannel_AnalyzerService implements AnalyzerService<ExecutionPur
         return analysisResult;
     }
 
-    private void checkFinalUrlForForbidden(VpnAnalysisResult analysisResult) {
+    private void checkFinalUrlForForbidden(PureChannelAnalysisResult analysisResult) {
         Boolean needTestFinalUrl = analysisResult.getNeedTestFinalUrl();
         if (needTestFinalUrl != null && needTestFinalUrl) {
-            String additionalInfo = "";
-            ResponseStatusString check = podExchange.checkUrl(analysisResult.getFinalUrl());
+            ResponseStatusString check = podExchange.checkUrl(analysisResult.getPageUrlFinal());
             if (check.isStatus()) {
                 analysisResult.setCheckResult(FORBIDDEN_CONTENT_DETECTED);
                 analysisResult.setForbiddenFinalUrl(true);
-                additionalInfo = "Обнаружен редирект на запрещенный ресурс. ЕРДИ ID:" + check.getResponse() + ".";
             } else {
                 analysisResult.setCheckResult(DOUBTFUL);
-                additionalInfo = "Обнаружен редирект на ресурс, не содержащийся в ЕРДИ.";
             }
-            String info = analysisResult.getStubScoreInfo();
-            info = info == null ? "" : info + ". ";
-            analysisResult.setStubScoreInfo(info + additionalInfo);
 
-            log.info("Результат проверки URL на находжение в ЕРДИ: " + check + ", URL = " + analysisResult.getPageUrlFinal());
+            log.info("Результат проверки URL на нахождение в ЕРДИ: " + check + ", URL = " + analysisResult.getPageUrlFinal());
         }
     }
 
@@ -138,7 +136,7 @@ public class PureChannel_AnalyzerService implements AnalyzerService<ExecutionPur
         return Jsoup.parse(result).text();
     }
 
-    protected void prepareResult(VpnAnalysisResult analysisResult, ExecutionPureChannelJobResult jobResult) throws IOException {
+    protected void prepareResult(PureChannelAnalysisResult analysisResult, ExecutionPureChannelJobResult jobResult) throws IOException {
         String chromeErrorCode = jobResult.getChromeErrorCode();
         Boolean responseError = jobResult.getResponseError();
         String pageContent = jobResult.getPageContent();
@@ -171,7 +169,7 @@ public class PureChannel_AnalyzerService implements AnalyzerService<ExecutionPur
     }
 
 
-    private CheckUnitJobResult obtainResult(VpnAnalysisResult analysisResult, ExecutionPureChannelJobResult jobResult) {
+    private CheckUnitJobResult obtainResult(PureChannelAnalysisResult analysisResult, ExecutionPureChannelJobResult jobResult) {
         if (analysisResult.hasError()) {
             return obtainErrorResult(analysisResult);
         }
@@ -180,7 +178,6 @@ public class PureChannel_AnalyzerService implements AnalyzerService<ExecutionPur
 
         NLPCategory resultNLP = getResultNLP(analysisResult.getPageUrlFinal(), jobResult);
         analysisResult.setResultNLP(resultNLP.getDescription());
-        appendInfo(analysisResult, String.format("Результат NLP: %s.", resultNLP.getDescription()));
 
         if (wasRedirect && resultNLP.equals(NLPCategory.NO_STUB)) {
             analysisResult.setNeedTestFinalUrl(true);
@@ -199,28 +196,20 @@ public class PureChannel_AnalyzerService implements AnalyzerService<ExecutionPur
         }
     }
 
-    private CheckUnitJobResult obtainErrorResult(VpnAnalysisResult analysisResult) {
+    private CheckUnitJobResult obtainErrorResult(PureChannelAnalysisResult analysisResult) {
         String errorCode = analysisResult.getResponseErrorCode();
         StringBuffer details = new StringBuffer();
 
+        if (skippingErrorContains(analysisResult)) {
+            return COMPLETED;
+        }
+
         CheckUnitJobResult result = AnalysisUtils.obtainErrorResult(errorCode, details);
         result = result == null ? COMPLETED : result;
-
-        appendInfo(analysisResult, details.toString());
         return result;
     }
 
-    private CheckUnitJobResult obtainErrorEtalon(VpnAnalysisResult analysisResult) {
-        String errorCodeEtalon = analysisResult.getResponseErrorCodeEtalon();
-        StringBuffer details = new StringBuffer();
-
-        CheckUnitJobResult result = AnalysisUtils.obtainErrorResultEtalon(errorCodeEtalon, details);
-        appendInfo(analysisResult, details.toString());
-
-        return result;
-    }
-
-    private void appendInfo(VpnAnalysisResult analysisResult, String append) {
-        analysisResult.setStubScoreInfo(AnalysisUtils.appendString(analysisResult.getStubScoreInfo(), append));
+    private boolean skippingErrorContains(PureChannelAnalysisResult analysisResult) {
+        return skippingErrorsKeywords.stream().anyMatch(keywords -> analysisResult.getResponseErrorCode().contains(keywords));
     }
 }

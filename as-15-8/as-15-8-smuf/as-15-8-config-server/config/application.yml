@@ -1,9 +1,9 @@
 subsystem: SMUF
 server:
   port: 15802
-gateway.url: ${GATEWAY_URI:http://localhost:15880}
+gateway.url: "http://gateway.as-15-8-dev:15880"
 system.mode.autoconfig:
-  url: http://localhost:15802/mode
+  url: http://config-server.as-15-8-dev:15802/mode
 logging:
   config: config/logback-spring.xml
 eureka:
@@ -21,6 +21,7 @@ eureka:
     instanceId: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port}
     metadata-map:
       subsystem: ${subsystem}
+      expectedAmount: 1
 security:
   oauth2:
     resource:
@@ -35,17 +36,20 @@ security:
 spring:
   application.name: config_server
   profiles.include: jdbc
-  main.allow-bean-definition-overriding: true
+  main:
+    allow-bean-definition-overriding: true
+    banner-mode: \"off\"
   liquibase:
     enabled: true
     change-log: classpath:db/db.changelog.master.xml
   datasource:
+    url: jdbc:postgresql://postgresql.as-15-8-dev:5432/asdb
     test-while-idle: true
     validation-query: SELECT 1;
     time-between-eviction-runs-millis: 300000
     max-active: 5
-    username: as_user
-    password: as_user
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
   jpa:
     properties:
       hibernate:
@@ -72,8 +76,11 @@ spring:
         springCloudBusOutput:
           destination: bus_config_input
       kafka.binder:
-        brokers: 192.168.5.12:9094,192.168.5.33:9094,192.168.5.184:9094
-        minPartitionCount: 30
+        brokers:
+          \"kafka-0.kafka.as-15-8-dev:9092,\\
+          kafka-1.kafka.as-15-8-dev:9092,\\
+          kafka-2.kafka.as-15-8-dev:9092\"
+        minPartitionCount: 12
 management.endpoints.web.exposure.include: bus-refresh
 user.activity.timeout.config.key: user.activity.timeout
 kibana.link.key: kibana.link
