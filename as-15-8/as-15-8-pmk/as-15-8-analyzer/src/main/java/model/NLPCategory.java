@@ -8,10 +8,12 @@ public enum NLPCategory {
     ERROR("Обнаружена ошибка загрузки страницы"),
     STUB("Обнаружена заглушка"),
     NO_STUB("Обнаружен контент страницы"),
-    EXCEPTION("Ошибка при категоризации контента");
+    EXCEPTION("Ошибка при категоризации контента"),
+    CAPTCHA("Обнаружена CAPTCHA"),
+    NOT_CAPTCHA("CAPTCHA не обнаружена");
 
     @Getter
-    private String description;
+    private final String description;
 
     public static NLPCategory parse(String text, NLPCategory def) {
         for (NLPCategory b : NLPCategory.values()) {
@@ -20,9 +22,5 @@ public enum NLPCategory {
             }
         }
         return def;
-    }
-
-    public static NLPCategory parse(String text) {
-        return NLPCategory.parse(text, EXCEPTION);
     }
 }

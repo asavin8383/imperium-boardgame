@@ -1,7 +1,7 @@
 subsystem: PMK
 server:
   port: 11200
-gateway.url: ${GATEWAY_URI:http://localhost:15880}
+gateway.url: ${GATEWAY_URI:https://as-15-8-dev.eclsoft.ru/api}
 system.mode.autoconfig:
   url: ${gateway.url}/config/mode
 logging:

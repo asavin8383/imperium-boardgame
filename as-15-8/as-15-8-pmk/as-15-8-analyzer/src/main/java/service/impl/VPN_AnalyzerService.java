@@ -11,6 +11,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import model.KeyWord;
 import model.NLPCategory;
+import model.NLPModel;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -98,7 +99,7 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
     private void checkFinalUrlForForbidden(VpnAnalysisResult analysisResult) {
         Boolean needTestFinalUrl = analysisResult.getNeedTestFinalUrl();
         if (needTestFinalUrl != null && needTestFinalUrl) {
-            String additionalInfo = "";
+            String additionalInfo;
             ResponseStatusString check = podExchange.checkUrl(analysisResult.getFinalUrl());
             if (check.isStatus()) {
                 analysisResult.setCheckResult(FORBIDDEN_CONTENT_DETECTED);
@@ -125,7 +126,7 @@ public class VPN_AnalyzerService implements AnalyzerService<ExecutionVpnJobResul
         log.info("Запуск NLP: " + url);
         String page = clearResult(result.getPageContent());
 
-        NLPCategory nlpCategory = classificationService.classify(page);
+        NLPCategory nlpCategory = classificationService.classify(page, NLPModel.PAGE_CONTENT_CLASSIFICATOR);
         nlpCategory = nlpCategory == null ? NLPCategory.EXCEPTION : nlpCategory;
         log.info("Результат NLP: " + nlpCategory.getDescription());
 

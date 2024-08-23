@@ -11,6 +11,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import model.KeyWord;
 import model.NLPCategory;
+import model.NLPModel;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -122,10 +123,16 @@ public class PureChannel_AnalyzerService implements AnalyzerService<ExecutionPur
             return NLPCategory.STUB;
         }
 
+        log.info("Запуск проверки на CAPTCHA");
+        NLPCategory nlpCategory = classificationService.classify(result.getPageContent(), NLPModel.CAPTCHA_DETECTOR);
+        if (nlpCategory.equals(NLPCategory.CAPTCHA)) {
+            return nlpCategory;
+        }
+
         log.info("Запуск NLP: " + url);
         String page = clearResult(result.getPageContent());
 
-        NLPCategory nlpCategory = classificationService.classify(page);
+        nlpCategory = classificationService.classify(page, NLPModel.PAGE_CONTENT_CLASSIFICATOR);
         nlpCategory = nlpCategory == null ? NLPCategory.EXCEPTION : nlpCategory;
         log.info("Результат NLP: " + nlpCategory.getDescription());
 
@@ -190,6 +197,7 @@ public class PureChannel_AnalyzerService implements AnalyzerService<ExecutionPur
             case NO_STUB:
                 return FORBIDDEN_CONTENT_DETECTED;
             case ERROR:
+            case CAPTCHA:
                 return DOUBTFUL;
             case EXCEPTION:
             default:
