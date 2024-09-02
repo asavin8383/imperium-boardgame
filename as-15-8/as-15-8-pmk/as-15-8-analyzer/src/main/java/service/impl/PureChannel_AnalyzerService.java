@@ -123,16 +123,16 @@ public class PureChannel_AnalyzerService implements AnalyzerService<ExecutionPur
             return NLPCategory.STUB;
         }
 
-        log.info("Запуск проверки на CAPTCHA");
-        NLPCategory nlpCategory = classificationService.classify(result.getPageContent(), NLPModel.CAPTCHA_DETECTOR);
-        if (nlpCategory.equals(NLPCategory.CAPTCHA)) {
-            return nlpCategory;
-        }
+//        log.info("Запуск проверки на CAPTCHA");
+//        NLPCategory nlpCategory = classificationService.classify(result.getPageContent(), NLPModel.CAPTCHA_DETECTOR);
+//        if (nlpCategory.equals(NLPCategory.CAPTCHA)) {
+//            return nlpCategory;
+//        }
 
         log.info("Запуск NLP: " + url);
         String page = clearResult(result.getPageContent());
 
-        nlpCategory = classificationService.classify(page, NLPModel.PAGE_CONTENT_CLASSIFICATOR);
+        NLPCategory nlpCategory = classificationService.classify(page, NLPModel.PAGE_CONTENT_CLASSIFICATOR);
         nlpCategory = nlpCategory == null ? NLPCategory.EXCEPTION : nlpCategory;
         log.info("Результат NLP: " + nlpCategory.getDescription());
 
