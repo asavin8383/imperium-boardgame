@@ -128,7 +128,7 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
             }
             return robot.run(checkUnit, executorProps.getExecutor().getTimeout(), throwExceptionByCaptchaOrBadIP);
         } catch (ExecutionException | WebDriverException ex) {
-            if (robot.getRemainingAttempts() > 0) {
+            if (!(ex instanceof CloudflareBlockExecutionException) && robot.getRemainingAttempts() > 0) {
                 log.warn("Будет выполнен {}-й перезапуск проверки ресурса {} по следующей причине: {}",
                         executorProps.getExecutor().getMaxRetryAttempts() - robot.getRemainingAttempts(),
                         checkUnit.getValue(), ex.getMessage());
