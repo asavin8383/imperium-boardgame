@@ -30,29 +30,35 @@ import java.util.stream.Collectors;
 @Slf4j
 public class GoogleApiRobot implements Robot{
 
-	@Getter @Setter
-	private int remainingAttempts;
+	@Getter
+	@Setter
+	private int restartAttempts;
+
+	@Getter
+	private final int restartInterval;
 
 	/** Сервис доступа к REST api */
-	private static RestTemplate restTemplate = new RestTemplate();
+	private static final RestTemplate restTemplate = new RestTemplate();
 	
 	private static final String GOOGLE_API_URL = "https://www.googleapis.com/customsearch/v1";
 	
 	private static final String SEARCH_FIELDS = "queries(request, nextPage/startIndex), items(snippet, link)";
 	
-	private String searchSystemID;
+	private final String searchSystemID;
 	
-	private String key;
+	private final String key;
 	
-	private String region;
+	private final String region;
 	
-	private int searchLimit;
+	private final int searchLimit;
 
 	public GoogleApiRobot(Map<AccessToolParameter, String> scriptParams) {
 		this.searchSystemID = scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_ID);
 		this.key = scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_KEY);
 		this.region = scriptParams.get(AccessToolParameter.SEARCH_REGION);
 		this.searchLimit = Integer.parseInt(scriptParams.get(AccessToolParameter.SEARCH_RESULT_LIMIT));
+		this.restartAttempts = Integer.parseInt(scriptParams.get(AccessToolParameter.RESTART_ATTEMPTS));
+		this.restartInterval = Integer.parseInt(scriptParams.get(AccessToolParameter.RESTART_INTERVAL));
 	}
 
 	@Override

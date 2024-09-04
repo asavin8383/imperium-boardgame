@@ -41,7 +41,7 @@ public class TestJobExecution {
 
             for (String resource : resources) {
                 CheckUnitJob checkUnitJob = new CheckUnitJob();
-                checkUnitJob.setAccessTool("pure-channel-pasd");
+                checkUnitJob.setAccessTool("express");
 
                 checkUnitJob.setCheckUnit(new CheckUnit(1L, CheckUnitType.URL, resource));
 

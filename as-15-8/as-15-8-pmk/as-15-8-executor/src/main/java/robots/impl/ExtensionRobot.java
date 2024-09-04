@@ -29,14 +29,17 @@ public class ExtensionRobot extends SeleniumRobot {
 
     private String stubUrl;
 
-    private String xpathField;
-    private String xpathButton;
+    private final String xpathField;
+    private final String xpathButton;
 
     @Getter
     @Setter
-    private int remainingAttempts;
+    private int restartAttempts;
 
-    private ChromeSettings.Extension extension;
+    @Getter
+    private final int restartInterval;
+
+    private final ChromeSettings.Extension extension;
     protected ExecutionVpnJobResult message = new ExecutionVpnJobResult();
 
     public ExtensionRobot(Map<AccessToolParameter, String> scriptParams) {
@@ -53,7 +56,8 @@ public class ExtensionRobot extends SeleniumRobot {
 
         this.xpathField = scriptParams.get(AccessToolParameter.EXTENSION_XPATH_FIELD);
         this.xpathButton = scriptParams.get(AccessToolParameter.EXTENSION_XPATH_BUTTON);
-
+        this.restartAttempts = Integer.parseInt(scriptParams.getOrDefault(AccessToolParameter.RESTART_ATTEMPTS, "0"));
+        this.restartInterval = Integer.parseInt(scriptParams.getOrDefault(AccessToolParameter.RESTART_INTERVAL, "0"));
     }
 
     ExecutionJobResult process(CheckUnit checkUnit) throws ExecutionException {

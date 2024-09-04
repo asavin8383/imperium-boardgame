@@ -28,7 +28,7 @@ public abstract class AnonymizerRobot extends SeleniumRobot {
 
     protected boolean useEtalon;
     private String etalonProxy;
-    protected boolean ignoreCaptcha = false;
+    protected boolean ignoreCaptcha;
 
     protected ExecutionAnonymizerResult message;
 

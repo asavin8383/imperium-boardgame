@@ -25,7 +25,10 @@ public class PureChannelRobot extends SeleniumRobot {
 
     @Getter
     @Setter
-    private int remainingAttempts;
+    private int restartAttempts;
+
+    @Getter
+    private final int restartInterval;
 
     private CompletableFuture<Void> pageGetterFuture;
 
@@ -39,6 +42,8 @@ public class PureChannelRobot extends SeleniumRobot {
                         scriptParams.get(AccessToolParameter.PROXY_PORT)
                 )
         );
+        this.restartAttempts = Integer.parseInt(scriptParams.getOrDefault(AccessToolParameter.RESTART_ATTEMPTS, "0"));
+        this.restartInterval = Integer.parseInt(scriptParams.getOrDefault(AccessToolParameter.RESTART_INTERVAL, "0"));
     }
 
     @Override

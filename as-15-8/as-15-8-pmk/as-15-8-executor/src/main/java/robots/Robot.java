@@ -8,26 +8,30 @@ import java.io.IOException;
 
 /**
  * Интефейс скрипта робота
- * @author shabalinAI
  *
+ * @author shabalinAI
  */
 public interface Robot {
 
-	/**
-	 * Метод выполнения скрипта робота
-	 * @param checkUnit
-	 * @return
-	 * @throws ExecutionException
-	 */
-	ExecutionJobResult run(CheckUnit checkUnit, long webDriverTimeout, boolean throwExceptionByCaptchaOrBadIP) throws Throwable;
+    /**
+     * Метод выполнения скрипта робота
+     *
+     * @param checkUnit
+     * @return
+     * @throws ExecutionException
+     */
+    ExecutionJobResult run(CheckUnit checkUnit, long webDriverTimeout, boolean throwExceptionByCaptchaOrBadIP) throws Throwable;
 
-	/**
-	 * Метод уничтожения робота
-	 * @throws IOException
-	 */
-	void destroy() throws IOException;
+    /**
+     * Метод уничтожения робота
+     *
+     * @throws IOException
+     */
+    void destroy() throws IOException;
 
-	int getRemainingAttempts();
+    void setRestartAttempts(int value);
 
-	void setRemainingAttempts(int value);
+    int getRestartAttempts();
+
+    int getRestartInterval();
 }

@@ -28,13 +28,16 @@ import static robots.utils.ScriptUtils.TIME_OUT_ERROR;
 @Slf4j
 public class CommonAnonymizerRobot extends SeleniumRobot {
 
-    private String anonymizerURL;
-    private String xpathField;
-    private String xpathButton;
+    private final String anonymizerURL;
+    private final String xpathField;
+    private final String xpathButton;
 
     @Getter
     @Setter
-    private int remainingAttempts;
+    private int restartAttempts;
+
+    @Getter
+    private final int restartInterval;
 
     protected ExecutionAnonymizerResult message;
 
@@ -53,6 +56,8 @@ public class CommonAnonymizerRobot extends SeleniumRobot {
         this.anonymizerURL = scriptParams.get(AccessToolParameter.ANONYMIZER_URL);
         this.xpathField = scriptParams.get(AccessToolParameter.ANONYMIZER_XPATH_FIELD);
         this.xpathButton = scriptParams.get(AccessToolParameter.ANONYMIZER_XPATH_BUTTON);
+        this.restartAttempts = Integer.parseInt(scriptParams.getOrDefault(AccessToolParameter.RESTART_ATTEMPTS, "0"));
+        this.restartInterval = Integer.parseInt(scriptParams.getOrDefault(AccessToolParameter.RESTART_INTERVAL, "0"));
     }
 
     ExecutionJobResult process(CheckUnit checkUnit) throws ExecutionException {

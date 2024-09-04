@@ -35,7 +35,11 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
 
     @Getter
     @Setter
-    private int remainingAttempts;
+    private int restartAttempts;
+
+    @Getter
+    @Setter
+    private int restartInterval;
 
     /** Время ожидания загрузки результатов (сек) */
     private static final int SEARCH_RESULT_TIMEOUT = 3;

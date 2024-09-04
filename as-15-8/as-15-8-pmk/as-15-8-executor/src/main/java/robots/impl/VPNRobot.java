@@ -26,11 +26,14 @@ public class VPNRobot extends SeleniumRobot {
 
     @Getter
     @Setter
-    private int remainingAttempts;
+    private int restartAttempts;
 
-    private boolean useEtalon;
-    private String etalonProxy;
-    private String stubUrl;
+    @Getter
+    private final int restartInterval;
+
+    private final boolean useEtalon;
+    private final String etalonProxy;
+    private final String stubUrl;
 
     private volatile WebDriver etalonDriver;
 
@@ -57,6 +60,8 @@ public class VPNRobot extends SeleniumRobot {
                 etalonProperties.getProxy().getPort()
 			);
      	this.stubUrl = scriptParams.get(AccessToolParameter.STUB_URL);
+        this.restartAttempts = Integer.parseInt(scriptParams.getOrDefault(AccessToolParameter.RESTART_ATTEMPTS, "0"));
+        this.restartInterval = Integer.parseInt(scriptParams.getOrDefault(AccessToolParameter.RESTART_INTERVAL, "0"));
     }
 
     @Override

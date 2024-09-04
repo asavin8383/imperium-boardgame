@@ -73,15 +73,13 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
             log.info("Запуск робота: {}", robotName);
 
             Robot robot = robotsFactory.createRobot(checkUnitJob.getAccessTool());
-            robot.setRemainingAttempts(executorProps.getExecutor().getMaxRetryAttempts());
-
             robots.add(robot);
 
             ExecutionJobResult message;
             boolean needToStop = true;
 
             try {
-                message = runWithRetry(robot, checkUnitJob.getCheckUnit());
+                message = runWithRetry(robot, checkUnitJob.getCheckUnit(), robot.getRestartAttempts());
             } catch (Exception ex) {
                 if (ex instanceof ExecutionException) {
                     if (ex instanceof Captcha_ExecutionException || ex instanceof BadIP_ExecutionExeption || ex instanceof CloudflareBlockExecutionException) {
@@ -114,26 +112,26 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
         }
     }
 
-    public ExecutionJobResult runWithRetry(Robot robot, CheckUnit checkUnit) throws Exception {
+    public ExecutionJobResult runWithRetry(Robot robot, CheckUnit checkUnit, int maxRestartAttempts) throws Exception {
         try {
-            robot.setRemainingAttempts(robot.getRemainingAttempts() - 1);
+            robot.setRestartAttempts(robot.getRestartAttempts() - 1);
             log.info("Запуск {}-й попытки проверки ресурса: {}, таймаут {}",
-                    executorProps.getExecutor().getMaxRetryAttempts() - robot.getRemainingAttempts(),
+                    maxRestartAttempts - robot.getRestartAttempts(),
                     checkUnit.getValue(),
                     executorProps.getExecutor().getTimeout());
 
             boolean throwExceptionByCaptchaOrBadIP = true;
-            if (robot.getRemainingAttempts() == 0) {
+            if (robot.getRestartAttempts() == 0) {
                 throwExceptionByCaptchaOrBadIP = false;
             }
             return robot.run(checkUnit, executorProps.getExecutor().getTimeout(), throwExceptionByCaptchaOrBadIP);
         } catch (ExecutionException | WebDriverException ex) {
-            if (!(ex instanceof CloudflareBlockExecutionException) && robot.getRemainingAttempts() > 0) {
+            if (robot.getRestartAttempts() > 0) {
                 log.warn("Будет выполнен {}-й перезапуск проверки ресурса {} по следующей причине: {}",
-                        executorProps.getExecutor().getMaxRetryAttempts() - robot.getRemainingAttempts(),
+                        maxRestartAttempts - robot.getRestartAttempts(),
                         checkUnit.getValue(), ex.getMessage());
                 try {
-                    Thread.sleep(executorProps.getExecutor().getMaxRetryDelay() * 1000);
+                    Thread.sleep(robot.getRestartInterval() * 1000L);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
@@ -142,7 +140,7 @@ public class RobotsServiceImpl implements CheckUnitVerificationService {
                 } catch (IOException e) {
                     log.error("Ошибка при закрытии скрипта", e);
                 }
-                return runWithRetry(robot, checkUnit);
+                return runWithRetry(robot, checkUnit, maxRestartAttempts);
             } else {
                 throw ex;
             }

@@ -28,14 +28,17 @@ import static robots.utils.HttpResponseHelper.HttpResponseMeta;
 
 public class HolaRobot extends SeleniumRobot {
 
-    private String stubUrl;
-    private boolean useEtalon;
+    private final String stubUrl;
+    private final boolean useEtalon;
 
     @Getter
     @Setter
-    private int remainingAttempts;
+    private int restartAttempts;
 
-    private ChromeSettings.Extension extension;
+    @Getter
+    private final int restartInterval;
+
+    private final ChromeSettings.Extension extension;
 
     public HolaRobot(Map<AccessToolParameter, String> scriptParams) {
 
@@ -56,6 +59,8 @@ public class HolaRobot extends SeleniumRobot {
                 scriptParams.get(AccessToolParameter.EXTENSION_VERSION),
                 scriptParams.get(AccessToolParameter.EXTENSION_POPUP)
         );
+        this.restartAttempts = Integer.parseInt(scriptParams.getOrDefault(AccessToolParameter.RESTART_ATTEMPTS, "0"));
+        this.restartInterval = Integer.parseInt(scriptParams.getOrDefault(AccessToolParameter.RESTART_INTERVAL, "0"));
     }
 
     @Override

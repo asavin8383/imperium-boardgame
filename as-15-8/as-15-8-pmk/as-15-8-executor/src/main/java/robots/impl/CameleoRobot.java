@@ -24,10 +24,15 @@ public class CameleoRobot extends AnonymizerRobot {
 
     @Getter
     @Setter
-    private int remainingAttempts;
+    private int restartAttempts;
+
+    @Getter
+    private final int restartInterval;
 	
 	public CameleoRobot(Map<AccessToolParameter, String> scriptParams)  {
 		super(scriptParams);
+        this.restartAttempts = Integer.parseInt(scriptParams.getOrDefault(AccessToolParameter.RESTART_ATTEMPTS, "0"));
+        this.restartInterval = Integer.parseInt(scriptParams.getOrDefault(AccessToolParameter.RESTART_INTERVAL, "0"));
 	}
 
     @Override

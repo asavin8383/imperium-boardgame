@@ -58,6 +58,28 @@ public enum AccessToolParameter {
             AccessToolUnit.PROXY,
             AccessToolUnit.PURE_CHANNEL),
 
+    RESTART_ATTEMPTS("Количество попыток перезапуска",
+            AccessToolUnit.SEARCH_SYSTEM,
+            AccessToolUnit.VPN,
+            AccessToolUnit.CAMELEO_XYZ,
+            AccessToolUnit.HIDEMYASS,
+            AccessToolUnit.ANONYMIZER,
+            AccessToolUnit.HOLA,
+            AccessToolUnit.EXTENSION,
+            AccessToolUnit.PROXY,
+            AccessToolUnit.PURE_CHANNEL),
+
+    RESTART_INTERVAL("Интервал между перезапусками",
+            AccessToolUnit.SEARCH_SYSTEM,
+            AccessToolUnit.VPN,
+            AccessToolUnit.CAMELEO_XYZ,
+            AccessToolUnit.HIDEMYASS,
+            AccessToolUnit.ANONYMIZER,
+            AccessToolUnit.HOLA,
+            AccessToolUnit.EXTENSION,
+            AccessToolUnit.PROXY,
+            AccessToolUnit.PURE_CHANNEL),
+
     //search-systems
     INPUT_DELAY("Задержка ввода поисковой строки",
             AccessToolUnit.SEARCH_SYSTEM),
@@ -191,10 +213,10 @@ public enum AccessToolParameter {
 
     @Getter
     @JsonIgnore
-    private Set<AccessToolUnit> accessToolUnits;
+    private final Set<AccessToolUnit> accessToolUnits;
 
     @Getter
-    private String description;
+    private final String description;
 
     AccessToolParameter(String description, AccessToolUnit... accessToolUnits) {
         this.accessToolUnits = new HashSet<>(Arrays.asList(accessToolUnits));
