@@ -22,6 +22,7 @@ import java.net.IDN;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -88,19 +89,24 @@ public class CreateCustomErdiService {
     }
 
     private Set<CustomErdi> createOrGetCustomErdis(Set<String> addresses) {
-        Set<CustomErdi> existsCustomErdiWithCustomErdiUnitsValues = customErdiRepository.findAllByCustomErdiUnitsValuesIn(addresses);
-        Set<String> existsCustomErdiUnitsValues = customErdiUnitRepository.findValuesByValueIn(addresses);
-        Set<String> notFoundedInCustomErdiUnits = addresses.stream()
-                .filter(address -> !existsCustomErdiUnitsValues.contains(address))
+        Set<CustomErdi> existsCustomErdis = customErdiRepository.findAllByNameInOrValueIn(addresses);
+        Set<String> existsErdiNameOrValues = existsCustomErdis.stream()
+                .flatMap(customErdi -> Stream.concat(
+                        Stream.of(customErdi.getName()),
+                        customErdi.getCustomErdiUnits().stream().map(CustomErdiUnit::getValue)))
                 .collect(Collectors.toSet());
 
-        Set<CustomErdi> existsCustomErdis = customErdiRepository.findAllByNameIn(notFoundedInCustomErdiUnits);
-        Set<String> existsCustomErdisNames = customErdiRepository.findNamesByNameIn(notFoundedInCustomErdiUnits);
-        Set<String> notFoundedInCustomErdisAndCustomErdiUnits = notFoundedInCustomErdiUnits.stream()
-                .filter(address -> !existsCustomErdisNames.contains(address))
+        Set<String> notExistsErdiNameOrValues = addresses.stream()
+                .filter(address -> !existsErdiNameOrValues.contains(address))
                 .collect(Collectors.toSet());
 
-        List<CustomErdi> createdCustomErdi = notFoundedInCustomErdisAndCustomErdiUnits.stream()
+//        Set<CustomErdi> existsCustomErdis = customErdiRepository.findAllByNameIn(notFoundedInCustomErdiUnits);
+//        Set<String> existsCustomErdisNames = customErdiRepository.findNamesByNameIn(notExistsErdiNameOrValues);
+//        Set<String> notFoundedInCustomErdisAndCustomErdiUnits = notExistsErdiNameOrValues.stream()
+//                .filter(address -> !existsCustomErdisNames.contains(address))
+//                .collect(Collectors.toSet());
+
+        List<CustomErdi> createdCustomErdi = notExistsErdiNameOrValues.stream()
                 .map(address -> {
                     String customErdiName = address.startsWith("xn--") ? IDN.toUnicode(address) : address;
                     CheckUnitType checkUnitType = getCheckUnitType(customErdiName);
@@ -122,7 +128,7 @@ public class CreateCustomErdiService {
 
         Set<CustomErdi> resultCustomErdis = new HashSet<>(savedCustomErdis);
         resultCustomErdis.addAll(existsCustomErdis);
-        resultCustomErdis.addAll(existsCustomErdiWithCustomErdiUnitsValues);
+        resultCustomErdis.addAll(existsCustomErdis);
         return resultCustomErdis;
     }
 
