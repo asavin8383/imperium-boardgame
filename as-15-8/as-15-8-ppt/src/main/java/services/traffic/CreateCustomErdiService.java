@@ -89,6 +89,10 @@ public class CreateCustomErdiService {
     }
 
     private Set<CustomErdi> createOrGetCustomErdis(Set<String> addresses) {
+        addresses = addresses.stream()
+                .map(address -> address.startsWith("xn--") ? IDN.toUnicode(address) : address)
+                .collect(Collectors.toSet());
+
         Set<CustomErdi> existsCustomErdis = customErdiRepository.findAllByNameInOrValueIn(addresses);
         Set<String> existsErdiNameOrValues = existsCustomErdis.stream()
                 .flatMap(customErdi -> Stream.concat(
@@ -100,18 +104,11 @@ public class CreateCustomErdiService {
                 .filter(address -> !existsErdiNameOrValues.contains(address))
                 .collect(Collectors.toSet());
 
-//        Set<CustomErdi> existsCustomErdis = customErdiRepository.findAllByNameIn(notFoundedInCustomErdiUnits);
-//        Set<String> existsCustomErdisNames = customErdiRepository.findNamesByNameIn(notExistsErdiNameOrValues);
-//        Set<String> notFoundedInCustomErdisAndCustomErdiUnits = notExistsErdiNameOrValues.stream()
-//                .filter(address -> !existsCustomErdisNames.contains(address))
-//                .collect(Collectors.toSet());
-
         List<CustomErdi> createdCustomErdi = notExistsErdiNameOrValues.stream()
                 .map(address -> {
-                    String customErdiName = address.startsWith("xn--") ? IDN.toUnicode(address) : address;
-                    CheckUnitType checkUnitType = getCheckUnitType(customErdiName);
+                    CheckUnitType checkUnitType = getCheckUnitType(address);
                     CustomErdi customErdi = new CustomErdi()
-                            .setName(customErdiName);
+                            .setName(address);
 
                     CustomErdiUnit customErdiUnit = new CustomErdiUnit()
                             .setCustomErdi(customErdi)
