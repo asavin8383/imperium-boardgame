@@ -20,9 +20,6 @@ public interface CustomErdiUnitRepository extends JpaRepository<CustomErdiUnit, 
     @Query(value = "select ceu.value from CustomErdiUnit ceu where ceu.value in :values")
     Set<String> findValuesByValueIn(@Param("values") Set<String> values);
 
-    @Query(value = "select ceu.value from CustomErdiUnit ceu where ceu.value not in :values")
-    Set<String> findValuesByValueNotIn(@Param("values") Set<String> values);
-
     Page<CustomErdiUnit> findByCustomErdiId(Long customErdiId, Pageable pageable);
 
     @Query("select units from CustomErdiUnit units " +
