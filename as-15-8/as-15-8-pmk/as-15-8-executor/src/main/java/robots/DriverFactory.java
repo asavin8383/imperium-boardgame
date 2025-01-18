@@ -1,10 +1,10 @@
 package robots;
 
-import common.ExecutorProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.Proxy;
+import org.openqa.selenium.UnexpectedAlertBehaviour;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.logging.LogType;
@@ -12,9 +12,14 @@ import org.openqa.selenium.logging.LoggingPreferences;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import robots.exceptions.ExecutionException;
 import robots.utils.ScriptUtils;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
@@ -67,9 +72,13 @@ public class DriverFactory {
 		}
 
 		ChromeOptions options = new ChromeOptions();
-		setLoadExtensions(options, Collections.singletonList(ChromeSettings.getScreenshotExtension()));
+
 		setOptimalChromeOptions(options);
-        setChromeAnonimyzerParams(options);
+		setOptionsForAnonymization(options);
+		addStealthExtension(options);
+		//addUBlockOriginalExtension(options);
+//		addAllFingerprintDefenderExtension(options);
+		addScreenshotExtension(options);
 
 		if (enableLog){
 			LoggingPreferences logPrefs = new LoggingPreferences();
@@ -79,7 +88,7 @@ public class DriverFactory {
 		}
 
 		cpb.setCapability(ChromeOptions.CAPABILITY, options);
-		WebDriver driver = new RemoteWebDriver(hubURL, cpb);
+		RemoteWebDriver driver = new RemoteWebDriver(hubURL, cpb);
 		ScriptUtils.openScreenshotExtension(driver);
 		return driver;
 	}
@@ -99,8 +108,13 @@ public class DriverFactory {
 
         ChromeOptions options = new ChromeOptions();
 		setOptimalChromeOptions(options);
-		setLoadExtensions(options, extensions);
+		setOptionsForAnonymization(options);
+		//addStealthExtension(options);
+		//addUBlockOriginalExtension(options);
+		addAllFingerprintDefenderExtension(options);
+		addScreenshotExtension(options);
 		cpb.setCapability(ChromeOptions.CAPABILITY, options);
+
 		WebDriver driver = new RemoteWebDriver(hubURL, cpb);
 		ScriptUtils.openScreenshotExtension(driver);
 		return driver;
@@ -109,31 +123,39 @@ public class DriverFactory {
     private static void setOptimalChromeOptions(ChromeOptions options){
 		options.addArguments("--start-maximized");
 		options.addArguments("--ignore-certificate-errors");
-		//options.addArguments("--disable-popup-blocking");
-		//options.addArguments("--headless");
-		//options.addArguments("--window-size=1920,1080");
-		//options.addArguments("--no-sandbox");				// избавляет от некоторых проблем с таймаутом, рендерингом, но не безопасно!
+
 		options.addArguments("--dns-prefetch-disable");		// отключение предварительной выборки DNS. в теории должно ускорить работу
-		//options.addArguments("--disable-gpu");				// говорят частично решает проблему с рендерингом (скриншотом)
-		//options.addArguments("--disable-features=VizDisplayCompositor");	// у кого-то в 73 версии устранило проблему: Timed out receiving message from renderer: 10.000
-		//options.setPageLoadStrategy(PageLoadStrategy.NORMAL);
 		LoggingPreferences logPrefs = new LoggingPreferences();
 		logPrefs.enable( LogType.PERFORMANCE, Level.ALL );
 		options.setCapability( "goog:loggingPrefs", logPrefs );
 
-		options.addArguments("--user-data-dir=" + ExecutorProperties.getChromeProperties().getUserDataDir());
-		options.addArguments("--profile-directory=" + ExecutorProperties.getChromeProperties().getProfileName());
 		options.addArguments("--auto-select-desktop-capture-source=Entire screen");
 
 		//Для отображения полного URL
 		options.addArguments("--enable-experimental-web-platform-features");
 		options.addArguments("--enable-features=TemporaryUnexpireFlagsM76");
+		options.addArguments("--disable-ipv6");
 		options.addArguments("--disable-features=OmniboxUIExperimentHideSteadyStateUrlScheme,OmniboxUIExperimentHideSteadyStateUrlTrivialSubdomains");
+
+		//принимать все непонятные алерты
+		options.setCapability(CapabilityType.UNEXPECTED_ALERT_BEHAVIOUR, UnexpectedAlertBehaviour.ACCEPT);
 	}
 
-	private static void setChromeAnonimyzerParams(ChromeOptions options){
-        options.setExperimentalOption("excludeSwitches", Collections.singletonList("enable-automation"));
-    }
+	private static void setOptionsForAnonymization(ChromeOptions options){
+		options.setExperimentalOption("excludeSwitches", Collections.singletonList("enable-automation"));
+
+		options.addArguments(
+				"--no-default-browser-check",
+				"--no-first-run",
+				"--no-sandbox",
+				"--test-type",
+				"--window-size=1920,1080",
+				"--lang=ru-RU,ru,en-US,en",
+				"--user-data-dir=/home/selenium/chrome_profile",
+				"--disable-blink-features",
+				"--disable-blink-features=AutomationControlled"
+		);
+	}
 
 	/**
 	 * Метод создания параметров драйвера
@@ -156,8 +178,46 @@ public class DriverFactory {
 		return capability;
 	}
 
-	private static void setLoadExtensions(ChromeOptions options, List<ChromeSettings.Extension> extensions) {
-		options.addArguments("--load-extension=" + ChromeSettings.buildLoadExtensionArgValue(extensions));
+	private static void addScreenshotExtension(ChromeOptions options) {
+		addExtension("screenshot_ext.crx", options);
+	}
+
+	private static void addStealthExtension(ChromeOptions options) {
+		addExtension("stealth_ext.crx", options);
+	}
+
+	private static void addUBlockOriginalExtension(ChromeOptions options) {
+		addExtension("uBlockOriginal.crx", options);
+	}
+
+	private static void addAllFingerprintDefenderExtension(ChromeOptions options) {
+		addExtension("allFingerprintsDefender.crx", options);
+	}
+
+	private static void addExtension(String extName, ChromeOptions options) {
+		try{
+			try(InputStream extIS = DriverFactory.class.getClassLoader().getResourceAsStream(extName)){
+
+				if(extIS == null){
+					throw new ExecutionException("Ошибка! Не найден файл с расширением " + extName);
+				}
+
+				ByteArrayOutputStream extOS = new ByteArrayOutputStream();
+				byte[] buffer = new byte[1024];
+				int length;
+				while ((length = extIS.read(buffer)) != -1) {
+					extOS.write(buffer, 0, length);
+				}
+
+				try {
+					options.addEncodedExtensions(Base64.getEncoder().encodeToString(extOS.toByteArray()));
+				} catch (Exception ex) {
+					throw new ExecutionException("Ошибка загрузки расширения" + extName, ex);
+				}
+			}
+		} catch (IOException ex) {
+			throw new ExecutionException("Ошибка закрытия потока чтения расширения" + extName);
+		}
 	}
 
 	/**

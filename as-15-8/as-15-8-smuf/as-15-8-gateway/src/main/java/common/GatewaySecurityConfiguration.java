@@ -7,9 +7,11 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableOAuth2Client;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
+import org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
+import org.springframework.web.filter.ForwardedHeaderFilter;
 
 @Configuration
 @EnableResourceServer
@@ -42,7 +44,11 @@ public class GatewaySecurityConfiguration extends ResourceServerConfigurerAdapte
                             "/dispatcher/results/protocol/nmap_log/**",
                             "/dispatcher/manual_arrangement/screenshot/**",
                             "/app/kibana/**",
-                            "/pod/erdi/ids/**")
+                            "/pod/erdi/ids/**",
+                            "/swagger/**",
+                            "/swagger-ui/**",
+                            "/swagger-ui.html"
+                            )
                     .permitAll()
                     .antMatchers(HttpMethod.POST,
                         "/pod/act/**",
@@ -58,6 +64,7 @@ public class GatewaySecurityConfiguration extends ResourceServerConfigurerAdapte
                     .permitAll()
                     .antMatchers("/**")
                     .authenticated();
+        http.addFilterBefore(new ForwardedHeaderFilter(), WebAsyncManagerIntegrationFilter.class);
     }
 
     @Bean

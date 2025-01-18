@@ -4,6 +4,7 @@ import enums.AccessToolParameter;
 import enums.AccessToolUnit;
 import lombok.Data;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import javax.annotation.PostConstruct;
@@ -15,18 +16,19 @@ import java.util.Optional;
 
 @Data
 @ConfigurationProperties
+@Slf4j
 public class ExecutorProperties {
 
     private final Map<String, Map<String, Map<String, String>>> robots = new HashMap<>();
 
     private EtalonProperties etalon;
 
-    /** URL selenium хаба */
+    /**
+     * URL selenium хаба
+     */
     private String seleniumHubUrl;
 
     private NmapProperties nmap;
-
-    private ChromeProperties chrome;
 
     private ScreenshotProperties screenshot;
 
@@ -34,8 +36,6 @@ public class ExecutorProperties {
 
 
     private static EtalonProperties etalonExtProperties;
-
-    private static ChromeProperties chromeProperties;
 
     private static ScreenshotProperties screenshotProperties;
 
@@ -48,11 +48,10 @@ public class ExecutorProperties {
     private void loadProps() throws MalformedURLException {
         etalonExtProperties = etalon;
         seleniumHubUrlExt = new URL(seleniumHubUrl);
-        chromeProperties = chrome;
         screenshotProperties = screenshot;
 
         this.props = new AccessToolUnits();
-        robots.forEach((accessToolUnitString, accessToolUnitPropsMap) ->{
+        robots.forEach((accessToolUnitString, accessToolUnitPropsMap) -> {
             AccessToolUnit accessToolUnit = AccessToolUnit.fromPropertyKey(accessToolUnitString);
             AccessToolUnitProps accessToolUnitProps = new AccessToolUnitProps();
             accessToolUnitPropsMap.forEach((robotName, robotPropsMap) -> {
@@ -67,7 +66,7 @@ public class ExecutorProperties {
         });
     }
 
-    public Optional<AccessToolUnit> getAccessToolUnit(String accessTool){
+    public Optional<AccessToolUnit> getAccessToolUnit(String accessTool) {
         return props.getAccessToolUnits().entrySet()
                 .stream()
                 .filter(accessToolUnitProps ->
@@ -78,32 +77,30 @@ public class ExecutorProperties {
                 .findFirst();
     }
 
-    public static EtalonProperties getEtalon(){
+    public static EtalonProperties getEtalon() {
         return etalonExtProperties;
     }
 
-    public static ChromeProperties getChromeProperties(){
-        return chromeProperties;
-    }
-
-    public static URL getSeleniumHubUrl(){
+    public static URL getSeleniumHubUrl() {
         return seleniumHubUrlExt;
     }
 
-    public static ScreenshotProperties getScreenshotProperties() { return screenshotProperties; }
+    public static ScreenshotProperties getScreenshotProperties() {
+        return screenshotProperties;
+    }
 
     @Data
-    public static class AccessToolUnits{
+    public static class AccessToolUnits {
         private Map<AccessToolUnit, AccessToolUnitProps> accessToolUnits = new HashMap<>();
     }
 
     @Data
-    public static class AccessToolUnitProps{
+    public static class AccessToolUnitProps {
         private Map<String, RobotProps> robotProps = new HashMap<>();
     }
 
     @Data
-    public static class RobotProps{
+    public static class RobotProps {
         private Map<AccessToolParameter, String> props = new HashMap<>();
     }
 
@@ -131,21 +128,16 @@ public class ExecutorProperties {
     }
 
     @Data
-    public static class ChromeProperties {
-        private String userDataDir;
-        private String extensionsDir;
-        private String profileName;
-    }
-
-    @Data
-    public static class ScreenshotProperties{
+    public static class ScreenshotProperties {
         private String extId;
         private String extVersion;
         private String extPopup;
     }
 
     @Data
-    public static class ExecutorProps{
+    public static class ExecutorProps {
         private Integer timeout;
+        private Integer maxRetryAttempts;
+        private Integer maxRetryDelay;
     }
 }

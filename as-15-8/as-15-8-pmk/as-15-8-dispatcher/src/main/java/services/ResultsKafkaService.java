@@ -11,9 +11,10 @@ import model.DetailResult;
 import model.Result;
 import model.Screenshots;
 import org.apache.kafka.streams.KeyValue;
+import org.apache.kafka.streams.kstream.Windowed;
 import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.QueryableStoreTypes;
-import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
+import org.apache.kafka.streams.state.ReadOnlyWindowStore;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,8 +25,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Method;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
@@ -48,11 +51,13 @@ public class ResultsKafkaService {
     @Value("${spring.cloud.stream.bindings.screenshots_table.destination}")
     private String screenshotsTableName;
 
+    @Value("${results.retention.days:31}")
+    private int resultsRetentionDays;
+
     private final InteractiveQueryService interactiveQueryService;
 
-    private ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult> resultsStore;
-    private ReadOnlyKeyValueStore<Long, Long> resultsCountStore;
-    private ReadOnlyKeyValueStore<CheckUnitKey, Screenshots> screenshotsStore;
+    private ReadOnlyWindowStore<CheckUnitKey, CheckUnitResult> resultsStore;
+    private ReadOnlyWindowStore<CheckUnitKey, Screenshots> screenshotsStore;
 
     public Page<Result> getArrangementResults(
             Long arrangementId,
@@ -117,8 +122,7 @@ public class ResultsKafkaService {
                             checkUnitResultComparator = checkUnitResultComparator.reversed();
                     }
 
-                    Stream<Result> resultsStream = StreamSupport
-                            .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), false)
+                    Stream<Result> resultsStream = getLastVersionValues(resultsIterator)
                             .filter(filter)
                             .map(kv -> {
                                 DetailResultService<? super CheckUnitResult, ? extends DetailResult> service = AnalysisResultServiceFactory.getService(kv.value.getClass());
@@ -138,40 +142,51 @@ public class ResultsKafkaService {
         return getArrangementResultsIterator(arrangementId)
                 .map(resultsIterator -> StreamSupport
                     .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), false)
-                    .map(kv -> kv.key.getJobId())
+                    .filter(kv -> kv.value.getCheckResult().equals(CheckUnitJobResult.COMPLETED) ||
+                            kv.value.getCheckResult().equals(CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED))
+                    .map(kv -> kv.key.key().getJobId())
                     .collect(Collectors.toList()))
                 .orElseGet(ArrayList::new);
     }
 
     public Optional<CheckUnitResult> getArrangementResult(Long arrangementId, Long jobId) {
         return getResultsKeyValueStore()
-            .flatMap(store -> getLastIteratorValue(
-                store.range(
+            .flatMap(store -> getLastVersionValues(
+                store.fetch(
                     new CheckUnitKey(arrangementId, jobId, minValue),
-                    new CheckUnitKey(arrangementId, jobId, maxValue)
+                    new CheckUnitKey(arrangementId, jobId, maxValue),
+                    Instant.now().minus(resultsRetentionDays, ChronoUnit.DAYS),
+                    Instant.now()
                 )
             )
-            .map(kv -> kv.value));
+            .map(kv -> kv.value)
+            .findFirst());
     }
 
-    public Optional<Screenshots> getScreenshot(Long arrangementId, Long jobId) {
+    public Optional<Screenshots> getScreenshot(Long arrangementId, Long jobId, Long version) {
+
         return getScreenshotsKeyValueStore()
-            .flatMap(store -> getLastIteratorValue(
-                store.range(
+            .flatMap(store -> getLastVersionValues(
+                store.fetch(
                     new CheckUnitKey(arrangementId, jobId, minValue),
-                    new CheckUnitKey(arrangementId, jobId, maxValue)
+                    new CheckUnitKey(arrangementId, jobId, version == null ? maxValue : version),
+                    Instant.now().minus(resultsRetentionDays, ChronoUnit.DAYS),
+                    Instant.now()
                 )
             )
-            .map(kv -> kv.value));
+            .map(kv -> kv.value)
+            .findFirst());
     }
 
     public long getResultsCount(Long arrangementId) {
         return getResultsKeyValueStore()
             .map(store -> {
                 AtomicLong count = new AtomicLong(0);
-                store.range(
-                        new CheckUnitKey(arrangementId, minValue, minValue),
-                        new CheckUnitKey(arrangementId, maxValue, maxValue)
+                store.fetch(
+                    new CheckUnitKey(arrangementId, minValue, minValue),
+                    new CheckUnitKey(arrangementId, maxValue, maxValue),
+                    Instant.now().minus(resultsRetentionDays, ChronoUnit.DAYS),
+                    Instant.now()
                 ).forEachRemaining(cu -> count.getAndIncrement());
                 return count.longValue();
             }).orElse(0L);
@@ -193,8 +208,7 @@ public class ResultsKafkaService {
 
     private <T> List<T> getDistinctResultValues(Long arrangementId, Function<KeyValue<CheckUnitKey, CheckUnitResult>, T> function){
         return getArrangementResultsIterator(arrangementId)
-            .map(resultsIterator -> StreamSupport
-                .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), false)
+            .map(resultsIterator -> getLastVersionValues(resultsIterator)
                 .map(function)
                 .distinct()
                 .collect(Collectors.toList())
@@ -204,17 +218,29 @@ public class ResultsKafkaService {
 
     private long getResultsCount(Long arrangementId, Predicate<KeyValue<CheckUnitKey, CheckUnitResult>> filter){
         return getArrangementResultsIterator(arrangementId)
-                .map(resultsIterator -> StreamSupport
-                        .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), false)
+                .map(resultsIterator -> getLastVersionValues(resultsIterator)
                         .filter(filter)
                         .count())
                 .orElse(0L);
     }
 
-    Optional<KeyValueIterator<CheckUnitKey, CheckUnitResult>> getArrangementResultsIterator(Long arrangementId) {
-        return getResultsKeyValueStore().map(store -> store.range(
+    Optional<KeyValueIterator<Windowed<CheckUnitKey>, CheckUnitResult>> getArrangementResultsIterator(Long arrangementId) {
+        return getResultsKeyValueStore().map(store -> store.fetch(
                 new CheckUnitKey(arrangementId, minValue, minValue),
-                new CheckUnitKey(arrangementId, maxValue, maxValue))
+                new CheckUnitKey(arrangementId, maxValue, maxValue),
+                Instant.now().minus(resultsRetentionDays, ChronoUnit.DAYS),
+                Instant.now()
+            )
+        );
+    }
+
+    Optional<KeyValueIterator<Windowed<CheckUnitKey>, Screenshots>> getArrangementResultScreenshotsIterator(Long arrangementId) {
+        return getScreenshotsKeyValueStore().map(store -> store.fetch(
+                new CheckUnitKey(arrangementId, minValue, minValue),
+                new CheckUnitKey(arrangementId, maxValue, maxValue),
+                Instant.now().minus(resultsRetentionDays, ChronoUnit.DAYS),
+                Instant.now()
+                )
         );
     }
 
@@ -240,11 +266,9 @@ public class ResultsKafkaService {
             List<CheckUnitType> checkUnitTypes,
             String query) {
 
-        boolean notFiltered = true;
-        if(checkUnitJobResults != null && checkUnitJobResults.size() > 0 &&
-                !checkUnitJobResults.contains(checkUnitResult.getCheckResult())
-        )
-            notFiltered = false;
+        boolean notFiltered = checkUnitJobResults == null || checkUnitJobResults.size() == 0 ||
+                checkUnitJobResults.contains(checkUnitResult.getCheckResult());
+
         if(checkUnitTypes != null && checkUnitTypes.size() > 0 &&
                 !checkUnitTypes.contains(checkUnitResult.getCheckUnit().getType())
         )
@@ -279,25 +303,32 @@ public class ResultsKafkaService {
         }
     }
 
-    private Optional<ReadOnlyKeyValueStore<CheckUnitKey, CheckUnitResult>> getResultsKeyValueStore() {
+    private Optional<ReadOnlyWindowStore<CheckUnitKey, CheckUnitResult>> getResultsKeyValueStore() {
         return Optional.ofNullable(resultsStore == null ?
                 interactiveQueryService.getQueryableStore(
                         resultsTableName,
-                        QueryableStoreTypes.keyValueStore()
+                        QueryableStoreTypes.windowStore()
                 ) : resultsStore);
     }
 
-    private Optional<ReadOnlyKeyValueStore<CheckUnitKey, Screenshots>> getScreenshotsKeyValueStore() {
+    private Optional<ReadOnlyWindowStore<CheckUnitKey, Screenshots>> getScreenshotsKeyValueStore() {
         return Optional.ofNullable(screenshotsStore == null ?
                 interactiveQueryService.getQueryableStore(
                         screenshotsTableName,
-                        QueryableStoreTypes.keyValueStore()
+                        QueryableStoreTypes.windowStore()
                 ) : screenshotsStore);
     }
 
-    private <K, V> Optional<KeyValue<K, V>> getLastIteratorValue(KeyValueIterator<K, V> resultsIterator){
+    private <V> Stream<KeyValue<CheckUnitKey, V>> getLastVersionValues(KeyValueIterator<Windowed<CheckUnitKey>, V> resultsIterator) {
         return StreamSupport
-            .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), false)
-            .reduce((first, second) -> second);
+                .stream(Spliterators.spliteratorUnknownSize(resultsIterator, Spliterator.ORDERED), false)
+                .collect(Collectors.groupingBy(
+                        v -> v.key.key().getJobId(),
+                        Collectors.maxBy(Comparator.comparingLong(v -> v.key.key().getVersion()))
+                ))
+                .values()
+                .stream()
+                .filter(Optional::isPresent)
+                .map(val -> KeyValue.pair(val.get().key.key(), val.get().value));
     }
 }

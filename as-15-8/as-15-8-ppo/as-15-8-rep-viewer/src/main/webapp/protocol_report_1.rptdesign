@@ -46,7 +46,7 @@ gateway= System.getenv("GATEWAY_URI");
                 </ex-property>
             </list-property>
             <property name="odaDriverClass">org.postgresql.Driver</property>
-            <property name="odaURL">jdbc:postgresql://192.168.5.195:5432/asdb</property>
+            <property name="odaURL">jdbc:postgresql://asdb:5432/asdb</property>
             <property name="odaUser">as_user</property>
             <encrypted-property name="odaPassword" encryptionID="base64">YXNfdXNlcg==</encrypted-property>
         </oda-data-source>
@@ -578,15 +578,15 @@ row_number() OVER ()  AS num,
 case when r.check_for_act then 'Да' else '' end check_for_act,
  r.check_unit_value, --ИРТЗ
        --r.result, -- Статус
-        coalesce(ci.blocktype,'url') as blocktype, -- Тип блокировки
+        coalesce(ci.blocktype,r.check_unit_type) as blocktype, -- Тип блокировки
        to_char (r.end_date,'DD.MM.YYYY HH24:MI:SS') as end_date, -- Дата и время проверки
               content.erdi_id as erdi_id,
        s.result_id::text as screenshot_id -- ID для формирования ссылки
  from
-results.results r join sor.content_history ch on r.content_id=ch.content_id
+results.results r left join sor.content_history ch on r.content_id=ch.content_id
 and r.start_date >=ch.st_dt and r.start_date<ch.end_dt
-join sor.content_info ci on ci.content_id=r.content_id and ci.content_version_id=ch.content_version_id
-join sor.content on ch.content_id = content.id
+left join sor.content_info ci on ci.content_id=r.content_id and ci.content_version_id=ch.content_version_id
+left join sor.content on ch.content_id = content.id
 left outer join results.result_screenshots  s on r.id = s.result_id
 where r.arrangement_id=?
 and coalesce(r.user_result,r.result) in (
@@ -865,16 +865,16 @@ row_number() OVER ()  AS num,
 case when r.check_for_act then 'Да' else '' end check_for_act,
  r.check_unit_value, --ИРТЗ
        --r.result, -- Статус
-        coalesce(ci.blocktype,'url') as blocktype, -- Тип блокировки
+        coalesce(ci.blocktype,r.check_unit_type) as blocktype, -- Тип блокировки
        to_char (r.end_date,'DD.MM.YYYY HH24:MI:SS') as end_date, -- Дата и время проверки
               content.erdi_id as erdi_id,
        
         s.result_id as screenshot_id -- ID для формирования ссылки
  from
-results.results r join sor.content_history ch on r.content_id=ch.content_id
+results.results r left join sor.content_history ch on r.content_id=ch.content_id
 and r.start_date >=ch.st_dt and r.start_date<ch.end_dt
-join sor.content_info ci on ci.content_id=r.content_id and ci.content_version_id=ch.content_version_id
-join sor.content on ch.content_id = content.id
+left join sor.content_info ci on ci.content_id=r.content_id and ci.content_version_id=ch.content_version_id
+left join sor.content on ch.content_id = content.id
 left join results.result_screenshots  s on r.id = s.result_id
 where r.arrangement_id=?
 and coalesce(r.user_result,r.result) in (
@@ -1133,16 +1133,16 @@ and coalesce(r.user_result,r.result) in (
 row_number() OVER ()  AS num,
  r.check_unit_value, --ИРТЗ
        --r.result, -- Статус
-        coalesce(ci.blocktype,'url') as blocktype, -- Тип блокировки
+        coalesce(ci.blocktype,r.check_unit_type) as blocktype, -- Тип блокировки
        to_char (r.end_date,'DD.MM.YYYY HH24:MI:SS') as end_date, -- Дата и время проверки
               content.erdi_id as erdi_id,
        
        s.result_id as screenshot_id -- ID для формирования ссылки
  from
-results.results r join sor.content_history ch on r.content_id=ch.content_id
+results.results r left join sor.content_history ch on r.content_id=ch.content_id
 and r.start_date >=ch.st_dt and r.start_date<ch.end_dt
-join sor.content_info ci on ci.content_id=r.content_id and ci.content_version_id=ch.content_version_id
-join sor.content on ch.content_id = content.id
+left join sor.content_info ci on ci.content_id=r.content_id and ci.content_version_id=ch.content_version_id
+left join sor.content on ch.content_id = content.id
 left join results.result_screenshots  s on r.id = s.result_id
 where r.arrangement_id=?
 and coalesce(r.user_result,r.result) in (
@@ -1402,19 +1402,19 @@ and coalesce(r.user_result,r.result) in (
 row_number() OVER ()  AS num,
  r.check_unit_value, --ИРТЗ
        --r.result, -- Статус
-        coalesce(ci.blocktype,'url') as blocktype, -- Тип блокировки
+        coalesce(ci.blocktype,r.check_unit_type) as blocktype, -- Тип блокировки
        to_char (r.end_date,'DD.MM.YYYY HH24:MI:SS') as end_date, -- Дата и время проверки
        r.id as screenshot_id, -- ID для формирования ссылки
-	   case when coalesce(r.user_result,r.result)='INTERNAL_ERROR' then  error
-	   when coalesce(r.user_result,r.result)='BAD_IP' then 'Недопустимый IP для ПС'
-   	   when coalesce(r.user_result,r.result)='CAPTCHA_DETECTED' then 'Обнаружена CAPTCHA'
-   	   when coalesce(r.user_result,r.result)='TIMEOUT_ERROR' then 'Превышено время ожидания'   	   
-	   when coalesce(r.user_result,r.result)='EXCLUDED' then 'Запись исключена'   	   
-	   else error end error
+       case when coalesce(r.user_result,r.result)='INTERNAL_ERROR' then  error
+       when coalesce(r.user_result,r.result)='BAD_IP' then 'Недопустимый IP для ПС'
+       when coalesce(r.user_result,r.result)='CAPTCHA_DETECTED' then 'Обнаружена CAPTCHA'
+       when coalesce(r.user_result,r.result)='TIMEOUT_ERROR' then 'Превышено время ожидания'
+       when coalesce(r.user_result,r.result)='EXCLUDED' then 'Запись исключена'
+       else error end error
  from
-results.results r join sor.content_history ch on r.content_id=ch.content_id
+results.results r left join sor.content_history ch on r.content_id=ch.content_id
 and r.start_date >=ch.st_dt and r.start_date<ch.end_dt
-join sor.content_info ci on ci.content_id=r.content_id and ci.content_version_id=ch.content_version_id
+left join sor.content_info ci on ci.content_id=r.content_id and ci.content_version_id=ch.content_version_id
 left join results.result_screenshots  s on r.id = s.result_id
 left outer join   results.error_detail_results d on r.id = d.result_id
 where r.arrangement_id=?
@@ -1768,6 +1768,13 @@ and coalesce(r.user_result,r.result) in (
                                 <expression name="expression" type="javascript">dataSetRow["erdi_id"]</expression>
                                 <property name="dataType">string</property>
                             </structure>
+                            <structure>
+                                <property name="name">screenshot_hyperlink</property>
+                                <text-property name="displayName">Открыть скриншот</text-property>
+                                <expression name="expression" type="javascript">"Открыть скриншот"</expression>
+                                <property name="dataType">string</property>
+                                <property name="allowExport">true</property>
+                            </structure>
                         </list-property>
                         <property name="pageBreakInterval">1000000</property>
                         <column id="144">
@@ -1990,7 +1997,7 @@ and coalesce(r.user_result,r.result) in (
                                                 <expression name="valueExpr" type="javascript">row["screenshot_id"] == null</expression>
                                             </structure>
                                         </list-property>
-                                        <property name="resultSetColumn">erdi_id</property>
+                                        <property name="resultSetColumn">screenshot_hyperlink</property>
                                         <list-property name="action">
                                             <structure>
                                                 <property name="linkType">hyperlink</property>
@@ -2083,6 +2090,13 @@ and coalesce(r.user_result,r.result) in (
                                 <text-property name="displayName">erdi_id</text-property>
                                 <expression name="expression" type="javascript">dataSetRow["erdi_id"]</expression>
                                 <property name="dataType">string</property>
+                            </structure>
+                            <structure>
+                                <property name="name">screenshot_hyperlink</property>
+                                <text-property name="displayName">Открыть скриншот</text-property>
+                                <expression name="expression" type="javascript">"Открыть скриншот"</expression>
+                                <property name="dataType">string</property>
+                                <property name="allowExport">true</property>
                             </structure>
                         </list-property>
                         <property name="pageBreakInterval">1000000</property>
@@ -2304,7 +2318,7 @@ and coalesce(r.user_result,r.result) in (
                                                 <expression name="valueExpr" type="javascript">row["screenshot_id"] == null</expression>
                                             </structure>
                                         </list-property>
-                                        <property name="resultSetColumn">erdi_id</property>
+                                        <property name="resultSetColumn">screenshot_hyperlink</property>
                                         <list-property name="action">
                                             <structure>
                                                 <property name="linkType">hyperlink</property>
@@ -2389,6 +2403,13 @@ and coalesce(r.user_result,r.result) in (
                                 <text-property name="displayName">erdi_id</text-property>
                                 <expression name="expression" type="javascript">dataSetRow["erdi_id"]</expression>
                                 <property name="dataType">string</property>
+                            </structure>
+                            <structure>
+                                <property name="name">screenshot_hyperlink</property>
+                                <text-property name="displayName">Открыть скриншот</text-property>
+                                <expression name="expression" type="javascript">"Открыть скриншот"</expression>
+                                <property name="dataType">string</property>
+                                <property name="allowExport">true</property>
                             </structure>
                         </list-property>
                         <property name="pageBreakInterval">1000000</property>
@@ -2588,7 +2609,7 @@ and coalesce(r.user_result,r.result) in (
                                                 <expression name="valueExpr" type="javascript">row["screenshot_id"] == null</expression>
                                             </structure>
                                         </list-property>
-                                        <property name="resultSetColumn">erdi_id</property>
+                                        <property name="resultSetColumn">screenshot_hyperlink</property>
                                         <list-property name="action">
                                             <structure>
                                                 <property name="linkType">hyperlink</property>

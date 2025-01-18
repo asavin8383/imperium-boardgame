@@ -5,8 +5,13 @@ import common.ExecutorProperties;
 import enums.AccessToolParameter;
 import execution.ExecutionAnonymizerResult;
 import execution.ExecutionJobResult;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.openqa.selenium.*;
+import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebElement;
 import org.springframework.util.StringUtils;
 import robots.ProxyUtils;
 import robots.exceptions.ExecutionException;
@@ -23,9 +28,16 @@ import static robots.utils.ScriptUtils.TIME_OUT_ERROR;
 @Slf4j
 public class CommonAnonymizerRobot extends SeleniumRobot {
 
-    private String anonymizerURL;
-    private String xpathField;
-    private String xpathButton;
+    private final String anonymizerURL;
+    private final String xpathField;
+    private final String xpathButton;
+
+    @Getter
+    @Setter
+    private int restartAttempts;
+
+    @Getter
+    private final int restartInterval;
 
     protected ExecutionAnonymizerResult message;
 
@@ -44,14 +56,16 @@ public class CommonAnonymizerRobot extends SeleniumRobot {
         this.anonymizerURL = scriptParams.get(AccessToolParameter.ANONYMIZER_URL);
         this.xpathField = scriptParams.get(AccessToolParameter.ANONYMIZER_XPATH_FIELD);
         this.xpathButton = scriptParams.get(AccessToolParameter.ANONYMIZER_XPATH_BUTTON);
+        this.restartAttempts = Integer.parseInt(scriptParams.getOrDefault(AccessToolParameter.RESTART_ATTEMPTS, "0"));
+        this.restartInterval = Integer.parseInt(scriptParams.getOrDefault(AccessToolParameter.RESTART_INTERVAL, "0"));
     }
 
-    ExecutionJobResult process(CheckUnit checkUnit) throws ExecutionException, InterruptedException {
+    ExecutionJobResult process(CheckUnit checkUnit) throws ExecutionException {
 
-        ScriptUtils.PageResult page = ScriptUtils.getPageSource(getDriver());
+        ScriptUtils.PageResult page = ScriptUtils.getPageSource(driver);
 
         if (message.getHttpStatus() == null){
-            HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(getDriver());
+            HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(driver);
             if (responseMeta != null){
                 message.setHttpStatus(responseMeta.status);
                 message.setHttpHeaders(HttpResponseHelper.headers2Str(responseMeta.jsonHeaders));
@@ -59,32 +73,32 @@ public class CommonAnonymizerRobot extends SeleniumRobot {
         }
         message.setErrorCode(page.errorCodeChrome);
         message.setPageContent(page.pageSource);
-        message.setScreenshot(ScriptUtils.getScreenshot(getDriver()));
+        message.setScreenshot(ScriptUtils.getScreenshot(driver));
 
         if (message.hasError())
             return message;
 
         if (StringUtils.isEmpty(message.getFinalUrl())){
-            message.setFinalUrl(ScriptUtils.getCurrentUrl(getDriver()));
+            message.setFinalUrl(ScriptUtils.getCurrentUrl(driver));
         }
 
-        close(getDriver());
+        close(driver);
 
 	    return message;
     }
 
-    ExecutionJobResult getTimeoutMessage() throws InterruptedException {
+    ExecutionJobResult getTimeoutMessage() {
         message.setErrorCode(TIME_OUT_ERROR);
-        message.setScreenshot(ScriptUtils.getScreenshot(getDriver()));
+        message.setScreenshot(ScriptUtils.getScreenshot(driver));
         return message;
     }
 
-    ExecutionJobResult getErrorMessage(String errorCode) throws InterruptedException {
+    ExecutionJobResult getErrorMessage(String errorCode) {
         return getErrorMessage(errorCode, null);
     }
 
-    ExecutionJobResult getErrorMessage(String errorCode, String details) throws InterruptedException {
-        HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(getDriver());
+    ExecutionJobResult getErrorMessage(String errorCode, String details) {
+        HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(driver);
         if (responseMeta != null){
             message.setHttpStatus(responseMeta.status);
             message.setHttpHeaders(HttpResponseHelper.headers2Str(responseMeta.jsonHeaders));
@@ -92,32 +106,32 @@ public class CommonAnonymizerRobot extends SeleniumRobot {
         message.setErrorCode(errorCode);
         if (details != null)
             message.setDetails(details);
-        message.setScreenshot(ScriptUtils.getScreenshot(getDriver()));
+        message.setScreenshot(ScriptUtils.getScreenshot(driver));
         return message;
     }
 
     @Override
-    public ExecutionJobResult execute(CheckUnit checkUnit) throws ExecutionException, InterruptedException {
-        getDriver().get(anonymizerURL);
+    public ExecutionJobResult execute(CheckUnit checkUnit, boolean throwExceptionByCaptchaOrBadIP) throws ExecutionException {
+        driver.get(anonymizerURL);
 
         try {
-            ScriptUtils.waitPageLoading(getDriver());
-            WebElement input = getDriver().findElement(By.xpath(xpathField));
+            ScriptUtils.waitPageLoading(driver);
+            WebElement input = driver.findElement(By.xpath(xpathField));
             input.sendKeys(checkUnit.getValue());
-            getDriver().findElement(By.xpath(xpathButton)).click();
+            driver.findElement(By.xpath(xpathButton)).click();
 
 
-            ScriptUtils.waitPageLoading(getDriver());
+            ScriptUtils.waitPageLoading(driver);
 
-            CloudflareUtils.waitCloudflareRedirect(getDriver());
-            ScriptUtils.waitPageLoading(getDriver());
-            if (CloudflareUtils.isCloudflareError(getDriver())) {
+            CloudflareUtils.waitCloudflareRedirect(driver);
+            ScriptUtils.waitPageLoading(driver);
+            if (CloudflareUtils.isCloudflareError(driver)) {
                 return getErrorMessage(CloudflareUtils
-                        .getCloudflareErrorDetails(getDriver()));
+                        .getCloudflareErrorDetails(driver));
             }
 
             String plainError = ScriptUtils
-                    .getPlainErrorDescriptionIfOccurred(getDriver());
+                    .getPlainErrorDescriptionIfOccurred(driver);
             if (plainError != null)
                 return getErrorMessage(plainError);
 
@@ -134,4 +148,5 @@ public class CommonAnonymizerRobot extends SeleniumRobot {
                     "Выполнение потока прервано", e);
         }
     }
+
 }

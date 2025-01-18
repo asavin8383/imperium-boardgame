@@ -1,12 +1,12 @@
-FROM openjdk:8-jdk-alpine
+FROM openjdk:8-jdk-slim
 
 LABEL Alex Shabalin <ashabalin@ec-leasing.ru>
 
 EXPOSE 11100
 
-RUN apk add --no-cache nmap \
-    && apk add --no-cache proxychains-ng \
-    && mkdir -p /share/nmap
+RUN apt update && \
+    apt install -y nmap proxychains-ng && \
+    mkdir -p /share/nmap
 
 ENV APP_PATH="/as-15-8-executor.jar" \
     LOG_PATH="/log"
@@ -19,6 +19,4 @@ ENTRYPOINT ["java", \
          "-jar", \
          "-Dapplication.logpath=${LOG_PATH}", \
          "-Dspring.profiles.active=${PROFILE}", \
-         "-Xms512M", \
-         "-Xmx1024M", \
          "/as-15-8-executor.jar"]

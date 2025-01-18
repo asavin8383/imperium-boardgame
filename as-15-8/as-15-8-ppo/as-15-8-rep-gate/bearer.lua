@@ -2,7 +2,7 @@ local http = require "resty.http"
 local httpc = http.new()
 local jwt = require "resty.jwt"
 
-    local token  = ngx.var.cookie_COOKIE_BEARER
+local token  = ngx.var.cookie_COOKIE_BEARER
 
 if token == nil then
    token = ngx.var.arg_token
@@ -19,6 +19,9 @@ local gateway_url=os.getenv("GATEWAY_URI")
 local basic_auth=os.getenv("BASIC_AUTH")
 local res, err = httpc:request_uri(gateway_url .. "/security/oauth/check_token",
  { method = "POST", query="token=" .. token, headers={authorization ="Basic " .. basic_auth}})
+if err ~= nil then
+    ngx.log(ngx.WARN, err)
+end
 
 if res.status ~= 200 then
     ngx.status = ngx.HTTP_UNAUTHORIZED

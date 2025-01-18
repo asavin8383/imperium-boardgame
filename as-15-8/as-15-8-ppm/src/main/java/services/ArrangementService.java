@@ -18,12 +18,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import repositories.*;
 import webClients.DispatcherWebClient;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import com.google.common.collect.Lists;
 
 /**
  * Created by san
@@ -91,13 +91,20 @@ public class ArrangementService {
     }
 
     @Transactional
-    public void refreshStoppedArrangement(Arrangement arrangement){
+    public int refreshStoppedArrangement(Arrangement arrangement){
         //Меняем статус для чек-юнитов, завершенных на диспетчере
-        scheduleCheckUnitRepo.changeFinished(
-            arrangement,
-            dispatcherWebClient.getJobIdsFromDispatcher(arrangement.getId()),
-            true
-        );
+        List<Long> dispatcherJobIds = dispatcherWebClient.getJobIdsFromDispatcher(arrangement.getId());
+        List<List<Long>> batchedJobIds = Lists.partition(dispatcherJobIds, 10000);
+        batchedJobIds.forEach(batch -> {
+            scheduleCheckUnitRepo.changeFinished(
+                    arrangement,
+                    batch,
+                    true
+            );
+        });
+
+        log.info("Статусы у ScheduleCheckUnit обновлены успешно");
+        return dispatcherJobIds.size();
     }
 
     public void closeSchedulePeriodArrangements(Arrangement arrangement, Long scheduleId) {

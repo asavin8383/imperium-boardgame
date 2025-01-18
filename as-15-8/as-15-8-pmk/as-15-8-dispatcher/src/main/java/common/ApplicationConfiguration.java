@@ -14,6 +14,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.kafka.core.CleanupConfig;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
@@ -28,6 +29,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EntityScan("model")
 @EnableJpaRepositories("repositories")
 @EnableConfigurationProperties(DispatcherProperties.class)
+@EnableAsync
 public class ApplicationConfiguration{
 
 	public static void main(String[] args) {

@@ -6,21 +6,30 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
+import org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter;
+import org.springframework.web.filter.ForwardedHeaderFilter;
 
 @Configuration
 @EnableResourceServer
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter {
+
+    private static final String[] AUTH_WHITELIST = {
+            "/swagger/**",
+            "/swagger-ui/**",
+            "/swagger-ui.html"
+    };
+
     @Override
     public void configure(final HttpSecurity http) throws Exception {
         http
-            .antMatcher("/**")
+                .antMatcher("/**")
                 .authorizeRequests()
-                .antMatchers(HttpMethod.GET,
-                        "/arrangements/checkUnits/**"
-                ).permitAll()
+                .antMatchers(HttpMethod.GET, "/arrangements/checkUnits/**").permitAll()
+                .antMatchers(HttpMethod.GET, AUTH_WHITELIST).permitAll()
                 .anyRequest().authenticated()
-            .and()
+                .and()
                 .httpBasic().disable();
+        http.addFilterBefore(new ForwardedHeaderFilter(), WebAsyncManagerIntegrationFilter.class);
     }
 }

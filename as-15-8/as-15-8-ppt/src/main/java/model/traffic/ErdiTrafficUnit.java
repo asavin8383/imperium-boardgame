@@ -15,6 +15,7 @@ import utils.TrafficUnitUtils;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -70,6 +71,13 @@ public class ErdiTrafficUnit extends TrafficUnit implements Serializable {
     public void syncContentAssociation() {
         if (formalErdiList != null)
             formalErdiList.forEach(join -> join.setTrafficUnit(this));
+    }
+
+    public void addAllCustomErdiList(Set<CustomErdi> customErdiList) {
+        if (this.customErdiList == null) {
+            this.customErdiList = new HashSet<>();
+        }
+        this.customErdiList.addAll(customErdiList);
     }
 
 }

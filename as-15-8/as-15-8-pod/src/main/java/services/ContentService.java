@@ -1,14 +1,14 @@
 package services;
 
 import checkUnits.CheckUnitType;
+import com.google.common.collect.Lists;
 import exceptions.AS_15_8_POD_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.actualViews.ContentCheckUnit;
 import model.projection.ContentView;
 import model.scheme.DomainMask;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
@@ -24,6 +24,9 @@ import repositories.DomainMaskRepo;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -41,7 +44,7 @@ public class ContentService {
     private final DomainMaskRepo domainMaskRepo;
     private final EntityManagerFactory emf;
     private EntityManager em;
-    private Session session;
+    private final int trafficContentViewBatchSize = 10000;
 
     @Cacheable
     public Optional<ContentView> getFormalErdiView(Long id) {
@@ -53,12 +56,8 @@ public class ContentService {
      * @param erdiId ИД ЕРДИ
      * @return список актуальных чек-юнитов
      */
-    public List<ContentCheckUnit> getActualCheckUnits(Long erdiId) {
+    public List<ContentCheckUnit> getActualCheckUnits(Long erdiId){
         return contentCheckUnitRepository.findAllByErdId(erdiId);
-    }
-
-    public Page<ContentCheckUnit> getActualCheckUnits(Long erdiId, Pageable page) {
-        return contentCheckUnitRepository.findAllByErdId(erdiId, page);
     }
 
     public List<ContentCheckUnit> getActualCheckUnits(List<Long> erdiIds){
@@ -86,38 +85,35 @@ public class ContentService {
 
     public ResponseEntity filterContentView(Pageable pageable, List<Long> contentIds) {
 
-
         Sort.Order order = pageable.getSort().stream().findFirst().orElseThrow(() ->
                 new AS_15_8_POD_Exception("фильтрация записей ерди невозможна, сортировка не задана!"));
 
         Page<ContentView> pageContent;
         em = emf.createEntityManager();
-        session = em.unwrap(Session.class);
-        Transaction transaction = session.beginTransaction();
+        EntityTransaction transaction = em.getTransaction();
+        transaction.begin();
         try {
-            createTempContentTable();
-            fillTempContentTable(contentIds);
-            List<ContentView> contentViewsSorted = filterContentView(order.getDirection().toString(), order.getProperty());
+            List<ContentView> contentViewsSorted = filterContentViewUnnest(order.getDirection().toString(),
+                    order.getProperty(),
+                    contentIds);
             pageContent = createPageable(pageable, contentViewsSorted, contentIds.size());
-            dropTempTable();
-            flushAndClearSession();
-
-            transaction.commit();
-
             return ResponseEntity.ok().body(pageContent);
         } catch (Exception ex) {
             if(transaction.isActive())
                 transaction.rollback();
 
             log.error("Ошибка при получении списка ЕРДИ", ex);
-
             List<String> errorMessages = getErrorMessagesByCause(ex);
-
             return ResponseEntity.badRequest().body(String.join(":\n", errorMessages));
         } finally {
-            session.close();
+            transaction.commit();
             em.close();
         }
+    }
+
+    private void logTime(String msg, LocalDateTime startTime) {
+        long timeDuration = ChronoUnit.SECONDS.between(startTime, LocalDateTime.now());
+        log.info(msg + " {} секунд", timeDuration);
     }
 
     private List<String> getErrorMessagesByCause(Exception ex) {
@@ -130,26 +126,21 @@ public class ContentService {
         return resultErrorMessage;
     }
 
-    private void createTempContentTable() {
-        String queryStr = "CREATE TEMPORARY TABLE content_temp ("
-                + "contentId bigint NOT NULL PRIMARY KEY)";
-        em.createNativeQuery(queryStr).executeUpdate();
-    }
+    private List<ContentView> filterContentViewUnnest(String sortingDirection, String sortingColumn, List<Long> contentIds) {
+        LocalDateTime startTime = LocalDateTime.now();
+        List<ContentView> result = new ArrayList<>();
+        List<List<Long>> subContentIds = Lists.partition(contentIds, trafficContentViewBatchSize);
+        subContentIds.forEach(subContent -> {
+            List<ContentView> contentViewsBstch = em.createNativeQuery("select * from sor.content_view c" +
+                            " join unnest(array" + subContent.toString() + ")" +
+                            " AS ppt_content_id" +
+                            " on c.id = ppt_content_id" +
+                            " ORDER BY " + sortingColumn + " " + sortingDirection,
+                    ContentView.class).getResultList();
+             result.addAll(contentViewsBstch);
+        });
 
-    private void fillTempContentTable(List<Long> contentIds) {
-        if (contentIds.size() > 0)
-            em.createNativeQuery("insert into content_temp (contentId) values(unnest(array" + contentIds.toString() + ")) ON CONFLICT DO NOTHING").executeUpdate();
-    }
-
-    private List<ContentView> filterContentView(String sortingDirection, String sortingColumn) {
-        @SuppressWarnings("unchecked")
-        List<ContentView> contentViews = em.createNativeQuery("select c.* from sor.content_view c " +
-                        "join content_temp t " +
-                        "on t.contentId = c.id " +
-                        "ORDER BY " + sortingColumn + " " + sortingDirection
-                , ContentView.class).getResultList();
-
-        return contentViews;
+        return result;
     }
 
     private Page<ContentView> createPageable(Pageable pageable, List<ContentView> result, Integer totalElements) {
@@ -157,15 +148,6 @@ public class ContentService {
         int end = (start + pageable.getPageSize()) > result.size() ? result.size() : (start + pageable.getPageSize());
 
         return new PageImpl<ContentView>((result.subList(start, end)), pageable, totalElements);
-    }
-
-    private void dropTempTable() {
-        em.createNativeQuery("DROP TABLE content_temp").executeUpdate();
-    }
-
-    private void flushAndClearSession() {
-        session.flush();
-        session.clear();
     }
 
     public String convertCamelCaseToSnakeCase(String parse) {

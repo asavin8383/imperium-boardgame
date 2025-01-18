@@ -4,6 +4,7 @@ import exceptions.AS_15_8_PPT_Exception;
 import liquibase.util.StringUtils;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import model.traffic.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -21,6 +22,7 @@ import javax.persistence.metamodel.SingularAttribute;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class CustomErdiService {
@@ -53,12 +55,12 @@ public class CustomErdiService {
     }
 
     private Specification<CustomErdiView> getSpecification(String query,
-                                                        boolean containsInTraffic,
-                                                        Long erdiTrafficUnitId,
-                                                        Long searchTrafficUnitId) {
+                                                           boolean containsInTraffic,
+                                                           Long erdiTrafficUnitId,
+                                                           Long searchTrafficUnitId) {
         if (erdiTrafficUnitId != null)
             return containsInTrafficUnit(query, containsInTraffic, erdiTrafficUnitId,
-                            CustomErdiView_.erdiTrafficUnits);
+                    CustomErdiView_.erdiTrafficUnits);
         else if (searchTrafficUnitId != null)
             return containsInTrafficUnit(query, containsInTraffic, searchTrafficUnitId,
                     CustomErdiView_.searchQueryPatterns);
@@ -137,8 +139,7 @@ public class CustomErdiService {
 
     public void deleteCustomErdi(Long id) {
         customErdiRepository.deleteById(id);
-        customErdiRepository.findById(id).ifPresent(customErdi ->
-                trafficService.actualizeCheckUnitsCount(customErdi));
+        customErdiRepository.findById(id).ifPresent(trafficService::actualizeCheckUnitsCount);
     }
 
 }

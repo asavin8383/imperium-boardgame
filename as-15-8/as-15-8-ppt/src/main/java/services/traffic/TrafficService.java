@@ -6,6 +6,7 @@ import enums.SortingDirection;
 import exceptions.AS_15_8_PPT_Exception;
 import liquibase.util.StringUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import model.catalog.AccessToolsCategory;
 import model.enums.AccessToolType;
 import model.enums.TrafficType;
@@ -21,6 +22,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
 import repositories.*;
 import utils.TrafficUnitUtils;
@@ -30,25 +32,27 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static utils.TrafficUnitUtils.fillTrafficUnit;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class TrafficService {
 
     private final TrafficRepository trafficRepository;
+    private final CustomErdiUnitRepository customErdiUnitRepository;
     private final AccessToolsCategoriesRepo accessToolsCategoriesRepo;
-    private final PodWebClient podWebClient;
     private final DynamicTrafficUnitRepository dynamicTrafficUnitRepository;
     private final ErdiContentJoinRepository erdiContentJoinRepository;
-    private final CustomErdiRepository customErdiRepository;
+    private final ErdiTrafficUnitRepository erdiTrafficUnitRepository;
+    private final PodWebClient podWebClient;
+    private final CreateCustomErdiService createCustomErdiService;
 
     public Page<TrafficBriefView> getBriefTrafficList(SortingDirection sortingDirection,
                                                       String sortingColumn,
@@ -77,7 +81,7 @@ public class TrafficService {
         view.setActualCheckUnitsCount(traffic.getActualCheckUnitsCount());
         view.setErdiCount(traffic.getErdiCount());
 
-        if (traffic.getDynamicTrafficUnits().size()>0)
+        if (traffic.getDynamicTrafficUnits().size() > 0)
             view.setContainsDynamicTraffic(true);
         view.setType(TrafficType.MIXED);
 
@@ -87,7 +91,7 @@ public class TrafficService {
     private long getDynamicTraficErdiCount(Long trafficId) {
         Optional<Traffic> traffic = trafficRepository.findById(trafficId);
         traffic.orElseThrow(() ->
-                new AS_15_8_PPT_Exception("Ошибка при актуализации количества чек юнитов для трафика, трафик с такми id не найден: "+ trafficId));
+                new AS_15_8_PPT_Exception("Ошибка при актуализации количества чек юнитов для трафика, трафик с такми id не найден: " + trafficId));
 
         return dynamicTrafficUnitRepository.findByTraffic(traffic.get()).
                 stream().findFirst().orElseGet(DynamicTrafficUnit::new).getErdiCountAbout();
@@ -97,7 +101,7 @@ public class TrafficService {
 
         Optional<Traffic> traffic = trafficRepository.findById(trafficId);
         traffic.orElseThrow(() ->
-                new AS_15_8_PPT_Exception("Ошибка при актуализации количества чек юнитов для трафика, трафик с такми id не найден: "+ trafficId));
+                new AS_15_8_PPT_Exception("Ошибка при актуализации количества чек юнитов для трафика, трафик с такми id не найден: " + trafficId));
 
         actualizeTrafficCheckUnitsCount(traffic.get());
         actualizeErdiCount(traffic.get());
@@ -106,25 +110,9 @@ public class TrafficService {
     }
 
     private Long actualizeTrafficCheckUnitsCount(Traffic traffic) {
-        Long actualCheckUnitsCount = getActualTrafficCheckUnitCountFromPod(traffic.getId());
-        Long customErdiCount = getActualCustomErdiCount(traffic);
-
-        traffic.setActualCheckUnitsCount(actualCheckUnitsCount + customErdiCount);
+        Long actualCheckUnitsCount = getActualTrafficCheckUnitCount(traffic.getId());
+        traffic.setActualCheckUnitsCount(actualCheckUnitsCount);
         return actualCheckUnitsCount;
-    }
-
-    private Long getActualCustomErdiCount(Traffic traffic) {
-        List<Long> customErdiIds = trafficRepository.getCustomErdiIdByTrafficId(traffic.getId());
-        AtomicReference<Long> customErdiCount = new AtomicReference<>(0L);
-
-        customErdiIds.forEach(customErdiId -> {
-            CustomErdi customErdi =  customErdiRepository.findById(customErdiId).orElseThrow(() ->
-                    new AS_15_8_PPT_Exception("Ошибка подсчёта актуального числа единичных проверок для custom ERDI c id:" + customErdiId));
-
-            Long customErdiCountSub = Long.valueOf(customErdi.getCustomErdiUnits().size());
-            customErdiCount.set(customErdiCount.get() + customErdiCountSub);
-        });
-        return customErdiCount.get();
     }
 
     private Long actualizeErdiCount(Traffic traffic) {
@@ -137,14 +125,11 @@ public class TrafficService {
     }
 
     void actualizeCheckUnitsCount(CustomErdi customErdi) {
-        List<ErdiTrafficUnit> list = customErdi.getErdiTrafficUnits();
-        if (list != null){
-            list.stream().findFirst().ifPresent(erdiTrafficUnit ->
-                    actualizeTrafficCheckUnitsCount(erdiTrafficUnit.getTraffic()));
-        }
+        customErdi.getErdiTrafficUnits().stream().findFirst().ifPresent(erdiTrafficUnit ->
+                actualizeTrafficCheckUnitsCount(erdiTrafficUnit.getTraffic()));
     }
 
-    private Long getActualTrafficCheckUnitCountFromPod(Long trafficId) {
+    private Long getActualTrafficCheckUnitCount(Long trafficId) {
         try {
             List<Long> erdiIds = trafficRepository.allContentErdiByTrafficId(trafficId);
             return podWebClient.calculateActualCheckUnitCount(erdiIds);
@@ -196,21 +181,20 @@ public class TrafficService {
         traffic.setName(trafficName);
 
 
+        traffic.getErdiTrafficUnits().add((ErdiTrafficUnit) fillTrafficUnit(new ErdiTrafficUnit(),
+                traffic,
+                TrafficUnitType.FORMAL,
+                category));
 
         traffic.getErdiTrafficUnits().add((ErdiTrafficUnit) fillTrafficUnit(new ErdiTrafficUnit(),
-                                                                                traffic,
-                                                                                TrafficUnitType.FORMAL,
-                                                                                category));
-
-        traffic.getErdiTrafficUnits().add((ErdiTrafficUnit) fillTrafficUnit(new ErdiTrafficUnit(),
-                                                                                traffic,
-                                                                                TrafficUnitType.CUSTOM,
-                                                                                category));
+                traffic,
+                TrafficUnitType.CUSTOM,
+                category));
 
         traffic.getSearchQueryTrafficUnits().add((SearchQueryTrafficUnit) fillTrafficUnit(new SearchQueryTrafficUnit(),
-                                                                                traffic,
-                                                                                TrafficUnitType.TEMPLATE,
-                                                                                category));
+                traffic,
+                TrafficUnitType.TEMPLATE,
+                category));
 
         return convertToFullView(trafficRepository.save(traffic));
     }
@@ -258,7 +242,7 @@ public class TrafficService {
             return Stream.concat(
                     erdiUnits.stream().map(TrafficUnit.class::cast),
                     Stream.concat(searchUnits.stream().map(TrafficUnit.class::cast),
-                    dynamicUnits.stream().map(TrafficUnit.class::cast))
+                            dynamicUnits.stream().map(TrafficUnit.class::cast))
             );
         } else if (erdiUnits != null) {
             return erdiUnits.stream().map(TrafficUnit.class::cast);
@@ -277,21 +261,9 @@ public class TrafficService {
         for (int i = 0; i < Integer.MAX_VALUE; i++) {
             String name = fName.apply(i);
             boolean exists = trafficRepository.existsByName(name);
-            if ( !exists ) return name;
+            if (!exists) return name;
         }
         return TrafficUnitUtils.generateRandomStringBounded();
-    }
-
-    private TrafficUnit fillTrafficUnit(TrafficUnit trafficUnit,
-                                                        Traffic traffic,
-                                                        TrafficUnitType type,
-                                                        AccessToolsCategory category) {
-        String name = TrafficUnitUtils.getNewName(traffic.getName(), type);
-
-        trafficUnit.setName(name);
-        trafficUnit.setCategory(category);
-        trafficUnit.setTraffic(traffic);
-        return trafficUnit;
     }
 
     private Specification<Traffic> createTrafficSpecification(String query, AccessToolType type) {
@@ -353,7 +325,7 @@ public class TrafficService {
             assert ids != null;
             contentIds.addAll(ids);
         });
-        return  contentIds;
+        return contentIds;
     }
 
     public DynamicTrafficUnit upadateFirstDynamicTrafficUnit(Traffic traffic, DynamicTrafficUnit newDynamicTrafficUnit) {
@@ -400,9 +372,11 @@ public class TrafficService {
     }
 
     public ResponseEntity<Page<ObjectNode>> getSortedContentViewFromPod(ErdiTrafficUnit erdiTrafficUnit, Pageable pageable) {
+        LocalDateTime startTime = LocalDateTime.now();
         List<Long> contentIds = erdiContentJoinRepository.findContentIds(erdiTrafficUnit);
         return podWebClient.getTrafficUnitContentIdsFiltered(pageable, contentIds);
     }
+
 
     public Page<ObjectNode> getUnsortedContentViewFromPod(ErdiTrafficUnit erdiTrafficUnit, Pageable pageable) {
         Page<ErdiTrafficUnitContent> trafficUnitContentIdsUnsorted =
@@ -417,4 +391,35 @@ public class TrafficService {
         List<ObjectNode> erdiList = podWebClient.fetchErdi(contentIds);
         return new PageImpl<>(erdiList, pageable, trafficUnitContentIdsUnsorted.getTotalElements());
     }
+
+    public Traffic updateTrafficFromFile(Long trafficId, MultipartFile file) {
+
+        Traffic traffic = trafficRepository.findById(trafficId).orElseThrow(() ->
+                new AS_15_8_PPT_Exception("Трафик не найден по id: " + trafficId));
+
+        Set<CustomErdi> customErdisFromFile = createCustomErdiService.createCustomErdiUnitsFromFile(file);
+
+        AccessToolsCategory category = accessToolsCategoriesRepo.findOneByOrderByIdDesc();
+
+        Optional<ErdiTrafficUnit> erdiTrafficUnitOpt = erdiTrafficUnitRepository.findFirstByNameEndingWithIgnoreCaseOrderByIdDesc("_CUSTOM");
+        ErdiTrafficUnit erdiTrafficUnit;
+
+        if (erdiTrafficUnitOpt.isPresent()) {
+            erdiTrafficUnit = erdiTrafficUnitOpt.get();
+        } else {
+            erdiTrafficUnit = (ErdiTrafficUnit) fillTrafficUnit(new ErdiTrafficUnit(),
+                    traffic,
+                    TrafficUnitType.CUSTOM,
+                    category);
+
+            traffic.addErdiTrafficUnit(erdiTrafficUnit);
+        }
+
+        erdiTrafficUnit.addAllCustomErdiList(customErdisFromFile);
+        erdiTrafficUnitRepository.save(erdiTrafficUnit);
+
+        actualizeTraffic(trafficId);
+        return trafficRepository.findById(trafficId).orElse(traffic);
+    }
+
 }

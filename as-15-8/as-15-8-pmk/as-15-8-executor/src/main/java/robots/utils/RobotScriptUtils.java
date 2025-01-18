@@ -1,23 +1,22 @@
 package robots.utils;
 
-import static robots.utils.ScriptUtils.TIME_OUT_CHECKING_ERROR;
-import static robots.utils.ScriptUtils.TIME_OUT_ERROR;
+import lombok.extern.slf4j.Slf4j;
+import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
+import robots.exceptions.CloudflareBlockExecutionException;
+import robots.exceptions.ExecutionException;
+import robots.exceptions.TimeoutCheckingBrowserException;
+import robots.exceptions.TimeoutScriptException;
+import robots.utils.ScriptUtils.PageResult;
 
-import java.net.ProtocolException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import org.openqa.selenium.TimeoutException;
-import org.openqa.selenium.WebDriver;
-
-import lombok.extern.slf4j.Slf4j;
-import org.openqa.selenium.remote.UnreachableBrowserException;
-import robots.exceptions.ExecutionException;
-import robots.exceptions.TimeoutCheckingBrowserException;
-import robots.exceptions.TimeoutScriptException;
-import robots.utils.ScriptUtils.PageResult;
+import static robots.utils.ScriptUtils.TIME_OUT_CHECKING_ERROR;
+import static robots.utils.ScriptUtils.TIME_OUT_ERROR;
 
 
 @Slf4j
@@ -53,20 +52,23 @@ public class RobotScriptUtils {
                 webDriver.get(url);
 
                 ScriptUtils.waitPageLoading(webDriver);
-                CloudflareUtils.waitCloudflareRedirect(webDriver, timeoutSec*1000);
+                CloudflareUtils.waitCloudflareRedirect(webDriver, timeoutSec * 1000);
                 ScriptUtils.waitPageLoading(webDriver);
 
                 if (CloudflareUtils.isCloudflareError(webDriver)) {
-                    pageSourceResult = new ScriptUtils.PageResult(null, CloudflareUtils.getCloudflareErrorDetailsOpt(webDriver, null));
+                    throw new CloudflareBlockExecutionException("Доступ был заблокирован Cloudflare.");
                 } else {
                     pageSourceResult = ScriptUtils.getPageSource(webDriver);
                 }
             } catch (TimeoutCheckingBrowserException e) {
-                log.info("TimeoutException на проверке браузера", e);
+                log.info("Таймаут проверки браузера: " + e.getMessage());
                 return new ScriptUtils.PageResult(null, TIME_OUT_CHECKING_ERROR);
             } catch (TimeoutException | TimeoutScriptException e) {
-                log.info("TimeoutException при получении страницы", e);
+                log.info("Таймаут при получении страницы: " + e.getMessage());
                 pageSourceResult = new ScriptUtils.PageResult(null, TIME_OUT_ERROR);
+            } catch (WebDriverException ex) {
+                log.info("Страница не была загружена браузером: {}", ex.getMessage());
+                pageSourceResult = new ScriptUtils.PageResult(null, ex.getMessage());
             } catch (InterruptedException e) {
                 throw new ExecutionException("Выполнение потока прервано", e);
             }
@@ -84,22 +86,21 @@ public class RobotScriptUtils {
         TimeoutException exception = null;
         PageResult pageSourceResult = new PageResult("", "FIRST");
 
-        while (++cnt <= tryCount && pageSourceResult.errorCodeChrome != null){
+        while (++cnt <= tryCount && pageSourceResult.errorCodeChrome != null) {
             if (cnt > 1)
-                ScriptUtils.waitDriver(driver, 3 * (cnt-1));
+                ScriptUtils.waitDriver(driver, 3 * (cnt - 1));
 
-            try{
+            try {
                 exception = null;
                 driver.get(url);
                 ScriptUtils.waitPageLoading(driver, timeoutSec);
                 pageSourceResult = ScriptUtils.getPageSource(driver);
-            }
-            catch (TimeoutException te){
+            } catch (TimeoutException te) {
                 exception = te;
             }
         }
 
-        if (exception != null){
+        if (exception != null) {
             throw exception;
         }
 
@@ -109,17 +110,16 @@ public class RobotScriptUtils {
     /**
      * Параллельная загрузка исходника страниц.
      **/
-    public static List<PageResult> getPageSources(List<WebDriver> drivers, String url){
+    public static List<PageResult> getPageSources(List<WebDriver> drivers, String url) {
         List<CompletableFuture<PageResult>> pageContentFutures = drivers.stream()
                 .map(webDriver -> {
                     return CompletableFuture.supplyAsync(() -> {
                         PageResult pResult = new PageResult();
-                        try{
+                        try {
                             webDriver.get(url);
                             ScriptUtils.waitDriver(webDriver, 3);
                             pResult = ScriptUtils.getPageSource(webDriver);
-                        }
-                        catch(Exception e){
+                        } catch (Exception e) {
                             e.printStackTrace();
                         }
                         return pResult;

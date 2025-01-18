@@ -37,7 +37,7 @@ services:
       collect_logs_with_filebeat: "true"
       decode_log_event_to_json_object: "true"
   executor:
-    image: dcr.ec-leasing.ru/as-15-8/as-15-8-executor:latest
+    image: dcr.ec-leasing.ru/as-15-8/as-15-8-executor:1.0.1
     deploy:
       mode: global
       placement:

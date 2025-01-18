@@ -3,6 +3,19 @@ server:
   port: 15800
   tomcat:
     max-threads: 200
+springdoc:
+  api-docs:
+    path: /swagger/api
+  swagger-ui:
+    operationsSorter: method
+    tagsSorter: alpha
+    docExpansion: none
+    tryItOutEnabled: true
+    filter: Трафик
+    oauth:
+      clientId: as-15-8
+      clientSecret: 1q0p2w9o
+      uri: https://as-15-8-dev.eclsoft.ru/api/security/oauth/token
 gateway.url: ${GATEWAY_URI:http://localhost:15880}
 eureka:
   client:
@@ -28,9 +41,12 @@ spring:
     properties:
       hibernate:
         jdbc:
+          batch_size: 5000
           lob:
             non_contextual_creation: true
         format_sql: true
+        order_inserts: true
+        order_updates: true
     databasePlatform: org.hibernate.dialect.PostgreSQL9Dialect
 
 ---
@@ -61,7 +77,7 @@ spring:
     hibernate:
       ddl-auto: none
   datasource:
-    url: jdbc:postgresql://192.168.5.195:5432/asdb
+    url: jdbc:postgresql://192.168.5.195:5432/asdb_release
 eureka:
   instance:
     metadata-map:
@@ -83,7 +99,9 @@ spring:
 spring:
   profiles: dev_asavin
   datasource:
-    url: jdbc:postgresql://192.168.5.211:5432/asdb_test2
+    url: jdbc:postgresql://as-15-8-pg.eclsoft.ru:5432/asdb
+    password: pHlAYup2
+gateway.url: https://as-15-8-dev.eclsoft.ru/api
 
 ---
 
@@ -106,14 +124,43 @@ spring:
 spring:
   profiles: dev_danikanov
   datasource:
-    url: jdbc:postgresql://192.168.5.195:5432/asdb
+    url: jdbc:postgresql://192.168.5.195:5432/asdb_release
 
 ---
 
 spring:
+  application.name: ppt_msnopok
   profiles: dev_msnopok
   datasource:
-    url: jdbc:postgresql://192.168.5.195:5432/asdb
+    url: jdbc:postgresql://as-15-8-pg-dev.eclsoft.ru:5432/asdb
+    password: sdfHFG674$^fdsFG
+    username: postgres
+gateway.url: https://as-15-8-dev.eclsoft.ru/api
+
+---
+
+#logging:
+#  level.org.hibernate:
+#    SQL: DEBUG
+#    type:
+#      descriptor:
+#        sql:
+#          BasicBinder: TRACE
+spring:
+  application.name: ppt_ifilimonov
+  profiles: dev_ifilimonov
+  datasource:
+    url: jdbc:postgresql://as-15-8-pg-dev.eclsoft.ru:5432/asdb
+    password: sdfHFG674$^fdsFG
+    username: postgres
+  jpa:
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 10000
+        generate_statistics: true
+gateway.url: https://as-15-8-dev.eclsoft.ru/api
+
 ---
 
 logging:

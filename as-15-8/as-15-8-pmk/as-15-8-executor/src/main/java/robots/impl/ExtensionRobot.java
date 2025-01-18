@@ -3,26 +3,23 @@ package robots.impl;
 import checkUnits.CheckUnit;
 import common.ExecutorProperties;
 import enums.AccessToolParameter;
-import execution.ExecutionAnonymizerResult;
 import execution.ExecutionJobResult;
 import execution.ExecutionVpnJobResult;
-import org.openqa.selenium.*;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
+import lombok.Getter;
+import lombok.Setter;
+import org.openqa.selenium.By;
+import org.openqa.selenium.Platform;
+import org.openqa.selenium.WebElement;
 import org.springframework.util.StringUtils;
 import robots.ChromeSettings;
 import robots.DriverFactory;
-import robots.ProxyUtils;
 import robots.exceptions.ExecutionException;
 import robots.utils.CloudflareUtils;
 import robots.utils.HttpResponseHelper;
-import robots.utils.RobotScriptUtils;
 import robots.utils.ScriptUtils;
-import robots.utils.ScriptUtils.PageResult;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.function.Function;
 
 import static robots.utils.HttpResponseHelper.HttpResponseMeta;
 import static robots.utils.ScriptUtils.TIME_OUT_ERROR;
@@ -32,10 +29,17 @@ public class ExtensionRobot extends SeleniumRobot {
 
     private String stubUrl;
 
-    private String xpathField;
-    private String xpathButton;
+    private final String xpathField;
+    private final String xpathButton;
 
-    private ChromeSettings.Extension extension;
+    @Getter
+    @Setter
+    private int restartAttempts;
+
+    @Getter
+    private final int restartInterval;
+
+    private final ChromeSettings.Extension extension;
     protected ExecutionVpnJobResult message = new ExecutionVpnJobResult();
 
     public ExtensionRobot(Map<AccessToolParameter, String> scriptParams) {
@@ -52,23 +56,23 @@ public class ExtensionRobot extends SeleniumRobot {
 
         this.xpathField = scriptParams.get(AccessToolParameter.EXTENSION_XPATH_FIELD);
         this.xpathButton = scriptParams.get(AccessToolParameter.EXTENSION_XPATH_BUTTON);
-
+        this.restartAttempts = Integer.parseInt(scriptParams.getOrDefault(AccessToolParameter.RESTART_ATTEMPTS, "0"));
+        this.restartInterval = Integer.parseInt(scriptParams.getOrDefault(AccessToolParameter.RESTART_INTERVAL, "0"));
     }
 
-    ExecutionJobResult process(CheckUnit checkUnit) throws ExecutionException, InterruptedException {
+    ExecutionJobResult process(CheckUnit checkUnit) throws ExecutionException {
 
-        setDriver(DriverFactory.createChromeDriver(
+        driver = DriverFactory.createChromeDriver(
                 ExecutorProperties.getSeleniumHubUrl(),
                 Platform.valueOf(getScriptParams().get(AccessToolParameter.PLATFORM)),
                 getScriptParams().get(AccessToolParameter.VERSION),
                 Collections.singletonList(extension)
-            )
         );
 
-        ScriptUtils.PageResult page = ScriptUtils.getPageSource(getDriver());
+        ScriptUtils.PageResult page = ScriptUtils.getPageSource(driver);
 
         if (message.getHttpStatus() == null){
-            HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(getDriver());
+            HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(driver);
             if (responseMeta != null){
                 message.setHttpStatus(responseMeta.status);
                 message.setHttpHeaders(HttpResponseHelper.headers2Str(responseMeta.jsonHeaders));
@@ -76,44 +80,44 @@ public class ExtensionRobot extends SeleniumRobot {
         }
         message.setChromeErrorCode(page.errorCodeChrome);
         message.setPageContent(page.pageSource);
-        message.setScreenshot(ScriptUtils.getScreenshot(getDriver()));
+        message.setScreenshot(ScriptUtils.getScreenshot(driver));
 
         if (message.hasError())
             return message;
 
         if (StringUtils.isEmpty(message.getFinalUrlPage())){
-            message.setFinalUrlPage(ScriptUtils.getCurrentUrl(getDriver()));
+            message.setFinalUrlPage(ScriptUtils.getCurrentUrl(driver));
         }
 
-        close(getDriver());
+        close(driver);
 
         return message;
     }
 
 
     @Override
-	public ExecutionJobResult execute(CheckUnit checkUnit) throws ExecutionException, InterruptedException {
+	public ExecutionJobResult execute(CheckUnit checkUnit, boolean throwExceptionByCaptchaOrBadIP) throws ExecutionException {
         // работает только с хромом!
         if (!checkBrowserChrome())
             throw new ExecutionException("Ошибка, неверный браузер! Для данного робота поддерживатся только браузер CHROME!");
 
-            getDriver().get(extension.getPopupUrl()); //gkojfkhlekighikafcpjkiklfbnlmeio/js/popup.html
+            driver.get(extension.getPopupUrl()); //gkojfkhlekighikafcpjkiklfbnlmeio/js/popup.html
 
             try {
-                ScriptUtils.waitPageLoading(getDriver());
-                WebElement input = getDriver().findElement(By.xpath(xpathField)); //"//*[@id=\"popup\"]/div/div[1]/input"
+                ScriptUtils.waitPageLoading(driver);
+                WebElement input = driver.findElement(By.xpath(xpathField)); //"//*[@id=\"popup\"]/div/div[1]/input"
                 input.sendKeys(checkUnit.getValue());
-                getDriver().findElement(By.xpath(xpathButton)).click(); //"//*[@id=\"popup\"]/div/div[1]/button"
+                driver.findElement(By.xpath(xpathButton)).click(); //"//*[@id=\"popup\"]/div/div[1]/button"
 
-                CloudflareUtils.waitCloudflareRedirect(getDriver());
-                ScriptUtils.waitPageLoading(getDriver());
-                if (CloudflareUtils.isCloudflareError(getDriver())) {
+                CloudflareUtils.waitCloudflareRedirect(driver);
+                ScriptUtils.waitPageLoading(driver);
+                if (CloudflareUtils.isCloudflareError(driver)) {
                     return getErrorMessage(CloudflareUtils
-                            .getCloudflareErrorDetails(getDriver()));
+                            .getCloudflareErrorDetails(driver));
                 }
 
                 String plainError = ScriptUtils
-                        .getPlainErrorDescriptionIfOccurred(getDriver());
+                        .getPlainErrorDescriptionIfOccurred(driver);
                 if (plainError != null)
                     return getErrorMessage(plainError);
 
@@ -122,7 +126,7 @@ public class ExtensionRobot extends SeleniumRobot {
 
 
             } finally {
-            close(getDriver());
+            close(driver);
         }
 
         return message;
@@ -132,24 +136,24 @@ public class ExtensionRobot extends SeleniumRobot {
         return "chrome".equalsIgnoreCase(getScriptParams().get(AccessToolParameter.BROWSER));
     }
 
-    ExecutionJobResult getTimeoutMessage() throws InterruptedException {
+    ExecutionJobResult getTimeoutMessage() {
         message.setChromeErrorCode(TIME_OUT_ERROR);
-        message.setScreenshot(ScriptUtils.getScreenshot(getDriver()));
+        message.setScreenshot(ScriptUtils.getScreenshot(driver));
         return message;
     }
 
-    ExecutionJobResult getErrorMessage(String errorCode) throws InterruptedException {
+    ExecutionJobResult getErrorMessage(String errorCode) {
         return getErrorMessage(errorCode, null);
     }
 
-    ExecutionJobResult getErrorMessage(String errorCode, String details) throws InterruptedException {
-        HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(getDriver());
+    ExecutionJobResult getErrorMessage(String errorCode, String details) {
+        HttpResponseMeta responseMeta = HttpResponseHelper.getGetResponseMeta(driver);
         if (responseMeta != null){
             message.setHttpStatus(responseMeta.status);
             message.setHttpHeaders(HttpResponseHelper.headers2Str(responseMeta.jsonHeaders));
         }
         message.setChromeErrorCode(errorCode);
-        message.setScreenshot(ScriptUtils.getScreenshot(getDriver()));
+        message.setScreenshot(ScriptUtils.getScreenshot(driver));
         return message;
     }
 

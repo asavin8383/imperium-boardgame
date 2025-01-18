@@ -3,6 +3,7 @@ package service.impl;
 import exception.ClassificationException;
 import exception.NlpException;
 import model.NLPCategory;
+import model.NLPModel;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import service.ClassificationService;
@@ -14,17 +15,14 @@ import java.net.URL;
 @Qualifier("openNLPClassificator")
 public class OpenNLP_ClassificationServiceImpl implements ClassificationService {
 
-    public static final String nlpModelPath = "classpath:classification.bin";
-
     @Override
-    public NLPCategory classify(String content) {
-        try{
-            URL resourceUrl = new URL(nlpModelPath);
-            //URL resourceUrl = OpenNlpUtil.class.getClassLoader().getResource(resourcePath);
+    public NLPCategory classify(String content, NLPModel model) {
+        try {
+            URL resourceUrl = new URL(model.getModelPath());
+//            URL resourceUrl = OpenNlpUtil.class.getClassLoader().getResource(model.getModelPath());
             if(resourceUrl == null) {
-                throw new NlpException("Ошибка прик категоризации текста! Не удалось найти дерево принятия решений среди ресурсов по пути " + resourceUrl);
+                throw new NlpException("Ошибка при категоризации текста! Не удалось найти дерево принятия решений среди ресурсов по пути " + resourceUrl);
             }
-
             String resultString = OpenNlpUtil.categorize(content, resourceUrl);
             try {
                 return NLPCategory.parse(resultString, NLPCategory.EXCEPTION);
@@ -32,7 +30,7 @@ public class OpenNLP_ClassificationServiceImpl implements ClassificationService 
                 throw new ClassificationException("Ошибка категоризации текста! Получен недопустимый вариант при попытке категоризации: " + resultString, ex);
             }
 
-        } catch (Exception ex){
+        } catch (Exception ex) {
             throw new ClassificationException("Ошибка при категоризации текста!", ex);
         }
     }

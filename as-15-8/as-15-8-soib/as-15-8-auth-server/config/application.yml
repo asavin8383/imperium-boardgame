@@ -66,7 +66,7 @@ spring:
   main:
     banner-mode: "off"
   datasource:
-    url: jdbc:postgresql://192.168.5.195:5432/asdb
+    url: jdbc:postgresql://192.168.5.195:5432/asdb_release
 eureka:
   instance:
     metadata-map:
@@ -99,7 +99,11 @@ spring:
 spring:
   profiles: dev_ashabalin
   datasource:
-    url: jdbc:postgresql://192.168.5.211:5432/asdb_test
+    url: jdbc:postgresql://as-15-8-pg.eclsoft.ru:5432/postgres
+    username: as_user
+    password: pHlAYup2
+  liquibase:
+    enabled: false
 
 ---
 
@@ -107,7 +111,7 @@ spring:
 spring:
   profiles: dev_danikanov
   datasource:
-    url: jdbc:postgresql://192.168.5.195:5432/asdb
+    url: jdbc:postgresql://192.168.5.195:5432/asdb_release
 
 ---
 

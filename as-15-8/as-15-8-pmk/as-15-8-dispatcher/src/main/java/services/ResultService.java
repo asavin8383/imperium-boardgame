@@ -1,15 +1,11 @@
 package services;
 
 import accessTools.AccessToolDTO;
-import analysis.AnalysisResult;
 import analysis.CheckUnitResult;
 import analysis.CheckUnitStatusNotification;
-import arrangement.ArrangementStatusNotification;
 import checkUnits.CheckUnitKey;
 import common.DispatcherProperties;
-import enums.ArrangementEvents;
 import enums.CheckUnitJobResult;
-import exceptions.AS_15_8_DispatcherException;
 import imprint.HeaderObject;
 import imprint.ImageProcessor;
 import lombok.RequiredArgsConstructor;
@@ -17,18 +13,22 @@ import lombok.extern.slf4j.Slf4j;
 import model.*;
 import model.enums.ArrangementStatus;
 import model.enums.CheckType;
-import model.enums.Reason;
 import org.apache.kafka.streams.KeyValue;
+import org.apache.kafka.streams.kstream.Windowed;
+import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.logging.log4j.util.Strings;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.type.LocalDateTimeType;
 import org.hibernate.type.LongType;
 import org.hibernate.type.StringType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import repositories.ArrangementRepo;
+import restapi.ArrangementRestApi;
 import restapi.ConfigClient;
 import restapi.PptClient;
 
@@ -40,7 +40,6 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.Objects;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -50,6 +49,7 @@ public class ResultService {
     private final ResultsKafkaService resultsKafkaService;
 
     private final ArrangementRepo arrangementRepo;
+    private final ArrangementRestApi arrangementRestApi;
     private final ArrangementService arrangementService;
     //Объекты для создания штампа на скриншоте
     private final ImageProcessor imageProcessor = new ImageProcessor();
@@ -60,154 +60,229 @@ public class ResultService {
 
     private final EntityManagerFactory entityManagerFactory;
 
+    @Value("${results.transaction.batch.size}")
+    private int transactionBatchSize;
+
+    @Value("${results.log.every}")
+    private int logEvery;
+
     @PostConstruct
     private void initImageProcessor() throws Exception {
         //Загружаем шрифт
         imageProcessor.loadFontFromFile(Objects.requireNonNull(ResultService.class.getClassLoader().getResourceAsStream("fonts/arial.ttf")));
+
     }
 
+    @Async
     @Scheduled(cron = "${results.save.schedule}")
     public void saveCompletionArrangements() {
         try{
             arrangementRepo
                     .findReadyToUpload()
                     .stream()
-                    .filter(arrangement -> {
-                        if(arrangement.getStatus().equals(ArrangementStatus.STOPPING) || isArrangementFinished(arrangement)) {
-                            arrangement.setStatus(ArrangementStatus.UPLOADING);
-                            arrangementRepo.save(arrangement);
-                            return true;
-                        }
-                        return false;
-                    })
-                    .forEach(this::saveArrangementResults);
+                    .filter(arrangement ->
+                        arrangement.getStatus().equals(ArrangementStatus.STOPPING) ||
+                                isArrangementFinished(arrangement))
+                    .forEach(this::saveArrangement);
         } catch (Exception ex){
             log.error("Ошибка при сохранении результатов мероприятий", ex);
         }
     }
 
-    public void saveArrangementResults(Long arrangementId){
-        Arrangement arrangement = arrangementRepo
-                .findById(arrangementId)
-                .orElseThrow((() -> new AS_15_8_DispatcherException("Ошибка! Мероприятие для выгрузки не найдено в БД по id: " + arrangementId)));
+    public void saveArrangement(Arrangement arrangement){
+        boolean isStopping = arrangement.getStatus().equals(ArrangementStatus.STOPPING);
         arrangement.setStatus(ArrangementStatus.UPLOADING);
         arrangementRepo.save(arrangement);
-        saveArrangementResults(arrangement);
+        saveArrangement(arrangement, isStopping);
+    }
+
+    private void logEvery_N_Result(int transactionCount, String objectName) {
+        if (transactionCount % logEvery == 0)
+            log.info("Записано {} {}", transactionCount, objectName);
     }
 
     @Transactional
-    void saveArrangementResults(Arrangement arrangement) {
-        log.info("Начато сохранение мероприятия: " + arrangement.getId());
+    void saveArrangement(Arrangement arrangement, boolean isStopping) {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
-        EntityTransaction transaction = entityManager.getTransaction();
-        boolean isStopped = false;
-        if (arrangementRepo.findByIdAndVersionAndReasonIsNot(arrangement.getId(), arrangement.getVersion(), Reason.NORMAL).isPresent()) {
-            isStopped = true;
-        }
         try {
-            boolean finalIsStopped = isStopped;
-            resultsKafkaService.getArrangementResultsIterator(arrangement.getId())
-                .ifPresent(resultsIterator -> {
-                    boolean isSaved = true;
-                    transaction.begin();
-                    while (resultsIterator.hasNext()) {
-                        KeyValue<CheckUnitKey, CheckUnitResult> result = resultsIterator.next();
-                        //Если штамп ставим, нужно попросить инфо об AccessTool
-                        AccessToolDTO accessToolDTO = dispatcherProperties.getImprint().isUseImprint() ? getAccessToolInfo(arrangement.getId()) : null;
-                        isSaved = saveArrangementResult(entityManager, result.key, result.value, arrangement, accessToolDTO);
+            Long version = arrangement.getVersion();
+            log.info("Начато сохранение мероприятия: " + arrangement.getId() + ", версия: " + version);
+
+            KeyValueIterator<Windowed<CheckUnitKey>, CheckUnitResult> resultsIterator =
+                    resultsKafkaService.getArrangementResultsIterator(arrangement.getId())
+                    .orElseThrow(() -> new Exception("Не удалось получить результаты мероприятия из временного хранилища"));
+            KeyValueIterator<Windowed<CheckUnitKey>, Screenshots> screenshotsIterator =
+                    resultsKafkaService.getArrangementResultScreenshotsIterator(arrangement.getId())
+                    .orElseThrow(() -> new Exception("Не удалось получить скриншоты результатов мероприятия из временного хранилища"));
+
+            boolean isSaved = saveArrangementResults(arrangement, version, resultsIterator, entityManager);
+            saveArrangementScreenshots(arrangement, version, screenshotsIterator, entityManager);
+
+            if (isSaved) {
+                log.info("Мероприятие успешно сохранено в БД: " + arrangement.getId() + ", версия: " + version);
+                if(isArrangementFinished(arrangement) || isStopping) {
+                    if (arrangementRestApi.sendStatusNotificationToPPM(arrangement.getId(), isStopping)) {
+                        boolean isActAvailable = arrangementRestApi.isActAvailableFromPPT(arrangement.getId());
+                        boolean isFinished = arrangementService.finishArrangement(arrangement.getId(), isStopping, isActAvailable);
+                        if (!isStopping && isFinished && isActAvailable)
+                            arrangementRestApi.changeArrangementStatusToActSentPPT(arrangement.getId());
+                        log.info("Мероприятие успешно завершено: " + arrangement.getId());
                     }
-                    transaction.commit();
-                    if (isSaved) {
-                        log.info("Мероприятие успешно сохранено в БД: " + arrangement.getId());
-                        if(isArrangementFinished(arrangement) || finalIsStopped) {
-                            if (arrangementService.sendStopOrFinishedStatusNotificationToPPT(arrangement.getId(), finalIsStopped)) {
-                                boolean isActSendAutomatically = arrangementService.isActAvailableFromPPT(arrangement.getId());
-                                boolean isFinished = arrangementService.finishArrangement(arrangement.getId(), finalIsStopped, isActSendAutomatically);
-                                if (!finalIsStopped && isFinished && isActSendAutomatically)
-                                    arrangementService.sendStatusNotificationToPPT(new ArrangementStatusNotification(
-                                            arrangement.getId(),
-                                            ArrangementEvents.SEND_ACT));
-                                log.info("Мероприятие успешно завершено: " + arrangement.getId());
-                            }
-                        }
-                    } else {
-                        log.info("Ошибка сохранения мероприятия: " + arrangement.getId());
-                    }
-                });
+                }
+            } else {
+                log.info("Ошибка сохранения мероприятия: " + arrangement.getId());
+            }
         } catch (Exception ex){
             log.error("Ошибка при сохранении результатов проверок мероприятия " + arrangement.getId(), ex);
-            if(transaction.isActive())
-                transaction.rollback();
-            arrangement.setStatus(isStopped ? ArrangementStatus.STOPPING : ArrangementStatus.RUNNING);
+            arrangement.setStatus(isStopping ? ArrangementStatus.STOPPING : ArrangementStatus.RUNNING);
             arrangementRepo.save(arrangement);
         } finally {
             entityManager.close();
         }
     }
 
-    private boolean saveArrangementResult(EntityManager entityManager, CheckUnitKey checkUnitKey, CheckUnitResult checkUnitResult, Arrangement arrangement, AccessToolDTO accessToolDTO) {
+
+    boolean saveArrangementResults(
+            Arrangement arrangement,
+            Long version,
+            KeyValueIterator<Windowed<CheckUnitKey>, CheckUnitResult> resultsIterator,
+            EntityManager entityManager){
+        boolean isSaved = true;
+        EntityTransaction transaction = entityManager.getTransaction();
         try {
-            saveJobResult(entityManager, arrangement, checkUnitKey.getJobId(), checkUnitResult, accessToolDTO);
-        } catch (Exception ex) {
-            try {
-                log.error("Ошибка при сохранении результата проверки: " + checkUnitKey.getJobId() + ", " + checkUnitResult.getCheckUnit().getValue(), ex);
+            int transactionCount = 0;
+            while (resultsIterator.hasNext()) {
 
-                StringWriter sw = new StringWriter();
-                ex.printStackTrace(new PrintWriter(sw));
+                KeyValue<Windowed<CheckUnitKey>, CheckUnitResult> windowedResult = resultsIterator.next();
+                KeyValue<CheckUnitKey, CheckUnitResult> result = KeyValue.pair(windowedResult.key.key(), windowedResult.value);
 
-                CheckUnitStatusNotification notification = new CheckUnitStatusNotification();
-                notification.setCheckResult(CheckUnitJobResult.INTERNAL_ERROR);
-                notification.setCheckUnit(checkUnitResult.getCheckUnit());
-                notification.setStartTime(checkUnitResult.getStartTime());
-                notification.setEndTime(checkUnitResult.getEndTime());
-                notification.setDescription(sw.toString());
+                if(version == null || result.key.getVersion().equals(version)) {
 
-                saveJobResult(entityManager, arrangement, checkUnitKey.getJobId(), notification, accessToolDTO);
-                log.info("Ошибка сохранена: " + checkUnitKey.getJobId());
-            } catch (Exception newEx) {
-                log.error("Ошибка при сохранении ошибочной обработки сообщения с анализом результатов проверки: " + checkUnitKey.getJobId() + ", " + checkUnitResult.getCheckUnit().getValue(), newEx);
-                return false;
+                    if (transactionCount % transactionBatchSize == 0)
+                        transaction.begin();
+
+                    if (!saveArrangementResult(entityManager, arrangement, result.key, result.value))
+                        isSaved = false;
+
+                    transactionCount++;
+
+                    if (transactionCount % transactionBatchSize == 0)
+                        transaction.commit();
+
+                    logEvery_N_Result(transactionCount, "результатов");
+                }
             }
+
+            if (transaction.isActive()) {
+                transaction.commit();
+                log.info("Записано {} результатов", transactionCount);
+            }
+        } catch (Exception ex) {
+            if(transaction.isActive())
+                transaction.rollback();
+        }
+        return isSaved;
+    }
+
+    private void saveArrangementScreenshots(
+            Arrangement arrangement,
+            Long version,
+            KeyValueIterator<Windowed<CheckUnitKey>, Screenshots> screenshotsIterator,
+            EntityManager entityManager){
+        EntityTransaction transaction = entityManager.getTransaction();
+        try {
+            int transactionCount = 0;
+            while (screenshotsIterator.hasNext()) {
+
+                KeyValue<Windowed<CheckUnitKey>, Screenshots> windowedResult = screenshotsIterator.next();
+                KeyValue<CheckUnitKey, Screenshots> screenshot = KeyValue.pair(windowedResult.key.key(), windowedResult.value);
+
+                if(version == null || screenshot.key.getVersion().equals(version)) {
+
+                    if (transactionCount % transactionBatchSize == 0)
+                        transaction.begin();
+
+                    //Если штамп ставим, нужно попросить инфо об AccessTool
+                    AccessToolDTO accessToolDTO = dispatcherProperties.getImprint().isUseImprint() ? getAccessToolInfo(arrangement.getId()) : null;
+
+                    saveScreenshot(screenshot.value, entityManager, screenshot.key.getJobId(), accessToolDTO);
+
+                    transactionCount++;
+                    if (transactionCount % transactionBatchSize == 0)
+                        transaction.commit();
+                    logEvery_N_Result(transactionCount, "скриншотов");
+                }
+            }
+
+            if (transaction.isActive()) {
+                transaction.commit();
+                log.info("Записано {} скриншотов", transactionCount);
+            }
+        } catch (Exception ex) {
+            if(transaction.isActive())
+                transaction.rollback();
+        }
+    }
+
+    private boolean saveArrangementResult(EntityManager entityManager, Arrangement arrangement, CheckUnitKey checkUnitKey, CheckUnitResult checkUnitResult) {
+        try {
+            DetailResultService<? super CheckUnitResult, ? extends DetailResult> service = AnalysisResultServiceFactory.getService(checkUnitResult.getClass());
+            //       Result result = resultRepo.findById(jobId).orElseGet(Result::new);
+            Result result = new Result();
+            result.setArrangement(arrangement);
+            resultsKafkaService.fillResult(result, checkUnitKey.getJobId(), checkUnitResult, service);
+            //DetailResult detailResult = service.getOrCreate(result, checkUnitResult);
+            DetailResult detailResult = service.create(checkUnitResult);
+            detailResult.setId(checkUnitKey.getJobId());
+
+            upsertResult(entityManager, result);
+            service.save(entityManager, detailResult);
+        } catch (Exception ex) {
+            saveErrorResult(ex, checkUnitKey, checkUnitResult, arrangement, entityManager);
+            return false;
         }
         return true;
     }
 
-    private void saveJobResult(EntityManager entityManager, Arrangement arrangement, Long jobId, CheckUnitResult checkUnitResult, AccessToolDTO accessToolDTO) {
-        DetailResultService<? super CheckUnitResult, ? extends DetailResult> service = AnalysisResultServiceFactory.getService(checkUnitResult.getClass());
- //       Result result = resultRepo.findById(jobId).orElseGet(Result::new);
-        Result result = new Result();
-        result.setArrangement(arrangement);
-        resultsKafkaService.fillResult(result, jobId, checkUnitResult, service);
-        //DetailResult detailResult = service.getOrCreate(result, checkUnitResult);
-        DetailResult detailResult = service.create(checkUnitResult);
-        detailResult.setId(jobId);
+    private void saveScreenshot(Screenshots screenshots, EntityManager entityManager, Long jobId, AccessToolDTO accessToolDTO){
+        if ((screenshots.getScreenshot() != null && screenshots.getScreenshot().length > 0) ||
+                (screenshots.getEtalonScreenshot() != null && screenshots.getEtalonScreenshot().length > 0)) {
+            //ResultScreenShot resultScreenShot = resultScreenShotRepo.findById(jobId).orElseGet(ResultScreenShot::new);
 
-        ResultScreenShot resultScreenShot = null;
-        if(checkUnitResult instanceof AnalysisResult) {
-            Optional<Screenshots> screenshotsOpt = resultsKafkaService.getScreenshot(arrangement.getId(), jobId);
-            if(screenshotsOpt.isPresent()) {
-                Screenshots screenshots = screenshotsOpt.get();
-                if ((screenshots.getScreenshot() != null && screenshots.getScreenshot().length > 0) ||
-                    (screenshots.getEtalonScreenshot() != null && screenshots.getEtalonScreenshot().length > 0)) {
-                    //ResultScreenShot resultScreenShot = resultScreenShotRepo.findById(jobId).orElseGet(ResultScreenShot::new);
-                    resultScreenShot = new ResultScreenShot();
-                    resultScreenShot.setId(jobId);
-                    if(dispatcherProperties.getImprint().isUseImprint()){
-                        //Устанавливаем штамп на скриншот
-                        resultScreenShot.setScreenshot(imprintScreenshot(accessToolDTO, checkUnitResult, screenshots.getScreenshot(), result.getCheckType()));
-                    } else {
-                        //Без штампа
-                        resultScreenShot.setScreenshot(screenshots.getScreenshot());
-                    }
-                    resultScreenShot.setEtalonScreenshot(screenshots.getEtalonScreenshot());
-                }
-            }
-        }
-        upsertResult(entityManager, result);
-        if(resultScreenShot != null) {
+            ResultScreenShot resultScreenShot = new ResultScreenShot();
+            resultScreenShot.setId(jobId);
+
+//                if(dispatcherProperties.getImprint().isUseImprint()){
+//                    //Устанавливаем штамп на скриншот
+//                    resultScreenShot.setScreenshot(imprintScreenshot(accessToolDTO, checkUnitResult, screenshots.getScreenshot(), checkType));
+//                } else {
+//                    //Без штампа
+//                }
+            resultScreenShot.setScreenshot(screenshots.getScreenshot());
+            resultScreenShot.setEtalonScreenshot(screenshots.getEtalonScreenshot());
             upsertResultScreenShot(entityManager, resultScreenShot);
         }
-        service.save(entityManager, detailResult);
+    }
+
+    private void saveErrorResult(Exception ex, CheckUnitKey checkUnitKey, CheckUnitResult checkUnitResult, Arrangement arrangement, EntityManager entityManager){
+        try {
+            log.error("Ошибка при сохранении результата проверки: " + checkUnitKey.getJobId() + ", " + checkUnitResult.getCheckUnit().getValue(), ex);
+
+            StringWriter sw = new StringWriter();
+            ex.printStackTrace(new PrintWriter(sw));
+
+            CheckUnitStatusNotification notification = new CheckUnitStatusNotification();
+            notification.setCheckResult(CheckUnitJobResult.INTERNAL_ERROR);
+            notification.setCheckUnit(checkUnitResult.getCheckUnit());
+            notification.setStartTime(checkUnitResult.getStartTime());
+            notification.setEndTime(checkUnitResult.getEndTime());
+            notification.setDescription(sw.toString());
+
+            saveArrangementResult(entityManager, arrangement, checkUnitKey, notification);
+            log.info("Ошибка сохранена: " + checkUnitKey.getJobId());
+        } catch (Exception newEx) {
+            log.error("Ошибка при сохранении ошибочной обработки сообщения с анализом результатов проверки: " + checkUnitKey.getJobId() + ", " + checkUnitResult.getCheckUnit().getValue(), newEx);
+        }
     }
 
     private void upsertResult(EntityManager entityManager, Result result){
@@ -226,7 +301,7 @@ public class ResultService {
             "check_type = :checkType, " +
             "check_unit_type = :checkUnitType, " +
             "check_unit_value = :checkUnitValue";
-        NativeQuery nativeQuery = entityManager.createNativeQuery(sql).unwrap(NativeQuery.class);
+        NativeQuery<?> nativeQuery = entityManager.createNativeQuery(sql).unwrap(NativeQuery.class);
         nativeQuery.setParameter("id", result.getId());
         nativeQuery.setParameter("arrangementId", result.getArrangement().getId(), LongType.INSTANCE);
         nativeQuery.setParameter("contentId", result.getErdiId(), LongType.INSTANCE);
@@ -250,10 +325,11 @@ public class ResultService {
             "result_id = :id, " +
             "screenshot = :screenshot, " +
             "etalon_screenshot = :etalonScreenshot";
-        NativeQuery nativeQuery = entityManager.createNativeQuery(sql).unwrap(NativeQuery.class);
+        NativeQuery<?> nativeQuery = entityManager.createNativeQuery(sql).unwrap(NativeQuery.class);
         nativeQuery.setParameter("id", resultScreenShot.getId());
         nativeQuery.setParameter("screenshot", resultScreenShot.getScreenshot());
         nativeQuery.setParameter("etalonScreenshot", resultScreenShot.getEtalonScreenshot());
+
         nativeQuery.executeUpdate();
     }
 
@@ -294,4 +370,5 @@ public class ResultService {
         //Возвращаем строки с пробелом, чтобы не сломать скриншот
         return new AccessToolDTO(accessTool, " ", " ");
     }
+
 }

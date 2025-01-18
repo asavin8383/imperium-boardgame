@@ -1,18 +1,21 @@
 package service.impl;
 
+import checkUnits.CheckUnit;
 import checkUnits.CheckUnitJob;
 import checkUnits.CheckUnitType;
+import common.ExecutorProperties;
 import enums.AccessToolUnit;
 import execution.ExecutionJobResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.openqa.selenium.WebDriverException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.kafka.listener.AbstractMessageListenerContainer;
 import org.springframework.stereotype.Service;
 import robots.Robot;
+import robots.exceptions.BadIP_ExecutionExeption;
 import robots.exceptions.Captcha_ExecutionException;
+import robots.exceptions.CloudflareBlockExecutionException;
 import robots.exceptions.ExecutionException;
 import robots.factory.RobotsFactory;
 import service.CheckUnitVerificationService;
@@ -23,124 +26,159 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Сервис управления роботами Selenium
- * @author shabalinAI
  *
+ * @author shabalinAI
  */
 @Service
-@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class RobotsServiceImpl implements CheckUnitVerificationService {
-	
-	/** Список роботов */
-	private final RobotsFactory robotsFactory;
-	
-    private final Map<Long, Robot> robots = new ConcurrentHashMap<>();
-    
+
+    /**
+     * Список роботов
+     */
+    private final RobotsFactory robotsFactory;
+
+    private final ExecutorProperties executorProps;
+
+    private volatile Set<Robot> robots = ConcurrentHashMap.newKeySet();
+
     private boolean isRunning = false;
 
+
     public Map<AccessToolUnit, List<CheckUnitType>> getSupportedTypes() {
-    	return new HashMap<AccessToolUnit, List<CheckUnitType>>(){{
-    		put(AccessToolUnit.SEARCH_SYSTEM, Arrays.asList(CheckUnitType.URL, CheckUnitType.DOMAIN, CheckUnitType.SEARCH_PHRASE));
-			put(AccessToolUnit.PROXY, Arrays.asList(CheckUnitType.URL, CheckUnitType.DOMAIN));
-			put(AccessToolUnit.VPN, Arrays.asList(CheckUnitType.URL, CheckUnitType.DOMAIN));
-			put(AccessToolUnit.CAMELEO_XYZ, Collections.singletonList(CheckUnitType.URL));
-			put(AccessToolUnit.ANONYMIZER, Collections.singletonList(CheckUnitType.URL));
-			put(AccessToolUnit.HIDEMYASS, Collections.singletonList(CheckUnitType.URL));
-			put(AccessToolUnit.HOLA, Collections.singletonList(CheckUnitType.URL));
-			put(AccessToolUnit.EXTENSION, Collections.singletonList(CheckUnitType.URL));
-			put(AccessToolUnit.GOOGLE_API, Arrays.asList(CheckUnitType.URL, CheckUnitType.DOMAIN, CheckUnitType.SEARCH_PHRASE));
-		}};
+        return new HashMap<AccessToolUnit, List<CheckUnitType>>() {{
+            put(AccessToolUnit.SEARCH_SYSTEM, Arrays.asList(CheckUnitType.URL, CheckUnitType.DOMAIN, CheckUnitType.SEARCH_PHRASE));
+            put(AccessToolUnit.PROXY, Arrays.asList(CheckUnitType.URL, CheckUnitType.DOMAIN));
+            put(AccessToolUnit.VPN, Arrays.asList(CheckUnitType.URL, CheckUnitType.DOMAIN));
+            put(AccessToolUnit.CAMELEO_XYZ, Collections.singletonList(CheckUnitType.URL));
+            put(AccessToolUnit.ANONYMIZER, Collections.singletonList(CheckUnitType.URL));
+            put(AccessToolUnit.HIDEMYASS, Collections.singletonList(CheckUnitType.URL));
+            put(AccessToolUnit.HOLA, Collections.singletonList(CheckUnitType.URL));
+            put(AccessToolUnit.EXTENSION, Collections.singletonList(CheckUnitType.URL));
+            put(AccessToolUnit.GOOGLE_API, Arrays.asList(CheckUnitType.URL, CheckUnitType.DOMAIN, CheckUnitType.SEARCH_PHRASE));
+            put(AccessToolUnit.PURE_CHANNEL, Collections.singletonList(CheckUnitType.URL));
+        }};
     }
 
-	@Override
-	public ExecutionJobResult run(Long jobId, CheckUnitJob checkUnitJob) throws ExecutionException {
-		try {
-			String robotName = "jobID = " + jobId +
-                    " accessTool = " + checkUnitJob.getAccessTool() +
-                    " checkUnit = " + checkUnitJob.getCheckUnit().getValue();
-			/*if(!this.isRunning)
-				throw new ExecutionException("Ошибка при запуске проверки запрещенного ресурса. Сервис проверки остановлен!");*/
-			log.info("Запуск робота: " + robotName);
+    @Override
+    public ExecutionJobResult run(Long jobId, CheckUnitJob checkUnitJob) throws ExecutionException {
+        try {
+            String robotName = String.format("jobId = %s, accessTool = %s, checkUnit = %s",
+                    jobId,
+                    checkUnitJob.getAccessTool(),
+                    checkUnitJob.getCheckUnit().getValue()
+            );
 
-			Robot robot = robotsFactory.createRobot(checkUnitJob.getAccessTool());
-			
-			robots.put(jobId, robot);
+            log.info("Запуск робота: {}", robotName);
 
-			ExecutionJobResult message;
-			try{
-				message = robot.run(checkUnitJob.getCheckUnit());
-			} finally {
-				try {
-					robot.destroy();
-					robots.remove(jobId);
-					log.info("Робот был закрыт: " + Thread.currentThread().getId());
-				} catch (IOException ex) {
-					log.error("Ошибка при закрытии скрипта", ex);
-				}
-			}
-			message.setCheckUnit(checkUnitJob.getCheckUnit());
-	        message.setAccessTool(checkUnitJob.getAccessTool());
+            Robot robot = robotsFactory.createRobot(checkUnitJob.getAccessTool());
+            robots.add(robot);
 
-			log.info("Робот успешно завершил работу: "+robotName);
-			return message;
-		} catch (Exception ex) {
-			log.warn("RobotServiceImpl exc", ex);
-            if(ex instanceof ExecutionException)
+            ExecutionJobResult message;
+            boolean needToStop = true;
+
+            try {
+                message = runWithRetry(robot, checkUnitJob.getCheckUnit(), robot.getRestartAttempts());
+            } catch (Exception ex) {
+                if (ex instanceof ExecutionException) {
+                    if (ex instanceof Captcha_ExecutionException || ex instanceof BadIP_ExecutionExeption || ex instanceof CloudflareBlockExecutionException) {
+                        needToStop = false;
+                    }
+                    throw (ExecutionException) ex;
+                } else
+                    throw new ExecutionException("Ошибка при выполнении скрипта робота", ex);
+            } finally {
+                if (needToStop) {
+                    try {
+                        robot.destroy();
+                    } catch (IOException ex) {
+                        log.error("Ошибка при закрытии скрипта", ex);
+                    }
+                }
+            }
+
+            robots.remove(robot);
+            message.setCheckUnit(checkUnitJob.getCheckUnit());
+            message.setAccessTool(checkUnitJob.getAccessTool());
+
+            log.info("Робот успешно завершил работу: " + robotName);
+            return message;
+        } catch (Throwable ex) {
+            if (ex instanceof ExecutionException)
                 throw ex;
-			else
+            else
                 throw new ExecutionException("Ошибка при выполнении скрипта робота", ex);
-		}
-	}
+        }
+    }
 
-	@Override
-	public void stop(Long jobId) {
-    	log.info("Остановка робота, выполняющего задание {}", jobId);
-		try {
-			Robot robot = this.robots.get(jobId);
-			if(robot != null) {
-				robot.destroy();
-				this.robots.remove(jobId);
-				log.info("Робот, выполняющий задание {} успешно остановлен", jobId);
-			} else {
-				log.warn("Не найдено активного робота, выполняющего задание " + jobId);
-			}
-		} catch (Exception ex) {
-			log.warn("Ошибка при остановке робота, выполняющего задание " + jobId, ex);
-		}
-	}
+    public ExecutionJobResult runWithRetry(Robot robot, CheckUnit checkUnit, int maxRestartAttempts) throws Exception {
+        try {
+            robot.setRestartAttempts(robot.getRestartAttempts() - 1);
+            log.info("Запуск {}-й попытки проверки ресурса: {}, таймаут {}",
+                    maxRestartAttempts - robot.getRestartAttempts(),
+                    checkUnit.getValue(),
+                    executorProps.getExecutor().getTimeout());
 
-	@Override
-	public void start() {
-		this.isRunning = true;
-	}
+            boolean throwExceptionByCaptchaOrBadIP = true;
+            if (robot.getRestartAttempts() == 0) {
+                throwExceptionByCaptchaOrBadIP = false;
+            }
+            return robot.run(checkUnit, executorProps.getExecutor().getTimeout(), throwExceptionByCaptchaOrBadIP);
+        } catch (ExecutionException | WebDriverException ex) {
+            if (robot.getRestartAttempts() > 0) {
+                log.warn("Будет выполнен {}-й перезапуск проверки ресурса {} по следующей причине: {}",
+                        maxRestartAttempts - robot.getRestartAttempts(),
+                        checkUnit.getValue(), ex.getMessage());
+                try {
+                    Thread.sleep(robot.getRestartInterval() * 1000L);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                try {
+                    robot.destroy();
+                } catch (IOException e) {
+                    log.error("Ошибка при закрытии скрипта", e);
+                }
+                return runWithRetry(robot, checkUnit, maxRestartAttempts);
+            } else {
+                throw ex;
+            }
+        } catch (Throwable ex) {
+            throw new Exception("Ошибка робота", ex);
+        }
+    }
 
-	@Override
-	public void stop() {
-		isRunning = false;
-		log.info("\n\n-----------------------------\n"
-				+ "Oстановка активных роботов..."
-				+ "\n-----------------------------\n");
-		for(Robot robot : robots.values()) {
-			try {
-				robot.destroy();
-			} catch (IOException ex) {
-				log.warn("Ошибка при остановке робота", ex);
-			}
-		}
-		this.robots.clear();
-		log.info("\n\n-----------------------------\n"
-				+ "Pоботы успешно остановлены"
-				+ "\n-----------------------------\n");
-	}
+    @Override
+    public void start() {
+        this.isRunning = true;
+    }
 
-	@Override
-	public boolean isRunning() {
-		return this.isRunning;
-	}
-	
-	@Override
-	public int getPhase() {
-		return AbstractMessageListenerContainer.DEFAULT_PHASE - 10;
-	}
+    @Override
+    public void stop() {
+        isRunning = false;
+        log.info("\n\n-----------------------------\n"
+                + "Oстановка активных роботов..."
+                + "\n-----------------------------\n");
+        for (Robot robot : robots) {
+            try {
+                robot.destroy();
+            } catch (IOException ex) {
+                log.error("Ошибка при остановке робота", ex);
+            }
+        }
+        log.info("\n\n-----------------------------\n"
+                + "Pоботы успешно остановлены"
+                + "\n-----------------------------\n");
+    }
+
+    @Override
+    public boolean isRunning() {
+        return this.isRunning;
+    }
+
+    @Override
+    public int getPhase() {
+        return AbstractMessageListenerContainer.DEFAULT_PHASE - 10;
+    }
 }

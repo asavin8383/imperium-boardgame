@@ -1,0 +1,33 @@
+{
+  "name": "stealth",
+  "version": "1",
+  "manifest_version": 3,
+  "minimum_chrome_version": "103.0",
+  "content_scripts": [
+    {
+      "matches": ["*://*/*"],
+      "js": [
+        "javascript/utils.js",
+        "javascript/chrome.app.js",
+        "javascript/chrome.csi.js",
+        "javascript/chrome.loadTimes.js",
+        "javascript/chrome.runtime.js",
+        "javascript/hairline.fix.js",
+        "javascript/iframe.contentWindow.js",
+        "javascript/media.codecs.js",
+        "javascript/navigator.languages.js",
+        "javascript/navigator.permissions.js",
+        "javascript/navigator.plugins.js",
+        "javascript/navigator.vendor.js",
+        "javascript/navigator.webdriver.js",
+        "javascript/webgl.vendor.js",
+        "javascript/window.outerdimensions.js"
+      ],
+      "run_at": "document_start",
+      "world": "MAIN"
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "default-src 'self' 'wasm-unsafe-eval';"
+  }
+}

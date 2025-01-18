@@ -1,11 +1,11 @@
 package controllers;
 
 import controllers.helpers.SortingHelper;
+import enums.ExecutionStatus;
 import enums.SortingDirection;
 import exceptions.AS_15_8_PPT_Exception;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import model.enums.ExecutionStatus;
 import model.task.Arrangement;
 import model.task.ExecutionStatusStatistics;
 import model.task.FormalTask;
@@ -19,11 +19,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.multipart.MultipartFile;
 import repositories.ArrangementRepo;
 import repositories.TrafficRepository;
-import rest.ActRequest;
 import rest.ArrangementActData;
 import restapi.ppm.ArrangementUploader;
+import services.arrangement.ArrangementStatusService;
 import services.arrangement.impl.ArrangementService;
 
 import java.util.*;
@@ -36,7 +37,7 @@ import java.util.*;
 @RestController
 @RequestMapping(path = "/arrangements", produces = MediaType.APPLICATION_JSON_VALUE)
 @PreAuthorize("hasRole('ROLE_MANAGE_ARRANGEMENT')")
-@RequiredArgsConstructor(onConstructor_={@Autowired})
+@RequiredArgsConstructor(onConstructor_ = {@Autowired})
 @Slf4j
 public class ArrangementController {
 
@@ -45,6 +46,8 @@ public class ArrangementController {
     private final ArrangementUploader arrangementUploader;
     private final TrafficRepository trafficRepository;
 
+    private final ArrangementStatusService arrangementStatusService;
+
     @GetMapping
     public Page<Arrangement> findList(
             @RequestParam(required = false) Long formalTaskId,
@@ -52,20 +55,20 @@ public class ArrangementController {
             @RequestParam(required = false) SortingDirection sortingDirection,
             @RequestParam(required = false) String sortingColumn,
             @RequestParam(defaultValue = "0") int pageNumber,
-            @RequestParam(defaultValue = "10") int pageSize){
+            @RequestParam(defaultValue = "10") int pageSize) {
         PageRequest page = PageRequest.of(
                 pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
         return arrangementRepo.findPage(formalTaskId, id, page);
     }
 
     @GetMapping("{id}")
-    public Arrangement findById(@PathVariable Long id){
+    public Arrangement findById(@PathVariable Long id) {
         Optional<Arrangement> byId = arrangementRepo.findById(id);
         return byId.orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND, "Arrangement not found " + id));
     }
 
-    @GetMapping(path="/summary")
-    public List<ExecutionStatusStatistics> getSummary(){
+    @GetMapping(path = "/summary")
+    public List<ExecutionStatusStatistics> getSummary() {
         return arrangementRepo.findSummaryByStatus();
     }
 
@@ -75,7 +78,7 @@ public class ArrangementController {
             @RequestParam(required = false) SortingDirection sortingDirection,
             @RequestParam(required = false) String sortingColumn,
             @RequestParam(defaultValue = "0") int pageNumber,
-            @RequestParam(defaultValue = "10") int pageSize){
+            @RequestParam(defaultValue = "10") int pageSize) {
         PageRequest page = PageRequest.of(
                 pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
         return arrangementRepo.findAllByStatus(status, page);
@@ -89,7 +92,7 @@ public class ArrangementController {
             @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(required = false) String fgisId,
-            @RequestParam(required = false) String operator){
+            @RequestParam(required = false) String operator) {
         PageRequest page = PageRequest.of(
                 pageNumber, pageSize, SortingHelper.createSorting(sortingDirection, sortingColumn));
         return arrangementRepo.findPageFiltered(statuses, operator, fgisId, page);
@@ -97,7 +100,7 @@ public class ArrangementController {
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(code = HttpStatus.CREATED)
-    public Arrangement postArrangement(@RequestBody Arrangement arrangement, @RequestParam("formalTaskId") FormalTask formalTask){
+    public Arrangement postArrangement(@RequestBody Arrangement arrangement, @RequestParam("formalTaskId") FormalTask formalTask) {
         checkAndSetDeadlineDate(formalTask, arrangement);
         return arrangementService.saveArrangement(arrangement, formalTask);
 
@@ -105,20 +108,32 @@ public class ArrangementController {
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public Arrangement update(@RequestBody Arrangement newArrangement, @RequestParam("id") Arrangement arrangement) {
-        if(arrangement == null) {
+        if (arrangement == null) {
             throw new AS_15_8_PPT_Exception("Ошибка изменения мероприятия! Мероприятие не было найдено в БД");
-        } else if (arrangement.getStatus() != ExecutionStatus.NEW) {
+        } else if (arrangement.getStatus() != ExecutionStatus.NEW && arrangement.getStatus() != ExecutionStatus.FORMED) {
             throw new AS_15_8_PPT_Exception("Ошибка изменения мероприятия! Неверный статус: " + arrangement.getStatus().getDescription());
         }
         checkAndSetDeadlineDate(arrangement.getFormalTask(), newArrangement);
         return arrangementRepo.save(replaceFields(newArrangement, arrangement));
     }
 
-    private void checkAndSetDeadlineDate(FormalTask formalTask, Arrangement arrangement){
-        if(formalTask == null){
+    @PostMapping(path = "/change_to_formed")
+    @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
+    public ResponseEntity<Object> setFormedStatus(@RequestParam("id") Arrangement arrangement) {
+        try {
+            arrangement.setStatus(ExecutionStatus.FORMED);
+            arrangementStatusService.processArrangementStatusChange(arrangement);
+            return ResponseEntity.ok().build();
+        } catch (Exception ex){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+        }
+    }
+
+    private void checkAndSetDeadlineDate(FormalTask formalTask, Arrangement arrangement) {
+        if (formalTask == null) {
             throw new AS_15_8_PPT_Exception("Ошибка установки даты 'Выполнить до' мероприятию " + arrangement.getId() + ". Поручение не найдено в БД");
         }
-        if(formalTask.getDeadlineDate() != null && (arrangement.getDeadlineDate() == null || arrangement.getDeadlineDate().isAfter(formalTask.getDeadlineDate()))){
+        if (formalTask.getDeadlineDate() != null && (arrangement.getDeadlineDate() == null || arrangement.getDeadlineDate().isAfter(formalTask.getDeadlineDate()))) {
             arrangement.setDeadlineDate(formalTask.getDeadlineDate());
         }
     }
@@ -135,10 +150,10 @@ public class ArrangementController {
 
 
     @GetMapping(path = "/upload")
-    public void uploadArrangement(@RequestParam("id") Arrangement arrangement){
-        if(arrangement!= null) {
+    public void uploadArrangement(@RequestParam("id") Arrangement arrangement) {
+        if (arrangement != null) {
             //В ППМ отправляем только не запланированные мероприятия
-            if(arrangement.getStatus().equals(ExecutionStatus.NEW) || arrangement.getStatus().equals(ExecutionStatus.FORMED)){
+            if (arrangement.getStatus().equals(ExecutionStatus.NEW) || arrangement.getStatus().equals(ExecutionStatus.FORMED)) {
                 if (arrangement.getIsManual()) {
                     arrangementUploader.sendManualArrangementToDispatcher(arrangement);
                 } else {
@@ -154,25 +169,23 @@ public class ArrangementController {
 
     @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
     @GetMapping(path = "/confirm_success_sent", produces = MediaType.APPLICATION_STREAM_JSON_VALUE)
-    public void confirmSuccessSent(Long arrangementId){
+    public void confirmSuccessSent(Long arrangementId) {
         log.info("Уведомление об успешной отправке мероприятия. ID мероприятия: {}", arrangementId);
 
         Optional<Arrangement> optionalArrangement = arrangementRepo.findById(arrangementId);
         Arrangement arrangement = optionalArrangement.orElse(null);
-        if (arrangement == null){
+        if (arrangement == null) {
             log.info("Arrangement с id = {} не найден!", arrangementId);
-        }
-        else if (arrangement.getStatus() == ExecutionStatus.FINISHED) {
+        } else if (arrangement.getStatus() == ExecutionStatus.FINISHED) {
             arrangementRepo.updateStatusById(arrangementId, ExecutionStatus.ACT_SENT);
             log.info("Состояние у Arrangement с id = {} изменено на : {}", arrangement.getId(), ExecutionStatus.ACT_SENT);
-        }
-        else {
+        } else {
             log.info("Состояние Arrangement с id = {} не изменилось", arrangementId);
         }
     }
 
     @GetMapping(path = "/ready_for_act")
-    public Boolean readyForAct(@RequestParam Long id){
+    public Boolean readyForAct(@RequestParam Long id) {
         Optional<Arrangement> optArrangement = arrangementRepo.findById(id);
         if (!optArrangement.isPresent())
             throw new AS_15_8_PPT_Exception("Arrangement не найден, id = " + id);
@@ -181,7 +194,7 @@ public class ArrangementController {
         FormalTask formalTask = arrangement.getFormalTask();
 
         Set<ExecutionStatus> states =
-                new HashSet<>(Arrays.asList(ExecutionStatus.STOPPED,ExecutionStatus.FINISHED, ExecutionStatus.ACT_SENT));
+                new HashSet<>(Arrays.asList(ExecutionStatus.STOPPED, ExecutionStatus.FINISHED, ExecutionStatus.ACT_SENT));
         Boolean res =
                 formalTask.getMissionId() != null && states.contains(arrangement.getStatus());
         return res;
@@ -195,8 +208,9 @@ public class ArrangementController {
 
     /**
      * Заменяет доступные поля мероприятия из БД полученными с фронта
+     *
      * @param newArrangement полученное с фронта мероприятие
-     * @param arrangement мероприятие, сохраненное в БД
+     * @param arrangement    мероприятие, сохраненное в БД
      * @return изменнённое мероприятие
      */
     private Arrangement replaceFields(Arrangement newArrangement, Arrangement arrangement) {
@@ -217,55 +231,45 @@ public class ArrangementController {
     }
 
     @PreAuthorize("hasAnyRole('ROLE_SYSTEM', 'ROLE_MANAGE_ARRANGEMENT')")
-    @GetMapping("/execution_status_description")
-    public String getExecutionStatusName(@RequestParam("id") Arrangement arrangement) {
-        return arrangement.getStatus().getDescription();
-    }
-    @PreAuthorize("hasAnyRole('ROLE_SYSTEM', 'ROLE_MANAGE_ARRANGEMENT')")
     @GetMapping("/execution_status")
-    public String getExecutionStatus(@RequestParam("id") Arrangement arrangement) {
-        return arrangement.getStatus().name();
+    public ExecutionStatus getExecutionStatus(@RequestParam("id") Arrangement arrangement) {
+        return arrangement.getStatus();
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_SYSTEM', 'ROLE_MANAGE_ARRANGEMENT')" )
+    @PreAuthorize("hasAnyRole('ROLE_SYSTEM', 'ROLE_MANAGE_ARRANGEMENT')")
     @GetMapping(path = "/act_available_for_automatic_send")
-    public Optional<Boolean> isActAvailable(@RequestParam("id") Optional<Arrangement> arrangement){
-        arrangement.orElseThrow(()-> new AS_15_8_PPT_Exception("Arrangement не найден"));
+    public Optional<Boolean> isActAvailable(@RequestParam("id") Optional<Arrangement> arrangement) {
+        arrangement.orElseThrow(() -> new AS_15_8_PPT_Exception("Arrangement не найден"));
         return Optional.ofNullable(arrangement.get().getIsActAvailable());
     }
 
-    @PreAuthorize("hasRole('ROLE_SYSTEM')" )
-    @GetMapping(path = "/interrupt_violation_number")
-    public Long changeActStatus(@RequestParam("id") Arrangement arrangement){
-        Optional.ofNullable(arrangement).orElseThrow(()-> new AS_15_8_PPT_Exception("Arrangement не найден"));
-        return arrangement.getInterruptViolationNumber();
-    }
-
-    @PreAuthorize("hasRole('ROLE_SYSTEM')" )
-    @GetMapping(path = "/access_tool")
-    public String getAccessTool(@RequestParam("id") Arrangement arrangement){
-        Optional.ofNullable(arrangement).orElseThrow(()-> new AS_15_8_PPT_Exception("Arrangement не найден"));
-        return arrangement.getAccessTool();
+    @PreAuthorize("hasRole('ROLE_SYSTEM')")
+    @GetMapping(path = "/act_sent_status")
+    public void changeActStatus(@RequestParam("id") Optional<Arrangement> arrangement) {
+        arrangement.orElseThrow(() -> new AS_15_8_PPT_Exception("Arrangement не найден"));
+        arrangement.get().setStatus(ExecutionStatus.ACT_SENT);
+        arrangementRepo.save(arrangement.get());
     }
 
     @PreAuthorize("hasRole('ROLE_SYSTEM')")
-    @PutMapping(path = "/info_about_act")
-    public ResponseEntity updateArrangementAboutAct(@RequestBody ActRequest actRequest) {
-        if(actRequest != null) {
+    @GetMapping(path = "/interrupt_violation_number")
+    public Long changeActStatus(@RequestParam("id") Arrangement arrangement) {
+        Optional.ofNullable(arrangement).orElseThrow(() -> new AS_15_8_PPT_Exception("Arrangement не найден"));
+        return arrangement.getInterruptViolationNumber();
+    }
 
-            Arrangement arr = arrangementRepo.findById(actRequest.getArragementId()).orElseThrow(() ->
-                    new AS_15_8_PPT_Exception("Невозможно обновить иформацию о акте для мероприятия, мероприятие не найдено id:"  + actRequest.getArragementId()));
-            String operator;
+    @PreAuthorize("hasRole('ROLE_SYSTEM')")
+    @GetMapping(path = "/access_tool")
+    public String getAccessTool(@RequestParam("id") Arrangement arrangement) {
+        Optional.ofNullable(arrangement).orElseThrow(() -> new AS_15_8_PPT_Exception("Arrangement не найден"));
+        return arrangement.getAccessTool();
+    }
 
-            if (actRequest.isGeneratedAutomatically()) {
-                 operator = arr.getFormalTask().getOperator();
-            } else {
-                operator = actRequest.getOperatorName();
-            }
-
-            arr.setActCreationOperator(operator);
-            arrangementRepo.save(arr);
-            return ResponseEntity.ok(arr);
-        } return ResponseEntity.badRequest().build();
+    @PreAuthorize("hasAnyRole('ROLE_SYSTEM', 'ROLE_MANAGE_ARRANGEMENT')")
+    @PutMapping(path = "{id}/import-resources", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Object> updateTrafficFromFile(@PathVariable("id") Long arrangementId,
+                                                        @RequestPart("file") MultipartFile file) {
+        arrangementService.updateTrafficFromFile(arrangementId, file);
+        return ResponseEntity.noContent().build();
     }
 }

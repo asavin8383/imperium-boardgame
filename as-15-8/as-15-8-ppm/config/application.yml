@@ -20,7 +20,9 @@ spring:
         bindings:
           outputJobs:
             producer.configuration:
-              retries: 10
+              retries: 100
+              retry.backoff.ms: 1000
+              acks: all
               key.serializer: org.springframework.kafka.support.serializer.JsonSerializer
   liquibase:
     enabled: true
@@ -71,7 +73,7 @@ spring:
   main:
     banner-mode: "off"
   datasource:
-    url: jdbc:postgresql://192.168.5.195:5432/asdb
+    url: jdbc:postgresql://192.168.5.195:5432/asdb_release
 eureka:
   instance:
     metadata-map:
@@ -120,7 +122,7 @@ spring:
         springCloudBusInput.destination: bus_config_input_asavin
         springCloudBusOutput.destination: bus_config_output_asavin
   datasource:
-    url: jdbc:postgresql://192.168.5.211:5432/asdb_test2
+    url: jdbc:postgresql://192.168.5.195:5432/asdb
   liquibase:
     enabled: true
 
@@ -135,7 +137,7 @@ spring:
         springCloudBusInput.destination: bus_config_input_danikanov
         springCloudBusOutput.destination: bus_config_output_danikanov
   datasource:
-    url: jdbc:postgresql://192.168.5.195:5432/asdb
+    url: jdbc:postgresql://192.168.5.195:5432/asdb_release
   liquibase:
     enabled: true
 
@@ -180,7 +182,3 @@ spring:
         outputJobs.destination: jobs_pvorobiev
         springCloudBusInput.destination: bus_config_input_pvorobiev
         springCloudBusOutput.destination: bus_config_output_pvorobiev
-  datasource:
-    url: jdbc:postgresql://192.168.5.195:5432/asdb
-  liquibase:
-    enabled: false

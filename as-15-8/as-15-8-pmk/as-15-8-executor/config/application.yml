@@ -23,36 +23,41 @@ spring:
           group: executor:${spring.cloud.client.ip-address}
       kafka:
         binder:
-          brokers: 192.168.5.12:9094,192.168.5.33:9094,192.168.5.184:9094
+          brokers:
+            "kafka-0-dev.ec-leasing.ru:9094,\
+             kafka-1-dev.ec-leasing.ru:9094,\
+             kafka-2-dev.ec-leasing.ru:9094"
           minPartitionCount: 30
           replicationFactor: 3
           configuration:
-            max.request.size: 10485760
+            max.request.size: 31457280
         bindings:
           jobs:
             consumer:
               ackEachRecord: true
+              resetOffsets: true
+              startOffset: latest
               configuration:
                 key.deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
                 max.poll.records: 1
                 max.poll.interval.ms: 300000
-                auto.offset.reset: latest
+                request.timeout.ms: 150000
+                session.timeout.ms: 60000
           executionResults:
             producer.configuration:
-              retries: 10
+              retries: 100
+              retry.backoff.ms: 1000
+              acks: all
               key.serializer: org.springframework.kafka.support.serializer.JsonSerializer
           results:
             producer.configuration:
-              retries: 10
+              retries: 100
+              retry.backoff.ms: 1000
+              acks: all
               key.serializer: org.springframework.kafka.support.serializer.JsonSerializer
-          springCloudBusInput:
-            consumer:
-              resetOffsets: true
-              startOffset: latest
-          arrangementEvents:
-            consumer:
-              resetOffsets: true
-              startOffset: latest
+retryExecution:
+  maxAttempts: 3
+  maxDelay: 5000
 
 ---
 
@@ -113,6 +118,11 @@ spring:
         springCloudBusInput.destination: bus_config_input_ashabalin
         springCloudBusOutput.destination: bus_config_output_ashabalin
 nmap.path: C:\Program Files (x86)\Nmap
+selenium-hub-url: http://user:1q0p2w9o@as-15-8-ggr.eclsoft.ru:4445/wd/hub
+screenshot:
+  ext-id: "jnnpjgplfflpajnenldfnegaafmabmfn"
+  ext-version: "1.0"
+  ext-popup: "/popup.html"
 
 ---
 
@@ -139,6 +149,12 @@ spring:
       results.destination: results_asavin
       springCloudBusInput.destination: bus_config_input_asavin
       springCloudBusOutput.destination: bus_config_output_asavin
+nmap.path: C:\Program Files (x86)\Nmap
+selenium-hub-url: http://user:1q0p2w9o@as-15-8-ggr.eclsoft.ru:4445/wd/hub
+screenshot:
+  ext-id: "jnnpjgplfflpajnenldfnegaafmabmfn"
+  ext-version: "1.0"
+  ext-popup: "/popup.html"
 
 ---
 

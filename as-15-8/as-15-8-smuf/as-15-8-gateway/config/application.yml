@@ -78,11 +78,18 @@ zuul:
       path: /report_generator/**
       serviceId: report_generator
 ribbon:
-  ReadTimeout: 120000
-  ConnectTimeout: 60000
-  SocketTimeout: 120000
+  ReadTimeout: 300000
+  ConnectTimeout: 120000
+  SocketTimeout: 300000
   eureka:
     enabled: true
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 1000000
 
 ---
 

@@ -106,13 +106,13 @@
 		<repository>
 			<id>nexus</id>
 			<name>RepositoryProxy</name>
-			<url>http://192.168.1.146:8081/nexus/content/repositories/releases/</url>
+			<url>https://devops.ec-leasing.ru/nexus/repository/maven-releases/</url>
 		</repository>
 		<!-- use the following if you ARE using a snapshot version. -->
 		<snapshotRepository>
 			<id>nexus</id>
 			<name>RepositoryProxy</name>
-			<url>http://192.168.1.146:8081/nexus/content/repositories/snapshots/</url>
+			<url>https://devops.ec-leasing.ru/nexus/repository/maven-snapshots/</url>
 		</snapshotRepository>
 	</distributionManagement>
 

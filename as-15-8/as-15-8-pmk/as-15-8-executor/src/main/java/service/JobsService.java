@@ -15,16 +15,13 @@ import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
-import robots.exceptions.ExecutionException;
-import robots.exceptions.Timeout_ExecutionException;
-import service.impl.RobotsServiceImpl;
 
 import javax.annotation.PostConstruct;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @Slf4j
@@ -86,40 +83,7 @@ public class JobsService {
                 checkUnitVerificationServiceFactory
                         .getService(job);
 
-        ExecutionJobResult executionJobResult;
-
-        if (service instanceof RobotsServiceImpl && getJobTimeout() >= 0){
-            ExecutorService executorService = Executors.newSingleThreadExecutor();
-
-            try {
-                ExecutorService threadExecutor = Executors.newSingleThreadExecutor();
-                CompletableFuture<ExecutionJobResult> future =
-                    CompletableFuture
-                        .supplyAsync(() -> service.run(key.getJobId(), job), threadExecutor)
-                        .exceptionally(throwable -> {
-                            throw new CompletionException(throwable);
-                        })
-                        .whenComplete((x, y) -> threadExecutor.shutdownNow());
-                try {
-                    executionJobResult = future.get(getJobTimeout(), TimeUnit.SECONDS);
-                }
-                catch(TimeoutException ex) {
-                    service.stop(key.getJobId());
-                    throw new Timeout_ExecutionException();
-                }
-
-            } catch (Exception ex) {
-                log.warn("JobsService exc", ex);
-                if(ex instanceof ExecutionException)
-                    throw (ExecutionException)ex;
-                else
-                    throw new ExecutionException(ex);
-            }
-        }
-        else {
-            executionJobResult = service.run(key.getJobId(), job);
-        }
-        return executionJobResult;
+        return service.run(key.getJobId(), job);
     }
 
     public synchronized boolean isJobActual(Long arrangementId, Long version, LocalDateTime jobTime) {

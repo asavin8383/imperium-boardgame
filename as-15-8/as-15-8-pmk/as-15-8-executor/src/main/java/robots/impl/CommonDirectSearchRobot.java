@@ -1,27 +1,29 @@
 package robots.impl;
 
+import captcha.CaptchaType;
+import captcha.solver.*;
 import checkUnits.CheckUnit;
 import checkUnits.CheckUnitType;
 import enums.AccessToolParameter;
 import enums.CheckUnitJobResult;
 import execution.ExecutionJobResult;
 import execution.ExecutionPSJobResult;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import robots.exceptions.ExecutionException;
+import robots.exceptions.InternalError_ExecutionException;
 import robots.exceptions.TimeoutScriptException;
 import robots.utils.EqualityTest;
 import robots.utils.ScriptUtils;
 
 import java.net.MalformedURLException;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Slf4j(topic = "robots")
 public class CommonDirectSearchRobot extends SeleniumRobot {
@@ -30,6 +32,14 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         PAGINATION,
         CONTINUOUS
     }
+
+    @Getter
+    @Setter
+    private int restartAttempts;
+
+    @Getter
+    @Setter
+    private int restartInterval;
 
     /** Время ожидания загрузки результатов (сек) */
     private static final int SEARCH_RESULT_TIMEOUT = 3;
@@ -54,9 +64,16 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
     /** xpath поисковой строки */
     private String xpathInputField;
 
+    /** Тип капчи, выдаваемый поисковой системой.
+     *  Варианты (RECAPTCHA_V2) */
+    private CaptchaType captchaType;
+
     /** xpath элемента, по которому
      * опредеяется наличие капчи */
     private String xpathCaptcha;
+
+    /** xpath элемента капчи */
+    private String xpathCaptchaElement;
 
     /** xpath элемента, по клику на который
      * происходит переход на следующую страницу */
@@ -65,10 +82,6 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
     /** xpath тегов \<a>, содержащих
      *  проверяемые ссылки (href) */
     private String xpathItemLink;
-
-    /** Регулярное выражение, определяющее пустой результат
-     *  выполнения поискового запроса*/
-    private String resultNotFoundRegexp;
 
     /** Необходимость проверки подсказки ПС */
     private boolean needCheckHint;
@@ -108,6 +121,8 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
     /** Кол-во проверенных ссылок */
     protected Integer counter = 0;
 
+    protected CaptchaSolver captchaSolver;
+
     public CommonDirectSearchRobot(Map<AccessToolParameter, String> scriptParams) {
         super(scriptParams,
                 Strings.isNotEmpty(scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_PROXY)) ?
@@ -129,11 +144,13 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
 
         this.searchSystemUrl = scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_URL);
         this.xpathInputField = scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_XPATH_INPUT_FIELD);
-        this.xpathCaptcha = scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_XPATH_CAPTCHA);
         this.xpathNextPage = scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_XPATH_NEXT_PAGE);
         this.xpathItemLink = scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_XPATH_ITEM_LINK);
-        this.resultNotFoundRegexp = scriptParams.get(AccessToolParameter.RESULT_NOT_FOUND_REGEXP);
         this.checkSpellingLink = scriptParams.get(AccessToolParameter.CHECK_SPELLING_LINK);
+
+        this.captchaType = CaptchaType.of(scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_CAPTCHA_TYPE));
+        this.xpathCaptcha = scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_XPATH_CAPTCHA);
+        this.xpathCaptchaElement = scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_XPATH_CAPTCHA_ELEMENT);
 
         String needCheckHintStr = scriptParams.get(AccessToolParameter.SEARCH_SYSTEM_CHECK_HINT);
         this.needCheckHint = Strings.isNotEmpty(needCheckHintStr) && Boolean.parseBoolean(needCheckHintStr);
@@ -164,9 +181,13 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         return xpathInputField;
     }
 
+    public CaptchaType getCaptchaType() {return captchaType; }
+
     public String getXpathCaptcha() {
         return xpathCaptcha;
     }
+
+    public String getXpathCaptchaElement() { return xpathCaptchaElement; }
 
     public String getXpathNextPage() {
         return xpathNextPage;
@@ -181,15 +202,15 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
     }
 
 
-    final ExecutionPSJobResult createMessage(boolean linkFound, CheckUnitJobResult checkUnitJobResult) throws InterruptedException {
+    final ExecutionPSJobResult createMessage(boolean linkFound, CheckUnitJobResult checkUnitJobResult) {
         return createMessage(linkFound, checkUnitJobResult, null);
     }
-    final ExecutionPSJobResult createMessage(boolean linkFound, CheckUnitJobResult checkUnitJobResult, List<String> urls) throws InterruptedException {
+    final ExecutionPSJobResult createMessage(boolean linkFound, CheckUnitJobResult checkUnitJobResult, List<String> urls) {
         ExecutionPSJobResult message = new ExecutionPSJobResult();
         message.setLinkFound(linkFound);
         message.setError(false);
         if(linkFound || this.makeScreenShotOnCompleted){
-            message.setScreenshot(ScriptUtils.getScreenshot(getDriver()));
+            message.setScreenshot(ScriptUtils.getScreenshot(driver));
         }
         message.setUrls(urls);
         message.setCheckUnitJobResult(checkUnitJobResult);
@@ -198,18 +219,29 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
 
 
     @Override
-    public ExecutionJobResult execute(CheckUnit checkUnit) throws ExecutionException, InterruptedException {
-        getDriver().get(searchSystemUrl);
-        equalityTest = EqualityTest.forCheckUnit(checkUnit);
-
-        if (captcha())
-            return createMessage(false, CheckUnitJobResult.CAPTCHA_DETECTED);
+    public ExecutionJobResult execute(CheckUnit checkUnit, boolean needThrowEx) throws ExecutionException {
 
         try {
-            getDriver().findElement(By.xpath(xpathInputField));
-        } catch(NoSuchElementException ex) {
-            log.info("ПС обнаружила робота для URL: {}", checkUnit.getValue());
-            return createMessage(false, CheckUnitJobResult.BAD_IP);
+            ScriptUtils.waitDriver(driver);
+            ((JavascriptExecutor) driver).executeScript("window.open('" + searchSystemUrl + "', '_blank');");
+            ArrayList<String> tabs = new ArrayList<>(driver.getWindowHandles());
+            driver.switchTo().window(tabs.get(tabs.size()-1));
+        } catch (Exception ex) {
+            return processException(new ExecutionException("Ошибка открытия ПС", ex), needThrowEx);
+        }
+
+        equalityTest = EqualityTest.forCheckUnit(checkUnit);
+
+        try{
+            solveCaptcha(driver);
+        } catch (CaptchaSolverException ex) {
+            return processException(ex, needThrowEx);
+        }
+
+        if(!waitInputField(driver)) {
+            return processException(CheckUnitJobResult.DOUBTFUL,
+                    String.format("Не получилось найти поисковую строку на странице ПС: %s", checkUnit.getValue()),
+                    needThrowEx);
         }
 
         String value = checkUnit.getValue();
@@ -223,16 +255,23 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
             if (checkHintAndSearch(value))
                 return createMessage(true, CheckUnitJobResult.FORBIDDEN_CONTENT_DETECTED);
         } else {
-            searchText(value);
+            try {
+                searchText(value);
+            } catch (InternalError_ExecutionException ex) {
+                return processException(ex, needThrowEx);
+            }
         }
 
-        if (captcha())
-            return createMessage(false, CheckUnitJobResult.CAPTCHA_DETECTED);
+        try{
+            solveCaptcha(driver);
+        } catch (CaptchaSolverException ex) {
+            return processException(ex, needThrowEx);
+        }
 
         //Проверим, не исправилось ли правописание. Если исправилось, возвращаем назад
         if(Strings.isNotEmpty(this.checkSpellingLink)){
             WebElement spellingLink = ScriptUtils.findElementIfExists(
-                By.xpath(this.checkSpellingLink), getDriver());
+                By.xpath(this.checkSpellingLink), driver);
             try {
                 if (spellingLink != null) {
                     spellingLink.click();
@@ -242,8 +281,16 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
             }
         }
 
+        try{
+            WebDriverWait wait = new WebDriverWait(driver, 2);
+            WebElement errorElem = wait.until(ExpectedConditions
+                    .visibilityOfElementLocated(By.xpath("//div[@class='error-code']")));
+            return processException(CheckUnitJobResult.SOCKET_ERROR, String.format("Ошибка доступа к ПС: %s", checkUnit.getValue()), needThrowEx);
+
+        } catch (TimeoutException ignored){}
+
         //Проверяем, не вылез ли подозрительный трафик
-        Optional<ExecutionJobResult> optExecutionJobResult = checkNoLinks(checkUnit);
+        Optional<ExecutionJobResult> optExecutionJobResult = checkNoLinks(checkUnit, needThrowEx);
         if(optExecutionJobResult.isPresent()){
             return optExecutionJobResult.get();
         }
@@ -268,82 +315,148 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         } else if (resultPageType == ResultPageType.CONTINUOUS){
             isViolation = checkContinuousSearchResult();
         } else {
-            throw new ExecutionException("Ошибка проверки ПС! Недопустимый тип страницы: " + resultPageType);
+            return processException(CheckUnitJobResult.INTERNAL_ERROR, "Ошибка проверки ПС! Недопустимый тип страницы: " + resultPageType, needThrowEx);
         }
         return createMessage(isViolation, null);
     }
 
-    private boolean linksFound() throws InterruptedException {
-        ScriptUtils.waitPageLoading(getDriver());
+    private boolean linksFound(){
+        ScriptUtils.waitPageLoading(driver);
         By linkLocator = By.xpath(xpathItemLink);
-        List<WebElement> listNext = getDriver().findElements(linkLocator);
+        List<WebElement> listNext = driver.findElements(linkLocator);
         return (listNext != null && listNext.size() > 0);
     }
 
-    private Optional<ExecutionJobResult> checkNoLinks(CheckUnit checkUnit) throws InterruptedException {
+    private Optional<ExecutionJobResult> checkNoLinks(CheckUnit checkUnit, boolean needThrowEx){
         //Проверяем, не вылез ли подозрительный трафик
         if(!linksFound()) {
-            log.debug("По URL {} Список ссылок пустой нужно проверить на пустой IP", checkUnit.getValue());
-            if(Strings.isNotEmpty(resultNotFoundRegexp)) {
-                String content = ScriptUtils.getPageSource(getDriver()).pageSource;
-                //log.info("Контент страницы: {}", content);
-                log.debug("Регулярное выражение для проверки: {}", resultNotFoundRegexp);
-                Matcher matcher = Pattern.compile(resultNotFoundRegexp).matcher(content);
-                if(matcher.find()){
-                    // Ссылок не найдено
-                    return Optional.of(createMessage(false, CheckUnitJobResult.COMPLETED));
-                } else {
-                    //Плохой IP
-                    return Optional.of(createMessage(false, CheckUnitJobResult.BAD_IP));
-                }
+            log.debug("По URL {} Список ссылок пустой нужно проверить наличие поисковой строки", checkUnit.getValue());
+            if(waitInputField(driver)){
+                return Optional.of(createMessage(false, CheckUnitJobResult.COMPLETED));
             } else {
-                //регулярку не задали, считаем плохим IP
-                return Optional.of(createMessage(false, CheckUnitJobResult.BAD_IP));
+                return Optional.of(checkUnexpectedPage(checkUnit, needThrowEx));
             }
         }
         return Optional.empty();
     }
 
+    private ExecutionJobResult checkUnexpectedPage(CheckUnit checkUnit, boolean needThrowEx) {
 
-    private List<WebElement> getLinks(ResultPageType resultPageType) throws InterruptedException {
+        String content = ScriptUtils.getPageSource(driver).pageSource;
+        CheckUnitJobResult checkResult = CheckUnitJobResult.DOUBTFUL;
+        List<String> networkErrors = Arrays.asList("ERR_EMPTY_RESPONSE", "ERR_TUNNEL_CONNECTION_FAILED");
+
+        if(content != null){
+            for(String err : networkErrors){
+                if (content.contains(err)) {
+                    checkResult = CheckUnitJobResult.SOCKET_ERROR;
+                    break;
+                }
+            }
+        }
+
+        switch (checkResult){
+            case SOCKET_ERROR:
+                return processException(checkResult, String.format("Сетевая ошибка при проверке url: %s", checkUnit.getValue()), needThrowEx);
+            default:
+                return processException(checkResult, String.format("ПС выдала сомнительный ответ на url: %s", checkUnit.getValue()), needThrowEx);
+        }
+    }
+
+    private ExecutionJobResult processException(CheckUnitJobResult checkResult, String message, boolean needThrowEx){
+        return processException(checkResult, new ExecutionException(message), needThrowEx);
+    }
+
+    private ExecutionJobResult processException(Exception ex, boolean needThrowEx) {
+        CheckUnitJobResult checkResult;
+
+        if(ex instanceof CaptchaSolverBadIPException)
+            checkResult = CheckUnitJobResult.BAD_IP;
+        else if(ex instanceof CaptchaSolverException)
+            checkResult = CheckUnitJobResult.CAPTCHA_DETECTED;
+        else {
+            if (ex.getMessage().contains("unknown error: net::"))
+                checkResult = CheckUnitJobResult.SOCKET_ERROR;
+            else
+                checkResult = CheckUnitJobResult.INTERNAL_ERROR;
+        }
+        return processException(checkResult, ex, needThrowEx);
+    }
+    private ExecutionJobResult processException(CheckUnitJobResult checkResult, Exception ex, boolean needThrowEx) {
+        if(!(ex instanceof CaptchaSolverNotImplementedException)) {
+            log.error("Ошибка при выполнении проверки ПС", ex);
+        }
+        if (needThrowEx) {
+            throw new RuntimeException(ex);
+        } else {
+            return createMessage(false, checkResult);
+        }
+    }
+
+    private List<WebElement> getLinks(ResultPageType resultPageType){
         return resultPageType == ResultPageType.PAGINATION?
             getPaginatedLinks() : getContinuousLinks();
     }
 
-    boolean captcha() throws InterruptedException {
-        return xpathCaptcha != null && xpathCaptcha.length() > 0 &&
-                getDriver().findElements(By.xpath(xpathCaptcha)).size() > 0;
+    void solveCaptcha(WebDriver driver) throws CaptchaSolverException {
+        if (xpathCaptcha != null && xpathCaptcha.length() > 0) {
+            try {
+                ScriptUtils.waitPageLoading(driver);
+                WebDriverWait wait = new WebDriverWait(driver, 1);
+                wait.until(ExpectedConditions
+                        .visibilityOfElementLocated(By.xpath(xpathCaptcha)));
+
+                if (!this.captchaType.equals(CaptchaType.UNKNOWN) && Strings.isNotEmpty(this.xpathCaptchaElement)) {
+                    for (int i = 0; i < 3; i++) {
+
+                        try {
+                            if (this.captchaSolver == null)
+                                this.captchaSolver = CaptchaSolverFactory.getSolver(this.captchaType);
+
+                            WebElement captchaElement = wait.until(ExpectedConditions
+                                    .visibilityOfElementLocated(By.xpath(this.xpathCaptchaElement)));
+                            captchaSolver.solve(driver, captchaElement);
+
+                        } catch (TimeoutException ignored) {
+                            log.info("Капча была решена");
+                        }
+                    }
+                } else {
+                    throw new CaptchaSolverNotImplementedException("Не указан метод решения капчи для ПС");
+                }
+            } catch (TimeoutException ignored) {}
+        }
     }
 
-    List<WebElement> getContinuousLinks() throws ExecutionException, InterruptedException {
-        JavascriptExecutor jsExecutor = (JavascriptExecutor) getDriver();
+    List<WebElement> getContinuousLinks() throws ExecutionException {
+        JavascriptExecutor jsExecutor = (JavascriptExecutor) driver;
         By linkLocator = By.xpath(xpathItemLink);
 
-        int initResultCount = getDriver().findElements(linkLocator).size();
+        int initResultCount = driver.findElements(linkLocator).size();
         int buttonClickCount = (searchResultLimit - 1) / initResultCount;
 
         ScriptUtils.scrollToBottom(jsExecutor);
         for (int i = 0; i < buttonClickCount && nextPage(); i++) {
             ScriptUtils.scrollToBottom(jsExecutor);
-            ScriptUtils.waitPageLoading(getDriver());
+            ScriptUtils.waitPageLoading(driver);
         }
 
-        List<WebElement> links = getDriver().findElements(linkLocator);
+        List<WebElement> links = driver.findElements(linkLocator);
         while(links.size() < searchResultLimit && nextPage()) {
             ScriptUtils.scrollToBottom(jsExecutor);
-            ScriptUtils.waitPageLoading(getDriver());
-            links = getDriver().findElements(linkLocator);
+            ScriptUtils.waitPageLoading(driver);
+            links = driver.findElements(linkLocator);
         }
 
         return links;
     }
 
-    List<WebElement> getPaginatedLinks() throws ExecutionException, InterruptedException {
+    List<WebElement> getPaginatedLinks() throws ExecutionException {
         List<WebElement> links = new ArrayList<>();
         do {
-            ScriptUtils.waitPageLoading(getDriver());
+            ScriptUtils.waitPageLoading(driver);
             By linkLocator = By.xpath(xpathItemLink);
-            List<WebElement> listNext = getDriver().findElements(linkLocator);
+            List<WebElement> listNext = driver.findElements(linkLocator);
 
             if(listNext != null)
                 links.addAll(listNext);
@@ -353,14 +466,14 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         return links;
     }
 
-    private boolean checkContinuousSearchResult() throws ExecutionException, InterruptedException {
+    private boolean checkContinuousSearchResult() throws ExecutionException {
         List<WebElement> links = getContinuousLinks();
         return checkPageResult(links);
     }
 
-    boolean checkPaginatedSearchResult() throws ExecutionException, InterruptedException {
+    boolean checkPaginatedSearchResult() throws ExecutionException {
         do {
-            ScriptUtils.waitPageLoading(getDriver());
+            ScriptUtils.waitPageLoading(driver);
             if (checkPageResult())
                 return true;
         } while (counter < searchResultLimit && nextPage());
@@ -368,24 +481,39 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         return false;
     }
 
-    String extractUrl(WebElement element) throws InterruptedException {
+    String extractUrl(WebElement element) {
         return element.getAttribute("href");
     }
 
-    private void searchText(String value) throws InterruptedException {
-        WebElement inputField = getDriver().findElement(
+    private boolean waitInputField(WebDriver driver) {
+        WebDriverWait wait = new WebDriverWait(driver, 1);
+        try {
+            wait.until(ExpectedConditions
+                    .visibilityOfElementLocated(By.xpath(xpathInputField)));
+            return true;
+        } catch (TimeoutException ignored) {
+            return false;
+        }
+    }
+
+    private void searchText(String value) {
+        WebElement inputField = driver.findElement(
                 By.xpath(xpathInputField));
-        ScriptUtils.type(inputField, inputDelay, value);
+        long delayRand = inputDelay - new Random().nextInt((int)inputDelay);
+        ScriptUtils.type(inputField, delayRand, value);
+
+        ScriptUtils.waitPageLoading(driver);
         inputField.sendKeys(Keys.ENTER);
     }
 
     private boolean checkHintAndSearch(String value) {
         try {
-            WebElement inputField = getDriver().findElement(
+            WebElement inputField = driver.findElement(
                     By.xpath(xpathInputField));
-            observeHintLinks();
-            if(typeAndCheckHint(inputField, value, inputDelay))
-                return true;
+            // observeHintLinks();
+//            if(typeAndCheckHint(inputField, value, inputDelay))
+//                return true;
+            inputField.sendKeys(value);
             inputField.sendKeys(Keys.ENTER);
             return false;
         } catch (Exception ex){
@@ -393,7 +521,7 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         }
     }
 
-    private boolean typeAndCheckHint(WebElement inputField, String query, long sleep) throws InterruptedException {
+    private boolean typeAndCheckHint(WebElement inputField, String query, long sleep) {
 
         for (char cp : query.toCharArray()) {
             inputField.sendKeys(new String(
@@ -409,7 +537,7 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         return false;
     }
 
-    private boolean checkHintLinks() throws InterruptedException {
+    private boolean checkHintLinks() {
         List<String> links = getHintLinks();
         for(String link : links) {
             try {
@@ -424,35 +552,35 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         return false;
     }
 
-    private void observeHintLinks() throws InterruptedException {
-        JavascriptExecutor js = (JavascriptExecutor) getDriver();
+    private void observeHintLinks() {
+        JavascriptExecutor js = (JavascriptExecutor) driver;
         String script = ScriptUtils.getScriptFromResource("observeHintLinks.js");
         js.executeScript(script, this.hintCSSClassName, this.hintLinkCSSClassName);
     }
 
-    private List<String> getHintLinks() throws InterruptedException {
-        JavascriptExecutor js = (JavascriptExecutor) getDriver();
+    private List<String> getHintLinks() {
+        JavascriptExecutor js = (JavascriptExecutor) driver;
         String script = ScriptUtils.getScriptFromResource("getHintLinks.js");
         return Arrays.asList(js.executeScript(script).toString().split(", "));
     }
 
-    private void stopHintLinksObserver() throws InterruptedException {
-        JavascriptExecutor js = (JavascriptExecutor) getDriver();
+    private void stopHintLinksObserver() {
+        JavascriptExecutor js = (JavascriptExecutor) driver;
         String script = ScriptUtils.getScriptFromResource("stopHintLinksObserver.js");
         js.executeScript(script);
     }
 
     private boolean checkPageResult() {
         try {
-            return checkPageResult(new WebDriverWait(getDriver(), SEARCH_RESULT_TIMEOUT)
+            return checkPageResult(new WebDriverWait(driver, SEARCH_RESULT_TIMEOUT)
                     .until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(xpathItemLink))));
-        } catch (TimeoutException | InterruptedException e) {
+        } catch (TimeoutException e) {
             log.debug("Results not found");
             return false;
         }
     }
 
-    private boolean checkPageResult(List<WebElement> links) throws InterruptedException {
+    private boolean checkPageResult(List<WebElement> links) {
         Iterator<WebElement> it = links.iterator();
         while (it.hasNext() && counter++ < searchResultLimit) {
             WebElement link = it.next();
@@ -464,7 +592,7 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
                     scrollTo(link);
                     return true;
                 }
-            } catch (MalformedURLException | InterruptedException e) {
+            } catch (MalformedURLException e) {
                 log.warn("Ошибка при проверке ссылки '{}' в ({}): {}",
                         url, searchSystemUrl, e.getLocalizedMessage());
             }
@@ -472,18 +600,18 @@ public class CommonDirectSearchRobot extends SeleniumRobot {
         return false;
     }
 
-    private void scrollTo(WebElement webElement) throws InterruptedException {
-        Actions actions = new Actions(getDriver());
+    private void scrollTo(WebElement webElement) {
+        Actions actions = new Actions(driver);
         actions.moveToElement(webElement, 0, 0).perform();
     }
 
-    private boolean nextPage() throws TimeoutScriptException, InterruptedException {
+    private boolean nextPage() throws TimeoutScriptException {
         //Переходим в низ страницы
-        JavascriptExecutor jsExecutor = (JavascriptExecutor) getDriver();
+        JavascriptExecutor jsExecutor = (JavascriptExecutor) driver;
         ScriptUtils.scrollToBottom(jsExecutor);
         //Жмём на кнопку next
         WebElement next = ScriptUtils.findElementIfExists(
-                By.xpath(xpathNextPage), getDriver());
+                By.xpath(xpathNextPage), driver);
         try {
             if (next != null) {
                 next.click();

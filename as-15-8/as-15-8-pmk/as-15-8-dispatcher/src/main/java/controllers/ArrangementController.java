@@ -1,10 +1,10 @@
 package controllers;
 
 import arrangement.ArrangementToExecution;
-import exceptions.AS_15_8_DispatcherException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.Arrangement;
+import model.enums.ArrangementStatus;
 import model.enums.Reason;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import repositories.ArrangementRepo;
+import restapi.ArrangementRestApi;
 import services.ArrangementService;
 import services.ResultService;
 import services.ResultsKafkaService;
@@ -31,12 +32,15 @@ public class ArrangementController {
     private final ResultService resultService;
     private final ResultsKafkaService resultsKafkaService;
     private final ArrangementService arrangementService;
+    private final ArrangementRestApi arrangementRestApi;
+
     private final ArrangementRepo arrangementRepo;
+
 
     @PostMapping("/save")
     @PreAuthorize("hasAnyRole('ROLE_VIEW_RESULT')")
-    public void saveResults(@RequestParam Long arrangementId) {
-        CompletableFuture.runAsync(() -> resultService.saveArrangementResults(arrangementId));
+    public void saveResults(@RequestParam("arrangementId") Arrangement arrangement) {
+        CompletableFuture.runAsync(() -> resultService.saveArrangement(arrangement));
     }
 
     @PostMapping
@@ -53,8 +57,36 @@ public class ArrangementController {
     @PreAuthorize("hasAnyRole('ROLE_VIEW_RESULT')")
     @GetMapping(path = "/completion")
     public long getArrangementCompletion(@RequestParam(name = "id", required = false) Arrangement arrangement){
-        return arrangementService.getCompletionPerscent(arrangement);
+        return Optional.ofNullable(arrangement)
+        .map(arr -> {
+            Long checkUnits = arrangement.getCheckUnitsCount();
+
+            if (checkUnits == null || checkUnits == 0)
+                return 0L;
+
+            long arrangementsCount = resultsKafkaService.getResultsCount(arrangement.getId());
+            return Math.min(arrangementsCount * 100 / checkUnits, 100);
+        }).orElse(0L);
     }
+
+    @PostMapping(path = "resetStatus")
+    @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
+    public void resetStatus(@RequestParam("arrangementId") Arrangement arrangement){
+        arrangement.setStatus(ArrangementStatus.PLANNED);
+        arrangementRepo.save(arrangement);
+    }
+
+    @PostMapping("/stop")
+    @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
+    public void stopArrangement(@RequestParam Long arrangementId, @RequestParam Long version) {
+        arrangementService.stopExecution(arrangementId, version, Reason.MANUAL);
+    }
+
+    /*@PostMapping("/finish")
+    @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
+    public void finishArrangement(@RequestParam Long arrangementId) {
+        arrangementRestApi.sendStatusNotificationToPPM(arrangementId, false);
+    }*/
 
     @GetMapping("/stopped")
     @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
@@ -68,34 +100,4 @@ public class ArrangementController {
         arrangementService.stopAllRunningArrangements(Reason.STOPPED_BY_SERVICE_MODE);
     }
 
-    @PutMapping("/stop")
-    @PreAuthorize("hasAnyRole('ROLE_MANAGE_ARRANGEMENT')")
-    public void stopArrangement(@RequestParam Long id) {
-        Arrangement arrangement = arrangementRepo.findById(id).orElseThrow(() ->
-                new AS_15_8_DispatcherException("Ошибка остановки мероприятия. Такое мероприятие не найдено в БД, id = " + id));
-        arrangementService.stopExecution(id, arrangement.getVersion(), Reason.MANUAL);
-    }
-
-    @PutMapping("/finish")
-    @PreAuthorize("hasAnyRole('ROLE_MANAGE_ARRANGEMENT')")
-    public void finishArrangement(@RequestParam Long id) {
-        arrangementService.finishArrangement(id);
-    }
-
-    @PutMapping("/stop_by_day_gone")
-    @PreAuthorize("hasAnyRole('ROLE_MANAGE_ARRANGEMENT')")
-    public void stopAllArrsByDayGone(@RequestParam Long id) {
-        arrangementService.stopAllRunningArrangements(Reason.STOPPED_BY_DAY_GONE);
-    }
-
-    @PutMapping("/stoping_reason_normal")
-    @PreAuthorize("hasAnyRole('ROLE_SYSTEM')")
-    public ResponseEntity changeStoppingReasonToNormal(@RequestBody Long id) {
-        Arrangement arrangement = arrangementRepo.findById(id).orElseThrow(() ->
-                new AS_15_8_DispatcherException("Ошибка остановки мероприятия. Такое мероприятие не найдено в БД, id = " + id));
-
-        arrangement.setReason(Reason.NORMAL);
-        arrangementRepo.save(arrangement);
-        return ResponseEntity.ok().build();
-    }
 }

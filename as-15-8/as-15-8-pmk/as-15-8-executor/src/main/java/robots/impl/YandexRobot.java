@@ -1,5 +1,7 @@
 package robots.impl;
 
+import captcha.solver.CaptchaSolverBadIPException;
+import captcha.solver.CaptchaSolverException;
 import checkUnits.CheckUnit;
 import enums.AccessToolParameter;
 import enums.CheckUnitJobResult;
@@ -27,27 +29,37 @@ public class YandexRobot extends CommonDirectSearchRobot {
     }
 
     @Override
-    public ExecutionJobResult execute(CheckUnit checkUnit) throws ExecutionException, InterruptedException {
-        getDriver().get(getSearchSystemUrl());
+    public ExecutionJobResult execute(CheckUnit checkUnit, boolean throwExceptionByCaptchaOrBadIP) throws ExecutionException {
+        driver.get(getSearchSystemUrl());
 
         equalityTest = EqualityTest.forCheckUnit(checkUnit);
         if (checkSuggestedLink(checkUnit.getValue(), equalityTest))
             return createMessage(true, null);
 
-        if (captcha())
-            return createMessage(true, CheckUnitJobResult.CAPTCHA_DETECTED);
+        try{
+            solveCaptcha(driver);
+        } catch (CaptchaSolverException ex) {
+            if (throwExceptionByCaptchaOrBadIP) {
+                throw new Captcha_ExecutionException(String.format("ПС выдала капчу на url: %s", checkUnit.getValue()));
+            } else {
+                if(ex instanceof CaptchaSolverBadIPException)
+                    return createMessage(false, CheckUnitJobResult.BAD_IP);
+                else
+                    return createMessage(false, CheckUnitJobResult.CAPTCHA_DETECTED);
+            }
+        }
 
         return createMessage(checkPaginatedSearchResult(), null);
     }
 
-    String extractUrl(WebElement element) throws InterruptedException {
+    String extractUrl(WebElement element) {
         String url = element.getAttribute("href");
         return isWrapped(url) ? getDirectUrl(url) : url;
     }
 
 
 
-    private boolean checkLink(@Nullable WebElement element, EqualityTest test) throws InterruptedException {
+    private boolean checkLink(@Nullable WebElement element, EqualityTest test) {
         if (element == null)
             return false;
 
@@ -62,11 +74,11 @@ public class YandexRobot extends CommonDirectSearchRobot {
         return false;
     }
 
-    private boolean checkSuggestedLink(String query, EqualityTest test) throws InterruptedException {
-        WebElement inputField = getDriver().findElement(By.xpath(getXpathInputField()));
+    private boolean checkSuggestedLink(String query, EqualityTest test) {
+        WebElement inputField = driver.findElement(By.xpath(getXpathInputField()));
         ScriptUtils.type(inputField, getInputDelay(), query + " ");
 
-        WebElement suggestedLink = getSuggestedLink(getDriver());
+        WebElement suggestedLink = getSuggestedLink(driver);
         if (checkLink(suggestedLink, test)) return true;
 
         inputField.sendKeys(Keys.ENTER);
@@ -85,20 +97,20 @@ public class YandexRobot extends CommonDirectSearchRobot {
         }
     }
 
-    private String getDirectUrl(String wrappedUrl) throws InterruptedException {
+    private String getDirectUrl(String wrappedUrl) {
         // open new tab
-        ((JavascriptExecutor) getDriver()).executeScript("window.open()");
+        ((JavascriptExecutor) driver).executeScript("window.open()");
         // switch to tab
-        ArrayList<String> tabs = new ArrayList<>(getDriver().getWindowHandles());
-        getDriver().switchTo().window(tabs.get(1));
+        ArrayList<String> tabs = new ArrayList<>(driver.getWindowHandles());
+        driver.switchTo().window(tabs.get(1));
         // navigate to url
-        getDriver().get(wrappedUrl);
+        driver.get(wrappedUrl);
         // get current url
-        String result = getDriver().getCurrentUrl();
+        String result = driver.getCurrentUrl();
         // close tab
-        getDriver().close();
+        driver.close();
         // switch to previous tab
-        getDriver().switchTo().window(tabs.get(0));
+        driver.switchTo().window(tabs.get(0));
         return result;
     }
 

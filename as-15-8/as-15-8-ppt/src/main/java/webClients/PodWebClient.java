@@ -29,6 +29,8 @@ import reactor.core.scheduler.Schedulers;
 
 import javax.annotation.PostConstruct;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
@@ -90,7 +92,9 @@ public class PodWebClient {
         Sort.Order order = pageable.getSort().stream().findFirst().orElseThrow(() ->
                 new AS_15_8_PPT_Exception("Невозможно отправить запрос на получение сортированных записей ЕРДИ в ПОД, т.к сортировка не задана"));
 
-        return webClient.post()
+        LocalDateTime startTime = LocalDateTime.now();
+
+        ResponseEntity<?> response = webClient.post()
                 .uri(UriComponentsBuilder
                         .fromUriString(PUT_ERDI_WITH_FILTERS)
                         .queryParam("sortingDirection", SortingDirection.valueOf(order.getDirection().name()))
@@ -117,6 +121,10 @@ public class PodWebClient {
                     }
                 }).block();
 
+        long timeDuration = ChronoUnit.SECONDS.between(startTime, LocalDateTime.now());
+        log.info("post - запрос на загрузку трафика занял: {} секунд - podWebClient", timeDuration);
+
+        return response;
     }
 
     public Flux<List<Long>> getErdiIdList(

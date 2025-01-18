@@ -1,7 +1,6 @@
 package repositories;
 
 import model.Arrangement;
-import model.enums.Reason;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -24,6 +23,11 @@ public interface ArrangementRepo extends JpaRepository<Arrangement, Long> {
     List<Arrangement> findStopped(@Param("date") LocalDateTime date);
 
     @Query("select a from Arrangement a " +
+            "where a.creationDate > :date and " +
+            "(a.status = 'UPLOADING') and a.isManual = false")
+    List<Arrangement> findUploading(@Param("date") LocalDateTime date);
+
+    @Query("select a from Arrangement a " +
             "where a.status = 'RUNNING' and a.isManual = false")
     List<Arrangement> findAllRunning();
 
@@ -33,5 +37,4 @@ public interface ArrangementRepo extends JpaRepository<Arrangement, Long> {
             " where a.id = :arrangementId")
     Optional<Long> findMaxCheckUnitsCount(@Param("arrangementId") Long arrangementId);
 
-    Optional<Arrangement> findByIdAndVersionAndReasonIsNot(Long id, Long version, Reason reason);
 }

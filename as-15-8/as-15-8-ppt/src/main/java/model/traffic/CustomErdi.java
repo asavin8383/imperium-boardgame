@@ -6,16 +6,19 @@ import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import lombok.experimental.Accessors;
 import model.Views;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(schema = "portal", name = "custom_erdi")
 @Data
+@Accessors(chain = true)
 @ToString(onlyExplicitlyIncluded = true)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -50,5 +53,13 @@ public class CustomErdi implements Serializable {
     @ManyToMany(mappedBy = "customErdiList")
     @JsonIgnore
     private List<ErdiTrafficUnit> erdiTrafficUnits;
+
+    public void addCustomErdiUnit(CustomErdiUnit customErdiUnit) {
+        if (this.getCustomErdiUnits() == null) {
+            this.setCustomErdiUnits(new ArrayList<>());
+        }
+        this.getCustomErdiUnits().add(customErdiUnit);
+        customErdiUnit.setCustomErdi(this);
+    }
 
 }

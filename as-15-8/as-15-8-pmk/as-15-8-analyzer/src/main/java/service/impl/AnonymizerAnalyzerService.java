@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import model.KeyWord;
 import model.NLPCategory;
+import model.NLPModel;
 import org.jsoup.Jsoup;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -236,7 +237,7 @@ public class AnonymizerAnalyzerService implements AnalyzerService<ExecutionAnony
 		String page = clearResult(result.getPageContent());
 
 		log.info("Запуск NLP: " + url);
-		NLPCategory nlpCategory = classificationService.classify(page);
+		NLPCategory nlpCategory = classificationService.classify(page, NLPModel.PAGE_CONTENT_CLASSIFICATOR);
 		nlpCategory = nlpCategory == null ? NLPCategory.EXCEPTION : nlpCategory;
 
 		log.info("Результат NLP: " + nlpCategory.getDescription());

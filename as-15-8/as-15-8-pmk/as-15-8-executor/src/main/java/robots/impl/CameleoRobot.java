@@ -3,6 +3,8 @@ package robots.impl;
 import checkUnits.CheckUnit;
 import enums.AccessToolParameter;
 import execution.ExecutionJobResult;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -19,31 +21,40 @@ import java.util.Map;
 public class CameleoRobot extends AnonymizerRobot {
 
 	private static final String CAMELEO_URL = "http://www.cameleo.xyz";
+
+    @Getter
+    @Setter
+    private int restartAttempts;
+
+    @Getter
+    private final int restartInterval;
 	
 	public CameleoRobot(Map<AccessToolParameter, String> scriptParams)  {
 		super(scriptParams);
+        this.restartAttempts = Integer.parseInt(scriptParams.getOrDefault(AccessToolParameter.RESTART_ATTEMPTS, "0"));
+        this.restartInterval = Integer.parseInt(scriptParams.getOrDefault(AccessToolParameter.RESTART_INTERVAL, "0"));
 	}
 
     @Override
-    public ExecutionJobResult execute(CheckUnit checkUnit) throws ExecutionException, InterruptedException {
-        getDriver().get(CAMELEO_URL);
+    public ExecutionJobResult execute(CheckUnit checkUnit, boolean throwExceptionByCaptchaOrBadIP) throws ExecutionException {
+        driver.get(CAMELEO_URL);
 
         try {
-            ScriptUtils.waitPageLoading(getDriver());
-            WebElement input = getDriver().findElement(By.id("url"));
+            ScriptUtils.waitPageLoading(driver);
+            WebElement input = driver.findElement(By.id("url"));
             input.sendKeys(checkUnit.getValue());
-            getDriver().findElement(By.xpath("//*[@id=\"proxy\"]/div/div[2]/input")).click();
-            ScriptUtils.waitPageLoading(getDriver());
+            driver.findElement(By.xpath("//*[@id=\"proxy\"]/div/div[2]/input")).click();
+            ScriptUtils.waitPageLoading(driver);
 
-            CloudflareUtils.waitCloudflareRedirect(getDriver());
-            ScriptUtils.waitPageLoading(getDriver());
-            if (CloudflareUtils.isCloudflareError(getDriver())) {
+            CloudflareUtils.waitCloudflareRedirect(driver);
+            ScriptUtils.waitPageLoading(driver);
+            if (CloudflareUtils.isCloudflareError(driver)) {
                 return getErrorMessage(CloudflareUtils
-                        .getCloudflareErrorDetails(getDriver()));
+                        .getCloudflareErrorDetails(driver));
             }
 
             String plainError = ScriptUtils
-                    .getPlainErrorDescriptionIfOccurred(getDriver());
+                    .getPlainErrorDescriptionIfOccurred(driver);
             if (plainError != null)
                 return getErrorMessage(plainError);
 
@@ -60,4 +71,5 @@ public class CameleoRobot extends AnonymizerRobot {
                     "Выполнение потока прервано", e);
         }
     }
+
 }

@@ -42,7 +42,7 @@ public class ScriptUtils {
     }
 
     private static Integer WAIT_TIMEOUT = 30000;
-    private static Integer WAIT_DRIVER_DEFAULT = 3;
+    private static Integer WAIT_DRIVER_DEFAULT = 15;
 
 
     public static void waitDriver(WebDriver driver){
@@ -50,11 +50,15 @@ public class ScriptUtils {
     }
 
     public static void waitDriver(WebDriver driver, Integer seconds){
-        try{
-            WebDriverWait wait = new WebDriverWait(driver, seconds);
-            wait.until(webDriver -> false);
-        }
-        catch (TimeoutException ignored){}
+        new WebDriverWait(driver, seconds)
+            .until(webDriver -> {
+                try {
+                    ((JavascriptExecutor) webDriver).executeScript("return window.name");
+                    return true;
+                } catch (Exception ignored){
+                    return false;
+                }
+            });
     }
 
     public static void waitPageLoading(WebDriver driver) {
@@ -62,10 +66,16 @@ public class ScriptUtils {
     }
 
     public static void waitPageLoading(WebDriver driver, int timeoutInSeconds) {
-        new WebDriverWait(driver, timeoutInSeconds)
+            new WebDriverWait(driver, timeoutInSeconds)
                 .withMessage("загрузка страницы")
-                .until(webDriver -> ((JavascriptExecutor) webDriver)
-                        .executeScript("return document.readyState").equals("complete"));
+                .until(webDriver -> {
+                    try {
+                        return ((JavascriptExecutor) webDriver)
+                                .executeScript("return document.readyState").equals("complete");
+                    } catch (Exception ignored) {
+                        return false;
+                    }
+                });
     }
 
     private static String getErrorCode(WebDriver driver){
@@ -86,16 +96,19 @@ public class ScriptUtils {
 
     public static byte[] getScreenshot(WebDriver webDriver)  {
         try{
-            switchToTab(webDriver, 2);
+            String[] windowHandles = webDriver.getWindowHandles().toArray(new String[0]);
+            webDriver.switchTo().window(windowHandles[1]);
             WebDriverWait wait = new WebDriverWait(webDriver, WAIT_TIMEOUT);
-            wait.until(ExpectedConditions.presenceOfElementLocated(
+            wait.until(ExpectedConditions.visibilityOfElementLocated(
                     By.id("screen"))).click();
 
-            ScriptUtils.waitForTab(webDriver, 2);
-            switchToTab(webDriver, 2);
+            ScriptUtils.waitForTab(webDriver, windowHandles.length-1);
+
+            windowHandles = webDriver.getWindowHandles().toArray(new String[0]);
+            webDriver.switchTo().window(windowHandles[windowHandles.length - 1]);
 
             String screenSrc = wait
-                    .until(ExpectedConditions.presenceOfElementLocated(
+                    .until(ExpectedConditions.visibilityOfElementLocated(
                             By.xpath("//img[@id = 'screen' and @src and string-length(@src)!=0]")))
                     .getAttribute("src");
 
@@ -107,7 +120,7 @@ public class ScriptUtils {
 
             // close screenshot tab
             webDriver.close();
-            switchToTab(webDriver, 1);
+            webDriver.switchTo().window(windowHandles[windowHandles.length - 2]);
 
             try {
                 return Base64.getDecoder().decode(base64Image);
@@ -151,12 +164,7 @@ public class ScriptUtils {
     private static void waitForTab(WebDriver webDriver, int tabIndex) { // one-based tab index
         new WebDriverWait(webDriver, WAIT_TIMEOUT)
                 .until(driver -> driver != null &&
-                        driver.getWindowHandles().size() > tabIndex - 1);
-    }
-
-    private static void switchToTab(WebDriver webDriver, int tabIndex) { // one-based tab index
-        ArrayList<String> handles = new ArrayList<>(webDriver.getWindowHandles());
-        webDriver.switchTo().window(handles.get(tabIndex - 1));
+                        driver.getWindowHandles().size() > tabIndex);
     }
 
     @Nullable
@@ -273,9 +281,10 @@ public class ScriptUtils {
 
     public static void openScreenshotExtension(WebDriver driver){
         ((JavascriptExecutor)driver).executeScript("window.open()");
-        switchToTab(driver, 2);
+        String[] windowHandles = driver.getWindowHandles().toArray(new String[0]);
+        driver.switchTo().window(windowHandles[1]);
         driver.get(ChromeSettings.getScreenshotExtension().getPopupUrl());
-        switchToTab(driver, 1);
+        driver.switchTo().window(windowHandles[0]);
     }
 
     public static String getScriptFromResource(String resourceName){

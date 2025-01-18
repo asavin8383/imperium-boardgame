@@ -18,10 +18,17 @@ public interface EqualityTest {
     @SneakyThrows
     static String decode(String url) {
         if (!StringUtils.isEmpty(url)) {
+            url = replacePercentageAndPlusSymbols(url);
             return URLDecoder.decode(url,
                     StandardCharsets.UTF_8.name());
         }
         return url;
+    }
+
+    static String replacePercentageAndPlusSymbols(String bad_url) {
+        bad_url = bad_url.replaceAll("%(?![0-9a-fA-F]{2})", "%25");
+        bad_url = bad_url.replaceAll("\\+", "%2B");
+        return bad_url;
     }
 
     @Nullable

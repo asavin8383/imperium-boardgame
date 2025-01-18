@@ -1,9 +1,7 @@
 package services;
 
-import arrangement.ArrangementStatusNotification;
 import arrangement.ArrangementToExecution;
 import checkUnits.CheckUnit;
-import enums.ArrangementEvents;
 import enums.CheckUnitJobResult;
 import events.producers.ArrangementStopEventProducer;
 import exceptions.AS_15_8_DispatcherException;
@@ -20,10 +18,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.*;
-import org.springframework.http.converter.json.MappingJacksonValue;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
@@ -34,6 +33,7 @@ import reactor.core.publisher.Flux;
 import remoteEvents.ArrangementStopEvent;
 import repositories.ArrangementRepo;
 import repositories.ResultRepo;
+import restapi.ArrangementRestApi;
 
 import javax.annotation.PostConstruct;
 import java.time.LocalDate;
@@ -52,20 +52,16 @@ public class ArrangementService {
     private String gatewayUrl;
 
     @Getter
-    private Map<Long, Set<Long>> stoppedArrangements = new ConcurrentHashMap<>();
+    private final Map<Long, Set<Long>> stoppedArrangements = new ConcurrentHashMap<>();
 
     private final ArrangementRepo arrangementRepo;
     private final ArrangementStopEventProducer arrangementStopEventProducer;
     private final ResultsKafkaService resultsKafkaService;
     private final ActService actService;
+    private final ArrangementRestApi arrangementRestApi;
     private final ResultRepo resultRepo;
 
     private final String GET_CHECK_UNITS_FROM_PPT = "/ppt/arrangements/checkUnits";
-    private final String PPT_STATUS_ENDPOINT = "/ppt/arrangements/status";
-    private final String PPT_IS_ACT_AVAILABLE_FOR_AUTOMATIC_SEND = "/arrangements/act_available_for_automatic_send";
-    private final String PPT_ARRANGEMENT_INTERRUPT_VIOLATION_NUMBER = "/arrangements/interrupt_violation_number";
-
-    private final OAuth2RestTemplate restTemplate;
 
     @PostConstruct
     private void fillStoppedArrangements() {
@@ -80,17 +76,19 @@ public class ArrangementService {
         );
     }
 
+
+    @Async
     @Scheduled(cron = "0 0 0 * * ?")
     void clearStoppedArrangements() {
-        stopAllRunningArrangementsByDayGone();
         evictCaches();
         stoppedArrangements.clear();
+        stopAllRunningArrangementsByDayGone();
     }
 
-    private void stopAllRunningArrangementsByDayGone() {
+    void stopAllRunningArrangementsByDayGone() {
         try {
             log.info("Попытка завершения всех мероприятий по шедулеру на текущий день");
-            stopAllRunningArrangements(Reason.STOPPED_BY_DAY_GONE);
+            stopAllRunningArrangements(Reason.MANUAL);
         } catch (Exception ex){
             log.error("Ошибка при остановке мероприятий по окончанию для ", ex);
         }
@@ -109,8 +107,7 @@ public class ArrangementService {
         arrangement.setCreationDate(LocalDateTime.now());
         arrangement.setVersion(Optional.ofNullable(arrangementToExecution.getVersion()).orElse(0L));
         arrangement.setStatus(ArrangementStatus.RUNNING);
-        arrangement.setReason(Reason.NORMAL);
-        arrangement.setMaxCheckUnitsCount(getInterruptViolationNumberFromPPT(arrangementToExecution.getId()));
+        arrangement.setMaxCheckUnitsCount(arrangementRestApi.getInterruptViolationNumberFromPPT(arrangementToExecution.getId()));
         arrangementRepo.save(arrangement);
 
         if(arrangement.getId() != null && arrangement.getStatus().equals(ArrangementStatus.STOPPED)) {
@@ -148,28 +145,6 @@ public class ArrangementService {
 
         final ArrangementStopEvent event = new ArrangementStopEvent(arrangementId, version);
         arrangementStopEventProducer.send(event);
-
-        sendStatusNotificationToPPT(new ArrangementStatusNotification(
-                arrangement.getId(),
-                ArrangementEvents.PREPARE_TO_STOP,
-                getCompletionPerscent(arrangement)
-        ));
-    }
-
-    @Transactional
-    public boolean finishArrangement(Long arrangementId) {
-        Arrangement arrangement = arrangementRepo
-                .findById(arrangementId)
-                .orElseThrow(() -> new AS_15_8_DispatcherException("Ошибка завершения мероприятия. Мероприятие не найдено по ID: " + arrangementId));
-        arrangement.setStatus(ArrangementStatus.FINISHED);
-        arrangementRepo.save(arrangement);
-
-        if (sendStatusNotificationToPPT(new ArrangementStatusNotification(
-                arrangement.getId(),
-                ArrangementEvents.FINISH,
-                getCompletionPerscent(arrangement)))) {
-            return true;
-        } else return false;
     }
 
     public synchronized boolean isArrangementRunning(Long arrangementId, Long version) {
@@ -178,7 +153,7 @@ public class ArrangementService {
                 .orElse(true);
     }
 
-    boolean finishArrangement(Long arrangementId, boolean isStopped, boolean isActSendAutomatically) {
+    boolean finishArrangement(Long arrangementId, boolean isStopped, boolean isActAvailable) {
         try {
             Arrangement arr = arrangementRepo.findById(arrangementId)
                     .orElseThrow(() -> new AS_15_8_DispatcherException("Ошибка при закрытии мероприятия. Мероприятие не найдено по ID: " + arrangementId));
@@ -193,16 +168,13 @@ public class ArrangementService {
                         arr.setStatus(ArrangementStatus.STOPPED_BY_MAX_CHECK_UNITS);
                         break;
                     case MANUAL:
-                    case NORMAL:
                         arr.setStatus(ArrangementStatus.STOPPED);
                         break;
-                    case STOPPED_BY_DAY_GONE:
-                        arr.setStatus(ArrangementStatus.STOPPED_BY_DAY_GONE);
                 }
             }
             arrangementRepo.save(arr);
-            if (!isStopped && isActSendAutomatically) {
-                return actService.createAutomaticAct(arrangementId);
+            if (!isStopped && isActAvailable) {
+                return actService.createAct(arrangementId);
             }
             return true;
         } catch (Exception ex) {
@@ -219,9 +191,7 @@ public class ArrangementService {
     public void stopAllRunningArrangements(Reason reason) {
         List<Arrangement> arrangements = arrangementRepo.findAllRunning();
         if (!arrangements.isEmpty()) {
-            arrangements.forEach(arrangement -> {
-                stopExecution(arrangement.getId(), arrangement.getVersion(), reason);
-            });
+            arrangements.forEach(arrangement -> stopExecution(arrangement.getId(), arrangement.getVersion(), reason));
         }
     }
 
@@ -258,9 +228,7 @@ public class ArrangementService {
     }
 
     private void saveResults(List<Result> manualArrResults) {
-        manualArrResults.forEach(result -> {
-            resultRepo.save(result);
-        });
+        manualArrResults.forEach(resultRepo::save);
     }
 
     private Arrangement createNewManualArrangement(Long arrangementId, int checkUnitsCount) {
@@ -307,134 +275,4 @@ public class ArrangementService {
             throw AS_15_8_DispatcherException.logAndGet(log, String.format("Ошибка получения чек-юнитов мероприятия %d в ППМ", arrangementId), ex);
         }
     }
-
-
-    public boolean sendStopOrFinishedStatusNotificationToPPT(Long arrangementId, boolean isStopped){
-        ArrangementStatusNotification notification = createStatusNotification(arrangementId, isStopped);
-        return sendStatusNotificationToPPT(notification);
-    }
-
-    public boolean sendStatusNotificationToPPT(ArrangementStatusNotification notification){
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        MappingJacksonValue jacksonValue = new MappingJacksonValue(notification);
-        HttpEntity<MappingJacksonValue> entity = new HttpEntity<>(jacksonValue, headers);
-
-        log.info("Отправка сообщения с изменением статуса мероприятия id:  {}, путь: {}, событие: {} ", notification.getArrangementId(), PPT_STATUS_ENDPOINT, notification.getEvent());
-        try {
-            restTemplate.put(UriComponentsBuilder
-                    .fromHttpUrl(gatewayUrl)
-                    .path(PPT_STATUS_ENDPOINT)
-                    .queryParam("id", notification.getArrangementId())
-                    .build().toString(), entity);
-        } catch (HttpClientErrorException | HttpServerErrorException ex) {
-            log.info("Ошибка отправки сообщения с изменением статуса мероприятия, " + notification.getArrangementId() + " путь: " + PPT_STATUS_ENDPOINT + ", код возврата " + ex.getStatusCode());
-            return false;
-        }
-        log.info("Сообщение с изменением статуса мероприятия {} успешно отправлено, путь: " + PPT_STATUS_ENDPOINT, notification.getArrangementId());
-        return true;
-    }
-
-    private ArrangementStatusNotification createStatusNotification(Long arrangementId, boolean isStopped) {
-        ArrangementStatusNotification notification = null;
-
-        Arrangement arr = arrangementRepo.findById(arrangementId).orElseThrow(() ->
-                new AS_15_8_DispatcherException("Ошибка создания уведомления для отправки в ППМ или ППТ, мероприятие не найдено id:" + arrangementId));
-
-        switch (arr.getReason()) {
-            case NORMAL:
-            case MANUAL:
-                notification = new ArrangementStatusNotification(
-                        arrangementId,
-                        isStopped ? ArrangementEvents.STOP : ArrangementEvents.FINISH,
-                        getCompletionPerscent(arr));
-                break;
-            case STOPPED_BY_MAX_CHECK_UNITS_COUNT:
-                notification = new ArrangementStatusNotification(arrangementId,
-                        ArrangementEvents.STOP_BY_MAX_CHECK_UNITS_COUNT,
-                        getCompletionPerscent(arr));
-                break;
-            case STOPPED_BY_SERVICE_MODE:
-                notification = new ArrangementStatusNotification(arrangementId,
-                        ArrangementEvents.STOP_BY_SERVICE_MODE,
-                        getCompletionPerscent(arr));
-                break;
-            case STOPPED_BY_DAY_GONE:
-                notification = new ArrangementStatusNotification(arrangementId,
-                        ArrangementEvents.STOP_BY_DAY_GONE,
-                        getCompletionPerscent(arr));
-                break;
-        }
-
-        return notification;
-    }
-
-    public boolean isActAvailableFromPPT(Long arrangementId) {
-        try {
-            Optional<Boolean> result = restTemplate.exchange(
-                    createUri(arrangementId, PPT_IS_ACT_AVAILABLE_FOR_AUTOMATIC_SEND),
-                    HttpMethod.GET,
-                    null,
-                    new ParameterizedTypeReference<Optional<Boolean>>(){}
-            ).getBody();
-            //FIXME Как то много опшеналов...
-            return Optional.ofNullable(result).map(res -> res.orElse(false)).orElse(false);
-        } catch (Exception ex) {
-            throw AS_15_8_DispatcherException.logAndGet(log, String.format("Ошибка отправки сообщения с запросом статуса доступности отправки акта мероприятию %d в ППТ", arrangementId));
-        }
-    }
-
-    //TODO убрать, заменить на нотификешн
-    /*public void changeArrangementStatusToActSentPPT(Long arrangementId) {
-        try {
-            restTemplate.getForObject(UriComponentsBuilder.fromHttpUrl(gatewayUrl).path(PPT_ACT_SENT_STATUS).queryParam("id", arrangementId).build().toString(), Boolean.class);
-        } catch (HttpClientErrorException | HttpServerErrorException ex) {
-            throw AS_15_8_DispatcherException.logAndGet(log, String.format("Ошибка отправки сообщения с изменение статуса ACT_SENT %d в ППТ, код возврата %s", arrangementId, ex.getStatusCode()));
-        }
-    }*/
-
-    public Long getInterruptViolationNumberFromPPT(Long arrangementId) {
-        try {
-            ResponseEntity<Long> result = restTemplate.getForEntity(
-                    createUri(arrangementId, PPT_ARRANGEMENT_INTERRUPT_VIOLATION_NUMBER),
-                    Long.class
-            );
-
-            if (result.getBody() != null) {
-                return result.getBody();
-            } else return null;
-
-        } catch (Exception ex) {
-            log.error("Ошибка запроса предельного числа проверок для прерывания мероприятия " + arrangementId + " из ППТ", ex);
-            return null;
-        }
-    }
-
-    private String createUri(Long arrangementId, String path) {
-        return UriComponentsBuilder
-                .fromHttpUrl(gatewayUrl)
-                .path(path)
-                .queryParam("id", arrangementId)
-                .build()
-                .toString();
-    }
-
-    public Long getCompletionPerscent(Arrangement arrangement) {
-        /*Arrangement arrangement = arrangementRepo.findById(arrangementId).orElseThrow(() ->
-                new AS_15_8_DispatcherException("Ошибка расчёта % выполнения для мероприятия id =  " + arrangementId));
-        */
-        return Optional.ofNullable(arrangement)
-                .map(arr -> {
-                    Long checkUnits = arrangement.getCheckUnitsCount();
-
-                    if (checkUnits == null || checkUnits == 0)
-                        return 0L;
-
-                    long arrangementsCount = resultsKafkaService.getResultsCount(arrangement.getId());
-                    return Math.min(arrangementsCount * 100 / checkUnits, 100);
-                }).orElse(0L);
-    }
-
 }

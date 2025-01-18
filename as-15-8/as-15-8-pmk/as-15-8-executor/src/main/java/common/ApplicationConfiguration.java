@@ -14,7 +14,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 @EnableScheduling
 @EnableConfigurationProperties(ExecutorProperties.class)
-@ComponentScan(basePackages={"common", "events", "robots.factory", "service"})
+@ComponentScan(basePackages={"common", "captcha", "events", "robots.factory", "service"})
 public class ApplicationConfiguration{
 	
 	public static void main(String[] args) {
