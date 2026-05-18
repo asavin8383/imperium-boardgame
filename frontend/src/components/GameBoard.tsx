@@ -45,7 +45,8 @@ function CardView({ card, selected = false, onClick, size = 'normal', dimmed = f
 }) {
   const color = catColor(card);
   const [hov, setHov] = useState(false);
-  const d = { small: { w: 82, h: 104, n: 10, c: 8 }, normal: { w: 112, h: 148, n: 11, c: 9 }, large: { w: 130, h: 168, n: 12, c: 10 } }[size];
+  const [imgErr, setImgErr] = useState(false);
+  const d = { small: { w: 90, h: 114, n: 10, c: 8 }, normal: { w: 123, h: 163, n: 11, c: 9 }, large: { w: 143, h: 185, n: 12, c: 10 } }[size];
   return (
     <div onClick={onClick} onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)} style={{
       width: d.w, minHeight: d.h, flexShrink: 0,
@@ -56,6 +57,14 @@ function CardView({ card, selected = false, onClick, size = 'normal', dimmed = f
       transition: 'all 0.15s', display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative',
       boxShadow: selected ? `0 0 12px ${color}44` : hov && onClick ? `0 4px 12px rgba(0,0,0,.5)` : `0 2px 4px rgba(0,0,0,.4)`,
     }}>
+      {!imgErr && (
+        <img
+          src={`/cards/${card.id}.jpg`}
+          alt=""
+          onError={() => setImgErr(true)}
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.75, borderRadius: 7, pointerEvents: 'none' }}
+        />
+      )}
       <div style={{ height: 4, background: color, flexShrink: 0 }} />
       <div style={{ padding: '6px 7px', flex: 1, display: 'flex', flexDirection: 'column', gap: 3 }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 4, flex: 1 }}>
@@ -425,6 +434,28 @@ export default function GameBoard() {
             </div>
           )}
 
+          {/* Hand */}
+          <div>
+            <div style={{ fontSize: 9, color: '#555', letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 6 }}>
+              Рука ({(player?.hand ?? []).length}/{player?.hand_limit ?? 5})
+            </div>
+            <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
+              {(player?.hand ?? []).map(card => {
+                const isDisorder = card.categories?.includes('disorder');
+                const canSelect = isDiscardPhase || (isPlayerTurn && (mode === 'activation' || (mode === 'revolution' && isDisorder)));
+                return (
+                  <CardView key={card.id} card={card} size="normal"
+                    selected={selectedCards.includes(card.id)}
+                    onClick={canSelect ? () => toggleCard(card.id) : undefined}
+                    dimmed={isPlayerTurn && mode === 'revolution' && !isDisorder} />
+                );
+              })}
+              {(player?.hand ?? []).length === 0 && (
+                <div style={{ fontSize: 11, color: '#2a2d40' }}>Рука пуста</div>
+              )}
+            </div>
+          </div>
+
           {loading && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, color: '#3498db' }}>
               <div style={{ width: 12, height: 12, border: '2px solid #3498db44', borderTop: '2px solid #3498db', borderRadius: '50%', animation: 'spin .8s linear infinite' }} />
@@ -515,28 +546,6 @@ export default function GameBoard() {
             <DeckPile count={bot?.dynasty_deck_count ?? 0} label="Династия" color="#1a0a2d" />
             <DeckPile count={bot?.chronicle_count ?? 0} label="Летопись" color="#1a2a1a" />
           </div>
-        </div>
-      </div>
-
-      {/* BOTTOM — Hand */}
-      <div style={{ background: 'linear-gradient(0deg,#060710,#080a12)', borderTop: '1px solid #1e2235', padding: '10px 16px', flexShrink: 0 }}>
-        <div style={{ fontSize: 9, color: '#555', letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 8 }}>
-          Рука ({(player?.hand ?? []).length}/{player?.hand_limit ?? 5})
-        </div>
-        <div style={{ display: 'flex', gap: 9, overflowX: 'auto', paddingBottom: 4 }}>
-          {(player?.hand ?? []).map(card => {
-            const isDisorder = card.categories?.includes('disorder');
-            const canSelect = (isDiscardPhase) || (isPlayerTurn && (mode === 'activation' || (mode === 'revolution' && isDisorder)));
-            return (
-              <CardView key={card.id} card={card} size="large"
-                selected={selectedCards.includes(card.id)}
-                onClick={canSelect ? () => toggleCard(card.id) : undefined}
-                dimmed={isPlayerTurn && mode === 'revolution' && !isDisorder} />
-            );
-          })}
-          {(player?.hand ?? []).length === 0 && (
-            <div style={{ fontSize: 11, color: '#2a2d40', alignSelf: 'center' }}>Рука пуста</div>
-          )}
         </div>
       </div>
 
