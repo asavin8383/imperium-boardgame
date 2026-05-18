@@ -1,7 +1,7 @@
 // Imperium game types matching backend models
 
 export type Period = 'barbarism' | 'civilization';
-export type GamePhase = 'setup' | 'player_turn' | 'bot_turn' | 'solstice' | 'final_round' | 'scoring' | 'game_over';
+export type GamePhase = 'setup' | 'player_turn' | 'player_discard' | 'bot_turn' | 'solstice' | 'final_round' | 'scoring' | 'game_over';
 export type TurnAction = 'activation' | 'innovation' | 'revolution';
 export type Nation = 'vikings' | 'greeks' | 'carthaginians' | 'celts' | 'macedonians' | 'persians' | 'romans' | 'scythians';
 export type Difficulty = 'chieftain' | 'commander' | 'emperor' | 'overlord' | 'sovereign';

@@ -64,14 +64,20 @@ def do_revolution(game_id: str, card_ids: list) -> GameState:
 
 
 def end_player_turn(game_id: str, discard_ids: list = None) -> GameState:
-    state = _require(game_id)
-    if discard_ids:
-        state = _engine.discard_from_hand(state, discard_ids)
-    state = _engine.end_turn(state)
-    # Immediately run bot turn
     from .enums import GamePhase
-    if state.phase == GamePhase.BOT_TURN:
-        state = _engine.run_bot_turn(state)
+    state = _require(game_id)
+
+    if state.phase == GamePhase.PLAYER_TURN:
+        # Первый вызов: переходим в фазу сброса
+        state = _engine.end_turn(state)
+    elif state.phase == GamePhase.PLAYER_DISCARD:
+        # Второй вызов: сбрасываем выбранные карты, добираем до 5, ход бота
+        if discard_ids:
+            state = _engine.discard_from_hand(state, discard_ids)
+        state = _engine.end_turn(state)
+        if state.phase == GamePhase.BOT_TURN:
+            state = _engine.run_bot_turn(state)
+
     save_game(state)
     return state
 

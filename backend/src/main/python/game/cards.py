@@ -47,6 +47,10 @@ class Card:
     sends_to_chronicle: int = 0   # отправляет N карт соперника/своих в летопись
     goes_to_chronicle: bool = False  # сама идёт в летопись после розыгрыша (не в сброс)
 
+    def __post_init__(self):
+        if CardCategory.REGION in self.categories:
+            self.card_type = CardType.PERMANENT
+
     def __hash__(self):
         return hash(self.id)
 

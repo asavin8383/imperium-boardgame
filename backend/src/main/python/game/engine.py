@@ -138,14 +138,19 @@ class GameEngine:
         return state
 
     def end_turn(self, state: GameState) -> GameState:
-        """Игрок завершает ход (фаза обновления)"""
-        if state.phase != GamePhase.PLAYER_TURN:
+        """Игрок завершает ход — переходит к фазе сброса карт"""
+        if state.phase == GamePhase.PLAYER_TURN:
+            if state.player.turn_action_chosen is None:
+                state.player.turn_action_chosen = TurnAction.ACTIVATION
+            state.phase = GamePhase.PLAYER_DISCARD
+            state.pending_choice = {"type": "discard"}
+            state.add_log("Выберите карты для сброса (или пропустите)")
+            return state
+        elif state.phase == GamePhase.PLAYER_DISCARD:
+            state.pending_choice = None
+            return self._end_player_turn(state)
+        else:
             raise ValueError("Не ваш ход")
-        if state.player.turn_action_chosen is None:
-            # Default to ending without action
-            state.player.turn_action_chosen = TurnAction.ACTIVATION
-        state = self._end_player_turn(state)
-        return state
 
     def discard_from_hand(self, state: GameState, card_ids: List[str]) -> GameState:
         """Сбросить карты с руки (во время фазы обновления)"""

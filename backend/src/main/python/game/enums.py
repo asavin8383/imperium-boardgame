@@ -60,6 +60,7 @@ class Nation(str, Enum):
 class GamePhase(str, Enum):
     SETUP = "setup"
     PLAYER_TURN = "player_turn"
+    PLAYER_DISCARD = "player_discard"  # игрок сбрасывает лишние карты
     BOT_TURN = "bot_turn"
     SOLSTICE = "solstice"         # солнцестояние
     FINAL_ROUND = "final_round"

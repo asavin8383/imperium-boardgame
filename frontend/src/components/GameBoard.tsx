@@ -10,6 +10,8 @@ import slvIcon from '../assets/icons/category/СЛВ.svg';
 import spsIcon from '../assets/icons/category/СПС.svg';
 import varIcon from '../assets/icons/period/ВАР.svg';
 import impIcon from '../assets/icons/period/ИМП.svg';
+import postIcon from '../assets/icons/type/ПОСТ.svg';
+import atkIcon from '../assets/icons/type/АТК.svg';
 
 const CAT_COLOR: Record<string, string> = {
   region: '#2ecc71', origins: '#e67e22', civilization: '#3498db',
@@ -28,7 +30,7 @@ const VP_PER_LABEL: Record<string, string> = {
 };
 const REGION_ICON: Record<string, string> = { land: '🌾', sea: '🌊', mountain: '🏔' };
 const PHASE_RU: Record<string, string> = {
-  player_turn: '🎯 Ваш ход', bot_turn: '🤖 Ход бота', solstice: '☀ Солнцестояние',
+  player_turn: '🎯 Ваш ход', player_discard: '🗑 Сброс карт', bot_turn: '🤖 Ход бота', solstice: '☀ Солнцестояние',
   final_round: '⚡ Финальный раунд', scoring: '🏆 Подсчёт ПО', game_over: '🏁 Конец игры', setup: '⚙ Подготовка',
 };
 
@@ -57,6 +59,12 @@ function CardView({ card, selected = false, onClick, size = 'normal', dimmed = f
       <div style={{ height: 4, background: color, flexShrink: 0 }} />
       <div style={{ padding: '6px 7px', flex: 1, display: 'flex', flexDirection: 'column', gap: 3 }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 4, flex: 1 }}>
+          {card.card_type === 'permanent' && (
+            <img src={postIcon} alt="Постоянная" style={{ width: 18, height: 18, opacity: 0.85, flexShrink: 0, marginTop: 1 }} />
+          )}
+          {card.card_type === 'attack' && (
+            <img src={atkIcon} alt="Атака" style={{ width: 18, height: 18, opacity: 0.85, flexShrink: 0, marginTop: 1 }} />
+          )}
           <div style={{ fontSize: d.n, fontWeight: 600, color: '#e8e8f0', lineHeight: 1.3, flex: 1 }}>{card.name}</div>
           {card.period && (
             <img
@@ -118,21 +126,6 @@ function CardView({ card, selected = false, onClick, size = 'normal', dimmed = f
             <span title="Идёт в летопись после розыгрыша" style={{ fontSize: d.c - 1, color: '#c8a84b' }}>📜→</span>
           )}
         </div>
-        {/* VP row */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
-          <div style={{ display: 'flex', gap: 3, alignItems: 'center', flexWrap: 'wrap' }}>
-            {(card.vp_fixed ?? 0) > 0 && (
-              <div style={{ background: '#f1c40f', color: '#000', borderRadius: 3, padding: '1px 4px', fontSize: d.c, fontWeight: 700 }}>{card.vp_fixed} ПО</div>
-            )}
-            {(card.vp_penalty ?? 0) > 0 && (
-              <div style={{ background: '#e74c3c', color: '#fff', borderRadius: 3, padding: '1px 4px', fontSize: d.c, fontWeight: 700 }}>−{card.vp_penalty}</div>
-            )}
-            {card.vp_per_condition && (
-              <div style={{ color: '#f1c40f', fontSize: d.c - 1, fontWeight: 600 }}>*/{VP_PER_LABEL[card.vp_per_condition] ?? card.vp_per_condition}</div>
-            )}
-          </div>
-          {card.period && <div style={{ fontSize: d.c - 1, color: card.period === 'barbarism' ? '#e74c3c' : '#3498db' }}>{card.period === 'barbarism' ? '⚔' : '🏛'}</div>}
-        </div>
         {card.categories && card.categories.length > 0 && (() => {
           const iconMap: Record<string, { src: string; alt: string }> = {
             region:       { src: regIcon, alt: 'Регион' },
@@ -152,6 +145,17 @@ function CardView({ card, selected = false, onClick, size = 'normal', dimmed = f
         })()}
       </div>
       {badge && <div style={{ position: 'absolute', top: 6, right: 6 }}>{badge}</div>}
+      <div style={{ position: 'absolute', bottom: 5, right: 5, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
+        {(card.vp_fixed ?? 0) > 0 && (
+          <div style={{ background: '#f1c40f', color: '#000', borderRadius: 3, padding: '1px 4px', fontSize: d.c, fontWeight: 700, lineHeight: 1.2 }}>{card.vp_fixed}</div>
+        )}
+        {(card.vp_penalty ?? 0) > 0 && (
+          <div style={{ background: '#e74c3c', color: '#fff', borderRadius: 3, padding: '1px 4px', fontSize: d.c, fontWeight: 700, lineHeight: 1.2 }}>−{card.vp_penalty}</div>
+        )}
+        {card.vp_per_condition && (
+          <div style={{ color: '#f1c40f', fontSize: d.c - 1, fontWeight: 700, lineHeight: 1.2 }}>*/{VP_PER_LABEL[card.vp_per_condition] ?? card.vp_per_condition}</div>
+        )}
+      </div>
     </div>
   );
 }
@@ -211,6 +215,7 @@ export default function GameBoard() {
   if (!gs) return null;
   const { player, bot, shared } = gs;
   const isPlayerTurn = gs.phase === 'player_turn';
+  const isDiscardPhase = gs.phase === 'player_discard';
   const isGameOver = gs.phase === 'game_over' || gs.phase === 'scoring';
 
   useEffect(() => {
@@ -251,6 +256,10 @@ export default function GameBoard() {
     setMode(null); setSelectedCards([]); setAcquireMode(false);
     await endTurn([]);
   }
+  async function handleConfirmDiscard() {
+    await endTurn(selectedCards);
+    setSelectedCards([]);
+  }
 
   return (
     <div style={{ minHeight: '100vh', background: 'linear-gradient(160deg,#0a0c14,#080a10)', color: '#e8e8f0', fontFamily: "'Georgia', serif", display: 'flex', flexDirection: 'column' }}>
@@ -263,7 +272,7 @@ export default function GameBoard() {
           {gs.is_final_round && <span style={{ background: '#3d1a00', border: '1px solid #e67e22', borderRadius: 4, padding: '2px 8px', fontSize: 10, color: '#e67e22', fontWeight: 700 }}>⚡ ФИНАЛЬНЫЙ</span>}
         </div>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          <div style={{ padding: '3px 10px', background: isPlayerTurn ? '#0a2d1a' : '#1a0a1a', border: `1px solid ${isPlayerTurn ? '#2ecc71' : '#9b59b6'}`, borderRadius: 5, fontSize: 11, color: isPlayerTurn ? '#2ecc71' : '#9b59b6', fontWeight: 600 }}>
+          <div style={{ padding: '3px 10px', background: isPlayerTurn ? '#0a2d1a' : isDiscardPhase ? '#1a0a2d' : '#1a0a1a', border: `1px solid ${isPlayerTurn ? '#2ecc71' : isDiscardPhase ? '#9b59b6' : '#9b59b6'}`, borderRadius: 5, fontSize: 11, color: isPlayerTurn ? '#2ecc71' : isDiscardPhase ? '#c39bd3' : '#9b59b6', fontWeight: 600 }}>
             {PHASE_RU[gs.phase] ?? gs.phase}
           </div>
           <button onClick={resetGame} style={{ background: 'transparent', border: '1px solid #2a2d40', borderRadius: 5, color: '#555', padding: '3px 9px', cursor: 'pointer', fontSize: 10 }}>Новая игра</button>
@@ -404,6 +413,18 @@ export default function GameBoard() {
             </div>
           )}
 
+          {isDiscardPhase && (
+            <div style={{ background: '#0d1020', border: '1px solid #9b59b6', borderRadius: 9, padding: '10px 12px' }}>
+              <div style={{ fontSize: 9, color: '#9b59b6', marginBottom: 8, letterSpacing: '.08em', textTransform: 'uppercase' }}>Сброс карт</div>
+              <div style={{ fontSize: 10, color: '#aaa', marginBottom: 8 }}>
+                {selectedCards.length > 0 ? `Выбрано для сброса: ${selectedCards.length}` : 'Выберите карты для сброса или пропустите'}
+              </div>
+              <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
+                <Btn label={selectedCards.length > 0 ? `Сбросить (${selectedCards.length})` : 'Пропустить'} onClick={handleConfirmDiscard} color="#9b59b6" icon="🗑" />
+              </div>
+            </div>
+          )}
+
           {loading && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, color: '#3498db' }}>
               <div style={{ width: 12, height: 12, border: '2px solid #3498db44', borderTop: '2px solid #3498db', borderRadius: '50%', animation: 'spin .8s linear infinite' }} />
@@ -505,7 +526,7 @@ export default function GameBoard() {
         <div style={{ display: 'flex', gap: 9, overflowX: 'auto', paddingBottom: 4 }}>
           {(player?.hand ?? []).map(card => {
             const isDisorder = card.categories?.includes('disorder');
-            const canSelect = isPlayerTurn && (mode === 'activation' || (mode === 'revolution' && isDisorder));
+            const canSelect = (isDiscardPhase) || (isPlayerTurn && (mode === 'activation' || (mode === 'revolution' && isDisorder)));
             return (
               <CardView key={card.id} card={card} size="large"
                 selected={selectedCards.includes(card.id)}
