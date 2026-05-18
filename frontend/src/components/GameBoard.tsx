@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { CardInfo, MarketSlot as MarketSlotInfo } from '../types/game';
+import regIcon from '../assets/icons/category/РЕГ.svg';
+import istIcon from '../assets/icons/category/ИСТ.svg';
+import civIcon from '../assets/icons/category/ЦИВ.svg';
+import besIcon from '../assets/icons/category/БЕС.svg';
+import nabIcon from '../assets/icons/category/НАБ.svg';
+import slvIcon from '../assets/icons/category/СЛВ.svg';
+import spsIcon from '../assets/icons/category/СПС.svg';
+import varIcon from '../assets/icons/period/ВАР.svg';
+import impIcon from '../assets/icons/period/ИМП.svg';
 
 const CAT_COLOR: Record<string, string> = {
   region: '#2ecc71', origins: '#e67e22', civilization: '#3498db',
@@ -47,10 +56,16 @@ function CardView({ card, selected = false, onClick, size = 'normal', dimmed = f
     }}>
       <div style={{ height: 4, background: color, flexShrink: 0 }} />
       <div style={{ padding: '6px 7px', flex: 1, display: 'flex', flexDirection: 'column', gap: 3 }}>
-        <div style={{ fontSize: d.c, color, fontWeight: 700, letterSpacing: '.05em', textTransform: 'uppercase' }}>
-            {(card.categories?.[0] ? (CAT_RU[card.categories[0]] ?? card.categories[0]) : '—')}
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 4, flex: 1 }}>
+          <div style={{ fontSize: d.n, fontWeight: 600, color: '#e8e8f0', lineHeight: 1.3, flex: 1 }}>{card.name}</div>
+          {card.period && (
+            <img
+              src={card.period === 'barbarism' ? varIcon : impIcon}
+              alt={card.period === 'barbarism' ? 'Варварство' : 'Цивилизация'}
+              style={{ width: 18, height: 18, opacity: 0.85, flexShrink: 0, marginTop: 1 }}
+            />
+          )}
         </div>
-        <div style={{ fontSize: d.n, fontWeight: 600, color: '#e8e8f0', lineHeight: 1.3, flex: 1 }}>{card.name}</div>
         {/* Effect icons */}
         <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap', minHeight: 12 }}>
           {card.card_type === 'attack' && <span title="Атака" style={{ fontSize: d.c - 1, color: '#e74c3c' }}>⚔</span>}
@@ -69,6 +84,39 @@ function CardView({ card, selected = false, onClick, size = 'normal', dimmed = f
           {(card.progress_cost_upgrade ?? 0) > 0 && (
             <span style={{ fontSize: d.c - 1, color: '#3498db' }}>▶{card.progress_cost_upgrade}</span>
           )}
+          {(card.gives_resource ?? 0) > 0 && (
+            <span title="Даёт ресурсы" style={{ fontSize: d.c - 1, color: '#e67e22' }}>+⚙{card.gives_resource}</span>
+          )}
+          {(card.gives_population ?? 0) > 0 && (
+            <span title="Даёт население" style={{ fontSize: d.c - 1, color: '#2ecc71' }}>+👥{card.gives_population}</span>
+          )}
+          {(card.gives_progress ?? 0) > 0 && (
+            <span title="Даёт жетоны прогресса" style={{ fontSize: d.c - 1, color: '#f1c40f' }}>+◆{card.gives_progress}</span>
+          )}
+          {(card.draws_cards ?? 0) > 0 && (
+            <span title="Тянет карты" style={{ fontSize: d.c - 1, color: '#1abc9c' }}>+🃏{card.draws_cards}</span>
+          )}
+          {(card.steal_progress ?? 0) > 0 && (
+            <span title="Забирает жетоны прогресса у соперника" style={{ fontSize: d.c - 1, color: '#e74c3c' }}>−◆{card.steal_progress}</span>
+          )}
+          {(card.steal_population ?? 0) > 0 && (
+            <span title="Забирает население у соперника" style={{ fontSize: d.c - 1, color: '#e74c3c' }}>−👥{card.steal_population}</span>
+          )}
+          {card.discard_opponent_card && (
+            <span title="Соперник сбрасывает карту из игровой зоны" style={{ fontSize: d.c - 1, color: '#e74c3c' }}>✂</span>
+          )}
+          {(card.gives_disorder ?? 0) > 0 && (
+            <span title="Даёт сопернику карты беспорядков" style={{ fontSize: d.c - 1, color: '#9b59b6' }}>⚡{card.gives_disorder}</span>
+          )}
+          {card.can_be_reinforced && (
+            <span title="Можно укрепить" style={{ fontSize: d.c - 1, color: '#4a90d9' }}>🛡</span>
+          )}
+          {(card.sends_to_chronicle ?? 0) > 0 && (
+            <span title="Отправляет карты в летопись" style={{ fontSize: d.c - 1, color: '#1abc9c' }}>📜{card.sends_to_chronicle}</span>
+          )}
+          {card.goes_to_chronicle && (
+            <span title="Идёт в летопись после розыгрыша" style={{ fontSize: d.c - 1, color: '#c8a84b' }}>📜→</span>
+          )}
         </div>
         {/* VP row */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
@@ -85,6 +133,23 @@ function CardView({ card, selected = false, onClick, size = 'normal', dimmed = f
           </div>
           {card.period && <div style={{ fontSize: d.c - 1, color: card.period === 'barbarism' ? '#e74c3c' : '#3498db' }}>{card.period === 'barbarism' ? '⚔' : '🏛'}</div>}
         </div>
+        {card.categories && card.categories.length > 0 && (() => {
+          const iconMap: Record<string, { src: string; alt: string }> = {
+            region:       { src: regIcon, alt: 'Регион' },
+            origins:      { src: istIcon, alt: 'Исток' },
+            civilization: { src: civIcon, alt: 'Цивилизация' },
+            disorder:     { src: besIcon, alt: 'Беспорядки' },
+            raid:         { src: nabIcon, alt: 'Набег' },
+            glory:        { src: slvIcon, alt: 'Слава' },
+            ability:      { src: spsIcon, alt: 'Способность' },
+          };
+          const icon = iconMap[card.categories[0]];
+          return icon ? (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '4px 0 6px' }}>
+              <img src={icon.src} alt={icon.alt} style={{ width: 24, height: 24, opacity: 0.85 }} />
+            </div>
+          ) : null;
+        })()}
       </div>
       {badge && <div style={{ position: 'absolute', top: 6, right: 6 }}>{badge}</div>}
     </div>

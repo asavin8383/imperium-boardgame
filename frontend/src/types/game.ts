@@ -25,6 +25,21 @@ export interface CardInfo {
   progress_cost_resource?: number;
   progress_cost_population?: number;
   progress_cost_upgrade?: number;
+  // Resource generation on play
+  gives_resource?: number;
+  gives_population?: number;
+  gives_progress?: number;
+  draws_cards?: number;
+  // Opponent effects
+  steal_progress?: number;
+  steal_population?: number;
+  discard_opponent_card?: boolean;
+  gives_disorder?: number;
+  // Reinforcement
+  can_be_reinforced?: boolean;
+  // Chronicle
+  sends_to_chronicle?: number;
+  goes_to_chronicle?: boolean;
 }
 
 export interface Resources {

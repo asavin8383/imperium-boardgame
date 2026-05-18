@@ -31,6 +31,21 @@ class Card:
     passive_effect: bool = False
     # Starting location symbol
     start_location: str = ""  # "ability", "boost", "transformation", "progress", "reserve"
+    # Resource generation on play
+    gives_resource: int = 0       # даёт жетоны ресурсов при розыгрыше
+    gives_population: int = 0     # даёт жетоны населения при розыгрыше
+    gives_progress: int = 0       # даёт жетоны прогресса при розыгрыше
+    draws_cards: int = 0          # тянет карты из колоды при розыгрыше
+    # Opponent effects
+    steal_progress: int = 0       # забирает жетоны прогресса у соперника
+    steal_population: int = 0     # забирает жетоны населения у соперника
+    discard_opponent_card: bool = False  # соперник сбрасывает карту из игровой зоны
+    gives_disorder: int = 0       # даёт сопернику карты беспорядков
+    # Reinforcement
+    can_be_reinforced: bool = False  # можно укрепить (добавить карту из руки поверх)
+    # Chronicle
+    sends_to_chronicle: int = 0   # отправляет N карт соперника/своих в летопись
+    goes_to_chronicle: bool = False  # сама идёт в летопись после розыгрыша (не в сброс)
 
     def __hash__(self):
         return hash(self.id)
