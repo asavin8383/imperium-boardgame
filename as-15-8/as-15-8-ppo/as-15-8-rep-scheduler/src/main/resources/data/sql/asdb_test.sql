@@ -1,1 +1,0 @@
-select * from portal.access_tools;

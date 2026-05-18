@@ -1,1 +1,0 @@
-return Array.from(window.urls).join(', ');

@@ -1,7 +1,0 @@
-C:/NonAdminPrograms/liquibase/liquibase.bat --driver=org.postgresql.Driver \
-	      --classpath=./postgresql-42.2.5.jar \
-	      --changeLogFile=reports.changelog.master.xml \
-	      --url="jdbc:postgresql://192.168.5.195:5432/asdb_test" \
-	      --username=as_user \
-	      --password=as_user \
-	      update
