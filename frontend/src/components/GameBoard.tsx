@@ -39,13 +39,17 @@ function catColor(card: CardInfo) {
     return cat ? (CAT_COLOR[cat] ?? '#555') : '#555';
 }
 
+const imgCache = new Map<string, 'loaded' | 'error'>();
+
 function CardView({ card, selected = false, onClick, size = 'normal', dimmed = false, badge }: {
   card: CardInfo; selected?: boolean; onClick?: () => void;
   size?: 'small' | 'normal' | 'large'; dimmed?: boolean; badge?: React.ReactNode;
 }) {
   const color = catColor(card);
   const [hov, setHov] = useState(false);
-  const [imgErr, setImgErr] = useState(false);
+  const cached = imgCache.get(card.id);
+  const [imgErr, setImgErr] = useState(cached === 'error');
+  const [imgLoaded, setImgLoaded] = useState(cached === 'loaded');
   const d = { small: { w: 90, h: 114, n: 10, c: 8 }, normal: { w: 123, h: 163, n: 11, c: 9 }, large: { w: 143, h: 185, n: 12, c: 10 } }[size];
   return (
     <div onClick={onClick} onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)} style={{
@@ -61,110 +65,115 @@ function CardView({ card, selected = false, onClick, size = 'normal', dimmed = f
         <img
           src={`/cards/${card.id}.jpg`}
           alt=""
-          onError={() => setImgErr(true)}
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.75, borderRadius: 7, pointerEvents: 'none' }}
+          onLoad={() => { imgCache.set(card.id, 'loaded'); setImgLoaded(true); }}
+          onError={() => { imgCache.set(card.id, 'error'); setImgErr(true); }}
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: imgLoaded ? 1 : 0.75, borderRadius: 7, pointerEvents: 'none' }}
         />
       )}
-      <div style={{ height: 4, background: color, flexShrink: 0 }} />
-      <div style={{ padding: '6px 7px', flex: 1, display: 'flex', flexDirection: 'column', gap: 3 }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 4, flex: 1 }}>
-          {card.card_type === 'permanent' && (
-            <img src={postIcon} alt="Постоянная" style={{ width: 18, height: 18, opacity: 0.85, flexShrink: 0, marginTop: 1 }} />
-          )}
-          {card.card_type === 'attack' && (
-            <img src={atkIcon} alt="Атака" style={{ width: 18, height: 18, opacity: 0.85, flexShrink: 0, marginTop: 1 }} />
-          )}
-          <div style={{ fontSize: d.n, fontWeight: 600, color: '#e8e8f0', lineHeight: 1.3, flex: 1 }}>{card.name}</div>
-          {card.period && (
-            <img
-              src={card.period === 'barbarism' ? varIcon : impIcon}
-              alt={card.period === 'barbarism' ? 'Варварство' : 'Цивилизация'}
-              style={{ width: 18, height: 18, opacity: 0.85, flexShrink: 0, marginTop: 1 }}
-            />
-          )}
+      {!imgLoaded && <div style={{ height: 4, background: color, flexShrink: 0 }} />}
+      {!imgLoaded && (
+        <div style={{ padding: '6px 7px', flex: 1, display: 'flex', flexDirection: 'column', gap: 3 }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 4, flex: 1 }}>
+            {card.card_type === 'permanent' && (
+              <img src={postIcon} alt="Постоянная" style={{ width: 18, height: 18, opacity: 0.85, flexShrink: 0, marginTop: 1 }} />
+            )}
+            {card.card_type === 'attack' && (
+              <img src={atkIcon} alt="Атака" style={{ width: 18, height: 18, opacity: 0.85, flexShrink: 0, marginTop: 1 }} />
+            )}
+            <div style={{ fontSize: d.n, fontWeight: 600, color: '#e8e8f0', lineHeight: 1.3, flex: 1 }}>{card.name}</div>
+            {card.period && (
+              <img
+                src={card.period === 'barbarism' ? varIcon : impIcon}
+                alt={card.period === 'barbarism' ? 'Варварство' : 'Цивилизация'}
+                style={{ width: 18, height: 18, opacity: 0.85, flexShrink: 0, marginTop: 1 }}
+              />
+            )}
+          </div>
+          {/* Effect icons */}
+          <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap', minHeight: 12 }}>
+            {card.card_type === 'attack' && <span title="Атака" style={{ fontSize: d.c - 1, color: '#e74c3c' }}>⚔</span>}
+            {card.is_exploit && <span title="Эксплуатация" style={{ fontSize: d.c - 1, color: '#e67e22' }}>✕</span>}
+            {card.passive_effect && <span title="Пассивный эффект" style={{ fontSize: d.c - 1, color: '#1abc9c' }}>∞</span>}
+            {card.solstice_effect && <span title="Солнцестояние" style={{ fontSize: d.c - 1, color: '#f1c40f' }}>☀</span>}
+            {(card.region_types ?? []).map(rt => REGION_ICON[rt] && (
+              <span key={rt} style={{ fontSize: d.c - 1 }}>{REGION_ICON[rt]}</span>
+            ))}
+            {(card.progress_cost_resource ?? 0) > 0 && (
+              <span style={{ fontSize: d.c - 1, color: '#e67e22' }}>⚙{card.progress_cost_resource}</span>
+            )}
+            {(card.progress_cost_population ?? 0) > 0 && (
+              <span style={{ fontSize: d.c - 1, color: '#2ecc71' }}>👥{card.progress_cost_population}</span>
+            )}
+            {(card.progress_cost_upgrade ?? 0) > 0 && (
+              <span style={{ fontSize: d.c - 1, color: '#3498db' }}>▶{card.progress_cost_upgrade}</span>
+            )}
+            {(card.gives_resource ?? 0) > 0 && (
+              <span title="Даёт ресурсы" style={{ fontSize: d.c - 1, color: '#e67e22' }}>+⚙{card.gives_resource}</span>
+            )}
+            {(card.gives_population ?? 0) > 0 && (
+              <span title="Даёт население" style={{ fontSize: d.c - 1, color: '#2ecc71' }}>+👥{card.gives_population}</span>
+            )}
+            {(card.gives_progress ?? 0) > 0 && (
+              <span title="Даёт жетоны прогресса" style={{ fontSize: d.c - 1, color: '#f1c40f' }}>+◆{card.gives_progress}</span>
+            )}
+            {(card.draws_cards ?? 0) > 0 && (
+              <span title="Тянет карты" style={{ fontSize: d.c - 1, color: '#1abc9c' }}>+🃏{card.draws_cards}</span>
+            )}
+            {(card.steal_progress ?? 0) > 0 && (
+              <span title="Забирает жетоны прогресса у соперника" style={{ fontSize: d.c - 1, color: '#e74c3c' }}>−◆{card.steal_progress}</span>
+            )}
+            {(card.steal_population ?? 0) > 0 && (
+              <span title="Забирает население у соперника" style={{ fontSize: d.c - 1, color: '#e74c3c' }}>−👥{card.steal_population}</span>
+            )}
+            {card.discard_opponent_card && (
+              <span title="Соперник сбрасывает карту из игровой зоны" style={{ fontSize: d.c - 1, color: '#e74c3c' }}>✂</span>
+            )}
+            {(card.gives_disorder ?? 0) > 0 && (
+              <span title="Даёт сопернику карты беспорядков" style={{ fontSize: d.c - 1, color: '#9b59b6' }}>⚡{card.gives_disorder}</span>
+            )}
+            {card.can_be_reinforced && (
+              <span title="Можно укрепить" style={{ fontSize: d.c - 1, color: '#4a90d9' }}>🛡</span>
+            )}
+            {(card.sends_to_chronicle ?? 0) > 0 && (
+              <span title="Отправляет карты в летопись" style={{ fontSize: d.c - 1, color: '#1abc9c' }}>📜{card.sends_to_chronicle}</span>
+            )}
+            {card.goes_to_chronicle && (
+              <span title="Идёт в летопись после розыгрыша" style={{ fontSize: d.c - 1, color: '#c8a84b' }}>📜→</span>
+            )}
+          </div>
+          {card.categories && card.categories.length > 0 && (() => {
+            const iconMap: Record<string, { src: string; alt: string }> = {
+              region:       { src: regIcon, alt: 'Регион' },
+              origins:      { src: istIcon, alt: 'Исток' },
+              civilization: { src: civIcon, alt: 'Цивилизация' },
+              disorder:     { src: besIcon, alt: 'Беспорядки' },
+              raid:         { src: nabIcon, alt: 'Набег' },
+              glory:        { src: slvIcon, alt: 'Слава' },
+              ability:      { src: spsIcon, alt: 'Способность' },
+            };
+            const icon = iconMap[card.categories[0]];
+            return icon ? (
+              <div style={{ display: 'flex', justifyContent: 'center', padding: '4px 0 6px' }}>
+                <img src={icon.src} alt={icon.alt} style={{ width: 24, height: 24, opacity: 0.85 }} />
+              </div>
+            ) : null;
+          })()}
         </div>
-        {/* Effect icons */}
-        <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap', minHeight: 12 }}>
-          {card.card_type === 'attack' && <span title="Атака" style={{ fontSize: d.c - 1, color: '#e74c3c' }}>⚔</span>}
-          {card.is_exploit && <span title="Эксплуатация" style={{ fontSize: d.c - 1, color: '#e67e22' }}>✕</span>}
-          {card.passive_effect && <span title="Пассивный эффект" style={{ fontSize: d.c - 1, color: '#1abc9c' }}>∞</span>}
-          {card.solstice_effect && <span title="Солнцестояние" style={{ fontSize: d.c - 1, color: '#f1c40f' }}>☀</span>}
-          {(card.region_types ?? []).map(rt => REGION_ICON[rt] && (
-            <span key={rt} style={{ fontSize: d.c - 1 }}>{REGION_ICON[rt]}</span>
-          ))}
-          {(card.progress_cost_resource ?? 0) > 0 && (
-            <span style={{ fontSize: d.c - 1, color: '#e67e22' }}>⚙{card.progress_cost_resource}</span>
-          )}
-          {(card.progress_cost_population ?? 0) > 0 && (
-            <span style={{ fontSize: d.c - 1, color: '#2ecc71' }}>👥{card.progress_cost_population}</span>
-          )}
-          {(card.progress_cost_upgrade ?? 0) > 0 && (
-            <span style={{ fontSize: d.c - 1, color: '#3498db' }}>▶{card.progress_cost_upgrade}</span>
-          )}
-          {(card.gives_resource ?? 0) > 0 && (
-            <span title="Даёт ресурсы" style={{ fontSize: d.c - 1, color: '#e67e22' }}>+⚙{card.gives_resource}</span>
-          )}
-          {(card.gives_population ?? 0) > 0 && (
-            <span title="Даёт население" style={{ fontSize: d.c - 1, color: '#2ecc71' }}>+👥{card.gives_population}</span>
-          )}
-          {(card.gives_progress ?? 0) > 0 && (
-            <span title="Даёт жетоны прогресса" style={{ fontSize: d.c - 1, color: '#f1c40f' }}>+◆{card.gives_progress}</span>
-          )}
-          {(card.draws_cards ?? 0) > 0 && (
-            <span title="Тянет карты" style={{ fontSize: d.c - 1, color: '#1abc9c' }}>+🃏{card.draws_cards}</span>
-          )}
-          {(card.steal_progress ?? 0) > 0 && (
-            <span title="Забирает жетоны прогресса у соперника" style={{ fontSize: d.c - 1, color: '#e74c3c' }}>−◆{card.steal_progress}</span>
-          )}
-          {(card.steal_population ?? 0) > 0 && (
-            <span title="Забирает население у соперника" style={{ fontSize: d.c - 1, color: '#e74c3c' }}>−👥{card.steal_population}</span>
-          )}
-          {card.discard_opponent_card && (
-            <span title="Соперник сбрасывает карту из игровой зоны" style={{ fontSize: d.c - 1, color: '#e74c3c' }}>✂</span>
-          )}
-          {(card.gives_disorder ?? 0) > 0 && (
-            <span title="Даёт сопернику карты беспорядков" style={{ fontSize: d.c - 1, color: '#9b59b6' }}>⚡{card.gives_disorder}</span>
-          )}
-          {card.can_be_reinforced && (
-            <span title="Можно укрепить" style={{ fontSize: d.c - 1, color: '#4a90d9' }}>🛡</span>
-          )}
-          {(card.sends_to_chronicle ?? 0) > 0 && (
-            <span title="Отправляет карты в летопись" style={{ fontSize: d.c - 1, color: '#1abc9c' }}>📜{card.sends_to_chronicle}</span>
-          )}
-          {card.goes_to_chronicle && (
-            <span title="Идёт в летопись после розыгрыша" style={{ fontSize: d.c - 1, color: '#c8a84b' }}>📜→</span>
-          )}
-        </div>
-        {card.categories && card.categories.length > 0 && (() => {
-          const iconMap: Record<string, { src: string; alt: string }> = {
-            region:       { src: regIcon, alt: 'Регион' },
-            origins:      { src: istIcon, alt: 'Исток' },
-            civilization: { src: civIcon, alt: 'Цивилизация' },
-            disorder:     { src: besIcon, alt: 'Беспорядки' },
-            raid:         { src: nabIcon, alt: 'Набег' },
-            glory:        { src: slvIcon, alt: 'Слава' },
-            ability:      { src: spsIcon, alt: 'Способность' },
-          };
-          const icon = iconMap[card.categories[0]];
-          return icon ? (
-            <div style={{ display: 'flex', justifyContent: 'center', padding: '4px 0 6px' }}>
-              <img src={icon.src} alt={icon.alt} style={{ width: 24, height: 24, opacity: 0.85 }} />
-            </div>
-          ) : null;
-        })()}
-      </div>
+      )}
       {badge && <div style={{ position: 'absolute', top: 6, right: 6 }}>{badge}</div>}
-      <div style={{ position: 'absolute', bottom: 5, right: 5, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
-        {(card.vp_fixed ?? 0) > 0 && (
-          <div style={{ background: '#f1c40f', color: '#000', borderRadius: 3, padding: '1px 4px', fontSize: d.c, fontWeight: 700, lineHeight: 1.2 }}>{card.vp_fixed}</div>
-        )}
-        {(card.vp_penalty ?? 0) > 0 && (
-          <div style={{ background: '#e74c3c', color: '#fff', borderRadius: 3, padding: '1px 4px', fontSize: d.c, fontWeight: 700, lineHeight: 1.2 }}>−{card.vp_penalty}</div>
-        )}
-        {card.vp_per_condition && (
-          <div style={{ color: '#f1c40f', fontSize: d.c - 1, fontWeight: 700, lineHeight: 1.2 }}>*/{VP_PER_LABEL[card.vp_per_condition] ?? card.vp_per_condition}</div>
-        )}
-      </div>
+      {!imgLoaded && (
+        <div style={{ position: 'absolute', bottom: 5, right: 5, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
+          {(card.vp_fixed ?? 0) > 0 && (
+            <div style={{ background: '#f1c40f', color: '#000', borderRadius: 3, padding: '1px 4px', fontSize: d.c, fontWeight: 700, lineHeight: 1.2 }}>{card.vp_fixed}</div>
+          )}
+          {(card.vp_penalty ?? 0) > 0 && (
+            <div style={{ background: '#e74c3c', color: '#fff', borderRadius: 3, padding: '1px 4px', fontSize: d.c, fontWeight: 700, lineHeight: 1.2 }}>−{card.vp_penalty}</div>
+          )}
+          {card.vp_per_condition && (
+            <div style={{ color: '#f1c40f', fontSize: d.c - 1, fontWeight: 700, lineHeight: 1.2 }}>*/{VP_PER_LABEL[card.vp_per_condition] ?? card.vp_per_condition}</div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -214,12 +223,26 @@ function Btn({ label, onClick, color = '#2ecc71', disabled = false, active = fal
 }
 
 export default function GameBoard() {
-  const { gameState: gs, loading, error, playCard, exploitCard, doInnovation, doRevolution, endTurn, acquireCard, accelerateProgress, resetGame } = useGameStore();
+  const { gameState: gs, loading, error, playCard, exploitCard, doInnovation, doRevolution, endTurn, acquireCard, accelerateProgress, resetGame, undoAction } = useGameStore();
   const [selectedCards, setSelectedCards] = useState<string[]>([]);
   const [mode, setMode] = useState<'activation' | 'innovation' | 'revolution' | null>(null);
   const [acquireMode, setAcquireMode] = useState(false);
   const [innovationCat, setInnovationCat] = useState<string | null>(null);
   const [scores, setScores] = useState<{ player: number; bot: number } | null>(null);
+  const [previewCard, setPreviewCard] = useState<CardInfo | null>(null);
+  const [previewOrigin, setPreviewOrigin] = useState('top left');
+  const previewRef = React.useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!previewCard) return;
+    const handler = (e: MouseEvent) => {
+      if (previewRef.current && !previewRef.current.contains(e.target as Node)) {
+        setPreviewCard(null);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [previewCard]);
 
   if (!gs) return null;
   const { player, bot, shared } = gs;
@@ -359,11 +382,17 @@ export default function GameBoard() {
             <div>
               <div style={{ fontSize: 9, color: '#555', marginBottom: 5, letterSpacing: '.08em', textTransform: 'uppercase' }}>Разыгранные</div>
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                {(player?.play_area ?? []).map(c => (
-                  <CardView key={c.id} card={c} size="small"
-                    selected={selectedCards.includes(c.id)}
-                    onClick={mode === 'activation' ? () => toggleCard(c.id) : undefined} />
-                ))}
+                {(player?.play_area ?? []).map(c => {
+                  const isPreview = previewCard?.id === c.id;
+                  return (
+                    <div key={c.id} ref={isPreview ? previewRef : undefined}
+                      style={{ flexShrink: 0, position: 'relative', zIndex: isPreview ? 200 : undefined, transform: isPreview ? 'scale(2)' : undefined, transformOrigin: 'top left', transition: 'transform 0.15s' }}>
+                      <CardView card={c} size="small"
+                        selected={selectedCards.includes(c.id)}
+                        onClick={() => { setPreviewCard(isPreview ? null : c); if (mode === 'activation') toggleCard(c.id); }} />
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -386,6 +415,7 @@ export default function GameBoard() {
                   <Btn label="Инновация" onClick={() => setMode('innovation')} color="#3498db" icon="💡" />
                   <Btn label="Революция" onClick={() => setMode('revolution')} color="#9b59b6" icon="🔄" />
                   <Btn label="Закончить ход" onClick={handleEndTurn} color="#e67e22" icon="⏭" />
+                  <Btn label="Отменить" onClick={() => { undoAction(); setMode(null); setSelectedCards([]); }} color="#e74c3c" icon="↩" />
                 </div>
               ) : mode === 'activation' ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -395,6 +425,7 @@ export default function GameBoard() {
                     <Btn label="Эксплуатировать" onClick={handleExploit} color="#e67e22" disabled={selectedCards.length !== 1} />
                     <Btn label={acquireMode ? "Отмена покупки" : "Купить с рынка"} onClick={() => setAcquireMode(!acquireMode)} color="#3498db" active={acquireMode} />
                     <Btn label="Завершить" onClick={handleEndTurn} color="#888" />
+                    <Btn label="Отменить" onClick={() => { undoAction(); setMode(null); setSelectedCards([]); }} color="#e74c3c" icon="↩" />
                   </div>
                 </div>
               ) : mode === 'innovation' ? (
@@ -443,11 +474,22 @@ export default function GameBoard() {
               {(player?.hand ?? []).map(card => {
                 const isDisorder = card.categories?.includes('disorder');
                 const canSelect = isDiscardPhase || (isPlayerTurn && (mode === 'activation' || (mode === 'revolution' && isDisorder)));
+                const isPreview = previewCard?.id === card.id;
                 return (
-                  <CardView key={card.id} card={card} size="normal"
-                    selected={selectedCards.includes(card.id)}
-                    onClick={canSelect ? () => toggleCard(card.id) : undefined}
-                    dimmed={isPlayerTurn && mode === 'revolution' && !isDisorder} />
+                  <div key={card.id} ref={isPreview ? previewRef : undefined}
+                    onClickCapture={(e) => {
+                      if (!isPreview) {
+                        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                        const leftColRight = (window.innerWidth - 260) / 2;
+                        setPreviewOrigin(rect.left + rect.width * 2 > leftColRight ? 'top right' : 'top left');
+                      }
+                    }}
+                    style={{ flexShrink: 0, position: 'relative', zIndex: isPreview ? 200 : undefined, transform: isPreview ? 'scale(2)' : undefined, transformOrigin: isPreview ? previewOrigin : 'top left', transition: 'transform 0.15s' }}>
+                    <CardView card={card} size="large"
+                      selected={selectedCards.includes(card.id)}
+                      onClick={() => { setPreviewCard(isPreview ? null : card); if (canSelect) toggleCard(card.id); }}
+                      dimmed={isPlayerTurn && mode === 'revolution' && !isDisorder} />
+                  </div>
                 );
               })}
               {(player?.hand ?? []).length === 0 && (
@@ -482,9 +524,12 @@ export default function GameBoard() {
                   <div style={{ fontSize: 9, color: '#444', background: '#12141f', border: '1px solid #1e2235', borderRadius: 3, padding: '1px 6px' }}>Маркер {slot.market_marker}</div>
                   {slot.card ? (
                     <>
-                      <CardView card={slot.card}
-                        onClick={acquireMode && isPlayerTurn ? () => acquireCard(idx) : undefined}
-                        badge={slot.upgrade_tokens > 0 ? <div style={{ background: '#3498db', color: '#fff', borderRadius: 3, padding: '1px 4px', fontSize: 8, fontWeight: 700 }}>+{slot.upgrade_tokens}▶</div> : undefined} />
+                      <div ref={previewCard?.id === slot.card.id ? previewRef : undefined}
+                        style={{ flexShrink: 0, position: 'relative', zIndex: previewCard?.id === slot.card.id ? 200 : undefined, transform: previewCard?.id === slot.card.id ? 'scale(2)' : undefined, transformOrigin: 'top center', transition: 'transform 0.15s' }}>
+                        <CardView card={slot.card} size="large"
+                          onClick={() => { setPreviewCard(previewCard?.id === slot.card!.id ? null : slot.card); if (acquireMode && isPlayerTurn) acquireCard(idx); }}
+                          badge={slot.upgrade_tokens > 0 ? <div style={{ background: '#3498db', color: '#fff', borderRadius: 3, padding: '1px 4px', fontSize: 8, fontWeight: 700 }}>+{slot.upgrade_tokens}▶</div> : undefined} />
+                      </div>
                       {slot.has_disorder_under && <div style={{ fontSize: 8, color: '#9b59b6' }}>⚠ Беспорядки</div>}
                       {acquireMode && isPlayerTurn && (
                         <button onClick={() => acquireCard(idx)} style={{ background: 'linear-gradient(135deg,#1abc9c,#16a085)', border: 'none', borderRadius: 5, color: '#fff', fontSize: 9, padding: '3px 8px', cursor: 'pointer', fontWeight: 600 }}>Приобрести</button>

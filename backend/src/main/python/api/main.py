@@ -219,6 +219,15 @@ def accelerate_progress(game_id: str, req: AccelerateProgressRequest):
         raise HTTPException(status_code=400, detail=str(e))
 
 
+@app.post("/api/games/{game_id}/undo")
+def undo_action(game_id: str):
+    try:
+        state = game_session.undo_last_action(game_id)
+        return {"state": state.to_dict()}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
 @app.delete("/api/games/{game_id}")
 def delete_game(game_id: str):
     game_session.delete_game(game_id)

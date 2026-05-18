@@ -18,6 +18,7 @@ interface GameStore {
 
   // Actions
   createGame: (playerNation: string, botNation: string, difficulty: string) => Promise<void>;
+  undoAction: () => Promise<void>;
   playCard: (cardId: string) => Promise<void>;
   exploitCard: (cardId: string) => Promise<void>;
   doInnovation: (category: string) => Promise<void>;
@@ -54,6 +55,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
       set({ gameId: game_id, gameState: state, loading: false });
     } catch (e: any) {
       set({ error: e.message, loading: false });
+    }
+  },
+
+  undoAction: async () => {
+    const { gameId } = get();
+    if (!gameId) return;
+    set({ loading: true, error: null });
+    try {
+      const state = await api.undoAction(gameId);
+      set({ gameState: state, loading: false, selectedCards: [] });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
     }
   },
 

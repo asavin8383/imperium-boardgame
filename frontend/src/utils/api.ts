@@ -72,6 +72,11 @@ export async function accelerateProgress(gameId: string, progressCardId: string)
   return res.data.state;
 }
 
+export async function undoAction(gameId: string): Promise<GameState> {
+  const res = await api.post(`/api/games/${gameId}/undo`);
+  return res.data.state;
+}
+
 export async function deleteGame(gameId: string): Promise<void> {
   await api.delete(`/api/games/${gameId}`);
 }
