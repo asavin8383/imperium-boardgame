@@ -39,6 +39,29 @@ function catColor(card: CardInfo) {
     return cat ? (CAT_COLOR[cat] ?? '#555') : '#555';
 }
 
+const CARD_FOLDER: Record<string, string> = {
+  '1VIK': 'vikings',
+  '1GRE': 'greeks',
+  '1KAR': 'carthaginians',
+  '1KEL': 'celts',
+  '1MAK': 'macedonians',
+  '1PER': 'persians',
+  '1RIM': 'romans',
+  '1SKF': 'scythians',
+  '1REG': 'regions',
+  '1IST': 'origins',
+  '1CIV': 'civilization',
+  '1SLV': 'glory',
+  '1NAB': 'raids',
+  '1BES': 'disorder',
+};
+
+function cardImagePath(id: string): string {
+  const prefix = Object.keys(CARD_FOLDER).find(p => id.startsWith(p));
+  const folder = prefix ? CARD_FOLDER[prefix] : '';
+  return folder ? `/cards/${folder}/${id}.jpg` : `/cards/${id}.jpg`;
+}
+
 const imgCache = new Map<string, 'loaded' | 'error'>();
 
 function CardView({ card, selected = false, onClick, size = 'normal', dimmed = false, badge }: {
@@ -63,7 +86,7 @@ function CardView({ card, selected = false, onClick, size = 'normal', dimmed = f
     }}>
       {!imgErr && (
         <img
-          src={`/cards/${card.id}.jpg`}
+          src={cardImagePath(card.id)}
           alt=""
           onLoad={() => { imgCache.set(card.id, 'loaded'); setImgLoaded(true); }}
           onError={() => { imgCache.set(card.id, 'error'); setImgErr(true); }}
