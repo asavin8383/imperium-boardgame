@@ -58,7 +58,7 @@ def setup_solo_game(
 
 
 def _setup_shared_area(base_cards: List[Card],
-                        player_nation: Nation,
+                         player_nation: Nation,
                         bot_nation: Nation) -> SharedArea:
     shared = SharedArea()
 

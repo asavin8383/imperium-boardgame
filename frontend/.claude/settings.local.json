@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(Get-ChildItem -Path \"D:\\\\IdeaProjects\\\\imperium\\\\backend\" -Directory)",
+      "Bash(Select-Object Name)",
+      "Bash(xargs grep -l \"CardCategory\\\\|CardSubtype\\\\|class Card\")",
+      "Bash(python -c \"from src.main.python.game.cards import Card, BaseCard, NationCard, build_base_deck_classics, get_nation_deck; from src.main.python.game.enums import Nation; base = build_base_deck_classics\\(\\); vik = get_nation_deck\\(Nation.VIKINGS\\); print\\(f'BaseCard: {type\\(base[0]\\).__name__}, NationCard: {type\\(vik[0]\\).__name__}'\\); print\\(f'base[0].categories={base[0].categories}'\\); print\\(f'vik[0].subtype={vik[0].subtype}'\\)\")"
+    ]
+  }
+}
