@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(python -c ':*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(mkdir -p macedonians vikings greeks carthaginians celts persians romans scythians regions origins civilization glory raids disorder)",
+      "Bash(mv 1MAK*.jpg macedonians/)"
     ]
   }
 }
