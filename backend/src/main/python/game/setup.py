@@ -3,9 +3,8 @@ Game Setup — prepares a new solo game of Imperium: Classics
 """
 import random
 from typing import List
-from .cards import (Card, build_base_deck_classics, get_nation_deck,
-                    CardCategory)
-from .enums import Nation, Period, Difficulty, GamePhase
+from .cards import (Card, build_base_deck_classics, get_nation_deck)
+from .enums import Nation, Period, Difficulty, GamePhase, CardCategory, CardSubtype, CardType
 from .state import (GameState, PlayerArea, BotArea, SharedArea,
                     MarketSlot, Resources)
 
@@ -64,8 +63,8 @@ def _setup_shared_area(base_cards: List[Card],
     shared = SharedArea()
 
     # Separate disorder cards
-    disorder_cards = [c for c in base_cards if CardCategory.DISORDER in c.categories]
-    non_disorder = [c for c in base_cards if CardCategory.DISORDER not in c.categories]
+    disorder_cards = [c for c in base_cards if c.card_type == CardType.DISORDER]
+    non_disorder = [c for c in base_cards if c.card_type != CardType.DISORDER]
 
     # Remove player_count-restricted cards (≥3 and 4-player cards)
     # In solo mode remove all multi-player restricted cards
@@ -158,7 +157,7 @@ def _setup_player_area(nation: Nation, nation_cards: List[Card],
     player = PlayerArea(nation=nation)
 
     # Find ability card
-    ability_cards = [c for c in nation_cards if CardCategory.ABILITY in c.categories]
+    ability_cards = [c for c in nation_cards if getattr(c, 'subtype', None) == CardSubtype.ABILITY]
     ability = next((c for c in ability_cards if c.id.endswith(ability_side)), None)
     if ability is None and ability_cards:
         ability = ability_cards[0]
@@ -171,12 +170,12 @@ def _setup_player_area(nation: Nation, nation_cards: List[Card],
 
     # Transformation card (●)
     transformation = next((c for c in nation_cards
-                            if CardCategory.TRANSFORMATION in c.categories), None)
+                            if getattr(c, 'subtype', None) == CardSubtype.TRANSFORMATION), None)
     if transformation:
         player.boost_deck = []  # placed face-up next to ability
 
     # Boost deck (⌒)
-    boost_cards = [c for c in nation_cards if CardCategory.BOOST in c.categories]
+    boost_cards = [c for c in nation_cards if getattr(c, 'subtype', None) == CardSubtype.BOOST]
     random.shuffle(boost_cards)
     # Place transformation on top of boost deck
     if transformation:
@@ -205,7 +204,7 @@ def _setup_player_area(nation: Nation, nation_cards: List[Card],
         used_ids.add(c.id)
 
     personal = [c for c in nation_cards if c.id not in used_ids
-                and CardCategory.ABILITY not in c.categories]
+                and getattr(c, 'subtype', None) != CardSubtype.ABILITY]
     random.shuffle(personal)
     player.deck = personal
 
@@ -220,7 +219,7 @@ def _setup_bot_area(nation: Nation, nation_cards: List[Card],
     bot = BotArea(nation=nation)
 
     # Ability card (ignored mechanically but stored)
-    ability_cards = [c for c in nation_cards if CardCategory.ABILITY in c.categories]
+    ability_cards = [c for c in nation_cards if getattr(c, 'subtype', None) == CardSubtype.ABILITY]
     bot.ability_card = ability_cards[0] if ability_cards else None
 
     # Dynasty deck: sorted progress (+) cards by VP ascending
@@ -229,9 +228,9 @@ def _setup_bot_area(nation: Nation, nation_cards: List[Card],
 
     # Transformation card (●) placed face-up on top of dynasty deck
     transformation = next((c for c in nation_cards
-                            if CardCategory.TRANSFORMATION in c.categories), None)
+                            if getattr(c, 'subtype', None) == CardSubtype.TRANSFORMATION), None)
     if transformation:
-        boost_cards = [c for c in nation_cards if CardCategory.BOOST in c.categories]
+        boost_cards = [c for c in nation_cards if getattr(c, 'subtype', None) == CardSubtype.BOOST]
         random.shuffle(boost_cards)
         # Dynasty = [transformation] on top of boost, then transformation at bottom
         # Per rulebook: B● face-up, then ⌒ shuffled below it
@@ -251,7 +250,7 @@ def _setup_bot_area(nation: Nation, nation_cards: List[Card],
         used_ids.add(c.id)
 
     bot_main = [c for c in nation_cards if c.id not in used_ids
-                and CardCategory.ABILITY not in c.categories]
+                and getattr(c, 'subtype', None) != CardSubtype.ABILITY]
     random.shuffle(bot_main)
     bot.bot_deck = bot_main
 

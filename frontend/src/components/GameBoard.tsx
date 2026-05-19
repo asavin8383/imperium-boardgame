@@ -43,14 +43,14 @@ const imgCache = new Map<string, 'loaded' | 'error'>();
 
 function CardView({ card, selected = false, onClick, size = 'normal', dimmed = false, badge }: {
   card: CardInfo; selected?: boolean; onClick?: () => void;
-  size?: 'small' | 'normal' | 'large'; dimmed?: boolean; badge?: React.ReactNode;
+  size?: 'small' | 'normal' | 'large' | 'xlarge'; dimmed?: boolean; badge?: React.ReactNode;
 }) {
   const color = catColor(card);
   const [hov, setHov] = useState(false);
   const cached = imgCache.get(card.id);
   const [imgErr, setImgErr] = useState(cached === 'error');
   const [imgLoaded, setImgLoaded] = useState(cached === 'loaded');
-  const d = { small: { w: 90, h: 114, n: 10, c: 8 }, normal: { w: 123, h: 163, n: 11, c: 9 }, large: { w: 143, h: 185, n: 12, c: 10 } }[size];
+  const d = { small: { w: 90, h: 114, n: 10, c: 8 }, normal: { w: 123, h: 163, n: 11, c: 9 }, large: { w: 143, h: 185, n: 12, c: 10 }, xlarge: { w: 180, h: 240, n: 15, c: 12 } }[size];
   return (
     <div onClick={onClick} onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)} style={{
       width: d.w, minHeight: d.h, flexShrink: 0,
@@ -484,8 +484,8 @@ export default function GameBoard() {
                         setPreviewOrigin(rect.left + rect.width * 2 > leftColRight ? 'top right' : 'top left');
                       }
                     }}
-                    style={{ flexShrink: 0, position: 'relative', zIndex: isPreview ? 200 : undefined, transform: isPreview ? 'scale(2)' : undefined, transformOrigin: isPreview ? previewOrigin : 'top left', transition: 'transform 0.15s' }}>
-                    <CardView card={card} size="large"
+                    style={{ flexShrink: 0, position: 'relative', zIndex: isPreview ? 200 : undefined, transform: isPreview ? 'scale(1.5)' : undefined, transformOrigin: isPreview ? previewOrigin : 'top left', transition: 'transform 0.15s' }}>
+                    <CardView card={card} size="xlarge"
                       selected={selectedCards.includes(card.id)}
                       onClick={() => { setPreviewCard(isPreview ? null : card); if (canSelect) toggleCard(card.id); }}
                       dimmed={isPlayerTurn && mode === 'revolution' && !isDisorder} />

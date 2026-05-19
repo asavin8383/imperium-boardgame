@@ -12,23 +12,26 @@ class Period(str, Enum):
 
 
 class CardCategory(str, Enum):
-    ABILITY = "ability"       # способность (символ шестерёнки)
     REGION = "region"         # регион
     ORIGINS = "origins"       # истоки
     CIVILIZATION = "civilization"  # цивилизация
     RAID = "raid"             # набеги
     GLORY = "glory"           # слава
-    DISORDER = "disorder"     # беспорядки
+
+class CardSubtype(str, Enum):
+    ABILITY = "ability"       # способность (символ шестерёнки)
     TRANSFORMATION = "transformation"  # трансформация (символ ●)
     BOOST = "boost"           # усиление (символ ⌒)
     PROGRESS = "progress"     # прогресс (символ +)
     RESERVE = "reserve"       # запас (символ →)
+    START = "start"           # стартовая колода
 
 
 class CardType(str, Enum):
     PERMANENT = "permanent"   # постоянного действия (∞)
     ATTACK = "attack"         # атака (символ перекрещенных мечей)
     NORMAL = "normal"
+    DISORDER = "disorder"
 
 
 class RegionType(str, Enum):

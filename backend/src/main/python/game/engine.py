@@ -5,7 +5,7 @@ import random
 from typing import List, Optional, Tuple
 from .state import GameState, PlayerArea, MarketSlot, Resources
 from .enums import (Period, GamePhase, TurnAction, EndCondition,
-                    CardCategory, Difficulty)
+                    CardCategory, CardSubtype, Difficulty)
 from .cards import Card
 from .setup import _draw_to_hand
 
@@ -128,7 +128,7 @@ class GameEngine:
 
         for cid in card_ids:
             card = self._find_in_hand(state, cid)
-            if card and CardCategory.DISORDER in card.categories:
+            if card and CardCategory.DISORDER in getattr(card, 'categories', []):
                 state.player.hand.remove(card)
                 state.shared.disorder_deck.append(card)
                 random.shuffle(state.shared.disorder_deck)
@@ -316,7 +316,7 @@ class GameEngine:
                     state.bot.bot_discard = []
                     random.shuffle(state.bot.bot_deck)
                     # Check transformation card
-                    if dynasty_card and CardCategory.TRANSFORMATION in dynasty_card.categories:
+                    if dynasty_card and getattr(dynasty_card, 'subtype', None) == CardSubtype.TRANSFORMATION:
                         state.bot.period = Period.CIVILIZATION
                         state.add_log("Бот вступает в период цивилизации!")
 
@@ -406,7 +406,7 @@ class GameEngine:
                 player.discard.append(top_boost)
                 state.add_log(f"Карта усиления «{top_boost.name}» перемещена в сброс")
                 # If it was the transformation card, flip period
-                if CardCategory.TRANSFORMATION in top_boost.categories:
+                if getattr(top_boost, 'subtype', None) == CardSubtype.TRANSFORMATION:
                     player.period = Period.CIVILIZATION
                     state.add_log("Период изменён на Цивилизацию!")
                 else:
@@ -559,13 +559,13 @@ class GameEngine:
 
         cond = card.vp_condition or card.vp_per_condition or ""
         if "region" in cond:
-            count = sum(1 for c in all_cards if CardCategory.REGION in c.categories)
+            count = sum(1 for c in all_cards if CardCategory.REGION in getattr(c, 'categories', []))
             return min(count, 10)
         elif "civilization" in cond:
-            count = sum(1 for c in all_cards if CardCategory.CIVILIZATION in c.categories)
+            count = sum(1 for c in all_cards if CardCategory.CIVILIZATION in getattr(c, 'categories', []))
             return min(count, 10)
         elif "origins" in cond:
-            count = sum(1 for c in all_cards if CardCategory.ORIGINS in c.categories)
+            count = sum(1 for c in all_cards if CardCategory.ORIGINS in getattr(c, 'categories', []))
             return min(count, 10)
         elif "population" in cond:
             return min(player.resources.population // 2, 10)
@@ -593,13 +593,13 @@ class GameEngine:
 
             if card:
                 slot.card = card
-                needs_disorder = (CardCategory.REGION in card.categories or
-                                  CardCategory.ORIGINS in card.categories or
-                                  CardCategory.CIVILIZATION in card.categories)
+                needs_disorder = (CardCategory.REGION in getattr(card, 'categories', []) or
+                                  CardCategory.ORIGINS in getattr(card, 'categories', []) or
+                                  CardCategory.CIVILIZATION in getattr(card, 'categories', []))
                 if needs_disorder and state.shared.disorder_deck:
                     slot.disorder_under = state.shared.disorder_deck.pop(0)
-                needs_upgrade = (CardCategory.CIVILIZATION in card.categories and
-                                 CardCategory.ORIGINS not in card.categories)
+                needs_upgrade = (CardCategory.CIVILIZATION in getattr(card, 'categories', []) and
+                                 CardCategory.ORIGINS not in getattr(card, 'categories', []))
                 if needs_upgrade:
                     slot.upgrade_tokens = 1
         return state
@@ -626,7 +626,7 @@ class GameEngine:
         best_slot_idx = None
         best_vp = -1
         for i, slot in enumerate(state.shared.market):
-            if slot.card and target_cat in slot.card.categories:
+            if slot.card and target_cat in getattr(slot.card, 'categories', []):
                 total_vp = slot.card.vp_fixed + slot.upgrade_tokens
                 if total_vp > best_vp:
                     best_vp = total_vp
@@ -661,25 +661,25 @@ class GameEngine:
                 state.player.play_area.append(card)
 
         # Generic effects based on category
-        if CardCategory.REGION in card.categories:
+        if CardCategory.REGION in getattr(card, 'categories', []):
             # Regions give resources
             state.player.resources.resource += 1
 
-        if CardCategory.ORIGINS in card.categories:
+        if CardCategory.ORIGINS in getattr(card, 'categories', []):
             # Origins give population or allow progress
             state.player.resources.population += 1
 
-        if CardCategory.CIVILIZATION in card.categories:
+        if CardCategory.CIVILIZATION in getattr(card, 'categories', []):
             # Civilisation cards give upgrade tokens
             state.player.resources.upgrade += 1
 
-        if CardCategory.RAID in card.categories:
+        if CardCategory.RAID in getattr(card, 'categories', []):
             # Raid: attack bot — bot loses a resource
             if card.card_type == CardType.ATTACK:
                 state.bot.resource = max(0, state.bot.resource - 1)
                 state.add_log("Набег! Бот теряет 1 ресурс")
 
-        if CardCategory.GLORY in card.categories:
+        if CardCategory.GLORY in getattr(card, 'categories', []):
             # Glory cards go to chronicle (летопись)
             if card in state.player.play_area:
                 state.player.play_area.remove(card)
@@ -690,12 +690,12 @@ class GameEngine:
     def _apply_exploit_effect(self, state: GameState, card: Card) -> GameState:
         """Apply exploitation effect of a card"""
         # Generic exploit: gain resources based on card type
-        if CardCategory.REGION in card.categories:
+        if CardCategory.REGION in getattr(card, 'categories', []):
             state.player.resources.resource += 2
-        elif CardCategory.ORIGINS in card.categories:
+        elif CardCategory.ORIGINS in getattr(card, 'categories', []):
             state.player.resources.population += 1
             state.player.resources.resource += 1
-        elif CardCategory.CIVILIZATION in card.categories:
+        elif CardCategory.CIVILIZATION in getattr(card, 'categories', []):
             state.player.resources.upgrade += 1
         return state
 

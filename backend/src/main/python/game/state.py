@@ -7,14 +7,17 @@ from dataclasses import dataclass, field
 from typing import List, Optional, Dict
 from .cards import Card, build_base_deck_classics, get_nation_deck
 from .enums import (Period, Nation, GamePhase, TurnAction, EndCondition,
-                    Difficulty, CardCategory, ResourceType)
+                    Difficulty, CardCategory, CardSubtype, ResourceType)
 
 
 def _card_info(card: Card) -> dict:
+    cats = getattr(card, 'categories', [])
+    sub = getattr(card, 'subtype', None)
     return {
         "id": card.id,
         "name": card.name,
-        "categories": [c.value for c in card.categories],
+        "categories": [c.value for c in cats],
+        "subtype": sub.value if sub else None,
         "period": card.period.value if card.period else None,
         "vp_fixed": card.vp_fixed,
         "vp_condition": card.vp_condition,

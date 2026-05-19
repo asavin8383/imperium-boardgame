@@ -5,12 +5,14 @@ export type GamePhase = 'setup' | 'player_turn' | 'player_discard' | 'bot_turn' 
 export type TurnAction = 'activation' | 'innovation' | 'revolution';
 export type Nation = 'vikings' | 'greeks' | 'carthaginians' | 'celts' | 'macedonians' | 'persians' | 'romans' | 'scythians';
 export type Difficulty = 'chieftain' | 'commander' | 'emperor' | 'overlord' | 'sovereign';
-export type CardCategory = 'ability' | 'region' | 'origins' | 'civilization' | 'raid' | 'glory' | 'disorder' | 'transformation' | 'boost' | 'progress' | 'reserve';
+export type CardCategory = 'region' | 'origins' | 'civilization' | 'raid' | 'glory' | 'disorder';
+export type CardSubtype = 'ability' | 'transformation' | 'boost' | 'progress' | 'reserve' | 'start';
 
 export interface CardInfo {
   id: string;
   name: string;
   categories?: CardCategory[];
+  subtype?: CardSubtype;
   period?: Period | null;
   vp_fixed?: number;
   vp_condition?: string | null;
