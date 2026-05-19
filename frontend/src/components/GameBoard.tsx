@@ -357,23 +357,69 @@ export default function GameBoard() {
             </div>
           </div>
 
-          {/* Ability card */}
-          {player?.ability_card && (
-            <div>
-              <div style={{ fontSize: 9, color: '#555', marginBottom: 5, letterSpacing: '.08em', textTransform: 'uppercase' }}>Способность</div>
-              <CardView card={player.ability_card} />
-            </div>
-          )}
+          {/* Ability card + Progress stack — same row, xlarge */}
+          {(player?.ability_card || (player?.progress_area ?? []).length > 0) && (
+            <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
 
-          {/* Progress area */}
-          {(player?.progress_area ?? []).length > 0 && (
-            <div>
-              <div style={{ fontSize: 9, color: '#555', marginBottom: 5, letterSpacing: '.08em', textTransform: 'uppercase' }}>Прогресс</div>
-              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                {(player?.progress_area ?? []).map(c => (
-                  <CardView key={c.id} card={c} size="small" onClick={isPlayerTurn ? () => accelerateProgress(c.id) : undefined} />
-                ))}
-              </div>
+              {/* Ability card */}
+              {player?.ability_card && (
+                <div>
+                  <div style={{ fontSize: 9, color: '#555', marginBottom: 5, letterSpacing: '.08em', textTransform: 'uppercase' }}>Способность</div>
+                  <CardView card={player.ability_card} size="xlarge" />
+                </div>
+              )}
+
+              {/* Progress stack — only top card visible */}
+              {(player?.progress_area ?? []).length > 0 && (() => {
+                const progressCards = player!.progress_area;
+                const topCard = progressCards[0];
+                const count = progressCards.length;
+                const isPreview = previewCard?.id === topCard.id;
+                return (
+                  <div>
+                    <div style={{ fontSize: 9, color: '#555', marginBottom: 5, letterSpacing: '.08em', textTransform: 'uppercase' }}>
+                      Прогресс <span style={{ color: '#9098b8' }}>({count})</span>
+                    </div>
+                    <div
+                      ref={isPreview ? previewRef : undefined}
+                      onClickCapture={(e) => {
+                        if (!isPreview) {
+                          const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                          const leftColRight = (window.innerWidth - 260) / 2;
+                          setPreviewOrigin(rect.left + rect.width * 2 > leftColRight ? 'top right' : 'top left');
+                        }
+                      }}
+                      style={{
+                        position: 'relative', display: 'inline-block',
+                        zIndex: isPreview ? 200 : undefined,
+                        transform: isPreview ? 'scale(1.5)' : undefined,
+                        transformOrigin: isPreview ? previewOrigin : 'top left',
+                        transition: 'transform 0.15s',
+                      }}
+                    >
+                      {count > 2 && (
+                        <div style={{ position: 'absolute', top: 4, left: 4, width: 180, height: 240, background: '#0d0f1a', border: '1px solid #1a1d30', borderRadius: 8, pointerEvents: 'none' }} />
+                      )}
+                      {count > 1 && (
+                        <div style={{ position: 'absolute', top: 2, left: 2, width: 180, height: 240, background: '#10121e', border: '1px solid #1e2138', borderRadius: 8, pointerEvents: 'none' }} />
+                      )}
+                      <CardView
+                        card={topCard}
+                        size="xlarge"
+                        onClick={() => {
+                          if (isPreview) {
+                            setPreviewCard(null);
+                            if (isPlayerTurn) accelerateProgress(topCard.id);
+                          } else {
+                            setPreviewCard(topCard);
+                          }
+                        }}
+                      />
+                    </div>
+                  </div>
+                );
+              })()}
+
             </div>
           )}
 

@@ -168,31 +168,30 @@ def _setup_player_area(nation: Nation, nation_cards: List[Card],
     # Atlanteans start in civilisation period — but we only have Classics here
     player.period = Period.BARBARISM
 
-    # Transformation card (●)
+    # Progress area (+) — карты с subtype PROGRESS, лежат открыто рядом с картой способности
+    progress_cards = [c for c in nation_cards
+                      if getattr(c, 'subtype', None) == CardSubtype.PROGRESS]
+    random.shuffle(progress_cards)
+    player.progress_area = progress_cards
+
+    # Boost deck (⌒) — справа от зоны прогресса:
+    #   · карты BOOST перемешиваются и кладутся сверху закрытыми
+    #   · карта TRANSFORMATION лежит снизу открытой
     transformation = next((c for c in nation_cards
                             if getattr(c, 'subtype', None) == CardSubtype.TRANSFORMATION), None)
-    if transformation:
-        player.boost_deck = []  # placed face-up next to ability
-
-    # Boost deck (⌒)
     boost_cards = [c for c in nation_cards if getattr(c, 'subtype', None) == CardSubtype.BOOST]
     random.shuffle(boost_cards)
-    # Place transformation on top of boost deck
     if transformation:
-        player.boost_deck = [transformation] + boost_cards
+        player.boost_deck = boost_cards + [transformation]
     else:
         player.boost_deck = boost_cards
-
-    # Progress area (+)
-    progress_cards = [c for c in nation_cards if c.start_location == "progress"]
-    player.progress_area = progress_cards
 
     # Reserve cards (→) go to disorder deck
     reserve_cards = [c for c in nation_cards if c.start_location == "reserve"]
     shared.disorder_deck.extend(reserve_cards)
     random.shuffle(shared.disorder_deck)
 
-    # Personal deck = remaining nation cards
+    # Personal deck = только стартовые карты (subtype START) + карты без специального подтипа
     used_ids = set()
     if ability:
         used_ids.add(ability.id)
@@ -204,7 +203,10 @@ def _setup_player_area(nation: Nation, nation_cards: List[Card],
         used_ids.add(c.id)
 
     personal = [c for c in nation_cards if c.id not in used_ids
-                and getattr(c, 'subtype', None) != CardSubtype.ABILITY]
+                and getattr(c, 'subtype', None) not in (
+                    CardSubtype.ABILITY, CardSubtype.BOOST,
+                    CardSubtype.TRANSFORMATION, CardSubtype.PROGRESS,
+                )]
     random.shuffle(personal)
     player.deck = personal
 
@@ -222,23 +224,22 @@ def _setup_bot_area(nation: Nation, nation_cards: List[Card],
     ability_cards = [c for c in nation_cards if getattr(c, 'subtype', None) == CardSubtype.ABILITY]
     bot.ability_card = ability_cards[0] if ability_cards else None
 
-    # Dynasty deck: sorted progress (+) cards by VP ascending
-    progress_cards = [c for c in nation_cards if c.start_location == "progress"]
+    # Dynasty deck: boost cards (shuffled) on top, transformation at bottom (face-up),
+    # then progress cards sorted by VP ascending below transformation
+    progress_cards = [c for c in nation_cards
+                      if getattr(c, 'subtype', None) == CardSubtype.PROGRESS]
     progress_cards.sort(key=lambda c: c.vp_fixed)
 
-    # Transformation card (●) placed face-up on top of dynasty deck
     transformation = next((c for c in nation_cards
                             if getattr(c, 'subtype', None) == CardSubtype.TRANSFORMATION), None)
+    boost_cards = [c for c in nation_cards if getattr(c, 'subtype', None) == CardSubtype.BOOST]
+    random.shuffle(boost_cards)
     if transformation:
-        boost_cards = [c for c in nation_cards if getattr(c, 'subtype', None) == CardSubtype.BOOST]
-        random.shuffle(boost_cards)
-        # Dynasty = [transformation] on top of boost, then transformation at bottom
-        # Per rulebook: B● face-up, then ⌒ shuffled below it
-        bot.dynasty_deck = [transformation] + boost_cards + progress_cards
+        bot.dynasty_deck = boost_cards + [transformation] + progress_cards
     else:
         bot.dynasty_deck = progress_cards
 
-    # Bot deck = remaining nation cards (not ability, not dynasty items)
+    # Bot deck = стартовые карты (subtype START) + карты без специального подтипа
     used_ids = set()
     if bot.ability_card:
         used_ids.add(bot.ability_card.id)
@@ -250,7 +251,10 @@ def _setup_bot_area(nation: Nation, nation_cards: List[Card],
         used_ids.add(c.id)
 
     bot_main = [c for c in nation_cards if c.id not in used_ids
-                and getattr(c, 'subtype', None) != CardSubtype.ABILITY]
+                and getattr(c, 'subtype', None) not in (
+                    CardSubtype.ABILITY, CardSubtype.BOOST,
+                    CardSubtype.TRANSFORMATION, CardSubtype.PROGRESS,
+                )]
     random.shuffle(bot_main)
     bot.bot_deck = bot_main
 

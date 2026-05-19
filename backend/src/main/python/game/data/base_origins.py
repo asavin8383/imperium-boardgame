@@ -1,0 +1,26 @@
+"""Card data for the base Origins deck (IST)."""
+
+DECK: dict = {
+    "1IST1":  {"name": "Регулярная армия", "categories": ["origins"],                      "passive_effect": True, "vp_fixed": 1},
+    "1IST2":  {"name": "Земледелие",       "categories": ["origins"],                      "vp_fixed": 1},
+    "1IST3":  {"name": "Скотоводство",     "categories": ["origins"],                      "vp_fixed": 1},
+    "1IST4":  {"name": "Металлургия",      "categories": ["origins"],                      "vp_fixed": 1},
+    "1IST5":  {"name": "Торговля",         "categories": ["origins"],                      "vp_fixed": 1},
+    "1IST6":  {"name": "Мореплавание",     "categories": ["origins"],                      "vp_fixed": 1},
+    "1IST7":  {"name": "Письменность",     "categories": ["origins"],                      "vp_fixed": 2},
+    "1IST8":  {"name": "Строительство",    "categories": ["origins"],                      "vp_fixed": 1},
+    "1IST9":  {"name": "Лодки",            "categories": ["origins"],                      "vp_fixed": 1},
+    "1IST10": {"name": "Порт",             "categories": ["origins"],                      "vp_fixed": 1},
+    "1IST11": {"name": "Процветание",      "categories": ["origins", "civilization"],      "vp_fixed": 2, "is_exploit": True},
+    "1IST12": {"name": "Колодец-журавль",  "categories": ["origins"],                      "vp_fixed": 2, "is_exploit": True, "passive_effect": True},
+    "1IST13": {"name": "Гончарное дело",   "categories": ["origins"],                      "vp_fixed": 1},
+    "1IST14": {"name": "Одомашнивание",    "categories": ["origins"],                      "vp_fixed": 1, "is_exploit": True, "passive_effect": True},
+    "1IST15": {"name": "Медицина",         "categories": ["origins"],                      "vp_fixed": 2},
+    "1IST16": {"name": "Астрономия",       "categories": ["origins"],                      "vp_fixed": 2},
+    "1IST17": {"name": "Математика",       "categories": ["origins"],                      "vp_fixed": 2},
+    "1IST18": {"name": "Философия",        "categories": ["origins"],                      "vp_fixed": 2},
+    "1IST19": {"name": "Музыка",           "categories": ["origins"],                      "vp_fixed": 1},
+    "1IST20": {"name": "Охота",            "categories": ["origins"],                      "vp_fixed": 1},
+    "1IST21": {"name": "Рыболовство",      "categories": ["origins"],                      "vp_fixed": 1},
+    "1IST22": {"name": "Поселенцы",        "categories": ["origins"],                      "vp_fixed": 1},
+}
