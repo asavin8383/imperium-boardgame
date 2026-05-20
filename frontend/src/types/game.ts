@@ -72,6 +72,7 @@ export interface PlayerState {
   deck_count: number;
   hand: CardInfo[];
   discard_count: number;
+  discard_top: CardInfo | null;
   play_area: CardInfo[];
   chronicle_count: number;
   progress_area: CardInfo[];

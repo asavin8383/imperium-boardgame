@@ -130,6 +130,7 @@ class PlayerArea:
             "deck_count": len(self.deck),
             "hand": [_card_info(c) for c in self.hand],
             "discard_count": len(self.discard),
+            "discard_top": _card_info(self.discard[-1]) if self.discard else None,
             "play_area": [_card_info(c) for c in self.play_area],
             "chronicle_count": len(self.chronicle),
             "progress_area": [_card_info(c) for c in self.progress_area],

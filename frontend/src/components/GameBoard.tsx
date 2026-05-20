@@ -64,14 +64,16 @@ const CARD_FOLDER: Record<string, string> = {
 function cardImagePath(id: string): string {
   const prefix = Object.keys(CARD_FOLDER).find(p => id.startsWith(p));
   const folder = prefix ? CARD_FOLDER[prefix] : '';
+  if (folder === 'disorder') return `/cards/disorder/DISORDER.jpg`;
   return folder ? `/cards/${folder}/${id}.jpg` : `/cards/${id}.jpg`;
 }
 
 const imgCache = new Map<string, 'loaded' | 'error'>();
 
-function CardView({ card, selected = false, onClick, size = 'normal', dimmed = false, badge }: {
+function CardView({ card, selected = false, onClick, size = 'normal', dimmed = false, badge, overrideStyle }: {
   card: CardInfo; selected?: boolean; onClick?: () => void;
   size?: 'small' | 'normal' | 'large' | 'xlarge'; dimmed?: boolean; badge?: React.ReactNode;
+  overrideStyle?: React.CSSProperties;
 }) {
   const color = catColor(card);
   const [hov, setHov] = useState(false);
@@ -88,6 +90,7 @@ function CardView({ card, selected = false, onClick, size = 'normal', dimmed = f
       transform: selected ? 'translateY(-4px)' : hov && onClick ? 'translateY(-2px)' : 'none',
       transition: 'all 0.15s', display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative',
       boxShadow: selected ? `0 0 12px ${color}44` : hov && onClick ? `0 4px 12px rgba(0,0,0,.5)` : `0 2px 4px rgba(0,0,0,.4)`,
+      ...overrideStyle,
     }}>
       {!imgErr && (
         <img
@@ -382,11 +385,21 @@ export default function GameBoard() {
           {(player?.ability_card || (player?.progress_area ?? []).length > 0) && (
             <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
 
-              {/* Ability card */}
+              {/* Ability card over chronicle stack */}
               {player?.ability_card && (
                 <div>
-                  <div style={{ fontSize: 9, color: '#555', marginBottom: 5, letterSpacing: '.08em', textTransform: 'uppercase' }}>Способность</div>
-                  <CardView card={player.ability_card} size="xlarge" />
+                  <div style={{ fontSize: 9, color: '#555', marginBottom: 5, letterSpacing: '.08em', textTransform: 'uppercase' }}>
+                    Летопись <span style={{ color: '#9098b8' }}>({player?.chronicle_count ?? 0})</span>
+                  </div>
+                  <div style={{ position: 'relative', display: 'inline-block' }}>
+                    {(player?.chronicle_count ?? 0) > 2 && (
+                      <div style={{ position: 'absolute', top: 8, left: 8, width: 180, height: 240, background: '#0a1a0a', border: '1px solid #1a301a', borderRadius: 8, pointerEvents: 'none' }} />
+                    )}
+                    {(player?.chronicle_count ?? 0) > 1 && (
+                      <div style={{ position: 'absolute', top: 4, left: 4, width: 180, height: 240, background: '#0c1e0c', border: '1px solid #1e381e', borderRadius: 8, pointerEvents: 'none' }} />
+                    )}
+                    <CardView card={player.ability_card} size="xlarge" />
+                  </div>
                 </div>
               )}
 
@@ -468,13 +481,14 @@ export default function GameBoard() {
           {(player?.play_area ?? []).length > 0 && (
             <div>
               <div style={{ fontSize: 9, color: '#555', marginBottom: 5, letterSpacing: '.08em', textTransform: 'uppercase' }}>Разыгранные</div>
-              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 6 }}>
                 {(player?.play_area ?? []).map(c => {
                   const isPreview = previewCard?.id === c.id;
                   return (
                     <div key={c.id} ref={isPreview ? previewRef : undefined}
-                      style={{ flexShrink: 0, position: 'relative', zIndex: isPreview ? 200 : undefined, transform: isPreview ? 'scale(2)' : undefined, transformOrigin: 'top left', transition: 'transform 0.15s' }}>
+                      style={{ position: 'relative', zIndex: isPreview ? 200 : undefined, transform: isPreview ? 'scale(2)' : undefined, transformOrigin: 'top left', transition: 'transform 0.15s' }}>
                       <CardView card={c} size="small"
+                        overrideStyle={{ width: '100%', minHeight: 'unset', aspectRatio: '3/4' }}
                         selected={isPreview && !!c.is_exploit}
                         onClick={() => {
                           if (isPreview) {
@@ -491,11 +505,7 @@ export default function GameBoard() {
             </div>
           )}
 
-          {/* Deck counts */}
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-            <DeckPile count={player?.discard_count ?? 0} label="Сброс" color="#2d1a00" />
-            <DeckPile count={player?.chronicle_count ?? 0} label="Летопись" color="#1a2a1a" />
-          </div>
+
 
           {/* Actions */}
           {isPlayerTurn && !isInnovatePending && !revMode && turnAction === null && (
@@ -563,7 +573,7 @@ export default function GameBoard() {
             <div style={{ fontSize: 9, color: '#555', letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 6 }}>
               Рука ({(player?.hand ?? []).length}/{player?.hand_limit ?? 5})
             </div>
-            <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 7 }}>
               {(player?.hand ?? []).map(card => {
                 const isPreview = previewCard?.id === card.id;
                 const periodBlocked = isPlayerTurn && !revMode && !isInnovatePending && card.period != null && card.period !== player?.period;
@@ -580,8 +590,9 @@ export default function GameBoard() {
                         setPreviewOrigin(rect.left + rect.width * 2 > leftColRight ? 'top right' : 'top left');
                       }
                     }}
-                    style={{ flexShrink: 0, position: 'relative', zIndex: isPreview ? 200 : undefined, transform: isPreview ? 'scale(1.5)' : undefined, transformOrigin: isPreview ? previewOrigin : 'top left', transition: 'transform 0.15s' }}>
+                    style={{ position: 'relative', zIndex: isPreview ? 200 : undefined, transform: isPreview ? 'scale(1.5)' : undefined, transformOrigin: isPreview ? previewOrigin : 'top left', transition: 'transform 0.15s' }}>
                     <CardView card={card} size="xlarge"
+                      overrideStyle={{ width: '100%', minHeight: 'unset', aspectRatio: '3/4' }}
                       selected={(isDiscardPhase && selectedCards.includes(card.id)) || isRevSelected}
                       onClick={() => {
                         if (isDiscardPhase) {
@@ -602,8 +613,21 @@ export default function GameBoard() {
                 );
               })}
               {(player?.hand ?? []).length === 0 && (
-                <div style={{ fontSize: 11, color: '#2a2d40' }}>Рука пуста</div>
+                <div style={{ fontSize: 11, color: '#2a2d40', gridColumn: '1 / -1' }}>Рука пуста</div>
               )}
+            </div>
+          </div>
+
+          {/* Discard pile */}
+          <div>
+            <div style={{ fontSize: 9, color: '#555', marginBottom: 5, letterSpacing: '.08em', textTransform: 'uppercase' }}>
+              Сброс <span style={{ color: '#9098b8' }}>({player?.discard_count ?? 0})</span>
+            </div>
+            <div style={{ width: 180, height: 240, borderRadius: 8, overflow: 'hidden', border: '1px solid #2a2d40', flexShrink: 0 }}>
+              {player?.discard_top
+                ? <CardView card={player.discard_top} size="xlarge" />
+                : <img src="/cards/common/BACK.jpg" alt="Сброс" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+              }
             </div>
           </div>
 
