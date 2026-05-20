@@ -116,36 +116,36 @@ def _setup_shared_area(base_cards: List[Card],
     shared.disorder_deck = disorder_cards
 
     # Build market (5 slots: 1 reg, 1 ist, 1 civ, 2 from main)
-    market_slots = []
-    slot_cards = []
+    # source_deck: "region" | "origins" | "civilization" | "main"
+    slot_specs = []
     if shared.region_deck:
-        slot_cards.append(("region", shared.region_deck.pop(0)))
+        slot_specs.append(("region", shared.region_deck.pop(0)))
     if shared.origins_deck:
-        slot_cards.append(("origins", shared.origins_deck.pop(0)))
+        slot_specs.append(("origins", shared.origins_deck.pop(0)))
     if shared.civilization_deck:
-        slot_cards.append(("civ", shared.civilization_deck.pop(0)))
-    # 2 from main deck
+        slot_specs.append(("civilization", shared.civilization_deck.pop(0)))
     for _ in range(2):
         if shared.main_deck:
-            slot_cards.append(("main", shared.main_deck.pop(0)))
+            slot_specs.append(("main", shared.main_deck.pop(0)))
 
-    for i, (src, card) in enumerate(slot_cards):
-        disorder_under = None
-        needs_disorder = (CardCategory.REGION in card.categories or
-                          CardCategory.ORIGINS in card.categories or
-                          CardCategory.CIVILIZATION in card.categories)
-        if needs_disorder and shared.disorder_deck:
-            disorder_under = shared.disorder_deck.pop(0)
+    market_slots = []
+    for i, (source_deck, card) in enumerate(slot_specs):
+        cats = card.categories
+        # Беспорядки подкладываются под карты истоков, цивилизаций и набегов
+        needs_disorder = (CardCategory.ORIGINS in cats or
+                          CardCategory.CIVILIZATION in cats or
+                          CardCategory.RAID in cats)
+        disorder_under = shared.disorder_deck.pop(0) if needs_disorder and shared.disorder_deck else None
 
-        needs_upgrade = (CardCategory.CIVILIZATION in card.categories and
-                         CardCategory.ORIGINS not in card.categories)
+        needs_upgrade = (CardCategory.CIVILIZATION in cats and CardCategory.ORIGINS not in cats)
         upgrade_tokens = 1 if needs_upgrade else 0
 
         market_slots.append(MarketSlot(
             card=card,
             upgrade_tokens=upgrade_tokens,
             disorder_under=disorder_under,
-            market_marker=i + 1
+            market_marker=i + 1,
+            source_deck=source_deck,
         ))
 
     shared.market = market_slots

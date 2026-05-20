@@ -3,7 +3,7 @@ Card model and all card definitions for Imperium: Classics
 """
 from dataclasses import dataclass, field
 from typing import Optional, List
-from .enums import CardCategory, CardSubtype, CardType, RegionType, Period, Nation
+from .enums import CardCategory, CardSubtype, CardType, Period, Nation, ResourceType
 from .data import vikings as _d_vikings
 from .data import greeks as _d_greeks
 from .data import carthaginians as _d_carthaginians
@@ -21,13 +21,52 @@ from .data import base_disorder as _d_base_disorder
 
 
 @dataclass
+class GainResourceAction:
+    """Действие карты: добавить игроку ресурсы указанного типа."""
+    resource_type: ResourceType
+    amount: int
+
+
+@dataclass
+class AcquireCardAction:
+    """Действие карты: приобрести карту с рынка по категории."""
+    allowed_categories: List[CardCategory]
+    count: int = 1
+
+
+# Словарь имя → член enum, не зависящий от поведения __getitem__ в Python 3.11
+_RESOURCE_TYPE_BY_NAME: dict = {rt.name: rt for rt in ResourceType}
+
+
+def _parse_on_play_actions(data: dict) -> List:
+    actions = []
+    for a in data.get("on_play_actions", []):
+        action_type = a.get("type")
+        if action_type == "acquire_from_market":
+            actions.append(AcquireCardAction(
+                allowed_categories=[CardCategory(c) for c in a.get("categories", [])],
+                count=a.get("count", 1),
+            ))
+        else:
+            # Без type — считаем gain_resource (обратная совместимость)
+            rt_name = a["resource_type"]
+            if rt_name not in _RESOURCE_TYPE_BY_NAME:
+                raise ValueError(f"Неизвестный ResourceType: '{rt_name}'. "
+                                 f"Допустимые: {list(_RESOURCE_TYPE_BY_NAME)}")
+            actions.append(GainResourceAction(
+                resource_type=_RESOURCE_TYPE_BY_NAME[rt_name],
+                amount=a["amount"],
+            ))
+    return actions
+
+
+@dataclass
 class Card:
     id: str                          # уникальный буквенно-числовой номер
     name: str
     nation: Optional[Nation] = None  # None = базовая колода
     card_type: CardType = CardType.NORMAL
     period: Optional[Period] = None  # ограничение по периоду
-    region_types: List[RegionType] = field(default_factory=list)
     # VP
     vp_fixed: int = 0               # фиксированные ПО (X)
     vp_condition: Optional[str] = None   # условные ПО (?)
@@ -59,6 +98,8 @@ class Card:
     # Chronicle
     sends_to_chronicle: int = 0   # отправляет N карт соперника/своих в летопись
     goes_to_chronicle: bool = False  # сама идёт в летопись после розыгрыша (не в сброс)
+    # Actions executed on play
+    on_play_actions: List[GainResourceAction] = field(default_factory=list)
 
     def __hash__(self):
         return hash(self.id)
@@ -86,8 +127,7 @@ class NationCard(Card):
     subtype: Optional[CardSubtype] = None
 
     def __post_init__(self):
-        if self.region_types:
-            self.card_type = CardType.PERMANENT
+        pass
 
 
 # ──────────────────────────────────────────────────
@@ -97,7 +137,6 @@ class NationCard(Card):
 def _base_card_from_dict(card_id: str, data: dict) -> BaseCard:
     """Создаёт BaseCard из словаря параметров карты."""
     categories = [CardCategory(c) for c in data.get("categories", [])]
-    region_types = [RegionType(r) for r in data.get("region_types", [])]
     card_type = CardType(data["card_type"]) if "card_type" in data else CardType.NORMAL
     period = Period(data["period"]) if "period" in data else None
 
@@ -105,7 +144,6 @@ def _base_card_from_dict(card_id: str, data: dict) -> BaseCard:
         id=card_id,
         name=data["name"],
         categories=categories,
-        region_types=region_types,
         card_type=card_type,
         period=period,
         vp_fixed=data.get("vp_fixed", 0),
@@ -128,6 +166,7 @@ def _base_card_from_dict(card_id: str, data: dict) -> BaseCard:
         can_be_reinforced=data.get("can_be_reinforced", False),
         sends_to_chronicle=data.get("sends_to_chronicle", 0),
         goes_to_chronicle=data.get("goes_to_chronicle", False),
+        on_play_actions=_parse_on_play_actions(data),
     )
 
 
@@ -194,6 +233,7 @@ def _card_from_dict(card_id: str, data: dict, nation: Nation) -> NationCard:
         can_be_reinforced=data.get("can_be_reinforced", False),
         sends_to_chronicle=data.get("sends_to_chronicle", 0),
         goes_to_chronicle=data.get("goes_to_chronicle", False),
+        on_play_actions=_parse_on_play_actions(data),
     )
 
 

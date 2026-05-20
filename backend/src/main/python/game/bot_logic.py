@@ -6,7 +6,7 @@ import random
 from typing import Optional
 from .state import GameState
 from .cards import Card
-from .enums import CardCategory, Period, Nation
+from .enums import CardCategory, CardType, Period, Nation
 
 
 class BotLogic:
@@ -19,7 +19,7 @@ class BotLogic:
     def resolve_card(state: GameState, card: Card, slot_index: int) -> GameState:
         """Dispatch to the correct nation table"""
         # If disorder card — return to disorder deck
-        if CardCategory.DISORDER in card.categories:
+        if card.card_type == CardType.DISORDER:
             state.shared.disorder_deck.append(card)
             random.shuffle(state.shared.disorder_deck)
             state.add_log("Бот: карта беспорядков возвращена в колоду")

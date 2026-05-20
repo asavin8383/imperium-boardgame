@@ -43,7 +43,7 @@ class ExploitCardRequest(BaseModel):
 
 
 class InnovationRequest(BaseModel):
-    category: str  # "region" | "origins" | "civilization" | "raid"
+    pass  # no body needed
 
 
 class RevolutionRequest(BaseModel):
@@ -173,9 +173,9 @@ def exploit_card(game_id: str, req: ExploitCardRequest):
 
 
 @app.post("/api/games/{game_id}/innovation")
-def do_innovation(game_id: str, req: InnovationRequest):
+def do_innovation(game_id: str):
     try:
-        state = game_session.do_innovation(game_id, req.category)
+        state = game_session.do_innovation(game_id)
         return {"state": state.to_dict()}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

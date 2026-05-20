@@ -4,7 +4,12 @@
       "Bash(python -c ':*)",
       "Bash(npx tsc:*)",
       "Bash(mkdir -p macedonians vikings greeks carthaginians celts persians romans scythians regions origins civilization glory raids disorder)",
-      "Bash(mv 1MAK*.jpg macedonians/)"
+      "Bash(mv 1MAK*.jpg macedonians/)",
+      "Bash(find G:/IdeaProjects/imperium-boardgame/backend/src/main/python -name \"*.pyc\" -delete)",
+      "Bash(find G:/IdeaProjects/imperium-boardgame/backend/src/main/python -name \"__pycache__\" -type d -exec rm -rf {} +)",
+      "Bash(python -c \"import sys; sys.path.insert\\(0, 'src/main/python'\\); from api.main import app; print\\('OK'\\)\")",
+      "Bash(echo \"Exit: $?\")",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('proxy:', d.get\\('proxy'\\)\\); print\\('scripts:', list\\(d.get\\('scripts',{}\\).keys\\(\\)\\)\\)\")"
     ]
   }
 }

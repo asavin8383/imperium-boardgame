@@ -20,11 +20,16 @@ export default function GameSetup() {
   const [playerNation, setPlayerNation] = useState('romans');
   const [botNation, setBotNation] = useState('greeks');
   const [difficulty, setDifficulty] = useState('emperor');
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const { createGame, loading, error } = useGameStore();
 
   useEffect(() => {
-    fetchNations().then(setNations);
-    fetchDifficulties().then(setDifficulties);
+    fetchNations()
+      .then(setNations)
+      .catch(e => setFetchError('Не удалось загрузить данные: ' + (e?.message ?? 'Проверьте, запущен ли сервер на порту 8000')));
+    fetchDifficulties()
+      .then(setDifficulties)
+      .catch(() => {});
   }, []);
 
   const handleStart = () => {
@@ -47,6 +52,9 @@ export default function GameSetup() {
         <section style={styles.section}>
           <h2 style={styles.sectionTitle}>Ваш народ</h2>
           <div style={styles.nationGrid}>
+            {Object.keys(nations).length === 0 && !fetchError && (
+              <div style={{ color: '#555', fontSize: 12, padding: 8 }}>Загрузка...</div>
+            )}
             {Object.entries(nations).map(([id, info]) => (
               <button
                 key={id}
@@ -118,6 +126,7 @@ export default function GameSetup() {
           </div>
         </section>
 
+        {fetchError && <div style={styles.error}>{fetchError}</div>}
         {error && <div style={styles.error}>{error}</div>}
 
         <button

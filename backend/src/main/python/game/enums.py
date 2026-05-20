@@ -17,6 +17,7 @@ class CardCategory(str, Enum):
     CIVILIZATION = "civilization"  # цивилизация
     RAID = "raid"             # набеги
     GLORY = "glory"           # слава
+    DISORDER = "disorder"     # беспорядки
 
 class CardSubtype(str, Enum):
     ABILITY = "ability"       # способность (символ шестерёнки)
@@ -34,16 +35,11 @@ class CardType(str, Enum):
     DISORDER = "disorder"
 
 
-class RegionType(str, Enum):
-    LAND = "land"             # суша
-    SEA = "sea"               # море
-    MOUNTAIN = "mountain"     # горы
-
 
 class ResourceType(str, Enum):
-    RESOURCE = "resource"     # ресурс (монеты/зерно)
+    MATERIAL = "ресурс"     # ресурс (монеты/зерно)
     POPULATION = "population" # население
-    UPGRADE = "upgrade"       # модернизация
+    PROGRESS = "progress"       # жетон прогресса
     ACTION = "action"         # жетон действия (квадрат)
     EXPLOIT = "exploit"       # жетон эксплуатации (X)
 

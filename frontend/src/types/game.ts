@@ -23,7 +23,6 @@ export interface CardInfo {
   passive_effect?: boolean;
   solstice_effect?: boolean;
   card_type?: 'normal' | 'attack' | 'permanent';
-  region_types?: string[];
   progress_cost_resource?: number;
   progress_cost_population?: number;
   progress_cost_upgrade?: number;
@@ -42,6 +41,11 @@ export interface CardInfo {
   // Chronicle
   sends_to_chronicle?: number;
   goes_to_chronicle?: boolean;
+  // Actions on play
+  on_play_actions?: Array<
+    | { type: 'gain_resource'; resource_type: string; amount: number }
+    | { type: 'acquire_from_market'; categories: CardCategory[]; count: number }
+  >;
 }
 
 export interface Resources {
@@ -52,11 +56,14 @@ export interface Resources {
   exploit: number;
 }
 
+export type MarketSourceDeck = 'region' | 'origins' | 'civilization' | 'main';
+
 export interface MarketSlot {
   card: CardInfo | null;
   upgrade_tokens: number;
   has_disorder_under: boolean;
   market_marker: number;
+  source_deck: MarketSourceDeck;
 }
 
 export interface PlayerState {
@@ -73,6 +80,7 @@ export interface PlayerState {
   ability_card: { id: string; name: string; side: string } | null;
   resources: Resources;
   hand_limit: number;
+  turn_action_chosen: TurnAction | null;
 }
 
 export interface BotSlot {

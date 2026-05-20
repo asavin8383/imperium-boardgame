@@ -5,7 +5,7 @@ import random
 import uuid
 from dataclasses import dataclass, field
 from typing import List, Optional, Dict
-from .cards import Card, build_base_deck_classics, get_nation_deck
+from .cards import Card, GainResourceAction, AcquireCardAction, build_base_deck_classics, get_nation_deck
 from .enums import (Period, Nation, GamePhase, TurnAction, EndCondition,
                     Difficulty, CardCategory, CardSubtype, ResourceType)
 
@@ -13,6 +13,37 @@ from .enums import (Period, Nation, GamePhase, TurnAction, EndCondition,
 def _card_info(card: Card) -> dict:
     cats = getattr(card, 'categories', [])
     sub = getattr(card, 'subtype', None)
+
+    # Derive display fields from on_play_actions
+    gives_resource = sum(
+        a.amount for a in card.on_play_actions
+        if isinstance(a, GainResourceAction) and a.resource_type == ResourceType.MATERIAL
+    )
+    gives_population = sum(
+        a.amount for a in card.on_play_actions
+        if isinstance(a, GainResourceAction) and a.resource_type == ResourceType.POPULATION
+    )
+    gives_progress = sum(
+        a.amount for a in card.on_play_actions
+        if isinstance(a, GainResourceAction) and a.resource_type == ResourceType.PROGRESS
+    )
+
+    # Serialize on_play_actions for frontend
+    serialized_actions = []
+    for a in card.on_play_actions:
+        if isinstance(a, GainResourceAction):
+            serialized_actions.append({
+                "type": "gain_resource",
+                "resource_type": a.resource_type.value,
+                "amount": a.amount,
+            })
+        elif isinstance(a, AcquireCardAction):
+            serialized_actions.append({
+                "type": "acquire_from_market",
+                "categories": [c.value for c in a.allowed_categories],
+                "count": a.count,
+            })
+
     return {
         "id": card.id,
         "name": card.name,
@@ -28,10 +59,14 @@ def _card_info(card: Card) -> dict:
         "passive_effect": card.passive_effect,
         "solstice_effect": card.solstice_effect,
         "card_type": card.card_type.value,
-        "region_types": [r.value for r in card.region_types],
+
         "progress_cost_resource": card.progress_cost_resource,
         "progress_cost_population": card.progress_cost_population,
         "progress_cost_upgrade": card.progress_cost_upgrade,
+        "gives_resource": gives_resource,
+        "gives_population": gives_population,
+        "gives_progress": gives_progress,
+        "on_play_actions": serialized_actions,
     }
 
 
@@ -104,6 +139,7 @@ class PlayerArea:
                               "side": self.ability_side} if self.ability_card else None,
             "resources": self.resources.to_dict(),
             "hand_limit": self.hand_limit,
+            "turn_action_chosen": self.turn_action_chosen.value if self.turn_action_chosen else None,
         }
 
 
@@ -154,6 +190,7 @@ class MarketSlot:
     upgrade_tokens: int = 0      # жетоны модернизации на карте
     disorder_under: Optional[Card] = None  # карта беспорядков под картой
     market_marker: int = 0       # номер маркера рынка (1-5, для бота)
+    source_deck: str = "main"    # "region" | "origins" | "civilization" | "main"
 
     def to_dict(self):
         return {
@@ -161,6 +198,7 @@ class MarketSlot:
             "upgrade_tokens": self.upgrade_tokens,
             "has_disorder_under": self.disorder_under is not None,
             "market_marker": self.market_marker,
+            "source_deck": self.source_deck,
         }
 
 

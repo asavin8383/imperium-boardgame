@@ -21,7 +21,7 @@ interface GameStore {
   undoAction: () => Promise<void>;
   playCard: (cardId: string) => Promise<void>;
   exploitCard: (cardId: string) => Promise<void>;
-  doInnovation: (category: string) => Promise<void>;
+  doInnovation: () => Promise<void>;
   doRevolution: (cardIds?: string[]) => Promise<void>;
   endTurn: (discardIds?: string[]) => Promise<void>;
   acquireCard: (slotIndex: number) => Promise<void>;
@@ -94,12 +94,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
   },
 
-  doInnovation: async (category) => {
+  doInnovation: async () => {
     const { gameId } = get();
     if (!gameId) return;
     set({ loading: true, error: null });
     try {
-      const state = await api.doInnovation(gameId, category);
+      const state = await api.doInnovation(gameId);
       set({ gameState: state, loading: false });
     } catch (e: any) {
       set({ error: e.response?.data?.detail || e.message, loading: false });

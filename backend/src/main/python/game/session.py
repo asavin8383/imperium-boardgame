@@ -43,7 +43,6 @@ def delete_game(game_id: str):
 def play_card(game_id: str, card_id: str) -> GameState:
     state = _require(game_id)
     _snapshot(game_id, state)
-    state = _engine.start_activation(state)
     state = _engine.play_card(state, card_id)
     save_game(state)
     return state
@@ -57,10 +56,10 @@ def exploit_card(game_id: str, card_id: str) -> GameState:
     return state
 
 
-def do_innovation(game_id: str, category: str) -> GameState:
+def do_innovation(game_id: str) -> GameState:
     state = _require(game_id)
     _snapshot(game_id, state)
-    state = _engine.do_innovation(state, category)
+    state = _engine.do_innovation(state)
     save_game(state)
     return state
 

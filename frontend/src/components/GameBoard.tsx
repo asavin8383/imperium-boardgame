@@ -28,7 +28,12 @@ const VP_PER_LABEL: Record<string, string> = {
   region: 'рег', population: 'нас', civilization: 'цив',
   origins: 'ист', resource: 'рес', attack: 'ат', sea: 'море', glory: 'сл',
 };
-const REGION_ICON: Record<string, string> = { land: '🌾', sea: '🌊', mountain: '🏔' };
+const DECK_LABEL: Record<string, string> = {
+  region: 'Регионы', origins: 'Истоки', civilization: 'Цивилизация', main: 'Основная',
+};
+const DECK_COLOR: Record<string, string> = {
+  region: '#2ecc71', origins: '#e67e22', civilization: '#3498db', main: '#9b59b6',
+};
 const PHASE_RU: Record<string, string> = {
   player_turn: '🎯 Ваш ход', player_discard: '🗑 Сброс карт', bot_turn: '🤖 Ход бота', solstice: '☀ Солнцестояние',
   final_round: '⚡ Финальный раунд', scoring: '🏆 Подсчёт ПО', game_over: '🏁 Конец игры', setup: '⚙ Подготовка',
@@ -118,9 +123,6 @@ function CardView({ card, selected = false, onClick, size = 'normal', dimmed = f
             {card.is_exploit && <span title="Эксплуатация" style={{ fontSize: d.c - 1, color: '#e67e22' }}>✕</span>}
             {card.passive_effect && <span title="Пассивный эффект" style={{ fontSize: d.c - 1, color: '#1abc9c' }}>∞</span>}
             {card.solstice_effect && <span title="Солнцестояние" style={{ fontSize: d.c - 1, color: '#f1c40f' }}>☀</span>}
-            {(card.region_types ?? []).map(rt => REGION_ICON[rt] && (
-              <span key={rt} style={{ fontSize: d.c - 1 }}>{REGION_ICON[rt]}</span>
-            ))}
             {(card.progress_cost_resource ?? 0) > 0 && (
               <span style={{ fontSize: d.c - 1, color: '#e67e22' }}>⚙{card.progress_cost_resource}</span>
             )}
@@ -248,13 +250,17 @@ function Btn({ label, onClick, color = '#2ecc71', disabled = false, active = fal
 export default function GameBoard() {
   const { gameState: gs, loading, error, playCard, exploitCard, doInnovation, doRevolution, endTurn, acquireCard, accelerateProgress, resetGame, undoAction } = useGameStore();
   const [selectedCards, setSelectedCards] = useState<string[]>([]);
-  const [mode, setMode] = useState<'activation' | 'innovation' | 'revolution' | null>(null);
-  const [acquireMode, setAcquireMode] = useState(false);
-  const [innovationCat, setInnovationCat] = useState<string | null>(null);
   const [scores, setScores] = useState<{ player: number; bot: number } | null>(null);
   const [previewCard, setPreviewCard] = useState<CardInfo | null>(null);
   const [previewOrigin, setPreviewOrigin] = useState('top left');
+  const [revMode, setRevMode] = useState(false);  // revolution selection mode
   const previewRef = React.useRef<HTMLDivElement | null>(null);
+
+  const isPlayerTurn = gs?.phase === 'player_turn';
+  const isDiscardPhase = gs?.phase === 'player_discard';
+  const isGameOver = gs?.phase === 'game_over' || gs?.phase === 'scoring';
+  const turnAction = gs?.player?.turn_action_chosen ?? null;
+  const isInnovatePending = gs?.pending_choice?.type === 'innovate_from_market';
 
   useEffect(() => {
     if (!previewCard) return;
@@ -267,48 +273,40 @@ export default function GameBoard() {
     return () => document.removeEventListener('mousedown', handler);
   }, [previewCard]);
 
-  if (!gs) return null;
-  const { player, bot, shared } = gs;
-  const isPlayerTurn = gs.phase === 'player_turn';
-  const isDiscardPhase = gs.phase === 'player_discard';
-  const isGameOver = gs.phase === 'game_over' || gs.phase === 'scoring';
-
   useEffect(() => {
+    if (!gs) return;
     if (isGameOver && !scores) {
       const sl = gs.log.find(l => l.includes('Игрок:') && l.includes('ПО'));
       if (sl) {
         const m = sl.match(/(\d+)/g);
-          if (m && m.length >= 2) setScores({ player: parseInt(m[0]), bot: parseInt(m[1]) });
+        if (m && m.length >= 2) setScores({ player: parseInt(m[0]), bot: parseInt(m[1]) });
       }
     }
-  }, [isGameOver, gs.log]);
+  }, [isGameOver, gs?.log]);
+
+  // Reset revolution mode when turn action is chosen or turn ends
+  useEffect(() => {
+    if (turnAction !== null || !isPlayerTurn) {
+      setRevMode(false);
+      setSelectedCards([]);
+    }
+  }, [gs?.round_number, turnAction, isPlayerTurn]);
+
+  if (!gs) return null;
+  const { player, bot, shared } = gs;
+
+  // Pending выбор с рынка (от действия карты или инновации)
+  const pendingAcquire = (gs.pending_choice?.type === 'acquire_from_market' || gs.pending_choice?.type === 'innovate_from_market')
+    ? gs.pending_choice as { type: string; allowed_categories: string[]; remaining?: number }
+    : null;
+  const isAcquireMode = pendingAcquire != null;
 
   function toggleCard(id: string) {
     setSelectedCards(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
   }
 
-  async function handlePlay() {
-    for (const id of selectedCards) await playCard(id);
-    setSelectedCards([]);
-  }
-  async function handleExploit() {
-    if (selectedCards.length !== 1) return;
-    await exploitCard(selectedCards[0]);
-    setSelectedCards([]);
-  }
-  async function handleInnovation() {
-    if (!innovationCat) return;
-    setMode(null);
-    await doInnovation(innovationCat);
-    setInnovationCat(null);
-  }
-  async function handleRevolution() {
-    setMode(null);
-    await doRevolution(selectedCards);
-    setSelectedCards([]);
-  }
   async function handleEndTurn() {
-    setMode(null); setSelectedCards([]); setAcquireMode(false);
+    setSelectedCards([]);
     await endTurn([]);
   }
   async function handleConfirmDiscard() {
@@ -443,6 +441,26 @@ export default function GameBoard() {
                 );
               })()}
 
+              {/* Personal deck */}
+              <div>
+                <div style={{ fontSize: 9, color: '#555', marginBottom: 5, letterSpacing: '.08em', textTransform: 'uppercase' }}>
+                  Личная колода <span style={{ color: '#9098b8' }}>({player?.deck_count ?? 0})</span>
+                </div>
+                <div style={{ width: 180, height: 240, borderRadius: 8, overflow: 'hidden', border: '1px solid #2a2d40', flexShrink: 0 }}>
+                  <img src="/cards/common/BACK.jpg" alt="Личная колода" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                </div>
+              </div>
+
+              {/* Enhancement deck */}
+              <div>
+                <div style={{ fontSize: 9, color: '#555', marginBottom: 5, letterSpacing: '.08em', textTransform: 'uppercase' }}>
+                  Усиление <span style={{ color: '#9098b8' }}>({player?.boost_deck_count ?? 0})</span>
+                </div>
+                <div style={{ width: 180, height: 240, borderRadius: 8, overflow: 'hidden', border: '1px solid #2a2d40', flexShrink: 0 }}>
+                  <img src="/cards/common/BACK.jpg" alt="Колода усиления" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                </div>
+              </div>
+
             </div>
           )}
 
@@ -457,8 +475,15 @@ export default function GameBoard() {
                     <div key={c.id} ref={isPreview ? previewRef : undefined}
                       style={{ flexShrink: 0, position: 'relative', zIndex: isPreview ? 200 : undefined, transform: isPreview ? 'scale(2)' : undefined, transformOrigin: 'top left', transition: 'transform 0.15s' }}>
                       <CardView card={c} size="small"
-                        selected={selectedCards.includes(c.id)}
-                        onClick={() => { setPreviewCard(isPreview ? null : c); if (mode === 'activation') toggleCard(c.id); }} />
+                        selected={isPreview && !!c.is_exploit}
+                        onClick={() => {
+                          if (isPreview) {
+                            if (isPlayerTurn && c.is_exploit) exploitCard(c.id);
+                            setPreviewCard(null);
+                          } else {
+                            setPreviewCard(c);
+                          }
+                        }} />
                     </div>
                   );
                 })}
@@ -468,57 +493,56 @@ export default function GameBoard() {
 
           {/* Deck counts */}
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-            <DeckPile count={player?.deck_count ?? 0} label="Личная колода" color="#1a2040" />
             <DeckPile count={player?.discard_count ?? 0} label="Сброс" color="#2d1a00" />
-            <DeckPile count={player?.boost_deck_count ?? 0} label="Усиление" color="#3d2000" />
             <DeckPile count={player?.chronicle_count ?? 0} label="Летопись" color="#1a2a1a" />
           </div>
 
           {/* Actions */}
-          {isPlayerTurn && (
-            <div style={{ background: '#0d1020', border: '1px solid #1e2235', borderRadius: 9, padding: '10px 12px' }}>
-              <div style={{ fontSize: 9, color: '#555', marginBottom: 8, letterSpacing: '.08em', textTransform: 'uppercase' }}>Действия</div>
-              {!mode ? (
-                <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
-                  <Btn label="Активация" onClick={() => { setMode('activation'); setSelectedCards([]); }} color="#2ecc71" icon="▶" />
-                  <Btn label="Инновация" onClick={() => setMode('innovation')} color="#3498db" icon="💡" />
-                  <Btn label="Революция" onClick={() => setMode('revolution')} color="#9b59b6" icon="🔄" />
-                  <Btn label="Закончить ход" onClick={handleEndTurn} color="#e67e22" icon="⏭" />
-                  <Btn label="Отменить" onClick={() => { undoAction(); setMode(null); setSelectedCards([]); }} color="#e74c3c" icon="↩" />
+          {isPlayerTurn && !isInnovatePending && !revMode && turnAction === null && (
+            <div style={{ background: '#0d1020', border: '1px solid #2a2d40', borderRadius: 9, padding: '10px 12px' }}>
+              <div style={{ fontSize: 9, color: '#666', marginBottom: 8, letterSpacing: '.08em', textTransform: 'uppercase' }}>Выберите действие</div>
+              <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
+                <Btn label="Активация" onClick={() => {}} color="#2ecc71" icon="⚡"
+                  disabled={false} />
+                <Btn label="Инновация" onClick={() => doInnovation()} color="#3498db" icon="🔬" />
+                <Btn label="Революция" onClick={() => { setRevMode(true); setSelectedCards([]); }} color="#9b59b6" icon="⚔" />
+              </div>
+              <div style={{ marginTop: 8, display: 'flex', gap: 7 }}>
+                <Btn label="Завершить ход" onClick={handleEndTurn} color="#e67e22" icon="⏭" />
+                <Btn label="Отменить" onClick={() => { undoAction(); setPreviewCard(null); }} color="#e74c3c" icon="↩" />
+              </div>
+            </div>
+          )}
+
+          {isPlayerTurn && revMode && (
+            <div style={{ background: '#0d1020', border: '1px solid #9b59b6', borderRadius: 9, padding: '10px 12px' }}>
+              <div style={{ fontSize: 9, color: '#9b59b6', marginBottom: 8, letterSpacing: '.08em', textTransform: 'uppercase' }}>Революция</div>
+              <div style={{ fontSize: 10, color: '#aaa', marginBottom: 8 }}>
+                {selectedCards.length > 0 ? `Выбрано карт беспорядков: ${selectedCards.length}` : 'Выберите карты беспорядков для возврата (можно 0)'}
+              </div>
+              <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
+                <Btn label={selectedCards.length > 0 ? `Подтвердить (${selectedCards.length})` : 'Подтвердить (0)'} onClick={async () => { await doRevolution(selectedCards); setRevMode(false); setSelectedCards([]); }} color="#9b59b6" icon="✔" />
+                <Btn label="Отмена" onClick={() => { setRevMode(false); setSelectedCards([]); }} color="#e74c3c" icon="✕" />
+              </div>
+            </div>
+          )}
+
+          {isPlayerTurn && isInnovatePending && (
+            <div style={{ background: '#0d1020', border: '1px solid #3498db', borderRadius: 9, padding: '10px 12px' }}>
+              <div style={{ fontSize: 9, color: '#3498db', marginBottom: 6, letterSpacing: '.08em', textTransform: 'uppercase' }}>Инновация</div>
+              <div style={{ fontSize: 10, color: '#aaa' }}>Выберите карту с рынка (регион, исток, цивилизация, набег)</div>
+            </div>
+          )}
+
+          {isPlayerTurn && !revMode && !isInnovatePending && turnAction !== null && (
+            <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
+              {turnAction && (
+                <div style={{ padding: '4px 8px', background: '#0a0c14', border: '1px solid #2a2d40', borderRadius: 5, fontSize: 10, color: '#888' }}>
+                  {turnAction === 'activation' ? '⚡ Активация' : turnAction === 'innovation' ? '🔬 Инновация' : '⚔ Революция'}
                 </div>
-              ) : mode === 'activation' ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  <div style={{ fontSize: 10, color: '#2ecc71' }}>{selectedCards.length > 0 ? `Выбрано: ${selectedCards.length}` : 'Выберите карты с руки'}</div>
-                  <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
-                    <Btn label="Разыграть" onClick={handlePlay} color="#2ecc71" disabled={selectedCards.length === 0} />
-                    <Btn label="Эксплуатировать" onClick={handleExploit} color="#e67e22" disabled={selectedCards.length !== 1} />
-                    <Btn label={acquireMode ? "Отмена покупки" : "Купить с рынка"} onClick={() => setAcquireMode(!acquireMode)} color="#3498db" active={acquireMode} />
-                    <Btn label="Завершить" onClick={handleEndTurn} color="#888" />
-                    <Btn label="Отменить" onClick={() => { undoAction(); setMode(null); setSelectedCards([]); }} color="#e74c3c" icon="↩" />
-                  </div>
-                </div>
-              ) : mode === 'innovation' ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  <div style={{ fontSize: 10, color: '#3498db' }}>Выберите категорию:</div>
-                  <div style={{ display: 'flex', gap: 6 }}>
-                    {['region', 'origins', 'civilization', 'raid'].map(cat => (
-                      <button key={cat} onClick={() => setInnovationCat(cat)} style={{ background: innovationCat === cat ? CAT_COLOR[cat] : `${CAT_COLOR[cat]}20`, border: `1px solid ${CAT_COLOR[cat]}`, borderRadius: 5, color: innovationCat === cat ? '#000' : CAT_COLOR[cat], padding: '5px 10px', cursor: 'pointer', fontSize: 10, fontWeight: 600 }}>{CAT_RU[cat]}</button>
-                    ))}
-                  </div>
-                  <div style={{ display: 'flex', gap: 7 }}>
-                    <Btn label="Подтвердить" onClick={handleInnovation} color="#3498db" disabled={!innovationCat} />
-                    <Btn label="Отмена" onClick={() => { setMode(null); setInnovationCat(null); }} color="#888" />
-                  </div>
-                </div>
-              ) : mode === 'revolution' ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  <div style={{ fontSize: 10, color: '#9b59b6' }}>Выберите карты беспорядков ({selectedCards.length} выбрано)</div>
-                  <div style={{ display: 'flex', gap: 7 }}>
-                    <Btn label={`Вернуть (${selectedCards.length})`} onClick={handleRevolution} color="#9b59b6" disabled={selectedCards.length === 0} />
-                    <Btn label="Отмена" onClick={() => { setMode(null); setSelectedCards([]); }} color="#888" />
-                  </div>
-                </div>
-              ) : null}
+              )}
+              <Btn label="Завершить ход" onClick={handleEndTurn} color="#e67e22" icon="⏭" />
+              <Btn label="Отменить" onClick={() => { undoAction(); setPreviewCard(null); }} color="#e74c3c" icon="↩" />
             </div>
           )}
 
@@ -541,13 +565,16 @@ export default function GameBoard() {
             </div>
             <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
               {(player?.hand ?? []).map(card => {
-                const isDisorder = card.categories?.includes('disorder');
-                const canSelect = isDiscardPhase || (isPlayerTurn && (mode === 'activation' || (mode === 'revolution' && isDisorder)));
                 const isPreview = previewCard?.id === card.id;
+                const periodBlocked = isPlayerTurn && !revMode && !isInnovatePending && card.period != null && card.period !== player?.period;
+                const isDisorder = card.categories?.includes('disorder') ?? false;
+                const isRevSelectable = revMode && isDisorder;
+                const isRevSelected = revMode && selectedCards.includes(card.id);
+                const dimmedCard = (isInnovatePending && isPlayerTurn) || (revMode && !isDisorder) || periodBlocked;
                 return (
                   <div key={card.id} ref={isPreview ? previewRef : undefined}
                     onClickCapture={(e) => {
-                      if (!isPreview) {
+                      if (!isPreview && !revMode && !isInnovatePending) {
                         const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
                         const leftColRight = (window.innerWidth - 260) / 2;
                         setPreviewOrigin(rect.left + rect.width * 2 > leftColRight ? 'top right' : 'top left');
@@ -555,9 +582,22 @@ export default function GameBoard() {
                     }}
                     style={{ flexShrink: 0, position: 'relative', zIndex: isPreview ? 200 : undefined, transform: isPreview ? 'scale(1.5)' : undefined, transformOrigin: isPreview ? previewOrigin : 'top left', transition: 'transform 0.15s' }}>
                     <CardView card={card} size="xlarge"
-                      selected={selectedCards.includes(card.id)}
-                      onClick={() => { setPreviewCard(isPreview ? null : card); if (canSelect) toggleCard(card.id); }}
-                      dimmed={isPlayerTurn && mode === 'revolution' && !isDisorder} />
+                      selected={(isDiscardPhase && selectedCards.includes(card.id)) || isRevSelected}
+                      onClick={() => {
+                        if (isDiscardPhase) {
+                          toggleCard(card.id);
+                        } else if (revMode) {
+                          if (isRevSelectable) toggleCard(card.id);
+                        } else if (isInnovatePending) {
+                          // hand not interactive during innovation pick
+                        } else if (isPreview) {
+                          if (isPlayerTurn && !periodBlocked) playCard(card.id);
+                          setPreviewCard(null);
+                        } else {
+                          setPreviewCard(card);
+                        }
+                      }}
+                      dimmed={dimmedCard} />
                   </div>
                 );
               })}
@@ -579,6 +619,9 @@ export default function GameBoard() {
         <div style={{ display: 'flex', flexDirection: 'column', borderRight: '1px solid #1e2235', overflow: 'hidden' }}>
           {/* Deck summary */}
           <div style={{ padding: '8px 10px', background: '#080a10', borderBottom: '1px solid #1e2235', display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <DeckPile count={shared?.region_deck_count ?? 0} label="Регионы" color="#1a402a" />
+            <DeckPile count={shared?.origins_deck_count ?? 0} label="Истоки" color="#1a2a40" />
+            <DeckPile count={shared?.civilization_deck_count ?? 0} label="Цивилизация" color="#102040" />
             <DeckPile count={shared?.main_deck_count ?? 0} label="Основная" color="#2a1a40" />
             <DeckPile count={shared?.disorder_deck_count ?? 0} label="Беспорядки" color="#2d0a2d" />
             <DeckPile count={shared?.glory_deck_count ?? 0} label="Слава" color="#2d2600" />
@@ -587,22 +630,45 @@ export default function GameBoard() {
           {/* Market */}
           <div style={{ flex: 1, overflow: 'auto', padding: '10px 8px', background: '#08090e' }}>
             <div style={{ fontSize: 9, color: '#555', marginBottom: 10, textAlign: 'center', letterSpacing: '.1em', textTransform: 'uppercase' }}>☉ Текущий рынок</div>
+            {pendingAcquire && (
+              <div style={{ background: isInnovatePending ? '#0a1020' : '#0d2010', border: `1px solid ${isInnovatePending ? '#3498db' : '#1abc9c'}`, borderRadius: 6, padding: '6px 10px', marginBottom: 10, fontSize: 9, color: isInnovatePending ? '#3498db' : '#1abc9c', textAlign: 'center' }}>
+                {isInnovatePending ? '🔬 Инновация: выберите' : 'Выберите'} карту с рынка ({pendingAcquire.allowed_categories.join(', ')})
+                {pendingAcquire.remaining != null && pendingAcquire.remaining > 1 && ` — осталось: ${pendingAcquire.remaining}`}
+              </div>
+            )}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'center' }}>
               {(shared?.market ?? []).map((slot, idx) => (
                 <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-                  <div style={{ fontSize: 9, color: '#444', background: '#12141f', border: '1px solid #1e2235', borderRadius: 3, padding: '1px 6px' }}>Маркер {slot.market_marker}</div>
+                  <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                    <div style={{ fontSize: 9, color: '#444', background: '#12141f', border: '1px solid #1e2235', borderRadius: 3, padding: '1px 6px' }}>Маркер {slot.market_marker}</div>
+                    <div style={{ fontSize: 8, color: DECK_COLOR[slot.source_deck] ?? '#555', background: '#0a0c14', border: `1px solid ${DECK_COLOR[slot.source_deck] ?? '#333'}44`, borderRadius: 3, padding: '1px 5px' }}>{DECK_LABEL[slot.source_deck] ?? slot.source_deck}</div>
+                  </div>
                   {slot.card ? (
                     <>
                       <div ref={previewCard?.id === slot.card.id ? previewRef : undefined}
                         style={{ flexShrink: 0, position: 'relative', zIndex: previewCard?.id === slot.card.id ? 200 : undefined, transform: previewCard?.id === slot.card.id ? 'scale(2)' : undefined, transformOrigin: 'top center', transition: 'transform 0.15s' }}>
-                        <CardView card={slot.card} size="large"
-                          onClick={() => { setPreviewCard(previewCard?.id === slot.card!.id ? null : slot.card); if (acquireMode && isPlayerTurn) acquireCard(idx); }}
-                          badge={slot.upgrade_tokens > 0 ? <div style={{ background: '#3498db', color: '#fff', borderRadius: 3, padding: '1px 4px', fontSize: 8, fontWeight: 700 }}>+{slot.upgrade_tokens}▶</div> : undefined} />
+                        {(() => {
+                          const slotAllowed = !pendingAcquire ||
+                            (slot.card.categories?.some(c => pendingAcquire.allowed_categories.includes(c)) ?? false);
+                          return (
+                            <CardView card={slot.card} size="large"
+                              dimmed={isAcquireMode && isPlayerTurn && !slotAllowed}
+                              onClick={() => {
+                                setPreviewCard(previewCard?.id === slot.card!.id ? null : slot.card);
+                                if (isAcquireMode && isPlayerTurn && slotAllowed) acquireCard(idx);
+                              }}
+                              badge={slot.upgrade_tokens > 0 ? <div style={{ background: '#3498db', color: '#fff', borderRadius: 3, padding: '1px 4px', fontSize: 8, fontWeight: 700 }}>+{slot.upgrade_tokens}▶</div> : undefined} />
+                          );
+                        })()}
                       </div>
                       {slot.has_disorder_under && <div style={{ fontSize: 8, color: '#9b59b6' }}>⚠ Беспорядки</div>}
-                      {acquireMode && isPlayerTurn && (
-                        <button onClick={() => acquireCard(idx)} style={{ background: 'linear-gradient(135deg,#1abc9c,#16a085)', border: 'none', borderRadius: 5, color: '#fff', fontSize: 9, padding: '3px 8px', cursor: 'pointer', fontWeight: 600 }}>Приобрести</button>
-                      )}
+                      {isAcquireMode && isPlayerTurn && (() => {
+                        const slotAllowed = !pendingAcquire ||
+                          (slot.card.categories?.some(c => pendingAcquire.allowed_categories.includes(c)) ?? false);
+                        return slotAllowed
+                          ? <button onClick={() => acquireCard(idx)} style={{ background: 'linear-gradient(135deg,#1abc9c,#16a085)', border: 'none', borderRadius: 5, color: '#fff', fontSize: 9, padding: '3px 8px', cursor: 'pointer', fontWeight: 600 }}>Приобрести</button>
+                          : <div style={{ fontSize: 8, color: '#555', padding: '2px 0' }}>Недоступно</div>;
+                      })()}
                     </>
                   ) : (
                     <div style={{ width: 112, height: 148, border: '1px dashed #1e2235', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, color: '#2a2d40' }}>Пусто</div>

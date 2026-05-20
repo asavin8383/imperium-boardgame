@@ -5,8 +5,8 @@ import random
 from typing import List, Optional, Tuple
 from .state import GameState, PlayerArea, MarketSlot, Resources
 from .enums import (Period, GamePhase, TurnAction, EndCondition,
-                    CardCategory, CardSubtype, Difficulty)
-from .cards import Card
+                    CardCategory, CardSubtype, Difficulty, ResourceType)
+from .cards import Card, GainResourceAction, AcquireCardAction
 from .setup import _draw_to_hand
 
 
@@ -31,8 +31,11 @@ class GameEngine:
         Розыгрыш карты с руки.
         Правила: убрать жетон действия с карты периода → выложить карту → применить эффект.
         """
-        if state.player.turn_action_chosen != TurnAction.ACTIVATION:
-            raise ValueError("Сначала выберите Активацию")
+        # Автоматически выбираем активацию если действие ещё не выбрано
+        if state.player.turn_action_chosen is None:
+            state.player.turn_action_chosen = TurnAction.ACTIVATION
+        elif state.player.turn_action_chosen != TurnAction.ACTIVATION:
+            raise ValueError("Действие уже выбрано — розыгрыш карт недоступен")
 
         card = self._find_in_hand(state, card_id)
         if card is None:
@@ -71,8 +74,10 @@ class GameEngine:
         Эксплуатация карты в личной игровой области.
         Правила: переместить жетон X с карты периода на эксплуатируемую карту.
         """
-        if state.player.turn_action_chosen != TurnAction.ACTIVATION:
-            raise ValueError("Сначала выберите Активацию")
+        if state.player.turn_action_chosen is None:
+            state.player.turn_action_chosen = TurnAction.ACTIVATION
+        elif state.player.turn_action_chosen != TurnAction.ACTIVATION:
+            raise ValueError("Эксплуатация доступна только при Активации")
         if state.player.resources.exploit <= 0:
             raise ValueError("Нет жетонов эксплуатации")
 
@@ -99,22 +104,21 @@ class GameEngine:
         state.add_log(f"Эксплуатирована карта: {card.name}")
         return state
 
-    def do_innovation(self, state: GameState, category: str) -> GameState:
+    def do_innovation(self, state: GameState) -> GameState:
         """
-        Инновация: сбросить все карты с руки → присвоить карту указанной категории.
+        Инновация: присвоить одну карту с рынка (регион, исток, цивилизация, набег).
+        Карта беспорядков из-под неё в руку не идёт.
         """
         if state.phase != GamePhase.PLAYER_TURN:
             raise ValueError("Не ваш ход")
+        if state.player.turn_action_chosen is not None:
+            raise ValueError("Действие уже выбрано")
         state.player.turn_action_chosen = TurnAction.INNOVATION
-
-        # Discard hand
-        state.player.discard.extend(state.player.hand)
-        state.player.hand = []
-
-        # Assign a card from market
-        state = self._assign_card(state, category)
-        state.add_log(f"Инновация: присвоена карта категории {category}")
-        state = self._end_player_turn(state)
+        state.pending_choice = {
+            "type": "innovate_from_market",
+            "allowed_categories": ["region", "origins", "civilization", "raid"],
+        }
+        state.add_log("Инновация: выберите карту с рынка (регион, исток, цивилизация, набег)")
         return state
 
     def do_revolution(self, state: GameState,
@@ -124,22 +128,28 @@ class GameEngine:
         """
         if state.phase != GamePhase.PLAYER_TURN:
             raise ValueError("Не ваш ход")
+        if state.player.turn_action_chosen is not None:
+            raise ValueError("Действие уже выбрано")
         state.player.turn_action_chosen = TurnAction.REVOLUTION
 
+        returned = 0
         for cid in card_ids:
             card = self._find_in_hand(state, cid)
             if card and CardCategory.DISORDER in getattr(card, 'categories', []):
                 state.player.hand.remove(card)
                 state.shared.disorder_deck.append(card)
-                random.shuffle(state.shared.disorder_deck)
+                returned += 1
+        if returned > 0:
+            random.shuffle(state.shared.disorder_deck)
 
-        state.add_log(f"Революция: возвращено {len(card_ids)} карт беспорядков")
-        state = self._end_player_turn(state)
+        state.add_log(f"Революция: возвращено {returned} карт беспорядков")
         return state
 
     def end_turn(self, state: GameState) -> GameState:
         """Игрок завершает ход — переходит к фазе сброса карт"""
         if state.phase == GamePhase.PLAYER_TURN:
+            if state.pending_choice and state.pending_choice.get("type") == "innovate_from_market":
+                raise ValueError("Сначала выберите карту с рынка для инновации")
             if state.player.turn_action_chosen is None:
                 state.player.turn_action_chosen = TurnAction.ACTIVATION
             state.phase = GamePhase.PLAYER_DISCARD
@@ -171,14 +181,29 @@ class GameEngine:
         if slot.card is None:
             raise ValueError("Слот пуст")
 
+        # Если есть pending выбор с рынка — проверяем категорию
+        pending = state.pending_choice
+        pending_type = pending.get("type") if pending else None
+        if pending_type in ("acquire_from_market", "innovate_from_market"):
+            allowed = pending["allowed_categories"]
+            card_cats = [c.value for c in getattr(slot.card, 'categories', [])]
+            if not any(c in allowed for c in card_cats):
+                raise ValueError(
+                    f"Эта карта не подходит. Разрешены: {', '.join(allowed)}"
+                )
+
         card = slot.card
+        slot.card = None  # clear slot before refill
+
         # Take upgrade tokens
         state.player.resources.upgrade += slot.upgrade_tokens
+        slot.upgrade_tokens = 0
 
-        # Take disorder card if present
-        if slot.disorder_under:
+        # Take disorder card only if NOT innovation (innovation ignores disorder under)
+        if pending_type != "innovate_from_market" and slot.disorder_under:
             state.player.hand.append(slot.disorder_under)
-            slot.disorder_under = None
+            state.add_log("Карта беспорядков из-под купленной карты добавлена в руку")
+        slot.disorder_under = None
 
         # Card goes to player hand
         state.player.hand.append(card)
@@ -186,6 +211,18 @@ class GameEngine:
         # Refill slot
         state = self._refill_market_slot(state, slot_index)
         state.add_log(f"Приобретена карта: {card.name}")
+
+        # Обновляем pending_choice
+        if pending_type == "acquire_from_market":
+            remaining = pending["remaining"] - 1
+            if remaining <= 0:
+                state.pending_choice = None
+            else:
+                pending["remaining"] = remaining
+                state.add_log(f"Осталось выборов с рынка: {remaining}")
+        elif pending_type == "innovate_from_market":
+            state.pending_choice = None
+
         state = self._check_end_conditions(state)
         return state
 
@@ -577,31 +614,35 @@ class GameEngine:
 
     def _refill_market_slot(self, state: GameState,
                              slot_index: int) -> GameState:
-        """Refill a market slot after a card is acquired"""
+        """Refill a market slot after a card is acquired — draws from slot's source_deck."""
         slot = state.shared.market[slot_index]
-        if slot.card is None:
-            # Determine which deck to draw from
-            card = None
-            if slot_index == 0 and state.shared.region_deck:
-                card = state.shared.region_deck.pop(0)
-            elif slot_index == 1 and state.shared.origins_deck:
-                card = state.shared.origins_deck.pop(0)
-            elif slot_index == 2 and state.shared.civilization_deck:
-                card = state.shared.civilization_deck.pop(0)
-            elif state.shared.main_deck:
-                card = state.shared.main_deck.pop(0)
+        if slot.card is not None:
+            return state
 
-            if card:
-                slot.card = card
-                needs_disorder = (CardCategory.REGION in getattr(card, 'categories', []) or
-                                  CardCategory.ORIGINS in getattr(card, 'categories', []) or
-                                  CardCategory.CIVILIZATION in getattr(card, 'categories', []))
-                if needs_disorder and state.shared.disorder_deck:
+        source_map = {
+            "region":       state.shared.region_deck,
+            "origins":      state.shared.origins_deck,
+            "civilization": state.shared.civilization_deck,
+            "main":         state.shared.main_deck,
+        }
+        deck = source_map.get(slot.source_deck, state.shared.main_deck)
+        card = deck.pop(0) if deck else None
+
+        if card:
+            slot.card = card
+            slot.upgrade_tokens = 0
+            slot.disorder_under = None
+            cats = getattr(card, 'categories', [])
+            # Беспорядки под картами истоков, цивилизаций и набегов
+            if (CardCategory.ORIGINS in cats or
+                    CardCategory.CIVILIZATION in cats or
+                    CardCategory.RAID in cats):
+                if state.shared.disorder_deck:
                     slot.disorder_under = state.shared.disorder_deck.pop(0)
-                needs_upgrade = (CardCategory.CIVILIZATION in getattr(card, 'categories', []) and
-                                 CardCategory.ORIGINS not in getattr(card, 'categories', []))
-                if needs_upgrade:
-                    slot.upgrade_tokens = 1
+            # Жетон модернизации на картах цивилизации
+            if CardCategory.CIVILIZATION in cats and CardCategory.ORIGINS not in cats:
+                slot.upgrade_tokens = 1
+
         return state
 
     # ── ASSIGN (ПРИСВОИТЬ) ─────────────────────────────────────────────────────
@@ -685,6 +726,13 @@ class GameEngine:
                 state.player.play_area.remove(card)
             state.player.chronicle.append(card)
 
+        # Apply typed on_play_actions
+        for action in card.on_play_actions:
+            if isinstance(action, GainResourceAction):
+                state = self._apply_gain_resource_action(state, action)
+            elif isinstance(action, AcquireCardAction):
+                state = self._apply_acquire_card_action(state, action)
+
         return state
 
     def _apply_exploit_effect(self, state: GameState, card: Card) -> GameState:
@@ -697,6 +745,32 @@ class GameEngine:
             state.player.resources.resource += 1
         elif CardCategory.CIVILIZATION in getattr(card, 'categories', []):
             state.player.resources.upgrade += 1
+        return state
+
+    def _apply_acquire_card_action(self, state: GameState, action: AcquireCardAction) -> GameState:
+        """Устанавливает pending_choice для выбора карты с рынка."""
+        allowed = [c.value for c in action.allowed_categories]
+        state.pending_choice = {
+            "type": "acquire_from_market",
+            "allowed_categories": allowed,
+            "remaining": action.count,
+        }
+        state.add_log(f"Выберите карту с рынка ({', '.join(allowed)})")
+        return state
+
+    def _apply_gain_resource_action(self, state: GameState, action: GainResourceAction) -> GameState:
+        """Применяет действие GainResourceAction: добавляет ресурс игроку."""
+        _RESOURCE_ATTR: dict = {
+            ResourceType.MATERIAL:   "resource",
+            ResourceType.POPULATION: "population",
+            ResourceType.PROGRESS:   "upgrade",
+            ResourceType.ACTION:     "action",
+            ResourceType.EXPLOIT:    "exploit",
+        }
+        attr = _RESOURCE_ATTR[action.resource_type]
+        setattr(state.player.resources, attr,
+                getattr(state.player.resources, attr) + action.amount)
+        state.add_log(f"+{action.amount} {action.resource_type.value}")
         return state
 
     # ── UTILS ──────────────────────────────────────────────────────────────────

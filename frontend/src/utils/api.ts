@@ -45,8 +45,8 @@ export async function exploitCard(gameId: string, cardId: string): Promise<GameS
   return res.data.state;
 }
 
-export async function doInnovation(gameId: string, category: string): Promise<GameState> {
-  const res = await api.post(`/api/games/${gameId}/innovation`, { category });
+export async function doInnovation(gameId: string): Promise<GameState> {
+  const res = await api.post(`/api/games/${gameId}/innovation`);
   return res.data.state;
 }
 
