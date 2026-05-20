@@ -573,7 +573,7 @@ export default function GameBoard() {
             <div style={{ fontSize: 9, color: '#555', letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 6 }}>
               Рука ({(player?.hand ?? []).length}/{player?.hand_limit ?? 5})
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 7 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 7 }}>
               {(player?.hand ?? []).map(card => {
                 const isPreview = previewCard?.id === card.id;
                 const periodBlocked = isPlayerTurn && !revMode && !isInnovatePending && card.period != null && card.period !== player?.period;
