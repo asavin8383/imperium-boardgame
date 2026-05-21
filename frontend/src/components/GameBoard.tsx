@@ -10,6 +10,8 @@ import slvIcon from '../assets/icons/category/СЛВ.svg';
 import spsIcon from '../assets/icons/category/СПС.svg';
 import varIcon from '../assets/icons/period/ВАР.svg';
 import impIcon from '../assets/icons/period/ИМП.svg';
+import exploitTokenIcon from '../assets/icons/tokens/exploit.svg';
+import progressTokenIcon from '../assets/icons/tokens/progress.svg';
 import postIcon from '../assets/icons/type/ПОСТ.svg';
 import atkIcon from '../assets/icons/type/АТК.svg';
 
@@ -487,8 +489,16 @@ export default function GameBoard() {
                 <div style={{ fontSize: 9, color: '#555', marginBottom: 5, letterSpacing: '.08em', textTransform: 'uppercase' }}>
                   Усиление <span style={{ color: '#9098b8' }}>({player?.boost_deck_count ?? 0})</span>
                 </div>
-                <div style={{ width: 180, height: 240, borderRadius: 8, overflow: 'hidden', border: '1px solid #2a2d40', flexShrink: 0 }}>
+                <div style={{ position: 'relative', width: 180, height: 240, borderRadius: 8, overflow: 'hidden', border: '1px solid #2a2d40', flexShrink: 0 }}>
                   <img src="/cards/common/BACK.jpg" alt="Колода усиления" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                  {player?.boost_top_token && (
+                    <img
+                      src={exploitTokenIcon}
+                      alt="Жетон эксплуатации"
+                      title="На верхней карте усиления лежит жетон эксплуатации"
+                      style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 64, height: 64, opacity: 0.95, filter: 'drop-shadow(0 0 6px #000)' }}
+                    />
+                  )}
                 </div>
               </div>
 
@@ -822,7 +832,12 @@ export default function GameBoard() {
                                 if (isAcquireMode && isPlayerTurn && acquireAllowed) acquireCard(idx);
                                 else if (isAppropriateMode && isPlayerTurn && appropriateAllowed) acquireCard(idx);
                               }}
-                              badge={slot.upgrade_tokens > 0 ? <div style={{ background: '#3498db', color: '#fff', borderRadius: 3, padding: '1px 4px', fontSize: 8, fontWeight: 700 }}>+{slot.upgrade_tokens}▶</div> : undefined} />
+                              badge={slot.upgrade_tokens > 0 ? (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 2, background: '#0d1a2e', border: '1px solid #3498db', borderRadius: 4, padding: '2px 5px' }}>
+                                  <img src={progressTokenIcon} alt="жетон прогресса" style={{ width: 12, height: 12 }} />
+                                  <span style={{ color: '#3498db', fontSize: 9, fontWeight: 700 }}>×{slot.upgrade_tokens}</span>
+                                </div>
+                              ) : undefined} />
                           );
                         })()}
                       </div>

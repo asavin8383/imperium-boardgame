@@ -422,6 +422,12 @@ class GameEngine:
         if state.shared.market:
             state.shared.market[0].upgrade_tokens += 1
 
+        # Снять жетон эксплуатации с колоды усиления и вернуть в запас
+        if state.player.boost_top_token:
+            state.player.boost_top_token = False
+            state.player.resources.exploit += 1
+            state.add_log("Жетон эксплуатации снят с колоды усиления")
+
         # Reset tokens
         state.player.resources.action = 3
         state.player.resources.exploit = 5
@@ -429,48 +435,33 @@ class GameEngine:
         # Draw to hand limit
         _draw_to_hand(state.player, state.player.hand_limit)
 
-        # Bot turn follows
-        state.phase = GamePhase.BOT_TURN
-        return state
+        # TODO: bot turn not implemented — skip directly to next player turn
+        state.add_log("─── Ход бота пропущен ───")
+        return self._apply_solstice(state)
 
     # ── CARD SHUFFLING ─────────────────────────────────────────────────────────
 
     def _reshuffle_player_deck(self, state: GameState) -> GameState:
-        """
-        Перетасовка личной колоды.
-        В период варварства: переместить верхнюю карту усиления в сброс,
-        перетасовать сброс, перевернуть карту периода если нужно.
-        """
+        """Перетасовка личной колоды — делегирует в _draw_to_hand через setup."""
+        # Логика переноса карты усиления и перемешивания встроена в _draw_to_hand.
+        # Этот метод оставлен для явного вызова, если колода пуста и нужно перемешать
+        # сброс прямо сейчас (без добора карт).
+        from .setup import _draw_to_hand as _dth
         player = state.player
-
-        if player.period == Period.BARBARISM:
-            # Move top boost card to discard
+        if not player.deck and player.discard:
             if player.boost_deck and not player.boost_top_token:
                 top_boost = player.boost_deck.pop(0)
                 player.discard.append(top_boost)
                 state.add_log(f"Карта усиления «{top_boost.name}» перемещена в сброс")
-                # If it was the transformation card, flip period
                 if getattr(top_boost, 'subtype', None) == CardSubtype.TRANSFORMATION:
                     player.period = Period.CIVILIZATION
                     state.add_log("Период изменён на Цивилизацию!")
-                else:
-                    # Place exploit token on new top boost card
-                    if player.boost_deck:
-                        player.boost_top_token = True
-            elif player.boost_top_token:
-                # Token already on top — skip step 1
-                pass
-
-        elif player.period == Period.CIVILIZATION:
-            # Можно ускорить прогресс при перетасовке
-            pass
-
-        # Reshuffle discard into new deck
-        if player.discard:
+                elif player.boost_deck:
+                    player.boost_top_token = True
+                    player.resources.exploit -= 1
             player.deck = player.discard[:]
             player.discard = []
             random.shuffle(player.deck)
-
         return state
 
     # ── END CONDITION CHECK ────────────────────────────────────────────────────

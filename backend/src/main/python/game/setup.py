@@ -301,11 +301,24 @@ def _apply_difficulty_setup(state: GameState, difficulty: Difficulty):
 
 
 def _draw_to_hand(player: PlayerArea, count: int):
-    """Draw cards from personal deck to hand"""
+    """Draw cards from personal deck to hand.
+
+    При перемешивании: если колода усиления не пуста и у верхней карты нет жетона эксплуатации,
+    верхняя карта усиления добавляется в сброс перед перемешиванием.
+    """
     while len(player.hand) < count:
         if not player.deck:
             if not player.discard:
                 break
+            # Добавить верхнюю карту усиления в сброс (если доступна)
+            if player.boost_deck and not player.boost_top_token:
+                top_boost = player.boost_deck.pop(0)
+                player.discard.append(top_boost)
+                if getattr(top_boost, 'subtype', None) == CardSubtype.TRANSFORMATION:
+                    player.period = Period.CIVILIZATION
+                elif player.boost_deck:
+                    player.boost_top_token = True
+                    player.resources.exploit -= 1
             # Shuffle discard into new deck
             player.deck = player.discard[:]
             player.discard = []
