@@ -26,6 +26,8 @@ interface GameStore {
   endTurn: (discardIds?: string[]) => Promise<void>;
   acquireCard: (slotIndex: number) => Promise<void>;
   accelerateProgress: (progressCardId: string) => Promise<void>;
+  makeChoice: (optionIndex: number) => Promise<void>;
+  appropriateFromDeck: (deckName: string) => Promise<void>;
   resetGame: () => void;
 }
 
@@ -148,6 +150,30 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const state = await api.accelerateProgress(gameId, progressCardId);
+      set({ gameState: state, loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
+
+  makeChoice: async (optionIndex) => {
+    const { gameId } = get();
+    if (!gameId) return;
+    set({ loading: true, error: null });
+    try {
+      const state = await api.makeChoice(gameId, optionIndex);
+      set({ gameState: state, loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
+
+  appropriateFromDeck: async (deckName) => {
+    const { gameId } = get();
+    if (!gameId) return;
+    set({ loading: true, error: null });
+    try {
+      const state = await api.appropriateFromDeck(gameId, deckName);
       set({ gameState: state, loading: false });
     } catch (e: any) {
       set({ error: e.response?.data?.detail || e.message, loading: false });

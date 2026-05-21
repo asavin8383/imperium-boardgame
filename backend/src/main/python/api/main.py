@@ -62,6 +62,14 @@ class AccelerateProgressRequest(BaseModel):
     progress_card_id: str
 
 
+class ChooseOptionRequest(BaseModel):
+    option_index: int
+
+
+class AppropriateFromDeckRequest(BaseModel):
+    deck_name: str
+
+
 # ── ENDPOINTS ──────────────────────────────────────────────────────────────────
 
 @app.get("/api/nations")
@@ -214,6 +222,24 @@ def acquire_card(game_id: str, req: AcquireCardRequest):
 def accelerate_progress(game_id: str, req: AccelerateProgressRequest):
     try:
         state = game_session.accelerate_progress(game_id, req.progress_card_id)
+        return {"state": state.to_dict()}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/games/{game_id}/choose-option")
+def choose_option(game_id: str, req: ChooseOptionRequest):
+    try:
+        state = game_session.choose_option(game_id, req.option_index)
+        return {"state": state.to_dict()}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/games/{game_id}/appropriate-from-deck")
+def appropriate_from_deck(game_id: str, req: AppropriateFromDeckRequest):
+    try:
+        state = game_session.appropriate_from_deck(game_id, req.deck_name)
         return {"state": state.to_dict()}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

@@ -251,7 +251,7 @@ function Btn({ label, onClick, color = '#2ecc71', disabled = false, active = fal
 }
 
 export default function GameBoard() {
-  const { gameState: gs, loading, error, playCard, exploitCard, doInnovation, doRevolution, endTurn, acquireCard, accelerateProgress, resetGame, undoAction } = useGameStore();
+  const { gameState: gs, loading, error, playCard, exploitCard, doInnovation, doRevolution, endTurn, acquireCard, accelerateProgress, resetGame, undoAction, makeChoice, appropriateFromDeck } = useGameStore();
   const [selectedCards, setSelectedCards] = useState<string[]>([]);
   const [scores, setScores] = useState<{ player: number; bot: number } | null>(null);
   const [previewCard, setPreviewCard] = useState<CardInfo | null>(null);
@@ -303,6 +303,18 @@ export default function GameBoard() {
     ? gs.pending_choice as { type: string; allowed_categories: string[]; remaining?: number }
     : null;
   const isAcquireMode = pendingAcquire != null;
+
+  // Pending присвоение
+  const pendingAppropriate = gs.pending_choice?.type === 'appropriate'
+    ? gs.pending_choice as { type: string; allowed_categories: string[]; source_decks: string[]; include_main_deck: boolean; remaining?: number }
+    : null;
+  const isAppropriateMode = pendingAppropriate != null;
+
+  // Pending выбор опции
+  type ChoiceOptionData = { label: string; cost_population: number; cost_resource: number; action: Record<string, unknown> };
+  const pendingPlayerChoice = gs.pending_choice?.type === 'player_choice'
+    ? gs.pending_choice as { type: string; options: ChoiceOptionData[] }
+    : null;
 
   function toggleCard(id: string) {
     setSelectedCards(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
@@ -544,6 +556,68 @@ export default function GameBoard() {
             </div>
           )}
 
+          {/* Выбор опции действия карты */}
+          {isPlayerTurn && pendingPlayerChoice && (
+            <div style={{ background: '#0d1020', border: '1px solid #c8a84b', borderRadius: 9, padding: '10px 12px' }}>
+              <div style={{ fontSize: 9, color: '#c8a84b', marginBottom: 8, letterSpacing: '.08em', textTransform: 'uppercase' }}>Выберите действие</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {pendingPlayerChoice.options.map((opt, idx) => {
+                  const action = opt.action as Record<string, unknown>;
+                  const cats = (action.categories as string[] | undefined)?.join(', ') ?? '';
+                  const costLabel = opt.cost_population > 0 ? `${opt.cost_population} нас.` : opt.cost_resource > 0 ? `${opt.cost_resource} рес.` : '';
+                  const actionLabel = action.type === 'acquire_from_market' ? 'приобрести с рынка' : 'присвоить';
+                  const canAfford = (opt.cost_population === 0 || (player?.resources?.population ?? 0) >= opt.cost_population) &&
+                    (opt.cost_resource === 0 || (player?.resources?.resource ?? 0) >= opt.cost_resource);
+                  return (
+                    <button key={idx} onClick={() => makeChoice(idx)} disabled={!canAfford} style={{
+                      background: canAfford ? '#1a1a2e' : '#100d14',
+                      border: `1px solid ${canAfford ? '#c8a84b' : '#3a3040'}`,
+                      borderRadius: 7, color: canAfford ? '#c8a84b' : '#4a4060',
+                      padding: '8px 12px', cursor: canAfford ? 'pointer' : 'not-allowed',
+                      fontSize: 11, fontWeight: 600, textAlign: 'left',
+                      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    }}>
+                      <span>{opt.label}</span>
+                      <span style={{ fontSize: 9, fontWeight: 400, color: canAfford ? '#9098b8' : '#4a4060' }}>
+                        {costLabel && `−${costLabel} → `}{actionLabel} ({cats})
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Режим присвоения: выбор источника */}
+          {isPlayerTurn && isAppropriateMode && pendingAppropriate && (
+            <div style={{ background: '#0d1020', border: '1px solid #e67e22', borderRadius: 9, padding: '10px 12px' }}>
+              <div style={{ fontSize: 9, color: '#e67e22', marginBottom: 6, letterSpacing: '.08em', textTransform: 'uppercase' }}>
+                Присвоение ({pendingAppropriate.allowed_categories.join(', ')})
+              </div>
+              <div style={{ fontSize: 10, color: '#aaa', marginBottom: 8 }}>
+                Выберите карту с рынка или возьмите из колоды:
+              </div>
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                {pendingAppropriate.source_decks.map(d => (
+                  <button key={d} onClick={() => appropriateFromDeck(d)} style={{
+                    background: '#1a120a', border: '1px solid #e67e22', borderRadius: 6,
+                    color: '#e67e22', padding: '5px 10px', cursor: 'pointer', fontSize: 10, fontWeight: 600,
+                  }}>
+                    📦 {d === 'region' ? 'Регионы' : d === 'origins' ? 'Истоки' : d === 'civilization' ? 'Цивилизация' : d} (верх. карта)
+                  </button>
+                ))}
+                {pendingAppropriate.include_main_deck && (
+                  <button onClick={() => appropriateFromDeck('main')} style={{
+                    background: '#1a0a1a', border: '1px solid #9b59b6', borderRadius: 6,
+                    color: '#9b59b6', padding: '5px 10px', cursor: 'pointer', fontSize: 10, fontWeight: 600,
+                  }}>
+                    🔍 Основная колода (поиск)
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
           {isPlayerTurn && !revMode && !isInnovatePending && turnAction !== null && (
             <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
               {turnAction && (
@@ -656,8 +730,14 @@ export default function GameBoard() {
             <div style={{ fontSize: 9, color: '#555', marginBottom: 10, textAlign: 'center', letterSpacing: '.1em', textTransform: 'uppercase' }}>☉ Текущий рынок</div>
             {pendingAcquire && (
               <div style={{ background: isInnovatePending ? '#0a1020' : '#0d2010', border: `1px solid ${isInnovatePending ? '#3498db' : '#1abc9c'}`, borderRadius: 6, padding: '6px 10px', marginBottom: 10, fontSize: 9, color: isInnovatePending ? '#3498db' : '#1abc9c', textAlign: 'center' }}>
-                {isInnovatePending ? '🔬 Инновация: выберите' : 'Выберите'} карту с рынка ({pendingAcquire.allowed_categories.join(', ')})
+                {isInnovatePending ? '🔬 Инновация: выберите' : 'Приобретение: выберите'} карту с рынка ({pendingAcquire.allowed_categories.join(', ')})
                 {pendingAcquire.remaining != null && pendingAcquire.remaining > 1 && ` — осталось: ${pendingAcquire.remaining}`}
+              </div>
+            )}
+            {pendingAppropriate && (
+              <div style={{ background: '#120a00', border: '1px solid #e67e22', borderRadius: 6, padding: '6px 10px', marginBottom: 10, fontSize: 9, color: '#e67e22', textAlign: 'center' }}>
+                Присвоение: выберите карту с рынка ({pendingAppropriate.allowed_categories.join(', ')}) или колоду выше
+                {pendingAppropriate.remaining != null && pendingAppropriate.remaining > 1 && ` — осталось: ${pendingAppropriate.remaining}`}
               </div>
             )}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'center' }}>
@@ -672,26 +752,45 @@ export default function GameBoard() {
                       <div ref={previewCard?.id === slot.card.id ? previewRef : undefined}
                         style={{ flexShrink: 0, position: 'relative', zIndex: previewCard?.id === slot.card.id ? 200 : undefined, transform: previewCard?.id === slot.card.id ? 'scale(2)' : undefined, transformOrigin: 'top center', transition: 'transform 0.15s' }}>
                         {(() => {
-                          const slotAllowed = !pendingAcquire ||
+                          const acquireAllowed = !pendingAcquire ||
                             (slot.card.categories?.some(c => pendingAcquire.allowed_categories.includes(c)) ?? false);
+                          const appropriateAllowed = !pendingAppropriate ||
+                            (slot.card.categories?.some(c => pendingAppropriate.allowed_categories.includes(c)) ?? false);
+                          const isMarketMode = isAcquireMode || isAppropriateMode;
+                          const marketAllowed = isAcquireMode ? acquireAllowed : appropriateAllowed;
                           return (
                             <CardView card={slot.card} size="large"
-                              dimmed={isAcquireMode && isPlayerTurn && !slotAllowed}
+                              dimmed={isMarketMode && isPlayerTurn && !marketAllowed}
                               onClick={() => {
                                 setPreviewCard(previewCard?.id === slot.card!.id ? null : slot.card);
-                                if (isAcquireMode && isPlayerTurn && slotAllowed) acquireCard(idx);
+                                if (isAcquireMode && isPlayerTurn && acquireAllowed) acquireCard(idx);
+                                else if (isAppropriateMode && isPlayerTurn && appropriateAllowed) acquireCard(idx);
                               }}
                               badge={slot.upgrade_tokens > 0 ? <div style={{ background: '#3498db', color: '#fff', borderRadius: 3, padding: '1px 4px', fontSize: 8, fontWeight: 700 }}>+{slot.upgrade_tokens}▶</div> : undefined} />
                           );
                         })()}
                       </div>
-                      {slot.has_disorder_under && <div style={{ fontSize: 8, color: '#9b59b6' }}>⚠ Беспорядки</div>}
-                      {isAcquireMode && isPlayerTurn && (() => {
-                        const slotAllowed = !pendingAcquire ||
-                          (slot.card.categories?.some(c => pendingAcquire.allowed_categories.includes(c)) ?? false);
-                        return slotAllowed
-                          ? <button onClick={() => acquireCard(idx)} style={{ background: 'linear-gradient(135deg,#1abc9c,#16a085)', border: 'none', borderRadius: 5, color: '#fff', fontSize: 9, padding: '3px 8px', cursor: 'pointer', fontWeight: 600 }}>Приобрести</button>
-                          : <div style={{ fontSize: 8, color: '#555', padding: '2px 0' }}>Недоступно</div>;
+                      {slot.has_disorder_under && (
+                        <div style={{ fontSize: 8, color: pendingAppropriate ? '#e67e22' : '#9b59b6' }}>
+                          {pendingAppropriate ? '↩ Беспорядки → стопка' : '⚠ Беспорядки'}
+                        </div>
+                      )}
+                      {isPlayerTurn && (() => {
+                        if (isAcquireMode) {
+                          const slotAllowed = !pendingAcquire ||
+                            (slot.card.categories?.some(c => pendingAcquire.allowed_categories.includes(c)) ?? false);
+                          return slotAllowed
+                            ? <button onClick={() => acquireCard(idx)} style={{ background: 'linear-gradient(135deg,#1abc9c,#16a085)', border: 'none', borderRadius: 5, color: '#fff', fontSize: 9, padding: '3px 8px', cursor: 'pointer', fontWeight: 600 }}>Приобрести</button>
+                            : <div style={{ fontSize: 8, color: '#555', padding: '2px 0' }}>Недоступно</div>;
+                        }
+                        if (isAppropriateMode) {
+                          const slotAllowed = !pendingAppropriate ||
+                            (slot.card.categories?.some(c => pendingAppropriate.allowed_categories.includes(c)) ?? false);
+                          return slotAllowed
+                            ? <button onClick={() => acquireCard(idx)} style={{ background: 'linear-gradient(135deg,#e67e22,#ca6f1e)', border: 'none', borderRadius: 5, color: '#fff', fontSize: 9, padding: '3px 8px', cursor: 'pointer', fontWeight: 600 }}>Присвоить</button>
+                            : <div style={{ fontSize: 8, color: '#555', padding: '2px 0' }}>Недоступно</div>;
+                        }
+                        return null;
                       })()}
                     </>
                   ) : (

@@ -72,6 +72,16 @@ export async function accelerateProgress(gameId: string, progressCardId: string)
   return res.data.state;
 }
 
+export async function makeChoice(gameId: string, optionIndex: number): Promise<GameState> {
+  const res = await api.post(`/api/games/${gameId}/choose-option`, { option_index: optionIndex });
+  return res.data.state;
+}
+
+export async function appropriateFromDeck(gameId: string, deckName: string): Promise<GameState> {
+  const res = await api.post(`/api/games/${gameId}/appropriate-from-deck`, { deck_name: deckName });
+  return res.data.state;
+}
+
 export async function undoAction(gameId: string): Promise<GameState> {
   const res = await api.post(`/api/games/${gameId}/undo`);
   return res.data.state;

@@ -5,7 +5,8 @@ import random
 import uuid
 from dataclasses import dataclass, field
 from typing import List, Optional, Dict
-from .cards import Card, GainResourceAction, AcquireCardAction, build_base_deck_classics, get_nation_deck
+from .cards import (Card, GainResourceAction, AcquireCardAction, AppropriateCardAction,
+                    ChoiceAction, ChoiceOption, build_base_deck_classics, get_nation_deck)
 from .enums import (Period, Nation, GamePhase, TurnAction, EndCondition,
                     Difficulty, CardCategory, CardSubtype, ResourceType)
 
@@ -43,6 +44,41 @@ def _card_info(card: Card) -> dict:
                 "categories": [c.value for c in a.allowed_categories],
                 "count": a.count,
             })
+        elif isinstance(a, AppropriateCardAction):
+            serialized_actions.append({
+                "type": "appropriate",
+                "categories": [c.value for c in a.allowed_categories],
+                "source_decks": a.allowed_source_decks,
+                "include_main_deck": a.include_main_deck,
+                "count": a.count,
+            })
+        elif isinstance(a, ChoiceAction):
+            serialized_opts = []
+            for opt in a.options:
+                inner = opt.action
+                if isinstance(inner, AcquireCardAction):
+                    inner_data = {
+                        "type": "acquire_from_market",
+                        "categories": [c.value for c in inner.allowed_categories],
+                        "count": inner.count,
+                    }
+                elif isinstance(inner, AppropriateCardAction):
+                    inner_data = {
+                        "type": "appropriate",
+                        "categories": [c.value for c in inner.allowed_categories],
+                        "source_decks": inner.allowed_source_decks,
+                        "include_main_deck": inner.include_main_deck,
+                        "count": inner.count,
+                    }
+                else:
+                    continue
+                serialized_opts.append({
+                    "label": opt.label,
+                    "cost_population": opt.cost_population,
+                    "cost_resource": opt.cost_resource,
+                    "action": inner_data,
+                })
+            serialized_actions.append({"type": "choice", "options": serialized_opts})
 
     return {
         "id": card.id,

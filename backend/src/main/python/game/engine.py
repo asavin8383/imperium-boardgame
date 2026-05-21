@@ -6,7 +6,7 @@ from typing import List, Optional, Tuple
 from .state import GameState, PlayerArea, MarketSlot, Resources
 from .enums import (Period, GamePhase, TurnAction, EndCondition,
                     CardCategory, CardSubtype, Difficulty, ResourceType)
-from .cards import Card, GainResourceAction, AcquireCardAction
+from .cards import Card, GainResourceAction, AcquireCardAction, AppropriateCardAction, ChoiceAction
 from .setup import _draw_to_hand
 
 
@@ -148,8 +148,11 @@ class GameEngine:
     def end_turn(self, state: GameState) -> GameState:
         """Игрок завершает ход — переходит к фазе сброса карт"""
         if state.phase == GamePhase.PLAYER_TURN:
-            if state.pending_choice and state.pending_choice.get("type") == "innovate_from_market":
+            pending_type = state.pending_choice.get("type") if state.pending_choice else None
+            if pending_type == "innovate_from_market":
                 raise ValueError("Сначала выберите карту с рынка для инновации")
+            if pending_type in ("player_choice", "acquire_from_market", "appropriate"):
+                raise ValueError("Сначала завершите действие карты")
             if state.player.turn_action_chosen is None:
                 state.player.turn_action_chosen = TurnAction.ACTIVATION
             state.phase = GamePhase.PLAYER_DISCARD
@@ -184,7 +187,7 @@ class GameEngine:
         # Если есть pending выбор с рынка — проверяем категорию
         pending = state.pending_choice
         pending_type = pending.get("type") if pending else None
-        if pending_type in ("acquire_from_market", "innovate_from_market"):
+        if pending_type in ("acquire_from_market", "innovate_from_market", "appropriate"):
             allowed = pending["allowed_categories"]
             card_cats = [c.value for c in getattr(slot.card, 'categories', [])]
             if not any(c in allowed for c in card_cats):
@@ -199,8 +202,12 @@ class GameEngine:
         state.player.resources.upgrade += slot.upgrade_tokens
         slot.upgrade_tokens = 0
 
-        # Take disorder card only if NOT innovation (innovation ignores disorder under)
-        if pending_type != "innovate_from_market" and slot.disorder_under:
+        # Обработка карты беспорядков под картой
+        if pending_type == "appropriate" and slot.disorder_under:
+            # Присвоение: беспорядки возвращаются в стопку беспорядков
+            state.shared.disorder_deck.append(slot.disorder_under)
+            state.add_log("Карта беспорядков возвращена в стопку беспорядков")
+        elif pending_type != "innovate_from_market" and slot.disorder_under:
             state.player.hand.append(slot.disorder_under)
             state.add_log("Карта беспорядков из-под купленной карты добавлена в руку")
         slot.disorder_under = None
@@ -213,7 +220,7 @@ class GameEngine:
         state.add_log(f"Приобретена карта: {card.name}")
 
         # Обновляем pending_choice
-        if pending_type == "acquire_from_market":
+        if pending_type in ("acquire_from_market", "appropriate"):
             remaining = pending["remaining"] - 1
             if remaining <= 0:
                 state.pending_choice = None
@@ -732,6 +739,10 @@ class GameEngine:
                 state = self._apply_gain_resource_action(state, action)
             elif isinstance(action, AcquireCardAction):
                 state = self._apply_acquire_card_action(state, action)
+            elif isinstance(action, AppropriateCardAction):
+                state = self._apply_appropriate_card_action(state, action)
+            elif isinstance(action, ChoiceAction):
+                state = self._apply_choice_action(state, action)
 
         return state
 
@@ -756,6 +767,150 @@ class GameEngine:
             "remaining": action.count,
         }
         state.add_log(f"Выберите карту с рынка ({', '.join(allowed)})")
+        return state
+
+    def _apply_appropriate_card_action(self, state: GameState, action: AppropriateCardAction) -> GameState:
+        """Устанавливает pending_choice для присвоения карты с рынка или из колоды."""
+        allowed = [c.value for c in action.allowed_categories]
+        state.pending_choice = {
+            "type": "appropriate",
+            "allowed_categories": allowed,
+            "source_decks": action.allowed_source_decks,
+            "include_main_deck": action.include_main_deck,
+            "remaining": action.count,
+        }
+        state.add_log(f"Присвоение: выберите карту с рынка или из колоды ({', '.join(allowed)})")
+        return state
+
+    def _apply_choice_action(self, state: GameState, action: ChoiceAction) -> GameState:
+        """Устанавливает pending_choice для выбора игрока из нескольких опций."""
+        options_data = []
+        for opt in action.options:
+            a = opt.action
+            if isinstance(a, AcquireCardAction):
+                action_data = {
+                    "type": "acquire_from_market",
+                    "categories": [c.value for c in a.allowed_categories],
+                    "count": a.count,
+                }
+            elif isinstance(a, AppropriateCardAction):
+                action_data = {
+                    "type": "appropriate",
+                    "categories": [c.value for c in a.allowed_categories],
+                    "source_decks": a.allowed_source_decks,
+                    "include_main_deck": a.include_main_deck,
+                    "count": a.count,
+                }
+            else:
+                continue
+            options_data.append({
+                "label": opt.label,
+                "cost_population": opt.cost_population,
+                "cost_resource": opt.cost_resource,
+                "action": action_data,
+            })
+        state.pending_choice = {"type": "player_choice", "options": options_data}
+        state.add_log("Выберите вариант действия")
+        return state
+
+    def choose_option(self, state: GameState, option_index: int) -> GameState:
+        """Игрок выбирает вариант из player_choice: списывает стоимость, активирует действие."""
+        pending = state.pending_choice
+        if not pending or pending.get("type") != "player_choice":
+            raise ValueError("Нет активного выбора")
+        options = pending.get("options", [])
+        if option_index < 0 or option_index >= len(options):
+            raise ValueError("Неверный индекс варианта")
+        option = options[option_index]
+
+        cost_pop = option.get("cost_population", 0)
+        cost_res = option.get("cost_resource", 0)
+        if state.player.resources.population < cost_pop:
+            raise ValueError(f"Недостаточно населения (нужно {cost_pop})")
+        if state.player.resources.resource < cost_res:
+            raise ValueError(f"Недостаточно ресурсов (нужно {cost_res})")
+
+        state.player.resources.population -= cost_pop
+        state.player.resources.resource -= cost_res
+        if cost_pop > 0:
+            state.add_log(f"Потрачено {cost_pop} населения")
+        if cost_res > 0:
+            state.add_log(f"Потрачено {cost_res} ресурсов")
+
+        action_data = option.get("action", {})
+        action_type = action_data.get("type")
+
+        if action_type == "acquire_from_market":
+            state.pending_choice = {
+                "type": "acquire_from_market",
+                "allowed_categories": action_data.get("categories", []),
+                "remaining": action_data.get("count", 1),
+            }
+            state.add_log(f"Выберите карту с рынка ({', '.join(action_data.get('categories', []))})")
+        elif action_type == "appropriate":
+            state.pending_choice = {
+                "type": "appropriate",
+                "allowed_categories": action_data.get("categories", []),
+                "source_decks": action_data.get("source_decks", []),
+                "include_main_deck": action_data.get("include_main_deck", False),
+                "remaining": action_data.get("count", 1),
+            }
+            state.add_log(f"Присвоение: выберите карту ({', '.join(action_data.get('categories', []))})")
+        else:
+            state.pending_choice = None
+
+        return state
+
+    def appropriate_from_deck(self, state: GameState, deck_name: str) -> GameState:
+        """Присвоить верхнюю карту из заданной колоды или найти нужный тип в основной колоде."""
+        pending = state.pending_choice
+        if not pending or pending.get("type") != "appropriate":
+            raise ValueError("Нет активного присвоения")
+
+        allowed_cats = pending.get("allowed_categories", [])
+        source_decks = pending.get("source_decks", [])
+        include_main_deck = pending.get("include_main_deck", False)
+
+        deck_map = {
+            "region": state.shared.region_deck,
+            "origins": state.shared.origins_deck,
+            "civilization": state.shared.civilization_deck,
+        }
+
+        if deck_name == "main":
+            if not include_main_deck:
+                raise ValueError("Основная колода недоступна для этого действия")
+            main_deck = state.shared.main_deck
+            found_idx = None
+            for i, card in enumerate(main_deck):
+                card_cats = [c.value for c in getattr(card, 'categories', [])]
+                if any(c in allowed_cats for c in card_cats):
+                    found_idx = i
+                    break
+            if found_idx is None:
+                raise ValueError(f"В основной колоде нет карт типов: {', '.join(allowed_cats)}")
+            found_card = main_deck.pop(found_idx)
+            state.player.hand.append(found_card)
+            state.add_log(f"Присвоена карта из основной колоды: {found_card.name}")
+        else:
+            if deck_name not in source_decks:
+                raise ValueError(f"Колода '{deck_name}' недоступна для этого действия")
+            deck = deck_map.get(deck_name)
+            if deck is None:
+                raise ValueError(f"Неизвестная колода: {deck_name}")
+            if not deck:
+                raise ValueError(f"Колода '{deck_name}' пуста")
+            card = deck.pop(0)
+            state.player.hand.append(card)
+            state.add_log(f"Присвоена верхняя карта из колоды '{deck_name}': {card.name}")
+
+        remaining = pending.get("remaining", 1) - 1
+        if remaining <= 0:
+            state.pending_choice = None
+        else:
+            pending["remaining"] = remaining
+
+        state = self._check_end_conditions(state)
         return state
 
     def _apply_gain_resource_action(self, state: GameState, action: GainResourceAction) -> GameState:

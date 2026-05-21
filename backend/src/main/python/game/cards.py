@@ -34,8 +34,52 @@ class AcquireCardAction:
     count: int = 1
 
 
+@dataclass
+class AppropriateCardAction:
+    """Присвоить карту с рынка (беспорядки → стопка беспорядков)
+    или взять верхнюю карту из заданной колоды,
+    или найти карту нужного типа в основной колоде."""
+    allowed_categories: List[CardCategory]
+    allowed_source_decks: List[str] = field(default_factory=list)
+    include_main_deck: bool = False
+    count: int = 1
+
+
+@dataclass
+class ChoiceOption:
+    """Одна опция в ChoiceAction."""
+    label: str
+    cost_population: int = 0
+    cost_resource: int = 0
+    action: object = None  # AcquireCardAction | AppropriateCardAction
+
+
+@dataclass
+class ChoiceAction:
+    """Действие карты: выбор игрока из нескольких опций."""
+    options: List  # List[ChoiceOption]
+
+
 # Словарь имя → член enum, не зависящий от поведения __getitem__ в Python 3.11
 _RESOURCE_TYPE_BY_NAME: dict = {rt.name: rt for rt in ResourceType}
+
+
+def _parse_choice_action_inner(a: dict):
+    """Разбирает одно вложенное действие внутри опции выбора."""
+    at = a.get("type")
+    if at == "acquire_from_market":
+        return AcquireCardAction(
+            allowed_categories=[CardCategory(c) for c in a.get("categories", [])],
+            count=a.get("count", 1),
+        )
+    if at == "appropriate":
+        return AppropriateCardAction(
+            allowed_categories=[CardCategory(c) for c in a.get("categories", [])],
+            allowed_source_decks=a.get("source_decks", []),
+            include_main_deck=a.get("include_main_deck", False),
+            count=a.get("count", 1),
+        )
+    return None
 
 
 def _parse_on_play_actions(data: dict) -> List:
@@ -47,6 +91,25 @@ def _parse_on_play_actions(data: dict) -> List:
                 allowed_categories=[CardCategory(c) for c in a.get("categories", [])],
                 count=a.get("count", 1),
             ))
+        elif action_type == "appropriate":
+            actions.append(AppropriateCardAction(
+                allowed_categories=[CardCategory(c) for c in a.get("categories", [])],
+                allowed_source_decks=a.get("source_decks", []),
+                include_main_deck=a.get("include_main_deck", False),
+                count=a.get("count", 1),
+            ))
+        elif action_type == "choice":
+            options = []
+            for opt in a.get("options", []):
+                inner = _parse_choice_action_inner(opt.get("action", {}))
+                if inner is not None:
+                    options.append(ChoiceOption(
+                        label=opt.get("label", ""),
+                        cost_population=opt.get("cost_population", 0),
+                        cost_resource=opt.get("cost_resource", 0),
+                        action=inner,
+                    ))
+            actions.append(ChoiceAction(options=options))
         else:
             # Без type — считаем gain_resource (обратная совместимость)
             rt_name = a["resource_type"]
@@ -66,6 +129,7 @@ class Card:
     name: str
     nation: Optional[Nation] = None  # None = базовая колода
     card_type: CardType = CardType.NORMAL
+    categories: List[CardCategory] = field(default_factory=list)  # категории карты (пусто для нац. карт)
     period: Optional[Period] = None  # ограничение по периоду
     # VP
     vp_fixed: int = 0               # фиксированные ПО (X)
@@ -114,7 +178,6 @@ class Card:
 @dataclass
 class BaseCard(Card):
     """Карта базовой колоды (регионы, истоки, цивилизации, набеги, слава, беспорядки)."""
-    categories: List[CardCategory] = field(default_factory=list)
 
     def __post_init__(self):
         if CardCategory.REGION in self.categories:

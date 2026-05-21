@@ -106,6 +106,22 @@ def accelerate_progress(game_id: str, progress_card_id: str) -> GameState:
     return state
 
 
+def choose_option(game_id: str, option_index: int) -> GameState:
+    state = _require(game_id)
+    _snapshot(game_id, state)
+    state = _engine.choose_option(state, option_index)
+    save_game(state)
+    return state
+
+
+def appropriate_from_deck(game_id: str, deck_name: str) -> GameState:
+    state = _require(game_id)
+    _snapshot(game_id, state)
+    state = _engine.appropriate_from_deck(state, deck_name)
+    save_game(state)
+    return state
+
+
 def undo_last_action(game_id: str) -> GameState:
     prev = _snapshots.get(game_id)
     if prev is None:
