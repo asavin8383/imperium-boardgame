@@ -151,7 +151,7 @@ class GameEngine:
             pending_type = state.pending_choice.get("type") if state.pending_choice else None
             if pending_type == "innovate_from_market":
                 raise ValueError("Сначала выберите карту с рынка для инновации")
-            if pending_type in ("player_choice", "acquire_from_market", "appropriate"):
+            if pending_type in ("player_choice", "acquire_from_market", "appropriate", "appropriate_select_category"):
                 raise ValueError("Сначала завершите действие карты")
             if state.player.turn_action_chosen is None:
                 state.player.turn_action_chosen = TurnAction.ACTIVATION
@@ -772,15 +772,31 @@ class GameEngine:
     def _apply_appropriate_card_action(self, state: GameState, action: AppropriateCardAction) -> GameState:
         """Устанавливает pending_choice для присвоения карты с рынка или из колоды."""
         allowed = [c.value for c in action.allowed_categories]
-        state.pending_choice = {
-            "type": "appropriate",
-            "allowed_categories": allowed,
-            "source_decks": action.allowed_source_decks,
-            "include_main_deck": action.include_main_deck,
-            "remaining": action.count,
-        }
-        state.add_log(f"Присвоение: выберите карту с рынка или из колоды ({', '.join(allowed)})")
+        self._set_appropriate_pending(state, allowed, action.allowed_source_decks, action.count)
         return state
+
+    def _set_appropriate_pending(self, state: GameState, categories: list, source_decks: list, count: int) -> None:
+        """Устанавливает pending_choice для присвоения.
+        Если категорий несколько — сначала запрашивает выбор категории.
+        Основная колода всегда доступна.
+        """
+        if len(categories) > 1:
+            state.pending_choice = {
+                "type": "appropriate_select_category",
+                "categories": categories,
+                "source_decks": source_decks,
+                "count": count,
+            }
+            state.add_log(f"Присвоение: выберите тип карты ({', '.join(categories)})")
+        else:
+            state.pending_choice = {
+                "type": "appropriate",
+                "allowed_categories": categories,
+                "source_decks": source_decks,
+                "include_main_deck": True,
+                "remaining": count,
+            }
+            state.add_log(f"Присвоение: выберите карту ({', '.join(categories)})")
 
     def _apply_choice_action(self, state: GameState, action: ChoiceAction) -> GameState:
         """Устанавливает pending_choice для выбора игрока из нескольких опций."""
@@ -825,17 +841,40 @@ class GameEngine:
 
         cost_pop = option.get("cost_population", 0)
         cost_res = option.get("cost_resource", 0)
-        if state.player.resources.population < cost_pop:
-            raise ValueError(f"Недостаточно населения (нужно {cost_pop})")
-        if state.player.resources.resource < cost_res:
-            raise ValueError(f"Недостаточно ресурсов (нужно {cost_res})")
 
-        state.player.resources.population -= cost_pop
-        state.player.resources.resource -= cost_res
-        if cost_pop > 0:
-            state.add_log(f"Потрачено {cost_pop} населения")
-        if cost_res > 0:
-            state.add_log(f"Потрачено {cost_res} ресурсов")
+        # Универсальное правило: нехватку населения покрывают жетоны прогресса 1:1,
+        # нехватку ресурсов — жетоны прогресса 2:1 (1 жетон = 2 ресурса).
+        pop_avail = state.player.resources.population
+        res_avail = state.player.resources.resource
+        upgrade_avail = state.player.resources.upgrade
+
+        pop_pay = min(pop_avail, cost_pop)
+        upgrade_for_pop = cost_pop - pop_pay
+
+        res_pay = min(res_avail, cost_res)
+        res_deficit = cost_res - res_pay
+        upgrade_for_res = (res_deficit + 1) // 2  # каждые 2 недостающих ресурса = 1 жетон
+
+        upgrade_pay = upgrade_for_pop + upgrade_for_res
+        if upgrade_avail < upgrade_pay:
+            raise ValueError(
+                f"Недостаточно ресурсов: нужно {cost_pop} нас. и {cost_res} рес. "
+                f"(есть {pop_avail} нас., {res_avail} рес., {upgrade_avail} жет. прогресса)"
+            )
+
+        state.player.resources.population -= pop_pay
+        state.player.resources.resource -= res_pay
+        state.player.resources.upgrade -= upgrade_pay
+
+        parts = []
+        if pop_pay > 0:
+            parts.append(f"{pop_pay} нас.")
+        if res_pay > 0:
+            parts.append(f"{res_pay} рес.")
+        if upgrade_pay > 0:
+            parts.append(f"{upgrade_pay} жет. прогресса")
+        if parts:
+            state.add_log(f"Потрачено {', '.join(parts)}")
 
         action_data = option.get("action", {})
         action_type = action_data.get("type")
@@ -848,17 +887,28 @@ class GameEngine:
             }
             state.add_log(f"Выберите карту с рынка ({', '.join(action_data.get('categories', []))})")
         elif action_type == "appropriate":
-            state.pending_choice = {
-                "type": "appropriate",
-                "allowed_categories": action_data.get("categories", []),
-                "source_decks": action_data.get("source_decks", []),
-                "include_main_deck": action_data.get("include_main_deck", False),
-                "remaining": action_data.get("count", 1),
-            }
-            state.add_log(f"Присвоение: выберите карту ({', '.join(action_data.get('categories', []))})")
+            self._set_appropriate_pending(
+                state,
+                action_data.get("categories", []),
+                action_data.get("source_decks", []),
+                action_data.get("count", 1),
+            )
         else:
             state.pending_choice = None
 
+        return state
+
+    def select_appropriate_category(self, state: GameState, category: str) -> GameState:
+        """Игрок выбирает категорию при присвоении нескольких возможных типов карт."""
+        pending = state.pending_choice
+        if not pending or pending.get("type") != "appropriate_select_category":
+            raise ValueError("Нет активного выбора категории присвоения")
+        allowed = pending.get("categories", [])
+        if category not in allowed:
+            raise ValueError(f"Недопустимая категория: {category}. Доступно: {allowed}")
+        source_decks = pending.get("source_decks", [])
+        count = pending.get("count", 1)
+        self._set_appropriate_pending(state, [category], source_decks, count)
         return state
 
     def appropriate_from_deck(self, state: GameState, deck_name: str) -> GameState:

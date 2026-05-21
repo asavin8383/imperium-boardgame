@@ -70,6 +70,10 @@ class AppropriateFromDeckRequest(BaseModel):
     deck_name: str
 
 
+class SelectAppropriateCategoryRequest(BaseModel):
+    category: str
+
+
 # ── ENDPOINTS ──────────────────────────────────────────────────────────────────
 
 @app.get("/api/nations")
@@ -231,6 +235,15 @@ def accelerate_progress(game_id: str, req: AccelerateProgressRequest):
 def choose_option(game_id: str, req: ChooseOptionRequest):
     try:
         state = game_session.choose_option(game_id, req.option_index)
+        return {"state": state.to_dict()}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/games/{game_id}/select-appropriate-category")
+def select_appropriate_category(game_id: str, req: SelectAppropriateCategoryRequest):
+    try:
+        state = game_session.select_appropriate_category(game_id, req.category)
         return {"state": state.to_dict()}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

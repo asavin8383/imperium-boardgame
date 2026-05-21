@@ -30,7 +30,14 @@ DECK: dict = {
     "1MAK11": {"name": "Уксии",       "subtype": "boost", "card_type": "attack"},
     "1MAK12": {"name": "Величие",     "subtype": "boost"},
     # START cards — go to personal deck
-    "1MAK13": {"name": "Реформы",               "subtype": "start", "period": "barbarism"},
+    "1MAK13": {"name": "Реформы", "subtype": "start", "period": "barbarism",
+               "on_play_actions": [{"type": "choice", "options": [
+                   {"label": "Приобрести", "cost_resource": 3,
+                    "action": {"type": "acquire_from_market", "categories": ["origins", "civilization"], "count": 1}},
+                   {"label": "Присвоить", "cost_resource": 5,
+                    "action": {"type": "appropriate", "categories": ["origins", "civilization"],
+                               "source_decks": ["origins", "civilization"], "include_main_deck": False, "count": 1}},
+               ]}]},
     "1MAK14": {"name": "Завоевание", "subtype": "start", "period": "barbarism",
                "on_play_actions": [{"type": "choice", "options": [
                    {"label": "Приобрести", "cost_population": 2,

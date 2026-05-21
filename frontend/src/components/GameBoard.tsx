@@ -251,7 +251,7 @@ function Btn({ label, onClick, color = '#2ecc71', disabled = false, active = fal
 }
 
 export default function GameBoard() {
-  const { gameState: gs, loading, error, playCard, exploitCard, doInnovation, doRevolution, endTurn, acquireCard, accelerateProgress, resetGame, undoAction, makeChoice, appropriateFromDeck } = useGameStore();
+  const { gameState: gs, loading, error, playCard, exploitCard, doInnovation, doRevolution, endTurn, acquireCard, accelerateProgress, resetGame, undoAction, makeChoice, selectAppropriateCategory, appropriateFromDeck } = useGameStore();
   const [selectedCards, setSelectedCards] = useState<string[]>([]);
   const [scores, setScores] = useState<{ player: number; bot: number } | null>(null);
   const [previewCard, setPreviewCard] = useState<CardInfo | null>(null);
@@ -295,6 +295,7 @@ export default function GameBoard() {
     }
   }, [gs?.round_number, turnAction, isPlayerTurn]);
 
+
   if (!gs) return null;
   const { player, bot, shared } = gs;
 
@@ -304,11 +305,16 @@ export default function GameBoard() {
     : null;
   const isAcquireMode = pendingAcquire != null;
 
-  // Pending присвоение
+  // Pending выбор категории для присвоения
+  const pendingAppropriateCategorySelect = gs.pending_choice?.type === 'appropriate_select_category'
+    ? gs.pending_choice as { type: string; categories: string[]; source_decks: string[]; count: number }
+    : null;
+
+  // Pending присвоение (категория уже выбрана)
   const pendingAppropriate = gs.pending_choice?.type === 'appropriate'
     ? gs.pending_choice as { type: string; allowed_categories: string[]; source_decks: string[]; include_main_deck: boolean; remaining?: number }
     : null;
-  const isAppropriateMode = pendingAppropriate != null;
+  const isAppropriateMode = pendingAppropriate != null || pendingAppropriateCategorySelect != null;
 
   // Pending выбор опции
   type ChoiceOptionData = { label: string; cost_population: number; cost_resource: number; action: Record<string, unknown> };
@@ -564,10 +570,26 @@ export default function GameBoard() {
                 {pendingPlayerChoice.options.map((opt, idx) => {
                   const action = opt.action as Record<string, unknown>;
                   const cats = (action.categories as string[] | undefined)?.join(', ') ?? '';
-                  const costLabel = opt.cost_population > 0 ? `${opt.cost_population} нас.` : opt.cost_resource > 0 ? `${opt.cost_resource} рес.` : '';
                   const actionLabel = action.type === 'acquire_from_market' ? 'приобрести с рынка' : 'присвоить';
-                  const canAfford = (opt.cost_population === 0 || (player?.resources?.population ?? 0) >= opt.cost_population) &&
-                    (opt.cost_resource === 0 || (player?.resources?.resource ?? 0) >= opt.cost_resource);
+                  const avPop = player?.resources?.population ?? 0;
+                  const avRes = player?.resources?.resource ?? 0;
+                  const avUpgrade = player?.resources?.upgrade ?? 0;
+
+                  // Вычисляем фактическую оплату с подстановкой жетонов прогресса
+                  const popPay = Math.min(avPop, opt.cost_population);
+                  const upgradeForPop = opt.cost_population - popPay;
+                  const resPay = Math.min(avRes, opt.cost_resource);
+                  const resDeficit = opt.cost_resource - resPay;
+                  const upgradeForRes = Math.ceil(resDeficit / 2);
+                  const upgradePay = upgradeForPop + upgradeForRes;
+                  const canAfford = avUpgrade >= upgradePay;
+
+                  const parts: string[] = [];
+                  if (popPay > 0) parts.push(`${popPay} нас.`);
+                  if (resPay > 0) parts.push(`${resPay} рес.`);
+                  if (upgradePay > 0) parts.push(`${upgradePay} жет.`);
+                  const costLabel = parts.join(' + ');
+
                   return (
                     <button key={idx} onClick={() => makeChoice(idx)} disabled={!canAfford} style={{
                       background: canAfford ? '#1a1a2e' : '#100d14',
@@ -575,12 +597,43 @@ export default function GameBoard() {
                       borderRadius: 7, color: canAfford ? '#c8a84b' : '#4a4060',
                       padding: '8px 12px', cursor: canAfford ? 'pointer' : 'not-allowed',
                       fontSize: 11, fontWeight: 600, textAlign: 'left',
-                      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                      display: 'flex', flexDirection: 'column', gap: 3,
                     }}>
-                      <span>{opt.label}</span>
-                      <span style={{ fontSize: 9, fontWeight: 400, color: canAfford ? '#9098b8' : '#4a4060' }}>
-                        {costLabel && `−${costLabel} → `}{actionLabel} ({cats})
-                      </span>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span>{opt.label}</span>
+                        <span style={{ fontSize: 9, fontWeight: 400, color: canAfford ? '#9098b8' : '#4a4060' }}>
+                          {actionLabel} ({cats})
+                        </span>
+                      </div>
+                      {(opt.cost_population > 0 || opt.cost_resource > 0) && (
+                        <div style={{ fontSize: 9, color: canAfford ? '#e0c060' : '#4a4060' }}>
+                          −{costLabel || '0'}
+                          {upgradePay > 0 && canAfford && <span style={{ color: '#888', marginLeft: 4 }}>(жет. вместо нехватки)</span>}
+                          {!canAfford && <span style={{ marginLeft: 4 }}>— недостаточно ресурсов</span>}
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Режим присвоения: выбор категории */}
+          {isPlayerTurn && pendingAppropriateCategorySelect && (
+            <div style={{ background: '#0d1020', border: '1px solid #e67e22', borderRadius: 9, padding: '10px 12px' }}>
+              <div style={{ fontSize: 9, color: '#e67e22', marginBottom: 6, letterSpacing: '.08em', textTransform: 'uppercase' }}>
+                Присвоение: выберите тип карты
+              </div>
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                {pendingAppropriateCategorySelect.categories.map(cat => {
+                  const label: Record<string, string> = { region: 'Регионы', origins: 'Истоки', civilization: 'Цивилизация', raid: 'Набеги', glory: 'Слава' };
+                  return (
+                    <button key={cat} onClick={() => selectAppropriateCategory(cat)} style={{
+                      background: '#1a120a', border: '1px solid #e67e22', borderRadius: 6,
+                      color: '#e67e22', padding: '6px 14px', cursor: 'pointer', fontSize: 11, fontWeight: 600,
+                    }}>
+                      {label[cat] ?? cat}
                     </button>
                   );
                 })}
@@ -589,7 +642,7 @@ export default function GameBoard() {
           )}
 
           {/* Режим присвоения: выбор источника */}
-          {isPlayerTurn && isAppropriateMode && pendingAppropriate && (
+          {isPlayerTurn && pendingAppropriate && (
             <div style={{ background: '#0d1020', border: '1px solid #e67e22', borderRadius: 9, padding: '10px 12px' }}>
               <div style={{ fontSize: 9, color: '#e67e22', marginBottom: 6, letterSpacing: '.08em', textTransform: 'uppercase' }}>
                 Присвоение ({pendingAppropriate.allowed_categories.join(', ')})
@@ -606,14 +659,12 @@ export default function GameBoard() {
                     📦 {d === 'region' ? 'Регионы' : d === 'origins' ? 'Истоки' : d === 'civilization' ? 'Цивилизация' : d} (верх. карта)
                   </button>
                 ))}
-                {pendingAppropriate.include_main_deck && (
-                  <button onClick={() => appropriateFromDeck('main')} style={{
-                    background: '#1a0a1a', border: '1px solid #9b59b6', borderRadius: 6,
-                    color: '#9b59b6', padding: '5px 10px', cursor: 'pointer', fontSize: 10, fontWeight: 600,
-                  }}>
-                    🔍 Основная колода (поиск)
-                  </button>
-                )}
+                <button onClick={() => appropriateFromDeck('main')} style={{
+                  background: '#1a0a1a', border: '1px solid #9b59b6', borderRadius: 6,
+                  color: '#9b59b6', padding: '5px 10px', cursor: 'pointer', fontSize: 10, fontWeight: 600,
+                }}>
+                  🔍 Основная колода (поиск)
+                </button>
               </div>
             </div>
           )}
@@ -734,9 +785,14 @@ export default function GameBoard() {
                 {pendingAcquire.remaining != null && pendingAcquire.remaining > 1 && ` — осталось: ${pendingAcquire.remaining}`}
               </div>
             )}
+            {pendingAppropriateCategorySelect && (
+              <div style={{ background: '#120a00', border: '1px solid #e67e22', borderRadius: 6, padding: '6px 10px', marginBottom: 10, fontSize: 9, color: '#e67e22', textAlign: 'center' }}>
+                Присвоение: сначала выберите тип карты слева
+              </div>
+            )}
             {pendingAppropriate && (
               <div style={{ background: '#120a00', border: '1px solid #e67e22', borderRadius: 6, padding: '6px 10px', marginBottom: 10, fontSize: 9, color: '#e67e22', textAlign: 'center' }}>
-                Присвоение: выберите карту с рынка ({pendingAppropriate.allowed_categories.join(', ')}) или колоду выше
+                Присвоение: выберите карту с рынка ({pendingAppropriate.allowed_categories.join(', ')}) или колоду слева
                 {pendingAppropriate.remaining != null && pendingAppropriate.remaining > 1 && ` — осталось: ${pendingAppropriate.remaining}`}
               </div>
             )}

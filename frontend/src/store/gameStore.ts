@@ -27,6 +27,7 @@ interface GameStore {
   acquireCard: (slotIndex: number) => Promise<void>;
   accelerateProgress: (progressCardId: string) => Promise<void>;
   makeChoice: (optionIndex: number) => Promise<void>;
+  selectAppropriateCategory: (category: string) => Promise<void>;
   appropriateFromDeck: (deckName: string) => Promise<void>;
   resetGame: () => void;
 }
@@ -162,6 +163,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const state = await api.makeChoice(gameId, optionIndex);
+      set({ gameState: state, loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
+
+  selectAppropriateCategory: async (category) => {
+    const { gameId } = get();
+    if (!gameId) return;
+    set({ loading: true, error: null });
+    try {
+      const state = await api.selectAppropriateCategory(gameId, category);
       set({ gameState: state, loading: false });
     } catch (e: any) {
       set({ error: e.response?.data?.detail || e.message, loading: false });

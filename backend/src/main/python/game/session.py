@@ -114,6 +114,14 @@ def choose_option(game_id: str, option_index: int) -> GameState:
     return state
 
 
+def select_appropriate_category(game_id: str, category: str) -> GameState:
+    state = _require(game_id)
+    _snapshot(game_id, state)
+    state = _engine.select_appropriate_category(state, category)
+    save_game(state)
+    return state
+
+
 def appropriate_from_deck(game_id: str, deck_name: str) -> GameState:
     state = _require(game_id)
     _snapshot(game_id, state)

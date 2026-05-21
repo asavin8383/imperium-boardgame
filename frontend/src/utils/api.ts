@@ -77,6 +77,11 @@ export async function makeChoice(gameId: string, optionIndex: number): Promise<G
   return res.data.state;
 }
 
+export async function selectAppropriateCategory(gameId: string, category: string): Promise<GameState> {
+  const res = await api.post(`/api/games/${gameId}/select-appropriate-category`, { category });
+  return res.data.state;
+}
+
 export async function appropriateFromDeck(gameId: string, deckName: string): Promise<GameState> {
   const res = await api.post(`/api/games/${gameId}/appropriate-from-deck`, { deck_name: deckName });
   return res.data.state;
