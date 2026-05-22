@@ -29,6 +29,9 @@ interface GameStore {
   makeChoice: (optionIndex: number) => Promise<void>;
   selectAppropriateCategory: (category: string) => Promise<void>;
   appropriateFromDeck: (deckName: string) => Promise<void>;
+  reinforceChoice: (reinforce: boolean) => Promise<void>;
+  reinforceWithCard: (handCardId: string) => Promise<void>;
+  chronicleChoice: (sendToChronicle: boolean) => Promise<void>;
   resetGame: () => void;
 }
 
@@ -187,6 +190,42 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const state = await api.appropriateFromDeck(gameId, deckName);
+      set({ gameState: state, loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
+
+  reinforceChoice: async (reinforce) => {
+    const { gameId } = get();
+    if (!gameId) return;
+    set({ loading: true, error: null });
+    try {
+      const state = await api.reinforceChoice(gameId, reinforce);
+      set({ gameState: state, loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
+
+  reinforceWithCard: async (handCardId) => {
+    const { gameId } = get();
+    if (!gameId) return;
+    set({ loading: true, error: null });
+    try {
+      const state = await api.reinforceWithCard(gameId, handCardId);
+      set({ gameState: state, loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
+
+  chronicleChoice: async (sendToChronicle) => {
+    const { gameId } = get();
+    if (!gameId) return;
+    set({ loading: true, error: null });
+    try {
+      const state = await api.chronicleChoice(gameId, sendToChronicle);
       set({ gameState: state, loading: false });
     } catch (e: any) {
       set({ error: e.response?.data?.detail || e.message, loading: false });

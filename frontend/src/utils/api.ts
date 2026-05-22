@@ -87,6 +87,21 @@ export async function appropriateFromDeck(gameId: string, deckName: string): Pro
   return res.data.state;
 }
 
+export async function reinforceChoice(gameId: string, reinforce: boolean): Promise<GameState> {
+  const res = await api.post(`/api/games/${gameId}/reinforce-choice`, { reinforce });
+  return res.data.state;
+}
+
+export async function reinforceWithCard(gameId: string, handCardId: string): Promise<GameState> {
+  const res = await api.post(`/api/games/${gameId}/reinforce-with-card`, { hand_card_id: handCardId });
+  return res.data.state;
+}
+
+export async function chronicleChoice(gameId: string, sendToChronicle: boolean): Promise<GameState> {
+  const res = await api.post(`/api/games/${gameId}/chronicle-choice`, { send_to_chronicle: sendToChronicle });
+  return res.data.state;
+}
+
 export async function undoAction(gameId: string): Promise<GameState> {
   const res = await api.post(`/api/games/${gameId}/undo`);
   return res.data.state;

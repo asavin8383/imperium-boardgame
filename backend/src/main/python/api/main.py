@@ -74,6 +74,18 @@ class SelectAppropriateCategoryRequest(BaseModel):
     category: str
 
 
+class ChronicleChoiceRequest(BaseModel):
+    send_to_chronicle: bool
+
+
+class ReinforceChoiceRequest(BaseModel):
+    reinforce: bool
+
+
+class ReinforceWithCardRequest(BaseModel):
+    hand_card_id: str
+
+
 # ── ENDPOINTS ──────────────────────────────────────────────────────────────────
 
 @app.get("/api/nations")
@@ -253,6 +265,33 @@ def select_appropriate_category(game_id: str, req: SelectAppropriateCategoryRequ
 def appropriate_from_deck(game_id: str, req: AppropriateFromDeckRequest):
     try:
         state = game_session.appropriate_from_deck(game_id, req.deck_name)
+        return {"state": state.to_dict()}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/games/{game_id}/reinforce-choice")
+def reinforce_choice(game_id: str, req: ReinforceChoiceRequest):
+    try:
+        state = game_session.resolve_reinforce_choice(game_id, req.reinforce)
+        return {"state": state.to_dict()}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/games/{game_id}/reinforce-with-card")
+def reinforce_with_card(game_id: str, req: ReinforceWithCardRequest):
+    try:
+        state = game_session.reinforce_with_card(game_id, req.hand_card_id)
+        return {"state": state.to_dict()}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/games/{game_id}/chronicle-choice")
+def chronicle_choice(game_id: str, req: ChronicleChoiceRequest):
+    try:
+        state = game_session.resolve_chronicle_choice(game_id, req.send_to_chronicle)
         return {"state": state.to_dict()}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

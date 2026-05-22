@@ -65,9 +65,18 @@ def do_innovation(game_id: str) -> GameState:
 
 
 def do_revolution(game_id: str, card_ids: list) -> GameState:
+    from .enums import GamePhase
     state = _require(game_id)
     _snapshot(game_id, state)
     state = _engine.do_revolution(state, card_ids)
+    # Революция завершает ход — переходим в фазу сброса
+    state = _engine.end_turn(state)  # PLAYER_TURN → PLAYER_DISCARD
+    # Если лимит руки не превышен — пропускаем фазу сброса
+    if state.phase == GamePhase.PLAYER_DISCARD:
+        if len(state.player.hand) <= state.player.hand_limit:
+            state = _engine.end_turn(state)
+            if state.phase == GamePhase.BOT_TURN:
+                state = _engine.run_bot_turn(state)
     save_game(state)
     return state
 
@@ -126,6 +135,30 @@ def appropriate_from_deck(game_id: str, deck_name: str) -> GameState:
     state = _require(game_id)
     _snapshot(game_id, state)
     state = _engine.appropriate_from_deck(state, deck_name)
+    save_game(state)
+    return state
+
+
+def resolve_reinforce_choice(game_id: str, reinforce: bool) -> GameState:
+    state = _require(game_id)
+    _snapshot(game_id, state)
+    state = _engine.resolve_reinforce_choice(state, reinforce)
+    save_game(state)
+    return state
+
+
+def reinforce_with_card(game_id: str, hand_card_id: str) -> GameState:
+    state = _require(game_id)
+    _snapshot(game_id, state)
+    state = _engine.reinforce_with_card(state, hand_card_id)
+    save_game(state)
+    return state
+
+
+def resolve_chronicle_choice(game_id: str, send_to_chronicle: bool) -> GameState:
+    state = _require(game_id)
+    _snapshot(game_id, state)
+    state = _engine.resolve_chronicle_choice(state, send_to_chronicle)
     save_game(state)
     return state
 

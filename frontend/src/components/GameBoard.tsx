@@ -168,7 +168,10 @@ function CardView({ card, selected = false, onClick, size = 'normal', dimmed = f
               <span title="Отправляет карты в летопись" style={{ fontSize: d.c - 1, color: '#1abc9c' }}>📜{card.sends_to_chronicle}</span>
             )}
             {card.goes_to_chronicle && (
-              <span title="Идёт в летопись после розыгрыша" style={{ fontSize: d.c - 1, color: '#c8a84b' }}>📜→</span>
+              <span title="Обязательно в летопись после розыгрыша" style={{ fontSize: d.c - 1, color: '#c8a84b' }}>📜!</span>
+            )}
+            {card.can_be_chronicled && (
+              <span title="Можно занести в летопись" style={{ fontSize: d.c - 1, color: '#1abc9c' }}>📜?</span>
             )}
           </div>
           {card.categories && card.categories.length > 0 && (() => {
@@ -202,6 +205,34 @@ function CardView({ card, selected = false, onClick, size = 'normal', dimmed = f
           {card.vp_per_condition && (
             <div style={{ color: '#f1c40f', fontSize: d.c - 1, fontWeight: 700, lineHeight: 1.2 }}>*/{VP_PER_LABEL[card.vp_per_condition] ?? card.vp_per_condition}</div>
           )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ChronicleLabel({ cards, count }: { cards: { id: string; name: string }[]; count: number }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div style={{ position: 'relative', marginBottom: 5 }}>
+      <div
+        onClick={() => count > 0 && setOpen(o => !o)}
+        style={{ fontSize: 9, color: '#555', letterSpacing: '.08em', textTransform: 'uppercase', cursor: count > 0 ? 'pointer' : 'default', userSelect: 'none' }}
+      >
+        Летопись <span style={{ color: '#1abc9c' }}>({count})</span>
+        {count > 0 && <span style={{ color: '#555', marginLeft: 4 }}>{open ? '▲' : '▼'}</span>}
+      </div>
+      {open && count > 0 && (
+        <div style={{
+          position: 'absolute', top: '100%', left: 0, zIndex: 300,
+          background: '#0d1a10', border: '1px solid #1abc9c44', borderRadius: 8,
+          padding: '8px 12px', minWidth: 180, maxHeight: 220, overflowY: 'auto',
+          boxShadow: '0 4px 16px rgba(0,0,0,.6)',
+        }}>
+          <div style={{ fontSize: 9, color: '#1abc9c', letterSpacing: '.1em', marginBottom: 6 }}>КАРТЫ В ЛЕТОПИСИ</div>
+          {cards.map(c => (
+            <div key={c.id} style={{ fontSize: 11, color: '#c8e0c8', padding: '2px 0', borderBottom: '1px solid #1a2a1a' }}>{c.name}</div>
+          ))}
         </div>
       )}
     </div>
@@ -253,7 +284,7 @@ function Btn({ label, onClick, color = '#2ecc71', disabled = false, active = fal
 }
 
 export default function GameBoard() {
-  const { gameState: gs, loading, error, playCard, exploitCard, doInnovation, doRevolution, endTurn, acquireCard, accelerateProgress, resetGame, undoAction, makeChoice, selectAppropriateCategory, appropriateFromDeck } = useGameStore();
+  const { gameState: gs, loading, error, playCard, exploitCard, doInnovation, doRevolution, endTurn, acquireCard, accelerateProgress, resetGame, undoAction, makeChoice, selectAppropriateCategory, appropriateFromDeck, chronicleChoice, reinforceChoice, reinforceWithCard } = useGameStore();
   const [selectedCards, setSelectedCards] = useState<string[]>([]);
   const [scores, setScores] = useState<{ player: number; bot: number } | null>(null);
   const [previewCard, setPreviewCard] = useState<CardInfo | null>(null);
@@ -324,6 +355,20 @@ export default function GameBoard() {
     ? gs.pending_choice as { type: string; options: ChoiceOptionData[] }
     : null;
 
+  // Pending выбор занесения в летопись
+  const pendingChronicleChoice = gs.pending_choice?.type === 'chronicle_choice'
+    ? gs.pending_choice as { type: string; card_id: string; card_name: string }
+    : null;
+
+  // Pending укрепление
+  const pendingReinforceChoice = gs.pending_choice?.type === 'reinforce_choice'
+    ? gs.pending_choice as { type: string; card_id: string; card_name: string }
+    : null;
+  const pendingReinforceSelect = gs.pending_choice?.type === 'reinforce_select_card'
+    ? gs.pending_choice as { type: string; target_card_id: string; target_card_name: string }
+    : null;
+  const isReinforceSelectMode = pendingReinforceSelect != null;
+
   function toggleCard(id: string) {
     setSelectedCards(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
   }
@@ -383,6 +428,35 @@ export default function GameBoard() {
         </div>
       )}
 
+      {/* Chronicle choice modal */}
+      {pendingChronicleChoice && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.75)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 800 }}>
+          <div style={{ background: 'linear-gradient(135deg,#0d1a10,#0a1208)', border: '2px solid #1abc9c', borderRadius: 14, padding: '28px 36px', maxWidth: 380, width: '90%', textAlign: 'center' }}>
+            <div style={{ fontSize: 13, color: '#1abc9c', letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: 10 }}>Летопись</div>
+            <div style={{ fontSize: 16, color: '#e8e8f0', marginBottom: 6, fontWeight: 600 }}>
+              {pendingChronicleChoice.card_name}
+            </div>
+            <div style={{ fontSize: 12, color: '#9098b8', marginBottom: 24 }}>
+              Занести эту карту в летопись? Карты в летописи остаются до конца партии и больше не возвращаются в руку.
+            </div>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+              <button
+                onClick={() => chronicleChoice(true)}
+                style={{ background: 'linear-gradient(135deg,#1abc9c,#148f77)', border: 'none', borderRadius: 8, color: '#fff', padding: '10px 24px', cursor: 'pointer', fontSize: 13, fontWeight: 700, letterSpacing: '.04em' }}
+              >
+                📜 Занести
+              </button>
+              <button
+                onClick={() => chronicleChoice(false)}
+                style={{ background: 'transparent', border: '1px solid #3a3d55', borderRadius: 8, color: '#9098b8', padding: '10px 24px', cursor: 'pointer', fontSize: 13 }}
+              >
+                Оставить в сбросе
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Main layout */}
       <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 260px 1fr', overflow: 'hidden' }}>
 
@@ -408,9 +482,7 @@ export default function GameBoard() {
               {/* Ability card over chronicle stack */}
               {player?.ability_card && (
                 <div>
-                  <div style={{ fontSize: 9, color: '#555', marginBottom: 5, letterSpacing: '.08em', textTransform: 'uppercase' }}>
-                    Летопись <span style={{ color: '#9098b8' }}>({player?.chronicle_count ?? 0})</span>
-                  </div>
+                  <ChronicleLabel cards={player.chronicle ?? []} count={player.chronicle_count ?? 0} />
                   <div style={{ position: 'relative', display: 'inline-block' }}>
                     {(player?.chronicle_count ?? 0) > 2 && (
                       <div style={{ position: 'absolute', top: 8, left: 8, width: 180, height: 240, background: '#0a1a0a', border: '1px solid #1a301a', borderRadius: 8, pointerEvents: 'none' }} />
@@ -509,14 +581,15 @@ export default function GameBoard() {
           {(player?.play_area ?? []).length > 0 && (
             <div>
               <div style={{ fontSize: 9, color: '#555', marginBottom: 5, letterSpacing: '.08em', textTransform: 'uppercase' }}>Разыгранные</div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 6 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 6, alignItems: 'start' }}>
                 {(player?.play_area ?? []).map(c => {
                   const isPreview = previewCard?.id === c.id;
+                  const reinf = c.reinforcement ?? null;
                   return (
                     <div key={c.id} ref={isPreview ? previewRef : undefined}
-                      style={{ position: 'relative', zIndex: isPreview ? 200 : undefined, transform: isPreview ? 'scale(2)' : undefined, transformOrigin: 'top left', transition: 'transform 0.15s' }}>
+                      style={{ zIndex: isPreview ? 200 : undefined, transform: isPreview ? 'scale(2)' : undefined, transformOrigin: 'top left', transition: 'transform 0.15s' }}>
                       <CardView card={c} size="small"
-                        overrideStyle={{ width: '100%', minHeight: 'unset', aspectRatio: '3/4' }}
+                        overrideStyle={{ width: '100%', minHeight: 'unset', aspectRatio: '3/4', borderRadius: reinf ? '8px 8px 0 0' : undefined }}
                         selected={isPreview && !!c.is_exploit}
                         onClick={() => {
                           if (isPreview) {
@@ -526,6 +599,33 @@ export default function GameBoard() {
                             setPreviewCard(c);
                           }
                         }} />
+                      {reinf && (
+                        <div style={{
+                          height: 30, overflow: 'hidden',
+                          borderRadius: '0 0 6px 6px',
+                          border: '1px solid #2a4a6a',
+                          borderTop: 'none',
+                        }}>
+                          <div style={{ position: 'relative', height: '100%' }}>
+                            <img
+                              src={cardImagePath(reinf.id)}
+                              alt=""
+                              style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top', display: 'block' }}
+                              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                            />
+                            <div style={{
+                              position: 'absolute', inset: 0,
+                              background: 'linear-gradient(to bottom, rgba(0,10,20,0.4), rgba(0,10,20,0.8))',
+                              display: 'flex', alignItems: 'flex-end',
+                              padding: '0 3px 2px',
+                            }}>
+                              <span style={{ fontSize: 7, color: '#8ac8f0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>
+                                🛡 {reinf.name}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   );
                 })}
@@ -629,6 +729,30 @@ export default function GameBoard() {
             </div>
           )}
 
+          {/* Укрепление: выбор да/нет */}
+          {isPlayerTurn && pendingReinforceChoice && (
+            <div style={{ background: '#0d1020', border: '1px solid #3498db', borderRadius: 9, padding: '10px 12px' }}>
+              <div style={{ fontSize: 9, color: '#3498db', marginBottom: 8, letterSpacing: '.08em', textTransform: 'uppercase' }}>Укрепление</div>
+              <div style={{ fontSize: 10, color: '#aaa', marginBottom: 8 }}>
+                Укрепить «{pendingReinforceChoice.card_name}»? Карта из руки ляжет под неё в игровую область.
+              </div>
+              <div style={{ display: 'flex', gap: 7 }}>
+                <Btn label="Укрепить" onClick={() => reinforceChoice(true)} color="#3498db" icon="🛡" />
+                <Btn label="Пропустить" onClick={() => reinforceChoice(false)} color="#555" icon="✕" />
+              </div>
+            </div>
+          )}
+
+          {/* Укрепление: выбор карты из руки */}
+          {isPlayerTurn && pendingReinforceSelect && (
+            <div style={{ background: '#0d1020', border: '1px solid #3498db', borderRadius: 9, padding: '10px 12px' }}>
+              <div style={{ fontSize: 9, color: '#3498db', marginBottom: 6, letterSpacing: '.08em', textTransform: 'uppercase' }}>Укрепление</div>
+              <div style={{ fontSize: 10, color: '#aaa' }}>
+                Выберите карту из руки для укрепления «{pendingReinforceSelect.target_card_name}»
+              </div>
+            </div>
+          )}
+
           {/* Режим присвоения: выбор категории */}
           {isPlayerTurn && pendingAppropriateCategorySelect && (
             <div style={{ background: '#0d1020', border: '1px solid #e67e22', borderRadius: 9, padding: '10px 12px' }}>
@@ -705,21 +829,23 @@ export default function GameBoard() {
 
           {/* Hand */}
           <div>
-            <div style={{ fontSize: 9, color: '#555', letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 6 }}>
-              Рука ({(player?.hand ?? []).length}/{player?.hand_limit ?? 5})
+            <div style={{ fontSize: 9, color: isReinforceSelectMode ? '#3498db' : '#555', letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 6 }}>
+              {isReinforceSelectMode
+                ? `🛡 Выберите карту для укрепления «${pendingReinforceSelect!.target_card_name}»`
+                : `Рука (${(player?.hand ?? []).length}/${player?.hand_limit ?? 5})`}
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 7 }}>
               {(player?.hand ?? []).map(card => {
                 const isPreview = previewCard?.id === card.id;
-                const periodBlocked = isPlayerTurn && !revMode && !isInnovatePending && card.period != null && card.period !== player?.period;
-                const isDisorder = card.categories?.includes('disorder') ?? false;
+                const periodBlocked = isPlayerTurn && !revMode && !isInnovatePending && !isReinforceSelectMode && card.period != null && card.period !== player?.period;
+                const isDisorder = (card.card_type === 'disorder') || (card.categories?.includes('disorder') ?? false);
                 const isRevSelectable = revMode && isDisorder;
                 const isRevSelected = revMode && selectedCards.includes(card.id);
-                const dimmedCard = (isInnovatePending && isPlayerTurn) || (revMode && !isDisorder) || periodBlocked;
+                const dimmedCard = (isInnovatePending && isPlayerTurn) || (revMode && !isDisorder) || (periodBlocked && !isReinforceSelectMode);
                 return (
                   <div key={card.id} ref={isPreview ? previewRef : undefined}
                     onClickCapture={(e) => {
-                      if (!isPreview && !revMode && !isInnovatePending) {
+                      if (!isPreview && !revMode && !isInnovatePending && !isReinforceSelectMode) {
                         const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
                         const leftColRight = (window.innerWidth - 260) / 2;
                         setPreviewOrigin(rect.left + rect.width * 2 > leftColRight ? 'top right' : 'top left');
@@ -728,9 +854,11 @@ export default function GameBoard() {
                     style={{ position: 'relative', zIndex: isPreview ? 200 : undefined, transform: isPreview ? 'scale(1.5)' : undefined, transformOrigin: isPreview ? previewOrigin : 'top left', transition: 'transform 0.15s' }}>
                     <CardView card={card} size="xlarge"
                       overrideStyle={{ width: '100%', minHeight: 'unset', aspectRatio: '3/4' }}
-                      selected={(isDiscardPhase && selectedCards.includes(card.id)) || isRevSelected}
+                      selected={(isDiscardPhase && selectedCards.includes(card.id)) || isRevSelected || (isReinforceSelectMode && isPreview)}
                       onClick={() => {
-                        if (isDiscardPhase) {
+                        if (isReinforceSelectMode) {
+                          reinforceWithCard(card.id);
+                        } else if (isDiscardPhase) {
                           toggleCard(card.id);
                         } else if (revMode) {
                           if (isRevSelectable) toggleCard(card.id);

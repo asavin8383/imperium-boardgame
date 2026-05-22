@@ -22,7 +22,7 @@ export interface CardInfo {
   is_exploit?: boolean;
   passive_effect?: boolean;
   solstice_effect?: boolean;
-  card_type?: 'normal' | 'attack' | 'permanent';
+  card_type?: 'normal' | 'attack' | 'permanent' | 'disorder';
   progress_cost_resource?: number;
   progress_cost_population?: number;
   progress_cost_upgrade?: number;
@@ -41,6 +41,9 @@ export interface CardInfo {
   // Chronicle
   sends_to_chronicle?: number;
   goes_to_chronicle?: boolean;
+  can_be_chronicled?: boolean;
+  // Reinforcement (only present on play_area cards)
+  reinforcement?: CardInfo | null;
   // Actions on play
   on_play_actions?: Array<
     | { type: 'gain_resource'; resource_type: string; amount: number }
@@ -75,6 +78,7 @@ export interface PlayerState {
   discard_top: CardInfo | null;
   play_area: CardInfo[];
   chronicle_count: number;
+  chronicle: CardInfo[];
   progress_area: CardInfo[];
   boost_deck_count: number;
   boost_top_token: boolean;
@@ -126,6 +130,8 @@ export interface GameState {
   difficulty: Difficulty;
   log: string[];
   pending_choice: Record<string, unknown> | null;
+  pending_chronicle_card_id: string | null;
+  pending_reinforce_card_id: string | null;
 }
 
 export interface NationInfo {

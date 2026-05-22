@@ -161,7 +161,8 @@ class Card:
     can_be_reinforced: bool = False  # можно укрепить (добавить карту из руки поверх)
     # Chronicle
     sends_to_chronicle: int = 0   # отправляет N карт соперника/своих в летопись
-    goes_to_chronicle: bool = False  # сама идёт в летопись после розыгрыша (не в сброс)
+    goes_to_chronicle: bool = False  # сама идёт в летопись после розыгрыша (обязательно, не в сброс)
+    can_be_chronicled: bool = False  # игрок МОЖЕТ занести карту в летопись (на выбор)
     # Actions executed on play
     on_play_actions: List[GainResourceAction] = field(default_factory=list)
 
@@ -229,6 +230,7 @@ def _base_card_from_dict(card_id: str, data: dict) -> BaseCard:
         can_be_reinforced=data.get("can_be_reinforced", False),
         sends_to_chronicle=data.get("sends_to_chronicle", 0),
         goes_to_chronicle=data.get("goes_to_chronicle", False),
+        can_be_chronicled=data.get("can_be_chronicled", False),
         on_play_actions=_parse_on_play_actions(data),
     )
 
@@ -296,6 +298,7 @@ def _card_from_dict(card_id: str, data: dict, nation: Nation) -> NationCard:
         can_be_reinforced=data.get("can_be_reinforced", False),
         sends_to_chronicle=data.get("sends_to_chronicle", 0),
         goes_to_chronicle=data.get("goes_to_chronicle", False),
+        can_be_chronicled=data.get("can_be_chronicled", False),
         on_play_actions=_parse_on_play_actions(data),
     )
 

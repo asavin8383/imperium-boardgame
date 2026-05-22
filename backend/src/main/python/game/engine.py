@@ -59,11 +59,27 @@ class GameEngine:
         # Apply card effect
         state = self._apply_player_card_effect(state, card)
 
-        # If not permanent — move to discard
+        # Determine destination after play
         from .enums import CardType
         if card.card_type != CardType.PERMANENT:
-            if card not in state.player.discard and card not in state.player.play_area:
-                state.player.discard.append(card)
+            if card not in state.player.discard and card not in state.player.play_area \
+                    and card not in state.player.chronicle:
+                if card.goes_to_chronicle:
+                    # Обязательно в летопись
+                    state.player.chronicle.append(card)
+                    state.add_log(f"Карта «{card.name}» занесена в летопись")
+                else:
+                    state.player.discard.append(card)
+                    if card.can_be_chronicled:
+                        # Запрос «занести в летопись?» — отложим если pending_choice занят
+                        state.pending_chronicle_card_id = card.id
+        else:
+            # Permanent card: check if reinforcement is available
+            if card.can_be_reinforced and card in state.player.play_area:
+                state.pending_reinforce_card_id = card.id
+
+        # Activate deferred choices (reinforce > chronicle, priority order)
+        state = self._check_deferred_choices(state)
 
         state.add_log(f"Разыграна карта: {card.name}")
         state = self._check_end_conditions(state)
@@ -135,7 +151,7 @@ class GameEngine:
         returned = 0
         for cid in card_ids:
             card = self._find_in_hand(state, cid)
-            if card and CardCategory.DISORDER in getattr(card, 'categories', []):
+            if card and self._is_disorder(card):
                 state.player.hand.remove(card)
                 state.shared.disorder_deck.append(card)
                 returned += 1
@@ -224,6 +240,7 @@ class GameEngine:
             remaining = pending["remaining"] - 1
             if remaining <= 0:
                 state.pending_choice = None
+                state = self._check_deferred_choices(state)
             else:
                 pending["remaining"] = remaining
                 state.add_log(f"Осталось выборов с рынка: {remaining}")
@@ -886,6 +903,7 @@ class GameEngine:
             )
         else:
             state.pending_choice = None
+            state = self._check_deferred_choices(state)
 
         return state
 
@@ -948,10 +966,113 @@ class GameEngine:
         remaining = pending.get("remaining", 1) - 1
         if remaining <= 0:
             state.pending_choice = None
+            state = self._check_deferred_choices(state)
         else:
             pending["remaining"] = remaining
 
         state = self._check_end_conditions(state)
+        return state
+
+    def resolve_chronicle_choice(self, state: GameState, send_to_chronicle: bool) -> GameState:
+        """Игрок решает: занести карту в летопись или оставить в сбросе."""
+        pending = state.pending_choice
+        if not pending or pending.get("type") != "chronicle_choice":
+            raise ValueError("Нет активного выбора летописи")
+        card_id = pending["card_id"]
+        card_name = pending["card_name"]
+        state.pending_choice = None
+
+        if send_to_chronicle:
+            card = next((c for c in state.player.discard if c.id == card_id), None)
+            if card:
+                state.player.discard.remove(card)
+                state.player.chronicle.append(card)
+                state.add_log(f"Карта «{card_name}» занесена в летопись")
+            else:
+                state.add_log(f"Карта «{card_name}» не найдена в сбросе — пропущено")
+        else:
+            state.add_log(f"Карта «{card_name}» оставлена в сбросе")
+
+        return state
+
+    def resolve_reinforce_choice(self, state: GameState, reinforce: bool) -> GameState:
+        """Игрок решает: укрепить карту или нет."""
+        pending = state.pending_choice
+        if not pending or pending.get("type") != "reinforce_choice":
+            raise ValueError("Нет активного выбора укрепления")
+        target_id = pending["card_id"]
+        target_name = pending["card_name"]
+        state.pending_choice = None
+
+        if reinforce:
+            state.pending_choice = {
+                "type": "reinforce_select_card",
+                "target_card_id": target_id,
+                "target_card_name": target_name,
+            }
+            state.add_log(f"Выберите карту из руки для укрепления «{target_name}»")
+        else:
+            state.add_log(f"Укрепление «{target_name}» пропущено")
+            state = self._check_deferred_choices(state)
+
+        return state
+
+    def reinforce_with_card(self, state: GameState, hand_card_id: str) -> GameState:
+        """Игрок выбирает карту из руки для укрепления."""
+        pending = state.pending_choice
+        if not pending or pending.get("type") != "reinforce_select_card":
+            raise ValueError("Нет активного выбора карты укрепления")
+        target_id = pending["target_card_id"]
+        target_name = pending["target_card_name"]
+
+        # Find card in hand (can be from any period — no period restriction for reinforcement)
+        reinf_card = next((c for c in state.player.hand if c.id == hand_card_id), None)
+        if reinf_card is None:
+            raise ValueError(f"Карта {hand_card_id} не найдена в руке")
+
+        # Check target is in play area
+        target = next((c for c in state.player.play_area if c.id == target_id), None)
+        if target is None:
+            raise ValueError(f"Карта-цель {target_id} не найдена в игровой области")
+
+        state.player.hand.remove(reinf_card)
+        state.player.reinforcements[target_id] = reinf_card
+        state.pending_choice = None
+        state.add_log(f"«{reinf_card.name}» укрепляет «{target_name}»")
+
+        state = self._check_deferred_choices(state)
+        return state
+
+    def _check_deferred_choices(self, state: GameState) -> GameState:
+        """Активирует следующий отложенный выбор, если pending_choice свободен.
+        Порядок приоритетов: укрепление → летопись.
+        """
+        if state.pending_choice is not None:
+            return state
+
+        if state.pending_reinforce_card_id:
+            card_id = state.pending_reinforce_card_id
+            state.pending_reinforce_card_id = None
+            card = next((c for c in state.player.play_area if c.id == card_id), None)
+            if card:
+                state.pending_choice = {
+                    "type": "reinforce_choice",
+                    "card_id": card.id,
+                    "card_name": card.name,
+                }
+            return state
+
+        if state.pending_chronicle_card_id:
+            card_id = state.pending_chronicle_card_id
+            state.pending_chronicle_card_id = None
+            card = next((c for c in state.player.discard if c.id == card_id), None)
+            if card:
+                state.pending_choice = {
+                    "type": "chronicle_choice",
+                    "card_id": card.id,
+                    "card_name": card.name,
+                }
+
         return state
 
     def _apply_gain_resource_action(self, state: GameState, action: GainResourceAction) -> GameState:
@@ -974,3 +1095,10 @@ class GameEngine:
     def _find_in_hand(self, state: GameState,
                        card_id: str) -> Optional[Card]:
         return next((c for c in state.player.hand if c.id == card_id), None)
+
+    @staticmethod
+    def _is_disorder(card: Card) -> bool:
+        """Карта является беспорядком — по типу карты или по категории."""
+        from .enums import CardType
+        return (card.card_type == CardType.DISORDER
+                or CardCategory.DISORDER in getattr(card, 'categories', []))

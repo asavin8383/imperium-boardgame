@@ -103,6 +103,8 @@ def _card_info(card: Card) -> dict:
         "gives_population": gives_population,
         "gives_progress": gives_progress,
         "on_play_actions": serialized_actions,
+        "goes_to_chronicle": card.goes_to_chronicle,
+        "can_be_chronicled": card.can_be_chronicled,
     }
 
 
@@ -136,6 +138,7 @@ class PlayerArea:
     hand: List[Card] = field(default_factory=list)          # рука
     discard: List[Card] = field(default_factory=list)       # сброс
     play_area: List[Card] = field(default_factory=list)     # игровая область (разыгранные ∞)
+    reinforcements: Dict[str, Card] = field(default_factory=dict)  # укрепления: parent_card_id → reinforcing_card
     chronicle: List[Card] = field(default_factory=list)     # летопись (под картой способности)
     progress_area: List[Card] = field(default_factory=list) # область прогресса
 
@@ -167,8 +170,12 @@ class PlayerArea:
             "hand": [_card_info(c) for c in self.hand],
             "discard_count": len(self.discard),
             "discard_top": _card_info(self.discard[-1]) if self.discard else None,
-            "play_area": [_card_info(c) for c in self.play_area],
+            "play_area": [
+                {**_card_info(c), "reinforcement": _card_info(self.reinforcements[c.id]) if c.id in self.reinforcements else None}
+                for c in self.play_area
+            ],
             "chronicle_count": len(self.chronicle),
+            "chronicle": [_card_info(c) for c in self.chronicle],
             "progress_area": [_card_info(c) for c in self.progress_area],
             "boost_deck_count": len(self.boost_deck),
             "boost_top_token": self.boost_top_token,
@@ -296,6 +303,12 @@ class GameState:
     # Pending action — для multi-step interactions
     pending_choice: Optional[Dict] = None
 
+    # Отложенный запрос «занести в летопись» (ставится, если pending_choice уже занят)
+    pending_chronicle_card_id: Optional[str] = None
+
+    # Отложенный запрос «укрепить карту» (ставится, если pending_choice уже занят)
+    pending_reinforce_card_id: Optional[str] = None
+
     def add_log(self, message: str):
         self.log.append(message)
         if len(self.log) > 100:
@@ -314,4 +327,6 @@ class GameState:
             "difficulty": self.difficulty.value,
             "log": self.log[-20:],  # last 20 messages
             "pending_choice": self.pending_choice,
+            "pending_chronicle_card_id": self.pending_chronicle_card_id,
+            "pending_reinforce_card_id": self.pending_reinforce_card_id,
         }
