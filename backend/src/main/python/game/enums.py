@@ -19,6 +19,12 @@ class CardCategory(str, Enum):
     GLORY = "glory"           # слава
     DISORDER = "disorder"     # беспорядки
 
+class CardLabel(str, Enum):
+    GRAIN = "grain"   # зерно
+    WATER = "water"   # вода
+    SACK = "sack"     # деньги
+
+
 class CardSubtype(str, Enum):
     ABILITY = "ability"       # способность (символ шестерёнки)
     TRANSFORMATION = "transformation"  # трансформация (символ ●)

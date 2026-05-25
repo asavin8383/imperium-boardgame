@@ -32,6 +32,8 @@ interface GameStore {
   reinforceChoice: (reinforce: boolean) => Promise<void>;
   reinforceWithCard: (handCardId: string) => Promise<void>;
   chronicleChoice: (sendToChronicle: boolean) => Promise<void>;
+  playFromDiscard: (cardId: string) => Promise<void>;
+  placeUpgradeToken: (slotIndex: number) => Promise<void>;
   resetGame: () => void;
 }
 
@@ -226,6 +228,30 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const state = await api.chronicleChoice(gameId, sendToChronicle);
+      set({ gameState: state, loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
+
+  playFromDiscard: async (cardId) => {
+    const { gameId } = get();
+    if (!gameId) return;
+    set({ loading: true, error: null });
+    try {
+      const state = await api.playFromDiscard(gameId, cardId);
+      set({ gameState: state, loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
+
+  placeUpgradeToken: async (slotIndex) => {
+    const { gameId } = get();
+    if (!gameId) return;
+    set({ loading: true, error: null });
+    try {
+      const state = await api.placeUpgradeToken(gameId, slotIndex);
       set({ gameState: state, loading: false });
     } catch (e: any) {
       set({ error: e.response?.data?.detail || e.message, loading: false });

@@ -49,6 +49,12 @@ export interface CardInfo {
     | { type: 'gain_resource'; resource_type: string; amount: number }
     | { type: 'acquire_from_market'; categories: CardCategory[]; count: number }
   >;
+  // Actions on exploitation
+  exploit_actions?: Array<
+    { type: 'play_from_discard'; categories: CardCategory[]; count: number; cost_action: number }
+  >;
+  // Labels
+  labels?: ('grain' | 'water' | 'sack')[];
 }
 
 export interface Resources {
@@ -86,6 +92,8 @@ export interface PlayerState {
   resources: Resources;
   hand_limit: number;
   turn_action_chosen: TurnAction | null;
+  exploits_used_ids: string[];
+  play_area_labels: Record<string, number>;
 }
 
 export interface BotSlot {

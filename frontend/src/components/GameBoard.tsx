@@ -14,6 +14,9 @@ import exploitTokenIcon from '../assets/icons/tokens/exploit.svg';
 import progressTokenIcon from '../assets/icons/tokens/progress.svg';
 import postIcon from '../assets/icons/type/ПОСТ.svg';
 import atkIcon from '../assets/icons/type/АТК.svg';
+import grainIcon from '../assets/icons/labels/grain.svg';
+import waterIcon from '../assets/icons/labels/water.svg';
+import sackIcon from '../assets/icons/labels/sack.svg';
 
 const CAT_COLOR: Record<string, string> = {
   region: '#2ecc71', origins: '#e67e22', civilization: '#3498db',
@@ -284,7 +287,7 @@ function Btn({ label, onClick, color = '#2ecc71', disabled = false, active = fal
 }
 
 export default function GameBoard() {
-  const { gameState: gs, loading, error, playCard, exploitCard, doInnovation, doRevolution, endTurn, acquireCard, accelerateProgress, resetGame, undoAction, makeChoice, selectAppropriateCategory, appropriateFromDeck, chronicleChoice, reinforceChoice, reinforceWithCard } = useGameStore();
+  const { gameState: gs, loading, error, playCard, exploitCard, doInnovation, doRevolution, endTurn, acquireCard, accelerateProgress, resetGame, undoAction, makeChoice, selectAppropriateCategory, appropriateFromDeck, chronicleChoice, reinforceChoice, reinforceWithCard, playFromDiscard, placeUpgradeToken } = useGameStore();
   const [selectedCards, setSelectedCards] = useState<string[]>([]);
   const [scores, setScores] = useState<{ player: number; bot: number } | null>(null);
   const [previewCard, setPreviewCard] = useState<CardInfo | null>(null);
@@ -368,6 +371,12 @@ export default function GameBoard() {
     ? gs.pending_choice as { type: string; target_card_id: string; target_card_name: string }
     : null;
   const isReinforceSelectMode = pendingReinforceSelect != null;
+
+  const pendingPlayFromDiscard = gs.pending_choice?.type === 'play_from_discard'
+    ? gs.pending_choice as { type: string; allowed_categories: string[]; available_cards: CardInfo[]; remaining: number }
+    : null;
+  const pendingPlaceUpgradeToken = gs.pending_choice?.type === 'place_upgrade_token';
+  const exploitsUsedIds: string[] = gs.player?.exploits_used_ids ?? [];
 
   function toggleCard(id: string) {
     setSelectedCards(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
@@ -457,6 +466,43 @@ export default function GameBoard() {
         </div>
       )}
 
+      {/* Play from discard modal */}
+      {pendingPlayFromDiscard && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.82)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 800 }}>
+          <div style={{
+            background: 'linear-gradient(135deg,#0d1a14,#0a1210)', border: '2px solid #2ecc71', borderRadius: 14,
+            padding: '24px 28px',
+            maxWidth: `${pendingPlayFromDiscard.available_cards.length * (180 + 10) + 56 + 4}px`,
+            width: '95%',
+          }}>
+            <div style={{ fontSize: 13, color: '#2ecc71', letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: 6 }}>Эксплуатация</div>
+            <div style={{ fontSize: 12, color: '#9098b8', marginBottom: 18 }}>
+              Выберите карту из личного сброса для розыгрыша в игровую область:
+            </div>
+            {pendingPlayFromDiscard.available_cards.length === 0 ? (
+              <div style={{ fontSize: 12, color: '#e74c3c', marginBottom: 16 }}>Нет подходящих карт в сбросе.</div>
+            ) : (
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 16 }}>
+                {pendingPlayFromDiscard.available_cards.map(c => (
+                  <CardView
+                    key={c.id}
+                    card={c}
+                    size="xlarge"
+                    onClick={() => playFromDiscard(c.id)}
+                  />
+                ))}
+              </div>
+            )}
+            <button
+              onClick={() => undoAction()}
+              style={{ background: 'transparent', border: '1px solid #3a3d55', borderRadius: 8, color: '#9098b8', padding: '8px 20px', cursor: 'pointer', fontSize: 12 }}
+            >
+              Отмена (undo)
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Main layout */}
       <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 260px 1fr', overflow: 'hidden' }}>
 
@@ -468,10 +514,20 @@ export default function GameBoard() {
               <div style={{ fontSize: 13, fontWeight: 700, color: '#c8a84b', letterSpacing: '.1em' }}>{player?.nation?.toUpperCase()}</div>
               <div style={{ fontSize: 10, color: player?.period === 'barbarism' ? '#e74c3c' : '#3498db', marginTop: 2 }}>{PERIOD_RU[player?.period ?? '']}</div>
             </div>
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'flex-end', alignItems: 'center' }}>
               {(['resource', 'population', 'upgrade', 'action', 'exploit'] as const).map(t => (
                 <Token key={t} type={t} value={(player?.resources as any)?.[t] ?? 0} />
               ))}
+              {([['grain', grainIcon], ['water', waterIcon], ['sack', sackIcon]] as const).map(([key, icon]) => {
+                const count = player?.play_area_labels?.[key] ?? 0;
+                if (!count) return null;
+                return (
+                  <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 2, background: '#0d1020', border: '1px solid #2a3040', borderRadius: 4, padding: '2px 5px' }}>
+                    <img src={icon} alt={key} style={{ width: 13, height: 13 }} />
+                    <span style={{ fontSize: 10, color: '#9098b8', fontWeight: 600 }}>×{count}</span>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
@@ -585,20 +641,31 @@ export default function GameBoard() {
                 {(player?.play_area ?? []).map(c => {
                   const isPreview = previewCard?.id === c.id;
                   const reinf = c.reinforcement ?? null;
+                  const isExploited = exploitsUsedIds.includes(c.id);
+                  const canExploit = !!c.is_exploit && isPlayerTurn && !isExploited;
                   return (
                     <div key={c.id} ref={isPreview ? previewRef : undefined}
-                      style={{ zIndex: isPreview ? 200 : undefined, transform: isPreview ? 'scale(2)' : undefined, transformOrigin: 'top left', transition: 'transform 0.15s' }}>
+                      style={{ zIndex: isPreview ? 200 : undefined, transform: isPreview ? 'scale(2)' : undefined, transformOrigin: 'top left', transition: 'transform 0.15s', position: 'relative' }}>
                       <CardView card={c} size="small"
                         overrideStyle={{ width: '100%', minHeight: 'unset', aspectRatio: '3/4', borderRadius: reinf ? '8px 8px 0 0' : undefined }}
-                        selected={isPreview && !!c.is_exploit}
+                        selected={isPreview && canExploit}
+                        dimmed={isExploited}
                         onClick={() => {
                           if (isPreview) {
-                            if (isPlayerTurn && c.is_exploit) exploitCard(c.id);
+                            if (canExploit) exploitCard(c.id);
                             setPreviewCard(null);
                           } else {
                             setPreviewCard(c);
                           }
                         }} />
+                      {isExploited && (
+                        <img
+                          src={exploitTokenIcon}
+                          alt="Жетон эксплуатации"
+                          title="Карта эксплуатирована в этом раунде"
+                          style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 32, height: 32, opacity: 0.9, pointerEvents: 'none', filter: 'drop-shadow(0 0 4px #000)' }}
+                        />
+                      )}
                       {reinf && (
                         <div style={{
                           height: 30, overflow: 'hidden',
@@ -903,7 +970,7 @@ export default function GameBoard() {
         </div>
 
         {/* CENTER — Market + Log */}
-        <div style={{ display: 'flex', flexDirection: 'column', borderRight: '1px solid #1e2235', overflow: 'hidden' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', borderRight: '1px solid #1e2235' }}>
           {/* Deck summary */}
           <div style={{ padding: '8px 10px', background: '#080a10', borderBottom: '1px solid #1e2235', display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
             <DeckPile count={shared?.region_deck_count ?? 0} label="Регионы" color="#1a402a" />
@@ -915,7 +982,7 @@ export default function GameBoard() {
           </div>
 
           {/* Market */}
-          <div style={{ flex: 1, overflow: 'auto', padding: '10px 8px', background: '#08090e' }}>
+          <div style={{ flex: 1, overflow: 'visible', padding: '10px 8px', background: '#08090e' }}>
             <div style={{ fontSize: 9, color: '#555', marginBottom: 10, textAlign: 'center', letterSpacing: '.1em', textTransform: 'uppercase' }}>☉ Текущий рынок</div>
             {pendingAcquire && (
               <div style={{ background: isInnovatePending ? '#0a1020' : '#0d2010', border: `1px solid ${isInnovatePending ? '#3498db' : '#1abc9c'}`, borderRadius: 6, padding: '6px 10px', marginBottom: 10, fontSize: 9, color: isInnovatePending ? '#3498db' : '#1abc9c', textAlign: 'center' }}>
@@ -932,6 +999,11 @@ export default function GameBoard() {
               <div style={{ background: '#120a00', border: '1px solid #e67e22', borderRadius: 6, padding: '6px 10px', marginBottom: 10, fontSize: 9, color: '#e67e22', textAlign: 'center' }}>
                 Присвоение: выберите карту с рынка ({pendingAppropriate.allowed_categories.join(', ')}) или колоду слева
                 {pendingAppropriate.remaining != null && pendingAppropriate.remaining > 1 && ` — осталось: ${pendingAppropriate.remaining}`}
+              </div>
+            )}
+            {pendingPlaceUpgradeToken && (
+              <div style={{ background: '#07101e', border: '1px solid #3498db', borderRadius: 6, padding: '6px 10px', marginBottom: 10, fontSize: 9, color: '#3498db', textAlign: 'center' }}>
+                Выберите карту рынка для размещения жетона прогресса
               </div>
             )}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'center' }}>
@@ -974,7 +1046,16 @@ export default function GameBoard() {
                           {pendingAppropriate ? '↩ Беспорядки → стопка' : '⚠ Беспорядки'}
                         </div>
                       )}
-                      {isPlayerTurn && (() => {
+                      {(isPlayerTurn || pendingPlaceUpgradeToken) && (() => {
+                        if (pendingPlaceUpgradeToken) {
+                          return (
+                            <button onClick={() => placeUpgradeToken(idx)}
+                              style={{ background: 'linear-gradient(135deg,#1a5276,#1a6699)', border: '1px solid #3498db', borderRadius: 5, color: '#fff', fontSize: 9, padding: '3px 8px', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
+                              <img src={progressTokenIcon} alt="" style={{ width: 10, height: 10 }} />
+                              Сюда
+                            </button>
+                          );
+                        }
                         if (isAcquireMode) {
                           const slotAllowed = !pendingAcquire ||
                             (slot.card.categories?.some(c => pendingAcquire.allowed_categories.includes(c)) ?? false);

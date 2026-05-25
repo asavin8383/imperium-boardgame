@@ -3,7 +3,7 @@ Card model and all card definitions for Imperium: Classics
 """
 from dataclasses import dataclass, field
 from typing import Optional, List
-from .enums import CardCategory, CardSubtype, CardType, Period, Nation, ResourceType
+from .enums import CardCategory, CardLabel, CardSubtype, CardType, Period, Nation, ResourceType
 from .data import vikings as _d_vikings
 from .data import greeks as _d_greeks
 from .data import carthaginians as _d_carthaginians
@@ -60,6 +60,14 @@ class ChoiceAction:
     options: List  # List[ChoiceOption]
 
 
+@dataclass
+class PlayFromDiscardAction:
+    """Действие эксплуатации: сыграть карту из личного сброса в игровую область."""
+    allowed_categories: List[CardCategory]
+    count: int = 1
+    cost_action: int = 0
+
+
 # Словарь имя → член enum, не зависящий от поведения __getitem__ в Python 3.11
 _RESOURCE_TYPE_BY_NAME: dict = {rt.name: rt for rt in ResourceType}
 
@@ -80,6 +88,20 @@ def _parse_choice_action_inner(a: dict):
             count=a.get("count", 1),
         )
     return None
+
+
+def _parse_exploit_actions(data: dict) -> List:
+    """Разбирает список exploit_actions из словаря данных карты."""
+    actions = []
+    for a in data.get("exploit_actions", []):
+        action_type = a.get("type")
+        if action_type == "play_from_discard":
+            actions.append(PlayFromDiscardAction(
+                allowed_categories=[CardCategory(c) for c in a.get("categories", [])],
+                count=a.get("count", 1),
+                cost_action=a.get("cost_action", 0),
+            ))
+    return actions
 
 
 def _parse_on_play_actions(data: dict) -> List:
@@ -158,6 +180,9 @@ class Card:
     discard_opponent_card: bool = False  # соперник сбрасывает карту из игровой зоны
     gives_disorder: int = 0       # даёт сопернику карты беспорядков
     # Reinforcement
+    # Labels (метки на карте: зерно, вода, деньги)
+    labels: List[CardLabel] = field(default_factory=list)
+    # Reinforcement
     can_be_reinforced: bool = False  # можно укрепить (добавить карту из руки поверх)
     # Chronicle
     sends_to_chronicle: int = 0   # отправляет N карт соперника/своих в летопись
@@ -165,6 +190,8 @@ class Card:
     can_be_chronicled: bool = False  # игрок МОЖЕТ занести карту в летопись (на выбор)
     # Actions executed on play
     on_play_actions: List[GainResourceAction] = field(default_factory=list)
+    # Actions executed on exploitation
+    exploit_actions: List = field(default_factory=list)
 
     def __hash__(self):
         return hash(self.id)
@@ -203,6 +230,7 @@ def _base_card_from_dict(card_id: str, data: dict) -> BaseCard:
     categories = [CardCategory(c) for c in data.get("categories", [])]
     card_type = CardType(data["card_type"]) if "card_type" in data else CardType.NORMAL
     period = Period(data["period"]) if "period" in data else None
+    labels = [CardLabel(lb) for lb in data.get("labels", [])]
 
     return BaseCard(
         id=card_id,
@@ -227,11 +255,13 @@ def _base_card_from_dict(card_id: str, data: dict) -> BaseCard:
         steal_population=data.get("steal_population", 0),
         discard_opponent_card=data.get("discard_opponent_card", False),
         gives_disorder=data.get("gives_disorder", 0),
+        labels=labels,
         can_be_reinforced=data.get("can_be_reinforced", False),
         sends_to_chronicle=data.get("sends_to_chronicle", 0),
         goes_to_chronicle=data.get("goes_to_chronicle", False),
         can_be_chronicled=data.get("can_be_chronicled", False),
         on_play_actions=_parse_on_play_actions(data),
+        exploit_actions=_parse_exploit_actions(data),
     )
 
 
@@ -267,6 +297,8 @@ def _card_from_dict(card_id: str, data: dict, nation: Nation) -> NationCard:
     subtype = CardSubtype(data["subtype"]) if "subtype" in data else None
     card_type = CardType(data.get("card_type", CardType.NORMAL))
     period = Period(data["period"]) if "period" in data else None
+    categories = [CardCategory(c) for c in data.get("categories", [])]
+    labels = [CardLabel(lb) for lb in data.get("labels", [])]
 
     return NationCard(
         id=card_id,
@@ -275,6 +307,7 @@ def _card_from_dict(card_id: str, data: dict, nation: Nation) -> NationCard:
         subtype=subtype,
         card_type=card_type,
         period=period,
+        categories=categories,
         vp_fixed=data.get("vp_fixed", 0),
         vp_condition=data.get("vp_condition"),
         vp_per_condition=data.get("vp_per_condition"),
@@ -295,11 +328,13 @@ def _card_from_dict(card_id: str, data: dict, nation: Nation) -> NationCard:
         steal_population=data.get("steal_population", 0),
         discard_opponent_card=data.get("discard_opponent_card", False),
         gives_disorder=data.get("gives_disorder", 0),
+        labels=labels,
         can_be_reinforced=data.get("can_be_reinforced", False),
         sends_to_chronicle=data.get("sends_to_chronicle", 0),
         goes_to_chronicle=data.get("goes_to_chronicle", False),
         can_be_chronicled=data.get("can_be_chronicled", False),
         on_play_actions=_parse_on_play_actions(data),
+        exploit_actions=_parse_exploit_actions(data),
     )
 
 

@@ -102,6 +102,16 @@ export async function chronicleChoice(gameId: string, sendToChronicle: boolean):
   return res.data.state;
 }
 
+export async function playFromDiscard(gameId: string, cardId: string): Promise<GameState> {
+  const res = await api.post(`/api/games/${gameId}/play-from-discard`, { card_id: cardId });
+  return res.data.state;
+}
+
+export async function placeUpgradeToken(gameId: string, slotIndex: number): Promise<GameState> {
+  const res = await api.post(`/api/games/${gameId}/place-upgrade-token`, { slot_index: slotIndex });
+  return res.data.state;
+}
+
 export async function undoAction(gameId: string): Promise<GameState> {
   const res = await api.post(`/api/games/${gameId}/undo`);
   return res.data.state;

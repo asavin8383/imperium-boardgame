@@ -86,6 +86,14 @@ class ReinforceWithCardRequest(BaseModel):
     hand_card_id: str
 
 
+class PlayFromDiscardRequest(BaseModel):
+    card_id: str
+
+
+class PlaceUpgradeTokenRequest(BaseModel):
+    slot_index: int
+
+
 # ── ENDPOINTS ──────────────────────────────────────────────────────────────────
 
 @app.get("/api/nations")
@@ -283,6 +291,24 @@ def reinforce_choice(game_id: str, req: ReinforceChoiceRequest):
 def reinforce_with_card(game_id: str, req: ReinforceWithCardRequest):
     try:
         state = game_session.reinforce_with_card(game_id, req.hand_card_id)
+        return {"state": state.to_dict()}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/games/{game_id}/play-from-discard")
+def play_from_discard(game_id: str, req: PlayFromDiscardRequest):
+    try:
+        state = game_session.play_from_discard(game_id, req.card_id)
+        return {"state": state.to_dict()}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/games/{game_id}/place-upgrade-token")
+def place_upgrade_token(game_id: str, req: PlaceUpgradeTokenRequest):
+    try:
+        state = game_session.place_upgrade_token(game_id, req.slot_index)
         return {"state": state.to_dict()}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

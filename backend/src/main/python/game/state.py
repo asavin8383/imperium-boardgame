@@ -6,9 +6,10 @@ import uuid
 from dataclasses import dataclass, field
 from typing import List, Optional, Dict
 from .cards import (Card, GainResourceAction, AcquireCardAction, AppropriateCardAction,
-                    ChoiceAction, ChoiceOption, build_base_deck_classics, get_nation_deck)
+                    ChoiceAction, ChoiceOption, PlayFromDiscardAction,
+                    build_base_deck_classics, get_nation_deck)
 from .enums import (Period, Nation, GamePhase, TurnAction, EndCondition,
-                    Difficulty, CardCategory, CardSubtype, ResourceType)
+                    Difficulty, CardCategory, CardLabel, CardSubtype, ResourceType)
 
 
 def _card_info(card: Card) -> dict:
@@ -80,6 +81,17 @@ def _card_info(card: Card) -> dict:
                 })
             serialized_actions.append({"type": "choice", "options": serialized_opts})
 
+    # Serialize exploit_actions
+    serialized_exploit_actions = []
+    for a in card.exploit_actions:
+        if isinstance(a, PlayFromDiscardAction):
+            serialized_exploit_actions.append({
+                "type": "play_from_discard",
+                "categories": [c.value for c in a.allowed_categories],
+                "count": a.count,
+                "cost_action": a.cost_action,
+            })
+
     return {
         "id": card.id,
         "name": card.name,
@@ -105,6 +117,8 @@ def _card_info(card: Card) -> dict:
         "on_play_actions": serialized_actions,
         "goes_to_chronicle": card.goes_to_chronicle,
         "can_be_chronicled": card.can_be_chronicled,
+        "exploit_actions": serialized_exploit_actions,
+        "labels": [lb.value for lb in getattr(card, 'labels', [])],
     }
 
 
@@ -184,7 +198,17 @@ class PlayerArea:
             "resources": self.resources.to_dict(),
             "hand_limit": self.hand_limit,
             "turn_action_chosen": self.turn_action_chosen.value if self.turn_action_chosen else None,
+            "exploits_used_ids": [c.id for c in self.exploits_used_this_turn],
+            "play_area_labels": self._count_play_area_labels(),
         }
+
+    def _count_play_area_labels(self) -> dict:
+        counts: dict = {}
+        for card in self.play_area:
+            for lb in getattr(card, 'labels', []):
+                key = lb.value
+                counts[key] = counts.get(key, 0) + 1
+        return counts
 
 
 @dataclass

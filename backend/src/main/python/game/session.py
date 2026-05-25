@@ -155,6 +155,22 @@ def reinforce_with_card(game_id: str, hand_card_id: str) -> GameState:
     return state
 
 
+def place_upgrade_token(game_id: str, slot_index: int) -> GameState:
+    state = _require(game_id)
+    _snapshot(game_id, state)
+    state = _engine.place_upgrade_token(state, slot_index)
+    save_game(state)
+    return state
+
+
+def play_from_discard(game_id: str, card_id: str) -> GameState:
+    state = _require(game_id)
+    _snapshot(game_id, state)
+    state = _engine.select_play_from_discard(state, card_id)
+    save_game(state)
+    return state
+
+
 def resolve_chronicle_choice(game_id: str, send_to_chronicle: bool) -> GameState:
     state = _require(game_id)
     _snapshot(game_id, state)

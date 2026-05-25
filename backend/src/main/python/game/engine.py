@@ -6,7 +6,7 @@ from typing import List, Optional, Tuple
 from .state import GameState, PlayerArea, MarketSlot, Resources
 from .enums import (Period, GamePhase, TurnAction, EndCondition,
                     CardCategory, CardSubtype, Difficulty, ResourceType)
-from .cards import Card, GainResourceAction, AcquireCardAction, AppropriateCardAction, ChoiceAction
+from .cards import Card, GainResourceAction, AcquireCardAction, AppropriateCardAction, ChoiceAction, PlayFromDiscardAction
 from .setup import _draw_to_hand
 
 
@@ -113,10 +113,19 @@ class GameEngine:
         if card in state.player.exploits_used_this_turn:
             raise ValueError("Карта уже эксплуатировалась в этом ходу")
 
+        # Проверяем дополнительные стоимости эксплуатации
+        for action in card.exploit_actions:
+            if isinstance(action, PlayFromDiscardAction) and action.cost_action > 0:
+                if state.player.resources.action < action.cost_action:
+                    raise ValueError(f"Нет жетонов действия (нужно {action.cost_action})")
+
         state.player.resources.exploit -= 1
         state.player.exploits_used_this_turn.append(card)
 
-        state = self._apply_exploit_effect(state, card)
+        if card.exploit_actions:
+            state = self._apply_exploit_card_actions(state, card)
+        else:
+            state = self._apply_exploit_effect(state, card)
         state.add_log(f"Эксплуатирована карта: {card.name}")
         return state
 
@@ -167,7 +176,7 @@ class GameEngine:
             pending_type = state.pending_choice.get("type") if state.pending_choice else None
             if pending_type == "innovate_from_market":
                 raise ValueError("Сначала выберите карту с рынка для инновации")
-            if pending_type in ("player_choice", "acquire_from_market", "appropriate", "appropriate_select_category"):
+            if pending_type in ("player_choice", "acquire_from_market", "appropriate", "appropriate_select_category", "play_from_discard"):
                 raise ValueError("Сначала завершите действие карты")
             if state.player.turn_action_chosen is None:
                 state.player.turn_action_chosen = TurnAction.ACTIVATION
@@ -429,16 +438,33 @@ class GameEngine:
     def _end_player_turn(self, state: GameState) -> GameState:
         """
         Фаза обновления для игрока:
-        1. Положить жетон > на карту рынка
+        1. Положить жетон > на карту рынка (игрок выбирает)
         2. Убрать жетоны ● и X с карты периода
         3. Сбросить любые карты с руки (handled by UI)
         4. Добрать до 5 карт
         Also trigger deck shuffle if needed.
         """
-        # Place 1 upgrade token on any market card (player chooses; default: first slot)
+        # Ask player to choose which market slot gets the upgrade token
         if state.shared.market:
-            state.shared.market[0].upgrade_tokens += 1
+            state.pending_choice = {"type": "place_upgrade_token"}
+            return state
 
+        return self._finish_end_player_turn(state)
+
+    def place_upgrade_token(self, state: GameState, slot_index: int) -> GameState:
+        """Игрок выбирает слот рынка для жетона прогресса."""
+        if slot_index < 0 or slot_index >= len(state.shared.market):
+            raise ValueError("Неверный индекс слота рынка")
+        slot = state.shared.market[slot_index]
+        if slot.card is None:
+            raise ValueError("В выбранном слоте нет карты")
+        slot.upgrade_tokens += 1
+        state.add_log(f"Жетон прогресса помещён на «{slot.card.name}»")
+        state.pending_choice = None
+        return self._finish_end_player_turn(state)
+
+    def _finish_end_player_turn(self, state: GameState) -> GameState:
+        """Завершает фазу обновления игрока после размещения жетона прогресса."""
         # Снять жетон эксплуатации с колоды усиления и вернуть в запас
         if state.player.boost_top_token:
             state.player.boost_top_token = False
@@ -751,6 +777,74 @@ class GameEngine:
                 state = self._apply_appropriate_card_action(state, action)
             elif isinstance(action, ChoiceAction):
                 state = self._apply_choice_action(state, action)
+
+        return state
+
+    def _apply_exploit_card_actions(self, state: GameState, card: Card) -> GameState:
+        """Применяет кастомные exploit_actions карты."""
+        from .state import _card_info
+        for action in card.exploit_actions:
+            if isinstance(action, PlayFromDiscardAction):
+                if action.cost_action > 0:
+                    state.player.resources.action -= action.cost_action
+                    state.add_log(f"−{action.cost_action} жетон(ов) действия")
+
+                allowed_cats = action.allowed_categories
+                available = [
+                    c for c in state.player.discard
+                    if any(cat in getattr(c, 'categories', []) for cat in allowed_cats)
+                ]
+
+                if not available:
+                    state.add_log("Нет подходящих карт в сбросе")
+                    continue
+
+                cat_values = [c.value for c in allowed_cats]
+                state.pending_choice = {
+                    "type": "play_from_discard",
+                    "allowed_categories": cat_values,
+                    "available_cards": [_card_info(c) for c in available],
+                    "count": action.count,
+                    "remaining": action.count,
+                }
+                state.add_log(f"Выберите карту из сброса ({', '.join(cat_values)})")
+        return state
+
+    def select_play_from_discard(self, state: GameState, card_id: str) -> GameState:
+        """
+        Игрок выбирает карту из личного сброса для розыгрыша в игровую область
+        (эффект эксплуатации карты типа play_from_discard).
+        """
+        pending = state.pending_choice
+        if not pending or pending.get("type") != "play_from_discard":
+            raise ValueError("Нет активного выбора карты из сброса")
+
+        allowed_cats = pending.get("allowed_categories", [])
+        card = next((c for c in state.player.discard if c.id == card_id), None)
+        if card is None:
+            raise ValueError(f"Карта {card_id} не найдена в сбросе")
+
+        card_cats = [c.value for c in getattr(card, 'categories', [])]
+        if not any(c in allowed_cats for c in card_cats):
+            raise ValueError(f"Карта не подходит по категории. Требуется: {', '.join(allowed_cats)}")
+
+        state.player.discard.remove(card)
+        state = self._apply_player_card_effect(state, card)
+        state.add_log(f"Сыграна из сброса: {card.name}")
+
+        remaining = pending.get("remaining", 1) - 1
+        if remaining <= 0:
+            state.pending_choice = None
+        else:
+            pending["remaining"] = remaining
+            # Обновляем список доступных карт
+            from .state import _card_info
+            available = [
+                c for c in state.player.discard
+                if any(cat in [cv.value for cv in getattr(c, 'categories', [])]
+                       for cat in allowed_cats)
+            ]
+            pending["available_cards"] = [_card_info(c) for c in available]
 
         return state
 
