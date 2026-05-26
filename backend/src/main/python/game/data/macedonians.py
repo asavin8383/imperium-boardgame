@@ -26,8 +26,21 @@ DECK: dict = {
     "1MAK8": {"name": "Александрия Египетская",   "subtype": "progress", "period": "civilization", "vp_fixed": 2},
     "1MAK9": {"name": "Александрия в Ариане",     "subtype": "progress", "period": "civilization"},
     # Boost cards — no start_location (unlike other nations)
-    "1MAK10": {"name": "Процветание", "subtype": "boost"},
-    "1MAK11": {"name": "Уксии",       "subtype": "boost", "card_type": "attack"},
+    "1MAK10": {"name": "Процветание", "subtype": "boost",
+               "on_play_actions": [
+                   {"type": "draw_from_deck_optional"},
+                   {"type": "choice", "options": [
+                       {"label": "Ресурс за метки денег",
+                        "action": {"type": "gain_per_label", "label": "sack", "resource_type": "MATERIAL"}},
+                       {"label": "Население за регионы",
+                        "action": {"type": "gain_per_category", "category": "region", "resource_type": "POPULATION"}},
+                   ]}
+               ]},
+    "1MAK11": {"name": "Уксии", "subtype": "boost", "card_type": "attack",
+               "on_play_actions": [
+                   {"type": "steal_resource", "resource_type": "MATERIAL", "amount": 2},
+                   {"type": "return_exploit_token_optional"},
+               ]},
     "1MAK12": {"name": "Величие",     "subtype": "boost"},
     # START cards — go to personal deck
     "1MAK13": {"name": "Реформы", "subtype": "start", "period": "barbarism",
@@ -59,7 +72,7 @@ DECK: dict = {
                "on_play_actions": [{"type": "acquire_from_market",
                                     "categories": ["region", "origins", "civilization", "glory"],
                                     "count": 1}]},
-    "1MAK17": {"name": "Македонские фаланги",   "subtype": "start", "period": "barbarism",
+    "1MAK17": {"name": "Македонские фаланги",   "subtype": "start",
                "card_type": "permanent",
                "is_exploit": True,
                "exploit_actions": [{"type": "play_from_discard", "categories": ["region"], "count": 1, "cost_action": 1}]},

@@ -171,6 +171,22 @@ def play_from_discard(game_id: str, card_id: str) -> GameState:
     return state
 
 
+def return_exploit_token(game_id: str, card_id: str | None) -> GameState:
+    state = _require(game_id)
+    _snapshot(game_id, state)
+    state = _engine.return_exploit_token(state, card_id)
+    save_game(state)
+    return state
+
+
+def resolve_draw_from_deck_optional(game_id: str, draw: bool) -> GameState:
+    state = _require(game_id)
+    _snapshot(game_id, state)
+    state = _engine.resolve_draw_from_deck_optional(state, draw)
+    save_game(state)
+    return state
+
+
 def resolve_chronicle_choice(game_id: str, send_to_chronicle: bool) -> GameState:
     state = _require(game_id)
     _snapshot(game_id, state)

@@ -78,6 +78,14 @@ class ChronicleChoiceRequest(BaseModel):
     send_to_chronicle: bool
 
 
+class ReturnExploitTokenRequest(BaseModel):
+    card_id: Optional[str] = None
+
+
+class DrawFromDeckOptionalRequest(BaseModel):
+    draw: bool
+
+
 class ReinforceChoiceRequest(BaseModel):
     reinforce: bool
 
@@ -273,6 +281,24 @@ def select_appropriate_category(game_id: str, req: SelectAppropriateCategoryRequ
 def appropriate_from_deck(game_id: str, req: AppropriateFromDeckRequest):
     try:
         state = game_session.appropriate_from_deck(game_id, req.deck_name)
+        return {"state": state.to_dict()}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/games/{game_id}/return-exploit-token")
+def return_exploit_token(game_id: str, req: ReturnExploitTokenRequest):
+    try:
+        state = game_session.return_exploit_token(game_id, req.card_id)
+        return {"state": state.to_dict()}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/games/{game_id}/draw-from-deck-optional")
+def draw_from_deck_optional(game_id: str, req: DrawFromDeckOptionalRequest):
+    try:
+        state = game_session.resolve_draw_from_deck_optional(game_id, req.draw)
         return {"state": state.to_dict()}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

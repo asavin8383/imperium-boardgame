@@ -287,7 +287,7 @@ function Btn({ label, onClick, color = '#2ecc71', disabled = false, active = fal
 }
 
 export default function GameBoard() {
-  const { gameState: gs, loading, error, playCard, exploitCard, doInnovation, doRevolution, endTurn, acquireCard, accelerateProgress, resetGame, undoAction, makeChoice, selectAppropriateCategory, appropriateFromDeck, chronicleChoice, reinforceChoice, reinforceWithCard, playFromDiscard, placeUpgradeToken } = useGameStore();
+  const { gameState: gs, loading, error, playCard, exploitCard, doInnovation, doRevolution, endTurn, acquireCard, accelerateProgress, resetGame, undoAction, makeChoice, selectAppropriateCategory, appropriateFromDeck, chronicleChoice, reinforceChoice, reinforceWithCard, playFromDiscard, placeUpgradeToken, resolveDrawFromDeck, returnExploitToken } = useGameStore();
   const [selectedCards, setSelectedCards] = useState<string[]>([]);
   const [scores, setScores] = useState<{ player: number; bot: number } | null>(null);
   const [previewCard, setPreviewCard] = useState<CardInfo | null>(null);
@@ -376,6 +376,12 @@ export default function GameBoard() {
     ? gs.pending_choice as { type: string; allowed_categories: string[]; available_cards: CardInfo[]; remaining: number }
     : null;
   const pendingPlaceUpgradeToken = gs.pending_choice?.type === 'place_upgrade_token';
+  const pendingDrawFromDeck = gs.pending_choice?.type === 'draw_from_deck_optional'
+    ? gs.pending_choice as { type: string; can_draw: boolean }
+    : null;
+  const pendingReturnExploit = gs.pending_choice?.type === 'return_exploit_token_optional'
+    ? gs.pending_choice as { type: string; available_cards: CardInfo[] }
+    : null;
   const exploitsUsedIds: string[] = gs.player?.exploits_used_ids ?? [];
 
   function toggleCard(id: string) {
@@ -520,11 +526,10 @@ export default function GameBoard() {
               ))}
               {([['grain', grainIcon], ['water', waterIcon], ['sack', sackIcon]] as const).map(([key, icon]) => {
                 const count = player?.play_area_labels?.[key] ?? 0;
-                if (!count) return null;
                 return (
-                  <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 2, background: '#0d1020', border: '1px solid #2a3040', borderRadius: 4, padding: '2px 5px' }}>
-                    <img src={icon} alt={key} style={{ width: 13, height: 13 }} />
-                    <span style={{ fontSize: 10, color: '#9098b8', fontWeight: 600 }}>×{count}</span>
+                  <div key={key} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                    <div style={{ background: '#0d1020', border: '1px solid #2a3040', borderRadius: 5, padding: '3px 7px', fontSize: 15, fontWeight: 700, color: '#9098b8', minWidth: 32, textAlign: 'center' }}>{count}</div>
+                    <img src={icon} alt={key} style={{ width: 14, height: 14 }} />
                   </div>
                 );
               })}
@@ -613,22 +618,48 @@ export default function GameBoard() {
               </div>
 
               {/* Enhancement deck */}
-              <div>
-                <div style={{ fontSize: 9, color: '#555', marginBottom: 5, letterSpacing: '.08em', textTransform: 'uppercase' }}>
-                  Усиление <span style={{ color: '#9098b8' }}>({player?.boost_deck_count ?? 0})</span>
-                </div>
-                <div style={{ position: 'relative', width: 180, height: 240, borderRadius: 8, overflow: 'hidden', border: '1px solid #2a2d40', flexShrink: 0 }}>
-                  <img src="/cards/common/BACK.jpg" alt="Колода усиления" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                  {player?.boost_top_token && (
-                    <img
-                      src={exploitTokenIcon}
-                      alt="Жетон эксплуатации"
-                      title="На верхней карте усиления лежит жетон эксплуатации"
-                      style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 64, height: 64, opacity: 0.95, filter: 'drop-shadow(0 0 6px #000)' }}
-                    />
-                  )}
-                </div>
-              </div>
+              {(() => {
+                const faceDownCount = (player?.boost_deck_count ?? 0) - (player?.boost_bottom_card ? 1 : 0);
+                const transformCard = player?.boost_bottom_card ?? null;
+                return (
+                  <div>
+                    <div style={{ fontSize: 9, color: '#555', marginBottom: 5, letterSpacing: '.08em', textTransform: 'uppercase' }}>
+                      Усиление <span style={{ color: '#9098b8' }}>({faceDownCount})</span>
+                      {transformCard && (
+                        <span style={{ marginLeft: 5, color: '#c8a84b' }}>+ трансформация</span>
+                      )}
+                    </div>
+                    {/* Stack: transformation card face-up at bottom, face-down cards on top */}
+                    <div style={{ position: 'relative', width: 180, height: transformCard ? 264 : 240, flexShrink: 0 }}>
+                      {/* Transformation card — always face-up, anchored to bottom */}
+                      {transformCard && (
+                        <div style={{ position: 'absolute', bottom: 0, left: 0, width: 180, height: 240, borderRadius: 8, overflow: 'hidden', border: '2px solid #c8a84b', boxShadow: '0 0 8px #c8a84b55' }}>
+                          <img
+                            src={cardImagePath(transformCard.id)}
+                            alt={transformCard.name}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                            onError={(e) => { (e.target as HTMLImageElement).src = '/cards/common/BACK.jpg'; }}
+                          />
+                        </div>
+                      )}
+                      {/* Face-down boost cards on top */}
+                      {faceDownCount > 0 && (
+                        <div style={{ position: 'absolute', top: 0, left: 0, width: 180, height: 240, borderRadius: 8, overflow: 'hidden', border: '1px solid #2a2d40' }}>
+                          <img src="/cards/common/BACK.jpg" alt="Колода усиления" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                          {player?.boost_top_token && (
+                            <img
+                              src={exploitTokenIcon}
+                              alt="Жетон эксплуатации"
+                              title="На верхней карте усиления лежит жетон эксплуатации"
+                              style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 64, height: 64, opacity: 0.95, filter: 'drop-shadow(0 0 6px #000)' }}
+                            />
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
 
             </div>
           )}
@@ -792,6 +823,50 @@ export default function GameBoard() {
                     </button>
                   );
                 })}
+              </div>
+            </div>
+          )}
+
+          {/* Взятие карты из колоды (1MAK10 и др.) */}
+          {isPlayerTurn && pendingDrawFromDeck && (
+            <div style={{ background: '#0d1020', border: '1px solid #3498db', borderRadius: 9, padding: '10px 12px' }}>
+              <div style={{ fontSize: 9, color: '#3498db', marginBottom: 8, letterSpacing: '.08em', textTransform: 'uppercase' }}>Взятие карты</div>
+              <div style={{ fontSize: 10, color: '#aaa', marginBottom: 8 }}>
+                {pendingDrawFromDeck.can_draw
+                  ? 'Взять верхнюю карту из личной колоды в руку?'
+                  : 'Личная колода пуста — взять нечего.'}
+              </div>
+              <div style={{ display: 'flex', gap: 7 }}>
+                {pendingDrawFromDeck.can_draw && (
+                  <Btn label="Взять" onClick={() => resolveDrawFromDeck(true)} color="#3498db" icon="+" />
+                )}
+                <Btn label={pendingDrawFromDeck.can_draw ? 'Пропустить' : 'Продолжить'} onClick={() => resolveDrawFromDeck(false)} color="#555" icon="✕" />
+              </div>
+            </div>
+          )}
+
+          {/* Возврат жетона эксплуатации (1MAK11 и др.) */}
+          {isPlayerTurn && pendingReturnExploit && (
+            <div style={{ background: '#0d1020', border: '1px solid #e67e22', borderRadius: 9, padding: '10px 12px' }}>
+              <div style={{ fontSize: 9, color: '#e67e22', marginBottom: 8, letterSpacing: '.08em', textTransform: 'uppercase' }}>Жетон эксплуатации</div>
+              <div style={{ fontSize: 10, color: '#aaa', marginBottom: 8 }}>
+                Вернуть жетон эксплуатации с карты в запас:
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                {pendingReturnExploit.available_cards.map(c => (
+                  <button
+                    key={c.id}
+                    onClick={() => returnExploitToken(c.id)}
+                    style={{
+                      background: '#1a1208', border: '1px solid #e67e22', borderRadius: 6,
+                      color: '#e67e22', padding: '5px 10px', cursor: 'pointer',
+                      fontSize: 11, fontWeight: 600,
+                    }}
+                  >
+                    {c.name}
+                  </button>
+                ))}
+                <Btn label="Пропустить" onClick={() => returnExploitToken(null)} color="#555" icon="✕" />
               </div>
             </div>
           )}

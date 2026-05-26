@@ -68,6 +68,39 @@ class PlayFromDiscardAction:
     cost_action: int = 0
 
 
+@dataclass
+class StealResourceAction:
+    """Украсть ресурс у оппонента (бота)."""
+    resource_type: ResourceType
+    amount: int
+
+
+@dataclass
+class ReturnExploitTokenOptionalAction:
+    """Игрок МОЖЕТ вернуть жетон эксплуатации с карты игровой области в запас."""
+    pass
+
+
+@dataclass
+class DrawFromDeckOptionalAction:
+    """Все игроки МОГУТ взять 1 карту из личной колоды в руку."""
+    pass
+
+
+@dataclass
+class GainPerLabelAction:
+    """Получить 1 ресурс за каждую метку указанного типа в игровой области игрока."""
+    label: str           # "sack", "grain", "water"
+    resource_type: ResourceType
+
+
+@dataclass
+class GainPerCategoryAction:
+    """Получить 1 ресурс за каждую карту указанной категории в игровой области игрока."""
+    category: CardCategory
+    resource_type: ResourceType
+
+
 # Словарь имя → член enum, не зависящий от поведения __getitem__ в Python 3.11
 _RESOURCE_TYPE_BY_NAME: dict = {rt.name: rt for rt in ResourceType}
 
@@ -86,6 +119,21 @@ def _parse_choice_action_inner(a: dict):
             allowed_source_decks=a.get("source_decks", []),
             include_main_deck=a.get("include_main_deck", False),
             count=a.get("count", 1),
+        )
+    if at == "gain_per_label":
+        return GainPerLabelAction(
+            label=a["label"],
+            resource_type=_RESOURCE_TYPE_BY_NAME[a["resource_type"]],
+        )
+    if at == "gain_per_category":
+        return GainPerCategoryAction(
+            category=CardCategory(a["category"]),
+            resource_type=_RESOURCE_TYPE_BY_NAME[a["resource_type"]],
+        )
+    if at == "gain_resource":
+        return GainResourceAction(
+            resource_type=_RESOURCE_TYPE_BY_NAME[a["resource_type"]],
+            amount=a.get("amount", 0),
         )
     return None
 
@@ -132,6 +180,18 @@ def _parse_on_play_actions(data: dict) -> List:
                         action=inner,
                     ))
             actions.append(ChoiceAction(options=options))
+        elif action_type == "steal_resource":
+            rt_name = a["resource_type"]
+            if rt_name not in _RESOURCE_TYPE_BY_NAME:
+                raise ValueError(f"Неизвестный ResourceType: '{rt_name}'")
+            actions.append(StealResourceAction(
+                resource_type=_RESOURCE_TYPE_BY_NAME[rt_name],
+                amount=a.get("amount", 1),
+            ))
+        elif action_type == "return_exploit_token_optional":
+            actions.append(ReturnExploitTokenOptionalAction())
+        elif action_type == "draw_from_deck_optional":
+            actions.append(DrawFromDeckOptionalAction())
         else:
             # Без type — считаем gain_resource (обратная совместимость)
             rt_name = a["resource_type"]

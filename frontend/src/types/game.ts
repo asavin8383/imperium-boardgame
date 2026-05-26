@@ -88,6 +88,7 @@ export interface PlayerState {
   progress_area: CardInfo[];
   boost_deck_count: number;
   boost_top_token: boolean;
+  boost_bottom_card: CardInfo | null;
   ability_card: { id: string; name: string; side: string } | null;
   resources: Resources;
   hand_limit: number;

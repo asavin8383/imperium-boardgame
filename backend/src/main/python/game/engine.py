@@ -6,7 +6,7 @@ from typing import List, Optional, Tuple
 from .state import GameState, PlayerArea, MarketSlot, Resources
 from .enums import (Period, GamePhase, TurnAction, EndCondition,
                     CardCategory, CardSubtype, Difficulty, ResourceType)
-from .cards import Card, GainResourceAction, AcquireCardAction, AppropriateCardAction, ChoiceAction, PlayFromDiscardAction
+from .cards import Card, GainResourceAction, AcquireCardAction, AppropriateCardAction, ChoiceAction, PlayFromDiscardAction, DrawFromDeckOptionalAction, GainPerLabelAction, GainPerCategoryAction, StealResourceAction, ReturnExploitTokenOptionalAction
 from .setup import _draw_to_hand
 
 
@@ -767,16 +767,31 @@ class GameEngine:
                 state.player.play_area.remove(card)
             state.player.chronicle.append(card)
 
-        # Apply typed on_play_actions
-        for action in card.on_play_actions:
+        # Apply typed on_play_actions; if a pending_choice is set mid-loop, queue the rest
+        actions_remaining = list(card.on_play_actions)
+        while actions_remaining:
+            action = actions_remaining.pop(0)
+            had_pending = state.pending_choice is not None
             if isinstance(action, GainResourceAction):
                 state = self._apply_gain_resource_action(state, action)
+            elif isinstance(action, StealResourceAction):
+                state = self._apply_steal_resource_action(state, action)
+            elif isinstance(action, ReturnExploitTokenOptionalAction):
+                state = self._apply_return_exploit_token_optional_action(state)
+            elif isinstance(action, DrawFromDeckOptionalAction):
+                state = self._apply_draw_from_deck_optional_action(state)
             elif isinstance(action, AcquireCardAction):
                 state = self._apply_acquire_card_action(state, action)
             elif isinstance(action, AppropriateCardAction):
                 state = self._apply_appropriate_card_action(state, action)
             elif isinstance(action, ChoiceAction):
                 state = self._apply_choice_action(state, action)
+            # If a new pending_choice appeared, queue remaining actions and stop
+            if not had_pending and state.pending_choice is not None and actions_remaining:
+                state.pending_card_play_actions.extend(
+                    self._serialize_on_play_action(a) for a in actions_remaining
+                )
+                break
 
         return state
 
@@ -911,6 +926,7 @@ class GameEngine:
                     "categories": [c.value for c in a.allowed_categories],
                     "count": a.count,
                 }
+                label = opt.label
             elif isinstance(a, AppropriateCardAction):
                 action_data = {
                     "type": "appropriate",
@@ -919,10 +935,40 @@ class GameEngine:
                     "include_main_deck": a.include_main_deck,
                     "count": a.count,
                 }
+                label = opt.label
+            elif isinstance(a, GainPerLabelAction):
+                count = sum(
+                    1 for c in state.player.play_area
+                    for lb in getattr(c, 'labels', []) if lb.value == a.label
+                )
+                action_data = {
+                    "type": "gain_resource",
+                    "resource_type": a.resource_type.name,
+                    "amount": count,
+                }
+                label = f"{opt.label} ({count})"
+            elif isinstance(a, GainPerCategoryAction):
+                count = sum(
+                    1 for c in state.player.play_area
+                    if a.category in getattr(c, 'categories', [])
+                )
+                action_data = {
+                    "type": "gain_resource",
+                    "resource_type": a.resource_type.name,
+                    "amount": count,
+                }
+                label = f"{opt.label} ({count})"
+            elif isinstance(a, GainResourceAction):
+                action_data = {
+                    "type": "gain_resource",
+                    "resource_type": a.resource_type.name,
+                    "amount": a.amount,
+                }
+                label = opt.label
             else:
                 continue
             options_data.append({
-                "label": opt.label,
+                "label": label,
                 "cost_population": opt.cost_population,
                 "cost_resource": opt.cost_resource,
                 "action": action_data,
@@ -995,6 +1041,17 @@ class GameEngine:
                 action_data.get("source_decks", []),
                 action_data.get("count", 1),
             )
+        elif action_type == "gain_resource":
+            _RESOURCE_ATTR: dict = {
+                "MATERIAL": "resource", "POPULATION": "population",
+                "PROGRESS": "upgrade", "ACTION": "action", "EXPLOIT": "exploit",
+            }
+            attr = _RESOURCE_ATTR.get(action_data.get("resource_type", "MATERIAL"), "resource")
+            amount = action_data.get("amount", 0)
+            setattr(state.player.resources, attr, getattr(state.player.resources, attr) + amount)
+            state.add_log(f"+{amount} {action_data.get('resource_type', 'MATERIAL')}")
+            state.pending_choice = None
+            state = self._check_deferred_choices(state)
         else:
             state.pending_choice = None
             state = self._check_deferred_choices(state)
@@ -1139,9 +1196,15 @@ class GameEngine:
 
     def _check_deferred_choices(self, state: GameState) -> GameState:
         """Активирует следующий отложенный выбор, если pending_choice свободен.
-        Порядок приоритетов: укрепление → летопись.
+        Порядок приоритетов: очередь действий карты → укрепление → летопись.
         """
         if state.pending_choice is not None:
+            return state
+
+        # Выполняем следующее действие из очереди розыгрыша карты
+        if state.pending_card_play_actions:
+            action_data = state.pending_card_play_actions.pop(0)
+            state = self._execute_queued_action(state, action_data)
             return state
 
         if state.pending_reinforce_card_id:
@@ -1182,6 +1245,242 @@ class GameEngine:
         setattr(state.player.resources, attr,
                 getattr(state.player.resources, attr) + action.amount)
         state.add_log(f"+{action.amount} {action.resource_type.value}")
+        return state
+
+    def _apply_draw_from_deck_optional_action(self, state: GameState) -> GameState:
+        """Бот тянет верхнюю карту из колоды автоматически; игрок получает выбор."""
+        # Бот тянет автоматически (если есть карты)
+        if state.bot.bot_deck:
+            drawn = state.bot.bot_deck.pop(0)
+            placed = False
+            for i, slot in enumerate(state.bot.hand_slots):
+                if slot is None:
+                    state.bot.hand_slots[i] = drawn
+                    placed = True
+                    break
+            if not placed:
+                # Нет свободного слота — возвращаем карту в низ колоды
+                state.bot.bot_deck.append(drawn)
+                state.add_log("Бот: нет свободного слота — карта из колоды не взята")
+            else:
+                state.add_log(f"Бот берёт карту из личной колоды")
+
+        # Игрок получает выбор
+        state.pending_choice = {
+            "type": "draw_from_deck_optional",
+            "can_draw": len(state.player.deck) > 0,
+        }
+        state.add_log("Вы МОЖЕТЕ взять 1 карту из личной колоды в руку")
+        return state
+
+    def _apply_steal_resource_action(self, state: GameState, action: StealResourceAction) -> GameState:
+        """Бот теряет указанное количество ресурсов."""
+        if action.resource_type == ResourceType.MATERIAL:
+            lost = min(state.bot.resource, action.amount)
+            state.bot.resource = max(0, state.bot.resource - action.amount)
+            state.add_log(f"Набег: бот теряет {lost} ресурс(а)")
+        return state
+
+    def _apply_return_exploit_token_optional_action(self, state: GameState) -> GameState:
+        """Предлагает игроку вернуть жетон эксплуатации с карты игровой области в запас."""
+        from .state import _card_info
+        available = [c for c in state.player.exploits_used_this_turn
+                     if c in state.player.play_area]
+        if not available:
+            state.add_log("Нет карт с жетонами эксплуатации в игровой области")
+            return state
+        state.pending_choice = {
+            "type": "return_exploit_token_optional",
+            "available_cards": [_card_info(c) for c in available],
+        }
+        state.add_log("Вы МОЖЕТЕ вернуть жетон эксплуатации с карты в запас")
+        return state
+
+    def return_exploit_token(self, state: GameState, card_id: Optional[str]) -> GameState:
+        """Игрок возвращает жетон эксплуатации с выбранной карты в запас, или пропускает."""
+        pending = state.pending_choice
+        if not pending or pending.get("type") != "return_exploit_token_optional":
+            raise ValueError("Нет активного выбора возврата жетона эксплуатации")
+        state.pending_choice = None
+        if card_id:
+            card = next((c for c in state.player.exploits_used_this_turn
+                         if c.id == card_id and c in state.player.play_area), None)
+            if card is None:
+                raise ValueError(f"Карта {card_id} не найдена среди эксплуатированных карт игровой области")
+            state.player.exploits_used_this_turn.remove(card)
+            state.player.resources.exploit += 1
+            state.add_log(f"Жетон эксплуатации с «{card.name}» возвращён в запас")
+        else:
+            state.add_log("Вы пропустили возврат жетона эксплуатации")
+        state = self._check_deferred_choices(state)
+        return state
+
+    def resolve_draw_from_deck_optional(self, state: GameState, draw: bool) -> GameState:
+        """Игрок отвечает на вопрос «взять карту из колоды?»."""
+        pending = state.pending_choice
+        if not pending or pending.get("type") != "draw_from_deck_optional":
+            raise ValueError("Нет активного выбора взятия карты из колоды")
+
+        state.pending_choice = None
+
+        if draw:
+            if state.player.deck:
+                card = state.player.deck.pop(0)
+                state.player.hand.append(card)
+                state.add_log(f"Вы берёте «{card.name}» из личной колоды в руку")
+            else:
+                state.add_log("В личной колоде нет карт")
+        else:
+            state.add_log("Вы отказались от взятия карты")
+
+        state = self._check_deferred_choices(state)
+        return state
+
+    def _serialize_on_play_action(self, action) -> dict:
+        """Сериализует действие карты в dict для очереди pending_card_play_actions."""
+        if isinstance(action, GainResourceAction):
+            return {"type": "gain_resource",
+                    "resource_type": action.resource_type.name,
+                    "amount": action.amount}
+        if isinstance(action, StealResourceAction):
+            return {"type": "steal_resource",
+                    "resource_type": action.resource_type.name,
+                    "amount": action.amount}
+        if isinstance(action, ReturnExploitTokenOptionalAction):
+            return {"type": "return_exploit_token_optional"}
+        if isinstance(action, DrawFromDeckOptionalAction):
+            return {"type": "draw_from_deck_optional"}
+        if isinstance(action, AcquireCardAction):
+            return {"type": "acquire_from_market",
+                    "categories": [c.value for c in action.allowed_categories],
+                    "count": action.count}
+        if isinstance(action, AppropriateCardAction):
+            return {"type": "appropriate",
+                    "categories": [c.value for c in action.allowed_categories],
+                    "source_decks": action.allowed_source_decks,
+                    "include_main_deck": action.include_main_deck,
+                    "count": action.count}
+        if isinstance(action, ChoiceAction):
+            options = []
+            for opt in action.options:
+                inner = opt.action
+                if isinstance(inner, AcquireCardAction):
+                    inner_data = {"type": "acquire_from_market",
+                                  "categories": [c.value for c in inner.allowed_categories],
+                                  "count": inner.count}
+                elif isinstance(inner, AppropriateCardAction):
+                    inner_data = {"type": "appropriate",
+                                  "categories": [c.value for c in inner.allowed_categories],
+                                  "source_decks": inner.allowed_source_decks,
+                                  "include_main_deck": inner.include_main_deck,
+                                  "count": inner.count}
+                elif isinstance(inner, GainPerLabelAction):
+                    inner_data = {"type": "gain_per_label",
+                                  "label": inner.label,
+                                  "resource_type": inner.resource_type.name}
+                elif isinstance(inner, GainPerCategoryAction):
+                    inner_data = {"type": "gain_per_category",
+                                  "category": inner.category.value,
+                                  "resource_type": inner.resource_type.name}
+                elif isinstance(inner, GainResourceAction):
+                    inner_data = {"type": "gain_resource",
+                                  "resource_type": inner.resource_type.name,
+                                  "amount": inner.amount}
+                else:
+                    continue
+                options.append({"label": opt.label,
+                                 "cost_population": opt.cost_population,
+                                 "cost_resource": opt.cost_resource,
+                                 "action": inner_data})
+            return {"type": "choice", "options": options}
+        return {}
+
+    def _execute_queued_action(self, state: GameState, action_data: dict) -> GameState:
+        """Выполняет одно сериализованное действие из очереди pending_card_play_actions."""
+        action_type = action_data.get("type")
+
+        if action_type == "draw_from_deck_optional":
+            state = self._apply_draw_from_deck_optional_action(state)
+
+        elif action_type == "return_exploit_token_optional":
+            state = self._apply_return_exploit_token_optional_action(state)
+
+        elif action_type == "steal_resource":
+            if action_data.get("resource_type") == "MATERIAL":
+                lost = min(state.bot.resource, action_data.get("amount", 0))
+                state.bot.resource -= lost
+                state.add_log(f"Набег: бот теряет {lost} ресурс(а)")
+
+        elif action_type == "gain_resource":
+            _RESOURCE_ATTR: dict = {
+                "MATERIAL": "resource", "POPULATION": "population",
+                "PROGRESS": "upgrade", "ACTION": "action", "EXPLOIT": "exploit",
+            }
+            attr = _RESOURCE_ATTR.get(action_data.get("resource_type", "MATERIAL"), "resource")
+            amount = action_data.get("amount", 0)
+            setattr(state.player.resources, attr, getattr(state.player.resources, attr) + amount)
+            state.add_log(f"+{amount} {action_data.get('resource_type', 'MATERIAL')}")
+
+        elif action_type == "acquire_from_market":
+            state.pending_choice = {
+                "type": "acquire_from_market",
+                "allowed_categories": action_data.get("categories", []),
+                "remaining": action_data.get("count", 1),
+            }
+            state.add_log(f"Выберите карту с рынка ({', '.join(action_data.get('categories', []))})")
+
+        elif action_type == "appropriate":
+            self._set_appropriate_pending(
+                state,
+                action_data.get("categories", []),
+                action_data.get("source_decks", []),
+                action_data.get("count", 1),
+            )
+
+        elif action_type == "choice":
+            # Вычисляем динамические количества и формируем player_choice
+            options_data = []
+            for opt in action_data.get("options", []):
+                inner = opt.get("action", {})
+                inner_type = inner.get("type")
+                if inner_type == "gain_per_label":
+                    label = inner["label"]
+                    rt_name = inner["resource_type"]
+                    count = sum(
+                        1 for c in state.player.play_area
+                        for lb in getattr(c, 'labels', []) if lb.value == label
+                    )
+                    action_out = {"type": "gain_resource", "resource_type": rt_name, "amount": count}
+                    opt_label = f"{opt['label']} ({count})"
+                elif inner_type == "gain_per_category":
+                    category_val = inner["category"]
+                    rt_name = inner["resource_type"]
+                    count = sum(
+                        1 for c in state.player.play_area
+                        if CardCategory(category_val) in getattr(c, 'categories', [])
+                    )
+                    action_out = {"type": "gain_resource", "resource_type": rt_name, "amount": count}
+                    opt_label = f"{opt['label']} ({count})"
+                elif inner_type == "acquire_from_market":
+                    action_out = inner
+                    opt_label = opt["label"]
+                elif inner_type == "appropriate":
+                    action_out = inner
+                    opt_label = opt["label"]
+                elif inner_type == "gain_resource":
+                    action_out = inner
+                    opt_label = opt["label"]
+                else:
+                    continue
+                options_data.append({
+                    "label": opt_label,
+                    "cost_population": opt.get("cost_population", 0),
+                    "cost_resource": opt.get("cost_resource", 0),
+                    "action": action_out,
+                })
+            state.pending_choice = {"type": "player_choice", "options": options_data}
+            state.add_log("Выберите вариант действия")
+
         return state
 
     # ── UTILS ──────────────────────────────────────────────────────────────────

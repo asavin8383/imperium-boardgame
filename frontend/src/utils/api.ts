@@ -87,6 +87,16 @@ export async function appropriateFromDeck(gameId: string, deckName: string): Pro
   return res.data.state;
 }
 
+export async function returnExploitToken(gameId: string, cardId: string | null): Promise<GameState> {
+  const res = await api.post(`/api/games/${gameId}/return-exploit-token`, { card_id: cardId });
+  return res.data.state;
+}
+
+export async function resolveDrawFromDeck(gameId: string, draw: boolean): Promise<GameState> {
+  const res = await api.post(`/api/games/${gameId}/draw-from-deck-optional`, { draw });
+  return res.data.state;
+}
+
 export async function reinforceChoice(gameId: string, reinforce: boolean): Promise<GameState> {
   const res = await api.post(`/api/games/${gameId}/reinforce-choice`, { reinforce });
   return res.data.state;

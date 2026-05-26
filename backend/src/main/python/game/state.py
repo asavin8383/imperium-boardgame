@@ -7,6 +7,8 @@ from dataclasses import dataclass, field
 from typing import List, Optional, Dict
 from .cards import (Card, GainResourceAction, AcquireCardAction, AppropriateCardAction,
                     ChoiceAction, ChoiceOption, PlayFromDiscardAction,
+                    DrawFromDeckOptionalAction, GainPerLabelAction, GainPerCategoryAction,
+                    StealResourceAction, ReturnExploitTokenOptionalAction,
                     build_base_deck_classics, get_nation_deck)
 from .enums import (Period, Nation, GamePhase, TurnAction, EndCondition,
                     Difficulty, CardCategory, CardLabel, CardSubtype, ResourceType)
@@ -53,6 +55,16 @@ def _card_info(card: Card) -> dict:
                 "include_main_deck": a.include_main_deck,
                 "count": a.count,
             })
+        elif isinstance(a, StealResourceAction):
+            serialized_actions.append({
+                "type": "steal_resource",
+                "resource_type": a.resource_type.name,
+                "amount": a.amount,
+            })
+        elif isinstance(a, ReturnExploitTokenOptionalAction):
+            serialized_actions.append({"type": "return_exploit_token_optional"})
+        elif isinstance(a, DrawFromDeckOptionalAction):
+            serialized_actions.append({"type": "draw_from_deck_optional"})
         elif isinstance(a, ChoiceAction):
             serialized_opts = []
             for opt in a.options:
@@ -70,6 +82,24 @@ def _card_info(card: Card) -> dict:
                         "source_decks": inner.allowed_source_decks,
                         "include_main_deck": inner.include_main_deck,
                         "count": inner.count,
+                    }
+                elif isinstance(inner, GainPerLabelAction):
+                    inner_data = {
+                        "type": "gain_per_label",
+                        "label": inner.label,
+                        "resource_type": inner.resource_type.name,
+                    }
+                elif isinstance(inner, GainPerCategoryAction):
+                    inner_data = {
+                        "type": "gain_per_category",
+                        "category": inner.category.value,
+                        "resource_type": inner.resource_type.name,
+                    }
+                elif isinstance(inner, GainResourceAction):
+                    inner_data = {
+                        "type": "gain_resource",
+                        "resource_type": inner.resource_type.name,
+                        "amount": inner.amount,
                     }
                 else:
                     continue
@@ -193,6 +223,10 @@ class PlayerArea:
             "progress_area": [_card_info(c) for c in self.progress_area],
             "boost_deck_count": len(self.boost_deck),
             "boost_top_token": self.boost_top_token,
+            "boost_bottom_card": _card_info(self.boost_deck[-1])
+                if self.boost_deck and getattr(self.boost_deck[-1], 'subtype', None) is not None
+                   and self.boost_deck[-1].subtype.value == 'transformation'
+                else None,
             "ability_card": {**_card_info(self.ability_card),
                               "side": self.ability_side} if self.ability_card else None,
             "resources": self.resources.to_dict(),
@@ -332,6 +366,9 @@ class GameState:
 
     # Отложенный запрос «укрепить карту» (ставится, если pending_choice уже занят)
     pending_reinforce_card_id: Optional[str] = None
+
+    # Очередь действий карты, ожидающих выполнения после разрешения pending_choice
+    pending_card_play_actions: List[dict] = field(default_factory=list)
 
     def add_log(self, message: str):
         self.log.append(message)

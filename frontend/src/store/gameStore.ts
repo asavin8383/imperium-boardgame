@@ -29,6 +29,8 @@ interface GameStore {
   makeChoice: (optionIndex: number) => Promise<void>;
   selectAppropriateCategory: (category: string) => Promise<void>;
   appropriateFromDeck: (deckName: string) => Promise<void>;
+  returnExploitToken: (cardId: string | null) => Promise<void>;
+  resolveDrawFromDeck: (draw: boolean) => Promise<void>;
   reinforceChoice: (reinforce: boolean) => Promise<void>;
   reinforceWithCard: (handCardId: string) => Promise<void>;
   chronicleChoice: (sendToChronicle: boolean) => Promise<void>;
@@ -192,6 +194,30 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const state = await api.appropriateFromDeck(gameId, deckName);
+      set({ gameState: state, loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
+
+  returnExploitToken: async (cardId) => {
+    const { gameId } = get();
+    if (!gameId) return;
+    set({ loading: true, error: null });
+    try {
+      const state = await api.returnExploitToken(gameId, cardId);
+      set({ gameState: state, loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
+
+  resolveDrawFromDeck: async (draw) => {
+    const { gameId } = get();
+    if (!gameId) return;
+    set({ loading: true, error: null });
+    try {
+      const state = await api.resolveDrawFromDeck(gameId, draw);
       set({ gameState: state, loading: false });
     } catch (e: any) {
       set({ error: e.response?.data?.detail || e.message, loading: false });
