@@ -370,6 +370,12 @@ class GameState:
     # Очередь действий карты, ожидающих выполнения после разрешения pending_choice
     pending_card_play_actions: List[dict] = field(default_factory=list)
 
+    # Отложенные атаки бота (ID карт), ожидающие решения игрока о отзыве 1REG12
+    pending_bot_attacks: List[str] = field(default_factory=list)
+
+    # Данные продолжения хода бота после разрешения отложенных атак
+    pending_bot_turn_continuation: Optional[dict] = None
+
     def add_log(self, message: str):
         self.log.append(message)
         if len(self.log) > 100:

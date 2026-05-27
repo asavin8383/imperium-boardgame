@@ -36,6 +36,14 @@ interface GameStore {
   chronicleChoice: (sendToChronicle: boolean) => Promise<void>;
   playFromDiscard: (cardId: string) => Promise<void>;
   placeUpgradeToken: (slotIndex: number) => Promise<void>;
+  recallToAvoidAttack: (recall: boolean) => Promise<void>;
+  chronicleFromDiscard: (cardId: string | null) => Promise<void>;
+  exileFromMarket: (slotIndex: number) => Promise<void>;
+  destroyCards: (cardIds: string[]) => Promise<void>;
+  gloryDeckTake: (cardId: string) => Promise<void>;
+  moveDiscardToDeck: (cardId: string | null) => Promise<void>;
+  sacredPathExploit: (destroy: boolean) => Promise<void>;
+  sacredPathExchange: (handCardId: string) => Promise<void>;
   resetGame: () => void;
 }
 
@@ -278,6 +286,102 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const state = await api.placeUpgradeToken(gameId, slotIndex);
+      set({ gameState: state, loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
+
+  recallToAvoidAttack: async (recall) => {
+    const { gameId } = get();
+    if (!gameId) return;
+    set({ loading: true, error: null });
+    try {
+      const state = await api.recallToAvoidAttack(gameId, recall);
+      set({ gameState: state, loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
+
+  chronicleFromDiscard: async (cardId) => {
+    const { gameId } = get();
+    if (!gameId) return;
+    set({ loading: true, error: null });
+    try {
+      const state = await api.chronicleFromDiscard(gameId, cardId);
+      set({ gameState: state, loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
+
+  exileFromMarket: async (slotIndex) => {
+    const { gameId } = get();
+    if (!gameId) return;
+    set({ loading: true, error: null });
+    try {
+      const state = await api.exileFromMarket(gameId, slotIndex);
+      set({ gameState: state, loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
+
+  destroyCards: async (cardIds) => {
+    const { gameId } = get();
+    if (!gameId) return;
+    set({ loading: true, error: null });
+    try {
+      const state = await api.destroyCards(gameId, cardIds);
+      set({ gameState: state, loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
+
+  gloryDeckTake: async (cardId) => {
+    const { gameId } = get();
+    if (!gameId) return;
+    set({ loading: true, error: null });
+    try {
+      const state = await api.gloryDeckTake(gameId, cardId);
+      set({ gameState: state, loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
+
+  moveDiscardToDeck: async (cardId) => {
+    const { gameId } = get();
+    if (!gameId) return;
+    set({ loading: true, error: null });
+    try {
+      const state = await api.moveDiscardToDeck(gameId, cardId);
+      set({ gameState: state, loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
+
+  sacredPathExploit: async (destroy) => {
+    const { gameId } = get();
+    if (!gameId) return;
+    set({ loading: true, error: null });
+    try {
+      const state = await api.sacredPathExploit(gameId, destroy);
+      set({ gameState: state, loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
+
+  sacredPathExchange: async (handCardId) => {
+    const { gameId } = get();
+    if (!gameId) return;
+    set({ loading: true, error: null });
+    try {
+      const state = await api.sacredPathExchange(gameId, handCardId);
       set({ gameState: state, loading: false });
     } catch (e: any) {
       set({ error: e.response?.data?.detail || e.message, loading: false });

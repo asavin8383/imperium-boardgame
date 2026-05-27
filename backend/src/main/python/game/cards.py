@@ -88,6 +88,45 @@ class DrawFromDeckOptionalAction:
 
 
 @dataclass
+class ChronicleFromDiscardAction:
+    """Занести 1 карту из личного сброса в летопись."""
+    optional: bool = False  # если True — игрок МОЖЕТ пропустить
+
+
+@dataclass
+class ExileFromMarketAction:
+    """Изгнать карту с рынка: навсегда убирает из игры, перезаполняет слот."""
+    pass
+
+
+@dataclass
+class DestroyFromPlayAreaAction:
+    """Разрушить N карт указанной категории из игровой области (→ личный сброс)."""
+    category: CardCategory
+    count: int
+
+
+@dataclass
+class LookAtGloryDeckAction:
+    """Посмотреть верхние look_count карт колоды славы, взять take_count в руку."""
+    look_count: int = 2
+    take_count: int = 1
+
+
+@dataclass
+class SacredPathExploitAction:
+    """Эксплуатация 1REG14: показать верхнюю карту колоды усиления,
+    МОЖНО разрушить 1REG14 и обменять карту из руки на верхнюю карту усиления."""
+    pass
+
+
+@dataclass
+class MoveDiscardToDeckAction:
+    """Переместить 1 карту из личного сброса на верх личной колоды (опционально)."""
+    optional: bool = True
+
+
+@dataclass
 class GainPerLabelAction:
     """Получить 1 ресурс за каждую метку указанного типа в игровой области игрока."""
     label: str           # "sack", "grain", "water"
@@ -149,6 +188,8 @@ def _parse_exploit_actions(data: dict) -> List:
                 count=a.get("count", 1),
                 cost_action=a.get("cost_action", 0),
             ))
+        elif action_type == "sacred_path_exploit":
+            actions.append(SacredPathExploitAction())
     return actions
 
 
@@ -192,6 +233,26 @@ def _parse_on_play_actions(data: dict) -> List:
             actions.append(ReturnExploitTokenOptionalAction())
         elif action_type == "draw_from_deck_optional":
             actions.append(DrawFromDeckOptionalAction())
+        elif action_type == "chronicle_from_discard":
+            actions.append(ChronicleFromDiscardAction(
+                optional=a.get("optional", False),
+            ))
+        elif action_type == "exile_from_market":
+            actions.append(ExileFromMarketAction())
+        elif action_type == "destroy_from_play_area":
+            actions.append(DestroyFromPlayAreaAction(
+                category=CardCategory(a["category"]),
+                count=a.get("count", 1),
+            ))
+        elif action_type == "look_at_glory_deck":
+            actions.append(LookAtGloryDeckAction(
+                look_count=a.get("look_count", 2),
+                take_count=a.get("take_count", 1),
+            ))
+        elif action_type == "move_discard_to_deck":
+            actions.append(MoveDiscardToDeckAction(
+                optional=a.get("optional", True),
+            ))
         else:
             # Без type — считаем gain_resource (обратная совместимость)
             rt_name = a["resource_type"]
@@ -244,6 +305,7 @@ class Card:
     labels: List[CardLabel] = field(default_factory=list)
     # Reinforcement
     can_be_reinforced: bool = False  # можно укрепить (добавить карту из руки поверх)
+    cannot_be_reinforcement: bool = False  # карта НЕ МОЖЕТ быть картой укрепления
     # Chronicle
     sends_to_chronicle: int = 0   # отправляет N карт соперника/своих в летопись
     goes_to_chronicle: bool = False  # сама идёт в летопись после розыгрыша (обязательно, не в сброс)
@@ -317,6 +379,7 @@ def _base_card_from_dict(card_id: str, data: dict) -> BaseCard:
         gives_disorder=data.get("gives_disorder", 0),
         labels=labels,
         can_be_reinforced=data.get("can_be_reinforced", False),
+        cannot_be_reinforcement=data.get("cannot_be_reinforcement", False),
         sends_to_chronicle=data.get("sends_to_chronicle", 0),
         goes_to_chronicle=data.get("goes_to_chronicle", False),
         can_be_chronicled=data.get("can_be_chronicled", False),
@@ -390,6 +453,7 @@ def _card_from_dict(card_id: str, data: dict, nation: Nation) -> NationCard:
         gives_disorder=data.get("gives_disorder", 0),
         labels=labels,
         can_be_reinforced=data.get("can_be_reinforced", False),
+        cannot_be_reinforcement=data.get("cannot_be_reinforcement", False),
         sends_to_chronicle=data.get("sends_to_chronicle", 0),
         goes_to_chronicle=data.get("goes_to_chronicle", False),
         can_be_chronicled=data.get("can_be_chronicled", False),

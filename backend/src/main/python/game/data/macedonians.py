@@ -41,7 +41,12 @@ DECK: dict = {
                    {"type": "steal_resource", "resource_type": "MATERIAL", "amount": 2},
                    {"type": "return_exploit_token_optional"},
                ]},
-    "1MAK12": {"name": "Величие",     "subtype": "boost"},
+    "1MAK12": {"name": "Величие", "subtype": "boost",
+               "cannot_be_reinforcement": True,
+               "on_play_actions": [
+                   {"type": "destroy_from_play_area", "category": "region", "count": 3},
+                   {"type": "look_at_glory_deck", "look_count": 2, "take_count": 1},
+               ]},
     # START cards — go to personal deck
     "1MAK13": {"name": "Реформы", "subtype": "start", "period": "barbarism",
                "on_play_actions": [{"type": "choice", "options": [

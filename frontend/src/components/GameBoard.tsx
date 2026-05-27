@@ -287,7 +287,7 @@ function Btn({ label, onClick, color = '#2ecc71', disabled = false, active = fal
 }
 
 export default function GameBoard() {
-  const { gameState: gs, loading, error, playCard, exploitCard, doInnovation, doRevolution, endTurn, acquireCard, accelerateProgress, resetGame, undoAction, makeChoice, selectAppropriateCategory, appropriateFromDeck, chronicleChoice, reinforceChoice, reinforceWithCard, playFromDiscard, placeUpgradeToken, resolveDrawFromDeck, returnExploitToken } = useGameStore();
+  const { gameState: gs, loading, error, playCard, exploitCard, doInnovation, doRevolution, endTurn, acquireCard, accelerateProgress, resetGame, undoAction, makeChoice, selectAppropriateCategory, appropriateFromDeck, chronicleChoice, reinforceChoice, reinforceWithCard, playFromDiscard, placeUpgradeToken, resolveDrawFromDeck, returnExploitToken, destroyCards, gloryDeckTake, exileFromMarket, chronicleFromDiscard, recallToAvoidAttack, moveDiscardToDeck, sacredPathExploit, sacredPathExchange } = useGameStore();
   const [selectedCards, setSelectedCards] = useState<string[]>([]);
   const [scores, setScores] = useState<{ player: number; bot: number } | null>(null);
   const [previewCard, setPreviewCard] = useState<CardInfo | null>(null);
@@ -331,6 +331,14 @@ export default function GameBoard() {
     }
   }, [gs?.round_number, turnAction, isPlayerTurn]);
 
+  // Reset selected cards when transitioning out of destroy mode
+  const prevDestroyMode = React.useRef(false);
+  useEffect(() => {
+    const now = gs?.pending_choice?.type === 'destroy_from_play_area';
+    if (prevDestroyMode.current && !now) setSelectedCards([]);
+    prevDestroyMode.current = !!now;
+  }, [gs?.pending_choice?.type]);
+
 
   if (!gs) return null;
   const { player, bot, shared } = gs;
@@ -368,7 +376,7 @@ export default function GameBoard() {
     ? gs.pending_choice as { type: string; card_id: string; card_name: string }
     : null;
   const pendingReinforceSelect = gs.pending_choice?.type === 'reinforce_select_card'
-    ? gs.pending_choice as { type: string; target_card_id: string; target_card_name: string }
+    ? gs.pending_choice as { type: string; target_card_id: string; target_card_name: string; excluded_card_ids?: string[] }
     : null;
   const isReinforceSelectMode = pendingReinforceSelect != null;
 
@@ -382,6 +390,47 @@ export default function GameBoard() {
   const pendingReturnExploit = gs.pending_choice?.type === 'return_exploit_token_optional'
     ? gs.pending_choice as { type: string; available_cards: CardInfo[] }
     : null;
+
+  // Pending эксплуатация 1REG14 «Священный путь»
+  const pendingSacredPathExploit = gs.pending_choice?.type === 'sacred_path_exploit_choice'
+    ? gs.pending_choice as { type: string; top_boost_card: CardInfo | null; source_card_id: string; source_card_name: string }
+    : null;
+  const pendingSacredPathExchange = gs.pending_choice?.type === 'sacred_path_exchange_choice'
+    ? gs.pending_choice as { type: string; top_boost_card: CardInfo; hand_cards: CardInfo[] }
+    : null;
+
+  // Pending перемещение карты из сброса на верх колоды
+  const pendingMoveDiscardToDeck = gs.pending_choice?.type === 'move_discard_to_deck'
+    ? gs.pending_choice as { type: string; optional: boolean; available_cards: CardInfo[] }
+    : null;
+
+  // Pending занесение из сброса в летопись
+  const pendingChronicleFromDiscard = gs.pending_choice?.type === 'chronicle_from_discard'
+    ? gs.pending_choice as { type: string; optional: boolean; available_cards: CardInfo[] }
+    : null;
+
+  // Pending изгнание с рынка
+  const pendingExileFromMarket = gs.pending_choice?.type === 'exile_from_market'
+    ? gs.pending_choice as { type: string; eligible_slot_indices: number[] }
+    : null;
+  const isExileMode = pendingExileFromMarket != null;
+
+  // Pending разрушение карт из игровой области
+  const pendingDestroyFromPlayArea = gs.pending_choice?.type === 'destroy_from_play_area'
+    ? gs.pending_choice as { type: string; category: string; count: number; available_cards: CardInfo[] }
+    : null;
+  const isDestroyMode = pendingDestroyFromPlayArea != null;
+
+  // Pending отзыв карты для избежания атаки бота
+  const pendingRecallToAvoidAttack = gs.pending_choice?.type === 'recall_to_avoid_attack'
+    ? gs.pending_choice as { type: string; attack_card_id: string; attack_card_name: string; recall_card_id: string }
+    : null;
+
+  // Pending просмотр колоды славы
+  const pendingGloryDeckLook = gs.pending_choice?.type === 'glory_deck_look'
+    ? gs.pending_choice as { type: string; look_count: number; take_count: number; revealed_cards: CardInfo[] }
+    : null;
+
   const exploitsUsedIds: string[] = gs.player?.exploits_used_ids ?? [];
 
   function toggleCard(id: string) {
@@ -472,7 +521,165 @@ export default function GameBoard() {
         </div>
       )}
 
+      {/* Эксплуатация 1REG14: решение разрушить или нет */}
+      {pendingSacredPathExploit && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.82)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 800 }}>
+          <div style={{ background: 'linear-gradient(135deg,#0d1220,#0a0e1a)', border: '2px solid #f1c40f', borderRadius: 14, padding: '24px 28px', maxWidth: 480, width: '95%' }}>
+            <div style={{ fontSize: 13, color: '#f1c40f', letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: 6 }}>Священный путь — Эксплуатация</div>
+            {pendingSacredPathExploit.top_boost_card ? (
+              <div style={{ fontSize: 12, color: '#9098b8', marginBottom: 16 }}>
+                Верхняя карта колоды усиления:{' '}
+                <span style={{ color: '#f1c40f', fontWeight: 700 }}>«{pendingSacredPathExploit.top_boost_card.name}»</span>.
+                <br />Разрушить «{pendingSacredPathExploit.source_card_name}» и обменять карту из руки на неё?
+              </div>
+            ) : (
+              <div style={{ fontSize: 12, color: '#9098b8', marginBottom: 16 }}>
+                Колода усиления пуста. Разрушить «{pendingSacredPathExploit.source_card_name}»?
+              </div>
+            )}
+            <div style={{ display: 'flex', gap: 10 }}>
+              {pendingSacredPathExploit.top_boost_card && (
+                <button onClick={() => sacredPathExploit(true)} style={{
+                  background: 'linear-gradient(135deg,#1a3a1a,#0d2210)', border: '1px solid #f1c40f',
+                  borderRadius: 6, color: '#f1c40f', padding: '7px 18px', cursor: 'pointer', fontSize: 11, fontWeight: 600,
+                }}>
+                  ☠ Разрушить и обменять
+                </button>
+              )}
+              <button onClick={() => sacredPathExploit(false)} style={{
+                background: '#111', border: '1px solid #444', borderRadius: 6, color: '#888', padding: '7px 16px', cursor: 'pointer', fontSize: 11,
+              }}>
+                Пропустить
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Эксплуатация 1REG14: выбор карты из руки для обмена */}
+      {pendingSacredPathExchange && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.82)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 800 }}>
+          <div style={{
+            background: 'linear-gradient(135deg,#0d1220,#0a0e1a)', border: '2px solid #f1c40f', borderRadius: 14,
+            padding: '24px 28px',
+            maxWidth: `${Math.max(1, pendingSacredPathExchange.hand_cards.length) * (180 + 10) + 56 + 4}px`,
+            width: '95%',
+          }}>
+            <div style={{ fontSize: 13, color: '#f1c40f', letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: 6 }}>Обмен карт</div>
+            <div style={{ fontSize: 12, color: '#9098b8', marginBottom: 18 }}>
+              Выберите карту из руки, которую отправите в сброс. Взамен получите{' '}
+              <span style={{ color: '#f1c40f', fontWeight: 700 }}>«{pendingSacredPathExchange.top_boost_card.name}»</span>:
+            </div>
+            {pendingSacredPathExchange.hand_cards.length === 0 ? (
+              <div style={{ fontSize: 12, color: '#e74c3c', marginBottom: 16 }}>Рука пуста.</div>
+            ) : (
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 4 }}>
+                {pendingSacredPathExchange.hand_cards.map(c => (
+                  <CardView
+                    key={c.id}
+                    card={c}
+                    size="xlarge"
+                    onClick={() => sacredPathExchange(c.id)}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Перемещение карты из сброса на верх колоды */}
+      {pendingMoveDiscardToDeck && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.82)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 800 }}>
+          <div style={{
+            background: 'linear-gradient(135deg,#0d1220,#0a0e1a)', border: '2px solid #2ecc71', borderRadius: 14,
+            padding: '24px 28px',
+            maxWidth: `${Math.max(1, pendingMoveDiscardToDeck.available_cards.length) * (180 + 10) + 56 + 4}px`,
+            width: '95%',
+          }}>
+            <div style={{ fontSize: 13, color: '#2ecc71', letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: 6 }}>Верх колоды</div>
+            <div style={{ fontSize: 12, color: '#9098b8', marginBottom: 18 }}>
+              {pendingMoveDiscardToDeck.optional
+                ? 'Вы МОЖЕТЕ переместить карту из личного сброса на верх личной колоды:'
+                : 'Выберите карту из личного сброса для перемещения на верх личной колоды:'}
+            </div>
+            {pendingMoveDiscardToDeck.available_cards.length === 0 ? (
+              <div style={{ fontSize: 12, color: '#e74c3c', marginBottom: 16 }}>Личный сброс пуст.</div>
+            ) : (
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 16 }}>
+                {pendingMoveDiscardToDeck.available_cards.map(c => (
+                  <CardView
+                    key={c.id}
+                    card={c}
+                    size="xlarge"
+                    onClick={() => moveDiscardToDeck(c.id)}
+                  />
+                ))}
+              </div>
+            )}
+            <div style={{ display: 'flex', gap: 10 }}>
+              {pendingMoveDiscardToDeck.optional && (
+                <button
+                  onClick={() => moveDiscardToDeck(null)}
+                  style={{ background: '#111', border: '1px solid #444', borderRadius: 6, color: '#888', padding: '6px 16px', cursor: 'pointer', fontSize: 11 }}
+                >
+                  Пропустить
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Play from discard modal */}
+      {pendingChronicleFromDiscard && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.82)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 800 }}>
+          <div style={{
+            background: 'linear-gradient(135deg,#0d1220,#0a0e1a)', border: '2px solid #c0392b', borderRadius: 14,
+            padding: '24px 28px',
+            maxWidth: `${Math.max(1, pendingChronicleFromDiscard.available_cards.length) * (180 + 10) + 56 + 4}px`,
+            width: '95%',
+          }}>
+            <div style={{ fontSize: 13, color: '#c0392b', letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: 6 }}>Летопись</div>
+            <div style={{ fontSize: 12, color: '#9098b8', marginBottom: 18 }}>
+              {pendingChronicleFromDiscard.optional
+                ? 'Вы МОЖЕТЕ занести карту из личного сброса в летопись:'
+                : 'Выберите карту из личного сброса для занесения в летопись:'}
+            </div>
+            {pendingChronicleFromDiscard.available_cards.length === 0 ? (
+              <div style={{ fontSize: 12, color: '#e74c3c', marginBottom: 16 }}>Личный сброс пуст.</div>
+            ) : (
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 16 }}>
+                {pendingChronicleFromDiscard.available_cards.map(c => (
+                  <CardView
+                    key={c.id}
+                    card={c}
+                    size="xlarge"
+                    onClick={() => chronicleFromDiscard(c.id)}
+                  />
+                ))}
+              </div>
+            )}
+            <div style={{ display: 'flex', gap: 10 }}>
+              {pendingChronicleFromDiscard.optional && (
+                <button
+                  onClick={() => chronicleFromDiscard(null)}
+                  style={{ background: 'transparent', border: '1px solid #555', borderRadius: 8, color: '#aaa', padding: '8px 20px', cursor: 'pointer', fontSize: 12 }}
+                >
+                  Пропустить
+                </button>
+              )}
+              <button
+                onClick={() => undoAction()}
+                style={{ background: 'transparent', border: '1px solid #3a3d55', borderRadius: 8, color: '#9098b8', padding: '8px 20px', cursor: 'pointer', fontSize: 12 }}
+              >
+                Отмена (undo)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {pendingPlayFromDiscard && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.82)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 800 }}>
           <div style={{
@@ -667,22 +874,30 @@ export default function GameBoard() {
           {/* Play area */}
           {(player?.play_area ?? []).length > 0 && (
             <div>
-              <div style={{ fontSize: 9, color: '#555', marginBottom: 5, letterSpacing: '.08em', textTransform: 'uppercase' }}>Разыгранные</div>
+              <div style={{ fontSize: 9, color: isDestroyMode ? '#e74c3c' : '#555', marginBottom: 5, letterSpacing: '.08em', textTransform: 'uppercase' }}>
+                {isDestroyMode
+                  ? `☠ Выберите ${pendingDestroyFromPlayArea!.count} карты для разрушения (выбрано: ${selectedCards.length})`
+                  : 'Разыгранные'}
+              </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 6, alignItems: 'start' }}>
                 {(player?.play_area ?? []).map(c => {
                   const isPreview = previewCard?.id === c.id;
                   const reinf = c.reinforcement ?? null;
                   const isExploited = exploitsUsedIds.includes(c.id);
-                  const canExploit = !!c.is_exploit && isPlayerTurn && !isExploited;
+                  const canExploit = !!c.is_exploit && isPlayerTurn && !isExploited && !isDestroyMode;
+                  const isDestroyable = isDestroyMode && (c.categories ?? []).includes(pendingDestroyFromPlayArea!.category as any);
+                  const isDestroySelected = isDestroyMode && selectedCards.includes(c.id);
                   return (
                     <div key={c.id} ref={isPreview ? previewRef : undefined}
                       style={{ zIndex: isPreview ? 200 : undefined, transform: isPreview ? 'scale(2)' : undefined, transformOrigin: 'top left', transition: 'transform 0.15s', position: 'relative' }}>
                       <CardView card={c} size="small"
-                        overrideStyle={{ width: '100%', minHeight: 'unset', aspectRatio: '3/4', borderRadius: reinf ? '8px 8px 0 0' : undefined }}
-                        selected={isPreview && canExploit}
-                        dimmed={isExploited}
+                        overrideStyle={{ width: '100%', minHeight: 'unset', aspectRatio: '3/4', borderRadius: reinf ? '8px 8px 0 0' : undefined, outline: isDestroySelected ? '2px solid #e74c3c' : undefined }}
+                        selected={isDestroySelected || (isPreview && canExploit)}
+                        dimmed={isExploited || (isDestroyMode && !isDestroyable)}
                         onClick={() => {
-                          if (isPreview) {
+                          if (isDestroyMode) {
+                            if (isDestroyable) toggleCard(c.id);
+                          } else if (isPreview) {
                             if (canExploit) exploitCard(c.id);
                             setPreviewCard(null);
                           } else {
@@ -895,6 +1110,78 @@ export default function GameBoard() {
             </div>
           )}
 
+          {/* Изгнание с рынка */}
+          {isPlayerTurn && isExileMode && (
+            <div style={{ background: '#0d1020', border: '1px solid #7d3c98', borderRadius: 9, padding: '10px 12px' }}>
+              <div style={{ fontSize: 9, color: '#a569bd', marginBottom: 6, letterSpacing: '.08em', textTransform: 'uppercase' }}>Изгнание</div>
+              <div style={{ fontSize: 10, color: '#aaa' }}>
+                Выберите карту на рынке без жетонов прогресса — она навсегда покинет игру.
+              </div>
+            </div>
+          )}
+
+          {/* Разрушение карт из игровой области */}
+          {isPlayerTurn && isDestroyMode && (
+            <div style={{ background: '#0d1020', border: '1px solid #e74c3c', borderRadius: 9, padding: '10px 12px' }}>
+              <div style={{ fontSize: 9, color: '#e74c3c', marginBottom: 6, letterSpacing: '.08em', textTransform: 'uppercase' }}>Разрушение</div>
+              <div style={{ fontSize: 10, color: '#aaa', marginBottom: 8 }}>
+                Выберите {pendingDestroyFromPlayArea!.count} карты «{pendingDestroyFromPlayArea!.category}» из игровой области (выбрано: {selectedCards.length})
+              </div>
+              <Btn
+                label={`Разрушить (${selectedCards.length}/${pendingDestroyFromPlayArea!.count})`}
+                onClick={() => { destroyCards(selectedCards); setSelectedCards([]); }}
+                color="#e74c3c"
+                icon="☠"
+                disabled={selectedCards.length !== pendingDestroyFromPlayArea!.count}
+              />
+            </div>
+          )}
+
+          {/* Просмотр колоды славы */}
+          {isPlayerTurn && pendingGloryDeckLook && (
+            <div style={{ background: '#0d1020', border: '1px solid #f1c40f', borderRadius: 9, padding: '10px 12px' }}>
+              <div style={{ fontSize: 9, color: '#f1c40f', marginBottom: 6, letterSpacing: '.08em', textTransform: 'uppercase' }}>Колода Славы</div>
+              <div style={{ fontSize: 10, color: '#aaa', marginBottom: 8 }}>
+                Выберите 1 карту, чтобы взять в руку. Вторая вернётся в колоду.
+              </div>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {pendingGloryDeckLook.revealed_cards.map(c => (
+                  <button key={c.id} onClick={() => gloryDeckTake(c.id)} style={{
+                    background: '#1a1500', border: '1px solid #f1c40f', borderRadius: 6,
+                    color: '#f1c40f', padding: '6px 14px', cursor: 'pointer', fontSize: 11, fontWeight: 600,
+                  }}>
+                    {c.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Пассивный эффект 1REG12: отзыв карты при атаке бота */}
+          {pendingRecallToAvoidAttack && (
+            <div style={{ background: '#0d1020', border: '2px solid #e74c3c', borderRadius: 9, padding: '10px 14px' }}>
+              <div style={{ fontSize: 9, color: '#e74c3c', marginBottom: 6, letterSpacing: '.08em', textTransform: 'uppercase' }}>Атака противника</div>
+              <div style={{ fontSize: 11, color: '#e8e8f0', marginBottom: 10 }}>
+                Бот сыграл атаку <span style={{ color: '#e74c3c', fontWeight: 700 }}>«{pendingRecallToAvoidAttack.attack_card_name}»</span>.
+                Вы можете отозвать «Мыс» обратно в руку, чтобы избежать атаки.
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button onClick={() => recallToAvoidAttack(true)} style={{
+                  background: 'linear-gradient(135deg,#1a3a2a,#0d2117)', border: '1px solid #2ecc71',
+                  borderRadius: 6, color: '#2ecc71', padding: '6px 14px', cursor: 'pointer', fontSize: 11, fontWeight: 600,
+                }}>
+                  ↩ Отозвать «Мыс»
+                </button>
+                <button onClick={() => recallToAvoidAttack(false)} style={{
+                  background: 'linear-gradient(135deg,#2a1a1a,#1a0d0d)', border: '1px solid #e74c3c',
+                  borderRadius: 6, color: '#e74c3c', padding: '6px 14px', cursor: 'pointer', fontSize: 11, fontWeight: 600,
+                }}>
+                  Принять атаку
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Режим присвоения: выбор категории */}
           {isPlayerTurn && pendingAppropriateCategorySelect && (
             <div style={{ background: '#0d1020', border: '1px solid #e67e22', borderRadius: 9, padding: '10px 12px' }}>
@@ -983,7 +1270,8 @@ export default function GameBoard() {
                 const isDisorder = (card.card_type === 'disorder') || (card.categories?.includes('disorder') ?? false);
                 const isRevSelectable = revMode && isDisorder;
                 const isRevSelected = revMode && selectedCards.includes(card.id);
-                const dimmedCard = (isInnovatePending && isPlayerTurn) || (revMode && !isDisorder) || (periodBlocked && !isReinforceSelectMode);
+                const isReinforceExcluded = isReinforceSelectMode && (pendingReinforceSelect!.excluded_card_ids ?? []).includes(card.id);
+                const dimmedCard = (isInnovatePending && isPlayerTurn) || (revMode && !isDisorder) || (periodBlocked && !isReinforceSelectMode) || isReinforceExcluded;
                 return (
                   <div key={card.id} ref={isPreview ? previewRef : undefined}
                     onClickCapture={(e) => {
@@ -996,10 +1284,10 @@ export default function GameBoard() {
                     style={{ position: 'relative', zIndex: isPreview ? 200 : undefined, transform: isPreview ? 'scale(1.5)' : undefined, transformOrigin: isPreview ? previewOrigin : 'top left', transition: 'transform 0.15s' }}>
                     <CardView card={card} size="xlarge"
                       overrideStyle={{ width: '100%', minHeight: 'unset', aspectRatio: '3/4' }}
-                      selected={(isDiscardPhase && selectedCards.includes(card.id)) || isRevSelected || (isReinforceSelectMode && isPreview)}
+                      selected={(isDiscardPhase && selectedCards.includes(card.id)) || isRevSelected || (isReinforceSelectMode && isPreview && !isReinforceExcluded)}
                       onClick={() => {
                         if (isReinforceSelectMode) {
-                          reinforceWithCard(card.id);
+                          if (!isReinforceExcluded) reinforceWithCard(card.id);
                         } else if (isDiscardPhase) {
                           toggleCard(card.id);
                         } else if (revMode) {
@@ -1097,14 +1385,16 @@ export default function GameBoard() {
                             (slot.card.categories?.some(c => pendingAcquire.allowed_categories.includes(c)) ?? false);
                           const appropriateAllowed = !pendingAppropriate ||
                             (slot.card.categories?.some(c => pendingAppropriate.allowed_categories.includes(c)) ?? false);
-                          const isMarketMode = isAcquireMode || isAppropriateMode;
-                          const marketAllowed = isAcquireMode ? acquireAllowed : appropriateAllowed;
+                          const exileAllowed = isExileMode && (pendingExileFromMarket!.eligible_slot_indices.includes(idx));
+                          const isMarketMode = isAcquireMode || isAppropriateMode || isExileMode;
+                          const marketAllowed = isAcquireMode ? acquireAllowed : isExileMode ? exileAllowed : appropriateAllowed;
                           return (
                             <CardView card={slot.card} size="large"
                               dimmed={isMarketMode && isPlayerTurn && !marketAllowed}
                               onClick={() => {
                                 setPreviewCard(previewCard?.id === slot.card!.id ? null : slot.card);
-                                if (isAcquireMode && isPlayerTurn && acquireAllowed) acquireCard(idx);
+                                if (isExileMode && isPlayerTurn && exileAllowed) exileFromMarket(idx);
+                                else if (isAcquireMode && isPlayerTurn && acquireAllowed) acquireCard(idx);
                                 else if (isAppropriateMode && isPlayerTurn && appropriateAllowed) acquireCard(idx);
                               }}
                               badge={slot.upgrade_tokens > 0 ? (
@@ -1137,6 +1427,12 @@ export default function GameBoard() {
                           return slotAllowed
                             ? <button onClick={() => acquireCard(idx)} style={{ background: 'linear-gradient(135deg,#1abc9c,#16a085)', border: 'none', borderRadius: 5, color: '#fff', fontSize: 9, padding: '3px 8px', cursor: 'pointer', fontWeight: 600 }}>Приобрести</button>
                             : <div style={{ fontSize: 8, color: '#555', padding: '2px 0' }}>Недоступно</div>;
+                        }
+                        if (isExileMode) {
+                          const eligible = pendingExileFromMarket!.eligible_slot_indices.includes(idx);
+                          return eligible
+                            ? <button onClick={() => exileFromMarket(idx)} style={{ background: 'linear-gradient(135deg,#7d3c98,#6c3483)', border: 'none', borderRadius: 5, color: '#fff', fontSize: 9, padding: '3px 8px', cursor: 'pointer', fontWeight: 600 }}>Изгнать</button>
+                            : <div style={{ fontSize: 8, color: '#555', padding: '2px 0' }}>Есть жетоны</div>;
                         }
                         if (isAppropriateMode) {
                           const slotAllowed = !pendingAppropriate ||

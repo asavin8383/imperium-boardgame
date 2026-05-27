@@ -38,6 +38,7 @@ export interface CardInfo {
   gives_disorder?: number;
   // Reinforcement
   can_be_reinforced?: boolean;
+  cannot_be_reinforcement?: boolean;
   // Chronicle
   sends_to_chronicle?: number;
   goes_to_chronicle?: boolean;

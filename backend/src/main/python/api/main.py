@@ -102,6 +102,38 @@ class PlaceUpgradeTokenRequest(BaseModel):
     slot_index: int
 
 
+class RecallToAvoidAttackRequest(BaseModel):
+    recall: bool
+
+
+class ChronicleFromDiscardRequest(BaseModel):
+    card_id: Optional[str] = None  # None = пропустить (только если optional)
+
+
+class ExileFromMarketRequest(BaseModel):
+    slot_index: int
+
+
+class DestroyCardsRequest(BaseModel):
+    card_ids: List[str]
+
+
+class GloryDeckTakeRequest(BaseModel):
+    card_id: str
+
+
+class MoveDiscardToDeckRequest(BaseModel):
+    card_id: Optional[str] = None  # None = пропустить (только если optional)
+
+
+class SacredPathExploitRequest(BaseModel):
+    destroy: bool
+
+
+class SacredPathExchangeRequest(BaseModel):
+    hand_card_id: str
+
+
 # ── ENDPOINTS ──────────────────────────────────────────────────────────────────
 
 @app.get("/api/nations")
@@ -335,6 +367,78 @@ def play_from_discard(game_id: str, req: PlayFromDiscardRequest):
 def place_upgrade_token(game_id: str, req: PlaceUpgradeTokenRequest):
     try:
         state = game_session.place_upgrade_token(game_id, req.slot_index)
+        return {"state": state.to_dict()}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/games/{game_id}/recall-to-avoid-attack")
+def recall_to_avoid_attack(game_id: str, req: RecallToAvoidAttackRequest):
+    try:
+        state = game_session.resolve_recall_to_avoid_attack(game_id, req.recall)
+        return {"state": state.to_dict()}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/games/{game_id}/chronicle-from-discard")
+def chronicle_from_discard(game_id: str, req: ChronicleFromDiscardRequest):
+    try:
+        state = game_session.chronicle_card_from_discard(game_id, req.card_id)
+        return {"state": state.to_dict()}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/games/{game_id}/exile-from-market")
+def exile_from_market(game_id: str, req: ExileFromMarketRequest):
+    try:
+        state = game_session.exile_card_from_market(game_id, req.slot_index)
+        return {"state": state.to_dict()}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/games/{game_id}/destroy-cards")
+def destroy_cards(game_id: str, req: DestroyCardsRequest):
+    try:
+        state = game_session.select_destroy_cards(game_id, req.card_ids)
+        return {"state": state.to_dict()}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/games/{game_id}/glory-deck-take")
+def glory_deck_take(game_id: str, req: GloryDeckTakeRequest):
+    try:
+        state = game_session.select_glory_deck_card(game_id, req.card_id)
+        return {"state": state.to_dict()}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/games/{game_id}/sacred-path-exploit")
+def sacred_path_exploit(game_id: str, req: SacredPathExploitRequest):
+    try:
+        state = game_session.resolve_sacred_path_exploit(game_id, req.destroy)
+        return {"state": state.to_dict()}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/games/{game_id}/sacred-path-exchange")
+def sacred_path_exchange(game_id: str, req: SacredPathExchangeRequest):
+    try:
+        state = game_session.resolve_sacred_path_exchange(game_id, req.hand_card_id)
+        return {"state": state.to_dict()}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/games/{game_id}/move-discard-to-deck")
+def move_discard_to_deck(game_id: str, req: MoveDiscardToDeckRequest):
+    try:
+        state = game_session.move_discard_to_deck_card(game_id, req.card_id)
         return {"state": state.to_dict()}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

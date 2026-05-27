@@ -122,6 +122,46 @@ export async function placeUpgradeToken(gameId: string, slotIndex: number): Prom
   return res.data.state;
 }
 
+export async function recallToAvoidAttack(gameId: string, recall: boolean): Promise<GameState> {
+  const res = await api.post(`/api/games/${gameId}/recall-to-avoid-attack`, { recall });
+  return res.data.state;
+}
+
+export async function chronicleFromDiscard(gameId: string, cardId: string | null): Promise<GameState> {
+  const res = await api.post(`/api/games/${gameId}/chronicle-from-discard`, { card_id: cardId });
+  return res.data.state;
+}
+
+export async function exileFromMarket(gameId: string, slotIndex: number): Promise<GameState> {
+  const res = await api.post(`/api/games/${gameId}/exile-from-market`, { slot_index: slotIndex });
+  return res.data.state;
+}
+
+export async function destroyCards(gameId: string, cardIds: string[]): Promise<GameState> {
+  const res = await api.post(`/api/games/${gameId}/destroy-cards`, { card_ids: cardIds });
+  return res.data.state;
+}
+
+export async function gloryDeckTake(gameId: string, cardId: string): Promise<GameState> {
+  const res = await api.post(`/api/games/${gameId}/glory-deck-take`, { card_id: cardId });
+  return res.data.state;
+}
+
+export async function moveDiscardToDeck(gameId: string, cardId: string | null): Promise<GameState> {
+  const res = await api.post(`/api/games/${gameId}/move-discard-to-deck`, { card_id: cardId });
+  return res.data.state;
+}
+
+export async function sacredPathExploit(gameId: string, destroy: boolean): Promise<GameState> {
+  const res = await api.post(`/api/games/${gameId}/sacred-path-exploit`, { destroy });
+  return res.data.state;
+}
+
+export async function sacredPathExchange(gameId: string, handCardId: string): Promise<GameState> {
+  const res = await api.post(`/api/games/${gameId}/sacred-path-exchange`, { hand_card_id: handCardId });
+  return res.data.state;
+}
+
 export async function undoAction(gameId: string): Promise<GameState> {
   const res = await api.post(`/api/games/${gameId}/undo`);
   return res.data.state;
