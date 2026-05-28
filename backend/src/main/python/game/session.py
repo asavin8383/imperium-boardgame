@@ -203,6 +203,14 @@ def resolve_recall_to_avoid_attack(game_id: str, recall: bool) -> GameState:
     return state
 
 
+def chronicle_card_from_hand(game_id: str, card_id=None) -> GameState:
+    state = _require(game_id)
+    _snapshot(game_id, state)
+    state = _engine.chronicle_card_from_hand(state, card_id)
+    save_game(state)
+    return state
+
+
 def chronicle_card_from_discard(game_id: str, card_id: str) -> GameState:
     state = _require(game_id)
     _snapshot(game_id, state)
@@ -251,10 +259,98 @@ def move_discard_to_deck_card(game_id: str, card_id) -> GameState:
     return state
 
 
+def resolve_return_card_to_deck_top(game_id: str, card_id: str) -> GameState:
+    state = _require(game_id)
+    _snapshot(game_id, state)
+    state = _engine.resolve_return_card_to_deck_top(state, card_id)
+    save_game(state)
+    return state
+
+
 def select_glory_deck_card(game_id: str, card_id: str) -> GameState:
     state = _require(game_id)
     _snapshot(game_id, state)
     state = _engine.select_glory_deck_card(state, card_id)
+    save_game(state)
+    return state
+
+
+def resolve_solstice_gain_progress(game_id: str, take: bool) -> GameState:
+    state = _require(game_id)
+    _snapshot(game_id, state)
+    state = _engine.resolve_solstice_gain_progress(state, take)
+    save_game(state)
+    return state
+
+
+def resolve_solstice_fate(game_id: str, choice: str) -> GameState:
+    state = _require(game_id)
+    _snapshot(game_id, state)
+    state = _engine.resolve_solstice_fate(state, choice)
+    save_game(state)
+    return state
+
+
+def resolve_solstice_select_card(game_id: str, card_id: str) -> GameState:
+    state = _require(game_id)
+    _snapshot(game_id, state)
+    state = _engine.resolve_solstice_select_card(state, card_id)
+    save_game(state)
+    return state
+
+
+def resolve_solstice_discard_hand_return_disorder(game_id: str, hand_card_id, disorder_card_id) -> GameState:
+    state = _require(game_id)
+    _snapshot(game_id, state)
+    state = _engine.resolve_solstice_discard_hand_return_disorder(state, hand_card_id, disorder_card_id)
+    save_game(state)
+    return state
+
+
+def resolve_guess_deck_category(game_id: str, category: str) -> GameState:
+    state = _require(game_id)
+    _snapshot(game_id, state)
+    state = _engine.resolve_guess_deck_category(state, category)
+    save_game(state)
+    return state
+
+
+def resolve_exploit_recall_choice(game_id: str, option_index: int, card_id: str) -> GameState:
+    state = _require(game_id)
+    _snapshot(game_id, state)
+    state = _engine.resolve_exploit_recall_choice(state, option_index, card_id)
+    save_game(state)
+    return state
+
+
+def resolve_draw_discard_choice(game_id: str, card_id: str) -> GameState:
+    state = _require(game_id)
+    _snapshot(game_id, state)
+    state = _engine.resolve_draw_discard_choice(state, card_id)
+    save_game(state)
+    return state
+
+
+def resolve_solstice_discard_for_reward(game_id: str, hand_card_id=None) -> GameState:
+    state = _require(game_id)
+    _snapshot(game_id, state)
+    state = _engine.resolve_solstice_discard_for_reward(state, hand_card_id)
+    save_game(state)
+    return state
+
+
+def resolve_solstice_discard_reward_choice(game_id: str, option_index: int) -> GameState:
+    state = _require(game_id)
+    _snapshot(game_id, state)
+    state = _engine.resolve_solstice_discard_reward_choice(state, option_index)
+    save_game(state)
+    return state
+
+
+def resolve_solstice_choice(game_id: str, option_index: int, card_ids=None) -> GameState:
+    state = _require(game_id)
+    _snapshot(game_id, state)
+    state = _engine.resolve_solstice_choice(state, option_index, card_ids)
     save_game(state)
     return state
 

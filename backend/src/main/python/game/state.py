@@ -149,6 +149,7 @@ def _card_info(card: Card) -> dict:
         "can_be_chronicled": card.can_be_chronicled,
         "exploit_actions": serialized_exploit_actions,
         "labels": [lb.value for lb in getattr(card, 'labels', [])],
+        "exploit_passive": getattr(card, 'exploit_passive', "") or None,
     }
 
 
@@ -242,6 +243,12 @@ class PlayerArea:
             for lb in getattr(card, 'labels', []):
                 key = lb.value
                 counts[key] = counts.get(key, 0) + 1
+        # Passive exploit: Порт — если эксплуатирована, 1 GRAIN = 3 SACK
+        if any(getattr(c, 'exploit_passive', '') == 'grain_to_sack_3'
+               for c in self.exploits_used_this_turn):
+            grain = counts.get('grain', 0)
+            if grain:
+                counts['sack'] = counts.get('sack', 0) + grain * 3
         return counts
 
 
@@ -375,6 +382,9 @@ class GameState:
 
     # Данные продолжения хода бота после разрешения отложенных атак
     pending_bot_turn_continuation: Optional[dict] = None
+
+    # Очередь карт с эффектами солнцестояния, ожидающих обработки
+    pending_solstice_card_ids: List[str] = field(default_factory=list)
 
     def add_log(self, message: str):
         self.log.append(message)

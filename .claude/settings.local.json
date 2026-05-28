@@ -14,7 +14,15 @@
       "Bash(python)",
       "Bash(find G:\\\\IdeaProjects\\\\imperium-boardgame:*)",
       "Read(//mnt/g/IdeaProjects/**)",
-      "Bash(find . -type f \\\\\\( -name \"*.py\" -o -name \"*.ts\" -o -name \"*.tsx\" \\\\\\) ! -path \"*/node_modules/*\" -exec grep -l \"Resourse\" {} \\\\;)"
+      "Bash(find . -type f \\\\\\( -name \"*.py\" -o -name \"*.ts\" -o -name \"*.tsx\" \\\\\\) ! -path \"*/node_modules/*\" -exec grep -l \"Resourse\" {} \\\\;)",
+      "Bash(python -m py_compile src/main/python/game/cards.py)",
+      "Bash(python -m py_compile src/main/python/game/engine.py)",
+      "Bash(python -m py_compile src/main/python/game/session.py)",
+      "Bash(python -m py_compile src/main/python/api/main.py)",
+      "Bash(python -m py_compile src/main/python/game/cards.py src/main/python/game/engine.py src/main/python/game/session.py src/main/python/api/main.py)",
+      "Bash(python3:*)",
+      "Bash(python -c \"from src.main.python.game.cards import DrawUpToNFromDeckAction, ReturnCardToDeckTopAction; from src.main.python.game.engine import GameEngine; print\\('imports OK'\\)\")",
+      "Bash(python -c \"from src.main.python.game.engine import GameEngine; print\\('OK'\\)\")"
     ]
   }
 }

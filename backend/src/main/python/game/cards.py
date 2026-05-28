@@ -28,6 +28,19 @@ class GainResourceAction:
 
 
 @dataclass
+class SpendResourceAction:
+    """Действие карты: игрок тратит N ресурсов указанного типа (проверяется до розыгрыша)."""
+    resource_type: ResourceType
+    amount: int
+
+
+@dataclass
+class BotGainsDisorderAction:
+    """Все остальные игроки (бот) берут N карт беспорядков из общей колоды."""
+    count: int = 1
+
+
+@dataclass
 class AcquireCardAction:
     """Действие карты: приобрести карту с рынка по категории."""
     allowed_categories: List[CardCategory]
@@ -52,6 +65,8 @@ class ChoiceOption:
     cost_population: int = 0
     cost_resource: int = 0
     action: object = None  # AcquireCardAction | AppropriateCardAction
+    opponent_gains_progress: int = 0  # бот получает N жетонов прогресса при выборе этого варианта
+    opponent_recalls_region: int = 0  # бот отзывает N карт регионов из игровой области при выборе этого варианта
 
 
 @dataclass
@@ -121,9 +136,86 @@ class SacredPathExploitAction:
 
 
 @dataclass
+class AllPlayersGainResourceAction:
+    """При эксплуатации все игроки получают ресурсы."""
+    resource_type: ResourceType
+    amount: int
+
+
+@dataclass
+class SolsticeOptionalGainProgressThenFateAction:
+    """Солнцестояние: МОЖНО взять N жетонов прогресса, затем обязательно разрушить или занести карту в летопись."""
+    amount: int = 2
+
+
+@dataclass
+class ExploitSpendResourceDrawCardAction:
+    """Потратить N ресурсов чтобы взять M карт из личной колоды."""
+    resource_type: ResourceType
+    resource_cost: int = 1
+    draw_count: int = 1
+
+
+@dataclass
+class SolsticeOptionalDiscardHandReturnDisorderAction:
+    """Солнцестояние: МОЖНО сбросить карту из руки, чтобы вернуть карту беспорядков из сброса в колоду беспорядков."""
+    pass
+
+
+@dataclass
 class MoveDiscardToDeckAction:
     """Переместить 1 карту из личного сброса на верх личной колоды (опционально)."""
     optional: bool = True
+
+
+@dataclass
+class DrawUpToNFromDeckAction:
+    """Взять до N карт с верха личной колоды в руку (берётся столько, сколько есть)."""
+    count: int = 3
+
+
+@dataclass
+class ReturnCardToDeckTopAction:
+    """Вернуть 1 карту из руки на верх личной колоды (обязательно)."""
+    pass
+
+
+@dataclass
+class SolsticeChoiceAction:
+    """Солнцестояние: выбор из нескольких опций (аналог ChoiceAction для on_play_actions)."""
+    options: List[dict] = field(default_factory=list)
+
+
+@dataclass
+class SolsticeOptionalDiscardForChoiceAction:
+    """Солнцестояние: МОЖНО сбросить карту из руки → выбрать 1 награду из опций."""
+    options: List[dict] = field(default_factory=list)
+
+
+@dataclass
+class DrawThenDiscardChoiceAction:
+    """Взять N карт из личной колоды в руку, затем обязательно сбросить M из них."""
+    draw_count: int = 2
+    discard_count: int = 1
+
+
+@dataclass
+class ChronicleFromHandAction:
+    """Занести карту из руки в летопись."""
+    optional: bool = False
+
+
+@dataclass
+class GuessDeckCategoryAction:
+    """Назвать категорию → вскрыть верхнюю карту основной колоды → в руку если совпало, иначе изгнать."""
+    allowed_categories: List[str] = field(default_factory=lambda: ["region", "origins", "civilization", "raid"])
+
+
+@dataclass
+class ExploitRecallLabelChoiceAction:
+    """Эксплуатация: выбор из опций 'отозвать карту с меткой X → получить ресурсы'."""
+    options: List[dict] = field(default_factory=list)
+    # options: [{"label": "water", "gains": [{"resource_type": "MATERIAL", "amount": 2}, ...]}, ...]
 
 
 @dataclass
@@ -174,6 +266,12 @@ def _parse_choice_action_inner(a: dict):
             resource_type=_RESOURCE_TYPE_BY_NAME[a["resource_type"]],
             amount=a.get("amount", 0),
         )
+    if at == "draw_up_to_n_from_deck":
+        return DrawUpToNFromDeckAction(count=a.get("count", 1))
+    if at == "chronicle_from_discard":
+        return ChronicleFromDiscardAction(optional=a.get("optional", False))
+    if at == "chronicle_from_hand":
+        return ChronicleFromHandAction(optional=a.get("optional", False))
     return None
 
 
@@ -190,6 +288,51 @@ def _parse_exploit_actions(data: dict) -> List:
             ))
         elif action_type == "sacred_path_exploit":
             actions.append(SacredPathExploitAction())
+        elif action_type == "all_players_gain_resource":
+            rt_name = a["resource_type"]
+            if rt_name not in _RESOURCE_TYPE_BY_NAME:
+                raise ValueError(f"Неизвестный ResourceType: '{rt_name}'")
+            actions.append(AllPlayersGainResourceAction(
+                resource_type=_RESOURCE_TYPE_BY_NAME[rt_name],
+                amount=a.get("amount", 1),
+            ))
+        elif action_type == "spend_resource_draw_card":
+            rt_name = a["resource_type"]
+            if rt_name not in _RESOURCE_TYPE_BY_NAME:
+                raise ValueError(f"Неизвестный ResourceType: '{rt_name}'")
+            actions.append(ExploitSpendResourceDrawCardAction(
+                resource_type=_RESOURCE_TYPE_BY_NAME[rt_name],
+                resource_cost=a.get("resource_cost", 1),
+                draw_count=a.get("draw_count", 1),
+            ))
+        elif action_type == "gain_resource":
+            rt_name = a["resource_type"]
+            if rt_name not in _RESOURCE_TYPE_BY_NAME:
+                raise ValueError(f"Неизвестный ResourceType: '{rt_name}'")
+            actions.append(GainResourceAction(
+                resource_type=_RESOURCE_TYPE_BY_NAME[rt_name],
+                amount=a.get("amount", 1),
+            ))
+        elif action_type == "recall_label_choice":
+            actions.append(ExploitRecallLabelChoiceAction(options=a.get("options", [])))
+    return actions
+
+
+def _parse_solstice_actions(data: dict) -> List:
+    """Разбирает список solstice_actions из словаря данных карты."""
+    actions = []
+    for a in data.get("solstice_actions", []):
+        action_type = a.get("type")
+        if action_type == "optional_gain_progress_then_fate":
+            actions.append(SolsticeOptionalGainProgressThenFateAction(
+                amount=a.get("amount", 2),
+            ))
+        elif action_type == "optional_discard_hand_return_disorder":
+            actions.append(SolsticeOptionalDiscardHandReturnDisorderAction())
+        elif action_type == "choice":
+            actions.append(SolsticeChoiceAction(options=a.get("options", [])))
+        elif action_type == "optional_discard_hand_for_choice":
+            actions.append(SolsticeOptionalDiscardForChoiceAction(options=a.get("options", [])))
     return actions
 
 
@@ -219,6 +362,8 @@ def _parse_on_play_actions(data: dict) -> List:
                         cost_population=opt.get("cost_population", 0),
                         cost_resource=opt.get("cost_resource", 0),
                         action=inner,
+                        opponent_gains_progress=opt.get("opponent_gains_progress", 0),
+                        opponent_recalls_region=opt.get("opponent_recalls_region", 0),
                     ))
             actions.append(ChoiceAction(options=options))
         elif action_type == "steal_resource":
@@ -253,6 +398,30 @@ def _parse_on_play_actions(data: dict) -> List:
             actions.append(MoveDiscardToDeckAction(
                 optional=a.get("optional", True),
             ))
+        elif action_type == "draw_up_to_n_from_deck":
+            actions.append(DrawUpToNFromDeckAction(count=a.get("count", 3)))
+        elif action_type == "return_card_to_deck_top":
+            actions.append(ReturnCardToDeckTopAction())
+        elif action_type == "spend_resource":
+            rt_name = a["resource_type"]
+            if rt_name not in _RESOURCE_TYPE_BY_NAME:
+                raise ValueError(f"Неизвестный ResourceType: '{rt_name}'")
+            actions.append(SpendResourceAction(
+                resource_type=_RESOURCE_TYPE_BY_NAME[rt_name],
+                amount=a["amount"],
+            ))
+        elif action_type == "bot_gains_disorder":
+            actions.append(BotGainsDisorderAction(count=a.get("count", 1)))
+        elif action_type == "draw_then_discard_choice":
+            actions.append(DrawThenDiscardChoiceAction(
+                draw_count=a.get("draw_count", 2),
+                discard_count=a.get("discard_count", 1),
+            ))
+        elif action_type == "guess_main_deck_category":
+            actions.append(GuessDeckCategoryAction(
+                allowed_categories=a.get("allowed_categories",
+                                         ["region", "origins", "civilization", "raid"]),
+            ))
         else:
             # Без type — считаем gain_resource (обратная совместимость)
             rt_name = a["resource_type"]
@@ -278,6 +447,7 @@ class Card:
     vp_fixed: int = 0               # фиксированные ПО (X)
     vp_condition: Optional[str] = None   # условные ПО (?)
     vp_per_condition: Optional[str] = None  # ПО за каждое выполнение (*) max 10
+    vp_per_condition_value: int = 1         # множитель ПО за одно выполнение условия
     vp_penalty: int = 0             # штрафные ПО (-)
     # Cost for progress cards
     progress_cost_resource: int = 0
@@ -310,10 +480,16 @@ class Card:
     sends_to_chronicle: int = 0   # отправляет N карт соперника/своих в летопись
     goes_to_chronicle: bool = False  # сама идёт в летопись после розыгрыша (обязательно, не в сброс)
     can_be_chronicled: bool = False  # игрок МОЖЕТ занести карту в летопись (на выбор)
+    vp_in_chronicle: Optional[int] = None  # ПО если карта находится в летописи
+    vp_out_of_chronicle: int = 0           # ПО если карта НЕ находится в летописи (только при vp_in_chronicle)
     # Actions executed on play
     on_play_actions: List[GainResourceAction] = field(default_factory=list)
     # Actions executed on exploitation
     exploit_actions: List = field(default_factory=list)
+    # Passive effect triggered when exploit token is placed on this card
+    exploit_passive: str = ""  # e.g. "grain_to_sack_3"
+    # Actions executed on solstice
+    solstice_actions: List = field(default_factory=list)
 
     def __hash__(self):
         return hash(self.id)
@@ -363,6 +539,7 @@ def _base_card_from_dict(card_id: str, data: dict) -> BaseCard:
         vp_fixed=data.get("vp_fixed", 0),
         vp_condition=data.get("vp_condition"),
         vp_per_condition=data.get("vp_per_condition"),
+        vp_per_condition_value=data.get("vp_per_condition_value", 1),
         vp_penalty=data.get("vp_penalty", 0),
         requires_action_token=data.get("requires_action_token", True),
         is_exploit=data.get("is_exploit", False),
@@ -383,8 +560,12 @@ def _base_card_from_dict(card_id: str, data: dict) -> BaseCard:
         sends_to_chronicle=data.get("sends_to_chronicle", 0),
         goes_to_chronicle=data.get("goes_to_chronicle", False),
         can_be_chronicled=data.get("can_be_chronicled", False),
+        vp_in_chronicle=data.get("vp_in_chronicle"),
+        vp_out_of_chronicle=data.get("vp_out_of_chronicle", 0),
         on_play_actions=_parse_on_play_actions(data),
         exploit_actions=_parse_exploit_actions(data),
+        solstice_actions=_parse_solstice_actions(data),
+        exploit_passive=data.get("exploit_passive", ""),
     )
 
 
@@ -434,6 +615,7 @@ def _card_from_dict(card_id: str, data: dict, nation: Nation) -> NationCard:
         vp_fixed=data.get("vp_fixed", 0),
         vp_condition=data.get("vp_condition"),
         vp_per_condition=data.get("vp_per_condition"),
+        vp_per_condition_value=data.get("vp_per_condition_value", 1),
         vp_penalty=data.get("vp_penalty", 0),
         progress_cost_resource=data.get("progress_cost_resource", 0),
         progress_cost_population=data.get("progress_cost_population", 0),
@@ -457,8 +639,12 @@ def _card_from_dict(card_id: str, data: dict, nation: Nation) -> NationCard:
         sends_to_chronicle=data.get("sends_to_chronicle", 0),
         goes_to_chronicle=data.get("goes_to_chronicle", False),
         can_be_chronicled=data.get("can_be_chronicled", False),
+        vp_in_chronicle=data.get("vp_in_chronicle"),
+        vp_out_of_chronicle=data.get("vp_out_of_chronicle", 0),
         on_play_actions=_parse_on_play_actions(data),
         exploit_actions=_parse_exploit_actions(data),
+        solstice_actions=_parse_solstice_actions(data),
+        exploit_passive=data.get("exploit_passive", ""),
     )
 
 

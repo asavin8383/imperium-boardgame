@@ -110,6 +110,10 @@ class ChronicleFromDiscardRequest(BaseModel):
     card_id: Optional[str] = None  # None = пропустить (только если optional)
 
 
+class ChronicleFromHandRequest(BaseModel):
+    card_id: Optional[str] = None  # None = пропустить (только если optional)
+
+
 class ExileFromMarketRequest(BaseModel):
     slot_index: int
 
@@ -130,8 +134,55 @@ class SacredPathExploitRequest(BaseModel):
     destroy: bool
 
 
+class ReturnCardToDeckTopRequest(BaseModel):
+    card_id: str
+
+
 class SacredPathExchangeRequest(BaseModel):
     hand_card_id: str
+
+
+class SolsticeGainProgressRequest(BaseModel):
+    take: bool
+
+
+class SolsticeFateRequest(BaseModel):
+    choice: str  # "destroy" or "chronicle"
+
+
+class SolsticeSelectCardRequest(BaseModel):
+    card_id: str
+
+
+class SolsticeDiscardHandReturnDisorderRequest(BaseModel):
+    hand_card_id: Optional[str] = None   # None = skip
+    disorder_card_id: Optional[str] = None
+
+
+class SolsticeChoiceRequest(BaseModel):
+    option_index: int
+    card_ids: Optional[List[str]] = None  # ID карт для сброса (если требуется опцией)
+
+
+class SolsticeDiscardForRewardRequest(BaseModel):
+    hand_card_id: Optional[str] = None  # None — пропустить эффект
+
+
+class SolsticeDiscardRewardChoiceRequest(BaseModel):
+    option_index: int
+
+
+class DrawDiscardChoiceRequest(BaseModel):
+    card_id: str  # ID карты из взятых для сброса
+
+
+class ExploitRecallChoiceRequest(BaseModel):
+    option_index: int
+    card_id: str  # ID карты в игровой области для отзыва
+
+
+class GuessDeckCategoryRequest(BaseModel):
+    category: str  # "region" | "origins" | "civilization" | "raid"
 
 
 # ── ENDPOINTS ──────────────────────────────────────────────────────────────────
@@ -381,6 +432,15 @@ def recall_to_avoid_attack(game_id: str, req: RecallToAvoidAttackRequest):
         raise HTTPException(status_code=400, detail=str(e))
 
 
+@app.post("/api/games/{game_id}/chronicle-from-hand")
+def chronicle_from_hand(game_id: str, req: ChronicleFromHandRequest):
+    try:
+        state = game_session.chronicle_card_from_hand(game_id, req.card_id)
+        return {"state": state.to_dict()}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
 @app.post("/api/games/{game_id}/chronicle-from-discard")
 def chronicle_from_discard(game_id: str, req: ChronicleFromDiscardRequest):
     try:
@@ -444,10 +504,109 @@ def move_discard_to_deck(game_id: str, req: MoveDiscardToDeckRequest):
         raise HTTPException(status_code=400, detail=str(e))
 
 
+@app.post("/api/games/{game_id}/return-card-to-deck-top")
+def return_card_to_deck_top(game_id: str, req: ReturnCardToDeckTopRequest):
+    try:
+        state = game_session.resolve_return_card_to_deck_top(game_id, req.card_id)
+        return {"state": state.to_dict()}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
 @app.post("/api/games/{game_id}/chronicle-choice")
 def chronicle_choice(game_id: str, req: ChronicleChoiceRequest):
     try:
         state = game_session.resolve_chronicle_choice(game_id, req.send_to_chronicle)
+        return {"state": state.to_dict()}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/games/{game_id}/solstice-gain-progress")
+def solstice_gain_progress(game_id: str, req: SolsticeGainProgressRequest):
+    try:
+        state = game_session.resolve_solstice_gain_progress(game_id, req.take)
+        return {"state": state.to_dict()}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/games/{game_id}/solstice-fate")
+def solstice_fate(game_id: str, req: SolsticeFateRequest):
+    try:
+        state = game_session.resolve_solstice_fate(game_id, req.choice)
+        return {"state": state.to_dict()}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/games/{game_id}/solstice-select-card")
+def solstice_select_card(game_id: str, req: SolsticeSelectCardRequest):
+    try:
+        state = game_session.resolve_solstice_select_card(game_id, req.card_id)
+        return {"state": state.to_dict()}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/games/{game_id}/solstice-discard-hand-return-disorder")
+def solstice_discard_hand_return_disorder(game_id: str, req: SolsticeDiscardHandReturnDisorderRequest):
+    try:
+        state = game_session.resolve_solstice_discard_hand_return_disorder(game_id, req.hand_card_id, req.disorder_card_id)
+        return {"state": state.to_dict()}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/games/{game_id}/solstice-choice")
+def solstice_choice(game_id: str, req: SolsticeChoiceRequest):
+    try:
+        state = game_session.resolve_solstice_choice(game_id, req.option_index, req.card_ids)
+        return {"state": state.to_dict()}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/games/{game_id}/solstice-discard-for-reward")
+def solstice_discard_for_reward(game_id: str, req: SolsticeDiscardForRewardRequest):
+    try:
+        state = game_session.resolve_solstice_discard_for_reward(game_id, req.hand_card_id)
+        return {"state": state.to_dict()}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/games/{game_id}/solstice-discard-reward-choice")
+def solstice_discard_reward_choice(game_id: str, req: SolsticeDiscardRewardChoiceRequest):
+    try:
+        state = game_session.resolve_solstice_discard_reward_choice(game_id, req.option_index)
+        return {"state": state.to_dict()}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/games/{game_id}/draw-discard-choice")
+def draw_discard_choice(game_id: str, req: DrawDiscardChoiceRequest):
+    try:
+        state = game_session.resolve_draw_discard_choice(game_id, req.card_id)
+        return {"state": state.to_dict()}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/games/{game_id}/exploit-recall-choice")
+def exploit_recall_choice(game_id: str, req: ExploitRecallChoiceRequest):
+    try:
+        state = game_session.resolve_exploit_recall_choice(game_id, req.option_index, req.card_id)
+        return {"state": state.to_dict()}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/games/{game_id}/guess-deck-category")
+def guess_deck_category(game_id: str, req: GuessDeckCategoryRequest):
+    try:
+        state = game_session.resolve_guess_deck_category(game_id, req.category)
         return {"state": state.to_dict()}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
