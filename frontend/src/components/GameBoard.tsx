@@ -293,8 +293,8 @@ export default function GameBoard() {
   const [scores, setScores] = useState<{ player: number; bot: number } | null>(null);
   const [previewCard, setPreviewCard] = useState<CardInfo | null>(null);
   const [previewOrigin, setPreviewOrigin] = useState('top left');
-  const [playAreaPreviewScale, setPlayAreaPreviewScale] = useState(2.5);
-  const [playAreaPreviewOrigin, setPlayAreaPreviewOrigin] = useState<string>('top left');
+  const [playAreaPreviewPos, setPlayAreaPreviewPos] = useState<{ top: number; left: number } | null>(null);
+  const playAreaOverlayRef = React.useRef<HTMLDivElement | null>(null);
   const [revMode, setRevMode] = useState(false);  // revolution selection mode
   const [saveLoadModal, setSaveLoadModal] = useState<'save' | 'load' | null>(null);
   const previewRef = React.useRef<HTMLDivElement | null>(null);
@@ -309,8 +309,11 @@ export default function GameBoard() {
   useEffect(() => {
     if (!previewCard) return;
     const handler = (e: MouseEvent) => {
-      if (previewRef.current && !previewRef.current.contains(e.target as Node)) {
+      const inCard = previewRef.current?.contains(e.target as Node);
+      const inOverlay = playAreaOverlayRef.current?.contains(e.target as Node);
+      if (!inCard && !inOverlay) {
         setPreviewCard(null);
+        setPlayAreaPreviewPos(null);
       }
     };
     document.addEventListener('mousedown', handler);
@@ -927,13 +930,15 @@ export default function GameBoard() {
                       onClickCapture={(e) => {
                         if (!isPreview && !isDestroyMode && !pendingSolsticeSelectCard) {
                           const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-                          const scale = 180 / rect.width;
-                          const leftColRight = (window.innerWidth - 260) / 2;
-                          setPlayAreaPreviewScale(scale);
-                          setPlayAreaPreviewOrigin(rect.left + 180 > leftColRight ? 'top right' : 'top left');
+                          const cardW = 180 * 1.8, cardH = 240 * 1.8;
+                          let left = rect.right + 8;
+                          if (left + cardW > window.innerWidth - 8) left = rect.left - cardW - 8;
+                          let top = rect.top;
+                          if (top + cardH > window.innerHeight - 8) top = window.innerHeight - cardH - 8;
+                          setPlayAreaPreviewPos({ top, left });
                         }
                       }}
-                      style={{ zIndex: isPreview ? 200 : undefined, transform: isPreview ? `scale(${playAreaPreviewScale})` : undefined, transformOrigin: isPreview ? playAreaPreviewOrigin : 'top left', transition: 'transform 0.15s', position: 'relative' }}>
+                      style={{ position: 'relative' }}>
                       <CardView card={c} size="small"
                         overrideStyle={{
                           width: '100%', minHeight: 'unset', aspectRatio: '3/4',
@@ -952,6 +957,7 @@ export default function GameBoard() {
                           } else if (isPreview) {
                             if (canExploit) exploitCard(c.id);
                             setPreviewCard(null);
+                            setPlayAreaPreviewPos(null);
                           } else {
                             setPreviewCard(c);
                           }
@@ -1015,6 +1021,26 @@ export default function GameBoard() {
             </div>
           )}
 
+          {/* Play area card overlay — full-size preview */}
+          {playAreaPreviewPos && previewCard && (
+            <div
+              ref={playAreaOverlayRef}
+              onClick={() => { setPreviewCard(null); setPlayAreaPreviewPos(null); }}
+              style={{
+                position: 'fixed',
+                top: playAreaPreviewPos.top,
+                left: playAreaPreviewPos.left,
+                zIndex: 500,
+                cursor: 'pointer',
+                transform: 'scale(1.8)',
+                transformOrigin: 'top left',
+                filter: 'drop-shadow(0 6px 24px rgba(0,0,0,0.9))',
+                borderRadius: 10,
+              }}
+            >
+              <CardView card={previewCard} size="xlarge" />
+            </div>
+          )}
 
 
           {/* Solstice actions */}

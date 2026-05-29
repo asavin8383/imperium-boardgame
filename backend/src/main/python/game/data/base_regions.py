@@ -1,7 +1,7 @@
 """Card data for the base Regions deck (REG)."""
 
 DECK: dict = {
-    "1REG2":  {"name": "Джунгли", "categories": ["region"], "vp_fixed": 1, "is_exploit": True,
+    "1REG2":  {"name": "Джунгли", "categories": ["region"], "vp_fixed": 1,
                "can_be_reinforced": True,
                "on_play_actions": [
                    {"type": "gain_resource", "resource_type": "POPULATION", "amount": 1},
@@ -20,7 +20,7 @@ DECK: dict = {
                "on_play_actions": [
                    {"type": "exile_from_market"},
                ]},
-    "1REG5":  {"name": "Пойма реки", "categories": ["region"], "is_exploit": True,
+    "1REG5":  {"name": "Пойма реки", "categories": ["region"],
                "can_be_reinforced": True,
                "labels": ["sack", "water"],
                "on_play_actions": [
@@ -33,7 +33,7 @@ DECK: dict = {
                "on_play_actions": [
                    {"type": "exile_from_market"},
                ]},
-    "1REG7":  {"name": "Оазис", "categories": ["region"], "is_exploit": True,
+    "1REG7":  {"name": "Оазис", "categories": ["region"],
                "can_be_reinforced": True,
                "labels": ["sack", "sack", "water"],
                "on_play_actions": [
