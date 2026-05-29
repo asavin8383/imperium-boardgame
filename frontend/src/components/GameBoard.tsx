@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useGameStore } from '../store/gameStore';
+import SaveLoadModal from './SaveLoadModal';
 import { CardInfo, MarketSlot as MarketSlotInfo } from '../types/game';
 import regIcon from '../assets/icons/category/РЕГ.svg';
 import istIcon from '../assets/icons/category/ИСТ.svg';
@@ -287,16 +288,18 @@ function Btn({ label, onClick, color = '#2ecc71', disabled = false, active = fal
 }
 
 export default function GameBoard() {
-  const { gameState: gs, loading, error, playCard, exploitCard, doInnovation, doRevolution, endTurn, acquireCard, accelerateProgress, resetGame, undoAction, makeChoice, selectAppropriateCategory, appropriateFromDeck, chronicleChoice, reinforceChoice, reinforceWithCard, playFromDiscard, placeUpgradeToken, resolveDrawFromDeck, returnExploitToken, destroyCards, gloryDeckTake, exileFromMarket, chronicleFromDiscard, recallToAvoidAttack, moveDiscardToDeck, sacredPathExploit, sacredPathExchange } = useGameStore();
+  const { gameState: gs, loading, error, playCard, exploitCard, doInnovation, doRevolution, endTurn, acquireCard, accelerateProgress, resetGame, undoAction, makeChoice, selectAppropriateCategory, appropriateFromDeck, chronicleChoice, reinforceChoice, reinforceWithCard, playFromDiscard, placeUpgradeToken, resolveDrawFromDeck, returnExploitToken, destroyCards, gloryDeckTake, exileFromMarket, chronicleFromDiscard, recallToAvoidAttack, moveDiscardToDeck, sacredPathExploit, sacredPathExchange, solsticeSelectCard, solsticeSkip } = useGameStore();
   const [selectedCards, setSelectedCards] = useState<string[]>([]);
   const [scores, setScores] = useState<{ player: number; bot: number } | null>(null);
   const [previewCard, setPreviewCard] = useState<CardInfo | null>(null);
   const [previewOrigin, setPreviewOrigin] = useState('top left');
   const [revMode, setRevMode] = useState(false);  // revolution selection mode
+  const [saveLoadModal, setSaveLoadModal] = useState<'save' | 'load' | null>(null);
   const previewRef = React.useRef<HTMLDivElement | null>(null);
 
   const isPlayerTurn = gs?.phase === 'player_turn';
   const isDiscardPhase = gs?.phase === 'player_discard';
+  const isSolsticePhase = gs?.phase === 'solstice';
   const isGameOver = gs?.phase === 'game_over' || gs?.phase === 'scoring';
   const turnAction = gs?.player?.turn_action_chosen ?? null;
   const isInnovatePending = gs?.pending_choice?.type === 'innovate_from_market';
@@ -421,6 +424,15 @@ export default function GameBoard() {
     : null;
   const isDestroyMode = pendingDestroyFromPlayArea != null;
 
+  // Солнцестояние: выбор карты для активации
+  const pendingSolsticeSelectCard = gs.pending_choice?.type === 'solstice_select_card'
+    ? gs.pending_choice as { type: string; available_cards: CardInfo[] }
+    : null;
+  // Набор ID карт, доступных для активации солнцестояния
+  const solsticeAvailableIds = new Set(
+    (pendingSolsticeSelectCard?.available_cards ?? []).map(c => c.id)
+  );
+
   // Pending отзыв карты для избежания атаки бота
   const pendingRecallToAvoidAttack = gs.pending_choice?.type === 'recall_to_avoid_attack'
     ? gs.pending_choice as { type: string; attack_card_id: string; attack_card_name: string; recall_card_id: string }
@@ -448,6 +460,9 @@ export default function GameBoard() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'linear-gradient(160deg,#0a0c14,#080a10)', color: '#e8e8f0', fontFamily: "'Georgia', serif", display: 'flex', flexDirection: 'column' }}>
+      {saveLoadModal && (
+        <SaveLoadModal mode={saveLoadModal} onClose={() => setSaveLoadModal(null)} />
+      )}
       {/* Header */}
       <div style={{ background: '#0b0d18', borderBottom: '1px solid #1e2235', padding: '9px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -460,6 +475,8 @@ export default function GameBoard() {
           <div style={{ padding: '3px 10px', background: isPlayerTurn ? '#0a2d1a' : isDiscardPhase ? '#1a0a2d' : '#1a0a1a', border: `1px solid ${isPlayerTurn ? '#2ecc71' : isDiscardPhase ? '#9b59b6' : '#9b59b6'}`, borderRadius: 5, fontSize: 11, color: isPlayerTurn ? '#2ecc71' : isDiscardPhase ? '#c39bd3' : '#9b59b6', fontWeight: 600 }}>
             {PHASE_RU[gs.phase] ?? gs.phase}
           </div>
+          <button onClick={() => setSaveLoadModal('save')} style={{ background: 'transparent', border: '1px solid #2a6040', borderRadius: 5, color: '#2ecc71', padding: '3px 9px', cursor: 'pointer', fontSize: 10 }}>Сохранить</button>
+          <button onClick={() => setSaveLoadModal('load')} style={{ background: 'transparent', border: '1px solid #2a4060', borderRadius: 5, color: '#3498db', padding: '3px 9px', cursor: 'pointer', fontSize: 10 }}>Загрузить</button>
           <button onClick={resetGame} style={{ background: 'transparent', border: '1px solid #2a2d40', borderRadius: 5, color: '#555', padding: '3px 9px', cursor: 'pointer', fontSize: 10 }}>Новая игра</button>
         </div>
       </div>
@@ -874,29 +891,45 @@ export default function GameBoard() {
           {/* Play area */}
           {(player?.play_area ?? []).length > 0 && (
             <div>
-              <div style={{ fontSize: 9, color: isDestroyMode ? '#e74c3c' : '#555', marginBottom: 5, letterSpacing: '.08em', textTransform: 'uppercase' }}>
+              <div style={{ fontSize: 9, marginBottom: 5, letterSpacing: '.08em', textTransform: 'uppercase',
+                color: isDestroyMode ? '#e74c3c' : pendingSolsticeSelectCard ? '#f1c40f' : '#555' }}>
                 {isDestroyMode
                   ? `☠ Выберите ${pendingDestroyFromPlayArea!.count} карты для разрушения (выбрано: ${selectedCards.length})`
-                  : 'Разыгранные'}
+                  : pendingSolsticeSelectCard
+                    ? '☀ Солнцестояние — активируйте карты'
+                    : 'Разыгранные'}
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 6, alignItems: 'start' }}>
                 {(player?.play_area ?? []).map(c => {
                   const isPreview = previewCard?.id === c.id;
                   const reinf = c.reinforcement ?? null;
                   const isExploited = exploitsUsedIds.includes(c.id);
-                  const canExploit = !!c.is_exploit && isPlayerTurn && !isExploited && !isDestroyMode;
+                  const canExploit = !!c.is_exploit && isPlayerTurn && !isExploited && !isDestroyMode && !pendingSolsticeSelectCard;
                   const isDestroyable = isDestroyMode && (c.categories ?? []).includes(pendingDestroyFromPlayArea!.category as any);
                   const isDestroySelected = isDestroyMode && selectedCards.includes(c.id);
+
+                  // Солнцестояние: карта доступна для активации?
+                  const isSolsticeCard = pendingSolsticeSelectCard ? solsticeAvailableIds.has(c.id) : false;
+                  const dimmedInSolstice = pendingSolsticeSelectCard ? !isSolsticeCard : false;
+
                   return (
                     <div key={c.id} ref={isPreview ? previewRef : undefined}
                       style={{ zIndex: isPreview ? 200 : undefined, transform: isPreview ? 'scale(2)' : undefined, transformOrigin: 'top left', transition: 'transform 0.15s', position: 'relative' }}>
                       <CardView card={c} size="small"
-                        overrideStyle={{ width: '100%', minHeight: 'unset', aspectRatio: '3/4', borderRadius: reinf ? '8px 8px 0 0' : undefined, outline: isDestroySelected ? '2px solid #e74c3c' : undefined }}
+                        overrideStyle={{
+                          width: '100%', minHeight: 'unset', aspectRatio: '3/4',
+                          borderRadius: reinf ? '8px 8px 0 0' : undefined,
+                          outline: isDestroySelected ? '2px solid #e74c3c'
+                            : isSolsticeCard ? '2px solid #f1c40f' : undefined,
+                          boxShadow: isSolsticeCard ? '0 0 10px #f1c40f55' : undefined,
+                        }}
                         selected={isDestroySelected || (isPreview && canExploit)}
-                        dimmed={isExploited || (isDestroyMode && !isDestroyable)}
+                        dimmed={isExploited || (isDestroyMode && !isDestroyable) || dimmedInSolstice}
                         onClick={() => {
                           if (isDestroyMode) {
                             if (isDestroyable) toggleCard(c.id);
+                          } else if (pendingSolsticeSelectCard) {
+                            // клик по карте в режиме солнцестояния не открывает превью
                           } else if (isPreview) {
                             if (canExploit) exploitCard(c.id);
                             setPreviewCard(null);
@@ -904,13 +937,30 @@ export default function GameBoard() {
                             setPreviewCard(c);
                           }
                         }} />
-                      {isExploited && (
+                      {isExploited && !pendingSolsticeSelectCard && (
                         <img
                           src={exploitTokenIcon}
                           alt="Жетон эксплуатации"
                           title="Карта эксплуатирована в этом раунде"
                           style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 32, height: 32, opacity: 0.9, pointerEvents: 'none', filter: 'drop-shadow(0 0 4px #000)' }}
                         />
+                      )}
+                      {/* Кнопка солнцестояния */}
+                      {isSolsticeCard && (
+                        <button
+                          onClick={() => solsticeSelectCard(c.id)}
+                          disabled={loading}
+                          style={{
+                            display: 'block', width: '100%', marginTop: 3,
+                            background: 'linear-gradient(135deg,#3d2e00,#5a4200)',
+                            border: '1px solid #f1c40f', borderRadius: 5,
+                            color: '#f1c40f', fontSize: 9, fontFamily: 'inherit',
+                            padding: '3px 0', cursor: 'pointer', letterSpacing: '.05em',
+                            fontWeight: 700,
+                          }}
+                        >
+                          ☀ Солнцестояние
+                        </button>
                       )}
                       {reinf && (
                         <div style={{
@@ -947,6 +997,24 @@ export default function GameBoard() {
           )}
 
 
+
+          {/* Solstice actions */}
+          {isSolsticePhase && (
+            <div style={{ background: '#0d1020', border: '1px solid #f1c40f44', borderRadius: 9, padding: '10px 12px' }}>
+              <div style={{ fontSize: 9, color: '#f1c40f', marginBottom: 8, letterSpacing: '.08em', textTransform: 'uppercase' }}>☀ Солнцестояние</div>
+              {pendingSolsticeSelectCard && (
+                <div style={{ fontSize: 10, color: '#aaa', marginBottom: 8 }}>
+                  Активируйте карты с эффектом солнцестояния или перейдите к следующему раунду.
+                </div>
+              )}
+              <Btn
+                label="Перейти к следующему раунду"
+                onClick={() => solsticeSkip()}
+                color="#e67e22"
+                icon="⏭"
+              />
+            </div>
+          )}
 
           {/* Actions */}
           {isPlayerTurn && !isInnovatePending && !revMode && turnAction === null && (
@@ -1244,7 +1312,7 @@ export default function GameBoard() {
             </div>
           )}
 
-          {isDiscardPhase && (
+          {isDiscardPhase && !isSolsticePhase && (
             <div style={{ background: '#0d1020', border: '1px solid #9b59b6', borderRadius: 9, padding: '10px 12px' }}>
               <div style={{ fontSize: 9, color: '#9b59b6', marginBottom: 8, letterSpacing: '.08em', textTransform: 'uppercase' }}>Сброс карт</div>
               <div style={{ fontSize: 10, color: '#aaa', marginBottom: 8 }}>

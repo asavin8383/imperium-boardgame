@@ -355,6 +355,14 @@ def resolve_solstice_choice(game_id: str, option_index: int, card_ids=None) -> G
     return state
 
 
+def skip_solstice(game_id: str) -> GameState:
+    state = _require(game_id)
+    _snapshot(game_id, state)
+    state = _engine.skip_solstice(state)
+    save_game(state)
+    return state
+
+
 def undo_last_action(game_id: str) -> GameState:
     prev = _snapshots.get(game_id)
     if prev is None:

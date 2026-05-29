@@ -170,3 +170,97 @@ export async function undoAction(gameId: string): Promise<GameState> {
 export async function deleteGame(gameId: string): Promise<void> {
   await api.delete(`/api/games/${gameId}`);
 }
+
+// ── Solstice ─────────────────────────────────────────────────────────────────
+
+export async function solsticeSkip(gameId: string): Promise<GameState> {
+  const res = await api.post(`/api/games/${gameId}/solstice-skip`);
+  return res.data.state;
+}
+
+export async function solsticeSelectCard(gameId: string, cardId: string): Promise<GameState> {
+  const res = await api.post(`/api/games/${gameId}/solstice-select-card`, { card_id: cardId });
+  return res.data.state;
+}
+
+export async function solsticeGainProgress(gameId: string, take: boolean): Promise<GameState> {
+  const res = await api.post(`/api/games/${gameId}/solstice-gain-progress`, { take });
+  return res.data.state;
+}
+
+export async function solsticeFate(gameId: string, choice: string): Promise<GameState> {
+  const res = await api.post(`/api/games/${gameId}/solstice-fate`, { choice });
+  return res.data.state;
+}
+
+export async function solsticeDiscardHandReturnDisorder(
+  gameId: string, handCardId: string | null, disorderCardId: string | null
+): Promise<GameState> {
+  const res = await api.post(`/api/games/${gameId}/solstice-discard-hand-return-disorder`, {
+    hand_card_id: handCardId,
+    disorder_card_id: disorderCardId,
+  });
+  return res.data.state;
+}
+
+export async function solsticeChoice(
+  gameId: string, optionIndex: number, cardIds?: string[]
+): Promise<GameState> {
+  const res = await api.post(`/api/games/${gameId}/solstice-choice`, {
+    option_index: optionIndex,
+    card_ids: cardIds ?? null,
+  });
+  return res.data.state;
+}
+
+export async function solsticeDiscardForReward(
+  gameId: string, handCardId: string | null
+): Promise<GameState> {
+  const res = await api.post(`/api/games/${gameId}/solstice-discard-for-reward`, {
+    hand_card_id: handCardId,
+  });
+  return res.data.state;
+}
+
+export async function solsticeDiscardRewardChoice(
+  gameId: string, optionIndex: number
+): Promise<GameState> {
+  const res = await api.post(`/api/games/${gameId}/solstice-discard-reward-choice`, {
+    option_index: optionIndex,
+  });
+  return res.data.state;
+}
+
+// ── Save / Load ──────────────────────────────────────────────────────────────
+
+export interface SaveMeta {
+  id: string;
+  name: string;
+  player_nation: string;
+  bot_nation: string;
+  difficulty: string;
+  game_phase: string;
+  round_number: number;
+  player_period: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export async function saveGame(gameId: string, name: string): Promise<SaveMeta> {
+  const res = await api.post(`/api/games/${gameId}/save`, { name });
+  return res.data.save;
+}
+
+export async function listSaves(): Promise<SaveMeta[]> {
+  const res = await api.get('/api/saves');
+  return res.data.saves;
+}
+
+export async function loadSave(saveId: string): Promise<{ game_id: string; state: GameState }> {
+  const res = await api.post(`/api/saves/${saveId}/load`);
+  return res.data;
+}
+
+export async function deleteSave(saveId: string): Promise<void> {
+  await api.delete(`/api/saves/${saveId}`);
+}

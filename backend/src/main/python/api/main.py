@@ -1,18 +1,27 @@
 """
 FastAPI application — Imperium REST API
 """
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
 import sys
 import os
+import uuid
+from datetime import datetime, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from game import session as game_session
 from game.enums import Nation, Difficulty
 from game.cards import get_all_available_nations
+from game.database import engine, get_db, Base
+from game.db_models import GameSave, CURRENT_FORMAT_VERSION
+from game.serialization import serialize_state, deserialize_state
+from sqlalchemy.orm import Session
+
+# Создаём таблицы, если ещё не созданы (Alembic управляет схемой в проде)
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Imperium: Classics API", version="1.0.0")
 
@@ -183,6 +192,10 @@ class ExploitRecallChoiceRequest(BaseModel):
 
 class GuessDeckCategoryRequest(BaseModel):
     category: str  # "region" | "origins" | "civilization" | "raid"
+
+
+class SaveGameRequest(BaseModel):
+    name: str
 
 
 # ── ENDPOINTS ──────────────────────────────────────────────────────────────────
@@ -522,6 +535,15 @@ def chronicle_choice(game_id: str, req: ChronicleChoiceRequest):
         raise HTTPException(status_code=400, detail=str(e))
 
 
+@app.post("/api/games/{game_id}/solstice-skip")
+def solstice_skip(game_id: str):
+    try:
+        state = game_session.skip_solstice(game_id)
+        return {"state": state.to_dict()}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
 @app.post("/api/games/{game_id}/solstice-gain-progress")
 def solstice_gain_progress(game_id: str, req: SolsticeGainProgressRequest):
     try:
@@ -630,6 +652,68 @@ def delete_game(game_id: str):
 @app.get("/api/health")
 def health():
     return {"status": "ok", "version": "1.0.0"}
+
+
+# ── SAVE / LOAD ────────────────────────────────────────────────────────────────
+
+@app.post("/api/games/{game_id}/save")
+def save_game_to_db(game_id: str, req: SaveGameRequest, db: Session = Depends(get_db)):
+    """Сохранить текущее состояние партии в базу данных."""
+    state = game_session.get_game(game_id)
+    if state is None:
+        raise HTTPException(status_code=404, detail="Партия не найдена")
+    if not req.name.strip():
+        raise HTTPException(status_code=400, detail="Укажите название сохранения")
+
+    now = datetime.now(timezone.utc)
+    save = GameSave(
+        id=str(uuid.uuid4()),
+        name=req.name.strip(),
+        player_nation=state.player.nation.value,
+        bot_nation=state.bot.nation.value,
+        difficulty=state.difficulty.value,
+        game_phase=state.phase.value,
+        round_number=state.round_number,
+        player_period=state.player.period.value,
+        created_at=now,
+        updated_at=now,
+        state_data=serialize_state(state),
+        format_version=CURRENT_FORMAT_VERSION,
+    )
+    db.add(save)
+    db.commit()
+    db.refresh(save)
+    return {"save_id": save.id, "save": save.to_dict()}
+
+
+@app.get("/api/saves")
+def list_saves(db: Session = Depends(get_db)):
+    """Список всех сохранённых партий (без данных состояния)."""
+    saves = db.query(GameSave).order_by(GameSave.updated_at.desc()).all()
+    return {"saves": [s.to_dict() for s in saves]}
+
+
+@app.post("/api/saves/{save_id}/load")
+def load_save(save_id: str, db: Session = Depends(get_db)):
+    """Загрузить сохранение в активную сессию и вернуть состояние."""
+    save = db.query(GameSave).filter(GameSave.id == save_id).first()
+    if save is None:
+        raise HTTPException(status_code=404, detail="Сохранение не найдено")
+
+    state = deserialize_state(save.state_data)
+    game_session.save_game(state)
+    return {"game_id": state.game_id, "state": state.to_dict()}
+
+
+@app.delete("/api/saves/{save_id}")
+def delete_save(save_id: str, db: Session = Depends(get_db)):
+    """Удалить сохранение из базы данных."""
+    save = db.query(GameSave).filter(GameSave.id == save_id).first()
+    if save is None:
+        raise HTTPException(status_code=404, detail="Сохранение не найдено")
+    db.delete(save)
+    db.commit()
+    return {"message": "Удалено"}
 
 
 if __name__ == "__main__":

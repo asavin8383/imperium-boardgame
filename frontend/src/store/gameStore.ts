@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { GameState } from '../types/game';
 import * as api from '../utils/api';
+import { SaveMeta } from '../utils/api';
 
 interface GameStore {
   gameId: string | null;
@@ -8,6 +9,7 @@ interface GameStore {
   loading: boolean;
   error: string | null;
   selectedCards: string[];
+  saves: SaveMeta[];
 
   setGame: (id: string, state: GameState) => void;
   updateState: (state: GameState) => void;
@@ -15,6 +17,12 @@ interface GameStore {
   setError: (e: string | null) => void;
   toggleSelectCard: (cardId: string) => void;
   clearSelection: () => void;
+
+  // Save / Load
+  saveGame: (name: string) => Promise<void>;
+  listSaves: () => Promise<void>;
+  loadSave: (saveId: string) => Promise<void>;
+  deleteSave: (saveId: string) => Promise<void>;
 
   // Actions
   createGame: (playerNation: string, botNation: string, difficulty: string) => Promise<void>;
@@ -45,6 +53,16 @@ interface GameStore {
   sacredPathExploit: (destroy: boolean) => Promise<void>;
   sacredPathExchange: (handCardId: string) => Promise<void>;
   resetGame: () => void;
+
+  // Solstice
+  solsticeSkip: () => Promise<void>;
+  solsticeSelectCard: (cardId: string) => Promise<void>;
+  solsticeGainProgress: (take: boolean) => Promise<void>;
+  solsticeFate: (choice: string) => Promise<void>;
+  solsticeDiscardHandReturnDisorder: (handCardId: string | null, disorderCardId: string | null) => Promise<void>;
+  solsticeChoice: (optionIndex: number, cardIds?: string[]) => Promise<void>;
+  solsticeDiscardForReward: (handCardId: string | null) => Promise<void>;
+  solsticeDiscardRewardChoice: (optionIndex: number) => Promise<void>;
 }
 
 export const useGameStore = create<GameStore>((set, get) => ({
@@ -53,6 +71,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   loading: false,
   error: null,
   selectedCards: [],
+  saves: [],
 
   setGame: (id, state) => set({ gameId: id, gameState: state }),
   updateState: (state) => set({ gameState: state }),
@@ -65,6 +84,49 @@ export const useGameStore = create<GameStore>((set, get) => ({
   })),
   clearSelection: () => set({ selectedCards: [] }),
   resetGame: () => set({ gameId: null, gameState: null, selectedCards: [], error: null }),
+
+  saveGame: async (name) => {
+    const { gameId } = get();
+    if (!gameId) return;
+    set({ loading: true, error: null });
+    try {
+      await api.saveGame(gameId, name);
+      set({ loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
+
+  listSaves: async () => {
+    set({ loading: true, error: null });
+    try {
+      const saves = await api.listSaves();
+      set({ saves, loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
+
+  loadSave: async (saveId) => {
+    set({ loading: true, error: null });
+    try {
+      const { game_id, state } = await api.loadSave(saveId);
+      set({ gameId: game_id, gameState: state, loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
+
+  deleteSave: async (saveId) => {
+    set({ loading: true, error: null });
+    try {
+      await api.deleteSave(saveId);
+      const saves = await api.listSaves();
+      set({ saves, loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
 
   createGame: async (playerNation, botNation, difficulty) => {
     set({ loading: true, error: null });
@@ -382,6 +444,102 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const state = await api.sacredPathExchange(gameId, handCardId);
+      set({ gameState: state, loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
+
+  solsticeSkip: async () => {
+    const { gameId } = get();
+    if (!gameId) return;
+    set({ loading: true, error: null });
+    try {
+      const state = await api.solsticeSkip(gameId);
+      set({ gameState: state, loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
+
+  solsticeSelectCard: async (cardId) => {
+    const { gameId } = get();
+    if (!gameId) return;
+    set({ loading: true, error: null });
+    try {
+      const state = await api.solsticeSelectCard(gameId, cardId);
+      set({ gameState: state, loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
+
+  solsticeGainProgress: async (take) => {
+    const { gameId } = get();
+    if (!gameId) return;
+    set({ loading: true, error: null });
+    try {
+      const state = await api.solsticeGainProgress(gameId, take);
+      set({ gameState: state, loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
+
+  solsticeFate: async (choice) => {
+    const { gameId } = get();
+    if (!gameId) return;
+    set({ loading: true, error: null });
+    try {
+      const state = await api.solsticeFate(gameId, choice);
+      set({ gameState: state, loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
+
+  solsticeDiscardHandReturnDisorder: async (handCardId, disorderCardId) => {
+    const { gameId } = get();
+    if (!gameId) return;
+    set({ loading: true, error: null });
+    try {
+      const state = await api.solsticeDiscardHandReturnDisorder(gameId, handCardId, disorderCardId);
+      set({ gameState: state, loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
+
+  solsticeChoice: async (optionIndex, cardIds) => {
+    const { gameId } = get();
+    if (!gameId) return;
+    set({ loading: true, error: null });
+    try {
+      const state = await api.solsticeChoice(gameId, optionIndex, cardIds);
+      set({ gameState: state, loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
+
+  solsticeDiscardForReward: async (handCardId) => {
+    const { gameId } = get();
+    if (!gameId) return;
+    set({ loading: true, error: null });
+    try {
+      const state = await api.solsticeDiscardForReward(gameId, handCardId);
+      set({ gameState: state, loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
+
+  solsticeDiscardRewardChoice: async (optionIndex) => {
+    const { gameId } = get();
+    if (!gameId) return;
+    set({ loading: true, error: null });
+    try {
+      const state = await api.solsticeDiscardRewardChoice(gameId, optionIndex);
       set({ gameState: state, loading: false });
     } catch (e: any) {
       set({ error: e.response?.data?.detail || e.message, loading: false });

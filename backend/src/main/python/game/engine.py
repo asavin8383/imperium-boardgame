@@ -554,6 +554,16 @@ class GameEngine:
             return self._prompt_solstice_selection(state)
         return state
 
+    def skip_solstice(self, state: GameState) -> GameState:
+        """Игрок пропускает оставшиеся эффекты солнцестояния и переходит к следующему раунду."""
+        from .enums import GamePhase
+        if state.phase != GamePhase.SOLSTICE:
+            raise ValueError("Нельзя пропустить солнцестояние вне фазы солнцестояния")
+        state.pending_solstice_card_ids = []
+        state.pending_choice = None
+        state.add_log("Солнцестояние пропущено")
+        return self._finish_solstice(state)
+
     def _continue_solstice_effects(self, state: GameState) -> GameState:
         """Called after a solstice card's pending_choice is resolved — show next selection."""
         return self._prompt_solstice_selection(state)
@@ -859,8 +869,12 @@ class GameEngine:
         state.player.resources.action = 3
         state.player.resources.exploit = 5
 
-        # TODO: bot turn not implemented — skip directly to next player turn
+        # TODO: bot turn not implemented — skip directly to solstice
         state.add_log("─── Ход бота пропущен ───")
+        state = self._check_end_conditions(state)
+        if state.phase == GamePhase.GAME_OVER:
+            return state
+        state.phase = GamePhase.SOLSTICE
         return self._apply_solstice(state)
 
     # ── CARD SHUFFLING ─────────────────────────────────────────────────────────
