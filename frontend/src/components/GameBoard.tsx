@@ -288,11 +288,13 @@ function Btn({ label, onClick, color = '#2ecc71', disabled = false, active = fal
 }
 
 export default function GameBoard() {
-  const { gameState: gs, loading, error, playCard, exploitCard, doInnovation, doRevolution, endTurn, acquireCard, accelerateProgress, resetGame, undoAction, makeChoice, selectAppropriateCategory, appropriateFromDeck, chronicleChoice, reinforceChoice, reinforceWithCard, playFromDiscard, placeUpgradeToken, resolveDrawFromDeck, returnExploitToken, destroyCards, gloryDeckTake, exileFromMarket, chronicleFromDiscard, recallToAvoidAttack, moveDiscardToDeck, sacredPathExploit, sacredPathExchange, solsticeSelectCard, solsticeSkip } = useGameStore();
+  const { gameState: gs, loading, error, playCard, exploitCard, doInnovation, doRevolution, endTurn, acquireCard, accelerateProgress, resetGame, undoAction, makeChoice, selectAppropriateCategory, appropriateFromDeck, chronicleChoice, reinforceChoice, reinforceWithCard, playFromDiscard, placeUpgradeToken, resolveDrawFromDeck, returnExploitToken, destroyCards, gloryDeckTake, exileFromMarket, chronicleFromDiscard, recallToAvoidAttack, moveDiscardToDeck, sacredPathExploit, sacredPathExchange, solsticeSelectCard, solsticeSkip, solsticeGainProgress, solsticeFate } = useGameStore();
   const [selectedCards, setSelectedCards] = useState<string[]>([]);
   const [scores, setScores] = useState<{ player: number; bot: number } | null>(null);
   const [previewCard, setPreviewCard] = useState<CardInfo | null>(null);
   const [previewOrigin, setPreviewOrigin] = useState('top left');
+  const [playAreaPreviewScale, setPlayAreaPreviewScale] = useState(2.5);
+  const [playAreaPreviewOrigin, setPlayAreaPreviewOrigin] = useState<string>('top left');
   const [revMode, setRevMode] = useState(false);  // revolution selection mode
   const [saveLoadModal, setSaveLoadModal] = useState<'save' | 'load' | null>(null);
   const previewRef = React.useRef<HTMLDivElement | null>(null);
@@ -432,6 +434,14 @@ export default function GameBoard() {
   const solsticeAvailableIds = new Set(
     (pendingSolsticeSelectCard?.available_cards ?? []).map(c => c.id)
   );
+  // Солнцестояние: взять жетоны прогресса?
+  const pendingSolsticeGainProgress = gs.pending_choice?.type === 'solstice_gain_progress_optional'
+    ? gs.pending_choice as { type: string; card_id: string; card_name: string; amount: number }
+    : null;
+  // Солнцестояние: судьба карты (разрушить или в летопись)
+  const pendingSolsticeFateChoice = gs.pending_choice?.type === 'solstice_fate_choice'
+    ? gs.pending_choice as { type: string; card_id: string; card_name: string }
+    : null;
 
   // Pending отзыв карты для избежания атаки бота
   const pendingRecallToAvoidAttack = gs.pending_choice?.type === 'recall_to_avoid_attack'
@@ -914,7 +924,16 @@ export default function GameBoard() {
 
                   return (
                     <div key={c.id} ref={isPreview ? previewRef : undefined}
-                      style={{ zIndex: isPreview ? 200 : undefined, transform: isPreview ? 'scale(2)' : undefined, transformOrigin: 'top left', transition: 'transform 0.15s', position: 'relative' }}>
+                      onClickCapture={(e) => {
+                        if (!isPreview && !isDestroyMode && !pendingSolsticeSelectCard) {
+                          const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                          const scale = 180 / rect.width;
+                          const leftColRight = (window.innerWidth - 260) / 2;
+                          setPlayAreaPreviewScale(scale);
+                          setPlayAreaPreviewOrigin(rect.left + 180 > leftColRight ? 'top right' : 'top left');
+                        }
+                      }}
+                      style={{ zIndex: isPreview ? 200 : undefined, transform: isPreview ? `scale(${playAreaPreviewScale})` : undefined, transformOrigin: isPreview ? playAreaPreviewOrigin : 'top left', transition: 'transform 0.15s', position: 'relative' }}>
                       <CardView card={c} size="small"
                         overrideStyle={{
                           width: '100%', minHeight: 'unset', aspectRatio: '3/4',
@@ -1002,17 +1021,50 @@ export default function GameBoard() {
           {isSolsticePhase && (
             <div style={{ background: '#0d1020', border: '1px solid #f1c40f44', borderRadius: 9, padding: '10px 12px' }}>
               <div style={{ fontSize: 9, color: '#f1c40f', marginBottom: 8, letterSpacing: '.08em', textTransform: 'uppercase' }}>☀ Солнцестояние</div>
-              {pendingSolsticeSelectCard && (
+
+              {/* Диалог: взять жетоны прогресса? */}
+              {pendingSolsticeGainProgress && (
+                <div>
+                  <div style={{ fontSize: 11, color: '#e8e8f0', marginBottom: 10 }}>
+                    «{pendingSolsticeGainProgress.card_name}»: получить{' '}
+                    <span style={{ color: '#f1c40f', fontWeight: 700 }}>{pendingSolsticeGainProgress.amount} жетона прогресса</span>?
+                  </div>
+                  <div style={{ display: 'flex', gap: 7 }}>
+                    <Btn label="Да" onClick={() => solsticeGainProgress(true)} color="#2ecc71" icon="✓" />
+                    <Btn label="Нет" onClick={() => solsticeGainProgress(false)} color="#555" icon="✕" />
+                  </div>
+                </div>
+              )}
+
+              {/* Диалог: судьба карты */}
+              {pendingSolsticeFateChoice && (
+                <div>
+                  <div style={{ fontSize: 11, color: '#e8e8f0', marginBottom: 10 }}>
+                    «{pendingSolsticeFateChoice.card_name}»: что сделать с картой?
+                  </div>
+                  <div style={{ display: 'flex', gap: 7 }}>
+                    <Btn label="Разрушить" onClick={() => solsticeFate('destroy')} color="#e74c3c" icon="☠" />
+                    <Btn label="В летопись" onClick={() => solsticeFate('chronicle')} color="#3498db" icon="📜" />
+                  </div>
+                </div>
+              )}
+
+              {/* Подсказка при выборе карты солнцестояния */}
+              {pendingSolsticeSelectCard && !pendingSolsticeGainProgress && !pendingSolsticeFateChoice && (
                 <div style={{ fontSize: 10, color: '#aaa', marginBottom: 8 }}>
                   Активируйте карты с эффектом солнцестояния или перейдите к следующему раунду.
                 </div>
               )}
-              <Btn
-                label="Перейти к следующему раунду"
-                onClick={() => solsticeSkip()}
-                color="#e67e22"
-                icon="⏭"
-              />
+
+              {/* Кнопка пропуска — только когда нет активного диалога */}
+              {!pendingSolsticeGainProgress && !pendingSolsticeFateChoice && (
+                <Btn
+                  label="Перейти к следующему раунду"
+                  onClick={() => solsticeSkip()}
+                  color="#e67e22"
+                  icon="⏭"
+                />
+              )}
             </div>
           )}
 
@@ -1454,7 +1506,7 @@ export default function GameBoard() {
                           const appropriateAllowed = !pendingAppropriate ||
                             (slot.card.categories?.some(c => pendingAppropriate.allowed_categories.includes(c)) ?? false);
                           const exileAllowed = isExileMode && (pendingExileFromMarket!.eligible_slot_indices.includes(idx));
-                          const isMarketMode = isAcquireMode || isAppropriateMode || isExileMode;
+                          const isMarketMode = isAcquireMode || !!pendingAppropriate || isExileMode;
                           const marketAllowed = isAcquireMode ? acquireAllowed : isExileMode ? exileAllowed : appropriateAllowed;
                           return (
                             <CardView card={slot.card} size="large"
@@ -1463,7 +1515,7 @@ export default function GameBoard() {
                                 setPreviewCard(previewCard?.id === slot.card!.id ? null : slot.card);
                                 if (isExileMode && isPlayerTurn && exileAllowed) exileFromMarket(idx);
                                 else if (isAcquireMode && isPlayerTurn && acquireAllowed) acquireCard(idx);
-                                else if (isAppropriateMode && isPlayerTurn && appropriateAllowed) acquireCard(idx);
+                                else if (pendingAppropriate && isPlayerTurn && appropriateAllowed) acquireCard(idx);
                               }}
                               badge={slot.upgrade_tokens > 0 ? (
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 2, background: '#0d1a2e', border: '1px solid #3498db', borderRadius: 4, padding: '2px 5px' }}>
@@ -1502,9 +1554,8 @@ export default function GameBoard() {
                             ? <button onClick={() => exileFromMarket(idx)} style={{ background: 'linear-gradient(135deg,#7d3c98,#6c3483)', border: 'none', borderRadius: 5, color: '#fff', fontSize: 9, padding: '3px 8px', cursor: 'pointer', fontWeight: 600 }}>Изгнать</button>
                             : <div style={{ fontSize: 8, color: '#555', padding: '2px 0' }}>Есть жетоны</div>;
                         }
-                        if (isAppropriateMode) {
-                          const slotAllowed = !pendingAppropriate ||
-                            (slot.card.categories?.some(c => pendingAppropriate.allowed_categories.includes(c)) ?? false);
+                        if (pendingAppropriate) {
+                          const slotAllowed = slot.card.categories?.some(c => pendingAppropriate.allowed_categories.includes(c)) ?? false;
                           return slotAllowed
                             ? <button onClick={() => acquireCard(idx)} style={{ background: 'linear-gradient(135deg,#e67e22,#ca6f1e)', border: 'none', borderRadius: 5, color: '#fff', fontSize: 9, padding: '3px 8px', cursor: 'pointer', fontWeight: 600 }}>Присвоить</button>
                             : <div style={{ fontSize: 8, color: '#555', padding: '2px 0' }}>Недоступно</div>;

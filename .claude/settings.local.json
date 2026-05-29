@@ -22,7 +22,9 @@
       "Bash(python -m py_compile src/main/python/game/cards.py src/main/python/game/engine.py src/main/python/game/session.py src/main/python/api/main.py)",
       "Bash(python3:*)",
       "Bash(python -c \"from src.main.python.game.cards import DrawUpToNFromDeckAction, ReturnCardToDeckTopAction; from src.main.python.game.engine import GameEngine; print\\('imports OK'\\)\")",
-      "Bash(python -c \"from src.main.python.game.engine import GameEngine; print\\('OK'\\)\")"
+      "Bash(python -c \"from src.main.python.game.engine import GameEngine; print\\('OK'\\)\")",
+      "Bash(pip install:*)",
+      "Bash(python -m alembic upgrade head)"
     ]
   }
 }
