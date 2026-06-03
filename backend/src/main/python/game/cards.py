@@ -48,10 +48,38 @@ class AcquireCardAction:
 
 
 @dataclass
+class AcquireFromExileAction:
+    """Приобрести карту из колоды изгнания по категории."""
+    allowed_categories: List[CardCategory]
+    count: int = 1
+
+
+@dataclass
 class AppropriateCardAction:
     """Присвоить карту с рынка (беспорядки → стопка беспорядков)
     или взять верхнюю карту из заданной колоды,
     или найти карту нужного типа в основной колоде."""
+    allowed_categories: List[CardCategory]
+    allowed_source_decks: List[str] = field(default_factory=list)
+    include_main_deck: bool = False
+    count: int = 1
+
+
+@dataclass
+class NoActionAction:
+    """Пустое действие — ничего не происходит (опция «Пропустить» в выборе)."""
+    pass
+
+
+@dataclass
+class AccelerateProgressAction:
+    """Ускорить прогресс из карты действия; если ignore_token=True — жетон на колоде игнорируется."""
+    ignore_token: bool = False
+
+
+@dataclass
+class AppropriateCardOptionalAction:
+    """Игрок МОЖЕТ (но не обязан) присвоить карту указанной категории."""
     allowed_categories: List[CardCategory]
     allowed_source_decks: List[str] = field(default_factory=list)
     include_main_deck: bool = False
@@ -157,6 +185,14 @@ class ExploitSpendResourceDrawCardAction:
 
 
 @dataclass
+class ExploitSpendResourceTakeFromDiscardAction:
+    """Потратить N ресурсов чтобы взять M карт из личного сброса в руку."""
+    resource_type: ResourceType
+    resource_cost: int = 1
+    count: int = 1
+
+
+@dataclass
 class SolsticeOptionalDiscardHandReturnDisorderAction:
     """Солнцестояние: МОЖНО сбросить карту из руки, чтобы вернуть карту беспорядков из сброса в колоду беспорядков."""
     pass
@@ -212,6 +248,12 @@ class GuessDeckCategoryAction:
 
 
 @dataclass
+class DrawCardExploitAction:
+    """Эксплуатация: взять N карт из личной колоды в руку (бесплатно)."""
+    count: int = 1
+
+
+@dataclass
 class ExploitRecallLabelChoiceAction:
     """Эксплуатация: выбор из опций 'отозвать карту с меткой X → получить ресурсы'."""
     options: List[dict] = field(default_factory=list)
@@ -244,6 +286,11 @@ def _parse_choice_action_inner(a: dict):
             allowed_categories=[CardCategory(c) for c in a.get("categories", [])],
             count=a.get("count", 1),
         )
+    if at == "acquire_from_exile":
+        return AcquireFromExileAction(
+            allowed_categories=[CardCategory(c) for c in a.get("categories", [])],
+            count=a.get("count", 1),
+        )
     if at == "appropriate":
         return AppropriateCardAction(
             allowed_categories=[CardCategory(c) for c in a.get("categories", [])],
@@ -272,6 +319,10 @@ def _parse_choice_action_inner(a: dict):
         return ChronicleFromDiscardAction(optional=a.get("optional", False))
     if at == "chronicle_from_hand":
         return ChronicleFromHandAction(optional=a.get("optional", False))
+    if at == "accelerate_progress":
+        return AccelerateProgressAction(ignore_token=a.get("ignore_token", False))
+    if at == "no_action":
+        return NoActionAction()
     return None
 
 
@@ -315,6 +366,17 @@ def _parse_exploit_actions(data: dict) -> List:
             ))
         elif action_type == "recall_label_choice":
             actions.append(ExploitRecallLabelChoiceAction(options=a.get("options", [])))
+        elif action_type == "draw_card":
+            actions.append(DrawCardExploitAction(count=a.get("count", 1)))
+        elif action_type == "spend_resource_take_from_discard":
+            rt_name = a["resource_type"]
+            if rt_name not in _RESOURCE_TYPE_BY_NAME:
+                raise ValueError(f"Неизвестный ResourceType: '{rt_name}'")
+            actions.append(ExploitSpendResourceTakeFromDiscardAction(
+                resource_type=_RESOURCE_TYPE_BY_NAME[rt_name],
+                resource_cost=a.get("resource_cost", 1),
+                count=a.get("count", 1),
+            ))
     return actions
 
 
@@ -347,6 +409,22 @@ def _parse_on_play_actions(data: dict) -> List:
             ))
         elif action_type == "appropriate":
             actions.append(AppropriateCardAction(
+                allowed_categories=[CardCategory(c) for c in a.get("categories", [])],
+                allowed_source_decks=a.get("source_decks", []),
+                include_main_deck=a.get("include_main_deck", False),
+                count=a.get("count", 1),
+            ))
+        elif action_type == "acquire_from_exile":
+            actions.append(AcquireFromExileAction(
+                allowed_categories=[CardCategory(c) for c in a.get("categories", [])],
+                count=a.get("count", 1),
+            ))
+        elif action_type == "accelerate_progress":
+            actions.append(AccelerateProgressAction(
+                ignore_token=a.get("ignore_token", False),
+            ))
+        elif action_type == "appropriate_optional":
+            actions.append(AppropriateCardOptionalAction(
                 allowed_categories=[CardCategory(c) for c in a.get("categories", [])],
                 allowed_source_decks=a.get("source_decks", []),
                 include_main_deck=a.get("include_main_deck", False),
@@ -482,12 +560,16 @@ class Card:
     can_be_chronicled: bool = False  # игрок МОЖЕТ занести карту в летопись (на выбор)
     vp_in_chronicle: Optional[int] = None  # ПО если карта находится в летописи
     vp_out_of_chronicle: int = 0           # ПО если карта НЕ находится в летописи (только при vp_in_chronicle)
+    # Passive: list of card IDs this card allows to be played regardless of period restriction
+    allows_barbarism_cards: List[str] = field(default_factory=list)
+    # Play condition: card ID that must be present in chronicle before this card can be played
+    requires_card_in_chronicle: str = ""
     # Actions executed on play
     on_play_actions: List[GainResourceAction] = field(default_factory=list)
     # Actions executed on exploitation
     exploit_actions: List = field(default_factory=list)
     # Passive effect triggered when exploit token is placed on this card
-    exploit_passive: str = ""  # e.g. "grain_to_sack_3"
+    exploit_passive: str = ""  # e.g. "grain_to_sack_3", "draw_on_play_region"
     # Actions executed on solstice
     solstice_actions: List = field(default_factory=list)
 
@@ -562,6 +644,7 @@ def _base_card_from_dict(card_id: str, data: dict) -> BaseCard:
         can_be_chronicled=data.get("can_be_chronicled", False),
         vp_in_chronicle=data.get("vp_in_chronicle"),
         vp_out_of_chronicle=data.get("vp_out_of_chronicle", 0),
+        allows_barbarism_cards=data.get("allows_barbarism_cards", []),
         on_play_actions=_parse_on_play_actions(data),
         exploit_actions=_parse_exploit_actions(data),
         solstice_actions=_parse_solstice_actions(data),
@@ -641,6 +724,8 @@ def _card_from_dict(card_id: str, data: dict, nation: Nation) -> NationCard:
         can_be_chronicled=data.get("can_be_chronicled", False),
         vp_in_chronicle=data.get("vp_in_chronicle"),
         vp_out_of_chronicle=data.get("vp_out_of_chronicle", 0),
+        allows_barbarism_cards=data.get("allows_barbarism_cards", []),
+        requires_card_in_chronicle=data.get("requires_card_in_chronicle", ""),
         on_play_actions=_parse_on_play_actions(data),
         exploit_actions=_parse_exploit_actions(data),
         solstice_actions=_parse_solstice_actions(data),

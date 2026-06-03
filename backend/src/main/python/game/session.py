@@ -187,6 +187,38 @@ def resolve_draw_from_deck_optional(game_id: str, draw: bool) -> GameState:
     return state
 
 
+def acquire_from_exile(game_id: str, card_id: str) -> GameState:
+    state = _require(game_id)
+    _snapshot(game_id, state)
+    state = _engine.resolve_acquire_from_exile(state, card_id)
+    save_game(state)
+    return state
+
+
+def accelerate_progress_from_card(game_id: str, progress_card_id: str) -> GameState:
+    state = _require(game_id)
+    _snapshot(game_id, state)
+    state = _engine.resolve_accelerate_progress_from_card(state, progress_card_id)
+    save_game(state)
+    return state
+
+
+def take_from_discard(game_id: str, card_id: str) -> GameState:
+    state = _require(game_id)
+    _snapshot(game_id, state)
+    state = _engine.resolve_take_from_discard(state, card_id)
+    save_game(state)
+    return state
+
+
+def resolve_appropriate_optional(game_id: str, proceed: bool) -> GameState:
+    state = _require(game_id)
+    _snapshot(game_id, state)
+    state = _engine.resolve_appropriate_optional(state, proceed)
+    save_game(state)
+    return state
+
+
 def resolve_chronicle_choice(game_id: str, send_to_chronicle: bool) -> GameState:
     state = _require(game_id)
     _snapshot(game_id, state)

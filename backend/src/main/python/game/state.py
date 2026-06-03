@@ -5,8 +5,8 @@ import random
 import uuid
 from dataclasses import dataclass, field
 from typing import List, Optional, Dict
-from .cards import (Card, GainResourceAction, AcquireCardAction, AppropriateCardAction,
-                    ChoiceAction, ChoiceOption, PlayFromDiscardAction,
+from .cards import (Card, GainResourceAction, AcquireCardAction, AcquireFromExileAction, AppropriateCardAction,
+                    AppropriateCardOptionalAction, NoActionAction, ChoiceAction, ChoiceOption, PlayFromDiscardAction,
                     DrawFromDeckOptionalAction, GainPerLabelAction, GainPerCategoryAction,
                     StealResourceAction, ReturnExploitTokenOptionalAction,
                     build_base_deck_classics, get_nation_deck)
@@ -55,6 +55,14 @@ def _card_info(card: Card) -> dict:
                 "include_main_deck": a.include_main_deck,
                 "count": a.count,
             })
+        elif isinstance(a, AppropriateCardOptionalAction):
+            serialized_actions.append({
+                "type": "appropriate_optional",
+                "categories": [c.value for c in a.allowed_categories],
+                "source_decks": a.allowed_source_decks,
+                "include_main_deck": a.include_main_deck,
+                "count": a.count,
+            })
         elif isinstance(a, StealResourceAction):
             serialized_actions.append({
                 "type": "steal_resource",
@@ -72,6 +80,12 @@ def _card_info(card: Card) -> dict:
                 if isinstance(inner, AcquireCardAction):
                     inner_data = {
                         "type": "acquire_from_market",
+                        "categories": [c.value for c in inner.allowed_categories],
+                        "count": inner.count,
+                    }
+                elif isinstance(inner, AcquireFromExileAction):
+                    inner_data = {
+                        "type": "acquire_from_exile",
                         "categories": [c.value for c in inner.allowed_categories],
                         "count": inner.count,
                     }
@@ -101,6 +115,8 @@ def _card_info(card: Card) -> dict:
                         "resource_type": inner.resource_type.name,
                         "amount": inner.amount,
                     }
+                elif isinstance(inner, NoActionAction):
+                    inner_data = {"type": "no_action"}
                 else:
                     continue
                 serialized_opts.append({
@@ -190,6 +206,7 @@ class PlayerArea:
     # Специальные колоды
     boost_deck: List[Card] = field(default_factory=list)    # колода усиления
     boost_top_token: bool = False                            # жетон X на верхней карте усиления
+    progress_exploit_token: bool = False                     # жетон X на колоде прогресса (блокирует ускорение)
 
     # Карты способности
     ability_card: Optional[Card] = None
@@ -222,6 +239,7 @@ class PlayerArea:
             "chronicle_count": len(self.chronicle),
             "chronicle": [_card_info(c) for c in self.chronicle],
             "progress_area": [_card_info(c) for c in self.progress_area],
+            "progress_exploit_token": self.progress_exploit_token,
             "boost_deck_count": len(self.boost_deck),
             "boost_top_token": self.boost_top_token,
             "boost_bottom_card": _card_info(self.boost_deck[-1])
@@ -371,6 +389,10 @@ class GameState:
     # Отложенный запрос «занести в летопись» (ставится, если pending_choice уже занят)
     pending_chronicle_card_id: Optional[str] = None
 
+    # Принудительный перевод карты в летопись после завершения всех pending-действий
+    # (используется для карт с goes_to_chronicle=True, у которых есть on_play_actions с pending)
+    pending_forced_chronicle_card_id: Optional[str] = None
+
     # Отложенный запрос «укрепить карту» (ставится, если pending_choice уже занят)
     pending_reinforce_card_id: Optional[str] = None
 
@@ -405,5 +427,6 @@ class GameState:
             "log": self.log[-20:],  # last 20 messages
             "pending_choice": self.pending_choice,
             "pending_chronicle_card_id": self.pending_chronicle_card_id,
+            "pending_forced_chronicle_card_id": self.pending_forced_chronicle_card_id,
             "pending_reinforce_card_id": self.pending_reinforce_card_id,
         }

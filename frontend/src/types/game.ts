@@ -87,6 +87,7 @@ export interface PlayerState {
   chronicle_count: number;
   chronicle: CardInfo[];
   progress_area: CardInfo[];
+  progress_exploit_token: boolean;
   boost_deck_count: number;
   boost_top_token: boolean;
   boost_bottom_card: CardInfo | null;

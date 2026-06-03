@@ -72,6 +72,23 @@ export async function accelerateProgress(gameId: string, progressCardId: string)
   return res.data.state;
 }
 
+export async function acquireFromExile(gameId: string, cardId: string): Promise<GameState> {
+  const res = await api.post(`/api/games/${gameId}/acquire-from-exile`, { card_id: cardId });
+  return res.data.state;
+}
+
+export async function takeFromDiscard(gameId: string, cardId: string): Promise<GameState> {
+  const res = await api.post(`/api/games/${gameId}/take-from-discard`, { card_id: cardId });
+  return res.data.state;
+}
+
+export async function accelerateProgressFromCard(gameId: string, progressCardId: string): Promise<GameState> {
+  const res = await api.post(`/api/games/${gameId}/accelerate-progress-from-card`, {
+    progress_card_id: progressCardId,
+  });
+  return res.data.state;
+}
+
 export async function makeChoice(gameId: string, optionIndex: number): Promise<GameState> {
   const res = await api.post(`/api/games/${gameId}/choose-option`, { option_index: optionIndex });
   return res.data.state;

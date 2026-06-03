@@ -34,6 +34,9 @@ interface GameStore {
   endTurn: (discardIds?: string[]) => Promise<void>;
   acquireCard: (slotIndex: number) => Promise<void>;
   accelerateProgress: (progressCardId: string) => Promise<void>;
+  accelerateProgressFromCard: (progressCardId: string) => Promise<void>;
+  acquireFromExile: (cardId: string) => Promise<void>;
+  takeFromDiscard: (cardId: string) => Promise<void>;
   makeChoice: (optionIndex: number) => Promise<void>;
   selectAppropriateCategory: (category: string) => Promise<void>;
   appropriateFromDeck: (deckName: string) => Promise<void>;
@@ -228,6 +231,42 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const state = await api.accelerateProgress(gameId, progressCardId);
+      set({ gameState: state, loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
+
+  acquireFromExile: async (cardId) => {
+    const { gameId } = get();
+    if (!gameId) return;
+    set({ loading: true, error: null });
+    try {
+      const state = await api.acquireFromExile(gameId, cardId);
+      set({ gameState: state, loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
+
+  takeFromDiscard: async (cardId) => {
+    const { gameId } = get();
+    if (!gameId) return;
+    set({ loading: true, error: null });
+    try {
+      const state = await api.takeFromDiscard(gameId, cardId);
+      set({ gameState: state, loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
+
+  accelerateProgressFromCard: async (progressCardId) => {
+    const { gameId } = get();
+    if (!gameId) return;
+    set({ loading: true, error: null });
+    try {
+      const state = await api.accelerateProgressFromCard(gameId, progressCardId);
       set({ gameState: state, loading: false });
     } catch (e: any) {
       set({ error: e.response?.data?.detail || e.message, loading: false });

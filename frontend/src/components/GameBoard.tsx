@@ -288,10 +288,11 @@ function Btn({ label, onClick, color = '#2ecc71', disabled = false, active = fal
 }
 
 export default function GameBoard() {
-  const { gameState: gs, loading, error, playCard, exploitCard, doInnovation, doRevolution, endTurn, acquireCard, accelerateProgress, resetGame, undoAction, makeChoice, selectAppropriateCategory, appropriateFromDeck, chronicleChoice, reinforceChoice, reinforceWithCard, playFromDiscard, placeUpgradeToken, resolveDrawFromDeck, returnExploitToken, destroyCards, gloryDeckTake, exileFromMarket, chronicleFromDiscard, recallToAvoidAttack, moveDiscardToDeck, sacredPathExploit, sacredPathExchange, solsticeSelectCard, solsticeSkip, solsticeGainProgress, solsticeFate } = useGameStore();
+  const { gameState: gs, loading, error, playCard, exploitCard, doInnovation, doRevolution, endTurn, acquireCard, accelerateProgress, accelerateProgressFromCard, acquireFromExile, takeFromDiscard, resetGame, undoAction, makeChoice, selectAppropriateCategory, appropriateFromDeck, chronicleChoice, reinforceChoice, reinforceWithCard, playFromDiscard, placeUpgradeToken, resolveDrawFromDeck, returnExploitToken, destroyCards, gloryDeckTake, exileFromMarket, chronicleFromDiscard, recallToAvoidAttack, moveDiscardToDeck, sacredPathExploit, sacredPathExchange, solsticeSelectCard, solsticeSkip, solsticeGainProgress, solsticeFate } = useGameStore();
   const [selectedCards, setSelectedCards] = useState<string[]>([]);
   const [scores, setScores] = useState<{ player: number; bot: number } | null>(null);
   const [previewCard, setPreviewCard] = useState<CardInfo | null>(null);
+  const [showProgressModal, setShowProgressModal] = useState(false);
   const [previewOrigin, setPreviewOrigin] = useState('top left');
   const [playAreaPreviewPos, setPlayAreaPreviewPos] = useState<{ top: number; left: number } | null>(null);
   const playAreaOverlayRef = React.useRef<HTMLDivElement | null>(null);
@@ -319,6 +320,12 @@ export default function GameBoard() {
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, [previewCard]);
+
+  useEffect(() => {
+    if (gs?.pending_choice?.type === 'accelerate_progress_from_card') {
+      setShowProgressModal(true);
+    }
+  }, [gs?.pending_choice?.type]);
 
   useEffect(() => {
     if (!gs) return;
@@ -746,6 +753,188 @@ export default function GameBoard() {
         </div>
       )}
 
+      {/* Acquire from exile modal */}
+      {gs?.pending_choice?.type === 'acquire_from_exile' && (() => {
+        const pending = gs.pending_choice as {
+          type: string;
+          allowed_categories: string[];
+          available_cards: import('../types/game').CardInfo[];
+          remaining: number;
+        };
+        return (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 850 }}>
+            <div style={{
+              background: 'linear-gradient(135deg,#1a0d0d,#100a0a)', border: '2px solid #8b2222', borderRadius: 14,
+              padding: '24px 28px', maxWidth: 900, width: '95%', maxHeight: '85vh', overflowY: 'auto',
+            }}>
+              <div style={{ fontSize: 13, color: '#e74c3c', letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: 6 }}>
+                Колода изгнания
+              </div>
+              <div style={{ fontSize: 11, color: '#9098b8', marginBottom: 16 }}>
+                Выберите карту из изгнания ({pending.remaining} {pending.remaining === 1 ? 'карта' : 'карты'}):
+              </div>
+              {pending.available_cards.length === 0 ? (
+                <div style={{ fontSize: 12, color: '#e74c3c', marginBottom: 16 }}>
+                  В колоде изгнания нет подходящих карт.
+                </div>
+              ) : (
+                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 20 }}>
+                  {pending.available_cards.map(c => (
+                    <CardView key={c.id} card={c} size="xlarge" onClick={() => acquireFromExile(c.id)} />
+                  ))}
+                </div>
+              )}
+              <button
+                onClick={() => undoAction()}
+                style={{ background: 'transparent', border: '1px solid #3a3d55', borderRadius: 8, color: '#9098b8', padding: '8px 20px', cursor: 'pointer', fontSize: 12 }}
+              >
+                Отмена (undo)
+              </button>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Take from discard modal (1MAK7 exploit) */}
+      {gs?.pending_choice?.type === 'take_from_discard' && (() => {
+        const pending = gs.pending_choice as {
+          type: string;
+          available_cards: import('../types/game').CardInfo[];
+          remaining: number;
+        };
+        return (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 850 }}>
+            <div style={{
+              background: 'linear-gradient(135deg,#0d1a0d,#0a100a)', border: '2px solid #22882b', borderRadius: 14,
+              padding: '24px 28px', maxWidth: 900, width: '95%', maxHeight: '85vh', overflowY: 'auto',
+            }}>
+              <div style={{ fontSize: 13, color: '#2ecc71', letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: 6 }}>
+                Личный сброс
+              </div>
+              <div style={{ fontSize: 11, color: '#9098b8', marginBottom: 16 }}>
+                Выберите карту из личного сброса для взятия в руку ({pending.remaining} {pending.remaining === 1 ? 'карта' : 'карты'}):
+              </div>
+              {pending.available_cards.length === 0 ? (
+                <div style={{ fontSize: 12, color: '#e74c3c', marginBottom: 16 }}>
+                  Личный сброс пуст.
+                </div>
+              ) : (
+                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 20 }}>
+                  {pending.available_cards.map(c => (
+                    <CardView key={c.id} card={c} size="xlarge" onClick={() => takeFromDiscard(c.id)} />
+                  ))}
+                </div>
+              )}
+              <button
+                onClick={() => undoAction()}
+                style={{ background: 'transparent', border: '1px solid #3a3d55', borderRadius: 8, color: '#9098b8', padding: '8px 20px', cursor: 'pointer', fontSize: 12 }}
+              >
+                Отмена (undo)
+              </button>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Progress deck modal */}
+      {showProgressModal && (() => {
+        const progressCards = player?.progress_area ?? [];
+        const res = player?.resources.resource ?? 0;
+        const pop = player?.resources.population ?? 0;
+        const upg = player?.resources.upgrade ?? 0;
+        const hasToken = player?.progress_exploit_token ?? false;
+        const fromCard = gs?.pending_choice?.type === 'accelerate_progress_from_card';
+        const ignoreToken = fromCard ? !!(gs?.pending_choice as any)?.ignore_token : false;
+        const blocked = hasToken && !ignoreToken;
+
+        const canAfford = (c: typeof progressCards[0]) => {
+          const costRes = c.progress_cost_resource ?? 0;
+          const costPop = c.progress_cost_population ?? 0;
+          const costUpg = c.progress_cost_upgrade ?? 0;
+          const popPay = Math.min(pop, costPop);
+          const resPay = Math.min(res, costRes);
+          const upgNeeded = (costPop - popPay) + Math.ceil(Math.max(0, costRes - resPay) / 2) + costUpg;
+          return upg >= upgNeeded;
+        };
+
+        const handleSelect = async (cardId: string) => {
+          setShowProgressModal(false);
+          if (fromCard) {
+            await accelerateProgressFromCard(cardId);
+          } else {
+            await accelerateProgress(cardId);
+          }
+        };
+
+        const handleClose = () => {
+          setShowProgressModal(false);
+        };
+
+        return (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 900 }}>
+            <div style={{
+              background: 'linear-gradient(135deg,#0d1020,#0a0c18)', border: '2px solid #c8a84b', borderRadius: 14,
+              padding: '24px 28px', maxWidth: 900, width: '95%', maxHeight: '85vh', overflowY: 'auto',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                <div style={{ fontSize: 13, color: '#c8a84b', letterSpacing: '.12em', textTransform: 'uppercase' }}>
+                  Колода прогресса
+                </div>
+                <button onClick={handleClose} style={{ background: 'transparent', border: 'none', color: '#666', fontSize: 18, cursor: 'pointer', lineHeight: 1 }}>✕</button>
+              </div>
+
+              {blocked && (
+                <div style={{ fontSize: 11, color: '#e67e22', marginBottom: 12, padding: '6px 10px', background: 'rgba(230,126,34,.1)', borderRadius: 6, border: '1px solid rgba(230,126,34,.3)' }}>
+                  На колоде прогресса лежит жетон эксплуатации — ускорение недоступно в этом раунде
+                </div>
+              )}
+
+              {!blocked && (
+                <div style={{ fontSize: 11, color: '#9098b8', marginBottom: 16 }}>
+                  {fromCard
+                    ? 'Выберите карту прогресса для ускорения (жетон игнорируется):'
+                    : 'Выберите карту прогресса для ускорения:'}
+                </div>
+              )}
+
+              {progressCards.length === 0 ? (
+                <div style={{ fontSize: 12, color: '#e74c3c', marginBottom: 16 }}>Область прогресса пуста.</div>
+              ) : (
+                <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 20 }}>
+                  {progressCards.map(c => {
+                    const costRes = c.progress_cost_resource ?? 0;
+                    const costPop = c.progress_cost_population ?? 0;
+                    const costUpg = c.progress_cost_upgrade ?? 0;
+                    const affordable = canAfford(c);
+                    const clickable = !blocked && affordable;
+                    const costParts: string[] = [];
+                    if (costRes) costParts.push(`${costRes} рес.`);
+                    if (costPop) costParts.push(`${costPop} нас.`);
+                    if (costUpg) costParts.push(`${costUpg} жет.`);
+                    return (
+                      <div key={c.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                        <div style={{ opacity: (blocked || !affordable) ? 0.45 : 1, cursor: clickable ? 'pointer' : 'default' }}>
+                          <CardView card={c} size="xlarge" onClick={() => { if (clickable) handleSelect(c.id); }} />
+                        </div>
+                        <div style={{ fontSize: 10, color: affordable ? '#c8a84b' : '#e74c3c', textAlign: 'center', maxWidth: 180 }}>
+                          {costParts.length > 0 ? costParts.join(' + ') : 'Бесплатно'}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button onClick={handleClose} style={{ background: 'transparent', border: '1px solid #3a3d55', borderRadius: 8, color: '#9098b8', padding: '8px 20px', cursor: 'pointer', fontSize: 12 }}>
+                  Закрыть
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Main layout */}
       <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 260px 1fr', overflow: 'hidden' }}>
 
@@ -793,33 +982,22 @@ export default function GameBoard() {
                 </div>
               )}
 
-              {/* Progress stack — only top card visible */}
+              {/* Progress stack — click opens modal */}
               {(player?.progress_area ?? []).length > 0 && (() => {
                 const progressCards = player!.progress_area;
                 const topCard = progressCards[0];
                 const count = progressCards.length;
-                const isPreview = previewCard?.id === topCard.id;
+                const hasToken = player!.progress_exploit_token;
+                const canOpen = isPlayerTurn && player?.period === 'civilization';
                 return (
                   <div>
                     <div style={{ fontSize: 9, color: '#555', marginBottom: 5, letterSpacing: '.08em', textTransform: 'uppercase' }}>
                       Прогресс <span style={{ color: '#9098b8' }}>({count})</span>
+                      {hasToken && <span title="Жетон эксплуатации на колоде прогресса" style={{ marginLeft: 4, color: '#e67e22', fontSize: 9 }}>✕</span>}
                     </div>
                     <div
-                      ref={isPreview ? previewRef : undefined}
-                      onClickCapture={(e) => {
-                        if (!isPreview) {
-                          const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-                          const leftColRight = (window.innerWidth - 260) / 2;
-                          setPreviewOrigin(rect.left + rect.width * 2 > leftColRight ? 'top right' : 'top left');
-                        }
-                      }}
-                      style={{
-                        position: 'relative', display: 'inline-block',
-                        zIndex: isPreview ? 200 : undefined,
-                        transform: isPreview ? 'scale(1.5)' : undefined,
-                        transformOrigin: isPreview ? previewOrigin : 'top left',
-                        transition: 'transform 0.15s',
-                      }}
+                      style={{ position: 'relative', display: 'inline-block', cursor: canOpen ? 'pointer' : 'default' }}
+                      onClick={() => { if (canOpen) setShowProgressModal(true); }}
                     >
                       {count > 2 && (
                         <div style={{ position: 'absolute', top: 4, left: 4, width: 180, height: 240, background: '#0d0f1a', border: '1px solid #1a1d30', borderRadius: 8, pointerEvents: 'none' }} />
@@ -827,18 +1005,10 @@ export default function GameBoard() {
                       {count > 1 && (
                         <div style={{ position: 'absolute', top: 2, left: 2, width: 180, height: 240, background: '#10121e', border: '1px solid #1e2138', borderRadius: 8, pointerEvents: 'none' }} />
                       )}
-                      <CardView
-                        card={topCard}
-                        size="xlarge"
-                        onClick={() => {
-                          if (isPreview) {
-                            setPreviewCard(null);
-                            if (isPlayerTurn) accelerateProgress(topCard.id);
-                          } else {
-                            setPreviewCard(topCard);
-                          }
-                        }}
-                      />
+                      <CardView card={topCard} size="xlarge" onClick={() => { if (canOpen) setShowProgressModal(true); }} />
+                      {hasToken && (
+                        <div style={{ position: 'absolute', top: 6, right: 6, background: '#e67e22', color: '#fff', borderRadius: '50%', width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, pointerEvents: 'none' }}>✕</div>
+                      )}
                     </div>
                   </div>
                 );
