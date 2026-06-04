@@ -43,19 +43,22 @@ export interface CardInfo {
   sends_to_chronicle?: number;
   goes_to_chronicle?: boolean;
   can_be_chronicled?: boolean;
+  // Period override: barbarism cards unlocked by this card in play area
+  allows_barbarism_cards?: string[];
   // Reinforcement (only present on play_area cards)
   reinforcement?: CardInfo | null;
   // Actions on play
   on_play_actions?: Array<
     | { type: 'gain_resource'; resource_type: string; amount: number }
     | { type: 'acquire_from_market'; categories: CardCategory[]; count: number }
+    | { type: 'destroy_from_play_area'; category: CardCategory; count: number }
   >;
   // Actions on exploitation
   exploit_actions?: Array<
     { type: 'play_from_discard'; categories: CardCategory[]; count: number; cost_action: number }
   >;
   // Labels
-  labels?: ('grain' | 'water' | 'sack')[];
+  labels?: ('grain' | 'water' | 'sack' | 'town' | 'city')[];
 }
 
 export interface Resources {
@@ -94,6 +97,7 @@ export interface PlayerState {
   ability_card: { id: string; name: string; side: string } | null;
   resources: Resources;
   hand_limit: number;
+  current_vp: number;
   turn_action_chosen: TurnAction | null;
   exploits_used_ids: string[];
   play_area_labels: Record<string, number>;

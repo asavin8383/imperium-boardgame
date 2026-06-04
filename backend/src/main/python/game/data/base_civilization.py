@@ -53,8 +53,8 @@ DECK: dict = {
     "1CIV12": {"name": "Градостроительство", "categories": ["civilization"], "period": "civilization",
                "vp_per_condition": "label_town", "vp_per_condition_value": 2,
                "on_play_actions": [
-                   {"type": "gain_per_label", "label": "town", "resource_type": "MATERIAL"},
-                   {"type": "gain_per_label", "label": "town", "resource_type": "POPULATION"},
+                   {"type": "gain_per_label", "labels": ["town", "city"], "resource_type": "MATERIAL"},
+                   {"type": "gain_per_label", "labels": ["town", "city"], "resource_type": "POPULATION"},
                ]},
     "1CIV13": {"name": "Наёмники",         "categories": ["civilization"], "period": "civilization", "card_type": "attack",
                "requires_action_token": False,

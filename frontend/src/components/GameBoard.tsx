@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useGameStore } from '../store/gameStore';
 import SaveLoadModal from './SaveLoadModal';
-import { CardInfo, MarketSlot as MarketSlotInfo } from '../types/game';
+import { CardInfo, CardCategory, MarketSlot as MarketSlotInfo } from '../types/game';
 import regIcon from '../assets/icons/category/РЕГ.svg';
 import istIcon from '../assets/icons/category/ИСТ.svg';
 import civIcon from '../assets/icons/category/ЦИВ.svg';
@@ -12,12 +12,14 @@ import spsIcon from '../assets/icons/category/СПС.svg';
 import varIcon from '../assets/icons/period/ВАР.svg';
 import impIcon from '../assets/icons/period/ИМП.svg';
 import exploitTokenIcon from '../assets/icons/tokens/exploit.svg';
+import coinIcon from '../assets/icons/tokens/coin.svg';
 import progressTokenIcon from '../assets/icons/tokens/progress.svg';
 import postIcon from '../assets/icons/type/ПОСТ.svg';
 import atkIcon from '../assets/icons/type/АТК.svg';
 import grainIcon from '../assets/icons/labels/grain.svg';
 import waterIcon from '../assets/icons/labels/water.svg';
 import sackIcon from '../assets/icons/labels/sack.svg';
+import cityIcon from '../assets/icons/labels/city.svg';
 
 const CAT_COLOR: Record<string, string> = {
   region: '#2ecc71', origins: '#e67e22', civilization: '#3498db',
@@ -126,6 +128,26 @@ function CardView({ card, selected = false, onClick, size = 'normal', dimmed = f
               />
             )}
           </div>
+          {/* Label icons */}
+          {(card.labels ?? []).length > 0 && (() => {
+            const labelIconMap: Record<string, { src: string; alt: string }> = {
+              grain: { src: grainIcon, alt: 'Зерно' },
+              water: { src: waterIcon, alt: 'Вода' },
+              sack:  { src: sackIcon,  alt: 'Деньги' },
+              city:  { src: cityIcon,  alt: 'Город' },
+            };
+            return (
+              <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap', marginBottom: 2 }}>
+                {(card.labels ?? []).map(lbl => {
+                  const li = labelIconMap[lbl];
+                  return li ? (
+                    <img key={lbl} src={li.src} alt={li.alt} title={li.alt}
+                      style={{ width: 14, height: 14, opacity: 0.9 }} />
+                  ) : null;
+                })}
+              </div>
+            );
+          })()}
           {/* Effect icons */}
           <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap', minHeight: 12 }}>
             {card.card_type === 'attack' && <span title="Атака" style={{ fontSize: d.c - 1, color: '#e74c3c' }}>⚔</span>}
@@ -288,7 +310,7 @@ function Btn({ label, onClick, color = '#2ecc71', disabled = false, active = fal
 }
 
 export default function GameBoard() {
-  const { gameState: gs, loading, error, playCard, exploitCard, doInnovation, doRevolution, endTurn, acquireCard, accelerateProgress, accelerateProgressFromCard, acquireFromExile, takeFromDiscard, resetGame, undoAction, makeChoice, selectAppropriateCategory, appropriateFromDeck, chronicleChoice, reinforceChoice, reinforceWithCard, playFromDiscard, placeUpgradeToken, resolveDrawFromDeck, returnExploitToken, destroyCards, gloryDeckTake, exileFromMarket, chronicleFromDiscard, recallToAvoidAttack, moveDiscardToDeck, sacredPathExploit, sacredPathExchange, solsticeSelectCard, solsticeSkip, solsticeGainProgress, solsticeFate } = useGameStore();
+  const { gameState: gs, loading, error, playCard, exploitCard, doInnovation, doRevolution, endTurn, acquireCard, accelerateProgress, accelerateProgressFromCard, acquireFromExile, takeFromDiscard, resetGame, undoAction, makeChoice, selectAppropriateCategory, appropriateFromDeck, chronicleChoice, reinforceChoice, reinforceWithCard, playFromDiscard, placeUpgradeToken, resolveDrawFromDeck, returnExploitToken, destroyCards, gloryDeckTake, exileFromMarket, chronicleFromDiscard, recallToAvoidAttack, moveDiscardToDeck, oracleDrawChoice, returnCardToDeckTop, sacredPathExploit, sacredPathExchange, solsticeSelectCard, solsticeSkip, solsticeGainProgress, solsticeFate, solsticeChoice } = useGameStore();
   const [selectedCards, setSelectedCards] = useState<string[]>([]);
   const [scores, setScores] = useState<{ player: number; bot: number } | null>(null);
   const [previewCard, setPreviewCard] = useState<CardInfo | null>(null);
@@ -451,6 +473,10 @@ export default function GameBoard() {
   // Солнцестояние: судьба карты (разрушить или в летопись)
   const pendingSolsticeFateChoice = gs.pending_choice?.type === 'solstice_fate_choice'
     ? gs.pending_choice as { type: string; card_id: string; card_name: string }
+    : null;
+  // Солнцестояние: выбор из нескольких опций (например, 1MAK8)
+  const pendingSolsticeChoice = gs.pending_choice?.type === 'solstice_choice'
+    ? gs.pending_choice as { type: string; card_id: string; card_name: string; options: Array<{ label: string; action: Record<string, unknown> }> }
     : null;
 
   // Pending отзыв карты для избежания атаки бота
@@ -836,6 +862,87 @@ export default function GameBoard() {
         );
       })()}
 
+      {/* Glory deck look modal (e.g. 1MAK12) */}
+      {pendingGloryDeckLook && (() => {
+        const take = pendingGloryDeckLook.take_count;
+        const total = pendingGloryDeckLook.revealed_cards.length;
+        return (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 850 }}>
+            <div style={{
+              background: 'linear-gradient(135deg,#14110a,#0e0c06)', border: '2px solid #f1c40f', borderRadius: 14,
+              padding: '24px 28px',
+              maxWidth: `${Math.max(1, total) * (180 + 10) + 56}px`,
+              width: '95%',
+            }}>
+              <div style={{ fontSize: 13, color: '#f1c40f', letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: 6 }}>Колода Славы</div>
+              <div style={{ fontSize: 12, color: '#9098b8', marginBottom: 18 }}>
+                Выберите {take === 1 ? 'одну карту для взятия в руку' : `${take} карты для взятия в руку`}.
+                {total > take ? ` Остальные вернутся верхними картами в колоду.` : ''}
+              </div>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 4 }}>
+                {pendingGloryDeckLook.revealed_cards.map(c => (
+                  <CardView key={c.id} card={c} size="xlarge" onClick={() => gloryDeckTake(c.id)} />
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Return card to deck top modal (e.g. 1NAB9) */}
+      {gs?.pending_choice?.type === 'return_card_to_deck_top' && (() => {
+        const pending = gs.pending_choice as { type: string; available_cards: CardInfo[] };
+        return (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 850 }}>
+            <div style={{
+              background: 'linear-gradient(135deg,#0d1020,#0a0e1a)', border: '2px solid #e74c3c', borderRadius: 14,
+              padding: '24px 28px',
+              maxWidth: `${Math.max(1, pending.available_cards.length) * (180 + 10) + 56}px`,
+              width: '95%',
+            }}>
+              <div style={{ fontSize: 13, color: '#e74c3c', letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: 6 }}>Вернуть карту в колоду</div>
+              <div style={{ fontSize: 12, color: '#9098b8', marginBottom: 18 }}>
+                Выберите карту из руки — она уйдёт на верх личной колоды.
+              </div>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 4 }}>
+                {pending.available_cards.map(c => (
+                  <CardView key={c.id} card={c} size="xlarge" onClick={() => returnCardToDeckTop(c.id)} />
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Oracle draw choice modal (1IST9) */}
+      {gs?.pending_choice?.type === 'oracle_draw_choice' && (() => {
+        const pending = gs.pending_choice as {
+          type: string;
+          revealed_card_ids: string[];
+          available_cards: CardInfo[];
+        };
+        return (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 850 }}>
+            <div style={{
+              background: 'linear-gradient(135deg,#0d1020,#0a0e1a)', border: '2px solid #e67e22', borderRadius: 14,
+              padding: '24px 28px',
+              maxWidth: `${Math.max(1, pending.available_cards.length) * (180 + 10) + 56}px`,
+              width: '95%',
+            }}>
+              <div style={{ fontSize: 13, color: '#e67e22', letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: 6 }}>Оракул</div>
+              <div style={{ fontSize: 12, color: '#9098b8', marginBottom: 18 }}>
+                Выберите карту, которую возьмёте в руку. Остальные уйдут в сброс.
+              </div>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 4 }}>
+                {pending.available_cards.map(c => (
+                  <CardView key={c.id} card={c} size="xlarge" onClick={() => oracleDrawChoice(c.id)} />
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Progress deck modal */}
       {showProgressModal && (() => {
         const progressCards = player?.progress_area ?? [];
@@ -943,7 +1050,13 @@ export default function GameBoard() {
           {/* Player info */}
           <div style={{ background: '#0d1020', border: '1px solid #1e2235', borderRadius: 8, padding: '8px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: '#c8a84b', letterSpacing: '.1em' }}>{player?.nation?.toUpperCase()}</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 13, fontWeight: 700, color: '#c8a84b', letterSpacing: '.1em' }}>{player?.nation?.toUpperCase()}</span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 12, fontWeight: 700, color: '#f1c40f' }}>
+                  <img src={coinIcon} alt="ПО" style={{ width: 16, height: 16 }} />
+                  {player?.current_vp ?? 0}
+                </span>
+              </div>
               <div style={{ fontSize: 10, color: player?.period === 'barbarism' ? '#e74c3c' : '#3498db', marginTop: 2 }}>{PERIOD_RU[player?.period ?? '']}</div>
             </div>
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'flex-end', alignItems: 'center' }}>
@@ -1245,15 +1358,29 @@ export default function GameBoard() {
                 </div>
               )}
 
+              {/* Диалог: выбор из опций (solstice_choice) */}
+              {pendingSolsticeChoice && (
+                <div>
+                  <div style={{ fontSize: 11, color: '#e8e8f0', marginBottom: 10 }}>
+                    «{pendingSolsticeChoice.card_name}»: выберите действие
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {pendingSolsticeChoice.options.map((opt, idx) => (
+                      <Btn key={idx} label={opt.label} onClick={() => solsticeChoice(idx)} color="#3498db" />
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Подсказка при выборе карты солнцестояния */}
-              {pendingSolsticeSelectCard && !pendingSolsticeGainProgress && !pendingSolsticeFateChoice && (
+              {pendingSolsticeSelectCard && !pendingSolsticeGainProgress && !pendingSolsticeFateChoice && !pendingSolsticeChoice && (
                 <div style={{ fontSize: 10, color: '#aaa', marginBottom: 8 }}>
                   Активируйте карты с эффектом солнцестояния или перейдите к следующему раунду.
                 </div>
               )}
 
               {/* Кнопка пропуска — только когда нет активного диалога */}
-              {!pendingSolsticeGainProgress && !pendingSolsticeFateChoice && (
+              {!pendingSolsticeGainProgress && !pendingSolsticeFateChoice && !pendingSolsticeChoice && (
                 <Btn
                   label="Перейти к следующему раунду"
                   onClick={() => solsticeSkip()}
@@ -1309,7 +1436,14 @@ export default function GameBoard() {
                 {pendingPlayerChoice.options.map((opt, idx) => {
                   const action = opt.action as Record<string, unknown>;
                   const cats = (action.categories as string[] | undefined)?.join(', ') ?? '';
-                  const actionLabel = action.type === 'acquire_from_market' ? 'приобрести с рынка' : 'присвоить';
+                  const actionLabel =
+                    action.type === 'acquire_from_market' ? `приобрести с рынка${cats ? ` (${cats})` : ''}` :
+                    action.type === 'acquire_from_exile'  ? `из изгнания${cats ? ` (${cats})` : ''}` :
+                    action.type === 'appropriate'         ? `присвоить${cats ? ` (${cats})` : ''}` :
+                    action.type === 'accelerate_progress' ? 'ускорить прогресс' :
+                    action.type === 'gain_resource'       ? `+${action.amount} ${action.resource_type}` :
+                    action.type === 'no_action'           ? 'пропустить' :
+                    action.type as string;
                   const avPop = player?.resources?.population ?? 0;
                   const avRes = player?.resources?.resource ?? 0;
                   const avUpgrade = player?.resources?.upgrade ?? 0;
@@ -1341,7 +1475,7 @@ export default function GameBoard() {
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span>{opt.label}</span>
                         <span style={{ fontSize: 9, fontWeight: 400, color: canAfford ? '#9098b8' : '#4a4060' }}>
-                          {actionLabel} ({cats})
+                          {actionLabel}
                         </span>
                       </div>
                       {(opt.cost_population > 0 || opt.cost_resource > 0) && (
@@ -1453,25 +1587,6 @@ export default function GameBoard() {
             </div>
           )}
 
-          {/* Просмотр колоды славы */}
-          {isPlayerTurn && pendingGloryDeckLook && (
-            <div style={{ background: '#0d1020', border: '1px solid #f1c40f', borderRadius: 9, padding: '10px 12px' }}>
-              <div style={{ fontSize: 9, color: '#f1c40f', marginBottom: 6, letterSpacing: '.08em', textTransform: 'uppercase' }}>Колода Славы</div>
-              <div style={{ fontSize: 10, color: '#aaa', marginBottom: 8 }}>
-                Выберите 1 карту, чтобы взять в руку. Вторая вернётся в колоду.
-              </div>
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                {pendingGloryDeckLook.revealed_cards.map(c => (
-                  <button key={c.id} onClick={() => gloryDeckTake(c.id)} style={{
-                    background: '#1a1500', border: '1px solid #f1c40f', borderRadius: 6,
-                    color: '#f1c40f', padding: '6px 14px', cursor: 'pointer', fontSize: 11, fontWeight: 600,
-                  }}>
-                    {c.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
 
           {/* Пассивный эффект 1REG12: отзыв карты при атаке бота */}
           {pendingRecallToAvoidAttack && (
@@ -1579,15 +1694,29 @@ export default function GameBoard() {
                 ? `🛡 Выберите карту для укрепления «${pendingReinforceSelect!.target_card_name}»`
                 : `Рука (${(player?.hand ?? []).length}/${player?.hand_limit ?? 5})`}
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 7 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 7, userSelect: 'none' }}>
               {(player?.hand ?? []).map(card => {
                 const isPreview = previewCard?.id === card.id;
-                const periodBlocked = isPlayerTurn && !revMode && !isInnovatePending && !isReinforceSelectMode && card.period != null && card.period !== player?.period;
+                const periodOverride = (player?.play_area ?? []).some(
+                  pa => (pa.allows_barbarism_cards ?? []).includes(card.id)
+                );
+                const periodBlocked = isPlayerTurn && !revMode && !isInnovatePending && !isReinforceSelectMode && card.period != null && card.period !== player?.period && !periodOverride;
+                const destroyBlocked = isPlayerTurn && !revMode && !isReinforceSelectMode && (() => {
+                  const destroyActions = (card.on_play_actions ?? []).filter(
+                    a => a.type === 'destroy_from_play_area'
+                  ) as { type: 'destroy_from_play_area'; category: CardCategory; count: number }[];
+                  return destroyActions.some(a => {
+                    const available = (player?.play_area ?? []).filter(
+                      pa => (pa.categories ?? []).includes(a.category)
+                    ).length;
+                    return available < a.count;
+                  });
+                })();
                 const isDisorder = (card.card_type === 'disorder') || (card.categories?.includes('disorder') ?? false);
                 const isRevSelectable = revMode && isDisorder;
                 const isRevSelected = revMode && selectedCards.includes(card.id);
                 const isReinforceExcluded = isReinforceSelectMode && (pendingReinforceSelect!.excluded_card_ids ?? []).includes(card.id);
-                const dimmedCard = (isInnovatePending && isPlayerTurn) || (revMode && !isDisorder) || (periodBlocked && !isReinforceSelectMode) || isReinforceExcluded;
+                const dimmedCard = (isInnovatePending && isPlayerTurn) || (revMode && !isDisorder) || (periodBlocked && !isReinforceSelectMode) || isReinforceExcluded || destroyBlocked;
                 return (
                   <div key={card.id} ref={isPreview ? previewRef : undefined}
                     onClickCapture={(e) => {
@@ -1611,7 +1740,7 @@ export default function GameBoard() {
                         } else if (isInnovatePending) {
                           // hand not interactive during innovation pick
                         } else if (isPreview) {
-                          if (isPlayerTurn && !periodBlocked) playCard(card.id);
+                          if (isPlayerTurn && !periodBlocked && !destroyBlocked) playCard(card.id);
                           setPreviewCard(null);
                         } else {
                           setPreviewCard(card);

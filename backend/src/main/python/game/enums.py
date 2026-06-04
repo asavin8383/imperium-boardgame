@@ -24,6 +24,7 @@ class CardLabel(str, Enum):
     WATER = "water"   # вода
     SACK = "sack"     # деньги
     TOWN = "town"     # город
+    CITY = "city"     # город (крупный)
 
 
 class CardSubtype(str, Enum):

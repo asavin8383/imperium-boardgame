@@ -262,6 +262,10 @@ class SelfDispositionRequest(BaseModel):
     region_card_id: Optional[str] = None  # нужен при choice="reinforce_region"
 
 
+class LookDeckTopRequest(BaseModel):
+    choice: str  # "discard" | "return" | "chronicle"
+
+
 class TakeFromDiscardRequest(BaseModel):
     card_id: str
 
@@ -683,6 +687,13 @@ def solstice_return_disorder(game_id: str, req: PlayFromDiscardRequest):
 def reinforce_region_optional(game_id: str, req: ReinforceRegionOptionalRequest):
     with _game_action(game_id, f"reinforce_region_optional({req.region_card_id})"):
         state = game_session.resolve_reinforce_region_optional(game_id, req.region_card_id)
+        return {"state": state.to_dict()}
+
+
+@app.post("/api/games/{game_id}/look-deck-top")
+def look_deck_top(game_id: str, req: LookDeckTopRequest):
+    with _game_action(game_id, f"look_deck_top({req.choice})"):
+        state = game_session.resolve_look_deck_top(game_id, req.choice)
         return {"state": state.to_dict()}
 
 

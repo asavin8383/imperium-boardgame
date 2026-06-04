@@ -6,7 +6,7 @@ from typing import List, Optional, Tuple
 from .state import GameState, PlayerArea, MarketSlot, Resources
 from .enums import (Period, GamePhase, TurnAction, EndCondition,
                     CardCategory, CardSubtype, Difficulty, ResourceType, CardLabel)
-from .cards import Card, GainResourceAction, AcquireCardAction, AcquireFromExileAction, AccelerateProgressAction, AppropriateCardAction, AppropriateCardOptionalAction, NoActionAction, DrawCardExploitAction, ChoiceAction, PlayFromDiscardAction, DrawFromDeckOptionalAction, GainPerLabelAction, GainPerCategoryAction, StealResourceAction, ReturnExploitTokenOptionalAction, DestroyFromPlayAreaAction, LookAtGloryDeckAction, ExileFromMarketAction, ChronicleFromDiscardAction, MoveDiscardToDeckAction, SacredPathExploitAction, DrawUpToNFromDeckAction, ReturnCardToDeckTopAction, AllPlayersGainResourceAction, SolsticeOptionalGainProgressThenFateAction, ExploitSpendResourceDrawCardAction, ExploitSpendResourceTakeFromDiscardAction, SolsticeOptionalDiscardHandReturnDisorderAction, SpendResourceAction, BotGainsDisorderAction, SolsticeChoiceAction, SolsticeOptionalDiscardForChoiceAction, DrawThenDiscardChoiceAction, ExploitRecallLabelChoiceAction, GuessDeckCategoryAction, ChronicleFromHandAction, BotDestroysLabelForResourcesAction, GiveCardToBotAction, SolsticeGainResourceAction, SolsticeReturnDisorderAction, ExploitDiscardHandGainResourceAction, BotDestroysFromPlayAreaAction, OptionalReinforceRegionAction, DrawFromBoostDeckAction, PeriodConditionalAction, ReturnDisordersFromHandOrDiscardAction
+from .cards import Card, GainResourceAction, AcquireCardAction, AcquireFromExileAction, AccelerateProgressAction, AppropriateCardAction, AppropriateCardOptionalAction, NoActionAction, DrawCardExploitAction, ChoiceAction, PlayFromDiscardAction, DrawFromDeckOptionalAction, GainPerLabelAction, GainPerCategoryAction, StealResourceAction, ReturnExploitTokenOptionalAction, DestroyFromPlayAreaAction, LookAtGloryDeckAction, ExileFromMarketAction, ChronicleFromDiscardAction, MoveDiscardToDeckAction, SacredPathExploitAction, DrawUpToNFromDeckAction, ReturnCardToDeckTopAction, AllPlayersGainResourceAction, SolsticeOptionalGainProgressThenFateAction, ExploitSpendResourceDrawCardAction, ExploitSpendResourceTakeFromDiscardAction, SolsticeOptionalDiscardHandReturnDisorderAction, SpendResourceAction, BotGainsDisorderAction, SolsticeChoiceAction, SolsticeOptionalDiscardForChoiceAction, DrawThenDiscardChoiceAction, ExploitRecallLabelChoiceAction, GuessDeckCategoryAction, ChronicleFromHandAction, BotDestroysLabelForResourcesAction, GiveCardToBotAction, SolsticeGainResourceAction, SolsticeReturnDisorderAction, ExploitDiscardHandGainResourceAction, BotDestroysFromPlayAreaAction, OptionalReinforceRegionAction, DrawFromBoostDeckAction, PeriodConditionalAction, ReturnDisordersFromHandOrDiscardAction, StealProgressOrDisorderAction, LookAndChooseDeckTopAction
 from .setup import _draw_to_hand
 
 
@@ -66,6 +66,23 @@ class GameEngine:
                 req_card = next((c for c in all_player_cards if c.id == req_id), None)
                 req_name = req_card.name if req_card else req_id
                 raise ValueError(f"Нельзя разыграть «{card.name}»: карта «{req_name}» должна находиться в летописи")
+
+        # Pre-validate DestroyFromPlayAreaAction: enough cards of the required category must be present
+        for action in card.on_play_actions:
+            if isinstance(action, DestroyFromPlayAreaAction):
+                available_count = sum(
+                    1 for c in state.player.play_area
+                    if action.category in getattr(c, 'categories', [])
+                )
+                if available_count < action.count:
+                    cat_ru = {
+                        CardCategory.REGION: "регионов", CardCategory.ORIGINS: "истоков",
+                        CardCategory.CIVILIZATION: "цивилизаций", CardCategory.RAID: "набегов",
+                    }.get(action.category, action.category.value)
+                    raise ValueError(
+                        f"Нельзя разыграть «{card.name}»: нужно {action.count} карты {cat_ru} "
+                        f"в игровой области, есть {available_count}"
+                    )
 
         # Requires action token check
         if card.requires_action_token:
@@ -239,7 +256,7 @@ class GameEngine:
             pending_type = state.pending_choice.get("type") if state.pending_choice else None
             if pending_type == "innovate_from_market":
                 raise ValueError("Сначала выберите карту с рынка для инновации")
-            if pending_type in ("player_choice", "acquire_from_market", "acquire_from_exile", "appropriate", "appropriate_select_category", "play_from_discard", "take_from_discard", "accelerate_progress_from_card", "exploit_discard_hand", "return_disorders", "self_disposition", "pre_scoring_return_disorders"):
+            if pending_type in ("player_choice", "acquire_from_market", "acquire_from_exile", "appropriate", "appropriate_select_category", "play_from_discard", "take_from_discard", "accelerate_progress_from_card", "exploit_discard_hand", "return_disorders", "self_disposition", "pre_scoring_return_disorders", "look_deck_top"):
                 raise ValueError("Сначала завершите действие карты")
             if state.player.turn_action_chosen is None:
                 state.player.turn_action_chosen = TurnAction.ACTIVATION
@@ -406,10 +423,11 @@ class GameEngine:
         return state
 
     def _finish_bot_turn(self, state: GameState) -> GameState:
-        """Завершает ход бота: лог, проверка окончания, солнцестояние."""
+        """Завершает ход бота: лог, проверка окончания, добор карт, солнцестояние."""
         state.add_log("─── Конец хода бота ───")
         state = self._check_end_conditions(state)
         if state.phase != GamePhase.GAME_OVER:
+            _draw_to_hand(state.player, state.player.hand_limit)
             state.phase = GamePhase.SOLSTICE
             state = self._apply_solstice(state)
         return state
@@ -618,7 +636,6 @@ class GameEngine:
         state.player.cards_played_this_turn = []
         state.player.exploits_used_this_turn = []
         state.player.ability_exploit_used = False
-        _draw_to_hand(state.player, state.player.hand_limit)
         state.add_log(f"Начинается раунд {state.round_number}")
         return state
 
@@ -1000,6 +1017,7 @@ class GameEngine:
         state = self._check_end_conditions(state)
         if state.phase == GamePhase.GAME_OVER:
             return state
+        _draw_to_hand(state.player, state.player.hand_limit)
         state.phase = GamePhase.SOLSTICE
         return self._apply_solstice(state)
 
@@ -1225,6 +1243,9 @@ class GameEngine:
                      player.play_area + player.chronicle)
 
         cond = card.vp_condition or card.vp_per_condition or ""
+        if cond == "period_based":
+            # Царь царей: VP зависит от периода на конец игры (уточнить у пользователя)
+            return 0
         if cond == "cards_per10":
             total = len(all_cards)
             return total // 10
@@ -1250,6 +1271,11 @@ class GameEngine:
             return min(count, 10)
         elif "raid" in cond:
             count = sum(1 for c in all_cards if CardCategory.RAID in getattr(c, 'categories', []))
+            return min(count, 10)
+        elif cond == "bot_disorder":
+            bot = state.bot
+            bot_all = bot.bot_deck + bot.bot_discard + bot.play_area
+            count = sum(1 for c in bot_all if self._is_disorder(c))
             return min(count, 10)
         elif cond == "population_per4":
             return min(player.resources.population // 4, 10)
@@ -1479,6 +1505,10 @@ class GameEngine:
                 state = self._apply_bot_destroys_label_for_resources_action(state, action)
             elif isinstance(action, ReturnDisordersFromHandOrDiscardAction):
                 state = self._apply_return_disorders_from_hand_or_discard_action(state, action)
+            elif isinstance(action, StealProgressOrDisorderAction):
+                state = self._apply_steal_progress_or_disorder_action(state)
+            elif isinstance(action, LookAndChooseDeckTopAction):
+                state = self._apply_look_and_choose_deck_top_action(state)
             # If a new pending_choice appeared, queue remaining actions and stop
             if not had_pending and state.pending_choice is not None and actions_remaining:
                 state.pending_card_play_actions.extend(
@@ -1908,6 +1938,12 @@ class GameEngine:
             elif isinstance(a, ChronicleFromHandAction):
                 action_data = {"type": "chronicle_from_hand", "optional": a.optional}
                 label = opt.label
+            elif isinstance(a, AccelerateProgressAction):
+                action_data = {"type": "accelerate_progress", "ignore_token": a.ignore_token}
+                label = opt.label
+            elif isinstance(a, NoActionAction):
+                action_data = {"type": "no_action"}
+                label = opt.label
             else:
                 continue
             options_data.append({
@@ -2047,6 +2083,22 @@ class GameEngine:
         elif action_type == "no_action":
             state.pending_choice = None
             state.add_log("Действие пропущено")
+            state = self._check_deferred_choices(state)
+        elif action_type == "flip_to_chronicle":
+            from .cards import build_base_deck_classics
+            to_id = action_data.get("to_id", "")
+            flipped = None
+            if to_id:
+                for c in build_base_deck_classics():
+                    if c.id == to_id:
+                        flipped = c
+                        break
+            if flipped:
+                state.player.chronicle.append(flipped)
+                state.add_log(f"«{flipped.name}» (сторона Б) занесена в летопись")
+            else:
+                state.add_log(f"Карта {to_id} не найдена при перевороте — пропущено")
+            state.pending_choice = None
             state = self._check_deferred_choices(state)
         else:
             state.pending_choice = None
@@ -2256,22 +2308,30 @@ class GameEngine:
                     "card_id": card.id,
                     "card_name": card.name,
                 }
+            return state
+
+        # All pending choices resolved — trigger end game if flagged
+        if state.pending_end_game and state.pending_choice is None:
+            state.pending_end_game = False
+            state = self.calculate_scores(state)
 
         return state
 
     def _apply_gain_per_label_action(self, state: GameState, action: GainPerLabelAction) -> GameState:
-        """Даёт игроку 1 ресурс за каждую метку action.label в его игровой области."""
+        """Даёт игроку 1 ресурс за каждую метку action.label (или action.labels) в его игровой области."""
         _ATTR = {ResourceType.MATERIAL: "resource", ResourceType.POPULATION: "population",
                  ResourceType.PROGRESS: "upgrade", ResourceType.ACTION: "action",
                  ResourceType.EXPLOIT: "exploit"}
+        target_labels = action.labels if action.labels else [action.label]
         count = sum(
             1 for c in state.player.play_area
-            for lb in getattr(c, 'labels', []) if lb.value == action.label
+            for lb in getattr(c, 'labels', []) if lb.value in target_labels
         )
         attr = _ATTR.get(action.resource_type, "resource")
         setattr(state.player.resources, attr,
                 getattr(state.player.resources, attr) + count)
-        state.add_log(f"+{count} {action.resource_type.value} за {count} меток «{action.label}»")
+        labels_str = ', '.join(f'«{l}»' for l in target_labels)
+        state.add_log(f"+{count} {action.resource_type.value} за {count} меток {labels_str}")
         return state
 
     def _apply_all_players_gain_resource_action(self, state: GameState, action: AllPlayersGainResourceAction) -> GameState:
@@ -2647,6 +2707,49 @@ class GameEngine:
         state = self._check_deferred_choices(state)
         return state
 
+    def _apply_look_and_choose_deck_top_action(self, state: GameState) -> GameState:
+        """Открывает верхнюю карту личной колоды; игрок выбирает: сброс / верх колоды / летопись."""
+        from .state import _card_info
+        if not state.player.deck:
+            state.add_log("Личная колода пуста — действие пропущено")
+            return state
+        card = state.player.deck.pop(0)
+        # Временно держим карту в руке до разрешения выбора
+        state.player.hand.append(card)
+        state.pending_choice = {
+            "type": "look_deck_top",
+            "card": _card_info(card),
+            "card_id": card.id,
+        }
+        state.add_log(f"Открыта верхняя карта колоды: «{card.name}». Выберите: сброс / вернуть на верх / летопись")
+        return state
+
+    def resolve_look_deck_top(self, state: GameState, choice: str) -> GameState:
+        """Игрок выбирает судьбу открытой карты: 'discard' / 'return' / 'chronicle'."""
+        pending = state.pending_choice
+        if not pending or pending.get("type") != "look_deck_top":
+            raise ValueError("Нет активного выбора для открытой карты")
+        card_id = pending["card_id"]
+        card = self._find_in_hand(state, card_id)
+        if card is None:
+            raise ValueError(f"Карта {card_id} не найдена (ожидалась в руке)")
+        state.player.hand.remove(card)
+        state.pending_choice = None
+
+        if choice == "discard":
+            state.player.discard.append(card)
+            state.add_log(f"«{card.name}» отправлена в сброс")
+        elif choice == "return":
+            state.player.deck.insert(0, card)
+            state.add_log(f"«{card.name}» возвращена на верх личной колоды")
+        elif choice == "chronicle":
+            state.player.chronicle.append(card)
+            state.add_log(f"«{card.name}» занесена в летопись")
+        else:
+            raise ValueError(f"Неизвестный выбор: {choice!r}. Допустимые: discard, return, chronicle")
+
+        return self._check_deferred_choices(state)
+
     def _apply_spend_resource_action(self, state: GameState, action: SpendResourceAction) -> GameState:
         """Игрок тратит N ресурсов (валидация уже выполнена в play_card)."""
         _ATTR = {"MATERIAL": "resource", "POPULATION": "population", "PROGRESS": "upgrade",
@@ -2669,6 +2772,21 @@ class GameEngine:
             state.add_log(f"Бот получает {taken} карт беспорядков")
         else:
             state.add_log("Колода беспорядков пуста — бот не получает карты беспорядков")
+        return state
+
+    def _apply_steal_progress_or_disorder_action(self, state: GameState) -> GameState:
+        """Украсть 1 жетон прогресса у бота; если у бота нет — бот берёт карту беспорядков."""
+        if state.bot.upgrade > 0:
+            state.bot.upgrade -= 1
+            state.player.resources.upgrade += 1
+            state.add_log("Украден 1 жетон прогресса у бота")
+        else:
+            if state.shared.disorder_deck:
+                disorder = state.shared.disorder_deck.pop(0)
+                state.bot.bot_discard.append(disorder)
+                state.add_log(f"У бота нет прогресса — бот берёт карту беспорядков «{disorder.name}»")
+            else:
+                state.add_log("У бота нет прогресса и колода беспорядков пуста")
         return state
 
     def _apply_give_card_to_bot_action(self, state: GameState, action: GiveCardToBotAction) -> GameState:
@@ -2921,46 +3039,80 @@ class GameEngine:
         return state
 
     def _apply_draw_then_discard_choice_action(self, state: GameState, action: DrawThenDiscardChoiceAction) -> GameState:
-        """Берёт draw_count карт в руку, предлагает сбросить discard_count из них."""
+        """Открывает draw_count карт из личной колоды, игрок выбирает одну в руку, остальные — в сброс.
+        Если карт в колоде меньше нужного, сначала добавляет верхнюю карту колоды усиления
+        в сброс, перемешивает сброс и формирует новую колоду."""
         from .state import _card_info
-        drawn_ids = []
-        for _ in range(action.draw_count):
-            if not state.player.deck:
+        player = state.player
+        needed = action.draw_count
+
+        # Пересборка колоды если карт не хватает
+        if len(player.deck) < needed:
+            if player.boost_deck and not player.boost_top_token:
+                top_boost = player.boost_deck.pop(0)
+                player.discard.append(top_boost)
+                state.add_log(f"Карта усиления «{top_boost.name}» перемещена в сброс")
+                if getattr(top_boost, 'subtype', None) == CardSubtype.TRANSFORMATION:
+                    player.period = Period.CIVILIZATION
+                    state.add_log("Период изменён на Цивилизацию!")
+                elif player.boost_deck:
+                    player.boost_top_token = True
+                    player.resources.exploit -= 1
+            if player.discard:
+                leftover = player.deck[:]
+                new_deck = player.discard[:]
+                random.shuffle(new_deck)
+                player.deck = new_deck + leftover
+                player.discard = []
+                state.add_log("Сброс перемешан, сформирована новая личная колода")
+
+        # Открываем карты (временно кладём в руку для сохранения в state)
+        revealed: list = []
+        for _ in range(needed):
+            if not player.deck:
                 break
-            card = state.player.deck.pop(0)
-            state.player.hand.append(card)
-            drawn_ids.append(card.id)
-        state.add_log(f"Взято {len(drawn_ids)} карт(ы) из колоды")
-        if len(drawn_ids) <= action.draw_count - action.discard_count:
-            # Взяли меньше, чем нужно сбросить — сбрасывать нечего
+            card = player.deck.pop(0)
+            player.hand.append(card)
+            revealed.append(card)
+
+        if not revealed:
+            state.add_log("Колода пуста — Оракул не может открыть карты")
             return state
-        available = [c for c in state.player.hand if c.id in drawn_ids]
+
+        if len(revealed) == 1:
+            state.add_log(f"«{revealed[0].name}» взята в руку (единственная карта в колоде)")
+            return state
+
         state.pending_choice = {
-            "type": "discard_from_drawn",
-            "drawn_card_ids": drawn_ids,
-            "discard_count": action.discard_count,
-            "available_cards": [_card_info(c) for c in available],
+            "type": "oracle_draw_choice",
+            "revealed_card_ids": [c.id for c in revealed],
+            "available_cards": [_card_info(c) for c in revealed],
         }
-        state.add_log(f"Выберите {action.discard_count} карту для сброса из взятых")
+        state.add_log(f"Оракул: открыто {len(revealed)} карты — выберите одну для взятия в руку")
         return state
 
     def resolve_draw_discard_choice(self, state: GameState, card_id: str) -> GameState:
-        """Игрок выбирает карту из взятых для сброса."""
+        """Игрок выбирает карту из открытых Оракулом для взятия в руку; остальные идут в сброс."""
         pending = state.pending_choice
-        if not pending or pending.get("type") != "discard_from_drawn":
-            raise ValueError("Нет активного выбора сброса карты")
-        drawn_ids = pending["drawn_card_ids"]
-        if card_id not in drawn_ids:
-            raise ValueError(f"Карта {card_id} не из взятых карт")
-        card = self._find_in_hand(state, card_id)
-        if card is None:
-            raise ValueError(f"Карта {card_id} не найдена в руке")
-        state.player.hand.remove(card)
-        state.player.discard.append(card)
-        state.add_log(f"«{card.name}» сброшена в личный сброс")
+        if not pending or pending.get("type") != "oracle_draw_choice":
+            raise ValueError("Нет активного выбора Оракула")
+        revealed_ids = pending["revealed_card_ids"]
+        if card_id not in revealed_ids:
+            raise ValueError(f"Карта {card_id} не среди открытых карт")
+        # Сбрасываем все невыбранные
+        for rid in revealed_ids:
+            if rid == card_id:
+                continue
+            card = self._find_in_hand(state, rid)
+            if card:
+                state.player.hand.remove(card)
+                state.player.discard.append(card)
+                state.add_log(f"«{card.name}» отправлена в сброс")
+        kept = self._find_in_hand(state, card_id)
+        if kept:
+            state.add_log(f"«{kept.name}» взята в руку")
         state.pending_choice = None
-        state = self._check_deferred_choices(state)
-        return state
+        return self._check_deferred_choices(state)
 
     def _apply_sacred_path_exploit_action(self, state: GameState, card: Card) -> GameState:
         """Эксплуатация 1REG14: показывает верхнюю карту колоды усиления и предлагает разрушить карту."""
@@ -3198,6 +3350,23 @@ class GameEngine:
         if taken is None:
             raise ValueError(f"Карта {card_id} не найдена в колоде славы")
         state.shared.glory_deck.remove(taken)
+
+        # Immediate-trigger cards (e.g. 1SLV9A "Царь царей") — effect fires on acquire,
+        # card does NOT go to hand; it flips and the B-side goes to chronicle.
+        if getattr(taken, 'triggers_on_acquire', False):
+            state.pending_choice = None
+            state.add_log(f"«{taken.name}» — немедленный эффект при взятии!")
+            for action in taken.on_play_actions:
+                state.pending_card_play_actions.append(self._serialize_on_play_action(action))
+            flips_to = getattr(taken, 'flips_to', '')
+            if flips_to:
+                state.pending_card_play_actions.append({"type": "flip_to_chronicle", "to_id": flips_to})
+            else:
+                state.player.chronicle.append(taken)
+                state.add_log(f"«{taken.name}» занесена в летопись")
+            state.pending_end_game = True
+            return self._check_deferred_choices(state)
+
         state.player.hand.append(taken)
         state.add_log(f"«{taken.name}» взята из колоды славы в руку")
         state.pending_choice = None
@@ -3347,6 +3516,10 @@ class GameEngine:
                     "allowed_categories": action.allowed_categories}
         if isinstance(action, ReturnDisordersFromHandOrDiscardAction):
             return {"type": "return_disorders_from_hand_or_discard", "max_count": action.max_count}
+        if isinstance(action, StealProgressOrDisorderAction):
+            return {"type": "steal_progress_or_disorder"}
+        if isinstance(action, LookAndChooseDeckTopAction):
+            return {"type": "look_and_choose_deck_top"}
         return {}
 
     def _execute_queued_action(self, state: GameState, action_data: dict) -> GameState:
@@ -3603,6 +3776,12 @@ class GameEngine:
                 ReturnDisordersFromHandOrDiscardAction(max_count=action_data.get("max_count", 2)),
             )
 
+        elif action_type == "steal_progress_or_disorder":
+            state = self._apply_steal_progress_or_disorder_action(state)
+
+        elif action_type == "look_and_choose_deck_top":
+            state = self._apply_look_and_choose_deck_top_action(state)
+
         return state
 
     # ── UTILS ──────────────────────────────────────────────────────────────────
@@ -3624,3 +3803,10 @@ class GameEngine:
         from .enums import CardType
         return (card.card_type == CardType.DISORDER
                 or CardCategory.DISORDER in getattr(card, 'categories', []))
+
+
+# ── Module-level helper (used by state.py for live VP display) ─────────────
+
+def compute_current_player_vp(state: "GameState") -> int:
+    """Вычисляет текущий счёт ПО игрока (вызывается при сериализации состояния)."""
+    return GameEngine()._calculate_player_vp(state)

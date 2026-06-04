@@ -308,6 +308,18 @@ class ReturnDisordersFromHandOrDiscardAction:
 
 
 @dataclass
+class StealProgressOrDisorderAction:
+    """Украсть 1 жетон прогресса у бота; если у бота нет прогресса — бот берёт карту беспорядков."""
+    pass
+
+
+@dataclass
+class LookAndChooseDeckTopAction:
+    """Посмотреть верхнюю карту личной колоды и выбрать: сброс / верх колоды / летопись."""
+    pass
+
+
+@dataclass
 class BotDestroysLabelForResourcesAction:
     """Бот разрушает N карт с меткой label из своей игровой области;
     разыгрывающий игрок получает gain_per_destroyed ресурсов gain_resource_type за каждую."""
@@ -333,8 +345,9 @@ class ExploitRecallLabelChoiceAction:
 @dataclass
 class GainPerLabelAction:
     """Получить 1 ресурс за каждую метку указанного типа в игровой области игрока."""
-    label: str           # "sack", "grain", "water"
+    label: str           # "sack", "grain", "water" — первичная метка (для обратной совместимости)
     resource_type: ResourceType
+    labels: list = None  # опционально: список меток (если задан — считаются все; иначе только label)
 
 
 @dataclass
@@ -370,8 +383,9 @@ def _parse_choice_action_inner(a: dict):
         )
     if at == "gain_per_label":
         return GainPerLabelAction(
-            label=a["label"],
+            label=a.get("label", a.get("labels", [""])[0] if isinstance(a.get("labels"), list) else ""),
             resource_type=_RESOURCE_TYPE_BY_NAME[a["resource_type"]],
+            labels=a.get("labels"),
         )
     if at == "gain_per_category":
         return GainPerCategoryAction(
@@ -576,9 +590,11 @@ def _parse_on_play_actions(data: dict) -> List:
             rt_name = a.get("resource_type", "MATERIAL")
             if rt_name not in _RESOURCE_TYPE_BY_NAME:
                 raise ValueError(f"Неизвестный ResourceType: '{rt_name}'")
+            raw_labels = a.get("labels")
             actions.append(GainPerLabelAction(
-                label=a["label"],
+                label=a.get("label", raw_labels[0] if raw_labels else ""),
                 resource_type=_RESOURCE_TYPE_BY_NAME[rt_name],
+                labels=raw_labels,
             ))
         elif action_type == "bot_destroys_label_for_resources":
             actions.append(BotDestroysLabelForResourcesAction(
@@ -619,6 +635,10 @@ def _parse_on_play_actions(data: dict) -> List:
             actions.append(BotGainsDisorderAction(count=a.get("count", 1)))
         elif action_type == "return_disorders_from_hand_or_discard":
             actions.append(ReturnDisordersFromHandOrDiscardAction(max_count=a.get("max_count", 2)))
+        elif action_type == "steal_progress_or_disorder":
+            actions.append(StealProgressOrDisorderAction())
+        elif action_type == "look_and_choose_deck_top":
+            actions.append(LookAndChooseDeckTopAction())
         elif action_type == "draw_then_discard_choice":
             actions.append(DrawThenDiscardChoiceAction(
                 draw_count=a.get("draw_count", 2),
@@ -668,7 +688,9 @@ class Card:
     hand_limit_bonus: int = 0        # пассивный эффект: увеличивает предел руки на N
     can_choose_disposition: bool = False  # после сброса игрок выбирает: летопись / укрепление региона / пропустить
     pre_scoring_return_disorders: int = 0  # перед подсчётом ПО игрок может вернуть до N беспорядков
-    cannot_be_played: bool = False  # карту нельзя разыграть как обычное действие
+    cannot_be_played: bool = False   # карту нельзя разыграть как обычное действие
+    triggers_on_acquire: bool = False  # при взятии из колоды эффект срабатывает немедленно (не идёт в руку)
+    flips_to: str = ""               # ID карты, в которую переворачивается после срабатывания
     # Starting location symbol
     start_location: str = ""  # "ability", "boost", "transformation", "progress", "reserve"
     # Resource generation on play
@@ -764,6 +786,8 @@ def _base_card_from_dict(card_id: str, data: dict) -> BaseCard:
         can_choose_disposition=data.get("can_choose_disposition", False),
         pre_scoring_return_disorders=data.get("pre_scoring_return_disorders", 0),
         cannot_be_played=data.get("cannot_be_played", False),
+        triggers_on_acquire=data.get("triggers_on_acquire", False),
+        flips_to=data.get("flips_to", ""),
         start_location=data.get("start_location", ""),
         gives_resource=data.get("gives_resource", 0),
         gives_population=data.get("gives_population", 0),
@@ -848,6 +872,8 @@ def _card_from_dict(card_id: str, data: dict, nation: Nation) -> NationCard:
         can_choose_disposition=data.get("can_choose_disposition", False),
         pre_scoring_return_disorders=data.get("pre_scoring_return_disorders", 0),
         cannot_be_played=data.get("cannot_be_played", False),
+        triggers_on_acquire=data.get("triggers_on_acquire", False),
+        flips_to=data.get("flips_to", ""),
         start_location=data.get("start_location", ""),
         gives_resource=data.get("gives_resource", 0),
         gives_population=data.get("gives_population", 0),

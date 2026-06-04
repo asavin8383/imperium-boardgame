@@ -53,6 +53,8 @@ interface GameStore {
   destroyCards: (cardIds: string[]) => Promise<void>;
   gloryDeckTake: (cardId: string) => Promise<void>;
   moveDiscardToDeck: (cardId: string | null) => Promise<void>;
+  oracleDrawChoice: (cardId: string) => Promise<void>;
+  returnCardToDeckTop: (cardId: string) => Promise<void>;
   sacredPathExploit: (destroy: boolean) => Promise<void>;
   sacredPathExchange: (handCardId: string) => Promise<void>;
   resetGame: () => void;
@@ -459,6 +461,30 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const state = await api.moveDiscardToDeck(gameId, cardId);
+      set({ gameState: state, loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
+
+  oracleDrawChoice: async (cardId) => {
+    const { gameId } = get();
+    if (!gameId) return;
+    set({ loading: true, error: null });
+    try {
+      const state = await api.oracleDrawChoice(gameId, cardId);
+      set({ gameState: state, loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
+
+  returnCardToDeckTop: async (cardId) => {
+    const { gameId } = get();
+    if (!gameId) return;
+    set({ loading: true, error: null });
+    try {
+      const state = await api.returnCardToDeckTop(gameId, cardId);
       set({ gameState: state, loading: false });
     } catch (e: any) {
       set({ error: e.response?.data?.detail || e.message, loading: false });

@@ -169,6 +169,16 @@ export async function moveDiscardToDeck(gameId: string, cardId: string | null): 
   return res.data.state;
 }
 
+export async function oracleDrawChoice(gameId: string, cardId: string): Promise<GameState> {
+  const res = await api.post(`/api/games/${gameId}/draw-discard-choice`, { card_id: cardId });
+  return res.data.state;
+}
+
+export async function returnCardToDeckTop(gameId: string, cardId: string): Promise<GameState> {
+  const res = await api.post(`/api/games/${gameId}/return-card-to-deck-top`, { card_id: cardId });
+  return res.data.state;
+}
+
 export async function sacredPathExploit(gameId: string, destroy: boolean): Promise<GameState> {
   const res = await api.post(`/api/games/${gameId}/sacred-path-exploit`, { destroy });
   return res.data.state;

@@ -8,7 +8,8 @@ from typing import List, Optional, Dict
 from .cards import (Card, GainResourceAction, AcquireCardAction, AcquireFromExileAction, AppropriateCardAction,
                     AppropriateCardOptionalAction, NoActionAction, ChoiceAction, ChoiceOption, PlayFromDiscardAction,
                     DrawFromDeckOptionalAction, GainPerLabelAction, GainPerCategoryAction,
-                    StealResourceAction, ReturnExploitTokenOptionalAction,
+                    StealResourceAction, ReturnExploitTokenOptionalAction, DestroyFromPlayAreaAction,
+                    AccelerateProgressAction,
                     build_base_deck_classics, get_nation_deck)
 from .enums import (Period, Nation, GamePhase, TurnAction, EndCondition,
                     Difficulty, CardCategory, CardLabel, CardSubtype, ResourceType)
@@ -71,6 +72,12 @@ def _card_info(card: Card) -> dict:
             })
         elif isinstance(a, ReturnExploitTokenOptionalAction):
             serialized_actions.append({"type": "return_exploit_token_optional"})
+        elif isinstance(a, DestroyFromPlayAreaAction):
+            serialized_actions.append({
+                "type": "destroy_from_play_area",
+                "category": a.category.value,
+                "count": a.count,
+            })
         elif isinstance(a, DrawFromDeckOptionalAction):
             serialized_actions.append({"type": "draw_from_deck_optional"})
         elif isinstance(a, ChoiceAction):
@@ -101,6 +108,7 @@ def _card_info(card: Card) -> dict:
                     inner_data = {
                         "type": "gain_per_label",
                         "label": inner.label,
+                        "labels": inner.labels if inner.labels else [inner.label],
                         "resource_type": inner.resource_type.name,
                     }
                 elif isinstance(inner, GainPerCategoryAction):
@@ -117,6 +125,8 @@ def _card_info(card: Card) -> dict:
                     }
                 elif isinstance(inner, NoActionAction):
                     inner_data = {"type": "no_action"}
+                elif isinstance(inner, AccelerateProgressAction):
+                    inner_data = {"type": "accelerate_progress", "ignore_token": inner.ignore_token}
                 else:
                     continue
                 serialized_opts.append({
@@ -166,6 +176,7 @@ def _card_info(card: Card) -> dict:
         "exploit_actions": serialized_exploit_actions,
         "labels": [lb.value for lb in getattr(card, 'labels', [])],
         "exploit_passive": getattr(card, 'exploit_passive', "") or None,
+        "allows_barbarism_cards": getattr(card, 'allows_barbarism_cards', []),
     }
 
 
@@ -402,6 +413,9 @@ class GameState:
     # Флаг — эффекты перед подсчётом ПО уже применены
     pre_scoring_disorders_resolved: bool = False
 
+    # Флаг — после разрешения всех pending-действий запустить calculate_scores
+    pending_end_game: bool = False
+
     # Очередь действий карты, ожидающих выполнения после разрешения pending_choice
     pending_card_play_actions: List[dict] = field(default_factory=list)
 
@@ -420,13 +434,20 @@ class GameState:
             self.log = self.log[-100:]
 
     def to_dict(self):
+        player_dict = self.player.to_dict() if self.player else None
+        if player_dict is not None:
+            try:
+                from .engine import compute_current_player_vp
+                player_dict["current_vp"] = compute_current_player_vp(self)
+            except Exception:
+                player_dict["current_vp"] = 0
         return {
             "game_id": self.game_id,
             "phase": self.phase.value,
             "round_number": self.round_number,
             "is_final_round": self.is_final_round,
             "end_condition": self.end_condition.value if self.end_condition else None,
-            "player": self.player.to_dict() if self.player else None,
+            "player": player_dict,
             "bot": self.bot.to_dict() if self.bot else None,
             "shared": self.shared.to_dict(),
             "difficulty": self.difficulty.value,
@@ -437,4 +458,5 @@ class GameState:
             "pending_reinforce_card_id": self.pending_reinforce_card_id,
             "pending_self_disposition_card_id": self.pending_self_disposition_card_id,
             "pre_scoring_disorders_resolved": self.pre_scoring_disorders_resolved,
+            "pending_end_game": self.pending_end_game,
         }

@@ -411,6 +411,14 @@ def resolve_reinforce_region_optional(game_id: str, region_card_id=None) -> Game
     return state
 
 
+def resolve_look_deck_top(game_id: str, choice: str) -> GameState:
+    state = _require(game_id)
+    _snapshot(game_id, state)
+    state = _engine.resolve_look_deck_top(state, choice)
+    save_game(state)
+    return state
+
+
 def resolve_self_disposition(game_id: str, choice: str, region_card_id=None) -> GameState:
     state = _require(game_id)
     _snapshot(game_id, state)

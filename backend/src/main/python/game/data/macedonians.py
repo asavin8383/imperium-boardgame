@@ -91,6 +91,8 @@ DECK: dict = {
     "1MAK8": {"name": "Александрия Египетская", "subtype": "progress", "period": "civilization", "vp_fixed": 2,
               "progress_cost_resource": 4, "progress_cost_population": 1,
               "card_type": "permanent",
+              "labels": ["city"],
+              "solstice_effect": True,
               "solstice_actions": [
                   {"type": "choice", "options": [
                       {"label": "Получить 1 ресурс",
