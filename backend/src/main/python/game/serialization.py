@@ -63,6 +63,8 @@ def serialize_state(state: GameState) -> str:
         "pending_choice": state.pending_choice,
         "pending_chronicle_card_id": state.pending_chronicle_card_id,
         "pending_reinforce_card_id": state.pending_reinforce_card_id,
+        "pending_self_disposition_card_id": state.pending_self_disposition_card_id,
+        "pre_scoring_disorders_resolved": state.pre_scoring_disorders_resolved,
         "pending_card_play_actions": state.pending_card_play_actions,
         "pending_bot_attacks": state.pending_bot_attacks,
         "pending_bot_turn_continuation": state.pending_bot_turn_continuation,
@@ -269,6 +271,8 @@ def deserialize_state(encoded: str) -> GameState:
     state.pending_choice = data["pending_choice"]
     state.pending_chronicle_card_id = data["pending_chronicle_card_id"]
     state.pending_reinforce_card_id = data["pending_reinforce_card_id"]
+    state.pending_self_disposition_card_id = data.get("pending_self_disposition_card_id")
+    state.pre_scoring_disorders_resolved = data.get("pre_scoring_disorders_resolved", False)
     state.pending_card_play_actions = data["pending_card_play_actions"]
     state.pending_bot_attacks = data["pending_bot_attacks"]
     state.pending_bot_turn_continuation = data["pending_bot_turn_continuation"]

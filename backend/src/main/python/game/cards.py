@@ -223,6 +223,26 @@ class SolsticeChoiceAction:
 
 
 @dataclass
+class SolsticeGainResourceAction:
+    """Солнцестояние: безусловно получить N ресурсов указанного типа."""
+    resource_type: str = "MATERIAL"  # имя ResourceType
+    amount: int = 1
+
+
+@dataclass
+class SolsticeReturnDisorderAction:
+    """Солнцестояние: вернуть 1 карту беспорядков из личного сброса в колоду беспорядков."""
+    pass
+
+
+@dataclass
+class ExploitDiscardHandGainResourceAction:
+    """Эксплуатация: сбросить 1 карту с руки → получить N ресурсов указанного типа."""
+    resource_type: str = "PROGRESS"  # имя ResourceType
+    amount: int = 1
+
+
+@dataclass
 class SolsticeOptionalDiscardForChoiceAction:
     """Солнцестояние: МОЖНО сбросить карту из руки → выбрать 1 награду из опций."""
     options: List[dict] = field(default_factory=list)
@@ -245,6 +265,56 @@ class ChronicleFromHandAction:
 class GuessDeckCategoryAction:
     """Назвать категорию → вскрыть верхнюю карту основной колоды → в руку если совпало, иначе изгнать."""
     allowed_categories: List[str] = field(default_factory=lambda: ["region", "origins", "civilization", "raid"])
+
+
+@dataclass
+class DrawFromBoostDeckAction:
+    """Взять верхнюю карту колоды усиления в личный сброс."""
+    pass
+
+
+@dataclass
+class PeriodConditionalAction:
+    """Действие зависит от текущего периода игрока.
+    barbarism и civilization — dict в формате on_play_action (с полем 'type')."""
+    barbarism: dict = field(default_factory=dict)
+    civilization: dict = field(default_factory=dict)
+
+
+@dataclass
+class BotDestroysFromPlayAreaAction:
+    """Бот разрушает N карт указанной категории из своей игровой области (→ сброс бота)."""
+    category: str = "region"
+    count: int = 1
+
+
+@dataclass
+class OptionalReinforceRegionAction:
+    """После розыгрыша: игрок МОЖЕТ укрепить 1 карту регионов в игровой области
+    используя указанную карту из своего сброса; укреплённая карта немедленно приносит эффект."""
+    reinforcement_card_id: str = ""
+
+
+@dataclass
+class GiveCardToBotAction:
+    """Игрок отдаёт 1 карту из руки или личного сброса боту."""
+    count: int = 1
+
+
+@dataclass
+class ReturnDisordersFromHandOrDiscardAction:
+    """Возвращает до N карт беспорядков из руки или личного сброса в колоду беспорядков."""
+    max_count: int = 2
+
+
+@dataclass
+class BotDestroysLabelForResourcesAction:
+    """Бот разрушает N карт с меткой label из своей игровой области;
+    разыгрывающий игрок получает gain_per_destroyed ресурсов gain_resource_type за каждую."""
+    label: str = "town"
+    count: int = 1
+    gain_per_destroyed: int = 2
+    gain_resource_type: str = "MATERIAL"
 
 
 @dataclass
@@ -377,6 +447,11 @@ def _parse_exploit_actions(data: dict) -> List:
                 resource_cost=a.get("resource_cost", 1),
                 count=a.get("count", 1),
             ))
+        elif action_type == "discard_hand_gain_resource":
+            actions.append(ExploitDiscardHandGainResourceAction(
+                resource_type=a.get("resource_type", "PROGRESS"),
+                amount=a.get("amount", 1),
+            ))
     return actions
 
 
@@ -395,6 +470,13 @@ def _parse_solstice_actions(data: dict) -> List:
             actions.append(SolsticeChoiceAction(options=a.get("options", [])))
         elif action_type == "optional_discard_hand_for_choice":
             actions.append(SolsticeOptionalDiscardForChoiceAction(options=a.get("options", [])))
+        elif action_type == "gain_resource":
+            actions.append(SolsticeGainResourceAction(
+                resource_type=a.get("resource_type", "MATERIAL"),
+                amount=a.get("amount", 1),
+            ))
+        elif action_type == "return_disorder":
+            actions.append(SolsticeReturnDisorderAction())
     return actions
 
 
@@ -460,6 +542,51 @@ def _parse_on_play_actions(data: dict) -> List:
             actions.append(ChronicleFromDiscardAction(
                 optional=a.get("optional", False),
             ))
+        elif action_type == "chronicle_from_hand":
+            actions.append(ChronicleFromHandAction(
+                optional=a.get("optional", False),
+            ))
+        elif action_type == "all_players_gain_resource":
+            rt_name = a.get("resource_type", "MATERIAL")
+            if rt_name not in _RESOURCE_TYPE_BY_NAME:
+                raise ValueError(f"Неизвестный ResourceType: '{rt_name}'")
+            actions.append(AllPlayersGainResourceAction(
+                resource_type=_RESOURCE_TYPE_BY_NAME[rt_name],
+                amount=a.get("amount", 1),
+            ))
+        elif action_type == "give_card_to_bot":
+            actions.append(GiveCardToBotAction(count=a.get("count", 1)))
+        elif action_type == "draw_from_boost_deck":
+            actions.append(DrawFromBoostDeckAction())
+        elif action_type == "period_conditional":
+            actions.append(PeriodConditionalAction(
+                barbarism=a.get("barbarism", {}),
+                civilization=a.get("civilization", {}),
+            ))
+        elif action_type == "bot_destroys_from_play_area":
+            actions.append(BotDestroysFromPlayAreaAction(
+                category=a.get("category", "region"),
+                count=a.get("count", 1),
+            ))
+        elif action_type == "reinforce_region_optional":
+            actions.append(OptionalReinforceRegionAction(
+                reinforcement_card_id=a.get("reinforcement_card_id", ""),
+            ))
+        elif action_type == "gain_per_label":
+            rt_name = a.get("resource_type", "MATERIAL")
+            if rt_name not in _RESOURCE_TYPE_BY_NAME:
+                raise ValueError(f"Неизвестный ResourceType: '{rt_name}'")
+            actions.append(GainPerLabelAction(
+                label=a["label"],
+                resource_type=_RESOURCE_TYPE_BY_NAME[rt_name],
+            ))
+        elif action_type == "bot_destroys_label_for_resources":
+            actions.append(BotDestroysLabelForResourcesAction(
+                label=a.get("label", "town"),
+                count=a.get("count", 1),
+                gain_per_destroyed=a.get("gain_per_destroyed", 2),
+                gain_resource_type=a.get("resource_type", "MATERIAL"),
+            ))
         elif action_type == "exile_from_market":
             actions.append(ExileFromMarketAction())
         elif action_type == "destroy_from_play_area":
@@ -490,6 +617,8 @@ def _parse_on_play_actions(data: dict) -> List:
             ))
         elif action_type == "bot_gains_disorder":
             actions.append(BotGainsDisorderAction(count=a.get("count", 1)))
+        elif action_type == "return_disorders_from_hand_or_discard":
+            actions.append(ReturnDisordersFromHandOrDiscardAction(max_count=a.get("max_count", 2)))
         elif action_type == "draw_then_discard_choice":
             actions.append(DrawThenDiscardChoiceAction(
                 draw_count=a.get("draw_count", 2),
@@ -536,6 +665,10 @@ class Card:
     is_exploit: bool = False
     solstice_effect: bool = False
     passive_effect: bool = False
+    hand_limit_bonus: int = 0        # пассивный эффект: увеличивает предел руки на N
+    can_choose_disposition: bool = False  # после сброса игрок выбирает: летопись / укрепление региона / пропустить
+    pre_scoring_return_disorders: int = 0  # перед подсчётом ПО игрок может вернуть до N беспорядков
+    cannot_be_played: bool = False  # карту нельзя разыграть как обычное действие
     # Starting location symbol
     start_location: str = ""  # "ability", "boost", "transformation", "progress", "reserve"
     # Resource generation on play
@@ -627,6 +760,10 @@ def _base_card_from_dict(card_id: str, data: dict) -> BaseCard:
         is_exploit=data.get("is_exploit", False),
         solstice_effect=data.get("solstice_effect", False),
         passive_effect=data.get("passive_effect", False),
+        hand_limit_bonus=data.get("hand_limit_bonus", 0),
+        can_choose_disposition=data.get("can_choose_disposition", False),
+        pre_scoring_return_disorders=data.get("pre_scoring_return_disorders", 0),
+        cannot_be_played=data.get("cannot_be_played", False),
         start_location=data.get("start_location", ""),
         gives_resource=data.get("gives_resource", 0),
         gives_population=data.get("gives_population", 0),
@@ -707,6 +844,10 @@ def _card_from_dict(card_id: str, data: dict, nation: Nation) -> NationCard:
         is_exploit=data.get("is_exploit", False),
         solstice_effect=data.get("solstice_effect", False),
         passive_effect=data.get("passive_effect", False),
+        hand_limit_bonus=data.get("hand_limit_bonus", 0),
+        can_choose_disposition=data.get("can_choose_disposition", False),
+        pre_scoring_return_disorders=data.get("pre_scoring_return_disorders", 0),
+        cannot_be_played=data.get("cannot_be_played", False),
         start_location=data.get("start_location", ""),
         gives_resource=data.get("gives_resource", 0),
         gives_population=data.get("gives_population", 0),

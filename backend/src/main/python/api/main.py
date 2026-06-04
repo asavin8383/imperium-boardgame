@@ -245,6 +245,23 @@ class GuessDeckCategoryRequest(BaseModel):
     category: str  # "region" | "origins" | "civilization" | "raid"
 
 
+class GiveCardToBotRequest(BaseModel):
+    card_id: str
+
+
+class ReinforceRegionOptionalRequest(BaseModel):
+    region_card_id: Optional[str] = None  # None = пропустить
+
+
+class ReturnDisordersRequest(BaseModel):
+    card_ids: List[str]  # пустой список = пропустить
+
+
+class SelfDispositionRequest(BaseModel):
+    choice: str  # "chronicle" | "reinforce_region" | "skip"
+    region_card_id: Optional[str] = None  # нужен при choice="reinforce_region"
+
+
 class TakeFromDiscardRequest(BaseModel):
     card_id: str
 
@@ -645,6 +662,55 @@ def exploit_recall_choice(game_id: str, req: ExploitRecallChoiceRequest):
 def guess_deck_category(game_id: str, req: GuessDeckCategoryRequest):
     with _game_action(game_id, f"guess_deck_category({req.category})"):
         state = game_session.resolve_guess_deck_category(game_id, req.category)
+        return {"state": state.to_dict()}
+
+
+@app.post("/api/games/{game_id}/exploit-discard-hand")
+def exploit_discard_hand(game_id: str, req: PlayFromDiscardRequest):
+    with _game_action(game_id, f"exploit_discard_hand({req.card_id})"):
+        state = game_session.resolve_exploit_discard_hand(game_id, req.card_id)
+        return {"state": state.to_dict()}
+
+
+@app.post("/api/games/{game_id}/solstice-return-disorder")
+def solstice_return_disorder(game_id: str, req: PlayFromDiscardRequest):
+    with _game_action(game_id, f"solstice_return_disorder({req.card_id})"):
+        state = game_session.resolve_solstice_return_disorder(game_id, req.card_id)
+        return {"state": state.to_dict()}
+
+
+@app.post("/api/games/{game_id}/reinforce-region-optional")
+def reinforce_region_optional(game_id: str, req: ReinforceRegionOptionalRequest):
+    with _game_action(game_id, f"reinforce_region_optional({req.region_card_id})"):
+        state = game_session.resolve_reinforce_region_optional(game_id, req.region_card_id)
+        return {"state": state.to_dict()}
+
+
+@app.post("/api/games/{game_id}/self-disposition")
+def self_disposition(game_id: str, req: SelfDispositionRequest):
+    with _game_action(game_id, f"self_disposition({req.choice})"):
+        state = game_session.resolve_self_disposition(game_id, req.choice, req.region_card_id)
+        return {"state": state.to_dict()}
+
+
+@app.post("/api/games/{game_id}/pre-scoring-return-disorders")
+def pre_scoring_return_disorders(game_id: str, req: ReturnDisordersRequest):
+    with _game_action(game_id, f"pre_scoring_return_disorders({req.card_ids})"):
+        state = game_session.resolve_pre_scoring_return_disorders(game_id, req.card_ids)
+        return {"state": state.to_dict()}
+
+
+@app.post("/api/games/{game_id}/return-disorders")
+def return_disorders(game_id: str, req: ReturnDisordersRequest):
+    with _game_action(game_id, f"return_disorders({req.card_ids})"):
+        state = game_session.resolve_return_disorders(game_id, req.card_ids)
+        return {"state": state.to_dict()}
+
+
+@app.post("/api/games/{game_id}/give-card-to-bot")
+def give_card_to_bot(game_id: str, req: GiveCardToBotRequest):
+    with _game_action(game_id, f"give_card_to_bot({req.card_id})"):
+        state = game_session.resolve_give_card_to_bot(game_id, req.card_id)
         return {"state": state.to_dict()}
 
 

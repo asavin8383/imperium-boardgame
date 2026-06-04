@@ -396,6 +396,12 @@ class GameState:
     # Отложенный запрос «укрепить карту» (ставится, если pending_choice уже занят)
     pending_reinforce_card_id: Optional[str] = None
 
+    # Отложенный запрос выбора судьбы карты: летопись / укрепление региона / пропустить
+    pending_self_disposition_card_id: Optional[str] = None
+
+    # Флаг — эффекты перед подсчётом ПО уже применены
+    pre_scoring_disorders_resolved: bool = False
+
     # Очередь действий карты, ожидающих выполнения после разрешения pending_choice
     pending_card_play_actions: List[dict] = field(default_factory=list)
 
@@ -429,4 +435,6 @@ class GameState:
             "pending_chronicle_card_id": self.pending_chronicle_card_id,
             "pending_forced_chronicle_card_id": self.pending_forced_chronicle_card_id,
             "pending_reinforce_card_id": self.pending_reinforce_card_id,
+            "pending_self_disposition_card_id": self.pending_self_disposition_card_id,
+            "pre_scoring_disorders_resolved": self.pre_scoring_disorders_resolved,
         }

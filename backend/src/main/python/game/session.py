@@ -387,6 +387,62 @@ def resolve_solstice_choice(game_id: str, option_index: int, card_ids=None) -> G
     return state
 
 
+def resolve_exploit_discard_hand(game_id: str, card_id: str) -> GameState:
+    state = _require(game_id)
+    _snapshot(game_id, state)
+    state = _engine.resolve_exploit_discard_hand(state, card_id)
+    save_game(state)
+    return state
+
+
+def resolve_solstice_return_disorder(game_id: str, card_id: str) -> GameState:
+    state = _require(game_id)
+    _snapshot(game_id, state)
+    state = _engine.resolve_solstice_return_disorder(state, card_id)
+    save_game(state)
+    return state
+
+
+def resolve_reinforce_region_optional(game_id: str, region_card_id=None) -> GameState:
+    state = _require(game_id)
+    _snapshot(game_id, state)
+    state = _engine.resolve_reinforce_region_optional(state, region_card_id)
+    save_game(state)
+    return state
+
+
+def resolve_self_disposition(game_id: str, choice: str, region_card_id=None) -> GameState:
+    state = _require(game_id)
+    _snapshot(game_id, state)
+    state = _engine.resolve_self_disposition(state, choice, region_card_id)
+    save_game(state)
+    return state
+
+
+def resolve_pre_scoring_return_disorders(game_id: str, card_ids: list) -> GameState:
+    state = _require(game_id)
+    _snapshot(game_id, state)
+    state = _engine.resolve_pre_scoring_return_disorders(state, card_ids)
+    save_game(state)
+    return state
+
+
+def resolve_return_disorders(game_id: str, card_ids: list) -> GameState:
+    state = _require(game_id)
+    _snapshot(game_id, state)
+    state = _engine.resolve_return_disorders(state, card_ids)
+    save_game(state)
+    return state
+
+
+def resolve_give_card_to_bot(game_id: str, card_id: str) -> GameState:
+    state = _require(game_id)
+    _snapshot(game_id, state)
+    state = _engine.resolve_give_card_to_bot(state, card_id)
+    save_game(state)
+    return state
+
+
 def skip_solstice(game_id: str) -> GameState:
     state = _require(game_id)
     _snapshot(game_id, state)

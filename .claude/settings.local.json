@@ -24,7 +24,12 @@
       "Bash(python -c \"from src.main.python.game.cards import DrawUpToNFromDeckAction, ReturnCardToDeckTopAction; from src.main.python.game.engine import GameEngine; print\\('imports OK'\\)\")",
       "Bash(python -c \"from src.main.python.game.engine import GameEngine; print\\('OK'\\)\")",
       "Bash(pip install:*)",
-      "Bash(python -m alembic upgrade head)"
+      "Bash(python -m alembic upgrade head)",
+      "Bash(ls -la /g/IdeaProjects/imperium-boardgame/backend/src/main/python/game/*.py)",
+      "Bash(ls:*)",
+      "Bash(grep:*)",
+      "Bash(python -c \"import game.engine, game.session; print\\('OK'\\)\")",
+      "Bash(python -c \"from game.logger import log, _LOG_FILE; log.info\\('Logger initialized'\\); print\\('Log file:', _LOG_FILE\\)\")"
     ]
   }
 }

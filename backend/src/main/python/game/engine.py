@@ -6,7 +6,7 @@ from typing import List, Optional, Tuple
 from .state import GameState, PlayerArea, MarketSlot, Resources
 from .enums import (Period, GamePhase, TurnAction, EndCondition,
                     CardCategory, CardSubtype, Difficulty, ResourceType, CardLabel)
-from .cards import Card, GainResourceAction, AcquireCardAction, AcquireFromExileAction, AccelerateProgressAction, AppropriateCardAction, AppropriateCardOptionalAction, NoActionAction, DrawCardExploitAction, ChoiceAction, PlayFromDiscardAction, DrawFromDeckOptionalAction, GainPerLabelAction, GainPerCategoryAction, StealResourceAction, ReturnExploitTokenOptionalAction, DestroyFromPlayAreaAction, LookAtGloryDeckAction, ExileFromMarketAction, ChronicleFromDiscardAction, MoveDiscardToDeckAction, SacredPathExploitAction, DrawUpToNFromDeckAction, ReturnCardToDeckTopAction, AllPlayersGainResourceAction, SolsticeOptionalGainProgressThenFateAction, ExploitSpendResourceDrawCardAction, ExploitSpendResourceTakeFromDiscardAction, SolsticeOptionalDiscardHandReturnDisorderAction, SpendResourceAction, BotGainsDisorderAction, SolsticeChoiceAction, SolsticeOptionalDiscardForChoiceAction, DrawThenDiscardChoiceAction, ExploitRecallLabelChoiceAction, GuessDeckCategoryAction, ChronicleFromHandAction
+from .cards import Card, GainResourceAction, AcquireCardAction, AcquireFromExileAction, AccelerateProgressAction, AppropriateCardAction, AppropriateCardOptionalAction, NoActionAction, DrawCardExploitAction, ChoiceAction, PlayFromDiscardAction, DrawFromDeckOptionalAction, GainPerLabelAction, GainPerCategoryAction, StealResourceAction, ReturnExploitTokenOptionalAction, DestroyFromPlayAreaAction, LookAtGloryDeckAction, ExileFromMarketAction, ChronicleFromDiscardAction, MoveDiscardToDeckAction, SacredPathExploitAction, DrawUpToNFromDeckAction, ReturnCardToDeckTopAction, AllPlayersGainResourceAction, SolsticeOptionalGainProgressThenFateAction, ExploitSpendResourceDrawCardAction, ExploitSpendResourceTakeFromDiscardAction, SolsticeOptionalDiscardHandReturnDisorderAction, SpendResourceAction, BotGainsDisorderAction, SolsticeChoiceAction, SolsticeOptionalDiscardForChoiceAction, DrawThenDiscardChoiceAction, ExploitRecallLabelChoiceAction, GuessDeckCategoryAction, ChronicleFromHandAction, BotDestroysLabelForResourcesAction, GiveCardToBotAction, SolsticeGainResourceAction, SolsticeReturnDisorderAction, ExploitDiscardHandGainResourceAction, BotDestroysFromPlayAreaAction, OptionalReinforceRegionAction, DrawFromBoostDeckAction, PeriodConditionalAction, ReturnDisordersFromHandOrDiscardAction
 from .setup import _draw_to_hand
 
 
@@ -40,6 +40,9 @@ class GameEngine:
         card = self._find_in_hand(state, card_id)
         if card is None:
             raise ValueError(f"Карта {card_id} не найдена на руке")
+
+        if getattr(card, 'cannot_be_played', False):
+            raise ValueError(f"Карту «{card.name}» нельзя разыграть напрямую")
 
         # Check period restriction
         if card.period is not None and card.period != state.player.period:
@@ -109,7 +112,9 @@ class GameEngine:
                         state.add_log(f"Карта «{card.name}» занесена в летопись")
                 else:
                     state.player.discard.append(card)
-                    if card.can_be_chronicled:
+                    if card.can_choose_disposition:
+                        state.pending_self_disposition_card_id = card.id
+                    elif card.can_be_chronicled:
                         # Запрос «занести в летопись?» — отложим если pending_choice занят
                         state.pending_chronicle_card_id = card.id
         else:
@@ -234,7 +239,7 @@ class GameEngine:
             pending_type = state.pending_choice.get("type") if state.pending_choice else None
             if pending_type == "innovate_from_market":
                 raise ValueError("Сначала выберите карту с рынка для инновации")
-            if pending_type in ("player_choice", "acquire_from_market", "acquire_from_exile", "appropriate", "appropriate_select_category", "play_from_discard", "take_from_discard", "accelerate_progress_from_card"):
+            if pending_type in ("player_choice", "acquire_from_market", "acquire_from_exile", "appropriate", "appropriate_select_category", "play_from_discard", "take_from_discard", "accelerate_progress_from_card", "exploit_discard_hand", "return_disorders", "self_disposition", "pre_scoring_return_disorders"):
                 raise ValueError("Сначала завершите действие карты")
             if state.player.turn_action_chosen is None:
                 state.player.turn_action_chosen = TurnAction.ACTIVATION
@@ -436,6 +441,7 @@ class GameEngine:
             card_1reg12 = next((c for c in state.player.play_area if c.id == '1REG12'), None)
             if card_1reg12:
                 state.player.play_area.remove(card_1reg12)
+                self._recalculate_hand_limit(state)
                 state.player.hand.append(card_1reg12)
                 state.add_log("«Мыс» (1REG12) отозван — атака предотвращена")
         else:
@@ -650,6 +656,10 @@ class GameEngine:
                 for opt in action.options:
                     inner = opt.get("action", {})
                     opt_data = {"label": opt.get("label", ""), "action": inner}
+                    if opt.get("cost_population", 0):
+                        opt_data["cost_population"] = opt["cost_population"]
+                    if opt.get("cost_resource", 0):
+                        opt_data["cost_resource"] = opt["cost_resource"]
                     if inner.get("type") == "draw_disorder":
                         opt_data["can_draw"] = len(state.shared.disorder_deck) > 0
                     elif inner.get("type") == "discard_hand":
@@ -678,12 +688,52 @@ class GameEngine:
                 }
                 state.add_log(f"Солнцестояние «{card.name}»: МОЖНО сбросить карту из руки и выбрать награду")
                 return state
+            elif isinstance(action, SolsticeGainResourceAction):
+                _ATTR = {"MATERIAL": "resource", "POPULATION": "population",
+                         "PROGRESS": "upgrade", "ACTION": "action", "EXPLOIT": "exploit"}
+                attr = _ATTR.get(action.resource_type, "resource")
+                setattr(state.player.resources, attr,
+                        getattr(state.player.resources, attr) + action.amount)
+                state.add_log(f"Солнцестояние «{card.name}»: +{action.amount} {action.resource_type.lower()}")
+            elif isinstance(action, SolsticeReturnDisorderAction):
+                disorder_in_discard = [c for c in state.player.discard if self._is_disorder(c)]
+                if not disorder_in_discard:
+                    state.add_log(f"Солнцестояние «{card.name}»: нет карт беспорядков в сбросе — пропущено")
+                elif len(disorder_in_discard) == 1:
+                    dc = disorder_in_discard[0]
+                    state.player.discard.remove(dc)
+                    state.shared.disorder_deck.append(dc)
+                    state.add_log(f"Солнцестояние «{card.name}»: «{dc.name}» возвращена в колоду беспорядков")
+                else:
+                    from .state import _card_info
+                    state.pending_choice = {
+                        "type": "solstice_return_disorder",
+                        "card_id": card.id,
+                        "card_name": card.name,
+                        "available_cards": [_card_info(c) for c in disorder_in_discard],
+                    }
+                    state.add_log(f"Солнцестояние «{card.name}»: выберите карту беспорядков для возврата")
+                    return state
         # Fallback: legacy hardcoded effects
         if "метрополия" in card.name.lower():
             state.player.resources.resource += 1
         elif "акрополь" in card.name.lower():
             state.player.resources.population += 1
         return state
+
+    def resolve_solstice_return_disorder(self, state: GameState, card_id: str) -> GameState:
+        """Игрок выбирает карту беспорядков из личного сброса для возврата в колоду беспорядков."""
+        pending = state.pending_choice
+        if not pending or pending.get("type") != "solstice_return_disorder":
+            raise ValueError("Нет активного выбора возврата карты беспорядков")
+        card = next((c for c in state.player.discard if c.id == card_id), None)
+        if card is None or not self._is_disorder(card):
+            raise ValueError(f"Карта {card_id} не найдена в сбросе или не является беспорядком")
+        state.player.discard.remove(card)
+        state.shared.disorder_deck.append(card)
+        state.add_log(f"«{card.name}» возвращена в колоду беспорядков")
+        state.pending_choice = None
+        return self._continue_solstice_effects(state)
 
     def resolve_solstice_gain_progress(self, state: GameState, take: bool) -> GameState:
         """Игрок решает, брать ли жетоны прогресса в солнцестояние."""
@@ -721,6 +771,7 @@ class GameEngine:
         card = next((c for c in state.player.play_area if c.id == card_id), None)
         if card is not None:
             state.player.play_area.remove(card)
+            self._recalculate_hand_limit(state)
             if choice == "destroy":
                 state.player.discard.append(card)
                 state.add_log(f"«{card_name}» разрушена → сброс")
@@ -766,8 +817,24 @@ class GameEngine:
         options = pending["options"]
         if option_index < 0 or option_index >= len(options):
             raise ValueError(f"Неверный индекс опции: {option_index}")
-        action = options[option_index]["action"]
+        chosen_opt = options[option_index]
+        action = chosen_opt["action"]
         action_type = action.get("type")
+
+        # Validate and deduct costs
+        cost_pop = chosen_opt.get("cost_population", 0)
+        cost_res = chosen_opt.get("cost_resource", 0)
+        if cost_pop and state.player.resources.population < cost_pop:
+            raise ValueError(f"Недостаточно населения: нужно {cost_pop}, есть {state.player.resources.population}")
+        if cost_res and state.player.resources.resource < cost_res:
+            raise ValueError(f"Недостаточно ресурсов: нужно {cost_res}, есть {state.player.resources.resource}")
+        if cost_pop:
+            state.player.resources.population -= cost_pop
+            state.add_log(f"−{cost_pop} население")
+        if cost_res:
+            state.player.resources.resource -= cost_res
+            state.add_log(f"−{cost_res} ресурс")
+
         state.pending_choice = None
 
         if action_type == "draw_disorder":
@@ -1013,6 +1080,12 @@ class GameEngine:
 
     def calculate_scores(self, state: GameState) -> GameState:
         """Подсчёт ПО в конце игры"""
+        # Проверка пред-скоринговых эффектов (напр. возврат беспорядков)
+        if not state.pre_scoring_disorders_resolved:
+            state = self._apply_pre_scoring_effects(state)
+            if state.pending_choice is not None:
+                return state  # ждём разрешения эффекта
+
         player_vp = self._calculate_player_vp(state)
         bot_vp = self._calculate_bot_vp(state)
 
@@ -1086,6 +1159,63 @@ class GameEngine:
 
         return max(0, vp)
 
+    def _apply_pre_scoring_effects(self, state: GameState) -> GameState:
+        """Применяет эффекты, которые срабатывают перед финальным подсчётом ПО."""
+        player = state.player
+        all_cards = (player.hand + player.deck + player.discard +
+                     player.play_area + player.chronicle)
+        max_return = max(
+            (getattr(c, 'pre_scoring_return_disorders', 0) for c in all_cards),
+            default=0,
+        )
+        if max_return <= 0:
+            return state
+        from .state import _card_info
+        disorder_in_hand = [c for c in player.hand if self._is_disorder(c)]
+        disorder_in_discard = [c for c in player.discard if self._is_disorder(c)]
+        available = (
+            [{"source": "hand", **_card_info(c)} for c in disorder_in_hand] +
+            [{"source": "discard", **_card_info(c)} for c in disorder_in_discard]
+        )
+        if not available:
+            return state
+        state.pending_choice = {
+            "type": "pre_scoring_return_disorders",
+            "max_count": max_return,
+            "available_cards": available,
+        }
+        state.add_log(f"Перед подсчётом ПО вы можете вернуть до {max_return} карт беспорядков")
+        return state
+
+    def resolve_pre_scoring_return_disorders(self, state: GameState,
+                                              card_ids: List[str]) -> GameState:
+        """Игрок выбирает карты беспорядков для возврата перед подсчётом ПО."""
+        pending = state.pending_choice
+        if not pending or pending.get("type") != "pre_scoring_return_disorders":
+            raise ValueError("Нет активного пред-скорингового выбора")
+        max_count = pending.get("max_count", 2)
+        if len(card_ids) > max_count:
+            raise ValueError(f"Можно вернуть не более {max_count} карт беспорядков")
+        returned = 0
+        for cid in card_ids:
+            card = next((c for c in state.player.hand if c.id == cid and self._is_disorder(c)), None)
+            if card:
+                state.player.hand.remove(card)
+                state.shared.disorder_deck.append(card)
+                returned += 1
+                continue
+            card = next((c for c in state.player.discard if c.id == cid and self._is_disorder(c)), None)
+            if card:
+                state.player.discard.remove(card)
+                state.shared.disorder_deck.append(card)
+                returned += 1
+        if returned > 0:
+            random.shuffle(state.shared.disorder_deck)
+        state.add_log(f"Возвращено {returned} карт беспорядков перед подсчётом ПО")
+        state.pending_choice = None
+        state.pre_scoring_disorders_resolved = True
+        return self.calculate_scores(state)
+
     def _evaluate_condition_vp(self, state: GameState,
                                 card: Card, is_player: bool) -> int:
         """Evaluate conditional VP cards"""
@@ -1095,6 +1225,17 @@ class GameEngine:
                      player.play_area + player.chronicle)
 
         cond = card.vp_condition or card.vp_per_condition or ""
+        if cond == "cards_per10":
+            total = len(all_cards)
+            return total // 10
+        if cond == "permanent_non_region_per3":
+            from .enums import CardType as _CT
+            count = sum(
+                1 for c in player.play_area
+                if c.card_type == _CT.PERMANENT
+                and CardCategory.REGION not in getattr(c, 'categories', [])
+            )
+            return count // 3
         if cond == "region_per2":
             count = sum(1 for c in all_cards if CardCategory.REGION in getattr(c, 'categories', []))
             return count // 2
@@ -1107,33 +1248,36 @@ class GameEngine:
         elif "origins" in cond:
             count = sum(1 for c in all_cards if CardCategory.ORIGINS in getattr(c, 'categories', []))
             return min(count, 10)
+        elif "raid" in cond:
+            count = sum(1 for c in all_cards if CardCategory.RAID in getattr(c, 'categories', []))
+            return min(count, 10)
+        elif cond == "population_per4":
+            return min(player.resources.population // 4, 10)
+        elif cond == "progress_per4":
+            return min(player.resources.upgrade // 4, 10)
+        elif cond == "progress_per5":
+            return min(player.resources.upgrade // 5, 10)
         elif "population" in cond:
             return min(player.resources.population // 2, 10)
+        elif cond == "resource_each":
+            return min(player.resources.resource, 10)
         elif "resource" in cond:
             return min(player.resources.resource // 3, 10)
         elif "glory" in cond:
             count = sum(1 for c in all_cards if CardCategory.GLORY in getattr(c, 'categories', []))
             return count
-        elif cond == "label_grain":
-            from .enums import CardLabel
-            count = sum(
-                lb == CardLabel.GRAIN
-                for c in all_cards
-                for lb in getattr(c, 'labels', [])
-            )
-            return count
-        elif cond == "label_water":
-            from .enums import CardLabel
-            count = sum(
-                lb == CardLabel.WATER
-                for c in all_cards
-                for lb in getattr(c, 'labels', [])
-            )
-            return count
         elif cond == "label_grain_and_water":
             from .enums import CardLabel
             count = sum(
                 lb in (CardLabel.GRAIN, CardLabel.WATER)
+                for c in all_cards
+                for lb in getattr(c, 'labels', [])
+            )
+            return count
+        elif cond.startswith("label_"):
+            label_name = cond[len("label_"):]
+            count = sum(
+                lb.value == label_name
                 for c in all_cards
                 for lb in getattr(c, 'labels', [])
             )
@@ -1230,6 +1374,7 @@ class GameEngine:
         if card.card_type == CardType.PERMANENT:
             if card not in state.player.play_area:
                 state.player.play_area.append(card)
+                self._recalculate_hand_limit(state)
 
         # Generic effects based on category
         if CardCategory.REGION in getattr(card, 'categories', []):
@@ -1254,6 +1399,7 @@ class GameEngine:
             # Glory cards go to chronicle (летопись)
             if card in state.player.play_area:
                 state.player.play_area.remove(card)
+                self._recalculate_hand_limit(state)
             state.player.chronicle.append(card)
 
         # Mandatory card draw
@@ -1293,6 +1439,10 @@ class GameEngine:
                 state = self._apply_choice_action(state, action)
             elif isinstance(action, ChronicleFromDiscardAction):
                 state = self._apply_chronicle_from_discard_action(state, action)
+            elif isinstance(action, ChronicleFromHandAction):
+                state = self._apply_chronicle_from_hand_action(state, action)
+            elif isinstance(action, AllPlayersGainResourceAction):
+                state = self._apply_all_players_gain_resource_action(state, action)
             elif isinstance(action, ExileFromMarketAction):
                 state = self._apply_exile_from_market_action(state)
             elif isinstance(action, DestroyFromPlayAreaAction):
@@ -1313,6 +1463,22 @@ class GameEngine:
                 state = self._apply_draw_then_discard_choice_action(state, action)
             elif isinstance(action, GuessDeckCategoryAction):
                 state = self._apply_guess_deck_category_action(state, action)
+            elif isinstance(action, GainPerLabelAction):
+                state = self._apply_gain_per_label_action(state, action)
+            elif isinstance(action, DrawFromBoostDeckAction):
+                state = self._apply_draw_from_boost_deck_action(state)
+            elif isinstance(action, PeriodConditionalAction):
+                state = self._apply_period_conditional_action(state, action)
+            elif isinstance(action, BotDestroysFromPlayAreaAction):
+                state = self._apply_bot_destroys_from_play_area_action(state, action)
+            elif isinstance(action, OptionalReinforceRegionAction):
+                state = self._apply_optional_reinforce_region_action(state, action)
+            elif isinstance(action, GiveCardToBotAction):
+                state = self._apply_give_card_to_bot_action(state, action)
+            elif isinstance(action, BotDestroysLabelForResourcesAction):
+                state = self._apply_bot_destroys_label_for_resources_action(state, action)
+            elif isinstance(action, ReturnDisordersFromHandOrDiscardAction):
+                state = self._apply_return_disorders_from_hand_or_discard_action(state, action)
             # If a new pending_choice appeared, queue remaining actions and stop
             if not had_pending and state.pending_choice is not None and actions_remaining:
                 state.pending_card_play_actions.extend(
@@ -1353,15 +1519,19 @@ class GameEngine:
             elif isinstance(action, SacredPathExploitAction):
                 state = self._apply_sacred_path_exploit_action(state, card)
             elif isinstance(action, AllPlayersGainResourceAction):
-                _RESOURCE_ATTR = {
-                    "MATERIAL": ("resource", "resource"),
-                    "POPULATION": ("population", "population"),
-                    "PROGRESS": ("upgrade", "upgrade"),
-                }
-                player_attr, bot_attr = _RESOURCE_ATTR.get(action.resource_type.name, ("resource", "resource"))
-                setattr(state.player.resources, player_attr, getattr(state.player.resources, player_attr) + action.amount)
-                setattr(state.bot, bot_attr, getattr(state.bot, bot_attr) + action.amount)
-                state.add_log(f"Все игроки получают +{action.amount} {action.resource_type.value}")
+                state = self._apply_all_players_gain_resource_action(state, action)
+            elif isinstance(action, ExploitDiscardHandGainResourceAction):
+                if not state.player.hand:
+                    state.add_log("Рука пуста — эксплуатация пропущена")
+                else:
+                    from .state import _card_info
+                    state.pending_choice = {
+                        "type": "exploit_discard_hand",
+                        "gain_resource_type": action.resource_type,
+                        "gain_amount": action.amount,
+                        "available_cards": [_card_info(c) for c in state.player.hand],
+                    }
+                    state.add_log("Выберите карту из руки для сброса → получите жетон прогресса")
             elif isinstance(action, ExploitSpendResourceDrawCardAction):
                 _RESOURCE_ATTR = {"MATERIAL": "resource", "POPULATION": "population", "PROGRESS": "upgrade"}
                 attr = _RESOURCE_ATTR.get(action.resource_type.name, "resource")
@@ -1461,6 +1631,7 @@ class GameEngine:
         if target_label not in getattr(card, 'labels', []):
             raise ValueError(f"Карта «{card.name}» не имеет метки {label_str.upper()}")
         state.player.play_area.remove(card)
+        self._recalculate_hand_limit(state)
         state.player.hand.append(card)
         state.add_log(f"«{card.name}» отозвана в руку")
         # Apply gains
@@ -1537,6 +1708,94 @@ class GameEngine:
             pending["available_cards"] = [_card_info(c) for c in state.player.discard]
 
         return state
+
+    def resolve_exploit_discard_hand(self, state: GameState, card_id: str) -> GameState:
+        """Игрок выбирает карту из руки для сброса при эксплуатации → получает ресурс."""
+        pending = state.pending_choice
+        if not pending or pending.get("type") != "exploit_discard_hand":
+            raise ValueError("Нет активного выбора эксплуатации (сброс карты с руки)")
+        card = self._find_in_hand(state, card_id)
+        if card is None:
+            raise ValueError(f"Карта {card_id} не найдена в руке")
+        state.player.hand.remove(card)
+        state.player.discard.append(card)
+        state.add_log(f"«{card.name}» сброшена с руки")
+        rt_name = pending.get("gain_resource_type", "PROGRESS")
+        amount = pending.get("gain_amount", 1)
+        _ATTR = {"MATERIAL": "resource", "POPULATION": "population",
+                 "PROGRESS": "upgrade", "ACTION": "action", "EXPLOIT": "exploit"}
+        attr = _ATTR.get(rt_name, "upgrade")
+        setattr(state.player.resources, attr, getattr(state.player.resources, attr) + amount)
+        state.add_log(f"+{amount} {rt_name.lower()}")
+        state.pending_choice = None
+        return state
+
+    def resolve_return_disorders(self, state: GameState, card_ids: List[str]) -> GameState:
+        """Игрок выбирает 0–N карт беспорядков из руки/личного сброса для возврата в колоду беспорядков."""
+        pending = state.pending_choice
+        if not pending or pending.get("type") != "return_disorders":
+            raise ValueError("Нет активного выбора возврата карт беспорядков")
+        max_count = pending.get("max_count", 2)
+        if len(card_ids) > max_count:
+            raise ValueError(f"Можно вернуть не более {max_count} карт беспорядков")
+        returned = 0
+        for cid in card_ids:
+            card = next((c for c in state.player.hand if c.id == cid and self._is_disorder(c)), None)
+            if card:
+                state.player.hand.remove(card)
+                state.shared.disorder_deck.append(card)
+                returned += 1
+                continue
+            card = next((c for c in state.player.discard if c.id == cid and self._is_disorder(c)), None)
+            if card:
+                state.player.discard.remove(card)
+                state.shared.disorder_deck.append(card)
+                returned += 1
+        if returned > 0:
+            random.shuffle(state.shared.disorder_deck)
+        state.add_log(f"Возвращено {returned} карт беспорядков в колоду беспорядков")
+        state.pending_choice = None
+        return self._check_deferred_choices(state)
+
+    def resolve_self_disposition(self, state: GameState, choice: str,
+                                  region_card_id: Optional[str] = None) -> GameState:
+        """Игрок выбирает судьбу карты: 'chronicle' / 'reinforce_region' / 'skip'."""
+        pending = state.pending_choice
+        if not pending or pending.get("type") != "self_disposition":
+            raise ValueError("Нет активного выбора судьбы карты")
+        card_id = pending["card_id"]
+        state.pending_choice = None
+
+        if choice == "chronicle":
+            card = next((c for c in state.player.discard if c.id == card_id), None)
+            if card is None:
+                raise ValueError(f"Карта {card_id} не найдена в сбросе")
+            state.player.discard.remove(card)
+            state.player.chronicle.append(card)
+            state.add_log(f"«{card.name}» занесена в летопись")
+            return self._check_deferred_choices(state)
+
+        if choice == "reinforce_region":
+            if not region_card_id:
+                raise ValueError("Не указана карта региона для укрепления")
+            reinf_card = next((c for c in state.player.discard if c.id == card_id), None)
+            region = next((c for c in state.player.play_area if c.id == region_card_id), None)
+            if reinf_card is None:
+                raise ValueError(f"Карта {card_id} не найдена в сбросе")
+            if region is None:
+                raise ValueError(f"Регион {region_card_id} не найден в игровой области")
+            if CardCategory.REGION not in getattr(region, 'categories', []):
+                raise ValueError(f"Карта {region_card_id} не является регионом")
+            state.player.discard.remove(reinf_card)
+            state.player.reinforcements[region_card_id] = reinf_card
+            state.add_log(f"«{reinf_card.name}» укрепляет «{region.name}»")
+            state.add_log(f"Эффект «{region.name}» применяется повторно")
+            state = self._apply_player_card_effect(state, region)
+            return self._check_deferred_choices(state)
+
+        # "skip" — карта остаётся в сбросе
+        state.add_log(f"Судьба карты не изменена — остаётся в сбросе")
+        return self._check_deferred_choices(state)
 
     def _apply_exploit_effect(self, state: GameState, card: Card) -> GameState:
         """Apply exploitation effect of a card"""
@@ -1971,6 +2230,22 @@ class GameEngine:
                 }
             return state
 
+        if state.pending_self_disposition_card_id:
+            card_id = state.pending_self_disposition_card_id
+            state.pending_self_disposition_card_id = None
+            card = next((c for c in state.player.discard if c.id == card_id), None)
+            if card:
+                from .state import _card_info
+                regions = [c for c in state.player.play_area
+                           if CardCategory.REGION in getattr(c, 'categories', [])]
+                state.pending_choice = {
+                    "type": "self_disposition",
+                    "card_id": card.id,
+                    "card_name": card.name,
+                    "available_regions": [_card_info(c) for c in regions],
+                }
+            return state
+
         if state.pending_chronicle_card_id:
             card_id = state.pending_chronicle_card_id
             state.pending_chronicle_card_id = None
@@ -1982,6 +2257,33 @@ class GameEngine:
                     "card_name": card.name,
                 }
 
+        return state
+
+    def _apply_gain_per_label_action(self, state: GameState, action: GainPerLabelAction) -> GameState:
+        """Даёт игроку 1 ресурс за каждую метку action.label в его игровой области."""
+        _ATTR = {ResourceType.MATERIAL: "resource", ResourceType.POPULATION: "population",
+                 ResourceType.PROGRESS: "upgrade", ResourceType.ACTION: "action",
+                 ResourceType.EXPLOIT: "exploit"}
+        count = sum(
+            1 for c in state.player.play_area
+            for lb in getattr(c, 'labels', []) if lb.value == action.label
+        )
+        attr = _ATTR.get(action.resource_type, "resource")
+        setattr(state.player.resources, attr,
+                getattr(state.player.resources, attr) + count)
+        state.add_log(f"+{count} {action.resource_type.value} за {count} меток «{action.label}»")
+        return state
+
+    def _apply_all_players_gain_resource_action(self, state: GameState, action: AllPlayersGainResourceAction) -> GameState:
+        """Все игроки получают N ресурсов указанного типа."""
+        _PLAYER_ATTR = {"MATERIAL": "resource", "POPULATION": "population", "PROGRESS": "upgrade",
+                        "ACTION": "action", "EXPLOIT": "exploit"}
+        _BOT_ATTR = {"MATERIAL": "resource", "POPULATION": "population", "PROGRESS": "upgrade"}
+        player_attr = _PLAYER_ATTR.get(action.resource_type.name, "resource")
+        setattr(state.player.resources, player_attr, getattr(state.player.resources, player_attr) + action.amount)
+        bot_attr = _BOT_ATTR.get(action.resource_type.name, "resource")
+        setattr(state.bot, bot_attr, getattr(state.bot, bot_attr) + action.amount)
+        state.add_log(f"Все игроки получают +{action.amount} {action.resource_type.value}")
         return state
 
     def _apply_gain_resource_action(self, state: GameState, action: GainResourceAction) -> GameState:
@@ -2369,6 +2671,200 @@ class GameEngine:
             state.add_log("Колода беспорядков пуста — бот не получает карты беспорядков")
         return state
 
+    def _apply_give_card_to_bot_action(self, state: GameState, action: GiveCardToBotAction) -> GameState:
+        """Игрок выбирает карту из руки или личного сброса и отдаёт её боту."""
+        from .state import _card_info
+        available = [_card_info(c) for c in state.player.hand] + \
+                    [_card_info(c) for c in state.player.discard]
+        if not available:
+            state.add_log("Нет карт в руке и сбросе — передача боту пропущена")
+            return state
+        state.pending_choice = {
+            "type": "give_card_to_bot",
+            "count": action.count,
+            "available_hand_cards":    [_card_info(c) for c in state.player.hand],
+            "available_discard_cards": [_card_info(c) for c in state.player.discard],
+        }
+        state.add_log("Выберите карту из руки или сброса для передачи боту")
+        return state
+
+    def resolve_give_card_to_bot(self, state: GameState, card_id: str) -> GameState:
+        """Игрок выбирает конкретную карту (из руки или сброса) для передачи боту."""
+        pending = state.pending_choice
+        if not pending or pending.get("type") != "give_card_to_bot":
+            raise ValueError("Нет активного выбора передачи карты боту")
+        # Ищем в руке, потом в сбросе
+        card = self._find_in_hand(state, card_id)
+        if card is not None:
+            state.player.hand.remove(card)
+        else:
+            card = next((c for c in state.player.discard if c.id == card_id), None)
+            if card is None:
+                raise ValueError(f"Карта {card_id} не найдена в руке или сбросе")
+            state.player.discard.remove(card)
+        state.bot.bot_discard.append(card)
+        state.add_log(f"«{card.name}» передана боту")
+        state.pending_choice = None
+        state = self._check_deferred_choices(state)
+        return state
+
+    def _apply_bot_destroys_label_for_resources_action(
+            self, state: GameState, action: BotDestroysLabelForResourcesAction) -> GameState:
+        """Бот разрушает N карт с меткой action.label из своей игровой области.
+        За каждую разрушённую карту разыгрывающий игрок получает gain_per_destroyed ресурсов."""
+        from .enums import CardLabel, ResourceType as _RT
+        try:
+            target_label = CardLabel(action.label)
+        except ValueError:
+            state.add_log(f"Неизвестная метка '{action.label}' — действие пропущено")
+            return state
+
+        destroyed = 0
+        for _ in range(action.count):
+            card = next(
+                (c for c in state.bot.play_area
+                 if target_label in getattr(c, 'labels', [])),
+                None
+            )
+            if card is None:
+                break
+            state.bot.play_area.remove(card)
+            state.bot.bot_discard.append(card)
+            destroyed += 1
+            state.add_log(f"Бот разрушает «{card.name}» (метка: {action.label})")
+
+        if destroyed == 0:
+            state.add_log(f"У бота нет карт с меткой «{action.label}» — разрушение пропущено")
+
+        gained = destroyed * action.gain_per_destroyed
+        if gained > 0:
+            _ATTR = {"MATERIAL": "resource", "POPULATION": "population",
+                     "PROGRESS": "upgrade", "ACTION": "action", "EXPLOIT": "exploit"}
+            attr = _ATTR.get(action.gain_resource_type, "resource")
+            setattr(state.player.resources, attr,
+                    getattr(state.player.resources, attr) + gained)
+            state.add_log(f"+{gained} {action.gain_resource_type} за {destroyed} разрушённых карт")
+        return state
+
+    def _apply_draw_from_boost_deck_action(self, state: GameState) -> GameState:
+        """Берёт верхнюю карту колоды усиления и помещает в личный сброс."""
+        if not state.player.boost_deck:
+            state.add_log("Колода усиления пуста — действие пропущено")
+            return state
+        card = state.player.boost_deck.pop(0)
+        state.player.discard.append(card)
+        state.add_log(f"Верхняя карта усиления «{card.name}» помещена в личный сброс")
+        return state
+
+    def _apply_return_disorders_from_hand_or_discard_action(
+            self, state: GameState, action: ReturnDisordersFromHandOrDiscardAction) -> GameState:
+        """Игрок может вернуть до max_count карт беспорядков из руки или личного сброса в колоду беспорядков."""
+        from .state import _card_info
+        disorder_in_hand = [c for c in state.player.hand if self._is_disorder(c)]
+        disorder_in_discard = [c for c in state.player.discard if self._is_disorder(c)]
+        available = (
+            [{"source": "hand", **_card_info(c)} for c in disorder_in_hand] +
+            [{"source": "discard", **_card_info(c)} for c in disorder_in_discard]
+        )
+        if not available:
+            state.add_log("Нет карт беспорядков в руке или личном сбросе — действие пропущено")
+            return state
+        state.pending_choice = {
+            "type": "return_disorders",
+            "max_count": action.max_count,
+            "available_cards": available,
+        }
+        state.add_log(f"Выберите до {action.max_count} карт беспорядков для возврата в колоду беспорядков")
+        return state
+
+    def _apply_period_conditional_action(self, state: GameState, action: PeriodConditionalAction) -> GameState:
+        """Выполняет действие в зависимости от текущего периода игрока."""
+        if state.player.period == Period.BARBARISM:
+            action_data = action.barbarism
+        else:
+            action_data = action.civilization
+        if not action_data:
+            return state
+        state = self._execute_queued_action(state, action_data)
+        return state
+
+    def _apply_bot_destroys_from_play_area_action(
+            self, state: GameState, action: BotDestroysFromPlayAreaAction) -> GameState:
+        """Бот разрушает N карт указанной категории из своей игровой области → сброс бота."""
+        try:
+            target_cat = CardCategory(action.category)
+        except ValueError:
+            state.add_log(f"Неизвестная категория '{action.category}' — действие пропущено")
+            return state
+        destroyed = 0
+        for _ in range(action.count):
+            card = next(
+                (c for c in state.bot.play_area
+                 if target_cat in getattr(c, 'categories', [])),
+                None
+            )
+            if card is None:
+                break
+            state.bot.play_area.remove(card)
+            state.bot.bot_discard.append(card)
+            destroyed += 1
+            state.add_log(f"Бот разрушает «{card.name}» (категория: {action.category})")
+        if destroyed == 0:
+            state.add_log(f"У бота нет карт категории «{action.category}» — разрушение пропущено")
+        return state
+
+    def _apply_optional_reinforce_region_action(
+            self, state: GameState, action: OptionalReinforceRegionAction) -> GameState:
+        """Игрок МОЖЕТ укрепить карту регионов в игровой области картой из сброса.
+        Укреплённая карта немедленно приносит свой эффект."""
+        from .state import _card_info
+        regions = [c for c in state.player.play_area
+                   if CardCategory.REGION in getattr(c, 'categories', [])]
+        reinf_card = next(
+            (c for c in state.player.discard if c.id == action.reinforcement_card_id),
+            None
+        )
+        if not regions or reinf_card is None:
+            state.add_log("Нет карт регионов или карта-укрепление не найдена — пропущено")
+            return state
+        state.pending_choice = {
+            "type": "reinforce_region_optional",
+            "reinforcement_card_id": action.reinforcement_card_id,
+            "available_regions": [_card_info(c) for c in regions],
+        }
+        state.add_log("Вы МОЖЕТЕ укрепить карту регионов в игровой области (эффект применится повторно)")
+        return state
+
+    def resolve_reinforce_region_optional(
+            self, state: GameState, region_card_id: Optional[str]) -> GameState:
+        """Игрок выбирает карту регионов для укрепления (None = пропустить)."""
+        pending = state.pending_choice
+        if not pending or pending.get("type") != "reinforce_region_optional":
+            raise ValueError("Нет активного выбора укрепления региона")
+        state.pending_choice = None
+        if region_card_id is None:
+            state.add_log("Укрепление региона пропущено")
+            state = self._check_deferred_choices(state)
+            return state
+        reinf_card_id = pending["reinforcement_card_id"]
+        reinf_card = next((c for c in state.player.discard if c.id == reinf_card_id), None)
+        region = next((c for c in state.player.play_area if c.id == region_card_id), None)
+        if reinf_card is None:
+            raise ValueError(f"Карта-укрепление {reinf_card_id} не найдена в сбросе")
+        if region is None:
+            raise ValueError(f"Карта региона {region_card_id} не найдена в игровой области")
+        if CardCategory.REGION not in getattr(region, 'categories', []):
+            raise ValueError(f"Карта {region_card_id} не является регионом")
+        # Place reinforcement card under the region
+        state.player.discard.remove(reinf_card)
+        state.player.reinforcements[region_card_id] = reinf_card
+        state.add_log(f"«{reinf_card.name}» укрепляет «{region.name}»")
+        # Re-trigger the region's on_play_actions
+        state.add_log(f"Эффект «{region.name}» применяется повторно")
+        state = self._apply_player_card_effect(state, region)
+        state = self._check_deferred_choices(state)
+        return state
+
     def _apply_guess_deck_category_action(self, state: GameState, action: GuessDeckCategoryAction) -> GameState:
         """Игрок называет категорию — устанавливает pending_choice для выбора."""
         state.pending_choice = {
@@ -2498,6 +2994,7 @@ class GameEngine:
         if card is None:
             raise ValueError(f"Карта {source_card_id} не найдена в игровой области")
         state.player.play_area.remove(card)
+        self._recalculate_hand_limit(state)
         state.player.discard.append(card)
         state.add_log(f"«{source_card_name}» разрушена и отправлена в личный сброс")
         if not state.player.boost_deck:
@@ -2628,6 +3125,7 @@ class GameEngine:
                 state.player.play_area.remove(card)
                 state.player.discard.append(card)
                 state.add_log(f"«{card.name}» разрушена")
+            self._recalculate_hand_limit(state)
             return state
         # Игрок выбирает карты
         state.pending_choice = {
@@ -2660,6 +3158,7 @@ class GameEngine:
             state.player.play_area.remove(card)
             state.player.discard.append(card)
             state.add_log(f"«{card.name}» разрушена")
+        self._recalculate_hand_limit(state)
         state.pending_choice = None
         state = self._check_deferred_choices(state)
         return state
@@ -2810,6 +3309,35 @@ class GameEngine:
                     "amount": action.amount}
         if isinstance(action, BotGainsDisorderAction):
             return {"type": "bot_gains_disorder", "count": action.count}
+        if isinstance(action, AllPlayersGainResourceAction):
+            return {"type": "all_players_gain_resource",
+                    "resource_type": action.resource_type.name,
+                    "amount": action.amount}
+        if isinstance(action, GainPerLabelAction):
+            return {"type": "gain_per_label",
+                    "label": action.label,
+                    "resource_type": action.resource_type.name}
+        if isinstance(action, DrawFromBoostDeckAction):
+            return {"type": "draw_from_boost_deck"}
+        if isinstance(action, PeriodConditionalAction):
+            return {"type": "period_conditional",
+                    "barbarism": action.barbarism,
+                    "civilization": action.civilization}
+        if isinstance(action, BotDestroysFromPlayAreaAction):
+            return {"type": "bot_destroys_from_play_area",
+                    "category": action.category,
+                    "count": action.count}
+        if isinstance(action, OptionalReinforceRegionAction):
+            return {"type": "reinforce_region_optional",
+                    "reinforcement_card_id": action.reinforcement_card_id}
+        if isinstance(action, GiveCardToBotAction):
+            return {"type": "give_card_to_bot", "count": action.count}
+        if isinstance(action, BotDestroysLabelForResourcesAction):
+            return {"type": "bot_destroys_label_for_resources",
+                    "label": action.label,
+                    "count": action.count,
+                    "gain_per_destroyed": action.gain_per_destroyed,
+                    "resource_type": action.gain_resource_type}
         if isinstance(action, DrawThenDiscardChoiceAction):
             return {"type": "draw_then_discard_choice",
                     "draw_count": action.draw_count,
@@ -2817,6 +3345,8 @@ class GameEngine:
         if isinstance(action, GuessDeckCategoryAction):
             return {"type": "guess_main_deck_category",
                     "allowed_categories": action.allowed_categories}
+        if isinstance(action, ReturnDisordersFromHandOrDiscardAction):
+            return {"type": "return_disorders_from_hand_or_discard", "max_count": action.max_count}
         return {}
 
     def _execute_queued_action(self, state: GameState, action_data: dict) -> GameState:
@@ -2992,6 +3522,62 @@ class GameEngine:
         elif action_type == "bot_gains_disorder":
             state = self._apply_bot_gains_disorder_action(state, BotGainsDisorderAction(count=action_data.get("count", 1)))
 
+        elif action_type == "all_players_gain_resource":
+            from .enums import ResourceType as _RT
+            rt_name = action_data.get("resource_type", "MATERIAL")
+            rt = next((r for r in _RT if r.name == rt_name), _RT.MATERIAL)
+            state = self._apply_all_players_gain_resource_action(state, AllPlayersGainResourceAction(rt, action_data.get("amount", 0)))
+
+        elif action_type == "gain_per_label":
+            from .enums import ResourceType as _RT
+            rt_name = action_data.get("resource_type", "MATERIAL")
+            rt = next((r for r in _RT if r.name == rt_name), _RT.MATERIAL)
+            state = self._apply_gain_per_label_action(
+                state, GainPerLabelAction(label=action_data["label"], resource_type=rt)
+            )
+
+        elif action_type == "draw_from_boost_deck":
+            state = self._apply_draw_from_boost_deck_action(state)
+
+        elif action_type == "period_conditional":
+            state = self._apply_period_conditional_action(
+                state, PeriodConditionalAction(
+                    barbarism=action_data.get("barbarism", {}),
+                    civilization=action_data.get("civilization", {}),
+                )
+            )
+
+        elif action_type == "bot_destroys_from_play_area":
+            state = self._apply_bot_destroys_from_play_area_action(
+                state, BotDestroysFromPlayAreaAction(
+                    category=action_data.get("category", "region"),
+                    count=action_data.get("count", 1),
+                )
+            )
+
+        elif action_type == "reinforce_region_optional":
+            state = self._apply_optional_reinforce_region_action(
+                state, OptionalReinforceRegionAction(
+                    reinforcement_card_id=action_data.get("reinforcement_card_id", ""),
+                )
+            )
+
+        elif action_type == "give_card_to_bot":
+            state = self._apply_give_card_to_bot_action(
+                state, GiveCardToBotAction(count=action_data.get("count", 1))
+            )
+
+        elif action_type == "bot_destroys_label_for_resources":
+            state = self._apply_bot_destroys_label_for_resources_action(
+                state,
+                BotDestroysLabelForResourcesAction(
+                    label=action_data.get("label", "town"),
+                    count=action_data.get("count", 1),
+                    gain_per_destroyed=action_data.get("gain_per_destroyed", 2),
+                    gain_resource_type=action_data.get("resource_type", "MATERIAL"),
+                )
+            )
+
         elif action_type == "draw_then_discard_choice":
             state = self._apply_draw_then_discard_choice_action(
                 state,
@@ -3011,6 +3597,12 @@ class GameEngine:
                 ),
             )
 
+        elif action_type == "return_disorders_from_hand_or_discard":
+            state = self._apply_return_disorders_from_hand_or_discard_action(
+                state,
+                ReturnDisordersFromHandOrDiscardAction(max_count=action_data.get("max_count", 2)),
+            )
+
         return state
 
     # ── UTILS ──────────────────────────────────────────────────────────────────
@@ -3018,6 +3610,13 @@ class GameEngine:
     def _find_in_hand(self, state: GameState,
                        card_id: str) -> Optional[Card]:
         return next((c for c in state.player.hand if c.id == card_id), None)
+
+    @staticmethod
+    def _recalculate_hand_limit(state: GameState) -> None:
+        """Пересчитывает предел руки с учётом пассивных бонусов карт в игровой области."""
+        base = 5
+        bonus = sum(getattr(c, 'hand_limit_bonus', 0) for c in state.player.play_area)
+        state.player.hand_limit = base + bonus
 
     @staticmethod
     def _is_disorder(card: Card) -> bool:
