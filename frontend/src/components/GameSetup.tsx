@@ -20,6 +20,7 @@ export default function GameSetup() {
   const [playerNation, setPlayerNation] = useState('romans');
   const [botNation, setBotNation] = useState('greeks');
   const [difficulty, setDifficulty] = useState('emperor');
+  const [abilitySide, setAbilitySide] = useState<'A' | 'B'>('B');
   const [fetchError, setFetchError] = useState<string | null>(null);
   const { createGame, loading, error } = useGameStore();
 
@@ -37,7 +38,7 @@ export default function GameSetup() {
       alert('Игрок и бот не могут играть одним народом!');
       return;
     }
-    createGame(playerNation, botNation, difficulty);
+    createGame(playerNation, botNation, difficulty, abilitySide);
   };
 
   return (
@@ -78,6 +79,53 @@ export default function GameSetup() {
             ))}
           </div>
         </section>
+
+        {/* Ability Side (Carthaginians only) */}
+        {playerNation === 'carthaginians' && (
+          <section style={styles.section}>
+            <h2 style={styles.sectionTitle}>Сторона карты способности</h2>
+            <p style={{ color: '#888', fontSize: 12, marginBottom: 12 }}>
+              Бот всегда играет стороной A (маркер цивилизации без ПО).
+            </p>
+            <div style={{ display: 'flex', gap: 12 }}>
+              {(['A', 'B'] as const).map(side => (
+                <button
+                  key={side}
+                  onClick={() => setAbilitySide(side)}
+                  style={{
+                    flex: 1,
+                    padding: 16,
+                    border: `2px solid ${abilitySide === side ? '#9B59B6' : '#333'}`,
+                    borderRadius: 8,
+                    background: abilitySide === side ? '#9B59B622' : '#1a1a2e',
+                    color: abilitySide === side ? '#9B59B6' : '#e0d5c0',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    boxShadow: abilitySide === side ? '0 0 12px #9B59B666' : 'none',
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 6 }}>
+                    Карфагеняне ({side})
+                  </div>
+                  {side === 'A' ? (
+                    <div style={{ fontSize: 12, color: '#aaa', lineHeight: 1.5 }}>
+                      Вместо жетона прогресса — 2 ресурса на карту рынка.<br />
+                      Если вы забираете карту — получаете ×2 ресурсов.<br />
+                      1 ПО за каждые 6 ресурсов.
+                    </div>
+                  ) : (
+                    <div style={{ fontSize: 12, color: '#aaa', lineHeight: 1.5 }}>
+                      Вместо жетона прогресса — 2 ресурса на карту рынка.<br />
+                      Забирающий получает карту вместе с ресурсами и жетонами прогресса.<br />
+                      1 ПО за каждые 3 ресурса.
+                    </div>
+                  )}
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Bot Nation */}
         <section style={styles.section}>

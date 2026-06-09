@@ -77,6 +77,7 @@ export interface MarketSlot {
   has_disorder_under: boolean;
   market_marker: number;
   source_deck: MarketSourceDeck;
+  resource_tokens: number;
 }
 
 export interface PlayerState {

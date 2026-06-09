@@ -25,7 +25,7 @@ interface GameStore {
   deleteSave: (saveId: string) => Promise<void>;
 
   // Actions
-  createGame: (playerNation: string, botNation: string, difficulty: string) => Promise<void>;
+  createGame: (playerNation: string, botNation: string, difficulty: string, abilitySide?: string) => Promise<void>;
   undoAction: () => Promise<void>;
   playCard: (cardId: string) => Promise<void>;
   exploitCard: (cardId: string) => Promise<void>;
@@ -57,6 +57,13 @@ interface GameStore {
   returnCardToDeckTop: (cardId: string) => Promise<void>;
   sacredPathExploit: (destroy: boolean) => Promise<void>;
   sacredPathExchange: (handCardId: string) => Promise<void>;
+  appropriateOptional: (proceed: boolean) => Promise<void>;
+  recallFromChronicle: (cardId: string | null) => Promise<void>;
+  exploitRecallLabelForResourceTokenCard: (cardId: string) => Promise<void>;
+  exploitDiscardForResourceTokenCard: (cardId: string) => Promise<void>;
+  acquireAndPlayRegion: (slotIndex: number | null) => Promise<void>;
+  placeResourceOnMarket: (slotIndex: number) => Promise<void>;
+  chronicleFromHandOrDiscard: (cardId: string | null) => Promise<void>;
   resetGame: () => void;
 
   // Solstice
@@ -133,10 +140,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
   },
 
-  createGame: async (playerNation, botNation, difficulty) => {
+  createGame: async (playerNation, botNation, difficulty, abilitySide = 'B') => {
     set({ loading: true, error: null });
     try {
-      const { game_id, state } = await api.createGame(playerNation, botNation, difficulty);
+      const { game_id, state } = await api.createGame(playerNation, botNation, difficulty, abilitySide);
       set({ gameId: game_id, gameState: state, loading: false });
     } catch (e: any) {
       set({ error: e.message, loading: false });
@@ -509,6 +516,90 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const state = await api.sacredPathExchange(gameId, handCardId);
+      set({ gameState: state, loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
+
+  appropriateOptional: async (proceed) => {
+    const { gameId } = get();
+    if (!gameId) return;
+    set({ loading: true, error: null });
+    try {
+      const state = await api.appropriateOptional(gameId, proceed);
+      set({ gameState: state, loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
+
+  recallFromChronicle: async (cardId) => {
+    const { gameId } = get();
+    if (!gameId) return;
+    set({ loading: true, error: null });
+    try {
+      const state = await api.recallFromChronicle(gameId, cardId);
+      set({ gameState: state, loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
+
+  exploitRecallLabelForResourceTokenCard: async (cardId) => {
+    const { gameId } = get();
+    if (!gameId) return;
+    set({ loading: true, error: null });
+    try {
+      const state = await api.exploitRecallLabelForResourceTokenCard(gameId, cardId);
+      set({ gameState: state, loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
+
+  exploitDiscardForResourceTokenCard: async (cardId) => {
+    const { gameId } = get();
+    if (!gameId) return;
+    set({ loading: true, error: null });
+    try {
+      const state = await api.exploitDiscardForResourceTokenCard(gameId, cardId);
+      set({ gameState: state, loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
+
+  acquireAndPlayRegion: async (slotIndex) => {
+    const { gameId } = get();
+    if (!gameId) return;
+    set({ loading: true, error: null });
+    try {
+      const state = await api.acquireAndPlayRegion(gameId, slotIndex);
+      set({ gameState: state, loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
+
+  placeResourceOnMarket: async (slotIndex) => {
+    const { gameId } = get();
+    if (!gameId) return;
+    set({ loading: true, error: null });
+    try {
+      const state = await api.placeResourceOnMarket(gameId, slotIndex);
+      set({ gameState: state, loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
+
+  chronicleFromHandOrDiscard: async (cardId) => {
+    const { gameId } = get();
+    if (!gameId) return;
+    set({ loading: true, error: null });
+    try {
+      const state = await api.chronicleFromHandOrDiscard(gameId, cardId);
       set({ gameState: state, loading: false });
     } catch (e: any) {
       set({ error: e.response?.data?.detail || e.message, loading: false });

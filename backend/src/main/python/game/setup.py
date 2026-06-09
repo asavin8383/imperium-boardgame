@@ -220,9 +220,12 @@ def _setup_bot_area(nation: Nation, nation_cards: List[Card],
                     difficulty: Difficulty) -> BotArea:
     bot = BotArea(nation=nation)
 
-    # Ability card (ignored mechanically but stored)
+    # Ability card (stored as civilisation marker; for Carthaginians always side A)
     ability_cards = [c for c in nation_cards if getattr(c, 'subtype', None) == CardSubtype.ABILITY]
-    bot.ability_card = ability_cards[0] if ability_cards else None
+    if nation == Nation.CARTHAGINIANS:
+        bot.ability_card = next((c for c in ability_cards if c.id.endswith("A")), None)
+    else:
+        bot.ability_card = ability_cards[0] if ability_cards else None
 
     # Dynasty deck: boost cards (shuffled) on top, transformation at bottom (face-up),
     # then progress cards sorted by VP ascending below transformation

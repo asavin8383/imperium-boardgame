@@ -46,6 +46,16 @@ const PHASE_RU: Record<string, string> = {
   player_turn: '🎯 Ваш ход', player_discard: '🗑 Сброс карт', bot_turn: '🤖 Ход бота', solstice: '☀ Солнцестояние',
   final_round: '⚡ Финальный раунд', scoring: '🏆 Подсчёт ПО', game_over: '🏁 Конец игры', setup: '⚙ Подготовка',
 };
+const NATION_SOLO_PREFIX: Record<string, string> = {
+  vikings: 'VIK',
+  greeks: 'GRE',
+  carthaginians: 'KAR',
+  celts: 'KEL',
+  macedonians: 'MAK',
+  persians: 'PER',
+  romans: 'RIM',
+  scythians: 'SKF',
+};
 
 function catColor(card: CardInfo) {
     const cat = card.categories?.[0];
@@ -310,7 +320,7 @@ function Btn({ label, onClick, color = '#2ecc71', disabled = false, active = fal
 }
 
 export default function GameBoard() {
-  const { gameState: gs, loading, error, playCard, exploitCard, doInnovation, doRevolution, endTurn, acquireCard, accelerateProgress, accelerateProgressFromCard, acquireFromExile, takeFromDiscard, resetGame, undoAction, makeChoice, selectAppropriateCategory, appropriateFromDeck, chronicleChoice, reinforceChoice, reinforceWithCard, playFromDiscard, placeUpgradeToken, resolveDrawFromDeck, returnExploitToken, destroyCards, gloryDeckTake, exileFromMarket, chronicleFromDiscard, recallToAvoidAttack, moveDiscardToDeck, oracleDrawChoice, returnCardToDeckTop, sacredPathExploit, sacredPathExchange, solsticeSelectCard, solsticeSkip, solsticeGainProgress, solsticeFate, solsticeChoice } = useGameStore();
+  const { gameState: gs, loading, error, playCard, exploitCard, doInnovation, doRevolution, endTurn, acquireCard, accelerateProgress, accelerateProgressFromCard, acquireFromExile, takeFromDiscard, resetGame, undoAction, makeChoice, selectAppropriateCategory, appropriateFromDeck, chronicleChoice, reinforceChoice, reinforceWithCard, playFromDiscard, placeUpgradeToken, resolveDrawFromDeck, returnExploitToken, destroyCards, gloryDeckTake, exileFromMarket, chronicleFromDiscard, recallToAvoidAttack, moveDiscardToDeck, oracleDrawChoice, returnCardToDeckTop, sacredPathExploit, sacredPathExchange, appropriateOptional, recallFromChronicle, exploitRecallLabelForResourceTokenCard, exploitDiscardForResourceTokenCard, acquireAndPlayRegion, placeResourceOnMarket, chronicleFromHandOrDiscard, solsticeSelectCard, solsticeSkip, solsticeGainProgress, solsticeFate, solsticeChoice } = useGameStore();
   const [selectedCards, setSelectedCards] = useState<string[]>([]);
   const [scores, setScores] = useState<{ player: number; bot: number } | null>(null);
   const [previewCard, setPreviewCard] = useState<CardInfo | null>(null);
@@ -458,6 +468,49 @@ export default function GameBoard() {
     : null;
   const isDestroyMode = pendingDestroyFromPlayArea != null;
 
+  // Pending опциональное присвоение (appropriate_optional)
+  const pendingAppropriateOptional = gs.pending_choice?.type === 'appropriate_optional'
+    ? gs.pending_choice as { type: string; categories: string[] }
+    : null;
+
+  // Pending возврат карты из летописи в руку
+  const pendingRecallFromChronicle = gs.pending_choice?.type === 'recall_from_chronicle'
+    ? gs.pending_choice as { type: string; count: number; available_cards: CardInfo[] }
+    : null;
+
+  // Торговые суда: выбор карты grain/water для отзыва
+  const pendingExploitRecallForTokenCard = gs.pending_choice?.type === 'exploit_recall_label_for_resource_token_card'
+    ? gs.pending_choice as { type: string; labels: string[]; available_cards: CardInfo[] }
+    : null;
+
+  // Иберия: выбор карты для сброса (эксплуатация)
+  const pendingExploitDiscardForTokenCard = gs.pending_choice?.type === 'exploit_discard_for_resource_token_card'
+    ? gs.pending_choice as { type: string; available_cards: CardInfo[] }
+    : null;
+
+  // Торговые суда (шаг 2): выбор карты с рынка с жетонами ресурсов
+  const pendingAcquireResourceTokenCard = gs.pending_choice?.type === 'acquire_resource_token_card'
+    ? gs.pending_choice as { type: string; eligible_slot_indices: number[] }
+    : null;
+  const isAcquireResourceTokenMode = pendingAcquireResourceTokenCard != null;
+
+  // Дидона: приобрести карту регионов и разыграть бесплатно
+  const pendingAcquireAndPlayRegion = gs.pending_choice?.type === 'acquire_and_play_region'
+    ? gs.pending_choice as { type: string; eligible_slot_indices: number[]; available_cards: CardInfo[] }
+    : null;
+  const isAcquireAndPlayRegionMode = pendingAcquireAndPlayRegion != null;
+
+  // Карфагенские торговцы: положить ресурс на карту рынка
+  const pendingPlaceResourceOnMarket = gs.pending_choice?.type === 'place_resource_on_market'
+    ? gs.pending_choice as { type: string; eligible_slot_indices: number[]; available_cards: CardInfo[] }
+    : null;
+  const isPlaceResourceOnMarketMode = pendingPlaceResourceOnMarket != null;
+
+  // Карфагенские торговцы: занести карту в летопись из руки или сброса
+  const pendingChronicleFromHandOrDiscard = gs.pending_choice?.type === 'chronicle_from_hand_or_discard'
+    ? gs.pending_choice as { type: string; available_cards: Array<CardInfo & { source: string }> }
+    : null;
+
   // Солнцестояние: выбор карты для активации
   const pendingSolsticeSelectCard = gs.pending_choice?.type === 'solstice_select_card'
     ? gs.pending_choice as { type: string; available_cards: CardInfo[] }
@@ -580,6 +633,150 @@ export default function GameBoard() {
                 Оставить в сбросе
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Опциональное присвоение карты с рынка */}
+      {pendingAppropriateOptional && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.75)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 800 }}>
+          <div style={{ background: 'linear-gradient(135deg,#0d1a2e,#0a1220)', border: '2px solid #e67e22', borderRadius: 14, padding: '28px 36px', maxWidth: 400, width: '90%', textAlign: 'center' }}>
+            <div style={{ fontSize: 13, color: '#e67e22', letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: 10 }}>Присвоение</div>
+            <div style={{ fontSize: 14, color: '#e8e8f0', marginBottom: 20 }}>
+              Вы можете присвоить 1 карту категории:{' '}
+              <span style={{ color: '#e67e22', fontWeight: 700 }}>
+                {pendingAppropriateOptional.categories.join(' или ')}
+              </span>
+            </div>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+              <button
+                onClick={() => appropriateOptional(true)}
+                style={{ background: 'linear-gradient(135deg,#7a3a00,#a05000)', border: '1px solid #e67e22', borderRadius: 8, color: '#fff', padding: '10px 24px', cursor: 'pointer', fontSize: 13, fontWeight: 700 }}
+              >
+                Присвоить
+              </button>
+              <button
+                onClick={() => appropriateOptional(false)}
+                style={{ background: 'transparent', border: '1px solid #3a3d55', borderRadius: 8, color: '#9098b8', padding: '10px 24px', cursor: 'pointer', fontSize: 13 }}
+              >
+                Пропустить
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Возврат карты из летописи в руку */}
+      {pendingRecallFromChronicle && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.75)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 800 }}>
+          <div style={{ background: 'linear-gradient(135deg,#0d1a10,#0a1208)', border: '2px solid #1abc9c', borderRadius: 14, padding: '28px 36px', maxWidth: 480, width: '95%' }}>
+            <div style={{ fontSize: 13, color: '#1abc9c', letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: 10 }}>Летопись → Рука</div>
+            <div style={{ fontSize: 14, color: '#e8e8f0', marginBottom: 16 }}>
+              Вы можете вернуть карту из летописи в руку (необязательно):
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
+              {pendingRecallFromChronicle.available_cards.map(c => (
+                <button key={c.id} onClick={() => recallFromChronicle(c.id)}
+                  style={{ background: 'linear-gradient(135deg,#0a2010,#0d2e1a)', border: '1px solid #1abc9c', borderRadius: 8, color: '#1abc9c', padding: '8px 16px', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>
+                  📜 {c.name}
+                </button>
+              ))}
+            </div>
+            <button onClick={() => recallFromChronicle(null)}
+              style={{ background: 'transparent', border: '1px solid #3a3d55', borderRadius: 8, color: '#9098b8', padding: '8px 20px', cursor: 'pointer', fontSize: 12 }}>
+              Пропустить
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Торговые суда: выбор карты grain/water для отзыва */}
+      {pendingExploitRecallForTokenCard && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.75)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 800 }}>
+          <div style={{ background: 'linear-gradient(135deg,#1a0d00,#2a1500)', border: '2px solid #e67e22', borderRadius: 14, padding: '28px 36px', maxWidth: 480, width: '95%' }}>
+            <div style={{ fontSize: 13, color: '#e67e22', letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: 10 }}>Торговые суда — Отзыв карты</div>
+            <div style={{ fontSize: 14, color: '#e8e8f0', marginBottom: 16 }}>
+              Отзовите карту с меткой {pendingExploitRecallForTokenCard.labels.join('/')} из игровой области, чтобы приобрести карту с рынка с жетонами ресурсов:
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {pendingExploitRecallForTokenCard.available_cards.map(c => (
+                <button key={c.id} onClick={() => exploitRecallLabelForResourceTokenCard(c.id)}
+                  style={{ background: 'linear-gradient(135deg,#2a1500,#4a2500)', border: '1px solid #e67e22', borderRadius: 8, color: '#e67e22', padding: '8px 16px', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>
+                  💰 {c.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Иберия: сброс карты с руки для эксплуатации */}
+      {pendingExploitDiscardForTokenCard && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.75)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 800 }}>
+          <div style={{ background: 'linear-gradient(135deg,#1a0d00,#2a1500)', border: '2px solid #e67e22', borderRadius: 14, padding: '28px 36px', maxWidth: 480, width: '95%' }}>
+            <div style={{ fontSize: 13, color: '#e67e22', letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: 10 }}>Иберия — Сброс карты</div>
+            <div style={{ fontSize: 14, color: '#e8e8f0', marginBottom: 16 }}>
+              Выберите карту из руки для сброса:
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {pendingExploitDiscardForTokenCard.available_cards.map(c => (
+                <button key={c.id} onClick={() => exploitDiscardForResourceTokenCard(c.id)}
+                  style={{ background: 'linear-gradient(135deg,#2a1500,#4a2500)', border: '1px solid #e67e22', borderRadius: 8, color: '#e67e22', padding: '8px 16px', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>
+                  🗑 {c.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Дидона: приобрести карту регионов и разыграть бесплатно */}
+      {pendingAcquireAndPlayRegion && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.78)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 800 }}>
+          <div style={{ background: 'linear-gradient(135deg,#001a0d,#002a15)', border: '2px solid #2ecc71', borderRadius: 14, padding: '28px 36px', maxWidth: 520, width: '95%' }}>
+            <div style={{ fontSize: 13, color: '#2ecc71', letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: 10 }}>Царица Карфагена Дидона</div>
+            <div style={{ fontSize: 14, color: '#e8e8f0', marginBottom: 16 }}>
+              Вы можете приобрести карту регионов с рынка и сразу разыграть её бесплатно:
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
+              {pendingAcquireAndPlayRegion.available_cards.map((c, idx) => {
+                const slotIdx = pendingAcquireAndPlayRegion.eligible_slot_indices[idx];
+                return (
+                  <button key={c.id} onClick={() => acquireAndPlayRegion(slotIdx)}
+                    style={{ background: 'linear-gradient(135deg,#002a15,#004a25)', border: '1px solid #2ecc71', borderRadius: 8, color: '#2ecc71', padding: '8px 16px', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>
+                    🏰 {c.name}
+                  </button>
+                );
+              })}
+            </div>
+            <button onClick={() => acquireAndPlayRegion(null)}
+              style={{ background: 'none', border: '1px solid #556', borderRadius: 7, color: '#778', padding: '6px 14px', cursor: 'pointer', fontSize: 12 }}>
+              Пропустить
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Карфагенские торговцы: летопись из руки или сброса */}
+      {pendingChronicleFromHandOrDiscard && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.78)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 800 }}>
+          <div style={{ background: 'linear-gradient(135deg,#0d1a10,#0a1a12)', border: '2px solid #f1c40f', borderRadius: 14, padding: '28px 36px', maxWidth: 520, width: '95%' }}>
+            <div style={{ fontSize: 13, color: '#f1c40f', letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: 10 }}>Карфагенские торговцы — Летопись</div>
+            <div style={{ fontSize: 14, color: '#e8e8f0', marginBottom: 16 }}>
+              Вы можете занести 1 карту из руки или личного сброса в летопись:
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
+              {pendingChronicleFromHandOrDiscard.available_cards.map(c => (
+                <button key={c.id} onClick={() => chronicleFromHandOrDiscard(c.id)}
+                  style={{ background: 'linear-gradient(135deg,#1a1500,#2a2000)', border: `1px solid ${c.source === 'hand' ? '#f1c40f' : '#c0a030'}`, borderRadius: 8, color: c.source === 'hand' ? '#f1c40f' : '#c0a030', padding: '8px 16px', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>
+                  {c.source === 'hand' ? '✋' : '🗑'} {c.name}
+                </button>
+              ))}
+            </div>
+            <button onClick={() => chronicleFromHandOrDiscard(null)}
+              style={{ background: 'none', border: '1px solid #556', borderRadius: 7, color: '#778', padding: '6px 14px', cursor: 'pointer', fontSize: 12 }}>
+              Пропустить
+            </button>
           </div>
         </div>
       )}
@@ -1560,6 +1757,16 @@ export default function GameBoard() {
             </div>
           )}
 
+          {/* Карфагенские торговцы: размещение ресурса на рынке */}
+          {isPlayerTurn && isPlaceResourceOnMarketMode && (
+            <div style={{ background: '#0d1020', border: '1px solid #e67e22', borderRadius: 9, padding: '10px 12px' }}>
+              <div style={{ fontSize: 9, color: '#e67e22', marginBottom: 6, letterSpacing: '.08em', textTransform: 'uppercase' }}>Торговцы — Ресурс на рынок</div>
+              <div style={{ fontSize: 10, color: '#aaa' }}>
+                Выберите карту рынка — на неё будет положен 1 ресурс из запаса.
+              </div>
+            </div>
+          )}
+
           {/* Изгнание с рынка */}
           {isPlayerTurn && isExileMode && (
             <div style={{ background: '#0d1020', border: '1px solid #7d3c98', borderRadius: 9, padding: '10px 12px' }}>
@@ -1798,6 +2005,11 @@ export default function GameBoard() {
                 {pendingAcquire.remaining != null && pendingAcquire.remaining > 1 && ` — осталось: ${pendingAcquire.remaining}`}
               </div>
             )}
+            {pendingAcquireResourceTokenCard && (
+              <div style={{ background: '#1a0d00', border: '1px solid #e67e22', borderRadius: 6, padding: '6px 10px', marginBottom: 10, fontSize: 9, color: '#e67e22', textAlign: 'center' }}>
+                💰 Торговые суда: выберите карту с жетонами ресурсов
+              </div>
+            )}
             {pendingAppropriateCategorySelect && (
               <div style={{ background: '#120a00', border: '1px solid #e67e22', borderRadius: 6, padding: '6px 10px', marginBottom: 10, fontSize: 9, color: '#e67e22', textAlign: 'center' }}>
                 Присвоение: сначала выберите тип карты слева
@@ -1831,21 +2043,35 @@ export default function GameBoard() {
                           const appropriateAllowed = !pendingAppropriate ||
                             (slot.card.categories?.some(c => pendingAppropriate.allowed_categories.includes(c)) ?? false);
                           const exileAllowed = isExileMode && (pendingExileFromMarket!.eligible_slot_indices.includes(idx));
-                          const isMarketMode = isAcquireMode || !!pendingAppropriate || isExileMode;
-                          const marketAllowed = isAcquireMode ? acquireAllowed : isExileMode ? exileAllowed : appropriateAllowed;
+                          const resourceTokenAllowed = isAcquireResourceTokenMode && (pendingAcquireResourceTokenCard!.eligible_slot_indices.includes(idx));
+                          const placeResAllowed = isPlaceResourceOnMarketMode && (pendingPlaceResourceOnMarket!.eligible_slot_indices.includes(idx));
+                          const isMarketMode = isAcquireMode || !!pendingAppropriate || isExileMode || isAcquireResourceTokenMode || isPlaceResourceOnMarketMode;
+                          const marketAllowed = isAcquireMode ? acquireAllowed : isExileMode ? exileAllowed : isAcquireResourceTokenMode ? resourceTokenAllowed : isPlaceResourceOnMarketMode ? placeResAllowed : appropriateAllowed;
                           return (
                             <CardView card={slot.card} size="large"
                               dimmed={isMarketMode && isPlayerTurn && !marketAllowed}
                               onClick={() => {
                                 setPreviewCard(previewCard?.id === slot.card!.id ? null : slot.card);
                                 if (isExileMode && isPlayerTurn && exileAllowed) exileFromMarket(idx);
+                                else if (isAcquireResourceTokenMode && isPlayerTurn && resourceTokenAllowed) acquireCard(idx);
+                                else if (isPlaceResourceOnMarketMode && isPlayerTurn && placeResAllowed) placeResourceOnMarket(idx);
                                 else if (isAcquireMode && isPlayerTurn && acquireAllowed) acquireCard(idx);
                                 else if (pendingAppropriate && isPlayerTurn && appropriateAllowed) acquireCard(idx);
                               }}
-                              badge={slot.upgrade_tokens > 0 ? (
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 2, background: '#0d1a2e', border: '1px solid #3498db', borderRadius: 4, padding: '2px 5px' }}>
-                                  <img src={progressTokenIcon} alt="жетон прогресса" style={{ width: 12, height: 12 }} />
-                                  <span style={{ color: '#3498db', fontSize: 9, fontWeight: 700 }}>×{slot.upgrade_tokens}</span>
+                              badge={(slot.upgrade_tokens > 0 || slot.resource_tokens > 0) ? (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                                  {slot.upgrade_tokens > 0 && (
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 2, background: '#0d1a2e', border: '1px solid #3498db', borderRadius: 4, padding: '2px 5px' }}>
+                                      <img src={progressTokenIcon} alt="жетон прогресса" style={{ width: 12, height: 12 }} />
+                                      <span style={{ color: '#3498db', fontSize: 9, fontWeight: 700 }}>×{slot.upgrade_tokens}</span>
+                                    </div>
+                                  )}
+                                  {slot.resource_tokens > 0 && (
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 2, background: '#1a0d00', border: '1px solid #e67e22', borderRadius: 4, padding: '2px 5px' }}>
+                                      <span style={{ fontSize: 10 }}>💰</span>
+                                      <span style={{ color: '#e67e22', fontSize: 9, fontWeight: 700 }}>×{slot.resource_tokens}</span>
+                                    </div>
+                                  )}
                                 </div>
                               ) : undefined} />
                           );
@@ -1858,13 +2084,20 @@ export default function GameBoard() {
                       )}
                       {(isPlayerTurn || pendingPlaceUpgradeToken) && (() => {
                         if (pendingPlaceUpgradeToken) {
+                          const isKar1a = player?.ability_card?.id === '1KAR1A';
                           return (
                             <button onClick={() => placeUpgradeToken(idx)}
-                              style={{ background: 'linear-gradient(135deg,#1a5276,#1a6699)', border: '1px solid #3498db', borderRadius: 5, color: '#fff', fontSize: 9, padding: '3px 8px', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
-                              <img src={progressTokenIcon} alt="" style={{ width: 10, height: 10 }} />
+                              style={{ background: isKar1a ? 'linear-gradient(135deg,#4a2000,#7a4000)' : 'linear-gradient(135deg,#1a5276,#1a6699)', border: `1px solid ${isKar1a ? '#e67e22' : '#3498db'}`, borderRadius: 5, color: '#fff', fontSize: 9, padding: '3px 8px', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
+                              {isKar1a ? <span style={{ fontSize: 10 }}>💰×2</span> : <img src={progressTokenIcon} alt="" style={{ width: 10, height: 10 }} />}
                               Сюда
                             </button>
                           );
+                        }
+                        if (isAcquireResourceTokenMode) {
+                          const eligible = pendingAcquireResourceTokenCard!.eligible_slot_indices.includes(idx);
+                          return eligible
+                            ? <button onClick={() => acquireCard(idx)} style={{ background: 'linear-gradient(135deg,#7a4000,#b05800)', border: '1px solid #e67e22', borderRadius: 5, color: '#fff', fontSize: 9, padding: '3px 8px', cursor: 'pointer', fontWeight: 600 }}>💰 Приобрести</button>
+                            : <div style={{ fontSize: 8, color: '#555', padding: '2px 0' }}>Нет жетонов</div>;
                         }
                         if (isAcquireMode) {
                           const slotAllowed = !pendingAcquire ||
@@ -1872,6 +2105,12 @@ export default function GameBoard() {
                           return slotAllowed
                             ? <button onClick={() => acquireCard(idx)} style={{ background: 'linear-gradient(135deg,#1abc9c,#16a085)', border: 'none', borderRadius: 5, color: '#fff', fontSize: 9, padding: '3px 8px', cursor: 'pointer', fontWeight: 600 }}>Приобрести</button>
                             : <div style={{ fontSize: 8, color: '#555', padding: '2px 0' }}>Недоступно</div>;
+                        }
+                        if (isPlaceResourceOnMarketMode) {
+                          const eligible = pendingPlaceResourceOnMarket!.eligible_slot_indices.includes(idx);
+                          return eligible
+                            ? <button onClick={() => placeResourceOnMarket(idx)} style={{ background: 'linear-gradient(135deg,#7a4000,#b05800)', border: '1px solid #e67e22', borderRadius: 5, color: '#fff', fontSize: 9, padding: '3px 8px', cursor: 'pointer', fontWeight: 600 }}>💰 Сюда</button>
+                            : null;
                         }
                         if (isExileMode) {
                           const eligible = pendingExileFromMarket!.eligible_slot_indices.includes(idx);
@@ -1944,6 +2183,24 @@ export default function GameBoard() {
             <DeckPile count={bot?.dynasty_deck_count ?? 0} label="Династия" color="#1a0a2d" />
             <DeckPile count={bot?.chronicle_count ?? 0} label="Летопись" color="#1a2a1a" />
           </div>
+
+          {bot?.nation && (() => {
+            const prefix = NATION_SOLO_PREFIX[bot.nation];
+            if (!prefix) return null;
+            const suffix = bot.period === 'barbarism' ? 'BAR' : 'CIV';
+            const src = `/cards/solo/${prefix}_${suffix}.jpg`;
+            return (
+              <div>
+                <div style={{ fontSize: 9, color: '#555', marginBottom: 6, letterSpacing: '.08em', textTransform: 'uppercase' }}>Карта действий бота</div>
+                <img
+                  src={src}
+                  alt={`${prefix} ${suffix}`}
+                  style={{ width: '100%', borderRadius: 6, border: '1px solid #2a1a2a', display: 'block' }}
+                  onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                />
+              </div>
+            );
+          })()}
         </div>
       </div>
 

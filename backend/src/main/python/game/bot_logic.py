@@ -514,6 +514,10 @@ def _bot_acquire_best(state: GameState, category: CardCategory):
         slot = state.shared.market[best_idx]
         card = slot.card
         state.bot.upgrade += slot.upgrade_tokens
+        # Пассив 1KAR1A: если на карте есть жетоны ресурсов — бот берёт их в свой запас
+        if slot.resource_tokens > 0:
+            state.bot.resource += slot.resource_tokens
+            state.add_log(f"Бот: получено {slot.resource_tokens} ресурсов с карты рынка")
         if slot.disorder_under:
             state.bot.bot_deck.insert(0, slot.disorder_under)
         state.bot.bot_deck.insert(0, card)

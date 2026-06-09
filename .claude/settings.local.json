@@ -29,7 +29,19 @@
       "Bash(ls:*)",
       "Bash(grep:*)",
       "Bash(python -c \"import game.engine, game.session; print\\('OK'\\)\")",
-      "Bash(python -c \"from game.logger import log, _LOG_FILE; log.info\\('Logger initialized'\\); print\\('Log file:', _LOG_FILE\\)\")"
+      "Bash(python -c \"from game.logger import log, _LOG_FILE; log.info\\('Logger initialized'\\); print\\('Log file:', _LOG_FILE\\)\")",
+      "Bash(python -c \"from game.state import GameState; from game.engine import compute_current_player_vp; print\\('OK'\\)\")",
+      "Bash(python -c \"from game.engine import GameEngine; print\\('OK'\\)\")",
+      "Bash(python -m py_compile src/main/python/game/state.py src/main/python/game/engine.py src/main/python/game/bot_logic.py src/main/python/game/serialization.py src/main/python/game/data/carthaginians.py)",
+      "Bash(python -m py_compile src/main/python/game/setup.py src/main/python/game/engine.py src/main/python/game/data/carthaginians.py)",
+      "Bash(python -c \"from src.main.python.game.data.carthaginians import DECK; import json; print\\(json.dumps\\({k:v for k,v in list\\(DECK.items\\(\\)\\)[:5]}, ensure_ascii=False, indent=2\\)\\)\")",
+      "Bash(python -m py_compile src/main/python/game/data/carthaginians.py)",
+      "Bash(python -m py_compile src/main/python/game/cards.py src/main/python/game/engine.py src/main/python/game/data/carthaginians.py)",
+      "Bash(python -m py_compile src/main/python/game/cards.py src/main/python/game/engine.py src/main/python/game/session.py src/main/python/api/main.py src/main/python/game/data/carthaginians.py)",
+      "Bash(python -c \"from src.main.python.game.cards import AcquireAndPlayRegionAction; print\\('OK'\\)\")",
+      "Bash(python -c \"from src.main.python.game.data.carthaginians import DECK; from src.main.python.game.cards import _parse_on_play_actions; [_parse_on_play_actions\\(v\\) for v in DECK.values\\(\\)]; print\\('OK'\\)\")",
+      "Bash(python -c \"from src.main.python.game.data.carthaginians import DECK; from src.main.python.game.cards import _parse_on_play_actions; [_parse_on_play_actions\\(v\\) for v in DECK.values\\(\\)]; print\\('OK', list\\(DECK\\)[-3:]\\)\")",
+      "Bash(python -c \"from src.main.python.game.data.carthaginians import DECK; print\\('OK', list\\(DECK\\)[-3:]\\)\")"
     ]
   }
 }

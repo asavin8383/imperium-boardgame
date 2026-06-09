@@ -329,6 +329,7 @@ class MarketSlot:
     disorder_under: Optional[Card] = None  # карта беспорядков под картой
     market_marker: int = 0       # номер маркера рынка (1-5, для бота)
     source_deck: str = "main"    # "region" | "origins" | "civilization" | "main"
+    resource_tokens: int = 0     # жетоны ресурсов (пассив карфагенян 1KAR1A)
 
     def to_dict(self):
         return {
@@ -337,6 +338,7 @@ class MarketSlot:
             "has_disorder_under": self.disorder_under is not None,
             "market_marker": self.market_marker,
             "source_deck": self.source_deck,
+            "resource_tokens": self.resource_tokens,
         }
 
 

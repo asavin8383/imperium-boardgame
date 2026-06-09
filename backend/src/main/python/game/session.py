@@ -251,6 +251,14 @@ def chronicle_card_from_discard(game_id: str, card_id: str) -> GameState:
     return state
 
 
+def resolve_recall_from_chronicle(game_id: str, card_id=None) -> GameState:
+    state = _require(game_id)
+    _snapshot(game_id, state)
+    state = _engine.resolve_recall_from_chronicle(state, card_id)
+    save_game(state)
+    return state
+
+
 def exile_card_from_market(game_id: str, slot_index: int) -> GameState:
     state = _require(game_id)
     _snapshot(game_id, state)
@@ -343,6 +351,46 @@ def resolve_guess_deck_category(game_id: str, category: str) -> GameState:
     state = _require(game_id)
     _snapshot(game_id, state)
     state = _engine.resolve_guess_deck_category(state, category)
+    save_game(state)
+    return state
+
+
+def resolve_exploit_discard_for_resource_token_card(game_id: str, card_id: str) -> GameState:
+    state = _require(game_id)
+    _snapshot(game_id, state)
+    state = _engine.resolve_exploit_discard_for_resource_token_card(state, card_id)
+    save_game(state)
+    return state
+
+
+def resolve_exploit_recall_label_for_resource_token_card(game_id: str, card_id: str) -> GameState:
+    state = _require(game_id)
+    _snapshot(game_id, state)
+    state = _engine.resolve_exploit_recall_label_for_resource_token_card(state, card_id)
+    save_game(state)
+    return state
+
+
+def resolve_acquire_and_play_region(game_id: str, slot_index) -> GameState:
+    state = _require(game_id)
+    _snapshot(game_id, state)
+    state = _engine.resolve_acquire_and_play_region(state, slot_index)
+    save_game(state)
+    return state
+
+
+def resolve_place_resource_on_market(game_id: str, slot_index: int) -> GameState:
+    state = _require(game_id)
+    _snapshot(game_id, state)
+    state = _engine.resolve_place_resource_on_market(state, slot_index)
+    save_game(state)
+    return state
+
+
+def resolve_chronicle_from_hand_or_discard(game_id: str, card_id) -> GameState:
+    state = _require(game_id)
+    _snapshot(game_id, state)
+    state = _engine.resolve_chronicle_from_hand_or_discard(state, card_id)
     save_game(state)
     return state
 

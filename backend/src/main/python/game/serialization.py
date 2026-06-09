@@ -145,6 +145,7 @@ def serialize_state(state: GameState) -> str:
                     "disorder_under_id": slot.disorder_under.id if slot.disorder_under else None,
                     "market_marker":   slot.market_marker,
                     "source_deck":     slot.source_deck,
+                    "resource_tokens": slot.resource_tokens,
                 }
                 for slot in s.market
             ],
@@ -255,6 +256,7 @@ def deserialize_state(encoded: str) -> GameState:
             disorder_under=lookup(slot["disorder_under_id"]),
             market_marker=slot["market_marker"],
             source_deck=slot["source_deck"],
+            resource_tokens=slot.get("resource_tokens", 0),
         )
         for slot in sd["market"]
     ]

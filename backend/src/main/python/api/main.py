@@ -146,6 +146,10 @@ class AppropriateOptionalRequest(BaseModel):
     proceed: bool
 
 
+class RecallFromChronicleRequest(BaseModel):
+    card_id: Optional[str] = None  # None — пропустить
+
+
 class ReinforceChoiceRequest(BaseModel):
     reinforce: bool
 
@@ -536,6 +540,13 @@ def chronicle_from_discard(game_id: str, req: ChronicleFromDiscardRequest):
         return {"state": state.to_dict()}
 
 
+@app.post("/api/games/{game_id}/recall-from-chronicle")
+def recall_from_chronicle(game_id: str, req: RecallFromChronicleRequest):
+    with _game_action(game_id, f"recall_from_chronicle({req.card_id})"):
+        state = game_session.resolve_recall_from_chronicle(game_id, req.card_id)
+        return {"state": state.to_dict()}
+
+
 @app.post("/api/games/{game_id}/exile-from-market")
 def exile_from_market(game_id: str, req: ExileFromMarketRequest):
     with _game_action(game_id, f"exile_from_market(slot={req.slot_index})"):
@@ -659,6 +670,53 @@ def draw_discard_choice(game_id: str, req: DrawDiscardChoiceRequest):
 def exploit_recall_choice(game_id: str, req: ExploitRecallChoiceRequest):
     with _game_action(game_id, f"exploit_recall_choice(index={req.option_index} card={req.card_id})"):
         state = game_session.resolve_exploit_recall_choice(game_id, req.option_index, req.card_id)
+        return {"state": state.to_dict()}
+
+
+@app.post("/api/games/{game_id}/exploit-recall-label-for-resource-token-card")
+def exploit_recall_label_for_resource_token_card(game_id: str, req: PlayFromDiscardRequest):
+    with _game_action(game_id, f"exploit_recall_label_for_resource_token_card({req.card_id})"):
+        state = game_session.resolve_exploit_recall_label_for_resource_token_card(game_id, req.card_id)
+        return {"state": state.to_dict()}
+
+
+@app.post("/api/games/{game_id}/exploit-discard-for-resource-token-card")
+def exploit_discard_for_resource_token_card(game_id: str, req: PlayFromDiscardRequest):
+    with _game_action(game_id, f"exploit_discard_for_resource_token_card({req.card_id})"):
+        state = game_session.resolve_exploit_discard_for_resource_token_card(game_id, req.card_id)
+        return {"state": state.to_dict()}
+
+
+class AcquireAndPlayRegionRequest(BaseModel):
+    slot_index: Optional[int] = None  # None = пропустить
+
+
+@app.post("/api/games/{game_id}/acquire-and-play-region")
+def acquire_and_play_region(game_id: str, req: AcquireAndPlayRegionRequest):
+    with _game_action(game_id, f"acquire_and_play_region({req.slot_index})"):
+        state = game_session.resolve_acquire_and_play_region(game_id, req.slot_index)
+        return {"state": state.to_dict()}
+
+
+class PlaceResourceOnMarketRequest(BaseModel):
+    slot_index: int
+
+
+@app.post("/api/games/{game_id}/place-resource-on-market")
+def place_resource_on_market(game_id: str, req: PlaceResourceOnMarketRequest):
+    with _game_action(game_id, f"place_resource_on_market({req.slot_index})"):
+        state = game_session.resolve_place_resource_on_market(game_id, req.slot_index)
+        return {"state": state.to_dict()}
+
+
+class ChronicleFromHandOrDiscardRequest(BaseModel):
+    card_id: Optional[str] = None  # None = пропустить
+
+
+@app.post("/api/games/{game_id}/chronicle-from-hand-or-discard")
+def chronicle_from_hand_or_discard(game_id: str, req: ChronicleFromHandOrDiscardRequest):
+    with _game_action(game_id, f"chronicle_from_hand_or_discard({req.card_id})"):
+        state = game_session.resolve_chronicle_from_hand_or_discard(game_id, req.card_id)
         return {"state": state.to_dict()}
 
 

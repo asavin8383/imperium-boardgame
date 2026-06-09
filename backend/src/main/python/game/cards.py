@@ -171,6 +171,19 @@ class AllPlayersGainResourceAction:
 
 
 @dataclass
+class AllPlayersAcquireFromMarketAction:
+    """Все игроки (включая разыгрывающего) МОГУТ взять по 1 карте с рынка указанных категорий.
+    Бот берёт лучшую карту автоматически, игрок делает выбор."""
+    allowed_categories: List[CardCategory] = field(default_factory=list)
+
+
+@dataclass
+class AllPlayersDrawCardAction:
+    """Все игроки берут по N карт из своих колод (бот — из bot_deck, игрок — из личной колоды)."""
+    count: int = 1
+
+
+@dataclass
 class SolsticeOptionalGainProgressThenFateAction:
     """Солнцестояние: МОЖНО взять N жетонов прогресса, затем обязательно разрушить или занести карту в летопись."""
     amount: int = 2
@@ -262,6 +275,12 @@ class ChronicleFromHandAction:
 
 
 @dataclass
+class RecallFromChronicleAction:
+    """Вернуть 1 карту из летописи в руку (опционально)."""
+    count: int = 1
+
+
+@dataclass
 class GuessDeckCategoryAction:
     """Назвать категорию → вскрыть верхнюю карту основной колоды → в руку если совпало, иначе изгнать."""
     allowed_categories: List[str] = field(default_factory=lambda: ["region", "origins", "civilization", "raid"])
@@ -330,9 +349,21 @@ class BotDestroysLabelForResourcesAction:
 
 
 @dataclass
+class BotLosesCardAction:
+    """Бот теряет N карт из своего сброса (или колоды, если сброс пуст)."""
+    count: int = 1
+
+
+@dataclass
 class DrawCardExploitAction:
     """Эксплуатация: взять N карт из личной колоды в руку (бесплатно)."""
     count: int = 1
+
+
+@dataclass
+class ExploitSpendAndDiscardForResourceTokenCardAction:
+    """Эксплуатация: потратить N ресурсов + сбросить 1 карту с руки → приобрести карту рынка с жетонами ресурсов."""
+    resource_cost: int = 3
 
 
 @dataclass
@@ -340,6 +371,30 @@ class ExploitRecallLabelChoiceAction:
     """Эксплуатация: выбор из опций 'отозвать карту с меткой X → получить ресурсы'."""
     options: List[dict] = field(default_factory=list)
     # options: [{"label": "water", "gains": [{"resource_type": "MATERIAL", "amount": 2}, ...]}, ...]
+
+
+@dataclass
+class ExploitRecallLabelForResourceTokenCardAction:
+    """Эксплуатация: отозвать карту с меткой grain/water → приобрести карту с рынка с жетонами ресурсов."""
+    labels: List[str] = field(default_factory=list)
+
+
+@dataclass
+class AcquireAndPlayRegionAction:
+    """Приобрести 1 карту регионов с рынка и сразу разыграть её без жетона действия (опционально)."""
+    pass
+
+
+@dataclass
+class PlaceResourceOnMarketAction:
+    """Потратить 1 ресурс и положить жетон ресурса на выбранную карту текущего рынка."""
+    pass
+
+
+@dataclass
+class ChronicleFromHandOrDiscardAction:
+    """Опционально занести 1 карту из руки или личного сброса в летопись."""
+    pass
 
 
 @dataclass
@@ -450,6 +505,11 @@ def _parse_exploit_actions(data: dict) -> List:
             ))
         elif action_type == "recall_label_choice":
             actions.append(ExploitRecallLabelChoiceAction(options=a.get("options", [])))
+        elif action_type == "recall_label_acquire_resource_token_card":
+            actions.append(ExploitRecallLabelForResourceTokenCardAction(labels=a.get("labels", [])))
+        elif action_type == "spend_and_discard_for_resource_token_card":
+            actions.append(ExploitSpendAndDiscardForResourceTokenCardAction(
+                resource_cost=a.get("resource_cost", 3)))
         elif action_type == "draw_card":
             actions.append(DrawCardExploitAction(count=a.get("count", 1)))
         elif action_type == "spend_resource_take_from_discard":
@@ -570,6 +630,8 @@ def _parse_on_play_actions(data: dict) -> List:
             ))
         elif action_type == "give_card_to_bot":
             actions.append(GiveCardToBotAction(count=a.get("count", 1)))
+        elif action_type == "bot_loses_card":
+            actions.append(BotLosesCardAction(count=a.get("count", 1)))
         elif action_type == "draw_from_boost_deck":
             actions.append(DrawFromBoostDeckAction())
         elif action_type == "period_conditional":
@@ -631,6 +693,14 @@ def _parse_on_play_actions(data: dict) -> List:
                 resource_type=_RESOURCE_TYPE_BY_NAME[rt_name],
                 amount=a["amount"],
             ))
+        elif action_type == "all_players_acquire_from_market":
+            actions.append(AllPlayersAcquireFromMarketAction(
+                allowed_categories=[CardCategory(c) for c in a.get("categories", [])],
+            ))
+        elif action_type == "all_players_draw_card":
+            actions.append(AllPlayersDrawCardAction(count=a.get("count", 1)))
+        elif action_type == "recall_from_chronicle":
+            actions.append(RecallFromChronicleAction(count=a.get("count", 1)))
         elif action_type == "bot_gains_disorder":
             actions.append(BotGainsDisorderAction(count=a.get("count", 1)))
         elif action_type == "return_disorders_from_hand_or_discard":
@@ -649,6 +719,12 @@ def _parse_on_play_actions(data: dict) -> List:
                 allowed_categories=a.get("allowed_categories",
                                          ["region", "origins", "civilization", "raid"]),
             ))
+        elif action_type == "acquire_and_play_region":
+            actions.append(AcquireAndPlayRegionAction())
+        elif action_type == "place_resource_on_market":
+            actions.append(PlaceResourceOnMarketAction())
+        elif action_type == "chronicle_from_hand_or_discard":
+            actions.append(ChronicleFromHandOrDiscardAction())
         else:
             # Без type — считаем gain_resource (обратная совместимость)
             rt_name = a["resource_type"]

@@ -189,6 +189,41 @@ export async function sacredPathExchange(gameId: string, handCardId: string): Pr
   return res.data.state;
 }
 
+export async function appropriateOptional(gameId: string, proceed: boolean): Promise<GameState> {
+  const res = await api.post(`/api/games/${gameId}/appropriate-optional`, { proceed });
+  return res.data.state;
+}
+
+export async function recallFromChronicle(gameId: string, cardId: string | null): Promise<GameState> {
+  const res = await api.post(`/api/games/${gameId}/recall-from-chronicle`, { card_id: cardId });
+  return res.data.state;
+}
+
+export async function exploitRecallLabelForResourceTokenCard(gameId: string, cardId: string): Promise<GameState> {
+  const res = await api.post(`/api/games/${gameId}/exploit-recall-label-for-resource-token-card`, { card_id: cardId });
+  return res.data.state;
+}
+
+export async function exploitDiscardForResourceTokenCard(gameId: string, cardId: string): Promise<GameState> {
+  const res = await api.post(`/api/games/${gameId}/exploit-discard-for-resource-token-card`, { card_id: cardId });
+  return res.data.state;
+}
+
+export async function acquireAndPlayRegion(gameId: string, slotIndex: number | null): Promise<GameState> {
+  const res = await api.post(`/api/games/${gameId}/acquire-and-play-region`, { slot_index: slotIndex });
+  return res.data.state;
+}
+
+export async function placeResourceOnMarket(gameId: string, slotIndex: number): Promise<GameState> {
+  const res = await api.post(`/api/games/${gameId}/place-resource-on-market`, { slot_index: slotIndex });
+  return res.data.state;
+}
+
+export async function chronicleFromHandOrDiscard(gameId: string, cardId: string | null): Promise<GameState> {
+  const res = await api.post(`/api/games/${gameId}/chronicle-from-hand-or-discard`, { card_id: cardId });
+  return res.data.state;
+}
+
 export async function undoAction(gameId: string): Promise<GameState> {
   const res = await api.post(`/api/games/${gameId}/undo`);
   return res.data.state;
