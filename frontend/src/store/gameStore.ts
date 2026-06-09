@@ -64,6 +64,8 @@ interface GameStore {
   acquireAndPlayRegion: (slotIndex: number | null) => Promise<void>;
   placeResourceOnMarket: (slotIndex: number) => Promise<void>;
   chronicleFromHandOrDiscard: (cardId: string | null) => Promise<void>;
+  runBotTurn: () => Promise<void>;
+  playBotCard: () => Promise<void>;
   resetGame: () => void;
 
   // Solstice
@@ -600,6 +602,30 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const state = await api.chronicleFromHandOrDiscard(gameId, cardId);
+      set({ gameState: state, loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
+
+  runBotTurn: async () => {
+    const { gameId } = get();
+    if (!gameId) return;
+    set({ loading: true, error: null });
+    try {
+      const state = await api.runBotTurn(gameId);
+      set({ gameState: state, loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
+
+  playBotCard: async () => {
+    const { gameId } = get();
+    if (!gameId) return;
+    set({ loading: true, error: null });
+    try {
+      const state = await api.playBotCard(gameId);
       set({ gameState: state, loading: false });
     } catch (e: any) {
       set({ error: e.response?.data?.detail || e.message, loading: false });

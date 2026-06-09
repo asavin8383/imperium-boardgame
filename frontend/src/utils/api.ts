@@ -224,6 +224,16 @@ export async function chronicleFromHandOrDiscard(gameId: string, cardId: string 
   return res.data.state;
 }
 
+export async function runBotTurn(gameId: string): Promise<GameState> {
+  const res = await api.post(`/api/games/${gameId}/bot-turn`);
+  return res.data.state;
+}
+
+export async function playBotCard(gameId: string): Promise<GameState> {
+  const res = await api.post(`/api/games/${gameId}/bot-play-card`);
+  return res.data.state;
+}
+
 export async function undoAction(gameId: string): Promise<GameState> {
   const res = await api.post(`/api/games/${gameId}/undo`);
   return res.data.state;

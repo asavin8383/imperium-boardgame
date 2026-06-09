@@ -720,6 +720,20 @@ def chronicle_from_hand_or_discard(game_id: str, req: ChronicleFromHandOrDiscard
         return {"state": state.to_dict()}
 
 
+@app.post("/api/games/{game_id}/bot-turn")
+def bot_turn(game_id: str):
+    with _game_action(game_id, "bot_turn"):
+        state = game_session.run_bot_turn(game_id)
+        return {"state": state.to_dict()}
+
+
+@app.post("/api/games/{game_id}/bot-play-card")
+def bot_play_card(game_id: str):
+    with _game_action(game_id, "bot_play_card"):
+        state = game_session.play_bot_card_step(game_id)
+        return {"state": state.to_dict()}
+
+
 @app.post("/api/games/{game_id}/guess-deck-category")
 def guess_deck_category(game_id: str, req: GuessDeckCategoryRequest):
     with _game_action(game_id, f"guess_deck_category({req.category})"):

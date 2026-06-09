@@ -261,14 +261,8 @@ def _setup_bot_area(nation: Nation, nation_cards: List[Card],
     random.shuffle(bot_main)
     bot.bot_deck = bot_main
 
-    # Fill hand slots (5 slots, one card each face-down)
-    num_slots = 5
-    bot.hand_slots = []
-    for i in range(num_slots):
-        if bot.bot_deck:
-            bot.hand_slots.append(bot.bot_deck.pop(0))
-        else:
-            bot.hand_slots.append(None)
+    # Hand slots are empty at setup; cards are drawn at the start of each bot turn
+    bot.hand_slots = [None] * 5
 
     return bot
 
@@ -278,12 +272,8 @@ def _apply_difficulty_setup(state: GameState, difficulty: Difficulty):
     from .enums import Difficulty
 
     if difficulty == Difficulty.CHIEFTAIN:
-        # Replace slot 5 with an exploit token (bot plays 3-4 cards)
-        if len(state.bot.hand_slots) >= 5:
-            displaced = state.bot.hand_slots[4]
-            if displaced and state.bot.bot_deck is not None:
-                state.bot.bot_deck.insert(0, displaced)
-            state.bot.hand_slots[4] = None  # signal: blocked slot
+        # Bot draws only 4 cards per turn
+        state.bot.hand_slots = [None] * 4
 
     elif difficulty == Difficulty.OVERLORD:
         # Bot gets extra starting resources
@@ -292,15 +282,11 @@ def _apply_difficulty_setup(state: GameState, difficulty: Difficulty):
         state.bot.upgrade += 1
 
     elif difficulty == Difficulty.SOVEREIGN:
-        # Same as Overlord + 6th slot
+        # Same as Overlord + 6th slot (6 cards per turn)
         state.bot.resource += 3
         state.bot.population += 2
         state.bot.upgrade += 1
-        # Add 6th slot
-        if state.bot.bot_deck:
-            state.bot.hand_slots.append(state.bot.bot_deck.pop(0))
-        else:
-            state.bot.hand_slots.append(None)
+        state.bot.hand_slots = [None] * 6
 
 
 def _draw_to_hand(player: PlayerArea, count: int):

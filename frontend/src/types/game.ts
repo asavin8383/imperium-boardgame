@@ -104,11 +104,6 @@ export interface PlayerState {
   play_area_labels: Record<string, number>;
 }
 
-export interface BotSlot {
-  id: string;
-  name: string;
-}
-
 export interface BotState {
   nation: Nation;
   period: Period;
@@ -116,7 +111,7 @@ export interface BotState {
   dynasty_deck_count: number;
   chronicle_count: number;
   play_area_count: number;
-  hand_slots: (BotSlot | null)[];
+  hand_slots: (CardInfo | null)[];
   resource: number;
   population: number;
   upgrade: number;
@@ -145,6 +140,9 @@ export interface GameState {
   shared: SharedState;
   difficulty: Difficulty;
   log: string[];
+  bot_turn_die_roll: number;
+  bot_turn_set_aside_slot: number | null;
+  bot_turn_current_slot: number;
   pending_choice: Record<string, unknown> | null;
   pending_chronicle_card_id: string | null;
   pending_reinforce_card_id: string | null;

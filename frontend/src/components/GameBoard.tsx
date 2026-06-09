@@ -320,7 +320,7 @@ function Btn({ label, onClick, color = '#2ecc71', disabled = false, active = fal
 }
 
 export default function GameBoard() {
-  const { gameState: gs, loading, error, playCard, exploitCard, doInnovation, doRevolution, endTurn, acquireCard, accelerateProgress, accelerateProgressFromCard, acquireFromExile, takeFromDiscard, resetGame, undoAction, makeChoice, selectAppropriateCategory, appropriateFromDeck, chronicleChoice, reinforceChoice, reinforceWithCard, playFromDiscard, placeUpgradeToken, resolveDrawFromDeck, returnExploitToken, destroyCards, gloryDeckTake, exileFromMarket, chronicleFromDiscard, recallToAvoidAttack, moveDiscardToDeck, oracleDrawChoice, returnCardToDeckTop, sacredPathExploit, sacredPathExchange, appropriateOptional, recallFromChronicle, exploitRecallLabelForResourceTokenCard, exploitDiscardForResourceTokenCard, acquireAndPlayRegion, placeResourceOnMarket, chronicleFromHandOrDiscard, solsticeSelectCard, solsticeSkip, solsticeGainProgress, solsticeFate, solsticeChoice } = useGameStore();
+  const { gameState: gs, loading, error, playCard, exploitCard, doInnovation, doRevolution, endTurn, acquireCard, accelerateProgress, accelerateProgressFromCard, acquireFromExile, takeFromDiscard, resetGame, undoAction, makeChoice, selectAppropriateCategory, appropriateFromDeck, chronicleChoice, reinforceChoice, reinforceWithCard, playFromDiscard, placeUpgradeToken, resolveDrawFromDeck, returnExploitToken, destroyCards, gloryDeckTake, exileFromMarket, chronicleFromDiscard, recallToAvoidAttack, moveDiscardToDeck, oracleDrawChoice, returnCardToDeckTop, sacredPathExploit, sacredPathExchange, appropriateOptional, recallFromChronicle, exploitRecallLabelForResourceTokenCard, exploitDiscardForResourceTokenCard, acquireAndPlayRegion, placeResourceOnMarket, chronicleFromHandOrDiscard, runBotTurn, playBotCard, solsticeSelectCard, solsticeSkip, solsticeGainProgress, solsticeFate, solsticeChoice } = useGameStore();
   const [selectedCards, setSelectedCards] = useState<string[]>([]);
   const [scores, setScores] = useState<{ player: number; bot: number } | null>(null);
   const [previewCard, setPreviewCard] = useState<CardInfo | null>(null);
@@ -334,6 +334,7 @@ export default function GameBoard() {
 
   const isPlayerTurn = gs?.phase === 'player_turn';
   const isDiscardPhase = gs?.phase === 'player_discard';
+  const isBotTurn = gs?.phase === 'bot_turn';
   const isSolsticePhase = gs?.phase === 'solstice';
   const isGameOver = gs?.phase === 'game_over' || gs?.phase === 'scoring';
   const turnAction = gs?.player?.turn_action_chosen ?? null;
@@ -1894,6 +1895,47 @@ export default function GameBoard() {
             </div>
           )}
 
+          {isBotTurn && (() => {
+            const dieRoll = gs?.bot_turn_die_roll ?? 0;
+            const setAside = gs?.bot_turn_set_aside_slot ?? null;
+            const currentSlot = gs?.bot_turn_current_slot ?? 0;
+            const slots = bot?.hand_slots ?? [];
+            const numSlots = slots.length;
+            // Найти следующий слот для розыгрыша
+            let nextSlot = currentSlot;
+            while (nextSlot < numSlots) {
+              if (nextSlot !== setAside && slots[nextSlot] !== null) break;
+              nextSlot++;
+            }
+            const hasMoreCards = nextSlot < numSlots;
+            const started = dieRoll > 0;
+
+            return (
+              <div style={{ background: '#0d1020', border: '1px solid #e74c3c', borderRadius: 9, padding: '10px 12px' }}>
+                <div style={{ fontSize: 9, color: '#e74c3c', marginBottom: 8, letterSpacing: '.08em', textTransform: 'uppercase' }}>Ход бота</div>
+                {!started ? (
+                  <Btn label="Начать ход бота (бросить кубик)" onClick={() => runBotTurn()} color="#e74c3c" icon="🎲" />
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <div style={{ fontSize: 9, color: '#888' }}>
+                      Кубик: <span style={{ color: '#e74c3c', fontWeight: 700 }}>{dieRoll}</span>
+                      {setAside !== null && <span style={{ color: '#888', marginLeft: 8 }}>Карта #{setAside + 1} отложена</span>}
+                    </div>
+                    {hasMoreCards && (
+                      <div style={{ fontSize: 9, color: '#aaa', marginBottom: 2 }}>
+                        Следующая: <span style={{ color: '#fff', fontWeight: 600 }}>#{nextSlot + 1} — {slots[nextSlot]?.name ?? '?'}</span>
+                      </div>
+                    )}
+                    {hasMoreCards
+                      ? <Btn label={`Разыграть карту #${nextSlot + 1}`} onClick={() => playBotCard()} color="#e74c3c" icon="▶" />
+                      : <div style={{ fontSize: 9, color: '#555', fontStyle: 'italic' }}>Все карты разыграны</div>
+                    }
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+
           {/* Hand */}
           <div>
             <div style={{ fontSize: 9, color: isReinforceSelectMode ? '#3498db' : '#555', letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 6 }}>
@@ -2158,18 +2200,8 @@ export default function GameBoard() {
             </div>
           </div>
 
-          <div>
-            <div style={{ fontSize: 9, color: '#555', marginBottom: 6, letterSpacing: '.08em', textTransform: 'uppercase' }}>Карты ниже маркеров</div>
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-              {(bot?.hand_slots ?? []).map((slot, idx) => (
-                <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
-                  <div style={{ width: 75, height: 95, background: slot ? '#14090d' : '#090910', border: `1px solid ${slot ? '#2d1a1a' : '#1a1a2e'}`, borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', color: slot ? '#4a1a1a' : '#1a1a2e', fontSize: slot ? 22 : 18 }}>
-                    {slot ? '🃏' : '—'}
-                  </div>
-                  <div style={{ fontSize: 8, color: '#333' }}>#{idx + 1}</div>
-                </div>
-              ))}
-            </div>
+          <div style={{ fontSize: 9, color: '#555' }}>
+            Рука: {(bot?.hand_slots ?? []).filter(s => s !== null).length} / {(bot?.hand_slots ?? []).length} карт
           </div>
 
           {(bot?.play_area_count ?? 0) > 0 && (
@@ -2183,6 +2215,52 @@ export default function GameBoard() {
             <DeckPile count={bot?.dynasty_deck_count ?? 0} label="Династия" color="#1a0a2d" />
             <DeckPile count={bot?.chronicle_count ?? 0} label="Летопись" color="#1a2a1a" />
           </div>
+
+          {(bot?.hand_slots ?? []).some(s => s !== null) && (() => {
+            const dieRoll = gs?.bot_turn_die_roll ?? 0;
+            const setAside = gs?.bot_turn_set_aside_slot ?? null;
+            const currentSlot = gs?.bot_turn_current_slot ?? 0;
+            const slots = bot?.hand_slots ?? [];
+            // Найти следующий слот для розыгрыша
+            let nextSlot = currentSlot;
+            while (nextSlot < slots.length) {
+              if (nextSlot !== setAside && slots[nextSlot] !== null) break;
+              nextSlot++;
+            }
+            return (
+              <div style={{ background: '#0a0508', border: '1px solid #2d1020', borderRadius: 8, padding: '10px 8px' }}>
+                <div style={{ fontSize: 9, color: '#e74c3c', marginBottom: 8, letterSpacing: '.1em', textTransform: 'uppercase' }}>
+                  Карты для розыгрыша
+                </div>
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'nowrap', overflowX: 'auto' }}>
+                  {slots.map((card, idx) => {
+                    const isNext = isBotTurn && dieRoll > 0 && idx === nextSlot;
+                    const isSetAside = isBotTurn && dieRoll > 0 && idx === setAside;
+                    const isPlayed = isBotTurn && dieRoll > 0 && card === null;
+                    return (
+                      <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, flex: '1 1 0', minWidth: 0 }}>
+                        {card
+                          ? <CardView
+                              card={card}
+                              size="large"
+                              overrideStyle={{
+                                width: '100%', minHeight: 'unset', aspectRatio: '143/185',
+                                outline: isNext ? '2px solid #e74c3c' : isSetAside ? '2px solid #f39c12' : 'none',
+                                opacity: isSetAside ? 0.6 : 1,
+                              }}
+                            />
+                          : <div style={{ width: '100%', aspectRatio: '143/185', border: '1px dashed #1a3a1a', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1a3a1a', fontSize: 14 }}>✓</div>
+                        }
+                        <div style={{ fontSize: 8, color: isNext ? '#e74c3c' : isSetAside ? '#f39c12' : '#555', fontWeight: isNext ? 700 : 400 }}>
+                          #{idx + 1}{isSetAside ? ' ⏸' : isNext ? ' ▶' : ''}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
 
           {bot?.nation && (() => {
             const prefix = NATION_SOLO_PREFIX[bot.nation];

@@ -300,42 +300,114 @@ class BotLogic:
     @staticmethod
     def _macedonians(state: GameState, card: Card) -> GameState:
         period = state.bot.period
+        if period == Period.BARBARISM:
+            return BotLogic._macedonians_barbarism(state, card)
+        else:
+            return BotLogic._macedonians_civilization(state, card)
+
+    # Таблица македонян — варварство (упорядоченные условия: первое совпадение выигрывает)
+    _MACEDONIANS_BAR_TABLE = None  # инициализируется ниже
+
+    @staticmethod
+    def _macedonians_barbarism(state: GameState, card: Card) -> GameState:
+        cats = card.categories
+        name = card.name.lower()
+
+        # 1. glory → занести в летопись
+        if CardCategory.GLORY in cats:
+            _bot_chronicle(state, card)
+            state.add_log("Бот(Македония): слава → летопись")
+
+        # 2. «Величие» → разрушить 3 региона; если удалось — взять верх колоды славы,
+        #    иначе — присвоить регион с максимальным числом жетонов прогресса
+        elif "величие" in name:
+            destroyed = _bot_destroy_regions(state, 3)
+            if destroyed:
+                if state.shared.glory_deck:
+                    top = state.shared.glory_deck.pop(0)
+                    state.bot.bot_deck.insert(0, top)
+                    state.add_log(f"Бот(Македония): Величие — взята слава «{top.name}»")
+                else:
+                    state.add_log("Бот(Македония): Величие — колода славы пуста")
+            else:
+                _bot_assign_most_upgraded_region(state)
+
+        # 3. Карта периода варварства → приоритетный каскад действий
+        elif card.period == Period.BARBARISM:
+            if state.bot.population >= 3:
+                state.bot.population -= 3
+                _bot_assign(state, CardCategory.RAID)
+                _bot_chronicle(state, card)
+                state.add_log("Бот(Македония): −3 население → набег, летопись")
+            elif state.bot.resource >= 3:
+                state.bot.resource -= 3
+                _bot_acquire_best_or_assign(state, CardCategory.ORIGINS, CardCategory.CIVILIZATION)
+                _bot_chronicle(state, card)
+                state.add_log("Бот(Македония): −3 ресурса → истоки/цивилизация, летопись")
+            else:
+                _bot_assign(state, CardCategory.REGION)
+                state.add_log("Бот(Македония): присвоен регион")
+
+        # 4. Категория регион → +1 ресурс, карта в игровую область, применить эффект, изгнать карту рынка
+        elif CardCategory.REGION in cats:
+            state.bot.resource += 1
+            _bot_place_in_play_area(state, card)
+            _mac_bar_apply_region_effect(state, card)
+            _bot_exile_market_card(state)
+            state.add_log(f"Бот(Македония): регион «{card.name}» → +1 ресурс, игровая область, изгнание")
+
+        # 5. Карта постоянного действия → бот получает 1 население
+        elif card.card_type == CardType.PERMANENT:
+            state.bot.population += 1
+            state.add_log("Бот(Македония): постоянная карта → +1 население")
+
+        # 6. «Процветание» → сброс верхней карты колоды, +1 ресурс и +1 нас. за каждый регион, игрок берёт 1 карту
+        elif "процветание" in name:
+            _bot_discard_top(state, 1)
+            regions_count = len([c for c in state.bot.play_area
+                                  if CardCategory.REGION in c.categories])
+            state.bot.resource += regions_count
+            state.bot.population += regions_count
+            # Игрок добирает 1 карту
+            from .setup import _draw_to_hand
+            _draw_to_hand(state.player, len(state.player.hand) + 1)
+            state.add_log(f"Бот(Македония): Процветание — сброс верхней, +{regions_count} ресурс/население, игрок берёт 1 карту")
+
+        # 7. Карта атаки → украсть 2 ресурса у игрока, сбросить верхнюю карту колоды
+        elif card.card_type == CardType.ATTACK:
+            _bot_steal(state, "resource", 2)
+            _bot_discard_top(state, 1)
+            state.add_log("Бот(Македония): атака → −2 ресурса у игрока, сброс верхней карты")
+
+        # 8. Иначе → +1 жетон прогресса за каждый регион, сброс верхней карты, летопись
+        else:
+            regions_count = len([c for c in state.bot.play_area
+                                  if CardCategory.REGION in c.categories])
+            state.bot.upgrade += regions_count
+            _bot_discard_top(state, 1)
+            _bot_chronicle(state, card)
+            state.add_log(f"Бот(Македония): иное — +{regions_count} прогресс, сброс, летопись")
+
+        return state
+
+    @staticmethod
+    def _macedonians_civilization(state: GameState, card: Card) -> GameState:
         cats = card.categories
 
-        if period == Period.BARBARISM:
-            if CardCategory.ORIGINS in cats:
-                _bot_chronicle(state, card)
-            elif "величие" in card.name.lower():
-                destroyed = _bot_destroy_regions(state, 3)
-                if destroyed:
-                    if state.shared.glory_deck:
-                        top = state.shared.glory_deck.pop(0)
-                        state.bot.bot_deck.insert(0, top)
-                else:
-                    _bot_assign(state, CardCategory.REGION)
-            elif CardCategory.REGION in cats:
-                _bot_place_in_play_area(state, card)
-                _bot_exile_market_card(state)
-                state.bot.resource += 1
+        if CardCategory.REGION in cats:
+            regions_count = len([c for c in state.bot.play_area
+                                  if CardCategory.REGION in c.categories])
+            state.bot.upgrade += regions_count
+            _bot_chronicle(state, card)
+        elif CardCategory.CIVILIZATION in cats:
+            if state.bot.resource >= 2:
+                state.bot.resource -= 2
+                _bot_acquire_best(state, CardCategory.REGION)
             else:
-                regions_count = len([c for c in state.bot.play_area
-                                     if CardCategory.REGION in c.categories])
-                state.bot.upgrade += regions_count
-                _bot_discard_top(state, 1)
+                _bot_discard_top_dynasty(state)
                 _bot_chronicle(state, card)
         else:
-            if CardCategory.REGION in cats:
-                regions_count = len([c for c in state.bot.play_area
-                                     if CardCategory.REGION in c.categories])
-                state.bot.upgrade += regions_count
-                _bot_chronicle(state, card)
-            elif CardCategory.CIVILIZATION in cats:
-                if state.bot.resource >= 2:
-                    state.bot.resource -= 2
-                    _bot_acquire_best(state, CardCategory.REGION)
-                else:
-                    _bot_discard_top_dynasty(state)
-                    _bot_chronicle(state, card)
+            _bot_assign(state, CardCategory.REGION)
 
         return state
 
@@ -691,6 +763,47 @@ def _bot_spend_and_gain_upgrade(state: GameState):
     elif state.bot.population >= 2:
         state.bot.population -= 2
         state.bot.upgrade += 1
+
+
+def _mac_bar_apply_region_effect(state: GameState, card: Card):
+    """Применяет базовый эффект карты региона для бота (Macedonia, barbarism).
+    Бот не может укреплять карту. Применяются только gives_resource и gives_population."""
+    if card.gives_resource:
+        state.bot.resource += card.gives_resource
+        state.add_log(f"Бот(Македония): эффект региона +{card.gives_resource} ресурс")
+    if card.gives_population:
+        state.bot.population += card.gives_population
+        state.add_log(f"Бот(Македония): эффект региона +{card.gives_population} население")
+
+
+def _bot_assign_most_upgraded_region(state: GameState):
+    """Присваивает карту региона с максимальным числом жетонов прогресса на рынке."""
+    best_idx = None
+    best_tokens = -1
+    for i, slot in enumerate(state.shared.market):
+        if slot.card and CardCategory.REGION in slot.card.categories:
+            if slot.upgrade_tokens > best_tokens:
+                best_tokens = slot.upgrade_tokens
+                best_idx = i
+    if best_idx is None:
+        # нет региона на рынке — берём из колоды регионов
+        if state.shared.region_deck:
+            card = state.shared.region_deck.pop(0)
+            state.bot.bot_deck.insert(0, card)
+            state.add_log(f"Бот: взят регион «{card.name}» из колоды")
+        return
+    slot = state.shared.market[best_idx]
+    card = slot.card
+    state.bot.upgrade += slot.upgrade_tokens
+    if slot.resource_tokens > 0:
+        state.bot.resource += slot.resource_tokens
+    if slot.disorder_under:
+        state.bot.bot_deck.insert(0, slot.disorder_under)
+    state.bot.bot_deck.insert(0, card)
+    from .engine import GameEngine
+    eng = GameEngine()
+    state = eng._refill_market_slot(state, best_idx)
+    state.add_log(f"Бот(Македония): присвоен регион «{card.name}» ({best_tokens} жетонов)")
 
 
 def _get_category_deck(state: GameState, category: CardCategory):

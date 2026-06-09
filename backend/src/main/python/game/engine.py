@@ -397,52 +397,89 @@ class GameEngine:
 
     def run_bot_turn(self, state: GameState) -> GameState:
         """
-        Полный ход бота согласно правилам одиночного режима.
+        Инициализирует ход бота: бросает кубик, откладывает карту.
+        Пошаговый розыгрыш — через play_bot_card_step.
         """
         if state.phase != GamePhase.BOT_TURN:
             raise ValueError("Не ход бота")
 
         state.add_log("─── Ход бота ───")
 
-        # Step 1: Roll die and set aside one card
+        # Бросок кубика
         die_roll = random.randint(1, 6)
         state.add_log(f"Бот бросает кубик: {die_roll}")
+        state.bot_turn_die_roll = die_roll
 
-        set_aside_slot = None
+        # Отложить карту под маркером die_roll
         num_slots = len(state.bot.hand_slots)
-        # Check if die value matches any marker
+        set_aside_slot = None
         if 1 <= die_roll <= num_slots:
-            slot_idx = die_roll - 1  # 0-indexed
+            slot_idx = die_roll - 1
             if state.bot.hand_slots[slot_idx] is not None:
                 set_aside_slot = slot_idx
-                state.add_log(f"Карта под маркером {die_roll} отложена в сторону")
+                card_name = state.bot.hand_slots[slot_idx].name
+                state.add_log(f"Карта #{die_roll} «{card_name}» отложена в сторону")
+        state.bot_turn_set_aside_slot = set_aside_slot
+        state.bot_turn_current_slot = 0
+        return state
 
-        # Step 2: Play remaining cards (ascending marker order)
-        for i in range(num_slots):
-            if i == set_aside_slot:
-                continue
-            card = state.bot.hand_slots[i]
-            if card is None:
-                continue
-            state = self._bot_play_card(state, card, i)
+    def play_bot_card_step(self, state: GameState) -> GameState:
+        """Разыгрывает следующую карту из руки бота (один шаг)."""
+        if state.phase != GamePhase.BOT_TURN:
+            raise ValueError("Не ход бота")
 
-        # Check for deferred attacks (1REG12 passive)
+        num_slots = len(state.bot.hand_slots)
+        set_aside = state.bot_turn_set_aside_slot
+
+        # Найти следующий слот для розыгрыша (пропустить отложенный и пустые)
+        slot_idx = state.bot_turn_current_slot
+        while slot_idx < num_slots:
+            if slot_idx != set_aside and state.bot.hand_slots[slot_idx] is not None:
+                break
+            slot_idx += 1
+
+        if slot_idx >= num_slots:
+            return self._finish_bot_cards(state)
+
+        # Разыграть карту
+        card = state.bot.hand_slots[slot_idx]
+        state.add_log(f"Бот играет карту #{slot_idx + 1}: {card.name}")
+        state = self._bot_play_card(state, card, slot_idx)
+        state.bot_turn_current_slot = slot_idx + 1
+
+        # Если атаки отложены — прерваться для выбора игрока
         if state.pending_bot_attacks:
             state.pending_bot_turn_continuation = {
-                "die_roll": die_roll,
-                "set_aside_slot": set_aside_slot,
+                "die_roll": state.bot_turn_die_roll,
+                "set_aside_slot": state.bot_turn_set_aside_slot,
             }
             state = self._setup_recall_attack_choice(state)
             return state
 
-        # Step 3: Update phase — place upgrade token on market
-        state = self._bot_update_phase(state, die_roll, set_aside_slot)
+        # Проверить, остались ли ещё карты
+        next_idx = state.bot_turn_current_slot
+        while next_idx < num_slots:
+            if next_idx != set_aside and state.bot.hand_slots[next_idx] is not None:
+                break
+            next_idx += 1
 
-        # Step 4: Refill bot hand
-        state = self._bot_refill_hand(state)
+        if next_idx >= num_slots:
+            return self._finish_bot_cards(state)
 
-        state = self._finish_bot_turn(state)
         return state
+
+    def _finish_bot_cards(self, state: GameState) -> GameState:
+        """Завершает розыгрыш всех карт бота — переходит к фазе обновления и солнцестоянию."""
+        if state.pending_bot_attacks:
+            state.pending_bot_turn_continuation = {
+                "die_roll": state.bot_turn_die_roll,
+                "set_aside_slot": state.bot_turn_set_aside_slot,
+            }
+            state = self._setup_recall_attack_choice(state)
+            return state
+
+        state = self._bot_update_phase(state, state.bot_turn_die_roll, state.bot_turn_set_aside_slot)
+        return self._finish_bot_turn(state)
 
     def _finish_bot_turn(self, state: GameState) -> GameState:
         """Завершает ход бота: лог, проверка окончания, добор карт, солнцестояние."""
@@ -507,13 +544,9 @@ class GameEngine:
                         state = BotLogic.resolve_card(state, attack_card, -1)
                 state.pending_bot_attacks = []
 
-        # Resume bot turn
-        cont = state.pending_bot_turn_continuation or {}
+        # Resume bot turn — continue step-by-step from where we left off
         state.pending_bot_turn_continuation = None
-        state = self._bot_update_phase(state, cont.get("die_roll", 0), cont.get("set_aside_slot"))
-        state = self._bot_refill_hand(state)
-        state = self._finish_bot_turn(state)
-        return state
+        return self._finish_bot_cards(state)
 
     def _bot_play_card(self, state: GameState, card: Card,
                         slot_index: int) -> GameState:
@@ -1040,14 +1073,15 @@ class GameEngine:
         state.player.resources.action = 3
         state.player.resources.exploit = 5
 
-        # TODO: bot turn not implemented — skip directly to solstice
-        state.add_log("─── Ход бота пропущен ───")
-        state = self._check_end_conditions(state)
-        if state.phase == GamePhase.GAME_OVER:
-            return state
+        # Draw player's new hand before bot turn
         _draw_to_hand(state.player, state.player.hand_limit)
-        state.phase = GamePhase.SOLSTICE
-        return self._apply_solstice(state)
+
+        # Transition to bot turn — refill bot hand slots
+        state = self._bot_refill_hand(state)
+        revealed = sum(1 for s in state.bot.hand_slots if s is not None)
+        state.add_log(f"Бот открывает {revealed} карт из руки")
+        state.phase = GamePhase.BOT_TURN
+        return state
 
     # ── CARD SHUFFLING ─────────────────────────────────────────────────────────
 

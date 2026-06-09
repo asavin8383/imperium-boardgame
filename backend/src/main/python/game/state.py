@@ -313,8 +313,7 @@ class BotArea:
             "dynasty_deck_count": len(self.dynasty_deck),
             "chronicle_count": len(self.chronicle),
             "play_area_count": len(self.play_area),
-            "hand_slots": [{"id": c.id, "name": c.name} if c else None
-                           for c in self.hand_slots],
+            "hand_slots": [_card_info(c) if c else None for c in self.hand_slots],
             "resource": self.resource,
             "population": self.population,
             "upgrade": self.upgrade,
@@ -427,6 +426,11 @@ class GameState:
     # Данные продолжения хода бота после разрешения отложенных атак
     pending_bot_turn_continuation: Optional[dict] = None
 
+    # Пошаговый розыгрыш хода бота
+    bot_turn_die_roll: int = 0
+    bot_turn_set_aside_slot: Optional[int] = None
+    bot_turn_current_slot: int = 0
+
     # Очередь карт с эффектами солнцестояния, ожидающих обработки
     pending_solstice_card_ids: List[str] = field(default_factory=list)
 
@@ -454,6 +458,9 @@ class GameState:
             "shared": self.shared.to_dict(),
             "difficulty": self.difficulty.value,
             "log": self.log[-20:],  # last 20 messages
+            "bot_turn_die_roll": self.bot_turn_die_roll,
+            "bot_turn_set_aside_slot": self.bot_turn_set_aside_slot,
+            "bot_turn_current_slot": self.bot_turn_current_slot,
             "pending_choice": self.pending_choice,
             "pending_chronicle_card_id": self.pending_chronicle_card_id,
             "pending_forced_chronicle_card_id": self.pending_forced_chronicle_card_id,

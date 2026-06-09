@@ -75,8 +75,6 @@ def do_revolution(game_id: str, card_ids: list) -> GameState:
     if state.phase == GamePhase.PLAYER_DISCARD:
         if len(state.player.hand) <= state.player.hand_limit:
             state = _engine.end_turn(state)
-            if state.phase == GamePhase.BOT_TURN:
-                state = _engine.run_bot_turn(state)
     save_game(state)
     return state
 
@@ -92,9 +90,22 @@ def end_player_turn(game_id: str, discard_ids: list = None) -> GameState:
         if discard_ids:
             state = _engine.discard_from_hand(state, discard_ids)
         state = _engine.end_turn(state)
-        if state.phase == GamePhase.BOT_TURN:
-            state = _engine.run_bot_turn(state)
 
+    save_game(state)
+    return state
+
+
+def run_bot_turn(game_id: str) -> GameState:
+    state = _require(game_id)
+    _snapshot(game_id, state)
+    state = _engine.run_bot_turn(state)
+    save_game(state)
+    return state
+
+
+def play_bot_card_step(game_id: str) -> GameState:
+    state = _require(game_id)
+    state = _engine.play_bot_card_step(state)
     save_game(state)
     return state
 
