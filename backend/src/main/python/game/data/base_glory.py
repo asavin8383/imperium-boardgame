@@ -10,7 +10,7 @@ DECK: dict = {
     "1SLV3":  {"name": "Золотой век",        "categories": ["glory"], "card_type": "attack",
                "requires_action_token": False, "vp_per_condition": "bot_disorder",
                "on_play_actions": [{"type": "steal_progress_or_disorder"}]},
-    "1SLV4":  {"name": "Мировое господство", "categories": ["glory"], "vp_fixed": 9,
+    "1SLV4":  {"name": "Превосходство", "categories": ["glory"], "vp_fixed": 9,
                "requires_action_token": False,
                "on_play_actions": [{"type": "look_and_choose_deck_top"}]},
     "1SLV5":  {"name": "Наследие",           "categories": ["glory"], "vp_fixed": 6,

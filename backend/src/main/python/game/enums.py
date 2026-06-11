@@ -62,6 +62,7 @@ class Nation(str, Enum):
     PERSIANS = "persians"
     ROMANS = "romans"
     SCYTHIANS = "scythians"
+    QIN = "qin"
 
 
 class GamePhase(str, Enum):

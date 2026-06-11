@@ -64,6 +64,8 @@ interface GameStore {
   acquireAndPlayRegion: (slotIndex: number | null) => Promise<void>;
   placeResourceOnMarket: (slotIndex: number) => Promise<void>;
   chronicleFromHandOrDiscard: (cardId: string | null) => Promise<void>;
+  returnDisorders: (cardIds: string[]) => Promise<void>;
+  resolveLookDeckTop: (choice: string) => Promise<void>;
   runBotTurn: () => Promise<void>;
   playBotCard: () => Promise<void>;
   resetGame: () => void;
@@ -602,6 +604,30 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const state = await api.chronicleFromHandOrDiscard(gameId, cardId);
+      set({ gameState: state, loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
+
+  returnDisorders: async (cardIds) => {
+    const { gameId } = get();
+    if (!gameId) return;
+    set({ loading: true, error: null });
+    try {
+      const state = await api.returnDisorders(gameId, cardIds);
+      set({ gameState: state, loading: false });
+    } catch (e: any) {
+      set({ error: e.response?.data?.detail || e.message, loading: false });
+    }
+  },
+
+  resolveLookDeckTop: async (choice) => {
+    const { gameId } = get();
+    if (!gameId) return;
+    set({ loading: true, error: null });
+    try {
+      const state = await api.resolveLookDeckTop(gameId, choice);
       set({ gameState: state, loading: false });
     } catch (e: any) {
       set({ error: e.response?.data?.detail || e.message, loading: false });

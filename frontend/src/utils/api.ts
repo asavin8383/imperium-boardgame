@@ -303,6 +303,16 @@ export async function solsticeDiscardRewardChoice(
   return res.data.state;
 }
 
+export async function returnDisorders(gameId: string, cardIds: string[]): Promise<GameState> {
+  const res = await api.post(`/api/games/${gameId}/return-disorders`, { card_ids: cardIds });
+  return res.data.state;
+}
+
+export async function resolveLookDeckTop(gameId: string, choice: string): Promise<GameState> {
+  const res = await api.post(`/api/games/${gameId}/look-deck-top`, { choice });
+  return res.data.state;
+}
+
 // ── Save / Load ──────────────────────────────────────────────────────────────
 
 export interface SaveMeta {

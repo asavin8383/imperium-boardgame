@@ -77,6 +77,17 @@ def _game_action(game_id: str, action: str):
         raise HTTPException(status_code=400, detail=str(e))
 
 
+def _respond(state, db: Session) -> dict:
+    """Возвращает state dict; если наступил ход игрока — пишет автосейв."""
+    from game.enums import GamePhase
+    if state.phase == GamePhase.PLAYER_TURN:
+        try:
+            _do_autosave(state, db)
+        except Exception as e:
+            log.error("Autosave failed: %s", e)
+    return {"state": state.to_dict()}
+
+
 # ── REQUEST MODELS ─────────────────────────────────────────────────────────────
 
 class CreateGameRequest(BaseModel):
@@ -377,314 +388,311 @@ def get_game(game_id: str):
 
 
 @app.post("/api/games/{game_id}/play-card")
-def play_card(game_id: str, req: PlayCardRequest):
+def play_card(game_id: str, req: PlayCardRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"play_card({req.card_id})"):
         state = game_session.play_card(game_id, req.card_id)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/exploit-card")
-def exploit_card(game_id: str, req: ExploitCardRequest):
+def exploit_card(game_id: str, req: ExploitCardRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"exploit_card({req.card_id})"):
         state = game_session.exploit_card(game_id, req.card_id)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/innovation")
-def do_innovation(game_id: str):
+def do_innovation(game_id: str, db: Session = Depends(get_db)):
     with _game_action(game_id, "innovation"):
         state = game_session.do_innovation(game_id)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/revolution")
-def do_revolution(game_id: str, req: RevolutionRequest):
+def do_revolution(game_id: str, req: RevolutionRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"revolution(cards={req.card_ids})"):
         state = game_session.do_revolution(game_id, req.card_ids)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/end-turn")
 def end_turn(game_id: str, req: EndTurnRequest, db: Session = Depends(get_db)):
-    from game.enums import GamePhase
     with _game_action(game_id, f"end_turn(discard={req.discard_ids})"):
         state = game_session.end_player_turn(game_id, req.discard_ids or [])
-        if state.phase == GamePhase.PLAYER_TURN:
-            _do_autosave(state, db)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/acquire-card")
-def acquire_card(game_id: str, req: AcquireCardRequest):
+def acquire_card(game_id: str, req: AcquireCardRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"acquire_card(slot={req.slot_index})"):
         state = game_session.acquire_card(game_id, req.slot_index)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/accelerate-progress")
-def accelerate_progress(game_id: str, req: AccelerateProgressRequest):
+def accelerate_progress(game_id: str, req: AccelerateProgressRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"accelerate_progress({req.progress_card_id})"):
         state = game_session.accelerate_progress(game_id, req.progress_card_id)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/choose-option")
-def choose_option(game_id: str, req: ChooseOptionRequest):
+def choose_option(game_id: str, req: ChooseOptionRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"choose_option(index={req.option_index})"):
         state = game_session.choose_option(game_id, req.option_index)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/select-appropriate-category")
-def select_appropriate_category(game_id: str, req: SelectAppropriateCategoryRequest):
+def select_appropriate_category(game_id: str, req: SelectAppropriateCategoryRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"select_appropriate_category({req.category})"):
         state = game_session.select_appropriate_category(game_id, req.category)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/appropriate-from-deck")
-def appropriate_from_deck(game_id: str, req: AppropriateFromDeckRequest):
+def appropriate_from_deck(game_id: str, req: AppropriateFromDeckRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"appropriate_from_deck({req.deck_name})"):
         state = game_session.appropriate_from_deck(game_id, req.deck_name)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/return-exploit-token")
-def return_exploit_token(game_id: str, req: ReturnExploitTokenRequest):
+def return_exploit_token(game_id: str, req: ReturnExploitTokenRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"return_exploit_token({req.card_id})"):
         state = game_session.return_exploit_token(game_id, req.card_id)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/draw-from-deck-optional")
-def draw_from_deck_optional(game_id: str, req: DrawFromDeckOptionalRequest):
+def draw_from_deck_optional(game_id: str, req: DrawFromDeckOptionalRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"draw_from_deck_optional(draw={req.draw})"):
         state = game_session.resolve_draw_from_deck_optional(game_id, req.draw)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/acquire-from-exile")
-def acquire_from_exile(game_id: str, req: AcquireFromExileRequest):
+def acquire_from_exile(game_id: str, req: AcquireFromExileRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"acquire_from_exile({req.card_id})"):
         state = game_session.acquire_from_exile(game_id, req.card_id)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/accelerate-progress-from-card")
-def accelerate_progress_from_card(game_id: str, req: AccelerateProgressRequest):
+def accelerate_progress_from_card(game_id: str, req: AccelerateProgressRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"accelerate_progress_from_card({req.progress_card_id})"):
         state = game_session.accelerate_progress_from_card(game_id, req.progress_card_id)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/take-from-discard")
-def take_from_discard(game_id: str, req: TakeFromDiscardRequest):
+def take_from_discard(game_id: str, req: TakeFromDiscardRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"take_from_discard({req.card_id})"):
         state = game_session.take_from_discard(game_id, req.card_id)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/appropriate-optional")
-def appropriate_optional(game_id: str, req: AppropriateOptionalRequest):
+def appropriate_optional(game_id: str, req: AppropriateOptionalRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"appropriate_optional(proceed={req.proceed})"):
         state = game_session.resolve_appropriate_optional(game_id, req.proceed)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/reinforce-choice")
-def reinforce_choice(game_id: str, req: ReinforceChoiceRequest):
+def reinforce_choice(game_id: str, req: ReinforceChoiceRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"reinforce_choice(reinforce={req.reinforce})"):
         state = game_session.resolve_reinforce_choice(game_id, req.reinforce)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/reinforce-with-card")
-def reinforce_with_card(game_id: str, req: ReinforceWithCardRequest):
+def reinforce_with_card(game_id: str, req: ReinforceWithCardRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"reinforce_with_card({req.hand_card_id})"):
         state = game_session.reinforce_with_card(game_id, req.hand_card_id)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/play-from-discard")
-def play_from_discard(game_id: str, req: PlayFromDiscardRequest):
+def play_from_discard(game_id: str, req: PlayFromDiscardRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"play_from_discard({req.card_id})"):
         state = game_session.play_from_discard(game_id, req.card_id)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/place-upgrade-token")
-def place_upgrade_token(game_id: str, req: PlaceUpgradeTokenRequest):
+def place_upgrade_token(game_id: str, req: PlaceUpgradeTokenRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"place_upgrade_token(slot={req.slot_index})"):
         state = game_session.place_upgrade_token(game_id, req.slot_index)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/recall-to-avoid-attack")
-def recall_to_avoid_attack(game_id: str, req: RecallToAvoidAttackRequest):
+def recall_to_avoid_attack(game_id: str, req: RecallToAvoidAttackRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"recall_to_avoid_attack(recall={req.recall})"):
         state = game_session.resolve_recall_to_avoid_attack(game_id, req.recall)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/chronicle-from-hand")
-def chronicle_from_hand(game_id: str, req: ChronicleFromHandRequest):
+def chronicle_from_hand(game_id: str, req: ChronicleFromHandRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"chronicle_from_hand({req.card_id})"):
         state = game_session.chronicle_card_from_hand(game_id, req.card_id)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/chronicle-from-discard")
-def chronicle_from_discard(game_id: str, req: ChronicleFromDiscardRequest):
+def chronicle_from_discard(game_id: str, req: ChronicleFromDiscardRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"chronicle_from_discard({req.card_id})"):
         state = game_session.chronicle_card_from_discard(game_id, req.card_id)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/recall-from-chronicle")
-def recall_from_chronicle(game_id: str, req: RecallFromChronicleRequest):
+def recall_from_chronicle(game_id: str, req: RecallFromChronicleRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"recall_from_chronicle({req.card_id})"):
         state = game_session.resolve_recall_from_chronicle(game_id, req.card_id)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/exile-from-market")
-def exile_from_market(game_id: str, req: ExileFromMarketRequest):
+def exile_from_market(game_id: str, req: ExileFromMarketRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"exile_from_market(slot={req.slot_index})"):
         state = game_session.exile_card_from_market(game_id, req.slot_index)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/destroy-cards")
-def destroy_cards(game_id: str, req: DestroyCardsRequest):
+def destroy_cards(game_id: str, req: DestroyCardsRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"destroy_cards({req.card_ids})"):
         state = game_session.select_destroy_cards(game_id, req.card_ids)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/glory-deck-take")
-def glory_deck_take(game_id: str, req: GloryDeckTakeRequest):
+def glory_deck_take(game_id: str, req: GloryDeckTakeRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"glory_deck_take({req.card_id})"):
         state = game_session.select_glory_deck_card(game_id, req.card_id)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/sacred-path-exploit")
-def sacred_path_exploit(game_id: str, req: SacredPathExploitRequest):
+def sacred_path_exploit(game_id: str, req: SacredPathExploitRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"sacred_path_exploit(destroy={req.destroy})"):
         state = game_session.resolve_sacred_path_exploit(game_id, req.destroy)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/sacred-path-exchange")
-def sacred_path_exchange(game_id: str, req: SacredPathExchangeRequest):
+def sacred_path_exchange(game_id: str, req: SacredPathExchangeRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"sacred_path_exchange({req.hand_card_id})"):
         state = game_session.resolve_sacred_path_exchange(game_id, req.hand_card_id)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/move-discard-to-deck")
-def move_discard_to_deck(game_id: str, req: MoveDiscardToDeckRequest):
+def move_discard_to_deck(game_id: str, req: MoveDiscardToDeckRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"move_discard_to_deck({req.card_id})"):
         state = game_session.move_discard_to_deck_card(game_id, req.card_id)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/return-card-to-deck-top")
-def return_card_to_deck_top(game_id: str, req: ReturnCardToDeckTopRequest):
+def return_card_to_deck_top(game_id: str, req: ReturnCardToDeckTopRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"return_card_to_deck_top({req.card_id})"):
         state = game_session.resolve_return_card_to_deck_top(game_id, req.card_id)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/chronicle-choice")
-def chronicle_choice(game_id: str, req: ChronicleChoiceRequest):
+def chronicle_choice(game_id: str, req: ChronicleChoiceRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"chronicle_choice(send={req.send_to_chronicle})"):
         state = game_session.resolve_chronicle_choice(game_id, req.send_to_chronicle)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/solstice-skip")
-def solstice_skip(game_id: str):
+def solstice_skip(game_id: str, db: Session = Depends(get_db)):
     with _game_action(game_id, "solstice_skip"):
         state = game_session.skip_solstice(game_id)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/solstice-gain-progress")
-def solstice_gain_progress(game_id: str, req: SolsticeGainProgressRequest):
+def solstice_gain_progress(game_id: str, req: SolsticeGainProgressRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"solstice_gain_progress(take={req.take})"):
         state = game_session.resolve_solstice_gain_progress(game_id, req.take)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/solstice-fate")
-def solstice_fate(game_id: str, req: SolsticeFateRequest):
+def solstice_fate(game_id: str, req: SolsticeFateRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"solstice_fate({req.choice})"):
         state = game_session.resolve_solstice_fate(game_id, req.choice)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/solstice-select-card")
-def solstice_select_card(game_id: str, req: SolsticeSelectCardRequest):
+def solstice_select_card(game_id: str, req: SolsticeSelectCardRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"solstice_select_card({req.card_id})"):
         state = game_session.resolve_solstice_select_card(game_id, req.card_id)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/solstice-discard-hand-return-disorder")
-def solstice_discard_hand_return_disorder(game_id: str, req: SolsticeDiscardHandReturnDisorderRequest):
+def solstice_discard_hand_return_disorder(game_id: str, req: SolsticeDiscardHandReturnDisorderRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"solstice_discard_hand_return_disorder(hand={req.hand_card_id} disorder={req.disorder_card_id})"):
         state = game_session.resolve_solstice_discard_hand_return_disorder(game_id, req.hand_card_id, req.disorder_card_id)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/solstice-choice")
-def solstice_choice(game_id: str, req: SolsticeChoiceRequest):
+def solstice_choice(game_id: str, req: SolsticeChoiceRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"solstice_choice(index={req.option_index})"):
         state = game_session.resolve_solstice_choice(game_id, req.option_index, req.card_ids)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/solstice-discard-for-reward")
-def solstice_discard_for_reward(game_id: str, req: SolsticeDiscardForRewardRequest):
+def solstice_discard_for_reward(game_id: str, req: SolsticeDiscardForRewardRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"solstice_discard_for_reward({req.hand_card_id})"):
         state = game_session.resolve_solstice_discard_for_reward(game_id, req.hand_card_id)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/solstice-discard-reward-choice")
-def solstice_discard_reward_choice(game_id: str, req: SolsticeDiscardRewardChoiceRequest):
+def solstice_discard_reward_choice(game_id: str, req: SolsticeDiscardRewardChoiceRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"solstice_discard_reward_choice(index={req.option_index})"):
         state = game_session.resolve_solstice_discard_reward_choice(game_id, req.option_index)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/draw-discard-choice")
-def draw_discard_choice(game_id: str, req: DrawDiscardChoiceRequest):
+def draw_discard_choice(game_id: str, req: DrawDiscardChoiceRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"draw_discard_choice({req.card_id})"):
         state = game_session.resolve_draw_discard_choice(game_id, req.card_id)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/exploit-recall-choice")
-def exploit_recall_choice(game_id: str, req: ExploitRecallChoiceRequest):
+def exploit_recall_choice(game_id: str, req: ExploitRecallChoiceRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"exploit_recall_choice(index={req.option_index} card={req.card_id})"):
         state = game_session.resolve_exploit_recall_choice(game_id, req.option_index, req.card_id)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/exploit-recall-label-for-resource-token-card")
-def exploit_recall_label_for_resource_token_card(game_id: str, req: PlayFromDiscardRequest):
+def exploit_recall_label_for_resource_token_card(game_id: str, req: PlayFromDiscardRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"exploit_recall_label_for_resource_token_card({req.card_id})"):
         state = game_session.resolve_exploit_recall_label_for_resource_token_card(game_id, req.card_id)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/exploit-discard-for-resource-token-card")
-def exploit_discard_for_resource_token_card(game_id: str, req: PlayFromDiscardRequest):
+def exploit_discard_for_resource_token_card(game_id: str, req: PlayFromDiscardRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"exploit_discard_for_resource_token_card({req.card_id})"):
         state = game_session.resolve_exploit_discard_for_resource_token_card(game_id, req.card_id)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 class AcquireAndPlayRegionRequest(BaseModel):
@@ -692,10 +700,10 @@ class AcquireAndPlayRegionRequest(BaseModel):
 
 
 @app.post("/api/games/{game_id}/acquire-and-play-region")
-def acquire_and_play_region(game_id: str, req: AcquireAndPlayRegionRequest):
+def acquire_and_play_region(game_id: str, req: AcquireAndPlayRegionRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"acquire_and_play_region({req.slot_index})"):
         state = game_session.resolve_acquire_and_play_region(game_id, req.slot_index)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 class PlaceResourceOnMarketRequest(BaseModel):
@@ -703,10 +711,10 @@ class PlaceResourceOnMarketRequest(BaseModel):
 
 
 @app.post("/api/games/{game_id}/place-resource-on-market")
-def place_resource_on_market(game_id: str, req: PlaceResourceOnMarketRequest):
+def place_resource_on_market(game_id: str, req: PlaceResourceOnMarketRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"place_resource_on_market({req.slot_index})"):
         state = game_session.resolve_place_resource_on_market(game_id, req.slot_index)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 class ChronicleFromHandOrDiscardRequest(BaseModel):
@@ -714,87 +722,87 @@ class ChronicleFromHandOrDiscardRequest(BaseModel):
 
 
 @app.post("/api/games/{game_id}/chronicle-from-hand-or-discard")
-def chronicle_from_hand_or_discard(game_id: str, req: ChronicleFromHandOrDiscardRequest):
+def chronicle_from_hand_or_discard(game_id: str, req: ChronicleFromHandOrDiscardRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"chronicle_from_hand_or_discard({req.card_id})"):
         state = game_session.resolve_chronicle_from_hand_or_discard(game_id, req.card_id)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/bot-turn")
-def bot_turn(game_id: str):
+def bot_turn(game_id: str, db: Session = Depends(get_db)):
     with _game_action(game_id, "bot_turn"):
         state = game_session.run_bot_turn(game_id)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/bot-play-card")
-def bot_play_card(game_id: str):
+def bot_play_card(game_id: str, db: Session = Depends(get_db)):
     with _game_action(game_id, "bot_play_card"):
         state = game_session.play_bot_card_step(game_id)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/guess-deck-category")
-def guess_deck_category(game_id: str, req: GuessDeckCategoryRequest):
+def guess_deck_category(game_id: str, req: GuessDeckCategoryRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"guess_deck_category({req.category})"):
         state = game_session.resolve_guess_deck_category(game_id, req.category)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/exploit-discard-hand")
-def exploit_discard_hand(game_id: str, req: PlayFromDiscardRequest):
+def exploit_discard_hand(game_id: str, req: PlayFromDiscardRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"exploit_discard_hand({req.card_id})"):
         state = game_session.resolve_exploit_discard_hand(game_id, req.card_id)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/solstice-return-disorder")
-def solstice_return_disorder(game_id: str, req: PlayFromDiscardRequest):
+def solstice_return_disorder(game_id: str, req: PlayFromDiscardRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"solstice_return_disorder({req.card_id})"):
         state = game_session.resolve_solstice_return_disorder(game_id, req.card_id)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/reinforce-region-optional")
-def reinforce_region_optional(game_id: str, req: ReinforceRegionOptionalRequest):
+def reinforce_region_optional(game_id: str, req: ReinforceRegionOptionalRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"reinforce_region_optional({req.region_card_id})"):
         state = game_session.resolve_reinforce_region_optional(game_id, req.region_card_id)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/look-deck-top")
-def look_deck_top(game_id: str, req: LookDeckTopRequest):
+def look_deck_top(game_id: str, req: LookDeckTopRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"look_deck_top({req.choice})"):
         state = game_session.resolve_look_deck_top(game_id, req.choice)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/self-disposition")
-def self_disposition(game_id: str, req: SelfDispositionRequest):
+def self_disposition(game_id: str, req: SelfDispositionRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"self_disposition({req.choice})"):
         state = game_session.resolve_self_disposition(game_id, req.choice, req.region_card_id)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/pre-scoring-return-disorders")
-def pre_scoring_return_disorders(game_id: str, req: ReturnDisordersRequest):
+def pre_scoring_return_disorders(game_id: str, req: ReturnDisordersRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"pre_scoring_return_disorders({req.card_ids})"):
         state = game_session.resolve_pre_scoring_return_disorders(game_id, req.card_ids)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/return-disorders")
-def return_disorders(game_id: str, req: ReturnDisordersRequest):
+def return_disorders(game_id: str, req: ReturnDisordersRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"return_disorders({req.card_ids})"):
         state = game_session.resolve_return_disorders(game_id, req.card_ids)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/give-card-to-bot")
-def give_card_to_bot(game_id: str, req: GiveCardToBotRequest):
+def give_card_to_bot(game_id: str, req: GiveCardToBotRequest, db: Session = Depends(get_db)):
     with _game_action(game_id, f"give_card_to_bot({req.card_id})"):
         state = game_session.resolve_give_card_to_bot(game_id, req.card_id)
-        return {"state": state.to_dict()}
+        return _respond(state, db)
 
 
 @app.post("/api/games/{game_id}/undo")

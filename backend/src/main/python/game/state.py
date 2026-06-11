@@ -310,9 +310,16 @@ class BotArea:
             "nation": self.nation.value,
             "period": self.period.value,
             "bot_deck_count": len(self.bot_deck),
+            "bot_deck": [_card_info(c) for c in self.bot_deck],
+            "bot_discard_count": len(self.bot_discard),
+            "bot_discard_top": _card_info(self.bot_discard[-1]) if self.bot_discard else None,
+            "bot_discard": [_card_info(c) for c in self.bot_discard],
             "dynasty_deck_count": len(self.dynasty_deck),
+            "dynasty_deck": [_card_info(c) for c in self.dynasty_deck],
             "chronicle_count": len(self.chronicle),
+            "chronicle": [_card_info(c) for c in self.chronicle],
             "play_area_count": len(self.play_area),
+            "play_area": [_card_info(c) for c in self.play_area],
             "hand_slots": [_card_info(c) if c else None for c in self.hand_slots],
             "resource": self.resource,
             "population": self.population,
@@ -329,6 +336,7 @@ class MarketSlot:
     market_marker: int = 0       # номер маркера рынка (1-5, для бота)
     source_deck: str = "main"    # "region" | "origins" | "civilization" | "main"
     resource_tokens: int = 0     # жетоны ресурсов (пассив карфагенян 1KAR1A)
+    population_tokens: int = 0   # жетоны населения (бот-Цинь)
 
     def to_dict(self):
         return {
@@ -338,6 +346,7 @@ class MarketSlot:
             "market_marker": self.market_marker,
             "source_deck": self.source_deck,
             "resource_tokens": self.resource_tokens,
+            "population_tokens": self.population_tokens,
         }
 
 
@@ -447,6 +456,13 @@ class GameState:
                 player_dict["current_vp"] = compute_current_player_vp(self)
             except Exception:
                 player_dict["current_vp"] = 0
+        bot_dict = self.bot.to_dict() if self.bot else None
+        if bot_dict is not None:
+            try:
+                from .engine import compute_current_bot_vp
+                bot_dict["current_vp"] = compute_current_bot_vp(self)
+            except Exception:
+                bot_dict["current_vp"] = 0
         return {
             "game_id": self.game_id,
             "phase": self.phase.value,
@@ -454,7 +470,7 @@ class GameState:
             "is_final_round": self.is_final_round,
             "end_condition": self.end_condition.value if self.end_condition else None,
             "player": player_dict,
-            "bot": self.bot.to_dict() if self.bot else None,
+            "bot": bot_dict,
             "shared": self.shared.to_dict(),
             "difficulty": self.difficulty.value,
             "log": self.log[-20:],  # last 20 messages

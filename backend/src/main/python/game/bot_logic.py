@@ -18,11 +18,12 @@ class BotLogic:
     @staticmethod
     def resolve_card(state: GameState, card: Card, slot_index: int) -> GameState:
         """Dispatch to the correct nation table"""
-        # If disorder card — return to disorder deck
-        if card.card_type == CardType.DISORDER:
+
+        # Disorder cards are the same for all nations: return to shared disorder deck
+        if card.card_type == CardType.DISORDER or CardCategory.DISORDER in getattr(card, 'categories', []):
             state.shared.disorder_deck.append(card)
             random.shuffle(state.shared.disorder_deck)
-            state.add_log("Бот: карта беспорядков возвращена в колоду")
+            state.add_log(f"Бот: карта беспорядков «{card.name}» → колода беспорядков")
             return state
 
         nation = state.bot.nation
@@ -35,6 +36,7 @@ class BotLogic:
             Nation.PERSIANS: BotLogic._persians,
             Nation.SCYTHIANS: BotLogic._scythians,
             Nation.VIKINGS: BotLogic._vikings,
+            Nation.QIN: BotLogic._default,
         }
         handler = dispatch.get(nation, BotLogic._default)
         return handler(state, card)
@@ -280,7 +282,6 @@ class BotLogic:
                         state.bot.bot_discard.append(dynasty)
                     _bot_player_take_disorder(state)
             else:
-                _bot_try_return_disorder(state)
                 state.bot.upgrade += 1
                 _bot_discard_top(state, 1)
         else:
@@ -487,7 +488,6 @@ class BotLogic:
                 _bot_exile_market_card(state)
                 state.bot.population += 1
             else:
-                _bot_try_return_disorder(state)
                 _bot_assign(state, CardCategory.REGION)
                 _bot_chronicle(state, card)
         else:
@@ -513,7 +513,6 @@ class BotLogic:
         name = card.name.lower()
 
         if CardCategory.RAID in cats:
-            _bot_try_return_disorder(state)
             _bot_acquire_best(state, CardCategory.CIVILIZATION)
             _bot_chronicle(state, card)
         elif "величие" in name:
@@ -540,7 +539,6 @@ class BotLogic:
                 _bot_place_in_play_area(state, move_region)
             _bot_chronicle(state, card)
         else:
-            _bot_try_return_disorder(state)
             _bot_acquire_best(state, CardCategory.REGION)
             _bot_chronicle(state, card)
 
@@ -590,6 +588,9 @@ def _bot_acquire_best(state: GameState, category: CardCategory):
         if slot.resource_tokens > 0:
             state.bot.resource += slot.resource_tokens
             state.add_log(f"Бот: получено {slot.resource_tokens} ресурсов с карты рынка")
+        if slot.population_tokens > 0:
+            state.bot.population += slot.population_tokens
+            state.add_log(f"Бот: получено {slot.population_tokens} населения с карты рынка")
         if slot.disorder_under:
             state.bot.bot_deck.insert(0, slot.disorder_under)
         state.bot.bot_deck.insert(0, card)
@@ -652,12 +653,17 @@ def _bot_exile_market_card(state: GameState):
 
 
 def _bot_discard_top(state: GameState, n: int):
-    """Bot moves top n cards of its deck to discard"""
+    """Bot moves top n cards of its deck to discard (disorder cards go to disorder deck)"""
     for _ in range(n):
         if state.bot.bot_deck:
             card = state.bot.bot_deck.pop(0)
-            state.bot.bot_discard.append(card)
-            state.add_log(f"Бот: {card.name} перемещена в сброс")
+            if card.card_type == CardType.DISORDER or CardCategory.DISORDER in getattr(card, 'categories', []):
+                state.shared.disorder_deck.append(card)
+                random.shuffle(state.shared.disorder_deck)
+                state.add_log(f"Бот: {card.name} → колода беспорядков")
+            else:
+                state.bot.bot_discard.append(card)
+                state.add_log(f"Бот: {card.name} перемещена в сброс")
 
 
 def _bot_discard_top_dynasty(state: GameState):
@@ -688,7 +694,8 @@ def _bot_steal(state: GameState, resource_type: str, amount: int):
 def _bot_try_return_disorder(state: GameState) -> bool:
     """Bot tries to return disorder from its discard to disorder deck"""
     disorder = next((c for c in state.bot.bot_discard
-                      if CardCategory.DISORDER in c.categories), None)
+                      if c.card_type == CardType.DISORDER
+                      or CardCategory.DISORDER in getattr(c, 'categories', [])), None)
     if disorder:
         state.bot.bot_discard.remove(disorder)
         state.shared.disorder_deck.append(disorder)
@@ -797,6 +804,8 @@ def _bot_assign_most_upgraded_region(state: GameState):
     state.bot.upgrade += slot.upgrade_tokens
     if slot.resource_tokens > 0:
         state.bot.resource += slot.resource_tokens
+    if slot.population_tokens > 0:
+        state.bot.population += slot.population_tokens
     if slot.disorder_under:
         state.bot.bot_deck.insert(0, slot.disorder_under)
     state.bot.bot_deck.insert(0, card)

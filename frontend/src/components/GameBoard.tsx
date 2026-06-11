@@ -289,6 +289,7 @@ function DeckPile({ count, label, color = '#2a2d40' }: { count: number; label: s
   );
 }
 
+
 function Token({ type, value }: { type: string; value: number }) {
   const c: Record<string, { l: string; c: string; b: string }> = {
     resource: { l: '⚙', c: '#e67e22', b: '#3d1f0a' }, population: { l: '👥', c: '#2ecc71', b: '#0a2d1a' },
@@ -299,6 +300,95 @@ function Token({ type, value }: { type: string; value: number }) {
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
       <div style={{ background: cfg.b, border: `1px solid ${cfg.c}55`, borderRadius: 5, padding: '3px 7px', fontSize: 15, fontWeight: 700, color: cfg.c, minWidth: 32, textAlign: 'center' }}>{value}</div>
       <div style={{ fontSize: 8, color: cfg.c }}>{cfg.l}</div>
+    </div>
+  );
+}
+
+function ReturnDisordersModal({ pending, onConfirm }: {
+  pending: { max_count: number; available_cards: Array<CardInfo & { source: string }> };
+  onConfirm: (cardIds: string[]) => void;
+}) {
+  const [selected, setSelected] = React.useState<string[]>([]);
+  const toggle = (id: string) => {
+    setSelected(prev =>
+      prev.includes(id)
+        ? prev.filter(x => x !== id)
+        : prev.length < pending.max_count ? [...prev, id] : prev
+    );
+  };
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.82)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 800 }}>
+      <div style={{ background: 'linear-gradient(135deg,#0d1a10,#0a1208)', border: '2px solid #e74c3c', borderRadius: 14, padding: '28px 36px', maxWidth: 520, width: '95%' }}>
+        <div style={{ fontSize: 13, color: '#e74c3c', letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: 10 }}>Возврат карт беспорядков</div>
+        <div style={{ fontSize: 14, color: '#e8e8f0', marginBottom: 16 }}>
+          Выберите до {pending.max_count} карт беспорядков из руки или личного сброса для возврата в колоду беспорядков:
+        </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 18 }}>
+          {pending.available_cards.map(c => {
+            const sel = selected.includes(c.id);
+            return (
+              <button key={c.id} onClick={() => toggle(c.id)} style={{
+                background: sel ? '#3a0a0a' : 'linear-gradient(135deg,#1a0808,#2a1010)',
+                border: `2px solid ${sel ? '#e74c3c' : '#5a2020'}`,
+                borderRadius: 8, color: sel ? '#e74c3c' : '#c08080',
+                padding: '8px 16px', cursor: 'pointer', fontSize: 12, fontWeight: 600,
+              }}>
+                {c.source === 'hand' ? '✋' : '🗑'} {c.name} {sel ? '✓' : ''}
+              </button>
+            );
+          })}
+        </div>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <button onClick={() => onConfirm(selected)} style={{
+            background: 'linear-gradient(135deg,#3a0808,#5a1010)', border: '1px solid #e74c3c',
+            borderRadius: 7, color: '#e74c3c', padding: '7px 20px', cursor: 'pointer', fontSize: 12, fontWeight: 700,
+          }}>
+            Подтвердить ({selected.length})
+          </button>
+          <button onClick={() => onConfirm([])} style={{
+            background: 'none', border: '1px solid #556', borderRadius: 7, color: '#778', padding: '6px 14px', cursor: 'pointer', fontSize: 12,
+          }}>
+            Пропустить
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function BotDeckModal({ title, color, cards, onClose }: {
+  title: string;
+  color: string;
+  cards: CardInfo[];
+  onClose: () => void;
+}) {
+  return (
+    <div
+      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 900 }}
+      onClick={onClose}
+    >
+      <div
+        style={{ background: 'linear-gradient(135deg,#0d0d1a,#0a0a14)', border: `2px solid ${color}`, borderRadius: 14, padding: '24px 28px', maxWidth: '90vw', maxHeight: '85vh', display: 'flex', flexDirection: 'column', gap: 12 }}
+        onClick={e => e.stopPropagation()}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24, flexShrink: 0 }}>
+          <div style={{ fontSize: 13, color, letterSpacing: '.12em', textTransform: 'uppercase', fontWeight: 700 }}>
+            {title} ({cards.length})
+          </div>
+          <button onClick={onClose} style={{ background: 'none', border: '1px solid #444', borderRadius: 6, color: '#888', padding: '4px 12px', cursor: 'pointer', fontSize: 12 }}>
+            ✕
+          </button>
+        </div>
+        {cards.length === 0 ? (
+          <div style={{ fontSize: 13, color: '#555', padding: '20px 0' }}>Колода пуста</div>
+        ) : (
+          <div style={{ overflowY: 'auto', display: 'flex', flexWrap: 'wrap', gap: 10, padding: '4px 2px' }}>
+            {cards.map((c, i) => (
+              <CardView key={`${c.id}-${i}`} card={c} size="xlarge" />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -319,17 +409,39 @@ function Btn({ label, onClick, color = '#2ecc71', disabled = false, active = fal
   );
 }
 
+function DiceFace({ value, size = 20 }: { value: number; size?: number }) {
+  const dots: Record<number, [number, number][]> = {
+    1: [[5, 5]],
+    2: [[3, 3], [7, 7]],
+    3: [[3, 3], [5, 5], [7, 7]],
+    4: [[3, 3], [7, 3], [3, 7], [7, 7]],
+    5: [[3, 3], [7, 3], [5, 5], [3, 7], [7, 7]],
+    6: [[3, 2.5], [7, 2.5], [3, 5], [7, 5], [3, 7.5], [7, 7.5]],
+  };
+  const positions = dots[value] ?? [];
+  return (
+    <svg width={size} height={size} viewBox="0 0 10 10" style={{ display: 'inline-block', verticalAlign: 'middle' }}>
+      <rect x="0.5" y="0.5" width="9" height="9" rx="1.8" ry="1.8" fill="#1a0505" stroke="#e74c3c" strokeWidth="0.6" />
+      {positions.map(([cx, cy], i) => (
+        <circle key={i} cx={cx} cy={cy} r="1.1" fill="#e74c3c" />
+      ))}
+    </svg>
+  );
+}
+
 export default function GameBoard() {
-  const { gameState: gs, loading, error, playCard, exploitCard, doInnovation, doRevolution, endTurn, acquireCard, accelerateProgress, accelerateProgressFromCard, acquireFromExile, takeFromDiscard, resetGame, undoAction, makeChoice, selectAppropriateCategory, appropriateFromDeck, chronicleChoice, reinforceChoice, reinforceWithCard, playFromDiscard, placeUpgradeToken, resolveDrawFromDeck, returnExploitToken, destroyCards, gloryDeckTake, exileFromMarket, chronicleFromDiscard, recallToAvoidAttack, moveDiscardToDeck, oracleDrawChoice, returnCardToDeckTop, sacredPathExploit, sacredPathExchange, appropriateOptional, recallFromChronicle, exploitRecallLabelForResourceTokenCard, exploitDiscardForResourceTokenCard, acquireAndPlayRegion, placeResourceOnMarket, chronicleFromHandOrDiscard, runBotTurn, playBotCard, solsticeSelectCard, solsticeSkip, solsticeGainProgress, solsticeFate, solsticeChoice } = useGameStore();
+  const { gameState: gs, loading, error, playCard, exploitCard, doInnovation, doRevolution, endTurn, acquireCard, accelerateProgress, accelerateProgressFromCard, acquireFromExile, takeFromDiscard, resetGame, undoAction, makeChoice, selectAppropriateCategory, appropriateFromDeck, chronicleChoice, reinforceChoice, reinforceWithCard, playFromDiscard, placeUpgradeToken, resolveDrawFromDeck, returnExploitToken, destroyCards, gloryDeckTake, exileFromMarket, chronicleFromDiscard, recallToAvoidAttack, moveDiscardToDeck, oracleDrawChoice, returnCardToDeckTop, sacredPathExploit, sacredPathExchange, appropriateOptional, recallFromChronicle, exploitRecallLabelForResourceTokenCard, exploitDiscardForResourceTokenCard, acquireAndPlayRegion, placeResourceOnMarket, chronicleFromHandOrDiscard, returnDisorders, resolveLookDeckTop, runBotTurn, playBotCard, solsticeSelectCard, solsticeSkip, solsticeGainProgress, solsticeFate, solsticeChoice } = useGameStore();
   const [selectedCards, setSelectedCards] = useState<string[]>([]);
   const [scores, setScores] = useState<{ player: number; bot: number } | null>(null);
   const [previewCard, setPreviewCard] = useState<CardInfo | null>(null);
   const [showProgressModal, setShowProgressModal] = useState(false);
+  const [showBotPlayArea, setShowBotPlayArea] = useState(false);
   const [previewOrigin, setPreviewOrigin] = useState('top left');
   const [playAreaPreviewPos, setPlayAreaPreviewPos] = useState<{ top: number; left: number } | null>(null);
   const playAreaOverlayRef = React.useRef<HTMLDivElement | null>(null);
   const [revMode, setRevMode] = useState(false);  // revolution selection mode
   const [saveLoadModal, setSaveLoadModal] = useState<'save' | 'load' | null>(null);
+  const [botDeckModal, setBotDeckModal] = useState<null | { title: string; color: string; cards: CardInfo[] }>(null);
   const previewRef = React.useRef<HTMLDivElement | null>(null);
 
   const isPlayerTurn = gs?.phase === 'player_turn';
@@ -563,6 +675,34 @@ export default function GameBoard() {
       {saveLoadModal && (
         <SaveLoadModal mode={saveLoadModal} onClose={() => setSaveLoadModal(null)} />
       )}
+      {botDeckModal && (
+        <BotDeckModal
+          title={botDeckModal.title}
+          color={botDeckModal.color}
+          cards={botDeckModal.cards}
+          onClose={() => setBotDeckModal(null)}
+        />
+      )}
+      {showBotPlayArea && (
+        <div onClick={() => setShowBotPlayArea(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.82)', zIndex: 1000, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', padding: '24px 16px', overflowY: 'auto' }}>
+          <div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 860, background: '#0d0a18', border: '1px solid #2d1a3a', borderRadius: 12, padding: '18px 20px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+              <div style={{ fontSize: 12, color: '#9b59b6', letterSpacing: '.1em', textTransform: 'uppercase', fontWeight: 600 }}>
+                Игровая область бота ({(bot?.play_area ?? []).length} карт)
+              </div>
+              <button onClick={() => setShowBotPlayArea(false)} style={{ background: 'none', border: '1px solid #3a2a4a', borderRadius: 6, color: '#888', cursor: 'pointer', fontSize: 16, padding: '2px 10px', lineHeight: 1.4 }}>✕</button>
+            </div>
+            {(bot?.play_area ?? []).length === 0
+              ? <div style={{ color: '#444', fontSize: 12, textAlign: 'center', padding: '24px 0' }}>Нет карт в игровой области</div>
+              : <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: 10 }}>
+                  {(bot?.play_area ?? []).map(card => (
+                    <CardView key={card.id} card={card} size="xlarge" overrideStyle={{ width: '100%', minHeight: 'unset', aspectRatio: '143/185' }} />
+                  ))}
+                </div>
+            }
+          </div>
+        </div>
+      )}
       {/* Header */}
       <div style={{ background: '#0b0d18', borderBottom: '1px solid #1e2235', padding: '9px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -780,6 +920,14 @@ export default function GameBoard() {
             </button>
           </div>
         </div>
+      )}
+
+      {/* Возврат карт беспорядков (1NAB4 и аналоги) */}
+      {gs?.pending_choice?.type === 'return_disorders' && (
+        <ReturnDisordersModal
+          pending={gs.pending_choice as { max_count: number; available_cards: Array<CardInfo & { source: string }> }}
+          onConfirm={(ids) => returnDisorders(ids)}
+        />
       )}
 
       {/* Эксплуатация 1REG14: решение разрушить или нет */}
@@ -1106,6 +1254,45 @@ export default function GameBoard() {
                 {pending.available_cards.map(c => (
                   <CardView key={c.id} card={c} size="xlarge" onClick={() => returnCardToDeckTop(c.id)} />
                 ))}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Look and choose deck top modal (1SLV4 — Превосходство) */}
+      {gs?.pending_choice?.type === 'look_deck_top' && (() => {
+        const pending = gs.pending_choice as { type: string; card: CardInfo | null; card_id: string | null };
+        if (!pending.card) return null;
+        return (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 850 }}>
+            <div style={{ background: 'linear-gradient(135deg,#0d0a1a,#0a0814)', border: '2px solid #9b59b6', borderRadius: 14, padding: '24px 28px', maxWidth: 400, width: '95%' }}>
+              <div style={{ fontSize: 13, color: '#9b59b6', letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: 10 }}>Превосходство — верхняя карта колоды</div>
+              <div style={{ fontSize: 12, color: '#9098b8', marginBottom: 18 }}>
+                Открыта карта: <span style={{ color: '#e8e8f0', fontWeight: 700 }}>«{pending.card.name}»</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
+                <CardView card={pending.card} size="xlarge" />
+              </div>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <button onClick={() => resolveLookDeckTop('discard')} style={{
+                  background: 'linear-gradient(135deg,#2a0a0a,#3a1010)', border: '1px solid #e74c3c',
+                  borderRadius: 7, color: '#e74c3c', padding: '8px 16px', cursor: 'pointer', fontSize: 12, fontWeight: 600,
+                }}>
+                  🗑 Сбросить
+                </button>
+                <button onClick={() => resolveLookDeckTop('return')} style={{
+                  background: 'linear-gradient(135deg,#0a1a2a,#101a3a)', border: '1px solid #3498db',
+                  borderRadius: 7, color: '#3498db', padding: '8px 16px', cursor: 'pointer', fontSize: 12, fontWeight: 600,
+                }}>
+                  ↩ Вернуть на верх
+                </button>
+                <button onClick={() => resolveLookDeckTop('chronicle')} style={{
+                  background: 'linear-gradient(135deg,#0a2a0a,#102a10)', border: '1px solid #2ecc71',
+                  borderRadius: 7, color: '#2ecc71', padding: '8px 16px', cursor: 'pointer', fontSize: 12, fontWeight: 600,
+                }}>
+                  📜 В летопись
+                </button>
               </div>
             </div>
           </div>
@@ -1917,9 +2104,9 @@ export default function GameBoard() {
                   <Btn label="Начать ход бота (бросить кубик)" onClick={() => runBotTurn()} color="#e74c3c" icon="🎲" />
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    <div style={{ fontSize: 9, color: '#888' }}>
-                      Кубик: <span style={{ color: '#e74c3c', fontWeight: 700 }}>{dieRoll}</span>
-                      {setAside !== null && <span style={{ color: '#888', marginLeft: 8 }}>Карта #{setAside + 1} отложена</span>}
+                    <div style={{ fontSize: 9, color: '#888', display: 'flex', alignItems: 'center', gap: 5 }}>
+                      Кубик: <DiceFace value={dieRoll} size={18} />
+                      {setAside !== null && <span style={{ color: '#888', marginLeft: 4 }}>Карта #{setAside + 1} отложена</span>}
                     </div>
                     {hasMoreCards && (
                       <div style={{ fontSize: 9, color: '#aaa', marginBottom: 2 }}>
@@ -2100,7 +2287,7 @@ export default function GameBoard() {
                                 else if (isAcquireMode && isPlayerTurn && acquireAllowed) acquireCard(idx);
                                 else if (pendingAppropriate && isPlayerTurn && appropriateAllowed) acquireCard(idx);
                               }}
-                              badge={(slot.upgrade_tokens > 0 || slot.resource_tokens > 0) ? (
+                              badge={(slot.upgrade_tokens > 0 || slot.resource_tokens > 0 || slot.population_tokens > 0) ? (
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                                   {slot.upgrade_tokens > 0 && (
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 2, background: '#0d1a2e', border: '1px solid #3498db', borderRadius: 4, padding: '2px 5px' }}>
@@ -2112,6 +2299,12 @@ export default function GameBoard() {
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 2, background: '#1a0d00', border: '1px solid #e67e22', borderRadius: 4, padding: '2px 5px' }}>
                                       <span style={{ fontSize: 10 }}>💰</span>
                                       <span style={{ color: '#e67e22', fontSize: 9, fontWeight: 700 }}>×{slot.resource_tokens}</span>
+                                    </div>
+                                  )}
+                                  {slot.population_tokens > 0 && (
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 2, background: '#0d1a0d', border: '1px solid #2ecc71', borderRadius: 4, padding: '2px 5px' }}>
+                                      <span style={{ fontSize: 10 }}>👥</span>
+                                      <span style={{ color: '#2ecc71', fontSize: 9, fontWeight: 700 }}>×{slot.population_tokens}</span>
                                     </div>
                                   )}
                                 </div>
@@ -2190,7 +2383,13 @@ export default function GameBoard() {
         <div style={{ padding: '14px 12px', display: 'flex', flexDirection: 'column', gap: 12, overflow: 'auto' }}>
           <div style={{ background: '#100d20', border: '1px solid #1e1e35', borderRadius: 8, padding: '8px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: '#e74c3c', letterSpacing: '.1em' }}>🤖 {bot?.nation?.toUpperCase()}</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 13, fontWeight: 700, color: '#e74c3c', letterSpacing: '.1em' }}>🤖 {bot?.nation?.toUpperCase()}</span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 12, fontWeight: 700, color: '#f1c40f' }}>
+                  <img src={coinIcon} alt="ПО" style={{ width: 16, height: 16 }} />
+                  {bot?.current_vp ?? 0}
+                </span>
+              </div>
               <div style={{ fontSize: 10, color: bot?.period === 'barbarism' ? '#e74c3c' : '#3498db', marginTop: 2 }}>{PERIOD_RU[bot?.period ?? '']}</div>
             </div>
             <div style={{ display: 'flex', gap: 6 }}>
@@ -2205,15 +2404,47 @@ export default function GameBoard() {
           </div>
 
           {(bot?.play_area_count ?? 0) > 0 && (
-            <div style={{ background: '#0d0a18', border: '1px solid #1e1a2e', borderRadius: 6, padding: '8px 12px', fontSize: 11, color: '#444' }}>
-              🃏 В игровой области: {bot?.play_area_count} карт
+            <div style={{ background: '#0d0a18', border: '1px solid #1e1a2e', borderRadius: 6, padding: '8px 12px', fontSize: 11, color: '#444', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+              <span>🃏 В игровой области: {bot?.play_area_count} карт</span>
+              <button onClick={() => setShowBotPlayArea(true)} style={{ background: 'rgba(155,89,182,0.12)', border: '1px solid #4a2a5a', borderRadius: 5, color: '#9b59b6', cursor: 'pointer', fontSize: 10, padding: '3px 8px', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                Просмотреть
+              </button>
             </div>
           )}
 
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-            <DeckPile count={bot?.bot_deck_count ?? 0} label="Колода бота" color="#2d0a1a" />
-            <DeckPile count={bot?.dynasty_deck_count ?? 0} label="Династия" color="#1a0a2d" />
-            <DeckPile count={bot?.chronicle_count ?? 0} label="Летопись" color="#1a2a1a" />
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+            {/* Колода бота */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, cursor: 'pointer' }}
+              onClick={() => setBotDeckModal({ title: 'Колода бота', color: '#c0392b', cards: bot?.bot_deck ?? [] })}>
+              <div style={{ width: 50, height: 68, background: 'linear-gradient(145deg,#2d0a1a,#2d0a1a88)', border: '1px solid #5a1a2a', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 700, color: '#e8e8f0', boxShadow: '2px 2px 0 #1a1a2e' }}>
+                {bot?.bot_deck_count ?? 0}
+              </div>
+              <div style={{ fontSize: 9, color: '#888', textAlign: 'center', maxWidth: 58 }}>Колода бота</div>
+            </div>
+            {/* Династия */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, cursor: 'pointer' }}
+              onClick={() => setBotDeckModal({ title: 'Колода династии', color: '#8e44ad', cards: bot?.dynasty_deck ?? [] })}>
+              <div style={{ width: 50, height: 68, background: 'linear-gradient(145deg,#1a0a2d,#1a0a2d88)', border: '1px solid #4a1a6a', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 700, color: '#e8e8f0', boxShadow: '2px 2px 0 #1a1a2e' }}>
+                {bot?.dynasty_deck_count ?? 0}
+              </div>
+              <div style={{ fontSize: 9, color: '#888', textAlign: 'center', maxWidth: 58 }}>Династия</div>
+            </div>
+            {/* Летопись */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, cursor: 'pointer' }}
+              onClick={() => setBotDeckModal({ title: 'Летопись бота', color: '#27ae60', cards: bot?.chronicle ?? [] })}>
+              <div style={{ width: 50, height: 68, background: 'linear-gradient(145deg,#1a2a1a,#1a2a1a88)', border: '1px solid #2a5a2a', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 700, color: '#e8e8f0', boxShadow: '2px 2px 0 #1a1a2e' }}>
+                {bot?.chronicle_count ?? 0}
+              </div>
+              <div style={{ fontSize: 9, color: '#888', textAlign: 'center', maxWidth: 58 }}>Летопись</div>
+            </div>
+            {/* Сброс бота */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, cursor: 'pointer' }}
+              onClick={() => setBotDeckModal({ title: 'Сброс бота', color: '#e67e22', cards: bot?.bot_discard ?? [] })}>
+              <div style={{ width: 50, height: 68, background: (bot?.bot_discard_count ?? 0) > 0 ? 'linear-gradient(145deg,#2d1a0a,#2d1a0a88)' : 'linear-gradient(145deg,#1a1a1a,#1a1a1a88)', border: `1px solid ${(bot?.bot_discard_count ?? 0) > 0 ? '#8a4a1a' : '#2a2a2a'}`, borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 700, color: (bot?.bot_discard_count ?? 0) > 0 ? '#e8d0b0' : '#444', boxShadow: '2px 2px 0 #1a1a2e' }}>
+                {bot?.bot_discard_count ?? 0}
+              </div>
+              <div style={{ fontSize: 9, color: '#888', textAlign: 'center', maxWidth: 58 }}>Сброс</div>
+            </div>
           </div>
 
           {(bot?.hand_slots ?? []).some(s => s !== null) && (() => {
@@ -2229,28 +2460,37 @@ export default function GameBoard() {
             }
             return (
               <div style={{ background: '#0a0508', border: '1px solid #2d1020', borderRadius: 8, padding: '10px 8px' }}>
-                <div style={{ fontSize: 9, color: '#e74c3c', marginBottom: 8, letterSpacing: '.1em', textTransform: 'uppercase' }}>
+                <div style={{ fontSize: 9, color: '#e74c3c', marginBottom: 8, letterSpacing: '.1em', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 6 }}>
                   Карты для розыгрыша
+                  {dieRoll === 6 && <DiceFace value={6} size={20} />}
                 </div>
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'nowrap', overflowX: 'auto' }}>
                   {slots.map((card, idx) => {
                     const isNext = isBotTurn && dieRoll > 0 && idx === nextSlot;
                     const isSetAside = isBotTurn && dieRoll > 0 && idx === setAside;
                     const isPlayed = isBotTurn && dieRoll > 0 && card === null;
+                    const isDieTarget = dieRoll > 0 && dieRoll < 6 && idx === dieRoll - 1;
                     return (
                       <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, flex: '1 1 0', minWidth: 0 }}>
-                        {card
-                          ? <CardView
-                              card={card}
-                              size="large"
-                              overrideStyle={{
-                                width: '100%', minHeight: 'unset', aspectRatio: '143/185',
-                                outline: isNext ? '2px solid #e74c3c' : isSetAside ? '2px solid #f39c12' : 'none',
-                                opacity: isSetAside ? 0.6 : 1,
-                              }}
-                            />
-                          : <div style={{ width: '100%', aspectRatio: '143/185', border: '1px dashed #1a3a1a', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1a3a1a', fontSize: 14 }}>✓</div>
-                        }
+                        <div style={{ position: 'relative', width: '100%' }}>
+                          {card
+                            ? <CardView
+                                card={card}
+                                size="large"
+                                overrideStyle={{
+                                  width: '100%', minHeight: 'unset', aspectRatio: '143/185',
+                                  outline: isNext ? '2px solid #e74c3c' : isSetAside ? '2px solid #f39c12' : 'none',
+                                  opacity: isSetAside ? 0.6 : 1,
+                                }}
+                              />
+                            : <div style={{ width: '100%', aspectRatio: '143/185', border: '1px dashed #1a3a1a', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1a3a1a', fontSize: 14 }}>✓</div>
+                          }
+                          {isDieTarget && (
+                            <div style={{ position: 'absolute', top: 4, right: 4, background: 'rgba(10,3,3,0.75)', borderRadius: 4, padding: '2px 3px', lineHeight: 1 }}>
+                              <DiceFace value={dieRoll} size={22} />
+                            </div>
+                          )}
+                        </div>
                         <div style={{ fontSize: 8, color: isNext ? '#e74c3c' : isSetAside ? '#f39c12' : '#555', fontWeight: isNext ? 700 : 400 }}>
                           #{idx + 1}{isSetAside ? ' ⏸' : isNext ? ' ▶' : ''}
                         </div>

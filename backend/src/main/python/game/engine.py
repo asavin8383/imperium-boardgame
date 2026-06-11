@@ -4,7 +4,7 @@ Game Engine — processes player and bot actions according to Imperium rules
 import random
 from typing import List, Optional, Tuple
 from .state import GameState, PlayerArea, MarketSlot, Resources
-from .enums import (Period, GamePhase, TurnAction, EndCondition,
+from .enums import (Period, Nation, GamePhase, TurnAction, EndCondition,
                     CardCategory, CardSubtype, Difficulty, ResourceType, CardLabel)
 from .cards import Card, GainResourceAction, AcquireCardAction, AcquireFromExileAction, AccelerateProgressAction, AppropriateCardAction, AppropriateCardOptionalAction, NoActionAction, DrawCardExploitAction, ChoiceAction, PlayFromDiscardAction, DrawFromDeckOptionalAction, GainPerLabelAction, GainPerCategoryAction, StealResourceAction, ReturnExploitTokenOptionalAction, DestroyFromPlayAreaAction, LookAtGloryDeckAction, ExileFromMarketAction, ChronicleFromDiscardAction, MoveDiscardToDeckAction, SacredPathExploitAction, DrawUpToNFromDeckAction, ReturnCardToDeckTopAction, AllPlayersGainResourceAction, AllPlayersAcquireFromMarketAction, AllPlayersDrawCardAction, SolsticeOptionalGainProgressThenFateAction, ExploitSpendResourceDrawCardAction, ExploitSpendResourceTakeFromDiscardAction, SolsticeOptionalDiscardHandReturnDisorderAction, SpendResourceAction, BotGainsDisorderAction, SolsticeChoiceAction, SolsticeOptionalDiscardForChoiceAction, DrawThenDiscardChoiceAction, ExploitRecallLabelChoiceAction, ExploitRecallLabelForResourceTokenCardAction, ExploitSpendAndDiscardForResourceTokenCardAction, GuessDeckCategoryAction, ChronicleFromHandAction, RecallFromChronicleAction, BotDestroysLabelForResourcesAction, BotLosesCardAction, GiveCardToBotAction, SolsticeGainResourceAction, SolsticeReturnDisorderAction, ExploitDiscardHandGainResourceAction, BotDestroysFromPlayAreaAction, OptionalReinforceRegionAction, DrawFromBoostDeckAction, PeriodConditionalAction, ReturnDisordersFromHandOrDiscardAction, StealProgressOrDisorderAction, LookAndChooseDeckTopAction, AcquireAndPlayRegionAction, PlaceResourceOnMarketAction, ChronicleFromHandOrDiscardAction
 from .setup import _draw_to_hand
@@ -326,6 +326,12 @@ class GameEngine:
                 state.add_log(f"Получено {slot.resource_tokens} ресурсов с карты рынка")
             slot.resource_tokens = 0
 
+        # Жетоны населения (бот-Цинь)
+        if slot.population_tokens > 0:
+            state.player.resources.population += slot.population_tokens
+            state.add_log(f"Получено {slot.population_tokens} населения с карты рынка")
+            slot.population_tokens = 0
+
         # Обработка карты беспорядков под картой
         if pending_type == "appropriate" and slot.disorder_under:
             # Присвоение: беспорядки возвращаются в стопку беспорядков
@@ -559,26 +565,37 @@ class GameEngine:
                 any(c.id == '1REG12' for c in state.player.play_area)):
             state.pending_bot_attacks.append(card.id)
             state.add_log(f"Бот играет атаку «{card.name}» — ожидает решения игрока")
+            state.bot.hand_slots[slot_index] = None
+            state.bot.bot_discard.append(card)
         else:
             state = BotLogic.resolve_card(state, card, slot_index)
+            state.bot.hand_slots[slot_index] = None
+            # Disorder cards are already sent to disorder_deck inside resolve_card;
+            # for all others send to discard if not in chronicle or play area
+            if (not self._is_disorder(card)
+                    and card not in state.bot.chronicle
+                    and card not in state.bot.play_area
+                    and card not in state.shared.disorder_deck):
+                state.bot.bot_discard.append(card)
 
-        state.bot.hand_slots[slot_index] = None
-        state.bot.bot_discard.append(card)
         return state
 
     def _bot_update_phase(self, state: GameState,
                            die_roll: int, set_aside_slot: Optional[int]) -> GameState:
         """Bot update phase: place token, return set-aside card"""
-        if 1 <= die_roll <= len(state.shared.market):
+        if die_roll == 6:
+            state.add_log("Бот: кубик 6 — жетон прогресса не добавляется")
+        elif 1 <= die_roll <= len(state.shared.market):
             slot = state.shared.market[die_roll - 1]
-            # Carthaginians bot: +2 resource; Qin: +1 population
-            if state.bot.nation.value == "carthaginians":
-                slot.upgrade_tokens += 2
-            elif state.bot.nation.value == "scythians":
-                slot.upgrade_tokens += 1
+            if state.bot.nation == Nation.CARTHAGINIANS:
+                slot.resource_tokens += 2
+                state.add_log(f"Бот(Карфаген): 2 жетона ресурсов на карту рынка #{die_roll}")
+            elif state.bot.nation == Nation.QIN:
+                slot.population_tokens += 1
+                state.add_log(f"Бот(Цинь): 1 жетон населения на карту рынка #{die_roll}")
             else:
                 slot.upgrade_tokens += 1
-            state.add_log(f"Жетон добавлен на карту рынка {die_roll}")
+                state.add_log(f"Бот: 1 жетон прогресса на карту рынка #{die_roll}")
 
         # Return set-aside card to slot 1 (marker 1)
         if set_aside_slot is not None:
@@ -1076,7 +1093,10 @@ class GameEngine:
         # Draw player's new hand before bot turn
         _draw_to_hand(state.player, state.player.hand_limit)
 
-        # Transition to bot turn — refill bot hand slots
+        # Transition to bot turn — reset bot turn state, refill bot hand slots
+        state.bot_turn_die_roll = 0
+        state.bot_turn_current_slot = 0
+        state.bot_turn_set_aside_slot = None
         state = self._bot_refill_hand(state)
         revealed = sum(1 for s in state.bot.hand_slots if s is not None)
         state.add_log(f"Бот открывает {revealed} карт из руки")
@@ -1400,6 +1420,7 @@ class GameEngine:
             slot.card = card
             slot.upgrade_tokens = 0
             slot.resource_tokens = 0
+            slot.population_tokens = 0
             slot.disorder_under = None
             cats = getattr(card, 'categories', [])
             # Беспорядки под картами истоков, цивилизаций и набегов
@@ -2563,6 +2584,8 @@ class GameEngine:
             state.bot.upgrade += slot.upgrade_tokens
             if slot.resource_tokens > 0:
                 state.bot.resource += slot.resource_tokens
+            if slot.population_tokens > 0:
+                state.bot.population += slot.population_tokens
             if slot.disorder_under:
                 state.bot.bot_deck.insert(0, slot.disorder_under)
             state.bot.bot_deck.insert(0, card)
@@ -2672,6 +2695,10 @@ class GameEngine:
             state.player.resources.resource += slot.resource_tokens
             state.add_log(f"Получено {slot.resource_tokens} ресурсов с карты рынка")
             slot.resource_tokens = 0
+        if slot.population_tokens > 0:
+            state.player.resources.population += slot.population_tokens
+            state.add_log(f"Получено {slot.population_tokens} населения с карты рынка")
+            slot.population_tokens = 0
         if slot.disorder_under:
             state.player.hand.append(slot.disorder_under)
             state.add_log("Карта беспорядков из-под купленной карты добавлена в руку")
@@ -3147,8 +3174,9 @@ class GameEngine:
     def _apply_look_and_choose_deck_top_action(self, state: GameState) -> GameState:
         """Открывает верхнюю карту личной колоды; игрок выбирает: сброс / верх колоды / летопись."""
         from .state import _card_info
+        deck_size = len(state.player.deck)
         if not state.player.deck:
-            state.add_log("Личная колода пуста — действие пропущено")
+            state.add_log(f"Превосходство: личная колода пуста ({deck_size} карт) — эффект пропущен")
             return state
         card = state.player.deck.pop(0)
         # Временно держим карту в руке до разрешения выбора
@@ -3158,7 +3186,7 @@ class GameEngine:
             "card": _card_info(card),
             "card_id": card.id,
         }
-        state.add_log(f"Открыта верхняя карта колоды: «{card.name}». Выберите: сброс / вернуть на верх / летопись")
+        state.add_log(f"Превосходство: открыта верхняя карта колоды (было {deck_size} карт) — «{card.name}»")
         return state
 
     def resolve_look_deck_top(self, state: GameState, choice: str) -> GameState:
@@ -3673,6 +3701,7 @@ class GameEngine:
         slot.card = None
         slot.upgrade_tokens = 0
         slot.resource_tokens = 0
+        slot.population_tokens = 0
 
         # Refill the slot (with fallback to main deck if source deck is empty)
         state = self._refill_market_slot_after_exile(state, slot_index)
@@ -3704,6 +3733,7 @@ class GameEngine:
             slot.card = card
             slot.upgrade_tokens = 0
             slot.resource_tokens = 0
+            slot.population_tokens = 0
             slot.disorder_under = None
             cats = getattr(card, 'categories', [])
             if (CardCategory.ORIGINS in cats or
@@ -4315,3 +4345,20 @@ class GameEngine:
 def compute_current_player_vp(state: "GameState") -> int:
     """Вычисляет текущий счёт ПО игрока (вызывается при сериализации состояния)."""
     return GameEngine()._calculate_player_vp(state)
+
+
+def compute_current_bot_vp(state: "GameState") -> int:
+    """Вычисляет промежуточный счёт ПО бота: ПО карт + жетоны прогресса."""
+    bot = state.bot
+    vp = bot.upgrade  # каждый жетон прогресса = 1 ПО
+
+    all_cards = (bot.bot_deck + bot.bot_discard + bot.chronicle + bot.play_area)
+    for slot in bot.hand_slots:
+        if slot:
+            all_cards.append(slot)
+
+    for card in all_cards:
+        vp += card.vp_fixed
+        vp -= card.vp_penalty
+
+    return max(0, vp)

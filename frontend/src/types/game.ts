@@ -78,6 +78,7 @@ export interface MarketSlot {
   market_marker: number;
   source_deck: MarketSourceDeck;
   resource_tokens: number;
+  population_tokens: number;
 }
 
 export interface PlayerState {
@@ -107,10 +108,18 @@ export interface PlayerState {
 export interface BotState {
   nation: Nation;
   period: Period;
+  current_vp: number;
   bot_deck_count: number;
+  bot_deck: CardInfo[];
+  bot_discard_count: number;
+  bot_discard_top: CardInfo | null;
+  bot_discard: CardInfo[];
   dynasty_deck_count: number;
+  dynasty_deck: CardInfo[];
   chronicle_count: number;
+  chronicle: CardInfo[];
   play_area_count: number;
+  play_area: CardInfo[];
   hand_slots: (CardInfo | null)[];
   resource: number;
   population: number;

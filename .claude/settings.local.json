@@ -41,7 +41,9 @@
       "Bash(python -c \"from src.main.python.game.cards import AcquireAndPlayRegionAction; print\\('OK'\\)\")",
       "Bash(python -c \"from src.main.python.game.data.carthaginians import DECK; from src.main.python.game.cards import _parse_on_play_actions; [_parse_on_play_actions\\(v\\) for v in DECK.values\\(\\)]; print\\('OK'\\)\")",
       "Bash(python -c \"from src.main.python.game.data.carthaginians import DECK; from src.main.python.game.cards import _parse_on_play_actions; [_parse_on_play_actions\\(v\\) for v in DECK.values\\(\\)]; print\\('OK', list\\(DECK\\)[-3:]\\)\")",
-      "Bash(python -c \"from src.main.python.game.data.carthaginians import DECK; print\\('OK', list\\(DECK\\)[-3:]\\)\")"
+      "Bash(python -c \"from src.main.python.game.data.carthaginians import DECK; print\\('OK', list\\(DECK\\)[-3:]\\)\")",
+      "Bash(python -c \"from src.main.python.game.bot_logic import BotLogic; print\\('OK'\\)\")",
+      "Bash(python -c \"from src.main.python.game.engine import GameEngine; from src.main.python.game.bot_logic import BotLogic; from src.main.python.game.enums import Nation; print\\('OK', Nation.QIN\\)\")"
     ]
   }
 }

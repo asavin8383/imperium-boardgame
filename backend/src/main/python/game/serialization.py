@@ -70,6 +70,9 @@ def serialize_state(state: GameState) -> str:
         "pending_bot_attacks": state.pending_bot_attacks,
         "pending_bot_turn_continuation": state.pending_bot_turn_continuation,
         "pending_solstice_card_ids": state.pending_solstice_card_ids,
+        "bot_turn_die_roll": state.bot_turn_die_roll,
+        "bot_turn_set_aside_slot": state.bot_turn_set_aside_slot,
+        "bot_turn_current_slot": state.bot_turn_current_slot,
 
         # ── Player ────────────────────────────────────────────────────────────
         "player": {
@@ -140,12 +143,13 @@ def serialize_state(state: GameState) -> str:
             # Market: each slot stores card ID + all token/marker state on that slot
             "market": [
                 {
-                    "card_id":         slot.card.id if slot.card else None,
-                    "upgrade_tokens":  slot.upgrade_tokens,
+                    "card_id":           slot.card.id if slot.card else None,
+                    "upgrade_tokens":    slot.upgrade_tokens,
                     "disorder_under_id": slot.disorder_under.id if slot.disorder_under else None,
-                    "market_marker":   slot.market_marker,
-                    "source_deck":     slot.source_deck,
-                    "resource_tokens": slot.resource_tokens,
+                    "market_marker":     slot.market_marker,
+                    "source_deck":       slot.source_deck,
+                    "resource_tokens":   slot.resource_tokens,
+                    "population_tokens": slot.population_tokens,
                 }
                 for slot in s.market
             ],
@@ -257,6 +261,7 @@ def deserialize_state(encoded: str) -> GameState:
             market_marker=slot["market_marker"],
             source_deck=slot["source_deck"],
             resource_tokens=slot.get("resource_tokens", 0),
+            population_tokens=slot.get("population_tokens", 0),
         )
         for slot in sd["market"]
     ]
@@ -281,6 +286,9 @@ def deserialize_state(encoded: str) -> GameState:
     state.pending_bot_attacks = data["pending_bot_attacks"]
     state.pending_bot_turn_continuation = data["pending_bot_turn_continuation"]
     state.pending_solstice_card_ids = data["pending_solstice_card_ids"]
+    state.bot_turn_die_roll = data.get("bot_turn_die_roll", 0)
+    state.bot_turn_set_aside_slot = data.get("bot_turn_set_aside_slot", None)
+    state.bot_turn_current_slot = data.get("bot_turn_current_slot", 0)
     state.player = player
     state.bot = bot
     state.shared = shared
